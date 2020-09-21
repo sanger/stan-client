@@ -27,10 +27,14 @@ jobs:
         name: yarn build
         with:
           cmd: build
+        
+      - name: Archive and compress
+        run: tar -czvf client.tar.gz build
           
       - uses: ncipollo/release-action@v1
+        name: Create Github Release
         with:
-          artifacts: "build/*"
+          artifacts: "client.tar.gz"
           token: ${{ secrets.GITHUB_TOKEN }}
           
       
