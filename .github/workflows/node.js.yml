@@ -33,3 +33,9 @@ jobs:
       with:
         cmd: build
         
+    - uses: actions/upload-artifact@v2
+      name: Upload build artifact
+      with:
+        name: client
+        path: build
+            
