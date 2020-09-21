@@ -16,6 +16,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      name: Checkout
+      
     - uses: borales/actions-yarn@v2.0.0
+      name: yarn install
       with:
-        cmd: install, test, build
+        cmd: install
+        
+    - uses: borales/actions-yarn@v2.0.0
+      name: yarn test
+      with:
+        cmd: test
+        
+    - uses: borales/actions-yarn@v2.0.0
+      name: yarn build
+      with:
+        cmd: build
+        
