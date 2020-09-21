@@ -27,15 +27,3 @@ jobs:
       name: yarn test
       with:
         cmd: test
-        
-    - uses: borales/actions-yarn@v2.0.0
-      name: yarn build
-      with:
-        cmd: build
-        
-    - uses: actions/upload-artifact@v2
-      name: Upload build artifact
-      with:
-        name: client
-        path: build
-            
