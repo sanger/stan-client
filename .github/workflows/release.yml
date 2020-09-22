@@ -28,6 +28,9 @@ jobs:
         with:
           cmd: build
         
+      - name: Rename the build
+        run: mv build client
+        
       - name: Archive and compress
         run: tar -czvf client.tar.gz build
           
