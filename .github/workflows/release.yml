@@ -32,7 +32,7 @@ jobs:
         run: mv build client
         
       - name: Archive and compress
-        run: tar -czvf client.tar.gz build
+        run: tar -czvf client.tar.gz client
           
       - uses: ncipollo/release-action@v1
         name: Create Github Release
