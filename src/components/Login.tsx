@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
 const Login: React.FC = () => {
   return (
@@ -57,8 +56,8 @@ const Login: React.FC = () => {
           </div>
 
           <div className="mt-6">
-            <Link
-              to="/dashboard"
+            <button
+              onClick={() => alert("Coming Soon!")}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out"
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -75,7 +74,7 @@ const Login: React.FC = () => {
                 </svg>
               </span>
               Sign in
-            </Link>
+            </button>
           </div>
         </form>
       </div>
