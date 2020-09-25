@@ -1,5 +1,17 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+
+## Dependencies
+
+- `Node v14.11`
+- `Yarn v1.22`
+
+## Getting Started
+
+To install the dependencies for the project, you can run:
+
+### `yarn`
+
 ## Available Scripts
 
 In the project directory, you can run:
