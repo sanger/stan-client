@@ -5,11 +5,9 @@ name: Test
 
 on:
   push:
-    branches: [ master ]
-    tags-ignore: 
-      - "*"
+    branches: [ devel ]
   pull_request:
-    branches: [ master ]
+    branches: [ devel ]
 
 jobs:
   build:
