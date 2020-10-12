@@ -2,33 +2,51 @@
   "name": "client",
   "version": "0.0.1",
   "private": true,
+  "proxy": "http://localhost:8080",
   "dependencies": {
+    "@apollo/client": "^3.2.4",
     "@tailwindcss/ui": "^0.6.2",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "@types/classnames": "^2.2.10",
     "@types/jest": "^24.0.0",
+    "@types/js-cookie": "^2.2.6",
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
     "@types/react-router-dom": "^5.1.5",
+    "@types/react-transition-group": "^4.4.0",
+    "@types/yup": "^0.29.8",
     "autoprefixer": "^9.0.0",
+    "classnames": "^2.2.6",
+    "formik": "^2.2.0",
+    "graphql": "^15.3.0",
+    "js-cookie": "^2.2.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
+    "react-transition-group": "^4.4.1",
     "tailwindcss": "^1.8.10",
-    "typescript": "~3.7.2"
+    "typescript": "~3.7.2",
+    "yup": "^0.29.3"
   },
   "scripts": {
     "start": "npm-run-all -p start:css start:js",
+    "start:msw": "REACT_APP_MOCK_API=msw PORT=3001 npm run start",
     "build": "npm-run-all build:css build:js",
     "start:js": "react-scripts start",
     "build:js": "react-scripts build",
     "start:css": "postcss src/styles/tailwind.css -o src/styles/index.css -w",
     "build:css": "postcss src/styles/tailwind.css -o src/styles/index.css --env production",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test": "start-server-and-test start:msw 3001 cypress:run",
+    "test:ci": "start-server-and-test start 3001 cypress:run",
+    "test:open": "start-server-and-test start 3001 cypress:open",
+    "eject": "react-scripts eject",
+    "codegen": "graphql-codegen --config codegen.yml -r dotenv/config"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -46,8 +64,17 @@
     ]
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "1.18.0",
+    "@testing-library/cypress": "^7.0.1",
+    "cypress": "^5.3.0",
+    "cypress-intellij-reporter": "^0.0.4",
+    "msw": "^0.21.2",
     "npm-run-all": "^4.1.5",
     "postcss-cli": "^7.1.2",
-    "prettier": "2.1.2"
+    "prettier": "2.1.2",
+    "start-server-and-test": "^1.11.5",
+    "@graphql-codegen/typescript-operations": "1.17.8",
+    "@graphql-codegen/typescript": "1.17.11",
+    "@graphql-codegen/typescript-react-apollo": "2.0.7"
   }
 }

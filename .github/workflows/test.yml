@@ -12,18 +12,17 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
-      name: Checkout
-      
-    - uses: borales/actions-yarn@v2.0.0
-      name: yarn install
-      with:
-        cmd: install
-        
-    - uses: borales/actions-yarn@v2.0.0
-      name: yarn test
-      with:
-        cmd: test
+      - uses: actions/checkout@v2
+        name: Checkout
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - run: yarn install
+      - run: yarn test:ci
+        env:
+          PORT: 3001
+          REACT_APP_MOCK_API: msw
