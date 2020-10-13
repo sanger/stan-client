@@ -24,6 +24,6 @@ jobs:
         cmd: install
         
     - uses: borales/actions-yarn@v2.0.0
-      name: yarn test
+      name: yarn test --passWithNoTests
       with:
         cmd: test
