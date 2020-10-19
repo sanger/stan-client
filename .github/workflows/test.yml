@@ -12,7 +12,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -23,12 +23,7 @@ jobs:
       with:
         node-version: '14.x'
       
-    - uses: borales/actions-yarn@v2.0.0
-      name: yarn install
-      with:
-        cmd: install
+    - name: Install dependencies
+      run: npm ci
         
-    - uses: borales/actions-yarn@v2.0.0
-      name: yarn test
-      with:
-        cmd: test
+    - run: npm test
