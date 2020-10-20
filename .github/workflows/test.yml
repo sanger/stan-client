@@ -20,7 +20,9 @@ jobs:
 
       - uses: actions/cache@v2
         with:
-          path: '**/node_modules'
+          path: |
+            '**/node_modules'
+            '/AppData/Local/Cypress/Cache/'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - uses: actions/setup-node@v1
