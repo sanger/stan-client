@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
-      - run: yarn install
+      - run: yarn install --frozen-lockfile
       - run: yarn test:ci
         env:
           PORT: 3001
