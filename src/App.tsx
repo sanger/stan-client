@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Switch, Router } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -11,11 +11,16 @@ import {
   ApolloClient,
   ApolloProvider,
   createHttpLink,
+  from,
   InMemoryCache,
 } from "@apollo/client";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import Cookies from "js-cookie";
 import { setContext } from "@apollo/client/link/context";
+import { onError } from "@apollo/client/link/error";
+import { createBrowserHistory } from "history";
+
+const history = createBrowserHistory();
 
 const httpLink = createHttpLink({
   credentials: "same-origin",
@@ -31,15 +36,35 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const errorLink = onError(({ operation, networkError }) => {
+  if (
+    networkError &&
+    "statusCode" in networkError &&
+    networkError.statusCode === 403
+  ) {
+    // Ignore if the CurrentUser query returns a 403. It means we're not logged in.
+    if (operation.operationName !== "CurrentUser") {
+      history.replace({
+        pathname: "/login",
+        state: {
+          warning: "Please log in to continue.",
+          loggedOut: true,
+          referrer: history.location.pathname,
+        },
+      });
+    }
+  }
+});
+
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  link: authLink.concat(httpLink),
+  link: from([authLink, errorLink, httpLink]),
 });
 
 function App() {
   return (
     <ApolloProvider client={client}>
-      <Router>
+      <Router history={history}>
         <AuthProvider>
           <AppRoutes />
         </AuthProvider>

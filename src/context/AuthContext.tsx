@@ -21,6 +21,7 @@ interface AuthState {
 interface AuthContext {
   authState: AuthState | null;
   setAuthState: (authState: AuthState) => void;
+  clearAuthState: () => void;
   logout: () => void;
   isAuthenticated: () => boolean;
 }
@@ -31,6 +32,7 @@ interface AuthContext {
 const initialContext: AuthContext = {
   isAuthenticated: () => false,
   setAuthState: () => {},
+  clearAuthState: () => {},
   logout: () => {},
   authState: null,
 };
@@ -94,10 +96,17 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     try {
       await logoutMutation();
       await client.clearStore();
-      setAuthState(null);
+      clearAuthState();
     } catch (e) {
       console.error(e);
     }
+  };
+
+  /**
+   * Reset the AuthState
+   */
+  const clearAuthState = () => {
+    setAuthState(null);
   };
 
   return (
@@ -105,6 +114,7 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       value={{
         authState,
         setAuthState: (authState: AuthState) => setAuthInfo(authState),
+        clearAuthState,
         isAuthenticated,
         logout,
       }}

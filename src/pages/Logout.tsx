@@ -21,7 +21,7 @@ const Logout = () => {
     if (authContext.isAuthenticated()) {
       logout();
     }
-  }, []);
+  }, [authContext]);
 
   return shouldRedirect ? (
     <Redirect

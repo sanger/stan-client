@@ -1,5 +1,5 @@
 import { Location } from "history";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Link, Redirect, RouteComponentProps } from "react-router-dom";
 import { StaticContext } from "react-router";
@@ -28,6 +28,7 @@ type LocationState = {
   referrer?: Location;
   success?: string;
   warning?: string;
+  loggedOut?: boolean;
 };
 
 /**
@@ -42,6 +43,14 @@ const Login = (
   props: RouteComponentProps<{}, StaticContext, LocationState>
 ): JSX.Element => {
   const authContext = useContext(AuthContext);
+
+  // If the user was redirected here because they were logged in, and then their session expired, clear the AuthState
+  useEffect(() => {
+    if (props.location?.state?.loggedOut) {
+      authContext.clearAuthState();
+    }
+  }, [authContext, props.location]);
+
   const [login] = useLoginMutation();
   const client = useApolloClient();
   const [showLoginSuccess, setShowLoginSuccess] = useState(false);
