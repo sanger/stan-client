@@ -12,7 +12,12 @@ on:
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        browser: [chrome, edge]
 
     steps:
       - uses: actions/checkout@v2
@@ -21,8 +26,15 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
+          
       - run: yarn install
-      - run: yarn test:ci
+        
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: yarn start
+          wait-on: 'http://localhost:3001'
+          browser: ${{ matrix.browser }}
         env:
           PORT: 3001
           REACT_APP_MOCK_API: msw
