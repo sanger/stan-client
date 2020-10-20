@@ -12,11 +12,10 @@ on:
 jobs:
   build:
 
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
         browser: [chrome, edge]
 
     steps:
