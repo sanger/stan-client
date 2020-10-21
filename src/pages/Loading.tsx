@@ -1,10 +1,15 @@
 import React from "react";
-import FadeInTransition from "../components/transitions/FadeInTransition";
+import { motion } from "framer-motion";
 
 const Loading = () => {
   return (
-    <FadeInTransition>
-      <div className="flex w-screen h-screen items-center justify-center bg-gradient-to-bl from-sdb to-sdb-400">
+    <div className="bg-gradient-to-bl from-sdb to-sdb-400">
+      <motion.div
+        initial={{ opacity: 0.1 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="flex w-screen h-screen items-center justify-center"
+      >
         <svg
           version="1.1"
           className="logo loading fill-current text-sp"
@@ -41,8 +46,8 @@ const Loading = () => {
           <rect x="1" y="80.5" width="7" height="7" ry="1.8" />
           <rect x="66.5" y="79.5" width="9" height="9" ry="1.8" />
         </svg>
-      </div>
-    </FadeInTransition>
+      </motion.div>
+    </div>
   );
 };
 

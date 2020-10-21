@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import LoadingSpinner from "../LoadingSpinner";
+import LoadingSpinner from "../icons/LoadingSpinner";
 
 export interface ButtonProps
   extends React.DetailedHTMLProps<

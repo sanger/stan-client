@@ -1,0 +1,17 @@
+mutation RegisterTissues($request: RegisterRequest!) {
+    register(request: $request) {
+        labware {
+            barcode
+            slots {
+                samples {
+                    tissue {
+                        externalName
+                    }
+                }
+            }
+            labwareType {
+                name
+            }
+        }
+    }
+}

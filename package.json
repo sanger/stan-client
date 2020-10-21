@@ -17,19 +17,21 @@
     "@types/react-dom": "^16.9.0",
     "@types/react-router-dom": "^5.1.5",
     "@types/react-transition-group": "^4.4.0",
-    "@types/yup": "^0.29.8",
+    "@types/yup": "^0.29.9",
+    "@xstate/react": "^1.0.1",
     "autoprefixer": "^9.0.0",
     "classnames": "^2.2.6",
-    "formik": "^2.2.0",
+    "formik": "^2.2.1",
+    "framer-motion": "^2.9.3",
     "graphql": "^15.3.0",
     "js-cookie": "^2.2.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
-    "react-transition-group": "^4.4.1",
     "tailwindcss": "1.9.5",
     "typescript": "~3.7.2",
+    "xstate": "^4.13.0",
     "yup": "^0.29.3"
   },
   "scripts": {
@@ -46,7 +48,7 @@
     "test:ci": "start-server-and-test start 3001 cypress:run",
     "test:open": "start-server-and-test start:msw 3001 cypress:open",
     "eject": "react-scripts eject",
-    "codegen": "graphql-codegen --config codegen.yml -r dotenv/config"
+    "codegen": "DOTENV_CONFIG_PATH=./.env.local graphql-codegen --config codegen.yml -r dotenv/config"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -68,6 +70,7 @@
     "@graphql-codegen/typescript": "1.17.11",
     "@graphql-codegen/typescript-operations": "1.17.8",
     "@graphql-codegen/typescript-react-apollo": "2.0.7",
+    "@tailwindcss/custom-forms": "^0.2.1",
     "@testing-library/cypress": "^7.0.1",
     "cypress": "^5.3.0",
     "cypress-intellij-reporter": "^0.0.4",

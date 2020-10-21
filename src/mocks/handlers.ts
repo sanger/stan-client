@@ -1,4 +1,9 @@
 import { graphql } from "msw";
+import {
+  GetRegistrationInfoQuery,
+  RegisterTissuesMutation,
+  RegisterTissuesMutationVariables,
+} from "../types/graphql";
 
 const CURRENT_USER_KEY = "currentUser";
 /**
@@ -53,4 +58,133 @@ export const handlers = [
       );
     }
   }),
+
+  graphql.query<GetRegistrationInfoQuery>(
+    "GetRegistrationInfo",
+    (req, res, ctx) => {
+      // return res(ctx.errors([{ message: "There was an error!" }]));
+      return res(
+        ctx.data({
+          hmdmcs: [
+            { hmdmc: "HMDMC1" },
+            { hmdmc: "HMDMC2" },
+            { hmdmc: "HMDMC3" },
+            { hmdmc: "HMDMC4" },
+          ],
+          labwareTypes: [
+            {
+              name: "Proviasette",
+            },
+          ],
+          tissueTypes: [
+            {
+              name: "Liver",
+              spatialLocations: [
+                {
+                  name: "Not specified",
+                  code: 0,
+                },
+                {
+                  name: "Liver segments IV (left lobe)",
+                  code: 1,
+                },
+                {
+                  name: "Surface cranial region",
+                  code: 2,
+                },
+                {
+                  name: "Surface central region",
+                  code: 3,
+                },
+                {
+                  name: "Surface caudal region",
+                  code: 4,
+                },
+                {
+                  name: "Deep parenchymal central region (towards hilum)",
+                  code: 5,
+                },
+                {
+                  name: "Right lobe (fine needle aspiration samples)",
+                  code: 6,
+                },
+              ],
+            },
+            {
+              name: "Kidney",
+              spatialLocations: [
+                {
+                  name: "Not specified",
+                  code: 0,
+                },
+                {
+                  name: "Cortex",
+                  code: 1,
+                },
+                {
+                  name: "Medulla at equator",
+                  code: 2,
+                },
+                {
+                  name: "Pelvis at equator",
+                  code: 3,
+                },
+                {
+                  name: "Upper pole",
+                  code: 4,
+                },
+                {
+                  name: "Lower pole",
+                  code: 5,
+                },
+              ],
+            },
+          ],
+          mediums: [{ name: "Wax" }, { name: "Clay" }],
+          mouldSizes: [
+            {
+              name: "5mm",
+            },
+            {
+              name: "10mm",
+            },
+            {
+              name: "20mm",
+            },
+          ],
+        })
+      );
+    }
+  ),
+
+  graphql.mutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>(
+    "RegisterTissues",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          register: {
+            labware: [
+              {
+                barcode: "LW_BC_1",
+                labwareType: {
+                  name: "Proviasette",
+                },
+                slots: [
+                  {
+                    samples: [
+                      {
+                        tissue: {
+                          externalName: "EXTERNAL_123",
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        })
+      );
+    }
+  ),
 ];
