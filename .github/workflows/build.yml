@@ -16,16 +16,18 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
-      - uses: borales/actions-yarn@v2.0.0
-        name: yarn install
+
+      - uses: actions/setup-node@v1
         with:
-          cmd: install
-      
-      - uses: borales/actions-yarn@v2.0.0
-        name: yarn build
+          node-version: '14.x'
+
+      - uses: actions/cache@v2
         with:
-          cmd: build
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
         
       - name: Rename the build
         run: mv build client
