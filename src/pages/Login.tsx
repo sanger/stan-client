@@ -15,7 +15,6 @@ import * as Yup from "yup";
 import LoginButton from "../components/buttons/LoginButton";
 import Warning from "../components/notifications/Warning";
 import Success from "../components/notifications/Success";
-import GradientBackground from "../components/GradientBackground";
 import Logo from "../components/Logo";
 import FadeInTransition from "../components/transitions/FadeInTransition";
 import { useApolloClient } from "@apollo/client";
@@ -112,94 +111,90 @@ const Login = (
         <Redirect to={props.location.state?.referrer ?? "/"} />
       )}
 
-      <GradientBackground direction="to-bl">
-        <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-          <FadeInTransition>
-            <div className="max-w-md w-full">
-              <div>
-                <Link to="/">
-                  <Logo className="mx-auto h-20 w-auto" />
-                </Link>
-              </div>
-              <div>
-                <h2 className="mt-6 text-center text-3xl leading-9 font-extrabold text-white">
-                  Sign in to STAN
-                </h2>
-              </div>
+      <div className="bg-gradient-to-bl from-sdb to-sdb-400 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <FadeInTransition>
+          <div className="max-w-md w-full">
+            <div>
+              <Link to="/">
+                <Logo className="mx-auto h-20 w-auto" />
+              </Link>
+            </div>
+            <div>
+              <h2 className="mt-6 text-center text-3xl leading-9 font-extrabold text-white">
+                Sign in to STAN
+              </h2>
+            </div>
 
-              {showLoginSuccess && (
-                <Success className="mt-8">Login Successful!</Success>
+            {showLoginSuccess && (
+              <Success className="mt-8">Login Successful!</Success>
+            )}
+
+            {props.location.state?.success &&
+              !showLoginSuccess &&
+              errorMessage == null && (
+                <Success className="mt-8">
+                  {props.location.state.success}
+                </Success>
               )}
 
-              {props.location.state?.success &&
-                !showLoginSuccess &&
-                errorMessage == null && (
-                  <Success className="mt-8">
-                    {props.location.state.success}
-                  </Success>
-                )}
-
-              {props.location.state?.warning &&
-                !showLoginSuccess &&
-                errorMessage == null && (
-                  <Warning className="mt-8">
-                    {props.location.state.warning}
-                  </Warning>
-                )}
-
-              {errorMessage && (
-                <Warning className="mt-8">{errorMessage}</Warning>
+            {props.location.state?.warning &&
+              !showLoginSuccess &&
+              errorMessage == null && (
+                <Warning className="mt-8">
+                  {props.location.state.warning}
+                </Warning>
               )}
 
-              <Formik
-                initialValues={formInitialValues}
-                onSubmit={(values, formikHelpers) => {
-                  submitCredentials(values, formikHelpers);
-                }}
-                validationSchema={LoginSchema}
-                validateOnChange={false}
-                validateOnBlur={false}
-              >
-                {(formik) => (
-                  <Form className="mt-8">
-                    <ErrorMessage name="username" />
-                    <ErrorMessage name="password" />
-                    <div className="rounded-md shadow-sm">
-                      <div>
-                        <Field
-                          aria-label="Sanger username"
-                          name="username"
-                          type="text"
-                          required
-                          className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
-                          placeholder="Sanger username"
-                        />
-                      </div>
-                    </div>
+            {errorMessage && <Warning className="mt-8">{errorMessage}</Warning>}
 
-                    <div className="-mt-px">
+            <Formik
+              initialValues={formInitialValues}
+              onSubmit={(values, formikHelpers) => {
+                submitCredentials(values, formikHelpers);
+              }}
+              validationSchema={LoginSchema}
+              validateOnChange={false}
+              validateOnBlur={false}
+            >
+              {(formik) => (
+                <Form className="mt-8">
+                  <ErrorMessage name="username" />
+                  <ErrorMessage name="password" />
+                  <div className="rounded-md shadow-sm">
+                    <div>
                       <Field
-                        aria-label="Password"
-                        name="password"
-                        type="password"
+                        aria-label="Sanger username"
+                        name="username"
+                        type="text"
                         required
-                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
-                        placeholder="Password"
+                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
+                        placeholder="Sanger username"
                       />
                     </div>
+                  </div>
 
-                    <div className="mt-6">
-                      <LoginButton loading={formik.isSubmitting}>
-                        Sign In
-                      </LoginButton>
-                    </div>
-                  </Form>
-                )}
-              </Formik>
-            </div>
-          </FadeInTransition>
-        </div>
-      </GradientBackground>
+                  <div className="-mt-px">
+                    <Field
+                      aria-label="Password"
+                      name="password"
+                      type="password"
+                      required
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
+                      placeholder="Password"
+                    />
+                  </div>
+
+                  <div className="mt-6">
+                    <LoginButton loading={formik.isSubmitting}>
+                      Sign In
+                    </LoginButton>
+                  </div>
+                </Form>
+              )}
+            </Formik>
+          </div>
+        </FadeInTransition>
+      </div>
     </>
   );
 };
