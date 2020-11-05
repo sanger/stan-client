@@ -29,7 +29,6 @@ function getNumErrorsPerTissue(
         Object.keys(block).forEach((blockKey) => {
           const fieldName = `tissues[${tissueIndex}].blocks[${blockIndex}].${blockKey}`;
           if (getIn(touched, fieldName) && getIn(errors, fieldName)) {
-            console.log(fieldName, "is not valid");
             count++;
           }
         });
@@ -40,7 +39,6 @@ function getNumErrorsPerTissue(
         .forEach((tissueKey) => {
           const fieldName = `tissues[${tissueIndex}].${tissueKey}`;
           if (getIn(touched, fieldName) && getIn(errors, fieldName)) {
-            console.log(fieldName, "is not valid");
             count++;
           }
         });

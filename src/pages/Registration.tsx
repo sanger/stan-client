@@ -39,10 +39,7 @@ function Registration(): JSX.Element {
 
         {current.matches("submissionError") && (
           <div ref={warningRef}>
-            <Warning
-              ref={warningRef}
-              message={"There was a problem registering your tissues"}
-            >
+            <Warning message={"There was a problem registering your tissues"}>
               <ul className="list-disc list-inside">
                 {getGraphQLProblems(current.context.registrationErrors).map(
                   (problem, index) => {

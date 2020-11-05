@@ -152,7 +152,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   login: LoginResult;
   logout?: Maybe<Scalars['String']>;
-  register?: Maybe<RegisterResult>;
+  register: RegisterResult;
 };
 
 
@@ -198,7 +198,7 @@ export type RegisterTissuesMutationVariables = Exact<{
 
 export type RegisterTissuesMutation = (
   { __typename?: 'Mutation' }
-  & { register?: Maybe<(
+  & { register: (
     { __typename?: 'RegisterResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
@@ -217,7 +217,7 @@ export type RegisterTissuesMutation = (
         & Pick<LabwareType, 'name'>
       ) }
     )> }
-  )> }
+  ) }
 );
 
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
