@@ -38,16 +38,18 @@ export type RegistrationEvent =
   | { type: "SUBMIT_FORM"; values: FormValues };
 
 /**
- * useRegistrationMachine is a React Hook
- *
- * @link https://xstate.js.org/docs/guides/machines.html#configuration
+ * useRegistrationMachine is a React Hook.
+ * See {@link https://xstate.js.org/docs/guides/machines.html#configuration}
  *
  * @example
  * const [current, send] = useRegistrationMachine();
- * // current is the current state
  *
  * // Use send to send an event to the state machine
  * send({ type: "SUBMIT_FORM", values: values});
+ *
+ * if (current.matches("loading")) {
+ *   // Show loading component
+ * }
  */
 export function useRegistrationMachine() {
   const client = useApolloClient();

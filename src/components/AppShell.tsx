@@ -8,6 +8,7 @@ import GuestIcon from "./icons/GuestIcon";
 import { AuthContext } from "../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "./Heading";
+import variants from "../lib/motionVariants";
 
 interface AppShellParams {
   children?: JSX.Element | JSX.Element[];
@@ -33,25 +34,6 @@ function AppShell({ children }: AppShellParams): JSX.Element {
   // Should the mobile menu be open
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Animation variants for the mobile menu
-  const menuVariants = {
-    hidden: {
-      height: 0,
-      transition: { when: "afterChildren", duration: 0.3 },
-    },
-    visible: {
-      height: "auto",
-      opacity: 1,
-      transition: {
-        when: "beforeChildren",
-        duration: 0.2,
-      },
-    },
-  };
-  const menuItemVariants = {
-    hidden: { opacity: 0, transition: { duration: 0.1 } },
-    visible: { opacity: 1, transition: { duration: 0.1 } },
-  };
   return (
     <div>
       <div className="bg-gradient-to-tr from-sdb to-sdb-400">
@@ -72,7 +54,6 @@ function AppShell({ children }: AppShellParams): JSX.Element {
                     <StanNavLink to="/lab">Lab Work</StanNavLink>
                     <StanNavLink to="/reports">Reports</StanNavLink>
                     <Authenticated>
-                      {/*<StanNavLink to="/admin">Admin</StanNavLink>*/}
                       <StanNavLink to="/admin/registration">
                         Registration
                       </StanNavLink>
@@ -188,11 +169,11 @@ function AppShell({ children }: AppShellParams): JSX.Element {
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
-                variants={menuVariants}
+                variants={variants.menuVariants}
                 className="block md:hidden"
               >
                 <motion.div
-                  variants={menuItemVariants}
+                  variants={variants.menuItemVariants}
                   className="px-2 pt-2 pb-3 space-y-1 sm:px-3"
                 >
                   <StanMobileNavLink to="/" exact>
@@ -201,14 +182,13 @@ function AppShell({ children }: AppShellParams): JSX.Element {
                   <StanMobileNavLink to="/lab">Lab Work</StanMobileNavLink>
                   <StanMobileNavLink to="/reports">Reports</StanMobileNavLink>
                   <Authenticated>
-                    {/*<StanMobileNavLink to="/admin">Admin</StanMobileNavLink>*/}
                     <StanMobileNavLink to="/admin/registration">
                       Registration
                     </StanMobileNavLink>
                   </Authenticated>
                 </motion.div>
                 <motion.div
-                  variants={menuItemVariants}
+                  variants={variants.menuItemVariants}
                   className="pt-4 pb-3 border-t border-gray-700"
                 >
                   <Authenticated>
