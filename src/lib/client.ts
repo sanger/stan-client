@@ -53,11 +53,15 @@ const client = new ApolloClient({
 
 export default client;
 
+export type GraphQLProblems = string[];
+
 /**
  * Returns a list of all extensions.problems from a list of GraphQLError objects
  * @param graphQLErrors
  */
-export function getGraphQLProblems(graphQLErrors: GraphQLError[]): string[] {
+export function getGraphQLProblems(
+  graphQLErrors: GraphQLError[]
+): GraphQLProblems {
   return graphQLErrors.reduce<string[]>(
     (memo, graphQLError, index, original) => {
       if (!graphQLError.extensions?.hasOwnProperty("problems")) {

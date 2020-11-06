@@ -1,15 +1,15 @@
 import React, { useEffect, useRef } from "react";
 import AppShell from "../components/AppShell";
 import PinkButton from "../components/buttons/PinkButton";
-import { useRegistrationMachine } from "../machines/registrationMachine";
+import registrationMachine from "../lib/machines/registrationMachine";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import Warning from "../components/notifications/Warning";
 import RegistrationForm from "./registration/RegistrationForm";
 import RegistrationSuccess from "./registration/RegistrationSuccess";
-import { getGraphQLProblems } from "../lib/client";
+import { useMachine } from "@xstate/react";
 
 function Registration(): JSX.Element {
-  const [current, send] = useRegistrationMachine();
+  const [current, send] = useMachine(registrationMachine);
   const warningRef = useRef<HTMLDivElement>(null);
 
   // Scroll the error notification into view if it appears
@@ -41,11 +41,9 @@ function Registration(): JSX.Element {
           <div ref={warningRef}>
             <Warning message={"There was a problem registering your tissues"}>
               <ul className="list-disc list-inside">
-                {getGraphQLProblems(current.context.registrationErrors).map(
-                  (problem, index) => {
-                    return <li key={index}>{problem}</li>;
-                  }
-                )}
+                {current.context.registrationErrors.map((problem, index) => {
+                  return <li key={index}>{problem}</li>;
+                })}
               </ul>
             </Warning>
           </div>
