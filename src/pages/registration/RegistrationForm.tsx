@@ -17,6 +17,7 @@ import PinkButton from "../../components/buttons/PinkButton";
 import BlueButton from "../../components/buttons/BlueButton";
 import SummaryBox from "./SummaryBox";
 import variants from "../../lib/motionVariants";
+import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
 
 export interface FormValues {
   tissues: FormTissueValues[];
@@ -121,7 +122,7 @@ const RegistrationForm = ({
       {({ values, setFieldValue, errors, touched }) => {
         return (
           <Form>
-            <div className="lg:w-5/6 mt-4 p-3 lg:pr-0 w-100 md:flex md:flex-row md:gap-4 md:justify-between bg-gray-100 rounded-md">
+            <GrayBox>
               <AnimatePresence
                 exitBeforeEnter
                 onExitComplete={() => {
@@ -411,24 +412,28 @@ const RegistrationForm = ({
                 )
               </AnimatePresence>
 
-              <FieldArray name={`tissues`}>
-                {(tissueHelpers) => (
-                  <SummaryBox
-                    submitting={submitting}
-                    values={values}
-                    errors={errors}
-                    touched={touched}
-                    currentFormIndex={currentTissueIndex}
-                    setCurrentFormIndex={setCurrentTissueIndex}
-                    onNewTissueButton={() => {
-                      tissueHelpers.push(getInitialTissueValues());
-                      setCurrentTissueIndex(values.tissues.length);
-                      tissueRef.current?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                  />
-                )}
-              </FieldArray>
-            </div>
+              <Sidebar>
+                <FieldArray name={`tissues`}>
+                  {(tissueHelpers) => (
+                    <SummaryBox
+                      submitting={submitting}
+                      values={values}
+                      errors={errors}
+                      touched={touched}
+                      currentFormIndex={currentTissueIndex}
+                      setCurrentFormIndex={setCurrentTissueIndex}
+                      onNewTissueButton={() => {
+                        tissueHelpers.push(getInitialTissueValues());
+                        setCurrentTissueIndex(values.tissues.length);
+                        tissueRef.current?.scrollIntoView({
+                          behavior: "smooth",
+                        });
+                      }}
+                    />
+                  )}
+                </FieldArray>
+              </Sidebar>
+            </GrayBox>
           </Form>
         );
       }}
