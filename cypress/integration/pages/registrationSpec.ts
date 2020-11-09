@@ -15,11 +15,25 @@ describe("Registration", () => {
       cy.findByText("Donor ID is a required field").should("be.visible");
     });
 
+    it("requires Donor ID to only permit certain characters", () => {
+      cy.findByLabelText("Donor ID").type("$DONOR1").blur();
+      cy.findByText(
+        "Donor ID contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
+      ).should("be.visible");
+    });
+
     it("requires External Identifier", () => {
       cy.findByLabelText("External Identifier").focus().blur();
       cy.findByText("External Identifier is a required field").should(
         "be.visible"
       );
+    });
+
+    it("requires External Identifer to only permit certain characters", () => {
+      cy.findByLabelText("External Identifier").type("EXT&99").blur();
+      cy.findByText(
+        "External Identifier contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
+      ).should("be.visible");
     });
 
     it("requires HMDMC", () => {
@@ -207,8 +221,8 @@ describe("Registration", () => {
 });
 
 function fillInForm() {
-  cy.findByLabelText("Donor ID").type("DONOR 1");
-  cy.findByLabelText("External Identifier").type("EXT ID 1");
+  cy.findByLabelText("Donor ID").type("DONOR_1");
+  cy.findByLabelText("External Identifier").type("EXT_ID_1");
   cy.findByLabelText("HMDMC").select("HMDMC1");
   cy.findByLabelText("Tissue Type").select("Liver");
   cy.findByLabelText("Spatial Location").select("3");

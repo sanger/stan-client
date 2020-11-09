@@ -167,7 +167,14 @@ function buildRegistrationSchema(
       .min(1)
       .of(
         Yup.object().shape({
-          donorId: Yup.string().trim().required().label("Donor ID"),
+          donorId: Yup.string()
+            .matches(
+              /^[a-z0-9-_]+$/i,
+              "Donor ID contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
+            )
+            .trim()
+            .required()
+            .label("Donor ID"),
           lifeStage: Yup.string()
             .oneOf(Object.values(LifeStage))
             .required()
@@ -182,6 +189,10 @@ function buildRegistrationSchema(
             .label("Tissue Type"),
           externalIdentifier: Yup.string()
             .trim()
+            .matches(
+              /^[a-z0-9-_]+$/i,
+              "External Identifier contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
+            )
             .required()
             .label("External Identifier"),
           blocks: Yup.array()
