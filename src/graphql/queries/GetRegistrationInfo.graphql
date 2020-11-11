@@ -1,0 +1,21 @@
+query GetRegistrationInfo {
+    hmdmcs {
+        hmdmc
+    }
+    labwareTypes {
+        name
+    }
+    tissueTypes {
+        name
+        spatialLocations {
+            name
+            code
+        }
+    }
+    mediums {
+        name
+    }
+    mouldSizes {
+        name
+    }
+}

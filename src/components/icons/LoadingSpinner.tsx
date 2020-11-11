@@ -9,7 +9,11 @@ interface LoadingSpinnerProps extends React.SVGProps<SVGSVGElement> {}
  * @constructor
  */
 function LoadingSpinner({ className }: LoadingSpinnerProps) {
-  const svgClasses = classNames("animate-spin h-5 w-5 text-sdb", className);
+  const svgClasses = classNames(
+    "animate-spin",
+    { "h-5 w-5 text-sdb": !className },
+    { [`${className}`]: !!className }
+  );
   return (
     <svg
       className={svgClasses}

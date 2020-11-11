@@ -96,4 +96,8 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 - Cypress testing library: https://testing-library.com/docs/cypress-testing-library/intro
 - Mock Service Worker docs: https://mswjs.io/docs/
 - Useful article about testing with MSW: https://kentcdodds.com/blog/stop-mocking-fetch
+- Tailwind CSS - https://tailwindcss.com
+- Tailwind CSS Custom Forms - https://tailwindcss-custom-forms.netlify.app/
 - Icon Set: https://heroicons.com/
+- XState (state machine library): https://xstate.js.org/docs/
+- React Framer Motion (animation components): https://www.framer.com/api/motion/

@@ -16,9 +16,9 @@ import LoginButton from "../components/buttons/LoginButton";
 import Warning from "../components/notifications/Warning";
 import Success from "../components/notifications/Success";
 import Logo from "../components/Logo";
-import FadeInTransition from "../components/transitions/FadeInTransition";
 import { useApolloClient } from "@apollo/client";
 import { useLoginMutation } from "../types/graphql";
+import { motion } from "framer-motion";
 
 /**
  * Properties that can be added on to the URL state. Frequently used with react-router's Redirect component.
@@ -111,9 +111,14 @@ const Login = (
         <Redirect to={props.location.state?.referrer ?? "/"} />
       )}
 
-      <div className="bg-gradient-to-bl from-sdb to-sdb-400 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <FadeInTransition>
-          <div className="max-w-md w-full">
+      <div className="bg-gradient-to-bl from-sdb to-sdb-400">
+        <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0.1 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="max-w-md w-full"
+          >
             <div>
               <Link to="/">
                 <Logo className="mx-auto h-20 w-auto" />
@@ -126,26 +131,30 @@ const Login = (
             </div>
 
             {showLoginSuccess && (
-              <Success className="mt-8">Login Successful!</Success>
+              <Success message={"Login Successful!"} className="mt-8" />
             )}
 
             {props.location.state?.success &&
               !showLoginSuccess &&
               errorMessage == null && (
-                <Success className="mt-8">
-                  {props.location.state.success}
-                </Success>
+                <Success
+                  message={props.location.state.success}
+                  className="mt-8"
+                />
               )}
 
             {props.location.state?.warning &&
               !showLoginSuccess &&
               errorMessage == null && (
-                <Warning className="mt-8">
-                  {props.location.state.warning}
-                </Warning>
+                <Warning
+                  className="mt-8"
+                  message={props.location.state.warning}
+                />
               )}
 
-            {errorMessage && <Warning className="mt-8">{errorMessage}</Warning>}
+            {errorMessage && (
+              <Warning className="mt-8" message={errorMessage} />
+            )}
 
             <Formik
               initialValues={formInitialValues}
@@ -192,8 +201,8 @@ const Login = (
                 </Form>
               )}
             </Formik>
-          </div>
-        </FadeInTransition>
+          </motion.div>
+        </div>
       </div>
     </>
   );

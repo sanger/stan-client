@@ -735,7 +735,7 @@ module.exports = {
     boxSizing: ["responsive"],
     container: ["responsive"],
     cursor: ["responsive"],
-    display: ["responsive"],
+    display: ["responsive", "group-hover"],
     divideColor: ["responsive"],
     divideOpacity: ["responsive"],
     divideStyle: ["responsive"],
@@ -823,5 +823,5 @@ module.exports = {
     animation: ["responsive"],
   },
   corePlugins: {},
-  plugins: [require("@tailwindcss/ui")],
+  plugins: [require("@tailwindcss/ui"), require("@tailwindcss/custom-forms")],
 };

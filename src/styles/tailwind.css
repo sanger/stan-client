@@ -31,40 +31,6 @@ svg.logo.loading rect:nth-child(3n+1) {
     }
 }
 
-/* Transitions */
-
-/* Fade In */
-.fade-in-appear, .fade-in-entry {
-    opacity: 0.01;
-}
-
-.fade-in-appear-active, .fade-in-entry-active {
-    opacity: 1;
-    transition: opacity 400ms ease-in-out;
-}
-
-/* Pop */
-.pop-enter {
-    opacity: 0;
-    transform: scale(0.95);
-}
-
-.pop-enter-active {
-    opacity: 1;
-    transform: scale(1);
-    transition: opacity 100ms ease-out;
-}
-
-.pop-exit {
-    opacity: 1;
-}
-
-.pop-exit-active {
-    opacity: 0;
-    transform: scale(0.95);
-    transition: opacity 75ms ease-in;
-}
-
 @tailwind components;
 
 @tailwind utilities;
