@@ -40,7 +40,7 @@ Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
 
 ### `yarn codegen`
 
-Runs the (GraphQL Code Generator)[https://graphql-code-generator.com/docs/getting-started/index]. This command automatically runs before `yarn start`, `yarn start:msw`, and `yarn test:open`. 
+Runs the [GraphQL Code Generator](https://graphql-code-generator.com/docs/getting-started/index). This command automatically runs before `yarn start`, `yarn start:msw`, and `yarn test:open`. 
 
 GraphQL Code Generator is a CLI tool that can generate TypeScript typings out of a GraphQL schema.
 
