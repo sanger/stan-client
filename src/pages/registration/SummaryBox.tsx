@@ -5,7 +5,7 @@ import EditIcon from "../../components/icons/EditIcon";
 import BlockIcon from "../../components/icons/BlockIcon";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import PinkButton from "../../components/buttons/PinkButton";
-import React from "react";
+import React, { useState } from "react";
 import { FormikErrors, FormikTouched, FormikValues, getIn } from "formik";
 import { FormTissueValues, FormValues } from "./RegistrationForm";
 import Pill from "../../components/Pill";
@@ -69,6 +69,7 @@ const SummaryBox = ({
   setCurrentFormIndex,
 }: SummaryBoxParams) => {
   const errorCount = getNumErrorsPerTissue(values.tissues, errors, touched);
+  const [whiteButtonDisabled, setWhiteButtonDisabled] = useState(false);
 
   return (
     <div className="sticky top-0 space-y-2">
@@ -138,12 +139,18 @@ const SummaryBox = ({
 
       <div>
         <WhiteButton
+          disabled={whiteButtonDisabled}
           type="button"
           action="primary"
           className="mt-2 w-full"
           onClick={(e) => {
             e.preventDefault();
+            if (whiteButtonDisabled) {
+              return;
+            }
+            setWhiteButtonDisabled(true);
             onNewTissueButton();
+            setTimeout(() => setWhiteButtonDisabled(false), 1500);
           }}
         >
           + Add Another Tissue

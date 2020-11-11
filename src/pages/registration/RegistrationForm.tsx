@@ -424,7 +424,7 @@ const RegistrationForm = ({
                       setCurrentFormIndex={setCurrentTissueIndex}
                       onNewTissueButton={() => {
                         tissueHelpers.push(getInitialTissueValues());
-                        setCurrentTissueIndex(values.tissues.length);
+                        setCurrentTissueIndex(currentTissueIndex + 1);
                         tissueRef.current?.scrollIntoView({
                           behavior: "smooth",
                         });
