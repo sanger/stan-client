@@ -187,18 +187,18 @@ function buildRegistrationSchema(
             .oneOf(registrationInfo.tissueTypes.map((tt) => tt.name))
             .required()
             .label("Tissue Type"),
-          externalIdentifier: Yup.string()
-            .trim()
-            .matches(
-              /^[a-z0-9-_]+$/i,
-              "External Identifier contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
-            )
-            .required()
-            .label("External Identifier"),
           blocks: Yup.array()
             .min(1)
             .of(
               Yup.object().shape({
+                externalIdentifier: Yup.string()
+                  .trim()
+                  .matches(
+                    /^[a-z0-9-_]+$/i,
+                    "External Identifier contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
+                  )
+                  .required()
+                  .label("External Identifier"),
                 spatialLocation: Yup.number()
                   .integer()
                   .min(0)
@@ -250,7 +250,7 @@ function buildRegisterTissuesMutationVariables(
           ...tissue.blocks.map<BlockRegisterRequest>((block) => {
             return {
               donorIdentifier: tissue.donorId,
-              externalIdentifier: tissue.externalIdentifier,
+              externalIdentifier: block.externalIdentifier,
               highestSection: block.lastKnownSectionNumber,
               hmdmc: tissue.hmdmc,
               labwareType: block.labwareType,

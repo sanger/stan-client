@@ -23,46 +23,48 @@ function Registration(): JSX.Element {
         <AppShell.Title>Tissue Registration</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        {current.matches("loading") && (
-          <LoadingSpinner className="mx-auto mt-10 h-8 w-8" />
-        )}
+        <div className="max-w-screen-xl mx-auto">
+          {current.matches("loading") && (
+            <LoadingSpinner className="mx-auto mt-10 h-8 w-8" />
+          )}
 
-        {current.matches("error") && (
-          <div className="mx-auto max-w-screen-lg">
-            <Warning message={current.context.loadingError}>
-              <PinkButton className="mt-4" onClick={() => send("RETRY")}>
-                Retry
-              </PinkButton>
-            </Warning>
-          </div>
-        )}
+          {current.matches("error") && (
+            <div className="mx-auto max-w-screen-lg">
+              <Warning message={current.context.loadingError}>
+                <PinkButton className="mt-4" onClick={() => send("RETRY")}>
+                  Retry
+                </PinkButton>
+              </Warning>
+            </div>
+          )}
 
-        {current.matches("submissionError") && (
-          <div ref={warningRef}>
-            <Warning message={"There was a problem registering your tissues"}>
-              <ul className="list-disc list-inside">
-                {current.context.registrationErrors.map((problem, index) => {
-                  return <li key={index}>{problem}</li>;
-                })}
-              </ul>
-            </Warning>
-          </div>
-        )}
+          {current.matches("submissionError") && (
+            <div ref={warningRef}>
+              <Warning message={"There was a problem registering your tissues"}>
+                <ul className="list-disc list-inside">
+                  {current.context.registrationErrors.map((problem, index) => {
+                    return <li key={index}>{problem}</li>;
+                  })}
+                </ul>
+              </Warning>
+            </div>
+          )}
 
-        {["loaded", "submitting", "submissionError"].some((val) =>
-          current.matches(val)
-        ) && (
-          <RegistrationForm
-            submitting={current.matches("submitting")}
-            registrationInfo={current.context.registrationInfo}
-            registrationSchema={current.context.registrationSchema}
-            onSubmission={(values) => send({ type: "SUBMIT_FORM", values })}
-          />
-        )}
+          {["loaded", "submitting", "submissionError"].some((val) =>
+            current.matches(val)
+          ) && (
+            <RegistrationForm
+              submitting={current.matches("submitting")}
+              registrationInfo={current.context.registrationInfo}
+              registrationSchema={current.context.registrationSchema}
+              onSubmission={(values) => send({ type: "SUBMIT_FORM", values })}
+            />
+          )}
 
-        {current.matches("complete") && (
-          <RegistrationSuccess result={current.context.registrationResult} />
-        )}
+          {current.matches("complete") && (
+            <RegistrationSuccess result={current.context.registrationResult} />
+          )}
+        </div>
       </AppShell.Main>
     </AppShell>
   );

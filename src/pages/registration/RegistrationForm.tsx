@@ -29,12 +29,12 @@ export interface FormTissueValues {
   lifeStage: LifeStage;
   hmdmc: string;
   tissueType: string;
-  externalIdentifier: string;
   blocks: FormBlockValues[];
 }
 
 export interface FormBlockValues {
   clientId: number;
+  externalIdentifier: string;
   spatialLocation: number;
   replicateNumber: number;
   lastKnownSectionNumber: number;
@@ -46,6 +46,7 @@ export interface FormBlockValues {
 function getInitialBlockValues(): FormBlockValues {
   return {
     clientId: Date.now(),
+    externalIdentifier: "",
     spatialLocation: -1, // Initialise it as invalid so user has to select something
     replicateNumber: 0,
     lastKnownSectionNumber: 0,
@@ -62,7 +63,6 @@ function getInitialTissueValues(): FormTissueValues {
     lifeStage: LifeStage.Fetal,
     hmdmc: "",
     tissueType: "",
-    externalIdentifier: "",
     blocks: [getInitialBlockValues()],
   };
 }
@@ -174,11 +174,6 @@ const RegistrationForm = ({
                   >
                     <Heading level={3}>Tissue Information</Heading>
 
-                    <Input
-                      label="External Identifier"
-                      name={`tissues.${currentTissueIndex}.externalIdentifier`}
-                    />
-
                     <Select
                       label="HMDMC"
                       name={`tissues.${currentTissueIndex}.hmdmc`}
@@ -262,6 +257,11 @@ const RegistrationForm = ({
                               exit={"hidden"}
                               className="relative p-4 shadow-lg bg-white space-y-4"
                             >
+                              <Input
+                                label="External Identifier"
+                                name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.externalIdentifier`}
+                              />
+
                               <Select
                                 disabled={
                                   availableSpatialLocations.length === 0
