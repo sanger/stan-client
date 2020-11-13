@@ -212,7 +212,7 @@ function buildRegistrationSchema(
                   .label("Replicate Number"),
                 lastKnownSectionNumber: Yup.number()
                   .integer()
-                  .min(1)
+                  .min(0)
                   .required()
                   .label("Last Known Section Number"),
                 labwareType: Yup.string()

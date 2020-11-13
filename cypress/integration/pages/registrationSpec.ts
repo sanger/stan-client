@@ -79,8 +79,15 @@ describe("Registration", () => {
       );
     });
 
-    it("requires Last Known Section Number to be greater than 0", () => {
-      cy.findByLabelText("Replicate Number").clear().type("-1").blur();
+    it("requires Last Known Section Number to be greater than or equal to 0", () => {
+      cy.findByLabelText("Last Known Section Number").clear().type("-1").blur();
+      cy.findByText(
+        "Last Known Section Number must be greater than or equal to 0"
+      ).should("be.visible");
+    });
+
+    it("requires Replicate Number to be greater than or equal to 1", () => {
+      cy.findByLabelText("Replicate Number").type("0").blur();
       cy.findByText(
         "Replicate Number must be greater than or equal to 1"
       ).should("be.visible");
