@@ -1,7 +1,7 @@
 import React from "react";
 import Label from "./Label";
 import { Field } from "formik";
-import { ErrorMessage } from "./index";
+import { FormikErrorMessage } from "./index";
 
 interface InputProps {
   label: string;
@@ -19,7 +19,7 @@ const Input = ({ label, name, type = "text" }: InputProps) => {
           name={name}
         />
       </Label>
-      <ErrorMessage name={name} />
+      <FormikErrorMessage name={name} />
     </>
   );
 };

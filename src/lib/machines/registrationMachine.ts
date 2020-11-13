@@ -54,7 +54,7 @@ const registrationMachine = Machine<
           initial: "fetching",
           states: {
             fetching: {
-              // When we enter the "fetching" state, invoke the getRegistrationInfo service.
+              // When we enter the "fetching" state, invoke the getRegistrationInfo actor.
               // https://xstate.js.org/docs/guides/communication.html#quick-reference
               invoke: {
                 id: "getRegistrationInfo",
@@ -96,7 +96,7 @@ const registrationMachine = Machine<
           states: {
             waiting: {
               after: {
-                800: "finished",
+                500: "finished",
               },
             },
             finished: { type: "final" },

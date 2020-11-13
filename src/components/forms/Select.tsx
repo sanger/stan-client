@@ -1,7 +1,7 @@
 import React from "react";
 import Label from "./Label";
 import { Field, FieldAttributes } from "formik";
-import { ErrorMessage } from "./index";
+import { FormikErrorMessage } from "./index";
 
 interface SelectProps extends FieldAttributes<any> {
   label: string;
@@ -31,7 +31,7 @@ const Select = ({
         {children}
       </Field>
     </Label>
-    <ErrorMessage name={name} />
+    <FormikErrorMessage name={name} />
   </>
 );
 

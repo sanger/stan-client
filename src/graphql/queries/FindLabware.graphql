@@ -1,0 +1,30 @@
+query FindLabware($barcode: String!) {
+    labware(barcode: $barcode) {
+        barcode
+        labwareType {
+            name
+        }
+        slots {
+            address {
+              row
+              column
+            }
+            block
+            samples {
+                section
+                tissue {
+                    donor {
+                        donorName
+                    }
+                    spatialLocation {
+                        tissueType {
+                            name
+                        }
+                        code
+                    }
+                    replicate
+                }
+            }
+        }
+    }
+}

@@ -1,8 +1,9 @@
 describe("Logout", () => {
   before(() => {
     cy.visit("/");
+    cy.wait(500);
     cy.get("#user-menu").click();
-    cy.findByRole("menu").find("a[href='/logout']").click();
+    cy.findByText("Sign out").click();
   });
 
   it("redirects the user to the /login page", () => {

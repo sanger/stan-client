@@ -5,13 +5,18 @@ import { getIn, useFormikContext } from "formik";
  * Will display an error message if <code>name</code> has been touched and has an error
  * @param name a field's name in Formik state
  */
-export const ErrorMessage = ({ name }: { name: string }) => {
+export const FormikErrorMessage = ({ name }: { name: string }) => {
   const { errors, touched } = useFormikContext();
   const error = getIn(errors, name);
   const touch = getIn(touched, name);
-  return touch && error ? (
-    <p className="text-red-500 text-xs italic">{error}</p>
-  ) : null;
+  return touch && error ? <ErrorMessage>{error}</ErrorMessage> : null;
+};
+
+/**
+ * Styled paragraph for an error message on a form input
+ */
+export const ErrorMessage: React.FC = ({ children }) => {
+  return <p className="text-red-500 text-xs italic">{children}</p>;
 };
 
 /**

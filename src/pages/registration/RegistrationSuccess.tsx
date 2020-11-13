@@ -6,6 +6,12 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { RegisterTissuesMutation } from "../../types/graphql";
 import variants from "../../lib/motionVariants";
+import Table, {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+} from "../../components/Table";
 
 interface RegistrationSuccessProps {
   result: RegisterTissuesMutation;
@@ -26,42 +32,26 @@ const RegistrationSuccess = ({ result }: RegistrationSuccessProps) => {
       </motion.div>
 
       <motion.div variants={variants.fadeInWithLift} className="flex flex-col">
-        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-            <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                      Labware Barcode
-                    </th>
-                    <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                      Labware Type
-                    </th>
-                    <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                      External ID
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {result.register?.labware.map((labware, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-no-wrap">
-                        {labware.barcode}
-                      </td>
-                      <td className="px-6 py-4 whitespace-no-wrap">
-                        {labware.labwareType.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-no-wrap">
-                        {labware.slots[0]?.samples[0]?.tissue.externalName}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Table>
+          <TableHead>
+            <tr>
+              <TableHeader>Labware Barcode</TableHeader>
+              <TableHeader>Labware Type</TableHeader>
+              <TableHeader>Labware ExternalId</TableHeader>
+            </tr>
+          </TableHead>
+          <TableBody>
+            {result.register?.labware.map((labware, index) => (
+              <tr key={index}>
+                <TableCell>{labware.barcode}</TableCell>
+                <TableCell>{labware.labwareType.name}</TableCell>
+                <TableCell>
+                  {labware.slots[0]?.samples[0]?.tissue.externalName}
+                </TableCell>
+              </tr>
+            ))}
+          </TableBody>
+        </Table>
       </motion.div>
 
       <motion.div
