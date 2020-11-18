@@ -219,13 +219,19 @@ function buildRegistrationSchema(
                   .oneOf(registrationInfo.labwareTypes.map((lt) => lt.name))
                   .required()
                   .label("Labware Type"),
+                fixative: Yup.string()
+                  .oneOf(
+                    registrationInfo.fixatives.map((fixative) => fixative.name)
+                  )
+                  .required()
+                  .label("Fixative"),
                 medium: Yup.string()
                   .oneOf(registrationInfo.mediums.map((m) => m.name))
-                  .optional()
+                  .required()
                   .label("Medium"),
                 mouldSize: Yup.string()
                   .oneOf(registrationInfo.mouldSizes.map((ms) => ms.name))
-                  .optional()
+                  .required()
                   .label("Mould Size"),
               })
             ),
@@ -258,6 +264,7 @@ function buildRegisterTissuesMutationVariables(
               tissueType: tissue.tissueType,
               spatialLocation: block.spatialLocation,
               replicateNumber: block.replicateNumber,
+              fixative: block.fixative,
               medium: block.medium,
               mouldSize: block.mouldSize,
             };

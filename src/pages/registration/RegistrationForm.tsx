@@ -39,8 +39,9 @@ export interface FormBlockValues {
   replicateNumber: number;
   lastKnownSectionNumber: number;
   labwareType: string;
-  medium?: string;
-  mouldSize?: string;
+  fixative: string;
+  medium: string;
+  mouldSize: string;
 }
 
 function getInitialBlockValues(): FormBlockValues {
@@ -51,6 +52,7 @@ function getInitialBlockValues(): FormBlockValues {
     replicateNumber: 0,
     lastKnownSectionNumber: 0,
     labwareType: "",
+    fixative: "",
     medium: "",
     mouldSize: "",
   };
@@ -313,7 +315,20 @@ const RegistrationForm = ({
 
                               <Select
                                 emptyOption
-                                label="Medium (optional)"
+                                label="Fixative"
+                                className="block mt-2"
+                                name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.fixative`}
+                              >
+                                {optionValues(
+                                  registrationInfo.fixatives,
+                                  "name",
+                                  "name"
+                                )}
+                              </Select>
+
+                              <Select
+                                emptyOption
+                                label="Medium"
                                 className="block mt-2"
                                 name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.medium`}
                               >
@@ -325,7 +340,7 @@ const RegistrationForm = ({
                               </Select>
 
                               <RadioGroup
-                                label="Mould Size (optional)"
+                                label="Mould Size"
                                 name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.mouldSize`}
                               >
                                 {registrationInfo.mouldSizes.map(

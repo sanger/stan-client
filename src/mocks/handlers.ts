@@ -140,16 +140,17 @@ export const handlers = [
               ],
             },
           ],
-          mediums: [{ name: "Wax" }, { name: "Clay" }],
+          fixatives: [{ name: "None" }, { name: "Formalin" }],
+          mediums: [{ name: "OCT" }, { name: "Paraffin" }, { name: "None" }],
           mouldSizes: [
             {
-              name: "5mm",
+              name: "10x10",
             },
             {
-              name: "10mm",
+              name: "15x15",
             },
             {
-              name: "20mm",
+              name: "30x24",
             },
           ],
         })

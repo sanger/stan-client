@@ -97,6 +97,16 @@ describe("Registration", () => {
       cy.findByLabelText("Labware Type").focus().blur();
       cy.findByText("Labware Type is a required field").should("be.visible");
     });
+
+    it("requires Fixative", () => {
+      cy.findByLabelText("Fixative").focus().blur();
+      cy.findByText("Fixative is a required field").should("be.visible");
+    });
+
+    it("requires Medium", () => {
+      cy.findByLabelText("Medium").focus().blur();
+      cy.findByText("Medium is a required field").should("be.visible");
+    });
   });
 
   context("when changing the selected Tissue Type", () => {
@@ -236,4 +246,7 @@ function fillInForm() {
   cy.findByLabelText("Replicate Number").type("2");
   cy.findByLabelText("Last Known Section Number").type("5");
   cy.findByLabelText("Labware Type").select("Proviasette");
+  cy.findByLabelText("Fixative").select("None");
+  cy.findByLabelText("Medium").select("Paraffin");
+  cy.get('[type="radio"]').check("15x15");
 }

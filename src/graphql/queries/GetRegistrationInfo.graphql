@@ -12,6 +12,9 @@ query GetRegistrationInfo {
             code
         }
     }
+    fixatives {
+        name
+    }
     mediums {
         name
     }

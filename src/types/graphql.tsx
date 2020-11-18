@@ -22,6 +22,11 @@ export type LoginResult = {
   user?: Maybe<User>;
 };
 
+export type Fixative = {
+  __typename?: 'Fixative';
+  name: Scalars['String'];
+};
+
 export type Medium = {
   __typename?: 'Medium';
   name: Scalars['String'];
@@ -124,7 +129,8 @@ export type BlockRegisterRequest = {
   externalIdentifier: Scalars['String'];
   highestSection: Scalars['Int'];
   labwareType: Scalars['String'];
-  medium?: Maybe<Scalars['String']>;
+  fixative: Scalars['String'];
+  medium: Scalars['String'];
   mouldSize?: Maybe<Scalars['String']>;
 };
 
@@ -144,6 +150,7 @@ export type Query = {
   tissueTypes: Array<TissueType>;
   labwareTypes: Array<LabwareType>;
   hmdmcs: Array<Hmdmc>;
+  fixatives: Array<Fixative>;
   mediums: Array<Medium>;
   mouldSizes: Array<MouldSize>;
 };
@@ -249,6 +256,9 @@ export type GetRegistrationInfoQuery = (
       { __typename?: 'SpatialLocation' }
       & Pick<SpatialLocation, 'name' | 'code'>
     )> }
+  )>, fixatives: Array<(
+    { __typename?: 'Fixative' }
+    & Pick<Fixative, 'name'>
   )>, mediums: Array<(
     { __typename?: 'Medium' }
     & Pick<Medium, 'name'>
@@ -413,6 +423,9 @@ export const GetRegistrationInfoDocument = gql`
       name
       code
     }
+  }
+  fixatives {
+    name
   }
   mediums {
     name
