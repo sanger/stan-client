@@ -2,9 +2,7 @@ import React from "react";
 import AppShell from "../components/AppShell";
 import LoadingSpinnerIcon from "../components/icons/LoadingSpinner";
 
-interface LoadingSpinnerProps {}
-
-const LoadingSpinner = ({}: LoadingSpinnerProps) => {
+const LoadingSpinner = () => {
   return (
     <AppShell>
       <AppShell.Header>

@@ -36,8 +36,8 @@ const Warning = ({
         />
       </svg>
       <div className="ml-2 flex-grow">
-        <p className="mb-2">{message}</p>
-        {children}
+        <p>{message}</p>
+        {children && <div className="mt-2">{children}</div>}
       </div>
     </section>
   );

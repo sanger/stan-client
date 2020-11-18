@@ -11,99 +11,11 @@ function Lab(): JSX.Element {
         <AppShell.Title>Lab Work</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        <div className="flex flex-row flex-wrap justify-around items-center max-w-screen-xl mx-auto">
-          <Link to={"/lab/sectioning"}>
-            <LabCard
-              icon={
-                <div>
-                  <span
-                    className="animate-bounce text-3xl"
-                    role="img"
-                    aria-label="Sectioning icons"
-                  >
-                    🔪
-                  </span>
-                  <span
-                    role="img"
-                    aria-label="Sectioning icons"
-                    className="text-3xl"
-                  >
-                    ⬜
-                  </span>
-                </div>
-              }
-              title={"Sectioning"}
-            >
+        <div className="flex flex-row flex-wrap justify-between items-center max-w-screen-xl mx-auto">
+          <Link className="w-full md:w-96 lg:w-84" to={"/lab/sectioning"}>
+            <LabCard icon="🔪 ⬜" title={"Sectioning"}>
               Slice up some tissue and place sections into pre-labelled pieces of labware.
             </LabCard>
-          </Link>
-          <Link to={"/lab/sectioning"}>
-            <div className="flex flex-col box-border items-center justify-center w-96 mb-3 px-20 py-12 hover:bg-gray-100 hover:scale-105 transform transition duration-300">
-              <span
-                role="img"
-                aria-label="Sectioning icons"
-                className="text-3xl"
-              >
-                🔪 ⬜
-              </span>
-              <Heading level={3} className="text-centre">
-                Sectioning
-              </Heading>
-              <p className="mt-4 text-center text-gray-600">
-                Slice some tissue and place it in tubes and on slides.
-              </p>
-            </div>
-          </Link>
-          <Link to={"/lab/sectioning"}>
-            <div className="flex flex-col box-border items-center justify-center w-96 mb-3 px-20 py-12 hover:bg-gray-100 hover:scale-105 transform transition duration-300">
-              <span
-                role="img"
-                aria-label="Sectioning icons"
-                className="text-3xl"
-              >
-                🔪 ⬜
-              </span>
-              <Heading level={3} className="text-centre">
-                Sectioning
-              </Heading>
-              <p className="mt-4 text-center text-gray-600">
-                Slice some tissue and place it in tubes and on slides.
-              </p>
-            </div>
-          </Link>
-          <Link to={"/lab/sectioning"}>
-            <div className="flex flex-col box-border items-center justify-center w-96 mb-3 px-20 py-12 hover:bg-gray-100 hover:scale-105 transform transition duration-300">
-              <span
-                role="img"
-                aria-label="Sectioning icons"
-                className="text-3xl"
-              >
-                🔪 ⬜
-              </span>
-              <Heading level={3} className="text-centre">
-                Sectioning
-              </Heading>
-              <p className="mt-4 text-center text-gray-600">
-                Slice some tissue and place it in tubes and on slides.
-              </p>
-            </div>
-          </Link>
-          <Link to={"/lab/sectioning"}>
-            <div className="flex flex-col box-border items-center justify-center w-96 mb-3 px-20 py-12 hover:bg-gray-100 hover:scale-105 transform transition duration-300">
-              <span
-                role="img"
-                aria-label="Sectioning icons"
-                className="text-3xl"
-              >
-                🔪 ⬜
-              </span>
-              <Heading level={3} className="text-centre">
-                Sectioning
-              </Heading>
-              <p className="mt-4 text-center text-gray-600">
-                Slice some tissue and place it in tubes and on slides.
-              </p>
-            </div>
           </Link>
         </div>
       </AppShell.Main>
@@ -114,13 +26,17 @@ function Lab(): JSX.Element {
 export default Lab;
 
 interface LabCardProps {
-  icon: React.ReactNode;
+  icon: string;
   title: string;
 }
 
 const LabCard: React.FC<LabCardProps> = ({ icon, title, children }) => (
-  <div className="flex flex-col box-border items-center justify-center w-96 mb-3 px-20 py-12 hover:bg-gray-100 transition duration-300">
-    {icon}
+  <div className="flex flex-col items-center justify-center mb-3 px-20 py-12 hover:bg-gray-100 hover:shadow transition duration-300">
+    <span
+      className="text-3xl"
+      role="img"
+      aria-label={title}
+    >{ icon }</span>
     <Heading level={3} className="text-centre">
       {title}
     </Heading>
