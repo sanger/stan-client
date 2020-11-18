@@ -28,9 +28,9 @@ export function Routes() {
         <Route exact path="/lab">
           <Lab />
         </Route>
-        <Route path="/lab/sectioning">
+        <AuthenticatedRoute path="/lab/sectioning">
           <Sectioning />
-        </Route>
+        </AuthenticatedRoute>
         <Route path="/reports">
           <Reports />
         </Route>
