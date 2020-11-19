@@ -194,11 +194,7 @@ export const handlers = [
       return res(
         ctx.errors([
           {
-            extensions: {
-              problems: [
-                `Labware "${req.variables.barcode}" could not be found`,
-              ],
-            },
+            message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.barcode}`,
           },
         ])
       );

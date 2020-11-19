@@ -201,7 +201,7 @@ const labwareMachine = Machine<
             target: "idle.error",
             actions: assign({
               errorMessage: (_ctx, e) =>
-                getGraphQLProblems(e.data.graphQLErrors).join("\n"),
+                e.data.message.match(/^.*\s:\s(.*)$/)[1],
             }),
           },
         },
