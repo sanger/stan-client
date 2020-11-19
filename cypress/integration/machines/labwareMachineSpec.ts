@@ -140,13 +140,8 @@ describe("labwareMachine", () => {
                 return new Promise<FindLabwareQuery["labware"]>(
                   (_resolve, reject) => {
                     reject({
-                      graphQLErrors: [
-                        {
-                          extensions: {
-                            problems: [`Labware "STAN-321" could not be found`],
-                          },
-                        },
-                      ],
+                      message:
+                        "Exception while fetching data (/labware) : No labware found with barcode: STAN-321",
                     });
                   }
                 );
@@ -157,7 +152,7 @@ describe("labwareMachine", () => {
           const machine = interpret(mockLTMachine).onTransition((state) => {
             if (state.matches("idle.error")) {
               expect(state.context.errorMessage).to.eq(
-                'Labware "STAN-321" could not be found'
+                "No labware found with barcode: STAN-321"
               );
               done();
             }
