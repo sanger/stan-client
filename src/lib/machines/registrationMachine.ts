@@ -96,7 +96,7 @@ const registrationMachine = Machine<
           states: {
             waiting: {
               after: {
-                800: "finished",
+                500: "finished",
               },
             },
             finished: { type: "final" },

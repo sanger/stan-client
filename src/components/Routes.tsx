@@ -1,13 +1,16 @@
 import React, { useEffect } from "react";
 import { Route, Switch } from "react-router-dom";
-import Login from "../pages/Login";
-import Logout from "../pages/Logout";
-import Lab from "../pages/Lab";
-import Reports from "../pages/Reports";
 import AuthenticatedRoute from "./AuthenticatedRoute";
-import Admin from "../pages/Admin";
-import Dashboard from "../pages/Dashboard";
-import Registration from "../pages/Registration";
+import LoadingSpinner from "../pages/LoadingSpinner";
+import Login from "../pages/Login";
+
+const Logout = React.lazy(() => import("../pages/Logout"));
+const Lab = React.lazy(() => import("../pages/Lab"));
+const Reports = React.lazy(() => import("../pages/Reports"));
+const Admin = React.lazy(() => import("../pages/Admin"));
+const Dashboard = React.lazy(() => import("../pages/Dashboard"));
+const Registration = React.lazy(() => import("../pages/Registration"));
+const Sectioning = React.lazy(() => import("../pages/Sectioning"));
 
 export function Routes() {
   // Hook to remove any location state after it has been consumed for a component.
@@ -17,26 +20,31 @@ export function Routes() {
   }, []);
 
   return (
-    <Switch>
-      <Route path="/logout">
-        <Logout />
-      </Route>
-      <Route path="/lab">
-        <Lab />
-      </Route>
-      <Route path="/reports">
-        <Reports />
-      </Route>
-      <AuthenticatedRoute exact path="/admin">
-        <Admin />
-      </AuthenticatedRoute>
-      <AuthenticatedRoute path="/admin/registration">
-        <Registration />
-      </AuthenticatedRoute>
-      <Route exact path="/">
-        <Dashboard />
-      </Route>
-      <Route path="/login" component={Login} />
-    </Switch>
+    <React.Suspense fallback={<LoadingSpinner />}>
+      <Switch>
+        <Route path="/logout">
+          <Logout />
+        </Route>
+        <Route exact path="/lab">
+          <Lab />
+        </Route>
+        <AuthenticatedRoute path="/lab/sectioning">
+          <Sectioning />
+        </AuthenticatedRoute>
+        <Route path="/reports">
+          <Reports />
+        </Route>
+        <AuthenticatedRoute exact path="/admin">
+          <Admin />
+        </AuthenticatedRoute>
+        <AuthenticatedRoute path="/admin/registration">
+          <Registration />
+        </AuthenticatedRoute>
+        <Route exact path="/">
+          <Dashboard />
+        </Route>
+        <Route path="/login" component={Login} />
+      </Switch>
+    </React.Suspense>
   );
 }
