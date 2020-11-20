@@ -22,13 +22,13 @@ export type LoginResult = {
   user?: Maybe<User>;
 };
 
-export type Fixative = {
-  __typename?: 'Fixative';
+export type Medium = {
+  __typename?: 'Medium';
   name: Scalars['String'];
 };
 
-export type Medium = {
-  __typename?: 'Medium';
+export type Fixative = {
+  __typename?: 'Fixative';
   name: Scalars['String'];
 };
 
@@ -81,8 +81,9 @@ export type Tissue = {
   spatialLocation: SpatialLocation;
   donor: Donor;
   hmdmc: Hmdmc;
-  mouldSize?: Maybe<MouldSize>;
-  medium?: Maybe<Medium>;
+  mouldSize: MouldSize;
+  medium: Medium;
+  fixative: Fixative;
 };
 
 export type Address = {
@@ -129,17 +130,13 @@ export type BlockRegisterRequest = {
   externalIdentifier: Scalars['String'];
   highestSection: Scalars['Int'];
   labwareType: Scalars['String'];
-  fixative: Scalars['String'];
   medium: Scalars['String'];
-  mouldSize?: Maybe<Scalars['String']>;
+  fixative: Scalars['String'];
+  mouldSize: Scalars['String'];
 };
 
 export type RegisterRequest = {
   blocks: Array<BlockRegisterRequest>;
-};
-
-export type LabwareInputType = {
-  barcode?: Maybe<Scalars['String']>;
 };
 
 export type RegisterResult = {
@@ -154,8 +151,8 @@ export type Query = {
   tissueTypes: Array<TissueType>;
   labwareTypes: Array<LabwareType>;
   hmdmcs: Array<Hmdmc>;
-  fixatives: Array<Fixative>;
   mediums: Array<Medium>;
+  fixatives: Array<Fixative>;
   mouldSizes: Array<MouldSize>;
   labware: Labware;
 };
@@ -269,7 +266,6 @@ export type FindLabwareQuery = (
         & Pick<Address, 'row' | 'column'>
       ), samples: Array<(
         { __typename?: 'Sample' }
-        & Pick<Sample, 'section'>
         & { tissue: (
           { __typename?: 'Tissue' }
           & Pick<Tissue, 'replicate'>
@@ -475,7 +471,6 @@ export const FindLabwareDocument = gql`
       }
       block
       samples {
-        section
         tissue {
           donor {
             donorName

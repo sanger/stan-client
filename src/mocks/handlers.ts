@@ -217,7 +217,6 @@ export const handlers = [
               },
               samples: [
                 {
-                  section: 1,
                   tissue: {
                     replicate: 5,
                     donor: {
