@@ -3,7 +3,6 @@ import { Labware, Maybe } from "../../types/graphql";
 import labwareService from "../services/labwareService";
 import * as Yup from "yup";
 import { ValidationError } from "yup";
-import { getGraphQLProblems } from "../client";
 
 /**
  * Context for a {@link labwareMachine}.
