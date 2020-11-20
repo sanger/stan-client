@@ -138,6 +138,10 @@ export type RegisterRequest = {
   blocks: Array<BlockRegisterRequest>;
 };
 
+export type LabwareInputType = {
+  barcode?: Maybe<Scalars['String']>;
+};
+
 export type RegisterResult = {
   __typename?: 'RegisterResult';
   labware: Array<Labware>;
@@ -153,6 +157,12 @@ export type Query = {
   fixatives: Array<Fixative>;
   mediums: Array<Medium>;
   mouldSizes: Array<MouldSize>;
+  labware: Labware;
+};
+
+
+export type QueryLabwareArgs = {
+  barcode: Scalars['String'];
 };
 
 export type Mutation = {
@@ -236,6 +246,48 @@ export type CurrentUserQuery = (
     { __typename?: 'User' }
     & Pick<User, 'username'>
   )> }
+);
+
+export type FindLabwareQueryVariables = Exact<{
+  barcode: Scalars['String'];
+}>;
+
+
+export type FindLabwareQuery = (
+  { __typename?: 'Query' }
+  & { labware: (
+    { __typename?: 'Labware' }
+    & Pick<Labware, 'barcode'>
+    & { labwareType: (
+      { __typename?: 'LabwareType' }
+      & Pick<LabwareType, 'name'>
+    ), slots: Array<(
+      { __typename?: 'Slot' }
+      & Pick<Slot, 'block'>
+      & { address: (
+        { __typename?: 'Address' }
+        & Pick<Address, 'row' | 'column'>
+      ), samples: Array<(
+        { __typename?: 'Sample' }
+        & Pick<Sample, 'section'>
+        & { tissue: (
+          { __typename?: 'Tissue' }
+          & Pick<Tissue, 'replicate'>
+          & { donor: (
+            { __typename?: 'Donor' }
+            & Pick<Donor, 'donorName'>
+          ), spatialLocation: (
+            { __typename?: 'SpatialLocation' }
+            & Pick<SpatialLocation, 'code'>
+            & { tissueType: (
+              { __typename?: 'TissueType' }
+              & Pick<TissueType, 'name'>
+            ) }
+          ) }
+        ) }
+      )> }
+    )> }
+  ) }
 );
 
 export type GetRegistrationInfoQueryVariables = Exact<{ [key: string]: never; }>;
@@ -409,6 +461,64 @@ export function useCurrentUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type CurrentUserQueryHookResult = ReturnType<typeof useCurrentUserQuery>;
 export type CurrentUserLazyQueryHookResult = ReturnType<typeof useCurrentUserLazyQuery>;
 export type CurrentUserQueryResult = Apollo.QueryResult<CurrentUserQuery, CurrentUserQueryVariables>;
+export const FindLabwareDocument = gql`
+    query FindLabware($barcode: String!) {
+  labware(barcode: $barcode) {
+    barcode
+    labwareType {
+      name
+    }
+    slots {
+      address {
+        row
+        column
+      }
+      block
+      samples {
+        section
+        tissue {
+          donor {
+            donorName
+          }
+          spatialLocation {
+            tissueType {
+              name
+            }
+            code
+          }
+          replicate
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindLabwareQuery__
+ *
+ * To run a query within a React component, call `useFindLabwareQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindLabwareQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindLabwareQuery({
+ *   variables: {
+ *      barcode: // value for 'barcode'
+ *   },
+ * });
+ */
+export function useFindLabwareQuery(baseOptions?: Apollo.QueryHookOptions<FindLabwareQuery, FindLabwareQueryVariables>) {
+        return Apollo.useQuery<FindLabwareQuery, FindLabwareQueryVariables>(FindLabwareDocument, baseOptions);
+      }
+export function useFindLabwareLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindLabwareQuery, FindLabwareQueryVariables>) {
+          return Apollo.useLazyQuery<FindLabwareQuery, FindLabwareQueryVariables>(FindLabwareDocument, baseOptions);
+        }
+export type FindLabwareQueryHookResult = ReturnType<typeof useFindLabwareQuery>;
+export type FindLabwareLazyQueryHookResult = ReturnType<typeof useFindLabwareLazyQuery>;
+export type FindLabwareQueryResult = Apollo.QueryResult<FindLabwareQuery, FindLabwareQueryVariables>;
 export const GetRegistrationInfoDocument = gql`
     query GetRegistrationInfo {
   hmdmcs {

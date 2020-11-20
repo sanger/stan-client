@@ -1,5 +1,6 @@
 import { graphql } from "msw";
 import {
+  FindLabwareQuery,
   GetRegistrationInfoQuery,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
@@ -188,4 +189,53 @@ export const handlers = [
       );
     }
   ),
+
+  graphql.query<FindLabwareQuery>("FindLabware", (req, res, ctx) => {
+    if (!req.variables.barcode.startsWith("STAN-")) {
+      return res(
+        ctx.errors([
+          {
+            message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.barcode}`,
+          },
+        ])
+      );
+    }
+
+    return res(
+      ctx.data({
+        labware: {
+          labwareType: {
+            name: "Proviasette",
+          },
+          barcode: req.variables.barcode,
+          slots: [
+            {
+              block: true,
+              address: {
+                row: 1,
+                column: 1,
+              },
+              samples: [
+                {
+                  section: 1,
+                  tissue: {
+                    replicate: 5,
+                    donor: {
+                      donorName: "Donor 3",
+                    },
+                    spatialLocation: {
+                      code: 3,
+                      tissueType: {
+                        name: "Lung",
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      })
+    );
+  }),
 ];

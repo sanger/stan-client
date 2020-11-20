@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Field } from "formik";
-import { ErrorMessage } from "./index";
+import { FormikErrorMessage } from "./index";
 
 interface RadioGroupProps {
   label: string;
@@ -21,7 +21,7 @@ const RadioGroup = ({ label, name, children }: RadioGroupProps) => {
           </RadioGroupContext.Provider>
         </div>
       </div>
-      <ErrorMessage name={name} />
+      <FormikErrorMessage name={name} />
     </>
   );
 };
