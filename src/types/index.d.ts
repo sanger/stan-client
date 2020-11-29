@@ -1,9 +1,10 @@
-import { graphql } from "msw";
 import { worker } from "../mocks/browser";
+import { Labware } from "./graphql";
+import { graphql } from "msw";
 
-export type graphqlType = typeof graphql;
 export type workerType = typeof worker;
 
+export type graphqlType = typeof graphql;
 // Make the `worker` and `graphql` references available globally,
 // so they can be accessed in both runtime and test suites.
 declare global {

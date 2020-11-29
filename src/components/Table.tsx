@@ -64,7 +64,7 @@ export const TableBody: React.FC = ({ children, ...rest }) => {
 
 export const TableCell: React.FC = ({ children, ...rest }) => {
   return (
-    <td className="px-6 py-4 whitespace-no-wrap" {...rest}>
+    <td className="px-6 py-4 whitespace-nowrap" {...rest}>
       {children}
     </td>
   );

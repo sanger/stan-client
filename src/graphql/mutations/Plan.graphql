@@ -1,0 +1,24 @@
+mutation Plan($request: PlanRequest!) {
+    plan(request: $request) {
+        labware {
+            id
+            barcode
+            slots {
+                samples {
+                    section
+                }
+            }
+        }
+        operations {
+            operationType {
+                name
+            }
+            planActions {
+                newSection
+                destination {
+                    labwareId
+                }
+            }
+        }
+    }
+}

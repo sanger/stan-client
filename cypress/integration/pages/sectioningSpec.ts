@@ -1,0 +1,139 @@
+describe("Sectioning", () => {
+  before(() => {
+    cy.visit("/lab/sectioning");
+    cy.wait(2000);
+  });
+
+  describe("Add Labware button", () => {
+    context("when there is no source labware loaded", () => {
+      it("is disabled", () => {
+        cy.get("#labwareScanInput").should("not.be.disabled");
+      });
+    });
+
+    context("when there is source labware loaded", () => {
+      before(() => {
+        cy.get("#labwareScanInput").type("STAN-123{enter}");
+      });
+
+      it("is enabled", () => {
+        cy.findByText("+ Add Labware").should("not.be.disabled");
+      });
+    });
+  });
+
+  describe("Source labware table", () => {
+    context("when destination labware is added", () => {
+      before(() => {
+        cy.findByText("+ Add Labware").click();
+      });
+
+      it("becomes disabled", () => {
+        cy.get("#labwareScanInput").should("be.disabled");
+      });
+
+      context("when destination labware becomes empty again", () => {
+        before(() => {
+          cy.findByText("Delete Layout").click();
+        });
+
+        it("is re-enabled", () => {
+          cy.get("#labwareScanInput").should("not.be.disabled");
+        });
+      });
+    });
+  });
+
+  describe("Labware Layout", () => {
+    context("when labware layout is added", () => {
+      before(() => {
+        cy.findByText("+ Add Labware").click();
+      });
+
+      it("has a disabled Create Labware button", () => {
+        cy.findByRole("button", { name: /Create Labware/i }).should(
+          "be.disabled"
+        );
+      });
+    });
+
+    context("when adding a layout", () => {
+      before(() => {
+        cy.findByText("Edit Layout").click();
+        cy.findByRole("dialog").within(() => {
+          cy.findByText("STAN-123").click();
+          cy.findByText("A1").click();
+          cy.findByText("Done").click();
+        });
+      });
+
+      after(() => {
+        cy.findByText("Delete Layout").click();
+      });
+
+      it("enables the Create Labware button", () => {
+        cy.findByText("Create Labware").should("not.be.disabled");
+      });
+
+      context("when Quantity is invalid", () => {
+        before(() => {
+          cy.findByLabelText("Quantity").clear();
+        });
+
+        after(() => {
+          cy.findByLabelText("Quantity").clear().type("1");
+        });
+
+        it("disabled the Create Labware button", () => {
+          cy.findByRole("button", { name: /Create Labware/i }).should(
+            "be.disabled"
+          );
+        });
+      });
+
+      context("when Section Thinkness is invalid", () => {
+        before(() => {
+          cy.findByLabelText("Section Thickness").clear();
+        });
+
+        after(() => {
+          cy.findByLabelText("Section Thickness").clear().type("5");
+        });
+
+        it("disabled the Create Labware button", () => {
+          cy.findByText("Create Labware").should("be.disabled");
+        });
+      });
+    });
+
+    context("when adding a Visium TO layout", () => {
+      before(() => {
+        cy.findByRole("combobox").select("Visium LP");
+        cy.findByText("+ Add Labware").click();
+      });
+
+      it("shows Barcode and Sectioning Thickness", () => {
+        cy.findByLabelText("Quantity").should("not.be.visible");
+        cy.findByLabelText("Barcode").should("be.visible");
+        cy.findByLabelText("Section Thickness").should("be.visible");
+        cy.findByText("Create Labware").should("be.disabled");
+      });
+
+      context("when adding a barcode of at least 14 characters", () => {
+        before(() => {
+          cy.findByText("Edit Layout").click();
+          cy.findByRole("dialog").within(() => {
+            cy.findByText("STAN-123").click();
+            cy.findByText("A1").click();
+            cy.findByText("Done").click();
+          });
+          cy.findByLabelText("Barcode").type("7777777A-7-7-7");
+        });
+
+        it("enables the Create Labware button", () => {
+          cy.findByText("Create Labware").should("not.be.disabled");
+        });
+      });
+    });
+  });
+});

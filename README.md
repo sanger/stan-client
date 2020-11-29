@@ -101,3 +101,4 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 - Icon Set: https://heroicons.com/
 - XState (state machine library): https://xstate.js.org/docs/
 - React Framer Motion (animation components): https://www.framer.com/api/motion/
+- Fishery (for defining factories): https://github.com/thoughtbot/fishery

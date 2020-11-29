@@ -14,6 +14,8 @@ import { Column, Row, useTable } from "react-table";
 import { Actor } from "xstate";
 import BarcodeIcon from "../icons/BarcodeIcon";
 import MutedText from "../MutedText";
+import LockIcon from "../icons/LockIcon";
+import classNames from "classnames";
 
 /**
  * Props for {@link LabwareScanTable}
@@ -59,6 +61,10 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
       Header: "",
       id: "actions",
       Cell: ({ row }: { row: Row<Labware> }) => {
+        if (current.matches("locked")) {
+          return <LockIcon className="block m-2 h-5 w-5 text-gray-800" />;
+        }
+
         return (
           <button
             onClick={() => {
@@ -74,7 +80,7 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
         );
       },
     };
-  }, [send]);
+  }, [send, current]);
 
   /**
    * Merge the columns passed in with the actionsColumn, memoizing the result.
@@ -94,7 +100,18 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
     headerGroups,
     rows,
     prepareRow,
-  } = useTable({ columns: allColumns, data });
+  } = useTable({
+    columns: allColumns,
+    data,
+  });
+
+  const inputClassNames = classNames(
+    {
+      "rounded-r-md": !current.matches("locked"),
+      "border-r-0 disabled:bg-gray-100": current.matches("locked"),
+    },
+    "flex-grow-0 focus:ring-sdb-100 focus:border-sdb-100 block w-full border-gray-300 rounded-none transition duration-150 ease-in-out"
+  );
 
   return (
     <div>
@@ -110,7 +127,9 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
           <BarcodeIcon className="block h-5 w-5" />
         </span>
         <input
+          id="labwareScanInput"
           value={current.context.currentBarcode}
+          type="text"
           disabled={!current.matches("idle")}
           onKeyDown={(e) => {
             if (["Tab", "Enter"].some((triggerKey) => triggerKey === e.key)) {
@@ -124,8 +143,13 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
               value: e.currentTarget.value,
             });
           }}
-          className="form-input flex-grow-0 block w-full rounded-none rounded-r-md transition duration-150 ease-in-out disabled:opacity-75"
+          className={inputClassNames}
         />
+        {current.matches("locked") && (
+          <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-100 transition duration-150 ease-in-out text-sm">
+            <LockIcon className="block h-5 w-5 text-sp-300 transition duration-150 ease-in-out" />
+          </span>
+        )}
       </div>
 
       {current.context.labwares.length === 0 && (
@@ -157,7 +181,7 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
                   <motion.tr
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    key={index}
+                    // key={index}
                     {...row.getRowProps()}
                   >
                     {row.cells.map((cell) => {

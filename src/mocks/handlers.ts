@@ -1,69 +1,86 @@
 import { graphql } from "msw";
 import {
+  CurrentUserQuery,
+  CurrentUserQueryVariables,
   FindLabwareQuery,
+  FindLabwareQueryVariables,
   GetRegistrationInfoQuery,
+  GetRegistrationInfoQueryVariables,
+  GetSectioningInfoQuery,
+  LoginMutation,
+  LoginMutationVariables,
+  LogoutMutation,
+  LogoutMutationVariables,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
 } from "../types/graphql";
+import { labwareTypeInstances } from "../lib/factories/labwareTypeFactory";
 
 const CURRENT_USER_KEY = "currentUser";
 /**
  * Default handlers for the mock API
  */
 export const handlers = [
-  graphql.mutation("Login", (req, res, ctx) => {
-    const { username } = req.variables;
-    sessionStorage.setItem(CURRENT_USER_KEY, username);
-    return res(
-      ctx.data({
-        login: {
-          message: "OK",
-          user: {
-            username,
-          },
-        },
-      })
-    );
-  }),
-
-  graphql.mutation("Logout", (req, res, ctx) => {
-    sessionStorage.removeItem(CURRENT_USER_KEY);
-    return res(
-      ctx.data({
-        logout: "OK",
-      })
-    );
-  }),
-
-  graphql.query("CurrentUser", (req, res, ctx) => {
-    const currentUser = sessionStorage.getItem(CURRENT_USER_KEY);
-
-    // By default we want the user to be logged in.
-    // If this is the first request, currentUser won't be set yet.
-    if (!currentUser) {
-      sessionStorage.setItem(CURRENT_USER_KEY, "jb1");
+  graphql.mutation<LoginMutation, LoginMutationVariables>(
+    "Login",
+    (req, res, ctx) => {
+      const { username } = req.variables;
+      sessionStorage.setItem(CURRENT_USER_KEY, username);
       return res(
         ctx.data({
-          user: {
-            username: "jb1",
-          },
-        })
-      );
-    } else {
-      return res(
-        ctx.data({
-          user: {
-            username: currentUser,
+          login: {
+            user: {
+              username,
+            },
           },
         })
       );
     }
-  }),
+  ),
 
-  graphql.query<GetRegistrationInfoQuery>(
+  graphql.mutation<LogoutMutation, LogoutMutationVariables>(
+    "Logout",
+    (req, res, ctx) => {
+      sessionStorage.removeItem(CURRENT_USER_KEY);
+      return res(
+        ctx.data({
+          logout: "OK",
+        })
+      );
+    }
+  ),
+
+  graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
+    "CurrentUser",
+    (req, res, ctx) => {
+      const currentUser = sessionStorage.getItem(CURRENT_USER_KEY);
+
+      // By default we want the user to be logged in.
+      // If this is the first request, currentUser won't be set yet.
+      if (!currentUser) {
+        sessionStorage.setItem(CURRENT_USER_KEY, "jb1");
+        return res(
+          ctx.data({
+            user: {
+              username: "jb1",
+            },
+          })
+        );
+      } else {
+        return res(
+          ctx.data({
+            user: {
+              username: currentUser,
+            },
+          })
+        );
+      }
+    }
+  ),
+
+  graphql.query<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>(
     "GetRegistrationInfo",
     (req, res, ctx) => {
-      // return res(ctx.errors([{ message: "There was an error!" }]));
       return res(
         ctx.data({
           hmdmcs: [
@@ -190,51 +207,66 @@ export const handlers = [
     }
   ),
 
-  graphql.query<FindLabwareQuery>("FindLabware", (req, res, ctx) => {
-    if (!req.variables.barcode.startsWith("STAN-")) {
-      return res(
-        ctx.errors([
-          {
-            message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.barcode}`,
-          },
-        ])
-      );
-    }
-
-    return res(
-      ctx.data({
-        labware: {
-          labwareType: {
-            name: "Proviasette",
-          },
-          barcode: req.variables.barcode,
-          slots: [
+  graphql.query<FindLabwareQuery, FindLabwareQueryVariables>(
+    "FindLabware",
+    (req, res, ctx) => {
+      if (!req.variables.barcode.startsWith("STAN-")) {
+        return res(
+          ctx.errors([
             {
-              block: true,
-              address: {
-                row: 1,
-                column: 1,
-              },
-              samples: [
-                {
-                  tissue: {
-                    replicate: 5,
-                    donor: {
-                      donorName: "Donor 3",
-                    },
-                    spatialLocation: {
-                      code: 3,
-                      tissueType: {
-                        name: "Lung",
+              message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.barcode}`,
+            },
+          ])
+        );
+      }
+
+      return res(
+        ctx.data({
+          labware: {
+            labwareType: {
+              name: "Proviasette",
+            },
+            barcode: req.variables.barcode,
+            slots: [
+              {
+                block: true,
+                address: {
+                  row: 1,
+                  column: 1,
+                },
+                samples: [
+                  {
+                    id: 3,
+                    tissue: {
+                      replicate: 5,
+                      donor: {
+                        donorName: "Donor 3",
+                      },
+                      spatialLocation: {
+                        code: 3,
+                        tissueType: {
+                          name: "Lung",
+                        },
                       },
                     },
                   },
-                },
-              ],
-            },
-          ],
-        },
-      })
-    );
-  }),
+                ],
+              },
+            ],
+          },
+        })
+      );
+    }
+  ),
+
+  graphql.query<GetSectioningInfoQuery, GetRegistrationInfoQueryVariables>(
+    "GetSectioningInfo",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          labwareTypes: labwareTypeInstances,
+        })
+      );
+    }
+  ),
 ];
