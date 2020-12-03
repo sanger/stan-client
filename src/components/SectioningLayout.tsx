@@ -13,7 +13,6 @@ import { motion } from "framer-motion";
 import variants from "../lib/motionVariants";
 import Table, { TableBody, TableCell, TableHead, TableHeader } from "./Table";
 import Warning from "./notifications/Warning";
-import { max, min } from "lodash";
 import {
   cancelEditLayout,
   createLabware,
@@ -22,6 +21,8 @@ import {
   SectioningLayoutEvents,
   updateSectioningLayout,
 } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
+import { LabwareTypeName } from "../types/stan";
+import { createFriendlyAddress } from "../lib/helpers/labwareHelper";
 
 interface SectioningLayoutProps {
   /**
@@ -93,7 +94,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
             )}
 
             {sectioningLayout.destinationLabware.labwareType.name ===
-              "Visium LP" && (
+              LabwareTypeName.VISIUM_LP && (
               <Label name={"Barcode"}>
                 <input
                   disabled={!current.matches("prep")}
@@ -114,7 +115,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
             )}
 
             {sectioningLayout.destinationLabware.labwareType.name !==
-              "Visium LP" && (
+              LabwareTypeName.VISIUM_LP && (
               <Label name={"Quantity"}>
                 <input
                   disabled={!current.matches("prep")}
@@ -171,18 +172,26 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
                     <tr key={i}>
                       <TableCell>{lw.barcode}</TableCell>
                       <TableCell>
-                        {planResult?.operations
-                          .map((operation) => {
-                            const newSections = operation.planActions
-                              .filter(
-                                (action) =>
-                                  action.destination.labwareId === lw.id
-                              )
-                              .map((action) => action.newSection);
+                        {planResult?.operations.map((operation, j) => {
+                          const newSections = operation.planActions
+                            .filter(
+                              (action) => action.destination.labwareId === lw.id
+                            )
+                            .map((action, i) => {
+                              return (
+                                <li key={i} className="text-sm">
+                                  <span className="font-semibold">
+                                    {createFriendlyAddress(
+                                      action.destination.address
+                                    )}
+                                  </span>{" "}
+                                  <span className="">{action.newSection}</span>
+                                </li>
+                              );
+                            });
 
-                            return `${min(newSections)} - ${max(newSections)}`;
-                          })
-                          .join("")}
+                          return <ul key={j}>{newSections}</ul>;
+                        })}
                       </TableCell>
                     </tr>
                   ))}

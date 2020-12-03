@@ -14,8 +14,8 @@ import { Column, Row, useTable } from "react-table";
 import { Actor } from "xstate";
 import BarcodeIcon from "../icons/BarcodeIcon";
 import MutedText from "../MutedText";
-import LockIcon from "../icons/LockIcon";
 import classNames from "classnames";
+import LockIcon from "../icons/LockIcon";
 
 /**
  * Props for {@link LabwareScanTable}

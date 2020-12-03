@@ -11,6 +11,8 @@ import {
   LoginMutationVariables,
   LogoutMutation,
   LogoutMutationVariables,
+  PlanMutation,
+  PlanMutationVariables,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
 } from "../types/graphql";
@@ -267,6 +269,149 @@ export const handlers = [
           labwareTypes: labwareTypeInstances,
         })
       );
+    }
+  ),
+
+  graphql.mutation<PlanMutation, PlanMutationVariables>(
+    "Plan",
+    (req, res, ctx) => {
+      if (req.variables.request.operationType === "Section") {
+        return res(
+          ctx.data({
+            // Response not dynamic in any way. Just need a successful response for now.
+            plan: {
+              labware: [
+                {
+                  id: 53,
+                  barcode: "STAN-002FB",
+                  slots: [
+                    {
+                      samples: [],
+                      __typename: "Slot",
+                    },
+                    {
+                      samples: [],
+                      __typename: "Slot",
+                    },
+                    {
+                      samples: [],
+                      __typename: "Slot",
+                    },
+                    {
+                      samples: [],
+                      __typename: "Slot",
+                    },
+                    {
+                      samples: [],
+                      __typename: "Slot",
+                    },
+                    {
+                      samples: [],
+                      __typename: "Slot",
+                    },
+                  ],
+                  labwareType: {
+                    numRows: 3,
+                    numColumns: 2,
+                    __typename: "LabwareType",
+                  },
+                  __typename: "Labware",
+                },
+              ],
+              operations: [
+                {
+                  operationType: {
+                    name: "Section",
+                    __typename: "OperationType",
+                  },
+                  planActions: [
+                    {
+                      newSection: 177,
+                      destination: {
+                        address: {
+                          row: 1,
+                          column: 1,
+                          __typename: "Address",
+                        },
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                    {
+                      newSection: 178,
+                      destination: {
+                        address: {
+                          row: 2,
+                          column: 1,
+                          __typename: "Address",
+                        },
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                    {
+                      newSection: 179,
+                      destination: {
+                        address: {
+                          row: 3,
+                          column: 1,
+                          __typename: "Address",
+                        },
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                    {
+                      newSection: 180,
+                      destination: {
+                        address: {
+                          row: 1,
+                          column: 2,
+                          __typename: "Address",
+                        },
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                    {
+                      newSection: 181,
+                      destination: {
+                        address: {
+                          row: 2,
+                          column: 2,
+                          __typename: "Address",
+                        },
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                    {
+                      newSection: 182,
+                      destination: {
+                        address: {
+                          row: 3,
+                          column: 2,
+                          __typename: "Address",
+                        },
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                  ],
+                  __typename: "PlanOperation",
+                },
+              ],
+              __typename: "PlanResult",
+            },
+          })
+        );
+      }
     }
   ),
 ];

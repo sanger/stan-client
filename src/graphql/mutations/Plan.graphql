@@ -8,6 +8,10 @@ mutation Plan($request: PlanRequest!) {
                     section
                 }
             }
+            labwareType {
+                numRows
+                numColumns
+            }
         }
         operations {
             operationType {
@@ -16,6 +20,10 @@ mutation Plan($request: PlanRequest!) {
             planActions {
                 newSection
                 destination {
+                    address {
+                        row
+                        column
+                    }
                     labwareId
                 }
             }

@@ -7,7 +7,7 @@ import { Labware } from "../../types/graphql";
  */
 type ColumnFactory = (meta?: Map<number, any>) => Column<Labware>;
 
-const meta: ColumnFactory = (meta) => {
+const color: ColumnFactory = (meta) => {
   return {
     id: "meta",
     Header: "",
@@ -75,7 +75,7 @@ const replicate: ColumnFactory = () => {
 };
 
 const columns = {
-  meta,
+  meta: color,
   barcode,
   donorId,
   tissueType,

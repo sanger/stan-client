@@ -1,3 +1,11 @@
+import {
+  PlanMutation,
+  PlanMutationVariables,
+  PlanOperation,
+  RegisterTissuesMutation,
+  RegisterTissuesMutationVariables,
+} from "../../../src/types/graphql";
+
 describe("Sectioning", () => {
   before(() => {
     cy.visit("/lab/sectioning");
@@ -112,6 +120,10 @@ describe("Sectioning", () => {
         cy.findByText("+ Add Labware").click();
       });
 
+      after(() => {
+        cy.findByText("Delete Layout").click();
+      });
+
       it("shows Barcode and Sectioning Thickness", () => {
         cy.findByLabelText("Quantity").should("not.be.visible");
         cy.findByLabelText("Barcode").should("be.visible");
@@ -133,6 +145,78 @@ describe("Sectioning", () => {
         it("enables the Create Labware button", () => {
           cy.findByText("Create Labware").should("not.be.disabled");
         });
+      });
+    });
+  });
+
+  describe("API Requests", () => {
+    context("when request is successful", () => {
+      before(() => {
+        cy.findByRole("combobox").select("Tube");
+        cy.findByText("+ Add Labware").click();
+        cy.findByText("Edit Layout").click();
+        cy.findByRole("dialog").within(() => {
+          cy.findByText("STAN-123").click();
+          cy.findByText("A1").click();
+          cy.findByText("Done").click();
+        });
+        cy.findByText("Create Labware").click();
+      });
+
+      it("removes the Sectioning Layout buttons", () => {
+        cy.findByText("Create Labware").should("not.be.visible");
+        cy.findByText("Delete Layout").should("not.be.visible");
+      });
+
+      it("disables the form inputs", () => {
+        cy.findByLabelText("Quantity").should("be.disabled");
+        cy.findByLabelText("Section Thickness").should("be.disabled");
+      });
+    });
+
+    context("when request is unsuccessful", () => {
+      before(() => {
+        cy.visit("/lab/sectioning");
+
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.mutation<PlanMutation, PlanMutationVariables>(
+              "Plan",
+              (req, res, ctx) => {
+                return res(
+                  ctx.errors([
+                    {
+                      extensions: {
+                        problems: [
+                          "This thing went wrong",
+                          "This other thing went wrong",
+                        ],
+                      },
+                    },
+                  ])
+                );
+              }
+            )
+          );
+        });
+
+        cy.wait(2000);
+
+        cy.get("#labwareScanInput").type("STAN-123{enter}");
+        cy.findByRole("combobox").select("Tube");
+        cy.findByText("+ Add Labware").click();
+        cy.findByText("Edit Layout").click();
+        cy.findByRole("dialog").within(() => {
+          cy.findByText("STAN-123").click();
+          cy.findByText("A1").click();
+          cy.findByText("Done").click();
+        });
+        cy.findByText("Create Labware").click();
+      });
+
+      it("shows the errors", () => {
+        cy.findByText("This thing went wrong").should("be.visible");
+        cy.findByText("This other thing went wrong").should("be.visible");
       });
     });
   });

@@ -1,5 +1,5 @@
 import React from "react";
-import { Maybe, PlanRequestAction, Slot as SlotModel } from "../types/graphql";
+import { Maybe, Slot as SlotModel } from "../types/graphql";
 import classNames from "classnames";
 import { labwareAddresses } from "../lib/helpers/labwareHelper";
 import {

@@ -6,7 +6,12 @@ interface LoginButtonProps extends ButtonProps {}
 
 const LoginButton = (props: LoginButtonProps) => {
   return (
-    <PinkButton {...props} type="submit" className="w-full">
+    <PinkButton
+      {...props}
+      type="submit"
+      style={{ width: "100%" }}
+      className="relative"
+    >
       <span className="absolute left-0 inset-y-0 flex items-center pl-3">
         <svg
           className="h-5 w-5 text-sdb group-hover:text-sdb-400 transition ease-in-out duration-150"

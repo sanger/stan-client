@@ -8,7 +8,7 @@ import {
   sectioningMachineOptions,
 } from "./sectioningMachineOptions";
 import { Labware } from "../../../types/graphql";
-import { UnregisteredLabware } from "../../../types/stan";
+import { LabwareTypeName, UnregisteredLabware } from "../../../types/stan";
 
 /**
  * Model of a sectioning layout
@@ -57,9 +57,14 @@ export const createSectioningMachine = () =>
       key: machineKey,
       initial: State.LOADING,
       context: {
-        inputLabwareTypeNames: ["Proviasette"],
+        inputLabwareTypeNames: [LabwareTypeName.PROVIASETTE],
         inputLabwareTypes: [],
-        outputLabwareTypeNames: ["Tube", "Slide", "Visium TO", "Visium LP"],
+        outputLabwareTypeNames: [
+          LabwareTypeName.TUBE,
+          LabwareTypeName.SLIDE,
+          LabwareTypeName.VISIUM_TO,
+          LabwareTypeName.VISIUM_LP,
+        ],
         outputLabwareTypes: [],
         selectedLabwareType: null,
         labwareMachine: null,
