@@ -117,31 +117,11 @@ describe("Sectioning", () => {
         cy.findByText("+ Add Labware").click();
       });
 
-      after(() => {
-        cy.findByText("Delete Layout").click();
-      });
-
       it("shows Barcode and Sectioning Thickness", () => {
         cy.findByLabelText("Quantity").should("not.be.visible");
         cy.findByLabelText("Barcode").should("be.visible");
         cy.findByLabelText("Section Thickness").should("be.visible");
         cy.findByText("Create Labware").should("be.disabled");
-      });
-
-      context("when adding a barcode of at least 14 characters", () => {
-        before(() => {
-          cy.findByText("Edit Layout").click();
-          cy.findByRole("dialog").within(() => {
-            cy.findByText("STAN-123").click();
-            cy.findByText("A1").click();
-            cy.findByText("Done").click();
-          });
-          cy.findByLabelText("Barcode").type("7777777A-7-7-7");
-        });
-
-        it("enables the Create Labware button", () => {
-          cy.findByText("Create Labware").should("not.be.disabled");
-        });
       });
     });
   });
@@ -149,6 +129,11 @@ describe("Sectioning", () => {
   describe("API Requests", () => {
     context("when request is successful", () => {
       before(() => {
+        cy.visit("/lab/sectioning");
+        cy.wait(2000);
+
+        cy.get("#labwareScanInput").type("STAN-123{enter}");
+
         cy.findByRole("combobox").select("Tube");
         cy.findByText("+ Add Labware").click();
         cy.findByText("Edit Layout").click();
