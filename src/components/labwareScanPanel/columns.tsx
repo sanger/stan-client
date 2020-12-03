@@ -9,7 +9,7 @@ type ColumnFactory = (meta?: Map<number, any>) => Column<Labware>;
 
 const color: ColumnFactory = (meta) => {
   return {
-    id: "meta",
+    id: "color",
     Header: "",
     accessor: (originalRow) =>
       meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? "#FFF",
