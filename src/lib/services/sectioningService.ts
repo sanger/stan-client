@@ -34,7 +34,8 @@ function planSection(
   });
 }
 
-export default {
+const fns = {
   getSectioningInfo,
   planSection,
 };
+export default fns;

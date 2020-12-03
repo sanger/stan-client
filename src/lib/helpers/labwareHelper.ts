@@ -1,4 +1,4 @@
-import { Address, AddressInput, Labware, Slot } from "../../types/graphql";
+import { Address, AddressInput, Labware } from "../../types/graphql";
 import { find, isEqual } from "lodash";
 import {
   AnyLabware,

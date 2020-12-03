@@ -22,6 +22,8 @@ async function findLabwareByBarcode(barcode: string) {
   return response.data.labware;
 }
 
-export default {
+const fns = {
   findLabwareByBarcode,
 };
+
+export default fns;

@@ -2,8 +2,6 @@ import { Factory } from "fishery";
 import { LabwareType } from "../../types/graphql";
 import labelTypeFactory from "./labelTypeFactory";
 import { LabwareTypeName } from "../../types/stan";
-import Lab from "../../pages/Lab";
-
 const labwareTypeFactory = Factory.define<LabwareType>(({ sequence }) => ({
   name: `Labware Type ${sequence}`,
   numRows: 1,
