@@ -40,7 +40,7 @@ type OptionTemplate<
  * Utility for generating a list of <code><option></code> tags
  * @param entities list of models to generate options for
  * @param label name of the property on each entity to use for the label
- * @param value name of the property on each entity to use for the sectioningLayout
+ * @param value name of the property on each entity to use for the value
  */
 export function optionValues<
   L extends string,

@@ -5,7 +5,7 @@ import * as Yup from "yup";
 import { ValidationError } from "yup";
 
 /**
- * SectioningContext for a {@link labwareMachine}.
+ * Context for a {@link labwareMachine}.
  */
 export interface LabwareMachineContext {
   /**
@@ -122,7 +122,7 @@ export type LabwareMachineType = Interpreter<
  * @example
  * const machine = interpret(labwareMachine);
  * machine.start();
- * machine.send({ type: "UPDATE_CURRENT_BARCODE", sectioningLayout: "STAN-123" });
+ * machine.send({ type: "UPDATE_CURRENT_BARCODE", value: "STAN-123" });
  * machine.send({ type: "SUBMIT_BARCODE" });
  *
  * @example Overriding the default validator to require a minimum length of 3
