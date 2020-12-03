@@ -1,9 +1,6 @@
 import {
   PlanMutation,
   PlanMutationVariables,
-  PlanOperation,
-  RegisterTissuesMutation,
-  RegisterTissuesMutationVariables,
 } from "../../../src/types/graphql";
 
 describe("Sectioning", () => {
@@ -99,7 +96,7 @@ describe("Sectioning", () => {
         });
       });
 
-      context("when Section Thinkness is invalid", () => {
+      context("when Section Thickness is invalid", () => {
         before(() => {
           cy.findByLabelText("Section Thickness").clear();
         });
