@@ -38,7 +38,7 @@ function Sectioning(): JSX.Element {
               <LabwareScanTable
                 actor={labwareMachine}
                 columns={[
-                  labwareScanTableColumns.meta(sampleColors),
+                  labwareScanTableColumns.color(sampleColors),
                   labwareScanTableColumns.barcode(),
                   labwareScanTableColumns.donorId(),
                   labwareScanTableColumns.tissueType(),

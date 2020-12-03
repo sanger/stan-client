@@ -75,7 +75,7 @@ const replicate: ColumnFactory = () => {
 };
 
 const columns = {
-  meta: color,
+  color,
   barcode,
   donorId,
   tissueType,
