@@ -40,6 +40,6 @@ const LabCard: React.FC<LabCardProps> = ({ icon, title, children }) => (
       {title}
     </Heading>
     <p className="mt-4 text-center text-gray-600 text-sm">{children}</p>
-    <PinkButton action="tertiary">Get Started `&gt;`</PinkButton>
+    <PinkButton action="tertiary">Get Started &gt;</PinkButton>
   </div>
 );
