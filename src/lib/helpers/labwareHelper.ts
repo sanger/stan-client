@@ -119,7 +119,7 @@ export function buildSampleColors(labwares: Labware[]): Map<number, string> {
     "#EC4899",
     "#F59E0B",
     "#3B82F6",
-    "#8B5CF6",
+    "#8b5cf6",
   ]);
   const sampleColors = new Map();
   labwares.forEach((labware) => {

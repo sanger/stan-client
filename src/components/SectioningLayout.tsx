@@ -61,14 +61,12 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
     >
       <div className="md:grid md:grid-cols-2">
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
-          {sectioningLayout.destinationLabware && (
-            <Labware
-              sampleColors={layoutPlan.sampleColors}
-              onClick={() => send(editLayout())}
-              labware={sectioningLayout.destinationLabware}
-              actions={layoutPlan.plannedActions}
-            />
-          )}
+          <Labware
+            sampleColors={layoutPlan.sampleColors}
+            onClick={() => send(editLayout())}
+            labware={sectioningLayout.destinationLabware}
+            actions={layoutPlan.plannedActions}
+          />
 
           {current.matches("prep") && (
             <PinkButton onClick={() => send(editLayout())}>

@@ -175,13 +175,12 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
               ))}
             </TableHead>
             <TableBody {...getTableBodyProps()}>
-              {rows.map((row, index) => {
+              {rows.map((row) => {
                 prepareRow(row);
                 return (
                   <motion.tr
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    // key={index}
                     {...row.getRowProps()}
                   >
                     {row.cells.map((cell) => {
