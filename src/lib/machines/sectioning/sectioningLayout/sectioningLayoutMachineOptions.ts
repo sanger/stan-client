@@ -9,7 +9,7 @@ import { extractServerErrors } from "../../../../types/stan";
 import { PlanRequestLabware } from "../../../../types/graphql";
 import sectioningService from "../../../services/sectioningService";
 import { createLayoutMachine } from "../../layout/layoutMachine";
-import { SectioningLayout } from "../sectioningMachine";
+import { SectioningLayout } from "./index";
 
 export enum Action {
   UPDATE_SECTIONING_LAYOUT = "updateSectioningLayout",

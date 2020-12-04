@@ -5,13 +5,13 @@ import { MachineOptions, spawn } from "xstate";
 import { createLabwareMachine } from "../labwareMachine";
 import { current } from "immer";
 import {
+  SectioningLayout,
   SectioningLayoutContext,
   SectioningLayoutEvents,
 } from "./sectioningLayout";
 import sectioningService from "../../services/sectioningService";
 import { createSectioningLayoutMachine } from "./sectioningLayout/sectioningLayoutMachine";
 import { buildSampleColors } from "../../helpers/labwareHelper";
-import { SectioningLayout } from "./sectioningMachine";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
 import { LabwareTypeName } from "../../../types/stan";
 

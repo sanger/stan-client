@@ -4,7 +4,7 @@ import * as Yup from "yup";
 import { Actor } from "xstate";
 import { LayoutEvents, LayoutMachineType } from "../../layout";
 import { LayoutPlan } from "../../layout";
-import { SectioningLayout } from "../sectioningMachine";
+import { SectioningLayout } from "./index";
 
 /**
  * Context for a {@link SectioningLayout} machine

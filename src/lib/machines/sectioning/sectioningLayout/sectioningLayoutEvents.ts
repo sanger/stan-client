@@ -1,7 +1,7 @@
 import { PlanMutationResult } from "../../../../types/graphql";
 import { ApolloError } from "@apollo/client";
 import { LayoutPlan } from "../../layout";
-import { SectioningLayout } from "../sectioningMachine";
+import { SectioningLayout } from "./index";
 
 type UpdateSectioningLayoutEvent = {
   type: "UPDATE_SECTIONING_LAYOUT";

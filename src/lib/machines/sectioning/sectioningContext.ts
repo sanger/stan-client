@@ -7,8 +7,7 @@ import {
 import { Actor } from "xstate";
 import { LabwareMachineEvents, LabwareMachineType } from "../labwareMachine";
 import { SectioningLayoutMachineType } from "./sectioningLayout/sectioningLayoutMachine";
-import { SectioningLayoutEvents } from "./sectioningLayout";
-import { SectioningLayout } from "./sectioningMachine";
+import { SectioningLayout, SectioningLayoutEvents } from "./sectioningLayout";
 
 interface SectioningMachineRef {
   ref: Actor<SectioningLayoutMachineType["state"], SectioningLayoutEvents>;

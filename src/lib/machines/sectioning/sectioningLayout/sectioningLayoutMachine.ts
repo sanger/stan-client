@@ -17,7 +17,7 @@ import {
   Action,
   sectioningLayoutMachineOptions,
 } from "./sectioningLayoutMachineOptions";
-import { SectioningLayout } from "../sectioningMachine";
+import { SectioningLayout } from "./index";
 
 export type SectioningLayoutMachineType = Interpreter<
   SectioningLayoutContext,

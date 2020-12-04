@@ -7,50 +7,13 @@ import {
   machineKey,
   sectioningMachineOptions,
 } from "./sectioningMachineOptions";
-import { Labware } from "../../../types/graphql";
-import { LabwareTypeName, UnregisteredLabware } from "../../../types/stan";
-
-/**
- * Model of a sectioning layout
- */
-export interface SectioningLayout {
-  /**
-   * The labwares available to section from
-   */
-  inputLabwares: Labware[];
-
-  /**
-   * The unregistered labware we are sectioning on to
-   */
-  destinationLabware: UnregisteredLabware;
-
-  /**
-   * How many labwares of this layout will we be sectioning on to
-   */
-  quantity: number;
-
-  /**
-   * The thinkness of each section (slice)
-   */
-  sectionThickness: number;
-
-  /**
-   * Map of sampleId to colors
-   */
-  sampleColors: Map<number, string>;
-
-  /**
-   * The barcode of the labware we're sectioning on to (for Visium LP slides)
-   */
-  barcode?: string;
-}
+import { LabwareTypeName } from "../../../types/stan";
 
 /**
  * Machine for controlling the sectioning workflow.
  *
  * @see {@link labwareMachine}
  */
-
 export const createSectioningMachine = () =>
   Machine<SectioningContext, SectioningSchema, SectioningEvents>(
     {
@@ -102,7 +65,7 @@ export const createSectioningMachine = () =>
           ],
         },
         [State.READY]: {
-          entry: "spawnLabwareMachine",
+          entry: Action.SPAWN_LABWARE_MACHINE,
           on: {
             UPDATE_LABWARES: {
               target: State.UNKNOWN,

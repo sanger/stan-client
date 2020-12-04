@@ -1,10 +1,4 @@
 import { Interpreter, Machine, sendParent } from "xstate";
-import {
-  AnyLabware,
-  FriendlyAddress,
-  SourcePlanRequestAction,
-} from "../../../types/stan";
-import { PlanRequestAction } from "../../../types/graphql";
 import { LayoutContext } from "./layoutContext";
 import { LayoutSchema, State } from "./layoutStates";
 import { LayoutEvents } from "./layoutEvents";
@@ -13,13 +7,7 @@ import {
   layoutMachineKey,
   machineOptions,
 } from "./layoutMachineOptions";
-
-export interface LayoutPlan {
-  destinationLabware: AnyLabware;
-  sourceActions: Array<SourcePlanRequestAction>;
-  sampleColors: Map<number, string>;
-  plannedActions: Map<FriendlyAddress, PlanRequestAction>;
-}
+import { LayoutPlan } from "./index";
 
 export type LayoutMachineType = Interpreter<
   LayoutContext,
