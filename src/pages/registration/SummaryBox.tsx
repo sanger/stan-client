@@ -137,7 +137,7 @@ const SummaryBox = ({
           ))}
       </div>
 
-      <div>
+      <div className="w-full flex flex-col space-y-4">
         <WhiteButton
           disabled={whiteButtonDisabled}
           type="button"

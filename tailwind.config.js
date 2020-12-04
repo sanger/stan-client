@@ -1,14 +1,15 @@
 module.exports = {
-  future: {
-    removeDeprecatedGapUtilities: true,
-    purgeLayersByDefault: true,
-  },
   purge: ["./src/**/*.html", "./src/**/*.tsx"],
-  target: "relaxed",
   prefix: "",
   important: false,
   separator: ":",
   theme: {
+    extend: {
+      boxShadow: {
+        xs: "0 0 0 1px rgba(0, 0, 0, 0.05)",
+        outline: "0 0 0 3px rgba(66, 153, 225, 0.5)",
+      },
+    },
     screens: {
       sm: "640px",
       md: "768px",
@@ -23,7 +24,7 @@ module.exports = {
       white: "#fff",
 
       sp: {
-        default: "#E91E63",
+        DEFAULT: "#E91E63",
         100: "#FDE9EF",
         200: "#FAC7D8",
         300: "#F6A5C1",
@@ -37,7 +38,7 @@ module.exports = {
 
       // Sanger Dark Blue
       sdb: {
-        default: "#232643",
+        DEFAULT: "#232643",
         100: "#7980B9",
         200: "#5860A7",
         300: "#464D86",
@@ -184,19 +185,18 @@ module.exports = {
     backgroundColor: (theme) => theme("colors"),
     backgroundImage: {
       none: "none",
-      "gradient-to-t": "linear-gradient(to top, var(--gradient-color-stops))",
+      "gradient-to-t": "linear-gradient(to top, var(--tw-gradient-stops))",
       "gradient-to-tr":
-        "linear-gradient(to top right, var(--gradient-color-stops))",
-      "gradient-to-r": "linear-gradient(to right, var(--gradient-color-stops))",
+        "linear-gradient(to top right, var(--tw-gradient-stops))",
+      "gradient-to-r": "linear-gradient(to right, var(--tw-gradient-stops))",
       "gradient-to-br":
-        "linear-gradient(to bottom right, var(--gradient-color-stops))",
-      "gradient-to-b":
-        "linear-gradient(to bottom, var(--gradient-color-stops))",
+        "linear-gradient(to bottom right, var(--tw-gradient-stops))",
+      "gradient-to-b": "linear-gradient(to bottom, var(--tw-gradient-stops))",
       "gradient-to-bl":
-        "linear-gradient(to bottom left, var(--gradient-color-stops))",
-      "gradient-to-l": "linear-gradient(to left, var(--gradient-color-stops))",
+        "linear-gradient(to bottom left, var(--tw-gradient-stops))",
+      "gradient-to-l": "linear-gradient(to left, var(--tw-gradient-stops))",
       "gradient-to-tl":
-        "linear-gradient(to top left, var(--gradient-color-stops))",
+        "linear-gradient(to top left, var(--tw-gradient-stops))",
     },
     gradientColorStops: (theme) => theme("colors"),
     backgroundOpacity: (theme) => theme("opacity"),
@@ -218,19 +218,19 @@ module.exports = {
     },
     borderColor: (theme) => ({
       ...theme("colors"),
-      default: theme("colors.gray.300", "currentColor"),
+      DEFAULT: theme("colors.gray.300", "currentColor"),
     }),
     borderOpacity: (theme) => theme("opacity"),
     borderRadius: {
       none: "0",
       sm: "0.125rem",
-      default: "0.25rem",
+      DEFAULT: "0.25rem",
       md: "0.375rem",
       lg: "0.5rem",
       full: "9999px",
     },
     borderWidth: {
-      default: "1px",
+      DEFAULT: "1px",
       0: "0",
       2: "2px",
       4: "4px",
@@ -239,7 +239,7 @@ module.exports = {
     boxShadow: {
       xs: "0 0 0 1px rgba(0, 0, 0, 0.05)",
       sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-      default:
+      DEFAULT:
         "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
       md:
         "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
@@ -255,7 +255,7 @@ module.exports = {
     container: {},
     cursor: {
       auto: "auto",
-      default: "default",
+      DEFAULT: "DEFAULT",
       pointer: "pointer",
       wait: "wait",
       text: "text",
@@ -276,11 +276,11 @@ module.exports = {
     },
     flexGrow: {
       0: "0",
-      default: "1",
+      DEFAULT: "1",
     },
     flexShrink: {
       0: "0",
-      default: "1",
+      DEFAULT: "1",
     },
     fontFamily: {
       sans: [
@@ -651,7 +651,7 @@ module.exports = {
     transitionProperty: {
       none: "none",
       all: "all",
-      default:
+      DEFAULT:
         "background-color, border-color, color, fill, stroke, opacity, box-shadow, transform",
       colors: "background-color, border-color, color, fill, stroke",
       opacity: "opacity",
@@ -792,7 +792,7 @@ module.exports = {
     strokeWidth: ["responsive"],
     tableLayout: ["responsive"],
     textAlign: ["responsive"],
-    textColor: ["responsive", "hover", "focus"],
+    textColor: ["responsive", "hover", "focus", "disabled"],
     textOpacity: ["responsive", "hover", "focus"],
     textDecoration: ["responsive", "hover", "focus"],
     textTransform: ["responsive"],
@@ -826,5 +826,9 @@ module.exports = {
     animation: ["responsive"],
   },
   corePlugins: {},
-  plugins: [require("@tailwindcss/ui"), require("@tailwindcss/custom-forms")],
+  plugins: [
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/aspect-ratio"),
+  ],
 };

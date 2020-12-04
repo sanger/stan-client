@@ -65,7 +65,7 @@ export type LabwareType = {
   name: Scalars['String'];
   numRows: Scalars['Int'];
   numColumns: Scalars['Int'];
-  labelType: LabelType;
+  labelType?: Maybe<LabelType>;
 };
 
 export type Donor = {
@@ -92,9 +92,15 @@ export type Address = {
   column: Scalars['Int'];
 };
 
+export type AddressInput = {
+  row: Scalars['Int'];
+  column: Scalars['Int'];
+};
+
 export type Sample = {
   __typename?: 'Sample';
-  section: Scalars['Int'];
+  id: Scalars['Int'];
+  section?: Maybe<Scalars['Int']>;
   tissue: Tissue;
 };
 
@@ -109,6 +115,7 @@ export type Slot = {
 
 export type Labware = {
   __typename?: 'Labware';
+  id: Scalars['Int'];
   barcode: Scalars['String'];
   labwareType: LabwareType;
   slots: Array<Slot>;
@@ -145,6 +152,54 @@ export type RegisterResult = {
   tissue: Array<Tissue>;
 };
 
+export type PlanRequestSource = {
+  barcode: Scalars['String'];
+  address?: Maybe<AddressInput>;
+};
+
+export type OperationType = {
+  __typename?: 'OperationType';
+  name: Scalars['String'];
+};
+
+export type PlanAction = {
+  __typename?: 'PlanAction';
+  source: Slot;
+  destination: Slot;
+  sample: Sample;
+  newSection?: Maybe<Scalars['Int']>;
+};
+
+export type PlanOperation = {
+  __typename?: 'PlanOperation';
+  operationType?: Maybe<OperationType>;
+  planActions: Array<PlanAction>;
+};
+
+export type PlanRequestAction = {
+  address: AddressInput;
+  sampleId: Scalars['Int'];
+  sampleThickness?: Maybe<Scalars['Int']>;
+  source: PlanRequestSource;
+};
+
+export type PlanRequestLabware = {
+  labwareType: Scalars['String'];
+  barcode?: Maybe<Scalars['String']>;
+  actions: Array<PlanRequestAction>;
+};
+
+export type PlanRequest = {
+  operationType: Scalars['String'];
+  labware: Array<PlanRequestLabware>;
+};
+
+export type PlanResult = {
+  __typename?: 'PlanResult';
+  labware: Array<Labware>;
+  operations: Array<PlanOperation>;
+};
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -167,6 +222,7 @@ export type Mutation = {
   login: LoginResult;
   logout?: Maybe<Scalars['String']>;
   register: RegisterResult;
+  plan: PlanResult;
 };
 
 
@@ -178,6 +234,11 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   request: RegisterRequest;
+};
+
+
+export type MutationPlanArgs = {
+  request: PlanRequest;
 };
 
 export type LoginMutationVariables = Exact<{
@@ -203,6 +264,49 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'logout'>
+);
+
+export type PlanMutationVariables = Exact<{
+  request: PlanRequest;
+}>;
+
+
+export type PlanMutation = (
+  { __typename?: 'Mutation' }
+  & { plan: (
+    { __typename?: 'PlanResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & Pick<Labware, 'id' | 'barcode'>
+      & { slots: Array<(
+        { __typename?: 'Slot' }
+        & { samples: Array<(
+          { __typename?: 'Sample' }
+          & Pick<Sample, 'section'>
+        )> }
+      )>, labwareType: (
+        { __typename?: 'LabwareType' }
+        & Pick<LabwareType, 'numRows' | 'numColumns'>
+      ) }
+    )>, operations: Array<(
+      { __typename?: 'PlanOperation' }
+      & { operationType?: Maybe<(
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      )>, planActions: Array<(
+        { __typename?: 'PlanAction' }
+        & Pick<PlanAction, 'newSection'>
+        & { destination: (
+          { __typename?: 'Slot' }
+          & Pick<Slot, 'labwareId'>
+          & { address: (
+            { __typename?: 'Address' }
+            & Pick<Address, 'row' | 'column'>
+          ) }
+        ) }
+      )> }
+    )> }
+  ) }
 );
 
 export type RegisterTissuesMutationVariables = Exact<{
@@ -266,6 +370,7 @@ export type FindLabwareQuery = (
         & Pick<Address, 'row' | 'column'>
       ), samples: Array<(
         { __typename?: 'Sample' }
+        & Pick<Sample, 'id'>
         & { tissue: (
           { __typename?: 'Tissue' }
           & Pick<Tissue, 'replicate'>
@@ -313,6 +418,17 @@ export type GetRegistrationInfoQuery = (
   )>, mouldSizes: Array<(
     { __typename?: 'MouldSize' }
     & Pick<MouldSize, 'name'>
+  )> }
+);
+
+export type GetSectioningInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSectioningInfoQuery = (
+  { __typename?: 'Query' }
+  & { labwareTypes: Array<(
+    { __typename?: 'LabwareType' }
+    & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
   )> }
 );
 
@@ -381,6 +497,65 @@ export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<Logou
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
 export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
+export const PlanDocument = gql`
+    mutation Plan($request: PlanRequest!) {
+  plan(request: $request) {
+    labware {
+      id
+      barcode
+      slots {
+        samples {
+          section
+        }
+      }
+      labwareType {
+        numRows
+        numColumns
+      }
+    }
+    operations {
+      operationType {
+        name
+      }
+      planActions {
+        newSection
+        destination {
+          address {
+            row
+            column
+          }
+          labwareId
+        }
+      }
+    }
+  }
+}
+    `;
+export type PlanMutationFn = Apollo.MutationFunction<PlanMutation, PlanMutationVariables>;
+
+/**
+ * __usePlanMutation__
+ *
+ * To run a mutation, you first call `usePlanMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePlanMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [planMutation, { data, loading, error }] = usePlanMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function usePlanMutation(baseOptions?: Apollo.MutationHookOptions<PlanMutation, PlanMutationVariables>) {
+        return Apollo.useMutation<PlanMutation, PlanMutationVariables>(PlanDocument, baseOptions);
+      }
+export type PlanMutationHookResult = ReturnType<typeof usePlanMutation>;
+export type PlanMutationResult = Apollo.MutationResult<PlanMutation>;
+export type PlanMutationOptions = Apollo.BaseMutationOptions<PlanMutation, PlanMutationVariables>;
 export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {
@@ -471,6 +646,7 @@ export const FindLabwareDocument = gql`
       }
       block
       samples {
+        id
         tissue {
           donor {
             donorName
@@ -565,3 +741,37 @@ export function useGetRegistrationInfoLazyQuery(baseOptions?: Apollo.LazyQueryHo
 export type GetRegistrationInfoQueryHookResult = ReturnType<typeof useGetRegistrationInfoQuery>;
 export type GetRegistrationInfoLazyQueryHookResult = ReturnType<typeof useGetRegistrationInfoLazyQuery>;
 export type GetRegistrationInfoQueryResult = Apollo.QueryResult<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>;
+export const GetSectioningInfoDocument = gql`
+    query GetSectioningInfo {
+  labwareTypes {
+    name
+    numRows
+    numColumns
+  }
+}
+    `;
+
+/**
+ * __useGetSectioningInfoQuery__
+ *
+ * To run a query within a React component, call `useGetSectioningInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetSectioningInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetSectioningInfoQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetSectioningInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>) {
+        return Apollo.useQuery<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(GetSectioningInfoDocument, baseOptions);
+      }
+export function useGetSectioningInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>) {
+          return Apollo.useLazyQuery<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(GetSectioningInfoDocument, baseOptions);
+        }
+export type GetSectioningInfoQueryHookResult = ReturnType<typeof useGetSectioningInfoQuery>;
+export type GetSectioningInfoLazyQueryHookResult = ReturnType<typeof useGetSectioningInfoLazyQuery>;
+export type GetSectioningInfoQueryResult = Apollo.QueryResult<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>;

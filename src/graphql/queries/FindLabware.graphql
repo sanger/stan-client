@@ -11,6 +11,7 @@ query FindLabware($barcode: String!) {
             }
             block
             samples {
+                id
                 tissue {
                     donor {
                         donorName

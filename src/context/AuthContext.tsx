@@ -37,8 +37,8 @@ const initialContext: AuthContext = {
   authState: null,
 };
 
-const AuthContext = createContext<AuthContext>(initialContext);
-const { Provider } = AuthContext;
+const authContext = createContext<AuthContext>(initialContext);
+const { Provider } = authContext;
 
 interface AuthProviderProps {
   children: JSX.Element | JSX.Element[];
@@ -124,4 +124,4 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   );
 };
 
-export { AuthContext, AuthProvider };
+export { authContext, AuthProvider };

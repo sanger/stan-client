@@ -1,0 +1,7 @@
+query GetSectioningInfo {
+    labwareTypes {
+        name
+        numRows
+        numColumns
+    }
+}

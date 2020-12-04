@@ -1,12 +1,14 @@
 import { interpret } from "xstate";
-import labwareMachine, {
+import {
+  createLabwareMachine,
   LabwareMachineContext,
 } from "../../../src/lib/machines/labwareMachine";
 import { FindLabwareQuery } from "../../../src/types/graphql";
+import { log } from "xstate/lib/actions";
 
 describe("labwareMachine", () => {
   it("has an initial state of idle.normal", (done) => {
-    const machine = interpret(labwareMachine).onTransition((state) => {
+    const machine = interpret(createLabwareMachine()).onTransition((state) => {
       if (state.matches("idle.normal")) {
         done();
       }
@@ -16,14 +18,16 @@ describe("labwareMachine", () => {
 
   describe("UPDATE_CURRENT_BARCODE", () => {
     it("updates the current barcode", (done) => {
-      const machine = interpret(labwareMachine).onTransition((state) => {
-        if (
-          state.matches("idle.normal") &&
-          state.context.currentBarcode == "STAN-123"
-        ) {
-          done();
+      const machine = interpret(createLabwareMachine()).onTransition(
+        (state) => {
+          if (
+            state.matches("idle.normal") &&
+            state.context.currentBarcode == "STAN-123"
+          ) {
+            done();
+          }
         }
-      });
+      );
       machine.start();
       machine.send({ type: "UPDATE_CURRENT_BARCODE", value: "STAN-123" });
     });
@@ -34,8 +38,8 @@ describe("labwareMachine", () => {
       "when the labware with this barcode is already in the table",
       () => {
         it("transitions to idle.error with an error message", (done) => {
-          const mockLabwareTableMachine = labwareMachine.withContext(
-            Object.assign({}, labwareMachine.context, {
+          const mockLabwareTableMachine = createLabwareMachine().withContext(
+            Object.assign({}, createLabwareMachine().context, {
               labwares: [
                 {
                   barcode: "STAN-123",
@@ -64,12 +68,14 @@ describe("labwareMachine", () => {
     context("when the barcode is not in the table", () => {
       context("when the barcode is empty", () => {
         it("assigns an error message", (done) => {
-          const machine = interpret(labwareMachine).onTransition((state) => {
-            if (state.matches("idle.error")) {
-              expect(state.context.errorMessage).to.eq("Barcode is required");
-              done();
+          const machine = interpret(createLabwareMachine()).onTransition(
+            (state) => {
+              if (state.matches("idle.error")) {
+                expect(state.context.errorMessage).to.eq("Barcode is required");
+                done();
+              }
             }
-          });
+          );
           machine.start();
           machine.send({ type: "SUBMIT_BARCODE" });
         });
@@ -77,9 +83,9 @@ describe("labwareMachine", () => {
 
       context("when barcode is valid", () => {
         it("will look up the labware via a service", (done) => {
-          const mockLTMachine = labwareMachine.withConfig({
+          const mockLTMachine = createLabwareMachine().withConfig({
             services: {
-              findLabwareByBarcode: (ctx: LabwareMachineContext) => {
+              findLabwareByBarcode: (_ctx: LabwareMachineContext) => {
                 return new Promise<FindLabwareQuery["labware"]>((resolve) => {
                   resolve({
                     labwareType: {
@@ -95,7 +101,7 @@ describe("labwareMachine", () => {
                         },
                         samples: [
                           {
-                            section: 1,
+                            id: 1,
                             tissue: {
                               replicate: 5,
                               donor: {
@@ -117,7 +123,13 @@ describe("labwareMachine", () => {
               },
             },
           });
-          const machine = interpret(mockLTMachine).onTransition((state) => {
+          const machine = interpret(
+            mockLTMachine.withConfig({
+              actions: {
+                updateLabwares: log("stubbed update labwares"),
+              },
+            })
+          ).onTransition((state) => {
             if (
               state.matches("idle.normal") &&
               state.context.labwares.length > 0
@@ -134,7 +146,7 @@ describe("labwareMachine", () => {
 
       context("when barcode can't be found", () => {
         it("assigns an error message", (done) => {
-          const mockLTMachine = labwareMachine.withConfig({
+          const mockLTMachine = createLabwareMachine().withConfig({
             services: {
               findLabwareByBarcode: (_ctx: LabwareMachineContext) => {
                 return new Promise<FindLabwareQuery["labware"]>(
@@ -167,15 +179,21 @@ describe("labwareMachine", () => {
 
   describe("REMOVE_LABWARE", () => {
     it("transitions to idle.success", (done) => {
-      const mockLabwareTableMachine = labwareMachine.withContext(
-        Object.assign({}, labwareMachine.context, {
-          labwares: [
-            {
-              barcode: "STAN-123",
-            },
-          ],
+      const mockLabwareTableMachine = createLabwareMachine()
+        .withConfig({
+          actions: {
+            updateLabwares: log("stubbed update labwares"),
+          },
         })
-      );
+        .withContext(
+          Object.assign({}, createLabwareMachine().context, {
+            labwares: [
+              {
+                barcode: "STAN-123",
+              },
+            ],
+          })
+        );
 
       const machine = interpret(mockLabwareTableMachine).onTransition(
         (state) => {
@@ -188,6 +206,25 @@ describe("labwareMachine", () => {
       );
       machine.start();
       machine.send({ type: "REMOVE_LABWARE", value: "STAN-123" });
+    });
+  });
+
+  describe("LOCK/UNLOCK", () => {
+    it("transitions to locked and back to idle.normal", (done) => {
+      let wasLocked = false;
+      const machine = interpret(createLabwareMachine()).onTransition(
+        (state) => {
+          if (state.matches("locked")) {
+            wasLocked = true;
+          }
+          if (wasLocked && state.matches("idle.normal")) {
+            done();
+          }
+        }
+      );
+      machine.start();
+      machine.send({ type: "LOCK" });
+      machine.send({ type: "UNLOCK" });
     });
   });
 });

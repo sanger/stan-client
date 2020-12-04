@@ -1,10 +1,26 @@
-import { Column } from "react-table";
+import React from "react";
+import { CellProps, Column } from "react-table";
 import { Labware } from "../../types/graphql";
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
  */
-type ColumnFactory = () => Column<Labware>;
+type ColumnFactory = (meta?: Map<number, any>) => Column<Labware>;
+
+const color: ColumnFactory = (meta) => {
+  return {
+    id: "color",
+    Header: "",
+    accessor: (originalRow) =>
+      meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? "#FFF",
+    Cell: (props: CellProps<Labware>) => (
+      <span
+        style={{ backgroundColor: props.value }}
+        className="inline-block h-8 w-8 rounded-full"
+      />
+    ),
+  };
+};
 
 /**
  * Barcode of the labware
@@ -58,10 +74,13 @@ const replicate: ColumnFactory = () => {
   };
 };
 
-export default {
+const columns = {
+  color,
   barcode,
   donorId,
   tissueType,
   spatialLocation,
   replicate,
 };
+
+export default columns;

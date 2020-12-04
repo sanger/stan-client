@@ -33,7 +33,9 @@ function registerTissues(
   });
 }
 
-export default {
+const fns = {
   getRegistrationInfo,
   registerTissues,
 };
+
+export default fns;

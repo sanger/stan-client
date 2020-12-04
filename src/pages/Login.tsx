@@ -1,6 +1,6 @@
 import { Location } from "history";
 import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { authContext } from "../context/AuthContext";
 import { Link, Redirect, RouteComponentProps } from "react-router-dom";
 import { StaticContext } from "react-router";
 import {
@@ -41,14 +41,14 @@ const LoginSchema = Yup.object().shape({
 const Login = (
   props: RouteComponentProps<{}, StaticContext, LocationState>
 ): JSX.Element => {
-  const authContext = useContext(AuthContext);
+  const auth = useContext(authContext);
 
   // If the user was redirected here because they were logged in, and then their session expired, clear the AuthState
   useEffect(() => {
     if (props.location?.state?.loggedOut) {
-      authContext.clearAuthState();
+      auth.clearAuthState();
     }
-  }, [authContext, props.location]);
+  }, [auth, props.location]);
 
   const [login] = useLoginMutation();
   const client = useApolloClient();
@@ -94,7 +94,7 @@ const Login = (
 
       // Allow some time for the user to see the success message before redirecting
       setTimeout(() => {
-        authContext.setAuthState({
+        auth.setAuthState({
           userInfo,
         });
         formikHelpers.setSubmitting(false);
@@ -107,7 +107,7 @@ const Login = (
 
   return (
     <>
-      {authContext.isAuthenticated() && (
+      {auth.isAuthenticated() && (
         <Redirect to={props.location.state?.referrer ?? "/"} />
       )}
 

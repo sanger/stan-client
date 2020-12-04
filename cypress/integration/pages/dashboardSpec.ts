@@ -15,7 +15,7 @@ describe("Dashboard", () => {
 
     context("when clicking the guest icon", () => {
       before(() => {
-        cy.get("#user-menu").click();
+        cy.findByLabelText("User menu").click();
       });
 
       it("shows the user menu", () => {

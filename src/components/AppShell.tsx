@@ -5,7 +5,7 @@ import { StanMobileNavLink, StanNavLink } from "./nav";
 import { useOnClickOutside } from "../hooks";
 import Logo from "./Logo";
 import GuestIcon from "./icons/GuestIcon";
-import { AuthContext } from "../context/AuthContext";
+import { authContext } from "../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "./Heading";
 import variants from "../lib/motionVariants";
@@ -15,7 +15,7 @@ interface AppShellParams {
 }
 
 function AppShell({ children }: AppShellParams): JSX.Element {
-  const authContext = useContext(AuthContext);
+  const auth = useContext(authContext);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -80,7 +80,7 @@ function AppShell({ children }: AppShellParams): JSX.Element {
                         </Unauthenticated>
                         <Authenticated>
                           <span className="inline-flex items-center justify-center h-10 w-10 p-1 rounded-full text-white bg-sp text-xs">
-                            {authContext.authState?.userInfo.username}
+                            {auth.authState?.userInfo.username}
                           </span>
                         </Authenticated>
                       </button>
@@ -195,7 +195,7 @@ function AppShell({ children }: AppShellParams): JSX.Element {
                     <div className="flex items-center px-5 space-x-3 mb-3">
                       <div className="flex-shrink-0">
                         <span className="inline-flex items-center justify-center h-10 w-10 p-1 rounded-full text-white bg-sp text-xs">
-                          {authContext.authState?.userInfo.username}
+                          {auth.authState?.userInfo.username}
                         </span>
                       </div>
 
@@ -204,7 +204,7 @@ function AppShell({ children }: AppShellParams): JSX.Element {
                           Logged In
                         </div>
                         <div className="text-sm font-medium leading-none text-gray-400">
-                          {authContext.authState?.userInfo.username}
+                          {auth.authState?.userInfo.username}
                           @sanger.ac.uk
                         </div>
                       </div>
