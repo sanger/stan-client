@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Registration page ([#5](https://github.com/sanger/stan-client/pull/5))
  - XState
  - Labware Scan Panel ([#7](https://github.com/sanger/stan-client/pull/7) & [#8](https://github.com/sanger/stan-client/pull/8))
+ - Sectioning layouts ([#9](https://github.com/sanger/stan-client/pull/9))
 
 ## [0.1.0] - 2020-10-27
 ### Added
