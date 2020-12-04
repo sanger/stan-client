@@ -52,6 +52,9 @@ export interface SectioningContext {
     Actor<LabwareMachineType["state"], LabwareMachineEvents>
   >;
 
+  /**
+   * The input labwares sent up from the labware machine
+   */
   sourceLabwares: Labware[];
 
   /**
@@ -61,6 +64,9 @@ export interface SectioningContext {
    */
   sectioningLayouts: Array<SectioningLayout & SectioningMachineRef>;
 
+  /**
+   * A map of sample color to a hex color
+   */
   sampleColors: Map<number, string>;
 }
 

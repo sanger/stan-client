@@ -6,10 +6,10 @@ export enum State {
 
 export interface LayoutSchema {
   states: {
-    ready: {
+    [State.READY]: {
       states: {
-        sourceNotSelected: {};
-        sourceSelected: {};
+        [State.SOURCE_NOT_SELECTED]: {};
+        [State.SOURCE_SELECTED]: {};
       };
     };
   };
