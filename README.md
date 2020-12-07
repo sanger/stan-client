@@ -46,6 +46,10 @@ GraphQL Code Generator is a CLI tool that can generate TypeScript typings out of
 
 Its configuration lives in `codegen.yml`. Its output goes into the `/types` directory.
 
+### `yarn codegen:machine <name>`
+
+Runs a code generator ([hydra](http://www.hygen.io/docs/quick-start)) to generate an XState state machine with name as the CLI argument `<name>`. Generator template is in `_templates/machine/new`. 
+
 ### `yarn test:open`
 
 Starts the app on [http://localhost:3001](http://localhost:3001) with `REACT_APP_MOCK_API=msw` then launches the [Cypress](https://www.cypress.io/) test runner.
