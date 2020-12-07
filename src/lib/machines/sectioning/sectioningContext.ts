@@ -5,9 +5,9 @@ import {
   Maybe,
 } from "../../../types/graphql";
 import { Actor } from "xstate";
-import { LabwareMachineEvents, LabwareMachineType } from "../labwareMachine";
 import { SectioningLayoutMachineType } from "./sectioningLayout/sectioningLayoutMachine";
 import { SectioningLayout, SectioningLayoutEvents } from "./sectioningLayout";
+import { LabwareEvents, LabwareMachineType } from "../labware";
 
 interface SectioningMachineRef {
   ref: Actor<SectioningLayoutMachineType["state"], SectioningLayoutEvents>;
@@ -47,9 +47,7 @@ export interface SectioningContext {
    *
    * @see {@link https://xstate.js.org/docs/guides/actors.html#actors}
    */
-  labwareMachine: Maybe<
-    Actor<LabwareMachineType["state"], LabwareMachineEvents>
-  >;
+  labwareMachine: Maybe<Actor<LabwareMachineType["state"], LabwareEvents>>;
 
   /**
    * The input labwares sent up from the labware machine

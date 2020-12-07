@@ -1,5 +1,5 @@
 import { GetSectioningInfoQuery } from "../../../types/graphql";
-import { UpdateLabwaresEvent } from "../labwareMachine";
+import { UpdateLabwaresEvent } from "../labware/labwareEvents";
 
 export type SelectLabwareTypeEvent = {
   type: "SELECT_LABWARE_TYPE";

@@ -1,8 +1,4 @@
 import React from "react";
-import {
-  LabwareMachineType,
-  LabwareMachineEvents,
-} from "../../lib/machines/labwareMachine";
 import { useActor } from "@xstate/react";
 import { Labware } from "../../types/graphql";
 import Success from "../notifications/Success";
@@ -16,6 +12,7 @@ import BarcodeIcon from "../icons/BarcodeIcon";
 import MutedText from "../MutedText";
 import classNames from "classnames";
 import LockIcon from "../icons/LockIcon";
+import { LabwareEvents, LabwareMachineType } from "../../lib/machines/labware";
 
 /**
  * Props for {@link LabwareScanTable}
@@ -45,10 +42,9 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
    *
    * @see {@link https://xstate.js.org/docs/packages/xstate-react/#useactor-actor-getsnapshot}
    */
-  const [current, send] = useActor<
-    LabwareMachineEvents,
-    LabwareMachineType["state"]
-  >(actor);
+  const [current, send] = useActor<LabwareEvents, LabwareMachineType["state"]>(
+    actor
+  );
 
   // Memoize the data for the table
   const data = React.useMemo(() => current.context.labwares, [

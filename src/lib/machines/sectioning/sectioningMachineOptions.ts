@@ -2,7 +2,6 @@ import { assign } from "@xstate/immer";
 import { SectioningContext } from "./sectioningContext";
 import { SectioningEvents } from "./sectioningEvents";
 import { MachineOptions, spawn } from "xstate";
-import { createLabwareMachine } from "../labwareMachine";
 import { current } from "immer";
 import {
   SectioningLayout,
@@ -14,6 +13,7 @@ import { createSectioningLayoutMachine } from "./sectioningLayout/sectioningLayo
 import { buildSampleColors } from "../../helpers/labwareHelper";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
 import { LabwareTypeName } from "../../../types/stan";
+import { createLabwareMachine } from "../labware/labwareMachine";
 
 export const machineKey = "sectioningMachine";
 
