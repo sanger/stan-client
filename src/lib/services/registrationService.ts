@@ -21,9 +21,7 @@ function getRegistrationInfo(): Promise<
  * Calls the register GraphQL mutation
  * @param mutationVariables
  */
-function registerTissues(
-  mutationVariables: RegisterTissuesMutationVariables
-): Promise<FetchResult<RegisterTissuesMutation>> {
+function registerTissues(mutationVariables: RegisterTissuesMutationVariables) {
   return client.mutate<
     RegisterTissuesMutation,
     RegisterTissuesMutationVariables
