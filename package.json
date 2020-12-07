@@ -58,7 +58,8 @@
     "test:ci": "start-server-and-test start 3001 cypress:run",
     "test:open": "start-server-and-test start:msw 3001 cypress:open",
     "eject": "react-scripts eject",
-    "codegen": "DOTENV_CONFIG_PATH=./.env.local graphql-codegen --config codegen.yml -r dotenv/config"
+    "codegen": "DOTENV_CONFIG_PATH=./.env.local graphql-codegen --config codegen.yml -r dotenv/config",
+    "codegen:machine": "npx hygen machine new"
   },
   "eslintConfig": {
     "extends": "react-app"
