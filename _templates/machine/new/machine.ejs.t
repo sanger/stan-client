@@ -16,7 +16,7 @@ import {
 export const create<%= Name %>Machine = () =>
   Machine<<%= Name %>Context, <%= Name %>Schema, <%= Name %>Events>(
     {
-      id: "<% name %>",
+      id: "<%= name %>",
       context: {},
       initial: State.READY,
       states: {

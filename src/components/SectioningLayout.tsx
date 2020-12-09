@@ -23,6 +23,9 @@ import {
 } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
 import { LabwareTypeName } from "../types/stan";
 import { createFriendlyAddress } from "../lib/helpers/labwareHelper";
+import LabelPrinter from "./LabelPrinter";
+import Success from "./notifications/Success";
+import LabelPrinterButton from "./LabelPrinterButton";
 
 interface SectioningLayoutProps {
   /**
@@ -46,10 +49,14 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
   >(actor);
   const {
     serverErrors,
-    planResult,
+    plannedLabware,
+    plannedOperations,
     sectioningLayout,
     layoutPlan,
     layoutPlanRef,
+    labelPrinterRef,
+    printSuccessMessage,
+    printErrorMessage,
   } = current.context;
 
   return (
@@ -156,21 +163,22 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
             </Label>
           </div>
 
-          {current.matches("readyToPrint") && (
-            <div className="w-full">
+          {current.matches("printing") && (
+            <div className="w-full space-y-4">
               <Table>
                 <TableHead>
                   <tr>
                     <TableHeader>Barcode</TableHeader>
                     <TableHeader>Section Number</TableHeader>
+                    <TableHeader />
                   </tr>
                 </TableHead>
                 <TableBody>
-                  {planResult?.labware.map((lw, i) => (
+                  {plannedLabware.map((lw, i) => (
                     <tr key={i}>
                       <TableCell>{lw.barcode}</TableCell>
                       <TableCell>
-                        {planResult?.operations.map((operation, j) => {
+                        {plannedOperations.map((operation, j) => {
                           const newSections = operation.planActions
                             .filter(
                               (action) => action.destination.labwareId === lw.id
@@ -191,10 +199,23 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
                           return <ul key={j}>{newSections}</ul>;
                         })}
                       </TableCell>
+                      <TableCell>
+                        <LabelPrinterButton actor={lw.actorRef} />
+                      </TableCell>
                     </tr>
                   ))}
                 </TableBody>
               </Table>
+
+              {current.matches({ printing: "printSuccess" }) && (
+                <Success message={printSuccessMessage} />
+              )}
+
+              {current.matches({ printing: "printError" }) && (
+                <Warning message={printErrorMessage} />
+              )}
+
+              {labelPrinterRef && <LabelPrinter actor={labelPrinterRef} />}
             </div>
           )}
 

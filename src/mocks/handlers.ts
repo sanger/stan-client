@@ -4,6 +4,8 @@ import {
   CurrentUserQueryVariables,
   FindLabwareQuery,
   FindLabwareQueryVariables,
+  GetPrintersQuery,
+  GetPrintersQueryVariables,
   GetRegistrationInfoQuery,
   GetRegistrationInfoQueryVariables,
   GetSectioningInfoQuery,
@@ -13,6 +15,8 @@ import {
   LogoutMutationVariables,
   PlanMutation,
   PlanMutationVariables,
+  PrintMutation,
+  PrintMutationVariables,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
 } from "../types/graphql";
@@ -412,6 +416,54 @@ export const handlers = [
           })
         );
       }
+    }
+  ),
+
+  graphql.query<GetPrintersQuery, GetPrintersQueryVariables>(
+    "GetPrinters",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          printers: [
+            {
+              __typename: "Printer",
+              name: "cgaptestbc",
+              labelType: {
+                name: "tiny",
+              },
+            },
+            {
+              __typename: "Printer",
+              name: "slidelabel",
+              labelType: {
+                name: "label",
+              },
+            },
+          ],
+        })
+      );
+    }
+  ),
+
+  graphql.mutation<PrintMutation, PrintMutationVariables>(
+    "Print",
+    (req, res, ctx) => {
+      // Just so we can test failure behaviour
+      if (req.variables.printer === "slidelabel") {
+        return res(
+          ctx.errors([
+            {
+              message: "Failed to print",
+            },
+          ])
+        );
+      }
+
+      return res(
+        ctx.data({
+          printLabware: "OK",
+        })
+      );
     }
   ),
 ];

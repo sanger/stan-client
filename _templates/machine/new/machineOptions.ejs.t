@@ -16,7 +16,7 @@ export enum Guards {}
 
 export enum Services {}
 
-export const machineOptions: Partial<MachineOptions<
+export const <%= name %>MachineOptions: Partial<MachineOptions<
   <%= Name %>Context,
   <%= Name %>Events
 >> = {

@@ -10,6 +10,7 @@ import { PlanRequestLabware } from "../../../../types/graphql";
 import sectioningService from "../../../services/sectioningService";
 import { createLayoutMachine } from "../../layout/layoutMachine";
 import { SectioningLayout } from "./index";
+import { createLabelPrinterMachine } from "../../labelPrinter/labelPrinterMachine";
 
 export enum Action {
   UPDATE_SECTIONING_LAYOUT = "updateSectioningLayout",
@@ -18,6 +19,8 @@ export enum Action {
   ASSIGN_LAYOUT_PLAN = "assignLayoutPlan",
   ASSIGN_PLAN_RESPONSE = "assignPlanResponse",
   ASSIGN_SERVER_ERRORS = "assignServerErrors",
+  SPAWN_LABEL_PRINTER_MACHINE = "spawnLabelPrinterMachines",
+  ASSIGN_PRINT_RESPONSE = "assignPrintResponse",
 }
 
 export const sectioningLayoutMachineOptions: Partial<MachineOptions<
@@ -58,10 +61,21 @@ export const sectioningLayoutMachineOptions: Partial<MachineOptions<
     }),
 
     [Action.ASSIGN_PLAN_RESPONSE]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.planSection") {
+      if (e.type !== "done.invoke.planSection" || !e.data.data) {
         return;
       }
-      ctx.planResult = e.data.data?.plan ?? null;
+      ctx.plannedOperations = e.data.data.plan.operations;
+      ctx.plannedLabware = e.data.data.plan.labware.map((labware) => {
+        return {
+          ...labware,
+          actorRef: spawn(
+            createLabelPrinterMachine(
+              { labwareBarcodes: [labware.barcode] },
+              { fetchPrinters: true }
+            )
+          ),
+        };
+      });
     }),
 
     [Action.ASSIGN_SERVER_ERRORS]: assign((ctx, e) => {
@@ -69,6 +83,27 @@ export const sectioningLayoutMachineOptions: Partial<MachineOptions<
         return;
       }
       ctx.serverErrors = extractServerErrors(e.data);
+    }),
+
+    [Action.SPAWN_LABEL_PRINTER_MACHINE]: assign((ctx, e) => {
+      const currentCtx = current(ctx);
+      const labwareBarcodes = currentCtx.plannedLabware.map((lw) => lw.barcode);
+      const subscribers = new Set(
+        currentCtx.plannedLabware.map((lw) => lw.actorRef as Actor)
+      );
+      ctx.labelPrinterRef = spawn(
+        createLabelPrinterMachine({ labwareBarcodes }, { subscribers })
+      );
+    }),
+
+    [Action.ASSIGN_PRINT_RESPONSE]: assign((ctx, e) => {
+      if (e.type === "PRINT_SUCCESS") {
+        ctx.printSuccessMessage = e.message;
+        ctx.printErrorMessage = undefined;
+      } else if (e.type === "PRINT_ERROR") {
+        ctx.printSuccessMessage = undefined;
+        ctx.printErrorMessage = e.message;
+      }
     }),
   },
 

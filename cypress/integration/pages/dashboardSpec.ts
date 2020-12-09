@@ -2,6 +2,7 @@ describe("Dashboard", () => {
   context("when visiting as a guest", () => {
     before(() => {
       cy.visitAsGuest("/");
+      cy.wait(2000);
     });
 
     it("does not show the Registration nav link", () => {
@@ -31,6 +32,7 @@ describe("Dashboard", () => {
   context("when visiting as an authenticated user", () => {
     before(() => {
       cy.visit("/");
+      cy.wait(2000);
     });
 
     it("does show the Registration nav link", () => {

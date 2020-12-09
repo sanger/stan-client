@@ -10,7 +10,7 @@ interface SuccessProps
     React.HTMLAttributes<HTMLElement>,
     HTMLElement
   > {
-  message: string;
+  message?: string;
 }
 
 /**
