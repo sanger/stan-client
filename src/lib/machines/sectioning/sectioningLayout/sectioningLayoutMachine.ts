@@ -46,8 +46,8 @@ export const createSectioningLayoutMachine = (
         validator: buildValidator(
           sectioningLayout.destinationLabware.labwareType
         ),
-        planResult: null,
-        layoutPlanRef: null,
+        plannedLabware: [],
+        plannedOperations: [],
         layoutPlan: buildLayoutPlan(sectioningLayout),
       },
       initial: State.PREP,
@@ -111,7 +111,7 @@ export const createSectioningLayoutMachine = (
             id: "planSection",
             src: "planSection",
             onDone: {
-              target: State.READY_TO_PRINT,
+              target: State.PRINTING,
               actions: Action.ASSIGN_PLAN_RESPONSE,
             },
             onError: {
@@ -120,9 +120,25 @@ export const createSectioningLayoutMachine = (
             },
           },
         },
-        [State.READY_TO_PRINT]: {},
-        [State.PRINTING]: {},
-        [State.READY_TO_REPRINT]: {},
+        [State.PRINTING]: {
+          entry: Action.SPAWN_LABEL_PRINTER_MACHINE,
+          initial: State.READY_TO_PRINT,
+          states: {
+            [State.READY_TO_PRINT]: {},
+            [State.PRINT_SUCCESS]: {},
+            [State.PRINT_ERROR]: {},
+          },
+          on: {
+            PRINT_SUCCESS: {
+              target: `.${State.PRINT_SUCCESS}`,
+              actions: Action.ASSIGN_PRINT_RESPONSE,
+            },
+            PRINT_ERROR: {
+              target: `.${State.PRINT_ERROR}`,
+              actions: Action.ASSIGN_PRINT_RESPONSE,
+            },
+          },
+        },
       },
     },
     sectioningLayoutMachineOptions
