@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Actor } from "xstate";
 import PinkButton from "./buttons/PinkButton";
 import { useActor } from "@xstate/react";
