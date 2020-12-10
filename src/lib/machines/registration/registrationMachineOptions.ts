@@ -12,6 +12,7 @@ import { assign } from "@xstate/immer";
 import { FormValues } from "../../../pages/registration/RegistrationForm";
 import { extractServerErrors, LabwareTypeName } from "../../../types/stan";
 import registrationService from "../../services/registrationService";
+import { createMinimumWaitService } from "../index";
 
 export enum Actions {
   ASSIGN_REGISTRATION_INFO = "assignRegistrationInfo",
@@ -21,6 +22,7 @@ export enum Actions {
 }
 
 export enum Services {
+  GET_REGISTRATION_INFO = "getRegistrationInfo",
   SUBMIT = "submit",
 }
 
@@ -67,6 +69,9 @@ export const registrationMachineOptions: Partial<MachineOptions<
     }),
   },
   services: {
+    [Services.GET_REGISTRATION_INFO]: () =>
+      createMinimumWaitService(300, registrationService.getRegistrationInfo),
+
     [Services.SUBMIT]: (context, event) => {
       if (event.type !== "SUBMIT_FORM") {
         return Promise.reject();
