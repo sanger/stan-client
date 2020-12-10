@@ -45,7 +45,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
     SectioningLayoutMachineType["state"]
   >(actor);
 
-  const [shouldEnableInputs, setShouldEnableInputs] = useState(false);
+  const [shouldEnableInputs, setShouldEnableInputs] = useState(true);
 
   const {
     serverErrors,
@@ -61,9 +61,9 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
    * re-render (which then can cause form inputs to blur)
    */
   useEffect(() => {
-    setShouldEnableInputs(
-      typeof current.value === "object" && "prep" in current.value
-    );
+    if (current.value === "readyToPrint") {
+      setShouldEnableInputs(false);
+    }
   }, [setShouldEnableInputs, current.value]);
 
   return (
