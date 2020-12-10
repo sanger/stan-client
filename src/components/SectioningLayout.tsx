@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Actor } from "xstate";
 import PinkButton from "./buttons/PinkButton";
 import { useActor } from "@xstate/react";
@@ -44,6 +44,9 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
     SectioningLayoutEvents,
     SectioningLayoutMachineType["state"]
   >(actor);
+
+  const [shouldEnableInputs, setShouldEnableInputs] = useState(false);
+
   const {
     serverErrors,
     planResult,
@@ -52,8 +55,20 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
     layoutPlanRef,
   } = current.context;
 
+  /**
+   * Should the Quantity, Section Thickness, Barcode inputs be disabled.
+   * Have to use `useEffect` with `current.value` because current can change at any time causing a
+   * re-render (which then can cause form inputs to blur)
+   */
+  useEffect(() => {
+    setShouldEnableInputs(
+      typeof current.value === "object" && "prep" in current.value
+    );
+  }, [setShouldEnableInputs, current.value]);
+
   return (
     <motion.div
+      key={4}
       variants={variants.fadeInWithLift}
       initial={"hidden"}
       animate={"visible"}
@@ -68,7 +83,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
             actions={layoutPlan.plannedActions}
           />
 
-          {current.matches("prep") && (
+          {shouldEnableInputs && (
             <PinkButton onClick={() => send(editLayout())}>
               Edit Layout
             </PinkButton>
@@ -95,7 +110,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
               LabwareTypeName.VISIUM_LP && (
               <Label name={"Barcode"}>
                 <input
-                  disabled={!current.matches("prep")}
+                  disabled={!shouldEnableInputs}
                   className={
                     "mt-1 focus:ring-sdb-100 focus:border-sdb-100 block w-full md:w-2/3 border-gray-300 rounded-md disabled:opacity-75 disabled:text-gray-600"
                   }
@@ -116,35 +131,43 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
               LabwareTypeName.VISIUM_LP && (
               <Label name={"Quantity"}>
                 <input
-                  disabled={!current.matches("prep")}
+                  disabled={!shouldEnableInputs}
                   className={
                     "mt-1 focus:ring-sdb-100 focus:border-sdb-100 block w-full md:w-2/3 border-gray-300 rounded-md disabled:opacity-75 disabled:text-gray-600"
                   }
                   type="number"
                   min={1}
                   step={1}
-                  value={sectioningLayout.quantity}
-                  onChange={(e) =>
+                  value={
+                    sectioningLayout.quantity === 0
+                      ? ""
+                      : sectioningLayout.quantity
+                  }
+                  onChange={(e) => {
                     send(
                       updateSectioningLayout({
                         quantity: Number(e.currentTarget.value),
                       })
-                    )
-                  }
+                    );
+                  }}
                 />
               </Label>
             )}
 
             <Label name={"Section Thickness"}>
               <input
-                disabled={!current.matches("prep")}
+                disabled={!shouldEnableInputs}
                 className={
                   "mt-1 focus:ring-sdb-100 focus:border-sdb-100 block w-full md:w-2/3 border-gray-300 rounded-md disabled:opacity-75 disabled:text-gray-600"
                 }
                 type={"number"}
                 min={1}
                 step={1}
-                value={sectioningLayout.sectionThickness}
+                value={
+                  sectioningLayout.sectionThickness === 0
+                    ? ""
+                    : sectioningLayout.sectionThickness
+                }
                 onChange={(e) => {
                   send(
                     updateSectioningLayout({

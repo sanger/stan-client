@@ -6,7 +6,7 @@ const LoadingSpinner = () => {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Reports</AppShell.Title>
+        <AppShell.Title>...</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <LoadingSpinnerIcon />

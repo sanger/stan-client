@@ -34,12 +34,12 @@ export interface SectioningLayout {
   /**
    * How many labwares of this layout will we be sectioning on to
    */
-  quantity: number;
+  quantity: number | undefined;
 
   /**
-   * The thinkness of each section (slice)
+   * The thickness of each section (slice)
    */
-  sectionThickness: number;
+  sectionThickness: number | undefined;
 
   /**
    * Map of sampleId to colors
