@@ -45,8 +45,6 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
     SectioningLayoutMachineType["state"]
   >(actor);
 
-  const [shouldEnableInputs, setShouldEnableInputs] = useState(true);
-
   const {
     serverErrors,
     planResult,
@@ -54,17 +52,6 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
     layoutPlan,
     layoutPlanRef,
   } = current.context;
-
-  /**
-   * Should the Quantity, Section Thickness, Barcode inputs be disabled.
-   * Have to use `useEffect` with `current.value` because current can change at any time causing a
-   * re-render (which then can cause form inputs to blur)
-   */
-  useEffect(() => {
-    if (current.value === "readyToPrint") {
-      setShouldEnableInputs(false);
-    }
-  }, [setShouldEnableInputs, current.value]);
 
   return (
     <motion.div
@@ -83,7 +70,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
             actions={layoutPlan.plannedActions}
           />
 
-          {shouldEnableInputs && (
+          {current.matches("prep") && (
             <PinkButton onClick={() => send(editLayout())}>
               Edit Layout
             </PinkButton>
@@ -110,7 +97,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
               LabwareTypeName.VISIUM_LP && (
               <Label name={"Barcode"}>
                 <input
-                  disabled={!shouldEnableInputs}
+                  disabled={current.matches("readyToPrint")}
                   className={
                     "mt-1 focus:ring-sdb-100 focus:border-sdb-100 block w-full md:w-2/3 border-gray-300 rounded-md disabled:opacity-75 disabled:text-gray-600"
                   }
@@ -131,7 +118,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
               LabwareTypeName.VISIUM_LP && (
               <Label name={"Quantity"}>
                 <input
-                  disabled={!shouldEnableInputs}
+                  disabled={current.matches("readyToPrint")}
                   className={
                     "mt-1 focus:ring-sdb-100 focus:border-sdb-100 block w-full md:w-2/3 border-gray-300 rounded-md disabled:opacity-75 disabled:text-gray-600"
                   }
@@ -156,7 +143,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
 
             <Label name={"Section Thickness"}>
               <input
-                disabled={!shouldEnableInputs}
+                disabled={current.matches("readyToPrint")}
                 className={
                   "mt-1 focus:ring-sdb-100 focus:border-sdb-100 block w-full md:w-2/3 border-gray-300 rounded-md disabled:opacity-75 disabled:text-gray-600"
                 }
