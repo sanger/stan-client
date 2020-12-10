@@ -3,7 +3,7 @@ import {
   RegisterTissuesMutation,
 } from "../../../types/graphql";
 import * as Yup from "yup";
-import { ServerErrors } from "../../../types/stan";
+import { LabwareTypeName, ServerErrors } from "../../../types/stan";
 
 export interface RegistrationContext {
   loadingError: string;

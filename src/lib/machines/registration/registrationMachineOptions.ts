@@ -10,7 +10,7 @@ import {
 import * as Yup from "yup";
 import { assign } from "@xstate/immer";
 import { FormValues } from "../../../pages/registration/RegistrationForm";
-import { extractServerErrors } from "../../../types/stan";
+import { extractServerErrors, LabwareTypeName } from "../../../types/stan";
 import registrationService from "../../services/registrationService";
 
 export enum Actions {
@@ -33,8 +33,16 @@ export const registrationMachineOptions: Partial<MachineOptions<
       if (e.type !== "done.invoke.getRegistrationInfo" || !e.data.data) {
         return;
       }
-      ctx.registrationInfo = e.data.data;
-      ctx.registrationSchema = buildRegistrationSchema(e.data.data);
+      const registrationInfo = e.data.data;
+
+      // Filter down the available labware types.
+      ctx.registrationInfo = {
+        ...registrationInfo,
+        labwareTypes: registrationInfo.labwareTypes.filter(
+          (lt) => lt.name === LabwareTypeName.PROVIASETTE
+        ),
+      };
+      ctx.registrationSchema = buildRegistrationSchema(ctx.registrationInfo);
     }),
 
     [Actions.ASSIGN_LOADING_ERROR]: assign((ctx, e) => {
