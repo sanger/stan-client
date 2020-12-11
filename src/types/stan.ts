@@ -1,4 +1,4 @@
-import {Address, AddressInput, Labware, Maybe, PlanRequestAction, Slot} from "./graphql";
+import {Labware, Maybe, PlanRequestAction, Slot} from "./graphql";
 import {ApolloError} from "@apollo/client";
 
 /**
@@ -17,25 +17,25 @@ export enum LabwareTypeName {
   SLIDE = "Slide"
 }
 
-export type RowAddress = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
-export type ColumnAddress = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-export type FriendlyRowAddress = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H";
-export type FriendlyColumnAddress = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12";
+export type RowNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+export type ColumnNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+export type RowAddress = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H";
+export type ColumnAddress = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12";
 
 /**
  * Template literal type for friendly labwareAddresses ("A1", "B1", etc.)
- * Builds a set of each combination of FriendlyRowAddress and FriendlyColumnAddress
+ * Builds a set of each combination of RowAddress and ColumnAddress
  *
  * @see {@link https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-1.html#template-literal-types}
  */
-export type FriendlyAddress = `${FriendlyRowAddress}${FriendlyColumnAddress}`;
+export type Address = `${RowAddress}${ColumnAddress}`;
 
 /**
- * Type guard for {@link FriendlyRowAddress}
+ * Type guard for {@link RowAddress}
  *
  * @param row the letter of row
  */
-export function isFriendlyRowAddress(row: string): row is FriendlyRowAddress {
+export function isRowAddress(row: string): row is RowAddress {
   return row.length === 1 && row >= "A" && row <= "H";
 }
 
@@ -43,7 +43,7 @@ export function isFriendlyRowAddress(row: string): row is FriendlyRowAddress {
  * Type guard for a {@FriendlyRowColumn}
  * @param column the friendly column name
  */
-export function isFriendlyColumnAddress(column: string): column is FriendlyColumnAddress {
+export function isColumnAddress(column: string): column is ColumnAddress {
   const colNumber = Number(column);
   return colNumber > 0 && colNumber <= 12;
 }
@@ -65,12 +65,10 @@ export type UnregisteredLabware = Nullable<Labware, "id" | "barcode">;
 export type AnyLabware = Labware | UnregisteredLabware;
 
 /**
- * Useful for when a {@link FriendlyAddress} is needed along with {@link Address} or {@link AddressInput}
+ * An {@link Address} with its {@link Slot}
  */
 export interface LabwareAddress {
   address: Address;
-  addressInput: AddressInput;
-  friendlyAddress: FriendlyAddress;
   slot: Maybe<Slot>;
 }
 

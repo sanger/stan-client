@@ -5,10 +5,7 @@ query FindLabware($barcode: String!) {
             name
         }
         slots {
-            address {
-              row
-              column
-            }
+            address
             block
             samples {
                 id

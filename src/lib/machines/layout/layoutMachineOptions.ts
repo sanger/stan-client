@@ -31,7 +31,7 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_DESTINATION") {
         return;
       }
-      ctx.layoutPlan.plannedActions.delete(e.labwareAddress.friendlyAddress);
+      ctx.layoutPlan.plannedActions.delete(e.labwareAddress.address);
     }),
 
     [Actions.ASSIGN_DESTINATION]: assign((ctx, e) => {
@@ -40,20 +40,20 @@ export const machineOptions: Partial<MachineOptions<
       }
 
       const newPlanRequestAction = {
-        address: e.labwareAddress.addressInput,
+        address: e.labwareAddress.address,
         ...ctx.selected,
       };
 
       if (
         isEqual(
-          ctx.layoutPlan.plannedActions.get(e.labwareAddress.friendlyAddress),
+          ctx.layoutPlan.plannedActions.get(e.labwareAddress.address),
           newPlanRequestAction
         )
       ) {
-        ctx.layoutPlan.plannedActions.delete(e.labwareAddress.friendlyAddress);
+        ctx.layoutPlan.plannedActions.delete(e.labwareAddress.address);
       } else {
         ctx.layoutPlan.plannedActions.set(
-          e.labwareAddress.friendlyAddress,
+          e.labwareAddress.address,
           newPlanRequestAction
         );
       }
@@ -64,7 +64,7 @@ export const machineOptions: Partial<MachineOptions<
         return;
       }
 
-      ctx.layoutPlan.plannedActions.delete(e.labwareAddress.friendlyAddress);
+      ctx.layoutPlan.plannedActions.delete(e.labwareAddress.address);
     }),
 
     [Actions.ASSIGN_DESTINATION_ACTIONS]: assign((ctx, e) => {
@@ -74,8 +74,8 @@ export const machineOptions: Partial<MachineOptions<
 
       labwareAddresses(ctx.layoutPlan.destinationLabware).forEach(
         (labwareAddress) => {
-          ctx.layoutPlan.plannedActions.set(labwareAddress.friendlyAddress, {
-            address: labwareAddress.addressInput,
+          ctx.layoutPlan.plannedActions.set(labwareAddress.address, {
+            address: labwareAddress.address,
             sampleId: e.action.sampleId,
             source: e.action.source,
           });

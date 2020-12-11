@@ -236,10 +236,7 @@ export const handlers = [
             slots: [
               {
                 block: true,
-                address: {
-                  row: 1,
-                  column: 1,
-                },
+                address: "A1",
                 samples: [
                   {
                     id: 3,
@@ -332,11 +329,7 @@ export const handlers = [
                     {
                       newSection: 177,
                       destination: {
-                        address: {
-                          row: 1,
-                          column: 1,
-                          __typename: "Address",
-                        },
+                        address: "A1",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -345,11 +338,7 @@ export const handlers = [
                     {
                       newSection: 178,
                       destination: {
-                        address: {
-                          row: 2,
-                          column: 1,
-                          __typename: "Address",
-                        },
+                        address: "B1",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -358,11 +347,7 @@ export const handlers = [
                     {
                       newSection: 179,
                       destination: {
-                        address: {
-                          row: 3,
-                          column: 1,
-                          __typename: "Address",
-                        },
+                        address: "C1",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -371,11 +356,7 @@ export const handlers = [
                     {
                       newSection: 180,
                       destination: {
-                        address: {
-                          row: 1,
-                          column: 2,
-                          __typename: "Address",
-                        },
+                        address: "A2",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -384,11 +365,7 @@ export const handlers = [
                     {
                       newSection: 181,
                       destination: {
-                        address: {
-                          row: 2,
-                          column: 2,
-                          __typename: "Address",
-                        },
+                        address: "B2",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -397,11 +374,7 @@ export const handlers = [
                     {
                       newSection: 182,
                       destination: {
-                        address: {
-                          row: 3,
-                          column: 2,
-                          __typename: "Address",
-                        },
+                        address: "B3",
                         labwareId: 53,
                         __typename: "Slot",
                       },
