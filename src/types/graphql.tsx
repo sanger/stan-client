@@ -9,7 +9,9 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Address: any;
 };
+
 
 export type User = {
   __typename?: 'User';
@@ -86,17 +88,6 @@ export type Tissue = {
   fixative: Fixative;
 };
 
-export type Address = {
-  __typename?: 'Address';
-  row: Scalars['Int'];
-  column: Scalars['Int'];
-};
-
-export type AddressInput = {
-  row: Scalars['Int'];
-  column: Scalars['Int'];
-};
-
 export type Sample = {
   __typename?: 'Sample';
   id: Scalars['Int'];
@@ -106,7 +97,7 @@ export type Sample = {
 
 export type Slot = {
   __typename?: 'Slot';
-  address: Address;
+  address: Scalars['Address'];
   labwareId: Scalars['Int'];
   samples: Array<Sample>;
   block: Scalars['Boolean'];
@@ -154,7 +145,7 @@ export type RegisterResult = {
 
 export type PlanRequestSource = {
   barcode: Scalars['String'];
-  address?: Maybe<AddressInput>;
+  address?: Maybe<Scalars['Address']>;
 };
 
 export type OperationType = {
@@ -177,7 +168,7 @@ export type PlanOperation = {
 };
 
 export type PlanRequestAction = {
-  address: AddressInput;
+  address: Scalars['Address'];
   sampleId: Scalars['Int'];
   sampleThickness?: Maybe<Scalars['Int']>;
   source: PlanRequestSource;
@@ -317,11 +308,7 @@ export type PlanMutation = (
         & Pick<PlanAction, 'newSection'>
         & { destination: (
           { __typename?: 'Slot' }
-          & Pick<Slot, 'labwareId'>
-          & { address: (
-            { __typename?: 'Address' }
-            & Pick<Address, 'row' | 'column'>
-          ) }
+          & Pick<Slot, 'address' | 'labwareId'>
         ) }
       )> }
     )> }
@@ -394,11 +381,8 @@ export type FindLabwareQuery = (
       & Pick<LabwareType, 'name'>
     ), slots: Array<(
       { __typename?: 'Slot' }
-      & Pick<Slot, 'block'>
-      & { address: (
-        { __typename?: 'Address' }
-        & Pick<Address, 'row' | 'column'>
-      ), samples: Array<(
+      & Pick<Slot, 'address' | 'block'>
+      & { samples: Array<(
         { __typename?: 'Sample' }
         & Pick<Sample, 'id'>
         & { tissue: (
@@ -565,10 +549,7 @@ export const PlanDocument = gql`
       planActions {
         newSection
         destination {
-          address {
-            row
-            column
-          }
+          address
           labwareId
         }
       }
@@ -716,10 +697,7 @@ export const FindLabwareDocument = gql`
       name
     }
     slots {
-      address {
-        row
-        column
-      }
+      address
       block
       samples {
         id

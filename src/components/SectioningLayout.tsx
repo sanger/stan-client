@@ -22,7 +22,7 @@ import {
   updateSectioningLayout,
 } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
 import { LabwareTypeName } from "../types/stan";
-import { createFriendlyAddress } from "../lib/helpers/labwareHelper";
+import { createAddress } from "../lib/helpers/labwareHelper";
 import LabelPrinter from "./LabelPrinter";
 import Success from "./notifications/Success";
 import LabelPrinterButton from "./LabelPrinterButton";
@@ -187,9 +187,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
                               return (
                                 <li key={i} className="text-sm">
                                   <span className="font-semibold">
-                                    {createFriendlyAddress(
-                                      action.destination.address
-                                    )}
+                                    {action.destination.address}
                                   </span>{" "}
                                   <span className="">{action.newSection}</span>
                                 </li>
