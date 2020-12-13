@@ -10,6 +10,7 @@ export enum SectioningLayoutState {
   READY_TO_PRINT = "readyToPrint",
   PRINT_SUCCESS = "printSuccess",
   PRINT_ERROR = "printError",
+  DONE = "done",
 }
 
 export interface SectioningLayoutSchema {
@@ -31,5 +32,6 @@ export interface SectioningLayoutSchema {
         [SectioningLayoutState.PRINT_ERROR]: {};
       };
     };
+    [SectioningLayoutState.DONE]: {};
   };
 }

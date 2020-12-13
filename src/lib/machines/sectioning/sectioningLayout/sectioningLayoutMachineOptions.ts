@@ -5,7 +5,7 @@ import { current } from "immer";
 import { Actor, MachineOptions, send, spawn } from "xstate";
 import { LayoutContext, LayoutEvents, LayoutPlan } from "../../layout";
 import { RequestLayoutPlanEvent } from "../../layout/layoutEvents";
-import { extractServerErrors } from "../../../../types/stan";
+import { extractServerErrors, LabwareTypeName } from "../../../../types/stan";
 import { PlanRequestLabware } from "../../../../types/graphql";
 import sectioningService from "../../../services/sectioningService";
 import { createLayoutMachine } from "../../layout/layoutMachine";
@@ -21,6 +21,10 @@ export enum Action {
   ASSIGN_SERVER_ERRORS = "assignServerErrors",
   SPAWN_LABEL_PRINTER_MACHINE = "spawnLabelPrinterMachines",
   ASSIGN_PRINT_RESPONSE = "assignPrintResponse",
+}
+
+export enum Guards {
+  IS_VISIUM_LP = "isVisiumLP",
 }
 
 export const sectioningLayoutMachineOptions: Partial<MachineOptions<
@@ -105,6 +109,12 @@ export const sectioningLayoutMachineOptions: Partial<MachineOptions<
         ctx.printErrorMessage = e.message;
       }
     }),
+  },
+
+  guards: {
+    [Guards.IS_VISIUM_LP]: (ctx) =>
+      ctx.sectioningLayout.destinationLabware.labwareType.name ===
+      LabwareTypeName.VISIUM_LP,
   },
 
   services: {
