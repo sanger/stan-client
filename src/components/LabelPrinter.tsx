@@ -1,7 +1,7 @@
 import React from "react";
 import PinkButton from "./buttons/PinkButton";
 import { optionValues } from "./forms";
-import { Actor } from "xstate";
+import { Actor, ActorRef } from "xstate";
 import { useActor } from "@xstate/react";
 import LoadingSpinner from "./icons/LoadingSpinner";
 import {
@@ -9,13 +9,12 @@ import {
   LabelPrinterMachineType,
 } from "../lib/machines/labelPrinter";
 import {
-  updateLabelPrinter,
   print,
   updateSelectedLabelPrinter,
 } from "../lib/machines/labelPrinter/labelPrinterEvents";
 
 interface LabelPrinterProps {
-  actor: Actor<any, any>;
+  actor: ActorRef<LabelPrinterEvents, LabelPrinterMachineType["state"]>;
 }
 
 const LabelPrinter: React.FC<LabelPrinterProps> = ({ actor }) => {

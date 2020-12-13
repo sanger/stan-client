@@ -35,7 +35,7 @@ function AppShell({ children }: AppShellParams): JSX.Element {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <div className="bg-gradient-to-tr from-sdb to-sdb-400">
         <nav>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -236,13 +236,9 @@ function AppShell({ children }: AppShellParams): JSX.Element {
           </AnimatePresence>
         </nav>
       </div>
-      <motion.div
-        initial={{ opacity: 0.1 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-      >
-        {children}
-      </motion.div>
+
+      {children}
+      <footer className="border border-t-2 border-sdb-100 h-16 flex-shrink-0 bg-sdb-400" />
     </div>
   );
 }
@@ -270,9 +266,14 @@ AppShell.Title = function ({ children }: { children: string }) {
 };
 
 const Main: React.FC = ({ children }) => (
-  <main>
+  <motion.main
+    className="flex-auto"
+    initial={{ opacity: 0.1 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.4 }}
+  >
     <div className="py-6 px-4 sm:px-6 lg:px-8">{children}</div>
-  </main>
+  </motion.main>
 );
 AppShell.Main = Main;
 

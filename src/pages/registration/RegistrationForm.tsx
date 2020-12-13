@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   GetRegistrationInfoQuery,
   LifeStage,
@@ -18,6 +18,7 @@ import BlueButton from "../../components/buttons/BlueButton";
 import SummaryBox from "./SummaryBox";
 import variants from "../../lib/motionVariants";
 import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
+import { useScrollToRef } from "../../hooks";
 
 export interface FormValues {
   tissues: FormTissueValues[];
@@ -101,17 +102,7 @@ const RegistrationForm = ({
   // Reference to the current Tissue being registered
   const tissueRef = useRef<HTMLDivElement>(null);
 
-  // Reference to the last block in the current Tissue being registered
-  const lastBlockRef = useRef<HTMLDivElement>(null);
-
-  // Track whether to scroll to the latest block
-  const [scrollToLatestBlock, setScrollToLatestBlock] = useState(false);
-  useEffect(() => {
-    if (scrollToLatestBlock && lastBlockRef.current) {
-      lastBlockRef.current.scrollIntoView({ behavior: "smooth" });
-      setScrollToLatestBlock(false);
-    }
-  }, [scrollToLatestBlock]);
+  const [lastBlockRef, scrollToLatestBlock] = useScrollToRef();
 
   return (
     <Formik
@@ -392,7 +383,7 @@ const RegistrationForm = ({
                           className="mt-4 inline-flex"
                           onClick={() => {
                             blockHelpers.push(getInitialBlockValues());
-                            setScrollToLatestBlock(true);
+                            scrollToLatestBlock();
                           }}
                         >
                           + Add Another Tissue Block

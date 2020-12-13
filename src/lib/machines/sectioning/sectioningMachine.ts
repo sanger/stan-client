@@ -108,6 +108,17 @@ export const createSectioningMachine = () =>
             SELECT_LABWARE_TYPE: {
               actions: Action.SELECT_LABWARE_TYPE,
             },
+
+            PREP_DONE: {
+              target: `#${machineKey}.${State.OUTCOMES}`,
+            },
+          },
+        },
+        [State.OUTCOMES]: {
+          on: {
+            BACK_TO_PREP: {
+              target: State.UNKNOWN,
+            },
           },
         },
       },

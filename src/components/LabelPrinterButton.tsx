@@ -1,7 +1,8 @@
 import React from "react";
-import { Actor } from "xstate";
+import { ActorRef } from "xstate";
 import { useActor } from "@xstate/react";
 import {
+  LabelPrinterContext,
   LabelPrinterEvents,
   LabelPrinterMachineType,
 } from "../lib/machines/labelPrinter";
@@ -9,7 +10,7 @@ import PrintIcon from "./icons/PrintIcon";
 import { print } from "../lib/machines/labelPrinter/labelPrinterEvents";
 
 interface LabelPrinterButtonProps {
-  actor: Actor<any, any>;
+  actor: ActorRef<LabelPrinterEvents, LabelPrinterMachineType["state"]>;
 }
 
 const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({ actor }) => {

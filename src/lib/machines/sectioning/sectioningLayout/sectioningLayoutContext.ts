@@ -1,18 +1,17 @@
 import { Maybe, PlanMutation } from "../../../../types/graphql";
 import { ServerErrors } from "../../../../types/stan";
 import * as Yup from "yup";
-import { Actor } from "xstate";
-import { LayoutEvents, LayoutMachineType } from "../../layout";
+import { Actor, ActorRef } from "xstate";
+import { LayoutEvents } from "../../layout";
 import { LayoutPlan } from "../../layout";
 import { SectioningLayout } from "./index";
-import { ActorRef } from "@xstate/react/es/types";
 import {
   LabelPrinterEvents,
   LabelPrinterMachineType,
 } from "../../labelPrinter";
 
 interface HasLabelPrinterActor {
-  actorRef: Actor<LabelPrinterMachineType["state"], LabelPrinterEvents>;
+  actorRef: ActorRef<LabelPrinterEvents>;
 }
 
 /**
@@ -49,7 +48,7 @@ export interface SectioningLayoutContext {
   /**
    * Reference to a `LayoutMachine` Actor
    */
-  layoutPlanRef?: Actor<LayoutMachineType["state"], LayoutEvents>;
+  layoutPlanRef?: ActorRef<LayoutEvents>;
 
   /**
    * A layout plan
@@ -59,7 +58,7 @@ export interface SectioningLayoutContext {
   /**
    * Label printer machine
    */
-  labelPrinterRef?: Actor<LabelPrinterMachineType["state"], LabelPrinterEvents>;
+  labelPrinterRef?: ActorRef<LabelPrinterEvents>;
 
   /**
    * Message from the label printer containing details of the printer's great success

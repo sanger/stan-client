@@ -1,5 +1,5 @@
 import React from "react";
-import { Actor } from "xstate";
+import { ActorRef } from "xstate";
 import PinkButton from "./buttons/PinkButton";
 import { useActor } from "@xstate/react";
 import { SectioningLayoutMachineType } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutMachine";
@@ -22,7 +22,6 @@ import {
   updateSectioningLayout,
 } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
 import { LabwareTypeName } from "../types/stan";
-import { createAddress } from "../lib/helpers/labwareHelper";
 import LabelPrinter from "./LabelPrinter";
 import Success from "./notifications/Success";
 import LabelPrinterButton from "./LabelPrinterButton";
@@ -31,7 +30,7 @@ interface SectioningLayoutProps {
   /**
    * {@link https://xstate.js.org/docs/guides/actors.html#spawning-machines Actor} to that will be passed into `useActor`.
    */
-  actor: Actor<any, any>;
+  actor: ActorRef<SectioningLayoutEvents, SectioningLayoutMachineType["state"]>;
 
   /**
    * Callback to be called when deleting a SectioningLayout
@@ -39,10 +38,10 @@ interface SectioningLayoutProps {
   onDelete: () => void;
 }
 
-const SectioningLayout: React.FC<SectioningLayoutProps> = ({
-  actor,
-  onDelete,
-}) => {
+const SectioningLayout = React.forwardRef<
+  HTMLDivElement,
+  SectioningLayoutProps
+>(({ actor, onDelete }, ref) => {
   const [current, send] = useActor<
     SectioningLayoutEvents,
     SectioningLayoutMachineType["state"]
@@ -61,6 +60,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
 
   return (
     <motion.div
+      ref={ref}
       variants={variants.fadeInWithLift}
       initial={"hidden"}
       animate={"visible"}
@@ -264,6 +264,6 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
       </Modal>
     </motion.div>
   );
-};
+});
 
 export default SectioningLayout;

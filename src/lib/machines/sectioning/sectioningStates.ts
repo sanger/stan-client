@@ -6,6 +6,7 @@ export enum State {
   STARTED = "started",
   SOURCE_SCANNING = "sourceScanning",
   PREPARING_LABWARE = "preparingLabware",
+  OUTCOMES = "outcome",
 }
 
 export interface SectioningSchema {
@@ -20,5 +21,6 @@ export interface SectioningSchema {
         [State.PREPARING_LABWARE]: {};
       };
     };
+    [State.OUTCOMES]: {};
   };
 }

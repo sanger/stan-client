@@ -7,6 +7,7 @@ function Reports(): JSX.Element {
       <AppShell.Header>
         <AppShell.Title>Reports</AppShell.Title>
       </AppShell.Header>
+      <AppShell.Main></AppShell.Main>
     </AppShell>
   );
 }

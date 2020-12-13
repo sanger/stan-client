@@ -7,7 +7,7 @@ import RemoveIcon from "../icons/RemoveIcon";
 import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 import { motion } from "framer-motion";
 import { Column, Row, useTable } from "react-table";
-import { Actor } from "xstate";
+import { Actor, ActorRef } from "xstate";
 import BarcodeIcon from "../icons/BarcodeIcon";
 import MutedText from "../MutedText";
 import classNames from "classnames";
@@ -24,7 +24,7 @@ interface LabwareScanTableProps {
    * @remarks
    * This should be a spawned instance of {@link labwareMachine}
    */
-  actor: Actor<any, any>;
+  actor: ActorRef<LabwareEvents, LabwareMachineType["state"]>;
 
   /**
    * The list of columns to display in the table

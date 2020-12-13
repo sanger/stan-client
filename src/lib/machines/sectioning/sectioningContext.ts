@@ -4,13 +4,13 @@ import {
   LabwareType,
   Maybe,
 } from "../../../types/graphql";
-import { Actor } from "xstate";
+import { ActorRef } from "xstate";
 import { SectioningLayoutMachineType } from "./sectioningLayout/sectioningLayoutMachine";
 import { SectioningLayout, SectioningLayoutEvents } from "./sectioningLayout";
 import { LabwareEvents, LabwareMachineType } from "../labware";
 
 interface SectioningMachineRef {
-  ref: Actor<SectioningLayoutMachineType["state"], SectioningLayoutEvents>;
+  ref: ActorRef<SectioningLayoutEvents, SectioningLayoutMachineType["state"]>;
 }
 
 /**
@@ -47,7 +47,7 @@ export interface SectioningContext {
    *
    * @see {@link https://xstate.js.org/docs/guides/actors.html#actors}
    */
-  labwareMachine: Maybe<Actor<LabwareMachineType["state"], LabwareEvents>>;
+  labwareMachine: Maybe<ActorRef<LabwareEvents, LabwareMachineType["state"]>>;
 
   /**
    * The input labwares sent up from the labware machine
@@ -62,7 +62,7 @@ export interface SectioningContext {
   sectioningLayouts: Array<SectioningLayout & SectioningMachineRef>;
 
   /**
-   * A map of sample color to a hex color
+   * A map of sample ID to a hex color
    */
   sampleColors: Map<number, string>;
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { Actor } from "xstate";
+import { ActorRef } from "xstate";
 import { useActor } from "@xstate/react";
 import { isEqual } from "lodash";
 import Labware from "./Labware";
@@ -11,7 +11,7 @@ import {
 } from "../lib/machines/layout/layoutEvents";
 
 interface LayoutPlannerProps {
-  actor: Actor<any, any>;
+  actor: ActorRef<LayoutEvents>;
 }
 
 const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ actor }) => {

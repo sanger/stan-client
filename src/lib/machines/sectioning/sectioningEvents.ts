@@ -37,9 +37,29 @@ export function deleteLabwareLayout(index: number): DeleteLabwareLayoutEvent {
   };
 }
 
+type PrepDoneEvent = {
+  type: "PREP_DONE";
+};
+export function prepDone(): PrepDoneEvent {
+  return {
+    type: "PREP_DONE",
+  };
+}
+
+type BackToPrepEvent = {
+  type: "BACK_TO_PREP";
+};
+export function backToPrep(): BackToPrepEvent {
+  return {
+    type: "BACK_TO_PREP",
+  };
+}
+
 export type SectioningEvents =
   | SelectLabwareTypeEvent
   | AddLabwareLayoutEvent
   | DeleteLabwareLayoutEvent
   | GetSectioningInfoResolveEvent
-  | UpdateLabwaresEvent;
+  | UpdateLabwaresEvent
+  | PrepDoneEvent
+  | BackToPrepEvent;

@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 
 /**
  * Hook to call a side effect after a given delay
@@ -60,4 +60,25 @@ export function useOnClickOutside(
 
     // Reload only if ref or handler changes
   }, [refs, handler]);
+}
+
+/**
+ * Hook that will provide a ref and a function to scroll to that ref after render
+ */
+export function useScrollToRef() {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [shouldScrollToRef, setShouldScrollToRef] = useState(false);
+
+  useEffect(() => {
+    if (shouldScrollToRef) {
+      ref.current?.scrollIntoView({ behavior: "smooth" });
+      setShouldScrollToRef(false);
+    }
+  });
+
+  function scrollToRef() {
+    setShouldScrollToRef(true);
+  }
+
+  return [ref, scrollToRef] as const;
 }
