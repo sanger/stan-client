@@ -15,6 +15,7 @@ import { SectioningLayoutEvents } from "./sectioningLayoutEvents";
 import { LayoutPlan } from "../../layout";
 import {
   Action,
+  Guards,
   sectioningLayoutMachineOptions,
 } from "./sectioningLayoutMachineOptions";
 import { SectioningLayout } from "./index";
@@ -110,10 +111,17 @@ export const createSectioningLayoutMachine = (
           invoke: {
             id: "planSection",
             src: "planSection",
-            onDone: {
-              target: State.PRINTING,
-              actions: Action.ASSIGN_PLAN_RESPONSE,
-            },
+            onDone: [
+              {
+                cond: Guards.IS_VISIUM_LP,
+                target: State.DONE,
+                actions: Action.ASSIGN_PLAN_RESPONSE,
+              },
+              {
+                target: State.PRINTING,
+                actions: Action.ASSIGN_PLAN_RESPONSE,
+              },
+            ],
             onError: {
               target: `${State.PREP}.${State.ERROR}`,
               actions: Action.ASSIGN_SERVER_ERRORS,
@@ -139,6 +147,7 @@ export const createSectioningLayoutMachine = (
             },
           },
         },
+        [State.DONE]: {},
       },
     },
     sectioningLayoutMachineOptions

@@ -163,7 +163,7 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
             </Label>
           </div>
 
-          {current.matches("printing") && (
+          {plannedLabware.length > 0 && (
             <div className="w-full space-y-4">
               <Table>
                 <TableHead>
@@ -198,7 +198,9 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
                         })}
                       </TableCell>
                       <TableCell>
-                        <LabelPrinterButton actor={lw.actorRef} />
+                        {current.matches("printing") && (
+                          <LabelPrinterButton actor={lw.actorRef} />
+                        )}
                       </TableCell>
                     </tr>
                   ))}
@@ -213,7 +215,9 @@ const SectioningLayout: React.FC<SectioningLayoutProps> = ({
                 <Warning message={printErrorMessage} />
               )}
 
-              {labelPrinterRef && <LabelPrinter actor={labelPrinterRef} />}
+              {current.matches("printing") && labelPrinterRef && (
+                <LabelPrinter actor={labelPrinterRef} />
+              )}
             </div>
           )}
 
