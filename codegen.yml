@@ -1,6 +1,9 @@
 overwrite: true
 schema: ${GRAPHQL_SCHEMA_PATH}
 documents: "src/**/*.graphql"
+config:
+  scalars:
+    Address: string
 generates:
   src/types/graphql.tsx:
     plugins:
