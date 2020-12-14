@@ -5,7 +5,7 @@ import {
   LabwareTypeName,
   SourcePlanRequestAction,
 } from "../../../../types/stan";
-import { labwareSamples } from "../../../helpers/labwareHelper";
+import { createAddress, labwareSamples } from "../../../helpers/labwareHelper";
 import { SectioningLayoutContext } from "./sectioningLayoutContext";
 import {
   SectioningLayoutSchema,
@@ -205,10 +205,7 @@ function buildLayoutPlan(sectioningLayout: SectioningLayout): LayoutPlan {
               sampleId: labwareSample.sample.id,
               source: {
                 barcode: labwareSample.labware.barcode,
-                address: {
-                  row: labwareSample.slot.address.row,
-                  column: labwareSample.slot.address.column,
-                },
+                address: labwareSample.slot.address,
               },
             };
           }
