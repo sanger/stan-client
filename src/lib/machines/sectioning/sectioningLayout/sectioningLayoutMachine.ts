@@ -5,7 +5,7 @@ import {
   LabwareTypeName,
   SourcePlanRequestAction,
 } from "../../../../types/stan";
-import { createAddress, labwareSamples } from "../../../helpers/labwareHelper";
+import { labwareSamples } from "../../../helpers/labwareHelper";
 import { SectioningLayoutContext } from "./sectioningLayoutContext";
 import {
   SectioningLayoutSchema,
