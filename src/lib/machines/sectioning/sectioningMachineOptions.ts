@@ -12,10 +12,18 @@ import sectioningService from "../../services/sectioningService";
 import { createSectioningLayoutMachine } from "./sectioningLayout/sectioningLayoutMachine";
 import { buildSampleColors } from "../../helpers/labwareHelper";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
-import { LabwareTypeName } from "../../../types/stan";
+import { Address, LabwareTypeName } from "../../../types/stan";
 import { createLabwareMachine } from "../labware/labwareMachine";
-import { buildConfirmOperationLabware } from "../../factories/confirmOperationRequest";
 import { createSectioningOutcomeMachine } from "./sectioningOutcome/sectioningOutcomeMachine";
+import {
+  Labware,
+  LabwareLayoutFragment,
+  PlanMutation,
+} from "../../../types/graphql";
+import {
+  LayoutPlan,
+  Source as LayoutPlanAction,
+} from "../layout/layoutContext";
 
 export const machineKey = "sectioningMachine";
 
@@ -108,13 +116,18 @@ export const sectioningMachineOptions: Partial<MachineOptions<
         return;
       }
 
-      e.data.data.plan.labware.forEach((labware) => {
-        const confirmOperationLabware = buildConfirmOperationLabware(labware);
+      const { plan } = e.data.data;
 
-        ctx.confirmOperationLabware.push({
-          ...confirmOperationLabware,
-          ref: spawn(createSectioningOutcomeMachine([], labware)),
-        });
+      plan.labware.forEach((labware) => {
+        ctx.sectioningOutcomeMachines.push(
+          spawn(
+            createSectioningOutcomeMachine(
+              [],
+              labware,
+              buildSectioningOutcomeLayoutPlan(ctx, labware, plan.operations)
+            )
+          )
+        );
       });
     }),
   },
@@ -158,4 +171,48 @@ function buildSectioningLayout(ctx: SectioningContext): SectioningLayout {
   }
 
   return sectioningLayout;
+}
+
+function buildSectioningOutcomeLayoutPlan(
+  ctx: SectioningContext,
+  labware: LabwareLayoutFragment,
+  operations: PlanMutation["plan"]["operations"]
+): LayoutPlan {
+  const currentCtx = current(ctx);
+
+  return {
+    destinationLabware: labware,
+    // As we're only allowing removing an existing planned source, no source actions should be available
+    sources: [],
+    sampleColors: currentCtx.sampleColors,
+
+    plannedActions: operations[0].planActions
+      .filter((planAction) => {
+        return planAction.destination.labwareId === labware.id;
+      })
+      .reduce<Map<Address, LayoutPlanAction>>((memo, planAction) => {
+        const action: LayoutPlanAction = {
+          sampleId: planAction.sample.id,
+          labware: findSourceLabware(
+            currentCtx.sourceLabwares,
+            planAction.source.labwareId
+          ),
+          address: planAction.source.address,
+        };
+        memo.set(planAction.destination.address, action);
+        return memo;
+      }, new Map()),
+  };
+}
+
+function findSourceLabware(labwares: Labware[], labwareId: number): Labware {
+  const labware = labwares.find((lw) => lw.id === labwareId);
+
+  if (!labware) {
+    throw new Error(
+      `Plan returned an unrecognised source labware: ${labwareId}`
+    );
+  }
+
+  return labware;
 }

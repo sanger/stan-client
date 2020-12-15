@@ -18,7 +18,7 @@ import {
   sectioningLayoutMachineOptions,
 } from "./sectioningLayoutMachineOptions";
 import { SectioningLayout } from "./index";
-import { LayoutPlan } from "../../layout/layoutContext";
+import { LayoutPlan, Source } from "../../layout/layoutContext";
 
 export type SectioningLayoutMachineType = Interpreter<
   SectioningLayoutContext,
@@ -200,23 +200,20 @@ function buildLayoutPlan(sectioningLayout: SectioningLayout): LayoutPlan {
     destinationLabware: sectioningLayout.destinationLabware,
     plannedActions: new Map(),
     sampleColors: sectioningLayout.sampleColors,
-    sourceActions: sectioningLayout.inputLabwares.reduce<
-      Array<SourcePlanRequestAction>
-    >((memo, labware) => {
-      return [
-        ...memo,
-        ...labwareSamples(labware).map<SourcePlanRequestAction>(
-          (labwareSample) => {
+    sources: sectioningLayout.inputLabwares.reduce<Array<Source>>(
+      (memo, labware) => {
+        return [
+          ...memo,
+          ...labwareSamples(labware).map<Source>((labwareSample) => {
             return {
               sampleId: labwareSample.sample.id,
-              source: {
-                barcode: labwareSample.labware.barcode,
-                address: labwareSample.slot.address,
-              },
+              address: labwareSample.slot.address,
+              labware,
             };
-          }
-        ),
-      ];
-    }, []),
+          }),
+        ];
+      },
+      []
+    ),
   };
 }

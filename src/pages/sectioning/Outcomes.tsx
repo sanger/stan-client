@@ -20,7 +20,7 @@ interface OutcomesProps {
 }
 
 const Outcomes: React.FC<OutcomesProps> = ({ current, send }) => {
-  const { confirmOperationLabware } = current.context;
+  const { sectioningOutcomeMachines } = current.context;
 
   return (
     <AppShell>
@@ -30,8 +30,8 @@ const Outcomes: React.FC<OutcomesProps> = ({ current, send }) => {
       <AppShell.Main>
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
           <div className="space-y-4">
-            {confirmOperationLabware.map((cop) => (
-              <SectioningConfirm actor={cop.ref} />
+            {sectioningOutcomeMachines.map((som, i) => (
+              <SectioningConfirm actor={som} key={i} />
             ))}
           </div>
         </div>

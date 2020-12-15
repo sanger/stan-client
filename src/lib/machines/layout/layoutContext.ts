@@ -1,4 +1,8 @@
-import { Maybe, PlanRequestAction } from "../../../types/graphql";
+import {
+  LabwareLayoutFragment,
+  Maybe,
+  PlanRequestAction,
+} from "../../../types/graphql";
 import {
   Address,
   SourcePlanRequestAction,
@@ -9,7 +13,7 @@ export interface LayoutPlan {
   /**
    * List of all the available source actions
    */
-  sourceActions: Array<SourcePlanRequestAction>;
+  sources: Array<Source>;
 
   /**
    * The labware we're laying out onto
@@ -22,21 +26,21 @@ export interface LayoutPlan {
   sampleColors: Map<number, string>;
 
   /**
-   * Map of friendly address to planned action
+   * Map of friendly address to planned source
    *
    * NOTE: This will probably need to change to a list of {@link PlanRequestAction}
    * in the future as each address can actually support multiple samples
    */
-  plannedActions: Map<Address, Action>;
+  plannedActions: Map<Address, Source>;
 }
 
-export interface Action {
+export interface Source {
   sampleId: number;
-  sourceBarcode: string;
-  sourceAddress?: Maybe<Address>;
+  labware: LabwareLayoutFragment;
+  address?: Maybe<Address>;
 }
 
 export interface LayoutContext {
   layoutPlan: LayoutPlan;
-  selected: Maybe<SourcePlanRequestAction>;
+  selected: Maybe<Source>;
 }

@@ -35,7 +35,7 @@ export const createSectioningMachine = () =>
         sourceLabwares: [],
         sectioningLayouts: [],
         sampleColors: new Map(),
-        confirmOperationLabware: [],
+        sectioningOutcomeMachines: [],
       },
       states: {
         [State.LOADING]: {

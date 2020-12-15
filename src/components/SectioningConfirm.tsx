@@ -26,7 +26,7 @@ const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
     SectioningOutcomeMachineType["state"]
   >(actor);
 
-  const { labware } = current.context;
+  const { layoutPlan, labware } = current.context;
 
   return (
     <motion.div
@@ -40,6 +40,16 @@ const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
           <Labware
             // onClick={() => send(editLayout())}
             labware={labware}
+            slotText={(slot) =>
+              layoutPlan.plannedActions.get(slot.address)?.labware.barcode
+            }
+            slotColor={(slot) => {
+              const action = layoutPlan.plannedActions.get(slot.address);
+              if (action) {
+                return layoutPlan.sampleColors.get(action.sampleId);
+              }
+              return undefined;
+            }}
           />
 
           <PinkButton>Edit Layout</PinkButton>

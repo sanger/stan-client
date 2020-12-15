@@ -229,6 +229,7 @@ export const handlers = [
       return res(
         ctx.data({
           labware: {
+            id: 1,
             labwareType: {
               name: "Proviasette",
             },

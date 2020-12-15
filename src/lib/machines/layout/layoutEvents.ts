@@ -1,29 +1,26 @@
 import { Address, SourcePlanRequestAction } from "../../../types/stan";
+import { Source } from "./layoutContext";
 
 type SelectSourceEvent = {
   type: "SELECT_SOURCE";
-  action: SourcePlanRequestAction;
+  source: Source;
 };
-export function selectSource(
-  action: SourcePlanRequestAction
-): SelectSourceEvent {
+export function selectSource(source: Source): SelectSourceEvent {
   return {
     type: "SELECT_SOURCE",
-    action,
+    source,
   };
 }
 
 export type SetAllDestinationsEvent = {
   type: "SET_ALL_DESTINATIONS";
-  action: SourcePlanRequestAction;
+  source: Source;
 };
 
-export function setAllDestinations(
-  action: SourcePlanRequestAction
-): SetAllDestinationsEvent {
+export function setAllDestinations(source: Source): SetAllDestinationsEvent {
   return {
     type: "SET_ALL_DESTINATIONS",
-    action,
+    source,
   };
 }
 

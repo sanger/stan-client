@@ -31,7 +31,7 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ actor }) => {
               send(selectDestination(slot.address));
             }}
             slotText={(slot) =>
-              layoutPlan.plannedActions.get(slot.address)?.sourceBarcode
+              layoutPlan.plannedActions.get(slot.address)?.labware.barcode
             }
             slotColor={(slot) => {
               const action = layoutPlan.plannedActions.get(slot.address);
@@ -44,24 +44,24 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ actor }) => {
         )}
       </div>
       <div className="mt-2 grid gap-2 grid-cols-3">
-        {layoutPlan.sourceActions.map((action, i) => (
+        {layoutPlan.sources.map((source, i) => (
           <div key={i} className="">
             <span
               onClick={() => {
-                send(selectSource(action));
+                send(selectSource(source));
               }}
               onDoubleClick={() => {
-                send(setAllDestinations(action));
+                send(setAllDestinations(source));
               }}
               style={{
-                backgroundColor: layoutPlan.sampleColors.get(action.sampleId),
+                backgroundColor: layoutPlan.sampleColors.get(source.sampleId),
               }}
               className={`${
-                isEqual(action, selected) &&
+                isEqual(source, selected) &&
                 "ring-2 ring-offset-2 ring-gray-700"
               } inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
             >
-              {action.source.barcode}
+              {source.labware.barcode}
             </span>
           </div>
         ))}

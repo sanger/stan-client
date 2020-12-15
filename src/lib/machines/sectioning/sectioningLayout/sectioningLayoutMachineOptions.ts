@@ -147,20 +147,20 @@ function buildPlanRequestLabware(
     labwareType: sectioningLayout.destinationLabware.labwareType.name,
     barcode: sectioningLayout.barcode,
     actions: Array.from(layoutPlan.plannedActions.keys()).map((address) => {
-      const action = layoutPlan.plannedActions.get(address);
+      const source = layoutPlan.plannedActions.get(address);
 
-      if (!action) {
+      if (!source) {
         throw new Error("Mess up here");
       }
 
       return {
         address,
-        source: {
-          address: action.sourceAddress,
-          barcode: action.sourceBarcode,
-        },
-        sampleId: action.sampleId,
         sampleThickness: sectioningLayout.sectionThickness,
+        sampleId: source.sampleId,
+        source: {
+          barcode: source.labware.barcode,
+          address: source.address,
+        },
       };
     }),
   };

@@ -72,7 +72,7 @@ const SectioningLayout = React.forwardRef<
             onClick={() => send(editLayout())}
             labware={sectioningLayout.destinationLabware}
             slotText={(slot) =>
-              layoutPlan.plannedActions.get(slot.address)?.sourceBarcode
+              layoutPlan.plannedActions.get(slot.address)?.labware.barcode
             }
             slotColor={(slot) => {
               const action = layoutPlan.plannedActions.get(slot.address);

@@ -20,10 +20,6 @@ interface SectioningLayoutMachineRef {
   ref: ActorRef<SectioningLayoutEvents, SectioningLayoutMachineType["state"]>;
 }
 
-interface SectioningOutcomeMachineRef {
-  ref: ActorRef<SectioningOutcomeEvents, SectioningOutcomeMachineType["state"]>;
-}
-
 /**
  * SectioningContext for the {@link sectioningMachine}
  */
@@ -78,10 +74,10 @@ export interface SectioningContext {
   sampleColors: Map<number, string>;
 
   /**
-   * The request to send to the ConfirmOperation mutation
+   * Machines to handle each labware's sectioning outcome
    */
-  confirmOperationLabware: Array<
-    ConfirmOperationLabware & SectioningOutcomeMachineRef
+  sectioningOutcomeMachines: Array<
+    ActorRef<SectioningOutcomeEvents, SectioningOutcomeMachineType["state"]>
   >;
 }
 

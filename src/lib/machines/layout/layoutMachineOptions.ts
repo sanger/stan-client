@@ -1,5 +1,5 @@
 import { MachineOptions } from "xstate";
-import { Action, LayoutContext } from "./layoutContext";
+import { Source, LayoutContext } from "./layoutContext";
 import { LayoutEvents } from "./layoutEvents";
 import { assign } from "@xstate/immer";
 import { isEqual } from "lodash";
@@ -23,7 +23,7 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_SOURCE") {
         return;
       }
-      ctx.selected = e.action;
+      ctx.selected = e.source;
     }),
 
     [Actions.DELETE_DESTINATION_ACTION]: assign((ctx, e) => {
@@ -38,10 +38,10 @@ export const machineOptions: Partial<MachineOptions<
         return;
       }
 
-      const action: Action = {
+      const action: Source = {
         sampleId: ctx.selected.sampleId,
-        sourceAddress: ctx.selected.source.address,
-        sourceBarcode: ctx.selected.source.barcode,
+        address: ctx.selected.address,
+        labware: ctx.selected.labware,
       };
 
       if (isEqual(ctx.layoutPlan.plannedActions.get(e.address), action)) {
@@ -65,11 +65,7 @@ export const machineOptions: Partial<MachineOptions<
       }
 
       ctx.layoutPlan.destinationLabware.slots.forEach((slot) => {
-        ctx.layoutPlan.plannedActions.set(slot.address, {
-          sampleId: e.action.sampleId,
-          sourceAddress: e.action.source.address,
-          sourceBarcode: e.action.source.barcode,
-        });
+        ctx.layoutPlan.plannedActions.set(slot.address, e.source);
       });
     }),
   },

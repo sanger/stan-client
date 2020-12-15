@@ -429,7 +429,7 @@ export type FindLabwareQuery = (
   { __typename?: 'Query' }
   & { labware: (
     { __typename?: 'Labware' }
-    & Pick<Labware, 'barcode'>
+    & Pick<Labware, 'id' | 'barcode'>
     & { labwareType: (
       { __typename?: 'LabwareType' }
       & Pick<LabwareType, 'name'>
@@ -793,6 +793,7 @@ export type CurrentUserQueryResult = Apollo.QueryResult<CurrentUserQuery, Curren
 export const FindLabwareDocument = gql`
     query FindLabware($barcode: String!) {
   labware(barcode: $barcode) {
+    id
     barcode
     labwareType {
       name
