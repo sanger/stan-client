@@ -273,124 +273,173 @@ export const handlers = [
     }
   ),
 
-  graphql.mutation<PlanMutation, PlanMutationVariables>(
-    "Plan",
-    (req, res, ctx) => {
-      if (req.variables.request.operationType === "Section") {
-        return res(
-          ctx.data({
-            // Response not dynamic in any way. Just need a successful response for now.
-            plan: {
-              labware: [
-                {
-                  id: 53,
-                  barcode: "STAN-002FB",
-                  slots: [
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                  ],
-                  labwareType: {
-                    numRows: 3,
-                    numColumns: 2,
-                    __typename: "LabwareType",
-                  },
-                  __typename: "Labware",
-                },
-              ],
-              operations: [
-                {
-                  operationType: {
-                    name: "Section",
-                    __typename: "OperationType",
-                  },
-                  planActions: [
-                    {
-                      newSection: 177,
-                      destination: {
-                        address: "A1",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                    {
-                      newSection: 178,
-                      destination: {
-                        address: "B1",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                    {
-                      newSection: 179,
-                      destination: {
-                        address: "C1",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                    {
-                      newSection: 180,
-                      destination: {
-                        address: "A2",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                    {
-                      newSection: 181,
-                      destination: {
-                        address: "B2",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                    {
-                      newSection: 182,
-                      destination: {
-                        address: "B3",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                  ],
-                  __typename: "PlanOperation",
-                },
-              ],
-              __typename: "PlanResult",
-            },
-          })
-        );
-      }
-    }
-  ),
+  // graphql.mutation<PlanMutation, PlanMutationVariables>(
+  //   "Plan",
+  //   (req, res, ctx) => {
+  //     if (req.variables.request.operationType === "Section") {
+  //       return res(
+  //         ctx.data({
+  //           // Response not dynamic in any way. Just need a successful response for now.
+  //           plan: {
+  //             labware: [
+  //               {
+  //                 id: 53,
+  //                 barcode: "STAN-002FB",
+  //                 slots: [
+  //                   {
+  //                     samples: [],
+  //                     address: "A1",
+  //                     __typename: "Slot",
+  //                   },
+  //                   {
+  //                     samples: [],
+  //                     address: "B1",
+  //                     __typename: "Slot",
+  //                   },
+  //                   {
+  //                     samples: [],
+  //                     address: "C1",
+  //                     __typename: "Slot",
+  //                   },
+  //                   {
+  //                     samples: [],
+  //                     address: "A2",
+  //                     __typename: "Slot",
+  //                   },
+  //                   {
+  //                     samples: [],
+  //                     address: "B2",
+  //                     __typename: "Slot",
+  //                   },
+  //                   {
+  //                     samples: [],
+  //                     address: "C2",
+  //                     __typename: "Slot",
+  //                   },
+  //                 ],
+  //                 labwareType: {
+  //                   name: "slide",
+  //                   numRows: 3,
+  //                   numColumns: 2,
+  //                   __typename: "LabwareType",
+  //                 },
+  //                 __typename: "Labware",
+  //               },
+  //             ],
+  //             operations: [
+  //               {
+  //                 operationType: {
+  //                   name: "Section",
+  //                   __typename: "OperationType",
+  //                 },
+  //                 planActions: [
+  //                   {
+  //                     newSection: 177,
+  //                     sample: {
+  //                       id: 1,
+  //                     },
+  //                     source: {
+  //                       address: "A1",
+  //                       __typename: "Slot",
+  //                     },
+  //                     destination: {
+  //                       address: "A1",
+  //                       labwareId: 53,
+  //                       __typename: "Slot",
+  //                     },
+  //                     __typename: "PlanAction",
+  //                   },
+  //                   {
+  //                     newSection: 178,
+  //                     sample: {
+  //                       id: 1,
+  //                     },
+  //                     source: {
+  //                       address: "A1",
+  //                       __typename: "Slot",
+  //                     },
+  //                     destination: {
+  //                       address: "B1",
+  //                       labwareId: 53,
+  //                       __typename: "Slot",
+  //                     },
+  //                     __typename: "PlanAction",
+  //                   },
+  //                   {
+  //                     newSection: 179,
+  //                     sample: {
+  //                       id: 1,
+  //                     },
+  //                     source: {
+  //                       address: "A1",
+  //                       __typename: "Slot",
+  //                     },
+  //                     destination: {
+  //                       address: "C1",
+  //                       labwareId: 53,
+  //                       __typename: "Slot",
+  //                     },
+  //                     __typename: "PlanAction",
+  //                   },
+  //                   {
+  //                     newSection: 180,
+  //                     sample: {
+  //                       id: 1,
+  //                     },
+  //                     source: {
+  //                       address: "A1",
+  //                       __typename: "Slot",
+  //                     },
+  //                     destination: {
+  //                       address: "A2",
+  //                       labwareId: 53,
+  //                       __typename: "Slot",
+  //                     },
+  //                     __typename: "PlanAction",
+  //                   },
+  //                   {
+  //                     newSection: 181,
+  //                     sample: {
+  //                       id: 1,
+  //                     },
+  //                     source: {
+  //                       address: "A1",
+  //                       __typename: "Slot",
+  //                     },
+  //                     destination: {
+  //                       address: "B2",
+  //                       labwareId: 53,
+  //                       __typename: "Slot",
+  //                     },
+  //                     __typename: "PlanAction",
+  //                   },
+  //                   {
+  //                     newSection: 182,
+  //                     sample: {
+  //                       id: 1,
+  //                     },
+  //                     source: {
+  //                       address: "A1",
+  //                       __typename: "Slot",
+  //                     },
+  //                     destination: {
+  //                       address: "B3",
+  //                       labwareId: 53,
+  //                       __typename: "Slot",
+  //                     },
+  //                     __typename: "PlanAction",
+  //                   },
+  //                 ],
+  //                 __typename: "PlanOperation",
+  //               },
+  //             ],
+  //             __typename: "PlanResult",
+  //           },
+  //         })
+  //       );
+  //     }
+  //   }
+  // ),
 
   graphql.query<GetPrintersQuery, GetPrintersQueryVariables>(
     "GetPrinters",

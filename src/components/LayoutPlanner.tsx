@@ -9,6 +9,7 @@ import {
   selectSource,
   setAllDestinations,
 } from "../lib/machines/layout/layoutEvents";
+import { Address } from "../types/stan";
 
 interface LayoutPlannerProps {
   actor: ActorRef<LayoutEvents>;
@@ -26,10 +27,18 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ actor }) => {
         {layoutPlan.destinationLabware && (
           <Labware
             labware={layoutPlan.destinationLabware}
-            actions={layoutPlan.plannedActions}
-            sampleColors={layoutPlan.sampleColors}
-            onSlotClick={(labwareAddress) => {
-              send(selectDestination(labwareAddress));
+            onSlotClick={(slot) => {
+              send(selectDestination(slot.address));
+            }}
+            slotText={(slot) =>
+              layoutPlan.plannedActions.get(slot.address)?.sourceBarcode
+            }
+            slotColor={(slot) => {
+              const action = layoutPlan.plannedActions.get(slot.address);
+              if (action) {
+                return layoutPlan.sampleColors.get(action.sampleId);
+              }
+              return undefined;
             }}
           />
         )}

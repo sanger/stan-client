@@ -21,7 +21,7 @@ import {
   SectioningLayoutEvents,
   updateSectioningLayout,
 } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
-import { LabwareTypeName } from "../types/stan";
+import { Address, LabwareTypeName } from "../types/stan";
 import LabelPrinter from "./LabelPrinter";
 import Success from "./notifications/Success";
 import LabelPrinterButton from "./LabelPrinterButton";
@@ -69,10 +69,18 @@ const SectioningLayout = React.forwardRef<
       <div className="md:grid md:grid-cols-2">
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
-            sampleColors={layoutPlan.sampleColors}
             onClick={() => send(editLayout())}
             labware={sectioningLayout.destinationLabware}
-            actions={layoutPlan.plannedActions}
+            slotText={(slot) =>
+              layoutPlan.plannedActions.get(slot.address)?.sourceBarcode
+            }
+            slotColor={(slot) => {
+              const action = layoutPlan.plannedActions.get(slot.address);
+              if (action) {
+                return layoutPlan.sampleColors.get(action.sampleId);
+              }
+              return undefined;
+            }}
           />
 
           {current.matches("prep") && (

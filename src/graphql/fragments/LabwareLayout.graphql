@@ -1,0 +1,18 @@
+fragment LabwareLayout on Labware {
+    id
+    barcode
+    labwareType {
+        name
+        numRows
+        numColumns
+    }
+    slots {
+        address
+        block
+        highestSection
+        labwareId
+        samples {
+            id
+        }
+    }
+}

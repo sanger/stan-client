@@ -3,12 +3,12 @@ import { ServerErrors } from "../../../../types/stan";
 import * as Yup from "yup";
 import { Actor, ActorRef } from "xstate";
 import { LayoutEvents } from "../../layout";
-import { LayoutPlan } from "../../layout";
 import { SectioningLayout } from "./index";
 import {
   LabelPrinterEvents,
   LabelPrinterMachineType,
 } from "../../labelPrinter";
+import { LayoutPlan } from "../../layout/layoutContext";
 
 interface HasLabelPrinterActor {
   actorRef: ActorRef<LabelPrinterEvents>;

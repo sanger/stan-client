@@ -14,6 +14,8 @@ import { buildSampleColors } from "../../helpers/labwareHelper";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
 import { LabwareTypeName } from "../../../types/stan";
 import { createLabwareMachine } from "../labware/labwareMachine";
+import { buildConfirmOperationLabware } from "../../factories/confirmOperationRequest";
+import { createSectioningOutcomeMachine } from "./sectioningOutcome/sectioningOutcomeMachine";
 
 export const machineKey = "sectioningMachine";
 
@@ -24,6 +26,7 @@ export enum Action {
   UPDATE_LABWARES = "updateLabwares",
   ADD_LABWARE_LAYOUT = "addLabwareLayout",
   DELETE_LABWARE_LAYOUT = "deleteLabwareLayout",
+  ASSIGN_PLAN = "assignPlan",
 }
 
 export const sectioningMachineOptions: Partial<MachineOptions<
@@ -99,6 +102,21 @@ export const sectioningMachineOptions: Partial<MachineOptions<
         ctx.sectioningLayouts.splice(e.index, 1);
       }
     ),
+
+    [Action.ASSIGN_PLAN]: assign((ctx, e) => {
+      if (e.type !== "done.invoke.planSection" || !e.data.data) {
+        return;
+      }
+
+      e.data.data.plan.labware.forEach((labware) => {
+        const confirmOperationLabware = buildConfirmOperationLabware(labware);
+
+        ctx.confirmOperationLabware.push({
+          ...confirmOperationLabware,
+          ref: spawn(createSectioningOutcomeMachine([], labware)),
+        });
+      });
+    }),
   },
 
   guards: {

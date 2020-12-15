@@ -1,4 +1,4 @@
-import { Interpreter, Machine } from "xstate";
+import { forwardTo, Interpreter, Machine } from "xstate";
 import { LabwareType } from "../../../../types/graphql";
 import * as Yup from "yup";
 import {
@@ -12,13 +12,13 @@ import {
   SectioningLayoutState as State,
 } from "./sectioningLayoutStates";
 import { SectioningLayoutEvents } from "./sectioningLayoutEvents";
-import { LayoutPlan } from "../../layout";
 import {
   Action,
   Guards,
   sectioningLayoutMachineOptions,
 } from "./sectioningLayoutMachineOptions";
 import { SectioningLayout } from "./index";
+import { LayoutPlan } from "../../layout/layoutContext";
 
 export type SectioningLayoutMachineType = Interpreter<
   SectioningLayoutContext,
@@ -115,11 +115,17 @@ export const createSectioningLayoutMachine = (
               {
                 cond: Guards.IS_VISIUM_LP,
                 target: State.DONE,
-                actions: Action.ASSIGN_PLAN_RESPONSE,
+                actions: [
+                  Action.ASSIGN_PLAN_RESPONSE,
+                  forwardTo("sectioningMachine"),
+                ],
               },
               {
                 target: State.PRINTING,
-                actions: Action.ASSIGN_PLAN_RESPONSE,
+                actions: [
+                  Action.ASSIGN_PLAN_RESPONSE,
+                  forwardTo("sectioningMachine"),
+                ],
               },
             ],
             onError: {

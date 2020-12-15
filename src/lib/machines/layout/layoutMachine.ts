@@ -1,5 +1,5 @@
 import { Interpreter, Machine, sendParent } from "xstate";
-import { LayoutContext } from "./layoutContext";
+import { LayoutContext, LayoutPlan } from "./layoutContext";
 import { LayoutSchema, State } from "./layoutStates";
 import { LayoutEvents } from "./layoutEvents";
 import {
@@ -7,7 +7,6 @@ import {
   layoutMachineKey,
   machineOptions,
 } from "./layoutMachineOptions";
-import { LayoutPlan } from "./index";
 
 export type LayoutMachineType = Interpreter<
   LayoutContext,

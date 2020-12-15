@@ -8,6 +8,7 @@ import {
   sectioningMachineOptions,
 } from "./sectioningMachineOptions";
 import { LabwareTypeName } from "../../../types/stan";
+import { buildConfirmOperationRequest } from "../../factories/confirmOperationRequest";
 
 /**
  * Machine for controlling the sectioning workflow.
@@ -34,6 +35,7 @@ export const createSectioningMachine = () =>
         sourceLabwares: [],
         sectioningLayouts: [],
         sampleColors: new Map(),
+        confirmOperationLabware: [],
       },
       states: {
         [State.LOADING]: {
@@ -99,6 +101,10 @@ export const createSectioningMachine = () =>
                 },
                 ADD_LABWARE_LAYOUT: {
                   actions: Action.ADD_LABWARE_LAYOUT,
+                  target: `#${machineKey}.${State.UNKNOWN}`,
+                },
+                "done.invoke.planSection": {
+                  actions: Action.ASSIGN_PLAN,
                   target: `#${machineKey}.${State.UNKNOWN}`,
                 },
               },

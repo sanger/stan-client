@@ -1,4 +1,4 @@
-import { LabwareAddress, SourcePlanRequestAction } from "../../../types/stan";
+import { Address, SourcePlanRequestAction } from "../../../types/stan";
 
 type SelectSourceEvent = {
   type: "SELECT_SOURCE";
@@ -29,15 +29,13 @@ export function setAllDestinations(
 
 export type SelectDestinationEvent = {
   type: "SELECT_DESTINATION";
-  labwareAddress: LabwareAddress;
+  address: Address;
 };
 
-export function selectDestination(
-  labwareAddress: LabwareAddress
-): SelectDestinationEvent {
+export function selectDestination(address: Address): SelectDestinationEvent {
   return {
     type: "SELECT_DESTINATION",
-    labwareAddress,
+    address,
   };
 }
 

@@ -1,16 +1,27 @@
 import {
+  ConfirmOperationLabware,
+  ConfirmOperationRequest,
   GetSectioningInfoQuery,
   Labware,
   LabwareType,
   Maybe,
+  PlanMutation,
 } from "../../../types/graphql";
 import { ActorRef } from "xstate";
 import { SectioningLayoutMachineType } from "./sectioningLayout/sectioningLayoutMachine";
 import { SectioningLayout, SectioningLayoutEvents } from "./sectioningLayout";
 import { LabwareEvents, LabwareMachineType } from "../labware";
+import {
+  SectioningOutcomeEvents,
+  SectioningOutcomeMachineType,
+} from "./sectioningOutcome";
 
-interface SectioningMachineRef {
+interface SectioningLayoutMachineRef {
   ref: ActorRef<SectioningLayoutEvents, SectioningLayoutMachineType["state"]>;
+}
+
+interface SectioningOutcomeMachineRef {
+  ref: ActorRef<SectioningOutcomeEvents, SectioningOutcomeMachineType["state"]>;
 }
 
 /**
@@ -59,12 +70,19 @@ export interface SectioningContext {
    *
    * @see {@link https://xstate.js.org/docs/guides/actors.html#actors}
    */
-  sectioningLayouts: Array<SectioningLayout & SectioningMachineRef>;
+  sectioningLayouts: Array<SectioningLayout & SectioningLayoutMachineRef>;
 
   /**
    * A map of sample ID to a hex color
    */
   sampleColors: Map<number, string>;
+
+  /**
+   * The request to send to the ConfirmOperation mutation
+   */
+  confirmOperationLabware: Array<
+    ConfirmOperationLabware & SectioningOutcomeMachineRef
+  >;
 }
 
 export {};

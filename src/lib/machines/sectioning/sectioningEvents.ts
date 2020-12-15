@@ -1,5 +1,6 @@
 import { GetSectioningInfoQuery } from "../../../types/graphql";
 import { UpdateLabwaresEvent } from "../labware/labwareEvents";
+import { PlanSectionResolveEvent } from "./sectioningLayout/sectioningLayoutEvents";
 
 export type SelectLabwareTypeEvent = {
   type: "SELECT_LABWARE_TYPE";
@@ -62,4 +63,5 @@ export type SectioningEvents =
   | GetSectioningInfoResolveEvent
   | UpdateLabwaresEvent
   | PrepDoneEvent
-  | BackToPrepEvent;
+  | BackToPrepEvent
+  | PlanSectionResolveEvent;

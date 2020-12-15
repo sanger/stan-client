@@ -2,15 +2,20 @@ import { assign } from "@xstate/immer";
 import { SectioningLayoutContext } from "./sectioningLayoutContext";
 import { SectioningLayoutEvents } from "./sectioningLayoutEvents";
 import { current } from "immer";
-import { Actor, MachineOptions, send, spawn } from "xstate";
-import { LayoutContext, LayoutEvents, LayoutPlan } from "../../layout";
+import { Actor, MachineOptions, send, sendParent, spawn } from "xstate";
+import { LayoutContext, LayoutEvents } from "../../layout";
 import { RequestLayoutPlanEvent } from "../../layout/layoutEvents";
 import { extractServerErrors, LabwareTypeName } from "../../../../types/stan";
-import { PlanRequestLabware } from "../../../../types/graphql";
+import {
+  PlanAction,
+  PlanRequestAction,
+  PlanRequestLabware,
+} from "../../../../types/graphql";
 import sectioningService from "../../../services/sectioningService";
 import { createLayoutMachine } from "../../layout/layoutMachine";
 import { SectioningLayout } from "./index";
 import { createLabelPrinterMachine } from "../../labelPrinter/labelPrinterMachine";
+import { LayoutPlan } from "../../layout/layoutContext";
 
 export enum Action {
   UPDATE_SECTIONING_LAYOUT = "updateSectioningLayout",
@@ -18,6 +23,7 @@ export enum Action {
   REQUEST_LAYOUT_PLAN = "sendRequestLayoutPlan",
   ASSIGN_LAYOUT_PLAN = "assignLayoutPlan",
   ASSIGN_PLAN_RESPONSE = "assignPlanResponse",
+  NOTIFY_PARENT_PLAN = "notifyParentPlan",
   ASSIGN_SERVER_ERRORS = "assignServerErrors",
   SPAWN_LABEL_PRINTER_MACHINE = "spawnLabelPrinterMachines",
   ASSIGN_PRINT_RESPONSE = "assignPrintResponse",
@@ -140,9 +146,22 @@ function buildPlanRequestLabware(
   return {
     labwareType: sectioningLayout.destinationLabware.labwareType.name,
     barcode: sectioningLayout.barcode,
-    actions: Array.from(layoutPlan.plannedActions.values()).map((action) => ({
-      ...action,
-      sampleThickness: sectioningLayout.sectionThickness,
-    })),
+    actions: Array.from(layoutPlan.plannedActions.keys()).map((address) => {
+      const action = layoutPlan.plannedActions.get(address);
+
+      if (!action) {
+        throw new Error("Mess up here");
+      }
+
+      return {
+        address,
+        source: {
+          address: action.sourceAddress,
+          barcode: action.sourceBarcode,
+        },
+        sampleId: action.sampleId,
+        sampleThickness: sectioningLayout.sectionThickness,
+      };
+    }),
   };
 }

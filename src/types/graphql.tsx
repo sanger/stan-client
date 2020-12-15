@@ -197,6 +197,28 @@ export type Printer = {
   labelType: LabelType;
 };
 
+export type Comment = {
+  __typename?: 'Comment';
+  id: Scalars['Int'];
+  description: Scalars['String'];
+};
+
+export type AddressStringInput = {
+  address: Scalars['Address'];
+  comment: Scalars['Int'];
+};
+
+export type ConfirmOperationLabware = {
+  barcode: Scalars['String'];
+  cancelled?: Maybe<Scalars['Boolean']>;
+  cancelledAddresses?: Maybe<Array<Scalars['Address']>>;
+  addressComments?: Maybe<Array<AddressStringInput>>;
+};
+
+export type ConfirmOperationRequest = {
+  labware: Array<ConfirmOperationLabware>;
+};
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -227,6 +249,7 @@ export type Mutation = {
   register: RegisterResult;
   plan: PlanResult;
   printLabware?: Maybe<Scalars['String']>;
+  confirm?: Maybe<Scalars['String']>;
 };
 
 
@@ -250,6 +273,37 @@ export type MutationPrintLabwareArgs = {
   printer: Scalars['String'];
   barcodes: Array<Scalars['String']>;
 };
+
+
+export type MutationConfirmArgs = {
+  request: ConfirmOperationRequest;
+};
+
+export type LabwareLayoutFragment = (
+  { __typename?: 'Labware' }
+  & Pick<Labware, 'id' | 'barcode'>
+  & { labwareType: (
+    { __typename?: 'LabwareType' }
+    & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
+  ), slots: Array<(
+    { __typename?: 'Slot' }
+    & Pick<Slot, 'address' | 'block' | 'highestSection' | 'labwareId'>
+    & { samples: Array<(
+      { __typename?: 'Sample' }
+      & Pick<Sample, 'id'>
+    )> }
+  )> }
+);
+
+export type ConfirmMutationVariables = Exact<{
+  request: ConfirmOperationRequest;
+}>;
+
+
+export type ConfirmMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'confirm'>
+);
 
 export type LoginMutationVariables = Exact<{
   username: Scalars['String'];
@@ -287,17 +341,7 @@ export type PlanMutation = (
     { __typename?: 'PlanResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
-      & Pick<Labware, 'id' | 'barcode'>
-      & { slots: Array<(
-        { __typename?: 'Slot' }
-        & { samples: Array<(
-          { __typename?: 'Sample' }
-          & Pick<Sample, 'section'>
-        )> }
-      )>, labwareType: (
-        { __typename?: 'LabwareType' }
-        & Pick<LabwareType, 'numRows' | 'numColumns'>
-      ) }
+      & LabwareLayoutFragment
     )>, operations: Array<(
       { __typename?: 'PlanOperation' }
       & { operationType?: Maybe<(
@@ -306,7 +350,17 @@ export type PlanMutation = (
       )>, planActions: Array<(
         { __typename?: 'PlanAction' }
         & Pick<PlanAction, 'newSection'>
-        & { destination: (
+        & { sample: (
+          { __typename?: 'Sample' }
+          & Pick<Sample, 'id'>
+        ), source: (
+          { __typename?: 'Slot' }
+          & Pick<Slot, 'address' | 'labwareId'>
+          & { samples: Array<(
+            { __typename?: 'Sample' }
+            & Pick<Sample, 'id'>
+          )> }
+        ), destination: (
           { __typename?: 'Slot' }
           & Pick<Slot, 'address' | 'labwareId'>
         ) }
@@ -461,7 +515,56 @@ export type GetSectioningInfoQuery = (
   )> }
 );
 
+export const LabwareLayoutFragmentDoc = gql`
+    fragment LabwareLayout on Labware {
+  id
+  barcode
+  labwareType {
+    name
+    numRows
+    numColumns
+  }
+  slots {
+    address
+    block
+    highestSection
+    labwareId
+    samples {
+      id
+    }
+  }
+}
+    `;
+export const ConfirmDocument = gql`
+    mutation Confirm($request: ConfirmOperationRequest!) {
+  confirm(request: $request)
+}
+    `;
+export type ConfirmMutationFn = Apollo.MutationFunction<ConfirmMutation, ConfirmMutationVariables>;
 
+/**
+ * __useConfirmMutation__
+ *
+ * To run a mutation, you first call `useConfirmMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConfirmMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [confirmMutation, { data, loading, error }] = useConfirmMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useConfirmMutation(baseOptions?: Apollo.MutationHookOptions<ConfirmMutation, ConfirmMutationVariables>) {
+        return Apollo.useMutation<ConfirmMutation, ConfirmMutationVariables>(ConfirmDocument, baseOptions);
+      }
+export type ConfirmMutationHookResult = ReturnType<typeof useConfirmMutation>;
+export type ConfirmMutationResult = Apollo.MutationResult<ConfirmMutation>;
+export type ConfirmMutationOptions = Apollo.BaseMutationOptions<ConfirmMutation, ConfirmMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(username: $username, password: $password) {
@@ -530,17 +633,7 @@ export const PlanDocument = gql`
     mutation Plan($request: PlanRequest!) {
   plan(request: $request) {
     labware {
-      id
-      barcode
-      slots {
-        samples {
-          section
-        }
-      }
-      labwareType {
-        numRows
-        numColumns
-      }
+      ...LabwareLayout
     }
     operations {
       operationType {
@@ -548,6 +641,16 @@ export const PlanDocument = gql`
       }
       planActions {
         newSection
+        sample {
+          id
+        }
+        source {
+          address
+          labwareId
+          samples {
+            id
+          }
+        }
         destination {
           address
           labwareId
@@ -556,7 +659,7 @@ export const PlanDocument = gql`
     }
   }
 }
-    `;
+    ${LabwareLayoutFragmentDoc}`;
 export type PlanMutationFn = Apollo.MutationFunction<PlanMutation, PlanMutationVariables>;
 
 /**

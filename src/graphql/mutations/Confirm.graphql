@@ -1,0 +1,3 @@
+mutation Confirm($request: ConfirmOperationRequest!) {
+    confirm(request: $request)
+}

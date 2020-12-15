@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { useMachine } from "@xstate/react";
 import createSectioningMachine from "../lib/machines/sectioning";
 import Prep from "./sectioning/Prep";
