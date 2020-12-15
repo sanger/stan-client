@@ -8,8 +8,6 @@ fragment LabwareLayout on Labware {
     }
     slots {
         address
-        block
-        highestSection
         labwareId
         samples {
             id

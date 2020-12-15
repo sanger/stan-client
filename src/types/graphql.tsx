@@ -287,7 +287,7 @@ export type LabwareLayoutFragment = (
     & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
   ), slots: Array<(
     { __typename?: 'Slot' }
-    & Pick<Slot, 'address' | 'block' | 'highestSection' | 'labwareId'>
+    & Pick<Slot, 'address' | 'labwareId'>
     & { samples: Array<(
       { __typename?: 'Sample' }
       & Pick<Sample, 'id'>
@@ -526,8 +526,6 @@ export const LabwareLayoutFragmentDoc = gql`
   }
   slots {
     address
-    block
-    highestSection
     labwareId
     samples {
       id

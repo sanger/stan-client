@@ -1,12 +1,12 @@
 import { Factory } from "fishery";
 import { Labware } from "../../types/graphql";
 import { labwareTypes } from "./labwareTypeFactory";
-import { LabwareTypeName, UnregisteredLabware } from "../../types/stan";
+import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
 import { labwareAddresses } from "../helpers/labwareHelper";
 import { slotFactory } from "./slotFactory";
 import { uniqueId } from "lodash";
 
-export const unregisteredLabwareFactory = Factory.define<UnregisteredLabware>(
+export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
   ({ params, associations, afterBuild }) => {
     afterBuild((labware) => {
       const addresses = Array.from(labwareAddresses(labware.labwareType));

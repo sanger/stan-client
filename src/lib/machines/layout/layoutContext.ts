@@ -1,8 +1,8 @@
-import { Maybe, PlanAction, PlanRequestAction } from "../../../types/graphql";
+import { Maybe, PlanRequestAction } from "../../../types/graphql";
 import {
   Address,
-  AnyLabware,
   SourcePlanRequestAction,
+  NewLabwareLayout,
 } from "../../../types/stan";
 
 export interface LayoutPlan {
@@ -14,7 +14,7 @@ export interface LayoutPlan {
   /**
    * The labware we're laying out onto
    */
-  destinationLabware: AnyLabware;
+  destinationLabware: NewLabwareLayout;
 
   /**
    * Map of sample ID to hex color

@@ -6,7 +6,7 @@ import {
 import { SectioningLayoutEvents } from "./sectioningLayoutEvents";
 import { createSectioningLayoutMachine } from "./sectioningLayoutMachine";
 import { Labware } from "../../../../types/graphql";
-import { UnregisteredLabware } from "../../../../types/stan";
+import { NewLabwareLayout } from "../../../../types/stan";
 
 export type {
   SectioningLayoutContext,
@@ -27,9 +27,9 @@ export interface SectioningLayout {
   inputLabwares: Labware[];
 
   /**
-   * The unregistered labware we are sectioning on to
+   * The new labware we are sectioning on to
    */
-  destinationLabware: UnregisteredLabware;
+  destinationLabware: NewLabwareLayout;
 
   /**
    * How many labwares of this layout will we be sectioning on to

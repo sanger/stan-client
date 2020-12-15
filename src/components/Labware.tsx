@@ -1,23 +1,14 @@
 import React from "react";
-import {
-  LabwareLayoutFragment as LabwareLayout,
-  Slot as SlotModel,
-} from "../types/graphql";
+import { Slot as SlotModel } from "../types/graphql";
 import classNames from "classnames";
-import { Nullable } from "../types/stan";
-
-type UnregisteredLabwareLayout = Nullable<LabwareLayout, "id" | "barcode">;
+import { NewLabwareLayout } from "../types/stan";
 
 interface LabwareProps {
-  labware: UnregisteredLabwareLayout;
-  onClick?: (labware: UnregisteredLabwareLayout) => void;
-  onSlotClick?: (slot: UnregisteredLabwareLayout["slots"][number]) => void;
-  slotText?: (
-    slot: UnregisteredLabwareLayout["slots"][number]
-  ) => string | undefined;
-  slotColor?: (
-    slot: UnregisteredLabwareLayout["slots"][number]
-  ) => string | undefined;
+  labware: NewLabwareLayout;
+  onClick?: (labware: NewLabwareLayout) => void;
+  onSlotClick?: (slot: NewLabwareLayout["slots"][number]) => void;
+  slotText?: (slot: NewLabwareLayout["slots"][number]) => string | undefined;
+  slotColor?: (slot: NewLabwareLayout["slots"][number]) => string | undefined;
 }
 
 const Labware: React.FC<LabwareProps> = ({
@@ -71,7 +62,7 @@ function defaultSlotText(slot: Pick<SlotModel, "address">) {
 }
 
 interface SlotParams {
-  slot: UnregisteredLabwareLayout["slots"][number];
+  slot: NewLabwareLayout["slots"][number];
   onClick?: LabwareProps["onSlotClick"];
   color?: LabwareProps["slotColor"];
   text?: LabwareProps["slotText"];
@@ -89,7 +80,7 @@ const Slot: React.FC<SlotParams> = ({ slot, onClick, color, text }) => {
       [`bg-${bgColor}-600 text-gray-100`]: bgColor,
       "text-gray-800": !bgColor,
     },
-    "border border-gray-500 inline-flex items-center justify-center mx-auto h-20 w-20 bg-gray-100 rounded-full text-xs font-semibold"
+    "border border-gray-800 inline-flex items-center justify-center mx-auto h-20 w-20 bg-gray-100 rounded-full text-xs font-semibold"
   );
 
   return (

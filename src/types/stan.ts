@@ -1,5 +1,6 @@
 import {
   Labware,
+  LabwareLayoutFragment as LabwareLayout,
   LabwareLayoutFragment,
   Maybe,
   PlanRequestAction,
@@ -34,12 +35,7 @@ export type SourcePlanRequestAction = Omit<PlanRequestAction, "address">;
  * Type for when a piece of labware has been created in the client, but has not
  * yet been persisted, and so will not have a barcode yet.
  */
-export type UnregisteredLabware = Nullable<Labware, "id" | "barcode">;
-
-/**
- * Labware that could be either be registered or unregistered (e.g. if it currently only exists in the client)
- */
-export type AnyLabware = Labware | UnregisteredLabware;
+export type NewLabwareLayout = Nullable<LabwareLayout, "barcode">;
 
 export interface ServerErrors {
   /**
