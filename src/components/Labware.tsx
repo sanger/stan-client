@@ -4,14 +4,14 @@ import classNames from "classnames";
 import { labwareAddresses } from "../lib/helpers/labwareHelper";
 import {
   AnyLabware,
-  FriendlyAddress,
+  Address as AddressType,
   LabwareAddress,
   SourcePlanRequestAction,
 } from "../types/stan";
 
 interface LabwareProps {
   labware: AnyLabware;
-  actions?: Map<FriendlyAddress, SourcePlanRequestAction>;
+  actions?: Map<AddressType, SourcePlanRequestAction>;
   sampleColors?: Map<number, string>;
   onClick?: (labware: AnyLabware) => void;
   onSlotClick?: (labwareAddress: LabwareAddress) => void;
@@ -66,7 +66,7 @@ export default Labware;
 interface AddressProps {
   labwareAddress: LabwareAddress;
   sampleColors?: Map<number, string>;
-  actions?: Map<FriendlyAddress, SourcePlanRequestAction>;
+  actions?: Map<AddressType, SourcePlanRequestAction>;
   onClick?: (labwareAddress: LabwareAddress) => void;
 }
 
@@ -78,7 +78,7 @@ const Address: React.FC<AddressProps> = ({
 }) => {
   const defaultBackgroundColor = "#FFF";
   let backgroundColor = defaultBackgroundColor;
-  const sampleId = actions?.get(labwareAddress.friendlyAddress)?.sampleId;
+  const sampleId = actions?.get(labwareAddress.address)?.sampleId;
 
   if (sampleId && sampleColors?.has(sampleId)) {
     backgroundColor = sampleColors.get(sampleId) ?? defaultBackgroundColor;
@@ -100,19 +100,19 @@ const Address: React.FC<AddressProps> = ({
       style={{ backgroundColor }}
     >
       {/* If there's an action associated with this address, show that */}
-      {actions?.has(labwareAddress.friendlyAddress) && (
-        <Action action={actions.get(labwareAddress.friendlyAddress) ?? null} />
+      {actions?.has(labwareAddress.address) && (
+        <Action action={actions.get(labwareAddress.address) ?? null} />
       )}
 
       {/* If there's no action associated with this address, but there is a slot show that */}
-      {!actions?.has(labwareAddress.friendlyAddress) && labwareAddress.slot && (
+      {!actions?.has(labwareAddress.address) && labwareAddress.slot && (
         <Slot slot={labwareAddress.slot} />
       )}
 
       {/* Otherwise, show the friendly address */}
-      {!actions?.has(labwareAddress.friendlyAddress) &&
+      {!actions?.has(labwareAddress.address) &&
         !labwareAddress.slot &&
-        labwareAddress.friendlyAddress}
+        labwareAddress.address}
     </span>
   );
 };

@@ -1,158 +1,82 @@
-import * as Yup from "yup";
-import { assign, Machine } from "xstate";
+import { MachineOptions } from "xstate";
+import { RegistrationContext } from "./registrationContext";
+import { RegistrationEvent } from "./registrationEvents";
 import {
   BlockRegisterRequest,
   GetRegistrationInfoQuery,
   LifeStage,
-  RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
-} from "../../types/graphql";
-import { GraphQLError } from "graphql";
-import { FormValues } from "../../pages/registration/RegistrationForm";
-import registrationService from "../services/registrationService";
-import { getGraphQLProblems, GraphQLProblems } from "../client";
+} from "../../../types/graphql";
+import * as Yup from "yup";
+import { assign } from "@xstate/immer";
+import { FormValues } from "../../../pages/registration/RegistrationForm";
+import { extractServerErrors, LabwareTypeName } from "../../../types/stan";
+import registrationService from "../../services/registrationService";
 
-export interface RegistrationContext {
-  loadingError: string;
-  registrationInfo: GetRegistrationInfoQuery;
-  registrationSchema: Yup.ObjectSchema;
-  registrationResult: RegisterTissuesMutation;
-  registrationErrors: GraphQLProblems;
+export enum Actions {
+  ASSIGN_REGISTRATION_INFO = "assignRegistrationInfo",
+  ASSIGN_LOADING_ERROR = "assignLoadingError",
+  ASSIGN_REGISTRATION_RESULT = "assignRegistrationResult",
+  ASSIGN_REGISTRATION_ERROR = "assignRegistrationError",
 }
 
-export interface RegistrationSchema {
-  states: {
-    loading: {};
-    loaded: {};
-    error: {};
-    submitting: {};
-    submissionError: {};
-    complete: {};
-  };
+export enum Services {
+  SUBMIT = "submit",
 }
 
-type RetryEvent = { type: "RETRY" };
-type SubmitFormEvent = { type: "SUBMIT_FORM"; values: FormValues };
-
-export type RegistrationEvent = RetryEvent | SubmitFormEvent;
-
-/**
- * XState state machine for Registration
- */
-const registrationMachine = Machine<
+export const registrationMachineOptions: Partial<MachineOptions<
   RegistrationContext,
-  RegistrationSchema,
   RegistrationEvent
->({
-  key: "registration",
-  initial: "loading",
-  states: {
-    loading: {
-      type: "parallel" as const, // https://github.com/davidkpiano/xstate/issues/965#issuecomment-579773494
-      states: {
-        fetchingRegistrationInfo: {
-          initial: "fetching",
-          states: {
-            fetching: {
-              // When we enter the "fetching" state, invoke the getRegistrationInfo service.
-              // https://xstate.js.org/docs/guides/communication.html#quick-reference
-              invoke: {
-                id: "getRegistrationInfo",
-                src: registrationService.getRegistrationInfo,
-                onDone: {
-                  target: "finished",
-                  actions: assign({
-                    registrationInfo: (
-                      ctx,
-                      event: {
-                        data: { data: GetRegistrationInfoQuery };
-                      }
-                    ) => {
-                      return event.data.data;
-                    },
-                    registrationSchema: (
-                      ctx,
-                      event: { data: { data: GetRegistrationInfoQuery } }
-                    ) => {
-                      return buildRegistrationSchema(event.data.data);
-                    },
-                  }),
-                },
-                onError: {
-                  target: "#registration.error",
-                  actions: assign({
-                    loadingError: (ctx, event: { data: GraphQLError }) => {
-                      return event.data.message;
-                    },
-                  }),
-                },
-              },
-            },
-            finished: { type: "final" },
-          },
-        },
-        minimumWait: {
-          initial: "waiting",
-          states: {
-            waiting: {
-              after: {
-                500: "finished",
-              },
-            },
-            finished: { type: "final" },
-          },
-        },
-      },
-      onDone: "loaded",
-    },
-    loaded: {
-      on: {
-        SUBMIT_FORM: "submitting",
-      },
-    },
-    error: {
-      on: {
-        RETRY: "loading",
-      },
-    },
-    submitting: {
-      invoke: {
-        id: "submitting",
-        src: (ctx: RegistrationContext, event: RegistrationEvent) => {
-          if (event.type !== "SUBMIT_FORM") {
-            return Promise.reject();
-          }
-          return buildRegisterTissuesMutationVariables(event.values).then(
-            registrationService.registerTissues
-          );
-        },
-        onDone: {
-          target: "#registration.complete",
-          actions: assign({
-            registrationResult: (ctx, event) => event.data.data,
-          }),
-        },
-        onError: {
-          target: "#registration.submissionError",
-          actions: assign({
-            registrationErrors: (ctx, event) =>
-              getGraphQLProblems(event.data.graphQLErrors),
-          }),
-        },
-      },
-    },
-    submissionError: {
-      on: {
-        SUBMIT_FORM: "submitting",
-      },
-    },
-    complete: {
-      type: "final" as const,
+>> = {
+  actions: {
+    [Actions.ASSIGN_REGISTRATION_INFO]: assign((ctx, e) => {
+      if (e.type !== "done.invoke.getRegistrationInfo" || !e.data.data) {
+        return;
+      }
+      const registrationInfo = e.data.data;
+
+      // Filter down the available labware types.
+      ctx.registrationInfo = {
+        ...registrationInfo,
+        labwareTypes: registrationInfo.labwareTypes.filter(
+          (lt) => lt.name === LabwareTypeName.PROVIASETTE
+        ),
+      };
+      ctx.registrationSchema = buildRegistrationSchema(ctx.registrationInfo);
+    }),
+
+    [Actions.ASSIGN_LOADING_ERROR]: assign((ctx, e) => {
+      if (e.type !== "error.platform") {
+        return;
+      }
+      ctx.loadingError = e.data.message;
+    }),
+
+    [Actions.ASSIGN_REGISTRATION_RESULT]: assign((ctx, e) => {
+      if (e.type !== "done.invoke.submitting" || !e.data.data) {
+        return;
+      }
+      ctx.registrationResult = e.data.data;
+    }),
+
+    [Actions.ASSIGN_REGISTRATION_ERROR]: assign((ctx, e) => {
+      if (e.type !== "error.platform.submitting") {
+        return;
+      }
+      ctx.registrationErrors = extractServerErrors(e.data);
+    }),
+  },
+  services: {
+    [Services.SUBMIT]: (context, event) => {
+      if (event.type !== "SUBMIT_FORM") {
+        return Promise.reject();
+      }
+      return buildRegisterTissuesMutationVariables(event.values).then(
+        registrationService.registerTissues
+      );
     },
   },
-});
-
-export default registrationMachine;
+};
 
 /**
  * Using yup to build the Registration Schema

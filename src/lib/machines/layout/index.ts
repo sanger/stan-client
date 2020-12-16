@@ -4,7 +4,7 @@ import { LayoutSchema } from "./layoutStates";
 import { createLayoutMachine, LayoutMachineType } from "./layoutMachine";
 import {
   AnyLabware,
-  FriendlyAddress,
+  Address,
   SourcePlanRequestAction,
 } from "../../../types/stan";
 import { PlanRequestAction } from "../../../types/graphql";
@@ -35,5 +35,5 @@ export interface LayoutPlan {
    * NOTE: This will probably need to change to a list of {@link PlanRequestAction}
    * in the future as each address can actually support multiple samples
    */
-  plannedActions: Map<FriendlyAddress, PlanRequestAction>;
+  plannedActions: Map<Address, PlanRequestAction>;
 }

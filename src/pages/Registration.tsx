@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import AppShell from "../components/AppShell";
 import PinkButton from "../components/buttons/PinkButton";
-import registrationMachine from "../lib/machines/registrationMachine";
+import registrationMachine from "../lib/machines/registration/registrationMachine";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import Warning from "../components/notifications/Warning";
 import RegistrationForm from "./registration/RegistrationForm";
@@ -42,9 +42,11 @@ function Registration(): JSX.Element {
             <div ref={warningRef}>
               <Warning message={"There was a problem registering your tissues"}>
                 <ul className="list-disc list-inside">
-                  {current.context.registrationErrors.map((problem, index) => {
-                    return <li key={index}>{problem}</li>;
-                  })}
+                  {current.context.registrationErrors.problems.map(
+                    (problem, index) => {
+                      return <li key={index}>{problem}</li>;
+                    }
+                  )}
                 </ul>
               </Warning>
             </div>

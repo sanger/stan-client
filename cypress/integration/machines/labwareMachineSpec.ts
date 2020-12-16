@@ -1,10 +1,8 @@
 import { interpret } from "xstate";
-import {
-  createLabwareMachine,
-  LabwareMachineContext,
-} from "../../../src/lib/machines/labwareMachine";
 import { FindLabwareQuery } from "../../../src/types/graphql";
 import { log } from "xstate/lib/actions";
+import { createLabwareMachine } from "../../../src/lib/machines/labware/labwareMachine";
+import { LabwareContext } from "../../../src/lib/machines/labware";
 
 describe("labwareMachine", () => {
   it("has an initial state of idle.normal", (done) => {
@@ -83,9 +81,13 @@ describe("labwareMachine", () => {
 
       context("when barcode is valid", () => {
         it("will look up the labware via a service", (done) => {
-          const mockLTMachine = createLabwareMachine().withConfig({
+          const labwareMachine = createLabwareMachine();
+          const mockLTMachine = labwareMachine.withConfig({
+            actions: {
+              notifyParent: log("stubbed update labwares"),
+            },
             services: {
-              findLabwareByBarcode: (_ctx: LabwareMachineContext) => {
+              findLabwareByBarcode: (_ctx: LabwareContext) => {
                 return new Promise<FindLabwareQuery["labware"]>((resolve) => {
                   resolve({
                     labwareType: {
@@ -123,13 +125,7 @@ describe("labwareMachine", () => {
               },
             },
           });
-          const machine = interpret(
-            mockLTMachine.withConfig({
-              actions: {
-                updateLabwares: log("stubbed update labwares"),
-              },
-            })
-          ).onTransition((state) => {
+          const machine = interpret(mockLTMachine).onTransition((state) => {
             if (
               state.matches("idle.normal") &&
               state.context.labwares.length > 0
@@ -148,7 +144,7 @@ describe("labwareMachine", () => {
         it("assigns an error message", (done) => {
           const mockLTMachine = createLabwareMachine().withConfig({
             services: {
-              findLabwareByBarcode: (_ctx: LabwareMachineContext) => {
+              findLabwareByBarcode: (_ctx: LabwareContext) => {
                 return new Promise<FindLabwareQuery["labware"]>(
                   (_resolve, reject) => {
                     reject({
@@ -182,7 +178,7 @@ describe("labwareMachine", () => {
       const mockLabwareTableMachine = createLabwareMachine()
         .withConfig({
           actions: {
-            updateLabwares: log("stubbed update labwares"),
+            notifyParent: log("stubbed notify parent"),
           },
         })
         .withContext(

@@ -9,7 +9,9 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Address: string;
 };
+
 
 export type User = {
   __typename?: 'User';
@@ -86,17 +88,6 @@ export type Tissue = {
   fixative: Fixative;
 };
 
-export type Address = {
-  __typename?: 'Address';
-  row: Scalars['Int'];
-  column: Scalars['Int'];
-};
-
-export type AddressInput = {
-  row: Scalars['Int'];
-  column: Scalars['Int'];
-};
-
 export type Sample = {
   __typename?: 'Sample';
   id: Scalars['Int'];
@@ -106,7 +97,7 @@ export type Sample = {
 
 export type Slot = {
   __typename?: 'Slot';
-  address: Address;
+  address: Scalars['Address'];
   labwareId: Scalars['Int'];
   samples: Array<Sample>;
   block: Scalars['Boolean'];
@@ -154,7 +145,7 @@ export type RegisterResult = {
 
 export type PlanRequestSource = {
   barcode: Scalars['String'];
-  address?: Maybe<AddressInput>;
+  address?: Maybe<Scalars['Address']>;
 };
 
 export type OperationType = {
@@ -177,7 +168,7 @@ export type PlanOperation = {
 };
 
 export type PlanRequestAction = {
-  address: AddressInput;
+  address: Scalars['Address'];
   sampleId: Scalars['Int'];
   sampleThickness?: Maybe<Scalars['Int']>;
   source: PlanRequestSource;
@@ -200,6 +191,12 @@ export type PlanResult = {
   operations: Array<PlanOperation>;
 };
 
+export type Printer = {
+  __typename?: 'Printer';
+  name: Scalars['String'];
+  labelType: LabelType;
+};
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -210,11 +207,17 @@ export type Query = {
   fixatives: Array<Fixative>;
   mouldSizes: Array<MouldSize>;
   labware: Labware;
+  printers: Array<Printer>;
 };
 
 
 export type QueryLabwareArgs = {
   barcode: Scalars['String'];
+};
+
+
+export type QueryPrintersArgs = {
+  labelType?: Maybe<Scalars['String']>;
 };
 
 export type Mutation = {
@@ -223,6 +226,7 @@ export type Mutation = {
   logout?: Maybe<Scalars['String']>;
   register: RegisterResult;
   plan: PlanResult;
+  printLabware?: Maybe<Scalars['String']>;
 };
 
 
@@ -239,6 +243,12 @@ export type MutationRegisterArgs = {
 
 export type MutationPlanArgs = {
   request: PlanRequest;
+};
+
+
+export type MutationPrintLabwareArgs = {
+  printer: Scalars['String'];
+  barcodes: Array<Scalars['String']>;
 };
 
 export type LoginMutationVariables = Exact<{
@@ -298,15 +308,22 @@ export type PlanMutation = (
         & Pick<PlanAction, 'newSection'>
         & { destination: (
           { __typename?: 'Slot' }
-          & Pick<Slot, 'labwareId'>
-          & { address: (
-            { __typename?: 'Address' }
-            & Pick<Address, 'row' | 'column'>
-          ) }
+          & Pick<Slot, 'address' | 'labwareId'>
         ) }
       )> }
     )> }
   ) }
+);
+
+export type PrintMutationVariables = Exact<{
+  barcodes: Array<Scalars['String']>;
+  printer: Scalars['String'];
+}>;
+
+
+export type PrintMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'printLabware'>
 );
 
 export type RegisterTissuesMutationVariables = Exact<{
@@ -364,11 +381,8 @@ export type FindLabwareQuery = (
       & Pick<LabwareType, 'name'>
     ), slots: Array<(
       { __typename?: 'Slot' }
-      & Pick<Slot, 'block'>
-      & { address: (
-        { __typename?: 'Address' }
-        & Pick<Address, 'row' | 'column'>
-      ), samples: Array<(
+      & Pick<Slot, 'address' | 'block'>
+      & { samples: Array<(
         { __typename?: 'Sample' }
         & Pick<Sample, 'id'>
         & { tissue: (
@@ -389,6 +403,21 @@ export type FindLabwareQuery = (
       )> }
     )> }
   ) }
+);
+
+export type GetPrintersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetPrintersQuery = (
+  { __typename?: 'Query' }
+  & { printers: Array<(
+    { __typename?: 'Printer' }
+    & Pick<Printer, 'name'>
+    & { labelType: (
+      { __typename?: 'LabelType' }
+      & Pick<LabelType, 'name'>
+    ) }
+  )> }
 );
 
 export type GetRegistrationInfoQueryVariables = Exact<{ [key: string]: never; }>;
@@ -520,10 +549,7 @@ export const PlanDocument = gql`
       planActions {
         newSection
         destination {
-          address {
-            row
-            column
-          }
+          address
           labwareId
         }
       }
@@ -556,6 +582,37 @@ export function usePlanMutation(baseOptions?: Apollo.MutationHookOptions<PlanMut
 export type PlanMutationHookResult = ReturnType<typeof usePlanMutation>;
 export type PlanMutationResult = Apollo.MutationResult<PlanMutation>;
 export type PlanMutationOptions = Apollo.BaseMutationOptions<PlanMutation, PlanMutationVariables>;
+export const PrintDocument = gql`
+    mutation Print($barcodes: [String!]!, $printer: String!) {
+  printLabware(barcodes: $barcodes, printer: $printer)
+}
+    `;
+export type PrintMutationFn = Apollo.MutationFunction<PrintMutation, PrintMutationVariables>;
+
+/**
+ * __usePrintMutation__
+ *
+ * To run a mutation, you first call `usePrintMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePrintMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [printMutation, { data, loading, error }] = usePrintMutation({
+ *   variables: {
+ *      barcodes: // value for 'barcodes'
+ *      printer: // value for 'printer'
+ *   },
+ * });
+ */
+export function usePrintMutation(baseOptions?: Apollo.MutationHookOptions<PrintMutation, PrintMutationVariables>) {
+        return Apollo.useMutation<PrintMutation, PrintMutationVariables>(PrintDocument, baseOptions);
+      }
+export type PrintMutationHookResult = ReturnType<typeof usePrintMutation>;
+export type PrintMutationResult = Apollo.MutationResult<PrintMutation>;
+export type PrintMutationOptions = Apollo.BaseMutationOptions<PrintMutation, PrintMutationVariables>;
 export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {
@@ -640,10 +697,7 @@ export const FindLabwareDocument = gql`
       name
     }
     slots {
-      address {
-        row
-        column
-      }
+      address
       block
       samples {
         id
@@ -690,6 +744,41 @@ export function useFindLabwareLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type FindLabwareQueryHookResult = ReturnType<typeof useFindLabwareQuery>;
 export type FindLabwareLazyQueryHookResult = ReturnType<typeof useFindLabwareLazyQuery>;
 export type FindLabwareQueryResult = Apollo.QueryResult<FindLabwareQuery, FindLabwareQueryVariables>;
+export const GetPrintersDocument = gql`
+    query GetPrinters {
+  printers {
+    name
+    labelType {
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetPrintersQuery__
+ *
+ * To run a query within a React component, call `useGetPrintersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPrintersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPrintersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetPrintersQuery(baseOptions?: Apollo.QueryHookOptions<GetPrintersQuery, GetPrintersQueryVariables>) {
+        return Apollo.useQuery<GetPrintersQuery, GetPrintersQueryVariables>(GetPrintersDocument, baseOptions);
+      }
+export function useGetPrintersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPrintersQuery, GetPrintersQueryVariables>) {
+          return Apollo.useLazyQuery<GetPrintersQuery, GetPrintersQueryVariables>(GetPrintersDocument, baseOptions);
+        }
+export type GetPrintersQueryHookResult = ReturnType<typeof useGetPrintersQuery>;
+export type GetPrintersLazyQueryHookResult = ReturnType<typeof useGetPrintersLazyQuery>;
+export type GetPrintersQueryResult = Apollo.QueryResult<GetPrintersQuery, GetPrintersQueryVariables>;
 export const GetRegistrationInfoDocument = gql`
     query GetRegistrationInfo {
   hmdmcs {

@@ -6,9 +6,11 @@ export enum SectioningLayoutState {
   EDITING_LAYOUT = "editingLayout",
   VALIDATING = "validating",
   CREATING = "creating",
-  READY_TO_PRINT = "readyToPrint",
   PRINTING = "printing",
-  READY_TO_REPRINT = "readyToReprint",
+  READY_TO_PRINT = "readyToPrint",
+  PRINT_SUCCESS = "printSuccess",
+  PRINT_ERROR = "printError",
+  DONE = "done",
 }
 
 export interface SectioningLayoutSchema {
@@ -23,8 +25,13 @@ export interface SectioningLayoutSchema {
     [SectioningLayoutState.EDITING_LAYOUT]: {};
     [SectioningLayoutState.VALIDATING]: {};
     [SectioningLayoutState.CREATING]: {};
-    [SectioningLayoutState.READY_TO_PRINT]: {};
-    [SectioningLayoutState.PRINTING]: {};
-    [SectioningLayoutState.READY_TO_REPRINT]: {};
+    [SectioningLayoutState.PRINTING]: {
+      states: {
+        [SectioningLayoutState.READY_TO_PRINT]: {};
+        [SectioningLayoutState.PRINT_SUCCESS]: {};
+        [SectioningLayoutState.PRINT_ERROR]: {};
+      };
+    };
+    [SectioningLayoutState.DONE]: {};
   };
 }

@@ -4,6 +4,8 @@ import {
   CurrentUserQueryVariables,
   FindLabwareQuery,
   FindLabwareQueryVariables,
+  GetPrintersQuery,
+  GetPrintersQueryVariables,
   GetRegistrationInfoQuery,
   GetRegistrationInfoQueryVariables,
   GetSectioningInfoQuery,
@@ -13,6 +15,8 @@ import {
   LogoutMutationVariables,
   PlanMutation,
   PlanMutationVariables,
+  PrintMutation,
+  PrintMutationVariables,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
 } from "../types/graphql";
@@ -232,10 +236,7 @@ export const handlers = [
             slots: [
               {
                 block: true,
-                address: {
-                  row: 1,
-                  column: 1,
-                },
+                address: "A1",
                 samples: [
                   {
                     id: 3,
@@ -328,11 +329,7 @@ export const handlers = [
                     {
                       newSection: 177,
                       destination: {
-                        address: {
-                          row: 1,
-                          column: 1,
-                          __typename: "Address",
-                        },
+                        address: "A1",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -341,11 +338,7 @@ export const handlers = [
                     {
                       newSection: 178,
                       destination: {
-                        address: {
-                          row: 2,
-                          column: 1,
-                          __typename: "Address",
-                        },
+                        address: "B1",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -354,11 +347,7 @@ export const handlers = [
                     {
                       newSection: 179,
                       destination: {
-                        address: {
-                          row: 3,
-                          column: 1,
-                          __typename: "Address",
-                        },
+                        address: "C1",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -367,11 +356,7 @@ export const handlers = [
                     {
                       newSection: 180,
                       destination: {
-                        address: {
-                          row: 1,
-                          column: 2,
-                          __typename: "Address",
-                        },
+                        address: "A2",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -380,11 +365,7 @@ export const handlers = [
                     {
                       newSection: 181,
                       destination: {
-                        address: {
-                          row: 2,
-                          column: 2,
-                          __typename: "Address",
-                        },
+                        address: "B2",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -393,11 +374,7 @@ export const handlers = [
                     {
                       newSection: 182,
                       destination: {
-                        address: {
-                          row: 3,
-                          column: 2,
-                          __typename: "Address",
-                        },
+                        address: "B3",
                         labwareId: 53,
                         __typename: "Slot",
                       },
@@ -412,6 +389,54 @@ export const handlers = [
           })
         );
       }
+    }
+  ),
+
+  graphql.query<GetPrintersQuery, GetPrintersQueryVariables>(
+    "GetPrinters",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          printers: [
+            {
+              __typename: "Printer",
+              name: "cgaptestbc",
+              labelType: {
+                name: "tiny",
+              },
+            },
+            {
+              __typename: "Printer",
+              name: "slidelabel",
+              labelType: {
+                name: "label",
+              },
+            },
+          ],
+        })
+      );
+    }
+  ),
+
+  graphql.mutation<PrintMutation, PrintMutationVariables>(
+    "Print",
+    (req, res, ctx) => {
+      // Just so we can test failure behaviour
+      if (req.variables.printer === "slidelabel") {
+        return res(
+          ctx.errors([
+            {
+              message: "Failed to print",
+            },
+          ])
+        );
+      }
+
+      return res(
+        ctx.data({
+          printLabware: "OK",
+        })
+      );
     }
   ),
 ];

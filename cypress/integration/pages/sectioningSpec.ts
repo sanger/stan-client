@@ -131,18 +131,7 @@ describe("Sectioning", () => {
       before(() => {
         cy.visit("/lab/sectioning");
         cy.wait(2000);
-
-        cy.get("#labwareScanInput").type("STAN-123{enter}");
-
-        cy.findByRole("combobox").select("Tube");
-        cy.findByText("+ Add Labware").click();
-        cy.findByText("Edit Layout").click();
-        cy.findByRole("dialog").within(() => {
-          cy.findByText("STAN-123").click();
-          cy.findByText("A1").click();
-          cy.findByText("Done").click();
-        });
-        cy.findByText("Create Labware").click();
+        createLabware();
       });
 
       it("removes the Sectioning Layout buttons", () => {
@@ -153,6 +142,10 @@ describe("Sectioning", () => {
       it("disables the form inputs", () => {
         cy.findByLabelText("Quantity").should("be.disabled");
         cy.findByLabelText("Section Thickness").should("be.disabled");
+      });
+
+      it("shows the LabelPrinter", () => {
+        cy.findByText("Print Labels").should("be.visible");
       });
     });
 
@@ -183,17 +176,7 @@ describe("Sectioning", () => {
         });
 
         cy.wait(2000);
-
-        cy.get("#labwareScanInput").type("STAN-123{enter}");
-        cy.findByRole("combobox").select("Tube");
-        cy.findByText("+ Add Labware").click();
-        cy.findByText("Edit Layout").click();
-        cy.findByRole("dialog").within(() => {
-          cy.findByText("STAN-123").click();
-          cy.findByText("A1").click();
-          cy.findByText("Done").click();
-        });
-        cy.findByText("Create Labware").click();
+        createLabware();
       });
 
       it("shows the errors", () => {
@@ -202,4 +185,50 @@ describe("Sectioning", () => {
       });
     });
   });
+
+  describe("Printing", () => {
+    before(() => {
+      cy.visit("/lab/sectioning");
+      cy.wait(2000);
+      createLabware();
+    });
+
+    context("when printing succeeds", () => {
+      before(() => {
+        cy.findByLabelText("printers").select("cgaptestbc");
+        cy.findByText("Print Labels").click();
+      });
+
+      it("shows a success message", () => {
+        cy.findByText("cgaptestbc successfully printed STAN-002FB").should(
+          "exist"
+        );
+      });
+    });
+
+    context("when printing fails", () => {
+      before(() => {
+        cy.findByLabelText("printers").select("slidelabel");
+        cy.findByText("Print Labels").click();
+      });
+
+      it("shows an error message", () => {
+        cy.findByText("slidelabel failed to print STAN-002FB").should("exist");
+      });
+    });
+  });
 });
+
+function createLabware() {
+  cy.get("#labwareScanInput").type("STAN-123{enter}");
+
+  cy.findByRole("combobox").select("Tube");
+  cy.findByText("+ Add Labware").click();
+  cy.findByText("Edit Layout").click();
+  cy.findByRole("dialog").within(() => {
+    cy.findByText("STAN-123").click();
+    cy.findByText("A1").click();
+    cy.findByText("Done").click();
+  });
+  cy.findByText("Create Labware").click();
+}

@@ -15,6 +15,7 @@ import { SectioningLayoutEvents } from "./sectioningLayoutEvents";
 import { LayoutPlan } from "../../layout";
 import {
   Action,
+  Guards,
   sectioningLayoutMachineOptions,
 } from "./sectioningLayoutMachineOptions";
 import { SectioningLayout } from "./index";
@@ -46,8 +47,8 @@ export const createSectioningLayoutMachine = (
         validator: buildValidator(
           sectioningLayout.destinationLabware.labwareType
         ),
-        planResult: null,
-        layoutPlanRef: null,
+        plannedLabware: [],
+        plannedOperations: [],
         layoutPlan: buildLayoutPlan(sectioningLayout),
       },
       initial: State.PREP,
@@ -110,19 +111,43 @@ export const createSectioningLayoutMachine = (
           invoke: {
             id: "planSection",
             src: "planSection",
-            onDone: {
-              target: State.READY_TO_PRINT,
-              actions: Action.ASSIGN_PLAN_RESPONSE,
-            },
+            onDone: [
+              {
+                cond: Guards.IS_VISIUM_LP,
+                target: State.DONE,
+                actions: Action.ASSIGN_PLAN_RESPONSE,
+              },
+              {
+                target: State.PRINTING,
+                actions: Action.ASSIGN_PLAN_RESPONSE,
+              },
+            ],
             onError: {
               target: `${State.PREP}.${State.ERROR}`,
               actions: Action.ASSIGN_SERVER_ERRORS,
             },
           },
         },
-        [State.READY_TO_PRINT]: {},
-        [State.PRINTING]: {},
-        [State.READY_TO_REPRINT]: {},
+        [State.PRINTING]: {
+          entry: Action.SPAWN_LABEL_PRINTER_MACHINE,
+          initial: State.READY_TO_PRINT,
+          states: {
+            [State.READY_TO_PRINT]: {},
+            [State.PRINT_SUCCESS]: {},
+            [State.PRINT_ERROR]: {},
+          },
+          on: {
+            PRINT_SUCCESS: {
+              target: `.${State.PRINT_SUCCESS}`,
+              actions: Action.ASSIGN_PRINT_RESPONSE,
+            },
+            PRINT_ERROR: {
+              target: `.${State.PRINT_ERROR}`,
+              actions: Action.ASSIGN_PRINT_RESPONSE,
+            },
+          },
+        },
+        [State.DONE]: {},
       },
     },
     sectioningLayoutMachineOptions
@@ -180,10 +205,7 @@ function buildLayoutPlan(sectioningLayout: SectioningLayout): LayoutPlan {
               sampleId: labwareSample.sample.id,
               source: {
                 barcode: labwareSample.labware.barcode,
-                address: {
-                  row: labwareSample.slot.address.row,
-                  column: labwareSample.slot.address.column,
-                },
+                address: labwareSample.slot.address,
               },
             };
           }

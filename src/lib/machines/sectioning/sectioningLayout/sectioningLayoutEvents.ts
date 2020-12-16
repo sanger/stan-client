@@ -2,6 +2,10 @@ import { PlanMutationResult } from "../../../../types/graphql";
 import { ApolloError } from "@apollo/client";
 import { LayoutPlan } from "../../layout";
 import { SectioningLayout } from "./index";
+import {
+  PrintErrorEvent,
+  PrintSuccessEvent,
+} from "../../labelPrinter/labelPrinterEvents";
 
 type UpdateSectioningLayoutEvent = {
   type: "UPDATE_SECTIONING_LAYOUT";
@@ -59,4 +63,6 @@ export type SectioningLayoutEvents =
   | CreateLabwareEvent
   | UpdateLayoutPlanEvent
   | PlanSectionResolveEvent
-  | PlanSectionRejectEvent;
+  | PlanSectionRejectEvent
+  | PrintSuccessEvent
+  | PrintErrorEvent;

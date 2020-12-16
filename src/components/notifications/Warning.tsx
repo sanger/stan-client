@@ -6,7 +6,7 @@ interface WarningProps
     React.HTMLAttributes<HTMLElement>,
     HTMLElement
   > {
-  message: string;
+  message?: string;
 }
 
 const Warning = ({

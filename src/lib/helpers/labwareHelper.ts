@@ -1,10 +1,10 @@
-import { Address, AddressInput, Labware } from "../../types/graphql";
+import { Labware } from "../../types/graphql";
 import { find, isEqual } from "lodash";
 import {
   AnyLabware,
-  FriendlyAddress,
-  isFriendlyColumnAddress,
-  isFriendlyRowAddress,
+  Address,
+  isColumnAddress,
+  isRowAddress,
   LabwareAddress,
 } from "../../types/stan";
 import { cycle } from "../helpers";
@@ -17,13 +17,13 @@ export function labwareAddresses(labware: AnyLabware): Array<LabwareAddress> {
   const addresses: Array<LabwareAddress> = [];
   for (let i = 1, j = labware.labwareType.numColumns; i <= j; i++) {
     for (let m = 1, n = labware.labwareType.numRows; m <= n; m++) {
-      let address = createAddress(m, i);
+      const friendlyAddress = createAddress(m, i);
       addresses.push({
-        address,
-        addressInput: createAddressInput(m, i),
-        friendlyAddress: createFriendlyAddress(address),
+        address: friendlyAddress,
         slot:
-          find(labware.slots, (slot) => isEqual(slot.address, address)) ?? null,
+          find(labware.slots, (slot) =>
+            isEqual(slot.address, friendlyAddress)
+          ) ?? null,
       });
     }
   }
@@ -31,65 +31,32 @@ export function labwareAddresses(labware: AnyLabware): Array<LabwareAddress> {
 }
 
 /**
- * Create an {@link Address}
- * @param row row number
- * @param column column number
- */
-function createAddress(row: number, column: number): Address {
-  validateAddressInput(row, column);
-  return { row, column, __typename: "Address" };
-}
-
-/**
- * Creates an {@link Address}
- * Same as {@link Address} but without the `__typename` property. Used as a GraphQL input.
- *
- * @param row row number
- * @param column column number
- */
-function createAddressInput(row: number, column: number): AddressInput {
-  validateAddressInput(row, column);
-  return { row, column };
-}
-
-/**
- * Validate that an Address is within range
- * @param row Labware row
- * @param column Labware column
- */
-function validateAddressInput(row: number, column: number): void {
-  if (row < 1 || row > 8) {
-    throw new Error("Row is out of range");
-  }
-  if (column < 1 || row > 12) {
-    throw new Error("Column is out of range");
-  }
-}
-
-/**
  * Converts an {@link Address} into its user-friendly version
- * @param address an Address on a piece of Labware
  *
  * @example
- * createFriendlyAddress({ row: 3, column: 5 }) // "C5"
+ * createAddress(3, 5) // "C5"
+ *
+ * @param rowNumber the 1-based index of the row
+ * @param columnNumber the 1-based index of the column
  */
-export function createFriendlyAddress(address: Address): FriendlyAddress {
+export function createAddress(
+  rowNumber: number,
+  columnNumber: number
+): Address {
   const aCharCode = "A".charCodeAt(0);
 
-  const row = String.fromCharCode(address.row + aCharCode - 1);
-  const col = String(address.column);
+  const row = String.fromCharCode(rowNumber + aCharCode - 1);
+  const col = String(columnNumber);
 
-  if (!isFriendlyRowAddress(row)) {
+  if (!isRowAddress(row)) {
+    throw new Error(`${rowNumber} can not be converted to FriendlyRowAddress`);
+  }
+  if (!isColumnAddress(col)) {
     throw new Error(
-      `${address.row} can not be converted to FriendlyRowAddress`
+      `${columnNumber} can not be converted to FriendlyColumnAddress`
     );
   }
-  if (!isFriendlyColumnAddress(col)) {
-    throw new Error(
-      `${address.column} can not be converted to FriendlyColumnAddress`
-    );
-  }
-  return `${row}${col}` as FriendlyAddress;
+  return `${row}${col}` as Address;
 }
 
 /**
