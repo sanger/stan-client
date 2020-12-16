@@ -22,7 +22,6 @@ import {
   updateSectioningLayout,
 } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
 import { LabwareTypeName } from "../types/stan";
-import { createAddress } from "../lib/helpers/labwareHelper";
 import LabelPrinter from "./LabelPrinter";
 import Success from "./notifications/Success";
 import LabelPrinterButton from "./LabelPrinterButton";

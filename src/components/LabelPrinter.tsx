@@ -9,7 +9,6 @@ import {
   LabelPrinterMachineType,
 } from "../lib/machines/labelPrinter";
 import {
-  updateLabelPrinter,
   print,
   updateSelectedLabelPrinter,
 } from "../lib/machines/labelPrinter/labelPrinterEvents";

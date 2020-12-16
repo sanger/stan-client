@@ -1,4 +1,4 @@
-import { ApolloQueryResult, FetchResult } from "@apollo/client";
+import { ApolloQueryResult } from "@apollo/client";
 import {
   GetRegistrationInfoDocument,
   GetRegistrationInfoQuery,

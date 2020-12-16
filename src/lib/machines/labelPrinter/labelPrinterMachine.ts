@@ -1,4 +1,4 @@
-import { Actor, Machine } from "xstate";
+import { Machine } from "xstate";
 import {
   LabelPrinter,
   LabelPrinterContext,
