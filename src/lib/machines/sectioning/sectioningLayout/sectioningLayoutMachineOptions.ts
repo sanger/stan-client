@@ -11,6 +11,8 @@ import sectioningService from "../../../services/sectioningService";
 import { createLayoutMachine } from "../../layout/layoutMachine";
 import { SectioningLayout } from "./index";
 import { createLabelPrinterMachine } from "../../labelPrinter/labelPrinterMachine";
+import { LabelPrinterContext } from "../../labelPrinter";
+import { updateSelectedLabelPrinter } from "../../labelPrinter/labelPrinterEvents";
 
 export enum Action {
   UPDATE_SECTIONING_LAYOUT = "updateSectioningLayout",
@@ -92,11 +94,18 @@ export const sectioningLayoutMachineOptions: Partial<MachineOptions<
     [Action.SPAWN_LABEL_PRINTER_MACHINE]: assign((ctx, e) => {
       const currentCtx = current(ctx);
       const labwareBarcodes = currentCtx.plannedLabware.map((lw) => lw.barcode);
-      const subscribers = new Set(
-        currentCtx.plannedLabware.map((lw) => lw.actorRef as Actor)
-      );
       ctx.labelPrinterRef = spawn(
-        createLabelPrinterMachine({ labwareBarcodes }, { subscribers })
+        createLabelPrinterMachine({ labwareBarcodes })
+      );
+      ctx.labelPrinterRef.subscribe(
+        ({ context }: { context: LabelPrinterContext }) => {
+          const printerName = context.labelPrinter.selectedPrinter?.name;
+          if (printerName) {
+            currentCtx.plannedLabware.forEach((lw) => {
+              lw.actorRef.send(updateSelectedLabelPrinter(printerName));
+            });
+          }
+        }
       );
     }),
 
