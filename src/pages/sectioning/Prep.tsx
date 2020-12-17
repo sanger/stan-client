@@ -8,25 +8,18 @@ import {
   addLabwareLayout,
   deleteLabwareLayout,
   prepDone,
-  SectioningEvents,
   selectLabwareType,
 } from "../../lib/machines/sectioning/sectioningEvents";
 import { find } from "lodash";
 import { optionValues } from "../../components/forms";
 import BlueButton from "../../components/buttons/BlueButton";
 import PinkButton from "../../components/buttons/PinkButton";
-import { SectioningContext } from "../../lib/machines/sectioning";
-import { State } from "xstate";
 import { useScrollToRef } from "../../hooks";
+import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
 
 interface PrepProps {
-  current: State<
-    SectioningContext,
-    SectioningEvents,
-    any,
-    { value: any; context: SectioningContext }
-  >;
-  send: any;
+  current: SectioningMachineType["state"];
+  send: SectioningMachineType["send"];
 }
 
 const Prep: React.FC<PrepProps> = ({ current, send }) => {
@@ -38,6 +31,7 @@ const Prep: React.FC<PrepProps> = ({ current, send }) => {
     labwareMachine,
     sampleColors,
     sectioningLayouts,
+    numSectioningLayoutsComplete,
   } = current.context;
 
   return (
@@ -82,10 +76,11 @@ const Prep: React.FC<PrepProps> = ({ current, send }) => {
       </AppShell.Main>
 
       <div className="flex-shrink-0 max-w-screen-xl mx-auto">
-        <div className="my-4 mx-auto p-4 rounded-md bg-gray-100">
-          <p className="my-3 text-sm text-gray-700">
-            Once all blocks have been scanned, select a type of labware to plan
-            Sectioning layouts:
+        <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">
+          <p className="my-3 text-gray-800 text-sm leading-normal">
+            Once <span className="font-bold text-gray-900">all blocks</span>{" "}
+            have been scanned, select a type of labware to plan Sectioning
+            layouts:
           </p>
 
           <div className="flex flex-row items-center justify-center gap-4">
@@ -129,7 +124,16 @@ const Prep: React.FC<PrepProps> = ({ current, send }) => {
         <div className="max-w-screen-xl mx-auto">
           <div className="flex flex-row items-center justify-between">
             <PinkButton action="tertiary">Cancel</PinkButton>
-            <PinkButton onClick={() => send(prepDone())} action="primary">
+            <PinkButton
+              disabled={
+                !(
+                  sectioningLayouts.length > 0 &&
+                  sectioningLayouts.length === numSectioningLayoutsComplete
+                )
+              }
+              onClick={() => send(prepDone())}
+              action="primary"
+            >
               Next {">"}
             </PinkButton>
           </div>

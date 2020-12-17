@@ -1,4 +1,4 @@
-import { Actor, Machine } from "xstate";
+import { Machine } from "xstate";
 import {
   LabelPrinter,
   LabelPrinterContext,
@@ -32,10 +32,7 @@ export const createLabelPrinterMachine = (
           },
           labelPrinter
         ),
-        options: Object.assign(
-          { fetchPrinters: true, subscribers: new Set() },
-          options
-        ),
+        options: Object.assign({ fetchPrinters: true }, options),
       },
       initial: State.INITIALISING,
       states: {
@@ -54,10 +51,7 @@ export const createLabelPrinterMachine = (
             src: Services.FETCH_PRINTERS,
             onDone: {
               target: State.READY,
-              actions: [
-                Actions.ASSIGN_LABEL_PRINTER,
-                Actions.NOTIFY_SUBSCRIBERS,
-              ],
+              actions: [Actions.ASSIGN_LABEL_PRINTER],
             },
             onError: {
               target: State.FETCH_ERROR,
@@ -72,16 +66,10 @@ export const createLabelPrinterMachine = (
         [State.READY]: {
           on: {
             UPDATE_SELECTED_LABEL_PRINTER: {
-              actions: [
-                Actions.ASSIGN_LABEL_PRINTER,
-                Actions.NOTIFY_SUBSCRIBERS,
-              ],
+              actions: [Actions.ASSIGN_LABEL_PRINTER],
             },
             UPDATE_LABEL_PRINTER: {
-              actions: [
-                Actions.ASSIGN_LABEL_PRINTER,
-                Actions.NOTIFY_SUBSCRIBERS,
-              ],
+              actions: [Actions.ASSIGN_LABEL_PRINTER],
             },
             PRINT: {
               target: State.PRINTING,

@@ -213,61 +213,79 @@ export const handlers = [
     }
   ),
 
-  graphql.query<FindLabwareQuery, FindLabwareQueryVariables>(
-    "FindLabware",
-    (req, res, ctx) => {
-      if (!req.variables.barcode.startsWith("STAN-")) {
-        return res(
-          ctx.errors([
-            {
-              message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.barcode}`,
-            },
-          ])
-        );
-      }
-
-      return res(
-        ctx.data({
-          labware: {
-            id: 1,
-            labwareType: {
-              name: "Proviasette",
-            },
-            barcode: req.variables.barcode,
-            slots: [
-              {
-                block: true,
-                address: "A1",
-                samples: [
-                  {
-                    id: 3,
-                    tissue: {
-                      replicate: 5,
-                      donor: {
-                        donorName: "Donor 3",
-                      },
-                      spatialLocation: {
-                        code: 3,
-                        tissueType: {
-                          name: "Lung",
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-        })
-      );
-    }
-  ),
+  // graphql.query<FindLabwareQuery, FindLabwareQueryVariables>(
+  //   "FindLabware",
+  //   (req, res, ctx) => {
+  //     if (!req.variables.barcode.startsWith("STAN-")) {
+  //       return res(
+  //         ctx.errors([
+  //           {
+  //             message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.barcode}`,
+  //           },
+  //         ])
+  //       );
+  //     }
+  //
+  //     return res(
+  //       ctx.data({
+  //         labware: {
+  //           id: 1,
+  //           labwareType: {
+  //             name: "Proviasette",
+  //           },
+  //           barcode: req.variables.barcode,
+  //           slots: [
+  //             {
+  //               block: true,
+  //               address: "A1",
+  //               samples: [
+  //                 {
+  //                   id: 3,
+  //                   tissue: {
+  //                     replicate: 5,
+  //                     donor: {
+  //                       donorName: "Donor 3",
+  //                     },
+  //                     spatialLocation: {
+  //                       code: 3,
+  //                       tissueType: {
+  //                         name: "Lung",
+  //                       },
+  //                     },
+  //                   },
+  //                 },
+  //               ],
+  //             },
+  //           ],
+  //         },
+  //       })
+  //     );
+  //   }
+  // ),
 
   graphql.query<GetSectioningInfoQuery, GetRegistrationInfoQueryVariables>(
     "GetSectioningInfo",
     (req, res, ctx) => {
       return res(
         ctx.data({
+          comments: [
+            {
+              id: 1,
+              comment: "Section Folded",
+            },
+            {
+              id: 2,
+              comment: "Poor section quality",
+            },
+            {
+              id: 3,
+              comment: "Sectioned well",
+            },
+            {
+              id: 4,
+              comment: "Section exploded",
+            },
+          ],
           labwareTypes: labwareTypeInstances,
         })
       );
@@ -288,32 +306,62 @@ export const handlers = [
   //                 barcode: "STAN-002FB",
   //                 slots: [
   //                   {
-  //                     samples: [],
+  //                     samples: [
+  //                       {
+  //                         id: 1,
+  //                       },
+  //                     ],
+  //                     labwareId: 53,
   //                     address: "A1",
   //                     __typename: "Slot",
   //                   },
   //                   {
-  //                     samples: [],
+  //                     samples: [
+  //                       {
+  //                         id: 1,
+  //                       },
+  //                     ],
+  //                     labwareId: 53,
   //                     address: "B1",
   //                     __typename: "Slot",
   //                   },
   //                   {
-  //                     samples: [],
+  //                     samples: [
+  //                       {
+  //                         id: 1,
+  //                       },
+  //                     ],
+  //                     labwareId: 53,
   //                     address: "C1",
   //                     __typename: "Slot",
   //                   },
   //                   {
-  //                     samples: [],
+  //                     samples: [
+  //                       {
+  //                         id: 1,
+  //                       },
+  //                     ],
+  //                     labwareId: 53,
   //                     address: "A2",
   //                     __typename: "Slot",
   //                   },
   //                   {
-  //                     samples: [],
+  //                     samples: [
+  //                       {
+  //                         id: 1,
+  //                       },
+  //                     ],
+  //                     labwareId: 53,
   //                     address: "B2",
   //                     __typename: "Slot",
   //                   },
   //                   {
-  //                     samples: [],
+  //                     samples: [
+  //                       {
+  //                         id: 1,
+  //                       },
+  //                     ],
+  //                     labwareId: 53,
   //                     address: "C2",
   //                     __typename: "Slot",
   //                   },
@@ -341,6 +389,12 @@ export const handlers = [
   //                     },
   //                     source: {
   //                       address: "A1",
+  //                       labwareId: 1,
+  //                       samples: [
+  //                         {
+  //                           id: 1,
+  //                         },
+  //                       ],
   //                       __typename: "Slot",
   //                     },
   //                     destination: {
@@ -357,6 +411,12 @@ export const handlers = [
   //                     },
   //                     source: {
   //                       address: "A1",
+  //                       labwareId: 1,
+  //                       samples: [
+  //                         {
+  //                           id: 1,
+  //                         },
+  //                       ],
   //                       __typename: "Slot",
   //                     },
   //                     destination: {
@@ -373,6 +433,12 @@ export const handlers = [
   //                     },
   //                     source: {
   //                       address: "A1",
+  //                       labwareId: 1,
+  //                       samples: [
+  //                         {
+  //                           id: 1,
+  //                         },
+  //                       ],
   //                       __typename: "Slot",
   //                     },
   //                     destination: {
@@ -389,6 +455,12 @@ export const handlers = [
   //                     },
   //                     source: {
   //                       address: "A1",
+  //                       labwareId: 1,
+  //                       samples: [
+  //                         {
+  //                           id: 1,
+  //                         },
+  //                       ],
   //                       __typename: "Slot",
   //                     },
   //                     destination: {
@@ -405,6 +477,12 @@ export const handlers = [
   //                     },
   //                     source: {
   //                       address: "A1",
+  //                       labwareId: 1,
+  //                       samples: [
+  //                         {
+  //                           id: 1,
+  //                         },
+  //                       ],
   //                       __typename: "Slot",
   //                     },
   //                     destination: {
@@ -421,6 +499,12 @@ export const handlers = [
   //                     },
   //                     source: {
   //                       address: "A1",
+  //                       labwareId: 1,
+  //                       samples: [
+  //                         {
+  //                           id: 1,
+  //                         },
+  //                       ],
   //                       __typename: "Slot",
   //                     },
   //                     destination: {

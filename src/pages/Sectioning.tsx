@@ -1,8 +1,8 @@
 import React from "react";
 import { useMachine } from "@xstate/react";
-import createSectioningMachine from "../lib/machines/sectioning";
 import Prep from "./sectioning/Prep";
 import Outcomes from "./sectioning/Outcomes";
+import { createSectioningMachine } from "../lib/machines/sectioning/sectioningMachine";
 
 function Sectioning() {
   const [current, send] = useMachine(createSectioningMachine());

@@ -1,5 +1,6 @@
 import { Labware, LabwareType } from "../../types/graphql";
 import { cycle } from "../helpers";
+import { orderBy } from "lodash";
 
 /**
  * Generator for labware addresses
@@ -76,4 +77,27 @@ export function buildSampleColors(labwares: Labware[]): Map<number, string> {
     });
   });
   return sampleColors;
+}
+
+function getRowIndex(address: string): number {
+  return address.charCodeAt(0) - "A".charCodeAt(0) + 1;
+}
+
+function getColumnIndex(address: string): number {
+  return parseInt(address.substr(1));
+}
+
+interface HasAddress {
+  address: string;
+}
+
+export function rowMajor<T extends HasAddress>(slots: Array<T>): Array<T> {
+  return orderBy(
+    slots,
+    [
+      (slot) => getRowIndex(slot.address),
+      (slot) => getColumnIndex(slot.address),
+    ],
+    ["asc", "asc"]
+  );
 }

@@ -1,26 +1,34 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AppShell from "../../components/AppShell";
 import PinkButton from "../../components/buttons/PinkButton";
-import { State } from "xstate";
-import {
-  SectioningContext,
-  SectioningEvents,
-} from "../../lib/machines/sectioning";
 import { backToPrep } from "../../lib/machines/sectioning/sectioningEvents";
-import SectioningConfirm from "../../components/SectioningConfirm";
+import SectioningConfirm, {
+  SectioningConfirmTube,
+} from "../../components/SectioningConfirm";
+import { sortBy } from "lodash";
+import { LabwareTypeName } from "../../types/stan";
+import Heading from "../../components/Heading";
+import Table, {
+  TableBody,
+  TableHead,
+  TableHeader,
+} from "../../components/Table";
+import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
+import { SectioningOutcomeActorRef } from "../../lib/machines/sectioning/sectioningOutcome/sectioningOutcomeTypes";
 
 interface OutcomesProps {
-  current: State<
-    SectioningContext,
-    SectioningEvents,
-    any,
-    { value: any; context: SectioningContext }
-  >;
-  send: any;
+  current: SectioningMachineType["state"];
+  send: SectioningMachineType["send"];
 }
 
 const Outcomes: React.FC<OutcomesProps> = ({ current, send }) => {
+  useEffect(() => window.scrollTo(0, 0), []);
+
   const { sectioningOutcomeMachines } = current.context;
+  const sortedSOMs = sortBy(
+    Array.from(sectioningOutcomeMachines.keys()),
+    (som) => som !== LabwareTypeName.TUBE
+  );
 
   return (
     <AppShell>
@@ -30,8 +38,12 @@ const Outcomes: React.FC<OutcomesProps> = ({ current, send }) => {
       <AppShell.Main>
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
           <div className="space-y-4">
-            {sectioningOutcomeMachines.map((som, i) => (
-              <SectioningConfirm actor={som} key={i} />
+            {sortedSOMs.map((labwareTypeName, i) => (
+              <SectionConfirmSection
+                key={i}
+                actors={sectioningOutcomeMachines.get(labwareTypeName)}
+                labwareTypeName={labwareTypeName}
+              />
             ))}
           </div>
         </div>
@@ -48,6 +60,54 @@ const Outcomes: React.FC<OutcomesProps> = ({ current, send }) => {
         </div>
       </div>
     </AppShell>
+  );
+};
+
+interface SectionConfirmSectionParams {
+  labwareTypeName: string;
+  actors: Array<SectioningOutcomeActorRef> | undefined;
+}
+
+const SectionConfirmSection: React.FC<SectionConfirmSectionParams> = ({
+  labwareTypeName,
+  actors,
+}) => {
+  if (!actors || actors.length === 0) {
+    return null;
+  }
+  return (
+    <div className="p-4 space-y-4">
+      <Heading level={3}>{labwareTypeName}</Heading>
+
+      {labwareTypeName === LabwareTypeName.TUBE && (
+        <div className="p-4 lg:w-2/3 lg:mx-auto rounded-lg bg-gray-100 space-y-4 lg:space-y-0 lg:space-x-4 lg:grid lg:grid-cols-2">
+          <div>
+            <p className="text-gray-800 text-sm leading-normal">
+              For any tubes that were created but did receive any sections, you
+              can mark them as{" "}
+              <span className="font-bold text-gray-900">unused</span> in the
+              table.
+            </p>
+          </div>
+          <div className="">
+            <Table>
+              <TableHead>
+                <TableHeader>Tube Barcode</TableHeader>
+                <TableHeader></TableHeader>
+              </TableHead>
+              <TableBody>
+                {actors.map((actor, i) => (
+                  <SectioningConfirmTube key={i} actor={actor} />
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {labwareTypeName !== LabwareTypeName.TUBE &&
+        actors.map((actor) => <SectioningConfirm actor={actor} />)}
+    </div>
   );
 };
 

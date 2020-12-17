@@ -12,6 +12,7 @@ export enum Actions {
   ASSIGN_DESTINATION = "layoutMachine.assignDestination",
   REMOVE_PLANNED_ACTION = "layoutMachine.removePlannedAction",
   ASSIGN_DESTINATION_ACTIONS = "layoutMachine.assignDestinationActions",
+  TOGGLE_DESTINATION = "layoutMachine.toggleDestination",
 }
 
 export const machineOptions: Partial<MachineOptions<
@@ -67,6 +68,21 @@ export const machineOptions: Partial<MachineOptions<
       ctx.layoutPlan.destinationLabware.slots.forEach((slot) => {
         ctx.layoutPlan.plannedActions.set(slot.address, e.source);
       });
+    }),
+
+    [Actions.TOGGLE_DESTINATION]: assign((ctx, e) => {
+      if (e.type !== "SELECT_DESTINATION") {
+        return;
+      }
+
+      if (ctx.layoutPlan.plannedActions.has(e.address)) {
+        ctx.layoutPlan.plannedActions.delete(e.address);
+      } else if (ctx.possibleActions && ctx.possibleActions.has(e.address)) {
+        const source = ctx.possibleActions.get(e.address);
+        if (source) {
+          ctx.layoutPlan.plannedActions.set(e.address, source);
+        }
+      }
     }),
   },
 };

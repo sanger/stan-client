@@ -74,7 +74,7 @@ export function useScrollToRef() {
       ref.current?.scrollIntoView({ behavior: "smooth" });
       setShouldScrollToRef(false);
     }
-  });
+  }, [shouldScrollToRef]);
 
   function scrollToRef() {
     setShouldScrollToRef(true);

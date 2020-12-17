@@ -1,5 +1,5 @@
 ---
-to: src/lib/machines/<%= name %>/index.ts
+to: src/lib/machines/<%= name %>/sectioningOutcomeTypes.ts
 ---
 import { <%= Name %>Events } from "./<%= name %>Events";
 import { <%= Name %>Context } from "./<%= name %>Context";

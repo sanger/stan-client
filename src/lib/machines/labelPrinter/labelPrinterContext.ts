@@ -24,11 +24,6 @@ export interface LabelPrinterOptions {
    * Should this machine go fetch the printers from the API
    */
   fetchPrinters: boolean;
-
-  /**
-   * Set of subscribers to notify of updates
-   */
-  subscribers: Set<Actor>;
 }
 
 export interface LabelPrinterContext {

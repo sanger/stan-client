@@ -1,18 +1,20 @@
 import React from "react";
-import { ActorRef } from "xstate";
 import { useActor } from "@xstate/react";
 import { isEqual } from "lodash";
 import Labware from "./Labware";
-import { LayoutEvents, LayoutMachineType } from "../lib/machines/layout";
+import {
+  LayoutEvents,
+  LayoutMachineActorRef,
+  LayoutMachineType,
+} from "../lib/machines/layout";
 import {
   selectDestination,
   selectSource,
   setAllDestinations,
 } from "../lib/machines/layout/layoutEvents";
-import { Address } from "../types/stan";
 
 interface LayoutPlannerProps {
-  actor: ActorRef<LayoutEvents>;
+  actor: LayoutMachineActorRef;
 }
 
 const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ actor }) => {

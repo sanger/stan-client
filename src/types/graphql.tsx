@@ -200,7 +200,7 @@ export type Printer = {
 export type Comment = {
   __typename?: 'Comment';
   id: Scalars['Int'];
-  description: Scalars['String'];
+  comment: Scalars['String'];
 };
 
 export type AddressStringInput = {
@@ -230,6 +230,7 @@ export type Query = {
   mouldSizes: Array<MouldSize>;
   labware: Labware;
   printers: Array<Printer>;
+  comments: Array<Comment>;
 };
 
 
@@ -509,7 +510,10 @@ export type GetSectioningInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetSectioningInfoQuery = (
   { __typename?: 'Query' }
-  & { labwareTypes: Array<(
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & Pick<Comment, 'id' | 'comment'>
+  )>, labwareTypes: Array<(
     { __typename?: 'LabwareType' }
     & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
   )> }
@@ -934,6 +938,10 @@ export type GetRegistrationInfoLazyQueryHookResult = ReturnType<typeof useGetReg
 export type GetRegistrationInfoQueryResult = Apollo.QueryResult<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>;
 export const GetSectioningInfoDocument = gql`
     query GetSectioningInfo {
+  comments {
+    id
+    comment
+  }
   labwareTypes {
     name
     numRows

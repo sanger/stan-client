@@ -2,6 +2,8 @@ import React from "react";
 import { Slot as SlotModel } from "../types/graphql";
 import classNames from "classnames";
 import { NewLabwareLayout } from "../types/stan";
+import BarcodeIcon from "./icons/BarcodeIcon";
+import { rowMajor } from "../lib/helpers/labwareHelper";
 
 interface LabwareProps {
   labware: NewLabwareLayout;
@@ -20,7 +22,14 @@ const Labware: React.FC<LabwareProps> = ({
 }) => {
   const { labwareType } = labware;
 
-  const labwareClassNames = classNames(
+  const labwareClasses = classNames(
+    {
+      "hover:bg-blue-200 cursor-pointer": !!onClick,
+    },
+    "w-48 bg-blue-100 rounded-lg transition duration-300 ease-in-out"
+  );
+
+  const slotGrid = classNames(
     {
       "grid-rows-1": labwareType.numRows === 1,
       "grid-rows-2": labwareType.numRows === 2,
@@ -30,18 +39,14 @@ const Labware: React.FC<LabwareProps> = ({
       "grid-rows-6": labwareType.numRows === 6,
       "grid-cols-1": labwareType.numColumns === 1,
       "grid-cols-2": labwareType.numColumns === 2,
-      "hover:bg-blue-200 cursor-pointer": !!onClick,
     },
-    "py-8 px-2 grid grid-flow-col gap-4 bg-blue-100 rounded-lg transition duration-300 ease-in-out"
+    "py-4 px-2 grid gap-4"
   );
 
   return (
-    <div className="w-48">
-      <div
-        className={labwareClassNames}
-        onClick={() => onClick && onClick(labware)}
-      >
-        {labware.slots.map((slot, i) => (
+    <div className={labwareClasses}>
+      <div className={slotGrid} onClick={() => onClick && onClick(labware)}>
+        {rowMajor(labware.slots).map((slot, i) => (
           <Slot
             key={i}
             slot={slot}
@@ -50,6 +55,16 @@ const Labware: React.FC<LabwareProps> = ({
             color={slotColor}
           />
         ))}
+      </div>
+
+      <div className="flex flex-col items-start justify-between py-1 px-2 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+        <span>{labware.labwareType.name}</span>
+        {labware.barcode && (
+          <span className="inline-flex">
+            <BarcodeIcon className="mr-1 h-4 w-4 text-gray-500" />
+            {labware.barcode}
+          </span>
+        )}
       </div>
     </div>
   );

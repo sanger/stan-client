@@ -42,5 +42,6 @@ export interface Source {
 
 export interface LayoutContext {
   layoutPlan: LayoutPlan;
+  possibleActions?: LayoutPlan["plannedActions"];
   selected: Maybe<Source>;
 }

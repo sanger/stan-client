@@ -15,7 +15,6 @@ import { find } from "lodash";
 
 export enum Actions {
   ASSIGN_LABEL_PRINTER = "assignLabelPriner",
-  NOTIFY_SUBSCRIBERS = "notifySubscribers",
   NOTIFY_PARENT_SUCCESS = "notifyParentSuccess",
   NOTIFY_PARENT_ERROR = "notifyParentError",
 }
@@ -54,15 +53,6 @@ export const labelPrinterMachineOptions: Partial<MachineOptions<
       if (e.type === "UPDATE_LABEL_PRINTER") {
         ctx.labelPrinter = Object.assign({}, ctx.labelPrinter, e.labelPrinter);
       }
-    }),
-
-    [Actions.NOTIFY_SUBSCRIBERS]: pure((ctx, e) => {
-      const subscribers = Array.from(ctx.options.subscribers.values());
-      return subscribers.map((subscriber) => {
-        return send(updateLabelPrinter(ctx.labelPrinter), {
-          to: () => subscriber,
-        });
-      });
     }),
 
     [Actions.NOTIFY_PARENT_SUCCESS]: sendParent<

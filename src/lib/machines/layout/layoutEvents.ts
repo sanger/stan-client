@@ -1,4 +1,4 @@
-import { Address, SourcePlanRequestAction } from "../../../types/stan";
+import { Address } from "../../../types/stan";
 import { Source } from "./layoutContext";
 
 type SelectSourceEvent = {
@@ -40,8 +40,20 @@ export type RequestLayoutPlanEvent = {
   type: "REQUEST_LAYOUT_PLAN";
 };
 
+type CancelEvent = { type: "CANCEL" };
+export function cancel(): CancelEvent {
+  return { type: "CANCEL" };
+}
+
+type DoneEvent = { type: "DONE" };
+export function done(): DoneEvent {
+  return { type: "DONE" };
+}
+
 export type LayoutEvents =
   | SelectSourceEvent
   | SelectDestinationEvent
   | SetAllDestinationsEvent
-  | RequestLayoutPlanEvent;
+  | RequestLayoutPlanEvent
+  | CancelEvent
+  | DoneEvent;

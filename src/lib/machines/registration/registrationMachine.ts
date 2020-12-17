@@ -1,5 +1,4 @@
 import { Machine } from "xstate";
-import registrationService from "../../services/registrationService";
 import { RegistrationContext } from "./registrationContext";
 import { RegistrationSchema, State } from "./registrationStates";
 import { RegistrationEvent } from "./registrationEvents";
@@ -8,7 +7,6 @@ import {
   registrationMachineOptions,
   Services,
 } from "./registrationMachineOptions";
-import { createMinimumWaitService } from "../index";
 
 /**
  * XState state machine for Registration

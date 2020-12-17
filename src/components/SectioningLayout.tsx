@@ -1,8 +1,6 @@
 import React from "react";
-import { ActorRef } from "xstate";
 import PinkButton from "./buttons/PinkButton";
 import { useActor } from "@xstate/react";
-import { SectioningLayoutMachineType } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutMachine";
 import Label from "./forms/Label";
 import Modal, { ModalBody, ModalFooter } from "./Modal";
 import BlueButton from "./buttons/BlueButton";
@@ -14,23 +12,26 @@ import variants from "../lib/motionVariants";
 import Table, { TableBody, TableCell, TableHead, TableHeader } from "./Table";
 import Warning from "./notifications/Warning";
 import {
-  cancelEditLayout,
   createLabware,
-  doneEditLayout,
   editLayout,
-  SectioningLayoutEvents,
   updateSectioningLayout,
 } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
-import { Address, LabwareTypeName } from "../types/stan";
+import { LabwareTypeName } from "../types/stan";
 import LabelPrinter from "./LabelPrinter";
 import Success from "./notifications/Success";
 import LabelPrinterButton from "./LabelPrinterButton";
+import { cancel, done } from "../lib/machines/layout/layoutEvents";
+import {
+  SectioningLayoutActorRef,
+  SectioningLayoutEvent,
+  SectioningLayoutMachineType,
+} from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
 
 interface SectioningLayoutProps {
   /**
    * {@link https://xstate.js.org/docs/guides/actors.html#spawning-machines Actor} to that will be passed into `useActor`.
    */
-  actor: ActorRef<SectioningLayoutEvents, SectioningLayoutMachineType["state"]>;
+  actor: SectioningLayoutActorRef;
 
   /**
    * Callback to be called when deleting a SectioningLayout
@@ -43,20 +44,22 @@ const SectioningLayout = React.forwardRef<
   SectioningLayoutProps
 >(({ actor, onDelete }, ref) => {
   const [current, send] = useActor<
-    SectioningLayoutEvents,
+    SectioningLayoutEvent,
     SectioningLayoutMachineType["state"]
   >(actor);
+
   const {
     serverErrors,
     plannedLabware,
     plannedOperations,
     sectioningLayout,
     layoutPlan,
-    layoutPlanRef,
     labelPrinterRef,
     printSuccessMessage,
     printErrorMessage,
   } = current.context;
+
+  const { layoutMachine } = current.children;
 
   return (
     <motion.div
@@ -89,8 +92,8 @@ const SectioningLayout = React.forwardRef<
             </PinkButton>
           )}
         </div>
-        <div className="p-4 flex flex-col items-center justify-between space-y-4 bg-gray-100">
-          <div className="w-full space-y-4">
+        <div className="border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow">
+          <div className="py-4 px-8 w-full space-y-4">
             {current.matches("prep.error") && (
               <Warning
                 message={
@@ -172,7 +175,7 @@ const SectioningLayout = React.forwardRef<
           </div>
 
           {plannedLabware.length > 0 && (
-            <div className="w-full space-y-4">
+            <div className="w-full space-y-4 py-4 px-8">
               <Table>
                 <TableHead>
                   <tr>
@@ -230,7 +233,7 @@ const SectioningLayout = React.forwardRef<
           )}
 
           {current.matches("prep") && (
-            <div className="w-full sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <div className="w-full py-3 px-4 sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
               <button
                 onClick={onDelete}
                 type="button"
@@ -252,17 +255,17 @@ const SectioningLayout = React.forwardRef<
       <Modal show={current.matches("editingLayout")}>
         <ModalBody>
           <Heading level={3}>Set Layout</Heading>
-          {layoutPlanRef && <LayoutPlanner actor={layoutPlanRef} />}
+          {layoutMachine && <LayoutPlanner actor={layoutMachine} />}
         </ModalBody>
         <ModalFooter>
           <BlueButton
-            onClick={() => send(doneEditLayout())}
+            onClick={() => layoutMachine.send(done())}
             className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
           >
             Done
           </BlueButton>
           <button
-            onClick={() => send(cancelEditLayout())}
+            onClick={() => layoutMachine.send(cancel())}
             type="button"
             className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
           >

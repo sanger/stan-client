@@ -1,32 +1,45 @@
-import { forwardTo, Interpreter, Machine } from "xstate";
-import { LabwareType } from "../../../../types/graphql";
+import { forwardTo, Machine, MachineOptions, sendParent, spawn } from "xstate";
+import { LabwareType, PlanRequestLabware } from "../../../../types/graphql";
 import * as Yup from "yup";
-import {
-  LabwareTypeName,
-  SourcePlanRequestAction,
-} from "../../../../types/stan";
+import { extractServerErrors, LabwareTypeName } from "../../../../types/stan";
 import { labwareSamples } from "../../../helpers/labwareHelper";
-import { SectioningLayoutContext } from "./sectioningLayoutContext";
-import {
-  SectioningLayoutSchema,
-  SectioningLayoutState as State,
-} from "./sectioningLayoutStates";
-import { SectioningLayoutEvents } from "./sectioningLayoutEvents";
-import {
-  Action,
-  Guards,
-  sectioningLayoutMachineOptions,
-} from "./sectioningLayoutMachineOptions";
-import { SectioningLayout } from "./index";
 import { LayoutPlan, Source } from "../../layout/layoutContext";
-
-export type SectioningLayoutMachineType = Interpreter<
+import {
+  SectioningLayout,
   SectioningLayoutContext,
+  SectioningLayoutEvent,
   SectioningLayoutSchema,
-  SectioningLayoutEvents
->;
+  State,
+} from "./sectioningLayoutTypes";
+import { assign } from "@xstate/immer";
+import { createLabelPrinterMachine } from "../../labelPrinter/labelPrinterMachine";
+import { current } from "immer";
+import { LabelPrinterContext } from "../../labelPrinter";
+import { updateSelectedLabelPrinter } from "../../labelPrinter/labelPrinterEvents";
+import { createLayoutMachine } from "../../layout/layoutMachine";
+import sectioningService from "../../../services/sectioningService";
+import { prepComplete } from "./sectioningLayoutEvents";
 
 const sectioningLayoutKey = "sectioningLayout";
+
+enum Action {
+  UPDATE_SECTIONING_LAYOUT = "updateSectioningLayout",
+  SPAWN_LAYOUT_PLAN = "spawnLayoutPlan",
+  ASSIGN_LAYOUT_PLAN = "assignLayoutPlan",
+  ASSIGN_PLAN_RESPONSE = "assignPlanResponse",
+  NOTIFY_PARENT_PLAN = "notifyParentPlan",
+  ASSIGN_SERVER_ERRORS = "assignServerErrors",
+  SPAWN_LABEL_PRINTER_MACHINE = "spawnLabelPrinterMachines",
+  ASSIGN_PRINT_RESPONSE = "assignPrintResponse",
+}
+
+enum Guards {
+  IS_VISIUM_LP = "isVisiumLP",
+}
+
+enum Services {
+  LAYOUT_MACHINE = "layoutMachine",
+}
 
 /**
  * Machine for the controlling how samples will be laid out into labware.
@@ -37,7 +50,7 @@ export const createSectioningLayoutMachine = (
   Machine<
     SectioningLayoutContext,
     SectioningLayoutSchema,
-    SectioningLayoutEvents
+    SectioningLayoutEvent
   >(
     {
       key: sectioningLayoutKey,
@@ -81,15 +94,9 @@ export const createSectioningLayoutMachine = (
           },
         },
         [State.EDITING_LAYOUT]: {
-          entry: Action.SPAWN_LAYOUT_PLAN,
-          on: {
-            CANCEL_EDIT_LAYOUT: {
-              target: State.VALIDATING,
-            },
-            DONE_EDIT_LAYOUT: {
-              actions: Action.REQUEST_LAYOUT_PLAN,
-            },
-            UPDATE_LAYOUT_PLAN: {
+          invoke: {
+            src: Services.LAYOUT_MACHINE,
+            onDone: {
               target: State.VALIDATING,
               actions: Action.ASSIGN_LAYOUT_PLAN,
             },
@@ -118,6 +125,7 @@ export const createSectioningLayoutMachine = (
                 actions: [
                   Action.ASSIGN_PLAN_RESPONSE,
                   forwardTo("sectioningMachine"),
+                  sendParent(prepComplete()),
                 ],
               },
               {
@@ -125,6 +133,7 @@ export const createSectioningLayoutMachine = (
                 actions: [
                   Action.ASSIGN_PLAN_RESPONSE,
                   forwardTo("sectioningMachine"),
+                  sendParent(prepComplete()),
                 ],
               },
             ],
@@ -145,7 +154,7 @@ export const createSectioningLayoutMachine = (
           on: {
             PRINT_SUCCESS: {
               target: `.${State.PRINT_SUCCESS}`,
-              actions: Action.ASSIGN_PRINT_RESPONSE,
+              actions: [Action.ASSIGN_PRINT_RESPONSE],
             },
             PRINT_ERROR: {
               target: `.${State.PRINT_ERROR}`,
@@ -158,6 +167,138 @@ export const createSectioningLayoutMachine = (
     },
     sectioningLayoutMachineOptions
   );
+
+const sectioningLayoutMachineOptions: Partial<MachineOptions<
+  SectioningLayoutContext,
+  SectioningLayoutEvent
+>> = {
+  actions: {
+    [Action.UPDATE_SECTIONING_LAYOUT]: assign((ctx, e) => {
+      if (e.type !== "UPDATE_SECTIONING_LAYOUT") {
+        return;
+      }
+      ctx.sectioningLayout = Object.assign(
+        ctx.sectioningLayout,
+        e.sectioningLayout
+      );
+    }),
+
+    [Action.ASSIGN_LAYOUT_PLAN]: assign((ctx, e) => {
+      if (e.type !== "done.invoke.layoutMachine" || !e.data) {
+        return;
+      }
+      ctx.layoutPlan = e.data.layoutPlan;
+    }),
+
+    [Action.ASSIGN_PLAN_RESPONSE]: assign((ctx, e) => {
+      if (e.type !== "done.invoke.planSection" || !e.data.data) {
+        return;
+      }
+      ctx.plannedOperations = e.data.data.plan.operations;
+      ctx.plannedLabware = e.data.data.plan.labware.map((labware) => {
+        return {
+          ...labware,
+          actorRef: spawn(
+            createLabelPrinterMachine(
+              { labwareBarcodes: [labware.barcode] },
+              { fetchPrinters: true }
+            )
+          ),
+        };
+      });
+    }),
+
+    [Action.ASSIGN_SERVER_ERRORS]: assign((ctx, e) => {
+      if (e.type !== "error.platform.planSection") {
+        return;
+      }
+      ctx.serverErrors = extractServerErrors(e.data);
+    }),
+
+    [Action.SPAWN_LABEL_PRINTER_MACHINE]: assign((ctx, _e) => {
+      const currentCtx = current(ctx);
+      const labwareBarcodes = currentCtx.plannedLabware.map((lw) => lw.barcode);
+      ctx.labelPrinterRef = spawn(
+        createLabelPrinterMachine({ labwareBarcodes })
+      );
+
+      // Notify other label printers of the change in the selected label printer
+      ctx.labelPrinterRef.subscribe(
+        ({ context }: { context: LabelPrinterContext }) => {
+          const printerName = context.labelPrinter.selectedPrinter?.name;
+
+          if (printerName) {
+            currentCtx.plannedLabware.map((lw) =>
+              lw.actorRef.send(updateSelectedLabelPrinter(printerName))
+            );
+          }
+        }
+      );
+    }),
+
+    [Action.ASSIGN_PRINT_RESPONSE]: assign((ctx, e) => {
+      if (e.type === "PRINT_SUCCESS") {
+        ctx.printSuccessMessage = e.message;
+        ctx.printErrorMessage = undefined;
+      } else if (e.type === "PRINT_ERROR") {
+        ctx.printSuccessMessage = undefined;
+        ctx.printErrorMessage = e.message;
+      }
+    }),
+  },
+
+  guards: {
+    [Guards.IS_VISIUM_LP]: (ctx) =>
+      ctx.sectioningLayout.destinationLabware.labwareType.name ===
+      LabwareTypeName.VISIUM_LP,
+  },
+
+  services: {
+    [Services.LAYOUT_MACHINE]: (ctx, _e) => {
+      return createLayoutMachine(ctx.layoutPlan);
+    },
+
+    validateLayout: (ctx) => ctx.validator.validate(ctx),
+
+    planSection: (ctx) => {
+      const planRequestLabware = buildPlanRequestLabware(
+        ctx.sectioningLayout,
+        ctx.layoutPlan
+      );
+      const labware: PlanRequestLabware[] = new Array(
+        ctx.sectioningLayout.quantity
+      ).fill(planRequestLabware);
+      return sectioningService.planSection({ labware });
+    },
+  },
+};
+
+function buildPlanRequestLabware(
+  sectioningLayout: SectioningLayout,
+  layoutPlan: LayoutPlan
+): PlanRequestLabware {
+  return {
+    labwareType: sectioningLayout.destinationLabware.labwareType.name,
+    barcode: sectioningLayout.barcode,
+    actions: Array.from(layoutPlan.plannedActions.keys()).map((address) => {
+      const source = layoutPlan.plannedActions.get(address);
+
+      if (!source) {
+        throw new Error("Mess up here");
+      }
+
+      return {
+        address,
+        sampleThickness: sectioningLayout.sectionThickness,
+        sampleId: source.sampleId,
+        source: {
+          barcode: source.labware.barcode,
+          address: source.address,
+        },
+      };
+    }),
+  };
+}
 
 /**
  * Builds the validator for {@link createSectioningLayoutMachine}
