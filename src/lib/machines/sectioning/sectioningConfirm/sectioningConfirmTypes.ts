@@ -7,15 +7,15 @@ import {
 } from "../../../../types/graphql";
 import { Address } from "../../../../types/stan";
 
-export type SectioningOutcomeMachineType = Interpreter<
-  SectioningOutcomeContext,
-  SectioningOutcomeSchema,
-  SectioningOutcomeEvent
+export type SectioningConfirmMachineType = Interpreter<
+  SectioningConfirmContext,
+  SectioningConfirmSchema,
+  SectioningConfirmEvent
 >;
 
-export type SectioningOutcomeActorRef = ActorRef<
-  SectioningOutcomeEvent,
-  SectioningOutcomeMachineType["state"]
+export type SectioningConfirmActorRef = ActorRef<
+  SectioningConfirmEvent,
+  SectioningConfirmMachineType["state"]
 >;
 
 //region State
@@ -26,7 +26,7 @@ export enum State {
   EDITING_LAYOUT = "editingLayout",
 }
 
-export interface SectioningOutcomeSchema {
+export interface SectioningConfirmSchema {
   states: {
     [State.INIT]: {};
     [State.CANCELLABLE_MODE]: {};
@@ -37,7 +37,7 @@ export interface SectioningOutcomeSchema {
 //endregion
 
 //region Context
-export interface SectioningOutcomeContext {
+export interface SectioningConfirmContext {
   /**
    * The layout plan created in the plan stage
    */
@@ -105,7 +105,7 @@ export type CommitConfirmationEvent = {
   confirmOperationLabware: ConfirmOperationLabware;
 };
 
-export type SectioningOutcomeEvent =
+export type SectioningConfirmEvent =
   | SetCommentForAddressEvent
   | SetCommentForAllEvent
   | EditLayoutEvent

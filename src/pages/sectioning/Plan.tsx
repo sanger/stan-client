@@ -17,12 +17,12 @@ import PinkButton from "../../components/buttons/PinkButton";
 import { useScrollToRef } from "../../hooks";
 import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
 
-interface PrepProps {
+interface PlanProps {
   current: SectioningMachineType["state"];
   send: SectioningMachineType["send"];
 }
 
-const Prep: React.FC<PrepProps> = ({ current, send }) => {
+const Plan: React.FC<PlanProps> = ({ current, send }) => {
   const [ref, scrollToRef] = useScrollToRef();
 
   const {
@@ -37,7 +37,7 @@ const Prep: React.FC<PrepProps> = ({ current, send }) => {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Sectioning - Prep</AppShell.Title>
+        <AppShell.Title>Sectioning - Plan</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
@@ -143,4 +143,4 @@ const Prep: React.FC<PrepProps> = ({ current, send }) => {
   );
 };
 
-export default Prep;
+export default Plan;

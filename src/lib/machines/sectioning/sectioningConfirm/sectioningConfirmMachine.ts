@@ -9,12 +9,12 @@ import { LabwareTypeName } from "../../../../types/stan";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../layout/layoutMachine";
 import {
-  SectioningOutcomeContext,
-  SectioningOutcomeEvent,
-  SectioningOutcomeSchema,
+  SectioningConfirmContext,
+  SectioningConfirmEvent,
+  SectioningConfirmSchema,
   State,
-} from "./sectioningOutcomeTypes";
-import { commitConfirmation } from "./sectioningOutcomeEvents";
+} from "./sectioningConfirmTypes";
+import { commitConfirmation } from "./sectioningConfirmEvents";
 
 enum Actions {
   ASSIGN_ADDRESS_COMMENT = "assignAddressComment",
@@ -33,17 +33,17 @@ enum Services {
 }
 
 /**
- * SectioningOutcome State Machine
+ * SectioningConfirm State Machine
  */
-export const createSectioningOutcomeMachine = (
+export const createSectioningConfirmMachine = (
   comments: Array<Comment>,
   labware: LabwareLayout,
   layoutPlan: LayoutPlan
 ) =>
   Machine<
-    SectioningOutcomeContext,
-    SectioningOutcomeSchema,
-    SectioningOutcomeEvent
+    SectioningConfirmContext,
+    SectioningConfirmSchema,
+    SectioningConfirmEvent
   >(
     {
       id: "sectioningOutcome",
@@ -113,8 +113,8 @@ export const createSectioningOutcomeMachine = (
   );
 
 const machineOptions: Partial<MachineOptions<
-  SectioningOutcomeContext,
-  SectioningOutcomeEvent
+  SectioningConfirmContext,
+  SectioningConfirmEvent
 >> = {
   actions: {
     /**

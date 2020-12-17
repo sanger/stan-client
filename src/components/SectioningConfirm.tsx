@@ -13,28 +13,28 @@ import {
   setCommentForAddress,
   setCommentForAll,
   toggleCancel,
-} from "../lib/machines/sectioning/sectioningOutcome/sectioningOutcomeEvents";
+} from "../lib/machines/sectioning/sectioningConfirm/sectioningConfirmEvents";
 import LayoutPlanner from "./LayoutPlanner";
 import { cancel, done } from "../lib/machines/layout/layoutEvents";
 import { TableCell } from "./Table";
 import RemoveIcon from "./icons/RemoveIcon";
 import {
-  SectioningOutcomeActorRef,
-  SectioningOutcomeEvent,
-  SectioningOutcomeMachineType,
-} from "../lib/machines/sectioning/sectioningOutcome/sectioningOutcomeTypes";
+  SectioningConfirmActorRef,
+  SectioningConfirmEvent,
+  SectioningConfirmMachineType,
+} from "../lib/machines/sectioning/sectioningConfirm/sectioningConfirmTypes";
 import classNames from "classnames";
 import MutedText from "./MutedText";
 import Label from "./forms/Label";
 
 interface SectioningConfirmProps {
-  actor: SectioningOutcomeActorRef;
+  actor: SectioningConfirmActorRef;
 }
 
 const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
   const [current, send] = useActor<
-    SectioningOutcomeEvent,
-    SectioningOutcomeMachineType["state"]
+    SectioningConfirmEvent,
+    SectioningConfirmMachineType["state"]
   >(actor);
 
   const {
@@ -151,15 +151,15 @@ const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
 export default SectioningConfirm;
 
 interface SectioningConfirmProps {
-  actor: SectioningOutcomeActorRef;
+  actor: SectioningConfirmActorRef;
 }
 
 export const SectioningConfirmTube: React.FC<SectioningConfirmProps> = ({
   actor,
 }) => {
   const [current, send] = useActor<
-    SectioningOutcomeEvent,
-    SectioningOutcomeMachineType["state"]
+    SectioningConfirmEvent,
+    SectioningConfirmMachineType["state"]
   >(actor);
 
   const { labware, cancelled } = current.context;

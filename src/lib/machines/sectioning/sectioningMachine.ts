@@ -9,7 +9,7 @@ import { createLabwareMachine } from "../labware/labwareMachine";
 import { current } from "immer";
 import { buildSampleColors } from "../../helpers/labwareHelper";
 import { createSectioningLayoutMachine } from "./sectioningLayout/sectioningLayoutMachine";
-import { createSectioningOutcomeMachine } from "./sectioningOutcome/sectioningOutcomeMachine";
+import { createSectioningConfirmMachine } from "./sectioningConfirm/sectioningConfirmMachine";
 import sectioningService from "../../services/sectioningService";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
 import {
@@ -84,7 +84,7 @@ export const createSectioningMachine = () =>
         sectioningLayouts: [],
         numSectioningLayoutsComplete: 0,
         sampleColors: new Map(),
-        sectioningOutcomeMachines: new Map(),
+        sectioningConfirmMachines: new Map(),
         confirmOperationRequest: buildConfirmOperationRequest(),
       },
       states: {
@@ -170,11 +170,11 @@ export const createSectioningMachine = () =>
 
             PREP_DONE: {
               cond: Guard.ALL_LAYOUT_COMPLETE,
-              target: `#${machineKey}.${State.OUTCOMES}`,
+              target: `#${machineKey}.${State.CONFIRMING}`,
             },
           },
         },
-        [State.OUTCOMES]: {
+        [State.CONFIRMING]: {
           on: {
             BACK_TO_PREP: {
               target: State.UNKNOWN,
@@ -263,8 +263,8 @@ const sectioningMachineOptions: Partial<MachineOptions<
         const labwareTypeName = labware.labwareType.name;
 
         // Because JS maps can't have default values :(
-        if (!ctx.sectioningOutcomeMachines.has(labwareTypeName)) {
-          ctx.sectioningOutcomeMachines.set(labwareTypeName, []);
+        if (!ctx.sectioningConfirmMachines.has(labwareTypeName)) {
+          ctx.sectioningConfirmMachines.set(labwareTypeName, []);
         }
 
         // Add a new ConfirmOperationLabware to ConfirmOperationRequest
@@ -273,12 +273,12 @@ const sectioningMachineOptions: Partial<MachineOptions<
         );
 
         // Spawn a new Sectioning Outcome Machine
-        const sectioningOutComeActorsByType = ctx.sectioningOutcomeMachines.get(
+        const sectioningOutComeActorsByType = ctx.sectioningConfirmMachines.get(
           labwareTypeName
         );
         sectioningOutComeActorsByType?.push(
           spawn(
-            createSectioningOutcomeMachine(
+            createSectioningConfirmMachine(
               currentCtx.comments,
               labware,
               buildSectioningOutcomeLayoutPlan(ctx, labware, plan.operations)

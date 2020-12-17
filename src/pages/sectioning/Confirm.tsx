@@ -14,19 +14,19 @@ import Table, {
   TableHeader,
 } from "../../components/Table";
 import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
-import { SectioningOutcomeActorRef } from "../../lib/machines/sectioning/sectioningOutcome/sectioningOutcomeTypes";
+import { SectioningConfirmActorRef } from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmTypes";
 
-interface OutcomesProps {
+interface ConfirmProps {
   current: SectioningMachineType["state"];
   send: SectioningMachineType["send"];
 }
 
-const Outcomes: React.FC<OutcomesProps> = ({ current, send }) => {
+const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
   useEffect(() => window.scrollTo(0, 0), []);
 
-  const { sectioningOutcomeMachines } = current.context;
+  const { sectioningConfirmMachines } = current.context;
   const sortedSOMs = sortBy(
-    Array.from(sectioningOutcomeMachines.keys()),
+    Array.from(sectioningConfirmMachines.keys()),
     (som) => som !== LabwareTypeName.TUBE
   );
 
@@ -41,7 +41,7 @@ const Outcomes: React.FC<OutcomesProps> = ({ current, send }) => {
             {sortedSOMs.map((labwareTypeName, i) => (
               <SectionConfirmSection
                 key={i}
-                actors={sectioningOutcomeMachines.get(labwareTypeName)}
+                actors={sectioningConfirmMachines.get(labwareTypeName)}
                 labwareTypeName={labwareTypeName}
               />
             ))}
@@ -65,7 +65,7 @@ const Outcomes: React.FC<OutcomesProps> = ({ current, send }) => {
 
 interface SectionConfirmSectionParams {
   labwareTypeName: string;
-  actors: Array<SectioningOutcomeActorRef> | undefined;
+  actors: Array<SectioningConfirmActorRef> | undefined;
 }
 
 const SectionConfirmSection: React.FC<SectionConfirmSectionParams> = ({
@@ -111,4 +111,4 @@ const SectionConfirmSection: React.FC<SectionConfirmSectionParams> = ({
   );
 };
 
-export default Outcomes;
+export default Confirm;

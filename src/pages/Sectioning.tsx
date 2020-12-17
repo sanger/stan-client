@@ -1,16 +1,16 @@
 import React from "react";
 import { useMachine } from "@xstate/react";
-import Prep from "./sectioning/Prep";
-import Outcomes from "./sectioning/Outcomes";
+import Plan from "./sectioning/Plan";
+import Confirm from "./sectioning/Confirm";
 import { createSectioningMachine } from "../lib/machines/sectioning/sectioningMachine";
 
 function Sectioning() {
   const [current, send] = useMachine(createSectioningMachine());
 
-  if (!current.matches("outcome")) {
-    return <Prep current={current} send={send} />;
+  if (!current.matches("confirming")) {
+    return <Plan current={current} send={send} />;
   } else {
-    return <Outcomes current={current} send={send} />;
+    return <Confirm current={current} send={send} />;
   }
 }
 

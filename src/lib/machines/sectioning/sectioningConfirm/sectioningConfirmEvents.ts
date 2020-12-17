@@ -1,12 +1,12 @@
 import {
-  SectioningOutcomeContext,
-  SectioningOutcomeEvent,
-} from "./sectioningOutcomeTypes";
+  SectioningConfirmContext,
+  SectioningConfirmEvent,
+} from "./sectioningConfirmTypes";
 
 export function setCommentForAddress(
   address: string,
   commentId: string
-): SectioningOutcomeEvent {
+): SectioningConfirmEvent {
   return {
     type: "SET_COMMENT_FOR_ADDRESS",
     address,
@@ -14,32 +14,32 @@ export function setCommentForAddress(
   };
 }
 
-export function setCommentForAll(commentId: string): SectioningOutcomeEvent {
+export function setCommentForAll(commentId: string): SectioningConfirmEvent {
   return {
     type: "SET_COMMENT_FOR_ALL",
     commentId,
   };
 }
 
-export function editLayout(): SectioningOutcomeEvent {
+export function editLayout(): SectioningConfirmEvent {
   return { type: "EDIT_LAYOUT" };
 }
 
-export function cancelEditLayout(): SectioningOutcomeEvent {
+export function cancelEditLayout(): SectioningConfirmEvent {
   return { type: "CANCEL_EDIT_LAYOUT" };
 }
 
-export function doneEditLayout(): SectioningOutcomeEvent {
+export function doneEditLayout(): SectioningConfirmEvent {
   return { type: "DONE_EDIT_LAYOUT" };
 }
 
-export function toggleCancel(): SectioningOutcomeEvent {
+export function toggleCancel(): SectioningConfirmEvent {
   return { type: "TOGGLE_CANCEL" };
 }
 
 export function commitConfirmation(
-  ctx: SectioningOutcomeContext
-): SectioningOutcomeEvent {
+  ctx: SectioningConfirmContext
+): SectioningConfirmEvent {
   return {
     type: "COMMIT_CONFIRMATION",
     confirmOperationLabware: {

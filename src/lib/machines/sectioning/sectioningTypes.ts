@@ -11,8 +11,8 @@ import { LabwareMachineActorRef } from "../labware";
 import { UpdateLabwaresEvent } from "../labware/labwareEvents";
 import {
   CommitConfirmationEvent,
-  SectioningOutcomeActorRef,
-} from "./sectioningOutcome/sectioningOutcomeTypes";
+  SectioningConfirmActorRef,
+} from "./sectioningConfirm/sectioningConfirmTypes";
 import {
   PlanSectionResolveEvent,
   PrepCompleteEvent,
@@ -35,7 +35,7 @@ export enum State {
   STARTED = "started",
   SOURCE_SCANNING = "sourceScanning",
   PREPARING_LABWARE = "preparingLabware",
-  OUTCOMES = "outcome",
+  CONFIRMING = "confirming",
 }
 
 export interface SectioningSchema {
@@ -50,7 +50,7 @@ export interface SectioningSchema {
         [State.PREPARING_LABWARE]: {};
       };
     };
-    [State.OUTCOMES]: {};
+    [State.CONFIRMING]: {};
   };
 }
 //endregion
@@ -126,7 +126,7 @@ export interface SectioningContext {
   /**
    * A map of labware type names to machines handling each labware's sectioning outcome
    */
-  sectioningOutcomeMachines: Map<string, Array<SectioningOutcomeActorRef>>;
+  sectioningConfirmMachines: Map<string, Array<SectioningConfirmActorRef>>;
 
   /**
    * The request that will be send to the API at the end of Sectioning
