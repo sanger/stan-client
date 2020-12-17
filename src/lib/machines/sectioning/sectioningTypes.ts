@@ -6,7 +6,7 @@ import {
   LabwareType,
   Maybe,
 } from "../../../types/graphql";
-import { Interpreter, State as XState } from "xstate";
+import { Interpreter } from "xstate";
 import { LabwareMachineActorRef } from "../labware";
 import { UpdateLabwaresEvent } from "../labware/labwareEvents";
 import {
@@ -24,13 +24,6 @@ export type SectioningMachineType = Interpreter<
   SectioningContext,
   SectioningSchema,
   SectioningEvent
->;
-
-export type SectioningState = XState<
-  SectioningContext,
-  SectioningEvent,
-  SectioningSchema,
-  any
 >;
 
 //region Sectioning States

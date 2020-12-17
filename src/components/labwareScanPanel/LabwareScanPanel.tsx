@@ -7,7 +7,6 @@ import RemoveIcon from "../icons/RemoveIcon";
 import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 import { motion } from "framer-motion";
 import { Column, Row, useTable } from "react-table";
-import { ActorRef } from "xstate";
 import BarcodeIcon from "../icons/BarcodeIcon";
 import MutedText from "../MutedText";
 import classNames from "classnames";

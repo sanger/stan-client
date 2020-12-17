@@ -1,7 +1,7 @@
 import { Machine, MachineOptions, sendParent } from "xstate";
 import {
-  LabwareLayoutFragment as LabwareLayout,
   Comment,
+  LabwareLayoutFragment as LabwareLayout,
 } from "../../../../types/graphql";
 import { LayoutPlan } from "../../layout/layoutContext";
 import { cloneDeep } from "@apollo/client/utilities";
@@ -15,7 +15,6 @@ import {
   State,
 } from "./sectioningOutcomeTypes";
 import { commitConfirmation } from "./sectioningOutcomeEvents";
-import { yupToFormErrors } from "formik";
 
 enum Actions {
   ASSIGN_ADDRESS_COMMENT = "assignAddressComment",

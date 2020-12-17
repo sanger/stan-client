@@ -1,10 +1,7 @@
 import {
-  Labware,
   LabwareLayoutFragment as LabwareLayout,
-  LabwareLayoutFragment,
   Maybe,
   PlanRequestAction,
-  Slot,
 } from "./graphql";
 import { ApolloError } from "@apollo/client";
 

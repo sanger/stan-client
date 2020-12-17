@@ -1,16 +1,14 @@
-import { MachineOptions, send, sendParent } from "xstate";
+import { MachineOptions, sendParent } from "xstate";
 import { assign } from "@xstate/immer";
 import { LabelPrinterContext } from "./labelPrinterContext";
 import {
-  updateLabelPrinter,
   LabelPrinterEvents,
-  PrintErrorEvent,
-  PrintSuccessEvent,
-  printSuccess,
   printError,
+  PrintErrorEvent,
+  printSuccess,
+  PrintSuccessEvent,
 } from "./labelPrinterEvents";
 import printService from "../../services/printService";
-import { pure } from "xstate/lib/actions";
 import { find } from "lodash";
 
 export enum Actions {
