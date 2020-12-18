@@ -33,6 +33,10 @@ enum Action {
   ASSIGN_PRINT_RESPONSE = "assignPrintResponse",
 }
 
+enum Activity {
+  UPDATE_SELECTED_PRINTER = "updateSelectedPrinter",
+}
+
 enum Guards {
   IS_VISIUM_LP = "isVisiumLP",
 }
@@ -134,6 +138,7 @@ export const createSectioningLayoutMachine = (
                   Action.ASSIGN_PLAN_RESPONSE,
                   forwardTo("sectioningMachine"),
                   sendParent(prepComplete()),
+                  Action.SPAWN_LABEL_PRINTER_MACHINE,
                 ],
               },
             ],
@@ -144,8 +149,8 @@ export const createSectioningLayoutMachine = (
           },
         },
         [State.PRINTING]: {
-          entry: Action.SPAWN_LABEL_PRINTER_MACHINE,
           initial: State.READY_TO_PRINT,
+          activities: Activity.UPDATE_SELECTED_PRINTER,
           states: {
             [State.READY_TO_PRINT]: {},
             [State.PRINT_SUCCESS]: {},
@@ -217,22 +222,8 @@ const sectioningLayoutMachineOptions: Partial<MachineOptions<
 
     [Action.SPAWN_LABEL_PRINTER_MACHINE]: assign((ctx, _e) => {
       const currentCtx = current(ctx);
-      const labwareBarcodes = currentCtx.plannedLabware.map((lw) => lw.barcode);
       ctx.labelPrinterRef = spawn(
         createLabelPrinterMachine({ labwares: currentCtx.plannedLabware })
-      );
-
-      // Notify other label printers of the change in the selected label printer
-      ctx.labelPrinterRef.subscribe(
-        ({ context }: { context: LabelPrinterContext }) => {
-          const printerName = context.labelPrinter.selectedPrinter?.name;
-
-          if (printerName) {
-            currentCtx.plannedLabware.map((lw) =>
-              lw.actorRef.send(updateSelectedLabelPrinter(printerName))
-            );
-          }
-        }
       );
     }),
 
@@ -245,6 +236,25 @@ const sectioningLayoutMachineOptions: Partial<MachineOptions<
         ctx.printErrorMessage = e.message;
       }
     }),
+  },
+
+  activities: {
+    // Notify other label printers of the change in the selected label printer
+    [Activity.UPDATE_SELECTED_PRINTER]: (ctx) => {
+      const subscription = ctx.labelPrinterRef?.subscribe(
+        ({ context }: { context: LabelPrinterContext }) => {
+          const printerName = context.labelPrinter.selectedPrinter?.name;
+
+          if (printerName) {
+            ctx.plannedLabware.map((lw) =>
+              lw.actorRef.send(updateSelectedLabelPrinter(printerName))
+            );
+          }
+        }
+      );
+
+      return () => subscription?.unsubscribe();
+    },
   },
 
   guards: {
