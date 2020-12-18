@@ -286,6 +286,10 @@ export type LabwareLayoutFragment = (
   & { labwareType: (
     { __typename?: 'LabwareType' }
     & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
+    & { labelType?: Maybe<(
+      { __typename?: 'LabelType' }
+      & Pick<LabelType, 'name'>
+    )> }
   ), slots: Array<(
     { __typename?: 'Slot' }
     & Pick<Slot, 'address' | 'labwareId'>
@@ -527,6 +531,9 @@ export const LabwareLayoutFragmentDoc = gql`
     name
     numRows
     numColumns
+    labelType {
+      name
+    }
   }
   slots {
     address

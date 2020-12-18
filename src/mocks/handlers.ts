@@ -543,7 +543,7 @@ export const handlers = [
               __typename: "Printer",
               name: "slidelabel",
               labelType: {
-                name: "label",
+                name: "slide",
               },
             },
           ],

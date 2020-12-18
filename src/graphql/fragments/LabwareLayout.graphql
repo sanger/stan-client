@@ -5,6 +5,9 @@ fragment LabwareLayout on Labware {
         name
         numRows
         numColumns
+        labelType {
+            name
+        }
     }
     slots {
         address

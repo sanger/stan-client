@@ -200,7 +200,7 @@ const sectioningLayoutMachineOptions: Partial<MachineOptions<
           ...labware,
           actorRef: spawn(
             createLabelPrinterMachine(
-              { labwareBarcodes: [labware.barcode] },
+              { labwares: [labware] },
               { fetchPrinters: true }
             )
           ),
@@ -219,7 +219,7 @@ const sectioningLayoutMachineOptions: Partial<MachineOptions<
       const currentCtx = current(ctx);
       const labwareBarcodes = currentCtx.plannedLabware.map((lw) => lw.barcode);
       ctx.labelPrinterRef = spawn(
-        createLabelPrinterMachine({ labwareBarcodes })
+        createLabelPrinterMachine({ labwares: currentCtx.plannedLabware })
       );
 
       // Notify other label printers of the change in the selected label printer
