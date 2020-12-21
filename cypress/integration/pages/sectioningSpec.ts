@@ -195,12 +195,15 @@ describe("Sectioning", () => {
 
     context("when printing succeeds", () => {
       before(() => {
-        cy.findByLabelText("printers").select("cgaptestbc");
+        cy.visit("/lab/sectioning");
+        cy.wait(2000);
+        createLabware();
+        cy.findByLabelText("printers").select("slidelabel");
         cy.findByText("Print Labels").click();
       });
 
       it("shows a success message", () => {
-        cy.findByText("cgaptestbc successfully printed STAN-002FB").should(
+        cy.findByText("slidelabel successfully printed STAN-002FB").should(
           "exist"
         );
       });
@@ -208,6 +211,22 @@ describe("Sectioning", () => {
 
     context("when printing fails", () => {
       before(() => {
+        cy.visit("/lab/sectioning");
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.mutation("Print", (req, res, ctx) => {
+              return res(
+                ctx.errors([
+                  {
+                    message: "slidelabel failed to print STAN-002FB",
+                  },
+                ])
+              );
+            })
+          );
+        });
+        cy.wait(2000);
+        createLabware();
         cy.findByLabelText("printers").select("slidelabel");
         cy.findByText("Print Labels").click();
       });

@@ -1,7 +1,10 @@
 import React, { useEffect } from "react";
 import AppShell from "../../components/AppShell";
 import PinkButton from "../../components/buttons/PinkButton";
-import { backToPrep } from "../../lib/machines/sectioning/sectioningEvents";
+import {
+  backToPrep,
+  confirmOperation,
+} from "../../lib/machines/sectioning/sectioningEvents";
 import SectioningConfirm, {
   SectioningConfirmTube,
 } from "../../components/SectioningConfirm";
@@ -15,6 +18,8 @@ import Table, {
 } from "../../components/Table";
 import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
 import { SectioningConfirmActorRef } from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmTypes";
+import Warning from "../../components/notifications/Warning";
+import { useScrollToRef } from "../../hooks";
 
 interface ConfirmProps {
   current: SectioningMachineType["state"];
@@ -22,6 +27,13 @@ interface ConfirmProps {
 }
 
 const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
+  const [ref, scrollToRef] = useScrollToRef();
+  useEffect(() => {
+    if (current.matches({ confirming: "confirmError" })) {
+      scrollToRef();
+    }
+  }, [current, scrollToRef]);
+
   useEffect(() => window.scrollTo(0, 0), []);
 
   const { sectioningConfirmMachines } = current.context;
@@ -45,6 +57,15 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
                 labwareTypeName={labwareTypeName}
               />
             ))}
+            {current.matches({ confirming: "confirmError" }) && (
+              <div ref={ref}>
+                <Warning
+                  message={
+                    "There was an error confirming the Sectioning operation"
+                  }
+                />
+              </div>
+            )}
           </div>
         </div>
       </AppShell.Main>
@@ -55,7 +76,13 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
             <PinkButton onClick={() => send(backToPrep())} action="tertiary">
               Back
             </PinkButton>
-            <PinkButton action="primary">Save</PinkButton>
+            <PinkButton
+              disabled={current.matches("confirm")}
+              onClick={() => send(confirmOperation())}
+              action="primary"
+            >
+              Save
+            </PinkButton>
           </div>
         </div>
       </div>
@@ -92,8 +119,10 @@ const SectionConfirmSection: React.FC<SectionConfirmSectionParams> = ({
           <div className="">
             <Table>
               <TableHead>
-                <TableHeader>Tube Barcode</TableHeader>
-                <TableHeader></TableHeader>
+                <tr>
+                  <TableHeader>Tube Barcode</TableHeader>
+                  <TableHeader />
+                </tr>
               </TableHead>
               <TableBody>
                 {actors.map((actor, i) => (

@@ -212,6 +212,6 @@ export interface SectioningLayout {
   barcode?: string;
 }
 
-interface HasLabelPrinterActor {
+export interface HasLabelPrinterActor {
   actorRef: LabelPrinterActorRef;
 }

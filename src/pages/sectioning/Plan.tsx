@@ -16,6 +16,7 @@ import BlueButton from "../../components/buttons/BlueButton";
 import PinkButton from "../../components/buttons/PinkButton";
 import { useScrollToRef } from "../../hooks";
 import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
+import ButtonBar from "../../components/ButtonBar";
 
 interface PlanProps {
   current: SectioningMachineType["state"];
@@ -119,26 +120,20 @@ const Plan: React.FC<PlanProps> = ({ current, send }) => {
         </div>
       </div>
 
-      {/* TODO: Maybe make this into some kind of <ButtonBar /> component */}
-      <div className="border border-t-2 border-gray-200 w-full py-4 px-4 sm:px-6 lg:px-8 bg-gray-100 flex-shrink-0">
-        <div className="max-w-screen-xl mx-auto">
-          <div className="flex flex-row items-center justify-between">
-            <PinkButton action="tertiary">Cancel</PinkButton>
-            <PinkButton
-              disabled={
-                !(
-                  sectioningLayouts.length > 0 &&
-                  sectioningLayouts.length === numSectioningLayoutsComplete
-                )
-              }
-              onClick={() => send(prepDone())}
-              action="primary"
-            >
-              Next {">"}
-            </PinkButton>
-          </div>
-        </div>
-      </div>
+      <ButtonBar>
+        <PinkButton
+          disabled={
+            !(
+              sectioningLayouts.length > 0 &&
+              sectioningLayouts.length === numSectioningLayoutsComplete
+            )
+          }
+          onClick={() => send(prepDone())}
+          action="primary"
+        >
+          Next {">"}
+        </PinkButton>
+      </ButtonBar>
     </AppShell>
   );
 };

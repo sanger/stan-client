@@ -296,6 +296,21 @@ export type LabwareLayoutFragment = (
     & { samples: Array<(
       { __typename?: 'Sample' }
       & Pick<Sample, 'id'>
+      & { tissue: (
+        { __typename?: 'Tissue' }
+        & Pick<Tissue, 'externalName' | 'replicate'>
+        & { donor: (
+          { __typename?: 'Donor' }
+          & Pick<Donor, 'donorName'>
+        ), spatialLocation: (
+          { __typename?: 'SpatialLocation' }
+          & Pick<SpatialLocation, 'code'>
+          & { tissueType: (
+            { __typename?: 'TissueType' }
+            & Pick<TissueType, 'name'>
+          ) }
+        ) }
+      ) }
     )> }
   )> }
 );
@@ -396,20 +411,7 @@ export type RegisterTissuesMutation = (
     { __typename?: 'RegisterResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
-      & Pick<Labware, 'barcode'>
-      & { slots: Array<(
-        { __typename?: 'Slot' }
-        & { samples: Array<(
-          { __typename?: 'Sample' }
-          & { tissue: (
-            { __typename?: 'Tissue' }
-            & Pick<Tissue, 'externalName'>
-          ) }
-        )> }
-      )>, labwareType: (
-        { __typename?: 'LabwareType' }
-        & Pick<LabwareType, 'name'>
-      ) }
+      & LabwareLayoutFragment
     )> }
   ) }
 );
@@ -540,6 +542,19 @@ export const LabwareLayoutFragmentDoc = gql`
     labwareId
     samples {
       id
+      tissue {
+        donor {
+          donorName
+        }
+        externalName
+        spatialLocation {
+          tissueType {
+            name
+          }
+          code
+        }
+        replicate
+      }
     }
   }
 }
@@ -729,21 +744,11 @@ export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {
     labware {
-      barcode
-      slots {
-        samples {
-          tissue {
-            externalName
-          }
-        }
-      }
-      labwareType {
-        name
-      }
+      ...LabwareLayout
     }
   }
 }
-    `;
+    ${LabwareLayoutFragmentDoc}`;
 export type RegisterTissuesMutationFn = Apollo.MutationFunction<RegisterTissuesMutation, RegisterTissuesMutationVariables>;
 
 /**

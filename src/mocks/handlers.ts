@@ -1,5 +1,7 @@
 import { graphql } from "msw";
 import {
+  ConfirmMutation,
+  ConfirmMutationVariables,
   CurrentUserQuery,
   CurrentUserQueryVariables,
   FindLabwareQuery,
@@ -190,16 +192,32 @@ export const handlers = [
           register: {
             labware: [
               {
+                id: 1,
                 barcode: "LW_BC_1",
                 labwareType: {
                   name: "Proviasette",
+                  numRows: 1,
+                  numColumns: 1,
                 },
                 slots: [
                   {
+                    address: "A1",
+                    labwareId: 1,
                     samples: [
                       {
+                        id: 1,
                         tissue: {
-                          externalName: "EXTERNAL_123",
+                          externalName: "EXT1",
+                          replicate: 5,
+                          donor: {
+                            donorName: "Donor 3",
+                          },
+                          spatialLocation: {
+                            code: 3,
+                            tissueType: {
+                              name: "Lung",
+                            },
+                          },
                         },
                       },
                     ],
@@ -213,55 +231,55 @@ export const handlers = [
     }
   ),
 
-  // graphql.query<FindLabwareQuery, FindLabwareQueryVariables>(
-  //   "FindLabware",
-  //   (req, res, ctx) => {
-  //     if (!req.variables.barcode.startsWith("STAN-")) {
-  //       return res(
-  //         ctx.errors([
-  //           {
-  //             message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.barcode}`,
-  //           },
-  //         ])
-  //       );
-  //     }
-  //
-  //     return res(
-  //       ctx.data({
-  //         labware: {
-  //           id: 1,
-  //           labwareType: {
-  //             name: "Proviasette",
-  //           },
-  //           barcode: req.variables.barcode,
-  //           slots: [
-  //             {
-  //               block: true,
-  //               address: "A1",
-  //               samples: [
-  //                 {
-  //                   id: 3,
-  //                   tissue: {
-  //                     replicate: 5,
-  //                     donor: {
-  //                       donorName: "Donor 3",
-  //                     },
-  //                     spatialLocation: {
-  //                       code: 3,
-  //                       tissueType: {
-  //                         name: "Lung",
-  //                       },
-  //                     },
-  //                   },
-  //                 },
-  //               ],
-  //             },
-  //           ],
-  //         },
-  //       })
-  //     );
-  //   }
-  // ),
+  graphql.query<FindLabwareQuery, FindLabwareQueryVariables>(
+    "FindLabware",
+    (req, res, ctx) => {
+      if (!req.variables.barcode.startsWith("STAN-")) {
+        return res(
+          ctx.errors([
+            {
+              message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.barcode}`,
+            },
+          ])
+        );
+      }
+
+      return res(
+        ctx.data({
+          labware: {
+            id: 1,
+            labwareType: {
+              name: "Proviasette",
+            },
+            barcode: req.variables.barcode,
+            slots: [
+              {
+                block: true,
+                address: "A1",
+                samples: [
+                  {
+                    id: 3,
+                    tissue: {
+                      replicate: 5,
+                      donor: {
+                        donorName: "Donor 3",
+                      },
+                      spatialLocation: {
+                        code: 3,
+                        tissueType: {
+                          name: "Lung",
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        })
+      );
+    }
+  ),
 
   graphql.query<GetSectioningInfoQuery, GetRegistrationInfoQueryVariables>(
     "GetSectioningInfo",
@@ -292,239 +310,320 @@ export const handlers = [
     }
   ),
 
-  // graphql.mutation<PlanMutation, PlanMutationVariables>(
-  //   "Plan",
-  //   (req, res, ctx) => {
-  //     if (req.variables.request.operationType === "Section") {
-  //       return res(
-  //         ctx.data({
-  //           // Response not dynamic in any way. Just need a successful response for now.
-  //           plan: {
-  //             labware: [
-  //               {
-  //                 id: 53,
-  //                 barcode: "STAN-002FB",
-  //                 slots: [
-  //                   {
-  //                     samples: [
-  //                       {
-  //                         id: 1,
-  //                       },
-  //                     ],
-  //                     labwareId: 53,
-  //                     address: "A1",
-  //                     __typename: "Slot",
-  //                   },
-  //                   {
-  //                     samples: [
-  //                       {
-  //                         id: 1,
-  //                       },
-  //                     ],
-  //                     labwareId: 53,
-  //                     address: "B1",
-  //                     __typename: "Slot",
-  //                   },
-  //                   {
-  //                     samples: [
-  //                       {
-  //                         id: 1,
-  //                       },
-  //                     ],
-  //                     labwareId: 53,
-  //                     address: "C1",
-  //                     __typename: "Slot",
-  //                   },
-  //                   {
-  //                     samples: [
-  //                       {
-  //                         id: 1,
-  //                       },
-  //                     ],
-  //                     labwareId: 53,
-  //                     address: "A2",
-  //                     __typename: "Slot",
-  //                   },
-  //                   {
-  //                     samples: [
-  //                       {
-  //                         id: 1,
-  //                       },
-  //                     ],
-  //                     labwareId: 53,
-  //                     address: "B2",
-  //                     __typename: "Slot",
-  //                   },
-  //                   {
-  //                     samples: [
-  //                       {
-  //                         id: 1,
-  //                       },
-  //                     ],
-  //                     labwareId: 53,
-  //                     address: "C2",
-  //                     __typename: "Slot",
-  //                   },
-  //                 ],
-  //                 labwareType: {
-  //                   name: "slide",
-  //                   numRows: 3,
-  //                   numColumns: 2,
-  //                   __typename: "LabwareType",
-  //                 },
-  //                 __typename: "Labware",
-  //               },
-  //             ],
-  //             operations: [
-  //               {
-  //                 operationType: {
-  //                   name: "Section",
-  //                   __typename: "OperationType",
-  //                 },
-  //                 planActions: [
-  //                   {
-  //                     newSection: 177,
-  //                     sample: {
-  //                       id: 1,
-  //                     },
-  //                     source: {
-  //                       address: "A1",
-  //                       labwareId: 1,
-  //                       samples: [
-  //                         {
-  //                           id: 1,
-  //                         },
-  //                       ],
-  //                       __typename: "Slot",
-  //                     },
-  //                     destination: {
-  //                       address: "A1",
-  //                       labwareId: 53,
-  //                       __typename: "Slot",
-  //                     },
-  //                     __typename: "PlanAction",
-  //                   },
-  //                   {
-  //                     newSection: 178,
-  //                     sample: {
-  //                       id: 1,
-  //                     },
-  //                     source: {
-  //                       address: "A1",
-  //                       labwareId: 1,
-  //                       samples: [
-  //                         {
-  //                           id: 1,
-  //                         },
-  //                       ],
-  //                       __typename: "Slot",
-  //                     },
-  //                     destination: {
-  //                       address: "B1",
-  //                       labwareId: 53,
-  //                       __typename: "Slot",
-  //                     },
-  //                     __typename: "PlanAction",
-  //                   },
-  //                   {
-  //                     newSection: 179,
-  //                     sample: {
-  //                       id: 1,
-  //                     },
-  //                     source: {
-  //                       address: "A1",
-  //                       labwareId: 1,
-  //                       samples: [
-  //                         {
-  //                           id: 1,
-  //                         },
-  //                       ],
-  //                       __typename: "Slot",
-  //                     },
-  //                     destination: {
-  //                       address: "C1",
-  //                       labwareId: 53,
-  //                       __typename: "Slot",
-  //                     },
-  //                     __typename: "PlanAction",
-  //                   },
-  //                   {
-  //                     newSection: 180,
-  //                     sample: {
-  //                       id: 1,
-  //                     },
-  //                     source: {
-  //                       address: "A1",
-  //                       labwareId: 1,
-  //                       samples: [
-  //                         {
-  //                           id: 1,
-  //                         },
-  //                       ],
-  //                       __typename: "Slot",
-  //                     },
-  //                     destination: {
-  //                       address: "A2",
-  //                       labwareId: 53,
-  //                       __typename: "Slot",
-  //                     },
-  //                     __typename: "PlanAction",
-  //                   },
-  //                   {
-  //                     newSection: 181,
-  //                     sample: {
-  //                       id: 1,
-  //                     },
-  //                     source: {
-  //                       address: "A1",
-  //                       labwareId: 1,
-  //                       samples: [
-  //                         {
-  //                           id: 1,
-  //                         },
-  //                       ],
-  //                       __typename: "Slot",
-  //                     },
-  //                     destination: {
-  //                       address: "B2",
-  //                       labwareId: 53,
-  //                       __typename: "Slot",
-  //                     },
-  //                     __typename: "PlanAction",
-  //                   },
-  //                   {
-  //                     newSection: 182,
-  //                     sample: {
-  //                       id: 1,
-  //                     },
-  //                     source: {
-  //                       address: "A1",
-  //                       labwareId: 1,
-  //                       samples: [
-  //                         {
-  //                           id: 1,
-  //                         },
-  //                       ],
-  //                       __typename: "Slot",
-  //                     },
-  //                     destination: {
-  //                       address: "B3",
-  //                       labwareId: 53,
-  //                       __typename: "Slot",
-  //                     },
-  //                     __typename: "PlanAction",
-  //                   },
-  //                 ],
-  //                 __typename: "PlanOperation",
-  //               },
-  //             ],
-  //             __typename: "PlanResult",
-  //           },
-  //         })
-  //       );
-  //     }
-  //   }
-  // ),
+  graphql.mutation<PlanMutation, PlanMutationVariables>(
+    "Plan",
+    (req, res, ctx) => {
+      if (req.variables.request.operationType === "Section") {
+        return res(
+          ctx.data({
+            // Response not dynamic in any way. Just need a successful response for now.
+            plan: {
+              labware: [
+                {
+                  id: 53,
+                  barcode: "STAN-002FB",
+                  slots: [
+                    {
+                      samples: [
+                        {
+                          id: 1,
+                          tissue: {
+                            externalName: "EXT1",
+                            replicate: 5,
+                            donor: {
+                              donorName: "Donor 3",
+                            },
+                            spatialLocation: {
+                              code: 3,
+                              tissueType: {
+                                name: "Lung",
+                              },
+                            },
+                          },
+                        },
+                      ],
+                      labwareId: 53,
+                      address: "A1",
+                      __typename: "Slot",
+                    },
+                    {
+                      samples: [
+                        {
+                          id: 1,
+                          tissue: {
+                            externalName: "EXT1",
+                            replicate: 5,
+                            donor: {
+                              donorName: "Donor 3",
+                            },
+                            spatialLocation: {
+                              code: 3,
+                              tissueType: {
+                                name: "Lung",
+                              },
+                            },
+                          },
+                        },
+                      ],
+                      labwareId: 53,
+                      address: "B1",
+                      __typename: "Slot",
+                    },
+                    {
+                      samples: [
+                        {
+                          id: 1,
+                          tissue: {
+                            externalName: "EXT1",
+                            replicate: 5,
+                            donor: {
+                              donorName: "Donor 3",
+                            },
+                            spatialLocation: {
+                              code: 3,
+                              tissueType: {
+                                name: "Lung",
+                              },
+                            },
+                          },
+                        },
+                      ],
+                      labwareId: 53,
+                      address: "C1",
+                      __typename: "Slot",
+                    },
+                    {
+                      samples: [
+                        {
+                          id: 1,
+                          tissue: {
+                            externalName: "EXT1",
+                            replicate: 5,
+                            donor: {
+                              donorName: "Donor 3",
+                            },
+                            spatialLocation: {
+                              code: 3,
+                              tissueType: {
+                                name: "Lung",
+                              },
+                            },
+                          },
+                        },
+                      ],
+                      labwareId: 53,
+                      address: "A2",
+                      __typename: "Slot",
+                    },
+                    {
+                      samples: [
+                        {
+                          id: 1,
+                          tissue: {
+                            externalName: "EXT1",
+                            replicate: 5,
+                            donor: {
+                              donorName: "Donor 3",
+                            },
+                            spatialLocation: {
+                              code: 3,
+                              tissueType: {
+                                name: "Lung",
+                              },
+                            },
+                          },
+                        },
+                      ],
+                      labwareId: 53,
+                      address: "B2",
+                      __typename: "Slot",
+                    },
+                    {
+                      samples: [
+                        {
+                          id: 1,
+                          tissue: {
+                            externalName: "EXT1",
+                            replicate: 5,
+                            donor: {
+                              donorName: "Donor 3",
+                            },
+                            spatialLocation: {
+                              code: 3,
+                              tissueType: {
+                                name: "Lung",
+                              },
+                            },
+                          },
+                        },
+                      ],
+                      labwareId: 53,
+                      address: "C2",
+                      __typename: "Slot",
+                    },
+                  ],
+                  labwareType: {
+                    name: "slide",
+                    numRows: 3,
+                    numColumns: 2,
+                    labelType: {
+                      name: "slide",
+                    },
+                    __typename: "LabwareType",
+                  },
+                  __typename: "Labware",
+                },
+              ],
+              operations: [
+                {
+                  operationType: {
+                    name: "Section",
+                    __typename: "OperationType",
+                  },
+                  planActions: [
+                    {
+                      newSection: 177,
+                      sample: {
+                        id: 1,
+                      },
+                      source: {
+                        address: "A1",
+                        labwareId: 1,
+                        samples: [
+                          {
+                            id: 1,
+                          },
+                        ],
+                        __typename: "Slot",
+                      },
+                      destination: {
+                        address: "A1",
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                    {
+                      newSection: 178,
+                      sample: {
+                        id: 1,
+                      },
+                      source: {
+                        address: "A1",
+                        labwareId: 1,
+                        samples: [
+                          {
+                            id: 1,
+                          },
+                        ],
+                        __typename: "Slot",
+                      },
+                      destination: {
+                        address: "B1",
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                    {
+                      newSection: 179,
+                      sample: {
+                        id: 1,
+                      },
+                      source: {
+                        address: "A1",
+                        labwareId: 1,
+                        samples: [
+                          {
+                            id: 1,
+                          },
+                        ],
+                        __typename: "Slot",
+                      },
+                      destination: {
+                        address: "C1",
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                    {
+                      newSection: 180,
+                      sample: {
+                        id: 1,
+                      },
+                      source: {
+                        address: "A1",
+                        labwareId: 1,
+                        samples: [
+                          {
+                            id: 1,
+                          },
+                        ],
+                        __typename: "Slot",
+                      },
+                      destination: {
+                        address: "A2",
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                    {
+                      newSection: 181,
+                      sample: {
+                        id: 1,
+                      },
+                      source: {
+                        address: "A1",
+                        labwareId: 1,
+                        samples: [
+                          {
+                            id: 1,
+                          },
+                        ],
+                        __typename: "Slot",
+                      },
+                      destination: {
+                        address: "B2",
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                    {
+                      newSection: 182,
+                      sample: {
+                        id: 1,
+                      },
+                      source: {
+                        address: "A1",
+                        labwareId: 1,
+                        samples: [
+                          {
+                            id: 1,
+                          },
+                        ],
+                        __typename: "Slot",
+                      },
+                      destination: {
+                        address: "B3",
+                        labwareId: 53,
+                        __typename: "Slot",
+                      },
+                      __typename: "PlanAction",
+                    },
+                  ],
+                  __typename: "PlanOperation",
+                },
+              ],
+              __typename: "PlanResult",
+            },
+          })
+        );
+      }
+    }
+  ),
 
   graphql.query<GetPrintersQuery, GetPrintersQueryVariables>(
     "GetPrinters",
@@ -555,20 +654,28 @@ export const handlers = [
   graphql.mutation<PrintMutation, PrintMutationVariables>(
     "Print",
     (req, res, ctx) => {
-      // Just so we can test failure behaviour
-      if (req.variables.printer === "slidelabel") {
-        return res(
-          ctx.errors([
-            {
-              message: "Failed to print",
-            },
-          ])
-        );
-      }
-
       return res(
         ctx.data({
           printLabware: "OK",
+        })
+      );
+    }
+  ),
+
+  graphql.mutation<ConfirmMutation, ConfirmMutationVariables>(
+    "Confirm",
+    (req, res, ctx) => {
+      // return res(
+      //   ctx.errors([
+      //     {
+      //       message: "Error in confirm",
+      //     },
+      //   ])
+      // );
+
+      return res(
+        ctx.data({
+          confirm: "OK",
         })
       );
     }

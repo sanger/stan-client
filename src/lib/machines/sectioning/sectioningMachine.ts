@@ -11,6 +11,7 @@ import { buildSampleColors } from "../../helpers/labwareHelper";
 import { createSectioningLayoutMachine } from "./sectioningLayout/sectioningLayoutMachine";
 import { createSectioningConfirmMachine } from "./sectioningConfirm/sectioningConfirmMachine";
 import sectioningService from "../../services/sectioningService";
+import confirmService from "../../services/confirmService";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
 import {
   Labware,
@@ -55,6 +56,7 @@ enum Guard {
 
 enum Service {
   GET_SECTIONING_INFO = "getSectioningInfo",
+  CONFIRM_OPERATION = "confirmOperation",
 }
 
 /**
@@ -103,7 +105,6 @@ export const createSectioningMachine = () =>
         },
         [State.ERROR]: {},
         [State.UNKNOWN]: {
-          // Transition state (immediately transitions to another state)
           always: [
             {
               cond: Guard.NO_SOURCE_LABWARES,
@@ -170,11 +171,12 @@ export const createSectioningMachine = () =>
 
             PREP_DONE: {
               cond: Guard.ALL_LAYOUT_COMPLETE,
-              target: `#${machineKey}.${State.CONFIRMING}`,
+              target: State.CONFIRMING,
             },
           },
         },
         [State.CONFIRMING]: {
+          initial: State.CONFIRMING_LABWARE,
           on: {
             BACK_TO_PREP: {
               target: State.UNKNOWN,
@@ -182,8 +184,27 @@ export const createSectioningMachine = () =>
             COMMIT_CONFIRMATION: {
               actions: Action.UPDATE_CONFIRMATION,
             },
+            CONFIRM_OPERATION: {
+              target: `${State.CONFIRMING}.${State.CONFIRM_OPERATION}`,
+            },
+          },
+          states: {
+            [State.CONFIRMING_LABWARE]: {},
+            [State.CONFIRM_OPERATION]: {
+              invoke: {
+                src: Service.CONFIRM_OPERATION,
+                onDone: {
+                  target: `#${machineKey}.${State.DONE}`,
+                },
+                onError: {
+                  target: State.CONFIRM_ERROR,
+                },
+              },
+            },
+            [State.CONFIRM_ERROR]: {},
           },
         },
+        [State.DONE]: {},
       },
     },
     sectioningMachineOptions
@@ -322,6 +343,8 @@ const sectioningMachineOptions: Partial<MachineOptions<
 
   services: {
     [Service.GET_SECTIONING_INFO]: sectioningService.getSectioningInfo,
+    [Service.CONFIRM_OPERATION]: (ctx) =>
+      confirmService.confirm(ctx.confirmOperationRequest),
   },
 };
 

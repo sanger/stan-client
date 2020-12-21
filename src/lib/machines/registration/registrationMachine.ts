@@ -50,7 +50,10 @@ const registrationMachine = Machine<
           src: Services.SUBMIT,
           onDone: {
             target: State.COMPLETE,
-            actions: Actions.ASSIGN_REGISTRATION_RESULT,
+            actions: [
+              Actions.ASSIGN_REGISTRATION_RESULT,
+              Actions.SPAWN_LABEL_PRINTER,
+            ],
           },
           onError: {
             target: State.SUBMISSION_ERROR,
@@ -64,7 +67,7 @@ const registrationMachine = Machine<
         },
       },
       [State.COMPLETE]: {
-        type: "final" as const,
+        type: "final",
       },
     },
   },

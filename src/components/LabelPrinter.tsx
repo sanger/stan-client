@@ -47,7 +47,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ actor }) => {
 
       <div>
         <PinkButton
-          disabled={state.matches("printing")}
+          disabled={state.matches("printing") || printers.length === 0}
           onClick={() => send(print())}
           className="flex flex-row items-center justify-center space-x-1"
         >

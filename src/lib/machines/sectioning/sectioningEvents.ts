@@ -32,3 +32,9 @@ export function backToPrep(): SectioningEvent {
     type: "BACK_TO_PREP",
   };
 }
+
+export function confirmOperation(): SectioningEvent {
+  return {
+    type: "CONFIRM_OPERATION",
+  };
+}

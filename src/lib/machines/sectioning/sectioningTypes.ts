@@ -35,7 +35,11 @@ export enum State {
   STARTED = "started",
   SOURCE_SCANNING = "sourceScanning",
   PREPARING_LABWARE = "preparingLabware",
+  CONFIRMING_LABWARE = "confirmingLabware",
   CONFIRMING = "confirming",
+  CONFIRM_OPERATION = "confirmOperation",
+  CONFIRM_ERROR = "confirmError",
+  DONE = "done",
 }
 
 export interface SectioningSchema {
@@ -50,7 +54,14 @@ export interface SectioningSchema {
         [State.PREPARING_LABWARE]: {};
       };
     };
-    [State.CONFIRMING]: {};
+    [State.CONFIRMING]: {
+      states: {
+        [State.CONFIRMING_LABWARE]: {};
+        [State.CONFIRM_OPERATION]: {};
+        [State.CONFIRM_ERROR]: {};
+      };
+    };
+    [State.DONE]: {};
   };
 }
 //endregion
@@ -163,6 +174,15 @@ type BackToPrepEvent = {
   type: "BACK_TO_PREP";
 };
 
+type ConfirmOperationEvent = {
+  type: "CONFIRM_OPERATION";
+};
+
+type ConfirmOperationResolveEvent = {
+  type: "done.invoke.confirmOperation";
+  data: ConfirmOperationRequest;
+};
+
 export type SectioningEvent =
   | SelectLabwareTypeEvent
   | AddLabwareLayoutEvent
@@ -173,5 +193,7 @@ export type SectioningEvent =
   | BackToPrepEvent
   | PlanSectionResolveEvent
   | CommitConfirmationEvent
-  | PrepCompleteEvent;
+  | PrepCompleteEvent
+  | ConfirmOperationEvent
+  | ConfirmOperationResolveEvent;
 //endregion

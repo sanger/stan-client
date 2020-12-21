@@ -4,6 +4,7 @@ import {
 } from "../../../types/graphql";
 import * as Yup from "yup";
 import { LabwareTypeName, ServerErrors } from "../../../types/stan";
+import { LabelPrinterActorRef } from "../labelPrinter";
 
 export interface RegistrationContext {
   loadingError: string;
@@ -11,4 +12,5 @@ export interface RegistrationContext {
   registrationSchema: Yup.ObjectSchema;
   registrationResult: RegisterTissuesMutation;
   registrationErrors: ServerErrors;
+  labelPrinterRef: LabelPrinterActorRef;
 }

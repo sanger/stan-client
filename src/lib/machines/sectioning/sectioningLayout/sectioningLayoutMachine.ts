@@ -228,13 +228,9 @@ const sectioningLayoutMachineOptions: Partial<MachineOptions<
     }),
 
     [Action.ASSIGN_PRINT_RESPONSE]: assign((ctx, e) => {
-      if (e.type === "PRINT_SUCCESS") {
-        ctx.printSuccessMessage = e.message;
-        ctx.printErrorMessage = undefined;
-      } else if (e.type === "PRINT_ERROR") {
-        ctx.printSuccessMessage = undefined;
-        ctx.printErrorMessage = e.message;
-      }
+      ctx.printSuccessMessage =
+        e.type === "PRINT_SUCCESS" ? e.message : undefined;
+      ctx.printErrorMessage = e.type === "PRINT_ERROR" ? e.message : undefined;
     }),
   },
 
@@ -294,7 +290,7 @@ function buildPlanRequestLabware(
       const source = layoutPlan.plannedActions.get(address);
 
       if (!source) {
-        throw new Error("Mess up here");
+        throw new Error("Source not found from planned actions");
       }
 
       return {

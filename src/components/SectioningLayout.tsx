@@ -1,4 +1,5 @@
 import React from "react";
+import labwareScanTableColumns from "../components/labwareScanPanel/columns";
 import PinkButton from "./buttons/PinkButton";
 import { useActor } from "@xstate/react";
 import Label from "./forms/Label";
@@ -9,7 +10,6 @@ import LayoutPlanner from "./LayoutPlanner";
 import Labware from "./Labware";
 import { motion } from "framer-motion";
 import variants from "../lib/motionVariants";
-import Table, { TableBody, TableCell, TableHead, TableHeader } from "./Table";
 import Warning from "./notifications/Warning";
 import {
   createLabware,
@@ -22,10 +22,14 @@ import Success from "./notifications/Success";
 import LabelPrinterButton from "./LabelPrinterButton";
 import { cancel, done } from "../lib/machines/layout/layoutEvents";
 import {
+  HasLabelPrinterActor,
   SectioningLayoutActorRef,
   SectioningLayoutEvent,
   SectioningLayoutMachineType,
 } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
+import LabwareTable from "./LabwareTable";
+import { Column, Row } from "react-table";
+import { LabwareLayoutFragment } from "../types/graphql";
 
 interface SectioningLayoutProps {
   /**
@@ -61,6 +65,47 @@ const SectioningLayout = React.forwardRef<
 
   const { layoutMachine } = current.children;
 
+  const sectionsColumn: Column<LabwareLayoutFragment> = React.useMemo(() => {
+    return {
+      Header: "Section Number",
+      id: "sections",
+      Cell: ({ row }: { row: Row<LabwareLayoutFragment> }) => {
+        return plannedOperations.map((operation, j) => {
+          const newSections = operation.planActions
+            .filter(
+              (action) => action.destination.labwareId === row.original.id
+            )
+            .map((action, i) => {
+              return (
+                <li key={i} className="text-sm">
+                  <span className="font-semibold">
+                    {action.destination.address}
+                  </span>{" "}
+                  <span className="">{action.newSection}</span>
+                </li>
+              );
+            });
+
+          return <ul key={j}>{newSections}</ul>;
+        });
+      },
+    };
+  }, [plannedOperations]);
+
+  const printColumn = {
+    id: "printer",
+    Header: "",
+    Cell: ({ row }: { row: Row<HasLabelPrinterActor> }) => (
+      <LabelPrinterButton actor={row.original.actorRef} />
+    ),
+  };
+
+  const columns = [
+    labwareScanTableColumns.barcode(),
+    sectionsColumn,
+    printColumn,
+  ];
+
   return (
     <motion.div
       ref={ref}
@@ -82,7 +127,6 @@ const SectioningLayout = React.forwardRef<
               if (action) {
                 return layoutPlan.sampleColors.get(action.sampleId);
               }
-              return undefined;
             }}
           />
 
@@ -176,47 +220,7 @@ const SectioningLayout = React.forwardRef<
 
           {plannedLabware.length > 0 && (
             <div className="w-full space-y-4 py-4 px-8">
-              <Table>
-                <TableHead>
-                  <tr>
-                    <TableHeader>Barcode</TableHeader>
-                    <TableHeader>Section Number</TableHeader>
-                    <TableHeader />
-                  </tr>
-                </TableHead>
-                <TableBody>
-                  {plannedLabware.map((lw, i) => (
-                    <tr key={i}>
-                      <TableCell>{lw.barcode}</TableCell>
-                      <TableCell>
-                        {plannedOperations.map((operation, j) => {
-                          const newSections = operation.planActions
-                            .filter(
-                              (action) => action.destination.labwareId === lw.id
-                            )
-                            .map((action, i) => {
-                              return (
-                                <li key={i} className="text-sm">
-                                  <span className="font-semibold">
-                                    {action.destination.address}
-                                  </span>{" "}
-                                  <span className="">{action.newSection}</span>
-                                </li>
-                              );
-                            });
-
-                          return <ul key={j}>{newSections}</ul>;
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        {current.matches("printing") && (
-                          <LabelPrinterButton actor={lw.actorRef} />
-                        )}
-                      </TableCell>
-                    </tr>
-                  ))}
-                </TableBody>
-              </Table>
+              <LabwareTable columns={columns} labware={plannedLabware} />
 
               {current.matches({ printing: "printSuccess" }) && (
                 <Success message={printSuccessMessage} />
@@ -225,15 +229,17 @@ const SectioningLayout = React.forwardRef<
               {current.matches({ printing: "printError" }) && (
                 <Warning message={printErrorMessage} />
               )}
+            </div>
+          )}
 
-              {current.matches("printing") && labelPrinterRef && (
-                <LabelPrinter actor={labelPrinterRef} />
-              )}
+          {current.matches("printing") && labelPrinterRef && (
+            <div className="w-full border-t-2 border-gray-200 py-3 px-4 space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
+              <LabelPrinter actor={labelPrinterRef} />
             </div>
           )}
 
           {current.matches("prep") && (
-            <div className="w-full py-3 px-4 sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
+            <div className="w-full border-t-2 border-gray-200 py-3 px-4 sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
               <button
                 onClick={onDelete}
                 type="button"

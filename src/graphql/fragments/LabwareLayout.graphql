@@ -14,6 +14,19 @@ fragment LabwareLayout on Labware {
         labwareId
         samples {
             id
+            tissue {
+                donor {
+                    donorName
+                }
+                externalName
+                spatialLocation {
+                    tissueType {
+                        name
+                    }
+                    code
+                }
+                replicate
+            }
         }
     }
 }
