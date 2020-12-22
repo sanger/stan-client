@@ -8,10 +8,9 @@ import {
 import { sortBy } from "lodash";
 import { LabwareTypeName } from "../../types/stan";
 import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
-import { SectioningConfirmActorRef } from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmTypes";
 import Warning from "../../components/notifications/Warning";
 import { useScrollToRef } from "../../hooks";
-import ConfirmSection from "./ConfirmSection";
+import ConfirmByLabwareType from "./ConfirmByLabwareType";
 
 interface ConfirmProps {
   current: SectioningMachineType["state"];
@@ -43,7 +42,7 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
           <div className="space-y-4">
             {sortedSOMs.map((labwareTypeName, i) => (
-              <ConfirmSection
+              <ConfirmByLabwareType
                 key={i}
                 actors={sectioningConfirmMachines.get(labwareTypeName)}
                 labwareTypeName={labwareTypeName}
@@ -65,11 +64,15 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
       <div className="border border-t-2 border-gray-200 w-full py-4 px-4 sm:px-6 lg:px-8 bg-gray-100 flex-shrink-0">
         <div className="max-w-screen-xl mx-auto">
           <div className="flex flex-row items-center justify-between">
-            <PinkButton onClick={() => send(backToPrep())} action="tertiary">
+            <PinkButton
+              disabled={current.matches("done")}
+              onClick={() => send(backToPrep())}
+              action="tertiary"
+            >
               Back
             </PinkButton>
             <PinkButton
-              disabled={current.matches("confirm")}
+              disabled={current.matches("done")}
               onClick={() => send(confirmOperation())}
               action="primary"
             >

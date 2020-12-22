@@ -24,6 +24,7 @@ export enum State {
   CANCELLABLE_MODE = "cancellableMode",
   EDITABLE_MODE = "editableMode",
   EDITING_LAYOUT = "editingLayout",
+  DONE = "done",
 }
 
 export interface SectioningConfirmSchema {
@@ -32,6 +33,7 @@ export interface SectioningConfirmSchema {
     [State.CANCELLABLE_MODE]: {};
     [State.EDITABLE_MODE]: {};
     [State.EDITING_LAYOUT]: {};
+    [State.DONE]: {};
   };
 }
 //endregion
@@ -105,6 +107,10 @@ export type CommitConfirmationEvent = {
   confirmOperationLabware: ConfirmOperationLabware;
 };
 
+export type SectioningConfirmationCompleteEvent = {
+  type: "SECTIONING_CONFIRMATION_COMPLETE";
+};
+
 export type SectioningConfirmEvent =
   | SetCommentForAddressEvent
   | SetCommentForAllEvent
@@ -113,5 +119,6 @@ export type SectioningConfirmEvent =
   | DoneEditLayoutEvent
   | LayoutMachineDone
   | ToggleCancelEvent
-  | CommitConfirmationEvent;
+  | CommitConfirmationEvent
+  | SectioningConfirmationCompleteEvent;
 //endregion

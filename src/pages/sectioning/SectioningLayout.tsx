@@ -1,37 +1,37 @@
 import React from "react";
-import labwareScanTableColumns from "../components/labwareScanPanel/columns";
-import PinkButton from "./buttons/PinkButton";
+import labwareScanTableColumns from "../../components/labwareScanPanel/columns";
+import PinkButton from "../../components/buttons/PinkButton";
 import { useActor } from "@xstate/react";
-import Label from "./forms/Label";
-import Modal, { ModalBody, ModalFooter } from "./Modal";
-import BlueButton from "./buttons/BlueButton";
-import Heading from "./Heading";
-import LayoutPlanner from "./LayoutPlanner";
-import Labware from "./Labware";
+import Label from "../../components/forms/Label";
+import Modal, { ModalBody, ModalFooter } from "../../components/Modal";
+import BlueButton from "../../components/buttons/BlueButton";
+import Heading from "../../components/Heading";
+import LayoutPlanner from "../../components/LayoutPlanner";
+import Labware from "../../components/Labware";
 import { motion } from "framer-motion";
-import variants from "../lib/motionVariants";
-import Warning from "./notifications/Warning";
+import variants from "../../lib/motionVariants";
+import Warning from "../../components/notifications/Warning";
 import {
   createLabware,
   editLayout,
   updateSectioningLayout,
-} from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
-import { LabwareTypeName } from "../types/stan";
-import LabelPrinter from "./LabelPrinter";
-import Success from "./notifications/Success";
-import LabelPrinterButton from "./LabelPrinterButton";
-import { cancel, done } from "../lib/machines/layout/layoutEvents";
+} from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
+import { LabwareTypeName } from "../../types/stan";
+import LabelPrinter from "../../components/LabelPrinter";
+import Success from "../../components/notifications/Success";
+import LabelPrinterButton from "../../components/LabelPrinterButton";
+import { cancel, done } from "../../lib/machines/layout/layoutEvents";
 import {
   HasLabelPrinterActor,
   SectioningLayoutActorRef,
   SectioningLayoutEvent,
   SectioningLayoutMachineType,
-} from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
-import LabwareTable from "./LabwareTable";
+} from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
+import LabwareTable from "../../components/LabwareTable";
 import { Column, Row } from "react-table";
-import { LabwareLayoutFragment } from "../types/graphql";
-import WhiteButton from "./buttons/WhiteButton";
-import { Input } from "./forms/Input";
+import { LabwareLayoutFragment } from "../../types/graphql";
+import WhiteButton from "../../components/buttons/WhiteButton";
+import { Input } from "../../components/forms/Input";
 
 interface SectioningLayoutProps {
   /**

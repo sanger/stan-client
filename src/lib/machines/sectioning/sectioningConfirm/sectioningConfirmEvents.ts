@@ -52,3 +52,9 @@ export function commitConfirmation(
     },
   };
 }
+
+export function sectioningConfirmationComplete(): SectioningConfirmEvent {
+  return {
+    type: "SECTIONING_CONFIRMATION_COMPLETE",
+  };
+}

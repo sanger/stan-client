@@ -33,7 +33,7 @@ enum Services {
 }
 
 /**
- * SectioningConfirm State Machine
+ * ConfirmLabware State Machine
  */
 export const createSectioningConfirmMachine = (
   comments: Array<Comment>,
@@ -56,6 +56,9 @@ export const createSectioningConfirmMachine = (
         addressToCommentMap: new Map(),
         cancelled: false,
         cancelledAddresses: [],
+      },
+      on: {
+        SECTIONING_CONFIRMATION_COMPLETE: State.DONE,
       },
       states: {
         [State.INIT]: {
@@ -106,6 +109,9 @@ export const createSectioningConfirmMachine = (
               ],
             },
           },
+        },
+        [State.DONE]: {
+          type: "final",
         },
       },
     },

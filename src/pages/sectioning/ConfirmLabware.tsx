@@ -1,42 +1,36 @@
-import React, { ChangeEvent } from "react";
+import React from "react";
 import { useActor } from "@xstate/react";
-import variants from "../lib/motionVariants";
-import Labware from "./Labware";
-import PinkButton from "./buttons/PinkButton";
-import Modal, { ModalBody, ModalFooter } from "./Modal";
-import Heading from "./Heading";
-import BlueButton from "./buttons/BlueButton";
+import variants from "../../lib/motionVariants";
+import Labware from "../../components/Labware";
+import PinkButton from "../../components/buttons/PinkButton";
+import Modal, { ModalBody, ModalFooter } from "../../components/Modal";
+import Heading from "../../components/Heading";
+import BlueButton from "../../components/buttons/BlueButton";
 import { motion } from "framer-motion";
-import { optionValues } from "./forms";
+import { optionValues } from "../../components/forms";
 import {
   editLayout,
   setCommentForAddress,
   setCommentForAll,
-  toggleCancel,
-} from "../lib/machines/sectioning/sectioningConfirm/sectioningConfirmEvents";
-import LayoutPlanner from "./LayoutPlanner";
-import { cancel, done } from "../lib/machines/layout/layoutEvents";
-import { TableCell } from "./Table";
-import RemoveIcon from "./icons/RemoveIcon";
+} from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmEvents";
+import LayoutPlanner from "../../components/LayoutPlanner";
+import { cancel, done } from "../../lib/machines/layout/layoutEvents";
 import {
   SectioningConfirmActorRef,
   SectioningConfirmEvent,
   SectioningConfirmMachineType,
-} from "../lib/machines/sectioning/sectioningConfirm/sectioningConfirmTypes";
-import classNames from "classnames";
-import MutedText from "./MutedText";
-import Label from "./forms/Label";
-import WhiteButton from "./buttons/WhiteButton";
-import { rowMajor } from "../lib/helpers/labwareHelper";
-import { Comment, LabwareLayoutFragment } from "../types/graphql";
-import { LayoutPlan } from "../lib/machines/layout/layoutContext";
-import { Select } from "./forms/Select";
+} from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmTypes";
+import Label from "../../components/forms/Label";
+import WhiteButton from "../../components/buttons/WhiteButton";
+import { rowMajor } from "../../lib/helpers/labwareHelper";
+import { Select } from "../../components/forms/Select";
+import LabwareComments from "./LabwareComments";
 
-interface SectioningConfirmProps {
+interface ConfirmLabwareProps {
   actor: SectioningConfirmActorRef;
 }
 
-const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
+const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
   const [current, send] = useActor<
     SectioningConfirmEvent,
     SectioningConfirmMachineType["state"]
@@ -74,7 +68,10 @@ const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
             }}
           />
 
-          <PinkButton onClick={() => send(editLayout())}>
+          <PinkButton
+            disabled={current.matches("done")}
+            onClick={() => send(editLayout())}
+          >
             Edit Layout
           </PinkButton>
         </div>
@@ -91,6 +88,7 @@ const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
                 <LabwareComments
                   slot={slot}
                   value={addressToCommentMap.get(slot.address) ?? ""}
+                  disabled={current.matches("done")}
                   comments={comments}
                   layoutPlan={layoutPlan}
                   onCommentChange={(e) => {
@@ -104,6 +102,7 @@ const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
           </div>
           <Label name={"All slots:"}>
             <Select
+              disabled={current.matches("done")}
               onChange={(e) => send(setCommentForAll(e.currentTarget.value))}
             >
               <option />
@@ -137,76 +136,4 @@ const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
   );
 };
 
-export default SectioningConfirm;
-
-interface SectioningConfirmProps {
-  actor: SectioningConfirmActorRef;
-}
-
-export const SectioningConfirmTube: React.FC<SectioningConfirmProps> = ({
-  actor,
-}) => {
-  const [current, send] = useActor<
-    SectioningConfirmEvent,
-    SectioningConfirmMachineType["state"]
-  >(actor);
-
-  const { labware, cancelled } = current.context;
-
-  const rowClassnames = classNames(
-    {
-      "opacity-50 line-through": cancelled,
-    },
-    "cursor-pointer hover:opacity-90 text-sm tracking-wide"
-  );
-
-  return (
-    <tr className={rowClassnames} onClick={() => send(toggleCancel())}>
-      <TableCell>
-        <span className="">{labware.barcode}</span>
-      </TableCell>
-      <TableCell>
-        <RemoveIcon className="h-4 w-4 text-red-500" />
-      </TableCell>
-    </tr>
-  );
-};
-
-interface LabwareCommentsProps {
-  slot: LabwareLayoutFragment["slots"][number];
-  layoutPlan: LayoutPlan;
-  comments: Array<Comment>;
-  value: string | number | undefined;
-  onCommentChange: (e: ChangeEvent<HTMLSelectElement>) => void;
-}
-
-const LabwareComments: React.FC<LabwareCommentsProps> = ({
-  slot,
-  layoutPlan,
-  comments,
-  value,
-  onCommentChange,
-}) => {
-  return (
-    <div className="flex flex-row items-center justify-start gap-x-2">
-      <span className="font-medium text-gray-800 tracking-wide">
-        {slot.address}
-      </span>
-      <span className="flex-grow text-center">
-        {!layoutPlan.plannedActions.has(slot.address) && (
-          <MutedText>Empty</MutedText>
-        )}
-        {layoutPlan.plannedActions.has(slot.address) && (
-          <Select
-            style={{ width: "100%" }}
-            value={value}
-            onChange={(e) => onCommentChange(e)}
-          >
-            <option value="" />
-            {optionValues(comments, "text", "id")}
-          </Select>
-        )}
-      </span>
-    </div>
-  );
-};
+export default ConfirmLabware;

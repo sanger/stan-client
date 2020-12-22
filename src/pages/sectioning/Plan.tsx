@@ -3,7 +3,7 @@ import AppShell from "../../components/AppShell";
 import Heading from "../../components/Heading";
 import LabwareScanTable from "../../components/labwareScanPanel/LabwareScanPanel";
 import labwareScanTableColumns from "../../components/labwareScanPanel/columns";
-import SectioningLayout from "../../components/SectioningLayout";
+import SectioningLayout from "./SectioningLayout";
 import {
   addLabwareLayout,
   deleteLabwareLayout,

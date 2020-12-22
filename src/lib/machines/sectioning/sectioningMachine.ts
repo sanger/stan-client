@@ -1,4 +1,4 @@
-import { Actor, Machine, MachineOptions, send, spawn } from "xstate";
+import { actions, Actor, Machine, MachineOptions, send, spawn } from "xstate";
 import { Address, LabwareTypeName } from "../../../types/stan";
 import {
   buildConfirmOperationLabware,
@@ -33,6 +33,7 @@ import {
   SectioningLayoutContext,
   SectioningLayoutEvent,
 } from "./sectioningLayout/sectioningLayoutTypes";
+import { sectioningConfirmationComplete } from "./sectioningConfirm/sectioningConfirmEvents";
 
 export const machineKey = "sectioningMachine";
 
@@ -47,6 +48,7 @@ enum Action {
   UPDATE_CONFIRMATION = "updateConfirmation",
   UPDATE_SECTIONS_COMPLETED = "updateSectionsCompleted",
   ASSIGN_CONFIRMED_OPERATION = "assignConfirmedOperation",
+  NOTIFY_COMPLETE = "notifyComplete",
 }
 
 enum Guard {
@@ -207,7 +209,10 @@ export const createSectioningMachine = () =>
             [State.CONFIRM_ERROR]: {},
           },
         },
-        [State.DONE]: {},
+        [State.DONE]: {
+          entry: Action.NOTIFY_COMPLETE,
+          type: "final",
+        },
       },
     },
     sectioningMachineOptions
@@ -218,6 +223,13 @@ const sectioningMachineOptions: Partial<MachineOptions<
   SectioningEvent
 >> = {
   actions: {
+    [Action.NOTIFY_COMPLETE]: actions.pure((ctx, _e) => {
+      const actors = Array.from(ctx.sectioningConfirmMachines.values()).flat();
+      return actors.map((actor) =>
+        send(sectioningConfirmationComplete(), { to: () => actor })
+      );
+    }),
+
     [Action.SELECT_LABWARE_TYPE]: assign((ctx, e) => {
       if (e.type !== "SELECT_LABWARE_TYPE") {
         return;
