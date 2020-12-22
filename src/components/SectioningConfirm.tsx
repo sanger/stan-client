@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 import { useActor } from "@xstate/react";
 import variants from "../lib/motionVariants";
 import Labware from "./Labware";
@@ -26,6 +26,11 @@ import {
 import classNames from "classnames";
 import MutedText from "./MutedText";
 import Label from "./forms/Label";
+import WhiteButton from "./buttons/WhiteButton";
+import { rowMajor } from "../lib/helpers/labwareHelper";
+import { Comment, LabwareLayoutFragment } from "../types/graphql";
+import { LayoutPlan } from "../lib/machines/layout/layoutContext";
+import { Select } from "./forms/Select";
 
 interface SectioningConfirmProps {
   actor: SectioningConfirmActorRef;
@@ -80,45 +85,30 @@ const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
 
           <div className="w-full space-y-4">
             <div
-              className={`grid grid-cols-${labware.labwareType.numColumns} gap-x-8`}
+              className={`grid grid-cols-1 sm:grid-cols-${labware.labwareType.numColumns} gap-x-8`}
             >
-              {labware.slots.map((slot) => (
-                <div className="flex flex-row items-center justify-start gap-x-2">
-                  <span>{slot.address}</span>
-                  <span className="flex-grow text-center">
-                    {!layoutPlan.plannedActions.has(slot.address) && (
-                      <MutedText>Empty</MutedText>
-                    )}
-                    {layoutPlan.plannedActions.has(slot.address) && (
-                      <select
-                        value={addressToCommentMap.get(slot.address) ?? ""}
-                        onChange={(e) =>
-                          send(
-                            setCommentForAddress(
-                              slot.address,
-                              e.currentTarget.value
-                            )
-                          )
-                        }
-                        className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
-                      >
-                        <option value="" />
-                        {optionValues(comments, "comment", "id")}
-                      </select>
-                    )}
-                  </span>
-                </div>
+              {rowMajor(labware.slots).map((slot) => (
+                <LabwareComments
+                  slot={slot}
+                  value={addressToCommentMap.get(slot.address) ?? ""}
+                  comments={comments}
+                  layoutPlan={layoutPlan}
+                  onCommentChange={(e) => {
+                    send(
+                      setCommentForAddress(slot.address, e.currentTarget.value)
+                    );
+                  }}
+                />
               ))}
             </div>
           </div>
           <Label name={"All slots:"}>
-            <select
+            <Select
               onChange={(e) => send(setCommentForAll(e.currentTarget.value))}
-              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
             >
               <option />
               {optionValues(comments, "comment", "id")}
-            </select>
+            </Select>
           </Label>
         </div>
       </div>
@@ -135,13 +125,12 @@ const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
           >
             Done
           </BlueButton>
-          <button
+          <WhiteButton
             onClick={() => layoutMachine.send(cancel())}
-            type="button"
-            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            className="mt-3 w-full sm:mt-0 sm:ml-3"
           >
             Cancel
-          </button>
+          </WhiteButton>
         </ModalFooter>
       </Modal>
     </motion.div>
@@ -180,5 +169,44 @@ export const SectioningConfirmTube: React.FC<SectioningConfirmProps> = ({
         <RemoveIcon className="h-4 w-4 text-red-500" />
       </TableCell>
     </tr>
+  );
+};
+
+interface LabwareCommentsProps {
+  slot: LabwareLayoutFragment["slots"][number];
+  layoutPlan: LayoutPlan;
+  comments: Array<Comment>;
+  value: string | number | undefined;
+  onCommentChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+}
+
+const LabwareComments: React.FC<LabwareCommentsProps> = ({
+  slot,
+  layoutPlan,
+  comments,
+  value,
+  onCommentChange,
+}) => {
+  return (
+    <div className="flex flex-row items-center justify-start gap-x-2">
+      <span className="font-medium text-gray-800 tracking-wide">
+        {slot.address}
+      </span>
+      <span className="flex-grow text-center">
+        {!layoutPlan.plannedActions.has(slot.address) && (
+          <MutedText>Empty</MutedText>
+        )}
+        {layoutPlan.plannedActions.has(slot.address) && (
+          <Select
+            style={{ width: "100%" }}
+            value={value}
+            onChange={(e) => onCommentChange(e)}
+          >
+            <option value="" />
+            {optionValues(comments, "comment", "id")}
+          </Select>
+        )}
+      </span>
+    </div>
   );
 };

@@ -91,9 +91,11 @@ interface HasAddress {
   address: string;
 }
 
-export function rowMajor<T extends HasAddress>(slots: Array<T>): Array<T> {
+export function rowMajor<T extends HasAddress>(
+  addressable: Array<T>
+): Array<T> {
   return orderBy(
-    slots,
+    addressable,
     [
       (slot) => getRowIndex(slot.address),
       (slot) => getColumnIndex(slot.address),

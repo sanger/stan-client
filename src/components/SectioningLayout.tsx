@@ -30,6 +30,8 @@ import {
 import LabwareTable from "./LabwareTable";
 import { Column, Row } from "react-table";
 import { LabwareLayoutFragment } from "../types/graphql";
+import WhiteButton from "./buttons/WhiteButton";
+import { Input } from "./forms/Input";
 
 interface SectioningLayoutProps {
   /**
@@ -65,6 +67,7 @@ const SectioningLayout = React.forwardRef<
 
   const { layoutMachine } = current.children;
 
+  // Special kind of column for displaying the sectioning numbers given from a planned operation
   const sectionsColumn: Column<LabwareLayoutFragment> = React.useMemo(() => {
     return {
       Header: "Section Number",
@@ -92,6 +95,7 @@ const SectioningLayout = React.forwardRef<
     };
   }, [plannedOperations]);
 
+  // Special case column that renders a label printer for each row
   const printColumn = {
     id: "printer",
     Header: "",
@@ -156,11 +160,8 @@ const SectioningLayout = React.forwardRef<
             {sectioningLayout.destinationLabware.labwareType.name ===
               LabwareTypeName.VISIUM_LP && (
               <Label name={"Barcode"}>
-                <input
+                <Input
                   disabled={!current.matches("prep")}
-                  className={
-                    "mt-1 focus:ring-sdb-100 focus:border-sdb-100 block w-full md:w-2/3 border-gray-300 rounded-md disabled:opacity-75 disabled:text-gray-600"
-                  }
                   type="text"
                   value={sectioningLayout.barcode}
                   onChange={(e) =>
@@ -177,11 +178,8 @@ const SectioningLayout = React.forwardRef<
             {sectioningLayout.destinationLabware.labwareType.name !==
               LabwareTypeName.VISIUM_LP && (
               <Label name={"Quantity"}>
-                <input
+                <Input
                   disabled={!current.matches("prep")}
-                  className={
-                    "mt-1 focus:ring-sdb-100 focus:border-sdb-100 block w-full md:w-2/3 border-gray-300 rounded-md disabled:opacity-75 disabled:text-gray-600"
-                  }
                   type="number"
                   min={1}
                   step={1}
@@ -198,11 +196,8 @@ const SectioningLayout = React.forwardRef<
             )}
 
             <Label name={"Section Thickness"}>
-              <input
+              <Input
                 disabled={!current.matches("prep")}
-                className={
-                  "mt-1 focus:ring-sdb-100 focus:border-sdb-100 block w-full md:w-2/3 border-gray-300 rounded-md disabled:opacity-75 disabled:text-gray-600"
-                }
                 type={"number"}
                 min={1}
                 step={1}
@@ -240,13 +235,7 @@ const SectioningLayout = React.forwardRef<
 
           {current.matches("prep") && (
             <div className="w-full border-t-2 border-gray-200 py-3 px-4 sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
-              <button
-                onClick={onDelete}
-                type="button"
-                className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Delete Layout
-              </button>
+              <WhiteButton onClick={onDelete}>Delete Layout</WhiteButton>
               <BlueButton
                 disabled={current.matches("prep.invalid")}
                 onClick={() => send(createLabware())}
@@ -270,13 +259,12 @@ const SectioningLayout = React.forwardRef<
           >
             Done
           </BlueButton>
-          <button
+          <WhiteButton
             onClick={() => layoutMachine.send(cancel())}
-            type="button"
-            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
           >
             Cancel
-          </button>
+          </WhiteButton>
         </ModalFooter>
       </Modal>
     </motion.div>
