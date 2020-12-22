@@ -10,7 +10,9 @@ export type Scalars = {
   Int: number;
   Float: number;
   Address: string;
+  Timestamp: string;
 };
+
 
 
 export type User = {
@@ -185,6 +187,44 @@ export type PlanRequest = {
   labware: Array<PlanRequestLabware>;
 };
 
+export type AddressCommentInput = {
+  address: Scalars['Address'];
+  commentId: Scalars['Int'];
+};
+
+export type ConfirmOperationLabware = {
+  barcode: Scalars['String'];
+  cancelled?: Maybe<Scalars['Boolean']>;
+  cancelledAddresses?: Maybe<Array<Scalars['Address']>>;
+  addressComments?: Maybe<Array<AddressCommentInput>>;
+};
+
+export type ConfirmOperationRequest = {
+  labware: Array<ConfirmOperationLabware>;
+};
+
+export type Action = {
+  __typename?: 'Action';
+  source: Slot;
+  destination: Slot;
+  operationId: Scalars['Int'];
+  sample: Sample;
+};
+
+export type Operation = {
+  __typename?: 'Operation';
+  operationType: OperationType;
+  actions: Array<Action>;
+  user: User;
+  performed: Scalars['Timestamp'];
+};
+
+export type ConfirmOperationResult = {
+  __typename?: 'ConfirmOperationResult';
+  labware: Array<Labware>;
+  operations: Array<Operation>;
+};
+
 export type PlanResult = {
   __typename?: 'PlanResult';
   labware: Array<Labware>;
@@ -200,23 +240,8 @@ export type Printer = {
 export type Comment = {
   __typename?: 'Comment';
   id: Scalars['Int'];
-  comment: Scalars['String'];
-};
-
-export type AddressStringInput = {
-  address: Scalars['Address'];
-  comment: Scalars['Int'];
-};
-
-export type ConfirmOperationLabware = {
-  barcode: Scalars['String'];
-  cancelled?: Maybe<Scalars['Boolean']>;
-  cancelledAddresses?: Maybe<Array<Scalars['Address']>>;
-  addressComments?: Maybe<Array<AddressStringInput>>;
-};
-
-export type ConfirmOperationRequest = {
-  labware: Array<ConfirmOperationLabware>;
+  text: Scalars['String'];
+  category: Scalars['String'];
 };
 
 export type Query = {
@@ -243,6 +268,11 @@ export type QueryPrintersArgs = {
   labelType?: Maybe<Scalars['String']>;
 };
 
+
+export type QueryCommentsArgs = {
+  category?: Maybe<Scalars['String']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   login: LoginResult;
@@ -250,7 +280,7 @@ export type Mutation = {
   register: RegisterResult;
   plan: PlanResult;
   printLabware?: Maybe<Scalars['String']>;
-  confirm?: Maybe<Scalars['String']>;
+  confirmOperation: ConfirmOperationResult;
 };
 
 
@@ -276,7 +306,7 @@ export type MutationPrintLabwareArgs = {
 };
 
 
-export type MutationConfirmArgs = {
+export type MutationConfirmOperationArgs = {
   request: ConfirmOperationRequest;
 };
 
@@ -322,7 +352,23 @@ export type ConfirmMutationVariables = Exact<{
 
 export type ConfirmMutation = (
   { __typename?: 'Mutation' }
-  & Pick<Mutation, 'confirm'>
+  & { confirmOperation: (
+    { __typename?: 'ConfirmOperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareLayoutFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
 );
 
 export type LoginMutationVariables = Exact<{
@@ -518,7 +564,7 @@ export type GetSectioningInfoQuery = (
   { __typename?: 'Query' }
   & { comments: Array<(
     { __typename?: 'Comment' }
-    & Pick<Comment, 'id' | 'comment'>
+    & Pick<Comment, 'id' | 'text' | 'category'>
   )>, labwareTypes: Array<(
     { __typename?: 'LabwareType' }
     & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
@@ -561,9 +607,22 @@ export const LabwareLayoutFragmentDoc = gql`
     `;
 export const ConfirmDocument = gql`
     mutation Confirm($request: ConfirmOperationRequest!) {
-  confirm(request: $request)
+  confirmOperation(request: $request) {
+    labware {
+      ...LabwareLayout
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
 }
-    `;
+    ${LabwareLayoutFragmentDoc}`;
 export type ConfirmMutationFn = Apollo.MutationFunction<ConfirmMutation, ConfirmMutationVariables>;
 
 /**
@@ -950,9 +1009,10 @@ export type GetRegistrationInfoLazyQueryHookResult = ReturnType<typeof useGetReg
 export type GetRegistrationInfoQueryResult = Apollo.QueryResult<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>;
 export const GetSectioningInfoDocument = gql`
     query GetSectioningInfo {
-  comments {
+  comments(category: "section") {
     id
-    comment
+    text
+    category
   }
   labwareTypes {
     name

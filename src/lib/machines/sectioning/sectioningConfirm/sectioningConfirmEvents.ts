@@ -48,7 +48,7 @@ export function commitConfirmation(
       cancelledAddresses: ctx.cancelledAddresses,
       addressComments: Array.from(
         ctx.addressToCommentMap.entries()
-      ).map(([address, comment]) => ({ address, comment })),
+      ).map(([address, commentId]) => ({ address, commentId })),
     },
   };
 }

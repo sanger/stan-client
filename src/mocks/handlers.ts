@@ -289,19 +289,23 @@ export const handlers = [
           comments: [
             {
               id: 1,
-              comment: "Section Folded",
+              text: "Section Folded",
+              category: "section",
             },
             {
               id: 2,
-              comment: "Poor section quality",
+              text: "Poor section quality",
+              category: "section",
             },
             {
               id: 3,
-              comment: "Sectioned well",
+              text: "Sectioned well",
+              category: "section",
             },
             {
               id: 4,
-              comment: "Section exploded",
+              text: "Section exploded",
+              category: "section",
             },
           ],
           labwareTypes: labwareTypeInstances,
@@ -662,22 +666,22 @@ export const handlers = [
     }
   ),
 
-  graphql.mutation<ConfirmMutation, ConfirmMutationVariables>(
-    "Confirm",
-    (req, res, ctx) => {
-      // return res(
-      //   ctx.errors([
-      //     {
-      //       message: "Error in confirm",
-      //     },
-      //   ])
-      // );
-
-      return res(
-        ctx.data({
-          confirm: "OK",
-        })
-      );
-    }
-  ),
+  // graphql.mutation<ConfirmMutation, ConfirmMutationVariables>(
+  //   "Confirm",
+  //   (req, res, ctx) => {
+  //     // return res(
+  //     //   ctx.errors([
+  //     //     {
+  //     //       message: "Error in confirm",
+  //     //     },
+  //     //   ])
+  //     // );
+  //
+  //     return res(
+  //       ctx.data({
+  //         confirm: "OK",
+  //       })
+  //     );
+  //   }
+  // ),
 ];

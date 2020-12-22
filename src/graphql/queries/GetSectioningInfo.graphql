@@ -1,7 +1,8 @@
 query GetSectioningInfo {
-    comments {
+    comments(category: "section") {
         id
-        comment
+        text
+        category
     }
     labwareTypes {
         name

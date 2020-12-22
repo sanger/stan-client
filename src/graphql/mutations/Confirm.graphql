@@ -1,3 +1,16 @@
 mutation Confirm($request: ConfirmOperationRequest!) {
-    confirm(request: $request)
+    confirmOperation(request: $request) {
+        labware {
+            ...LabwareLayout
+        }
+        operations {
+            operationType {
+                name
+            }
+            user {
+                username
+            }
+            performed
+        }
+    }
 }

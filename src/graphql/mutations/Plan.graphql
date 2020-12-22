@@ -22,7 +22,6 @@ mutation Plan($request: PlanRequest!) {
                 destination {
                     address
                     labwareId
-
                 }
             }
         }

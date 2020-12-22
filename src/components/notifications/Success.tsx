@@ -14,7 +14,7 @@ interface SuccessProps
 }
 
 /**
- * SectioningDone notification component.
+ * ConfirmedOperation notification component.
  */
 const Success = ({
   message,

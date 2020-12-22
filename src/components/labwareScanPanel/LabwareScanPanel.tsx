@@ -1,6 +1,6 @@
 import React from "react";
 import { useActor } from "@xstate/react";
-import { Labware, LabwareLayoutFragment } from "../../types/graphql";
+import { LabwareLayoutFragment } from "../../types/graphql";
 import Success from "../notifications/Success";
 import Warning from "../notifications/Warning";
 import RemoveIcon from "../icons/RemoveIcon";

@@ -1,6 +1,7 @@
 import {
   Comment,
   ConfirmOperationRequest,
+  ConfirmOperationResult,
   GetSectioningInfoQuery,
   Labware,
   LabwareType,
@@ -143,6 +144,11 @@ export interface SectioningContext {
    * The request that will be send to the API at the end of Sectioning
    */
   confirmOperationRequest: ConfirmOperationRequest;
+
+  /**
+   * The result of the Confirm Operation API call
+   */
+  confirmedOperation: Maybe<ConfirmOperationResult>;
 }
 //endregion Types T
 
@@ -180,7 +186,7 @@ type ConfirmOperationEvent = {
 
 type ConfirmOperationResolveEvent = {
   type: "done.invoke.confirmOperation";
-  data: ConfirmOperationRequest;
+  data: ConfirmOperationResult;
 };
 
 export type SectioningEvent =

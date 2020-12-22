@@ -107,7 +107,7 @@ const SectioningConfirm: React.FC<SectioningConfirmProps> = ({ actor }) => {
               onChange={(e) => send(setCommentForAll(e.currentTarget.value))}
             >
               <option />
-              {optionValues(comments, "comment", "id")}
+              {optionValues(comments, "text", "id")}
             </Select>
           </Label>
         </div>
@@ -203,7 +203,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
             onChange={(e) => onCommentChange(e)}
           >
             <option value="" />
-            {optionValues(comments, "comment", "id")}
+            {optionValues(comments, "text", "id")}
           </Select>
         )}
       </span>

@@ -46,6 +46,7 @@ enum Action {
   ASSIGN_PLAN = "assignPlan",
   UPDATE_CONFIRMATION = "updateConfirmation",
   UPDATE_SECTIONS_COMPLETED = "updateSectionsCompleted",
+  ASSIGN_CONFIRMED_OPERATION = "assignConfirmedOperation",
 }
 
 enum Guard {
@@ -88,6 +89,7 @@ export const createSectioningMachine = () =>
         sampleColors: new Map(),
         sectioningConfirmMachines: new Map(),
         confirmOperationRequest: buildConfirmOperationRequest(),
+        confirmedOperation: null,
       },
       states: {
         [State.LOADING]: {
@@ -194,6 +196,7 @@ export const createSectioningMachine = () =>
               invoke: {
                 src: Service.CONFIRM_OPERATION,
                 onDone: {
+                  actions: Action.ASSIGN_CONFIRMED_OPERATION,
                   target: `#${machineKey}.${State.DONE}`,
                 },
                 onError: {
@@ -327,6 +330,13 @@ const sectioningMachineOptions: Partial<MachineOptions<
         ctx.confirmOperationRequest.labware[confirmationIndex] =
           e.confirmOperationLabware;
       }
+    }),
+
+    [Action.ASSIGN_CONFIRMED_OPERATION]: assign((ctx, e) => {
+      if (e.type !== "done.invoke.confirmOperation") {
+        return;
+      }
+      ctx.confirmedOperation = e.data;
     }),
   },
 
