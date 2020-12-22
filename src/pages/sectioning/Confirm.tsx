@@ -11,6 +11,8 @@ import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningT
 import Warning from "../../components/notifications/Warning";
 import { useScrollToRef } from "../../hooks";
 import ConfirmByLabwareType from "./ConfirmByLabwareType";
+import { toast } from "react-toastify";
+import Success from "../../components/notifications/Success";
 
 interface ConfirmProps {
   current: SectioningMachineType["state"];
@@ -26,6 +28,14 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
   }, [current, scrollToRef]);
 
   useEffect(() => window.scrollTo(0, 0), []);
+
+  useEffect(() => {
+    if (current.matches("done")) {
+      toast(<Success message={"Sectioning Saved"} />, {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    }
+  }, [current]);
 
   const { sectioningConfirmMachines } = current.context;
   const sortedSOMs = sortBy(

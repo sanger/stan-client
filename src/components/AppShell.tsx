@@ -9,6 +9,8 @@ import { authContext } from "../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "./Heading";
 import variants from "../lib/motionVariants";
+import { Slide, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface AppShellParams {
   children?: JSX.Element | JSX.Element[];
@@ -272,7 +274,10 @@ const Main: React.FC = ({ children }) => (
     animate={{ opacity: 1 }}
     transition={{ duration: 0.4 }}
   >
-    <div className="py-6 px-4 sm:px-6 lg:px-8">{children}</div>
+    <div className="py-6 px-4 sm:px-6 lg:px-8">
+      {children}
+      <ToastContainer autoClose={false} transition={Slide} />
+    </div>
   </motion.main>
 );
 AppShell.Main = Main;
