@@ -187,23 +187,16 @@ describe("Sectioning", () => {
   });
 
   describe("Printing", () => {
-    before(() => {
-      cy.visit("/lab/sectioning");
-      cy.wait(2000);
-      createLabware();
-    });
-
     context("when printing succeeds", () => {
       before(() => {
         cy.visit("/lab/sectioning");
         cy.wait(2000);
         createLabware();
-        cy.findByLabelText("printers").select("slidelabel");
-        cy.findByText("Print Labels").click();
+        printLabels();
       });
 
       it("shows a success message", () => {
-        cy.findByText("slidelabel successfully printed STAN-002FB").should(
+        cy.findByText("Tube Printer successfully printed STAN-1002").should(
           "exist"
         );
       });
@@ -218,7 +211,7 @@ describe("Sectioning", () => {
               return res(
                 ctx.errors([
                   {
-                    message: "slidelabel failed to print STAN-002FB",
+                    message: "Tube Printer failed to print STAN-1002",
                   },
                 ])
               );
@@ -227,12 +220,60 @@ describe("Sectioning", () => {
         });
         cy.wait(2000);
         createLabware();
-        cy.findByLabelText("printers").select("slidelabel");
-        cy.findByText("Print Labels").click();
+        printLabels();
       });
 
       it("shows an error message", () => {
-        cy.findByText("slidelabel failed to print STAN-002FB").should("exist");
+        cy.findByText("Tube Printer failed to print STAN-1002").should("exist");
+      });
+    });
+  });
+
+  describe("Confirming", () => {
+    context("when nothing changed from the plan", () => {
+      before(() => {
+        cy.visit("/lab/sectioning");
+        cy.wait(2000);
+        createLabware();
+        printLabels();
+        cy.findByText("Next >").click();
+        cy.findByText("Save").click();
+      });
+
+      it("shows a success message", () => {
+        cy.findByText("Sectioning Saved").should("exist");
+      });
+    });
+
+    context("when the Confirm mutation fails", () => {
+      before(() => {
+        cy.visit("/lab/sectioning");
+
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.mutation("Confirm", (req, res, ctx) => {
+              return res(
+                ctx.errors([
+                  {
+                    message: "Failed to confirm sectioning",
+                  },
+                ])
+              );
+            })
+          );
+        });
+
+        cy.wait(2000);
+        createLabware();
+        printLabels();
+        cy.findByText("Next >").click();
+        cy.findByText("Save").click();
+      });
+
+      it("shows a success message", () => {
+        cy.findByText(
+          "There was an error confirming the Sectioning operation"
+        ).should("exist");
       });
     });
   });
@@ -250,4 +291,9 @@ function createLabware() {
     cy.findByText("Done").click();
   });
   cy.findByText("Create Labware").click();
+}
+
+function printLabels() {
+  cy.findByLabelText("printers").select("Tube Printer");
+  cy.findByText("Print Labels").click();
 }

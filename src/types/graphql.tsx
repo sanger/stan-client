@@ -1,7 +1,9 @@
-import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client';
+import { gql } from "@apollo/client";
+import * as Apollo from "@apollo/client";
 export type Maybe<T> = T | null;
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type Exact<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: T[K];
+};
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -13,75 +15,73 @@ export type Scalars = {
   Timestamp: string;
 };
 
-
-
 export type User = {
-  __typename?: 'User';
-  username: Scalars['String'];
+  __typename?: "User";
+  username: Scalars["String"];
 };
 
 export type LoginResult = {
-  __typename?: 'LoginResult';
-  message?: Maybe<Scalars['String']>;
+  __typename?: "LoginResult";
+  message?: Maybe<Scalars["String"]>;
   user?: Maybe<User>;
 };
 
 export type Medium = {
-  __typename?: 'Medium';
-  name: Scalars['String'];
+  __typename?: "Medium";
+  name: Scalars["String"];
 };
 
 export type Fixative = {
-  __typename?: 'Fixative';
-  name: Scalars['String'];
+  __typename?: "Fixative";
+  name: Scalars["String"];
 };
 
 export type MouldSize = {
-  __typename?: 'MouldSize';
-  name: Scalars['String'];
+  __typename?: "MouldSize";
+  name: Scalars["String"];
 };
 
 export type TissueType = {
-  __typename?: 'TissueType';
-  name: Scalars['String'];
+  __typename?: "TissueType";
+  name: Scalars["String"];
   spatialLocations: Array<SpatialLocation>;
 };
 
 export type SpatialLocation = {
-  __typename?: 'SpatialLocation';
-  name: Scalars['String'];
-  code: Scalars['Int'];
+  __typename?: "SpatialLocation";
+  name: Scalars["String"];
+  code: Scalars["Int"];
   tissueType: TissueType;
 };
 
 export type Hmdmc = {
-  __typename?: 'Hmdmc';
-  hmdmc: Scalars['String'];
+  __typename?: "Hmdmc";
+  hmdmc: Scalars["String"];
 };
 
 export type LabelType = {
-  __typename?: 'LabelType';
-  name: Scalars['String'];
+  __typename?: "LabelType";
+  name: Scalars["String"];
 };
 
 export type LabwareType = {
-  __typename?: 'LabwareType';
-  name: Scalars['String'];
-  numRows: Scalars['Int'];
-  numColumns: Scalars['Int'];
+  __typename?: "LabwareType";
+  name: Scalars["String"];
+  numRows: Scalars["Int"];
+  numColumns: Scalars["Int"];
   labelType?: Maybe<LabelType>;
 };
 
 export type Donor = {
-  __typename?: 'Donor';
-  donorName: Scalars['String'];
+  __typename?: "Donor";
+  donorName: Scalars["String"];
   lifeStage: LifeStage;
 };
 
 export type Tissue = {
-  __typename?: 'Tissue';
-  externalName: Scalars['String'];
-  replicate: Scalars['Int'];
+  __typename?: "Tissue";
+  externalName: Scalars["String"];
+  replicate: Scalars["Int"];
   spatialLocation: SpatialLocation;
   donor: Donor;
   hmdmc: Hmdmc;
@@ -91,48 +91,48 @@ export type Tissue = {
 };
 
 export type Sample = {
-  __typename?: 'Sample';
-  id: Scalars['Int'];
-  section?: Maybe<Scalars['Int']>;
+  __typename?: "Sample";
+  id: Scalars["Int"];
+  section?: Maybe<Scalars["Int"]>;
   tissue: Tissue;
 };
 
 export type Slot = {
-  __typename?: 'Slot';
-  address: Scalars['Address'];
-  labwareId: Scalars['Int'];
+  __typename?: "Slot";
+  address: Scalars["Address"];
+  labwareId: Scalars["Int"];
   samples: Array<Sample>;
-  block: Scalars['Boolean'];
-  highestSection?: Maybe<Scalars['Int']>;
+  block: Scalars["Boolean"];
+  highestSection?: Maybe<Scalars["Int"]>;
 };
 
 export type Labware = {
-  __typename?: 'Labware';
-  id: Scalars['Int'];
-  barcode: Scalars['String'];
+  __typename?: "Labware";
+  id: Scalars["Int"];
+  barcode: Scalars["String"];
   labwareType: LabwareType;
   slots: Array<Slot>;
 };
 
 export enum LifeStage {
-  Adult = 'adult',
-  Paediatric = 'paediatric',
-  Fetal = 'fetal'
+  Adult = "adult",
+  Paediatric = "paediatric",
+  Fetal = "fetal",
 }
 
 export type BlockRegisterRequest = {
-  donorIdentifier: Scalars['String'];
+  donorIdentifier: Scalars["String"];
   lifeStage: LifeStage;
-  hmdmc: Scalars['String'];
-  tissueType: Scalars['String'];
-  spatialLocation: Scalars['Int'];
-  replicateNumber: Scalars['Int'];
-  externalIdentifier: Scalars['String'];
-  highestSection: Scalars['Int'];
-  labwareType: Scalars['String'];
-  medium: Scalars['String'];
-  fixative: Scalars['String'];
-  mouldSize: Scalars['String'];
+  hmdmc: Scalars["String"];
+  tissueType: Scalars["String"];
+  spatialLocation: Scalars["Int"];
+  replicateNumber: Scalars["Int"];
+  externalIdentifier: Scalars["String"];
+  highestSection: Scalars["Int"];
+  labwareType: Scalars["String"];
+  medium: Scalars["String"];
+  fixative: Scalars["String"];
+  mouldSize: Scalars["String"];
 };
 
 export type RegisterRequest = {
@@ -140,62 +140,62 @@ export type RegisterRequest = {
 };
 
 export type RegisterResult = {
-  __typename?: 'RegisterResult';
+  __typename?: "RegisterResult";
   labware: Array<Labware>;
   tissue: Array<Tissue>;
 };
 
 export type PlanRequestSource = {
-  barcode: Scalars['String'];
-  address?: Maybe<Scalars['Address']>;
+  barcode: Scalars["String"];
+  address?: Maybe<Scalars["Address"]>;
 };
 
 export type OperationType = {
-  __typename?: 'OperationType';
-  name: Scalars['String'];
+  __typename?: "OperationType";
+  name: Scalars["String"];
 };
 
 export type PlanAction = {
-  __typename?: 'PlanAction';
+  __typename?: "PlanAction";
   source: Slot;
   destination: Slot;
   sample: Sample;
-  newSection?: Maybe<Scalars['Int']>;
+  newSection?: Maybe<Scalars["Int"]>;
 };
 
 export type PlanOperation = {
-  __typename?: 'PlanOperation';
+  __typename?: "PlanOperation";
   operationType?: Maybe<OperationType>;
   planActions: Array<PlanAction>;
 };
 
 export type PlanRequestAction = {
-  address: Scalars['Address'];
-  sampleId: Scalars['Int'];
-  sampleThickness?: Maybe<Scalars['Int']>;
+  address: Scalars["Address"];
+  sampleId: Scalars["Int"];
+  sampleThickness?: Maybe<Scalars["Int"]>;
   source: PlanRequestSource;
 };
 
 export type PlanRequestLabware = {
-  labwareType: Scalars['String'];
-  barcode?: Maybe<Scalars['String']>;
+  labwareType: Scalars["String"];
+  barcode?: Maybe<Scalars["String"]>;
   actions: Array<PlanRequestAction>;
 };
 
 export type PlanRequest = {
-  operationType: Scalars['String'];
+  operationType: Scalars["String"];
   labware: Array<PlanRequestLabware>;
 };
 
 export type AddressCommentInput = {
-  address: Scalars['Address'];
-  commentId: Scalars['Int'];
+  address: Scalars["Address"];
+  commentId: Scalars["Int"];
 };
 
 export type ConfirmOperationLabware = {
-  barcode: Scalars['String'];
-  cancelled?: Maybe<Scalars['Boolean']>;
-  cancelledAddresses?: Maybe<Array<Scalars['Address']>>;
+  barcode: Scalars["String"];
+  cancelled?: Maybe<Scalars["Boolean"]>;
+  cancelledAddresses?: Maybe<Array<Scalars["Address"]>>;
   addressComments?: Maybe<Array<AddressCommentInput>>;
 };
 
@@ -204,48 +204,48 @@ export type ConfirmOperationRequest = {
 };
 
 export type Action = {
-  __typename?: 'Action';
+  __typename?: "Action";
   source: Slot;
   destination: Slot;
-  operationId: Scalars['Int'];
+  operationId: Scalars["Int"];
   sample: Sample;
 };
 
 export type Operation = {
-  __typename?: 'Operation';
+  __typename?: "Operation";
   operationType: OperationType;
   actions: Array<Action>;
   user: User;
-  performed: Scalars['Timestamp'];
+  performed: Scalars["Timestamp"];
 };
 
 export type ConfirmOperationResult = {
-  __typename?: 'ConfirmOperationResult';
+  __typename?: "ConfirmOperationResult";
   labware: Array<Labware>;
   operations: Array<Operation>;
 };
 
 export type PlanResult = {
-  __typename?: 'PlanResult';
+  __typename?: "PlanResult";
   labware: Array<Labware>;
   operations: Array<PlanOperation>;
 };
 
 export type Printer = {
-  __typename?: 'Printer';
-  name: Scalars['String'];
+  __typename?: "Printer";
+  name: Scalars["String"];
   labelType: LabelType;
 };
 
 export type Comment = {
-  __typename?: 'Comment';
-  id: Scalars['Int'];
-  text: Scalars['String'];
-  category: Scalars['String'];
+  __typename?: "Comment";
+  id: Scalars["Int"];
+  text: Scalars["String"];
+  category: Scalars["String"];
 };
 
 export type Query = {
-  __typename?: 'Query';
+  __typename?: "Query";
   user?: Maybe<User>;
   tissueTypes: Array<TissueType>;
   labwareTypes: Array<LabwareType>;
@@ -258,372 +258,322 @@ export type Query = {
   comments: Array<Comment>;
 };
 
-
 export type QueryLabwareArgs = {
-  barcode: Scalars['String'];
+  barcode: Scalars["String"];
 };
-
 
 export type QueryPrintersArgs = {
-  labelType?: Maybe<Scalars['String']>;
+  labelType?: Maybe<Scalars["String"]>;
 };
 
-
 export type QueryCommentsArgs = {
-  category?: Maybe<Scalars['String']>;
+  category?: Maybe<Scalars["String"]>;
 };
 
 export type Mutation = {
-  __typename?: 'Mutation';
+  __typename?: "Mutation";
   login: LoginResult;
-  logout?: Maybe<Scalars['String']>;
+  logout?: Maybe<Scalars["String"]>;
   register: RegisterResult;
   plan: PlanResult;
-  printLabware?: Maybe<Scalars['String']>;
+  printLabware?: Maybe<Scalars["String"]>;
   confirmOperation: ConfirmOperationResult;
 };
 
-
 export type MutationLoginArgs = {
-  username: Scalars['String'];
-  password: Scalars['String'];
+  username: Scalars["String"];
+  password: Scalars["String"];
 };
-
 
 export type MutationRegisterArgs = {
   request: RegisterRequest;
 };
 
-
 export type MutationPlanArgs = {
   request: PlanRequest;
 };
 
-
 export type MutationPrintLabwareArgs = {
-  printer: Scalars['String'];
-  barcodes: Array<Scalars['String']>;
+  printer: Scalars["String"];
+  barcodes: Array<Scalars["String"]>;
 };
-
 
 export type MutationConfirmOperationArgs = {
   request: ConfirmOperationRequest;
 };
 
-export type LabwareLayoutFragment = (
-  { __typename?: 'Labware' }
-  & Pick<Labware, 'id' | 'barcode'>
-  & { labwareType: (
-    { __typename?: 'LabwareType' }
-    & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
-    & { labelType?: Maybe<(
-      { __typename?: 'LabelType' }
-      & Pick<LabelType, 'name'>
-    )> }
-  ), slots: Array<(
-    { __typename?: 'Slot' }
-    & Pick<Slot, 'address' | 'labwareId'>
-    & { samples: Array<(
-      { __typename?: 'Sample' }
-      & Pick<Sample, 'id'>
-      & { tissue: (
-        { __typename?: 'Tissue' }
-        & Pick<Tissue, 'externalName' | 'replicate'>
-        & { donor: (
-          { __typename?: 'Donor' }
-          & Pick<Donor, 'donorName'>
-        ), spatialLocation: (
-          { __typename?: 'SpatialLocation' }
-          & Pick<SpatialLocation, 'code'>
-          & { tissueType: (
-            { __typename?: 'TissueType' }
-            & Pick<TissueType, 'name'>
-          ) }
-        ) }
-      ) }
-    )> }
-  )> }
-);
+export type LabwareLayoutFragment = { __typename?: "Labware" } & Pick<
+  Labware,
+  "id" | "barcode"
+> & {
+    labwareType: { __typename?: "LabwareType" } & Pick<
+      LabwareType,
+      "name" | "numRows" | "numColumns"
+    > & {
+        labelType?: Maybe<
+          { __typename?: "LabelType" } & Pick<LabelType, "name">
+        >;
+      };
+    slots: Array<
+      { __typename?: "Slot" } & Pick<Slot, "address" | "labwareId"> & {
+          samples: Array<
+            { __typename?: "Sample" } & Pick<Sample, "id"> & {
+                tissue: { __typename?: "Tissue" } & Pick<
+                  Tissue,
+                  "externalName" | "replicate"
+                > & {
+                    donor: { __typename?: "Donor" } & Pick<Donor, "donorName">;
+                    spatialLocation: { __typename?: "SpatialLocation" } & Pick<
+                      SpatialLocation,
+                      "code"
+                    > & {
+                        tissueType: { __typename?: "TissueType" } & Pick<
+                          TissueType,
+                          "name"
+                        >;
+                      };
+                  };
+              }
+          >;
+        }
+    >;
+  };
 
 export type ConfirmMutationVariables = Exact<{
   request: ConfirmOperationRequest;
 }>;
 
-
-export type ConfirmMutation = (
-  { __typename?: 'Mutation' }
-  & { confirmOperation: (
-    { __typename?: 'ConfirmOperationResult' }
-    & { labware: Array<(
-      { __typename?: 'Labware' }
-      & LabwareLayoutFragment
-    )>, operations: Array<(
-      { __typename?: 'Operation' }
-      & Pick<Operation, 'performed'>
-      & { operationType: (
-        { __typename?: 'OperationType' }
-        & Pick<OperationType, 'name'>
-      ), user: (
-        { __typename?: 'User' }
-        & Pick<User, 'username'>
-      ) }
-    )> }
-  ) }
-);
+export type ConfirmMutation = { __typename?: "Mutation" } & {
+  confirmOperation: { __typename?: "ConfirmOperationResult" } & {
+    labware: Array<{ __typename?: "Labware" } & LabwareLayoutFragment>;
+    operations: Array<
+      { __typename?: "Operation" } & Pick<Operation, "performed"> & {
+          operationType: { __typename?: "OperationType" } & Pick<
+            OperationType,
+            "name"
+          >;
+          user: { __typename?: "User" } & Pick<User, "username">;
+        }
+    >;
+  };
+};
 
 export type LoginMutationVariables = Exact<{
-  username: Scalars['String'];
-  password: Scalars['String'];
+  username: Scalars["String"];
+  password: Scalars["String"];
 }>;
 
+export type LoginMutation = { __typename?: "Mutation" } & {
+  login: { __typename?: "LoginResult" } & {
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "username">>;
+  };
+};
 
-export type LoginMutation = (
-  { __typename?: 'Mutation' }
-  & { login: (
-    { __typename?: 'LoginResult' }
-    & { user?: Maybe<(
-      { __typename?: 'User' }
-      & Pick<User, 'username'>
-    )> }
-  ) }
-);
+export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
 
-export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LogoutMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'logout'>
-);
+export type LogoutMutation = { __typename?: "Mutation" } & Pick<
+  Mutation,
+  "logout"
+>;
 
 export type PlanMutationVariables = Exact<{
   request: PlanRequest;
 }>;
 
-
-export type PlanMutation = (
-  { __typename?: 'Mutation' }
-  & { plan: (
-    { __typename?: 'PlanResult' }
-    & { labware: Array<(
-      { __typename?: 'Labware' }
-      & LabwareLayoutFragment
-    )>, operations: Array<(
-      { __typename?: 'PlanOperation' }
-      & { operationType?: Maybe<(
-        { __typename?: 'OperationType' }
-        & Pick<OperationType, 'name'>
-      )>, planActions: Array<(
-        { __typename?: 'PlanAction' }
-        & Pick<PlanAction, 'newSection'>
-        & { sample: (
-          { __typename?: 'Sample' }
-          & Pick<Sample, 'id'>
-        ), source: (
-          { __typename?: 'Slot' }
-          & Pick<Slot, 'address' | 'labwareId'>
-          & { samples: Array<(
-            { __typename?: 'Sample' }
-            & Pick<Sample, 'id'>
-          )> }
-        ), destination: (
-          { __typename?: 'Slot' }
-          & Pick<Slot, 'address' | 'labwareId'>
-        ) }
-      )> }
-    )> }
-  ) }
-);
+export type PlanMutation = { __typename?: "Mutation" } & {
+  plan: { __typename?: "PlanResult" } & {
+    labware: Array<{ __typename?: "Labware" } & LabwareLayoutFragment>;
+    operations: Array<
+      { __typename?: "PlanOperation" } & {
+        operationType?: Maybe<
+          { __typename?: "OperationType" } & Pick<OperationType, "name">
+        >;
+        planActions: Array<
+          { __typename?: "PlanAction" } & Pick<PlanAction, "newSection"> & {
+              sample: { __typename?: "Sample" } & Pick<Sample, "id">;
+              source: { __typename?: "Slot" } & Pick<
+                Slot,
+                "address" | "labwareId"
+              > & {
+                  samples: Array<
+                    { __typename?: "Sample" } & Pick<Sample, "id">
+                  >;
+                };
+              destination: { __typename?: "Slot" } & Pick<
+                Slot,
+                "address" | "labwareId"
+              >;
+            }
+        >;
+      }
+    >;
+  };
+};
 
 export type PrintMutationVariables = Exact<{
-  barcodes: Array<Scalars['String']>;
-  printer: Scalars['String'];
+  barcodes: Array<Scalars["String"]>;
+  printer: Scalars["String"];
 }>;
 
-
-export type PrintMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'printLabware'>
-);
+export type PrintMutation = { __typename?: "Mutation" } & Pick<
+  Mutation,
+  "printLabware"
+>;
 
 export type RegisterTissuesMutationVariables = Exact<{
   request: RegisterRequest;
 }>;
 
+export type RegisterTissuesMutation = { __typename?: "Mutation" } & {
+  register: { __typename?: "RegisterResult" } & {
+    labware: Array<{ __typename?: "Labware" } & LabwareLayoutFragment>;
+  };
+};
 
-export type RegisterTissuesMutation = (
-  { __typename?: 'Mutation' }
-  & { register: (
-    { __typename?: 'RegisterResult' }
-    & { labware: Array<(
-      { __typename?: 'Labware' }
-      & LabwareLayoutFragment
-    )> }
-  ) }
-);
+export type CurrentUserQueryVariables = Exact<{ [key: string]: never }>;
 
-export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type CurrentUserQuery = (
-  { __typename?: 'Query' }
-  & { user?: Maybe<(
-    { __typename?: 'User' }
-    & Pick<User, 'username'>
-  )> }
-);
+export type CurrentUserQuery = { __typename?: "Query" } & {
+  user?: Maybe<{ __typename?: "User" } & Pick<User, "username">>;
+};
 
 export type FindLabwareQueryVariables = Exact<{
-  barcode: Scalars['String'];
+  barcode: Scalars["String"];
 }>;
 
+export type FindLabwareQuery = { __typename?: "Query" } & {
+  labware: { __typename?: "Labware" } & Pick<Labware, "id" | "barcode"> & {
+      labwareType: { __typename?: "LabwareType" } & Pick<LabwareType, "name">;
+      slots: Array<
+        { __typename?: "Slot" } & Pick<Slot, "address" | "block"> & {
+            samples: Array<
+              { __typename?: "Sample" } & Pick<Sample, "id"> & {
+                  tissue: { __typename?: "Tissue" } & Pick<
+                    Tissue,
+                    "replicate"
+                  > & {
+                      donor: { __typename?: "Donor" } & Pick<
+                        Donor,
+                        "donorName"
+                      >;
+                      spatialLocation: {
+                        __typename?: "SpatialLocation";
+                      } & Pick<SpatialLocation, "code"> & {
+                          tissueType: { __typename?: "TissueType" } & Pick<
+                            TissueType,
+                            "name"
+                          >;
+                        };
+                    };
+                }
+            >;
+          }
+      >;
+    };
+};
 
-export type FindLabwareQuery = (
-  { __typename?: 'Query' }
-  & { labware: (
-    { __typename?: 'Labware' }
-    & Pick<Labware, 'id' | 'barcode'>
-    & { labwareType: (
-      { __typename?: 'LabwareType' }
-      & Pick<LabwareType, 'name'>
-    ), slots: Array<(
-      { __typename?: 'Slot' }
-      & Pick<Slot, 'address' | 'block'>
-      & { samples: Array<(
-        { __typename?: 'Sample' }
-        & Pick<Sample, 'id'>
-        & { tissue: (
-          { __typename?: 'Tissue' }
-          & Pick<Tissue, 'replicate'>
-          & { donor: (
-            { __typename?: 'Donor' }
-            & Pick<Donor, 'donorName'>
-          ), spatialLocation: (
-            { __typename?: 'SpatialLocation' }
-            & Pick<SpatialLocation, 'code'>
-            & { tissueType: (
-              { __typename?: 'TissueType' }
-              & Pick<TissueType, 'name'>
-            ) }
-          ) }
-        ) }
-      )> }
-    )> }
-  ) }
-);
+export type GetPrintersQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetPrintersQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetPrintersQuery = { __typename?: "Query" } & {
+  printers: Array<
+    { __typename?: "Printer" } & Pick<Printer, "name"> & {
+        labelType: { __typename?: "LabelType" } & Pick<LabelType, "name">;
+      }
+  >;
+};
 
+export type GetRegistrationInfoQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetPrintersQuery = (
-  { __typename?: 'Query' }
-  & { printers: Array<(
-    { __typename?: 'Printer' }
-    & Pick<Printer, 'name'>
-    & { labelType: (
-      { __typename?: 'LabelType' }
-      & Pick<LabelType, 'name'>
-    ) }
-  )> }
-);
+export type GetRegistrationInfoQuery = { __typename?: "Query" } & {
+  hmdmcs: Array<{ __typename?: "Hmdmc" } & Pick<Hmdmc, "hmdmc">>;
+  labwareTypes: Array<
+    { __typename?: "LabwareType" } & Pick<LabwareType, "name">
+  >;
+  tissueTypes: Array<
+    { __typename?: "TissueType" } & Pick<TissueType, "name"> & {
+        spatialLocations: Array<
+          { __typename?: "SpatialLocation" } & Pick<
+            SpatialLocation,
+            "name" | "code"
+          >
+        >;
+      }
+  >;
+  fixatives: Array<{ __typename?: "Fixative" } & Pick<Fixative, "name">>;
+  mediums: Array<{ __typename?: "Medium" } & Pick<Medium, "name">>;
+  mouldSizes: Array<{ __typename?: "MouldSize" } & Pick<MouldSize, "name">>;
+};
 
-export type GetRegistrationInfoQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetSectioningInfoQueryVariables = Exact<{ [key: string]: never }>;
 
-
-export type GetRegistrationInfoQuery = (
-  { __typename?: 'Query' }
-  & { hmdmcs: Array<(
-    { __typename?: 'Hmdmc' }
-    & Pick<Hmdmc, 'hmdmc'>
-  )>, labwareTypes: Array<(
-    { __typename?: 'LabwareType' }
-    & Pick<LabwareType, 'name'>
-  )>, tissueTypes: Array<(
-    { __typename?: 'TissueType' }
-    & Pick<TissueType, 'name'>
-    & { spatialLocations: Array<(
-      { __typename?: 'SpatialLocation' }
-      & Pick<SpatialLocation, 'name' | 'code'>
-    )> }
-  )>, fixatives: Array<(
-    { __typename?: 'Fixative' }
-    & Pick<Fixative, 'name'>
-  )>, mediums: Array<(
-    { __typename?: 'Medium' }
-    & Pick<Medium, 'name'>
-  )>, mouldSizes: Array<(
-    { __typename?: 'MouldSize' }
-    & Pick<MouldSize, 'name'>
-  )> }
-);
-
-export type GetSectioningInfoQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetSectioningInfoQuery = (
-  { __typename?: 'Query' }
-  & { comments: Array<(
-    { __typename?: 'Comment' }
-    & Pick<Comment, 'id' | 'text' | 'category'>
-  )>, labwareTypes: Array<(
-    { __typename?: 'LabwareType' }
-    & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
-  )> }
-);
+export type GetSectioningInfoQuery = { __typename?: "Query" } & {
+  comments: Array<
+    { __typename?: "Comment" } & Pick<Comment, "id" | "text" | "category">
+  >;
+  labwareTypes: Array<
+    { __typename?: "LabwareType" } & Pick<
+      LabwareType,
+      "name" | "numRows" | "numColumns"
+    >
+  >;
+};
 
 export const LabwareLayoutFragmentDoc = gql`
-    fragment LabwareLayout on Labware {
-  id
-  barcode
-  labwareType {
-    name
-    numRows
-    numColumns
-    labelType {
+  fragment LabwareLayout on Labware {
+    id
+    barcode
+    labwareType {
       name
-    }
-  }
-  slots {
-    address
-    labwareId
-    samples {
-      id
-      tissue {
-        donor {
-          donorName
-        }
-        externalName
-        spatialLocation {
-          tissueType {
-            name
-          }
-          code
-        }
-        replicate
-      }
-    }
-  }
-}
-    `;
-export const ConfirmDocument = gql`
-    mutation Confirm($request: ConfirmOperationRequest!) {
-  confirmOperation(request: $request) {
-    labware {
-      ...LabwareLayout
-    }
-    operations {
-      operationType {
+      numRows
+      numColumns
+      labelType {
         name
       }
-      user {
-        username
+    }
+    slots {
+      address
+      labwareId
+      samples {
+        id
+        tissue {
+          donor {
+            donorName
+          }
+          externalName
+          spatialLocation {
+            tissueType {
+              name
+            }
+            code
+          }
+          replicate
+        }
       }
-      performed
     }
   }
-}
-    ${LabwareLayoutFragmentDoc}`;
-export type ConfirmMutationFn = Apollo.MutationFunction<ConfirmMutation, ConfirmMutationVariables>;
+`;
+export const ConfirmDocument = gql`
+  mutation Confirm($request: ConfirmOperationRequest!) {
+    confirmOperation(request: $request) {
+      labware {
+        ...LabwareLayout
+      }
+      operations {
+        operationType {
+          name
+        }
+        user {
+          username
+        }
+        performed
+      }
+    }
+  }
+  ${LabwareLayoutFragmentDoc}
+`;
+export type ConfirmMutationFn = Apollo.MutationFunction<
+  ConfirmMutation,
+  ConfirmMutationVariables
+>;
 
 /**
  * __useConfirmMutation__
@@ -642,22 +592,36 @@ export type ConfirmMutationFn = Apollo.MutationFunction<ConfirmMutation, Confirm
  *   },
  * });
  */
-export function useConfirmMutation(baseOptions?: Apollo.MutationHookOptions<ConfirmMutation, ConfirmMutationVariables>) {
-        return Apollo.useMutation<ConfirmMutation, ConfirmMutationVariables>(ConfirmDocument, baseOptions);
-      }
+export function useConfirmMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ConfirmMutation,
+    ConfirmMutationVariables
+  >
+) {
+  return Apollo.useMutation<ConfirmMutation, ConfirmMutationVariables>(
+    ConfirmDocument,
+    baseOptions
+  );
+}
 export type ConfirmMutationHookResult = ReturnType<typeof useConfirmMutation>;
 export type ConfirmMutationResult = Apollo.MutationResult<ConfirmMutation>;
-export type ConfirmMutationOptions = Apollo.BaseMutationOptions<ConfirmMutation, ConfirmMutationVariables>;
+export type ConfirmMutationOptions = Apollo.BaseMutationOptions<
+  ConfirmMutation,
+  ConfirmMutationVariables
+>;
 export const LoginDocument = gql`
-    mutation Login($username: String!, $password: String!) {
-  login(username: $username, password: $password) {
-    user {
-      username
+  mutation Login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      user {
+        username
+      }
     }
   }
-}
-    `;
-export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
+`;
+export type LoginMutationFn = Apollo.MutationFunction<
+  LoginMutation,
+  LoginMutationVariables
+>;
 
 /**
  * __useLoginMutation__
@@ -677,18 +641,32 @@ export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutati
  *   },
  * });
  */
-export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
-        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, baseOptions);
-      }
+export function useLoginMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    LoginMutation,
+    LoginMutationVariables
+  >
+) {
+  return Apollo.useMutation<LoginMutation, LoginMutationVariables>(
+    LoginDocument,
+    baseOptions
+  );
+}
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
-export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
+export type LoginMutationOptions = Apollo.BaseMutationOptions<
+  LoginMutation,
+  LoginMutationVariables
+>;
 export const LogoutDocument = gql`
-    mutation Logout {
-  logout
-}
-    `;
-export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
+  mutation Logout {
+    logout
+  }
+`;
+export type LogoutMutationFn = Apollo.MutationFunction<
+  LogoutMutation,
+  LogoutMutationVariables
+>;
 
 /**
  * __useLogoutMutation__
@@ -706,44 +684,59 @@ export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMut
  *   },
  * });
  */
-export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
-        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, baseOptions);
-      }
+export function useLogoutMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    LogoutMutation,
+    LogoutMutationVariables
+  >
+) {
+  return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(
+    LogoutDocument,
+    baseOptions
+  );
+}
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
-export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
+export type LogoutMutationOptions = Apollo.BaseMutationOptions<
+  LogoutMutation,
+  LogoutMutationVariables
+>;
 export const PlanDocument = gql`
-    mutation Plan($request: PlanRequest!) {
-  plan(request: $request) {
-    labware {
-      ...LabwareLayout
-    }
-    operations {
-      operationType {
-        name
+  mutation Plan($request: PlanRequest!) {
+    plan(request: $request) {
+      labware {
+        ...LabwareLayout
       }
-      planActions {
-        newSection
-        sample {
-          id
+      operations {
+        operationType {
+          name
         }
-        source {
-          address
-          labwareId
-          samples {
+        planActions {
+          newSection
+          sample {
             id
           }
-        }
-        destination {
-          address
-          labwareId
+          source {
+            address
+            labwareId
+            samples {
+              id
+            }
+          }
+          destination {
+            address
+            labwareId
+          }
         }
       }
     }
   }
-}
-    ${LabwareLayoutFragmentDoc}`;
-export type PlanMutationFn = Apollo.MutationFunction<PlanMutation, PlanMutationVariables>;
+  ${LabwareLayoutFragmentDoc}
+`;
+export type PlanMutationFn = Apollo.MutationFunction<
+  PlanMutation,
+  PlanMutationVariables
+>;
 
 /**
  * __usePlanMutation__
@@ -762,18 +755,29 @@ export type PlanMutationFn = Apollo.MutationFunction<PlanMutation, PlanMutationV
  *   },
  * });
  */
-export function usePlanMutation(baseOptions?: Apollo.MutationHookOptions<PlanMutation, PlanMutationVariables>) {
-        return Apollo.useMutation<PlanMutation, PlanMutationVariables>(PlanDocument, baseOptions);
-      }
+export function usePlanMutation(
+  baseOptions?: Apollo.MutationHookOptions<PlanMutation, PlanMutationVariables>
+) {
+  return Apollo.useMutation<PlanMutation, PlanMutationVariables>(
+    PlanDocument,
+    baseOptions
+  );
+}
 export type PlanMutationHookResult = ReturnType<typeof usePlanMutation>;
 export type PlanMutationResult = Apollo.MutationResult<PlanMutation>;
-export type PlanMutationOptions = Apollo.BaseMutationOptions<PlanMutation, PlanMutationVariables>;
+export type PlanMutationOptions = Apollo.BaseMutationOptions<
+  PlanMutation,
+  PlanMutationVariables
+>;
 export const PrintDocument = gql`
-    mutation Print($barcodes: [String!]!, $printer: String!) {
-  printLabware(barcodes: $barcodes, printer: $printer)
-}
-    `;
-export type PrintMutationFn = Apollo.MutationFunction<PrintMutation, PrintMutationVariables>;
+  mutation Print($barcodes: [String!]!, $printer: String!) {
+    printLabware(barcodes: $barcodes, printer: $printer)
+  }
+`;
+export type PrintMutationFn = Apollo.MutationFunction<
+  PrintMutation,
+  PrintMutationVariables
+>;
 
 /**
  * __usePrintMutation__
@@ -793,22 +797,37 @@ export type PrintMutationFn = Apollo.MutationFunction<PrintMutation, PrintMutati
  *   },
  * });
  */
-export function usePrintMutation(baseOptions?: Apollo.MutationHookOptions<PrintMutation, PrintMutationVariables>) {
-        return Apollo.useMutation<PrintMutation, PrintMutationVariables>(PrintDocument, baseOptions);
-      }
+export function usePrintMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PrintMutation,
+    PrintMutationVariables
+  >
+) {
+  return Apollo.useMutation<PrintMutation, PrintMutationVariables>(
+    PrintDocument,
+    baseOptions
+  );
+}
 export type PrintMutationHookResult = ReturnType<typeof usePrintMutation>;
 export type PrintMutationResult = Apollo.MutationResult<PrintMutation>;
-export type PrintMutationOptions = Apollo.BaseMutationOptions<PrintMutation, PrintMutationVariables>;
+export type PrintMutationOptions = Apollo.BaseMutationOptions<
+  PrintMutation,
+  PrintMutationVariables
+>;
 export const RegisterTissuesDocument = gql`
-    mutation RegisterTissues($request: RegisterRequest!) {
-  register(request: $request) {
-    labware {
-      ...LabwareLayout
+  mutation RegisterTissues($request: RegisterRequest!) {
+    register(request: $request) {
+      labware {
+        ...LabwareLayout
+      }
     }
   }
-}
-    ${LabwareLayoutFragmentDoc}`;
-export type RegisterTissuesMutationFn = Apollo.MutationFunction<RegisterTissuesMutation, RegisterTissuesMutationVariables>;
+  ${LabwareLayoutFragmentDoc}
+`;
+export type RegisterTissuesMutationFn = Apollo.MutationFunction<
+  RegisterTissuesMutation,
+  RegisterTissuesMutationVariables
+>;
 
 /**
  * __useRegisterTissuesMutation__
@@ -827,19 +846,34 @@ export type RegisterTissuesMutationFn = Apollo.MutationFunction<RegisterTissuesM
  *   },
  * });
  */
-export function useRegisterTissuesMutation(baseOptions?: Apollo.MutationHookOptions<RegisterTissuesMutation, RegisterTissuesMutationVariables>) {
-        return Apollo.useMutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>(RegisterTissuesDocument, baseOptions);
-      }
-export type RegisterTissuesMutationHookResult = ReturnType<typeof useRegisterTissuesMutation>;
-export type RegisterTissuesMutationResult = Apollo.MutationResult<RegisterTissuesMutation>;
-export type RegisterTissuesMutationOptions = Apollo.BaseMutationOptions<RegisterTissuesMutation, RegisterTissuesMutationVariables>;
-export const CurrentUserDocument = gql`
-    query CurrentUser {
-  user {
-    username
-  }
+export function useRegisterTissuesMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    RegisterTissuesMutation,
+    RegisterTissuesMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    RegisterTissuesMutation,
+    RegisterTissuesMutationVariables
+  >(RegisterTissuesDocument, baseOptions);
 }
-    `;
+export type RegisterTissuesMutationHookResult = ReturnType<
+  typeof useRegisterTissuesMutation
+>;
+export type RegisterTissuesMutationResult = Apollo.MutationResult<
+  RegisterTissuesMutation
+>;
+export type RegisterTissuesMutationOptions = Apollo.BaseMutationOptions<
+  RegisterTissuesMutation,
+  RegisterTissuesMutationVariables
+>;
+export const CurrentUserDocument = gql`
+  query CurrentUser {
+    user {
+      username
+    }
+  }
+`;
 
 /**
  * __useCurrentUserQuery__
@@ -856,45 +890,66 @@ export const CurrentUserDocument = gql`
  *   },
  * });
  */
-export function useCurrentUserQuery(baseOptions?: Apollo.QueryHookOptions<CurrentUserQuery, CurrentUserQueryVariables>) {
-        return Apollo.useQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, baseOptions);
-      }
-export function useCurrentUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CurrentUserQuery, CurrentUserQueryVariables>) {
-          return Apollo.useLazyQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, baseOptions);
-        }
+export function useCurrentUserQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    CurrentUserQuery,
+    CurrentUserQueryVariables
+  >
+) {
+  return Apollo.useQuery<CurrentUserQuery, CurrentUserQueryVariables>(
+    CurrentUserDocument,
+    baseOptions
+  );
+}
+export function useCurrentUserLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    CurrentUserQuery,
+    CurrentUserQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<CurrentUserQuery, CurrentUserQueryVariables>(
+    CurrentUserDocument,
+    baseOptions
+  );
+}
 export type CurrentUserQueryHookResult = ReturnType<typeof useCurrentUserQuery>;
-export type CurrentUserLazyQueryHookResult = ReturnType<typeof useCurrentUserLazyQuery>;
-export type CurrentUserQueryResult = Apollo.QueryResult<CurrentUserQuery, CurrentUserQueryVariables>;
+export type CurrentUserLazyQueryHookResult = ReturnType<
+  typeof useCurrentUserLazyQuery
+>;
+export type CurrentUserQueryResult = Apollo.QueryResult<
+  CurrentUserQuery,
+  CurrentUserQueryVariables
+>;
 export const FindLabwareDocument = gql`
-    query FindLabware($barcode: String!) {
-  labware(barcode: $barcode) {
-    id
-    barcode
-    labwareType {
-      name
-    }
-    slots {
-      address
-      block
-      samples {
-        id
-        tissue {
-          donor {
-            donorName
-          }
-          spatialLocation {
-            tissueType {
-              name
+  query FindLabware($barcode: String!) {
+    labware(barcode: $barcode) {
+      id
+      barcode
+      labwareType {
+        name
+      }
+      slots {
+        address
+        block
+        samples {
+          id
+          tissue {
+            donor {
+              donorName
             }
-            code
+            spatialLocation {
+              tissueType {
+                name
+              }
+              code
+            }
+            replicate
           }
-          replicate
         }
       }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useFindLabwareQuery__
@@ -912,25 +967,46 @@ export const FindLabwareDocument = gql`
  *   },
  * });
  */
-export function useFindLabwareQuery(baseOptions?: Apollo.QueryHookOptions<FindLabwareQuery, FindLabwareQueryVariables>) {
-        return Apollo.useQuery<FindLabwareQuery, FindLabwareQueryVariables>(FindLabwareDocument, baseOptions);
-      }
-export function useFindLabwareLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindLabwareQuery, FindLabwareQueryVariables>) {
-          return Apollo.useLazyQuery<FindLabwareQuery, FindLabwareQueryVariables>(FindLabwareDocument, baseOptions);
-        }
+export function useFindLabwareQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    FindLabwareQuery,
+    FindLabwareQueryVariables
+  >
+) {
+  return Apollo.useQuery<FindLabwareQuery, FindLabwareQueryVariables>(
+    FindLabwareDocument,
+    baseOptions
+  );
+}
+export function useFindLabwareLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    FindLabwareQuery,
+    FindLabwareQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<FindLabwareQuery, FindLabwareQueryVariables>(
+    FindLabwareDocument,
+    baseOptions
+  );
+}
 export type FindLabwareQueryHookResult = ReturnType<typeof useFindLabwareQuery>;
-export type FindLabwareLazyQueryHookResult = ReturnType<typeof useFindLabwareLazyQuery>;
-export type FindLabwareQueryResult = Apollo.QueryResult<FindLabwareQuery, FindLabwareQueryVariables>;
+export type FindLabwareLazyQueryHookResult = ReturnType<
+  typeof useFindLabwareLazyQuery
+>;
+export type FindLabwareQueryResult = Apollo.QueryResult<
+  FindLabwareQuery,
+  FindLabwareQueryVariables
+>;
 export const GetPrintersDocument = gql`
-    query GetPrinters {
-  printers {
-    name
-    labelType {
+  query GetPrinters {
+    printers {
       name
+      labelType {
+        name
+      }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useGetPrintersQuery__
@@ -947,41 +1023,62 @@ export const GetPrintersDocument = gql`
  *   },
  * });
  */
-export function useGetPrintersQuery(baseOptions?: Apollo.QueryHookOptions<GetPrintersQuery, GetPrintersQueryVariables>) {
-        return Apollo.useQuery<GetPrintersQuery, GetPrintersQueryVariables>(GetPrintersDocument, baseOptions);
-      }
-export function useGetPrintersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPrintersQuery, GetPrintersQueryVariables>) {
-          return Apollo.useLazyQuery<GetPrintersQuery, GetPrintersQueryVariables>(GetPrintersDocument, baseOptions);
-        }
+export function useGetPrintersQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetPrintersQuery,
+    GetPrintersQueryVariables
+  >
+) {
+  return Apollo.useQuery<GetPrintersQuery, GetPrintersQueryVariables>(
+    GetPrintersDocument,
+    baseOptions
+  );
+}
+export function useGetPrintersLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetPrintersQuery,
+    GetPrintersQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<GetPrintersQuery, GetPrintersQueryVariables>(
+    GetPrintersDocument,
+    baseOptions
+  );
+}
 export type GetPrintersQueryHookResult = ReturnType<typeof useGetPrintersQuery>;
-export type GetPrintersLazyQueryHookResult = ReturnType<typeof useGetPrintersLazyQuery>;
-export type GetPrintersQueryResult = Apollo.QueryResult<GetPrintersQuery, GetPrintersQueryVariables>;
+export type GetPrintersLazyQueryHookResult = ReturnType<
+  typeof useGetPrintersLazyQuery
+>;
+export type GetPrintersQueryResult = Apollo.QueryResult<
+  GetPrintersQuery,
+  GetPrintersQueryVariables
+>;
 export const GetRegistrationInfoDocument = gql`
-    query GetRegistrationInfo {
-  hmdmcs {
-    hmdmc
-  }
-  labwareTypes {
-    name
-  }
-  tissueTypes {
-    name
-    spatialLocations {
+  query GetRegistrationInfo {
+    hmdmcs {
+      hmdmc
+    }
+    labwareTypes {
       name
-      code
+    }
+    tissueTypes {
+      name
+      spatialLocations {
+        name
+        code
+      }
+    }
+    fixatives {
+      name
+    }
+    mediums {
+      name
+    }
+    mouldSizes {
+      name
     }
   }
-  fixatives {
-    name
-  }
-  mediums {
-    name
-  }
-  mouldSizes {
-    name
-  }
-}
-    `;
+`;
 
 /**
  * __useGetRegistrationInfoQuery__
@@ -998,29 +1095,52 @@ export const GetRegistrationInfoDocument = gql`
  *   },
  * });
  */
-export function useGetRegistrationInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>) {
-        return Apollo.useQuery<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>(GetRegistrationInfoDocument, baseOptions);
-      }
-export function useGetRegistrationInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>) {
-          return Apollo.useLazyQuery<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>(GetRegistrationInfoDocument, baseOptions);
-        }
-export type GetRegistrationInfoQueryHookResult = ReturnType<typeof useGetRegistrationInfoQuery>;
-export type GetRegistrationInfoLazyQueryHookResult = ReturnType<typeof useGetRegistrationInfoLazyQuery>;
-export type GetRegistrationInfoQueryResult = Apollo.QueryResult<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>;
-export const GetSectioningInfoDocument = gql`
-    query GetSectioningInfo {
-  comments(category: "section") {
-    id
-    text
-    category
-  }
-  labwareTypes {
-    name
-    numRows
-    numColumns
-  }
+export function useGetRegistrationInfoQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetRegistrationInfoQuery,
+    GetRegistrationInfoQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    GetRegistrationInfoQuery,
+    GetRegistrationInfoQueryVariables
+  >(GetRegistrationInfoDocument, baseOptions);
 }
-    `;
+export function useGetRegistrationInfoLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetRegistrationInfoQuery,
+    GetRegistrationInfoQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    GetRegistrationInfoQuery,
+    GetRegistrationInfoQueryVariables
+  >(GetRegistrationInfoDocument, baseOptions);
+}
+export type GetRegistrationInfoQueryHookResult = ReturnType<
+  typeof useGetRegistrationInfoQuery
+>;
+export type GetRegistrationInfoLazyQueryHookResult = ReturnType<
+  typeof useGetRegistrationInfoLazyQuery
+>;
+export type GetRegistrationInfoQueryResult = Apollo.QueryResult<
+  GetRegistrationInfoQuery,
+  GetRegistrationInfoQueryVariables
+>;
+export const GetSectioningInfoDocument = gql`
+  query GetSectioningInfo {
+    comments(category: "section") {
+      id
+      text
+      category
+    }
+    labwareTypes {
+      name
+      numRows
+      numColumns
+    }
+  }
+`;
 
 /**
  * __useGetSectioningInfoQuery__
@@ -1037,12 +1157,35 @@ export const GetSectioningInfoDocument = gql`
  *   },
  * });
  */
-export function useGetSectioningInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>) {
-        return Apollo.useQuery<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(GetSectioningInfoDocument, baseOptions);
-      }
-export function useGetSectioningInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>) {
-          return Apollo.useLazyQuery<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(GetSectioningInfoDocument, baseOptions);
-        }
-export type GetSectioningInfoQueryHookResult = ReturnType<typeof useGetSectioningInfoQuery>;
-export type GetSectioningInfoLazyQueryHookResult = ReturnType<typeof useGetSectioningInfoLazyQuery>;
-export type GetSectioningInfoQueryResult = Apollo.QueryResult<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>;
+export function useGetSectioningInfoQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetSectioningInfoQuery,
+    GetSectioningInfoQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    GetSectioningInfoQuery,
+    GetSectioningInfoQueryVariables
+  >(GetSectioningInfoDocument, baseOptions);
+}
+export function useGetSectioningInfoLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetSectioningInfoQuery,
+    GetSectioningInfoQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    GetSectioningInfoQuery,
+    GetSectioningInfoQueryVariables
+  >(GetSectioningInfoDocument, baseOptions);
+}
+export type GetSectioningInfoQueryHookResult = ReturnType<
+  typeof useGetSectioningInfoQuery
+>;
+export type GetSectioningInfoLazyQueryHookResult = ReturnType<
+  typeof useGetSectioningInfoLazyQuery
+>;
+export type GetSectioningInfoQueryResult = Apollo.QueryResult<
+  GetSectioningInfoQuery,
+  GetSectioningInfoQueryVariables
+>;

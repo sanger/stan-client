@@ -21,14 +21,18 @@ interface ConfirmProps {
 
 const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
   const [ref, scrollToRef] = useScrollToRef();
+
+  // Scroll to the top of the page when this component is first loaded
+  useEffect(() => window.scrollTo(0, 0), []);
+
+  // When there's an error, make sure the page scrolls to it so it's in view
   useEffect(() => {
     if (current.matches({ confirming: "confirmError" })) {
       scrollToRef();
     }
   }, [current, scrollToRef]);
 
-  useEffect(() => window.scrollTo(0, 0), []);
-
+  // Show a toast notification with a success message when sectioning is complete
   useEffect(() => {
     if (current.matches("done")) {
       toast(<Success message={"Sectioning Saved"} />, {
@@ -38,6 +42,8 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
   }, [current]);
 
   const { sectioningConfirmMachines } = current.context;
+
+  // Sort the sectioning confirmations by having tubes first
   const sortedSOMs = sortBy(
     Array.from(sectioningConfirmMachines.keys()),
     (som) => som !== LabwareTypeName.TUBE
