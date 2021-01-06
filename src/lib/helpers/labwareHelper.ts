@@ -1,33 +1,19 @@
-import { Labware } from "../../types/graphql";
-import { find, isEqual } from "lodash";
-import {
-  AnyLabware,
-  Address,
-  isColumnAddress,
-  isRowAddress,
-  LabwareAddress,
-} from "../../types/stan";
+import { Labware, LabwareType } from "../../types/graphql";
 import { cycle } from "../helpers";
+import { orderBy } from "lodash";
 
 /**
- * Returns an array of {@link LabwareAddress LabwareAddress}s for a labware (in column-major order)
- * @param labware
+ * Generator for labware addresses
+ * @param labwareType
  */
-export function labwareAddresses(labware: AnyLabware): Array<LabwareAddress> {
-  const addresses: Array<LabwareAddress> = [];
-  for (let i = 1, j = labware.labwareType.numColumns; i <= j; i++) {
-    for (let m = 1, n = labware.labwareType.numRows; m <= n; m++) {
-      const friendlyAddress = createAddress(m, i);
-      addresses.push({
-        address: friendlyAddress,
-        slot:
-          find(labware.slots, (slot) =>
-            isEqual(slot.address, friendlyAddress)
-          ) ?? null,
-      });
+export function* labwareAddresses(
+  labwareType: Pick<LabwareType, "numColumns" | "numRows">
+) {
+  for (let i = 1, j = labwareType.numColumns; i <= j; i++) {
+    for (let m = 1, n = labwareType.numRows; m <= n; m++) {
+      yield createAddress(m, i);
     }
   }
-  return addresses;
 }
 
 /**
@@ -39,24 +25,18 @@ export function labwareAddresses(labware: AnyLabware): Array<LabwareAddress> {
  * @param rowNumber the 1-based index of the row
  * @param columnNumber the 1-based index of the column
  */
-export function createAddress(
-  rowNumber: number,
-  columnNumber: number
-): Address {
+export function createAddress(rowNumber: number, columnNumber: number): string {
+  if (rowNumber < 1 || rowNumber > 8) {
+    throw new Error(`${rowNumber} can not be used as a row index`);
+  }
+  if (columnNumber < 1 || columnNumber > 12) {
+    throw new Error(`${columnNumber} can not be used as a column index`);
+  }
+
   const aCharCode = "A".charCodeAt(0);
-
   const row = String.fromCharCode(rowNumber + aCharCode - 1);
-  const col = String(columnNumber);
 
-  if (!isRowAddress(row)) {
-    throw new Error(`${rowNumber} can not be converted to FriendlyRowAddress`);
-  }
-  if (!isColumnAddress(col)) {
-    throw new Error(
-      `${columnNumber} can not be converted to FriendlyColumnAddress`
-    );
-  }
-  return `${row}${col}` as Address;
+  return `${row}${columnNumber}`;
 }
 
 /**
@@ -80,13 +60,13 @@ export function labwareSamples(labware: Labware) {
  */
 export function buildSampleColors(labwares: Labware[]): Map<number, string> {
   const colors = cycle([
-    "#EF4444",
-    "#10B981",
-    "#6366F1",
-    "#EC4899",
-    "#F59E0B",
-    "#3B82F6",
-    "#8b5cf6",
+    "red",
+    "green",
+    "indigo",
+    "pink",
+    "yellow",
+    "blue",
+    "purple",
   ]);
   const sampleColors = new Map();
   labwares.forEach((labware) => {
@@ -97,4 +77,29 @@ export function buildSampleColors(labwares: Labware[]): Map<number, string> {
     });
   });
   return sampleColors;
+}
+
+function getRowIndex(address: string): number {
+  return address.charCodeAt(0) - "A".charCodeAt(0) + 1;
+}
+
+function getColumnIndex(address: string): number {
+  return parseInt(address.substr(1));
+}
+
+interface HasAddress {
+  address: string;
+}
+
+export function rowMajor<T extends HasAddress>(
+  addressable: Array<T>
+): Array<T> {
+  return orderBy(
+    addressable,
+    [
+      (slot) => getRowIndex(slot.address),
+      (slot) => getColumnIndex(slot.address),
+    ],
+    ["asc", "asc"]
+  );
 }

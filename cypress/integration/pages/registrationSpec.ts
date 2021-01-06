@@ -193,7 +193,7 @@ describe("Registration", () => {
 
       it("shows the created labware", () => {
         cy.findByText("LW_BC_1").should("be.visible");
-        cy.findByText("EXTERNAL_123").should("be.visible");
+        cy.findByText("EXT1").should("be.visible");
       });
     });
 

@@ -1,4 +1,4 @@
-import { MachineOptions } from "xstate";
+import { MachineOptions, spawn } from "xstate";
 import { RegistrationContext } from "./registrationContext";
 import { RegistrationEvent } from "./registrationEvents";
 import {
@@ -12,15 +12,19 @@ import { assign } from "@xstate/immer";
 import { FormValues } from "../../../pages/registration/RegistrationForm";
 import { extractServerErrors, LabwareTypeName } from "../../../types/stan";
 import registrationService from "../../services/registrationService";
+import { createMinimumWaitService } from "../index";
+import { createLabelPrinterMachine } from "../labelPrinter/labelPrinterMachine";
 
 export enum Actions {
   ASSIGN_REGISTRATION_INFO = "assignRegistrationInfo",
   ASSIGN_LOADING_ERROR = "assignLoadingError",
   ASSIGN_REGISTRATION_RESULT = "assignRegistrationResult",
   ASSIGN_REGISTRATION_ERROR = "assignRegistrationError",
+  SPAWN_LABEL_PRINTER = "spawnLabelPrinter",
 }
 
 export enum Services {
+  GET_REGISTRATION_INFO = "getRegistrationInfo",
   SUBMIT = "submit",
 }
 
@@ -65,8 +69,20 @@ export const registrationMachineOptions: Partial<MachineOptions<
       }
       ctx.registrationErrors = extractServerErrors(e.data);
     }),
+
+    [Actions.SPAWN_LABEL_PRINTER]: assign((ctx, e) => {
+      ctx.labelPrinterRef = spawn(
+        createLabelPrinterMachine({
+          labwares: ctx.registrationResult.register.labware,
+        })
+      );
+    }),
   },
+
   services: {
+    [Services.GET_REGISTRATION_INFO]: () =>
+      createMinimumWaitService(300, registrationService.getRegistrationInfo),
+
     [Services.SUBMIT]: (context, event) => {
       if (event.type !== "SUBMIT_FORM") {
         return Promise.reject();

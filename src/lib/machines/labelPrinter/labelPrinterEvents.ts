@@ -50,7 +50,9 @@ export type PrintSuccessEvent = {
 export function printSuccess(labelPrinter: LabelPrinter): PrintSuccessEvent {
   const message = `${
     labelPrinter.selectedPrinter?.name
-  } successfully printed ${labelPrinter.labwareBarcodes.join(", ")}`;
+  } successfully printed ${labelPrinter.labwares
+    .map((lw) => lw.barcode)
+    .join(", ")}`;
 
   return {
     type: "PRINT_SUCCESS",
@@ -67,7 +69,9 @@ export type PrintErrorEvent = {
 export function printError(labelPrinter: LabelPrinter): PrintErrorEvent {
   const message = `${
     labelPrinter.selectedPrinter?.name
-  } failed to print ${labelPrinter.labwareBarcodes.join(", ")}`;
+  } failed to print ${labelPrinter.labwares
+    .map((lw) => lw.barcode)
+    .join(", ")}`;
 
   return {
     type: "PRINT_ERROR",

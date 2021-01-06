@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   GetRegistrationInfoQuery,
   LifeStage,
@@ -8,16 +8,17 @@ import * as Yup from "yup";
 import { FieldArray, Form, Formik } from "formik";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "../../components/Heading";
-import Input from "../../components/forms/Input";
+import FormikInput from "../../components/forms/Input";
 import RadioGroup, { RadioButton } from "../../components/forms/RadioGroup";
 import { enumKeys } from "../../lib/helpers";
-import Select from "../../components/forms/Select";
+import FormikSelect from "../../components/forms/Select";
 import { optionValues } from "../../components/forms";
 import PinkButton from "../../components/buttons/PinkButton";
 import BlueButton from "../../components/buttons/BlueButton";
 import SummaryBox from "./SummaryBox";
 import variants from "../../lib/motionVariants";
 import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
+import { useScrollToRef } from "../../hooks";
 
 export interface FormValues {
   tissues: FormTissueValues[];
@@ -101,17 +102,7 @@ const RegistrationForm = ({
   // Reference to the current Tissue being registered
   const tissueRef = useRef<HTMLDivElement>(null);
 
-  // Reference to the last block in the current Tissue being registered
-  const lastBlockRef = useRef<HTMLDivElement>(null);
-
-  // Track whether to scroll to the latest block
-  const [scrollToLatestBlock, setScrollToLatestBlock] = useState(false);
-  useEffect(() => {
-    if (scrollToLatestBlock && lastBlockRef.current) {
-      lastBlockRef.current.scrollIntoView({ behavior: "smooth" });
-      setScrollToLatestBlock(false);
-    }
-  }, [scrollToLatestBlock]);
+  const [lastBlockRef, scrollToLatestBlock] = useScrollToRef();
 
   return (
     <Formik
@@ -149,7 +140,7 @@ const RegistrationForm = ({
                   >
                     <Heading level={3}>Donor Information</Heading>
 
-                    <Input
+                    <FormikInput
                       label="Donor ID"
                       name={`tissues.${currentTissueIndex}.donorId`}
                     />
@@ -176,16 +167,16 @@ const RegistrationForm = ({
                   >
                     <Heading level={3}>Tissue Information</Heading>
 
-                    <Select
+                    <FormikSelect
                       label="HMDMC"
                       name={`tissues.${currentTissueIndex}.hmdmc`}
                       emptyOption
                       className="mt-2"
                     >
                       {optionValues(registrationInfo.hmdmcs, "hmdmc", "hmdmc")}
-                    </Select>
+                    </FormikSelect>
 
-                    <Select
+                    <FormikSelect
                       onChange={(e: React.FormEvent<HTMLSelectElement>) => {
                         // Unset any selected spatial locations in the blocks for this tissue
                         values.tissues[currentTissueIndex].blocks.forEach(
@@ -221,7 +212,7 @@ const RegistrationForm = ({
                         "name",
                         "name"
                       )}
-                    </Select>
+                    </FormikSelect>
                   </motion.div>
 
                   <motion.div
@@ -259,12 +250,12 @@ const RegistrationForm = ({
                               exit={"hidden"}
                               className="relative p-4 shadow-lg bg-white space-y-4"
                             >
-                              <Input
+                              <FormikInput
                                 label="External Identifier"
                                 name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.externalIdentifier`}
                               />
 
-                              <Select
+                              <FormikSelect
                                 disabled={
                                   availableSpatialLocations.length === 0
                                 }
@@ -279,21 +270,21 @@ const RegistrationForm = ({
                                   "code",
                                   "code"
                                 )}
-                              </Select>
+                              </FormikSelect>
 
-                              <Input
+                              <FormikInput
                                 label="Replicate Number"
                                 type="number"
                                 name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.replicateNumber`}
                               />
 
-                              <Input
+                              <FormikInput
                                 label="Last Known Section Number"
                                 type="number"
                                 name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.lastKnownSectionNumber`}
                               />
 
-                              <Select
+                              <FormikSelect
                                 emptyOption
                                 label="Labware Type"
                                 name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.labwareType`}
@@ -303,7 +294,7 @@ const RegistrationForm = ({
                                   "name",
                                   "name"
                                 )}
-                              </Select>
+                              </FormikSelect>
 
                               <Heading
                                 level={4}
@@ -313,7 +304,7 @@ const RegistrationForm = ({
                                 Embedding Information
                               </Heading>
 
-                              <Select
+                              <FormikSelect
                                 emptyOption
                                 label="Fixative"
                                 className="block mt-2"
@@ -324,9 +315,9 @@ const RegistrationForm = ({
                                   "name",
                                   "name"
                                 )}
-                              </Select>
+                              </FormikSelect>
 
-                              <Select
+                              <FormikSelect
                                 emptyOption
                                 label="Medium"
                                 className="block mt-2"
@@ -337,7 +328,7 @@ const RegistrationForm = ({
                                   "name",
                                   "name"
                                 )}
-                              </Select>
+                              </FormikSelect>
 
                               <RadioGroup
                                 label="Mould Size"
@@ -392,7 +383,7 @@ const RegistrationForm = ({
                           className="mt-4 inline-flex"
                           onClick={() => {
                             blockHelpers.push(getInitialBlockValues());
-                            setScrollToLatestBlock(true);
+                            scrollToLatestBlock();
                           }}
                         >
                           + Add Another Tissue Block

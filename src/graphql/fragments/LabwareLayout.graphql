@@ -1,0 +1,32 @@
+fragment LabwareLayout on Labware {
+    id
+    barcode
+    labwareType {
+        name
+        numRows
+        numColumns
+        labelType {
+            name
+        }
+    }
+    slots {
+        address
+        labwareId
+        samples {
+            id
+            tissue {
+                donor {
+                    donorName
+                }
+                externalName
+                spatialLocation {
+                    tissueType {
+                        name
+                    }
+                    code
+                }
+                replicate
+            }
+        }
+    }
+}

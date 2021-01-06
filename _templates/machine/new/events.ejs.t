@@ -1,6 +1,14 @@
 ---
 to: src/lib/machines/<%= name %>/<%= name %>Events.ts
 ---
-type FakeEvent = { type: "FAKE" }
+import { <%= Name %>Event } from "./<%= name %>Types";
 
-export type <%= Name %>Events = FakeEvent;
+/**
+* Event creator for an {@link InitEvent}
+*/
+export function init(message: string): <%= Name %>Event {
+  return {
+    type: "INIT",
+    message,
+  }
+}

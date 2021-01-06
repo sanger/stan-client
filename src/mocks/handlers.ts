@@ -1,5 +1,7 @@
 import { graphql } from "msw";
 import {
+  ConfirmMutation,
+  ConfirmMutationVariables,
   CurrentUserQuery,
   CurrentUserQueryVariables,
   FindLabwareQuery,
@@ -9,6 +11,7 @@ import {
   GetRegistrationInfoQuery,
   GetRegistrationInfoQueryVariables,
   GetSectioningInfoQuery,
+  LifeStage,
   LoginMutation,
   LoginMutationVariables,
   LogoutMutation,
@@ -21,6 +24,7 @@ import {
   RegisterTissuesMutationVariables,
 } from "../types/graphql";
 import { labwareTypeInstances } from "../lib/factories/labwareTypeFactory";
+import labwareFactory from "../lib/factories/labwareFactory";
 
 const CURRENT_USER_KEY = "currentUser";
 /**
@@ -190,16 +194,32 @@ export const handlers = [
           register: {
             labware: [
               {
+                id: 1,
                 barcode: "LW_BC_1",
                 labwareType: {
                   name: "Proviasette",
+                  numRows: 1,
+                  numColumns: 1,
                 },
                 slots: [
                   {
+                    address: "A1",
+                    labwareId: 1,
                     samples: [
                       {
+                        id: 1,
                         tissue: {
-                          externalName: "EXTERNAL_123",
+                          externalName: "EXT1",
+                          replicate: 5,
+                          donor: {
+                            donorName: "Donor 3",
+                          },
+                          spatialLocation: {
+                            code: 3,
+                            tissueType: {
+                              name: "Lung",
+                            },
+                          },
                         },
                       },
                     ],
@@ -226,37 +246,64 @@ export const handlers = [
         );
       }
 
-      return res(
-        ctx.data({
-          labware: {
-            labwareType: {
-              name: "Proviasette",
-            },
-            barcode: req.variables.barcode,
-            slots: [
+      const labware = labwareFactory.build({
+        labwareType: {
+          name: "Proviasette",
+          labelType: {
+            name: "tiny",
+          },
+        },
+        barcode: req.variables.barcode,
+        slots: [
+          {
+            block: true,
+            address: "A1",
+            labwareId: 3,
+            samples: [
               {
-                block: true,
-                address: "A1",
-                samples: [
-                  {
-                    id: 3,
-                    tissue: {
-                      replicate: 5,
-                      donor: {
-                        donorName: "Donor 3",
-                      },
-                      spatialLocation: {
-                        code: 3,
-                        tissueType: {
-                          name: "Lung",
-                        },
-                      },
+                id: 3,
+                tissue: {
+                  replicate: 5,
+                  externalName: "EXT 1",
+                  hmdmc: {
+                    hmdmc: "HMDMC",
+                  },
+                  mouldSize: {
+                    name: "hUGe",
+                  },
+                  medium: {
+                    name: "Slime",
+                  },
+                  fixative: {
+                    name: "Wax",
+                  },
+                  donor: {
+                    lifeStage: LifeStage.Fetal,
+                    donorName: "Donor 3",
+                  },
+                  spatialLocation: {
+                    name: "Somewhere",
+                    code: 3,
+                    tissueType: {
+                      spatialLocations: [],
+                      name: "Lung",
                     },
                   },
-                ],
+                },
               },
             ],
           },
+        ],
+      });
+
+      sessionStorage.setItem(
+        `labware-${labware.barcode}`,
+        JSON.stringify(labware)
+      );
+
+      return res(
+        ctx.data({
+          labware,
         })
       );
     }
@@ -267,6 +314,28 @@ export const handlers = [
     (req, res, ctx) => {
       return res(
         ctx.data({
+          comments: [
+            {
+              id: 1,
+              text: "Section Folded",
+              category: "section",
+            },
+            {
+              id: 2,
+              text: "Poor section quality",
+              category: "section",
+            },
+            {
+              id: 3,
+              text: "Sectioned well",
+              category: "section",
+            },
+            {
+              id: 4,
+              text: "Section exploded",
+              category: "section",
+            },
+          ],
           labwareTypes: labwareTypeInstances,
         })
       );
@@ -277,113 +346,74 @@ export const handlers = [
     "Plan",
     (req, res, ctx) => {
       if (req.variables.request.operationType === "Section") {
+        const plan: PlanMutation["plan"] = req.variables.request.labware.reduce<
+          PlanMutation["plan"]
+        >(
+          (memo, planRequestLabware) => {
+            const labwareType = labwareTypeInstances.find(
+              (lt) => lt.name === planRequestLabware.labwareType
+            );
+            const barcode = planRequestLabware.barcode ?? undefined;
+            const newLabware = labwareFactory.build({ labwareType, barcode });
+            memo.labware.push(newLabware);
+
+            const planActions: PlanMutation["plan"]["operations"][number]["planActions"] = planRequestLabware.actions.map(
+              (planAction) => {
+                const labwareJson = sessionStorage.getItem(
+                  `labware-${planAction.source.barcode}`
+                );
+
+                if (!labwareJson) {
+                  throw new Error(
+                    `Couldn't find labware with barcode ${planAction.source.barcode} in sessionStorage`
+                  );
+                }
+
+                const labware = JSON.parse(labwareJson);
+
+                return {
+                  newSection: undefined,
+                  sample: {
+                    id: planAction.sampleId,
+                  },
+                  source: {
+                    address: planAction.address,
+                    labwareId: labware.id,
+                    samples: [
+                      {
+                        id: planAction.sampleId,
+                      },
+                    ],
+                  },
+                  destination: {
+                    address: planAction.address,
+                    labwareId: newLabware.id,
+                  },
+                };
+              }
+            );
+
+            memo.operations[0].planActions = [
+              ...memo.operations[0].planActions,
+              ...planActions,
+            ];
+
+            return memo;
+          },
+          {
+            labware: [],
+            operations: [
+              { operationType: { name: "Section" }, planActions: [] },
+            ],
+          }
+        );
+
         return res(
           ctx.data({
             // Response not dynamic in any way. Just need a successful response for now.
             plan: {
-              labware: [
-                {
-                  id: 53,
-                  barcode: "STAN-002FB",
-                  slots: [
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                    {
-                      samples: [],
-                      __typename: "Slot",
-                    },
-                  ],
-                  labwareType: {
-                    numRows: 3,
-                    numColumns: 2,
-                    __typename: "LabwareType",
-                  },
-                  __typename: "Labware",
-                },
-              ],
-              operations: [
-                {
-                  operationType: {
-                    name: "Section",
-                    __typename: "OperationType",
-                  },
-                  planActions: [
-                    {
-                      newSection: 177,
-                      destination: {
-                        address: "A1",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                    {
-                      newSection: 178,
-                      destination: {
-                        address: "B1",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                    {
-                      newSection: 179,
-                      destination: {
-                        address: "C1",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                    {
-                      newSection: 180,
-                      destination: {
-                        address: "A2",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                    {
-                      newSection: 181,
-                      destination: {
-                        address: "B2",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                    {
-                      newSection: 182,
-                      destination: {
-                        address: "B3",
-                        labwareId: 53,
-                        __typename: "Slot",
-                      },
-                      __typename: "PlanAction",
-                    },
-                  ],
-                  __typename: "PlanOperation",
-                },
-              ],
+              labware: plan.labware,
+              operations: plan.operations,
               __typename: "PlanResult",
             },
           })
@@ -397,22 +427,20 @@ export const handlers = [
     (req, res, ctx) => {
       return res(
         ctx.data({
-          printers: [
-            {
-              __typename: "Printer",
-              name: "cgaptestbc",
-              labelType: {
-                name: "tiny",
-              },
+          printers: labwareTypeInstances.reduce<GetPrintersQuery["printers"]>(
+            (memo, labwareType) => {
+              if (labwareType.labelType?.name) {
+                memo.push({
+                  labelType: {
+                    name: labwareType.labelType.name,
+                  },
+                  name: `${labwareType.name} Printer`,
+                });
+              }
+              return memo;
             },
-            {
-              __typename: "Printer",
-              name: "slidelabel",
-              labelType: {
-                name: "label",
-              },
-            },
-          ],
+            []
+          ),
         })
       );
     }
@@ -421,20 +449,23 @@ export const handlers = [
   graphql.mutation<PrintMutation, PrintMutationVariables>(
     "Print",
     (req, res, ctx) => {
-      // Just so we can test failure behaviour
-      if (req.variables.printer === "slidelabel") {
-        return res(
-          ctx.errors([
-            {
-              message: "Failed to print",
-            },
-          ])
-        );
-      }
-
       return res(
         ctx.data({
           printLabware: "OK",
+        })
+      );
+    }
+  ),
+
+  graphql.mutation<ConfirmMutation, ConfirmMutationVariables>(
+    "Confirm",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          confirmOperation: {
+            labware: [],
+            operations: [],
+          },
         })
       );
     }

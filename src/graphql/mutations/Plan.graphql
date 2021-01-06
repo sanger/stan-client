@@ -1,17 +1,7 @@
 mutation Plan($request: PlanRequest!) {
     plan(request: $request) {
         labware {
-            id
-            barcode
-            slots {
-                samples {
-                    section
-                }
-            }
-            labwareType {
-                numRows
-                numColumns
-            }
+            ...LabwareLayout
         }
         operations {
             operationType {
@@ -19,6 +9,16 @@ mutation Plan($request: PlanRequest!) {
             }
             planActions {
                 newSection
+                sample {
+                    id
+                }
+                source {
+                    address
+                    labwareId
+                    samples {
+                        id
+                    }
+                }
                 destination {
                     address
                     labwareId

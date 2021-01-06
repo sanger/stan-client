@@ -1,5 +1,5 @@
-import { Interpreter, Machine, sendParent } from "xstate";
-import { LayoutContext } from "./layoutContext";
+import { Machine } from "xstate";
+import { LayoutContext, LayoutPlan } from "./layoutContext";
 import { LayoutSchema, State } from "./layoutStates";
 import { LayoutEvents } from "./layoutEvents";
 import {
@@ -7,25 +7,41 @@ import {
   layoutMachineKey,
   machineOptions,
 } from "./layoutMachineOptions";
-import { LayoutPlan } from "./index";
 
-export type LayoutMachineType = Interpreter<
-  LayoutContext,
-  LayoutSchema,
-  LayoutEvents
->;
-
-export const createLayoutMachine = (layoutPlan: LayoutPlan) => {
+export const createLayoutMachine = (
+  layoutPlan: LayoutPlan,
+  possibleActions?: LayoutPlan["plannedActions"]
+) => {
   return Machine<LayoutContext, LayoutSchema, LayoutEvents>(
     {
       key: layoutMachineKey,
-      initial: State.READY,
+      initial: State.INIT,
       context: {
         layoutPlan,
+        possibleActions,
         selected: null,
       },
+      on: {
+        DONE: {
+          target: State.DONE,
+        },
+        CANCEL: {
+          target: State.CANCELLED,
+        },
+      },
       states: {
-        [State.READY]: {
+        [State.INIT]: {
+          always: [
+            {
+              cond: (ctx) => ctx.layoutPlan.sources.length > 0,
+              target: State.SOURCE_DEST_MODE,
+            },
+            {
+              target: State.DEST_ONLY_MODE,
+            },
+          ],
+        },
+        [State.SOURCE_DEST_MODE]: {
           initial: State.SOURCE_NOT_SELECTED,
           states: {
             [State.SOURCE_NOT_SELECTED]: {
@@ -45,23 +61,30 @@ export const createLayoutMachine = (layoutPlan: LayoutPlan) => {
           },
           on: {
             SELECT_SOURCE: {
-              target: `${State.READY}.${State.SOURCE_SELECTED}`,
+              target: `${State.SOURCE_DEST_MODE}.${State.SOURCE_SELECTED}`,
               actions: Actions.ASSIGN_SELECTED,
             },
 
             SET_ALL_DESTINATIONS: {
               actions: Actions.ASSIGN_DESTINATION_ACTIONS,
             },
-
-            REQUEST_LAYOUT_PLAN: {
-              actions: [
-                sendParent((ctx) => ({
-                  type: "UPDATE_LAYOUT_PLAN",
-                  layoutPlan: ctx.layoutPlan,
-                })),
-              ],
+          },
+        },
+        [State.DEST_ONLY_MODE]: {
+          on: {
+            SELECT_DESTINATION: {
+              actions: Actions.TOGGLE_DESTINATION,
             },
           },
+        },
+        [State.DONE]: {
+          type: "final",
+          data: {
+            layoutPlan: (ctx: LayoutContext, _e: never) => ctx.layoutPlan,
+          },
+        },
+        [State.CANCELLED]: {
+          type: "final",
         },
       },
     },

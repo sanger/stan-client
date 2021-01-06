@@ -1,18 +1,21 @@
 import React from "react";
 import { useActor } from "@xstate/react";
-import { Labware } from "../../types/graphql";
+import { LabwareLayoutFragment } from "../../types/graphql";
 import Success from "../notifications/Success";
 import Warning from "../notifications/Warning";
 import RemoveIcon from "../icons/RemoveIcon";
-import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 import { motion } from "framer-motion";
-import { Column, Row, useTable } from "react-table";
-import { Actor } from "xstate";
+import { Column, Row } from "react-table";
 import BarcodeIcon from "../icons/BarcodeIcon";
 import MutedText from "../MutedText";
 import classNames from "classnames";
 import LockIcon from "../icons/LockIcon";
-import { LabwareEvents, LabwareMachineType } from "../../lib/machines/labware";
+import {
+  LabwareEvents,
+  LabwareMachineActorRef,
+  LabwareMachineType,
+} from "../../lib/machines/labware";
+import LabwareTable from "../LabwareTable";
 
 /**
  * Props for {@link LabwareScanTable}
@@ -24,12 +27,12 @@ interface LabwareScanTableProps {
    * @remarks
    * This should be a spawned instance of {@link labwareMachine}
    */
-  actor: Actor<any, any>;
+  actor: LabwareMachineActorRef;
 
   /**
    * The list of columns to display in the table
    */
-  columns: Column<Labware>[];
+  columns: Column<LabwareLayoutFragment>[];
 }
 
 const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
@@ -52,11 +55,11 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
   ]);
 
   // Column with actions (such as delete) to add to the end of the labwareScanTableColumns passed in
-  const actionsColumn: Column<Labware> = React.useMemo(() => {
+  const actionsColumn: Column<LabwareLayoutFragment> = React.useMemo(() => {
     return {
       Header: "",
       id: "actions",
-      Cell: ({ row }: { row: Row<Labware> }) => {
+      Cell: ({ row }: { row: Row<LabwareLayoutFragment> }) => {
         if (current.matches("locked")) {
           return <LockIcon className="block m-2 h-5 w-5 text-gray-800" />;
         }
@@ -64,10 +67,11 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
         return (
           <button
             onClick={() => {
-              send({
-                type: "REMOVE_LABWARE",
-                value: row.original.barcode,
-              });
+              row.original.barcode &&
+                send({
+                  type: "REMOVE_LABWARE",
+                  value: row.original.barcode,
+                });
             }}
             className="inline-flex items-center justify-center p-2 rounded-md hover:bg-red-100 focus:outline-none focus:bg-red-100 text-red-400 hover:text-red-600"
           >
@@ -81,25 +85,10 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
   /**
    * Merge the columns passed in with the actionsColumn, memoizing the result.
    */
-  const allColumns: Column<Labware>[] = React.useMemo(
-    () => [...columns, actionsColumn],
-    [columns, actionsColumn]
-  );
-
-  /**
-   * The `useTable` hook from {@link https://react-table.tanstack.com/docs/overview React Table}
-   * @see {@link https://react-table.tanstack.com/docs/api/useTable}
-   */
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = useTable({
-    columns: allColumns,
-    data,
-  });
+  const allColumns: Column<LabwareLayoutFragment>[] = [
+    ...columns,
+    actionsColumn,
+  ];
 
   const inputClassNames = classNames(
     {
@@ -158,39 +147,7 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
           animate={{ opacity: 1, y: 0 }}
           className="mt-3"
         >
-          <Table {...getTableProps()}>
-            <TableHead>
-              {headerGroups.map((headerGroup) => (
-                <tr {...headerGroup.getHeaderGroupProps()}>
-                  {headerGroup.headers.map((column) => (
-                    <TableHeader {...column.getHeaderProps()}>
-                      {column.render("Header")}
-                    </TableHeader>
-                  ))}
-                </tr>
-              ))}
-            </TableHead>
-            <TableBody {...getTableBodyProps()}>
-              {rows.map((row) => {
-                prepareRow(row);
-                return (
-                  <motion.tr
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    {...row.getRowProps()}
-                  >
-                    {row.cells.map((cell) => {
-                      return (
-                        <TableCell {...cell.getCellProps()}>
-                          {cell.render("Cell")}
-                        </TableCell>
-                      );
-                    })}
-                  </motion.tr>
-                );
-              })}
-            </TableBody>
-          </Table>
+          <LabwareTable columns={allColumns} labware={data} />
         </motion.div>
       )}
     </div>

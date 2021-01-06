@@ -1,43 +1,38 @@
-import { LabwareAddress, SourcePlanRequestAction } from "../../../types/stan";
+import { Address } from "../../../types/stan";
+import { Source } from "./layoutContext";
 
 type SelectSourceEvent = {
   type: "SELECT_SOURCE";
-  action: SourcePlanRequestAction;
+  source: Source;
 };
-export function selectSource(
-  action: SourcePlanRequestAction
-): SelectSourceEvent {
+export function selectSource(source: Source): SelectSourceEvent {
   return {
     type: "SELECT_SOURCE",
-    action,
+    source,
   };
 }
 
 export type SetAllDestinationsEvent = {
   type: "SET_ALL_DESTINATIONS";
-  action: SourcePlanRequestAction;
+  source: Source;
 };
 
-export function setAllDestinations(
-  action: SourcePlanRequestAction
-): SetAllDestinationsEvent {
+export function setAllDestinations(source: Source): SetAllDestinationsEvent {
   return {
     type: "SET_ALL_DESTINATIONS",
-    action,
+    source,
   };
 }
 
 export type SelectDestinationEvent = {
   type: "SELECT_DESTINATION";
-  labwareAddress: LabwareAddress;
+  address: Address;
 };
 
-export function selectDestination(
-  labwareAddress: LabwareAddress
-): SelectDestinationEvent {
+export function selectDestination(address: Address): SelectDestinationEvent {
   return {
     type: "SELECT_DESTINATION",
-    labwareAddress,
+    address,
   };
 }
 
@@ -45,8 +40,20 @@ export type RequestLayoutPlanEvent = {
   type: "REQUEST_LAYOUT_PLAN";
 };
 
+type CancelEvent = { type: "CANCEL" };
+export function cancel(): CancelEvent {
+  return { type: "CANCEL" };
+}
+
+type DoneEvent = { type: "DONE" };
+export function done(): DoneEvent {
+  return { type: "DONE" };
+}
+
 export type LayoutEvents =
   | SelectSourceEvent
   | SelectDestinationEvent
   | SetAllDestinationsEvent
-  | RequestLayoutPlanEvent;
+  | RequestLayoutPlanEvent
+  | CancelEvent
+  | DoneEvent;
