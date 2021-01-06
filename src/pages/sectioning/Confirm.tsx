@@ -44,9 +44,9 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
   const { sectioningConfirmMachines } = current.context;
 
   // Sort the sectioning confirmations by having tubes first
-  const sortedSOMs = sortBy(
+  const sortedConfirmMachines = sortBy(
     Array.from(sectioningConfirmMachines.keys()),
-    (som) => som !== LabwareTypeName.TUBE
+    (labwareTypeName) => labwareTypeName !== LabwareTypeName.TUBE
   );
 
   return (
@@ -57,7 +57,7 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
       <AppShell.Main>
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
           <div className="space-y-4">
-            {sortedSOMs.map((labwareTypeName, i) => (
+            {sortedConfirmMachines.map((labwareTypeName, i) => (
               <ConfirmByLabwareType
                 key={i}
                 actors={sectioningConfirmMachines.get(labwareTypeName)}
