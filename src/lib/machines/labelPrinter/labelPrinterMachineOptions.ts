@@ -37,7 +37,12 @@ export const labelPrinterMachineOptions: Partial<MachineOptions<
   actions: {
     [Actions.ASSIGN_LABEL_PRINTER]: assign((ctx, e) => {
       if (e.type === "done.invoke.fetchPrinters" && e.data.data) {
-        ctx.labelPrinter.printers = e.data.data.printers;
+        const availableLabelTypes = new Set(
+          ctx.labelPrinter.labwares.map((lw) => lw.labwareType?.labelType?.name)
+        );
+        ctx.labelPrinter.printers = e.data.data.printers.filter((printer) =>
+          availableLabelTypes.has(printer.labelType.name)
+        );
         ctx.labelPrinter.selectedPrinter = ctx.labelPrinter.printers[0];
       }
 
@@ -79,7 +84,7 @@ export const labelPrinterMachineOptions: Partial<MachineOptions<
 
       return printService.printLabels({
         printer: ctx.labelPrinter.selectedPrinter.name,
-        barcodes: ctx.labelPrinter.labwareBarcodes,
+        barcodes: ctx.labelPrinter.labwares.map((lw) => lw.barcode),
       });
     },
   },

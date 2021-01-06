@@ -1,9 +1,8 @@
 import { MachineOptions } from "xstate";
-import { LayoutContext } from "./layoutContext";
+import { Source, LayoutContext } from "./layoutContext";
 import { LayoutEvents } from "./layoutEvents";
 import { assign } from "@xstate/immer";
 import { isEqual } from "lodash";
-import { labwareAddresses } from "../../helpers/labwareHelper";
 
 export const layoutMachineKey = "layoutMachine";
 
@@ -13,6 +12,7 @@ export enum Actions {
   ASSIGN_DESTINATION = "layoutMachine.assignDestination",
   REMOVE_PLANNED_ACTION = "layoutMachine.removePlannedAction",
   ASSIGN_DESTINATION_ACTIONS = "layoutMachine.assignDestinationActions",
+  TOGGLE_DESTINATION = "layoutMachine.toggleDestination",
 }
 
 export const machineOptions: Partial<MachineOptions<
@@ -24,14 +24,14 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_SOURCE") {
         return;
       }
-      ctx.selected = e.action;
+      ctx.selected = e.source;
     }),
 
     [Actions.DELETE_DESTINATION_ACTION]: assign((ctx, e) => {
       if (e.type !== "SELECT_DESTINATION") {
         return;
       }
-      ctx.layoutPlan.plannedActions.delete(e.labwareAddress.address);
+      ctx.layoutPlan.plannedActions.delete(e.address);
     }),
 
     [Actions.ASSIGN_DESTINATION]: assign((ctx, e) => {
@@ -39,23 +39,16 @@ export const machineOptions: Partial<MachineOptions<
         return;
       }
 
-      const newPlanRequestAction = {
-        address: e.labwareAddress.address,
-        ...ctx.selected,
+      const action: Source = {
+        sampleId: ctx.selected.sampleId,
+        address: ctx.selected.address,
+        labware: ctx.selected.labware,
       };
 
-      if (
-        isEqual(
-          ctx.layoutPlan.plannedActions.get(e.labwareAddress.address),
-          newPlanRequestAction
-        )
-      ) {
-        ctx.layoutPlan.plannedActions.delete(e.labwareAddress.address);
+      if (isEqual(ctx.layoutPlan.plannedActions.get(e.address), action)) {
+        ctx.layoutPlan.plannedActions.delete(e.address);
       } else {
-        ctx.layoutPlan.plannedActions.set(
-          e.labwareAddress.address,
-          newPlanRequestAction
-        );
+        ctx.layoutPlan.plannedActions.set(e.address, action);
       }
     }),
 
@@ -64,7 +57,7 @@ export const machineOptions: Partial<MachineOptions<
         return;
       }
 
-      ctx.layoutPlan.plannedActions.delete(e.labwareAddress.address);
+      ctx.layoutPlan.plannedActions.delete(e.address);
     }),
 
     [Actions.ASSIGN_DESTINATION_ACTIONS]: assign((ctx, e) => {
@@ -72,15 +65,24 @@ export const machineOptions: Partial<MachineOptions<
         return;
       }
 
-      labwareAddresses(ctx.layoutPlan.destinationLabware).forEach(
-        (labwareAddress) => {
-          ctx.layoutPlan.plannedActions.set(labwareAddress.address, {
-            address: labwareAddress.address,
-            sampleId: e.action.sampleId,
-            source: e.action.source,
-          });
+      ctx.layoutPlan.destinationLabware.slots.forEach((slot) => {
+        ctx.layoutPlan.plannedActions.set(slot.address, e.source);
+      });
+    }),
+
+    [Actions.TOGGLE_DESTINATION]: assign((ctx, e) => {
+      if (e.type !== "SELECT_DESTINATION") {
+        return;
+      }
+
+      if (ctx.layoutPlan.plannedActions.has(e.address)) {
+        ctx.layoutPlan.plannedActions.delete(e.address);
+      } else if (ctx.possibleActions && ctx.possibleActions.has(e.address)) {
+        const source = ctx.possibleActions.get(e.address);
+        if (source) {
+          ctx.layoutPlan.plannedActions.set(e.address, source);
         }
-      );
+      }
     }),
   },
 };

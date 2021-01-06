@@ -1,4 +1,9 @@
 query GetSectioningInfo {
+    comments(category: "section") {
+        id
+        text
+        category
+    }
     labwareTypes {
         name
         numRows

@@ -1,10 +1,10 @@
 import React from "react";
 import PinkButton from "./buttons/PinkButton";
 import { optionValues } from "./forms";
-import { Actor } from "xstate";
 import { useActor } from "@xstate/react";
 import LoadingSpinner from "./icons/LoadingSpinner";
 import {
+  LabelPrinterActorRef,
   LabelPrinterEvents,
   LabelPrinterMachineType,
 } from "../lib/machines/labelPrinter";
@@ -14,7 +14,7 @@ import {
 } from "../lib/machines/labelPrinter/labelPrinterEvents";
 
 interface LabelPrinterProps {
-  actor: Actor<any, any>;
+  actor: LabelPrinterActorRef;
 }
 
 const LabelPrinter: React.FC<LabelPrinterProps> = ({ actor }) => {
@@ -47,7 +47,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ actor }) => {
 
       <div>
         <PinkButton
-          disabled={state.matches("printing")}
+          disabled={state.matches("printing") || printers.length === 0}
           onClick={() => send(print())}
           className="flex flex-row items-center justify-center space-x-1"
         >

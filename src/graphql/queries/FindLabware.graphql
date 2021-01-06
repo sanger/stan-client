@@ -1,5 +1,6 @@
 query FindLabware($barcode: String!) {
     labware(barcode: $barcode) {
+        id
         barcode
         labwareType {
             name

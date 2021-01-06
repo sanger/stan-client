@@ -1,13 +1,15 @@
 import React from "react";
 import { CellProps, Column } from "react-table";
-import { Labware } from "../../types/graphql";
+import { Labware, LabwareLayoutFragment } from "../../types/graphql";
+import { LabelPrinterActorRef } from "../../lib/machines/labelPrinter";
+import LabelPrinterButton from "../LabelPrinterButton";
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
  */
-type ColumnFactory = (meta?: Map<number, any>) => Column<Labware>;
+type ColumnFactory<E = any> = (meta?: E) => Column<LabwareLayoutFragment>;
 
-const color: ColumnFactory = (meta) => {
+const color: ColumnFactory<Map<number, any>> = (meta) => {
   return {
     id: "color",
     Header: "",
@@ -74,6 +76,37 @@ const replicate: ColumnFactory = () => {
   };
 };
 
+/**
+ * Show a {@link LabelPrinterButton}
+ */
+const printer: ColumnFactory<LabelPrinterActorRef> = (actorRef) => {
+  return {
+    id: "printer",
+    Header: "",
+    Cell: () => (actorRef ? <LabelPrinterButton actor={actorRef} /> : null),
+  };
+};
+
+/**
+ * Labware's labware type
+ */
+const labwareType: ColumnFactory = () => {
+  return {
+    Header: "Labware Type",
+    accessor: (labware) => labware.labwareType.name,
+  };
+};
+
+/**
+ * External name of the first sample in the first slot of the labware
+ */
+const externalName: ColumnFactory = () => {
+  return {
+    Header: "External ID",
+    accessor: (labware) => labware.slots[0]?.samples[0]?.tissue.externalName,
+  };
+};
+
 const columns = {
   color,
   barcode,
@@ -81,6 +114,9 @@ const columns = {
   tissueType,
   spatialLocation,
   replicate,
+  printer,
+  labwareType,
+  externalName,
 };
 
 export default columns;

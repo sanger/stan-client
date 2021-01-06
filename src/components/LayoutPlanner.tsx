@@ -1,9 +1,12 @@
 import React from "react";
-import { Actor } from "xstate";
 import { useActor } from "@xstate/react";
 import { isEqual } from "lodash";
 import Labware from "./Labware";
-import { LayoutEvents, LayoutMachineType } from "../lib/machines/layout";
+import {
+  LayoutEvents,
+  LayoutMachineActorRef,
+  LayoutMachineType,
+} from "../lib/machines/layout";
 import {
   selectDestination,
   selectSource,
@@ -11,7 +14,7 @@ import {
 } from "../lib/machines/layout/layoutEvents";
 
 interface LayoutPlannerProps {
-  actor: Actor<any, any>;
+  actor: LayoutMachineActorRef;
 }
 
 const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ actor }) => {
@@ -26,33 +29,41 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ actor }) => {
         {layoutPlan.destinationLabware && (
           <Labware
             labware={layoutPlan.destinationLabware}
-            actions={layoutPlan.plannedActions}
-            sampleColors={layoutPlan.sampleColors}
-            onSlotClick={(labwareAddress) => {
-              send(selectDestination(labwareAddress));
+            onSlotClick={(slot) => {
+              send(selectDestination(slot.address));
+            }}
+            slotText={(slot) =>
+              layoutPlan.plannedActions.get(slot.address)?.labware.barcode
+            }
+            slotColor={(slot) => {
+              const action = layoutPlan.plannedActions.get(slot.address);
+              if (action) {
+                return layoutPlan.sampleColors.get(action.sampleId);
+              }
+              return undefined;
             }}
           />
         )}
       </div>
       <div className="mt-2 grid gap-2 grid-cols-3">
-        {layoutPlan.sourceActions.map((action, i) => (
+        {layoutPlan.sources.map((source, i) => (
           <div key={i} className="">
             <span
               onClick={() => {
-                send(selectSource(action));
+                send(selectSource(source));
               }}
               onDoubleClick={() => {
-                send(setAllDestinations(action));
+                send(setAllDestinations(source));
               }}
               style={{
-                backgroundColor: layoutPlan.sampleColors.get(action.sampleId),
+                backgroundColor: layoutPlan.sampleColors.get(source.sampleId),
               }}
               className={`${
-                isEqual(action, selected) &&
+                isEqual(source, selected) &&
                 "ring-2 ring-offset-2 ring-gray-700"
               } inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
             >
-              {action.source.barcode}
+              {source.labware.barcode}
             </span>
           </div>
         ))}

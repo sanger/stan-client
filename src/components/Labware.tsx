@@ -1,32 +1,35 @@
 import React from "react";
-import { Maybe, Slot as SlotModel } from "../types/graphql";
+import { Slot as SlotModel } from "../types/graphql";
 import classNames from "classnames";
-import { labwareAddresses } from "../lib/helpers/labwareHelper";
-import {
-  AnyLabware,
-  Address as AddressType,
-  LabwareAddress,
-  SourcePlanRequestAction,
-} from "../types/stan";
+import { NewLabwareLayout } from "../types/stan";
+import BarcodeIcon from "./icons/BarcodeIcon";
+import { rowMajor } from "../lib/helpers/labwareHelper";
 
 interface LabwareProps {
-  labware: AnyLabware;
-  actions?: Map<AddressType, SourcePlanRequestAction>;
-  sampleColors?: Map<number, string>;
-  onClick?: (labware: AnyLabware) => void;
-  onSlotClick?: (labwareAddress: LabwareAddress) => void;
+  labware: NewLabwareLayout;
+  onClick?: (labware: NewLabwareLayout) => void;
+  onSlotClick?: (slot: NewLabwareLayout["slots"][number]) => void;
+  slotText?: (slot: NewLabwareLayout["slots"][number]) => string | undefined;
+  slotColor?: (slot: NewLabwareLayout["slots"][number]) => string | undefined;
 }
 
 const Labware: React.FC<LabwareProps> = ({
   labware,
-  actions,
-  sampleColors,
   onClick,
   onSlotClick,
+  slotText,
+  slotColor,
 }) => {
   const { labwareType } = labware;
 
-  const labwareClassNames = classNames(
+  const labwareClasses = classNames(
+    {
+      "hover:bg-blue-200 cursor-pointer": !!onClick,
+    },
+    "w-48 bg-blue-100 rounded-lg transition duration-300 ease-in-out"
+  );
+
+  const slotGrid = classNames(
     {
       "grid-rows-1": labwareType.numRows === 1,
       "grid-rows-2": labwareType.numRows === 2,
@@ -36,26 +39,32 @@ const Labware: React.FC<LabwareProps> = ({
       "grid-rows-6": labwareType.numRows === 6,
       "grid-cols-1": labwareType.numColumns === 1,
       "grid-cols-2": labwareType.numColumns === 2,
-      "hover:bg-blue-200 cursor-pointer": !!onClick,
     },
-    "py-8 px-2 grid grid-flow-col gap-4 bg-blue-100 rounded-lg transition duration-300 ease-in-out"
+    "py-4 px-2 grid gap-4"
   );
 
   return (
-    <div className="w-48">
-      <div
-        className={labwareClassNames}
-        onClick={() => onClick && onClick(labware)}
-      >
-        {labwareAddresses(labware).map((labwareAddress, i) => (
-          <Address
+    <div className={labwareClasses}>
+      <div className={slotGrid} onClick={() => onClick && onClick(labware)}>
+        {rowMajor(labware.slots).map((slot, i) => (
+          <Slot
             key={i}
-            sampleColors={sampleColors}
-            labwareAddress={labwareAddress}
+            slot={slot}
             onClick={onSlotClick}
-            actions={actions}
+            text={slotText}
+            color={slotColor}
           />
         ))}
+      </div>
+
+      <div className="flex flex-col items-start justify-between py-1 px-2 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+        <span>{labware.labwareType.name}</span>
+        {labware.barcode && (
+          <span className="inline-flex">
+            <BarcodeIcon className="mr-1 h-4 w-4 text-gray-500" />
+            {labware.barcode}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -63,75 +72,35 @@ const Labware: React.FC<LabwareProps> = ({
 
 export default Labware;
 
-interface AddressProps {
-  labwareAddress: LabwareAddress;
-  sampleColors?: Map<number, string>;
-  actions?: Map<AddressType, SourcePlanRequestAction>;
-  onClick?: (labwareAddress: LabwareAddress) => void;
+function defaultSlotText(slot: Pick<SlotModel, "address">) {
+  return slot.address;
 }
 
-const Address: React.FC<AddressProps> = ({
-  labwareAddress,
-  sampleColors,
-  actions,
-  onClick,
-}) => {
-  const defaultBackgroundColor = "#FFF";
-  let backgroundColor = defaultBackgroundColor;
-  const sampleId = actions?.get(labwareAddress.address)?.sampleId;
+interface SlotParams {
+  slot: NewLabwareLayout["slots"][number];
+  onClick?: LabwareProps["onSlotClick"];
+  color?: LabwareProps["slotColor"];
+  text?: LabwareProps["slotText"];
+}
 
-  if (sampleId && sampleColors?.has(sampleId)) {
-    backgroundColor = sampleColors.get(sampleId) ?? defaultBackgroundColor;
-  }
+const Slot: React.FC<SlotParams> = ({ slot, onClick, color, text }) => {
+  const slotText = (text && text(slot)) ?? defaultSlotText(slot);
+  const bgColor = color && color(slot);
 
-  const addressClassNames = classNames(
+  const slotClassNames = classNames(
     {
-      "transition duration-150 ease-in-out hover:bg-gray-200 cursor-pointer": !!onClick,
-      "text-gray-100": backgroundColor !== defaultBackgroundColor,
-      "text-gray-800": backgroundColor === defaultBackgroundColor,
+      "transition duration-150 ease-in-out cursor-pointer": onClick,
+      "hover:bg-gray-200": onClick && !bgColor,
+      [`hover:bg-${bgColor}-700`]: onClick && bgColor,
+      [`bg-${bgColor}-600 text-gray-100`]: bgColor,
+      "text-gray-800": !bgColor,
     },
-    "inline-flex items-center justify-center mx-auto h-20 w-20 rounded-full border border-gray-800 text-xs font-semibold"
+    "border border-gray-800 inline-flex items-center justify-center mx-auto h-20 w-20 bg-gray-100 rounded-full text-xs font-semibold"
   );
 
   return (
-    <span
-      onClick={() => onClick && onClick(labwareAddress)}
-      className={addressClassNames}
-      style={{ backgroundColor }}
-    >
-      {/* If there's an action associated with this address, show that */}
-      {actions?.has(labwareAddress.address) && (
-        <Action action={actions.get(labwareAddress.address) ?? null} />
-      )}
-
-      {/* If there's no action associated with this address, but there is a slot show that */}
-      {!actions?.has(labwareAddress.address) && labwareAddress.slot && (
-        <Slot slot={labwareAddress.slot} />
-      )}
-
-      {/* Otherwise, show the friendly address */}
-      {!actions?.has(labwareAddress.address) &&
-        !labwareAddress.slot &&
-        labwareAddress.address}
+    <span onClick={() => onClick && onClick(slot)} className={slotClassNames}>
+      {slotText}
     </span>
   );
-};
-
-interface ActionProps {
-  action: Maybe<SourcePlanRequestAction>;
-}
-
-const Action: React.FC<ActionProps> = ({ action }) => {
-  if (!action) {
-    return null;
-  }
-  return <span>{action.source.barcode}</span>;
-};
-
-interface SlotProps {
-  slot: SlotModel;
-}
-
-const Slot: React.FC<SlotProps> = ({ slot }) => {
-  return <span>{slot.samples[0].tissue.externalName}</span>;
 };

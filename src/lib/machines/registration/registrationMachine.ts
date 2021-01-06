@@ -1,5 +1,4 @@
 import { Machine } from "xstate";
-import registrationService from "../../services/registrationService";
 import { RegistrationContext } from "./registrationContext";
 import { RegistrationSchema, State } from "./registrationStates";
 import { RegistrationEvent } from "./registrationEvents";
@@ -22,43 +21,18 @@ const registrationMachine = Machine<
     initial: State.LOADING,
     states: {
       [State.LOADING]: {
-        type: "parallel" as const, // https://github.com/davidkpiano/xstate/issues/965#issuecomment-579773494
-        states: {
-          [State.FETCHING_REGISTRATION_INFO]: {
-            initial: State.FETCHING,
-            states: {
-              [State.FETCHING]: {
-                // When we enter the "fetching" state, invoke the getRegistrationInfo service.
-                // https://xstate.js.org/docs/guides/communication.html#quick-reference
-                invoke: {
-                  id: "getRegistrationInfo",
-                  src: registrationService.getRegistrationInfo,
-                  onDone: {
-                    target: State.FETCHING_FINISHED,
-                    actions: Actions.ASSIGN_REGISTRATION_INFO,
-                  },
-                  onError: {
-                    target: State.ERROR_FQ,
-                    actions: Actions.ASSIGN_LOADING_ERROR,
-                  },
-                },
-              },
-              [State.FETCHING_FINISHED]: { type: "final" },
-            },
+        invoke: {
+          id: "getRegistrationInfo",
+          src: Services.GET_REGISTRATION_INFO,
+          onDone: {
+            target: State.LOADED,
+            actions: Actions.ASSIGN_REGISTRATION_INFO,
           },
-          [State.MINIMUM_WAIT]: {
-            initial: State.WAITING,
-            states: {
-              [State.WAITING]: {
-                after: {
-                  500: State.MINIMUM_WAIT_FINISHED,
-                },
-              },
-              [State.MINIMUM_WAIT_FINISHED]: { type: "final" },
-            },
+          onError: {
+            target: State.ERROR,
+            actions: Actions.ASSIGN_REGISTRATION_ERROR,
           },
         },
-        onDone: State.LOADED,
       },
       [State.LOADED]: {
         on: {
@@ -76,7 +50,10 @@ const registrationMachine = Machine<
           src: Services.SUBMIT,
           onDone: {
             target: State.COMPLETE,
-            actions: Actions.ASSIGN_REGISTRATION_RESULT,
+            actions: [
+              Actions.ASSIGN_REGISTRATION_RESULT,
+              Actions.SPAWN_LABEL_PRINTER,
+            ],
           },
           onError: {
             target: State.SUBMISSION_ERROR,
@@ -90,7 +67,7 @@ const registrationMachine = Machine<
         },
       },
       [State.COMPLETE]: {
-        type: "final" as const,
+        type: "final",
       },
     },
   },

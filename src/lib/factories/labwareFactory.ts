@@ -1,16 +1,31 @@
 import { Factory } from "fishery";
 import { Labware } from "../../types/graphql";
 import { labwareTypes } from "./labwareTypeFactory";
-import { LabwareTypeName, UnregisteredLabware } from "../../types/stan";
+import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
+import { labwareAddresses } from "../helpers/labwareHelper";
+import { slotFactory } from "./slotFactory";
+import { uniqueId } from "lodash";
 
-export const unregisteredLabwareFactory = Factory.define<UnregisteredLabware>(
-  ({ params, associations, sequence }) => ({
-    labwareType:
-      associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
-    id: params.id ?? null,
-    barcode: params.barcode ?? null,
-    slots: associations.slots ?? [],
-  })
+export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
+  ({ params, associations, afterBuild }) => {
+    afterBuild((labware) => {
+      const addresses = Array.from(labwareAddresses(labware.labwareType));
+      labware.slots = addresses.map((address) =>
+        slotFactory.build({
+          address,
+          labwareId: labware.id ?? -1,
+        })
+      );
+    });
+
+    return {
+      labwareType:
+        associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
+      id: params.id ?? Number(uniqueId()),
+      barcode: params.barcode ?? null,
+      slots: associations.slots ?? [],
+    };
+  }
 );
 
 const labwareFactory = Factory.define<Labware>(({ sequence, params }) => {

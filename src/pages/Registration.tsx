@@ -17,6 +17,15 @@ function Registration(): JSX.Element {
     warningRef.current?.scrollIntoView({ behavior: "smooth" });
   });
 
+  if (current.matches("complete")) {
+    return (
+      <RegistrationSuccess
+        result={current.context.registrationResult}
+        labelPrinterRef={current.context.labelPrinterRef}
+      />
+    );
+  }
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -61,10 +70,6 @@ function Registration(): JSX.Element {
               registrationSchema={current.context.registrationSchema}
               onSubmission={(values) => send({ type: "SUBMIT_FORM", values })}
             />
-          )}
-
-          {current.matches("complete") && (
-            <RegistrationSuccess result={current.context.registrationResult} />
           )}
         </div>
       </AppShell.Main>

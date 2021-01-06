@@ -1,4 +1,9 @@
-import { GetPrintersQuery, Labware } from "../../../types/graphql";
+import {
+  GetPrintersQuery,
+  LabelType,
+  Labware,
+  LabwareType,
+} from "../../../types/graphql";
 import { Maybe } from "graphql/jsutils/Maybe";
 import { Actor } from "xstate";
 
@@ -14,9 +19,15 @@ export interface LabelPrinter {
   selectedPrinter: Maybe<GetPrintersQuery["printers"][number]>;
 
   /**
-   * The list of barcodes available to print
+   * The list of labwares with their labware types, and their labware type's label type (if they have one)
    */
-  labwareBarcodes: Array<Labware["barcode"]>;
+  labwares: Array<
+    Pick<Labware, "barcode"> & {
+      labwareType: {
+        labelType?: Maybe<Pick<LabelType, "name">>;
+      };
+    }
+  >;
 }
 
 export interface LabelPrinterOptions {
