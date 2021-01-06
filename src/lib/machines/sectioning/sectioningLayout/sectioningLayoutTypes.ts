@@ -115,12 +115,12 @@ export interface SectioningLayoutContext {
   labelPrinterRef?: LabelPrinterActorRef;
 
   /**
-   * Message from the label printer containing details of the printer's great success
+   * Message from the label printer containing details of the printer's success
    */
   printSuccessMessage?: string;
 
   /**
-   * Message from the label printer containing details of how the liberal media sabotaged the printer
+   * Message from the label printer containing details of how the printer failed
    */
   printErrorMessage?: string;
 }
