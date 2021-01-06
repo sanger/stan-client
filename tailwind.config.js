@@ -1,5 +1,26 @@
 module.exports = {
-  purge: ["./src/**/*.html", "./src/**/*.tsx"],
+  purge: {
+    content: ["./src/**/*.html", "./src/**/*.tsx"],
+
+    // Used in the Labware component for slots, but colour is built dynamically so we need to make sure it's not purged
+    safelist: [
+      "md:grid-cols-2",
+      "bg-red-600",
+      "hover:bg-red-700",
+      "bg-green-600",
+      "hover:bg-green-700",
+      "bg-indigo-600",
+      "hover:bg-indigo-700",
+      "bg-pink-600",
+      "hover:bg-pink-700",
+      "bg-yellow-600",
+      "hover:bg-yellow-700",
+      "bg-blue-600",
+      "hover:bg-blue-700",
+      "bg-purple-600",
+      "hover:bg-purple-700",
+    ],
+  },
   prefix: "",
   important: false,
   separator: ":",
