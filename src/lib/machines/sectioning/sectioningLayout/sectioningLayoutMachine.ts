@@ -223,7 +223,10 @@ const sectioningLayoutMachineOptions: Partial<MachineOptions<
     [Action.SPAWN_LABEL_PRINTER_MACHINE]: assign((ctx, _e) => {
       const currentCtx = current(ctx);
       ctx.labelPrinterRef = spawn(
-        createLabelPrinterMachine({ labwares: currentCtx.plannedLabware })
+        createLabelPrinterMachine(
+          { labwares: currentCtx.plannedLabware },
+          { showNotifications: false }
+        )
       );
     }),
 

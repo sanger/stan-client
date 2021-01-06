@@ -12,7 +12,9 @@ import printService from "../../services/printService";
 import { find } from "lodash";
 
 export enum Actions {
-  ASSIGN_LABEL_PRINTER = "assignLabelPriner",
+  ASSIGN_LABEL_PRINTER = "assignLabelPrinter",
+  ASSIGN_SUCCESS_MESSAGE = "assignSuccessMessage",
+  ASSIGN_ERROR_MESSAGE = "assignErrorMessage",
   NOTIFY_PARENT_SUCCESS = "notifyParentSuccess",
   NOTIFY_PARENT_ERROR = "notifyParentError",
 }
@@ -58,17 +60,31 @@ export const labelPrinterMachineOptions: Partial<MachineOptions<
       }
     }),
 
+    [Actions.ASSIGN_SUCCESS_MESSAGE]: assign((ctx, e) => {
+      ctx.errorMessage = "";
+      ctx.successMessage = successMessage(ctx);
+    }),
+
     [Actions.NOTIFY_PARENT_SUCCESS]: sendParent<
       LabelPrinterContext,
       LabelPrinterEvents,
       PrintSuccessEvent
-    >((ctx) => printSuccess(ctx.labelPrinter)),
+    >((ctx) =>
+      printSuccess(ctx.labelPrinter, ctx.successMessage ?? successMessage(ctx))
+    ),
+
+    [Actions.ASSIGN_ERROR_MESSAGE]: assign((ctx, e) => {
+      ctx.successMessage = "";
+      ctx.errorMessage = errorMessage(ctx);
+    }),
 
     [Actions.NOTIFY_PARENT_ERROR]: sendParent<
       LabelPrinterContext,
       LabelPrinterEvents,
       PrintErrorEvent
-    >((ctx) => printError(ctx.labelPrinter)),
+    >((ctx) =>
+      printError(ctx.labelPrinter, ctx.errorMessage ?? errorMessage(ctx))
+    ),
   },
   activities: {},
   delays: {},
@@ -89,3 +105,19 @@ export const labelPrinterMachineOptions: Partial<MachineOptions<
     },
   },
 };
+
+function successMessage(context: LabelPrinterContext) {
+  return `${
+    context.labelPrinter.selectedPrinter?.name
+  } successfully printed ${context.labelPrinter.labwares
+    .map((lw) => lw.barcode)
+    .join(", ")}`;
+}
+
+function errorMessage(context: LabelPrinterContext) {
+  return `${
+    context.labelPrinter.selectedPrinter?.name
+  } failed to print ${context.labelPrinter.labwares
+    .map((lw) => lw.barcode)
+    .join(", ")}`;
+}

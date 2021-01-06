@@ -73,11 +73,17 @@ export const createLabelPrinterMachine = (
             src: Services.PRINT_LABELS,
             onDone: {
               target: State.READY,
-              actions: Actions.NOTIFY_PARENT_SUCCESS,
+              actions: [
+                Actions.ASSIGN_SUCCESS_MESSAGE,
+                Actions.NOTIFY_PARENT_SUCCESS,
+              ],
             },
             onError: {
               target: State.READY,
-              actions: Actions.NOTIFY_PARENT_ERROR,
+              actions: [
+                Actions.ASSIGN_ERROR_MESSAGE,
+                Actions.NOTIFY_PARENT_ERROR,
+              ],
             },
           },
         },
@@ -107,6 +113,9 @@ function buildContext(
 
   return {
     labelPrinter: ctxLabelPrinter,
-    options: defaults(options, { fetchPrinters: true }),
+    options: defaults(options, {
+      fetchPrinters: true,
+      showNotifications: true,
+    }),
   };
 }

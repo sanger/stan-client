@@ -54,9 +54,14 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
             />
           </motion.div>
 
-          <motion.div variants={variants.fadeInWithLift}>
-            <LabelPrinter actor={labelPrinterRef} />
-          </motion.div>
+          <div className="flex flex-row items-center sm:justify-end">
+            <motion.div
+              variants={variants.fadeInWithLift}
+              className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow"
+            >
+              <LabelPrinter actor={labelPrinterRef} />
+            </motion.div>
+          </div>
         </motion.div>
       </AppShell.Main>
 
