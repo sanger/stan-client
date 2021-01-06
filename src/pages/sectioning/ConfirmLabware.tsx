@@ -122,7 +122,18 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
       <Modal show={current.matches("editingLayout")}>
         <ModalBody>
           <Heading level={3}>Set Layout</Heading>
-          {layoutMachine && <LayoutPlanner actor={layoutMachine} />}
+          {layoutMachine && (
+            <LayoutPlanner actor={layoutMachine}>
+              <div className="my-2">
+                <p className="text-gray-900 text-sm leading-normal">
+                  For any slots that were originally intended to contain
+                  sections, but ultimately remained empty, you can click the
+                  relevant slot to empty it. (You can re-add a sample to an
+                  empty slot by clicking it again).
+                </p>
+              </div>
+            </LayoutPlanner>
+          )}
         </ModalBody>
         <ModalFooter>
           <BlueButton
