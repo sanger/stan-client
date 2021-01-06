@@ -25,6 +25,7 @@ import WhiteButton from "../../components/buttons/WhiteButton";
 import { rowMajor } from "../../lib/helpers/labwareHelper";
 import { Select } from "../../components/forms/Select";
 import LabwareComments from "./LabwareComments";
+import classNames from "classnames";
 
 interface ConfirmLabwareProps {
   actor: SectioningConfirmActorRef;
@@ -44,6 +45,14 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
   } = current.context;
 
   const { layoutMachine } = current.children;
+
+  const gridClassNames = classNames(
+    {
+      "sm:grid-cols-1": labware.labwareType.numColumns === 1,
+      "sm:grid-cols-2": labware.labwareType.numColumns === 2,
+    },
+    "grid grid-cols-1 gap-x-8"
+  );
 
   return (
     <motion.div
@@ -81,9 +90,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
           </Heading>
 
           <div className="w-full space-y-4">
-            <div
-              className={`grid grid-cols-1 sm:grid-cols-${labware.labwareType.numColumns} gap-x-8`}
-            >
+            <div className={gridClassNames}>
               {rowMajor(labware.slots).map((slot) => (
                 <LabwareComments
                   slot={slot}

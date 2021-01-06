@@ -5,7 +5,6 @@ module.exports = {
     // Used in the Labware component for slots, but colour is built dynamically so we need to make sure it's not purged
     options: {
       safelist: [
-        "md:grid-cols-2",
         "bg-red-600",
         "hover:bg-red-700",
         "bg-green-600",
