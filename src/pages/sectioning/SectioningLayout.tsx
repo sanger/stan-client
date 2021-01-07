@@ -161,7 +161,11 @@ const SectioningLayout = React.forwardRef<
               LabwareTypeName.VISIUM_LP && (
               <Label name={"Barcode"}>
                 <Input
-                  disabled={current.matches("readyToPrint")}
+                  disabled={
+                    current.matches({ printing: "readyToPrint" }) ||
+                    current.matches({ printing: "printSuccess" }) ||
+                    current.matches("done")
+                  }
                   type="text"
                   value={sectioningLayout.barcode}
                   onChange={(e) =>
@@ -179,7 +183,11 @@ const SectioningLayout = React.forwardRef<
               LabwareTypeName.VISIUM_LP && (
               <Label name={"Quantity"}>
                 <Input
-                  disabled={current.matches("readyToPrint")}
+                  disabled={
+                    current.matches({ printing: "readyToPrint" }) ||
+                    current.matches({ printing: "printSuccess" }) ||
+                    current.matches("done")
+                  }
                   type="number"
                   min={1}
                   step={1}
@@ -197,7 +205,11 @@ const SectioningLayout = React.forwardRef<
 
             <Label name={"Section Thickness"}>
               <Input
-                disabled={current.matches("readyToPrint")}
+                disabled={
+                  current.matches({ printing: "readyToPrint" }) ||
+                  current.matches({ printing: "printSuccess" }) ||
+                  current.matches("done")
+                }
                 type={"number"}
                 min={1}
                 step={1}
