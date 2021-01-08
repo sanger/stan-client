@@ -3,7 +3,6 @@ import { useMachine } from "@xstate/react";
 import { Labware, LabwareLayoutFragment } from "../../types/graphql";
 import Success from "../notifications/Success";
 import Warning from "../notifications/Warning";
-import RemoveIcon from "../icons/RemoveIcon";
 import { motion } from "framer-motion";
 import { Column, Row } from "react-table";
 import MutedText from "../MutedText";
@@ -11,11 +10,12 @@ import LockIcon from "../icons/LockIcon";
 import LabwareTable from "../LabwareTable";
 import ScanInput from "../ScanInput";
 import { createLabwareMachine } from "../../lib/machines/labware/labwareMachine";
+import RemoveButton from "../buttons/RemoveButton";
 
 /**
- * Props for {@link LabwareScanTable}
+ * Props for {@link LabwareScanPanel}
  */
-interface LabwareScanTableProps {
+interface LabwareScanPanelProps {
   /**
    * The list of columns to display in the table
    */
@@ -33,7 +33,7 @@ interface LabwareScanTableProps {
   locked?: boolean;
 }
 
-const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
+const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({
   columns,
   onChange,
   locked = false,
@@ -68,7 +68,7 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
         }
 
         return (
-          <button
+          <RemoveButton
             onClick={() => {
               row.original.barcode &&
                 send({
@@ -76,10 +76,7 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
                   value: row.original.barcode,
                 });
             }}
-            className="inline-flex items-center justify-center p-2 rounded-md hover:bg-red-100 focus:outline-none focus:bg-red-100 text-red-400 hover:text-red-600"
-          >
-            <RemoveIcon className="block h-5 w-5" />
-          </button>
+          />
         );
       },
     };
@@ -102,21 +99,23 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
         <Warning message={current.context.errorMessage} />
       )}
 
-      <ScanInput
-        id="labwareScanInput"
-        value={current.context.currentBarcode}
-        type="text"
-        disabled={!current.matches("idle")}
-        onChange={(e) => {
-          send({
-            type: "UPDATE_CURRENT_BARCODE",
-            value: e.currentTarget.value,
-          });
-        }}
-        onScan={(_value) => {
-          send({ type: "SUBMIT_BARCODE" });
-        }}
-      />
+      <div className="sm:w-2/3 md:w-1/2">
+        <ScanInput
+          id="labwareScanInput"
+          value={current.context.currentBarcode}
+          type="text"
+          disabled={!current.matches("idle")}
+          onChange={(e) => {
+            send({
+              type: "UPDATE_CURRENT_BARCODE",
+              value: e.currentTarget.value,
+            });
+          }}
+          onScan={(_value) => {
+            send({ type: "SUBMIT_BARCODE" });
+          }}
+        />
+      </div>
 
       {current.context.labwares.length === 0 && (
         <MutedText>Scan a piece of labware to get started</MutedText>
@@ -135,4 +134,4 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
   );
 };
 
-export default LabwareScanTable;
+export default LabwareScanPanel;

@@ -33,7 +33,7 @@ const Plan: React.FC<PlanProps> = ({ model }) => {
       </AppShell.Header>
       <AppShell.Main>
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
-          <div>
+          <div className="space-y-4">
             <Heading level={3}>Source Labware</Heading>
             <LabwareScanTable
               locked={model.isLabwareTableLocked()}

@@ -44,7 +44,7 @@ const RegistrationForm = ({
   // Initial values provided to Formik
   const initialValues: FormValues = { tissues: [getInitialTissueValues()] };
 
-  // The Spatial Locations available will be determined by which Tissue Type is selected
+  // The Spatial Location available will be determined by which Tissue Type is selected
   const [availableSpatialLocations, setAvailableSpatialLocations] = useState<
     Array<
       { __typename?: "SpatialLocation" } & Pick<

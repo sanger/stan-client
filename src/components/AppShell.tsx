@@ -54,7 +54,7 @@ function AppShell({ children }: AppShellParams): JSX.Element {
                       Dashboard
                     </StanNavLink>
                     <StanNavLink to="/lab">Lab Work</StanNavLink>
-                    <StanNavLink to="/reports">Reports</StanNavLink>
+                    <StanNavLink to="/store">Store</StanNavLink>
                     <Authenticated>
                       <StanNavLink to="/admin/registration">
                         Registration
@@ -182,7 +182,7 @@ function AppShell({ children }: AppShellParams): JSX.Element {
                     Dashboard
                   </StanMobileNavLink>
                   <StanMobileNavLink to="/lab">Lab Work</StanMobileNavLink>
-                  <StanMobileNavLink to="/reports">Reports</StanMobileNavLink>
+                  <StanMobileNavLink to="/store">Store</StanMobileNavLink>
                   <Authenticated>
                     <StanMobileNavLink to="/admin/registration">
                       Registration

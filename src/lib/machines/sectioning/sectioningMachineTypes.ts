@@ -76,7 +76,7 @@ export type SectioningState = State<
 >;
 //endregion
 
-//region Context Types
+//region Context LocationSearchParams
 interface SectioningLayoutMachineRef {
   ref: SectioningLayoutActorRef;
 }
@@ -152,9 +152,9 @@ export interface SectioningContext {
    */
   confirmedOperation: Maybe<ConfirmOperationResult>;
 }
-//endregion Types T
+//endregion LocationSearchParams T
 
-//region Event Types
+//region Event LocationSearchParams
 type SelectLabwareTypeEvent = {
   type: "SELECT_LABWARE_TYPE";
   labwareType: GetSectioningInfoQuery["labwareTypes"][number];

@@ -7,6 +7,7 @@ import printHandlers from "./handlers/printHandlers";
 import registrationHandlers from "./handlers/registrationHandlers";
 import sectioningHandlers from "./handlers/sectioningHandlers";
 import userHandlers from "./handlers/userHandlers";
+import locationHandlers from "./handlers/locationHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -15,4 +16,5 @@ export const handlers = [
   ...registrationHandlers,
   ...sectioningHandlers,
   ...userHandlers,
+  ...locationHandlers,
 ];

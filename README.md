@@ -33,6 +33,8 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.
 
+It will also watch for any changes in the GraphQL schema, or in the queries and mutations in the `graphql` directory. It will automatically rebuild the graphql TypeScript types on any change. See `yarn codegen` below for more details.
+
 ### `yarn start:msw`
 
 Runs the app in the development mode with MockServiceWorker enabled (see below).<br />

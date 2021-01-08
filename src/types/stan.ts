@@ -2,6 +2,7 @@ import {
   LabwareLayoutFragment as LabwareLayout,
   Maybe,
   PlanRequestAction,
+  Size,
 } from "./graphql";
 import { ApolloError } from "@apollo/client";
 
@@ -22,6 +23,8 @@ export enum LabwareTypeName {
 }
 
 export type Address = string;
+
+export type SizeInput = Omit<Size, "__typename">;
 
 /**
  * A {@link PlanRequestAction} before it knows where it's going

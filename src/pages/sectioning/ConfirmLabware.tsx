@@ -51,7 +51,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
       "sm:grid-cols-1": labware.labwareType.numColumns === 1,
       "sm:grid-cols-2": labware.labwareType.numColumns === 2,
     },
-    "grid grid-cols-1 gap-x-8"
+    "grid grid-cols-1 gap-x-8 gap-y-2"
   );
 
   return (

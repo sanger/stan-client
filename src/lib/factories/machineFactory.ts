@@ -1,6 +1,8 @@
 import {
   GetRegistrationInfoQuery,
   GetSectioningInfoQuery,
+  LocationFieldsFragment,
+  Maybe,
 } from "../../types/graphql";
 import { RegistrationMachine } from "../machines/registration/registrationMachineTypes";
 import registrationMachine from "../machines/registration/registrationMachine";
@@ -8,6 +10,13 @@ import { buildRegistrationSchema } from "../services/registrationService";
 import { SectioningMachine } from "../machines/sectioning/sectioningMachineTypes";
 import { sectioningMachine } from "../machines/sectioning/sectioningMachine";
 import { LabwareTypeName } from "../../types/stan";
+import createLocationMachine from "../machines/locations/locationMachine";
+import {
+  LocationMachine,
+  StoredItemFragment,
+} from "../machines/locations/locationMachineTypes";
+import { LocationSearchParams } from "../../pages/Location";
+import { genAddresses } from "../helpers";
 
 export function buildRegistrationMachine(
   registrationInfo: GetRegistrationInfoQuery
@@ -50,4 +59,38 @@ export function buildSectioningMachine(
       comments,
     })
   );
+}
+
+export function buildLocationMachine(
+  location: LocationFieldsFragment,
+  locationSearchParams: Maybe<LocationSearchParams> | undefined
+): LocationMachine {
+  // Create all the possible addresses for this location if it has a size.
+  const locationAddresses = location.size
+    ? Array.from(genAddresses(location.size, location.direction!))
+    : [];
+
+  // Create a map of location addresses to items (or null if empty)
+  const addressToItemMap = new Map<string, Maybe<StoredItemFragment>>(
+    locationAddresses.map((address) => [
+      address,
+      location.stored.find((item) => item.address === address) ?? null,
+    ])
+  );
+
+  // Get the first selected address (which is the first empty address)
+  const selectedAddress =
+    locationAddresses.find(
+      (address) => addressToItemMap.get(address) == null
+    ) ?? null;
+
+  return createLocationMachine({
+    context: {
+      location,
+      locationSearchParams,
+      locationAddresses,
+      addressToItemMap,
+      selectedAddress,
+    },
+  });
 }
