@@ -16,6 +16,7 @@ import {
   LabwareMachineType,
 } from "../../lib/machines/labware";
 import LabwareTable from "../LabwareTable";
+import ScanInput from "../ScanInput";
 
 /**
  * Props for {@link LabwareScanTable}
@@ -107,35 +108,22 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
         <Warning message={current.context.errorMessage} />
       )}
 
-      <div className="mt-3 flex rounded-md shadow-sm md:w-1/2">
-        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-          <BarcodeIcon className="block h-5 w-5" />
-        </span>
-        <input
-          id="labwareScanInput"
-          value={current.context.currentBarcode}
-          type="text"
-          disabled={!current.matches("idle")}
-          onKeyDown={(e) => {
-            if (["Tab", "Enter"].some((triggerKey) => triggerKey === e.key)) {
-              e.preventDefault();
-              send({ type: "SUBMIT_BARCODE" });
-            }
-          }}
-          onChange={(e) => {
-            send({
-              type: "UPDATE_CURRENT_BARCODE",
-              value: e.currentTarget.value,
-            });
-          }}
-          className={inputClassNames}
-        />
-        {current.matches("locked") && (
-          <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-100 transition duration-150 ease-in-out text-sm">
-            <LockIcon className="block h-5 w-5 text-sp-300 transition duration-150 ease-in-out" />
-          </span>
-        )}
-      </div>
+      <ScanInput
+        id="labwareScanInput"
+        value={current.context.currentBarcode}
+        type="text"
+        disabled={!current.matches("idle")}
+        locked={current.matches("locked")}
+        onChange={(e) => {
+          send({
+            type: "UPDATE_CURRENT_BARCODE",
+            value: e.currentTarget.value,
+          });
+        }}
+        onScan={(_value) => {
+          send({ type: "SUBMIT_BARCODE" });
+        }}
+      />
 
       {current.context.labwares.length === 0 && (
         <MutedText>Scan a piece of labware to get started</MutedText>
