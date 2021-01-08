@@ -114,7 +114,7 @@ describe("Registration", () => {
       cy.findByLabelText("Tissue Type").select("Kidney");
     });
 
-    it("updates the available Spatial Locations", () => {
+    it("updates the available Spatial Location", () => {
       cy.findByLabelText("Spatial Location")
         .find("option")
         .should("have.length", 7); // 6 options plus empty

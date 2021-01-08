@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { authContext } from "../context/AuthContext";
 
 interface AuthProps {
-  children: JSX.Element | JSX.Element[];
+  children: React.ReactNode | React.ReactNode[];
 }
 
 /**

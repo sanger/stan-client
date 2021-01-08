@@ -1,43 +1,6 @@
-import { Labware, LabwareType } from "../../types/graphql";
+import { Labware } from "../../types/graphql";
 import { cycle } from "../helpers";
 import { orderBy } from "lodash";
-
-/**
- * Generator for labware addresses
- * @param labwareType
- */
-export function* labwareAddresses(
-  labwareType: Pick<LabwareType, "numColumns" | "numRows">
-) {
-  for (let i = 1, j = labwareType.numColumns; i <= j; i++) {
-    for (let m = 1, n = labwareType.numRows; m <= n; m++) {
-      yield createAddress(m, i);
-    }
-  }
-}
-
-/**
- * Converts an {@link Address} into its user-friendly version
- *
- * @example
- * createAddress(3, 5) // "C5"
- *
- * @param rowNumber the 1-based index of the row
- * @param columnNumber the 1-based index of the column
- */
-export function createAddress(rowNumber: number, columnNumber: number): string {
-  if (rowNumber < 1 || rowNumber > 8) {
-    throw new Error(`${rowNumber} can not be used as a row index`);
-  }
-  if (columnNumber < 1 || columnNumber > 12) {
-    throw new Error(`${columnNumber} can not be used as a column index`);
-  }
-
-  const aCharCode = "A".charCodeAt(0);
-  const row = String.fromCharCode(rowNumber + aCharCode - 1);
-
-  return `${row}${columnNumber}`;
-}
 
 /**
  * Build an array of all {@link Sample samples} in a {@link Labware} along with its {@link Slot} plus the original {@link Labware}
@@ -87,19 +50,26 @@ function getColumnIndex(address: string): number {
   return parseInt(address.substr(1));
 }
 
-interface HasAddress {
+export interface Addressable {
   address: string;
 }
 
-export function rowMajor<T extends HasAddress>(
+export function rowMajor<T extends Addressable>(
   addressable: Array<T>
 ): Array<T> {
   return orderBy(
     addressable,
-    [
-      (slot) => getRowIndex(slot.address),
-      (slot) => getColumnIndex(slot.address),
-    ],
+    [(a) => getRowIndex(a.address), (a) => getColumnIndex(a.address)],
+    ["asc", "asc"]
+  );
+}
+
+export function columnMajor<T extends Addressable>(
+  addressable: Array<T>
+): Array<T> {
+  return orderBy(
+    addressable,
+    [(a) => getColumnIndex(a.address), (a) => getRowIndex(a.address)],
     ["asc", "asc"]
   );
 }

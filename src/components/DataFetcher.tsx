@@ -48,7 +48,7 @@ const DataFetcher: <E>(
           {state.matches("failed") && (
             <Warning
               message={
-                "There was an error while trying to load the page. Please try again"
+                "There was an error while trying to load the page. Please try again."
               }
             >
               <WhiteButton onClick={() => send({ type: "RETRY" })}>

@@ -1,0 +1,7 @@
+mutation StoreBarcode($barcode: String!, $locationBarcode: String!, $address: Address) {
+    storeBarcode(barcode: $barcode, locationBarcode: $locationBarcode, address: $address) {
+        location {
+            ...LocationFields
+        }
+    }
+}

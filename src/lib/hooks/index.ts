@@ -1,4 +1,6 @@
 import { RefObject, useEffect, useRef, useState } from "react";
+import * as queryString from "query-string";
+import { useLocation } from "react-router-dom";
 import { MachinePresentationModel } from "../presentationModels/machinePresentationModel";
 import { EventObject, Interpreter, State, StateMachine } from "xstate";
 import { useMachine } from "@xstate/react";
@@ -73,11 +75,12 @@ export function useScrollToRef() {
   const ref = useRef<HTMLDivElement | null>(null);
   const [shouldScrollToRef, setShouldScrollToRef] = useState(false);
 
-  if (shouldScrollToRef) {
-    ref.current?.scrollIntoView({ behavior: "smooth" });
-    setShouldScrollToRef(false);
-  }
-  useEffect(() => {}, [shouldScrollToRef]);
+  useEffect(() => {
+    if (shouldScrollToRef) {
+      ref.current?.scrollIntoView({ behavior: "smooth" });
+      setShouldScrollToRef(false);
+    }
+  }, [shouldScrollToRef]);
 
   function scrollToRef() {
     setShouldScrollToRef(true);
@@ -87,9 +90,18 @@ export function useScrollToRef() {
 }
 
 /**
+ * TODO Create a Result type
+ */
+export function useURLQuery<T>(guard: (o: any) => o is T) {
+  const query = queryString.parse(useLocation().search);
+  return guard(query) ? { query, hasError: false } : { hasError: true };
+}
+
+/**
  * Starts interpreting a machine and connects it to a {@link MachinePresentationModel}
  * @param machine a state machine
- * @param initPresentationModel a function that returns a new {@link MachinePresentationModel}
+ * @param initPresentationModel a function that returns a new {@link MachinePre
+ * sentationModel}
  */
 export function usePresentationModel<
   E extends MachinePresentationModel<

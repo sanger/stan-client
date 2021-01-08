@@ -36,6 +36,10 @@ export abstract class MachinePresentationModel<
 
   init() {}
 
+  get context(): TContext {
+    return this.current.context;
+  }
+
   /**
    * Creates a new presentation model with the new state
    * @param newState the new state
@@ -43,7 +47,7 @@ export abstract class MachinePresentationModel<
   setState(newState: State<TContext, TEvent, TStateSchema, TTypestate>): this {
     return produce<this>(this, (draft: Draft<this>) => {
       /**
-       * `castDraft` will hint to TypeScript that we want to upcast the new State to be mutable for drafting purposes
+       * `castDraft` will hint to TypeScript that we want to upcast the new StateValue to be mutable for drafting purposes
        * @see {@link https://immerjs.github.io/immer/docs/typescript#cast-utilities}
        */
       draft.current = castDraft(newState);

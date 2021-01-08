@@ -2,14 +2,17 @@ import { Factory } from "fishery";
 import { Labware } from "../../types/graphql";
 import { labwareTypes } from "./labwareTypeFactory";
 import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
-import { labwareAddresses } from "../helpers/labwareHelper";
 import { slotFactory } from "./slotFactory";
 import { uniqueId } from "lodash";
+import { genAddresses } from "../helpers";
 
 export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
   ({ params, associations, afterBuild }) => {
     afterBuild((labware) => {
-      const addresses = Array.from(labwareAddresses(labware.labwareType));
+      if (!labware.labwareType) {
+        return;
+      }
+      const addresses = Array.from(genAddresses(labware.labwareType));
       labware.slots = addresses.map((address) =>
         slotFactory.build({
           address,

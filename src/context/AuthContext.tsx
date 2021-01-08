@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import { useApolloClient } from "@apollo/client";
 import { useMinimumWait } from "../lib/hooks";
-import Loading from "../pages/Loading";
+import Splash from "../pages/Splash";
 import { useCurrentUserLazyQuery, useLogoutMutation } from "../types/graphql";
 
 /**
@@ -119,7 +119,7 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         logout,
       }}
     >
-      {!waitElapsed ? <Loading /> : children}
+      {!waitElapsed ? <Splash /> : children}
     </Provider>
   );
 };

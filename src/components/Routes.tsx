@@ -1,25 +1,27 @@
 import React, { useEffect } from "react";
 import { Route, Switch } from "react-router-dom";
 import AuthenticatedRoute from "./AuthenticatedRoute";
-import LoadingSpinner from "../pages/LoadingSpinner";
+import Loading from "../pages/Loading";
 import Login from "../pages/Login";
 import { getRegistrationMachine } from "../lib/services/registrationService";
 import { getSectioningMachine } from "../lib/services/sectioningService";
 import Presenter from "./Presenter";
 import {
+  buildLocationPresentationModel,
   buildRegistrationPresentationModel,
-  buildReleasePresentationModel,
   buildSectioningModel,
 } from "../lib/factories/presentationModelFactory";
+import { getLocationMachine } from "../lib/services/locationService";
+import LocationPresentationModel from "../lib/presentationModels/locationPresentationModel";
 
 const Logout = React.lazy(() => import("../pages/Logout"));
 const Lab = React.lazy(() => import("../pages/Lab"));
-const Reports = React.lazy(() => import("../pages/Reports"));
+const Store = React.lazy(() => import("../pages/Store"));
 const Admin = React.lazy(() => import("../pages/Admin"));
 const Dashboard = React.lazy(() => import("../pages/Dashboard"));
 const Registration = React.lazy(() => import("../pages/Registration"));
 const Sectioning = React.lazy(() => import("../pages/Sectioning"));
-const Release = React.lazy(() => import("../pages/Release"));
+const Location = React.lazy(() => import("../pages/Location"));
 
 export function Routes() {
   // Hook to remove any location state after it has been consumed for a component.
@@ -29,7 +31,7 @@ export function Routes() {
   }, []);
 
   return (
-    <React.Suspense fallback={<LoadingSpinner />}>
+    <React.Suspense fallback={<Loading />}>
       <Switch>
         <Route path="/logout">
           <Logout />
@@ -45,9 +47,7 @@ export function Routes() {
             {(presentationModel) => <Sectioning model={presentationModel} />}
           </Presenter>
         </AuthenticatedRoute>
-        <Route path="/reports">
-          <Reports />
-        </Route>
+
         <AuthenticatedRoute exact path="/admin">
           <Admin />
         </AuthenticatedRoute>
@@ -62,15 +62,25 @@ export function Routes() {
         <Route exact path="/">
           <Dashboard />
         </Route>
+
+        <Route
+          path="/locations/:locationBarcode"
+          render={(routeProps) => (
+            <Presenter
+              key={routeProps.location.key}
+              machine={() => getLocationMachine(routeProps)}
+              model={buildLocationPresentationModel}
+            >
+              {(presentationModel: LocationPresentationModel) => (
+                <Location model={presentationModel} {...routeProps} />
+              )}
+            </Presenter>
+          )}
+        />
+
+        <Route path="/locations" component={Store} />
+        <Route path="/store" component={Store} />
         <Route path="/login" component={Login} />
-        <Route path="/release">
-          <Presenter
-            machine={getRegistrationMachine}
-            model={buildReleasePresentationModel}
-          >
-            {(presentationModel) => <Release model={presentationModel} />}
-          </Presenter>
-        </Route>
       </Switch>
     </React.Suspense>
   );

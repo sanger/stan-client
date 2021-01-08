@@ -1,0 +1,5 @@
+mutation EmptyLocation($barcode: String!) {
+    empty(locationBarcode: $barcode) {
+        numUnstored
+    }
+}

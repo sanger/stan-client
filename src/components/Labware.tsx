@@ -29,19 +29,7 @@ const Labware: React.FC<LabwareProps> = ({
     "w-48 bg-blue-100 rounded-lg transition duration-300 ease-in-out"
   );
 
-  const slotGrid = classNames(
-    {
-      "grid-rows-1": labwareType.numRows === 1,
-      "grid-rows-2": labwareType.numRows === 2,
-      "grid-rows-3": labwareType.numRows === 3,
-      "grid-rows-4": labwareType.numRows === 4,
-      "grid-rows-5": labwareType.numRows === 5,
-      "grid-rows-6": labwareType.numRows === 6,
-      "grid-cols-1": labwareType.numColumns === 1,
-      "grid-cols-2": labwareType.numColumns === 2,
-    },
-    "py-4 px-2 grid gap-4"
-  );
+  const slotGrid = `grid grid-rows-${labwareType.numRows} grid-cols-${labwareType.numColumns} py-4 px-2 gap-4`;
 
   return (
     <div className={labwareClasses}>

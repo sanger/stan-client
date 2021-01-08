@@ -10,7 +10,7 @@ export type DataFetcherMachineType = Interpreter<
 >;
 
 /**
- * State Schema for a DataFetcher Machine
+ * StateValue Schema for a DataFetcher Machine
  */
 export interface DataFetcherSchema {
   states: {

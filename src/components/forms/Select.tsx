@@ -4,7 +4,7 @@ import { Field, FieldAttributes } from "formik";
 import { FormikErrorMessage } from "./index";
 
 const defaultClassNames =
-  "mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2";
+  "block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100";
 
 interface FormikSelectProps extends FieldAttributes<any> {
   label: string;
@@ -39,10 +39,17 @@ interface SelectProps
   extends React.DetailedHTMLProps<
     React.SelectHTMLAttributes<HTMLSelectElement>,
     HTMLSelectElement
-  > {}
+  > {
+  emptyOption?: boolean;
+}
 
-export const Select: React.FC<SelectProps> = ({ children, ...props }) => (
+export const Select: React.FC<SelectProps> = ({
+  children,
+  emptyOption = false,
+  ...props
+}) => (
   <select className={defaultClassNames} {...props}>
+    {emptyOption && <option value="" />}
     {children}
   </select>
 );

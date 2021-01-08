@@ -9,6 +9,11 @@ import {
   SectioningState,
 } from "../machines/sectioning/sectioningMachineTypes";
 import SectioningPresentationModel from "../presentationModels/sectioningPresentationModel";
+import {
+  LocationMachineService,
+  LocationState,
+} from "../machines/locations/locationMachineTypes";
+import LocationPresentationModel from "../presentationModels/locationPresentationModel";
 
 export function buildReleasePresentationModel(
   current: RegistrationState,
@@ -29,4 +34,11 @@ export function buildSectioningModel(
   service: SectioningMachineService
 ): SectioningPresentationModel {
   return new SectioningPresentationModel(current, service);
+}
+
+export function buildLocationPresentationModel(
+  current: LocationState,
+  service: LocationMachineService
+): LocationPresentationModel {
+  return new LocationPresentationModel(current, service);
 }
