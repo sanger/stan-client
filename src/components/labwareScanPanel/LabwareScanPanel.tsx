@@ -6,9 +6,7 @@ import Warning from "../notifications/Warning";
 import RemoveIcon from "../icons/RemoveIcon";
 import { motion } from "framer-motion";
 import { Column, Row } from "react-table";
-import BarcodeIcon from "../icons/BarcodeIcon";
 import MutedText from "../MutedText";
-import classNames from "classnames";
 import LockIcon from "../icons/LockIcon";
 import {
   LabwareEvents,
@@ -91,14 +89,6 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
     actionsColumn,
   ];
 
-  const inputClassNames = classNames(
-    {
-      "rounded-r-md": !current.matches("locked"),
-      "border-r-0 disabled:bg-gray-100": current.matches("locked"),
-    },
-    "flex-grow-0 focus:ring-sdb-100 focus:border-sdb-100 block w-full border-gray-300 rounded-none transition duration-150 ease-in-out"
-  );
-
   return (
     <div>
       {current.matches("idle.success") && current.context.successMessage && (
@@ -113,7 +103,6 @@ const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
         value={current.context.currentBarcode}
         type="text"
         disabled={!current.matches("idle")}
-        locked={current.matches("locked")}
         onChange={(e) => {
           send({
             type: "UPDATE_CURRENT_BARCODE",
