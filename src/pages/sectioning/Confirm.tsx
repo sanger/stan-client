@@ -9,7 +9,7 @@ import { sortBy } from "lodash";
 import { LabwareTypeName } from "../../types/stan";
 import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
 import Warning from "../../components/notifications/Warning";
-import { useScrollToRef } from "../../hooks";
+import { useScrollToRef } from "../../lib/hooks";
 import ConfirmByLabwareType from "./ConfirmByLabwareType";
 import { toast } from "react-toastify";
 import Success from "../../components/notifications/Success";

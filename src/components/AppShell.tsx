@@ -2,7 +2,7 @@ import React, { useContext, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Authenticated, Unauthenticated } from "./Authenticated";
 import { StanMobileNavLink, StanNavLink } from "./nav";
-import { useOnClickOutside } from "../hooks";
+import { useOnClickOutside } from "../lib/hooks";
 import Logo from "./Logo";
 import GuestIcon from "./icons/GuestIcon";
 import { authContext } from "../context/AuthContext";

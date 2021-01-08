@@ -14,7 +14,7 @@ import { find } from "lodash";
 import { optionValues } from "../../components/forms";
 import BlueButton from "../../components/buttons/BlueButton";
 import PinkButton from "../../components/buttons/PinkButton";
-import { useScrollToRef } from "../../hooks";
+import { useScrollToRef } from "../../lib/hooks";
 import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
 import ButtonBar from "../../components/ButtonBar";
 

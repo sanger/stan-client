@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import { useApolloClient } from "@apollo/client";
-import { useMinimumWait } from "../hooks";
+import { useMinimumWait } from "../lib/hooks";
 import Loading from "../pages/Loading";
 import { useCurrentUserLazyQuery, useLogoutMutation } from "../types/graphql";
 

@@ -18,7 +18,7 @@ import BlueButton from "../../components/buttons/BlueButton";
 import SummaryBox from "./SummaryBox";
 import variants from "../../lib/motionVariants";
 import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
-import { useScrollToRef } from "../../hooks";
+import { useScrollToRef } from "../../lib/hooks";
 
 export interface FormValues {
   tissues: FormTissueValues[];
