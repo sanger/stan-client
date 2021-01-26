@@ -1,11 +1,5 @@
-import {
-  GetPrintersQuery,
-  LabelType,
-  Labware,
-  LabwareType,
-} from "../../../types/graphql";
+import { GetPrintersQuery, LabelType, Labware } from "../../../types/graphql";
 import { Maybe } from "graphql/jsutils/Maybe";
-import { Actor } from "xstate";
 
 export interface LabelPrinter {
   /**
@@ -35,6 +29,11 @@ export interface LabelPrinterOptions {
    * Should this machine go fetch the printers from the API
    */
   fetchPrinters: boolean;
+
+  /**
+   * Should the Label Printer component show notifications
+   */
+  showNotifications: boolean;
 }
 
 export interface LabelPrinterContext {
@@ -47,4 +46,14 @@ export interface LabelPrinterContext {
    * Options for the machine
    */
   options: LabelPrinterOptions;
+
+  /**
+   * Message if a print has been successful
+   */
+  successMessage?: string;
+
+  /**
+   * Message if a print failed
+   */
+  errorMessage?: string;
 }

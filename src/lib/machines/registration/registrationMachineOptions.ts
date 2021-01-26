@@ -14,6 +14,7 @@ import { extractServerErrors, LabwareTypeName } from "../../../types/stan";
 import registrationService from "../../services/registrationService";
 import { createMinimumWaitService } from "../index";
 import { createLabelPrinterMachine } from "../labelPrinter/labelPrinterMachine";
+import { current } from "immer";
 
 export enum Actions {
   ASSIGN_REGISTRATION_INFO = "assignRegistrationInfo",
@@ -71,9 +72,10 @@ export const registrationMachineOptions: Partial<MachineOptions<
     }),
 
     [Actions.SPAWN_LABEL_PRINTER]: assign((ctx, e) => {
+      const currentCtx = current(ctx);
       ctx.labelPrinterRef = spawn(
         createLabelPrinterMachine({
-          labwares: ctx.registrationResult.register.labware,
+          labwares: currentCtx.registrationResult.register.labware,
         })
       );
     }),

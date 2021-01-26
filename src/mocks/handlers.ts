@@ -27,6 +27,22 @@ import { labwareTypeInstances } from "../lib/factories/labwareTypeFactory";
 import labwareFactory from "../lib/factories/labwareFactory";
 
 const CURRENT_USER_KEY = "currentUser";
+
+const printers = labwareTypeInstances.reduce<GetPrintersQuery["printers"]>(
+  (memo, labwareType) => {
+    if (labwareType.labelType?.name) {
+      memo.push({
+        labelType: {
+          name: labwareType.labelType.name,
+        },
+        name: `${labwareType.name} Printer`,
+      });
+    }
+    return memo;
+  },
+  []
+);
+
 /**
  * Default handlers for the mock API
  */
@@ -200,6 +216,9 @@ export const handlers = [
                   name: "Proviasette",
                   numRows: 1,
                   numColumns: 1,
+                  labelType: {
+                    name: "Label Type 1",
+                  },
                 },
                 slots: [
                   {
@@ -427,20 +446,7 @@ export const handlers = [
     (req, res, ctx) => {
       return res(
         ctx.data({
-          printers: labwareTypeInstances.reduce<GetPrintersQuery["printers"]>(
-            (memo, labwareType) => {
-              if (labwareType.labelType?.name) {
-                memo.push({
-                  labelType: {
-                    name: labwareType.labelType.name,
-                  },
-                  name: `${labwareType.name} Printer`,
-                });
-              }
-              return memo;
-            },
-            []
-          ),
+          printers: printers,
         })
       );
     }
