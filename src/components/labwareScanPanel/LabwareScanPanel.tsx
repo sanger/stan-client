@@ -1,6 +1,6 @@
-import React from "react";
-import { useActor } from "@xstate/react";
-import { LabwareLayoutFragment } from "../../types/graphql";
+import React, { useEffect } from "react";
+import { useMachine } from "@xstate/react";
+import { Labware, LabwareLayoutFragment } from "../../types/graphql";
 import Success from "../notifications/Success";
 import Warning from "../notifications/Warning";
 import RemoveIcon from "../icons/RemoveIcon";
@@ -8,45 +8,49 @@ import { motion } from "framer-motion";
 import { Column, Row } from "react-table";
 import MutedText from "../MutedText";
 import LockIcon from "../icons/LockIcon";
-import {
-  LabwareEvents,
-  LabwareMachineActorRef,
-  LabwareMachineType,
-} from "../../lib/machines/labware";
 import LabwareTable from "../LabwareTable";
 import ScanInput from "../ScanInput";
+import { createLabwareMachine } from "../../lib/machines/labware/labwareMachine";
 
 /**
  * Props for {@link LabwareScanTable}
  */
 interface LabwareScanTableProps {
   /**
-   * {@link https://xstate.js.org/docs/guides/actors.html#spawning-machines Actor} to that will be passed into `useActor`.
-   *
-   * @remarks
-   * This should be a spawned instance of {@link labwareMachine}
-   */
-  actor: LabwareMachineActorRef;
-
-  /**
    * The list of columns to display in the table
    */
   columns: Column<LabwareLayoutFragment>[];
+
+  /**
+   * Called when the labwares in the table changes
+   * @param labwares the list of current labwares in the table
+   */
+  onChange?: (labwares: Labware[]) => void;
+
+  /**
+   * Lock the table. User won't be able to scan anything in, or remove anything.
+   */
+  locked?: boolean;
 }
 
 const LabwareScanTable: React.FC<LabwareScanTableProps> = ({
-  actor,
   columns,
+  onChange,
+  locked = false,
 }) => {
-  /**
-   * The `useActor` hook gives back the current state of the Actor (i.e. labwareMachine) and a function to send events
-   * to the actor
-   *
-   * @see {@link https://xstate.js.org/docs/packages/xstate-react/#useactor-actor-getsnapshot}
-   */
-  const [current, send] = useActor<LabwareEvents, LabwareMachineType["state"]>(
-    actor
-  );
+  const [current, send, service] = useMachine(createLabwareMachine());
+
+  useEffect(() => {
+    service.onEvent((e) => {
+      if (e.type === "done.invoke.findLabware" || e.type === "REMOVE_LABWARE") {
+        onChange?.(service.state.context.labwares);
+      }
+    });
+  }, [service, onChange]);
+
+  useEffect(() => {
+    send(locked ? { type: "LOCK" } : { type: "UNLOCK" });
+  }, [send, locked]);
 
   // Memoize the data for the table
   const data = React.useMemo(() => current.context.labwares, [

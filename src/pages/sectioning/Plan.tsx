@@ -4,36 +4,27 @@ import Heading from "../../components/Heading";
 import LabwareScanTable from "../../components/labwareScanPanel/LabwareScanPanel";
 import labwareScanTableColumns from "../../components/labwareScanPanel/columns";
 import SectioningLayout from "./SectioningLayout";
-import {
-  addLabwareLayout,
-  deleteLabwareLayout,
-  prepDone,
-  selectLabwareType,
-} from "../../lib/machines/sectioning/sectioningEvents";
 import { find } from "lodash";
 import { optionValues } from "../../components/forms";
 import BlueButton from "../../components/buttons/BlueButton";
 import PinkButton from "../../components/buttons/PinkButton";
 import { useScrollToRef } from "../../lib/hooks";
-import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
 import ButtonBar from "../../components/ButtonBar";
+import SectioningPresentationModel from "../../lib/presentationModels/sectioningPresentationModel";
 
 interface PlanProps {
-  current: SectioningMachineType["state"];
-  send: SectioningMachineType["send"];
+  model: SectioningPresentationModel;
 }
 
-const Plan: React.FC<PlanProps> = ({ current, send }) => {
+const Plan: React.FC<PlanProps> = ({ model }) => {
   const [ref, scrollToRef] = useScrollToRef();
 
   const {
     outputLabwareTypes,
     selectedLabwareType,
-    labwareMachine,
     sampleColors,
     sectioningLayouts,
-    numSectioningLayoutsComplete,
-  } = current.context;
+  } = model.current.context;
 
   return (
     <AppShell>
@@ -44,19 +35,18 @@ const Plan: React.FC<PlanProps> = ({ current, send }) => {
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
           <div>
             <Heading level={3}>Source Labware</Heading>
-            {labwareMachine && (
-              <LabwareScanTable
-                actor={labwareMachine}
-                columns={[
-                  labwareScanTableColumns.color(sampleColors),
-                  labwareScanTableColumns.barcode(),
-                  labwareScanTableColumns.donorId(),
-                  labwareScanTableColumns.tissueType(),
-                  labwareScanTableColumns.spatialLocation(),
-                  labwareScanTableColumns.replicate(),
-                ]}
-              />
-            )}
+            <LabwareScanTable
+              locked={model.isLabwareTableLocked()}
+              onChange={model.updateLabwares}
+              columns={[
+                labwareScanTableColumns.color(sampleColors),
+                labwareScanTableColumns.barcode(),
+                labwareScanTableColumns.donorId(),
+                labwareScanTableColumns.tissueType(),
+                labwareScanTableColumns.spatialLocation(),
+                labwareScanTableColumns.replicate(),
+              ]}
+            />
           </div>
 
           <div className="space-y-4">
@@ -68,7 +58,7 @@ const Plan: React.FC<PlanProps> = ({ current, send }) => {
               <SectioningLayout
                 ref={i === sectioningLayouts.length - 1 ? ref : null}
                 key={i}
-                onDelete={() => send(deleteLabwareLayout(i))}
+                onDelete={() => model.deleteLabwareLayout(i)}
                 actor={sectioningLayout.ref}
               />
             ))}
@@ -94,7 +84,7 @@ const Plan: React.FC<PlanProps> = ({ current, send }) => {
                 );
 
                 if (labwareType) {
-                  send(selectLabwareType(labwareType));
+                  model.selectLabwareType(labwareType);
                 }
               }}
               className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
@@ -103,12 +93,12 @@ const Plan: React.FC<PlanProps> = ({ current, send }) => {
             </select>
             <BlueButton
               id="#addLabware"
-              disabled={!current.matches("started")}
+              disabled={!model.isAddLabwareBtnEnabled()}
               onClick={(_e) => {
-                if (!current.matches("started")) {
+                if (!model.isStarted()) {
                   return;
                 }
-                send(addLabwareLayout());
+                model.addLabwareLayout();
                 scrollToRef();
               }}
               className="whitespace-nowrap"
@@ -122,13 +112,8 @@ const Plan: React.FC<PlanProps> = ({ current, send }) => {
 
       <ButtonBar>
         <PinkButton
-          disabled={
-            !(
-              sectioningLayouts.length > 0 &&
-              sectioningLayouts.length === numSectioningLayoutsComplete
-            )
-          }
-          onClick={() => send(prepDone())}
+          disabled={!model.isNextBtnEnabled()}
+          onClick={model.prepDone}
           action="primary"
         >
           Next {">"}

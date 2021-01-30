@@ -1,47 +1,22 @@
 ---
-to: src/lib/machines/<%= name %>/<%= name %>Types.ts
+to: src/lib/machines/<%= name %>/<%= name %>MachineTypes.ts
 ---
-import { ActorRef, Interpreter } from "xstate";
+import { Interpreter, State, StateNode } from "xstate";
 
 /**
-* The type of an interpreted <%= Name %> Machine
+* Context for <%= Name %> Machine
 */
-export type <%= Name %>MachineType = Interpreter<
-  <%= Name %>Context,
-  <%= Name %>Schema,
-  <%= Name %>Event
->;
-
-/**
-* Type to be used for the `ref` when <%= Name %> Machine is spawned in another machine
-* @see {@link https://xstate.js.org/docs/guides/actors.html#spawning-actors}
-*/
-export type <%= Name %>MachineActorRef = ActorRef<<%= Name %>Event, <%= Name %>MachineType["state"]>;
-
-/**
-* Available finite states for a <%= Name %> Machine
-*/
-export enum State {
-  INIT = "init",
+export interface <%= Name %>Context {
+  message: string
 }
 
 /**
-* State Schema for a <%= Name %> Machine
+* State Schema for <%= Name %> Machine
 */
 export interface <%= Name %>Schema {
   states: {
-    [State.INIT]: {};
+    init: {};
   };
-}
-
-/**
-* Context for a <%= Name %> Machine
-*/
-export interface <%= Name %>Context {
-  /**
-  * A friendly greeting from <%= Name %> Machine
-  */
-  message: string
 }
 
 /**
@@ -51,3 +26,30 @@ type InitEvent = { type: "INIT", message: string };
 
 export type <%= Name %>Event =
   | InitEvent;
+
+/**
+* The type of an interpreted <%= Name %> Machine
+*/
+export type <%= Name %>MachineService = Interpreter<
+  <%= Name %>Context,
+  <%= Name %>Schema,
+  <%= Name %>Event
+>;
+
+/**
+* <%= Name %> Machine type
+*/
+export type <%= Name %>Machine = StateNode<
+  <%= Name %>Context,
+  <%= Name %>Schema,
+  <%= Name %>Event
+>;
+
+/**
+* The type of an individual state (i.e. current returned from useMachine())
+*/
+export type <%= Name %>State = State<
+  <%= Name %>Context,
+  <%= Name %>Event,
+  <%= Name %>Schema
+>;

@@ -1,4 +1,8 @@
 import { RefObject, useEffect, useRef, useState } from "react";
+import { MachinePresentationModel } from "../presentationModels/machinePresentationModel";
+import { EventObject, Interpreter, State, StateMachine } from "xstate";
+import { useMachine } from "@xstate/react";
+import { Typestate } from "xstate/lib/types";
 
 /**
  * Hook to call a side effect after a given delay
@@ -69,16 +73,52 @@ export function useScrollToRef() {
   const ref = useRef<HTMLDivElement | null>(null);
   const [shouldScrollToRef, setShouldScrollToRef] = useState(false);
 
-  useEffect(() => {
-    if (shouldScrollToRef) {
-      ref.current?.scrollIntoView({ behavior: "smooth" });
-      setShouldScrollToRef(false);
-    }
-  }, [shouldScrollToRef]);
+  if (shouldScrollToRef) {
+    ref.current?.scrollIntoView({ behavior: "smooth" });
+    setShouldScrollToRef(false);
+  }
+  useEffect(() => {}, [shouldScrollToRef]);
 
   function scrollToRef() {
     setShouldScrollToRef(true);
   }
 
   return [ref, scrollToRef] as const;
+}
+
+/**
+ * Starts interpreting a machine and connects it to a {@link MachinePresentationModel}
+ * @param machine a state machine
+ * @param initPresentationModel a function that returns a new {@link MachinePresentationModel}
+ */
+export function usePresentationModel<
+  E extends MachinePresentationModel<
+    TContext,
+    TStateSchema,
+    TEvent,
+    TTypestate
+  >,
+  TContext,
+  TStateSchema,
+  TEvent extends EventObject,
+  TTypestate extends Typestate<TContext> = { value: any; context: TContext }
+>(
+  machine: StateMachine<TContext, TStateSchema, TEvent, TTypestate>,
+  initPresentationModel: (
+    current: State<TContext, TEvent, TStateSchema, TTypestate>,
+    service: Interpreter<TContext, TStateSchema, TEvent, TTypestate>
+  ) => E
+) {
+  // eslint-disable-next-line
+  const [current, _, service] = useMachine(machine);
+  const [model, setModel] = useState(() =>
+    initPresentationModel(current, service)
+  );
+
+  // Whenever the current state changes, set state of the presentation model
+  useEffect(() => {
+    setModel(model.setState(current));
+  }, [model, current]);
+
+  return model;
 }

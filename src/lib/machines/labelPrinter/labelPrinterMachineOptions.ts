@@ -8,7 +8,7 @@ import {
   printSuccess,
   PrintSuccessEvent,
 } from "./labelPrinterEvents";
-import printService from "../../services/printService";
+import * as printService from "../../services/printService";
 import { find } from "lodash";
 
 export enum Actions {

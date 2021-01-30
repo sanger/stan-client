@@ -33,7 +33,7 @@ enum Services {
 }
 
 /**
- * ConfirmLabware State Machine
+ * ConfirmLabware S Machine
  */
 export const createSectioningConfirmMachine = (
   comments: Array<Comment>,

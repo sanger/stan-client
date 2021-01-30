@@ -17,7 +17,7 @@ import { current } from "immer";
 import { LabelPrinterContext } from "../../labelPrinter";
 import { updateSelectedLabelPrinter } from "../../labelPrinter/labelPrinterEvents";
 import { createLayoutMachine } from "../../layout/layoutMachine";
-import sectioningService from "../../../services/sectioningService";
+import * as sectioningService from "../../../services/sectioningService";
 import { prepComplete } from "./sectioningLayoutEvents";
 
 const sectioningLayoutKey = "sectioningLayout";

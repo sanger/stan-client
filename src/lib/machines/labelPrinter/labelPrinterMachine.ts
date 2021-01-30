@@ -15,7 +15,7 @@ import {
 import { defaults } from "lodash";
 
 /**
- * LabelPrinter State Machine
+ * LabelPrinter S Machine
  */
 export const createLabelPrinterMachine = (
   labelPrinter: Partial<LabelPrinter>,

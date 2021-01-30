@@ -1,17 +1,16 @@
-import { actions, Actor, Machine, MachineOptions, send, spawn } from "xstate";
+import { actions, Machine, MachineOptions, send, spawn } from "xstate";
 import { Address, LabwareTypeName } from "../../../types/stan";
 import {
   buildConfirmOperationLabware,
   buildConfirmOperationRequest,
 } from "../../factories/confirmOperationRequest";
 import { assign } from "@xstate/immer";
-import { createLabwareMachine } from "../labware/labwareMachine";
 import { current } from "immer";
 import { buildSampleColors } from "../../helpers/labwareHelper";
 import { createSectioningLayoutMachine } from "./sectioningLayout/sectioningLayoutMachine";
 import { createSectioningConfirmMachine } from "./sectioningConfirm/sectioningConfirmMachine";
-import sectioningService from "../../services/sectioningService";
-import confirmService from "../../services/confirmService";
+import * as sectioningService from "../../services/sectioningService";
+import * as confirmService from "../../services/confirmService";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
 import {
   Labware,
@@ -23,11 +22,11 @@ import {
   Source as LayoutPlanAction,
 } from "../layout/layoutContext";
 import {
+  S,
   SectioningContext,
   SectioningEvent,
   SectioningSchema,
-  State,
-} from "./sectioningTypes";
+} from "./sectioningMachineTypes";
 import {
   SectioningLayout,
   SectioningLayoutContext,
@@ -39,8 +38,6 @@ export const machineKey = "sectioningMachine";
 
 enum Action {
   SELECT_LABWARE_TYPE = "selectLabwareType",
-  ASSIGN_SECTIONING_INFO = "assignSectioningInfo",
-  SPAWN_LABWARE_MACHINE = "spawnLabwareMachine",
   UPDATE_LABWARES = "updateLabwares",
   ADD_LABWARE_LAYOUT = "addLabwareLayout",
   DELETE_LABWARE_LAYOUT = "deleteLabwareLayout",
@@ -62,162 +59,6 @@ enum Service {
   CONFIRM_OPERATION = "confirmOperation",
 }
 
-/**
- * Machine for controlling the sectioning workflow.
- *
- * @see {@link labwareMachine}
- */
-export const createSectioningMachine = () =>
-  Machine<SectioningContext, SectioningSchema, SectioningEvent>(
-    {
-      key: machineKey,
-      initial: State.LOADING,
-      context: {
-        inputLabwareTypeNames: [LabwareTypeName.PROVIASETTE],
-        inputLabwareTypes: [],
-        outputLabwareTypeNames: [
-          LabwareTypeName.TUBE,
-          LabwareTypeName.SLIDE,
-          LabwareTypeName.VISIUM_TO,
-          LabwareTypeName.VISIUM_LP,
-        ],
-        comments: [],
-        outputLabwareTypes: [],
-        selectedLabwareType: null,
-        labwareMachine: null,
-        sourceLabwares: [],
-        sectioningLayouts: [],
-        numSectioningLayoutsComplete: 0,
-        sampleColors: new Map(),
-        sectioningConfirmMachines: new Map(),
-        confirmOperationRequest: buildConfirmOperationRequest(),
-        confirmedOperation: null,
-      },
-      states: {
-        [State.LOADING]: {
-          invoke: {
-            id: "getSectioningInfo",
-            src: "getSectioningInfo",
-            onDone: {
-              target: State.UNKNOWN,
-              actions: Action.ASSIGN_SECTIONING_INFO,
-            },
-            onError: {
-              target: State.ERROR,
-            },
-          },
-        },
-        [State.ERROR]: {},
-        [State.UNKNOWN]: {
-          always: [
-            {
-              cond: Guard.NO_SOURCE_LABWARES,
-              target: State.READY,
-            },
-            {
-              cond: Guard.NO_LAYOUTS,
-              target: `${State.STARTED}.${State.SOURCE_SCANNING}`,
-            },
-            { target: `${State.STARTED}.${State.PREPARING_LABWARE}` },
-          ],
-        },
-        [State.READY]: {
-          entry: Action.SPAWN_LABWARE_MACHINE,
-          on: {
-            UPDATE_LABWARES: {
-              target: State.UNKNOWN,
-              actions: Action.UPDATE_LABWARES,
-            },
-          },
-        },
-        [State.STARTED]: {
-          states: {
-            [State.SOURCE_SCANNING]: {
-              entry: send("UNLOCK", {
-                to: (ctx) => ctx.labwareMachine as Actor,
-              }),
-              on: {
-                UPDATE_LABWARES: {
-                  actions: Action.UPDATE_LABWARES,
-                  target: `#${machineKey}.${State.UNKNOWN}`,
-                },
-                ADD_LABWARE_LAYOUT: {
-                  actions: Action.ADD_LABWARE_LAYOUT,
-                  target: `#${machineKey}.${State.UNKNOWN}`,
-                },
-              },
-            },
-            [State.PREPARING_LABWARE]: {
-              entry: send("LOCK", { to: (ctx) => ctx.labwareMachine as Actor }),
-              on: {
-                DELETE_LABWARE_LAYOUT: {
-                  actions: Action.DELETE_LABWARE_LAYOUT,
-                  target: `#${machineKey}.${State.UNKNOWN}`,
-                },
-                ADD_LABWARE_LAYOUT: {
-                  actions: Action.ADD_LABWARE_LAYOUT,
-                  target: `#${machineKey}.${State.UNKNOWN}`,
-                },
-                "done.invoke.planSection": {
-                  actions: Action.ASSIGN_PLAN,
-                  target: `#${machineKey}.${State.UNKNOWN}`,
-                },
-                PREP_COMPLETE: {
-                  actions: Action.UPDATE_SECTIONS_COMPLETED,
-                },
-              },
-            },
-          },
-          on: {
-            SELECT_LABWARE_TYPE: {
-              actions: Action.SELECT_LABWARE_TYPE,
-            },
-
-            PREP_DONE: {
-              cond: Guard.ALL_LAYOUT_COMPLETE,
-              target: State.CONFIRMING,
-            },
-          },
-        },
-        [State.CONFIRMING]: {
-          initial: State.CONFIRMING_LABWARE,
-          on: {
-            BACK_TO_PREP: {
-              target: State.UNKNOWN,
-            },
-            COMMIT_CONFIRMATION: {
-              actions: Action.UPDATE_CONFIRMATION,
-            },
-            CONFIRM_OPERATION: {
-              target: `${State.CONFIRMING}.${State.CONFIRM_OPERATION}`,
-            },
-          },
-          states: {
-            [State.CONFIRMING_LABWARE]: {},
-            [State.CONFIRM_OPERATION]: {
-              invoke: {
-                src: Service.CONFIRM_OPERATION,
-                onDone: {
-                  actions: Action.ASSIGN_CONFIRMED_OPERATION,
-                  target: `#${machineKey}.${State.DONE}`,
-                },
-                onError: {
-                  target: State.CONFIRM_ERROR,
-                },
-              },
-            },
-            [State.CONFIRM_ERROR]: {},
-          },
-        },
-        [State.DONE]: {
-          entry: Action.NOTIFY_COMPLETE,
-          type: "final",
-        },
-      },
-    },
-    sectioningMachineOptions
-  );
-
 const sectioningMachineOptions: Partial<MachineOptions<
   SectioningContext,
   SectioningEvent
@@ -235,26 +76,6 @@ const sectioningMachineOptions: Partial<MachineOptions<
         return;
       }
       ctx.selectedLabwareType = e.labwareType;
-    }),
-
-    [Action.ASSIGN_SECTIONING_INFO]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.getSectioningInfo") {
-        return;
-      }
-      ctx.inputLabwareTypes = e.data.labwareTypes.filter((lt) =>
-        ctx.inputLabwareTypeNames.includes(lt.name)
-      );
-      ctx.outputLabwareTypes = e.data.labwareTypes.filter((lt) =>
-        ctx.outputLabwareTypeNames.includes(lt.name)
-      );
-      ctx.selectedLabwareType = ctx.outputLabwareTypes[0];
-      ctx.comments = e.data.comments;
-    }),
-
-    [Action.SPAWN_LABWARE_MACHINE]: assign((ctx) => {
-      ctx.labwareMachine = spawn(
-        createLabwareMachine(current(ctx).sourceLabwares)
-      );
     }),
 
     [Action.UPDATE_LABWARES]: assign((ctx, e) => {
@@ -295,7 +116,7 @@ const sectioningMachineOptions: Partial<MachineOptions<
       const currentCtx = current(ctx);
       const { plan } = e.data.data;
 
-      plan.labware.forEach((labware) => {
+      plan.labware.forEach((labware: any) => {
         const labwareTypeName = labware.labwareType.name;
 
         // Because JS maps can't have default values :(
@@ -369,6 +190,146 @@ const sectioningMachineOptions: Partial<MachineOptions<
       confirmService.confirm(ctx.confirmOperationRequest),
   },
 };
+
+/**
+ * Machine for controlling the sectioning workflow.
+ *
+ * @see {@link labwareMachine}
+ */
+export const sectioningMachine = Machine<
+  SectioningContext,
+  SectioningSchema,
+  SectioningEvent
+>(
+  {
+    key: machineKey,
+    initial: S.UNKNOWN,
+    context: {
+      inputLabwareTypeNames: [LabwareTypeName.PROVIASETTE],
+      inputLabwareTypes: [],
+      outputLabwareTypeNames: [
+        LabwareTypeName.TUBE,
+        LabwareTypeName.SLIDE,
+        LabwareTypeName.VISIUM_TO,
+        LabwareTypeName.VISIUM_LP,
+      ],
+      comments: [],
+      outputLabwareTypes: [],
+      selectedLabwareType: null,
+      sourceLabwares: [],
+      sectioningLayouts: [],
+      numSectioningLayoutsComplete: 0,
+      sampleColors: new Map(),
+      sectioningConfirmMachines: new Map(),
+      confirmOperationRequest: buildConfirmOperationRequest(),
+      confirmedOperation: null,
+    },
+    states: {
+      [S.ERROR]: {},
+      [S.UNKNOWN]: {
+        always: [
+          {
+            cond: Guard.NO_SOURCE_LABWARES,
+            target: S.READY,
+          },
+          {
+            cond: Guard.NO_LAYOUTS,
+            target: `${S.STARTED}.${S.SOURCE_SCANNING}`,
+          },
+          { target: `${S.STARTED}.${S.PREPARING_LABWARE}` },
+        ],
+      },
+      [S.READY]: {
+        on: {
+          UPDATE_LABWARES: {
+            target: S.UNKNOWN,
+            actions: Action.UPDATE_LABWARES,
+          },
+        },
+      },
+      [S.STARTED]: {
+        states: {
+          [S.SOURCE_SCANNING]: {
+            on: {
+              UPDATE_LABWARES: {
+                actions: Action.UPDATE_LABWARES,
+                target: `#${machineKey}.${S.UNKNOWN}`,
+              },
+              ADD_LABWARE_LAYOUT: {
+                actions: Action.ADD_LABWARE_LAYOUT,
+                target: `#${machineKey}.${S.UNKNOWN}`,
+              },
+            },
+          },
+          [S.PREPARING_LABWARE]: {
+            on: {
+              DELETE_LABWARE_LAYOUT: {
+                actions: Action.DELETE_LABWARE_LAYOUT,
+                target: `#${machineKey}.${S.UNKNOWN}`,
+              },
+              ADD_LABWARE_LAYOUT: {
+                actions: Action.ADD_LABWARE_LAYOUT,
+                target: `#${machineKey}.${S.UNKNOWN}`,
+              },
+              "done.invoke.planSection": {
+                actions: Action.ASSIGN_PLAN,
+                target: `#${machineKey}.${S.UNKNOWN}`,
+              },
+              PREP_COMPLETE: {
+                actions: Action.UPDATE_SECTIONS_COMPLETED,
+              },
+            },
+          },
+        },
+        on: {
+          SELECT_LABWARE_TYPE: {
+            actions: Action.SELECT_LABWARE_TYPE,
+          },
+
+          PREP_DONE: {
+            cond: Guard.ALL_LAYOUT_COMPLETE,
+            target: S.CONFIRMING,
+          },
+        },
+      },
+      [S.CONFIRMING]: {
+        initial: S.CONFIRMING_LABWARE,
+        on: {
+          BACK_TO_PREP: {
+            target: S.UNKNOWN,
+          },
+          COMMIT_CONFIRMATION: {
+            actions: Action.UPDATE_CONFIRMATION,
+          },
+          CONFIRM_OPERATION: {
+            target: `${S.CONFIRMING}.${S.CONFIRM_OPERATION}`,
+          },
+        },
+        states: {
+          [S.CONFIRMING_LABWARE]: {},
+          [S.CONFIRM_OPERATION]: {
+            invoke: {
+              src: Service.CONFIRM_OPERATION,
+              onDone: {
+                actions: Action.ASSIGN_CONFIRMED_OPERATION,
+                target: `#${machineKey}.${S.DONE}`,
+              },
+              onError: {
+                target: S.CONFIRM_ERROR,
+              },
+            },
+          },
+          [S.CONFIRM_ERROR]: {},
+        },
+      },
+      [S.DONE]: {
+        entry: Action.NOTIFY_COMPLETE,
+        type: "final",
+      },
+    },
+  },
+  sectioningMachineOptions
+);
 
 /**
  * Build a {@link SectioningLayout} model from the {@link SectioningContext}

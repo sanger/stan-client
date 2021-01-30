@@ -19,56 +19,11 @@ import SummaryBox from "./SummaryBox";
 import variants from "../../lib/motionVariants";
 import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
 import { useScrollToRef } from "../../lib/hooks";
-
-export interface FormValues {
-  tissues: FormTissueValues[];
-}
-
-export interface FormTissueValues {
-  clientId: number;
-  donorId: string;
-  lifeStage: LifeStage;
-  hmdmc: string;
-  tissueType: string;
-  blocks: FormBlockValues[];
-}
-
-export interface FormBlockValues {
-  clientId: number;
-  externalIdentifier: string;
-  spatialLocation: number;
-  replicateNumber: number;
-  lastKnownSectionNumber: number;
-  labwareType: string;
-  fixative: string;
-  medium: string;
-  mouldSize: string;
-}
-
-function getInitialBlockValues(): FormBlockValues {
-  return {
-    clientId: Date.now(),
-    externalIdentifier: "",
-    spatialLocation: -1, // Initialise it as invalid so user has to select something
-    replicateNumber: 0,
-    lastKnownSectionNumber: 0,
-    labwareType: "",
-    fixative: "",
-    medium: "",
-    mouldSize: "",
-  };
-}
-
-function getInitialTissueValues(): FormTissueValues {
-  return {
-    clientId: Date.now(),
-    donorId: "",
-    lifeStage: LifeStage.Fetal,
-    hmdmc: "",
-    tissueType: "",
-    blocks: [getInitialBlockValues()],
-  };
-}
+import {
+  FormValues,
+  getInitialBlockValues,
+  getInitialTissueValues,
+} from "../../lib/services/registrationService";
 
 interface RegistrationFormParams {
   submitting: boolean;

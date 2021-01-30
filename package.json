@@ -84,7 +84,6 @@
     "@graphql-codegen/typescript-react-apollo": "2.0.7",
     "@tailwindcss/forms": "^0.2.1",
     "@testing-library/cypress": "^7.0.1",
-    "@xstate/inspect": "^0.2.0",
     "cypress": "5.6.0",
     "cypress-intellij-reporter": "^0.0.4",
     "fishery": "^1.0.1",

@@ -10,7 +10,7 @@ import {
  *
  * @param barcode barcode of the labware to find
  */
-async function findLabwareByBarcode(barcode: string) {
+export async function findLabwareByBarcode(barcode: string) {
   const response = await client.query<
     FindLabwareQuery,
     FindLabwareQueryVariables
@@ -21,9 +21,3 @@ async function findLabwareByBarcode(barcode: string) {
 
   return response.data.labware;
 }
-
-const fns = {
-  findLabwareByBarcode,
-};
-
-export default fns;

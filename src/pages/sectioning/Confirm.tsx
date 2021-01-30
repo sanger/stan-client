@@ -1,25 +1,20 @@
 import React, { useEffect } from "react";
 import AppShell from "../../components/AppShell";
 import PinkButton from "../../components/buttons/PinkButton";
-import {
-  backToPrep,
-  confirmOperation,
-} from "../../lib/machines/sectioning/sectioningEvents";
 import { sortBy } from "lodash";
 import { LabwareTypeName } from "../../types/stan";
-import { SectioningMachineType } from "../../lib/machines/sectioning/sectioningTypes";
 import Warning from "../../components/notifications/Warning";
 import { useScrollToRef } from "../../lib/hooks";
 import ConfirmByLabwareType from "./ConfirmByLabwareType";
 import { toast } from "react-toastify";
 import Success from "../../components/notifications/Success";
+import SectioningPresentationModel from "../../lib/presentationModels/sectioningPresentationModel";
 
 interface ConfirmProps {
-  current: SectioningMachineType["state"];
-  send: SectioningMachineType["send"];
+  model: SectioningPresentationModel;
 }
 
-const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
+const Confirm: React.FC<ConfirmProps> = ({ model }) => {
   const [ref, scrollToRef] = useScrollToRef();
 
   // Scroll to the top of the page when this component is first loaded
@@ -27,21 +22,21 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
 
   // When there's an error, make sure the page scrolls to it so it's in view
   useEffect(() => {
-    if (current.matches({ confirming: "confirmError" })) {
+    if (model.isConfirmError()) {
       scrollToRef();
     }
-  }, [current, scrollToRef]);
+  }, [model, scrollToRef]);
 
   // Show a toast notification with a success message when sectioning is complete
   useEffect(() => {
-    if (current.matches("done")) {
+    if (model.isDone()) {
       toast(<Success message={"Sectioning Saved"} />, {
         position: toast.POSITION.TOP_RIGHT,
       });
     }
-  }, [current]);
+  }, [model]);
 
-  const { sectioningConfirmMachines } = current.context;
+  const { sectioningConfirmMachines } = model.current.context;
 
   // Sort the sectioning confirmations by having tubes first
   const sortedConfirmMachines = sortBy(
@@ -64,7 +59,7 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
                 labwareTypeName={labwareTypeName}
               />
             ))}
-            {current.matches({ confirming: "confirmError" }) && (
+            {model.isConfirmError() && (
               <div ref={ref}>
                 <Warning
                   message={
@@ -81,15 +76,15 @@ const Confirm: React.FC<ConfirmProps> = ({ current, send }) => {
         <div className="max-w-screen-xl mx-auto">
           <div className="flex flex-row items-center justify-between">
             <PinkButton
-              disabled={current.matches("done")}
-              onClick={() => send(backToPrep())}
+              disabled={model.isDone()}
+              onClick={model.backToPrep}
               action="tertiary"
             >
               Back
             </PinkButton>
             <PinkButton
-              disabled={current.matches("done")}
-              onClick={() => send(confirmOperation())}
+              disabled={model.isDone()}
+              onClick={model.confirmOperation}
               action="primary"
             >
               Save

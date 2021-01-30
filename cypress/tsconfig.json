@@ -3,7 +3,11 @@
   "compilerOptions": {
     "allowJs":true,
     "target": "es5",
-    "lib": ["es5", "dom"],
+    "lib": [
+      "es5",
+      "dom",
+      "es2015.promise"
+    ],
     "types": ["cypress", "@testing-library/cypress"],
     "isolatedModules": false
   },

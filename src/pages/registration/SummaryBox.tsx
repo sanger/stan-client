@@ -7,8 +7,11 @@ import WhiteButton from "../../components/buttons/WhiteButton";
 import PinkButton from "../../components/buttons/PinkButton";
 import React, { useState } from "react";
 import { FormikErrors, FormikTouched, FormikValues, getIn } from "formik";
-import { FormTissueValues, FormValues } from "./RegistrationForm";
 import Pill from "../../components/Pill";
+import {
+  FormTissueValues,
+  FormValues,
+} from "../../lib/services/registrationService";
 
 function getNumberOfBlocks(values: FormikValues) {
   return values.tissues.reduce((memo: number, tissue: FormTissueValues) => {

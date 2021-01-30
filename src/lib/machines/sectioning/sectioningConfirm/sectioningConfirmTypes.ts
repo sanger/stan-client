@@ -18,7 +18,7 @@ export type SectioningConfirmActorRef = ActorRef<
   SectioningConfirmMachineType["state"]
 >;
 
-//region State
+//region S
 export enum State {
   INIT = "init",
   CANCELLABLE_MODE = "cancellableMode",

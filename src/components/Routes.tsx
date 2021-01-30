@@ -3,6 +3,14 @@ import { Route, Switch } from "react-router-dom";
 import AuthenticatedRoute from "./AuthenticatedRoute";
 import LoadingSpinner from "../pages/LoadingSpinner";
 import Login from "../pages/Login";
+import { getRegistrationMachine } from "../lib/services/registrationService";
+import { getSectioningMachine } from "../lib/services/sectioningService";
+import Presenter from "./Presenter";
+import {
+  buildRegistrationPresentationModel,
+  buildReleasePresentationModel,
+  buildSectioningModel,
+} from "../lib/factories/presentationModelFactory";
 
 const Logout = React.lazy(() => import("../pages/Logout"));
 const Lab = React.lazy(() => import("../pages/Lab"));
@@ -11,6 +19,7 @@ const Admin = React.lazy(() => import("../pages/Admin"));
 const Dashboard = React.lazy(() => import("../pages/Dashboard"));
 const Registration = React.lazy(() => import("../pages/Registration"));
 const Sectioning = React.lazy(() => import("../pages/Sectioning"));
+const Release = React.lazy(() => import("../pages/Release"));
 
 export function Routes() {
   // Hook to remove any location state after it has been consumed for a component.
@@ -29,7 +38,12 @@ export function Routes() {
           <Lab />
         </Route>
         <AuthenticatedRoute path="/lab/sectioning">
-          <Sectioning />
+          <Presenter
+            machine={getSectioningMachine}
+            model={buildSectioningModel}
+          >
+            {(presentationModel) => <Sectioning model={presentationModel} />}
+          </Presenter>
         </AuthenticatedRoute>
         <Route path="/reports">
           <Reports />
@@ -38,12 +52,25 @@ export function Routes() {
           <Admin />
         </AuthenticatedRoute>
         <AuthenticatedRoute path="/admin/registration">
-          <Registration />
+          <Presenter
+            machine={getRegistrationMachine}
+            model={buildRegistrationPresentationModel}
+          >
+            {(presentationModel) => <Registration model={presentationModel} />}
+          </Presenter>
         </AuthenticatedRoute>
         <Route exact path="/">
           <Dashboard />
         </Route>
         <Route path="/login" component={Login} />
+        <Route path="/release">
+          <Presenter
+            machine={getRegistrationMachine}
+            model={buildReleasePresentationModel}
+          >
+            {(presentationModel) => <Release model={presentationModel} />}
+          </Presenter>
+        </Route>
       </Switch>
     </React.Suspense>
   );

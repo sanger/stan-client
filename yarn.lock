@@ -3219,11 +3219,6 @@
   resolved "https://registry.yarnpkg.com/@xstate/immer/-/immer-0.1.0.tgz#34123ff18c13553ae4ecc2498994180829d432b1"
   integrity sha512-jiZf/ms4uZDUUz5UXqGUPEOXb/4VUjnawVsOIDPbXeiOKXhcTplNcJAyYWwxcXoo8to/VgKZm7nn8EBLhTJuAQ==
 
-"@xstate/inspect@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@xstate/inspect/-/inspect-0.2.0.tgz#c76dacc457ba503e7ee2f8649a6dd31c73f1162f"
-  integrity sha512-HxxkEbJi7FwBCrKA4sw/fXu1c5S2fpRYN1ijPLrp4euSddOiVly9TtasnL3SyX2KI75c0qc6oOihwqbtDomJrg==
-
 "@xstate/react@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@xstate/react/-/react-1.0.1.tgz#cb6d64c277b20c5357eb3fc4742feeb395759090"

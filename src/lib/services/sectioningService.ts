@@ -8,14 +8,22 @@ import {
   PlanRequest,
 } from "../../types/graphql";
 import { OperationTypeName } from "../../types/stan";
+import { SectioningMachine } from "../machines/sectioning/sectioningMachineTypes";
+import { buildSectioningMachine } from "../factories/machineFactory";
+
+export async function getSectioningMachine(): Promise<SectioningMachine> {
+  const sectioningInfo = await getSectioningInfo();
+  return buildSectioningMachine(sectioningInfo);
+}
 
 /**
  * Get information for the Sectioning page
  */
-async function getSectioningInfo() {
+export async function getSectioningInfo(): Promise<GetSectioningInfoQuery> {
   const response = await client.query<GetSectioningInfoQuery>({
     query: GetSectioningInfoDocument,
   });
+
   return response.data;
 }
 
@@ -24,7 +32,7 @@ async function getSectioningInfo() {
  * @param labware list of Labware to be created
  * @param operationType name of the operation (defaults to `"Section"`)
  */
-function planSection(
+export function planSection(
   { labware }: Omit<PlanRequest, "operationType">,
   operationType: OperationTypeName = "Section"
 ) {
@@ -33,9 +41,3 @@ function planSection(
     variables: { request: { labware, operationType } },
   });
 }
-
-const fns = {
-  getSectioningInfo,
-  planSection,
-};
-export default fns;

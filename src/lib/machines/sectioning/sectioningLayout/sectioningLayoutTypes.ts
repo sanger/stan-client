@@ -27,7 +27,7 @@ export type SectioningLayoutActorRef = ActorRef<
   SectioningLayoutMachineType["state"]
 >;
 
-//region State
+//region S
 export enum State {
   PREP = "prep",
   VALID = "valid",

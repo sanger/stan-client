@@ -7,9 +7,8 @@ import {
   LabwareType,
   Maybe,
 } from "../../../types/graphql";
-import { Interpreter } from "xstate";
-import { LabwareMachineActorRef } from "../labware";
-import { UpdateLabwaresEvent } from "../labware/labwareEvents";
+import { Interpreter, State, StateNode } from "xstate";
+import { UpdateLabwaresEvent } from "../labware/labwareMachineTypes";
 import {
   CommitConfirmationEvent,
   SectioningConfirmActorRef,
@@ -21,15 +20,20 @@ import {
   SectioningLayoutActorRef,
 } from "./sectioningLayout/sectioningLayoutTypes";
 
-export type SectioningMachineType = Interpreter<
+export type SectioningMachineService = Interpreter<
   SectioningContext,
   SectioningSchema,
   SectioningEvent
 >;
 
-//region Sectioning States
-export enum State {
-  LOADING = "loading",
+export type SectioningMachine = StateNode<
+  SectioningContext,
+  SectioningSchema,
+  SectioningEvent
+>;
+
+//region Sectioning S
+export enum S {
   UNKNOWN = "unknown",
   ERROR = "error",
   READY = "ready",
@@ -45,26 +49,31 @@ export enum State {
 
 export interface SectioningSchema {
   states: {
-    [State.LOADING]: {};
-    [State.UNKNOWN]: {};
-    [State.ERROR]: {};
-    [State.READY]: {};
-    [State.STARTED]: {
+    [S.UNKNOWN]: {};
+    [S.ERROR]: {};
+    [S.READY]: {};
+    [S.STARTED]: {
       states: {
-        [State.SOURCE_SCANNING]: {};
-        [State.PREPARING_LABWARE]: {};
+        [S.SOURCE_SCANNING]: {};
+        [S.PREPARING_LABWARE]: {};
       };
     };
-    [State.CONFIRMING]: {
+    [S.CONFIRMING]: {
       states: {
-        [State.CONFIRMING_LABWARE]: {};
-        [State.CONFIRM_OPERATION]: {};
-        [State.CONFIRM_ERROR]: {};
+        [S.CONFIRMING_LABWARE]: {};
+        [S.CONFIRM_OPERATION]: {};
+        [S.CONFIRM_ERROR]: {};
       };
     };
-    [State.DONE]: {};
+    [S.DONE]: {};
   };
 }
+
+export type SectioningState = State<
+  SectioningContext,
+  SectioningEvent,
+  SectioningSchema
+>;
 //endregion
 
 //region Context Types
@@ -105,13 +114,6 @@ export interface SectioningContext {
    * Labware Type selected by the user
    */
   selectedLabwareType: Maybe<LabwareType>;
-
-  /**
-   * A spawned {@link labwareMachine} to track which blocks will be sectioned. SectioningSchema is synced back to this machine.
-   *
-   * @see {@link https://xstate.js.org/docs/guides/actors.html#actors}
-   */
-  labwareMachine: Maybe<LabwareMachineActorRef>;
 
   /**
    * The input labwares sent up from the labware machine
@@ -162,11 +164,6 @@ type AddLabwareLayoutEvent = {
   type: "ADD_LABWARE_LAYOUT";
 };
 
-type GetSectioningInfoResolveEvent = {
-  type: "done.invoke.getSectioningInfo";
-  data: GetSectioningInfoQuery;
-};
-
 type DeleteLabwareLayoutEvent = {
   type: "DELETE_LABWARE_LAYOUT";
   index: number;
@@ -193,7 +190,6 @@ export type SectioningEvent =
   | SelectLabwareTypeEvent
   | AddLabwareLayoutEvent
   | DeleteLabwareLayoutEvent
-  | GetSectioningInfoResolveEvent
   | UpdateLabwaresEvent
   | PrepDoneEvent
   | BackToPrepEvent
