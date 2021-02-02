@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Sectioning layouts ([#9](https://github.com/sanger/stan-client/pull/9))
  - Label printing for sectioning ([#10](https://github.com/sanger/stan-client/pull/10))
  - Sectioning Confirmation ([#11](https://github.com/sanger/stan-client/pull/11))
+ - Label printing after Registration ([#12](https://github.com/sanger/stan-client/pull/12))
 
 ## [0.1.0] - 2020-10-27
 ### Added
