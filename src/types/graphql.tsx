@@ -112,6 +112,9 @@ export type Labware = {
   barcode: Scalars['String'];
   labwareType: LabwareType;
   slots: Array<Slot>;
+  released: Scalars['Boolean'];
+  destroyed: Scalars['Boolean'];
+  discarded: Scalars['Boolean'];
 };
 
 export enum LifeStage {
@@ -217,6 +220,8 @@ export type Operation = {
   actions: Array<Action>;
   user: User;
   performed: Scalars['Timestamp'];
+  releaseDestination?: Maybe<ReleaseDestination>;
+  releaseRecipient?: Maybe<ReleaseRecipient>;
 };
 
 export type ConfirmOperationResult = {
@@ -242,6 +247,34 @@ export type Comment = {
   id: Scalars['Int'];
   text: Scalars['String'];
   category: Scalars['String'];
+};
+
+export type ReleaseDestination = {
+  __typename?: 'ReleaseDestination';
+  name: Scalars['String'];
+};
+
+export type ReleaseRecipient = {
+  __typename?: 'ReleaseRecipient';
+  username: Scalars['String'];
+};
+
+export type Release = {
+  __typename?: 'Release';
+  labware: Labware;
+  destination: ReleaseDestination;
+  recipient: ReleaseRecipient;
+};
+
+export type ReleaseResult = {
+  __typename?: 'ReleaseResult';
+  releases: Array<Release>;
+};
+
+export type ReleaseRequest = {
+  barcodes: Array<Scalars['String']>;
+  destination: Scalars['String'];
+  recipient: Scalars['String'];
 };
 
 export type StoredItem = {
@@ -310,6 +343,8 @@ export type Query = {
   labware: Labware;
   printers: Array<Printer>;
   comments: Array<Comment>;
+  releaseDestinations: Array<ReleaseDestination>;
+  releaseRecipients: Array<ReleaseRecipient>;
   location: Location;
   stored: Array<StoredItem>;
 };
@@ -347,6 +382,7 @@ export type Mutation = {
   plan: PlanResult;
   printLabware?: Maybe<Scalars['String']>;
   confirmOperation: ConfirmOperationResult;
+  release: ReleaseResult;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
@@ -378,6 +414,11 @@ export type MutationPrintLabwareArgs = {
 
 export type MutationConfirmOperationArgs = {
   request: ConfirmOperationRequest;
+};
+
+
+export type MutationReleaseArgs = {
+  request: ReleaseRequest;
 };
 
 
@@ -586,6 +627,31 @@ export type RegisterTissuesMutation = (
   ) }
 );
 
+export type ReleaseLabwareMutationVariables = Exact<{
+  releaseRequest: ReleaseRequest;
+}>;
+
+
+export type ReleaseLabwareMutation = (
+  { __typename?: 'Mutation' }
+  & { release: (
+    { __typename?: 'ReleaseResult' }
+    & { releases: Array<(
+      { __typename?: 'Release' }
+      & { labware: (
+        { __typename?: 'Labware' }
+        & Pick<Labware, 'barcode'>
+      ), destination: (
+        { __typename?: 'ReleaseDestination' }
+        & Pick<ReleaseDestination, 'name'>
+      ), recipient: (
+        { __typename?: 'ReleaseRecipient' }
+        & Pick<ReleaseRecipient, 'username'>
+      ) }
+    )> }
+  ) }
+);
+
 export type SetLocationCustomNameMutationVariables = Exact<{
   locationBarcode: Scalars['String'];
   newCustomName: Scalars['String'];
@@ -663,7 +729,7 @@ export type FindLabwareQuery = (
         & Pick<Sample, 'id'>
         & { tissue: (
           { __typename?: 'Tissue' }
-          & Pick<Tissue, 'replicate'>
+          & Pick<Tissue, 'externalName' | 'replicate'>
           & { donor: (
             { __typename?: 'Donor' }
             & Pick<Donor, 'donorName'>
@@ -752,6 +818,20 @@ export type GetRegistrationInfoQuery = (
   )>, mouldSizes: Array<(
     { __typename?: 'MouldSize' }
     & Pick<MouldSize, 'name'>
+  )> }
+);
+
+export type GetReleaseInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetReleaseInfoQuery = (
+  { __typename?: 'Query' }
+  & { releaseDestinations: Array<(
+    { __typename?: 'ReleaseDestination' }
+    & Pick<ReleaseDestination, 'name'>
+  )>, releaseRecipients: Array<(
+    { __typename?: 'ReleaseRecipient' }
+    & Pick<ReleaseRecipient, 'username'>
   )> }
 );
 
@@ -1091,6 +1171,48 @@ export function useRegisterTissuesMutation(baseOptions?: Apollo.MutationHookOpti
 export type RegisterTissuesMutationHookResult = ReturnType<typeof useRegisterTissuesMutation>;
 export type RegisterTissuesMutationResult = Apollo.MutationResult<RegisterTissuesMutation>;
 export type RegisterTissuesMutationOptions = Apollo.BaseMutationOptions<RegisterTissuesMutation, RegisterTissuesMutationVariables>;
+export const ReleaseLabwareDocument = gql`
+    mutation ReleaseLabware($releaseRequest: ReleaseRequest!) {
+  release(request: $releaseRequest) {
+    releases {
+      labware {
+        barcode
+      }
+      destination {
+        name
+      }
+      recipient {
+        username
+      }
+    }
+  }
+}
+    `;
+export type ReleaseLabwareMutationFn = Apollo.MutationFunction<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>;
+
+/**
+ * __useReleaseLabwareMutation__
+ *
+ * To run a mutation, you first call `useReleaseLabwareMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReleaseLabwareMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [releaseLabwareMutation, { data, loading, error }] = useReleaseLabwareMutation({
+ *   variables: {
+ *      releaseRequest: // value for 'releaseRequest'
+ *   },
+ * });
+ */
+export function useReleaseLabwareMutation(baseOptions?: Apollo.MutationHookOptions<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>) {
+        return Apollo.useMutation<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>(ReleaseLabwareDocument, baseOptions);
+      }
+export type ReleaseLabwareMutationHookResult = ReturnType<typeof useReleaseLabwareMutation>;
+export type ReleaseLabwareMutationResult = Apollo.MutationResult<ReleaseLabwareMutation>;
+export type ReleaseLabwareMutationOptions = Apollo.BaseMutationOptions<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>;
 export const SetLocationCustomNameDocument = gql`
     mutation SetLocationCustomName($locationBarcode: String!, $newCustomName: String!) {
   setLocationCustomName(locationBarcode: $locationBarcode, customName: $newCustomName) {
@@ -1239,6 +1361,7 @@ export const FindLabwareDocument = gql`
       samples {
         id
         tissue {
+          externalName
           donor {
             donorName
           }
@@ -1435,6 +1558,41 @@ export function useGetRegistrationInfoLazyQuery(baseOptions?: Apollo.LazyQueryHo
 export type GetRegistrationInfoQueryHookResult = ReturnType<typeof useGetRegistrationInfoQuery>;
 export type GetRegistrationInfoLazyQueryHookResult = ReturnType<typeof useGetRegistrationInfoLazyQuery>;
 export type GetRegistrationInfoQueryResult = Apollo.QueryResult<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>;
+export const GetReleaseInfoDocument = gql`
+    query GetReleaseInfo {
+  releaseDestinations {
+    name
+  }
+  releaseRecipients {
+    username
+  }
+}
+    `;
+
+/**
+ * __useGetReleaseInfoQuery__
+ *
+ * To run a query within a React component, call `useGetReleaseInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetReleaseInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetReleaseInfoQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetReleaseInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>) {
+        return Apollo.useQuery<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>(GetReleaseInfoDocument, baseOptions);
+      }
+export function useGetReleaseInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>) {
+          return Apollo.useLazyQuery<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>(GetReleaseInfoDocument, baseOptions);
+        }
+export type GetReleaseInfoQueryHookResult = ReturnType<typeof useGetReleaseInfoQuery>;
+export type GetReleaseInfoLazyQueryHookResult = ReturnType<typeof useGetReleaseInfoLazyQuery>;
+export type GetReleaseInfoQueryResult = Apollo.QueryResult<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>;
 export const GetSectioningInfoDocument = gql`
     query GetSectioningInfo {
   comments(category: "section") {

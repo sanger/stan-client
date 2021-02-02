@@ -1,6 +1,7 @@
 import React from "react";
 import AppShell from "../components/AppShell";
-import BlueButton from "../components/buttons/BlueButton";
+import { Formik } from "formik";
+import ReleaseForm from "./release/ReleaseForm";
 import ReleasePresentationModel from "../lib/presentationModels/releasePresentationModel";
 
 interface PageParams {
@@ -11,13 +12,17 @@ const Release: React.FC<PageParams> = ({ model }) => {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>{model.title}</AppShell.Title>
+        <AppShell.Title>Release</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          {model.currentValue()}
-          {model.isReady() && <h2>Here we go!</h2>}
-          <BlueButton onClick={model.onClick}>Click</BlueButton>
+          <Formik
+            initialValues={model.initialFormValues}
+            validationSchema={model.formSchema}
+            onSubmit={model.onSubmit}
+          >
+            {(formik) => <ReleaseForm model={model} formik={formik} />}
+          </Formik>
         </div>
       </AppShell.Main>
     </AppShell>

@@ -1,0 +1,15 @@
+mutation ReleaseLabware($releaseRequest: ReleaseRequest!) {
+    release(request: $releaseRequest) {
+        releases {
+            labware {
+                barcode
+            }
+            destination {
+                name
+            }
+            recipient {
+                username
+            }
+        }
+    }
+}

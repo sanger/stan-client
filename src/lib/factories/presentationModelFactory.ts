@@ -14,10 +14,14 @@ import {
   LocationState,
 } from "../machines/locations/locationMachineTypes";
 import LocationPresentationModel from "../presentationModels/locationPresentationModel";
+import {
+  ReleaseMachineService,
+  ReleaseState,
+} from "../machines/release/releaseMachineTypes";
 
 export function buildReleasePresentationModel(
-  current: RegistrationState,
-  service: RegistrationMachineService
+  current: ReleaseState,
+  service: ReleaseMachineService
 ) {
   return new ReleasePresentationModel(current, service);
 }
