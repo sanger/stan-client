@@ -9,18 +9,27 @@ import Presenter from "./Presenter";
 import {
   buildLocationPresentationModel,
   buildRegistrationPresentationModel,
+  buildReleasePresentationModel,
   buildSectioningModel,
 } from "../lib/factories/presentationModelFactory";
 import { getLocationMachine } from "../lib/services/locationService";
 import LocationPresentationModel from "../lib/presentationModels/locationPresentationModel";
+import { getReleaseMachine } from "../lib/services/releaseService";
 
 const Logout = React.lazy(() => import("../pages/Logout"));
-const Lab = React.lazy(() => import("../pages/Lab"));
-const Store = React.lazy(() => import("../pages/Store"));
-const Admin = React.lazy(() => import("../pages/Admin"));
 const Dashboard = React.lazy(() => import("../pages/Dashboard"));
+
+// Admin
+const Admin = React.lazy(() => import("../pages/Admin"));
 const Registration = React.lazy(() => import("../pages/Registration"));
+const Release = React.lazy(() => import("../pages/Release"));
+
+// Lab
+const Lab = React.lazy(() => import("../pages/Lab"));
 const Sectioning = React.lazy(() => import("../pages/Sectioning"));
+
+// Storage
+const Store = React.lazy(() => import("../pages/Store"));
 const Location = React.lazy(() => import("../pages/Location"));
 
 export function Routes() {
@@ -57,6 +66,14 @@ export function Routes() {
             model={buildRegistrationPresentationModel}
           >
             {(presentationModel) => <Registration model={presentationModel} />}
+          </Presenter>
+        </AuthenticatedRoute>
+        <AuthenticatedRoute path="/admin/release">
+          <Presenter
+            machine={getReleaseMachine}
+            model={buildReleasePresentationModel}
+          >
+            {(presentationModel) => <Release model={presentationModel} />}
           </Presenter>
         </AuthenticatedRoute>
         <Route exact path="/">

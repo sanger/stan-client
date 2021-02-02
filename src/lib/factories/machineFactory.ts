@@ -1,5 +1,6 @@
 import {
   GetRegistrationInfoQuery,
+  GetReleaseInfoQuery,
   GetSectioningInfoQuery,
   LocationFieldsFragment,
   Maybe,
@@ -17,6 +18,8 @@ import {
 } from "../machines/locations/locationMachineTypes";
 import { LocationSearchParams } from "../../pages/Location";
 import { genAddresses } from "../helpers";
+import { ReleaseMachine } from "../machines/release/releaseMachineTypes";
+import createReleaseMachine from "../machines/release/releaseMachine";
 
 export function buildRegistrationMachine(
   registrationInfo: GetRegistrationInfoQuery
@@ -91,6 +94,21 @@ export function buildLocationMachine(
       locationAddresses,
       addressToItemMap,
       selectedAddress,
+    },
+  });
+}
+
+/**
+ * Build a {@link ReleaseMachine} using information from a {@link GetReleaseInfoQuery} request
+ * @param releaseInfo the information necessary for the Release page
+ */
+export function buildReleaseMachine(
+  releaseInfo: GetReleaseInfoQuery
+): ReleaseMachine {
+  return createReleaseMachine({
+    context: {
+      destinations: releaseInfo.releaseDestinations.map((rd) => rd.name),
+      recipients: releaseInfo.releaseRecipients.map((r) => r.username),
     },
   });
 }

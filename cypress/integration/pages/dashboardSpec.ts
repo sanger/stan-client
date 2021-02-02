@@ -5,9 +5,9 @@ describe("Dashboard", () => {
       cy.wait(2000);
     });
 
-    it("does not show the Registration nav link", () => {
+    it("does not show the Admin nav link", () => {
       cy.get("a[href='/']").should("exist");
-      cy.get("a[href='/admin/registration']").should("not.exist");
+      cy.get("a[href='/admin']").should("not.exist");
     });
 
     it("does not show the user menu", () => {
@@ -35,9 +35,9 @@ describe("Dashboard", () => {
       cy.wait(2000);
     });
 
-    it("does show the Registration nav link", () => {
+    it("does show the Admin nav link", () => {
       cy.get("a[href='/']").should("exist");
-      cy.get("a[href='/admin/registration']").should("exist");
+      cy.get("a[href='/admin']").should("exist");
     });
 
     it("shows the user's username", () => {
