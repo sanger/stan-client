@@ -1,32 +1,60 @@
 import { MachinePresentationModel } from "./machinePresentationModel";
 import {
-  RegistrationContext,
-  RegistrationEvent,
-  RegistrationSchema,
-} from "../machines/registration/registrationMachineTypes";
+  ReleaseContext,
+  ReleaseEvent,
+  ReleaseSchema,
+} from "../machines/release/releaseMachineTypes";
+import * as Yup from "yup";
+import { ReleaseRequest } from "../../types/graphql";
 
 export default class ReleasePresentationModel extends MachinePresentationModel<
-  RegistrationContext,
-  RegistrationSchema,
-  RegistrationEvent
+  ReleaseContext,
+  ReleaseSchema,
+  ReleaseEvent
 > {
   init() {
-    this.onClick = this.onClick.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
-  get title(): string {
-    return String(Math.random()) + " y o o o";
+  /**
+   * Create the validation schema for the release form
+   */
+  get formSchema(): Yup.ObjectSchema {
+    return Yup.object().shape({
+      barcodes: Yup.array()
+        .label("Labware")
+        .min(1, "Please scan in at least 1 labware")
+        .of(Yup.string().required()),
+      destination: Yup.string().required().label("Group/Team"),
+      recipient: Yup.string().required().label("Contact"),
+    });
   }
 
-  isReady() {
-    return this.current.matches("ready");
+  get initialFormValues(): ReleaseRequest {
+    return {
+      barcodes: [],
+      destination: "",
+      recipient: "",
+    };
   }
 
-  onClick() {
-    console.log("Form submission");
+  get formLocked(): boolean {
+    return this.current.matches("submitted");
   }
 
-  currentValue() {
-    return this.current.value;
+  get isSubmitting(): boolean {
+    return this.current.matches("submitting");
+  }
+
+  get isSubmitted(): boolean {
+    return this.current.matches("submitted");
+  }
+
+  get showWarning(): boolean {
+    return !!this.context.serverErrors;
+  }
+
+  onSubmit(formValues: ReleaseRequest) {
+    this.send({ type: "SUBMIT", formValues });
   }
 }

@@ -93,10 +93,10 @@ const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({
   return (
     <div>
       {current.matches("idle.success") && current.context.successMessage && (
-        <Success message={current.context.successMessage} />
+        <Success className="my-2" message={current.context.successMessage} />
       )}
       {current.matches("idle.error") && current.context.errorMessage && (
-        <Warning message={current.context.errorMessage} />
+        <Warning className="my-2" message={current.context.errorMessage} />
       )}
 
       <div className="sm:w-2/3 md:w-1/2">

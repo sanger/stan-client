@@ -8,6 +8,7 @@ import registrationHandlers from "./handlers/registrationHandlers";
 import sectioningHandlers from "./handlers/sectioningHandlers";
 import userHandlers from "./handlers/userHandlers";
 import locationHandlers from "./handlers/locationHandlers";
+import releaseHandlers from "./handlers/releaseHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -17,4 +18,5 @@ export const handlers = [
   ...sectioningHandlers,
   ...userHandlers,
   ...locationHandlers,
+  ...releaseHandlers,
 ];
