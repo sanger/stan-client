@@ -44,7 +44,7 @@ export interface LocationContext {
 }
 
 /**
- * StateValue Schema for a Location Machine
+ * State Schema for a Location Machine
  */
 export interface LocationSchema {
   states: {

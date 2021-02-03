@@ -1,11 +1,17 @@
 import { Address, SizeInput } from "../../types/stan";
 import { GridDirection } from "../../types/graphql";
 
+/**
+ * Convert a StoreLight address into a STAN address
+ * @param address the StoreLight address
+ * @param locationSize the size of the location
+ * @param direction the grid direction of the location
+ */
 export function addressToLocationAddress(
   address: Address,
   locationSize: SizeInput,
   direction: GridDirection
-): string {
+): number {
   let row = 0,
     column = 0;
   if (address.includes(",")) {
@@ -21,5 +27,5 @@ export function addressToLocationAddress(
       ? (row - 1) * locationSize.numColumns + column
       : (column - 1) * locationSize.numRows + row;
 
-  return String(locationAddress);
+  return locationAddress;
 }
