@@ -1,6 +1,4 @@
 import { RefObject, useEffect, useRef, useState } from "react";
-import * as queryString from "query-string";
-import { useLocation } from "react-router-dom";
 import { MachinePresentationModel } from "../presentationModels/machinePresentationModel";
 import { EventObject, Interpreter, State, StateMachine } from "xstate";
 import { useMachine } from "@xstate/react";
