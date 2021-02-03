@@ -233,7 +233,7 @@ export const machineConfig: MachineConfig<
 };
 
 /**
- * Location StateValue Machine
+ * Location Machine
  */
 const createLocationMachine = createMachineBuilder(
   machineConfig,

@@ -90,18 +90,9 @@ export function useScrollToRef() {
 }
 
 /**
- * TODO Create a Result type
- */
-export function useURLQuery<T>(guard: (o: any) => o is T) {
-  const query = queryString.parse(useLocation().search);
-  return guard(query) ? { query, hasError: false } : { hasError: true };
-}
-
-/**
  * Starts interpreting a machine and connects it to a {@link MachinePresentationModel}
  * @param machine a state machine
- * @param initPresentationModel a function that returns a new {@link MachinePre
- * sentationModel}
+ * @param initPresentationModel a function that returns a new {@link MachinePresentationModel}
  */
 export function usePresentationModel<
   E extends MachinePresentationModel<

@@ -2,45 +2,30 @@
   "locationType": {
     "Room Temperature": [
       {
-        "barcode": "STO-00A6",
-        "name": "Slide Trays",
-        "customName": "Room temperature stained slides"
-      },
-      {
-        "barcode": "STO-002",
-        "name": "Archive",
-        "customName": "Room temperature slides - Archive"
+        "barcode": "STO-005B",
+        "name": "Cabinet",
+        "customName": "Room Temperature Slides"
       }
     ],
 
     "Fridges": [
       {
-        "barcode": "STO-003",
+        "barcode": "STO-002E",
         "name": "Fridge Slides",
-        "customName": "Fridge Slides - Pre-treated"
-      },
-      {
-        "barcode": "STO-004",
-        "name": "Fridge Slides",
-        "customName": "Fridge Slides - Post stained"
-      },
-      {
-        "barcode": "STO-005",
-        "name": "20 Slides",
-        "customName": "20 Slides - Post stained archive"
+        "customName": "Fridge Slides"
       }
     ],
 
     "Freezers": [
       {
-        "barcode": "STO-006",
-        "name": "-80",
-        "customName": "-80 Blocks and Tubes"
+        "barcode": "STO-004C",
+        "name": "Freezer",
+        "customName": "-20 Slides - Post-stained Archive"
       },
       {
-        "barcode": "STO-007",
-        "name": "-80 Slides",
-        "customName": "-80 Slides"
+        "barcode": "STO-001F",
+        "name": "Freezer",
+        "customName": "-80 Blocks and Tubes"
       }
     ]
   }
