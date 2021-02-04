@@ -1,7 +1,7 @@
 describe("Authorized routes", () => {
-  describe("/admin", () => {
+  describe("/admin/registration", () => {
     before(() => {
-      cy.visitAsGuest("/admin");
+      cy.visitAsGuest("/admin/registration");
     });
 
     context("when not authenticated", () => {
@@ -12,28 +12,30 @@ describe("Authorized routes", () => {
       });
 
       it("should display a warning", () => {
-        cy.findByText("Please sign in to access /admin").should("be.visible");
+        cy.findByText("Please sign in to access /admin/registration").should(
+          "be.visible"
+        );
       });
 
-      it("should redirect to /admin after logging in", () => {
+      it("should redirect to /admin/registration after logging in", () => {
         cy.get("input[name='username']").type("jb1");
         cy.get("input[name='password']").type("supersecret");
         cy.get("button[type='submit']").click();
 
         cy.location().should((location) => {
-          expect(location.pathname).to.eq("/admin");
+          expect(location.pathname).to.eq("/admin/registration");
         });
       });
     });
 
     context("when authenticated", () => {
       before("I am authenticated", () => {
-        cy.visit("/admin");
+        cy.visit("/admin/registration");
       });
 
-      it("goes to the /admin page", () => {
+      it("goes to the /admin/registration page", () => {
         cy.location().should((location) => {
-          expect(location.pathname).to.eq("/admin");
+          expect(location.pathname).to.eq("/admin/registration");
         });
       });
     });

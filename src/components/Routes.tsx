@@ -20,12 +20,10 @@ const Logout = React.lazy(() => import("../pages/Logout"));
 const Dashboard = React.lazy(() => import("../pages/Dashboard"));
 
 // Admin
-const Admin = React.lazy(() => import("../pages/Admin"));
 const Registration = React.lazy(() => import("../pages/Registration"));
 const Release = React.lazy(() => import("../pages/Release"));
 
 // Lab
-const Lab = React.lazy(() => import("../pages/Lab"));
 const Sectioning = React.lazy(() => import("../pages/Sectioning"));
 
 // Storage
@@ -45,9 +43,6 @@ export function Routes() {
         <Route path="/logout">
           <Logout />
         </Route>
-        <Route exact path="/lab">
-          <Lab />
-        </Route>
         <AuthenticatedRoute path="/lab/sectioning">
           <Presenter
             machine={getSectioningMachine}
@@ -57,9 +52,6 @@ export function Routes() {
           </Presenter>
         </AuthenticatedRoute>
 
-        <AuthenticatedRoute exact path="/admin">
-          <Admin />
-        </AuthenticatedRoute>
         <AuthenticatedRoute path="/admin/registration">
           <Presenter
             machine={getRegistrationMachine}

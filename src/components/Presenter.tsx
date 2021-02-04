@@ -41,7 +41,9 @@ const Presenter: <
   }>
 ) => React.ReactElement = ({ machine, model, children }) => {
   return (
-    <DataFetcher dataFetcher={machine}>
+    // Setting the key to a value that's different every time forces React to
+    // unmount the previous instance, and mount a new one
+    <DataFetcher key={Date.now()} dataFetcher={machine}>
       {(data) => (
         <PresenterMachine machine={data} model={model}>
           {(presenter) => children(presenter)}
