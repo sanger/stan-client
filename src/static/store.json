@@ -5,6 +5,11 @@
         "barcode": "STO-005B",
         "name": "Cabinet",
         "customName": "Room Temperature Slides"
+      },
+      {
+        "barcode": "STO-003D",
+        "name": "Shelf",
+        "customName": "Shelf In Core"
       }
     ],
 
@@ -25,7 +30,7 @@
       {
         "barcode": "STO-001F",
         "name": "Freezer",
-        "customName": "-80 Blocks and Tubes"
+        "customName": "-80 Freezer"
       }
     ]
   }

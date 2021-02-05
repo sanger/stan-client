@@ -19,6 +19,8 @@ module.exports = {
         "hover:bg-blue-700",
         "bg-purple-600",
         "hover:bg-purple-700",
+        "grid-flow-col",
+        "grid-flow-row",
         "grid-cols-1",
         "grid-cols-2",
         "grid-cols-3",
