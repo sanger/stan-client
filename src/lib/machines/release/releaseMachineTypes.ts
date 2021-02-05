@@ -13,6 +13,7 @@ import { ServerErrors } from "../../../types/stan";
 export interface ReleaseContext {
   destinations: Array<string>;
   recipients: Array<string>;
+  releaseResult: ReleaseLabwareMutation;
   serverError?: ApolloError;
 }
 
@@ -28,19 +29,16 @@ export interface ReleaseSchema {
 }
 
 type SubmitEvent = { type: "SUBMIT"; formValues: ReleaseRequest };
-type SubmissionOnDoneEvent = {
+type ReleaseDoneEvent = {
   type: "done.invoke.releaseLabware";
   data: ReleaseLabwareMutation;
 };
-type SubmissionOnErrorEvent = {
+type ReleaseErrorEvent = {
   type: "error.platform.releaseLabware";
   data: ApolloError;
 };
 
-export type ReleaseEvent =
-  | SubmitEvent
-  | SubmissionOnDoneEvent
-  | SubmissionOnErrorEvent;
+export type ReleaseEvent = SubmitEvent | ReleaseDoneEvent | ReleaseErrorEvent;
 
 /**
  * The type of an interpreted Release Machine

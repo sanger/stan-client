@@ -43,7 +43,8 @@ const releaseHandlers = [
       return res(
         ctx.data({
           release: {
-            releases: barcodes.map((barcode) => ({
+            releases: barcodes.map((barcode, index) => ({
+              id: index + 1001,
               labware: { barcode },
               recipient: {
                 username: recipient,

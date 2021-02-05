@@ -14,6 +14,13 @@ import { castDraft } from "immer";
  */
 const machineOptions: Partial<MachineOptions<ReleaseContext, ReleaseEvent>> = {
   actions: {
+    assignReleases: assign((ctx, e) => {
+      if (e.type !== "done.invoke.releaseLabware") {
+        return;
+      }
+      ctx.releaseResult = e.data;
+    }),
+
     resetServerErrors: assign((ctx, _e) => {
       ctx.serverError = undefined;
     }),
@@ -61,6 +68,7 @@ export const machineConfig: MachineConfig<
         },
         onDone: {
           target: "submitted",
+          actions: "assignReleases",
         },
       },
     },

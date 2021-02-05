@@ -1,6 +1,7 @@
 mutation ReleaseLabware($releaseRequest: ReleaseRequest!) {
     release(request: $releaseRequest) {
         releases {
+            id
             labware {
                 barcode
             }

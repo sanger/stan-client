@@ -261,6 +261,7 @@ export type ReleaseRecipient = {
 
 export type Release = {
   __typename?: 'Release';
+  id: Scalars['Int'];
   labware: Labware;
   destination: ReleaseDestination;
   recipient: ReleaseRecipient;
@@ -638,6 +639,7 @@ export type ReleaseLabwareMutation = (
     { __typename?: 'ReleaseResult' }
     & { releases: Array<(
       { __typename?: 'Release' }
+      & Pick<Release, 'id'>
       & { labware: (
         { __typename?: 'Labware' }
         & Pick<Labware, 'barcode'>
@@ -1175,6 +1177,7 @@ export const ReleaseLabwareDocument = gql`
     mutation ReleaseLabware($releaseRequest: ReleaseRequest!) {
   release(request: $releaseRequest) {
     releases {
+      id
       labware {
         barcode
       }

@@ -54,6 +54,13 @@ export default class ReleasePresentationModel extends MachinePresentationModel<
     return !!this.context.serverError;
   }
 
+  get releaseFilePath(): string | undefined {
+    if (!this.isSubmitted) {
+      return undefined;
+    }
+    return `/release?id=${this.context.releaseResult.release.releases[0].id}`;
+  }
+
   onSubmit(formValues: ReleaseRequest) {
     this.send({ type: "SUBMIT", formValues });
   }
