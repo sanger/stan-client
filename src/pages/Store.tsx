@@ -105,6 +105,7 @@ interface LocationLinkProps {
 const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
   const { data, loading, error } = useFindLocationByBarcodeQuery({
     variables: { barcode },
+    fetchPolicy: "network-only",
   });
 
   if (loading) {
