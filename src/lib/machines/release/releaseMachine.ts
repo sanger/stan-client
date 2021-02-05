@@ -7,7 +7,7 @@ import {
 import { assign } from "@xstate/immer";
 import { createMachineBuilder } from "../index";
 import * as releaseService from "../../services/releaseService";
-import { extractServerErrors } from "../../../types/stan";
+import { castDraft } from "immer";
 
 /**
  * Release Machine Options
@@ -15,14 +15,14 @@ import { extractServerErrors } from "../../../types/stan";
 const machineOptions: Partial<MachineOptions<ReleaseContext, ReleaseEvent>> = {
   actions: {
     resetServerErrors: assign((ctx, _e) => {
-      ctx.serverErrors = undefined;
+      ctx.serverError = undefined;
     }),
 
     assignReleaseErrors: assign((ctx, e) => {
       if (e.type !== "error.platform.releaseLabware") {
         return;
       }
-      ctx.serverErrors = extractServerErrors(e.data);
+      ctx.serverError = castDraft(e.data);
     }),
   },
   services: {

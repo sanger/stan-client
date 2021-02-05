@@ -5,6 +5,7 @@ import {
   RegistrationSchema,
 } from "../machines/registration/registrationMachineTypes";
 import { FormValues } from "../services/registrationService";
+import { LabwareTypeName } from "../../types/stan";
 
 export default class RegistrationPresentationModel extends MachinePresentationModel<
   RegistrationContext,
@@ -16,23 +17,29 @@ export default class RegistrationPresentationModel extends MachinePresentationMo
   }
 
   get registrationResult() {
-    return this.current.context.registrationResult;
+    return this.context.registrationResult;
   }
 
   get labelPrinterRef() {
-    return this.current.context.labelPrinterRef;
+    return this.context.labelPrinterRef;
   }
 
   get registrationErrors() {
-    return this.current.context.registrationErrors;
+    return this.context.registrationErrors;
   }
 
   get registrationInfo() {
-    return this.current.context.registrationInfo;
+    return this.context.registrationInfo;
   }
 
   get registrationSchema() {
-    return this.current.context.registrationSchema;
+    return this.context.registrationSchema;
+  }
+
+  get availableLabwareTypes() {
+    return this.context.registrationInfo.labwareTypes.filter((lt) =>
+      this.context.availableLabwareTypes.includes(lt.name as LabwareTypeName)
+    );
   }
 
   submitForm(values: FormValues) {

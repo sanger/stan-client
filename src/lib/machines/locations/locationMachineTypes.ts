@@ -1,6 +1,7 @@
 import { Interpreter, State, StateNode } from "xstate";
 import { LocationFieldsFragment, Maybe } from "../../../types/graphql";
 import { LocationSearchParams } from "../../../pages/Location";
+import { ApolloError } from "@apollo/client";
 
 /**
  * Context for a Location Machine
@@ -41,6 +42,11 @@ export interface LocationContext {
    * The current error message
    */
   errorMessage: Maybe<string>;
+
+  /**
+   * Error that's come back from a request to core
+   */
+  serverError: Maybe<ApolloError>;
 }
 
 /**
@@ -75,6 +81,11 @@ type FetchLocationResolveEvent = {
   data: LocationFieldsFragment;
 };
 
+type FetchLocationErrorEvent = {
+  type: "error.platform.fetchLocation";
+  data: ApolloError;
+};
+
 type StoreBarcodeEvent = {
   type: "STORE_BARCODE";
   barcode: string;
@@ -84,6 +95,11 @@ type StoreBarcodeEvent = {
 type StoreBarcodeResolveEvent = {
   type: "done.invoke.storeBarcode";
   data: LocationFieldsFragment;
+};
+
+type StoreBarcodeErrorEvent = {
+  type: "error.platform.storeBarcode";
+  data: ApolloError;
 };
 
 type UnstoreBarcodeEvent = {
@@ -96,6 +112,11 @@ type UnstoreBarcodeResolveEvent = {
   data: LocationFieldsFragment;
 };
 
+type UnstoreBarcodeErrorEvent = {
+  type: "error.platform.unstoreBarcode";
+  data: ApolloError;
+};
+
 type EmptyLocationEvent = {
   type: "EMPTY_LOCATION";
 };
@@ -103,6 +124,11 @@ type EmptyLocationEvent = {
 type EmptyLocationResolveEvent = {
   type: "done.invoke.emptyLocation";
   data: LocationFieldsFragment;
+};
+
+type EmptyLocationErrorEvent = {
+  type: "error.platform.emptyLocation";
+  data: ApolloError;
 };
 
 type UpdateLocationEvent = {
@@ -128,12 +154,16 @@ type SetErrorMessageEvent = {
 export type LocationEvent =
   | FetchLocationEvent
   | FetchLocationResolveEvent
+  | FetchLocationErrorEvent
   | StoreBarcodeEvent
   | StoreBarcodeResolveEvent
+  | StoreBarcodeErrorEvent
   | UnstoreBarcodeEvent
   | UnstoreBarcodeResolveEvent
+  | UnstoreBarcodeErrorEvent
   | EmptyLocationEvent
   | EmptyLocationResolveEvent
+  | EmptyLocationErrorEvent
   | UpdateLocationEvent
   | SetSelectedAddressEvent
   | SetSuccessMessageEvent

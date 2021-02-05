@@ -41,7 +41,7 @@ const Success = ({
         />
       </svg>
       <div className="ml-2 flex-grow">
-        <p>{message}</p>
+        <p className="font-medium">{message}</p>
         {children && <div className="mt-2">{children}</div>}
       </div>
     </section>

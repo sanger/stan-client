@@ -55,15 +55,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
           exit={"hidden"}
           className="md:w-2/3 space-y-10"
         >
-          {model.showWarning && (
-            <Warning message={model.context.serverErrors?.message ?? ""}>
-              <ul>
-                {model.context.serverErrors?.problems.map((problem) => (
-                  <li>{problem}</li>
-                ))}
-              </ul>
-            </Warning>
-          )}
+          {model.showWarning && <Warning error={model.context.serverError} />}
 
           <motion.div variants={variants.fadeInWithLift} className="space-y-4">
             <Heading level={3}>Labware</Heading>

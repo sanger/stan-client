@@ -1,10 +1,5 @@
 import React, { useRef, useState } from "react";
-import {
-  GetRegistrationInfoQuery,
-  LifeStage,
-  SpatialLocation,
-} from "../../types/graphql";
-import * as Yup from "yup";
+import { LifeStage, SpatialLocation } from "../../types/graphql";
 import { FieldArray, Form, Formik } from "formik";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "../../components/Heading";
@@ -24,20 +19,13 @@ import {
   getInitialBlockValues,
   getInitialTissueValues,
 } from "../../lib/services/registrationService";
+import RegistrationPresentationModel from "../../lib/presentationModels/registrationPresentationModel";
 
 interface RegistrationFormParams {
-  submitting: boolean;
-  registrationInfo: GetRegistrationInfoQuery;
-  registrationSchema: Yup.ObjectSchema;
-  onSubmission: (values: FormValues) => void;
+  model: RegistrationPresentationModel;
 }
 
-const RegistrationForm = ({
-  submitting,
-  registrationInfo,
-  registrationSchema,
-  onSubmission,
-}: RegistrationFormParams) => {
+const RegistrationForm = ({ model }: RegistrationFormParams) => {
   // The tissue we are currently looking at.
   const [currentTissueIndex, setCurrentTissueIndex] = useState(0);
 
@@ -62,9 +50,9 @@ const RegistrationForm = ({
   return (
     <Formik
       initialValues={initialValues}
-      validationSchema={registrationSchema}
+      validationSchema={model.context.registrationSchema}
       onSubmit={(values) => {
-        onSubmission(values);
+        model.submitForm(values);
       }}
     >
       {({ values, setFieldValue, errors, touched }) => {
@@ -128,7 +116,11 @@ const RegistrationForm = ({
                       emptyOption
                       className="mt-2"
                     >
-                      {optionValues(registrationInfo.hmdmcs, "hmdmc", "hmdmc")}
+                      {optionValues(
+                        model.registrationInfo.hmdmcs,
+                        "hmdmc",
+                        "hmdmc"
+                      )}
                     </FormikSelect>
 
                     <FormikSelect
@@ -152,7 +144,7 @@ const RegistrationForm = ({
 
                         // Set the available spatial locations for this tissue type
                         setAvailableSpatialLocations(
-                          registrationInfo.tissueTypes.find(
+                          model.registrationInfo.tissueTypes.find(
                             (tt) => tt.name === e.currentTarget.value
                           )?.spatialLocations ?? []
                         );
@@ -163,7 +155,7 @@ const RegistrationForm = ({
                       className="mt-2"
                     >
                       {optionValues(
-                        registrationInfo.tissueTypes,
+                        model.registrationInfo.tissueTypes,
                         "name",
                         "name"
                       )}
@@ -245,7 +237,7 @@ const RegistrationForm = ({
                                 name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.labwareType`}
                               >
                                 {optionValues(
-                                  registrationInfo.labwareTypes,
+                                  model.availableLabwareTypes,
                                   "name",
                                   "name"
                                 )}
@@ -266,7 +258,7 @@ const RegistrationForm = ({
                                 name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.fixative`}
                               >
                                 {optionValues(
-                                  registrationInfo.fixatives,
+                                  model.registrationInfo.fixatives,
                                   "name",
                                   "name"
                                 )}
@@ -279,7 +271,7 @@ const RegistrationForm = ({
                                 name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.medium`}
                               >
                                 {optionValues(
-                                  registrationInfo.mediums,
+                                  model.registrationInfo.mediums,
                                   "name",
                                   "name"
                                 )}
@@ -289,7 +281,7 @@ const RegistrationForm = ({
                                 label="Mould Size"
                                 name={`tissues.${currentTissueIndex}.blocks.${blockIndex}.mouldSize`}
                               >
-                                {registrationInfo.mouldSizes.map(
+                                {model.registrationInfo.mouldSizes.map(
                                   (ms, index) => {
                                     return (
                                       <RadioButton
@@ -377,7 +369,7 @@ const RegistrationForm = ({
                 <FieldArray name={`tissues`}>
                   {(tissueHelpers) => (
                     <SummaryBox
-                      submitting={submitting}
+                      submitting={model.isSubmitting()}
                       values={values}
                       errors={errors}
                       touched={touched}

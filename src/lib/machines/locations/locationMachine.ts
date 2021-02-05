@@ -12,6 +12,7 @@ import * as locationService from "../../services/locationService";
 import { Maybe } from "../../../types/graphql";
 import { MachineConfig } from "xstate/lib/types";
 import { createMachineBuilder } from "../index";
+import { castDraft } from "immer";
 
 enum Action {
   ASSIGN_LOCATION = "assignLocation",
@@ -20,6 +21,7 @@ enum Action {
   UNSET_SUCCESS_MESSAGE = "unsetSuccessMessage",
   ASSIGN_SUCCESS_MESSAGE = "assignSuccessMessage",
   ASSIGN_ERROR_MESSAGE = "assignErrorMessage",
+  ASSIGN_SERVER_ERRORS = "assignServerErrors",
 }
 
 enum Service {
@@ -111,6 +113,18 @@ export const machineOptions: Partial<MachineOptions<
       ctx.errorMessage = e.message;
       ctx.successMessage = null;
     }),
+
+    [Action.ASSIGN_SERVER_ERRORS]: assign((ctx, e) => {
+      if (
+        e.type !== "error.platform.fetchLocation" &&
+        e.type !== "error.platform.storeBarcode" &&
+        e.type !== "error.platform.unstoreBarcode" &&
+        e.type !== "error.platform.emptyLocation"
+      ) {
+        return;
+      }
+      ctx.serverError = castDraft(e.data);
+    }),
   },
 
   services: {
@@ -189,7 +203,10 @@ export const machineConfig: MachineConfig<
               target: [`#locations.ready`],
             },
             onError: {
-              actions: [send(setErrorMessage("Barcode could not be stored"))],
+              actions: [
+                send(setErrorMessage("Barcode could not be stored")),
+                Action.ASSIGN_SERVER_ERRORS,
+              ],
               target: [`#locations.ready`],
             },
           },
@@ -205,7 +222,10 @@ export const machineConfig: MachineConfig<
               target: ["#locations.ready"],
             },
             onError: {
-              actions: [send(setErrorMessage("Barcode could not be unstored"))],
+              actions: [
+                send(setErrorMessage("Barcode could not be unstored")),
+                Action.ASSIGN_SERVER_ERRORS,
+              ],
               target: [`#locations.ready`],
             },
           },
@@ -221,7 +241,10 @@ export const machineConfig: MachineConfig<
               target: ["#locations.ready"],
             },
             onError: {
-              actions: [send(setErrorMessage("Location could not be emptied"))],
+              actions: [
+                send(setErrorMessage("Location could not be emptied")),
+                Action.ASSIGN_SERVER_ERRORS,
+              ],
               target: ["#locations.ready"],
             },
           },

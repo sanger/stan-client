@@ -51,7 +51,7 @@ export default class ReleasePresentationModel extends MachinePresentationModel<
   }
 
   get showWarning(): boolean {
-    return !!this.context.serverErrors;
+    return !!this.context.serverError;
   }
 
   onSubmit(formValues: ReleaseRequest) {
