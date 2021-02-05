@@ -15,6 +15,8 @@ import ReleasePresentationModel from "../../lib/presentationModels/releasePresen
 import Warning from "../../components/notifications/Warning";
 import { toast } from "react-toastify";
 import Success from "../../components/notifications/Success";
+import WhiteButton from "../../components/buttons/WhiteButton";
+import DownloadIcon from "../../components/icons/DownloadIcon";
 
 interface ReleaseFormProps {
   model: ReleasePresentationModel;
@@ -39,7 +41,9 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
   const isSubmitted = model.isSubmitted;
   useEffect(() => {
     if (isSubmitted) {
-      toast(<Success message={"Labware(s) Released"} />, {
+      const ToastSuccess = () => <Success message={"Labware(s) Released"} />;
+
+      toast(ToastSuccess, {
         position: toast.POSITION.TOP_RIGHT,
       });
     }
@@ -144,6 +148,21 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
           >
             Release Labware
           </PinkButton>
+
+          {model.isSubmitted && (
+            <WhiteButton className="sm:w-full">
+              <a
+                className="w-full text-gray-800 focus:outline-none"
+                download={"release.tsv"}
+                href={model.releaseFilePath}
+              >
+                <DownloadIcon
+                  className={"inline-block h-5 w-5 -mt-1 -ml-1 mr-2"}
+                />
+                Download Release File
+              </a>
+            </WhiteButton>
+          )}
         </Sidebar>
       </GrayBox>
     </Form>

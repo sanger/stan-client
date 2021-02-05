@@ -35,6 +35,11 @@ describe("Release Page", () => {
     it("shows a success message", () => {
       cy.findByText("Labware(s) Released").should("be.visible");
     });
+
+    it("shows the download button", () => {
+      cy.findByText("Download Release File").should("be.visible");
+      cy.get("a[href='/release?id=1001,1002']").should("be.visible");
+    });
   });
 
   context(
@@ -68,6 +73,10 @@ describe("Release Page", () => {
 
       it("shows an error", () => {
         cy.findByText("Labware has already been released: [STAN-123,STAN-456]");
+      });
+
+      it("doesn't show the download button", () => {
+        cy.findByText("Download Release File").should("not.be.visible");
       });
     }
   );
