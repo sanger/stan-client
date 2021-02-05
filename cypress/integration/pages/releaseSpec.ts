@@ -38,7 +38,7 @@ describe("Release Page", () => {
 
     it("shows the download button", () => {
       cy.findByText("Download Release File").should("be.visible");
-      cy.get("a[href='/release?id=1001']").should("be.visible");
+      cy.get("a[href='/release?id=1001,1002']").should("be.visible");
     });
   });
 

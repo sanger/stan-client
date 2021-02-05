@@ -58,7 +58,10 @@ export default class ReleasePresentationModel extends MachinePresentationModel<
     if (!this.isSubmitted) {
       return undefined;
     }
-    return `/release?id=${this.context.releaseResult.release.releases[0].id}`;
+    const releaseIds = this.context.releaseResult.release.releases.map(
+      (r) => r.id
+    );
+    return `/release?id=${releaseIds.join(",")}`;
   }
 
   onSubmit(formValues: ReleaseRequest) {
