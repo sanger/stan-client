@@ -45,14 +45,7 @@ const Registration: React.FC<RegistrationParams> = ({ model }) => {
             </div>
           )}
 
-          {model.isReady() && (
-            <RegistrationForm
-              submitting={model.isSubmitting()}
-              registrationInfo={model.registrationInfo}
-              registrationSchema={model.registrationSchema}
-              onSubmission={model.submitForm}
-            />
-          )}
+          {model.isReady() && <RegistrationForm model={model} />}
         </div>
       </AppShell.Main>
     </AppShell>

@@ -4,7 +4,7 @@ import {
   RegisterTissuesMutationResult,
 } from "../../../types/graphql";
 import * as Yup from "yup";
-import { ServerErrors } from "../../../types/stan";
+import { LabwareTypeName, ServerErrors } from "../../../types/stan";
 import { LabelPrinterActorRef } from "../labelPrinter";
 import { ApolloError } from "@apollo/client";
 import { FormValues } from "../../services/registrationService";
@@ -39,6 +39,7 @@ export type RegistrationState = State<
 
 export interface RegistrationContext {
   registrationInfo: GetRegistrationInfoQuery;
+  availableLabwareTypes: LabwareTypeName[];
   registrationSchema: Yup.ObjectSchema;
   registrationResult: RegisterTissuesMutation;
   registrationErrors: ServerErrors;

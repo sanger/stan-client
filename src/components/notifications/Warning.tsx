@@ -1,5 +1,8 @@
 import React from "react";
 import classNames from "classnames";
+import { ApolloError } from "@apollo/client";
+import { Maybe } from "../../types/graphql";
+import { extractServerErrors, ServerErrors } from "../../types/stan";
 
 interface WarningProps
   extends React.DetailedHTMLProps<
@@ -7,10 +10,12 @@ interface WarningProps
     HTMLElement
   > {
   message?: string;
+  error?: Maybe<ApolloError>;
 }
 
 const Warning = ({
   message,
+  error,
   children,
   className,
   ...rest
@@ -19,6 +24,10 @@ const Warning = ({
     "flex flex-row items-start justify-between border-l-4 border-orange-600 p-2 bg-orange-200 text-orange-800",
     className
   );
+  let serverErrors: ServerErrors | undefined;
+  if (error) {
+    serverErrors = extractServerErrors(error);
+  }
   return (
     <section {...rest} className={sectionClasses}>
       <svg
@@ -36,7 +45,24 @@ const Warning = ({
         />
       </svg>
       <div className="ml-2 flex-grow">
-        <p>{message}</p>
+        <p className="font-medium">{message}</p>
+
+        {serverErrors?.message && (
+          <p className="mt-2">{serverErrors.message}</p>
+        )}
+
+        {serverErrors?.problems && (
+          <div className="mt-2">
+            {
+              <ul className="list-disc list-inside">
+                {serverErrors.problems.map((problem, index) => {
+                  return <li key={index}>{problem}</li>;
+                })}
+              </ul>
+            }
+          </div>
+        )}
+
         {children && <div className="mt-2">{children}</div>}
       </div>
     </section>

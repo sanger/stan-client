@@ -1,5 +1,9 @@
 import { Interpreter, State, StateNode } from "xstate";
-import { ReleaseLabwareMutation, ReleaseRequest } from "../../../types/graphql";
+import {
+  Maybe,
+  ReleaseLabwareMutation,
+  ReleaseRequest,
+} from "../../../types/graphql";
 import { ApolloError } from "@apollo/client";
 import { ServerErrors } from "../../../types/stan";
 
@@ -9,7 +13,7 @@ import { ServerErrors } from "../../../types/stan";
 export interface ReleaseContext {
   destinations: Array<string>;
   recipients: Array<string>;
-  serverErrors: ServerErrors | undefined;
+  serverError?: ApolloError;
 }
 
 /**

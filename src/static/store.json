@@ -2,30 +2,25 @@
   "locationType": {
     "Room Temperature": [
       {
-        "barcode": "STO-005B",
-        "name": "Cabinet",
-        "customName": "Room Temperature Slides"
+        "barcode": "STO-005B"
+      },
+      {
+        "barcode": "STO-003D"
       }
     ],
 
     "Fridges": [
       {
-        "barcode": "STO-002E",
-        "name": "Fridge Slides",
-        "customName": "Fridge Slides"
+        "barcode": "STO-002E"
       }
     ],
 
     "Freezers": [
       {
-        "barcode": "STO-004C",
-        "name": "Freezer",
-        "customName": "-20 Slides - Post-stained Archive"
+        "barcode": "STO-004C"
       },
       {
-        "barcode": "STO-001F",
-        "name": "Freezer",
-        "customName": "-80 Blocks and Tubes"
+        "barcode": "STO-001F"
       }
     ]
   }

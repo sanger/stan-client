@@ -14,6 +14,11 @@ import Heading from "../components/Heading";
 import storeConfig from "../static/store.json";
 import { Link } from "react-router-dom";
 import BarcodeIcon from "../components/icons/BarcodeIcon";
+import {
+  FindLocationByBarcodeQuery,
+  useFindLocationByBarcodeQuery,
+} from "../types/graphql";
+import LoadingSpinner from "../components/icons/LoadingSpinner";
 
 /**
  * RouteComponentProps from react-router allows the props to be passed in
@@ -77,30 +82,7 @@ const Store: React.FC<StoreProps> = ({ location }) => {
                   <div className="mt-10">
                     <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
                       {locations.map((location) => (
-                        <Link
-                          key={location.barcode}
-                          to={`/locations/${location.barcode}`}
-                        >
-                          <div className="border border-gray-200 p-4 flex bg-gray-50 hover:bg-gray-200 rounded">
-                            <div className="flex-shrink-0">
-                              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-sdb-400 text-white">
-                                <LocationIcon
-                                  iconStyle="stroke"
-                                  className="h-6 w-6"
-                                />
-                              </div>
-                            </div>
-                            <div className="ml-4">
-                              <dt className="text-lg leading-6 font-medium text-gray-900">
-                                {location.customName}
-                              </dt>
-                              <dd className="mt-2 text-base text-gray-500">
-                                <BarcodeIcon className="inline-block -mt-1 h-5 w-5" />{" "}
-                                {location.barcode}
-                              </dd>
-                            </div>
-                          </div>
-                        </Link>
+                        <LocationLink barcode={location.barcode} />
                       ))}
                     </dl>
                   </div>
@@ -115,3 +97,50 @@ const Store: React.FC<StoreProps> = ({ location }) => {
 };
 
 export default Store;
+
+interface LocationLinkProps {
+  barcode: string;
+}
+
+const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
+  const { data, loading, error } = useFindLocationByBarcodeQuery({
+    variables: { barcode },
+  });
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return (
+      <Warning message={`Failed to load Location ${barcode}`} error={error} />
+    );
+  }
+
+  let location: FindLocationByBarcodeQuery["location"] | undefined;
+
+  if (data) {
+    location = data.location;
+  }
+
+  return (
+    <Link key={location?.barcode} to={`/locations/${location?.barcode}`}>
+      <div className="border border-gray-200 p-4 flex bg-gray-50 hover:bg-gray-200 rounded">
+        <div className="flex-shrink-0">
+          <div className="flex items-center justify-center h-12 w-12 rounded-md bg-sdb-400 text-white">
+            <LocationIcon iconStyle="stroke" className="h-6 w-6" />
+          </div>
+        </div>
+        <div className="ml-4">
+          <dt className="text-lg leading-6 font-medium text-gray-900">
+            {location?.customName}
+          </dt>
+          <dd className="mt-2 text-base text-gray-500">
+            <BarcodeIcon className="inline-block -mt-1 h-5 w-5" />{" "}
+            {location?.barcode}
+          </dd>
+        </div>
+      </div>
+    </Link>
+  );
+};

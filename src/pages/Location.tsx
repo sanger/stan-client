@@ -103,9 +103,9 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
    */
   useEffect(() => {
     if (errorMessage) {
-      const WarningToast = () => {
-        return <Success message={errorMessage} />;
-      };
+      const WarningToast = () => (
+        <Warning message={errorMessage} error={model.context.serverError} />
+      );
 
       toast(<WarningToast />, {
         position: toast.POSITION.TOP_RIGHT,
@@ -113,7 +113,7 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
         hideProgressBar: true,
       });
     }
-  }, [errorMessage]);
+  }, [errorMessage, model.context.serverError]);
 
   /**
    * Event handler for the editable custom name

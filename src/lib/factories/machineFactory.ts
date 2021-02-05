@@ -28,6 +28,7 @@ export function buildRegistrationMachine(
     Object.assign({}, registrationMachine.context, {
       registrationInfo,
       registrationSchema: buildRegistrationSchema(registrationInfo),
+      availableLabwareTypes: [LabwareTypeName.PROVIASETTE],
     })
   );
 }
