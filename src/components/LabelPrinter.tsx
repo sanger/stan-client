@@ -1,60 +1,110 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { optionValues } from "./forms";
-import { useActor } from "@xstate/react";
+import { useMachine } from "@xstate/react";
 import LoadingSpinner from "./icons/LoadingSpinner";
-import {
-  LabelPrinterActorRef,
-  LabelPrinterEvents,
-  LabelPrinterMachineType,
-} from "../lib/machines/labelPrinter";
-import {
-  print,
-  updateSelectedLabelPrinter,
-} from "../lib/machines/labelPrinter/labelPrinterEvents";
 import Success from "./notifications/Success";
 import Warning from "./notifications/Warning";
 import BlueButton from "./buttons/BlueButton";
+import { buildLabelPrinterMachine } from "../lib/factories/machineFactory";
+import { GetPrintersQuery } from "../types/graphql";
+import { PrintableLabware } from "../types/stan";
 
 interface LabelPrinterProps {
-  actor: LabelPrinterActorRef;
+  labwares: Array<PrintableLabware>;
+  onPrint?: (
+    printer: GetPrintersQuery["printers"][number],
+    labwares: Array<PrintableLabware>
+  ) => void;
+  onPrintError?: (
+    printer: GetPrintersQuery["printers"][number],
+    labwares: Array<PrintableLabware>
+  ) => void;
+  onPrinterChange?: (printer: GetPrintersQuery["printers"][number]) => void;
+  showNotifications?: boolean;
 }
 
-const LabelPrinter: React.FC<LabelPrinterProps> = ({ actor }) => {
-  const [state, send] = useActor<
-    LabelPrinterEvents,
-    LabelPrinterMachineType["state"]
-  >(actor);
+const LabelPrinter: React.FC<LabelPrinterProps> = ({
+  labwares,
+  onPrint,
+  onPrintError,
+  onPrinterChange,
+  showNotifications = true,
+}) => {
+  const [current, send, service] = useMachine(
+    buildLabelPrinterMachine(labwares)
+  );
 
-  const {
-    labelPrinter: { printers, selectedPrinter },
-    successMessage,
-    errorMessage,
-    options: { showNotifications },
-  } = state.context;
+  useEffect(() => {
+    service.onTransition((state) => {
+      if (
+        state.context.selectedPrinter &&
+        state.matches({ ready: "printSuccess" })
+      ) {
+        onPrint?.(state.context.selectedPrinter, state.context.labwares);
+      }
 
-  if (state.matches("initialising")) {
+      if (
+        state.context.selectedPrinter &&
+        state.matches({ ready: "printError" })
+      ) {
+        onPrintError?.(state.context.selectedPrinter, state.context.labwares);
+      }
+    });
+  }, [service, onPrint, onPrintError]);
+
+  useEffect(() => {
+    onPrinterChange?.(current.context.selectedPrinter!);
+  }, [current.context.selectedPrinter, onPrinterChange]);
+
+  if (current.matches("fetching")) {
     return <LoadingSpinner />;
   }
 
+  const { context } = current;
+
+  const updateSelectedLabelPrinter = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    send({
+      type: "UPDATE_SELECTED_LABEL_PRINTER",
+      name: e.currentTarget.value,
+    });
+  };
+
+  const printLabels = () => send({ type: "PRINT" });
+
   return (
     <div className="space-y-4">
+      {showNotifications && current.matches({ ready: "printSuccess" }) && (
+        <PrintSuccess
+          printer={context.selectedPrinter!}
+          labwares={context.labwares}
+        />
+      )}
+      {showNotifications && current.matches({ ready: "printError" }) && (
+        <PrintError
+          printer={context.selectedPrinter!}
+          labwares={context.labwares}
+        />
+      )}
       <div className="sm:flex sm:flex-row space-y-2 items-center justify-end sm:space-x-2 sm:space-y-0">
         <select
           aria-label="printers"
-          disabled={state.matches("printing")}
-          value={selectedPrinter?.name}
+          disabled={current.matches("printing")}
+          value={context.selectedPrinter?.name}
           className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 sm:w-1/2"
-          onChange={(e) =>
-            send(updateSelectedLabelPrinter(e.currentTarget.value))
-          }
+          onChange={updateSelectedLabelPrinter}
         >
-          {optionValues(printers, "name", "name")}
+          {context?.printers.length > 0 &&
+            optionValues(context.printers, "name", "name")}
         </select>
 
         <div>
           <BlueButton
-            disabled={state.matches("printing") || printers.length === 0}
-            onClick={() => send(print())}
+            disabled={
+              current.matches("printing") || context?.printers.length === 0
+            }
+            onClick={printLabels}
             className="flex flex-row items-center justify-center space-x-1"
           >
             <svg
@@ -73,12 +123,34 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ actor }) => {
           </BlueButton>
         </div>
       </div>
-      {showNotifications && successMessage && (
-        <Success message={successMessage} />
-      )}
-      {showNotifications && errorMessage && <Warning message={errorMessage} />}
     </div>
   );
 };
 
 export default LabelPrinter;
+
+export function PrintSuccess(props: {
+  printer: GetPrintersQuery["printers"][number];
+  labwares: Array<PrintableLabware>;
+}) {
+  return (
+    <Success
+      message={`${props.printer.name} successfully printed ${props.labwares
+        .map((lw) => lw.barcode)
+        .join(", ")}`}
+    />
+  );
+}
+
+export function PrintError(props: {
+  printer: GetPrintersQuery["printers"][number];
+  labwares: Array<PrintableLabware>;
+}) {
+  return (
+    <Warning
+      message={`${props.printer.name} failed to print ${props.labwares
+        .map((lw) => lw.barcode)
+        .join(", ")}`}
+    />
+  );
+}

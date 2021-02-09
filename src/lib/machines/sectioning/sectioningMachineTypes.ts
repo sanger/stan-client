@@ -148,7 +148,7 @@ export interface SectioningContext {
   confirmOperationRequest: ConfirmOperationRequest;
 
   /**
-   * The result of the Confirm Operation API call
+   * The successful of the Confirm Operation API call
    */
   confirmedOperation: Maybe<ConfirmOperationResult>;
 }

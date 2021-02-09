@@ -20,10 +20,6 @@ export default class RegistrationPresentationModel extends MachinePresentationMo
     return this.context.registrationResult;
   }
 
-  get labelPrinterRef() {
-    return this.context.labelPrinterRef;
-  }
-
   get registrationErrors() {
     return this.context.registrationErrors;
   }

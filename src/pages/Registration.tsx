@@ -18,12 +18,7 @@ const Registration: React.FC<RegistrationParams> = ({ model }) => {
   });
 
   if (model.isComplete()) {
-    return (
-      <RegistrationSuccess
-        result={model.registrationResult}
-        labelPrinterRef={model.labelPrinterRef}
-      />
-    );
+    return <RegistrationSuccess result={model.registrationResult} />;
   }
 
   return (

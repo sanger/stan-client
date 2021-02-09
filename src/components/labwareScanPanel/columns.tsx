@@ -1,8 +1,8 @@
 import React from "react";
 import { CellProps, Column } from "react-table";
 import { Labware, LabwareLayoutFragment } from "../../types/graphql";
-import { LabelPrinterActorRef } from "../../lib/machines/labelPrinter";
 import LabelPrinterButton from "../LabelPrinterButton";
+import { buildLabelPrinterMachine } from "../../lib/factories/machineFactory";
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
@@ -79,11 +79,18 @@ const replicate: ColumnFactory = () => {
 /**
  * Show a {@link LabelPrinterButton}
  */
-const printer: ColumnFactory<LabelPrinterActorRef> = (actorRef) => {
+const printer: ColumnFactory<Parameters<typeof buildLabelPrinterMachine>> = (
+  params
+) => {
   return {
     id: "printer",
     Header: "",
-    Cell: () => (actorRef ? <LabelPrinterButton actor={actorRef} /> : null),
+    Cell: () => (
+      <LabelPrinterButton
+        labwares={params?.[0] ?? []}
+        selectedPrinter={params?.[1] ?? null}
+      />
+    ),
   };
 };
 

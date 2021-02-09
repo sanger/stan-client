@@ -1,4 +1,6 @@
 import {
+  LabelType,
+  Labware,
   LabwareLayoutFragment as LabwareLayout,
   Maybe,
   PlanRequestAction,
@@ -78,3 +80,12 @@ export function extractServerErrors(e: ApolloError): ServerErrors {
  */
 export type Nullable<T, K extends keyof T> = Omit<T, K> &
   { [P in K]: T[P] | null };
+
+/**
+ * A piece of labware than can be printed i.e. has a label type
+ */
+export type PrintableLabware = Pick<Labware, "barcode"> & {
+  labwareType: {
+    labelType?: Maybe<Pick<LabelType, "name">>;
+  };
+};

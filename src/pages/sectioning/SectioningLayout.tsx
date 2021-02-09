@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import labwareScanTableColumns from "../../components/labwareScanPanel/columns";
 import PinkButton from "../../components/buttons/PinkButton";
 import { useActor } from "@xstate/react";
@@ -16,22 +16,33 @@ import {
   editLayout,
   updateSectioningLayout,
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
-import { LabwareTypeName } from "../../types/stan";
-import LabelPrinter from "../../components/LabelPrinter";
-import Success from "../../components/notifications/Success";
+import { LabwareTypeName, PrintableLabware } from "../../types/stan";
+import LabelPrinter, {
+  PrintError,
+  PrintSuccess,
+} from "../../components/LabelPrinter";
 import LabelPrinterButton from "../../components/LabelPrinterButton";
 import { cancel, done } from "../../lib/machines/layout/layoutEvents";
 import {
-  HasLabelPrinterActor,
   SectioningLayoutActorRef,
   SectioningLayoutEvent,
   SectioningLayoutMachineType,
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
 import LabwareTable from "../../components/LabwareTable";
-import { Column, Row } from "react-table";
-import { LabwareLayoutFragment } from "../../types/graphql";
+import { CellProps, Column, Row } from "react-table";
+import {
+  GetPrintersQuery,
+  LabwareLayoutFragment,
+  Maybe,
+} from "../../types/graphql";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { Input } from "../../components/forms/Input";
+
+interface PrintResult {
+  successful: boolean;
+  printer: GetPrintersQuery["printers"][number];
+  labwares: Array<PrintableLabware>;
+}
 
 interface SectioningLayoutProps {
   /**
@@ -60,9 +71,6 @@ const SectioningLayout = React.forwardRef<
     plannedOperations,
     sectioningLayout,
     layoutPlan,
-    labelPrinterRef,
-    printSuccessMessage,
-    printErrorMessage,
   } = current.context;
 
   const { layoutMachine } = current.children;
@@ -95,12 +103,42 @@ const SectioningLayout = React.forwardRef<
     };
   }, [plannedOperations]);
 
-  // Special case column that renders a label printer for each row
+  const [printResult, setPrintResult] = useState<Maybe<PrintResult>>(null);
+
+  const handleOnPrint = React.useCallback(
+    (
+      printer: GetPrintersQuery["printers"][0],
+      labwares: Array<PrintableLabware>
+    ) => {
+      setPrintResult({ successful: true, labwares, printer });
+    },
+    [setPrintResult]
+  );
+  const handleOnPrintError = React.useCallback(
+    (
+      printer: GetPrintersQuery["printers"][0],
+      labwares: Array<PrintableLabware>
+    ) => {
+      setPrintResult({ successful: false, labwares, printer });
+    },
+    [setPrintResult]
+  );
+
+  const [currentPrinter, setCurrentPrinter] = useState<
+    Maybe<GetPrintersQuery["printers"][number]>
+  >(null);
+
+  // Special case column that renders a label printer button for each row
   const printColumn = {
     id: "printer",
     Header: "",
-    Cell: ({ row }: { row: Row<HasLabelPrinterActor> }) => (
-      <LabelPrinterButton actor={row.original.actorRef} />
+    Cell: (props: CellProps<PrintableLabware>) => (
+      <LabelPrinterButton
+        labwares={[props.row.original]}
+        selectedPrinter={currentPrinter}
+        onPrint={handleOnPrint}
+        onPrintError={handleOnPrintError}
+      />
     ),
   };
 
@@ -162,9 +200,7 @@ const SectioningLayout = React.forwardRef<
               <Label name={"Barcode"}>
                 <Input
                   disabled={
-                    current.matches({ printing: "readyToPrint" }) ||
-                    current.matches({ printing: "printSuccess" }) ||
-                    current.matches("done")
+                    current.matches("printing") || current.matches("done")
                   }
                   type="text"
                   value={sectioningLayout.barcode}
@@ -184,9 +220,7 @@ const SectioningLayout = React.forwardRef<
               <Label name={"Quantity"}>
                 <Input
                   disabled={
-                    current.matches({ printing: "readyToPrint" }) ||
-                    current.matches({ printing: "printSuccess" }) ||
-                    current.matches("done")
+                    current.matches("printing") || current.matches("done")
                   }
                   type="number"
                   min={1}
@@ -206,9 +240,7 @@ const SectioningLayout = React.forwardRef<
             <Label name={"Section Thickness"}>
               <Input
                 disabled={
-                  current.matches({ printing: "readyToPrint" }) ||
-                  current.matches({ printing: "printSuccess" }) ||
-                  current.matches("done")
+                  current.matches("printing") || current.matches("done")
                 }
                 type={"number"}
                 min={1}
@@ -229,19 +261,31 @@ const SectioningLayout = React.forwardRef<
             <div className="w-full space-y-4 py-4 px-8">
               <LabwareTable columns={columns} labware={plannedLabware} />
 
-              {current.matches({ printing: "printSuccess" }) && (
-                <Success message={printSuccessMessage} />
+              {printResult && printResult.successful && (
+                <PrintSuccess
+                  printer={printResult.printer}
+                  labwares={printResult.labwares}
+                />
               )}
 
-              {current.matches({ printing: "printError" }) && (
-                <Warning message={printErrorMessage} />
+              {printResult && !printResult.successful && (
+                <PrintError
+                  printer={printResult.printer}
+                  labwares={printResult.labwares}
+                />
               )}
             </div>
           )}
 
-          {current.matches("printing") && labelPrinterRef && (
+          {current.matches("printing") && (
             <div className="w-full border-t-2 border-gray-200 py-3 px-4 space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
-              <LabelPrinter actor={labelPrinterRef} />
+              <LabelPrinter
+                labwares={plannedLabware}
+                showNotifications={false}
+                onPrinterChange={(printer) => setCurrentPrinter(printer)}
+                onPrint={handleOnPrint}
+                onPrintError={handleOnPrintError}
+              />
             </div>
           )}
 

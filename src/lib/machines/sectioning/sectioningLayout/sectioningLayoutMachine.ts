@@ -1,4 +1,4 @@
-import { forwardTo, Machine, MachineOptions, sendParent, spawn } from "xstate";
+import { forwardTo, Machine, MachineOptions, sendParent } from "xstate";
 import { LabwareType, PlanRequestLabware } from "../../../../types/graphql";
 import * as Yup from "yup";
 import { extractServerErrors, LabwareTypeName } from "../../../../types/stan";
@@ -12,10 +12,6 @@ import {
   State,
 } from "./sectioningLayoutTypes";
 import { assign } from "@xstate/immer";
-import { createLabelPrinterMachine } from "../../labelPrinter/labelPrinterMachine";
-import { current } from "immer";
-import { LabelPrinterContext } from "../../labelPrinter";
-import { updateSelectedLabelPrinter } from "../../labelPrinter/labelPrinterEvents";
 import { createLayoutMachine } from "../../layout/layoutMachine";
 import * as sectioningService from "../../../services/sectioningService";
 import { prepComplete } from "./sectioningLayoutEvents";
@@ -29,12 +25,8 @@ enum Action {
   ASSIGN_PLAN_RESPONSE = "assignPlanResponse",
   NOTIFY_PARENT_PLAN = "notifyParentPlan",
   ASSIGN_SERVER_ERRORS = "assignServerErrors",
-  SPAWN_LABEL_PRINTER_MACHINE = "spawnLabelPrinterMachines",
-  ASSIGN_PRINT_RESPONSE = "assignPrintResponse",
-}
-
-enum Activity {
-  UPDATE_SELECTED_PRINTER = "updateSelectedPrinter",
+  ASSIGN_PRINT_MESSAGE = "assignPrintMessage",
+  ASSIGN_PRINT_ERROR_MESSAGE = "assignPrintErrorMessage",
 }
 
 enum Guards {
@@ -138,7 +130,6 @@ export const createSectioningLayoutMachine = (
                   Action.ASSIGN_PLAN_RESPONSE,
                   forwardTo("sectioningMachine"),
                   sendParent(prepComplete()),
-                  Action.SPAWN_LABEL_PRINTER_MACHINE,
                 ],
               },
             ],
@@ -148,25 +139,7 @@ export const createSectioningLayoutMachine = (
             },
           },
         },
-        [State.PRINTING]: {
-          initial: State.READY_TO_PRINT,
-          activities: Activity.UPDATE_SELECTED_PRINTER,
-          states: {
-            [State.READY_TO_PRINT]: {},
-            [State.PRINT_SUCCESS]: {},
-            [State.PRINT_ERROR]: {},
-          },
-          on: {
-            PRINT_SUCCESS: {
-              target: `.${State.PRINT_SUCCESS}`,
-              actions: [Action.ASSIGN_PRINT_RESPONSE],
-            },
-            PRINT_ERROR: {
-              target: `.${State.PRINT_ERROR}`,
-              actions: Action.ASSIGN_PRINT_RESPONSE,
-            },
-          },
-        },
+        [State.PRINTING]: {},
         [State.DONE]: {},
       },
     },
@@ -200,17 +173,7 @@ const sectioningLayoutMachineOptions: Partial<MachineOptions<
         return;
       }
       ctx.plannedOperations = e.data.data.plan.operations;
-      ctx.plannedLabware = e.data.data.plan.labware.map((labware) => {
-        return {
-          ...labware,
-          actorRef: spawn(
-            createLabelPrinterMachine(
-              { labwares: [labware] },
-              { fetchPrinters: true }
-            )
-          ),
-        };
-      });
+      ctx.plannedLabware = e.data.data.plan.labware;
     }),
 
     [Action.ASSIGN_SERVER_ERRORS]: assign((ctx, e) => {
@@ -219,41 +182,6 @@ const sectioningLayoutMachineOptions: Partial<MachineOptions<
       }
       ctx.serverErrors = extractServerErrors(e.data);
     }),
-
-    [Action.SPAWN_LABEL_PRINTER_MACHINE]: assign((ctx, _e) => {
-      const currentCtx = current(ctx);
-      ctx.labelPrinterRef = spawn(
-        createLabelPrinterMachine(
-          { labwares: currentCtx.plannedLabware },
-          { showNotifications: false }
-        )
-      );
-    }),
-
-    [Action.ASSIGN_PRINT_RESPONSE]: assign((ctx, e) => {
-      ctx.printSuccessMessage =
-        e.type === "PRINT_SUCCESS" ? e.message : undefined;
-      ctx.printErrorMessage = e.type === "PRINT_ERROR" ? e.message : undefined;
-    }),
-  },
-
-  activities: {
-    // Notify other label printers of the change in the selected label printer
-    [Activity.UPDATE_SELECTED_PRINTER]: (ctx) => {
-      const subscription = ctx.labelPrinterRef?.subscribe(
-        ({ context }: { context: LabelPrinterContext }) => {
-          const printerName = context.labelPrinter.selectedPrinter?.name;
-
-          if (printerName) {
-            ctx.plannedLabware.map((lw) =>
-              lw.actorRef.send(updateSelectedLabelPrinter(printerName))
-            );
-          }
-        }
-      );
-
-      return () => subscription?.unsubscribe();
-    },
   },
 
   guards: {

@@ -1,7 +1,10 @@
 import {
+  GetPrintersQuery,
   GetRegistrationInfoQuery,
   GetReleaseInfoQuery,
   GetSectioningInfoQuery,
+  LabelType,
+  Labware,
   LocationFieldsFragment,
   Maybe,
 } from "../../types/graphql";
@@ -20,6 +23,8 @@ import { LocationSearchParams } from "../../pages/Location";
 import { genAddresses } from "../helpers";
 import { ReleaseMachine } from "../machines/release/releaseMachineTypes";
 import createReleaseMachine from "../machines/release/releaseMachine";
+import { LabelPrinterMachine } from "../machines/labelPrinter/labelPrinterMachineTypes";
+import createLabelPrinterMachine from "../machines/labelPrinter/labelPrinterMachine";
 
 export function buildRegistrationMachine(
   registrationInfo: GetRegistrationInfoQuery
@@ -110,6 +115,30 @@ export function buildReleaseMachine(
     context: {
       destinations: releaseInfo.releaseDestinations.map((rd) => rd.name),
       recipients: releaseInfo.releaseRecipients.map((r) => r.username),
+    },
+  });
+}
+
+/**
+ * Build a {@link LabelPrinterMachine}
+ * @param printers the list of printers
+ * @param labwares the labwares to print
+ * @param selectedPrinter the currently selected printer
+ */
+export function buildLabelPrinterMachine(
+  labwares: Array<
+    Pick<Labware, "barcode"> & {
+      labwareType: {
+        labelType?: Maybe<Pick<LabelType, "name">>;
+      };
+    }
+  >,
+  selectedPrinter: Maybe<GetPrintersQuery["printers"][number]> = null
+): LabelPrinterMachine {
+  return createLabelPrinterMachine({
+    context: {
+      selectedPrinter,
+      labwares,
     },
   });
 }

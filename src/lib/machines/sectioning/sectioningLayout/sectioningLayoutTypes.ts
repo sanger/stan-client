@@ -6,15 +6,10 @@ import {
 } from "../../../../types/graphql";
 import { NewLabwareLayout, ServerErrors } from "../../../../types/stan";
 import { ActorRef, Interpreter } from "xstate";
-import { LabelPrinterActorRef } from "../../labelPrinter";
 import * as Yup from "yup";
 import { LayoutMachineActorRef } from "../../layout";
 import { LayoutPlan } from "../../layout/layoutContext";
 import { ApolloError } from "@apollo/client";
-import {
-  PrintErrorEvent,
-  PrintSuccessEvent,
-} from "../../labelPrinter/labelPrinterEvents";
 
 export type SectioningLayoutMachineType = Interpreter<
   SectioningLayoutContext,
@@ -37,9 +32,6 @@ export enum State {
   VALIDATING = "validating",
   CREATING = "creating",
   PRINTING = "printing",
-  READY_TO_PRINT = "readyToPrint",
-  PRINT_SUCCESS = "printSuccess",
-  PRINT_ERROR = "printError",
   DONE = "done",
 }
 
@@ -55,13 +47,7 @@ export interface SectioningLayoutSchema {
     [State.EDITING_LAYOUT]: {};
     [State.VALIDATING]: {};
     [State.CREATING]: {};
-    [State.PRINTING]: {
-      states: {
-        [State.READY_TO_PRINT]: {};
-        [State.PRINT_SUCCESS]: {};
-        [State.PRINT_ERROR]: {};
-      };
-    };
+    [State.PRINTING]: {};
     [State.DONE]: {};
   };
 }
@@ -93,11 +79,9 @@ export interface SectioningLayoutContext {
   plannedOperations: PlanMutation["plan"]["operations"];
 
   /**
-   * The planned labware returned from the plan mutation along with a LabelPrinter actor
+   * The planned labware returned from the plan mutation
    */
-  plannedLabware: Array<
-    PlanMutation["plan"]["labware"][number] & HasLabelPrinterActor
-  >;
+  plannedLabware: Array<PlanMutation["plan"]["labware"][number]>;
 
   /**
    * Reference to a `LayoutMachine` Actor
@@ -108,11 +92,6 @@ export interface SectioningLayoutContext {
    * A layout plan
    */
   layoutPlan: LayoutPlan;
-
-  /**
-   * Label printer machine
-   */
-  labelPrinterRef?: LabelPrinterActorRef;
 
   /**
    * Message from the label printer containing details of the printer's success
@@ -171,8 +150,6 @@ export type SectioningLayoutEvent =
   | UpdateLayoutPlanEvent
   | PlanSectionResolveEvent
   | PlanSectionRejectEvent
-  | PrintSuccessEvent
-  | PrintErrorEvent
   | LayoutMachineDone
   | PrepCompleteEvent;
 //endregion
@@ -210,8 +187,4 @@ export interface SectioningLayout {
    * The barcode of the labware we're sectioning on to (for Visium LP slides)
    */
   barcode?: string;
-}
-
-export interface HasLabelPrinterActor {
-  actorRef: LabelPrinterActorRef;
 }

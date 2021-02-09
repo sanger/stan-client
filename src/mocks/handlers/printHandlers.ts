@@ -16,6 +16,13 @@ const printers = labwareTypeInstances.reduce<GetPrintersQuery["printers"]>(
         },
         name: `${labwareType.name} Printer`,
       });
+
+      memo.push({
+        labelType: {
+          name: labwareType.labelType.name,
+        },
+        name: `${labwareType.name} Printer 2`,
+      });
     }
     return memo;
   },

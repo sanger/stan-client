@@ -1,13 +1,11 @@
-import { Machine, MachineOptions, spawn, interpret } from "xstate";
+import { interpret, Machine, MachineOptions } from "xstate";
 import {
-  RegistrationEvent,
   RegistrationContext,
+  RegistrationEvent,
   RegistrationSchema,
 } from "./registrationMachineTypes";
 import { assign } from "@xstate/immer";
 import { extractServerErrors } from "../../../types/stan";
-import { current } from "immer";
-import { createLabelPrinterMachine } from "../labelPrinter/labelPrinterMachine";
 import * as registrationService from "../../services/registrationService";
 import { FormValues } from "../../services/registrationService";
 import {
@@ -43,15 +41,6 @@ export const registrationMachineOptions: Partial<MachineOptions<
         return;
       }
       ctx.registrationErrors = extractServerErrors(e.data);
-    }),
-
-    [Actions.SPAWN_LABEL_PRINTER]: assign((ctx, _e) => {
-      const currentCtx = current(ctx);
-      ctx.labelPrinterRef = spawn(
-        createLabelPrinterMachine({
-          labwares: currentCtx.registrationResult.register.labware,
-        })
-      );
     }),
   },
 

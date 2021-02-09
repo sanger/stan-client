@@ -270,7 +270,7 @@ describe("Sectioning", () => {
         cy.findByText("Save").click();
       });
 
-      it("shows a success message", () => {
+      it("shows an error message", () => {
         cy.findByText(
           "There was an error confirming the Sectioning operation"
         ).should("exist");

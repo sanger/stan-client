@@ -8,19 +8,16 @@ import variants from "../../lib/motionVariants";
 import LabwareTable from "../../components/LabwareTable";
 import columns from "../../components/labwareScanPanel/columns";
 import LabelPrinter from "../../components/LabelPrinter";
-import { LabelPrinterActorRef } from "../../lib/machines/labelPrinter";
 import PinkButton from "../../components/buttons/PinkButton";
 import ButtonBar from "../../components/ButtonBar";
 import AppShell from "../../components/AppShell";
 
 interface RegistrationSuccessProps {
   result: RegisterTissuesMutation;
-  labelPrinterRef: LabelPrinterActorRef;
 }
 
 const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
   result,
-  labelPrinterRef,
 }) => {
   return (
     <AppShell>
@@ -59,16 +56,16 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
               variants={variants.fadeInWithLift}
               className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow"
             >
-              <LabelPrinter actor={labelPrinterRef} />
+              <LabelPrinter labwares={result.register.labware} />
             </motion.div>
           </div>
         </motion.div>
       </AppShell.Main>
 
       <ButtonBar>
-        <BlueButton action="secondary" disabled={true}>
-          Store
-        </BlueButton>
+        <Link to={"/store"}>
+          <BlueButton action="secondary">Store</BlueButton>
+        </Link>
         <Link to={"/"}>
           <PinkButton action="primary">Return to Dashboard</PinkButton>
         </Link>

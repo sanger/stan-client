@@ -8,10 +8,17 @@ import {
   PrintMutationVariables,
 } from "../../types/graphql";
 
-export function getPrinters() {
-  return client.query<GetPrintersQuery, GetPrintersQueryVariables>({
+/**
+ * Fetch all printers from STAN core
+ */
+export async function getPrinters(): Promise<GetPrintersQuery> {
+  const response = await client.query<
+    GetPrintersQuery,
+    GetPrintersQueryVariables
+  >({
     query: GetPrintersDocument,
   });
+  return response.data;
 }
 
 export function printLabels(variables: PrintMutationVariables) {
