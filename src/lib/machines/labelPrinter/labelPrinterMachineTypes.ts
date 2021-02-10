@@ -33,6 +33,11 @@ export interface LabelPrinterContext {
       };
     }
   >;
+
+  /**
+   * Number of labels to print off for each barcode
+   */
+  labelsPerBarcode: number;
 }
 
 /**

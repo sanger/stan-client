@@ -7,6 +7,7 @@ import { PrintableLabware } from "../types/stan";
 
 interface LabelPrinterButtonProps {
   selectedPrinter?: Maybe<GetPrintersQuery["printers"][number]>;
+  labelsPerBarcode?: number;
   labwares: Array<
     Pick<Labware, "barcode"> & {
       labwareType: {
@@ -16,22 +17,25 @@ interface LabelPrinterButtonProps {
   >;
   onPrint?: (
     printer: GetPrintersQuery["printers"][number],
-    labwares: Array<PrintableLabware>
+    labwares: Array<PrintableLabware>,
+    labelsPerBarcode: number
   ) => void;
   onPrintError?: (
     printer: GetPrintersQuery["printers"][number],
-    labwares: Array<PrintableLabware>
+    labwares: Array<PrintableLabware>,
+    labelsPerBarcode: number
   ) => void;
 }
 
 const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({
   selectedPrinter,
+  labelsPerBarcode = 1,
   labwares,
   onPrint,
   onPrintError,
 }) => {
   const [current, send, service] = useMachine(
-    buildLabelPrinterMachine(labwares, selectedPrinter)
+    buildLabelPrinterMachine(labwares, labelsPerBarcode, selectedPrinter)
   );
 
   useEffect(() => {
@@ -40,14 +44,22 @@ const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({
         state.context.selectedPrinter &&
         state.matches({ ready: "printSuccess" })
       ) {
-        onPrint?.(state.context.selectedPrinter, state.context.labwares);
+        onPrint?.(
+          state.context.selectedPrinter,
+          state.context.labwares,
+          state.context.labelsPerBarcode
+        );
       }
 
       if (
         state.context.selectedPrinter &&
         state.matches({ ready: "printError" })
       ) {
-        onPrintError?.(state.context.selectedPrinter, state.context.labwares);
+        onPrintError?.(
+          state.context.selectedPrinter,
+          state.context.labwares,
+          state.context.labelsPerBarcode
+        );
       }
     });
   }, [service, onPrint, onPrintError]);

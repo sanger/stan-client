@@ -64,7 +64,9 @@ export const machineOptions: Partial<MachineOptions<
 
       return printService.printLabels({
         printer: ctx.selectedPrinter.name,
-        barcodes: ctx.labwares.map((lw) => lw.barcode),
+        barcodes: ctx.labwares
+          .map((lw) => new Array(ctx.labelsPerBarcode).fill(lw.barcode))
+          .flat(),
       });
     },
   },

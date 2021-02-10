@@ -86,7 +86,7 @@ const printer: ColumnFactory<Parameters<typeof buildLabelPrinterMachine>> = (
     Cell: () => (
       <LabelPrinterButton
         labwares={params?.[0] ?? []}
-        selectedPrinter={params?.[1] ?? null}
+        selectedPrinter={params?.[2] ?? null}
       />
     ),
   };

@@ -20,6 +20,7 @@ import LabelPrinter, { PrintResult } from "../components/LabelPrinter";
 import Success from "../components/notifications/Success";
 import variants from "../lib/motionVariants";
 import { usePrinters } from "../lib/hooks";
+import MutedText from "../components/MutedText";
 
 interface PageParams {
   model: ExtractionPresentationModel;
@@ -95,6 +96,7 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
                       <TableCell>
                         {data.destinationLabware && (
                           <LabelPrinterButton
+                            labelsPerBarcode={2}
                             labwares={[data.destinationLabware]}
                             selectedPrinter={currentPrinter}
                             onPrint={handleOnPrint}
@@ -111,12 +113,16 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
                 <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
                   {printResult && <PrintResult result={printResult} />}
                   <LabelPrinter
+                    labelsPerBarcode={2}
                     showNotifications={false}
                     labwares={model.destinationLabwares}
                     onPrint={handleOnPrint}
                     onPrintError={handleOnPrintError}
                     onPrinterChange={handleOnPrinterChange}
                   />
+                  <MutedText className="text-right">
+                    Note: 2 labels for each destination labware will be printed.
+                  </MutedText>
                 </div>
               </div>
             </motion.div>

@@ -93,6 +93,7 @@ export type PrintableLabware = Pick<Labware, "barcode"> & {
 
 export type PrintResultType = {
   successful: boolean;
+  labelsPerBarcode: number;
   printer: GetPrintersQuery["printers"][number];
   labwares: Array<PrintableLabware>;
 };

@@ -77,7 +77,7 @@ describe("RNA Extraction", () => {
 
       it("prints the destination labware", () => {
         cy.findByText(
-          "Tube Printer successfully printed STAN-1004, STAN-1005, STAN-1006"
+          "Tube Printer successfully printed 2 labels for STAN-1004, STAN-1005, STAN-1006"
         ).should("be.visible");
       });
     });

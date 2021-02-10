@@ -11,13 +11,16 @@ import { PrintableLabware, PrintResultType } from "../types/stan";
 
 interface LabelPrinterProps {
   labwares: Array<PrintableLabware>;
+  labelsPerBarcode?: number;
   onPrint?: (
     printer: GetPrintersQuery["printers"][number],
-    labwares: Array<PrintableLabware>
+    labwares: Array<PrintableLabware>,
+    labelsPerBarcode: number
   ) => void;
   onPrintError?: (
     printer: GetPrintersQuery["printers"][number],
-    labwares: Array<PrintableLabware>
+    labwares: Array<PrintableLabware>,
+    labelsPerBarcode: number
   ) => void;
   onPrinterChange?: (printer: GetPrintersQuery["printers"][number]) => void;
   showNotifications?: boolean;
@@ -25,13 +28,14 @@ interface LabelPrinterProps {
 
 const LabelPrinter: React.FC<LabelPrinterProps> = ({
   labwares,
+  labelsPerBarcode = 1,
   onPrint,
   onPrintError,
   onPrinterChange,
   showNotifications = true,
 }) => {
   const [current, send, service] = useMachine(
-    buildLabelPrinterMachine(labwares)
+    buildLabelPrinterMachine(labwares, labelsPerBarcode)
   );
 
   useEffect(() => {
@@ -40,14 +44,22 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
         state.context.selectedPrinter &&
         state.matches({ ready: "printSuccess" })
       ) {
-        onPrint?.(state.context.selectedPrinter, state.context.labwares);
+        onPrint?.(
+          state.context.selectedPrinter,
+          state.context.labwares,
+          state.context.labelsPerBarcode
+        );
       }
 
       if (
         state.context.selectedPrinter &&
         state.matches({ ready: "printError" })
       ) {
-        onPrintError?.(state.context.selectedPrinter, state.context.labwares);
+        onPrintError?.(
+          state.context.selectedPrinter,
+          state.context.labwares,
+          state.context.labelsPerBarcode
+        );
       }
     });
   }, [service, onPrint, onPrintError]);
@@ -81,6 +93,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
           <PrintResult
             result={{
               successful: current.matches({ ready: "printSuccess" }),
+              labelsPerBarcode: context.labelsPerBarcode,
               printer: context.selectedPrinter!,
               labwares: context.labwares,
             }}
@@ -132,11 +145,11 @@ export function PrintResult(props: { result: PrintResultType }) {
   if (props.result.successful) {
     return (
       <Success
-        message={`${
-          props.result.printer.name
-        } successfully printed ${props.result.labwares
-          .map((lw) => lw.barcode)
-          .join(", ")}`}
+        message={`${props.result.printer.name} successfully printed${
+          props.result.labelsPerBarcode > 1
+            ? " " + props.result.labelsPerBarcode + " labels for"
+            : ""
+        } ${props.result.labwares.map((lw) => lw.barcode).join(", ")}`}
       />
     );
   } else {

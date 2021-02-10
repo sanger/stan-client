@@ -163,18 +163,25 @@ export function usePrinters() {
   const handleOnPrint = React.useCallback(
     (
       printer: GetPrintersQuery["printers"][0],
-      labwares: Array<PrintableLabware>
+      labwares: Array<PrintableLabware>,
+      labelsPerBarcode: number
     ) => {
-      setPrintResult({ successful: true, labwares, printer });
+      setPrintResult({ successful: true, labwares, printer, labelsPerBarcode });
     },
     [setPrintResult]
   );
   const handleOnPrintError = React.useCallback(
     (
       printer: GetPrintersQuery["printers"][0],
-      labwares: Array<PrintableLabware>
+      labwares: Array<PrintableLabware>,
+      labelsPerBarcode: number
     ) => {
-      setPrintResult({ successful: false, labwares, printer });
+      setPrintResult({
+        successful: false,
+        labwares,
+        printer,
+        labelsPerBarcode,
+      });
     },
     [setPrintResult]
   );
