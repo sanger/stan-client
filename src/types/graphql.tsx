@@ -381,6 +381,7 @@ export type Mutation = {
   logout?: Maybe<Scalars['String']>;
   register: RegisterResult;
   plan: PlanResult;
+  extract: PlanResult;
   printLabware?: Maybe<Scalars['String']>;
   confirmOperation: ConfirmOperationResult;
   release: ReleaseResult;
@@ -403,6 +404,11 @@ export type MutationRegisterArgs = {
 
 
 export type MutationPlanArgs = {
+  request: PlanRequest;
+};
+
+
+export type MutationExtractArgs = {
   request: PlanRequest;
 };
 
@@ -534,6 +540,45 @@ export type EmptyLocationMutation = (
   & { empty: (
     { __typename?: 'UnstoreResult' }
     & Pick<UnstoreResult, 'numUnstored'>
+  ) }
+);
+
+export type ExtractMutationVariables = Exact<{
+  request: PlanRequest;
+}>;
+
+
+export type ExtractMutation = (
+  { __typename?: 'Mutation' }
+  & { extract: (
+    { __typename?: 'PlanResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareLayoutFragment
+    )>, operations: Array<(
+      { __typename?: 'PlanOperation' }
+      & { operationType?: Maybe<(
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      )>, planActions: Array<(
+        { __typename?: 'PlanAction' }
+        & Pick<PlanAction, 'newSection'>
+        & { sample: (
+          { __typename?: 'Sample' }
+          & Pick<Sample, 'id'>
+        ), source: (
+          { __typename?: 'Slot' }
+          & Pick<Slot, 'address' | 'labwareId'>
+          & { samples: Array<(
+            { __typename?: 'Sample' }
+            & Pick<Sample, 'id'>
+          )> }
+        ), destination: (
+          { __typename?: 'Slot' }
+          & Pick<Slot, 'address' | 'labwareId'>
+        ) }
+      )> }
+    )> }
   ) }
 );
 
@@ -988,6 +1033,62 @@ export function useEmptyLocationMutation(baseOptions?: Apollo.MutationHookOption
 export type EmptyLocationMutationHookResult = ReturnType<typeof useEmptyLocationMutation>;
 export type EmptyLocationMutationResult = Apollo.MutationResult<EmptyLocationMutation>;
 export type EmptyLocationMutationOptions = Apollo.BaseMutationOptions<EmptyLocationMutation, EmptyLocationMutationVariables>;
+export const ExtractDocument = gql`
+    mutation Extract($request: PlanRequest!) {
+  extract(request: $request) {
+    labware {
+      ...LabwareLayout
+    }
+    operations {
+      operationType {
+        name
+      }
+      planActions {
+        newSection
+        sample {
+          id
+        }
+        source {
+          address
+          labwareId
+          samples {
+            id
+          }
+        }
+        destination {
+          address
+          labwareId
+        }
+      }
+    }
+  }
+}
+    ${LabwareLayoutFragmentDoc}`;
+export type ExtractMutationFn = Apollo.MutationFunction<ExtractMutation, ExtractMutationVariables>;
+
+/**
+ * __useExtractMutation__
+ *
+ * To run a mutation, you first call `useExtractMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExtractMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [extractMutation, { data, loading, error }] = useExtractMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useExtractMutation(baseOptions?: Apollo.MutationHookOptions<ExtractMutation, ExtractMutationVariables>) {
+        return Apollo.useMutation<ExtractMutation, ExtractMutationVariables>(ExtractDocument, baseOptions);
+      }
+export type ExtractMutationHookResult = ReturnType<typeof useExtractMutation>;
+export type ExtractMutationResult = Apollo.MutationResult<ExtractMutation>;
+export type ExtractMutationOptions = Apollo.BaseMutationOptions<ExtractMutation, ExtractMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(username: $username, password: $password) {

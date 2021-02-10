@@ -7,6 +7,7 @@ import { getRegistrationMachine } from "../lib/services/registrationService";
 import { getSectioningMachine } from "../lib/services/sectioningService";
 import Presenter from "./Presenter";
 import {
+  buildExtractionPresentationModel,
   buildLocationPresentationModel,
   buildRegistrationPresentationModel,
   buildReleasePresentationModel,
@@ -15,6 +16,7 @@ import {
 import { getLocationMachine } from "../lib/services/locationService";
 import LocationPresentationModel from "../lib/presentationModels/locationPresentationModel";
 import { getReleaseMachine } from "../lib/services/releaseService";
+import { getExtractionMachine } from "../lib/services/extractionService";
 
 const Logout = React.lazy(() => import("../pages/Logout"));
 const Dashboard = React.lazy(() => import("../pages/Dashboard"));
@@ -25,6 +27,7 @@ const Release = React.lazy(() => import("../pages/Release"));
 
 // Lab
 const Sectioning = React.lazy(() => import("../pages/Sectioning"));
+const Extraction = React.lazy(() => import("../pages/Extraction"));
 
 // Storage
 const Store = React.lazy(() => import("../pages/Store"));
@@ -49,6 +52,15 @@ export function Routes() {
             model={buildSectioningModel}
           >
             {(presentationModel) => <Sectioning model={presentationModel} />}
+          </Presenter>
+        </AuthenticatedRoute>
+
+        <AuthenticatedRoute path="/lab/extraction">
+          <Presenter
+            machine={getExtractionMachine}
+            model={buildExtractionPresentationModel}
+          >
+            {(presentationModel) => <Extraction model={presentationModel} />}
           </Presenter>
         </AuthenticatedRoute>
 

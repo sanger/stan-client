@@ -1,4 +1,5 @@
 import {
+  GetPrintersQuery,
   LabelType,
   Labware,
   LabwareLayoutFragment as LabwareLayout,
@@ -88,4 +89,10 @@ export type PrintableLabware = Pick<Labware, "barcode"> & {
   labwareType: {
     labelType?: Maybe<Pick<LabelType, "name">>;
   };
+};
+
+export type PrintResultType = {
+  successful: boolean;
+  printer: GetPrintersQuery["printers"][number];
+  labwares: Array<PrintableLabware>;
 };

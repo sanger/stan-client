@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import labwareScanTableColumns from "../../components/labwareScanPanel/columns";
 import PinkButton from "../../components/buttons/PinkButton";
 import { useActor } from "@xstate/react";
@@ -17,10 +17,7 @@ import {
   updateSectioningLayout,
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
 import { LabwareTypeName, PrintableLabware } from "../../types/stan";
-import LabelPrinter, {
-  PrintError,
-  PrintSuccess,
-} from "../../components/LabelPrinter";
+import LabelPrinter, { PrintResult } from "../../components/LabelPrinter";
 import LabelPrinterButton from "../../components/LabelPrinterButton";
 import { cancel, done } from "../../lib/machines/layout/layoutEvents";
 import {
@@ -30,19 +27,10 @@ import {
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
 import LabwareTable from "../../components/LabwareTable";
 import { CellProps, Column, Row } from "react-table";
-import {
-  GetPrintersQuery,
-  LabwareLayoutFragment,
-  Maybe,
-} from "../../types/graphql";
+import { LabwareLayoutFragment } from "../../types/graphql";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { Input } from "../../components/forms/Input";
-
-interface PrintResult {
-  successful: boolean;
-  printer: GetPrintersQuery["printers"][number];
-  labwares: Array<PrintableLabware>;
-}
+import { usePrinters } from "../../lib/hooks";
 
 interface SectioningLayoutProps {
   /**
@@ -64,6 +52,14 @@ const SectioningLayout = React.forwardRef<
     SectioningLayoutEvent,
     SectioningLayoutMachineType["state"]
   >(actor);
+
+  const {
+    handleOnPrint,
+    handleOnPrintError,
+    handleOnPrinterChange,
+    printResult,
+    currentPrinter,
+  } = usePrinters();
 
   const {
     serverErrors,
@@ -102,31 +98,6 @@ const SectioningLayout = React.forwardRef<
       },
     };
   }, [plannedOperations]);
-
-  const [printResult, setPrintResult] = useState<Maybe<PrintResult>>(null);
-
-  const handleOnPrint = React.useCallback(
-    (
-      printer: GetPrintersQuery["printers"][0],
-      labwares: Array<PrintableLabware>
-    ) => {
-      setPrintResult({ successful: true, labwares, printer });
-    },
-    [setPrintResult]
-  );
-  const handleOnPrintError = React.useCallback(
-    (
-      printer: GetPrintersQuery["printers"][0],
-      labwares: Array<PrintableLabware>
-    ) => {
-      setPrintResult({ successful: false, labwares, printer });
-    },
-    [setPrintResult]
-  );
-
-  const [currentPrinter, setCurrentPrinter] = useState<
-    Maybe<GetPrintersQuery["printers"][number]>
-  >(null);
 
   // Special case column that renders a label printer button for each row
   const printColumn = {
@@ -261,19 +232,7 @@ const SectioningLayout = React.forwardRef<
             <div className="w-full space-y-4 py-4 px-8">
               <LabwareTable columns={columns} labware={plannedLabware} />
 
-              {printResult && printResult.successful && (
-                <PrintSuccess
-                  printer={printResult.printer}
-                  labwares={printResult.labwares}
-                />
-              )}
-
-              {printResult && !printResult.successful && (
-                <PrintError
-                  printer={printResult.printer}
-                  labwares={printResult.labwares}
-                />
-              )}
+              {printResult && <PrintResult result={printResult} />}
             </div>
           )}
 
@@ -282,7 +241,7 @@ const SectioningLayout = React.forwardRef<
               <LabelPrinter
                 labwares={plannedLabware}
                 showNotifications={false}
-                onPrinterChange={(printer) => setCurrentPrinter(printer)}
+                onPrinterChange={handleOnPrinterChange}
                 onPrint={handleOnPrint}
                 onPrintError={handleOnPrintError}
               />

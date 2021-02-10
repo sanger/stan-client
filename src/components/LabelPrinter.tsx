@@ -7,7 +7,7 @@ import Warning from "./notifications/Warning";
 import BlueButton from "./buttons/BlueButton";
 import { buildLabelPrinterMachine } from "../lib/factories/machineFactory";
 import { GetPrintersQuery } from "../types/graphql";
-import { PrintableLabware } from "../types/stan";
+import { PrintableLabware, PrintResultType } from "../types/stan";
 
 interface LabelPrinterProps {
   labwares: Array<PrintableLabware>;
@@ -75,18 +75,17 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
 
   return (
     <div className="space-y-4">
-      {showNotifications && current.matches({ ready: "printSuccess" }) && (
-        <PrintSuccess
-          printer={context.selectedPrinter!}
-          labwares={context.labwares}
-        />
-      )}
-      {showNotifications && current.matches({ ready: "printError" }) && (
-        <PrintError
-          printer={context.selectedPrinter!}
-          labwares={context.labwares}
-        />
-      )}
+      {showNotifications &&
+        (current.matches({ ready: "printSuccess" }) ||
+          current.matches({ ready: "printError" })) && (
+          <PrintResult
+            result={{
+              successful: current.matches({ ready: "printSuccess" }),
+              printer: context.selectedPrinter!,
+              labwares: context.labwares,
+            }}
+          />
+        )}
       <div className="sm:flex sm:flex-row space-y-2 items-center justify-end sm:space-x-2 sm:space-y-0">
         <select
           aria-label="printers"
@@ -129,28 +128,26 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
 
 export default LabelPrinter;
 
-export function PrintSuccess(props: {
-  printer: GetPrintersQuery["printers"][number];
-  labwares: Array<PrintableLabware>;
-}) {
-  return (
-    <Success
-      message={`${props.printer.name} successfully printed ${props.labwares
-        .map((lw) => lw.barcode)
-        .join(", ")}`}
-    />
-  );
-}
-
-export function PrintError(props: {
-  printer: GetPrintersQuery["printers"][number];
-  labwares: Array<PrintableLabware>;
-}) {
-  return (
-    <Warning
-      message={`${props.printer.name} failed to print ${props.labwares
-        .map((lw) => lw.barcode)
-        .join(", ")}`}
-    />
-  );
+export function PrintResult(props: { result: PrintResultType }) {
+  if (props.result.successful) {
+    return (
+      <Success
+        message={`${
+          props.result.printer.name
+        } successfully printed ${props.result.labwares
+          .map((lw) => lw.barcode)
+          .join(", ")}`}
+      />
+    );
+  } else {
+    return (
+      <Warning
+        message={`${
+          props.result.printer.name
+        } failed to print ${props.result.labwares
+          .map((lw) => lw.barcode)
+          .join(", ")}`}
+      />
+    );
+  }
 }

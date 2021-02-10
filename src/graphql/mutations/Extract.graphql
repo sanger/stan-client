@@ -1,0 +1,29 @@
+mutation Extract($request: PlanRequest!) {
+    extract(request: $request) {
+        labware {
+            ...LabwareLayout
+        }
+        operations {
+            operationType {
+                name
+            }
+            planActions {
+                newSection
+                sample {
+                    id
+                }
+                source {
+                    address
+                    labwareId
+                    samples {
+                        id
+                    }
+                }
+                destination {
+                    address
+                    labwareId
+                }
+            }
+        }
+    }
+}

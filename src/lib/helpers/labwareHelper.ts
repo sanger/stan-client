@@ -1,4 +1,4 @@
-import { Labware } from "../../types/graphql";
+import { LabwareLayoutFragment } from "../../types/graphql";
 import { cycle } from "../helpers";
 import { orderBy } from "lodash";
 
@@ -6,7 +6,7 @@ import { orderBy } from "lodash";
  * Build an array of all {@link Sample samples} in a {@link Labware} along with its {@link Slot} plus the original {@link Labware}
  * @param labware a {@link Labware}
  */
-export function labwareSamples(labware: Labware) {
+export function labwareSamples(labware: LabwareLayoutFragment) {
   return labware.slots
     .map((slot) => {
       return slot.samples.map((sample) => {
@@ -21,7 +21,9 @@ export function labwareSamples(labware: Labware) {
  *
  * @param labwares list of labwares to get colors for
  */
-export function buildSampleColors(labwares: Labware[]): Map<number, string> {
+export function buildSampleColors(
+  labwares: LabwareLayoutFragment[]
+): Map<number, string> {
   const colors = cycle([
     "red",
     "green",
