@@ -24,7 +24,7 @@ describe("RNA Extraction", () => {
                 ctx.errors([
                   {
                     message:
-                      "Exception while fetching data (/release) : Failed to extract",
+                      "Exception while fetching data (/extract) : Failed to extract",
                   },
                 ])
               );

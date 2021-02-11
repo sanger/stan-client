@@ -11,6 +11,7 @@ const extractionHandlers = [
         ExtractMutation["extract"]
       >(
         (memo, barcode) => {
+          // Fetch the labware out of session storage
           const labwareJson = sessionStorage.getItem(`labware-${barcode}`);
 
           if (!labwareJson) {
@@ -19,29 +20,30 @@ const extractionHandlers = [
             );
           }
 
+          // Parse it
           const labware = JSON.parse(labwareJson);
 
+          // Find the requested labware type by name
           const labwareType = labwareTypeInstances.find(
             (lt) => lt.name === req.variables.request.labwareType
           );
+          // Create the new bit of destination labware using the same slots and samples as the source
           const newLabware = labwareFactory.build({
             labwareType,
-            barcode,
             slots: labware.slots,
           });
           memo.labware.push(newLabware);
 
           let action = {
-            newSection: undefined,
             sample: {
-              id: labware.slots.samples[0].sampleId,
+              id: labware.slots[0].samples[0].sampleId,
             },
             source: {
               address: "A1",
               labwareId: labware.id,
               samples: [
                 {
-                  id: labware.slots.samples[0].sampleId,
+                  id: labware.slots[0].samples[0].sampleId,
                 },
               ],
             },
