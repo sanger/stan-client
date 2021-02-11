@@ -80,6 +80,10 @@ export default class ExtractionPresentationModel extends MachinePresentationMode
     );
   }
 
+  get labelsPerBarcode(): number {
+    return 2;
+  }
+
   updateLabwares(labwares: Labware[]) {
     this.send({ type: "UPDATE_LABWARES", labwares });
   }

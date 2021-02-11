@@ -96,7 +96,7 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
                       <TableCell>
                         {data.destinationLabware && (
                           <LabelPrinterButton
-                            labelsPerBarcode={2}
+                            labelsPerBarcode={model.labelsPerBarcode}
                             labwares={[data.destinationLabware]}
                             selectedPrinter={currentPrinter}
                             onPrint={handleOnPrint}
@@ -113,7 +113,7 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
                 <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
                   {printResult && <PrintResult result={printResult} />}
                   <LabelPrinter
-                    labelsPerBarcode={2}
+                    labelsPerBarcode={model.labelsPerBarcode}
                     showNotifications={false}
                     labwares={model.destinationLabwares}
                     onPrint={handleOnPrint}
