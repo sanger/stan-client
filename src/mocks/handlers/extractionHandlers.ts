@@ -7,90 +7,67 @@ const extractionHandlers = [
   graphql.mutation<ExtractMutation, ExtractMutationVariables>(
     "Extract",
     (req, res, ctx) => {
-      // return res(
-      //   ctx.errors([
-      //     {
-      //       message: `Exception while fetching data (/release) : Your labwares are haunted`,
-      //     },
-      //   ])
-      // );
+      const extract: ExtractMutation["extract"] = req.variables.request.barcodes.reduce<
+        ExtractMutation["extract"]
+      >(
+        (memo, barcode) => {
+          const labwareJson = sessionStorage.getItem(`labware-${barcode}`);
 
-      if (req.variables.request.operationType === "Extract") {
-        const plan: ExtractMutation["extract"] = req.variables.request.labware.reduce<
-          ExtractMutation["extract"]
-        >(
-          (memo, planRequestLabware) => {
-            const planActions: ExtractMutation["extract"]["operations"][number]["planActions"] = planRequestLabware.actions.map(
-              (planAction) => {
-                const labwareJson = sessionStorage.getItem(
-                  `labware-${planAction.source.barcode}`
-                );
-
-                if (!labwareJson) {
-                  throw new Error(
-                    `Couldn't find labware with barcode ${planAction.source.barcode} in sessionStorage`
-                  );
-                }
-
-                const labware = JSON.parse(labwareJson);
-
-                const labwareType = labwareTypeInstances.find(
-                  (lt) => lt.name === planRequestLabware.labwareType
-                );
-                const barcode = planRequestLabware.barcode ?? undefined;
-                const newLabware = labwareFactory.build({
-                  labwareType,
-                  barcode,
-                  slots: labware.slots,
-                });
-                memo.labware.push(newLabware);
-
-                return {
-                  newSection: undefined,
-                  sample: {
-                    id: planAction.sampleId,
-                  },
-                  source: {
-                    address: planAction.address,
-                    labwareId: labware.id,
-                    samples: [
-                      {
-                        id: planAction.sampleId,
-                      },
-                    ],
-                  },
-                  destination: {
-                    address: planAction.address,
-                    labwareId: newLabware.id,
-                  },
-                };
-              }
+          if (!labwareJson) {
+            throw new Error(
+              `Couldn't find labware with barcode ${barcode} in sessionStorage`
             );
-
-            memo.operations[0].planActions = [
-              ...memo.operations[0].planActions,
-              ...planActions,
-            ];
-
-            return memo;
-          },
-          {
-            labware: [],
-            operations: [
-              { operationType: { name: "Extract" }, planActions: [] },
-            ],
           }
-        );
 
-        return res(
-          ctx.data({
-            extract: {
-              labware: plan.labware,
-              operations: plan.operations,
+          const labware = JSON.parse(labwareJson);
+
+          const labwareType = labwareTypeInstances.find(
+            (lt) => lt.name === req.variables.request.labwareType
+          );
+          const newLabware = labwareFactory.build({
+            labwareType,
+            barcode,
+            slots: labware.slots,
+          });
+          memo.labware.push(newLabware);
+
+          let action = {
+            newSection: undefined,
+            sample: {
+              id: labware.slots.samples[0].sampleId,
             },
-          })
-        );
-      }
+            source: {
+              address: "A1",
+              labwareId: labware.id,
+              samples: [
+                {
+                  id: labware.slots.samples[0].sampleId,
+                },
+              ],
+            },
+            destination: {
+              address: "A1",
+              labwareId: newLabware.id,
+            },
+          };
+
+          memo.operations[0].actions.push(action);
+          return memo;
+        },
+        {
+          labware: [],
+          operations: [{ operationType: { name: "Extract" }, actions: [] }],
+        }
+      );
+
+      return res(
+        ctx.data({
+          extract: {
+            labware: extract.labware,
+            operations: extract.operations,
+          },
+        })
+      );
     }
   ),
 ];

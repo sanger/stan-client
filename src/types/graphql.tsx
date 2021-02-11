@@ -216,12 +216,11 @@ export type Action = {
 
 export type Operation = {
   __typename?: 'Operation';
+  id: Scalars['Int'];
   operationType: OperationType;
   actions: Array<Action>;
   user: User;
   performed: Scalars['Timestamp'];
-  releaseDestination?: Maybe<ReleaseDestination>;
-  releaseRecipient?: Maybe<ReleaseRecipient>;
 };
 
 export type ConfirmOperationResult = {
@@ -276,6 +275,17 @@ export type ReleaseRequest = {
   barcodes: Array<Scalars['String']>;
   destination: Scalars['String'];
   recipient: Scalars['String'];
+};
+
+export type ExtractRequest = {
+  barcodes: Array<Scalars['String']>;
+  labwareType: Scalars['String'];
+};
+
+export type OperationResult = {
+  __typename?: 'OperationResult';
+  labware: Array<Labware>;
+  operations: Array<Operation>;
 };
 
 export type StoredItem = {
@@ -381,10 +391,10 @@ export type Mutation = {
   logout?: Maybe<Scalars['String']>;
   register: RegisterResult;
   plan: PlanResult;
-  extract: PlanResult;
   printLabware?: Maybe<Scalars['String']>;
   confirmOperation: ConfirmOperationResult;
   release: ReleaseResult;
+  extract: OperationResult;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
@@ -408,11 +418,6 @@ export type MutationPlanArgs = {
 };
 
 
-export type MutationExtractArgs = {
-  request: PlanRequest;
-};
-
-
 export type MutationPrintLabwareArgs = {
   printer: Scalars['String'];
   barcodes: Array<Scalars['String']>;
@@ -426,6 +431,11 @@ export type MutationConfirmOperationArgs = {
 
 export type MutationReleaseArgs = {
   request: ReleaseRequest;
+};
+
+
+export type MutationExtractArgs = {
+  request: ExtractRequest;
 };
 
 
@@ -544,25 +554,24 @@ export type EmptyLocationMutation = (
 );
 
 export type ExtractMutationVariables = Exact<{
-  request: PlanRequest;
+  request: ExtractRequest;
 }>;
 
 
 export type ExtractMutation = (
   { __typename?: 'Mutation' }
   & { extract: (
-    { __typename?: 'PlanResult' }
+    { __typename?: 'OperationResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
       & LabwareLayoutFragment
     )>, operations: Array<(
-      { __typename?: 'PlanOperation' }
-      & { operationType?: Maybe<(
+      { __typename?: 'Operation' }
+      & { operationType: (
         { __typename?: 'OperationType' }
         & Pick<OperationType, 'name'>
-      )>, planActions: Array<(
-        { __typename?: 'PlanAction' }
-        & Pick<PlanAction, 'newSection'>
+      ), actions: Array<(
+        { __typename?: 'Action' }
         & { sample: (
           { __typename?: 'Sample' }
           & Pick<Sample, 'id'>
@@ -1034,7 +1043,7 @@ export type EmptyLocationMutationHookResult = ReturnType<typeof useEmptyLocation
 export type EmptyLocationMutationResult = Apollo.MutationResult<EmptyLocationMutation>;
 export type EmptyLocationMutationOptions = Apollo.BaseMutationOptions<EmptyLocationMutation, EmptyLocationMutationVariables>;
 export const ExtractDocument = gql`
-    mutation Extract($request: PlanRequest!) {
+    mutation Extract($request: ExtractRequest!) {
   extract(request: $request) {
     labware {
       ...LabwareLayout
@@ -1043,8 +1052,7 @@ export const ExtractDocument = gql`
       operationType {
         name
       }
-      planActions {
-        newSection
+      actions {
         sample {
           id
         }

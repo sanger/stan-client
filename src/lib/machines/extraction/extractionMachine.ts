@@ -5,7 +5,6 @@ import {
   ExtractionSchema,
 } from "./extractionMachineTypes";
 import * as extractionService from "../../services/extractionService";
-import { getPlanRequestLabwares } from "../../services/extractionService";
 import { assign } from "@xstate/immer";
 import { createMachineBuilder } from "../index";
 import { castDraft } from "immer";
@@ -47,8 +46,8 @@ const machineOptions: Partial<MachineOptions<
   services: {
     extract: (ctx, _e) => {
       return extractionService.extract({
-        operationType: "Extract",
-        labware: getPlanRequestLabwares(ctx),
+        labwareType: "Tube",
+        barcodes: ctx.labwares.map((lw) => lw.barcode),
       });
     },
   },

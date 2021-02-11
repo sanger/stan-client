@@ -1,4 +1,4 @@
-mutation Extract($request: PlanRequest!) {
+mutation Extract($request: ExtractRequest!) {
     extract(request: $request) {
         labware {
             ...LabwareLayout
@@ -7,8 +7,7 @@ mutation Extract($request: PlanRequest!) {
             operationType {
                 name
             }
-            planActions {
-                newSection
+            actions {
                 sample {
                     id
                 }

@@ -65,7 +65,7 @@ export default class ExtractionPresentationModel extends MachinePresentationMode
     const destinationLabwares = this.destinationLabwares;
     const sampleColors = buildSampleColors(destinationLabwares);
 
-    return this.context.extraction.extract.operations[0].planActions.map(
+    return this.context.extraction.extract.operations[0].actions.map(
       (action) => {
         return {
           sampleColor: sampleColors.get(action.sample.id),
