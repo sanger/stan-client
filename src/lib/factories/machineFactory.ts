@@ -125,7 +125,6 @@ export function buildReleaseMachine(
 /**
  * Build a {@link LabelPrinterMachine}
  * @param labwares the labwares to print
- * @param labelsPerBarcode the number of labels to print for each barcode
  * @param selectedPrinter the currently selected printer
  */
 export function buildLabelPrinterMachine(
@@ -136,14 +135,12 @@ export function buildLabelPrinterMachine(
       };
     }
   >,
-  labelsPerBarcode: number = 1,
   selectedPrinter: Maybe<GetPrintersQuery["printers"][number]> = null
 ): LabelPrinterMachine {
   return createLabelPrinterMachine({
     context: {
       selectedPrinter,
       labwares,
-      labelsPerBarcode,
     },
   });
 }

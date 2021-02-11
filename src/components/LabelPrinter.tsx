@@ -35,7 +35,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
   showNotifications = true,
 }) => {
   const [current, send, service] = useMachine(
-    buildLabelPrinterMachine(labwares, labelsPerBarcode)
+    buildLabelPrinterMachine(labwares)
   );
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
         onPrint?.(
           state.context.selectedPrinter,
           state.context.labwares,
-          state.context.labelsPerBarcode
+          labelsPerBarcode
         );
       }
 
@@ -58,11 +58,11 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
         onPrintError?.(
           state.context.selectedPrinter,
           state.context.labwares,
-          state.context.labelsPerBarcode
+          labelsPerBarcode
         );
       }
     });
-  }, [service, onPrint, onPrintError]);
+  }, [service, onPrint, onPrintError, labelsPerBarcode]);
 
   useEffect(() => {
     onPrinterChange?.(current.context.selectedPrinter!);
@@ -83,7 +83,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
     });
   };
 
-  const printLabels = () => send({ type: "PRINT" });
+  const printLabels = () => send({ type: "PRINT", labelsPerBarcode });
 
   return (
     <div className="space-y-4">
@@ -93,7 +93,7 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
           <PrintResult
             result={{
               successful: current.matches({ ready: "printSuccess" }),
-              labelsPerBarcode: context.labelsPerBarcode,
+              labelsPerBarcode,
               printer: context.selectedPrinter!,
               labwares: context.labwares,
             }}
