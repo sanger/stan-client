@@ -82,7 +82,10 @@ const Store: React.FC<StoreProps> = ({ location }) => {
                   <div className="mt-10">
                     <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
                       {locations.map((location) => (
-                        <LocationLink barcode={location.barcode} />
+                        <LocationLink
+                          key={location.barcode}
+                          barcode={location.barcode}
+                        />
                       ))}
                     </dl>
                   </div>

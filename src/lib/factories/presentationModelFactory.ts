@@ -23,6 +23,11 @@ import {
   ExtractionState,
 } from "../machines/extraction/extractionMachineTypes";
 import ExtractionPresentationModel from "../presentationModels/extractionPresentationModel";
+import {
+  SearchMachineService,
+  SearchState,
+} from "../machines/search/searchMachineTypes";
+import SearchPresentationModel from "../presentationModels/searchPresentationModel";
 // HYGEN MARKER
 
 export function buildReleasePresentationModel(
@@ -57,4 +62,10 @@ export function buildExtractionPresentationModel(
   service: ExtractionMachineService
 ): ExtractionPresentationModel {
   return new ExtractionPresentationModel(current, service);
+}
+export function buildSearchPresentationModel(
+  current: SearchState,
+  service: SearchMachineService
+): SearchPresentationModel {
+  return new SearchPresentationModel(current, service);
 }

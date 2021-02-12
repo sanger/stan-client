@@ -72,7 +72,9 @@ describe("Release Page", () => {
       });
 
       it("shows an error", () => {
-        cy.findByText("Labware has already been released: [STAN-123,STAN-456]");
+        cy.findByText(
+          "Labware has already been released: [STAN-123,STAN-456]"
+        ).should("be.visible");
       });
 
       it("doesn't show the download button", () => {

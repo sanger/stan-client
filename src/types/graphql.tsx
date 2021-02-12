@@ -317,6 +317,7 @@ export enum GridDirection {
 
 export type Location = {
   __typename?: 'Location';
+  id: Scalars['Int'];
   barcode: Scalars['String'];
   name?: Maybe<Scalars['String']>;
   customName?: Maybe<Scalars['String']>;
@@ -342,6 +343,37 @@ export type UnstoreResult = {
   unstored: Array<UnstoredItem>;
 };
 
+export type FindEntry = {
+  __typename?: 'FindEntry';
+  sampleId: Scalars['Int'];
+  labwareId: Scalars['Int'];
+};
+
+export type LabwareLocationEntry = {
+  __typename?: 'LabwareLocationEntry';
+  labwareId: Scalars['Int'];
+  locationId: Scalars['Int'];
+  address?: Maybe<Scalars['Address']>;
+};
+
+export type FindResult = {
+  __typename?: 'FindResult';
+  entries: Array<FindEntry>;
+  samples: Array<Sample>;
+  labware: Array<Labware>;
+  locations: Array<Location>;
+  labwareLocations: Array<LabwareLocationEntry>;
+  numRecords: Scalars['Int'];
+};
+
+export type FindRequest = {
+  labwareBarcode?: Maybe<Scalars['String']>;
+  donorName?: Maybe<Scalars['String']>;
+  tissueExternalName?: Maybe<Scalars['String']>;
+  tissueType?: Maybe<Scalars['String']>;
+  maxRecords?: Maybe<Scalars['Int']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -356,6 +388,7 @@ export type Query = {
   comments: Array<Comment>;
   releaseDestinations: Array<ReleaseDestination>;
   releaseRecipients: Array<ReleaseRecipient>;
+  find: FindResult;
   location: Location;
   stored: Array<StoredItem>;
 };
@@ -373,6 +406,11 @@ export type QueryPrintersArgs = {
 
 export type QueryCommentsArgs = {
   category?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryFindArgs = {
+  request: FindRequest;
 };
 
 
@@ -764,6 +802,49 @@ export type CurrentUserQuery = (
   )> }
 );
 
+export type FindQueryVariables = Exact<{
+  request: FindRequest;
+}>;
+
+
+export type FindQuery = (
+  { __typename?: 'Query' }
+  & { find: (
+    { __typename?: 'FindResult' }
+    & Pick<FindResult, 'numRecords'>
+    & { entries: Array<(
+      { __typename?: 'FindEntry' }
+      & Pick<FindEntry, 'labwareId' | 'sampleId'>
+    )>, samples: Array<(
+      { __typename?: 'Sample' }
+      & Pick<Sample, 'id' | 'section'>
+      & { tissue: (
+        { __typename?: 'Tissue' }
+        & Pick<Tissue, 'replicate' | 'externalName'>
+        & { spatialLocation: (
+          { __typename?: 'SpatialLocation' }
+          & { tissueType: (
+            { __typename?: 'TissueType' }
+            & Pick<TissueType, 'name'>
+          ) }
+        ), donor: (
+          { __typename?: 'Donor' }
+          & Pick<Donor, 'donorName'>
+        ) }
+      ) }
+    )>, labware: Array<(
+      { __typename?: 'Labware' }
+      & Pick<Labware, 'id' | 'barcode'>
+    )>, locations: Array<(
+      { __typename?: 'Location' }
+      & Pick<Location, 'id' | 'barcode' | 'customName' | 'name'>
+    )>, labwareLocations: Array<(
+      { __typename?: 'LabwareLocationEntry' }
+      & Pick<LabwareLocationEntry, 'labwareId' | 'locationId' | 'address'>
+    )> }
+  ) }
+);
+
 export type FindLabwareQueryVariables = Exact<{
   barcode: Scalars['String'];
 }>;
@@ -888,6 +969,17 @@ export type GetReleaseInfoQuery = (
   )>, releaseRecipients: Array<(
     { __typename?: 'ReleaseRecipient' }
     & Pick<ReleaseRecipient, 'username'>
+  )> }
+);
+
+export type GetSearchInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSearchInfoQuery = (
+  { __typename?: 'Query' }
+  & { tissueTypes: Array<(
+    { __typename?: 'TissueType' }
+    & Pick<TissueType, 'name'>
   )> }
 );
 
@@ -1459,6 +1551,74 @@ export function useCurrentUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type CurrentUserQueryHookResult = ReturnType<typeof useCurrentUserQuery>;
 export type CurrentUserLazyQueryHookResult = ReturnType<typeof useCurrentUserLazyQuery>;
 export type CurrentUserQueryResult = Apollo.QueryResult<CurrentUserQuery, CurrentUserQueryVariables>;
+export const FindDocument = gql`
+    query Find($request: FindRequest!) {
+  find(request: $request) {
+    numRecords
+    entries {
+      labwareId
+      sampleId
+    }
+    samples {
+      id
+      section
+      tissue {
+        replicate
+        spatialLocation {
+          tissueType {
+            name
+          }
+        }
+        externalName
+        donor {
+          donorName
+        }
+      }
+    }
+    labware {
+      id
+      barcode
+    }
+    locations {
+      id
+      barcode
+      customName
+      name
+    }
+    labwareLocations {
+      labwareId
+      locationId
+      address
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindQuery__
+ *
+ * To run a query within a React component, call `useFindQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindQuery({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useFindQuery(baseOptions?: Apollo.QueryHookOptions<FindQuery, FindQueryVariables>) {
+        return Apollo.useQuery<FindQuery, FindQueryVariables>(FindDocument, baseOptions);
+      }
+export function useFindLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindQuery, FindQueryVariables>) {
+          return Apollo.useLazyQuery<FindQuery, FindQueryVariables>(FindDocument, baseOptions);
+        }
+export type FindQueryHookResult = ReturnType<typeof useFindQuery>;
+export type FindLazyQueryHookResult = ReturnType<typeof useFindLazyQuery>;
+export type FindQueryResult = Apollo.QueryResult<FindQuery, FindQueryVariables>;
 export const FindLabwareDocument = gql`
     query FindLabware($barcode: String!) {
   labware(barcode: $barcode) {
@@ -1705,6 +1865,38 @@ export function useGetReleaseInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type GetReleaseInfoQueryHookResult = ReturnType<typeof useGetReleaseInfoQuery>;
 export type GetReleaseInfoLazyQueryHookResult = ReturnType<typeof useGetReleaseInfoLazyQuery>;
 export type GetReleaseInfoQueryResult = Apollo.QueryResult<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>;
+export const GetSearchInfoDocument = gql`
+    query GetSearchInfo {
+  tissueTypes {
+    name
+  }
+}
+    `;
+
+/**
+ * __useGetSearchInfoQuery__
+ *
+ * To run a query within a React component, call `useGetSearchInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetSearchInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetSearchInfoQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetSearchInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetSearchInfoQuery, GetSearchInfoQueryVariables>) {
+        return Apollo.useQuery<GetSearchInfoQuery, GetSearchInfoQueryVariables>(GetSearchInfoDocument, baseOptions);
+      }
+export function useGetSearchInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetSearchInfoQuery, GetSearchInfoQueryVariables>) {
+          return Apollo.useLazyQuery<GetSearchInfoQuery, GetSearchInfoQueryVariables>(GetSearchInfoDocument, baseOptions);
+        }
+export type GetSearchInfoQueryHookResult = ReturnType<typeof useGetSearchInfoQuery>;
+export type GetSearchInfoLazyQueryHookResult = ReturnType<typeof useGetSearchInfoLazyQuery>;
+export type GetSearchInfoQueryResult = Apollo.QueryResult<GetSearchInfoQuery, GetSearchInfoQueryVariables>;
 export const GetSectioningInfoDocument = gql`
     query GetSectioningInfo {
   comments(category: "section") {

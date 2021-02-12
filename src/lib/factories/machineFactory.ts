@@ -1,7 +1,9 @@
 import {
+  FindRequest,
   GetPrintersQuery,
   GetRegistrationInfoQuery,
   GetReleaseInfoQuery,
+  GetSearchInfoQuery,
   GetSectioningInfoQuery,
   LabelType,
   Labware,
@@ -27,6 +29,8 @@ import { LabelPrinterMachine } from "../machines/labelPrinter/labelPrinterMachin
 import createLabelPrinterMachine from "../machines/labelPrinter/labelPrinterMachine";
 import createExtractionMachine from "../machines/extraction/extractionMachine";
 import { ExtractionMachine } from "../machines/extraction/extractionMachineTypes";
+import createSearchMachine from "../machines/search/searchMachine";
+import { SearchMachine } from "../machines/search/searchMachineTypes";
 // HYGEN MARKER
 
 export function buildRegistrationMachine(
@@ -152,6 +156,21 @@ export function buildExtractionMachine(): ExtractionMachine {
   return createExtractionMachine({
     context: {
       labwares: [],
+    },
+  });
+}
+
+/**
+ * Build a {@link SearchMachine}
+ */
+export function buildSearchMachine(
+  searchInfo: GetSearchInfoQuery,
+  findRequest: FindRequest
+): SearchMachine {
+  return createSearchMachine({
+    context: {
+      searchInfo,
+      findRequest,
     },
   });
 }

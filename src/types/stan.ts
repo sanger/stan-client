@@ -97,3 +97,27 @@ export type PrintResultType = {
   printer: GetPrintersQuery["printers"][number];
   labwares: Array<PrintableLabware>;
 };
+
+export type SearchResultsType = {
+  numDisplayed: number;
+  numRecords: number;
+  entries: SearchResultTableEntry[];
+};
+
+/**
+ * A single row on the results table of the Search page
+ */
+export type SearchResultTableEntry = {
+  barcode: string;
+  externalId: string;
+  donorId: string;
+  tissueType: string;
+  location: Maybe<SearchResultTableEntryLocation>;
+  sectionNumber: Maybe<number>;
+  replicate: number;
+};
+
+export type SearchResultTableEntryLocation = {
+  barcode: string;
+  displayName: string;
+};

@@ -12,6 +12,7 @@ const locationFactory = Factory.define<Location>(
     const barcode = `STO-${padStart(String(sequence), 3, "0")}`;
 
     const location: Location = {
+      id: sequence,
       barcode,
       name: params.name ?? `Location ${sequence}`,
       customName: params.customName ?? null,
