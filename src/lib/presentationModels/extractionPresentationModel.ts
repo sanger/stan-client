@@ -65,19 +65,21 @@ export default class ExtractionPresentationModel extends MachinePresentationMode
     const destinationLabwares = this.destinationLabwares;
     const sampleColors = buildSampleColors(destinationLabwares);
 
-    return this.context.extraction.extract.operations[0].actions.map(
-      (action) => {
-        return {
-          sampleColor: sampleColors.get(action.sample.id),
-          sourceLabware: sourceLabwares.find(
-            (lw) => lw.id === action.source.labwareId
-          ),
-          destinationLabware: destinationLabwares.find(
-            (lw) => lw.id === action.destination.labwareId
-          ),
-        };
-      }
-    );
+    return this.context.extraction.extract.operations
+      .map((operation) => {
+        return operation.actions.map((action) => {
+          return {
+            sampleColor: sampleColors.get(action.sample.id),
+            sourceLabware: sourceLabwares.find(
+              (lw) => lw.id === action.source.labwareId
+            ),
+            destinationLabware: destinationLabwares.find(
+              (lw) => lw.id === action.destination.labwareId
+            ),
+          };
+        });
+      })
+      .flat();
   }
 
   get labelsPerBarcode(): number {
