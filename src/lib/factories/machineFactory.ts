@@ -25,6 +25,9 @@ import { ReleaseMachine } from "../machines/release/releaseMachineTypes";
 import createReleaseMachine from "../machines/release/releaseMachine";
 import { LabelPrinterMachine } from "../machines/labelPrinter/labelPrinterMachineTypes";
 import createLabelPrinterMachine from "../machines/labelPrinter/labelPrinterMachine";
+import createExtractionMachine from "../machines/extraction/extractionMachine";
+import { ExtractionMachine } from "../machines/extraction/extractionMachineTypes";
+// HYGEN MARKER
 
 export function buildRegistrationMachine(
   registrationInfo: GetRegistrationInfoQuery
@@ -121,7 +124,6 @@ export function buildReleaseMachine(
 
 /**
  * Build a {@link LabelPrinterMachine}
- * @param printers the list of printers
  * @param labwares the labwares to print
  * @param selectedPrinter the currently selected printer
  */
@@ -139,6 +141,17 @@ export function buildLabelPrinterMachine(
     context: {
       selectedPrinter,
       labwares,
+    },
+  });
+}
+
+/**
+ * Build an {@link ExtractionMachine}
+ */
+export function buildExtractionMachine(): ExtractionMachine {
+  return createExtractionMachine({
+    context: {
+      labwares: [],
     },
   });
 }

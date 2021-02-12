@@ -216,12 +216,11 @@ export type Action = {
 
 export type Operation = {
   __typename?: 'Operation';
+  id: Scalars['Int'];
   operationType: OperationType;
   actions: Array<Action>;
   user: User;
   performed: Scalars['Timestamp'];
-  releaseDestination?: Maybe<ReleaseDestination>;
-  releaseRecipient?: Maybe<ReleaseRecipient>;
 };
 
 export type ConfirmOperationResult = {
@@ -276,6 +275,17 @@ export type ReleaseRequest = {
   barcodes: Array<Scalars['String']>;
   destination: Scalars['String'];
   recipient: Scalars['String'];
+};
+
+export type ExtractRequest = {
+  barcodes: Array<Scalars['String']>;
+  labwareType: Scalars['String'];
+};
+
+export type OperationResult = {
+  __typename?: 'OperationResult';
+  labware: Array<Labware>;
+  operations: Array<Operation>;
 };
 
 export type StoredItem = {
@@ -384,6 +394,7 @@ export type Mutation = {
   printLabware?: Maybe<Scalars['String']>;
   confirmOperation: ConfirmOperationResult;
   release: ReleaseResult;
+  extract: OperationResult;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
@@ -420,6 +431,11 @@ export type MutationConfirmOperationArgs = {
 
 export type MutationReleaseArgs = {
   request: ReleaseRequest;
+};
+
+
+export type MutationExtractArgs = {
+  request: ExtractRequest;
 };
 
 
@@ -534,6 +550,44 @@ export type EmptyLocationMutation = (
   & { empty: (
     { __typename?: 'UnstoreResult' }
     & Pick<UnstoreResult, 'numUnstored'>
+  ) }
+);
+
+export type ExtractMutationVariables = Exact<{
+  request: ExtractRequest;
+}>;
+
+
+export type ExtractMutation = (
+  { __typename?: 'Mutation' }
+  & { extract: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareLayoutFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), actions: Array<(
+        { __typename?: 'Action' }
+        & { sample: (
+          { __typename?: 'Sample' }
+          & Pick<Sample, 'id'>
+        ), source: (
+          { __typename?: 'Slot' }
+          & Pick<Slot, 'address' | 'labwareId'>
+          & { samples: Array<(
+            { __typename?: 'Sample' }
+            & Pick<Sample, 'id'>
+          )> }
+        ), destination: (
+          { __typename?: 'Slot' }
+          & Pick<Slot, 'address' | 'labwareId'>
+        ) }
+      )> }
+    )> }
   ) }
 );
 
@@ -988,6 +1042,61 @@ export function useEmptyLocationMutation(baseOptions?: Apollo.MutationHookOption
 export type EmptyLocationMutationHookResult = ReturnType<typeof useEmptyLocationMutation>;
 export type EmptyLocationMutationResult = Apollo.MutationResult<EmptyLocationMutation>;
 export type EmptyLocationMutationOptions = Apollo.BaseMutationOptions<EmptyLocationMutation, EmptyLocationMutationVariables>;
+export const ExtractDocument = gql`
+    mutation Extract($request: ExtractRequest!) {
+  extract(request: $request) {
+    labware {
+      ...LabwareLayout
+    }
+    operations {
+      operationType {
+        name
+      }
+      actions {
+        sample {
+          id
+        }
+        source {
+          address
+          labwareId
+          samples {
+            id
+          }
+        }
+        destination {
+          address
+          labwareId
+        }
+      }
+    }
+  }
+}
+    ${LabwareLayoutFragmentDoc}`;
+export type ExtractMutationFn = Apollo.MutationFunction<ExtractMutation, ExtractMutationVariables>;
+
+/**
+ * __useExtractMutation__
+ *
+ * To run a mutation, you first call `useExtractMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExtractMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [extractMutation, { data, loading, error }] = useExtractMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useExtractMutation(baseOptions?: Apollo.MutationHookOptions<ExtractMutation, ExtractMutationVariables>) {
+        return Apollo.useMutation<ExtractMutation, ExtractMutationVariables>(ExtractDocument, baseOptions);
+      }
+export type ExtractMutationHookResult = ReturnType<typeof useExtractMutation>;
+export type ExtractMutationResult = Apollo.MutationResult<ExtractMutation>;
+export type ExtractMutationOptions = Apollo.BaseMutationOptions<ExtractMutation, ExtractMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(username: $username, password: $password) {

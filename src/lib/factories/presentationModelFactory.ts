@@ -18,6 +18,12 @@ import {
   ReleaseMachineService,
   ReleaseState,
 } from "../machines/release/releaseMachineTypes";
+import {
+  ExtractionMachineService,
+  ExtractionState,
+} from "../machines/extraction/extractionMachineTypes";
+import ExtractionPresentationModel from "../presentationModels/extractionPresentationModel";
+// HYGEN MARKER
 
 export function buildReleasePresentationModel(
   current: ReleaseState,
@@ -45,4 +51,10 @@ export function buildLocationPresentationModel(
   service: LocationMachineService
 ): LocationPresentationModel {
   return new LocationPresentationModel(current, service);
+}
+export function buildExtractionPresentationModel(
+  current: ExtractionState,
+  service: ExtractionMachineService
+): ExtractionPresentationModel {
+  return new ExtractionPresentationModel(current, service);
 }

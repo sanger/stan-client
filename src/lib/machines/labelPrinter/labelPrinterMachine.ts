@@ -57,14 +57,21 @@ export const machineOptions: Partial<MachineOptions<
   services: {
     fetchPrinters: () => getPrinters(),
 
-    printLabels: (ctx) => {
+    printLabels: (ctx, e) => {
       if (!ctx.selectedPrinter) {
         return Promise.reject("No selected printer");
       }
 
+      let labelsPerBarcode = 1;
+      if (e.type === "PRINT" && e.labelsPerBarcode) {
+        labelsPerBarcode = e.labelsPerBarcode;
+      }
+
       return printService.printLabels({
         printer: ctx.selectedPrinter.name,
-        barcodes: ctx.labwares.map((lw) => lw.barcode),
+        barcodes: ctx.labwares
+          .map((lw) => new Array(labelsPerBarcode).fill(lw.barcode))
+          .flat(),
       });
     },
   },

@@ -3,6 +3,7 @@ import { CellProps, Column } from "react-table";
 import { Labware, LabwareLayoutFragment } from "../../types/graphql";
 import LabelPrinterButton from "../LabelPrinterButton";
 import { buildLabelPrinterMachine } from "../../lib/factories/machineFactory";
+import Circle from "../Circle";
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
@@ -16,10 +17,7 @@ const color: ColumnFactory<Map<number, any>> = (meta) => {
     accessor: (originalRow) =>
       meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? "#FFF",
     Cell: (props: CellProps<Labware>) => (
-      <span
-        style={{ backgroundColor: props.value }}
-        className="inline-block h-8 w-8 rounded-full"
-      />
+      <Circle backgroundColor={props.value} />
     ),
   };
 };

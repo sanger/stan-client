@@ -1,8 +1,10 @@
-import { RefObject, useEffect, useRef, useState } from "react";
+import React, { RefObject, useEffect, useRef, useState } from "react";
 import { MachinePresentationModel } from "../presentationModels/machinePresentationModel";
 import { EventObject, Interpreter, State, StateMachine } from "xstate";
 import { useMachine } from "@xstate/react";
 import { Typestate } from "xstate/lib/types";
+import { GetPrintersQuery, Maybe } from "../../types/graphql";
+import { PrintableLabware, PrintResultType } from "../../types/stan";
 
 /**
  * Hook to call a side effect after a given delay
@@ -122,4 +124,73 @@ export function usePresentationModel<
   }, [model, current]);
 
   return model;
+}
+
+/**
+ * Hook for handling multiple print buttons on a page
+ *
+ * `handleOnPrint` is a handler for a printer that will set a successful print result
+ * `handleOnPrintError` is a handler for a printer that will set an unsuccessful print result
+ * `handleOnPrinterChange` ia a handler to set the current printer on user selection
+ * `printResult` is a {@link PrintResultType}, based on the most recent print attempt
+ * `currentPrinter` is the current printer
+ *
+ * @example
+ * const {
+ *   handleOnPrint,
+ *   handleOnPrintError,
+ *   handleOnPrinterChange,
+ *   printResult,
+ *   currentPrinter,
+ * } = usePrinters();
+ *
+ */
+export function usePrinters() {
+  const [currentPrinter, setCurrentPrinter] = useState<
+    Maybe<GetPrintersQuery["printers"][number]>
+  >(null);
+
+  const [printResult, setPrintResult] = useState<Maybe<PrintResultType>>(null);
+
+  const handleOnPrinterChange = React.useCallback(
+    (printer: GetPrintersQuery["printers"][0]) => {
+      setCurrentPrinter(printer);
+      setPrintResult(null);
+    },
+    [setCurrentPrinter]
+  );
+
+  const handleOnPrint = React.useCallback(
+    (
+      printer: GetPrintersQuery["printers"][0],
+      labwares: Array<PrintableLabware>,
+      labelsPerBarcode: number
+    ) => {
+      setPrintResult({ successful: true, labwares, printer, labelsPerBarcode });
+    },
+    [setPrintResult]
+  );
+  const handleOnPrintError = React.useCallback(
+    (
+      printer: GetPrintersQuery["printers"][0],
+      labwares: Array<PrintableLabware>,
+      labelsPerBarcode: number
+    ) => {
+      setPrintResult({
+        successful: false,
+        labwares,
+        printer,
+        labelsPerBarcode,
+      });
+    },
+    [setPrintResult]
+  );
+
+  return {
+    handleOnPrint,
+    handleOnPrintError,
+    handleOnPrinterChange,
+    currentPrinter,
+    printResult,
+  };
 }

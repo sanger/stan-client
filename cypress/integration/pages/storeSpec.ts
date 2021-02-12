@@ -3,6 +3,7 @@ describe("Store", () => {
     context("when the location is found", () => {
       before(() => {
         cy.visit("/store");
+        cy.wait(2000);
         cy.findByLabelText("Find Location:").type("STO-001F{enter}");
       });
 
@@ -17,6 +18,7 @@ describe("Store", () => {
     context("when the location is not found", () => {
       before(() => {
         cy.visit("/store");
+        cy.wait(2000);
         cy.findByLabelText("Find Location:").type("FAKE-LOCATION{enter}");
       });
 

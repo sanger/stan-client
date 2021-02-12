@@ -35,7 +35,7 @@ const labwareHandlers = [
             labwareId: 3,
             samples: [
               {
-                id: 3,
+                id: Math.ceil(Math.random() * 1000),
                 tissue: {
                   replicate: 5,
                   externalName: "EXT 1",

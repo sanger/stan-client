@@ -25,8 +25,6 @@ enum Action {
   ASSIGN_PLAN_RESPONSE = "assignPlanResponse",
   NOTIFY_PARENT_PLAN = "notifyParentPlan",
   ASSIGN_SERVER_ERRORS = "assignServerErrors",
-  ASSIGN_PRINT_MESSAGE = "assignPrintMessage",
-  ASSIGN_PRINT_ERROR_MESSAGE = "assignPrintErrorMessage",
 }
 
 enum Guards {

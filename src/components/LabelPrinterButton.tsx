@@ -7,6 +7,7 @@ import { PrintableLabware } from "../types/stan";
 
 interface LabelPrinterButtonProps {
   selectedPrinter?: Maybe<GetPrintersQuery["printers"][number]>;
+  labelsPerBarcode?: number;
   labwares: Array<
     Pick<Labware, "barcode"> & {
       labwareType: {
@@ -16,16 +17,19 @@ interface LabelPrinterButtonProps {
   >;
   onPrint?: (
     printer: GetPrintersQuery["printers"][number],
-    labwares: Array<PrintableLabware>
+    labwares: Array<PrintableLabware>,
+    labelsPerBarcode: number
   ) => void;
   onPrintError?: (
     printer: GetPrintersQuery["printers"][number],
-    labwares: Array<PrintableLabware>
+    labwares: Array<PrintableLabware>,
+    labelsPerBarcode: number
   ) => void;
 }
 
 const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({
   selectedPrinter,
+  labelsPerBarcode = 1,
   labwares,
   onPrint,
   onPrintError,
@@ -40,22 +44,30 @@ const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({
         state.context.selectedPrinter &&
         state.matches({ ready: "printSuccess" })
       ) {
-        onPrint?.(state.context.selectedPrinter, state.context.labwares);
+        onPrint?.(
+          state.context.selectedPrinter,
+          state.context.labwares,
+          labelsPerBarcode
+        );
       }
 
       if (
         state.context.selectedPrinter &&
         state.matches({ ready: "printError" })
       ) {
-        onPrintError?.(state.context.selectedPrinter, state.context.labwares);
+        onPrintError?.(
+          state.context.selectedPrinter,
+          state.context.labwares,
+          labelsPerBarcode
+        );
       }
     });
-  }, [service, onPrint, onPrintError]);
+  }, [service, onPrint, onPrintError, labelsPerBarcode]);
 
   return (
     <button
       disabled={current.matches("fetching") || current.matches("printing")}
-      onClick={() => send({ type: "PRINT" })}
+      onClick={() => send({ type: "PRINT", labelsPerBarcode })}
       type="button"
       className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-100 active:opacity-75 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
     >

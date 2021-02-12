@@ -64,7 +64,7 @@ type FetchPrintersErrorEvent = {
   data: ApolloError;
 };
 
-type PrintEvent = { type: "PRINT" };
+type PrintEvent = { type: "PRINT"; labelsPerBarcode?: number };
 
 type UpdateSelectedLabelPrinterEvent = {
   type: "UPDATE_SELECTED_LABEL_PRINTER";

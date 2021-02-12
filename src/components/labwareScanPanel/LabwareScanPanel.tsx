@@ -38,15 +38,12 @@ const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({
   onChange,
   locked = false,
 }) => {
-  const [current, send, service] = useMachine(createLabwareMachine());
+  const [current, send] = useMachine(createLabwareMachine());
 
+  // Call onChange handler whenever labwares change
   useEffect(() => {
-    service.onEvent((e) => {
-      if (e.type === "done.invoke.findLabware" || e.type === "REMOVE_LABWARE") {
-        onChange?.(service.state.context.labwares);
-      }
-    });
-  }, [service, onChange]);
+    onChange?.(current.context.labwares);
+  }, [current.context.labwares, onChange]);
 
   useEffect(() => {
     send(locked ? { type: "LOCK" } : { type: "UNLOCK" });
