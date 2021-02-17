@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Label printing after Registration ([#12](https://github.com/sanger/stan-client/pull/12))
  - Storage ([#13](https://github.com/sanger/stan-client/pull/13))
  - Release ([#15](https://github.com/sanger/stan-client/pull/15))
+ - Release Files ([#16](https://github.com/sanger/stan-client/pull/16))
+ - RNA Extraction ([#17](https://github.com/sanger/stan-client/pull/17))
 
 ## [0.1.0] - 2020-10-27
 ### Added
