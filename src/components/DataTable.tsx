@@ -10,7 +10,7 @@ import {
 import Table, { TableBody, TableCell, TableHead, TableHeader } from "./Table";
 import { motion } from "framer-motion";
 
-interface LabwareTableProps<T extends object> {
+interface DataTableProps<T extends object> {
   columns: Column<T>[];
   data: T[];
 
@@ -31,8 +31,8 @@ function DataTable<T extends object>({
   data,
   defaultSort,
   sortable = false,
-}: React.PropsWithChildren<LabwareTableProps<T>>): React.ReactElement<
-  LabwareTableProps<T>
+}: React.PropsWithChildren<DataTableProps<T>>): React.ReactElement<
+  DataTableProps<T>
 > {
   /**
    * Memoize columns
