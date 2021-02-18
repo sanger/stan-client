@@ -26,6 +26,7 @@ import { addressToLocationAddress } from "../lib/helpers/locationHelper";
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
 import LocationPresentationModel from "../lib/presentationModels/locationPresentationModel";
 import { RouteComponentProps } from "react-router-dom";
+import { LocationMatchParams } from "../types/stan";
 
 /**
  * The different ways of displaying stored items
@@ -38,27 +39,6 @@ enum ViewType {
 export const ModelContext = React.createContext<
   LocationPresentationModel | undefined
 >(undefined);
-
-/**
- * Type for possible location URL params
- */
-export type LocationSearchParams = {
-  labwareBarcode: string;
-};
-
-/**
- * Custom type guard for {@link LocationSearchParams}
- */
-export function isLocationSearch(obj: any): obj is LocationSearchParams {
-  return "labwareBarcode" in obj && typeof obj["labwareBarcode"] === "string";
-}
-
-/**
- * Parameters expected in the react-router match object (i.e. URL parameters)
- */
-export interface LocationMatchParams {
-  locationBarcode: string;
-}
 
 interface LocationProps extends RouteComponentProps<LocationMatchParams> {
   model: LocationPresentationModel;

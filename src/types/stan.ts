@@ -121,3 +121,24 @@ export type SearchResultTableEntryLocation = {
   barcode: string;
   displayName: string;
 };
+
+/**
+ * Type for possible location URL params
+ */
+export type LocationSearchParams = {
+  labwareBarcode: string;
+};
+
+/**
+ * Custom type guard for {@link LocationSearchParams}
+ */
+export function isLocationSearch(obj: any): obj is LocationSearchParams {
+  return "labwareBarcode" in obj && typeof obj["labwareBarcode"] === "string";
+}
+
+/**
+ * Parameters expected in the react-router match object (i.e. URL parameters)
+ */
+export interface LocationMatchParams {
+  locationBarcode: string;
+}

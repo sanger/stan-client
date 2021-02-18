@@ -15,13 +15,12 @@ import registrationMachine from "../machines/registration/registrationMachine";
 import { buildRegistrationSchema } from "../services/registrationService";
 import { SectioningMachine } from "../machines/sectioning/sectioningMachineTypes";
 import { sectioningMachine } from "../machines/sectioning/sectioningMachine";
-import { LabwareTypeName } from "../../types/stan";
+import { LabwareTypeName, LocationSearchParams } from "../../types/stan";
 import createLocationMachine from "../machines/locations/locationMachine";
 import {
   LocationMachine,
   StoredItemFragment,
 } from "../machines/locations/locationMachineTypes";
-import { LocationSearchParams } from "../../pages/Location";
 import { genAddresses } from "../helpers";
 import { ReleaseMachine } from "../machines/release/releaseMachineTypes";
 import createReleaseMachine from "../machines/release/releaseMachine";
