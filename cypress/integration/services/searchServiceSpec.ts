@@ -102,9 +102,6 @@ describe("Search Service", () => {
 
     it("formats FindResult into a SearchResultsType", () => {
       const result = formatFindResult(findResult);
-      console.log(result);
-      console.log(expected);
-
       expect(result).to.deep.equal(expected);
     });
   });
