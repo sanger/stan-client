@@ -160,7 +160,7 @@ const columns: Column<SearchResultTableEntry>[] = [
       if (displayNameA && displayNameB) {
         if (displayNameA > displayNameB) return 1;
         if (displayNameA < displayNameB) return -1;
-        if (displayNameA === displayNameB) return -1;
+        return 0;
       }
       if (displayNameA && !displayNameB) return 1;
       if (!displayNameA && displayNameB) return -1;
