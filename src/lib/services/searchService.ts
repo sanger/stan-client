@@ -14,6 +14,7 @@ import { RouteComponentProps } from "react-router-dom";
 import { cleanParams, parseQueryString } from "../helpers";
 import { ParsedQuery } from "query-string";
 import _ from "lodash";
+import { addressToLocationAddress } from "../helpers/locationHelper";
 
 const findRequestKeys: (keyof FindRequest)[] = [
   "labwareBarcode",
@@ -64,7 +65,10 @@ export async function search(
   const request = _.defaults(
     { maxRecords: 40 },
     // Strip any empty string values from the provided request
-    _.omitBy(findRequest, _.isEmpty)
+    _(findRequest)
+      .omitBy(_.isEmpty)
+      .mapValues((value: string) => value.trim())
+      .value()
   );
   const response = await client.query<FindQuery, FindQueryVariables>({
     query: FindDocument,
@@ -91,10 +95,13 @@ export function formatFindResult(
     return [];
   }
 
-  const sampleMap = new Map();
-  const labwareMap = new Map();
-  const locationMap = new Map();
-  const labwareToLocationMap = new Map();
+  const sampleMap = new Map<number, FindQuery["find"]["samples"][number]>();
+  const labwareMap = new Map<number, FindQuery["find"]["labware"][number]>();
+  const locationMap = new Map<number, FindQuery["find"]["locations"][number]>();
+  const labwareLocationMap = new Map<
+    number,
+    FindQuery["find"]["labwareLocations"][number]
+  >();
 
   findResult.samples.forEach((sample) => sampleMap.set(sample.id, sample));
   findResult.labware.forEach((labware) => labwareMap.set(labware.id, labware));
@@ -102,17 +109,18 @@ export function formatFindResult(
     locationMap.set(location.id, location)
   );
   findResult.labwareLocations.forEach((ll) =>
-    labwareToLocationMap.set(ll.labwareId, locationMap.get(ll.locationId))
+    labwareLocationMap.set(ll.labwareId, ll)
   );
 
   return findResult.entries.map((entry) => {
     const { labwareId, sampleId } = entry;
     const labware = labwareMap.get(labwareId)!;
     const sample = sampleMap.get(sampleId)!;
+    const labwareLocation = labwareLocationMap.get(labwareId);
 
     let location = null;
-    if (labwareToLocationMap.has(labwareId)) {
-      location = labwareToLocationMap.get(labwareId);
+    if (labwareLocation) {
+      location = locationMap.get(labwareLocation.locationId);
     }
 
     return {
@@ -125,7 +133,18 @@ export function formatFindResult(
           ? null
           : {
               barcode: location.barcode,
-              displayName: location.customName || location.name,
+              displayName:
+                location.customName ?? location.name ?? location.barcode,
+              address:
+                labwareLocation?.address &&
+                location?.direction &&
+                location?.size
+                  ? addressToLocationAddress(
+                      labwareLocation?.address,
+                      location.size,
+                      location.direction
+                    )
+                  : null,
             },
       sectionNumber: sample.section,
       replicate: sample.tissue.replicate,

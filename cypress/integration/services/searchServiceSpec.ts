@@ -1,9 +1,9 @@
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
 import { sampleFactory } from "../../../src/lib/factories/sampleFactory";
 import { formatFindResult } from "../../../src/lib/services/searchService";
-import { FindQuery, Maybe } from "../../../src/types/graphql";
+import { FindQuery, GridDirection } from "../../../src/types/graphql";
 import locationFactory from "../../../src/lib/factories/locationFactory";
-import { SearchResultTableEntryLocation } from "../../../src/types/stan";
+import { addressToLocationAddress } from "../../../src/lib/helpers/locationHelper";
 
 describe("Search Service", () => {
   describe("#formatFindResult", () => {
@@ -20,7 +20,11 @@ describe("Search Service", () => {
     const labware3 = labwareFactory.build({ id: 3 });
 
     const location100 = locationFactory.build({ id: 100 });
-    const location102 = locationFactory.build({ id: 102 });
+    const location102 = locationFactory.build({
+      id: 102,
+      size: { numRows: 50, numColumns: 2 },
+      direction: GridDirection.DownRight,
+    });
 
     findResult = {
       numRecords: 5,
@@ -39,7 +43,7 @@ describe("Search Service", () => {
           labwareId: 1,
           locationId: 100,
         },
-        { labwareId: 3, locationId: 102 },
+        { labwareId: 3, locationId: 102, address: "40,2" },
       ],
     };
 
@@ -52,6 +56,7 @@ describe("Search Service", () => {
         location: {
           barcode: location100.barcode,
           displayName: location100.name,
+          address: null,
         },
         sectionNumber: sample10.section,
         replicate: sample10.tissue.replicate,
@@ -73,6 +78,11 @@ describe("Search Service", () => {
         location: {
           barcode: location102.barcode,
           displayName: location102.name,
+          address: addressToLocationAddress(
+            "40,2",
+            location102.size!,
+            location102.direction!
+          ),
         },
         sectionNumber: sample12.section,
         replicate: sample12.tissue.replicate,
@@ -94,6 +104,7 @@ describe("Search Service", () => {
         location: {
           barcode: location100.barcode,
           displayName: location100.name,
+          address: location100.address,
         },
         sectionNumber: sample14.section,
         replicate: sample14.tissue.replicate,

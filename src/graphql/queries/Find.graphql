@@ -30,6 +30,11 @@ query Find($request: FindRequest!) {
             barcode
             customName
             name
+            direction
+            size {
+                numRows
+                numColumns
+            }
         }
         labwareLocations {
             labwareId

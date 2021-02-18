@@ -837,7 +837,11 @@ export type FindQuery = (
       & Pick<Labware, 'id' | 'barcode'>
     )>, locations: Array<(
       { __typename?: 'Location' }
-      & Pick<Location, 'id' | 'barcode' | 'customName' | 'name'>
+      & Pick<Location, 'id' | 'barcode' | 'customName' | 'name' | 'direction'>
+      & { size?: Maybe<(
+        { __typename?: 'Size' }
+        & Pick<Size, 'numRows' | 'numColumns'>
+      )> }
     )>, labwareLocations: Array<(
       { __typename?: 'LabwareLocationEntry' }
       & Pick<LabwareLocationEntry, 'labwareId' | 'locationId' | 'address'>
@@ -1584,6 +1588,11 @@ export const FindDocument = gql`
       barcode
       customName
       name
+      direction
+      size {
+        numRows
+        numColumns
+      }
     }
     labwareLocations {
       labwareId

@@ -25,17 +25,17 @@ export default class SearchPresentationModel extends MachinePresentationModel<
   get validationSchema(): Yup.ObjectSchema {
     return Yup.object()
       .shape({
-        labwareBarcode: Yup.string(),
-        tissueExternalName: Yup.string(),
-        donorName: Yup.string(),
+        labwareBarcode: Yup.string().ensure(),
+        tissueExternalName: Yup.string().ensure(),
+        donorName: Yup.string().ensure(),
       })
       .test({
         name: "atLeastOneRequired",
         test: function (value) {
           const isValid = !!(
-            value?.labwareBarcode ||
-            value?.tissueExternalName ||
-            value?.donorName
+            value?.labwareBarcode.trim() ||
+            value?.tissueExternalName.trim() ||
+            value?.donorName.trim()
           );
 
           if (isValid) return true;

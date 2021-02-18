@@ -113,13 +113,14 @@ export type SearchResultTableEntry = {
   donorId: string;
   tissueType: string;
   location: Maybe<SearchResultTableEntryLocation>;
-  sectionNumber: Maybe<number>;
+  sectionNumber?: Maybe<number>;
   replicate: number;
 };
 
 export type SearchResultTableEntryLocation = {
   barcode: string;
   displayName: string;
+  address?: Maybe<number>;
 };
 
 /**

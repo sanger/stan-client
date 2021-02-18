@@ -12,6 +12,7 @@ import { SearchResultTableEntry } from "../types/stan";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import SearchPresentationModel from "../lib/presentationModels/searchPresentationModel";
 import Warning from "../components/notifications/Warning";
+import Heading from "../components/Heading";
 
 type SearchProps = {
   model: SearchPresentationModel;
@@ -25,7 +26,10 @@ const Search: React.FC<SearchProps> = ({ model }) => {
       </AppShell.Header>
       <AppShell.Main>
         <div className="mx-auto max-w-screen-xl">
-          <div className="mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md">
+          <div className="mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
+            <Heading level={3} showBorder={false}>
+              Find Stored Labware
+            </Heading>
             <Formik
               initialValues={model.defaultFindRequest}
               validationSchema={model.validationSchema}
@@ -88,7 +92,7 @@ const Search: React.FC<SearchProps> = ({ model }) => {
               {model.showEmptyNotification && (
                 <Warning
                   message={
-                    "There were not results for the given search. Please try again."
+                    "There were no results for the given search. Please try again."
                   }
                 />
               )}
@@ -167,11 +171,22 @@ const columns: Column<SearchResultTableEntry>[] = [
       return 0;
     },
     Cell: (props: Cell<SearchResultTableEntry>) => {
+      const location = props.row.original.location;
+
+      if (!location) {
+        return null;
+      }
+
+      let linkText = location.displayName;
+      if (location.address) {
+        linkText += `(${location.address})`;
+      }
+
       return (
         <StyledLink
-          to={`/locations/${props.row.original.location?.barcode}?labwareBarcode=${props.row.original.barcode}`}
+          to={`/locations/${location.barcode}?labwareBarcode=${props.row.original.barcode}`}
         >
-          {props.row.original.location?.displayName}
+          {linkText}
         </StyledLink>
       );
     },

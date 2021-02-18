@@ -96,7 +96,7 @@ describe("Search", () => {
 
       it("will show a notification", () => {
         cy.findByText(
-          "There were not results for the given search. Please try again."
+          "There were no results for the given search. Please try again."
         ).should("be.visible");
       });
     });
