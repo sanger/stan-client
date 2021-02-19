@@ -10,6 +10,7 @@ import userHandlers from "./handlers/userHandlers";
 import locationHandlers from "./handlers/locationHandlers";
 import releaseHandlers from "./handlers/releaseHandlers";
 import extractionHandlers from "./handlers/extractionHandlers";
+import findHandlers from "./handlers/findHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -21,4 +22,5 @@ export const handlers = [
   ...locationHandlers,
   ...releaseHandlers,
   ...extractionHandlers,
+  ...findHandlers,
 ];

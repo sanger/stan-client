@@ -103,8 +103,8 @@ function AppShell({ children }: AppShellParams) {
               </button>
             </div>
             <nav className="hidden md:flex space-x-10">
-              <StanNavLink exact to="/">
-                Dashboard
+              <StanNavLink exact to="/search">
+                Search
               </StanNavLink>
               <StanNavLink to="/store">Store</StanNavLink>
               <Authenticated>
@@ -362,9 +362,7 @@ function AppShell({ children }: AppShellParams) {
                 variants={variants.menuItemVariants}
                 className="px-2 pt-2 space-y-1 sm:px-3"
               >
-                <StanMobileNavLink to="/" exact>
-                  Dashboard
-                </StanMobileNavLink>
+                <StanMobileNavLink to="/search">Search</StanMobileNavLink>
                 <StanMobileNavLink to="/store">Store</StanMobileNavLink>
               </motion.div>
               <Authenticated>
