@@ -1,6 +1,8 @@
 import * as queryString from "query-string";
+import { ParsedQuery } from "query-string";
 import { GridDirection, Maybe } from "../types/graphql";
 import { SizeInput } from "../types/stan";
+import _ from "lodash";
 
 /**
  * Utility for retrieving a list of enum keys.
@@ -39,13 +41,26 @@ export function safeParseQueryString<T>(
   query: string,
   guard: (s: any) => s is T
 ): Maybe<T> {
-  const parsed = queryString.parse(query, {
+  const parsed = parseQueryString(query, {
     arrayFormat: "bracket",
     parseNumbers: false,
     parseBooleans: true,
   });
-
   return guard(parsed) ? parsed : null;
+}
+
+/**
+ * Parse a query string into an object
+ * @param query the query string
+ */
+export const parseQueryString = queryString.parse;
+
+/**
+ * Stringify an object to be used as a query string
+ * @param obj the object to stringify
+ */
+export function stringify(obj: object): string {
+  return queryString.stringify(obj, { skipEmptyString: true });
 }
 
 /**
@@ -90,4 +105,20 @@ export function* genAddresses(
       }
     }
   }
+}
+
+/**
+ * Loop through URL params, filtering out unwanted keys,
+ * removing nil (null or undefined), empty values, and values that are arrays
+ *
+ * @param params the URL params
+ * @param allowedKeys
+ */
+export function cleanParams(params: ParsedQuery, allowedKeys: any[]) {
+  return _(params)
+    .pick(allowedKeys)
+    .omitBy(_.isNil)
+    .omitBy(_.isEmpty)
+    .omitBy(_.isArray)
+    .value();
 }

@@ -1,7 +1,9 @@
 import {
+  FindRequest,
   GetPrintersQuery,
   GetRegistrationInfoQuery,
   GetReleaseInfoQuery,
+  GetSearchInfoQuery,
   GetSectioningInfoQuery,
   LabelType,
   Labware,
@@ -13,13 +15,12 @@ import registrationMachine from "../machines/registration/registrationMachine";
 import { buildRegistrationSchema } from "../services/registrationService";
 import { SectioningMachine } from "../machines/sectioning/sectioningMachineTypes";
 import { sectioningMachine } from "../machines/sectioning/sectioningMachine";
-import { LabwareTypeName } from "../../types/stan";
+import { LabwareTypeName, LocationSearchParams } from "../../types/stan";
 import createLocationMachine from "../machines/locations/locationMachine";
 import {
   LocationMachine,
   StoredItemFragment,
 } from "../machines/locations/locationMachineTypes";
-import { LocationSearchParams } from "../../pages/Location";
 import { genAddresses } from "../helpers";
 import { ReleaseMachine } from "../machines/release/releaseMachineTypes";
 import createReleaseMachine from "../machines/release/releaseMachine";
@@ -27,6 +28,8 @@ import { LabelPrinterMachine } from "../machines/labelPrinter/labelPrinterMachin
 import createLabelPrinterMachine from "../machines/labelPrinter/labelPrinterMachine";
 import createExtractionMachine from "../machines/extraction/extractionMachine";
 import { ExtractionMachine } from "../machines/extraction/extractionMachineTypes";
+import createSearchMachine from "../machines/search/searchMachine";
+import { SearchMachine } from "../machines/search/searchMachineTypes";
 // HYGEN MARKER
 
 export function buildRegistrationMachine(
@@ -152,6 +155,21 @@ export function buildExtractionMachine(): ExtractionMachine {
   return createExtractionMachine({
     context: {
       labwares: [],
+    },
+  });
+}
+
+/**
+ * Build a {@link SearchMachine}
+ */
+export function buildSearchMachine(
+  searchInfo: GetSearchInfoQuery,
+  findRequest: FindRequest
+): SearchMachine {
+  return createSearchMachine({
+    context: {
+      searchInfo,
+      findRequest,
     },
   });
 }

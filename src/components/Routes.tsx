@@ -11,15 +11,16 @@ import {
   buildLocationPresentationModel,
   buildRegistrationPresentationModel,
   buildReleasePresentationModel,
+  buildSearchPresentationModel,
   buildSectioningModel,
 } from "../lib/factories/presentationModelFactory";
 import { getLocationMachine } from "../lib/services/locationService";
 import LocationPresentationModel from "../lib/presentationModels/locationPresentationModel";
 import { getReleaseMachine } from "../lib/services/releaseService";
 import { getExtractionMachine } from "../lib/services/extractionService";
+import { getSearchMachine } from "../lib/services/searchService";
 
 const Logout = React.lazy(() => import("../pages/Logout"));
-const Dashboard = React.lazy(() => import("../pages/Dashboard"));
 
 // Admin
 const Registration = React.lazy(() => import("../pages/Registration"));
@@ -32,6 +33,8 @@ const Extraction = React.lazy(() => import("../pages/Extraction"));
 // Storage
 const Store = React.lazy(() => import("../pages/Store"));
 const Location = React.lazy(() => import("../pages/Location"));
+
+const Search = React.lazy(() => import("../pages/Search"));
 
 export function Routes() {
   // Hook to remove any location state after it has been consumed for a component.
@@ -46,6 +49,7 @@ export function Routes() {
         <Route path="/logout">
           <Logout />
         </Route>
+
         <AuthenticatedRoute path="/lab/sectioning">
           <Presenter
             machine={getSectioningMachine}
@@ -80,9 +84,6 @@ export function Routes() {
             {(presentationModel) => <Release model={presentationModel} />}
           </Presenter>
         </AuthenticatedRoute>
-        <Route exact path="/">
-          <Dashboard />
-        </Route>
 
         <Route
           path="/locations/:locationBarcode"
@@ -102,6 +103,18 @@ export function Routes() {
         <Route path="/locations" component={Store} />
         <Route path="/store" component={Store} />
         <Route path="/login" component={Login} />
+
+        <Route
+          path={["/", "/search"]}
+          render={(routeProps) => (
+            <Presenter
+              machine={() => getSearchMachine(routeProps)}
+              model={buildSearchPresentationModel}
+            >
+              {(model) => <Search model={model} />}
+            </Presenter>
+          )}
+        />
       </Switch>
     </React.Suspense>
   );

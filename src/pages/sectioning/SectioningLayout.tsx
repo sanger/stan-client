@@ -25,7 +25,7 @@ import {
   SectioningLayoutEvent,
   SectioningLayoutMachineType,
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
-import LabwareTable from "../../components/LabwareTable";
+import DataTable from "../../components/DataTable";
 import { CellProps, Column, Row } from "react-table";
 import { LabwareLayoutFragment } from "../../types/graphql";
 import WhiteButton from "../../components/buttons/WhiteButton";
@@ -230,7 +230,7 @@ const SectioningLayout = React.forwardRef<
 
           {plannedLabware.length > 0 && (
             <div className="w-full space-y-4 py-4 px-8">
-              <LabwareTable columns={columns} labware={plannedLabware} />
+              <DataTable columns={columns} data={plannedLabware} />
 
               {printResult && <PrintResult result={printResult} />}
             </div>

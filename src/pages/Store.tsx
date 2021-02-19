@@ -3,7 +3,6 @@ import AppShell from "../components/AppShell";
 import LocationSearch from "../components/LocationSearch";
 import { RouteComponentProps } from "react-router";
 import { safeParseQueryString } from "../lib/helpers";
-import { isLocationSearch, LocationSearchParams } from "./Location";
 import { findLabwareLocation } from "../lib/services/locationService";
 import { history } from "../lib/client";
 import Warning from "../components/notifications/Warning";
@@ -19,6 +18,7 @@ import {
   useFindLocationByBarcodeQuery,
 } from "../types/graphql";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
+import { isLocationSearch, LocationSearchParams } from "../types/stan";
 
 /**
  * RouteComponentProps from react-router allows the props to be passed in
@@ -82,7 +82,10 @@ const Store: React.FC<StoreProps> = ({ location }) => {
                   <div className="mt-10">
                     <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
                       {locations.map((location) => (
-                        <LocationLink barcode={location.barcode} />
+                        <LocationLink
+                          key={location.barcode}
+                          barcode={location.barcode}
+                        />
                       ))}
                     </dl>
                   </div>

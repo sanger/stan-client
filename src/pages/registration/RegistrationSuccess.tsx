@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { RegisterTissuesMutation } from "../../types/graphql";
 import variants from "../../lib/motionVariants";
-import LabwareTable from "../../components/LabwareTable";
+import DataTable from "../../components/DataTable";
 import columns from "../../components/labwareScanPanel/columns";
 import LabelPrinter from "../../components/LabelPrinter";
 import PinkButton from "../../components/buttons/PinkButton";
@@ -41,13 +41,13 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
             variants={variants.fadeInWithLift}
             className="flex flex-col"
           >
-            <LabwareTable
+            <DataTable
               columns={[
                 columns.barcode(),
                 columns.labwareType(),
                 columns.externalName(),
               ]}
-              labware={result.register?.labware}
+              data={result.register?.labware}
             />
           </motion.div>
 

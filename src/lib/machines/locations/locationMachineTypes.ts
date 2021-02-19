@@ -1,7 +1,7 @@
 import { Interpreter, State, StateNode } from "xstate";
 import { LocationFieldsFragment, Maybe } from "../../../types/graphql";
-import { LocationSearchParams } from "../../../pages/Location";
 import { ApolloError } from "@apollo/client";
+import { LocationSearchParams } from "../../../types/stan";
 
 /**
  * Context for a Location Machine

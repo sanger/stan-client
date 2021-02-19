@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Column, Row } from "react-table";
 import MutedText from "../MutedText";
 import LockIcon from "../icons/LockIcon";
-import LabwareTable from "../LabwareTable";
+import DataTable from "../DataTable";
 import ScanInput from "../ScanInput";
 import { createLabwareMachine } from "../../lib/machines/labware/labwareMachine";
 import RemoveButton from "../buttons/RemoveButton";
@@ -124,7 +124,7 @@ const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({
           animate={{ opacity: 1, y: 0 }}
           className="mt-3"
         >
-          <LabwareTable columns={allColumns} labware={data} />
+          <DataTable columns={allColumns} data={data} />
         </motion.div>
       )}
     </div>

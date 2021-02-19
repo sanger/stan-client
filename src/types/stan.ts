@@ -97,3 +97,49 @@ export type PrintResultType = {
   printer: GetPrintersQuery["printers"][number];
   labwares: Array<PrintableLabware>;
 };
+
+export type SearchResultsType = {
+  numDisplayed: number;
+  numRecords: number;
+  entries: SearchResultTableEntry[];
+};
+
+/**
+ * A single row on the results table of the Search page
+ */
+export type SearchResultTableEntry = {
+  barcode: string;
+  externalId: string;
+  donorId: string;
+  tissueType: string;
+  location: Maybe<SearchResultTableEntryLocation>;
+  sectionNumber?: Maybe<number>;
+  replicate: number;
+};
+
+export type SearchResultTableEntryLocation = {
+  barcode: string;
+  displayName: string;
+  address?: Maybe<number>;
+};
+
+/**
+ * Type for possible location URL params
+ */
+export type LocationSearchParams = {
+  labwareBarcode: string;
+};
+
+/**
+ * Custom type guard for {@link LocationSearchParams}
+ */
+export function isLocationSearch(obj: any): obj is LocationSearchParams {
+  return "labwareBarcode" in obj && typeof obj["labwareBarcode"] === "string";
+}
+
+/**
+ * Parameters expected in the react-router match object (i.e. URL parameters)
+ */
+export interface LocationMatchParams {
+  locationBarcode: string;
+}

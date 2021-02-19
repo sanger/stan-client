@@ -25,12 +25,12 @@ import { QueryOptions } from "@apollo/client";
 import { LocationMachine } from "../machines/locations/locationMachineTypes";
 import { buildLocationMachine } from "../factories/machineFactory";
 import { RouteComponentProps } from "react-router-dom";
+import { safeParseQueryString } from "../helpers";
 import {
   isLocationSearch,
   LocationMatchParams,
   LocationSearchParams,
-} from "../../pages/Location";
-import { safeParseQueryString } from "../helpers";
+} from "../../types/stan";
 
 /**
  * Return a location machine based off the barcode of a location

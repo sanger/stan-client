@@ -5,7 +5,7 @@ import {
   LocationSchema,
 } from "../machines/locations/locationMachineTypes";
 import { LocationFieldsFragment, Maybe } from "../../types/graphql";
-import { LocationSearchParams } from "../../pages/Location";
+import { LocationSearchParams } from "../../types/stan";
 
 export default class LocationPresentationModel extends MachinePresentationModel<
   LocationContext,
