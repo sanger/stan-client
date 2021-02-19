@@ -12,6 +12,7 @@ import variants from "../lib/motionVariants";
 import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LabwareIcon from "./icons/LabwareIcon";
+import SupportIcon from "./icons/SupportIcon";
 
 interface AppShellParams {
   children?: React.ReactNode | React.ReactNode[];
@@ -223,21 +224,7 @@ function AppShell({ children }: AppShellParams) {
                               to="/admin/registration"
                               className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
                             >
-                              <svg
-                                className="flex-shrink-0 h-6 w-6 text-sdb-400"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                aria-hidden="true"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
-                                />
-                              </svg>
+                              <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                               <div className="ml-4">
                                 <p className="text-base font-medium text-gray-900">
                                   Registration
@@ -249,24 +236,25 @@ function AppShell({ children }: AppShellParams) {
                               </div>
                             </Link>
                             <Link
+                              to="/admin/destroy"
+                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
+                            >
+                              <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                              <div className="ml-4">
+                                <p className="text-base font-medium text-gray-900">
+                                  Destroy
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  Destroy multiple pieces of labware and have
+                                  STAN remove them from storage.
+                                </p>
+                              </div>
+                            </Link>
+                            <Link
                               to="/admin/release"
                               className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
                             >
-                              <svg
-                                className="flex-shrink-0 h-6 w-6 text-sdb-400"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                aria-hidden="true"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
-                                />
-                              </svg>
+                              <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                               <div className="ml-4">
                                 <p className="text-base font-medium text-gray-900">
                                   Release

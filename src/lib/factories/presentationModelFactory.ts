@@ -28,6 +28,11 @@ import {
   SearchState,
 } from "../machines/search/searchMachineTypes";
 import SearchPresentationModel from "../presentationModels/searchPresentationModel";
+import {
+  DestroyMachineService,
+  DestroyState,
+} from "../machines/destroy/destroyMachineTypes";
+import DestroyPresentationModel from "../presentationModels/destroyPresentationModel";
 // HYGEN MARKER
 
 export function buildReleasePresentationModel(
@@ -68,4 +73,10 @@ export function buildSearchPresentationModel(
   service: SearchMachineService
 ): SearchPresentationModel {
   return new SearchPresentationModel(current, service);
+}
+export function buildDestroyPresentationModel(
+  current: DestroyState,
+  service: DestroyMachineService
+): DestroyPresentationModel {
+  return new DestroyPresentationModel(current, service);
 }

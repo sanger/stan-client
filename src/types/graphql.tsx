@@ -288,6 +288,30 @@ export type OperationResult = {
   operations: Array<Operation>;
 };
 
+export type DestructionReason = {
+  __typename?: 'DestructionReason';
+  id: Scalars['Int'];
+  text: Scalars['String'];
+};
+
+export type Destruction = {
+  __typename?: 'Destruction';
+  labware?: Maybe<Labware>;
+  user?: Maybe<User>;
+  destroyed?: Maybe<Scalars['Timestamp']>;
+  reason?: Maybe<DestructionReason>;
+};
+
+export type DestroyResult = {
+  __typename?: 'DestroyResult';
+  destructions: Array<Destruction>;
+};
+
+export type DestroyRequest = {
+  barcodes: Array<Scalars['String']>;
+  reasonId: Scalars['Int'];
+};
+
 export type StoredItem = {
   __typename?: 'StoredItem';
   barcode: Scalars['String'];
@@ -388,6 +412,7 @@ export type Query = {
   comments: Array<Comment>;
   releaseDestinations: Array<ReleaseDestination>;
   releaseRecipients: Array<ReleaseRecipient>;
+  destructionReasons: Array<DestructionReason>;
   find: FindResult;
   location: Location;
   stored: Array<StoredItem>;
@@ -433,6 +458,7 @@ export type Mutation = {
   confirmOperation: ConfirmOperationResult;
   release: ReleaseResult;
   extract: OperationResult;
+  destroy: DestroyResult;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
@@ -474,6 +500,11 @@ export type MutationReleaseArgs = {
 
 export type MutationExtractArgs = {
   request: ExtractRequest;
+};
+
+
+export type MutationDestroyArgs = {
+  request: DestroyRequest;
 };
 
 
@@ -574,6 +605,25 @@ export type ConfirmMutation = (
         { __typename?: 'User' }
         & Pick<User, 'username'>
       ) }
+    )> }
+  ) }
+);
+
+export type DestroyMutationVariables = Exact<{
+  request: DestroyRequest;
+}>;
+
+
+export type DestroyMutation = (
+  { __typename?: 'Mutation' }
+  & { destroy: (
+    { __typename?: 'DestroyResult' }
+    & { destructions: Array<(
+      { __typename?: 'Destruction' }
+      & { labware?: Maybe<(
+        { __typename?: 'Labware' }
+        & Pick<Labware, 'barcode'>
+      )> }
     )> }
   ) }
 );
@@ -917,6 +967,17 @@ export type FindLocationByBarcodeQuery = (
   ) }
 );
 
+export type GetDestroyInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetDestroyInfoQuery = (
+  { __typename?: 'Query' }
+  & { destructionReasons: Array<(
+    { __typename?: 'DestructionReason' }
+    & Pick<DestructionReason, 'id' | 'text'>
+  )> }
+);
+
 export type GetPrintersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1106,6 +1167,42 @@ export function useConfirmMutation(baseOptions?: Apollo.MutationHookOptions<Conf
 export type ConfirmMutationHookResult = ReturnType<typeof useConfirmMutation>;
 export type ConfirmMutationResult = Apollo.MutationResult<ConfirmMutation>;
 export type ConfirmMutationOptions = Apollo.BaseMutationOptions<ConfirmMutation, ConfirmMutationVariables>;
+export const DestroyDocument = gql`
+    mutation Destroy($request: DestroyRequest!) {
+  destroy(request: $request) {
+    destructions {
+      labware {
+        barcode
+      }
+    }
+  }
+}
+    `;
+export type DestroyMutationFn = Apollo.MutationFunction<DestroyMutation, DestroyMutationVariables>;
+
+/**
+ * __useDestroyMutation__
+ *
+ * To run a mutation, you first call `useDestroyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDestroyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [destroyMutation, { data, loading, error }] = useDestroyMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useDestroyMutation(baseOptions?: Apollo.MutationHookOptions<DestroyMutation, DestroyMutationVariables>) {
+        return Apollo.useMutation<DestroyMutation, DestroyMutationVariables>(DestroyDocument, baseOptions);
+      }
+export type DestroyMutationHookResult = ReturnType<typeof useDestroyMutation>;
+export type DestroyMutationResult = Apollo.MutationResult<DestroyMutation>;
+export type DestroyMutationOptions = Apollo.BaseMutationOptions<DestroyMutation, DestroyMutationVariables>;
 export const EmptyLocationDocument = gql`
     mutation EmptyLocation($barcode: String!) {
   empty(locationBarcode: $barcode) {
@@ -1753,6 +1850,39 @@ export function useFindLocationByBarcodeLazyQuery(baseOptions?: Apollo.LazyQuery
 export type FindLocationByBarcodeQueryHookResult = ReturnType<typeof useFindLocationByBarcodeQuery>;
 export type FindLocationByBarcodeLazyQueryHookResult = ReturnType<typeof useFindLocationByBarcodeLazyQuery>;
 export type FindLocationByBarcodeQueryResult = Apollo.QueryResult<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>;
+export const GetDestroyInfoDocument = gql`
+    query GetDestroyInfo {
+  destructionReasons {
+    id
+    text
+  }
+}
+    `;
+
+/**
+ * __useGetDestroyInfoQuery__
+ *
+ * To run a query within a React component, call `useGetDestroyInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDestroyInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDestroyInfoQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetDestroyInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>) {
+        return Apollo.useQuery<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>(GetDestroyInfoDocument, baseOptions);
+      }
+export function useGetDestroyInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>) {
+          return Apollo.useLazyQuery<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>(GetDestroyInfoDocument, baseOptions);
+        }
+export type GetDestroyInfoQueryHookResult = ReturnType<typeof useGetDestroyInfoQuery>;
+export type GetDestroyInfoLazyQueryHookResult = ReturnType<typeof useGetDestroyInfoLazyQuery>;
+export type GetDestroyInfoQueryResult = Apollo.QueryResult<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>;
 export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
