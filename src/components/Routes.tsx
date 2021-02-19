@@ -26,6 +26,7 @@ import Registration from "../pages/Registration";
 import Release from "../pages/Release";
 import Store from "../pages/Store";
 import Search from "../pages/Search";
+//HYGEN MARKER
 
 export function Routes() {
   // Hook to remove any location state after it has been consumed for a component.

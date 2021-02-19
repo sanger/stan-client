@@ -58,15 +58,12 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
                   onDoubleClick={() => {
                     send(setAllDestinations(source));
                   }}
-                  style={{
-                    backgroundColor: layoutPlan.sampleColors.get(
-                      source.sampleId
-                    ),
-                  }}
                   className={`${
                     isEqual(source, selected) &&
                     "ring-2 ring-offset-2 ring-gray-700"
-                  } inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
+                  } bg-${layoutPlan.sampleColors.get(
+                    source.sampleId
+                  )}-600 inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}
                 >
                   {source.labware.barcode}
                 </span>
