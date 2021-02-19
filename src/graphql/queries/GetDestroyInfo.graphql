@@ -1,0 +1,6 @@
+query GetDestroyInfo {
+    destructionReasons {
+        id
+        text
+    }
+}

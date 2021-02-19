@@ -1,5 +1,6 @@
 import {
   FindRequest,
+  GetDestroyInfoQuery,
   GetPrintersQuery,
   GetRegistrationInfoQuery,
   GetReleaseInfoQuery,
@@ -30,6 +31,8 @@ import createExtractionMachine from "../machines/extraction/extractionMachine";
 import { ExtractionMachine } from "../machines/extraction/extractionMachineTypes";
 import createSearchMachine from "../machines/search/searchMachine";
 import { SearchMachine } from "../machines/search/searchMachineTypes";
+import createDestroyMachine from "../machines/destroy/destroyMachine";
+import { DestroyMachine } from "../machines/destroy/destroyMachineTypes";
 // HYGEN MARKER
 
 export function buildRegistrationMachine(
@@ -172,4 +175,12 @@ export function buildSearchMachine(
       findRequest,
     },
   });
+}
+/**
+ * Build a {@link DestroyMachine}
+ */
+export function buildDestroyMachine(
+  destroyInfo: GetDestroyInfoQuery
+): DestroyMachine {
+  return createDestroyMachine({ context: { destroyInfo } });
 }

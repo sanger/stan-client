@@ -143,3 +143,24 @@ export function isLocationSearch(obj: any): obj is LocationSearchParams {
 export interface LocationMatchParams {
   locationBarcode: string;
 }
+
+/**
+ * Type for when an XState service resolves without error
+ * @param <T> the name of the service
+ * @param <E> the data the service resolves with
+ * @see {@link https://xstate.js.org/docs/guides/communication.html#invoking-services XState Services}
+ */
+export type MachineServiceDone<T extends string, E> = {
+  type: `done.invoke.${T}`;
+  data: E;
+}
+
+/**
+ * Type for when an XState service errors
+ * @param <T> the name of the service
+ * @see {@link https://xstate.js.org/docs/guides/communication.html#invoking-services XState Services}
+ */
+export type MachineServiceError<T extends string> = {
+  type: `error.platform.${T}`;
+  data: ApolloError;
+};

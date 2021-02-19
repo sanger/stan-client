@@ -6,6 +6,7 @@ import { getRegistrationMachine } from "../lib/services/registrationService";
 import { getSectioningMachine } from "../lib/services/sectioningService";
 import Presenter from "./Presenter";
 import {
+  buildDestroyPresentationModel,
   buildExtractionPresentationModel,
   buildLocationPresentationModel,
   buildRegistrationPresentationModel,
@@ -18,6 +19,7 @@ import LocationPresentationModel from "../lib/presentationModels/locationPresent
 import { getReleaseMachine } from "../lib/services/releaseService";
 import { getExtractionMachine } from "../lib/services/extractionService";
 import { getSearchMachine } from "../lib/services/searchService";
+import { getDestroyMachine } from "../lib/services/destroyService";
 import Logout from "../pages/Logout";
 import Location from "../pages/Location";
 import Sectioning from "../pages/Sectioning";
@@ -26,6 +28,8 @@ import Registration from "../pages/Registration";
 import Release from "../pages/Release";
 import Store from "../pages/Store";
 import Search from "../pages/Search";
+import Destroy from "../pages/Destroy";
+
 //HYGEN MARKER
 
 export function Routes() {
@@ -91,6 +95,15 @@ export function Routes() {
       <Route path="/locations" component={Store} />
       <Route path="/store" component={Store} />
       <Route path="/login" component={Login} />
+
+      <AuthenticatedRoute path="/admin/destroy">
+        <Presenter
+          machine={getDestroyMachine}
+          model={buildDestroyPresentationModel}
+        >
+          {(model) => <Destroy model={model} />}
+        </Presenter>
+      </AuthenticatedRoute>
 
       <Route
         path={["/", "/search"]}
