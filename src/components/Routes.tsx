@@ -27,22 +27,6 @@ import Release from "../pages/Release";
 import Store from "../pages/Store";
 import Search from "../pages/Search";
 
-// const Logout = React.lazy(() => import("../pages/Logout"));
-//
-// // Admin
-// const Registration = React.lazy(() => import("../pages/Registration"));
-// const Release = React.lazy(() => import("../pages/Release"));
-//
-// // Lab
-// const Sectioning = React.lazy(() => import("../pages/Sectioning"));
-// const Extraction = React.lazy(() => import("../pages/Extraction"));
-//
-// // Storage
-// const Store = React.lazy(() => import("../pages/Store"));
-// const Location = React.lazy(() => import("../pages/Location"));
-//
-// const Search = React.lazy(() => import("../pages/Search"));
-
 export function Routes() {
   // Hook to remove any location state after it has been consumed for a component.
   // Turns state into "flashes"
