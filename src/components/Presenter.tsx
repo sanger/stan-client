@@ -86,5 +86,7 @@ const PresenterMachine: <
     model(current, service)
   );
 
+  console.log(presentationModel);
+
   return children(presentationModel);
 };
