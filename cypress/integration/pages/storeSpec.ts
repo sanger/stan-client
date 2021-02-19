@@ -10,7 +10,7 @@ describe("Store", () => {
       it("takes you to that location's page", () => {
         cy.location("pathname").should("eq", "/locations/STO-001F");
         cy.findByText("Location STO-001F could not be found").should(
-          "not.be.visible"
+          "not.exist"
         );
       });
     });

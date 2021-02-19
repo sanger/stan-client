@@ -118,7 +118,7 @@ describe("Sectioning", () => {
       });
 
       it("shows Barcode and Sectioning Thickness", () => {
-        cy.findByLabelText("Quantity").should("not.be.visible");
+        cy.findByLabelText("Quantity").should("not.exist");
         cy.findByLabelText("Barcode").should("be.visible");
         cy.findByLabelText("Section Thickness").should("be.visible");
         cy.findByText("Create Labware").should("be.disabled");
@@ -135,8 +135,8 @@ describe("Sectioning", () => {
       });
 
       it("removes the Sectioning Layout buttons", () => {
-        cy.findByText("Create Labware").should("not.be.visible");
-        cy.findByText("Delete Layout").should("not.be.visible");
+        cy.findByText("Create Labware").should("not.exist");
+        cy.findByText("Delete Layout").should("not.exist");
       });
 
       it("disables the form inputs", () => {

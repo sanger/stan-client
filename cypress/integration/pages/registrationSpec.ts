@@ -130,7 +130,7 @@ describe("Registration", () => {
 
   context("when clicking the Add Another Tissue Block button", () => {
     before(() => {
-      cy.findByText("Delete Block").should("not.be.visible");
+      cy.findByText("Delete Block").should("not.exist");
       cy.findByText("Block Information").siblings().should("have.length", 1);
       cy.findByText("+ Add Another Tissue Block").click();
     });
@@ -146,7 +146,7 @@ describe("Registration", () => {
 
   context("when clicking the Add Another Tissue button", () => {
     before(() => {
-      cy.findByText("- Delete Tissue").should("not.be.visible");
+      cy.findByText("- Delete Tissue").should("not.exist");
       cy.get("#tissue-summaries").children().should("have.length", 1);
       cy.findByText("+ Add Another Tissue").click();
     });

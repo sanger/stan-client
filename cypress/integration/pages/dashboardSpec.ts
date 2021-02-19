@@ -10,7 +10,7 @@ describe("Dashboard", () => {
     });
 
     it("does not show the user menu", () => {
-      cy.findByRole("menu").should("not.be.visible");
+      cy.findByRole("menu").should("not.exist");
     });
 
     context("when clicking the guest icon", () => {
@@ -43,7 +43,7 @@ describe("Dashboard", () => {
     });
 
     it("does not show the user menu", () => {
-      cy.findByRole("menu").should("not.be.visible");
+      cy.findByRole("menu").should("not.exist");
     });
 
     context("when clicking the username", () => {

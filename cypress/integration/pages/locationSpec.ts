@@ -87,7 +87,7 @@ describe("Location", () => {
       });
 
       it("doesn't display a section for Stored Items", () => {
-        cy.findByText("Stored Items").should("not.be.visible");
+        cy.findByText("Stored Items").should("not.exist");
       });
     });
   });

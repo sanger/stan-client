@@ -29,7 +29,7 @@ describe("Search", () => {
     });
 
     it("will not perform a search immediately", () => {
-      cy.findByRole("table").should("not.be.visible");
+      cy.findByRole("table").should("not.exist");
     });
 
     context(

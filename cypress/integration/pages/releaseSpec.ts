@@ -78,7 +78,7 @@ describe("Release Page", () => {
       });
 
       it("doesn't show the download button", () => {
-        cy.findByText("Download Release File").should("not.be.visible");
+        cy.findByText("Download Release File").should("not.exist");
       });
     }
   );

@@ -63,7 +63,7 @@ describe("RNA Extraction", () => {
     });
 
     it("hides the Extract button", () => {
-      cy.findByRole("button", { name: /Extract/i }).should("not.be.visible");
+      cy.findByRole("button", { name: /Extract/i }).should("not.exist");
     });
 
     it("shows a success message", () => {
