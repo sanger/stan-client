@@ -42,6 +42,9 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
     >
   >([]);
 
+  // HMDMC field is only enabled if "Human" is selected for Species
+  const [isHMDMCEnabled, setIsHMDMCEnabled] = useState(false);
+
   // Reference to the current Tissue being registered
   const tissueRef = useRef<HTMLDivElement>(null);
 
@@ -102,6 +105,38 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                         );
                       })}
                     </RadioGroup>
+
+                    <FormikSelect
+                      label={"Species"}
+                      name={`tissues.${currentTissueIndex}.species`}
+                      emptyOption
+                      className="mt-2"
+                      onChange={(e: React.FormEvent<HTMLSelectElement>) => {
+                        setFieldValue(
+                          `tissues[${currentTissueIndex}].species`,
+                          e.currentTarget.value,
+                          false
+                        );
+
+                        // Only want HMDMC selection to be enabled when species is "Human"
+                        if (e.currentTarget.value !== "Human") {
+                          setFieldValue(
+                            `tissues[${currentTissueIndex}].hmdmc`,
+                            "",
+                            false
+                          );
+                          setIsHMDMCEnabled(false);
+                        } else {
+                          setIsHMDMCEnabled(true);
+                        }
+                      }}
+                    >
+                      {optionValues(
+                        model.registrationInfo.species,
+                        "name",
+                        "name"
+                      )}
+                    </FormikSelect>
                   </motion.div>
 
                   <motion.div
@@ -113,6 +148,7 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                     <FormikSelect
                       label="HMDMC"
                       name={`tissues.${currentTissueIndex}.hmdmc`}
+                      disabled={!isHMDMCEnabled}
                       emptyOption
                       className="mt-2"
                     >

@@ -1,4 +1,7 @@
 query GetRegistrationInfo {
+    species {
+        name
+    }
     hmdmcs {
         hmdmc
     }

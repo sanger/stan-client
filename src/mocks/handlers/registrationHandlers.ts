@@ -12,6 +12,12 @@ const registrationHandlers = [
     (req, res, ctx) => {
       return res(
         ctx.data({
+          species: [
+            { name: "Human" },
+            { name: "Mouse" },
+            { name: "Pig" },
+            { name: "Hamster" },
+          ],
           hmdmcs: [
             { hmdmc: "HMDMC1" },
             { hmdmc: "HMDMC2" },

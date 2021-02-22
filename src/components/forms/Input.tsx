@@ -4,7 +4,7 @@ import { Field } from "formik";
 import { FormikErrorMessage } from "./index";
 
 const inputClassNames =
-  "focus:ring-sdb-100 focus:border-sdb-100 block w-full border-gray-300 rounded-md disabled:opacity-75";
+  "focus:ring-sdb-100 focus:border-sdb-100 block w-full border-gray-300 rounded-md disabled:opacity-75 disabled:bg-gray-200 disabled:cursor-not-allowed";
 
 interface FormikInputProps {
   label: string;

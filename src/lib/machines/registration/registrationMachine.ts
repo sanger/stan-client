@@ -71,6 +71,7 @@ function buildRegisterTissuesMutationVariables(
           ...memo,
           ...tissue.blocks.map<BlockRegisterRequest>((block) => {
             return {
+              species: tissue.species,
               donorIdentifier: tissue.donorId,
               externalIdentifier: block.externalIdentifier,
               highestSection: block.lastKnownSectionNumber,

@@ -54,6 +54,9 @@ const labwareHandlers = [
                   donor: {
                     lifeStage: LifeStage.Fetal,
                     donorName: "Donor 3",
+                    species: {
+                      name: "Species 1",
+                    },
                   },
                   spatialLocation: {
                     name: "Somewhere",

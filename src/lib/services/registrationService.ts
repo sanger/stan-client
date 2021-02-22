@@ -68,10 +68,18 @@ export function buildRegistrationSchema(
             .oneOf(Object.values(LifeStage))
             .required()
             .label("Life Stage"),
-          hmdmc: Yup.string()
-            .oneOf(registrationInfo.hmdmcs.map((h) => h.hmdmc))
+          species: Yup.string()
+            .oneOf(registrationInfo.species.map((s) => s.name))
             .required()
-            .label("HMDMC"),
+            .label("Species"),
+          hmdmc: Yup.string().when("species", {
+            is: "Human",
+            then: Yup.string()
+              .oneOf(registrationInfo.hmdmcs.map((h) => h.hmdmc))
+              .required()
+              .label("HMDMC"),
+            otherwise: Yup.string().length(0),
+          }),
           tissueType: Yup.string()
             .oneOf(registrationInfo.tissueTypes.map((tt) => tt.name))
             .required()
@@ -145,6 +153,7 @@ export interface FormTissueValues {
   clientId: number;
   donorId: string;
   lifeStage: LifeStage;
+  species: string;
   hmdmc: string;
   tissueType: string;
   blocks: FormBlockValues[];
@@ -172,6 +181,7 @@ export function getInitialTissueValues(): FormTissueValues {
   return {
     clientId: Date.now(),
     donorId: "",
+    species: "",
     lifeStage: LifeStage.Fetal,
     hmdmc: "",
     tissueType: "",

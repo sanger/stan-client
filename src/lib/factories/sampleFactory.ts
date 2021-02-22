@@ -9,6 +9,7 @@ import {
   MouldSize,
   Sample,
   SpatialLocation,
+  Species,
   Tissue,
   TissueType,
 } from "../../types/graphql";
@@ -62,13 +63,20 @@ export const hmdmcFactory: Factory<Hmdmc> = Factory.define<Hmdmc>(
 );
 
 export const donorFactory: Factory<Donor> = Factory.define<Donor>(
-  ({ params, sequence }) => ({
+  ({ params, sequence, associations }) => ({
     donorName:
       params.donorName ??
       `${_.capitalize(faker.random.word())}${faker.random.number()}`,
     lifeStage:
       params.lifeStage ??
       _.shuffle([LifeStage.Fetal, LifeStage.Paediatric, LifeStage.Adult])[0],
+    species: associations.species ?? speciesFactory.build(),
+  })
+);
+
+export const speciesFactory: Factory<Species> = Factory.define<Species>(
+  ({ params, sequence }) => ({
+    name: params.name ?? `Species ${sequence}`,
   })
 );
 
