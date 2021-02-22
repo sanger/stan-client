@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Release Files ([#16](https://github.com/sanger/stan-client/pull/16))
  - RNA Extraction ([#17](https://github.com/sanger/stan-client/pull/17))
  - Search ([#18](https://github.com/sanger/stan-client/pull/18))
+ - Destroy Labware ([#19](https://github.com/sanger/stan-client/pull/19))
 
 ## [0.1.0] - 2020-10-27
 ### Added
