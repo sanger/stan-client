@@ -1,7 +1,6 @@
 import React from "react";
 import AppShell from "../components/AppShell";
 import DestroyPresentationModel from "../lib/presentationModels/destroyPresentationModel";
-import ReleaseForm from "./release/ReleaseForm";
 import { Formik } from "formik";
 import DestroyForm from "./destroy/DestroyForm";
 
