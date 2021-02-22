@@ -22,6 +22,40 @@ describe("Registration", () => {
       ).should("be.visible");
     });
 
+    it("requires Species", () => {
+      cy.findByLabelText("Species").focus().blur();
+      cy.findByText("Species is a required field").should("be.visible");
+    });
+
+    it("has HMDMC initially disabled", () => {
+      cy.findByLabelText("HMDMC").should("be.disabled");
+    });
+
+    context("when selecting a non-Human Species", () => {
+      before(() => {
+        cy.findByLabelText("Species").select("Pig");
+      });
+
+      it("keeps HMDMC disabled", () => {
+        cy.findByLabelText("HMDMC").should("be.disabled");
+      });
+    });
+
+    context("when selecting Human for Species", () => {
+      before(() => {
+        cy.findByLabelText("Species").select("Human");
+      });
+
+      it("enables the HMDMC field", () => {
+        cy.findByLabelText("HMDMC").should("not.be.disabled");
+      });
+
+      it("requires HMDMC to be set", () => {
+        cy.findByLabelText("HMDMC").focus().blur();
+        cy.findByText("HMDMC is a required field").should("be.visible");
+      });
+    });
+
     it("requires External Identifier", () => {
       cy.findByLabelText("External Identifier").focus().blur();
       cy.findByText("External Identifier is a required field").should(
@@ -34,11 +68,6 @@ describe("Registration", () => {
       cy.findByText(
         "External Identifier contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
       ).should("be.visible");
-    });
-
-    it("requires HMDMC", () => {
-      cy.findByLabelText("HMDMC").focus().blur();
-      cy.findByText("HMDMC is a required field").should("be.visible");
     });
 
     it("requires Tissue Type", () => {
@@ -239,6 +268,7 @@ describe("Registration", () => {
 
 function fillInForm() {
   cy.findByLabelText("Donor ID").type("DONOR_1");
+  cy.findByLabelText("Species").select("Human");
   cy.findByLabelText("External Identifier").type("EXT_ID_1");
   cy.findByLabelText("HMDMC").select("HMDMC1");
   cy.findByLabelText("Tissue Type").select("Liver");
