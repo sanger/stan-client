@@ -125,6 +125,7 @@ export function formatFindResult(
 
     return {
       barcode: labware.barcode,
+      labwareType: labware.labwareType.name,
       externalId: sample.tissue.externalName,
       donorId: sample.tissue.donor.donorName,
       tissueType: sample.tissue.spatialLocation.tissueType.name,

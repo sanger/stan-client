@@ -50,6 +50,7 @@ describe("Search Service", () => {
     const expected = [
       {
         barcode: labware1.barcode,
+        labwareType: labware1.labwareType.name,
         externalId: sample10.tissue.externalName,
         donorId: sample10.tissue.donor.donorName,
         tissueType: sample10.tissue.spatialLocation.tissueType.name,
@@ -63,6 +64,7 @@ describe("Search Service", () => {
       },
       {
         barcode: labware2.barcode,
+        labwareType: labware2.labwareType.name,
         externalId: sample11.tissue.externalName,
         donorId: sample11.tissue.donor.donorName,
         tissueType: sample11.tissue.spatialLocation.tissueType.name,
@@ -72,6 +74,7 @@ describe("Search Service", () => {
       },
       {
         barcode: labware3.barcode,
+        labwareType: labware3.labwareType.name,
         externalId: sample12.tissue.externalName,
         donorId: sample12.tissue.donor.donorName,
         tissueType: sample12.tissue.spatialLocation.tissueType.name,
@@ -89,6 +92,7 @@ describe("Search Service", () => {
       },
       {
         barcode: labware2.barcode,
+        labwareType: labware2.labwareType.name,
         externalId: sample13.tissue.externalName,
         donorId: sample13.tissue.donor.donorName,
         tissueType: sample13.tissue.spatialLocation.tissueType.name,
@@ -98,6 +102,7 @@ describe("Search Service", () => {
       },
       {
         barcode: labware1.barcode,
+        labwareType: labware1.labwareType.name,
         externalId: sample14.tissue.externalName,
         donorId: sample14.tissue.donor.donorName,
         tissueType: sample14.tissue.spatialLocation.tissueType.name,

@@ -893,6 +893,10 @@ export type FindQuery = (
     )>, labware: Array<(
       { __typename?: 'Labware' }
       & Pick<Labware, 'id' | 'barcode'>
+      & { labwareType: (
+        { __typename?: 'LabwareType' }
+        & Pick<LabwareType, 'name'>
+      ) }
     )>, locations: Array<(
       { __typename?: 'Location' }
       & Pick<Location, 'id' | 'barcode' | 'customName' | 'name' | 'direction'>
@@ -1690,6 +1694,9 @@ export const FindDocument = gql`
     labware {
       id
       barcode
+      labwareType {
+        name
+      }
     }
     locations {
       id
