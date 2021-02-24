@@ -109,6 +109,7 @@ export type SearchResultsType = {
  */
 export type SearchResultTableEntry = {
   barcode: string;
+  labwareType: string;
   externalId: string;
   donorId: string;
   tissueType: string;
