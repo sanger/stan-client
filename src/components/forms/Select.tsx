@@ -4,7 +4,7 @@ import { Field, FieldAttributes } from "formik";
 import { FormikErrorMessage } from "./index";
 
 const defaultClassNames =
-  "block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100";
+  "block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 disabled:opacity-75 disabled:bg-gray-200 disabled:cursor-not-allowed";
 
 interface FormikSelectProps extends FieldAttributes<any> {
   label: string;

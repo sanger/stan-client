@@ -144,6 +144,10 @@ const columns: Column<SearchResultTableEntry>[] = [
     accessor: "barcode",
   },
   {
+    Header: "Labware Type",
+    accessor: "labwareType",
+  },
+  {
     Header: "External ID",
     accessor: "externalId",
   },

@@ -24,6 +24,9 @@ query Find($request: FindRequest!) {
         labware {
             id
             barcode
+            labwareType {
+                name
+            }
         }
         locations {
             id

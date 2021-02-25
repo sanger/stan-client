@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Search ([#18](https://github.com/sanger/stan-client/pull/18))
  - Destroy Labware ([#19](https://github.com/sanger/stan-client/pull/19))
 
+### Modified
+ - Registration includes species ([#20](https://github.com/sanger/stan-client/pull/20))
+ - Labware type included in search results ([#21](https://github.com/sanger/stan-client/pull/21))
+
 ## [0.1.0] - 2020-10-27
 ### Added
 - Authentication ([#4](https://github.com/sanger/stan-client/pull/4))

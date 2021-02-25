@@ -72,10 +72,16 @@ export type LabwareType = {
   labelType?: Maybe<LabelType>;
 };
 
+export type Species = {
+  __typename?: 'Species';
+  name: Scalars['String'];
+};
+
 export type Donor = {
   __typename?: 'Donor';
   donorName: Scalars['String'];
   lifeStage: LifeStage;
+  species: Species;
 };
 
 export type Tissue = {
@@ -84,7 +90,7 @@ export type Tissue = {
   replicate: Scalars['Int'];
   spatialLocation: SpatialLocation;
   donor: Donor;
-  hmdmc: Hmdmc;
+  hmdmc?: Maybe<Hmdmc>;
   mouldSize: MouldSize;
   medium: Medium;
   fixative: Fixative;
@@ -126,7 +132,7 @@ export enum LifeStage {
 export type BlockRegisterRequest = {
   donorIdentifier: Scalars['String'];
   lifeStage: LifeStage;
-  hmdmc: Scalars['String'];
+  hmdmc?: Maybe<Scalars['String']>;
   tissueType: Scalars['String'];
   spatialLocation: Scalars['Int'];
   replicateNumber: Scalars['Int'];
@@ -136,6 +142,7 @@ export type BlockRegisterRequest = {
   medium: Scalars['String'];
   fixative: Scalars['String'];
   mouldSize: Scalars['String'];
+  species: Scalars['String'];
 };
 
 export type RegisterRequest = {
@@ -407,6 +414,7 @@ export type Query = {
   mediums: Array<Medium>;
   fixatives: Array<Fixative>;
   mouldSizes: Array<MouldSize>;
+  species: Array<Species>;
   labware: Labware;
   printers: Array<Printer>;
   comments: Array<Comment>;
@@ -885,6 +893,10 @@ export type FindQuery = (
     )>, labware: Array<(
       { __typename?: 'Labware' }
       & Pick<Labware, 'id' | 'barcode'>
+      & { labwareType: (
+        { __typename?: 'LabwareType' }
+        & Pick<LabwareType, 'name'>
+      ) }
     )>, locations: Array<(
       { __typename?: 'Location' }
       & Pick<Location, 'id' | 'barcode' | 'customName' | 'name' | 'direction'>
@@ -998,7 +1010,10 @@ export type GetRegistrationInfoQueryVariables = Exact<{ [key: string]: never; }>
 
 export type GetRegistrationInfoQuery = (
   { __typename?: 'Query' }
-  & { hmdmcs: Array<(
+  & { species: Array<(
+    { __typename?: 'Species' }
+    & Pick<Species, 'name'>
+  )>, hmdmcs: Array<(
     { __typename?: 'Hmdmc' }
     & Pick<Hmdmc, 'hmdmc'>
   )>, labwareTypes: Array<(
@@ -1679,6 +1694,9 @@ export const FindDocument = gql`
     labware {
       id
       barcode
+      labwareType {
+        name
+      }
     }
     locations {
       id
@@ -1920,6 +1938,9 @@ export type GetPrintersLazyQueryHookResult = ReturnType<typeof useGetPrintersLaz
 export type GetPrintersQueryResult = Apollo.QueryResult<GetPrintersQuery, GetPrintersQueryVariables>;
 export const GetRegistrationInfoDocument = gql`
     query GetRegistrationInfo {
+  species {
+    name
+  }
   hmdmcs {
     hmdmc
   }
