@@ -12,8 +12,6 @@ import {
   Maybe,
 } from "../../types/graphql";
 import { RegistrationMachine } from "../machines/registration/registrationMachineTypes";
-import registrationMachine from "../machines/registration/registrationMachine";
-import { buildRegistrationSchema } from "../services/registrationService";
 import { SectioningMachine } from "../machines/sectioning/sectioningMachineTypes";
 import { sectioningMachine } from "../machines/sectioning/sectioningMachine";
 import { LabwareTypeName, LocationSearchParams } from "../../types/stan";
@@ -33,18 +31,29 @@ import createSearchMachine from "../machines/search/searchMachine";
 import { SearchMachine } from "../machines/search/searchMachineTypes";
 import createDestroyMachine from "../machines/destroy/destroyMachine";
 import { DestroyMachine } from "../machines/destroy/destroyMachineTypes";
+import createRegistrationMachine from "../machines/registration/registrationMachine";
+import { SlideRegistrationMachine } from "../machines/slideRegistration/slideRegistrationMachineTypes";
+import createSlideRegistrationMachine from "../machines/slideRegistration/slideRegistrationMachine";
 // HYGEN MARKER
 
 export function buildRegistrationMachine(
   registrationInfo: GetRegistrationInfoQuery
 ): RegistrationMachine {
-  return registrationMachine.withContext(
-    Object.assign({}, registrationMachine.context, {
+  return createRegistrationMachine({
+    context: {
       registrationInfo,
-      registrationSchema: buildRegistrationSchema(registrationInfo),
-      availableLabwareTypes: [LabwareTypeName.PROVIASETTE],
-    })
-  );
+    },
+  });
+}
+
+export function buildSlideRegistrationMachine(
+  registrationInfo: GetRegistrationInfoQuery
+): SlideRegistrationMachine {
+  return createSlideRegistrationMachine({
+    context: {
+      registrationInfo,
+    },
+  });
 }
 
 export function buildSectioningMachine(

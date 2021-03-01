@@ -22,11 +22,6 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numRows: 1,
     numColumns: 1,
   }),
-  [LabwareTypeName.PROVIASETTE]: labwareTypeFactory.params({
-    name: LabwareTypeName.PROVIASETTE,
-    numRows: 1,
-    numColumns: 1,
-  }),
   [LabwareTypeName.SLIDE]: labwareTypeFactory.params({
     name: LabwareTypeName.SLIDE,
     numRows: 3,

@@ -1,7 +1,10 @@
 import { graphql } from "msw";
+import { uniqueId } from "lodash";
 import {
   GetRegistrationInfoQuery,
   GetRegistrationInfoQueryVariables,
+  RegisterSectionsMutation,
+  RegisterSectionsMutationVariables,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
 } from "../../types/graphql";
@@ -155,6 +158,53 @@ const registrationHandlers = [
                 ],
               },
             ],
+          },
+        })
+      );
+    }
+  ),
+
+  graphql.mutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>(
+    "RegisterSections",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          registerSections: {
+            labware: req.variables.request.labware.map((labware) => {
+              let labwareId = parseInt(uniqueId());
+              return {
+                id: labwareId,
+                labwareType: {
+                  name: labware.labwareType,
+                  // numRows and numColumns not correct but don't need to be for this particular mock
+                  numRows: 1,
+                  numColumns: 1,
+                },
+                barcode: labware.externalBarcode,
+                slots: labware.contents.map((content) => ({
+                  labwareId,
+                  address: content.address,
+                  samples: [
+                    {
+                      id: parseInt(uniqueId()),
+                      tissue: {
+                        spatialLocation: {
+                          code: content.spatialLocation,
+                          tissueType: {
+                            name: content.tissueType,
+                          },
+                        },
+                        externalName: content.externalIdentifier,
+                        replicate: content.replicateNumber,
+                        donor: {
+                          donorName: content.donorIdentifier,
+                        },
+                      },
+                    },
+                  ],
+                })),
+              };
+            }),
           },
         })
       );

@@ -4,6 +4,7 @@ import classNames from "classnames";
 import { NewLabwareLayout } from "../types/stan";
 import BarcodeIcon from "./icons/BarcodeIcon";
 import { rowMajor } from "../lib/helpers/labwareHelper";
+import { brightenColor } from "../lib/helpers/tailwindHelper";
 
 interface LabwareProps {
   labware: NewLabwareLayout;
@@ -11,6 +12,7 @@ interface LabwareProps {
   onSlotClick?: (slot: NewLabwareLayout["slots"][number]) => void;
   slotText?: (slot: NewLabwareLayout["slots"][number]) => string | undefined;
   slotColor?: (slot: NewLabwareLayout["slots"][number]) => string | undefined;
+  slotSelected?: (slot: NewLabwareLayout["slots"][number]) => boolean;
 }
 
 const Labware: React.FC<LabwareProps> = ({
@@ -19,6 +21,7 @@ const Labware: React.FC<LabwareProps> = ({
   onSlotClick,
   slotText,
   slotColor,
+  slotSelected,
 }) => {
   const { labwareType } = labware;
 
@@ -41,6 +44,7 @@ const Labware: React.FC<LabwareProps> = ({
             onClick={onSlotClick}
             text={slotText}
             color={slotColor}
+            selected={slotSelected}
           />
         ))}
       </div>
@@ -69,26 +73,36 @@ interface SlotParams {
   onClick?: LabwareProps["onSlotClick"];
   color?: LabwareProps["slotColor"];
   text?: LabwareProps["slotText"];
+  selected?: LabwareProps["slotSelected"];
 }
 
-const Slot: React.FC<SlotParams> = ({ slot, onClick, color, text }) => {
+const Slot: React.FC<SlotParams> = ({
+  slot,
+  onClick,
+  color,
+  text,
+  selected,
+}) => {
   const slotText = (text && text(slot)) ?? defaultSlotText(slot);
   const bgColor = color && color(slot);
+  const slotSelected = !!selected ? selected(slot) : false;
 
   const slotClassNames = classNames(
     {
       "transition duration-150 ease-in-out cursor-pointer": onClick,
       "hover:bg-gray-200": onClick && !bgColor,
-      [`hover:bg-${bgColor}-700`]: onClick && bgColor,
-      [`bg-${bgColor}-600 text-gray-100`]: bgColor,
-      "text-gray-800": !bgColor,
+      [`hover:bg-${brightenColor(bgColor)}`]: onClick && bgColor,
+      [`bg-${bgColor} text-gray-100`]: bgColor,
+      "bg-gray-100 text-gray-800": !bgColor,
+      "ring ring-pink-600 ring-offset-2": slotSelected,
+      "border border-gray-800": !slotSelected,
     },
-    "border border-gray-800 inline-flex items-center justify-center mx-auto h-20 w-20 bg-gray-100 rounded-full text-xs font-semibold"
+    "inline-flex items-center justify-center mx-auto h-20 w-20 rounded-full text-xs font-semibold"
   );
 
   return (
-    <span onClick={() => onClick && onClick(slot)} className={slotClassNames}>
-      {slotText}
-    </span>
+    <div onClick={() => onClick && onClick(slot)} className={slotClassNames}>
+      <p className="truncate">{slotText}</p>
+    </div>
   );
 };

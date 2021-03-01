@@ -2,7 +2,10 @@ import React, { useEffect } from "react";
 import { Route, Switch } from "react-router-dom";
 import AuthenticatedRoute from "./AuthenticatedRoute";
 import Login from "../pages/Login";
-import { getRegistrationMachine } from "../lib/services/registrationService";
+import {
+  getRegistrationMachine,
+  getSlideRegistrationMachine,
+} from "../lib/services/registrationService";
 import { getSectioningMachine } from "../lib/services/sectioningService";
 import Presenter from "./Presenter";
 import {
@@ -13,6 +16,7 @@ import {
   buildReleasePresentationModel,
   buildSearchPresentationModel,
   buildSectioningModel,
+  buildSlideRegistrationPresentationModel,
 } from "../lib/factories/presentationModelFactory";
 import { getLocationMachine } from "../lib/services/locationService";
 import LocationPresentationModel from "../lib/presentationModels/locationPresentationModel";
@@ -29,6 +33,7 @@ import Release from "../pages/Release";
 import Store from "../pages/Store";
 import Search from "../pages/Search";
 import Destroy from "../pages/Destroy";
+import SlideRegistration from "../pages/SlideRegistration";
 
 //HYGEN MARKER
 
@@ -68,6 +73,18 @@ export function Routes() {
           {(presentationModel) => <Registration model={presentationModel} />}
         </Presenter>
       </AuthenticatedRoute>
+
+      <AuthenticatedRoute path="/admin/slide_registration">
+        <Presenter
+          machine={getSlideRegistrationMachine}
+          model={buildSlideRegistrationPresentationModel}
+        >
+          {(presentationModel) => (
+            <SlideRegistration model={presentationModel} />
+          )}
+        </Presenter>
+      </AuthenticatedRoute>
+
       <AuthenticatedRoute path="/admin/release">
         <Presenter
           machine={getReleaseMachine}

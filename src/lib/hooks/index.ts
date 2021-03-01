@@ -90,6 +90,44 @@ export function useScrollToRef() {
 }
 
 /**
+ * Hook that uses an {@code IntersectionObserver} for watching when an element comes on screen.
+ *
+ * @param ref the HTML element to observe
+ * @param options initialisation object for the {@code IntersectionObserver}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver}
+ *
+ * @usage
+ * const ref = useRef<HTMLDivElement>(null);
+ *
+ * // isIntersecting will be true when the whole element is visible
+ * const isIntersecting = useOnScreen(ref, { threshold: 1.0 });
+ */
+export function useOnScreen<E extends HTMLElement>(
+  ref: React.RefObject<E>,
+  options: IntersectionObserverInit
+) {
+  const [isIntersecting, setIntersecting] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      setIntersecting(entry.isIntersecting);
+    }, options);
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    const current = ref.current;
+
+    return () => {
+      current && observer.unobserve(current);
+    };
+  }, [options, ref]);
+
+  return isIntersecting;
+}
+
+/**
  * Starts interpreting a machine and connects it to a {@link MachinePresentationModel}
  * @param machine a state machine
  * @param initPresentationModel a function that returns a new {@link MachinePresentationModel}

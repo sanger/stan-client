@@ -38,8 +38,6 @@ export type RegistrationState = State<
 
 export interface RegistrationContext {
   registrationInfo: GetRegistrationInfoQuery;
-  availableLabwareTypes: LabwareTypeName[];
-  registrationSchema: Yup.ObjectSchema;
   registrationResult: RegisterTissuesMutation;
   registrationErrors: ServerErrors;
 }

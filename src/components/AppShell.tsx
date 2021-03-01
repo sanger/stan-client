@@ -227,11 +227,26 @@ function AppShell({ children }: AppShellParams) {
                               <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                               <div className="ml-4">
                                 <p className="text-base font-medium text-gray-900">
-                                  Registration
+                                  Block Registration
                                 </p>
                                 <p className="mt-1 text-sm text-gray-500">
                                   Register blocks of tissue into STAN and obtain
                                   new barcodes for its labware.
+                                </p>
+                              </div>
+                            </Link>
+                            <Link
+                              to="/admin/slide_registration"
+                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
+                            >
+                              <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                              <div className="ml-4">
+                                <p className="text-base font-medium text-gray-900">
+                                  Slide Registration
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  Register sections of tissue on pre-barcoded
+                                  slides into STAN.
                                 </p>
                               </div>
                             </Link>
@@ -380,6 +395,10 @@ function AppShell({ children }: AppShellParams) {
                     <div className="grid grid-cols-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/admin/registration">
                         Registration
+                      </StanMobileNavLink>
+
+                      <StanMobileNavLink to="/admin/slide_registration">
+                        Slide Registration
                       </StanMobileNavLink>
 
                       <StanMobileNavLink to="/admin/release">
