@@ -1,0 +1,8 @@
+query GetReleaseInfo {
+    releaseDestinations {
+        name
+    }
+    releaseRecipients {
+        username
+    }
+}

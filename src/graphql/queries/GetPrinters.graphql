@@ -1,0 +1,8 @@
+query GetPrinters {
+    printers {
+        name
+        labelType {
+            name
+        }
+    }
+}

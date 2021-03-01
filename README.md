@@ -21,6 +21,19 @@ In order for `graphql-codegen` to generate TypeScript types to match the GraphQL
     // .env.local
     GRAPHQL_SCHEMA_LOCATION=/path/to/schema.graphqls
 
+## Front-end Architecture
+The architecture of the front-end is split into 4 layers:
+
+![Front-end Architecture](public/frontend_architecture.png)
+
+- **UI (React)** - The user interface are the pages and components that make up the application. Built with React, they contain no application logic.
+
+- **Presentation Model** - Presentation models are designed to encapsulate UI logic and behaviour e.g. should this “Save” button be enabled right now? Should the Print component be visible? It also handles user interface events that need to be forwarded on to the data model e.g. when the “Confirm” button is clicked, send the `confirmOperation` event to the data model. A presentation model has a one-to-one mapping with a page.
+
+- **Data Model (XState)** - STAN client state management uses [XState](https://xstate.js.org/docs/), a library for building StateCharts.
+
+- **Services** - Services handle all communication between STAN client and STAN core.
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -33,6 +46,8 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.
 
+It will also watch for any changes in the GraphQL schema, or in the queries and mutations in the `graphql` directory. It will automatically rebuild the graphql TypeScript types on any change. See `yarn codegen` below for more details.
+
 ### `yarn start:msw`
 
 Runs the app in the development mode with MockServiceWorker enabled (see below).<br />
@@ -40,11 +55,15 @@ Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
 
 ### `yarn codegen`
 
-Runs the (GraphQL Code Generator)[https://graphql-code-generator.com/docs/getting-started/index]. This command automatically runs before `yarn start`, `yarn start:msw`, and `yarn test:open`. 
+Runs the [GraphQL Code Generator](https://graphql-code-generator.com/docs/getting-started/index). This command automatically runs before `yarn start`, `yarn start:msw`, and `yarn test:open`. 
 
 GraphQL Code Generator is a CLI tool that can generate TypeScript typings out of a GraphQL schema.
 
 Its configuration lives in `codegen.yml`. Its output goes into the `/types` directory.
+
+### `yarn codegen:machine <name>`
+
+Runs a code generator ([hydra](http://www.hygen.io/docs/quick-start)) to generate an XState state machine with name as the CLI argument `<name>`. Generator template is in `_templates/machine/new`. 
 
 ### `yarn test:open`
 
@@ -96,4 +115,9 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 - Cypress testing library: https://testing-library.com/docs/cypress-testing-library/intro
 - Mock Service Worker docs: https://mswjs.io/docs/
 - Useful article about testing with MSW: https://kentcdodds.com/blog/stop-mocking-fetch
+- Tailwind CSS - https://tailwindcss.com
+- Tailwind CSS Custom Forms - https://tailwindcss-custom-forms.netlify.app/
 - Icon Set: https://heroicons.com/
+- XState (state machine library): https://xstate.js.org/docs/
+- React Framer Motion (animation components): https://www.framer.com/api/motion/
+- Fishery (for defining factories): https://github.com/thoughtbot/fishery

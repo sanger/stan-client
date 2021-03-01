@@ -39,6 +39,9 @@ declare global {
     interface Chainable<Subject> {
       msw(): Chainable<MSW>;
       visitAsGuest(url: string): Chainable<ReturnType<typeof cy.visit>>;
+      findByTextContent(
+        textContent: string
+      ): Chainable<ReturnType<typeof cy.findByText>>;
     }
   }
 }
@@ -71,4 +74,26 @@ Cypress.Commands.add("visitAsGuest", (url: string) => {
   });
 
   return cy.visit(url);
+});
+
+/**
+ * Command to find a piece of text on a page that could be broken up within
+ * multiple HTML elements (unlike findByText)
+ *
+ * @example
+ *
+ * <div>Hello <span>World!</span></div>
+ *
+ * cy.findByTextContent("Hello World!") // finds it
+ */
+Cypress.Commands.add("findByTextContent", (textContent: string) => {
+  return cy.findByText((content, node) => {
+    const hasText = (node: Element) => node.textContent === textContent;
+    const nodeHasText = hasText(node);
+    const childrenDontHaveText = Array.from(node.children).every(
+      (child) => !hasText(child)
+    );
+
+    return nodeHasText && childrenDontHaveText;
+  });
 });

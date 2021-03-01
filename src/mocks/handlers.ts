@@ -1,56 +1,28 @@
-import { graphql } from "msw";
-
-const CURRENT_USER_KEY = "currentUser";
 /**
  * Default handlers for the mock API
  */
+import labwareHandlers from "./handlers/labwareHandlers";
+import planHandlers from "./handlers/planHandlers";
+import printHandlers from "./handlers/printHandlers";
+import registrationHandlers from "./handlers/registrationHandlers";
+import sectioningHandlers from "./handlers/sectioningHandlers";
+import userHandlers from "./handlers/userHandlers";
+import locationHandlers from "./handlers/locationHandlers";
+import releaseHandlers from "./handlers/releaseHandlers";
+import extractionHandlers from "./handlers/extractionHandlers";
+import findHandlers from "./handlers/findHandlers";
+import destroyHandlers from "./handlers/destroyHandlers";
+
 export const handlers = [
-  graphql.mutation("Login", (req, res, ctx) => {
-    const { username } = req.variables;
-    sessionStorage.setItem(CURRENT_USER_KEY, username);
-    return res(
-      ctx.data({
-        login: {
-          message: "OK",
-          user: {
-            username,
-          },
-        },
-      })
-    );
-  }),
-
-  graphql.mutation("Logout", (req, res, ctx) => {
-    sessionStorage.removeItem(CURRENT_USER_KEY);
-    return res(
-      ctx.data({
-        logout: "OK",
-      })
-    );
-  }),
-
-  graphql.query("CurrentUser", (req, res, ctx) => {
-    const currentUser = sessionStorage.getItem(CURRENT_USER_KEY);
-
-    // By default we want the user to be logged in.
-    // If this is the first request, currentUser won't be set yet.
-    if (!currentUser) {
-      sessionStorage.setItem(CURRENT_USER_KEY, "jb1");
-      return res(
-        ctx.data({
-          user: {
-            username: "jb1",
-          },
-        })
-      );
-    } else {
-      return res(
-        ctx.data({
-          user: {
-            username: currentUser,
-          },
-        })
-      );
-    }
-  }),
+  ...labwareHandlers,
+  ...planHandlers,
+  ...printHandlers,
+  ...registrationHandlers,
+  ...sectioningHandlers,
+  ...userHandlers,
+  ...locationHandlers,
+  ...releaseHandlers,
+  ...extractionHandlers,
+  ...findHandlers,
+  ...destroyHandlers,
 ];

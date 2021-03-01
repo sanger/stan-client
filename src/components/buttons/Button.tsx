@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import LoadingSpinner from "../LoadingSpinner";
+import LoadingSpinner from "../icons/LoadingSpinner";
 
 export interface ButtonProps
   extends React.DetailedHTMLProps<
@@ -22,7 +22,7 @@ const Button = ({
   ...rest
 }: ButtonProps) => {
   const buttonClasses = classNames(
-    "group relative flex justify-center py-2 px-4 border border-transparent text-sm leading-5 font-medium rounded-md focus:outline-none transition duration-150 ease-in-out",
+    "w-full inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm",
     {
       "cursor-not-allowed opacity-50": disabled || loading,
     },
@@ -30,7 +30,7 @@ const Button = ({
   );
 
   return (
-    <button {...rest} className={buttonClasses}>
+    <button {...rest} disabled={disabled} className={buttonClasses}>
       {children}
       {loading && (
         <span className="absolute right-0 inset-y-0 flex items-center pr-3">

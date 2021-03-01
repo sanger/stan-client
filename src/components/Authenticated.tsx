@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { authContext } from "../context/AuthContext";
 
 interface AuthProps {
-  children: JSX.Element | JSX.Element[];
+  children: React.ReactNode | React.ReactNode[];
 }
 
 /**
@@ -10,8 +10,8 @@ interface AuthProps {
  * @param children
  */
 function Authenticated({ children }: AuthProps) {
-  const authContext = useContext(AuthContext);
-  return <>{authContext.isAuthenticated() && children}</>;
+  const auth = useContext(authContext);
+  return <>{auth.isAuthenticated() && children}</>;
 }
 
 /**
@@ -19,8 +19,8 @@ function Authenticated({ children }: AuthProps) {
  * @param children
  */
 function Unauthenticated({ children }: AuthProps) {
-  const authContext = useContext(AuthContext);
-  return <>{!authContext.isAuthenticated() && children}</>;
+  const auth = useContext(authContext);
+  return <>{!auth.isAuthenticated() && children}</>;
 }
 
 export { Authenticated, Unauthenticated };

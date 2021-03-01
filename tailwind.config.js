@@ -1,14 +1,74 @@
 module.exports = {
-  future: {
-    removeDeprecatedGapUtilities: true,
-    purgeLayersByDefault: true,
+  purge: {
+    content: ["./src/**/*.html", "./src/**/*.tsx"],
+
+    // Used in the Labware component for slots, but colour is built dynamically so we need to make sure it's not purged
+    options: {
+      safelist: [
+        "bg-red-600",
+        "hover:bg-red-700",
+        "bg-green-600",
+        "hover:bg-green-700",
+        "bg-indigo-600",
+        "hover:bg-indigo-700",
+        "bg-pink-600",
+        "hover:bg-pink-700",
+        "bg-yellow-600",
+        "hover:bg-yellow-700",
+        "bg-blue-600",
+        "hover:bg-blue-700",
+        "bg-purple-600",
+        "hover:bg-purple-700",
+        "grid-flow-col",
+        "grid-flow-row",
+        "grid-cols-1",
+        "grid-cols-2",
+        "grid-cols-3",
+        "grid-cols-4",
+        "grid-cols-5",
+        "grid-cols-6",
+        "grid-cols-7",
+        "grid-cols-8",
+        "grid-cols-9",
+        "grid-cols-10",
+        "grid-cols-11",
+        "grid-cols-12",
+        "grid-cols-location-1",
+        "grid-cols-location-2",
+        "grid-cols-location-3",
+        "grid-cols-location-4",
+        "grid-cols-location-5",
+        "grid-cols-location-6",
+        "grid-cols-location-7",
+        "grid-cols-location-8",
+        "grid-cols-location-9",
+        "grid-cols-location-10",
+        "grid-cols-location-11",
+        "grid-cols-location-12",
+        "grid-cols-location-13",
+        "grid-cols-location-14",
+        "grid-rows-1",
+        "grid-rows-2",
+        "grid-rows-3",
+        "grid-rows-4",
+        "grid-rows-5",
+        "grid-rows-6",
+        "grid-rows-10",
+        "grid-rows-25",
+        "grid-rows-50",
+      ],
+    },
   },
-  purge: ["./src/**/*.html", "./src/**/*.tsx"],
-  target: "relaxed",
   prefix: "",
   important: false,
   separator: ":",
   theme: {
+    extend: {
+      boxShadow: {
+        xs: "0 0 0 1px rgba(0, 0, 0, 0.05)",
+        outline: "0 0 0 3px rgba(66, 153, 225, 0.5)",
+      },
+    },
     screens: {
       sm: "640px",
       md: "768px",
@@ -23,7 +83,7 @@ module.exports = {
       white: "#fff",
 
       sp: {
-        default: "#E91E63",
+        DEFAULT: "#E91E63",
         100: "#FDE9EF",
         200: "#FAC7D8",
         300: "#F6A5C1",
@@ -37,7 +97,7 @@ module.exports = {
 
       // Sanger Dark Blue
       sdb: {
-        default: "#232643",
+        DEFAULT: "#232643",
         100: "#7980B9",
         200: "#5860A7",
         300: "#464D86",
@@ -47,6 +107,7 @@ module.exports = {
       },
 
       gray: {
+        50: "#f9fafb",
         100: "#f7fafc",
         200: "#edf2f7",
         300: "#e2e8f0",
@@ -177,23 +238,25 @@ module.exports = {
       48: "12rem",
       56: "14rem",
       64: "16rem",
+      72: "18rem",
+      84: "21rem",
+      96: "24rem",
     },
     backgroundColor: (theme) => theme("colors"),
     backgroundImage: {
       none: "none",
-      "gradient-to-t": "linear-gradient(to top, var(--gradient-color-stops))",
+      "gradient-to-t": "linear-gradient(to top, var(--tw-gradient-stops))",
       "gradient-to-tr":
-        "linear-gradient(to top right, var(--gradient-color-stops))",
-      "gradient-to-r": "linear-gradient(to right, var(--gradient-color-stops))",
+        "linear-gradient(to top right, var(--tw-gradient-stops))",
+      "gradient-to-r": "linear-gradient(to right, var(--tw-gradient-stops))",
       "gradient-to-br":
-        "linear-gradient(to bottom right, var(--gradient-color-stops))",
-      "gradient-to-b":
-        "linear-gradient(to bottom, var(--gradient-color-stops))",
+        "linear-gradient(to bottom right, var(--tw-gradient-stops))",
+      "gradient-to-b": "linear-gradient(to bottom, var(--tw-gradient-stops))",
       "gradient-to-bl":
-        "linear-gradient(to bottom left, var(--gradient-color-stops))",
-      "gradient-to-l": "linear-gradient(to left, var(--gradient-color-stops))",
+        "linear-gradient(to bottom left, var(--tw-gradient-stops))",
+      "gradient-to-l": "linear-gradient(to left, var(--tw-gradient-stops))",
       "gradient-to-tl":
-        "linear-gradient(to top left, var(--gradient-color-stops))",
+        "linear-gradient(to top left, var(--tw-gradient-stops))",
     },
     gradientColorStops: (theme) => theme("colors"),
     backgroundOpacity: (theme) => theme("opacity"),
@@ -215,19 +278,19 @@ module.exports = {
     },
     borderColor: (theme) => ({
       ...theme("colors"),
-      default: theme("colors.gray.300", "currentColor"),
+      DEFAULT: theme("colors.gray.300", "currentColor"),
     }),
     borderOpacity: (theme) => theme("opacity"),
     borderRadius: {
       none: "0",
       sm: "0.125rem",
-      default: "0.25rem",
+      DEFAULT: "0.25rem",
       md: "0.375rem",
       lg: "0.5rem",
       full: "9999px",
     },
     borderWidth: {
-      default: "1px",
+      DEFAULT: "1px",
       0: "0",
       2: "2px",
       4: "4px",
@@ -236,7 +299,7 @@ module.exports = {
     boxShadow: {
       xs: "0 0 0 1px rgba(0, 0, 0, 0.05)",
       sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-      default:
+      DEFAULT:
         "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
       md:
         "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
@@ -252,7 +315,7 @@ module.exports = {
     container: {},
     cursor: {
       auto: "auto",
-      default: "default",
+      DEFAULT: "DEFAULT",
       pointer: "pointer",
       wait: "wait",
       text: "text",
@@ -273,11 +336,11 @@ module.exports = {
     },
     flexGrow: {
       0: "0",
-      default: "1",
+      DEFAULT: "1",
     },
     flexShrink: {
       0: "0",
-      default: "1",
+      DEFAULT: "1",
     },
     fontFamily: {
       sans: [
@@ -510,6 +573,21 @@ module.exports = {
       10: "repeat(10, minmax(0, 1fr))",
       11: "repeat(11, minmax(0, 1fr))",
       12: "repeat(12, minmax(0, 1fr))",
+
+      "location-1": "repeat(1, minmax(180px, 220px))",
+      "location-2": "repeat(2, minmax(180px, 220px))",
+      "location-3": "repeat(3, minmax(180px, 220px))",
+      "location-4": "repeat(4, minmax(180px, 220px))",
+      "location-5": "repeat(5, minmax(180px, 220px))",
+      "location-6": "repeat(6, minmax(180px, 220px))",
+      "location-7": "repeat(7, minmax(180px, 220px))",
+      "location-8": "repeat(8, minmax(180px, 220px))",
+      "location-9": "repeat(9, minmax(180px, 220px))",
+      "location-10": "repeat(10, minmax(180px, 220px))",
+      "location-11": "repeat(11, minmax(180px, 220px))",
+      "location-12": "repeat(12, minmax(180px, 220px))",
+      "location-13": "repeat(13, minmax(180px, 220px))",
+      "location-14": "repeat(14, minmax(180px, 220px))",
     },
     gridColumn: {
       auto: "auto",
@@ -566,6 +644,9 @@ module.exports = {
       4: "repeat(4, minmax(0, 1fr))",
       5: "repeat(5, minmax(0, 1fr))",
       6: "repeat(6, minmax(0, 1fr))",
+      10: "repeat(10, minmax(0, 1fr))",
+      25: "repeat(25, minmax(0, 1fr))",
+      50: "repeat(50, minmax(0, 1fr))",
     },
     gridRow: {
       auto: "auto",
@@ -648,7 +729,7 @@ module.exports = {
     transitionProperty: {
       none: "none",
       all: "all",
-      default:
+      DEFAULT:
         "background-color, border-color, color, fill, stroke, opacity, box-shadow, transform",
       colors: "background-color, border-color, color, fill, stroke",
       opacity: "opacity",
@@ -718,7 +799,15 @@ module.exports = {
     appearance: ["responsive"],
     backgroundAttachment: ["responsive"],
     backgroundClip: ["responsive"],
-    backgroundColor: ["responsive", "hover", "focus", "active"],
+    backgroundColor: [
+      "responsive",
+      "hover",
+      "focus",
+      "active",
+      "odd",
+      "even",
+      "disabled",
+    ],
     backgroundImage: ["responsive"],
     gradientColorStops: ["responsive", "hover", "focus"],
     backgroundOpacity: ["responsive", "hover", "focus"],
@@ -734,8 +823,8 @@ module.exports = {
     boxShadow: ["responsive", "hover", "focus"],
     boxSizing: ["responsive"],
     container: ["responsive"],
-    cursor: ["responsive"],
-    display: ["responsive"],
+    cursor: ["responsive", "disabled"],
+    display: ["responsive", "group-hover"],
     divideColor: ["responsive"],
     divideOpacity: ["responsive"],
     divideStyle: ["responsive"],
@@ -770,7 +859,7 @@ module.exports = {
     minWidth: ["responsive"],
     objectFit: ["responsive"],
     objectPosition: ["responsive"],
-    opacity: ["responsive", "hover", "focus"],
+    opacity: ["responsive", "hover", "focus", "disabled"],
     order: ["responsive"],
     outline: ["responsive", "focus"],
     overflow: ["responsive"],
@@ -789,7 +878,7 @@ module.exports = {
     strokeWidth: ["responsive"],
     tableLayout: ["responsive"],
     textAlign: ["responsive"],
-    textColor: ["responsive", "hover", "focus"],
+    textColor: ["responsive", "hover", "focus", "disabled"],
     textOpacity: ["responsive", "hover", "focus"],
     textDecoration: ["responsive", "hover", "focus"],
     textTransform: ["responsive"],
@@ -823,5 +912,9 @@ module.exports = {
     animation: ["responsive"],
   },
   corePlugins: {},
-  plugins: [require("@tailwindcss/ui")],
+  plugins: [
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/aspect-ratio"),
+  ],
 };

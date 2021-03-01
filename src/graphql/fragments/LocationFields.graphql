@@ -1,0 +1,26 @@
+fragment LocationFields on Location {
+    barcode
+    name
+    customName
+    address
+    direction
+    parent {
+        barcode
+        name
+        customName
+    }
+    size {
+        numRows
+        numColumns
+    }
+    stored {
+        barcode
+        address
+    }
+    children {
+        barcode
+        name
+        customName
+        address
+    }
+}

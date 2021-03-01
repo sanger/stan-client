@@ -1,0 +1,7 @@
+mutation RegisterTissues($request: RegisterRequest!) {
+    register(request: $request) {
+        labware {
+            ...LabwareLayout
+        }
+    }
+}

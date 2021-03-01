@@ -1,7 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { enableAllPlugins } from "immer";
 import "./styles/index.css";
 import App from "./App";
+
+/**
+ * Enable all immer plugins
+ * {@link https://immerjs.github.io/immer/docs/installation}
+ */
+enableAllPlugins();
 
 /**
  * Setup MockServiceWorker if `REACT_APP_MOCK_API` is set to `msw`
@@ -10,7 +17,7 @@ import App from "./App";
  */
 async function prepare() {
   if (process.env.REACT_APP_MOCK_API === "msw") {
-    const { worker } = require("./mocks/browser");
+    const { worker } = require("./mocks/mswSetup");
     const { graphql } = require("msw");
     await worker.start();
     if (window.postMSWStart) {

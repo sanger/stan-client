@@ -1,0 +1,27 @@
+query GetRegistrationInfo {
+    species {
+        name
+    }
+    hmdmcs {
+        hmdmc
+    }
+    labwareTypes {
+        name
+    }
+    tissueTypes {
+        name
+        spatialLocations {
+            name
+            code
+        }
+    }
+    fixatives {
+        name
+    }
+    mediums {
+        name
+    }
+    mouldSizes {
+        name
+    }
+}

@@ -1,0 +1,5 @@
+query FindLocationByBarcode($barcode: String!) {
+    location(locationBarcode: $barcode) {
+        ...LocationFields
+    }
+}

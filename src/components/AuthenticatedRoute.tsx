@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Redirect, Route, RouteProps } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { authContext } from "../context/AuthContext";
 
 interface AuthenticatedRouteProps extends RouteProps {}
 
@@ -10,9 +10,9 @@ interface AuthenticatedRouteProps extends RouteProps {}
  * If the user is not authenticated, redirects them to the login page.
  */
 function AuthenticatedRoute({ children, ...rest }: AuthenticatedRouteProps) {
-  const authContext = useContext(AuthContext);
+  const auth = useContext(authContext);
 
-  if (authContext.isAuthenticated()) {
+  if (auth.isAuthenticated()) {
     return <Route {...rest}>{children}</Route>;
   } else {
     return (
