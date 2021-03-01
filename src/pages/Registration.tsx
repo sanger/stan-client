@@ -4,6 +4,12 @@ import Warning from "../components/notifications/Warning";
 import RegistrationForm from "./registration/RegistrationForm";
 import RegistrationSuccess from "./registration/RegistrationSuccess";
 import RegistrationPresentationModel from "../lib/presentationModels/registrationPresentationModel";
+import { Formik } from "formik";
+import {
+  FormValues,
+  getInitialTissueValues,
+} from "../lib/services/registrationService";
+import columns from "../components/labwareScanPanel/columns";
 
 interface RegistrationParams {
   model: RegistrationPresentationModel;
@@ -18,8 +24,20 @@ const Registration: React.FC<RegistrationParams> = ({ model }) => {
   });
 
   if (model.isComplete()) {
-    return <RegistrationSuccess result={model.registrationResult} />;
+    return (
+      <RegistrationSuccess
+        labware={model.registrationResult.register.labware}
+        columns={[
+          columns.barcode(),
+          columns.labwareType(),
+          columns.externalName(),
+        ]}
+      />
+    );
   }
+
+  // Initial values provided to Formik
+  const initialValues: FormValues = { tissues: [getInitialTissueValues()] };
 
   return (
     <AppShell>
@@ -40,7 +58,19 @@ const Registration: React.FC<RegistrationParams> = ({ model }) => {
             </div>
           )}
 
-          {model.isReady() && <RegistrationForm model={model} />}
+          {model.isReady() && (
+            <Formik<FormValues>
+              initialValues={initialValues}
+              validationSchema={model.registrationSchema}
+              validateOnChange={false}
+              validateOnBlur={true}
+              onSubmit={(values) => {
+                model.submitForm(values);
+              }}
+            >
+              <RegistrationForm model={model} />
+            </Formik>
+          )}
         </div>
       </AppShell.Main>
     </AppShell>

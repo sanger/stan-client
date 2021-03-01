@@ -1,5 +1,5 @@
 import { LabwareLayoutFragment } from "../../types/graphql";
-import { cycle } from "../helpers";
+import { cycleColors } from "../helpers";
 import { orderBy } from "lodash";
 
 /**
@@ -24,15 +24,7 @@ export function labwareSamples(labware: LabwareLayoutFragment) {
 export function buildSampleColors(
   labwares: LabwareLayoutFragment[]
 ): Map<number, string> {
-  const colors = cycle([
-    "red",
-    "green",
-    "indigo",
-    "pink",
-    "yellow",
-    "blue",
-    "purple",
-  ]);
+  const colors = cycleColors();
   const sampleColors = new Map();
   labwares.forEach((labware) => {
     labwareSamples(labware).forEach((value) => {

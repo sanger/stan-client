@@ -149,6 +149,32 @@ export type RegisterRequest = {
   blocks: Array<BlockRegisterRequest>;
 };
 
+export type SectionRegisterContent = {
+  address: Scalars['Address'];
+  species: Scalars['String'];
+  hmdmc?: Maybe<Scalars['String']>;
+  donorIdentifier: Scalars['String'];
+  lifeStage: LifeStage;
+  externalIdentifier: Scalars['String'];
+  tissueType: Scalars['String'];
+  spatialLocation: Scalars['Int'];
+  replicateNumber: Scalars['Int'];
+  fixative: Scalars['String'];
+  medium: Scalars['String'];
+  sectionNumber: Scalars['Int'];
+  sectionThickness?: Maybe<Scalars['Int']>;
+};
+
+export type SectionRegisterLabware = {
+  labwareType: Scalars['String'];
+  externalBarcode: Scalars['String'];
+  contents: Array<SectionRegisterContent>;
+};
+
+export type SectionRegisterRequest = {
+  labware: Array<SectionRegisterLabware>;
+};
+
 export type RegisterResult = {
   __typename?: 'RegisterResult';
   labware: Array<Labware>;
@@ -461,6 +487,7 @@ export type Mutation = {
   login: LoginResult;
   logout?: Maybe<Scalars['String']>;
   register: RegisterResult;
+  registerSections: RegisterResult;
   plan: PlanResult;
   printLabware?: Maybe<Scalars['String']>;
   confirmOperation: ConfirmOperationResult;
@@ -482,6 +509,11 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   request: RegisterRequest;
+};
+
+
+export type MutationRegisterSectionsArgs = {
+  request?: Maybe<SectionRegisterRequest>;
 };
 
 
@@ -760,6 +792,22 @@ export type PrintMutationVariables = Exact<{
 export type PrintMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'printLabware'>
+);
+
+export type RegisterSectionsMutationVariables = Exact<{
+  request: SectionRegisterRequest;
+}>;
+
+
+export type RegisterSectionsMutation = (
+  { __typename?: 'Mutation' }
+  & { registerSections: (
+    { __typename?: 'RegisterResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareLayoutFragment
+    )> }
+  ) }
 );
 
 export type RegisterTissuesMutationVariables = Exact<{
@@ -1456,6 +1504,40 @@ export function usePrintMutation(baseOptions?: Apollo.MutationHookOptions<PrintM
 export type PrintMutationHookResult = ReturnType<typeof usePrintMutation>;
 export type PrintMutationResult = Apollo.MutationResult<PrintMutation>;
 export type PrintMutationOptions = Apollo.BaseMutationOptions<PrintMutation, PrintMutationVariables>;
+export const RegisterSectionsDocument = gql`
+    mutation RegisterSections($request: SectionRegisterRequest!) {
+  registerSections(request: $request) {
+    labware {
+      ...LabwareLayout
+    }
+  }
+}
+    ${LabwareLayoutFragmentDoc}`;
+export type RegisterSectionsMutationFn = Apollo.MutationFunction<RegisterSectionsMutation, RegisterSectionsMutationVariables>;
+
+/**
+ * __useRegisterSectionsMutation__
+ *
+ * To run a mutation, you first call `useRegisterSectionsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRegisterSectionsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [registerSectionsMutation, { data, loading, error }] = useRegisterSectionsMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useRegisterSectionsMutation(baseOptions?: Apollo.MutationHookOptions<RegisterSectionsMutation, RegisterSectionsMutationVariables>) {
+        return Apollo.useMutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>(RegisterSectionsDocument, baseOptions);
+      }
+export type RegisterSectionsMutationHookResult = ReturnType<typeof useRegisterSectionsMutation>;
+export type RegisterSectionsMutationResult = Apollo.MutationResult<RegisterSectionsMutation>;
+export type RegisterSectionsMutationOptions = Apollo.BaseMutationOptions<RegisterSectionsMutation, RegisterSectionsMutationVariables>;
 export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {

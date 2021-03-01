@@ -138,7 +138,7 @@ const SectioningLayout = React.forwardRef<
             slotColor={(slot) => {
               const action = layoutPlan.plannedActions.get(slot.address);
               if (action) {
-                return layoutPlan.sampleColors.get(action.sampleId);
+                return `${layoutPlan.sampleColors.get(action.sampleId)}-600`;
               }
             }}
           />

@@ -62,7 +62,7 @@ export function extractServerErrors(e: ApolloError): ServerErrors {
   return {
     message: matchArray !== null ? matchArray[1] : null,
     problems: e.graphQLErrors.reduce<string[]>(
-      (memo, graphQLError, index, original) => {
+      (memo, graphQLError, _index, _original) => {
         if (!graphQLError.extensions?.hasOwnProperty("problems")) {
           return memo;
         }
