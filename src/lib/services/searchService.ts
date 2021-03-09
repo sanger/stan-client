@@ -135,7 +135,7 @@ export function formatFindResult(
           : {
               barcode: location.barcode,
               displayName:
-                location.customName ?? location.name ?? location.barcode,
+                location.customName ?? location.fixedName ?? location.barcode,
               address:
                 labwareLocation?.address &&
                 location?.direction &&

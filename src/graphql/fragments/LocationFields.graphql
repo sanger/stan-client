@@ -1,12 +1,12 @@
 fragment LocationFields on Location {
     barcode
-    name
+    fixedName
     customName
     address
     direction
     parent {
         barcode
-        name
+        fixedName
         customName
     }
     size {
@@ -19,7 +19,7 @@ fragment LocationFields on Location {
     }
     children {
         barcode
-        name
+        fixedName
         customName
         address
     }

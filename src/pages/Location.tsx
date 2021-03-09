@@ -175,7 +175,7 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
                 description={location.barcode}
               >
                 <StripyCardDetail term={"Name"}>
-                  {location.name ?? <span className="italic">None</span>}
+                  {location.fixedName ?? <span className="italic">None</span>}
                 </StripyCardDetail>
 
                 {location.parent && (
@@ -206,7 +206,9 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
                         return (
                           <li key={child.barcode}>
                             <StyledLink to={`/locations/${child.barcode}`}>
-                              {child.customName ?? child.name ?? child.barcode}
+                              {child.customName ??
+                                child.fixedName ??
+                                child.barcode}
                             </StyledLink>
                           </li>
                         );
@@ -294,7 +296,7 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
                           Are you sure you want to remove all labware from{" "}
                           <span className="font-semibold">
                             {location.customName ??
-                              location.name ??
+                              location.fixedName ??
                               location.barcode}
                           </span>
                           ?

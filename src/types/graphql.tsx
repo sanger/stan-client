@@ -149,6 +149,32 @@ export type RegisterRequest = {
   blocks: Array<BlockRegisterRequest>;
 };
 
+export type SectionRegisterContent = {
+  address: Scalars['Address'];
+  species: Scalars['String'];
+  hmdmc?: Maybe<Scalars['String']>;
+  donorIdentifier: Scalars['String'];
+  lifeStage: LifeStage;
+  externalIdentifier: Scalars['String'];
+  tissueType: Scalars['String'];
+  spatialLocation: Scalars['Int'];
+  replicateNumber: Scalars['Int'];
+  fixative: Scalars['String'];
+  medium: Scalars['String'];
+  sectionNumber: Scalars['Int'];
+  sectionThickness?: Maybe<Scalars['Int']>;
+};
+
+export type SectionRegisterLabware = {
+  labwareType: Scalars['String'];
+  externalBarcode: Scalars['String'];
+  contents: Array<SectionRegisterContent>;
+};
+
+export type SectionRegisterRequest = {
+  labware: Array<SectionRegisterLabware>;
+};
+
 export type RegisterResult = {
   __typename?: 'RegisterResult';
   labware: Array<Labware>;
@@ -350,7 +376,7 @@ export type Location = {
   __typename?: 'Location';
   id: Scalars['Int'];
   barcode: Scalars['String'];
-  name?: Maybe<Scalars['String']>;
+  fixedName?: Maybe<Scalars['String']>;
   customName?: Maybe<Scalars['String']>;
   address?: Maybe<Scalars['Address']>;
   size?: Maybe<Size>;
@@ -363,7 +389,7 @@ export type Location = {
 export type LinkedLocation = {
   __typename?: 'LinkedLocation';
   barcode: Scalars['String'];
-  name?: Maybe<Scalars['String']>;
+  fixedName?: Maybe<Scalars['String']>;
   customName?: Maybe<Scalars['String']>;
   address?: Maybe<Scalars['Address']>;
 };
@@ -461,6 +487,7 @@ export type Mutation = {
   login: LoginResult;
   logout?: Maybe<Scalars['String']>;
   register: RegisterResult;
+  registerSections: RegisterResult;
   plan: PlanResult;
   printLabware?: Maybe<Scalars['String']>;
   confirmOperation: ConfirmOperationResult;
@@ -482,6 +509,11 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   request: RegisterRequest;
+};
+
+
+export type MutationRegisterSectionsArgs = {
+  request?: Maybe<SectionRegisterRequest>;
 };
 
 
@@ -575,10 +607,10 @@ export type LabwareLayoutFragment = (
 
 export type LocationFieldsFragment = (
   { __typename?: 'Location' }
-  & Pick<Location, 'barcode' | 'name' | 'customName' | 'address' | 'direction'>
+  & Pick<Location, 'barcode' | 'fixedName' | 'customName' | 'address' | 'direction'>
   & { parent?: Maybe<(
     { __typename?: 'LinkedLocation' }
-    & Pick<LinkedLocation, 'barcode' | 'name' | 'customName'>
+    & Pick<LinkedLocation, 'barcode' | 'fixedName' | 'customName'>
   )>, size?: Maybe<(
     { __typename?: 'Size' }
     & Pick<Size, 'numRows' | 'numColumns'>
@@ -587,7 +619,7 @@ export type LocationFieldsFragment = (
     & Pick<StoredItem, 'barcode' | 'address'>
   )>, children: Array<(
     { __typename?: 'LinkedLocation' }
-    & Pick<LinkedLocation, 'barcode' | 'name' | 'customName' | 'address'>
+    & Pick<LinkedLocation, 'barcode' | 'fixedName' | 'customName' | 'address'>
   )> }
 );
 
@@ -899,7 +931,7 @@ export type FindQuery = (
       ) }
     )>, locations: Array<(
       { __typename?: 'Location' }
-      & Pick<Location, 'id' | 'barcode' | 'customName' | 'name' | 'direction'>
+      & Pick<Location, 'id' | 'barcode' | 'customName' | 'fixedName' | 'direction'>
       & { size?: Maybe<(
         { __typename?: 'Size' }
         & Pick<Size, 'numRows' | 'numColumns'>
@@ -1114,13 +1146,13 @@ export const LabwareLayoutFragmentDoc = gql`
 export const LocationFieldsFragmentDoc = gql`
     fragment LocationFields on Location {
   barcode
-  name
+  fixedName
   customName
   address
   direction
   parent {
     barcode
-    name
+    fixedName
     customName
   }
   size {
@@ -1133,7 +1165,7 @@ export const LocationFieldsFragmentDoc = gql`
   }
   children {
     barcode
-    name
+    fixedName
     customName
     address
   }
@@ -1702,7 +1734,7 @@ export const FindDocument = gql`
       id
       barcode
       customName
-      name
+      fixedName
       direction
       size {
         numRows
