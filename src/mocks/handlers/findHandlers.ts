@@ -56,7 +56,7 @@ export function buildFindResult(
   const locationCount = _.random(numRecordsReturned);
   const locations = [...Array(locationCount)].map(() =>
     locationFactory.build({
-      name: faker.address.countryCode(),
+      fixedName: faker.address.countryCode(),
       customName: _.sample([faker.address.streetName(), null]),
     })
   );

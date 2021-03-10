@@ -14,7 +14,7 @@ const locationFactory = Factory.define<Location>(
     const location: Location = {
       id: sequence,
       barcode,
-      name: params.name ?? `Location ${sequence}`,
+      fixedName: params.fixedName ?? `Location ${sequence}`,
       customName: params.customName ?? null,
       address: params.address ?? null,
       children: params.children ?? [],
@@ -59,7 +59,7 @@ export function buildLinkedLocation(location: Location): LinkedLocation {
   return {
     __typename: "LinkedLocation",
     barcode: location.barcode,
-    name: location.name,
+    fixedName: location.fixedName,
     customName: location.customName,
     address: location.address,
   };

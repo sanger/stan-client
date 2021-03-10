@@ -182,14 +182,14 @@ function locationResponse(location: Location): LocationFieldsFragment {
   return {
     __typename: "Location" as const,
     barcode: location.barcode,
-    name: location.name,
+    fixedName: location.fixedName,
     customName: location.customName,
     address: location.address,
     direction: location.direction,
     parent: location.parent
       ? {
           barcode: location.parent.barcode,
-          name: location.parent.name,
+          fixedName: location.parent.fixedName,
           customName: location.parent.customName,
         }
       : null,
@@ -206,7 +206,7 @@ function locationResponse(location: Location): LocationFieldsFragment {
     children: location.children.map((child) => {
       return {
         barcode: child.barcode,
-        name: child.name,
+        fixedName: child.fixedName,
         customName: child.customName,
         address: child.address,
       };
