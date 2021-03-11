@@ -132,10 +132,12 @@ export function getInitialTissueValues(): FormTissueValues {
 /**
  * Builds the registerTissue mutation variables from the FormValues
  * @param formValues
+ * @param existingTissue the user has confirmed this is an existing piece of tissue
  * @return Promise<RegisterTissuesMutationVariables> mutation variables wrapped in a promise
  */
 export function buildRegisterTissuesMutationVariables(
-  formValues: FormValues
+  formValues: FormValues,
+  existingTissue: boolean = false
 ): Promise<RegisterTissuesMutationVariables> {
   return new Promise((resolve) => {
     const blocks = formValues.tissues.reduce<BlockRegisterRequest[]>(
@@ -157,6 +159,7 @@ export function buildRegisterTissuesMutationVariables(
               fixative: block.fixative,
               medium: block.medium,
               mouldSize: block.mouldSize,
+              existingTissue,
             };
           }),
         ];

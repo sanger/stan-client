@@ -143,6 +143,7 @@ export type BlockRegisterRequest = {
   fixative: Scalars['String'];
   mouldSize: Scalars['String'];
   species: Scalars['String'];
+  existingTissue?: Maybe<Scalars['Boolean']>;
 };
 
 export type RegisterRequest = {
@@ -175,10 +176,16 @@ export type SectionRegisterRequest = {
   labware: Array<SectionRegisterLabware>;
 };
 
+export type RegisterClash = {
+  __typename?: 'RegisterClash';
+  tissue: Tissue;
+  labware: Array<Labware>;
+};
+
 export type RegisterResult = {
   __typename?: 'RegisterResult';
   labware: Array<Labware>;
-  tissue: Array<Tissue>;
+  clashes: Array<RegisterClash>;
 };
 
 export type PlanRequestSource = {
@@ -822,6 +829,19 @@ export type RegisterTissuesMutation = (
     & { labware: Array<(
       { __typename?: 'Labware' }
       & LabwareLayoutFragment
+    )>, clashes: Array<(
+      { __typename?: 'RegisterClash' }
+      & { tissue: (
+        { __typename?: 'Tissue' }
+        & Pick<Tissue, 'externalName'>
+      ), labware: Array<(
+        { __typename?: 'Labware' }
+        & Pick<Labware, 'barcode'>
+        & { labwareType: (
+          { __typename?: 'LabwareType' }
+          & Pick<LabwareType, 'name'>
+        ) }
+      )> }
     )> }
   ) }
 );
@@ -1543,6 +1563,17 @@ export const RegisterTissuesDocument = gql`
   register(request: $request) {
     labware {
       ...LabwareLayout
+    }
+    clashes {
+      tissue {
+        externalName
+      }
+      labware {
+        barcode
+        labwareType {
+          name
+        }
+      }
     }
   }
 }

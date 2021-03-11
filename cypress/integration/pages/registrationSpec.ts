@@ -3,6 +3,8 @@ import {
   RegisterTissuesMutationVariables,
 } from "../../../src/types/graphql";
 import { shouldBehaveLikeARegistrationForm } from "../shared/registration";
+import { tissueFactory } from "../../../src/lib/factories/sampleFactory";
+import labwareFactory from "../../../src/lib/factories/labwareFactory";
 
 describe("Registration", () => {
   before(() => {
@@ -159,6 +161,49 @@ describe("Registration", () => {
       });
     });
   });
+
+  context("when the submission has clashes", () => {
+    const tissue = tissueFactory.build();
+    const labware = labwareFactory.buildList(2);
+
+    before(() => {
+      cy.visit("/admin/registration");
+
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.mutation<
+            RegisterTissuesMutation,
+            RegisterTissuesMutationVariables
+          >("RegisterTissues", (req, res, ctx) => {
+            return res(
+              ctx.data({
+                register: {
+                  labware: [],
+                  clashes: [
+                    {
+                      tissue,
+                      labware,
+                    },
+                  ],
+                },
+              })
+            );
+          })
+        );
+      });
+
+      cy.wait(2000);
+      fillInForm();
+      cy.findByText("Register").click();
+    });
+
+    it("shows a modal with the clashing labware", () => {
+      labware.forEach((lw) => {
+        cy.findByText(lw.barcode).should("be.visible");
+        cy.findAllByText(lw.labwareType.name).should("be.visible");
+      });
+    });
+  });
 });
 
 function fillInForm() {
@@ -173,5 +218,6 @@ function fillInForm() {
   cy.findByLabelText("Labware Type").select("Proviasette");
   cy.findByLabelText("Fixative").select("None");
   cy.findByLabelText("Medium").select("Paraffin");
-  cy.get('[type="radio"]').check("15x15");
+  // Can't figure out why, but for some reason, without { force: true }, this is really temperamental
+  cy.get('[type="radio"]').check("10x10", { force: true });
 }

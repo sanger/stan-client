@@ -16,6 +16,10 @@ export enum Actions {
   ASSIGN_REGISTRATION_ERROR = "assignRegistrationError",
 }
 
+enum Guards {
+  IS_CLASH = "isClash",
+}
+
 export enum Services {
   SUBMIT = "submit",
 }
@@ -40,14 +44,20 @@ export const machineOptions: Partial<MachineOptions<
     }),
   },
 
+  guards: {
+    [Guards.IS_CLASH]: (ctx) =>
+      ctx.registrationResult.register.clashes.length > 0,
+  },
+
   services: {
     [Services.SUBMIT]: (context, event) => {
       if (event.type !== "SUBMIT_FORM") {
         return Promise.reject();
       }
-      return buildRegisterTissuesMutationVariables(event.values).then(
-        registrationService.registerTissues
-      );
+      return buildRegisterTissuesMutationVariables(
+        event.values,
+        event.existingTissue
+      ).then(registrationService.registerTissues);
     },
   },
 };
@@ -74,13 +84,30 @@ const machineConfig: MachineConfig<
         id: "submitting",
         src: "submit",
         onDone: {
-          target: "complete",
+          target: "checkSubmissionClashes",
           actions: [Actions.ASSIGN_REGISTRATION_RESULT],
         },
         onError: {
           target: "submissionError",
           actions: Actions.ASSIGN_REGISTRATION_ERROR,
         },
+      },
+    },
+    checkSubmissionClashes: {
+      always: [
+        {
+          cond: Guards.IS_CLASH,
+          target: "clashed",
+        },
+        {
+          target: "complete",
+        },
+      ],
+    },
+    clashed: {
+      on: {
+        EDIT_SUBMISSION: "ready",
+        SUBMIT_FORM: "submitting",
       },
     },
     submissionError: {

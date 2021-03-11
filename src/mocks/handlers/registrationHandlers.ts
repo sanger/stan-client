@@ -120,6 +120,7 @@ const registrationHandlers = [
       return res(
         ctx.data({
           register: {
+            clashes: [],
             labware: [
               {
                 id: 1,

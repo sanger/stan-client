@@ -16,6 +16,7 @@ export default class RegistrationPresentationModel extends MachinePresentationMo
 > {
   init() {
     this.submitForm = this.submitForm.bind(this);
+    this.editSubmission = this.editSubmission.bind(this);
   }
 
   get registrationResult() {
@@ -68,8 +69,12 @@ export default class RegistrationPresentationModel extends MachinePresentationMo
     });
   }
 
-  submitForm(values: FormValues) {
-    this.send({ type: "SUBMIT_FORM", values });
+  submitForm(values: FormValues, existingTissue: boolean = false) {
+    this.send({ type: "SUBMIT_FORM", values, existingTissue });
+  }
+
+  editSubmission() {
+    this.send({ type: "EDIT_SUBMISSION" });
   }
 
   isComplete(): boolean {
@@ -85,8 +90,12 @@ export default class RegistrationPresentationModel extends MachinePresentationMo
   }
 
   isReady(): boolean {
-    return ["ready", "submitting", "submissionError"].some((val) =>
+    return ["ready", "submitting", "clashed", "submissionError"].some((val) =>
       this.current.matches(val)
     );
+  }
+
+  submissionHasClash(): boolean {
+    return this.current.matches("clashed");
   }
 }
