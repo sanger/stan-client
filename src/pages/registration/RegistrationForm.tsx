@@ -192,7 +192,6 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                             ? lastBlockRef
                             : null
                         }
-                        layout
                         key={block.clientId}
                         variants={variants.fadeIn}
                         animate={"visible"}
@@ -275,17 +274,15 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                           label="Mould Size"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.mouldSize`}
                         >
-                          {model.registrationInfo.mouldSizes.map(
-                            (ms, index) => {
-                              return (
-                                <RadioButton
-                                  key={index}
-                                  name={ms.name}
-                                  value={ms.name}
-                                />
-                              );
-                            }
-                          )}
+                          {model.registrationInfo.mouldSizes.map((ms) => {
+                            return (
+                              <RadioButton
+                                key={ms.name}
+                                name={ms.name}
+                                value={ms.name}
+                              />
+                            );
+                          })}
                         </RadioGroup>
 
                         {/* Only show the delete button if we've got more than 1 block */}

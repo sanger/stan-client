@@ -40,7 +40,7 @@ export default Modal;
 export const ModalHeader: React.FC = ({ children }) => {
   return (
     <h3
-      className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4 text-lg leading-6 font-medium text-gray-900"
+      className="border-b-2 border-gray-200 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 bg-gray-100 text-lg leading-6 font-medium text-gray-900"
       id="modal-headline"
     >
       {children}
