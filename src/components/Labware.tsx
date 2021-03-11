@@ -13,6 +13,7 @@ interface LabwareProps {
   slotText?: (slot: NewLabwareLayout["slots"][number]) => string | undefined;
   slotColor?: (slot: NewLabwareLayout["slots"][number]) => string | undefined;
   slotSelected?: (slot: NewLabwareLayout["slots"][number]) => boolean;
+  className?: string;
 }
 
 const Labware: React.FC<LabwareProps> = ({
@@ -22,6 +23,7 @@ const Labware: React.FC<LabwareProps> = ({
   slotText,
   slotColor,
   slotSelected,
+  className = "",
 }) => {
   const { labwareType } = labware;
 
@@ -29,7 +31,7 @@ const Labware: React.FC<LabwareProps> = ({
     {
       "hover:bg-blue-200 cursor-pointer": !!onClick,
     },
-    "w-48 bg-blue-100 rounded-lg transition duration-300 ease-in-out"
+    `w-48 bg-blue-100 rounded-lg transition duration-300 ease-in-out ${className}`
   );
 
   const slotGrid = `grid grid-rows-${labwareType.numRows} grid-cols-${labwareType.numColumns} py-4 px-2 gap-4`;

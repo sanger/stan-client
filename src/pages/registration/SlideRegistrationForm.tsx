@@ -62,7 +62,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
 
   return (
     <Form>
-      <div className="grid grid-cols-9 gap-2">
+      <div className="lg:grid lg:grid-cols-9 lg:gap-2">
         <div className="col-span-2 relative">
           <motion.div
             key={currentLabware.clientId}
@@ -74,6 +74,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
             {currentLabware?.labwareTypeName && (
               <>
                 <Labware
+                  className="mx-auto"
                   labware={labwareFactories[
                     currentLabware.labwareTypeName
                   ].build({
@@ -110,7 +111,9 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
                   }}
                 />
 
-                <MutedText>Click an empty slot to add a new section.</MutedText>
+                <MutedText className="text-center">
+                  Click an empty slot to add a new section.
+                </MutedText>
               </>
             )}
 
