@@ -120,18 +120,20 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
             {values.labwares.length > 1 && (
               <FieldArray name={`labwares`}>
                 {(labwaresHelper) => (
-                  <PinkButton
-                    type={"button"}
-                    action={"tertiary"}
-                    onClick={() => {
-                      labwaresHelper.remove(currentIndex);
-                      if (currentIndex !== 0) {
-                        setCurrentIndex(currentIndex - 1);
-                      }
-                    }}
-                  >
-                    - Remove Slide
-                  </PinkButton>
+                  <div className="text-center">
+                    <PinkButton
+                      type={"button"}
+                      action={"tertiary"}
+                      onClick={() => {
+                        labwaresHelper.remove(currentIndex);
+                        if (currentIndex !== 0) {
+                          setCurrentIndex(currentIndex - 1);
+                        }
+                      }}
+                    >
+                      - Remove Slide
+                    </PinkButton>
+                  </div>
                 )}
               </FieldArray>
             )}
