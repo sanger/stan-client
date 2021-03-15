@@ -2,6 +2,9 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+const defaultOptions =  {}
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -84,6 +87,11 @@ export type Donor = {
   species: Species;
 };
 
+export type BioState = {
+  __typename?: 'BioState';
+  name: Scalars['String'];
+};
+
 export type Tissue = {
   __typename?: 'Tissue';
   externalName: Scalars['String'];
@@ -101,6 +109,7 @@ export type Sample = {
   id: Scalars['Int'];
   section?: Maybe<Scalars['Int']>;
   tissue: Tissue;
+  bioState: BioState;
 };
 
 export type Slot = {
@@ -246,6 +255,18 @@ export type ConfirmOperationRequest = {
   labware: Array<ConfirmOperationLabware>;
 };
 
+export type SlotCopyContent = {
+  sourceBarcode: Scalars['String'];
+  sourceAddress: Scalars['Address'];
+  destinationAddress: Scalars['Address'];
+};
+
+export type SlotCopyRequest = {
+  labwareType: Scalars['String'];
+  operationType: Scalars['String'];
+  contents: Array<SlotCopyContent>;
+};
+
 export type Action = {
   __typename?: 'Action';
   source: Slot;
@@ -278,7 +299,7 @@ export type PlanResult = {
 export type Printer = {
   __typename?: 'Printer';
   name: Scalars['String'];
-  labelType: LabelType;
+  labelTypes: Array<LabelType>;
 };
 
 export type Comment = {
@@ -501,6 +522,7 @@ export type Mutation = {
   release: ReleaseResult;
   extract: OperationResult;
   destroy: DestroyResult;
+  slotCopy: OperationResult;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
@@ -555,6 +577,11 @@ export type MutationDestroyArgs = {
 };
 
 
+export type MutationSlotCopyArgs = {
+  request: SlotCopyRequest;
+};
+
+
 export type MutationStoreBarcodeArgs = {
   barcode: Scalars['String'];
   locationBarcode: Scalars['String'];
@@ -582,33 +609,19 @@ export type LabwareLayoutFragment = (
   & Pick<Labware, 'id' | 'barcode'>
   & { labwareType: (
     { __typename?: 'LabwareType' }
-    & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
-    & { labelType?: Maybe<(
-      { __typename?: 'LabelType' }
-      & Pick<LabelType, 'name'>
-    )> }
+    & LabwareTypeFieldsFragment
   ), slots: Array<(
     { __typename?: 'Slot' }
-    & Pick<Slot, 'address' | 'labwareId'>
-    & { samples: Array<(
-      { __typename?: 'Sample' }
-      & Pick<Sample, 'id'>
-      & { tissue: (
-        { __typename?: 'Tissue' }
-        & Pick<Tissue, 'externalName' | 'replicate'>
-        & { donor: (
-          { __typename?: 'Donor' }
-          & Pick<Donor, 'donorName'>
-        ), spatialLocation: (
-          { __typename?: 'SpatialLocation' }
-          & Pick<SpatialLocation, 'code'>
-          & { tissueType: (
-            { __typename?: 'TissueType' }
-            & Pick<TissueType, 'name'>
-          ) }
-        ) }
-      ) }
-    )> }
+    & SlotFieldsFragment
+  )> }
+);
+
+export type LabwareTypeFieldsFragment = (
+  { __typename?: 'LabwareType' }
+  & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
+  & { labelType?: Maybe<(
+    { __typename?: 'LabelType' }
+    & Pick<LabelType, 'name'>
   )> }
 );
 
@@ -627,6 +640,35 @@ export type LocationFieldsFragment = (
   )>, children: Array<(
     { __typename?: 'LinkedLocation' }
     & Pick<LinkedLocation, 'barcode' | 'fixedName' | 'customName' | 'address'>
+  )> }
+);
+
+export type SampleFieldsFragment = (
+  { __typename?: 'Sample' }
+  & Pick<Sample, 'id'>
+  & { tissue: (
+    { __typename?: 'Tissue' }
+    & Pick<Tissue, 'externalName' | 'replicate'>
+    & { donor: (
+      { __typename?: 'Donor' }
+      & Pick<Donor, 'donorName'>
+    ), spatialLocation: (
+      { __typename?: 'SpatialLocation' }
+      & Pick<SpatialLocation, 'code'>
+      & { tissueType: (
+        { __typename?: 'TissueType' }
+        & Pick<TissueType, 'name'>
+      ) }
+    ) }
+  ) }
+);
+
+export type SlotFieldsFragment = (
+  { __typename?: 'Slot' }
+  & Pick<Slot, 'address' | 'labwareId'>
+  & { samples: Array<(
+    { __typename?: 'Sample' }
+    & SampleFieldsFragment
   )> }
 );
 
@@ -791,7 +833,7 @@ export type PlanMutation = (
 );
 
 export type PrintMutationVariables = Exact<{
-  barcodes: Array<Scalars['String']>;
+  barcodes: Array<Scalars['String']> | Scalars['String'];
   printer: Scalars['String'];
 }>;
 
@@ -883,6 +925,22 @@ export type SetLocationCustomNameMutation = (
   & { setLocationCustomName: (
     { __typename?: 'Location' }
     & LocationFieldsFragment
+  ) }
+);
+
+export type SlotCopyMutationVariables = Exact<{
+  request: SlotCopyRequest;
+}>;
+
+
+export type SlotCopyMutation = (
+  { __typename?: 'Mutation' }
+  & { slotCopy: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareLayoutFragment
+    )> }
   ) }
 );
 
@@ -988,38 +1046,12 @@ export type FindLabwareQuery = (
   { __typename?: 'Query' }
   & { labware: (
     { __typename?: 'Labware' }
-    & Pick<Labware, 'id' | 'barcode'>
-    & { labwareType: (
-      { __typename?: 'LabwareType' }
-      & Pick<LabwareType, 'name'>
-    ), slots: Array<(
-      { __typename?: 'Slot' }
-      & Pick<Slot, 'address' | 'block'>
-      & { samples: Array<(
-        { __typename?: 'Sample' }
-        & Pick<Sample, 'id'>
-        & { tissue: (
-          { __typename?: 'Tissue' }
-          & Pick<Tissue, 'externalName' | 'replicate'>
-          & { donor: (
-            { __typename?: 'Donor' }
-            & Pick<Donor, 'donorName'>
-          ), spatialLocation: (
-            { __typename?: 'SpatialLocation' }
-            & Pick<SpatialLocation, 'code'>
-            & { tissueType: (
-              { __typename?: 'TissueType' }
-              & Pick<TissueType, 'name'>
-            ) }
-          ) }
-        ) }
-      )> }
-    )> }
+    & LabwareLayoutFragment
   ) }
 );
 
 export type FindLabwareLocationQueryVariables = Exact<{
-  barcodes: Array<Scalars['String']>;
+  barcodes: Array<Scalars['String']> | Scalars['String'];
 }>;
 
 
@@ -1066,10 +1098,10 @@ export type GetPrintersQuery = (
   & { printers: Array<(
     { __typename?: 'Printer' }
     & Pick<Printer, 'name'>
-    & { labelType: (
+    & { labelTypes: Array<(
       { __typename?: 'LabelType' }
       & Pick<LabelType, 'name'>
-    ) }
+    )> }
   )> }
 );
 
@@ -1145,40 +1177,56 @@ export type GetSectioningInfoQuery = (
   )> }
 );
 
+export const LabwareTypeFieldsFragmentDoc = gql`
+    fragment LabwareTypeFields on LabwareType {
+  name
+  numRows
+  numColumns
+  labelType {
+    name
+  }
+}
+    `;
+export const SampleFieldsFragmentDoc = gql`
+    fragment SampleFields on Sample {
+  id
+  tissue {
+    donor {
+      donorName
+    }
+    externalName
+    spatialLocation {
+      tissueType {
+        name
+      }
+      code
+    }
+    replicate
+  }
+}
+    `;
+export const SlotFieldsFragmentDoc = gql`
+    fragment SlotFields on Slot {
+  address
+  labwareId
+  samples {
+    ...SampleFields
+  }
+}
+    ${SampleFieldsFragmentDoc}`;
 export const LabwareLayoutFragmentDoc = gql`
     fragment LabwareLayout on Labware {
   id
   barcode
   labwareType {
-    name
-    numRows
-    numColumns
-    labelType {
-      name
-    }
+    ...LabwareTypeFields
   }
   slots {
-    address
-    labwareId
-    samples {
-      id
-      tissue {
-        donor {
-          donorName
-        }
-        externalName
-        spatialLocation {
-          tissueType {
-            name
-          }
-          code
-        }
-        replicate
-      }
-    }
+    ...SlotFields
   }
 }
-    `;
+    ${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}`;
 export const LocationFieldsFragmentDoc = gql`
     fragment LocationFields on Location {
   barcode
@@ -1245,7 +1293,8 @@ export type ConfirmMutationFn = Apollo.MutationFunction<ConfirmMutation, Confirm
  * });
  */
 export function useConfirmMutation(baseOptions?: Apollo.MutationHookOptions<ConfirmMutation, ConfirmMutationVariables>) {
-        return Apollo.useMutation<ConfirmMutation, ConfirmMutationVariables>(ConfirmDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ConfirmMutation, ConfirmMutationVariables>(ConfirmDocument, options);
       }
 export type ConfirmMutationHookResult = ReturnType<typeof useConfirmMutation>;
 export type ConfirmMutationResult = Apollo.MutationResult<ConfirmMutation>;
@@ -1281,7 +1330,8 @@ export type DestroyMutationFn = Apollo.MutationFunction<DestroyMutation, Destroy
  * });
  */
 export function useDestroyMutation(baseOptions?: Apollo.MutationHookOptions<DestroyMutation, DestroyMutationVariables>) {
-        return Apollo.useMutation<DestroyMutation, DestroyMutationVariables>(DestroyDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DestroyMutation, DestroyMutationVariables>(DestroyDocument, options);
       }
 export type DestroyMutationHookResult = ReturnType<typeof useDestroyMutation>;
 export type DestroyMutationResult = Apollo.MutationResult<DestroyMutation>;
@@ -1313,7 +1363,8 @@ export type EmptyLocationMutationFn = Apollo.MutationFunction<EmptyLocationMutat
  * });
  */
 export function useEmptyLocationMutation(baseOptions?: Apollo.MutationHookOptions<EmptyLocationMutation, EmptyLocationMutationVariables>) {
-        return Apollo.useMutation<EmptyLocationMutation, EmptyLocationMutationVariables>(EmptyLocationDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EmptyLocationMutation, EmptyLocationMutationVariables>(EmptyLocationDocument, options);
       }
 export type EmptyLocationMutationHookResult = ReturnType<typeof useEmptyLocationMutation>;
 export type EmptyLocationMutationResult = Apollo.MutationResult<EmptyLocationMutation>;
@@ -1368,7 +1419,8 @@ export type ExtractMutationFn = Apollo.MutationFunction<ExtractMutation, Extract
  * });
  */
 export function useExtractMutation(baseOptions?: Apollo.MutationHookOptions<ExtractMutation, ExtractMutationVariables>) {
-        return Apollo.useMutation<ExtractMutation, ExtractMutationVariables>(ExtractDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ExtractMutation, ExtractMutationVariables>(ExtractDocument, options);
       }
 export type ExtractMutationHookResult = ReturnType<typeof useExtractMutation>;
 export type ExtractMutationResult = Apollo.MutationResult<ExtractMutation>;
@@ -1403,7 +1455,8 @@ export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutati
  * });
  */
 export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
-        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, options);
       }
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
@@ -1432,7 +1485,8 @@ export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMut
  * });
  */
 export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
-        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, options);
       }
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
@@ -1488,7 +1542,8 @@ export type PlanMutationFn = Apollo.MutationFunction<PlanMutation, PlanMutationV
  * });
  */
 export function usePlanMutation(baseOptions?: Apollo.MutationHookOptions<PlanMutation, PlanMutationVariables>) {
-        return Apollo.useMutation<PlanMutation, PlanMutationVariables>(PlanDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PlanMutation, PlanMutationVariables>(PlanDocument, options);
       }
 export type PlanMutationHookResult = ReturnType<typeof usePlanMutation>;
 export type PlanMutationResult = Apollo.MutationResult<PlanMutation>;
@@ -1519,7 +1574,8 @@ export type PrintMutationFn = Apollo.MutationFunction<PrintMutation, PrintMutati
  * });
  */
 export function usePrintMutation(baseOptions?: Apollo.MutationHookOptions<PrintMutation, PrintMutationVariables>) {
-        return Apollo.useMutation<PrintMutation, PrintMutationVariables>(PrintDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PrintMutation, PrintMutationVariables>(PrintDocument, options);
       }
 export type PrintMutationHookResult = ReturnType<typeof usePrintMutation>;
 export type PrintMutationResult = Apollo.MutationResult<PrintMutation>;
@@ -1553,7 +1609,8 @@ export type RegisterSectionsMutationFn = Apollo.MutationFunction<RegisterSection
  * });
  */
 export function useRegisterSectionsMutation(baseOptions?: Apollo.MutationHookOptions<RegisterSectionsMutation, RegisterSectionsMutationVariables>) {
-        return Apollo.useMutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>(RegisterSectionsDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>(RegisterSectionsDocument, options);
       }
 export type RegisterSectionsMutationHookResult = ReturnType<typeof useRegisterSectionsMutation>;
 export type RegisterSectionsMutationResult = Apollo.MutationResult<RegisterSectionsMutation>;
@@ -1598,7 +1655,8 @@ export type RegisterTissuesMutationFn = Apollo.MutationFunction<RegisterTissuesM
  * });
  */
 export function useRegisterTissuesMutation(baseOptions?: Apollo.MutationHookOptions<RegisterTissuesMutation, RegisterTissuesMutationVariables>) {
-        return Apollo.useMutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>(RegisterTissuesDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>(RegisterTissuesDocument, options);
       }
 export type RegisterTissuesMutationHookResult = ReturnType<typeof useRegisterTissuesMutation>;
 export type RegisterTissuesMutationResult = Apollo.MutationResult<RegisterTissuesMutation>;
@@ -1641,14 +1699,18 @@ export type ReleaseLabwareMutationFn = Apollo.MutationFunction<ReleaseLabwareMut
  * });
  */
 export function useReleaseLabwareMutation(baseOptions?: Apollo.MutationHookOptions<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>) {
-        return Apollo.useMutation<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>(ReleaseLabwareDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>(ReleaseLabwareDocument, options);
       }
 export type ReleaseLabwareMutationHookResult = ReturnType<typeof useReleaseLabwareMutation>;
 export type ReleaseLabwareMutationResult = Apollo.MutationResult<ReleaseLabwareMutation>;
 export type ReleaseLabwareMutationOptions = Apollo.BaseMutationOptions<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>;
 export const SetLocationCustomNameDocument = gql`
     mutation SetLocationCustomName($locationBarcode: String!, $newCustomName: String!) {
-  setLocationCustomName(locationBarcode: $locationBarcode, customName: $newCustomName) {
+  setLocationCustomName(
+    locationBarcode: $locationBarcode
+    customName: $newCustomName
+  ) {
     ...LocationFields
   }
 }
@@ -1674,14 +1736,54 @@ export type SetLocationCustomNameMutationFn = Apollo.MutationFunction<SetLocatio
  * });
  */
 export function useSetLocationCustomNameMutation(baseOptions?: Apollo.MutationHookOptions<SetLocationCustomNameMutation, SetLocationCustomNameMutationVariables>) {
-        return Apollo.useMutation<SetLocationCustomNameMutation, SetLocationCustomNameMutationVariables>(SetLocationCustomNameDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetLocationCustomNameMutation, SetLocationCustomNameMutationVariables>(SetLocationCustomNameDocument, options);
       }
 export type SetLocationCustomNameMutationHookResult = ReturnType<typeof useSetLocationCustomNameMutation>;
 export type SetLocationCustomNameMutationResult = Apollo.MutationResult<SetLocationCustomNameMutation>;
 export type SetLocationCustomNameMutationOptions = Apollo.BaseMutationOptions<SetLocationCustomNameMutation, SetLocationCustomNameMutationVariables>;
+export const SlotCopyDocument = gql`
+    mutation SlotCopy($request: SlotCopyRequest!) {
+  slotCopy(request: $request) {
+    labware {
+      ...LabwareLayout
+    }
+  }
+}
+    ${LabwareLayoutFragmentDoc}`;
+export type SlotCopyMutationFn = Apollo.MutationFunction<SlotCopyMutation, SlotCopyMutationVariables>;
+
+/**
+ * __useSlotCopyMutation__
+ *
+ * To run a mutation, you first call `useSlotCopyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSlotCopyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [slotCopyMutation, { data, loading, error }] = useSlotCopyMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useSlotCopyMutation(baseOptions?: Apollo.MutationHookOptions<SlotCopyMutation, SlotCopyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SlotCopyMutation, SlotCopyMutationVariables>(SlotCopyDocument, options);
+      }
+export type SlotCopyMutationHookResult = ReturnType<typeof useSlotCopyMutation>;
+export type SlotCopyMutationResult = Apollo.MutationResult<SlotCopyMutation>;
+export type SlotCopyMutationOptions = Apollo.BaseMutationOptions<SlotCopyMutation, SlotCopyMutationVariables>;
 export const StoreBarcodeDocument = gql`
     mutation StoreBarcode($barcode: String!, $locationBarcode: String!, $address: Address) {
-  storeBarcode(barcode: $barcode, locationBarcode: $locationBarcode, address: $address) {
+  storeBarcode(
+    barcode: $barcode
+    locationBarcode: $locationBarcode
+    address: $address
+  ) {
     location {
       ...LocationFields
     }
@@ -1710,7 +1812,8 @@ export type StoreBarcodeMutationFn = Apollo.MutationFunction<StoreBarcodeMutatio
  * });
  */
 export function useStoreBarcodeMutation(baseOptions?: Apollo.MutationHookOptions<StoreBarcodeMutation, StoreBarcodeMutationVariables>) {
-        return Apollo.useMutation<StoreBarcodeMutation, StoreBarcodeMutationVariables>(StoreBarcodeDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<StoreBarcodeMutation, StoreBarcodeMutationVariables>(StoreBarcodeDocument, options);
       }
 export type StoreBarcodeMutationHookResult = ReturnType<typeof useStoreBarcodeMutation>;
 export type StoreBarcodeMutationResult = Apollo.MutationResult<StoreBarcodeMutation>;
@@ -1743,7 +1846,8 @@ export type UnstoreBarcodeMutationFn = Apollo.MutationFunction<UnstoreBarcodeMut
  * });
  */
 export function useUnstoreBarcodeMutation(baseOptions?: Apollo.MutationHookOptions<UnstoreBarcodeMutation, UnstoreBarcodeMutationVariables>) {
-        return Apollo.useMutation<UnstoreBarcodeMutation, UnstoreBarcodeMutationVariables>(UnstoreBarcodeDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UnstoreBarcodeMutation, UnstoreBarcodeMutationVariables>(UnstoreBarcodeDocument, options);
       }
 export type UnstoreBarcodeMutationHookResult = ReturnType<typeof useUnstoreBarcodeMutation>;
 export type UnstoreBarcodeMutationResult = Apollo.MutationResult<UnstoreBarcodeMutation>;
@@ -1772,10 +1876,12 @@ export const CurrentUserDocument = gql`
  * });
  */
 export function useCurrentUserQuery(baseOptions?: Apollo.QueryHookOptions<CurrentUserQuery, CurrentUserQueryVariables>) {
-        return Apollo.useQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, options);
       }
 export function useCurrentUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CurrentUserQuery, CurrentUserQueryVariables>) {
-          return Apollo.useLazyQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, options);
         }
 export type CurrentUserQueryHookResult = ReturnType<typeof useCurrentUserQuery>;
 export type CurrentUserLazyQueryHookResult = ReturnType<typeof useCurrentUserLazyQuery>;
@@ -1847,11 +1953,13 @@ export const FindDocument = gql`
  *   },
  * });
  */
-export function useFindQuery(baseOptions?: Apollo.QueryHookOptions<FindQuery, FindQueryVariables>) {
-        return Apollo.useQuery<FindQuery, FindQueryVariables>(FindDocument, baseOptions);
+export function useFindQuery(baseOptions: Apollo.QueryHookOptions<FindQuery, FindQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindQuery, FindQueryVariables>(FindDocument, options);
       }
 export function useFindLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindQuery, FindQueryVariables>) {
-          return Apollo.useLazyQuery<FindQuery, FindQueryVariables>(FindDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindQuery, FindQueryVariables>(FindDocument, options);
         }
 export type FindQueryHookResult = ReturnType<typeof useFindQuery>;
 export type FindLazyQueryHookResult = ReturnType<typeof useFindLazyQuery>;
@@ -1859,34 +1967,10 @@ export type FindQueryResult = Apollo.QueryResult<FindQuery, FindQueryVariables>;
 export const FindLabwareDocument = gql`
     query FindLabware($barcode: String!) {
   labware(barcode: $barcode) {
-    id
-    barcode
-    labwareType {
-      name
-    }
-    slots {
-      address
-      block
-      samples {
-        id
-        tissue {
-          externalName
-          donor {
-            donorName
-          }
-          spatialLocation {
-            tissueType {
-              name
-            }
-            code
-          }
-          replicate
-        }
-      }
-    }
+    ...LabwareLayout
   }
 }
-    `;
+    ${LabwareLayoutFragmentDoc}`;
 
 /**
  * __useFindLabwareQuery__
@@ -1904,11 +1988,13 @@ export const FindLabwareDocument = gql`
  *   },
  * });
  */
-export function useFindLabwareQuery(baseOptions?: Apollo.QueryHookOptions<FindLabwareQuery, FindLabwareQueryVariables>) {
-        return Apollo.useQuery<FindLabwareQuery, FindLabwareQueryVariables>(FindLabwareDocument, baseOptions);
+export function useFindLabwareQuery(baseOptions: Apollo.QueryHookOptions<FindLabwareQuery, FindLabwareQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindLabwareQuery, FindLabwareQueryVariables>(FindLabwareDocument, options);
       }
 export function useFindLabwareLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindLabwareQuery, FindLabwareQueryVariables>) {
-          return Apollo.useLazyQuery<FindLabwareQuery, FindLabwareQueryVariables>(FindLabwareDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindLabwareQuery, FindLabwareQueryVariables>(FindLabwareDocument, options);
         }
 export type FindLabwareQueryHookResult = ReturnType<typeof useFindLabwareQuery>;
 export type FindLabwareLazyQueryHookResult = ReturnType<typeof useFindLabwareLazyQuery>;
@@ -1939,11 +2025,13 @@ export const FindLabwareLocationDocument = gql`
  *   },
  * });
  */
-export function useFindLabwareLocationQuery(baseOptions?: Apollo.QueryHookOptions<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>) {
-        return Apollo.useQuery<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>(FindLabwareLocationDocument, baseOptions);
+export function useFindLabwareLocationQuery(baseOptions: Apollo.QueryHookOptions<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>(FindLabwareLocationDocument, options);
       }
 export function useFindLabwareLocationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>) {
-          return Apollo.useLazyQuery<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>(FindLabwareLocationDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>(FindLabwareLocationDocument, options);
         }
 export type FindLabwareLocationQueryHookResult = ReturnType<typeof useFindLabwareLocationQuery>;
 export type FindLabwareLocationLazyQueryHookResult = ReturnType<typeof useFindLabwareLocationLazyQuery>;
@@ -1972,11 +2060,13 @@ export const FindLocationByBarcodeDocument = gql`
  *   },
  * });
  */
-export function useFindLocationByBarcodeQuery(baseOptions?: Apollo.QueryHookOptions<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>) {
-        return Apollo.useQuery<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>(FindLocationByBarcodeDocument, baseOptions);
+export function useFindLocationByBarcodeQuery(baseOptions: Apollo.QueryHookOptions<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>(FindLocationByBarcodeDocument, options);
       }
 export function useFindLocationByBarcodeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>) {
-          return Apollo.useLazyQuery<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>(FindLocationByBarcodeDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>(FindLocationByBarcodeDocument, options);
         }
 export type FindLocationByBarcodeQueryHookResult = ReturnType<typeof useFindLocationByBarcodeQuery>;
 export type FindLocationByBarcodeLazyQueryHookResult = ReturnType<typeof useFindLocationByBarcodeLazyQuery>;
@@ -2006,10 +2096,12 @@ export const GetDestroyInfoDocument = gql`
  * });
  */
 export function useGetDestroyInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>) {
-        return Apollo.useQuery<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>(GetDestroyInfoDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>(GetDestroyInfoDocument, options);
       }
 export function useGetDestroyInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>) {
-          return Apollo.useLazyQuery<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>(GetDestroyInfoDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>(GetDestroyInfoDocument, options);
         }
 export type GetDestroyInfoQueryHookResult = ReturnType<typeof useGetDestroyInfoQuery>;
 export type GetDestroyInfoLazyQueryHookResult = ReturnType<typeof useGetDestroyInfoLazyQuery>;
@@ -2018,7 +2110,7 @@ export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
     name
-    labelType {
+    labelTypes {
       name
     }
   }
@@ -2041,10 +2133,12 @@ export const GetPrintersDocument = gql`
  * });
  */
 export function useGetPrintersQuery(baseOptions?: Apollo.QueryHookOptions<GetPrintersQuery, GetPrintersQueryVariables>) {
-        return Apollo.useQuery<GetPrintersQuery, GetPrintersQueryVariables>(GetPrintersDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPrintersQuery, GetPrintersQueryVariables>(GetPrintersDocument, options);
       }
 export function useGetPrintersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPrintersQuery, GetPrintersQueryVariables>) {
-          return Apollo.useLazyQuery<GetPrintersQuery, GetPrintersQueryVariables>(GetPrintersDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPrintersQuery, GetPrintersQueryVariables>(GetPrintersDocument, options);
         }
 export type GetPrintersQueryHookResult = ReturnType<typeof useGetPrintersQuery>;
 export type GetPrintersLazyQueryHookResult = ReturnType<typeof useGetPrintersLazyQuery>;
@@ -2095,10 +2189,12 @@ export const GetRegistrationInfoDocument = gql`
  * });
  */
 export function useGetRegistrationInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>) {
-        return Apollo.useQuery<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>(GetRegistrationInfoDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>(GetRegistrationInfoDocument, options);
       }
 export function useGetRegistrationInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>) {
-          return Apollo.useLazyQuery<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>(GetRegistrationInfoDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>(GetRegistrationInfoDocument, options);
         }
 export type GetRegistrationInfoQueryHookResult = ReturnType<typeof useGetRegistrationInfoQuery>;
 export type GetRegistrationInfoLazyQueryHookResult = ReturnType<typeof useGetRegistrationInfoLazyQuery>;
@@ -2130,10 +2226,12 @@ export const GetReleaseInfoDocument = gql`
  * });
  */
 export function useGetReleaseInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>) {
-        return Apollo.useQuery<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>(GetReleaseInfoDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>(GetReleaseInfoDocument, options);
       }
 export function useGetReleaseInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>) {
-          return Apollo.useLazyQuery<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>(GetReleaseInfoDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>(GetReleaseInfoDocument, options);
         }
 export type GetReleaseInfoQueryHookResult = ReturnType<typeof useGetReleaseInfoQuery>;
 export type GetReleaseInfoLazyQueryHookResult = ReturnType<typeof useGetReleaseInfoLazyQuery>;
@@ -2162,10 +2260,12 @@ export const GetSearchInfoDocument = gql`
  * });
  */
 export function useGetSearchInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetSearchInfoQuery, GetSearchInfoQueryVariables>) {
-        return Apollo.useQuery<GetSearchInfoQuery, GetSearchInfoQueryVariables>(GetSearchInfoDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetSearchInfoQuery, GetSearchInfoQueryVariables>(GetSearchInfoDocument, options);
       }
 export function useGetSearchInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetSearchInfoQuery, GetSearchInfoQueryVariables>) {
-          return Apollo.useLazyQuery<GetSearchInfoQuery, GetSearchInfoQueryVariables>(GetSearchInfoDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetSearchInfoQuery, GetSearchInfoQueryVariables>(GetSearchInfoDocument, options);
         }
 export type GetSearchInfoQueryHookResult = ReturnType<typeof useGetSearchInfoQuery>;
 export type GetSearchInfoLazyQueryHookResult = ReturnType<typeof useGetSearchInfoLazyQuery>;
@@ -2201,10 +2301,12 @@ export const GetSectioningInfoDocument = gql`
  * });
  */
 export function useGetSectioningInfoQuery(baseOptions?: Apollo.QueryHookOptions<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>) {
-        return Apollo.useQuery<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(GetSectioningInfoDocument, baseOptions);
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(GetSectioningInfoDocument, options);
       }
 export function useGetSectioningInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>) {
-          return Apollo.useLazyQuery<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(GetSectioningInfoDocument, baseOptions);
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(GetSectioningInfoDocument, options);
         }
 export type GetSectioningInfoQueryHookResult = ReturnType<typeof useGetSectioningInfoQuery>;
 export type GetSectioningInfoLazyQueryHookResult = ReturnType<typeof useGetSectioningInfoLazyQuery>;

@@ -1,6 +1,6 @@
 import { Machine, MachineOptions } from "xstate";
 import * as Yup from "yup";
-import { Labware } from "../../../types/graphql";
+import { LabwareLayoutFragment } from "../../../types/graphql";
 import {
   LabwareContext,
   LabwareEvents,
@@ -48,7 +48,7 @@ export const labwareMachineOptions: Partial<MachineOptions<
       if (e.type !== "SUBMIT_BARCODE") {
         return;
       }
-      ctx.errorMessage = `"${ctx.currentBarcode}" is already in the table`;
+      ctx.errorMessage = `"${ctx.currentBarcode}" has already been scanned`;
     }),
 
     [Actions.REMOVE_LABWARE]: assign((ctx, e) => {
@@ -115,7 +115,11 @@ export const labwareMachineOptions: Partial<MachineOptions<
  *   Object.assign({}, labwareMachine.context, { validator: Yup.string().min(3).required("Barcode is required") })
  * )
  */
-export const createLabwareMachine = (labwares: Labware[] = []) =>
+export const createLabwareMachine = ({
+  labwares = [],
+}: {
+  labwares?: LabwareLayoutFragment[];
+}) =>
   Machine<LabwareContext, LabwareSchema, LabwareEvents>(
     {
       context: {

@@ -12,6 +12,7 @@ import releaseHandlers from "./handlers/releaseHandlers";
 import extractionHandlers from "./handlers/extractionHandlers";
 import findHandlers from "./handlers/findHandlers";
 import destroyHandlers from "./handlers/destroyHandlers";
+import slotCopyHandlers from "./handlers/slotCopyHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -25,4 +26,5 @@ export const handlers = [
   ...extractionHandlers,
   ...findHandlers,
   ...destroyHandlers,
+  ...slotCopyHandlers,
 ];

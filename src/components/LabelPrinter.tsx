@@ -107,14 +107,14 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
           className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 sm:w-1/2"
           onChange={updateSelectedLabelPrinter}
         >
-          {context?.printers.length > 0 &&
+          {context.printers?.length > 0 &&
             optionValues(context.printers, "name", "name")}
         </select>
 
         <div>
           <BlueButton
             disabled={
-              current.matches("printing") || context?.printers.length === 0
+              current.matches("printing") || context.printers?.length === 0
             }
             onClick={printLabels}
             className="flex flex-row items-center justify-center space-x-1"

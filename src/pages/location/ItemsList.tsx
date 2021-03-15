@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState } from "react";
-import ScanInput from "../../components/ScanInput";
+import ScanInput from "../../components/scanInput/ScanInput";
 import Table, {
   TableBody,
   TableCell,

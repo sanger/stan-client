@@ -1,6 +1,6 @@
 import { ActorRef, Interpreter } from "xstate";
 import * as Yup from "yup";
-import { Labware, Maybe } from "../../../types/graphql";
+import { Labware, LabwareLayoutFragment, Maybe } from "../../../types/graphql";
 import { ApolloError } from "@apollo/client";
 
 export type LabwareMachineType = Interpreter<
@@ -70,7 +70,7 @@ export interface LabwareContext {
   /**
    * The list of sourceLabwares fetched so far
    */
-  labwares: Labware[];
+  labwares: LabwareLayoutFragment[];
 
   /**
    * A {@link https://github.com/jquense/yup#string Yup string schema} to validate the barcode on submission
@@ -118,7 +118,7 @@ type UnlockEvent = { type: "UNLOCK" };
 
 export type UpdateLabwaresEvent = {
   type: "UPDATE_LABWARES";
-  labwares: Labware[];
+  labwares: LabwareLayoutFragment[];
 };
 
 type ValidationErrorEvent = {

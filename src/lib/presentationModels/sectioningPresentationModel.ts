@@ -4,7 +4,10 @@ import {
   SectioningEvent,
   SectioningSchema,
 } from "../machines/sectioning/sectioningMachineTypes";
-import { GetSectioningInfoQuery, Labware } from "../../types/graphql";
+import {
+  GetSectioningInfoQuery,
+  LabwareLayoutFragment,
+} from "../../types/graphql";
 
 export default class SectioningPresentationModel extends MachinePresentationModel<
   SectioningContext,
@@ -37,7 +40,7 @@ export default class SectioningPresentationModel extends MachinePresentationMode
     );
   }
 
-  updateLabwares(labwares: Labware[]) {
+  updateLabwares(labwares: LabwareLayoutFragment[]) {
     this.send({ type: "UPDATE_LABWARES", labwares });
   }
 

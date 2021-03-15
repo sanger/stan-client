@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Labware from "../../components/Labware";
+import Labware from "../../components/labware/Labware";
 import { labwareFactories } from "../../lib/factories/labwareFactory";
 import {
   FieldArray,
@@ -60,6 +60,31 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
     setScrollToSlot(null);
   }, 200);
 
+  const labware = labwareFactories[currentLabware.labwareTypeName].build();
+
+  const buildSlot = model.buildSlot;
+  const handleOnSlotClick = React.useCallback(
+    (address: string) => {
+      // If this is a new slot, build it
+      if (!currentOccupiedSlots.includes(address)) {
+        setFieldValue(
+          `labwares.${currentIndex}.slots`,
+          Object.assign({}, currentLabware.slots, {
+            [address]: buildSlot(),
+          })
+        );
+      }
+      setScrollToSlot(address);
+    },
+    [
+      currentOccupiedSlots,
+      setFieldValue,
+      currentLabware.slots,
+      buildSlot,
+      currentIndex,
+    ]
+  );
+
   return (
     <Form>
       <div className="grid grid-cols-9 gap-2">
@@ -74,40 +99,26 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
             {currentLabware?.labwareTypeName && (
               <>
                 <Labware
-                  labware={labwareFactories[
-                    currentLabware.labwareTypeName
-                  ].build({
-                    barcode: currentLabware.externalSlideBarcode,
-                  })}
-                  slotSelected={(slot) => slot.address === currentSlotAddress}
-                  slotText={(slot) => {
+                  name={currentLabware.labwareTypeName}
+                  labware={labware}
+                  selectionMode={"single"}
+                  selectable={"any"}
+                  slotText={(address) => {
                     const externalIdentifier =
-                      currentLabware.slots[slot.address]?.externalIdentifier ??
-                      "";
+                      currentLabware.slots[address]?.externalIdentifier ?? "";
                     return externalIdentifier !== ""
                       ? externalIdentifier
                       : undefined;
                   }}
-                  slotColor={(slot) => {
-                    if (slot.address === currentSlotAddress) {
+                  slotColor={(address) => {
+                    if (address === currentSlotAddress) {
                       return "sp-500";
                     }
-                    if (currentOccupiedSlots.includes(slot.address)) {
+                    if (currentOccupiedSlots.includes(address)) {
                       return "sdb-200";
                     }
                   }}
-                  onSlotClick={(slot) => {
-                    // If this is a new slot, build it
-                    if (!currentOccupiedSlots.includes(slot.address)) {
-                      setFieldValue(
-                        `labwares.${currentIndex}.slots`,
-                        Object.assign({}, currentLabware.slots, {
-                          [slot.address]: model.buildSlot(),
-                        })
-                      );
-                    }
-                    setScrollToSlot(slot.address);
-                  }}
+                  onSlotClick={handleOnSlotClick}
                 />
 
                 <MutedText>Click an empty slot to add a new section.</MutedText>
@@ -467,7 +478,7 @@ const SlotForm: React.FC<SlotFormParams> = ({
 
       <FormikInput
         label="Section External Identifier"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.sectionExternalIdentifier`}
+        name={`labwares.${currentIndex}.slots.${slotAddress}.externalIdentifier`}
       />
 
       <FormikInput

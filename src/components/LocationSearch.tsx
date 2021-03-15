@@ -1,5 +1,5 @@
 import React from "react";
-import ScanInput from "./ScanInput";
+import ScanInput from "./scanInput/ScanInput";
 import { history } from "../lib/client";
 import LabwareIcon from "./icons/LabwareIcon";
 import LocationIcon from "./icons/LocationIcon";

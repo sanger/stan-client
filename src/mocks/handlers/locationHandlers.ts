@@ -132,7 +132,9 @@ const locationHandlers = [
     "FindLabwareLocation",
     (req, res, ctx) => {
       const storedItems: Array<StoredItem> = locationRepository.findByLabwareBarcode(
-        req.variables.barcodes
+        Array.isArray(req.variables.barcodes)
+          ? req.variables.barcodes
+          : [req.variables.barcodes]
       );
 
       return res(
@@ -180,7 +182,7 @@ export default locationHandlers;
 
 function locationResponse(location: Location): LocationFieldsFragment {
   return {
-    __typename: "Location" as const,
+    __typename: "Location",
     barcode: location.barcode,
     fixedName: location.fixedName,
     customName: location.customName,
@@ -188,6 +190,7 @@ function locationResponse(location: Location): LocationFieldsFragment {
     direction: location.direction,
     parent: location.parent
       ? {
+          __typename: "LinkedLocation",
           barcode: location.parent.barcode,
           fixedName: location.parent.fixedName,
           customName: location.parent.customName,
@@ -195,16 +198,19 @@ function locationResponse(location: Location): LocationFieldsFragment {
       : null,
     size: location.size
       ? {
+          __typename: "Size",
           numRows: location.size.numRows,
           numColumns: location.size.numColumns,
         }
       : null,
     stored: location.stored.map((item) => ({
+      __typename: "StoredItem",
       barcode: item.barcode,
       address: item.address,
     })),
     children: location.children.map((child) => {
       return {
+        __typename: "LinkedLocation",
         barcode: child.barcode,
         fixedName: child.fixedName,
         customName: child.customName,

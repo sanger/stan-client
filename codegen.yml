@@ -5,6 +5,7 @@ config:
   scalars:
     Address: string
     Timestamp: string
+
 generates:
   src/types/graphql.tsx:
     plugins:

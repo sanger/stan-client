@@ -1,5 +1,5 @@
 import {
-  Labware,
+  LabwareLayoutFragment,
   Maybe,
   PlanMutation,
   PlanMutationResult,
@@ -161,7 +161,7 @@ export interface SectioningLayout {
   /**
    * The labwares available to section from
    */
-  inputLabwares: Labware[];
+  inputLabwares: LabwareLayoutFragment[];
 
   /**
    * The new labware we are sectioning on to

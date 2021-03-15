@@ -1,10 +1,16 @@
-import { LabwareLayoutFragment } from "../../types/graphql";
+import {
+  Labware,
+  LabwareLayoutFragment,
+  SlotFieldsFragment,
+} from "../../types/graphql";
 import { cycleColors } from "../helpers";
 import { orderBy } from "lodash";
+import { Addressable } from "../../types/stan";
+import * as slotHelper from "./slotHelper";
 
 /**
  * Build an array of all {@link Sample samples} in a {@link Labware} along with its {@link Slot} plus the original {@link Labware}
- * @param labware a {@link Labware}
+ * @param labware a {@link LabwareLayoutFragment}
  */
 export function labwareSamples(labware: LabwareLayoutFragment) {
   return labware.slots
@@ -36,19 +42,15 @@ export function buildSampleColors(
   return sampleColors;
 }
 
-function getRowIndex(address: string): number {
+export function getRowIndex(address: string): number {
   return address.charCodeAt(0) - "A".charCodeAt(0) + 1;
 }
 
-function getColumnIndex(address: string): number {
+export function getColumnIndex(address: string): number {
   return parseInt(address.substr(1));
 }
 
-export interface Addressable {
-  address: string;
-}
-
-export function rowMajor<T extends Addressable>(
+export function sortRightDown<T extends Addressable>(
   addressable: Array<T>
 ): Array<T> {
   return orderBy(
@@ -58,7 +60,7 @@ export function rowMajor<T extends Addressable>(
   );
 }
 
-export function columnMajor<T extends Addressable>(
+export function sortDownRight<T extends Addressable>(
   addressable: Array<T>
 ): Array<T> {
   return orderBy(
@@ -66,4 +68,68 @@ export function columnMajor<T extends Addressable>(
     [(a) => getColumnIndex(a.address), (a) => getRowIndex(a.address)],
     ["asc", "asc"]
   );
+}
+
+/**
+ * Returns the filled slots for the given labware
+ * @param labware a {@link LabwareLayoutFragment}
+ */
+export function filledSlots(
+  labware: LabwareLayoutFragment
+): Array<SlotFieldsFragment> {
+  return slotHelper.filledSlots(labware.slots);
+}
+
+/**
+ * Returns the empty slots for the given labware
+ * @param labware a {@link LabwareLayoutFragment}
+ */
+export function emptySlots(
+  labware: LabwareLayoutFragment
+): Array<SlotFieldsFragment> {
+  return slotHelper.emptySlots(labware.slots);
+}
+
+/**
+ * Build a {@type LabwareLayoutFragment} from a {@type Labware}
+ */
+export function buildLabwareFragment(labware: Labware): LabwareLayoutFragment {
+  return {
+    __typename: "Labware",
+    id: labware.id,
+    barcode: labware.barcode,
+    labwareType: {
+      __typename: "LabwareType",
+      name: labware.labwareType.name,
+      numRows: labware.labwareType.numRows,
+      numColumns: labware.labwareType.numColumns,
+      labelType: labware.labwareType.labelType,
+    },
+    slots: labware.slots.map((slot) => ({
+      __typename: "Slot",
+      address: slot.address,
+      labwareId: slot.labwareId,
+      samples: slot.samples.map((sample) => ({
+        id: sample.id,
+        tissue: {
+          donor: {
+            donorName: sample.tissue.donor.donorName,
+            __typename: "Donor",
+          },
+          externalName: sample.tissue.externalName,
+          spatialLocation: {
+            tissueType: {
+              name: sample.tissue.spatialLocation.tissueType.name,
+              __typename: "TissueType",
+            },
+            code: sample.tissue.spatialLocation.code,
+            __typename: "SpatialLocation",
+          },
+          replicate: sample.tissue.replicate,
+          __typename: "Tissue",
+        },
+        __typename: "Sample",
+      })),
+    })),
+  };
 }

@@ -18,7 +18,7 @@ describe("Sectioning", () => {
 
     context("when there is source labware loaded", () => {
       before(() => {
-        cy.get("#labwareScanInput").type("STAN-123{enter}");
+        cy.get("#labwareScanInput").type("STAN-113{enter}");
       });
 
       it("is enabled", () => {
@@ -66,7 +66,7 @@ describe("Sectioning", () => {
       before(() => {
         cy.findByText("Edit Layout").click();
         cy.findByRole("dialog").within(() => {
-          cy.findByText("STAN-123").click();
+          cy.findByText("STAN-113").click();
           cy.findByText("A1").click();
           cy.findByText("Done").click();
         });
@@ -280,13 +280,13 @@ describe("Sectioning", () => {
 });
 
 function createLabware() {
-  cy.get("#labwareScanInput").type("STAN-123{enter}");
+  cy.get("#labwareScanInput").type("STAN-113{enter}");
 
   cy.findByRole("combobox").select("Tube");
   cy.findByText("+ Add Labware").click();
   cy.findByText("Edit Layout").click();
   cy.findByRole("dialog").within(() => {
-    cy.findByText("STAN-123").click();
+    cy.findByText("STAN-113").click();
     cy.findByText("A1").click();
     cy.findByText("Done").click();
   });
