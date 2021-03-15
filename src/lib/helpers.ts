@@ -127,5 +127,5 @@ export function cleanParams(params: ParsedQuery, allowedKeys: any[]) {
  * Create a generator for cycling through a list of colors
  */
 export function cycleColors() {
-  return cycle(["red", "green", "indigo", "pink", "yellow", "blue", "purple"]);
+  return cycle(["red", "green", "indigo", "pink", "blue", "purple"]);
 }

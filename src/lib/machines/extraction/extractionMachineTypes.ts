@@ -1,12 +1,16 @@
 import { Interpreter, State, StateNode } from "xstate";
-import { ExtractMutation, Labware } from "../../../types/graphql";
+import {
+  ExtractMutation,
+  Labware,
+  LabwareLayoutFragment,
+} from "../../../types/graphql";
 import { ApolloError } from "@apollo/client";
 
 /**
  * Context for Extraction Machine
  */
 export interface ExtractionContext {
-  labwares: Labware[];
+  labwares: LabwareLayoutFragment[];
   extraction: ExtractMutation;
   serverErrors: ApolloError;
 }
@@ -23,7 +27,10 @@ export interface ExtractionSchema {
   };
 }
 
-type UpdateLabwaresEvent = { type: "UPDATE_LABWARES"; labwares: Labware[] };
+type UpdateLabwaresEvent = {
+  type: "UPDATE_LABWARES";
+  labwares: LabwareLayoutFragment[];
+};
 type ExtractEvent = { type: "EXTRACT" };
 type ExtractDoneEvent = {
   type: "done.invoke.extract";

@@ -610,36 +610,19 @@ export type LabwareLayoutFragment = (
   & Pick<Labware, 'id' | 'barcode'>
   & { labwareType: (
     { __typename?: 'LabwareType' }
-    & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
-    & { labelType?: Maybe<(
-      { __typename?: 'LabelType' }
-      & Pick<LabelType, 'name'>
-    )> }
+    & LabwareTypeFieldsFragment
   ), slots: Array<(
     { __typename?: 'Slot' }
-    & Pick<Slot, 'address' | 'labwareId'>
-    & { samples: Array<(
-      { __typename?: 'Sample' }
-      & Pick<Sample, 'id'>
-      & { tissue: (
-        { __typename?: 'Tissue' }
-        & Pick<Tissue, 'externalName' | 'replicate'>
-        & { donor: (
-          { __typename?: 'Donor' }
-          & Pick<Donor, 'donorName'>
-        ), spatialLocation: (
-          { __typename?: 'SpatialLocation' }
-          & Pick<SpatialLocation, 'code'>
-          & { tissueType: (
-            { __typename?: 'TissueType' }
-            & Pick<TissueType, 'name'>
-          ) }
-        ) }
-      ), bioState: (
-        { __typename?: 'BioState' }
-        & Pick<BioState, 'name'>
-      ) }
-    )> }
+    & SlotFieldsFragment
+  )> }
+);
+
+export type LabwareTypeFieldsFragment = (
+  { __typename?: 'LabwareType' }
+  & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
+  & { labelType?: Maybe<(
+    { __typename?: 'LabelType' }
+    & Pick<LabelType, 'name'>
   )> }
 );
 
@@ -658,6 +641,35 @@ export type LocationFieldsFragment = (
   )>, children: Array<(
     { __typename?: 'LinkedLocation' }
     & Pick<LinkedLocation, 'barcode' | 'fixedName' | 'customName' | 'address'>
+  )> }
+);
+
+export type SampleFieldsFragment = (
+  { __typename?: 'Sample' }
+  & Pick<Sample, 'id'>
+  & { tissue: (
+    { __typename?: 'Tissue' }
+    & Pick<Tissue, 'externalName' | 'replicate'>
+    & { donor: (
+      { __typename?: 'Donor' }
+      & Pick<Donor, 'donorName'>
+    ), spatialLocation: (
+      { __typename?: 'SpatialLocation' }
+      & Pick<SpatialLocation, 'code'>
+      & { tissueType: (
+        { __typename?: 'TissueType' }
+        & Pick<TissueType, 'name'>
+      ) }
+    ) }
+  ) }
+);
+
+export type SlotFieldsFragment = (
+  { __typename?: 'Slot' }
+  & Pick<Slot, 'address' | 'labwareId'>
+  & { samples: Array<(
+    { __typename?: 'Sample' }
+    & SampleFieldsFragment
   )> }
 );
 
@@ -822,7 +834,7 @@ export type PlanMutation = (
 );
 
 export type PrintMutationVariables = Exact<{
-  barcodes: Array<Scalars['String']>;
+  barcodes: Array<Scalars['String']> | Scalars['String'];
   printer: Scalars['String'];
 }>;
 
@@ -914,6 +926,22 @@ export type SetLocationCustomNameMutation = (
   & { setLocationCustomName: (
     { __typename?: 'Location' }
     & LocationFieldsFragment
+  ) }
+);
+
+export type SlotCopyMutationVariables = Exact<{
+  request: SlotCopyRequest;
+}>;
+
+
+export type SlotCopyMutation = (
+  { __typename?: 'Mutation' }
+  & { slotCopy: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareLayoutFragment
+    )> }
   ) }
 );
 
@@ -1019,41 +1047,12 @@ export type FindLabwareQuery = (
   { __typename?: 'Query' }
   & { labware: (
     { __typename?: 'Labware' }
-    & Pick<Labware, 'id' | 'barcode' | 'released' | 'discarded' | 'destroyed'>
-    & { labwareType: (
-      { __typename?: 'LabwareType' }
-      & Pick<LabwareType, 'name'>
-    ), slots: Array<(
-      { __typename?: 'Slot' }
-      & Pick<Slot, 'address' | 'block'>
-      & { samples: Array<(
-        { __typename?: 'Sample' }
-        & Pick<Sample, 'id'>
-        & { tissue: (
-          { __typename?: 'Tissue' }
-          & Pick<Tissue, 'externalName' | 'replicate'>
-          & { donor: (
-            { __typename?: 'Donor' }
-            & Pick<Donor, 'donorName'>
-          ), spatialLocation: (
-            { __typename?: 'SpatialLocation' }
-            & Pick<SpatialLocation, 'code'>
-            & { tissueType: (
-              { __typename?: 'TissueType' }
-              & Pick<TissueType, 'name'>
-            ) }
-          ) }
-        ), bioState: (
-          { __typename?: 'BioState' }
-          & Pick<BioState, 'name'>
-        ) }
-      )> }
-    )> }
+    & LabwareLayoutFragment
   ) }
 );
 
 export type FindLabwareLocationQueryVariables = Exact<{
-  barcodes: Array<Scalars['String']>;
+  barcodes: Array<Scalars['String']> | Scalars['String'];
 }>;
 
 
@@ -1179,43 +1178,56 @@ export type GetSectioningInfoQuery = (
   )> }
 );
 
+export const LabwareTypeFieldsFragmentDoc = gql`
+    fragment LabwareTypeFields on LabwareType {
+  name
+  numRows
+  numColumns
+  labelType {
+    name
+  }
+}
+    `;
+export const SampleFieldsFragmentDoc = gql`
+    fragment SampleFields on Sample {
+  id
+  tissue {
+    donor {
+      donorName
+    }
+    externalName
+    spatialLocation {
+      tissueType {
+        name
+      }
+      code
+    }
+    replicate
+  }
+}
+    `;
+export const SlotFieldsFragmentDoc = gql`
+    fragment SlotFields on Slot {
+  address
+  labwareId
+  samples {
+    ...SampleFields
+  }
+}
+    ${SampleFieldsFragmentDoc}`;
 export const LabwareLayoutFragmentDoc = gql`
     fragment LabwareLayout on Labware {
   id
   barcode
   labwareType {
-    name
-    numRows
-    numColumns
-    labelType {
-      name
-    }
+    ...LabwareTypeFields
   }
   slots {
-    address
-    labwareId
-    samples {
-      id
-      tissue {
-        donor {
-          donorName
-        }
-        externalName
-        spatialLocation {
-          tissueType {
-            name
-          }
-          code
-        }
-        replicate
-      }
-      bioState {
-        name
-      }
-    }
+    ...SlotFields
   }
 }
-    `;
+    ${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}`;
 export const LocationFieldsFragmentDoc = gql`
     fragment LocationFields on Location {
   barcode
@@ -1696,7 +1708,10 @@ export type ReleaseLabwareMutationResult = Apollo.MutationResult<ReleaseLabwareM
 export type ReleaseLabwareMutationOptions = Apollo.BaseMutationOptions<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>;
 export const SetLocationCustomNameDocument = gql`
     mutation SetLocationCustomName($locationBarcode: String!, $newCustomName: String!) {
-  setLocationCustomName(locationBarcode: $locationBarcode, customName: $newCustomName) {
+  setLocationCustomName(
+    locationBarcode: $locationBarcode
+    customName: $newCustomName
+  ) {
     ...LocationFields
   }
 }
@@ -1728,9 +1743,48 @@ export function useSetLocationCustomNameMutation(baseOptions?: Apollo.MutationHo
 export type SetLocationCustomNameMutationHookResult = ReturnType<typeof useSetLocationCustomNameMutation>;
 export type SetLocationCustomNameMutationResult = Apollo.MutationResult<SetLocationCustomNameMutation>;
 export type SetLocationCustomNameMutationOptions = Apollo.BaseMutationOptions<SetLocationCustomNameMutation, SetLocationCustomNameMutationVariables>;
+export const SlotCopyDocument = gql`
+    mutation SlotCopy($request: SlotCopyRequest!) {
+  slotCopy(request: $request) {
+    labware {
+      ...LabwareLayout
+    }
+  }
+}
+    ${LabwareLayoutFragmentDoc}`;
+export type SlotCopyMutationFn = Apollo.MutationFunction<SlotCopyMutation, SlotCopyMutationVariables>;
+
+/**
+ * __useSlotCopyMutation__
+ *
+ * To run a mutation, you first call `useSlotCopyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSlotCopyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [slotCopyMutation, { data, loading, error }] = useSlotCopyMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useSlotCopyMutation(baseOptions?: Apollo.MutationHookOptions<SlotCopyMutation, SlotCopyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SlotCopyMutation, SlotCopyMutationVariables>(SlotCopyDocument, options);
+      }
+export type SlotCopyMutationHookResult = ReturnType<typeof useSlotCopyMutation>;
+export type SlotCopyMutationResult = Apollo.MutationResult<SlotCopyMutation>;
+export type SlotCopyMutationOptions = Apollo.BaseMutationOptions<SlotCopyMutation, SlotCopyMutationVariables>;
 export const StoreBarcodeDocument = gql`
     mutation StoreBarcode($barcode: String!, $locationBarcode: String!, $address: Address) {
-  storeBarcode(barcode: $barcode, locationBarcode: $locationBarcode, address: $address) {
+  storeBarcode(
+    barcode: $barcode
+    locationBarcode: $locationBarcode
+    address: $address
+  ) {
     location {
       ...LocationFields
     }
@@ -1914,40 +1968,10 @@ export type FindQueryResult = Apollo.QueryResult<FindQuery, FindQueryVariables>;
 export const FindLabwareDocument = gql`
     query FindLabware($barcode: String!) {
   labware(barcode: $barcode) {
-    id
-    barcode
-    released
-    discarded
-    destroyed
-    labwareType {
-      name
-    }
-    slots {
-      address
-      block
-      samples {
-        id
-        tissue {
-          externalName
-          donor {
-            donorName
-          }
-          spatialLocation {
-            tissueType {
-              name
-            }
-            code
-          }
-          replicate
-        }
-        bioState {
-          name
-        }
-      }
-    }
+    ...LabwareLayout
   }
 }
-    `;
+    ${LabwareLayoutFragmentDoc}`;
 
 /**
  * __useFindLabwareQuery__

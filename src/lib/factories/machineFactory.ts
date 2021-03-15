@@ -14,7 +14,11 @@ import {
 import { RegistrationMachine } from "../machines/registration/registrationMachineTypes";
 import { SectioningMachine } from "../machines/sectioning/sectioningMachineTypes";
 import { sectioningMachine } from "../machines/sectioning/sectioningMachine";
-import { LabwareTypeName, LocationSearchParams } from "../../types/stan";
+import {
+  LabwareTypeName,
+  LocationSearchParams,
+  OperationTypeName,
+} from "../../types/stan";
 import createLocationMachine from "../machines/locations/locationMachine";
 import {
   LocationMachine,
@@ -34,6 +38,8 @@ import { DestroyMachine } from "../machines/destroy/destroyMachineTypes";
 import createRegistrationMachine from "../machines/registration/registrationMachine";
 import { SlideRegistrationMachine } from "../machines/slideRegistration/slideRegistrationMachineTypes";
 import createSlideRegistrationMachine from "../machines/slideRegistration/slideRegistrationMachine";
+import createSlotCopyMachine from "../machines/slotCopy/slotCopyMachine";
+import { SlotCopyMachine } from "../machines/slotCopy/slotCopyMachineTypes";
 // HYGEN MARKER
 
 export function buildRegistrationMachine(
@@ -192,4 +198,21 @@ export function buildDestroyMachine(
   destroyInfo: GetDestroyInfoQuery
 ): DestroyMachine {
   return createDestroyMachine({ context: { destroyInfo } });
+}
+
+/**
+ * Build a {@link SlotCopyMachine}
+ */
+export function buildSlotCopyMachine(params: {
+  operationType: OperationTypeName;
+  outputLabwareType: LabwareTypeName;
+}): SlotCopyMachine {
+  return createSlotCopyMachine({
+    context: {
+      operationType: params.operationType,
+      outputLabwareType: params.outputLabwareType,
+      outputLabwares: [],
+      slotCopyContent: [],
+    },
+  });
 }

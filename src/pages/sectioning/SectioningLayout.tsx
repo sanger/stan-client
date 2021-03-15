@@ -7,7 +7,7 @@ import Modal, { ModalBody, ModalFooter } from "../../components/Modal";
 import BlueButton from "../../components/buttons/BlueButton";
 import Heading from "../../components/Heading";
 import LayoutPlanner from "../../components/LayoutPlanner";
-import Labware from "../../components/Labware";
+import Labware from "../../components/labware/Labware";
 import { motion } from "framer-motion";
 import variants from "../../lib/motionVariants";
 import Warning from "../../components/notifications/Warning";
@@ -130,13 +130,14 @@ const SectioningLayout = React.forwardRef<
       <div className="md:grid md:grid-cols-2">
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
-            onClick={() => send(editLayout())}
             labware={sectioningLayout.destinationLabware}
-            slotText={(slot) =>
-              layoutPlan.plannedActions.get(slot.address)?.labware.barcode
+            onClick={() => send(editLayout())}
+            name={sectioningLayout.destinationLabware.labwareType.name}
+            slotText={(address) =>
+              layoutPlan.plannedActions.get(address)?.labware.barcode
             }
-            slotColor={(slot) => {
-              const action = layoutPlan.plannedActions.get(slot.address);
+            slotColor={(address) => {
+              const action = layoutPlan.plannedActions.get(address);
               if (action) {
                 return `${layoutPlan.sampleColors.get(action.sampleId)}-600`;
               }

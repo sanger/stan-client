@@ -11,6 +11,7 @@ import PinkButton from "../../components/buttons/PinkButton";
 import { useScrollToRef } from "../../lib/hooks";
 import ButtonBar from "../../components/ButtonBar";
 import SectioningPresentationModel from "../../lib/presentationModels/sectioningPresentationModel";
+import LabwareScanner from "../../components/labwareScanner/LabwareScanner";
 
 interface PlanProps {
   model: SectioningPresentationModel;
@@ -35,18 +36,21 @@ const Plan: React.FC<PlanProps> = ({ model }) => {
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
           <div className="space-y-4">
             <Heading level={3}>Source Labware</Heading>
-            <LabwareScanTable
+            <LabwareScanner
               locked={model.isLabwareTableLocked()}
               onChange={model.updateLabwares}
-              columns={[
-                labwareScanTableColumns.color(sampleColors),
-                labwareScanTableColumns.barcode(),
-                labwareScanTableColumns.donorId(),
-                labwareScanTableColumns.tissueType(),
-                labwareScanTableColumns.spatialLocation(),
-                labwareScanTableColumns.replicate(),
-              ]}
-            />
+            >
+              <LabwareScanTable
+                columns={[
+                  labwareScanTableColumns.color(sampleColors),
+                  labwareScanTableColumns.barcode(),
+                  labwareScanTableColumns.donorId(),
+                  labwareScanTableColumns.tissueType(),
+                  labwareScanTableColumns.spatialLocation(),
+                  labwareScanTableColumns.replicate(),
+                ]}
+              />
+            </LabwareScanner>
           </div>
 
           <div className="space-y-4">

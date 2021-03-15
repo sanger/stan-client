@@ -1,6 +1,6 @@
-import React, {useEffect} from "react";
-import GrayBox, {Sidebar} from "../../components/layouts/GrayBox";
-import {motion} from "framer-motion";
+import React, { useEffect } from "react";
+import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
+import { motion } from "framer-motion";
 import variants from "../../lib/motionVariants";
 import Heading from "../../components/Heading";
 import MutedText from "../../components/MutedText";
@@ -8,15 +8,16 @@ import LabwareScanPanel from "../../components/labwareScanPanel/LabwareScanPanel
 import columns from "../../components/labwareScanPanel/columns";
 import FormikSelect from "../../components/forms/Select";
 import PinkButton from "../../components/buttons/PinkButton";
-import {Form, FormikProps} from "formik";
-import {Labware, ReleaseRequest} from "../../types/graphql";
-import {FormikErrorMessage} from "../../components/forms";
+import { Form, FormikProps } from "formik";
+import { LabwareLayoutFragment, ReleaseRequest } from "../../types/graphql";
+import { FormikErrorMessage } from "../../components/forms";
 import ReleasePresentationModel from "../../lib/presentationModels/releasePresentationModel";
 import Warning from "../../components/notifications/Warning";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import Success from "../../components/notifications/Success";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import DownloadIcon from "../../components/icons/DownloadIcon";
+import LabwareScanner from "../../components/labwareScanner/LabwareScanner";
 
 interface ReleaseFormProps {
   model: ReleasePresentationModel;
@@ -28,7 +29,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
 
   // Update the formik barcodes field when labware changes in the scan panel
   const onScanPanelChange = React.useCallback(
-    (labwares: Labware[]) => {
+    (labwares: LabwareLayoutFragment[]) => {
       setFieldValue(
         "barcodes",
         labwares.map((lw) => lw.barcode)
@@ -37,7 +38,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
     [setFieldValue]
   );
 
-  const labwareBsContent = (labware: Labware) => {
+  const labwareBsContent = (labware: LabwareLayoutFragment) => {
     const bss = new Set(labware.slots.flatMap(slot => slot.samples).map(sam => sam.bioState.name.toLowerCase()));
     if (bss.has("cdna")) {
       return {cdna:true, other:(bss.size>1)};
@@ -45,7 +46,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
     return {cdna:false, other:(bss.size>0)};
   }
 
-  const labwareBioStateCheck = (labwares: Labware[], foundLabware: Labware) => {
+  const labwareBioStateCheck = (labwares: LabwareLayoutFragment[], foundLabware: LabwareLayoutFragment) => {
     if (foundLabware.released) {
       return ["Labware "+foundLabware.barcode+" has already been released."];
     }
@@ -104,18 +105,19 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
               Please scan in the labware you wish to release.
             </MutedText>
 
-            <LabwareScanPanel
-              locked={model.formLocked}
-              columns={[
-                columns.barcode(),
-                columns.donorId(),
-                columns.labwareType(),
-                columns.externalName(),
-                columns.bioState(),
-              ]}
+            <LabwareScanner
               onChange={onScanPanelChange}
-              labwareCheckFunction={labwareBioStateCheck}
-            />
+              locked={model.formLocked}
+            >
+              <LabwareScanPanel
+                columns={[
+                  columns.barcode(),
+                  columns.donorId(),
+                  columns.labwareType(),
+                  columns.externalName(),
+                ]}
+              />
+            </LabwareScanner>
             <FormikErrorMessage name={"barcodes"} />
           </motion.div>
 

@@ -17,6 +17,7 @@ import {
   buildSearchPresentationModel,
   buildSectioningModel,
   buildSlideRegistrationPresentationModel,
+  buildSlotCopyPresentationModel,
 } from "../lib/factories/presentationModelFactory";
 import { getLocationMachine } from "../lib/services/locationService";
 import LocationPresentationModel from "../lib/presentationModels/locationPresentationModel";
@@ -34,7 +35,9 @@ import Store from "../pages/Store";
 import Search from "../pages/Search";
 import Destroy from "../pages/Destroy";
 import SlideRegistration from "../pages/SlideRegistration";
-
+import SlotCopy from "../pages/SlotCopy";
+import { plateFactory } from "../lib/factories/labwareFactory";
+import { getVisiumCDNAMachine } from "../lib/services/slotCopyService";
 //HYGEN MARKER
 
 export function Routes() {
@@ -62,6 +65,21 @@ export function Routes() {
           model={buildExtractionPresentationModel}
         >
           {(presentationModel) => <Extraction model={presentationModel} />}
+        </Presenter>
+      </AuthenticatedRoute>
+
+      <AuthenticatedRoute path="/lab/visium_cdna">
+        <Presenter
+          machine={getVisiumCDNAMachine}
+          model={buildSlotCopyPresentationModel}
+        >
+          {(presentationModel) => (
+            <SlotCopy
+              title={"Visium cDNA"}
+              initialOutputLabware={plateFactory.build()}
+              model={presentationModel}
+            />
+          )}
         </Presenter>
       </AuthenticatedRoute>
 
