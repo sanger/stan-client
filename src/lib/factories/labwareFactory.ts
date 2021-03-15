@@ -2,31 +2,41 @@ import { Factory } from "fishery";
 import { GridDirection, Labware } from "../../types/graphql";
 import { labwareTypes } from "./labwareTypeFactory";
 import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
-import { slotFactory } from "./slotFactory";
 import { uniqueId } from "lodash";
 import { genAddresses } from "../helpers";
+import { slotFactory } from "./slotFactory";
 
 export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
-  ({ params, associations, afterBuild }) => {
+  ({ params, associations, afterBuild, transientParams }) => {
     afterBuild((labware) => {
-      if (!labware.labwareType) {
+      if (!labware.labwareType || labware.slots.length > 0) {
         return;
       }
+
       const addresses = Array.from(
         genAddresses(labware.labwareType, GridDirection.RightDown)
       );
+
       labware.slots = addresses.map((address) =>
-        slotFactory.build({
-          address,
-          labwareId: labware.id ?? -1,
-        })
+        slotFactory.build(
+          {
+            address,
+            labwareId: labware.id,
+          },
+          {
+            transient: {
+              numberOfSamples: transientParams.samplesPerSlot ?? 0,
+            },
+          }
+        )
       );
     });
 
     return {
+      __typename: "Labware",
       labwareType:
         associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
-      id: params.id ?? Number(uniqueId()),
+      id: params.id ?? -1,
       barcode: params.barcode ?? null,
       slots: associations.slots ?? [],
     };
@@ -34,12 +44,14 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
 );
 
 const labwareFactory = Factory.define<Labware>(
-  ({ sequence, params, associations }) => {
-    params.id = params.id ?? sequence;
+  ({ sequence, params, associations, transientParams }) => {
+    params.id = params.id ?? -Number(uniqueId());
     params.barcode = params.barcode ?? `STAN-${sequence + 1000}`;
-    params.__typename = "Labware";
     return unregisteredLabwareFactory.build(params, {
       associations,
+      transient: {
+        samplesPerSlot: transientParams.samplesPerSlot ?? 2,
+      },
     }) as Labware;
   }
 );
@@ -65,6 +77,10 @@ export const visiumLPFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.VISIUM_LP].build(),
 });
 
+export const plateFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.PLATE].build(),
+});
+
 export const labwareFactories: Record<
   LabwareTypeName,
   Factory<NewLabwareLayout>
@@ -74,4 +90,5 @@ export const labwareFactories: Record<
   [LabwareTypeName.SLIDE]: slideFactory,
   [LabwareTypeName.VISIUM_TO]: visiumTOFactory,
   [LabwareTypeName.VISIUM_LP]: visiumLPFactory,
+  [LabwareTypeName.PLATE]: plateFactory,
 };

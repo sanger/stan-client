@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Form, FormikProps } from "formik";
-import { DestroyRequest, Labware } from "../../types/graphql";
+import { DestroyRequest, LabwareLayoutFragment } from "../../types/graphql";
 import DestroyPresentationModel from "../../lib/presentationModels/destroyPresentationModel";
 import Success from "../../components/notifications/Success";
 import { toast } from "react-toastify";
@@ -15,6 +15,7 @@ import columns from "../../components/labwareScanPanel/columns";
 import { FormikErrorMessage } from "../../components/forms";
 import FormikSelect from "../../components/forms/Select";
 import PinkButton from "../../components/buttons/PinkButton";
+import LabwareScanner from "../../components/labwareScanner/LabwareScanner";
 
 interface DestroyFormProps {
   model: DestroyPresentationModel;
@@ -26,7 +27,7 @@ const DestroyForm: React.FC<DestroyFormProps> = ({ model, formik }) => {
 
   // Update the formik barcodes field when labware changes in the scan panel
   const onScanPanelChange = React.useCallback(
-    (labwares: Labware[]) => {
+    (labwares: LabwareLayoutFragment[]) => {
       setFieldValue(
         "barcodes",
         labwares.map((lw) => lw.barcode)
@@ -64,16 +65,19 @@ const DestroyForm: React.FC<DestroyFormProps> = ({ model, formik }) => {
               Please scan in the labware you wish to destroy.
             </MutedText>
 
-            <LabwareScanPanel
-              locked={model.formLocked}
-              columns={[
-                columns.barcode(),
-                columns.donorId(),
-                columns.labwareType(),
-                columns.externalName(),
-              ]}
+            <LabwareScanner
               onChange={onScanPanelChange}
-            />
+              locked={model.formLocked}
+            >
+              <LabwareScanPanel
+                columns={[
+                  columns.barcode(),
+                  columns.donorId(),
+                  columns.labwareType(),
+                  columns.externalName(),
+                ]}
+              />
+            </LabwareScanner>
             <FormikErrorMessage name={"barcodes"} />
           </motion.div>
 

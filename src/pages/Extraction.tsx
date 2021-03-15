@@ -21,6 +21,7 @@ import Success from "../components/notifications/Success";
 import variants from "../lib/motionVariants";
 import { usePrinters } from "../lib/hooks";
 import MutedText from "../components/MutedText";
+import LabwareScanner from "../components/labwareScanner/LabwareScanner";
 
 interface PageParams {
   model: ExtractionPresentationModel;
@@ -54,11 +55,12 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
           <div className="space-y-4">
             <Heading level={3}>Section Tubes</Heading>
 
-            <LabwareScanPanel
+            <LabwareScanner
               onChange={model.updateLabwares}
-              columns={columns}
               locked={model.isLabwareScanPanelLocked}
-            />
+            >
+              <LabwareScanPanel columns={columns} />
+            </LabwareScanner>
           </div>
 
           {model.showExtractionTubes && (

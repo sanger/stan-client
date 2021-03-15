@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import ScanInput from "../../components/ScanInput";
+import ScanInput from "../../components/scanInput/ScanInput";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { ModelContext } from "../Location";
 import UnstoreBarcodeModal from "./UnstoreBarcodeModal";

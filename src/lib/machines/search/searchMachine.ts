@@ -17,7 +17,7 @@ const machineOptions: Partial<MachineOptions<SearchContext, SearchEvent>> = {
       ctx.searchResult = e.data;
     }),
 
-    unassignServerError: assign((ctx, e) => {
+    unassignServerError: assign((ctx, _e) => {
       ctx.serverError = null;
     }),
 

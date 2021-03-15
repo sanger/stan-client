@@ -53,6 +53,7 @@ module.exports = {
         "grid-rows-4",
         "grid-rows-5",
         "grid-rows-6",
+        "grid-rows-8",
         "grid-rows-10",
         "grid-rows-25",
         "grid-rows-50",

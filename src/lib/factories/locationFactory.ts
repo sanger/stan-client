@@ -12,6 +12,7 @@ const locationFactory = Factory.define<Location>(
     const barcode = `STO-${padStart(String(sequence), 3, "0")}`;
 
     const location: Location = {
+      __typename: "Location",
       id: sequence,
       barcode,
       fixedName: params.fixedName ?? `Location ${sequence}`,
@@ -42,6 +43,7 @@ export default locationFactory;
 export const locationItemFactory = Factory.define<StoredItem>(
   ({ sequence, params, associations }) => {
     const locationItem: StoredItem = {
+      __typename: "StoredItem",
       barcode: `STAN-${sequence + 1000}`,
       location: locationFactory.build(),
       address: params.address ?? null,

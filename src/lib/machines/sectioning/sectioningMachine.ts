@@ -12,11 +12,7 @@ import { createSectioningConfirmMachine } from "./sectioningConfirm/sectioningCo
 import * as sectioningService from "../../services/sectioningService";
 import * as confirmService from "../../services/confirmService";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
-import {
-  Labware,
-  LabwareLayoutFragment,
-  PlanMutation,
-} from "../../../types/graphql";
+import { LabwareLayoutFragment, PlanMutation } from "../../../types/graphql";
 import {
   LayoutPlan,
   Source as LayoutPlanAction,
@@ -394,7 +390,10 @@ function buildSectioningOutcomeLayoutPlan(
   };
 }
 
-function findSourceLabware(labwares: Labware[], labwareId: number): Labware {
+function findSourceLabware(
+  labwares: LabwareLayoutFragment[],
+  labwareId: number
+): LabwareLayoutFragment {
   const labware = labwares.find((lw) => lw.id === labwareId);
 
   if (!labware) {

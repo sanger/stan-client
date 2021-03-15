@@ -3,6 +3,7 @@ import { LabwareType } from "../../types/graphql";
 import labelTypeFactory from "./labelTypeFactory";
 import { LabwareTypeName } from "../../types/stan";
 const labwareTypeFactory = Factory.define<LabwareType>(({ sequence }) => ({
+  __typename: "LabwareType",
   name: `Labware Type ${sequence}`,
   numRows: 1,
   numColumns: 1,
@@ -36,6 +37,11 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     name: LabwareTypeName.VISIUM_LP,
     numRows: 4,
     numColumns: 1,
+  }),
+  [LabwareTypeName.PLATE]: labwareTypeFactory.params({
+    name: LabwareTypeName.PLATE,
+    numRows: 8,
+    numColumns: 12,
   }),
 };
 

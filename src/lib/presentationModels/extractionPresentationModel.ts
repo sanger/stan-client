@@ -4,7 +4,7 @@ import {
   ExtractionEvent,
   ExtractionSchema,
 } from "../machines/extraction/extractionMachineTypes";
-import { Labware } from "../../types/graphql";
+import { LabwareLayoutFragment } from "../../types/graphql";
 import { buildSampleColors } from "../helpers/labwareHelper";
 
 export default class ExtractionPresentationModel extends MachinePresentationModel<
@@ -86,7 +86,7 @@ export default class ExtractionPresentationModel extends MachinePresentationMode
     return 2;
   }
 
-  updateLabwares(labwares: Labware[]) {
+  updateLabwares(labwares: LabwareLayoutFragment[]) {
     this.send({ type: "UPDATE_LABWARES", labwares });
   }
 
