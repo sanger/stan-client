@@ -57,7 +57,7 @@ const Registration: React.FC<RegistrationParams> = ({ model }) => {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Tissue Registration</AppShell.Title>
+        <AppShell.Title>Block Registration</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
