@@ -11,6 +11,7 @@ import { buildRegisterTissuesMutationVariables } from "../../services/registrati
 import { createMachineBuilder } from "../index";
 
 export enum Actions {
+  EMPTY_CONFIRMED_TISSUES = "emptyConfirmedTissues",
   ASSIGN_LOADING_ERROR = "assignLoadingError",
   ASSIGN_REGISTRATION_RESULT = "assignRegistrationResult",
   ASSIGN_REGISTRATION_ERROR = "assignRegistrationError",
@@ -29,11 +30,20 @@ export const machineOptions: Partial<MachineOptions<
   RegistrationEvent
 >> = {
   actions: {
+    [Actions.EMPTY_CONFIRMED_TISSUES]: assign(
+      (ctx) => (ctx.confirmedTissues = [])
+    ),
+
     [Actions.ASSIGN_REGISTRATION_RESULT]: assign((ctx, e) => {
       if (e.type !== "done.invoke.submitting" || !e.data.data) {
         return;
       }
       ctx.registrationResult = e.data.data;
+
+      // Store the clashed tissues to be used for possible user confirmation
+      ctx.confirmedTissues = ctx.registrationResult.register.clashes.map(
+        (clash) => clash.tissue.externalName
+      );
     }),
 
     [Actions.ASSIGN_REGISTRATION_ERROR]: assign((ctx, e) => {
@@ -56,7 +66,7 @@ export const machineOptions: Partial<MachineOptions<
       }
       return buildRegisterTissuesMutationVariables(
         event.values,
-        event.existingTissue
+        context.confirmedTissues
       ).then(registrationService.registerTissues);
     },
   },
@@ -75,6 +85,7 @@ const machineConfig: MachineConfig<
   initial: "ready",
   states: {
     ready: {
+      entry: [Actions.EMPTY_CONFIRMED_TISSUES],
       on: {
         SUBMIT_FORM: "submitting",
       },
