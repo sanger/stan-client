@@ -69,8 +69,8 @@ export default class RegistrationPresentationModel extends MachinePresentationMo
     });
   }
 
-  submitForm(values: FormValues, existingTissue: boolean = false) {
-    this.send({ type: "SUBMIT_FORM", values, existingTissue });
+  submitForm(values: FormValues) {
+    this.send({ type: "SUBMIT_FORM", values });
   }
 
   editSubmission() {

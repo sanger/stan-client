@@ -141,7 +141,7 @@ const Registration: React.FC<RegistrationParams> = ({ model }) => {
                     <ModalFooter>
                       <PinkButton
                         type="button"
-                        onClick={() => model.submitForm(values, true)}
+                        onClick={() => model.submitForm(values)}
                         className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
                       >
                         Confirm

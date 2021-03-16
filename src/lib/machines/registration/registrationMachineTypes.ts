@@ -41,12 +41,12 @@ export interface RegistrationContext {
   registrationInfo: GetRegistrationInfoQuery;
   registrationResult: RegisterTissuesMutation;
   registrationErrors: ServerErrors;
+  confirmedTissues: Array<string>;
 }
 
 type SubmitFormEvent = {
   type: "SUBMIT_FORM";
   values: FormValues;
-  existingTissue?: boolean;
 };
 
 type EditSubmissionEvent = {

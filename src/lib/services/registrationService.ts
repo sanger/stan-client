@@ -132,12 +132,12 @@ export function getInitialTissueValues(): FormTissueValues {
 /**
  * Builds the registerTissue mutation variables from the FormValues
  * @param formValues
- * @param existingTissue the user has confirmed this is an existing piece of tissue
+ * @param existingTissues list of tissue external names that the user has confirmed as pre-existing
  * @return Promise<RegisterTissuesMutationVariables> mutation variables wrapped in a promise
  */
 export function buildRegisterTissuesMutationVariables(
   formValues: FormValues,
-  existingTissue: boolean = false
+  existingTissues: Array<string> = []
 ): Promise<RegisterTissuesMutationVariables> {
   return new Promise((resolve) => {
     const blocks = formValues.tissues.reduce<BlockRegisterRequest[]>(
@@ -145,7 +145,7 @@ export function buildRegisterTissuesMutationVariables(
         return [
           ...memo,
           ...tissue.blocks.map<BlockRegisterRequest>((block) => {
-            return {
+            const blockRegisterRequest: BlockRegisterRequest = {
               species: tissue.species,
               donorIdentifier: tissue.donorId,
               externalIdentifier: block.externalIdentifier,
@@ -159,8 +159,15 @@ export function buildRegisterTissuesMutationVariables(
               fixative: block.fixative,
               medium: block.medium,
               mouldSize: block.mouldSize,
-              existingTissue,
             };
+
+            if (
+              existingTissues.includes(blockRegisterRequest.externalIdentifier)
+            ) {
+              blockRegisterRequest.existingTissue = true;
+            }
+
+            return blockRegisterRequest;
           }),
         ];
       },
