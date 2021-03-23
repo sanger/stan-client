@@ -1,17 +1,18 @@
 import { Factory } from "fishery";
 import _ from "lodash";
 import {
-  Donor,
-  Fixative,
-  Hmdmc,
-  LifeStage,
-  Medium,
-  MouldSize,
-  Sample,
-  SpatialLocation,
-  Species,
-  Tissue,
-  TissueType,
+    BioState,
+    Donor,
+    Fixative,
+    Hmdmc,
+    LifeStage,
+    Medium,
+    MouldSize,
+    Sample,
+    SpatialLocation,
+    Species,
+    Tissue,
+    TissueType,
 } from "../../types/graphql";
 import * as faker from "faker";
 
@@ -20,6 +21,7 @@ export const sampleFactory = Factory.define<Sample>(
     id: params.id ?? sequence,
     section: params.section ?? _.random(10),
     tissue: associations.tissue ?? tissueFactory.build(),
+    bioState: associations.bioState ?? bioStateFactory.build(),
   })
 );
 
@@ -36,6 +38,12 @@ export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(
     medium: associations.medium ?? mediumFactory.build(),
     fixative: associations.fixative ?? fixativeFactory.build(),
   })
+);
+
+export const bioStateFactory: Factory<BioState> = Factory.define<BioState>(
+    ({params, sequence}) => ({
+        name: params.name ?? `BioState ${sequence}`,
+    })
 );
 
 export const fixativeFactory: Factory<Fixative> = Factory.define<Fixative>(
