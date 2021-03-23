@@ -1,5 +1,6 @@
-import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
+import {gql} from '@apollo/client';
+
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -634,6 +635,9 @@ export type LabwareLayoutFragment = (
             & Pick<TissueType, 'name'>
           ) }
         ) }
+      ), bioState: (
+        { __typename?: 'BioState' }
+        & Pick<BioState, 'name'>
       ) }
     )> }
   )> }
@@ -1039,6 +1043,9 @@ export type FindLabwareQuery = (
               & Pick<TissueType, 'name'>
             ) }
           ) }
+        ), bioState: (
+          { __typename?: 'BioState' }
+          & Pick<BioState, 'name'>
         ) }
       )> }
     )> }
@@ -1201,6 +1208,9 @@ export const LabwareLayoutFragmentDoc = gql`
           code
         }
         replicate
+      }
+      bioState {
+        name
       }
     }
   }
@@ -1926,6 +1936,9 @@ export const FindLabwareDocument = gql`
             code
           }
           replicate
+        }
+        bioState {
+          name
         }
       }
     }

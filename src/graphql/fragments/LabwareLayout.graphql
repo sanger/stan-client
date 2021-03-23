@@ -27,6 +27,7 @@ fragment LabwareLayout on Labware {
                 }
                 replicate
             }
+            bioState { name }
         }
     }
 }

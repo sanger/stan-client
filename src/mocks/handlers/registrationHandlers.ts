@@ -1,5 +1,5 @@
-import { graphql } from "msw";
-import { uniqueId } from "lodash";
+import {graphql} from "msw";
+import {uniqueId} from "lodash";
 import {
   GetRegistrationInfoQuery,
   GetRegistrationInfoQueryVariables,
@@ -153,6 +153,7 @@ const registrationHandlers = [
                             },
                           },
                         },
+                        bioState: { name: "Tissue" },
                       },
                     ],
                   },
@@ -201,6 +202,7 @@ const registrationHandlers = [
                           donorName: content.donorIdentifier,
                         },
                       },
+                      bioState: { name:"Tissue" }
                     },
                   ],
                 })),

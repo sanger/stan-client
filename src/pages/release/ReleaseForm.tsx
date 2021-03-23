@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
-import { motion } from "framer-motion";
+import React, {useEffect} from "react";
+import GrayBox, {Sidebar} from "../../components/layouts/GrayBox";
+import {motion} from "framer-motion";
 import variants from "../../lib/motionVariants";
 import Heading from "../../components/Heading";
 import MutedText from "../../components/MutedText";
@@ -8,12 +8,12 @@ import LabwareScanPanel from "../../components/labwareScanPanel/LabwareScanPanel
 import columns from "../../components/labwareScanPanel/columns";
 import FormikSelect from "../../components/forms/Select";
 import PinkButton from "../../components/buttons/PinkButton";
-import { Form, FormikProps } from "formik";
-import { Labware, ReleaseRequest } from "../../types/graphql";
-import { FormikErrorMessage } from "../../components/forms";
+import {Form, FormikProps} from "formik";
+import {Labware, ReleaseRequest} from "../../types/graphql";
+import {FormikErrorMessage} from "../../components/forms";
 import ReleasePresentationModel from "../../lib/presentationModels/releasePresentationModel";
 import Warning from "../../components/notifications/Warning";
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
 import Success from "../../components/notifications/Success";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import DownloadIcon from "../../components/icons/DownloadIcon";
@@ -74,6 +74,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
                 columns.donorId(),
                 columns.labwareType(),
                 columns.externalName(),
+                columns.bioState(),
               ]}
               onChange={onScanPanelChange}
             />

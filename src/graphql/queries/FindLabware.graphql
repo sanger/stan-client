@@ -23,6 +23,7 @@ query FindLabware($barcode: String!) {
                     }
                     replicate
                 }
+                bioState { name }
             }
         }
     }
