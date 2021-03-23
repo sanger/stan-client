@@ -467,7 +467,7 @@ const SlotForm: React.FC<SlotFormParams> = ({
 
       <FormikInput
         label="Section External Identifier"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.sectionExternalIdentifier`}
+        name={`labwares.${currentIndex}.slots.${slotAddress}.externalIdentifier`}
       />
 
       <FormikInput
