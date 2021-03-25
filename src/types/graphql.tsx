@@ -1019,7 +1019,7 @@ export type FindLabwareQuery = (
   { __typename?: 'Query' }
   & { labware: (
     { __typename?: 'Labware' }
-    & Pick<Labware, 'id' | 'barcode'>
+    & Pick<Labware, 'id' | 'barcode' | 'released' | 'discarded' | 'destroyed'>
     & { labwareType: (
       { __typename?: 'LabwareType' }
       & Pick<LabwareType, 'name'>
@@ -1916,6 +1916,9 @@ export const FindLabwareDocument = gql`
   labware(barcode: $barcode) {
     id
     barcode
+    released
+    discarded
+    destroyed
     labwareType {
       name
     }
