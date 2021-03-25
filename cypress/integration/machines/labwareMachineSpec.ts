@@ -18,7 +18,7 @@ describe("labwareMachine", () => {
 
   describe("UPDATE_CURRENT_BARCODE", () => {
     it("updates the current barcode", (done) => {
-      const machine = interpret(createLabwareMachine({})).onTransition(
+      const machine = interpret(createLabwareMachine()).onTransition(
         (state) => {
           if (
             state.matches("idle.normal") &&
@@ -38,8 +38,8 @@ describe("labwareMachine", () => {
       "when the labware with this barcode is already in the table",
       () => {
         it("transitions to idle.error with an error message", (done) => {
-          const mockLabwareTableMachine = createLabwareMachine({}).withContext(
-            Object.assign({}, createLabwareMachine({}).context, {
+          const mockLabwareTableMachine = createLabwareMachine().withContext(
+            Object.assign({}, createLabwareMachine().context, {
               labwares: [
                 {
                   barcode: "STAN-123",
@@ -68,7 +68,7 @@ describe("labwareMachine", () => {
     context("when the barcode is not in the table", () => {
       context("when the barcode is empty", () => {
         it("assigns an error message", (done) => {
-          const machine = interpret(createLabwareMachine({})).onTransition(
+          const machine = interpret(createLabwareMachine()).onTransition(
             (state) => {
               if (state.matches("idle.error")) {
                 expect(state.context.errorMessage).to.eq("Barcode is required");
@@ -83,7 +83,7 @@ describe("labwareMachine", () => {
 
       context("when barcode is valid", () => {
         it("will look up the labware via a service", (done) => {
-          const labwareMachine = createLabwareMachine({});
+          const labwareMachine = createLabwareMachine();
           const mockLTMachine = labwareMachine.withConfig({
             actions: {
               notifyParent: log("stubbed update labwares"),
@@ -144,7 +144,7 @@ describe("labwareMachine", () => {
 
       context("when barcode can't be found", () => {
         it("assigns an error message", (done) => {
-          const mockLTMachine = createLabwareMachine({}).withConfig({
+          const mockLTMachine = createLabwareMachine().withConfig({
             services: {
               findLabwareByBarcode: (_ctx: LabwareContext) => {
                 return new Promise<FindLabwareQuery["labware"]>(
@@ -177,14 +177,14 @@ describe("labwareMachine", () => {
 
   describe("REMOVE_LABWARE", () => {
     it("transitions to idle.success", (done) => {
-      const mockLabwareTableMachine = createLabwareMachine({})
+      const mockLabwareTableMachine = createLabwareMachine()
         .withConfig({
           actions: {
             notifyParent: log("stubbed notify parent"),
           },
         })
         .withContext(
-          Object.assign({}, createLabwareMachine({}).context, {
+          Object.assign({}, createLabwareMachine().context, {
             labwares: [
               {
                 barcode: "STAN-123",
@@ -210,7 +210,7 @@ describe("labwareMachine", () => {
   describe("LOCK/UNLOCK", () => {
     it("transitions to locked and back to idle.normal", (done) => {
       let wasLocked = false;
-      const machine = interpret(createLabwareMachine({})).onTransition(
+      const machine = interpret(createLabwareMachine()).onTransition(
         (state) => {
           if (state.matches("locked")) {
             wasLocked = true;

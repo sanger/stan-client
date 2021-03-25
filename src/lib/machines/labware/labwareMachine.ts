@@ -115,16 +115,14 @@ export const labwareMachineOptions: Partial<MachineOptions<
  *   Object.assign({}, labwareMachine.context, { validator: Yup.string().min(3).required("Barcode is required") })
  * )
  */
-export const createLabwareMachine = ({
-  labwares = [],
-}: {
+export const createLabwareMachine = (props?: {
   labwares?: LabwareLayoutFragment[];
 }) =>
   Machine<LabwareContext, LabwareSchema, LabwareEvents>(
     {
       context: {
         currentBarcode: "",
-        labwares,
+        labwares: props?.labwares ?? [],
         validator: Yup.string().trim().required("Barcode is required"),
         successMessage: null,
         errorMessage: null,
