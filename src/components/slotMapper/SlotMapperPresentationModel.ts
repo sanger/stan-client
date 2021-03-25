@@ -16,20 +16,10 @@ class SlotMapperPresentationModel extends MachinePresentationModel<
 > {
   init() {
     this.updateInputLabware = this.updateInputLabware.bind(this);
-    this.onInputPageChange = this.onInputPageChange.bind(this);
-    this.onOutputPageChange = this.onOutputPageChange.bind(this);
   }
 
   updateInputLabware(labware: Array<LabwareLayoutFragment>) {
     this.send({ type: "UPDATE_INPUT_LABWARE", labware });
-  }
-
-  onInputPageChange(page: number) {
-    this.send({ type: "UPDATE_INPUT_PAGE", page });
-  }
-
-  onOutputPageChange(page: number) {
-    this.send({ type: "UPDATE_OUTPUT_PAGE", page });
   }
 
   copySlots(

@@ -35,11 +35,7 @@ export interface SlotMapperProps {
 
 export interface SlotMapperContext {
   inputLabware: Array<LabwareLayoutFragment>;
-  currentInputPage: number;
-  currentInputLabware: Maybe<LabwareLayoutFragment>;
   outputLabware: Array<NewLabwareLayout>;
-  currentOutputPage: number;
-  currentOutputLabware: Maybe<NewLabwareLayout>;
   slotCopyContent: Array<SlotCopyContent>;
   colorByBarcode: Map<string, string>;
 }
@@ -70,16 +66,6 @@ type ClearSlotsEvent = {
   outputAddresses: Array<string>;
 };
 
-type UpdateInputPageEvent = {
-  type: "UPDATE_INPUT_PAGE";
-  page: number;
-};
-
-type UpdateOutputPageEvent = {
-  type: "UPDATE_OUTPUT_PAGE";
-  page: number;
-};
-
 type LockEvent = { type: "LOCK" };
 type UnlockEvent = { type: "UNLOCK" };
 
@@ -87,7 +73,5 @@ export type SlotMapperEvent =
   | UpdateInputLabwareEvent
   | CopySlotsEvent
   | ClearSlotsEvent
-  | UpdateInputPageEvent
-  | UpdateOutputPageEvent
   | LockEvent
   | UnlockEvent;

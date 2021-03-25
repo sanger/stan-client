@@ -1,5 +1,5 @@
 import React, { ComponentProps } from "react";
-import { Story } from "@storybook/react";
+import { Meta, Story } from "@storybook/react";
 
 import SlotMapper from "./SlotMapper";
 import labwareFactory from "../../lib/factories/labwareFactory";
@@ -9,10 +9,12 @@ import { slotFactory } from "../../lib/factories/slotFactory";
 import { genAddresses } from "../../lib/helpers";
 import { sampleSize } from "lodash";
 
-export default {
+const meta: Meta = {
   title: "Slot Mapper",
   component: SlotMapper,
 };
+
+export default meta;
 
 const Template: Story<ComponentProps<typeof SlotMapper>> = (args) => (
   <SlotMapper {...args} />

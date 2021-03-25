@@ -21,21 +21,6 @@ const machineConfig: Partial<MachineOptions<
       e.type === "UPDATE_INPUT_LABWARE" && (ctx.inputLabware = e.labware);
     }),
 
-    assignCurrentInputLabware: assign((ctx) => {
-      ctx.currentInputLabware = ctx.inputLabware[ctx.currentInputPage - 1];
-    }),
-
-    assignCurrentInputPage: assign((ctx, e) => {
-      e.type === "UPDATE_INPUT_PAGE" && (ctx.currentInputPage = e.page);
-    }),
-    assignCurrentOutputLabware: assign((ctx) => {
-      ctx.currentOutputLabware = ctx.outputLabware[ctx.currentOutputPage - 1];
-    }),
-
-    assignCurrentOutputPage: assign((ctx, e) => {
-      e.type === "UPDATE_OUTPUT_PAGE" && (ctx.currentOutputPage = e.page);
-    }),
-
     assignLabwareColors: assign((ctx) => {
       ctx.inputLabware.forEach((lw) => {
         if (!ctx.colorByBarcode.has(lw.barcode)) {
@@ -162,16 +147,9 @@ const slotMapperMachine = Machine<
           UPDATE_INPUT_LABWARE: {
             actions: [
               "assignInputLabware",
-              "assignCurrentInputLabware",
               "assignLabwareColors",
               "checkSlots",
             ],
-          },
-          UPDATE_INPUT_PAGE: {
-            actions: ["assignCurrentInputPage", "assignCurrentInputLabware"],
-          },
-          UPDATE_OUTPUT_PAGE: {
-            actions: ["assignCurrentOutputPage", "assignCurrentOutputLabware"],
           },
           LOCK: "locked",
         },

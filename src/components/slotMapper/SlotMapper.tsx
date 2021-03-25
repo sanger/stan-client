@@ -8,11 +8,17 @@ import SlotMapperPresentationModel from "./SlotMapperPresentationModel";
 import WhiteButton from "../buttons/WhiteButton";
 import LabwareScanner from "../labwareScanner/LabwareScanner";
 import RemoveButton from "../buttons/RemoveButton";
-import { Maybe, SlotFieldsFragment } from "../../types/graphql";
+import {
+  LabwareLayoutFragment,
+  Maybe,
+  SlotFieldsFragment,
+} from "../../types/graphql";
 import SlotMapperTable from "./SlotMapperTable";
-import { findSlotByAddress } from "../../lib/helpers/slotHelper";
+import { maybeFindSlotByAddress } from "../../lib/helpers/slotHelper";
 import Heading from "../Heading";
 import MutedText from "../MutedText";
+import { usePager } from "../../lib/hooks/usePager";
+import { NewLabwareLayout } from "../../types/stan";
 
 function SlotMapper({
   onChange,
@@ -23,30 +29,37 @@ function SlotMapper({
   const model = usePresentationModel(
     slotMapperMachine.withContext({
       inputLabware: initialInputLabware,
-      currentInputLabware:
-        initialInputLabware.length > 0 ? initialInputLabware[0] : null,
-      currentInputPage: 1,
       outputLabware: initialOutputLabware,
-      currentOutputLabware:
-        initialOutputLabware?.length > 0 ? initialOutputLabware[0] : null,
-      currentOutputPage: 1,
       slotCopyContent: [],
       colorByBarcode: new Map(),
     }),
     (current, service) => new SlotMapperPresentationModel(current, service)
   );
 
-  const {
-    currentInputLabware,
-    currentOutputLabware,
-    inputLabware,
-    outputLabware,
-    slotCopyContent,
-  } = model.context;
+  const { inputLabware, slotCopyContent } = model.context;
+
+  /**
+   * State to track the current input labware (for paging)
+   */
+  const [currentInputLabware, setCurrentInputLabware] = useState<
+    Maybe<LabwareLayoutFragment>
+  >(() => {
+    return initialInputLabware?.length === 0 ? null : initialInputLabware[0];
+  });
+
+  /**
+   * State to track the current output labware (in case there's multiple one day)
+   */
+  const [currentOutputLabware] = useState<Maybe<NewLabwareLayout>>(() => {
+    return initialOutputLabware?.length === 0 ? null : initialOutputLabware[0];
+  });
 
   const currentInputId = currentInputLabware?.id;
   const currentOutputId = currentOutputLabware?.id;
 
+  /**
+   * State to track the currently selected input and output addresses
+   */
   const [selectedInputAddresses, setSelectedInputAddresses] = useState<
     Array<string>
   >([]);
@@ -54,18 +67,65 @@ function SlotMapper({
     Array<string>
   >([]);
 
+  /**
+   * If there's only one input slot selected, store it here
+   * Will be used for the slop map table
+   */
   let selectedInputSlot: Maybe<SlotFieldsFragment> = null;
   if (selectedInputAddresses.length === 1 && currentInputLabware) {
-    selectedInputSlot = findSlotByAddress(
+    selectedInputSlot = maybeFindSlotByAddress(
       currentInputLabware.slots,
       selectedInputAddresses[0]
     );
   }
 
-  useEffect(() => {
-    setSelectedOutputAddresses([]);
-  }, [currentOutputLabware]);
+  /**
+   * Hook for tracking state for Pager component
+   */
+  const {
+    currentPage,
+    numberOfPages,
+    setNumberOfPages,
+    setCurrentPage,
+    goToLastPage,
+    ...pagerRest
+  } = usePager({
+    initialCurrentPage: 1,
+    initialNumberOfPages: inputLabware.length,
+  });
 
+  /**
+   * Whenever the number of input labwares changes, set the number of pages on the pager
+   */
+  const numberOfInputLabware = inputLabware.length;
+  useEffect(() => {
+    setNumberOfPages(numberOfInputLabware);
+  }, [numberOfInputLabware, setNumberOfPages]);
+
+  /**
+   * Whenever the number of input labwares changes, go to the last page
+   */
+  useEffect(() => {
+    goToLastPage();
+  }, [inputLabware.length, goToLastPage]);
+
+  /**
+   * Whenever the current page changes, set the current input labware
+   */
+  useEffect(() => {
+    setCurrentInputLabware(inputLabware[currentPage - 1]);
+  }, [currentPage, inputLabware]);
+
+  /**
+   * When the current input labware changes, unset the selected input addresses
+   */
+  useEffect(() => {
+    setSelectedInputAddresses([]);
+  }, [currentInputLabware]);
+
+  /**
+   * If `locked` changes, tell the model
+   */
   useEffect(() => {
     locked ? model.lock() : model.unlock();
   }, [locked, model]);
@@ -77,6 +137,9 @@ function SlotMapper({
   const inputLabwareRef = useRef<LabwareImperativeRef>(null);
   const outputLabwareRef = useRef<LabwareImperativeRef>(null);
 
+  /**
+   * Callback for sending the actual copy slots event
+   */
   const handleOnOutputLabwareSlotClick = React.useCallback(
     (outputAddress: string) => {
       if (currentInputId && currentOutputId) {
@@ -91,7 +154,9 @@ function SlotMapper({
     [model, currentInputId, selectedInputAddresses, currentOutputId]
   );
 
-  // Handler for the "Clear" button
+  /**
+   * Handler for the "Clear" button
+   */
   const handleOnClickClear = React.useCallback(() => {
     if (currentOutputId) {
       model.clearSlots(currentOutputId, selectedOutputAddresses);
@@ -99,16 +164,31 @@ function SlotMapper({
     }
   }, [model, currentOutputId, selectedOutputAddresses, outputLabwareRef]);
 
-  // Whenever the SlotCopyContent map changes, or the current input labware changes,
-  // deselect any selected input slots
+  /**
+   * Whenever the SlotCopyContent map changes, or the current input labware changes,
+   * deselect any selected input slots
+   */
   useEffect(() => {
     inputLabwareRef.current?.deselectAll();
   }, [model.context.slotCopyContent, currentInputLabware]);
 
-  // Whenever the SlotCopyContent map changes, call the onChange handler
+  /**
+   * Whenever the SlotCopyContent map changes, call the onChange handler
+   */
   useEffect(() => {
     onChange?.(model.context.slotCopyContent, model.allSourcesMapped);
   }, [onChange, model.context.slotCopyContent, model.allSourcesMapped]);
+
+  /**
+   * Handler for whenever labware is added or removed by the labware scanner
+   */
+  const updateInputLabware = model.updateInputLabware;
+  const onLabwareScannerChange = React.useCallback(
+    (labwares: LabwareLayoutFragment[]) => {
+      updateInputLabware(labwares);
+    },
+    [updateInputLabware]
+  );
 
   return (
     <div className="space-y-8">
@@ -119,8 +199,8 @@ function SlotMapper({
 
         <div id="inputLabwares" className="bg-gray-100 p-4">
           <LabwareScanner
-            initialLabwares={inputLabware}
-            onChange={model.updateInputLabware}
+            initialLabwares={initialInputLabware}
+            onChange={onLabwareScannerChange}
           >
             {(props) => {
               if (!currentInputLabware) {
@@ -186,20 +266,14 @@ function SlotMapper({
         <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-between bg-gray-200">
           {inputLabware.length > 0 && (
             <Pager
-              numberOfPages={inputLabware.length}
-              onPageChange={model.onInputPageChange}
+              currentPage={currentPage}
+              numberOfPages={numberOfPages}
+              {...pagerRest}
             />
           )}
         </div>
 
-        <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-between bg-gray-200">
-          {outputLabware.length > 0 && (
-            <Pager
-              numberOfPages={model.context.outputLabware.length}
-              onPageChange={model.onOutputPageChange}
-            />
-          )}
-
+        <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-end bg-gray-200">
           {!locked && (
             <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>
           )}

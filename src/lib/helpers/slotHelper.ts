@@ -1,19 +1,31 @@
-import { SlotFieldsFragment } from "../../types/graphql";
+import { Maybe, SlotFieldsFragment } from "../../types/graphql";
 
 /**
  * Find a slot by its address. Throws an error if slot can not be found.
- * @param slots list of slots
- * @param address an address
+ * @param slots list of slots to search in
+ * @param address the address of the slot to find
  */
 export function findSlotByAddress(
   slots: Array<SlotFieldsFragment>,
   address: string
 ): SlotFieldsFragment {
-  const slot = slots.find((slot) => slot.address === address);
-  if (!slot) {
+  const slot = maybeFindSlotByAddress(slots, address);
+  if (slot == null) {
     throw new Error(`No slot could be found with address: ${address}`);
   }
   return slot;
+}
+
+/**
+ * Attempts to find a slot by its address. Returns null if slot can not be found
+ * @param slots list of slots to search in
+ * @param address the address of the slot to find
+ */
+export function maybeFindSlotByAddress(
+  slots: Array<SlotFieldsFragment>,
+  address: string
+): Maybe<SlotFieldsFragment> {
+  return slots.find((slot) => slot.address === address) ?? null;
 }
 
 /**

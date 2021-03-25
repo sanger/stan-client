@@ -73,13 +73,17 @@ export function Routes() {
           machine={getVisiumCDNAMachine}
           model={buildSlotCopyPresentationModel}
         >
-          {(presentationModel) => (
-            <SlotCopy
-              title={"Visium cDNA"}
-              initialOutputLabware={plateFactory.build()}
-              model={presentationModel}
-            />
-          )}
+          {(presentationModel) => {
+            const initialOutputLabware = [plateFactory.build()];
+
+            return (
+              <SlotCopy
+                title={"Visium cDNA"}
+                initialOutputLabware={initialOutputLabware}
+                model={presentationModel}
+              />
+            );
+          }}
         </Presenter>
       </AuthenticatedRoute>
 
