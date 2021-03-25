@@ -138,7 +138,8 @@ export default class SlideRegistrationPresentationModel extends MachinePresentat
                     species: validation.species,
                     hmdmc: validation.hmdmc,
                     tissueType: validation.tissueType,
-                    externalIdentifier: validation.sectionExternalIdentifier,
+                    externalIdentifier:
+                      validation.sectionExternalIdentifier,
                     spatialLocation: validation.spatialLocation,
                     replicateNumber: validation.replicateNumber,
                     sectionNumber: validation.sectionNumber,
