@@ -12,7 +12,7 @@ import { useScrollToRef } from "../lib/hooks";
 
 type PageParams = {
   title: string;
-  initialOutputLabware: NewLabwareLayout;
+  initialOutputLabware: NewLabwareLayout[];
   model: SlotCopyPresentationModel;
 };
 
@@ -58,7 +58,7 @@ function SlotMapperPage({ title, initialOutputLabware, model }: PageParams) {
 
           <SlotMapper
             locked={model.isSlotMapperLocked}
-            initialOutputLabware={[initialOutputLabware]}
+            initialOutputLabware={initialOutputLabware}
             onChange={model.handleOnSlotMapperChange}
           />
 

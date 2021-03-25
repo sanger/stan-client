@@ -1,7 +1,8 @@
 import React, { ComponentProps } from "react";
-import { Story, Meta } from "@storybook/react";
+import { Meta, Story } from "@storybook/react";
 
 import Pager from "./Pager";
+import { usePager } from "../../lib/hooks/usePager";
 
 const meta: Meta = {
   title: "Pager",
@@ -9,11 +10,17 @@ const meta: Meta = {
 };
 export default meta;
 
-const Template: Story<ComponentProps<typeof Pager>> = (args) => (
-  <Pager {...args} />
-);
+export const WithUsePager: Story<ComponentProps<typeof Pager>> = () => {
+  const pager = usePager({ initialCurrentPage: 1, initialNumberOfPages: 7 });
 
-export const Default = Template.bind({});
-Default.args = {
-  numberOfPages: 5,
+  return (
+    <Pager
+      currentPage={pager.currentPage}
+      numberOfPages={pager.numberOfPages}
+      pageDownDisabled={pager.pageDownDisabled}
+      pageUpDisabled={pager.pageUpDisabled}
+      onPageDownClick={pager.onPageDownClick}
+      onPageUpClick={pager.onPageUpClick}
+    />
+  );
 };
