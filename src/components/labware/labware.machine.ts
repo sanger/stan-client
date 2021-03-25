@@ -84,6 +84,10 @@ function createLabwareMachine({
             },
             non_empty: {
               states: {
+                /**
+                 * The event handlers in this state are the same as `{any: single}` above
+                 * EXCEPT, they will check the selected well is non-empty first. If it's not, no action is taken.
+                 */
                 single: {
                   on: {
                     SELECT_SLOT: [
@@ -97,6 +101,10 @@ function createLabwareMachine({
                   },
                 },
                 multi: {
+                  /**
+                   * The event handlers in this state are the same as `{any: multi}` above
+                   * EXCEPT, they will check the selected well is non-empty first. If it's not, no action is taken.
+                   */
                   on: {
                     SELECT_SLOT: [
                       isSelectedEmptyHandler,
@@ -118,6 +126,10 @@ function createLabwareMachine({
               states: {
                 single: {
                   on: {
+                    /**
+                     * The event handlers in this state are exactly the same as `{any: single}` above
+                     * EXCEPT, they will check the selected well is empty first. If it is, no action is taken.
+                     */
                     SELECT_SLOT: [
                       isSelectedNotEmptyHandler,
                       ...singleSelectSlotHandler,
@@ -129,6 +141,10 @@ function createLabwareMachine({
                   },
                 },
                 multi: {
+                  /**
+                   * The event handlers in this state are exactly the same as `{any: multi}` above
+                   * EXCEPT, they will check the selected well is empty first. If it is, no action is taken.
+                   */
                   on: {
                     SELECT_SLOT: [
                       isSelectedNotEmptyHandler,
@@ -176,6 +192,10 @@ const machineOptions: Partial<MachineOptions<
       "address" in e && (ctx.lastSelectedAddress = e.address);
     }),
 
+    /**
+     * Selects all slots between the `ctx.lastSelectedAddress` (if available), and the newly clicked address.
+     * Takes into account the current state (e.g. empty, non-empty) of the machine
+     */
     selectSlotsBetween: assign((ctx, e, meta) => {
       if (e.type !== "SELECT_TO_SLOT" || ctx.lastSelectedAddress == null) {
         return;
@@ -239,6 +259,9 @@ const machineOptions: Partial<MachineOptions<
 
 export default createLabwareMachine;
 
+/**
+ * Actions for choosing the next state based on the current context's `selectable` and `selectionMode` values
+ */
 const chooseState = [
   {
     cond: (ctx: LabwareMachineContext) => ctx.selectable === "none",
@@ -276,6 +299,20 @@ const chooseState = [
   },
 ];
 
+/**
+ * Event handlers with conditions for checking if a selected slot is empty or not
+ */
+const isSelectedEmptyHandler = {
+  cond: "isSelectedEmpty",
+};
+
+const isSelectedNotEmptyHandler = {
+  cond: "isSelectedNotEmpty",
+};
+
+/**
+ * Handlers for the various states of the machine ({any, empty, non_empty} and {single, multi})
+ */
 const singleSelectSlotHandler = [
   {
     cond: "isSlotSelected",
@@ -320,9 +357,3 @@ const multiCtrlSelectSlotHandler = [
     actions: ["selectSlot"],
   },
 ];
-const isSelectedEmptyHandler = {
-  cond: "isSelectedEmpty",
-};
-const isSelectedNotEmptyHandler = {
-  cond: "isSelectedNotEmpty",
-};
