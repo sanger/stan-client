@@ -37,6 +37,43 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
     [setFieldValue]
   );
 
+  const labwareBsContent = (labware: Labware) => {
+    const bss = new Set(labware.slots.flatMap(slot => slot.samples).map(sam => sam.bioState.name.toLowerCase()));
+    if (bss.has("cdna")) {
+      return {cdna:true, other:(bss.size>1)};
+    }
+    return {cdna:false, other:(bss.size>0)};
+  }
+
+  const labwareBioStateCheck = (labwares: Labware[], foundLabware: Labware) => {
+    if (foundLabware.released) {
+      return ["Labware "+foundLabware.barcode+" has already been released."];
+    }
+    if (foundLabware.destroyed) {
+      return ["Labware "+foundLabware.barcode+" has been destroyed."];
+    }
+    if (foundLabware.discarded) {
+      return ["Labware "+foundLabware.barcode+" has been discarded."];
+    }
+    const newBsContent = labwareBsContent(foundLabware);
+    if (!newBsContent.cdna && !newBsContent.other) {
+      return ["Labware "+foundLabware.barcode+" is empty."];
+    }
+    if (newBsContent.cdna && newBsContent.other) {
+      return ["Labware "+foundLabware.barcode+" contains a mix of bio states that cannot be released together."];
+    }
+    if (labwares.length > 0) {
+      const lwBsContent = labwareBsContent(labwares[0]);
+      if (newBsContent.cdna && lwBsContent.other) {
+        return ["Labware " + foundLabware.barcode + " cannot be released with the labware already scanned, because it contains cDNA."];
+      }
+      if (newBsContent.other && lwBsContent.cdna) {
+        return ["Labware " + foundLabware.barcode + " cannot be released with the labware already scanned, because it does not contain cDNA."];
+      }
+    }
+    return [];
+  };
+
   // Show a toast notification with a success message when sectioning is complete
   const isSubmitted = model.isSubmitted;
   useEffect(() => {
@@ -77,6 +114,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
                 columns.bioState(),
               ]}
               onChange={onScanPanelChange}
+              labwareCheckFunction={labwareBioStateCheck}
             />
             <FormikErrorMessage name={"barcodes"} />
           </motion.div>

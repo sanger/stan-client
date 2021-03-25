@@ -1,15 +1,15 @@
-import React, { useEffect } from "react";
-import { useMachine } from "@xstate/react";
-import { Labware, LabwareLayoutFragment } from "../../types/graphql";
+import React, {useEffect} from "react";
+import {useMachine} from "@xstate/react";
+import {Labware, LabwareLayoutFragment} from "../../types/graphql";
 import Success from "../notifications/Success";
 import Warning from "../notifications/Warning";
-import { motion } from "framer-motion";
-import { Column, Row } from "react-table";
+import {motion} from "framer-motion";
+import {Column, Row} from "react-table";
 import MutedText from "../MutedText";
 import LockIcon from "../icons/LockIcon";
 import DataTable from "../DataTable";
 import ScanInput from "../ScanInput";
-import { createLabwareMachine } from "../../lib/machines/labware/labwareMachine";
+import {createLabwareMachine} from "../../lib/machines/labware/labwareMachine";
 import RemoveButton from "../buttons/RemoveButton";
 
 /**
@@ -31,14 +31,20 @@ interface LabwareScanPanelProps {
    * Lock the table. User won't be able to scan anything in, or remove anything.
    */
   locked?: boolean;
+
+  /**
+   * A function to check for problems with new labware because it is added
+   */
+  labwareCheckFunction?: ((labwares: Labware[], foundLabware: Labware) => string[]);
 }
 
 const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({
   columns,
   onChange,
   locked = false,
+  labwareCheckFunction,
 }) => {
-  const [current, send] = useMachine(createLabwareMachine());
+  const [current, send] = useMachine(createLabwareMachine([], labwareCheckFunction));
 
   // Call onChange handler whenever labwares change
   useEffect(() => {

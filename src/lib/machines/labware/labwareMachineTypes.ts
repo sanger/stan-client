@@ -1,7 +1,7 @@
-import { ActorRef, Interpreter } from "xstate";
+import {ActorRef, Interpreter} from "xstate";
 import * as Yup from "yup";
-import { Labware, Maybe } from "../../../types/graphql";
-import { ApolloError } from "@apollo/client";
+import {Labware, Maybe} from "../../../types/graphql";
+import {ApolloError} from "@apollo/client";
 
 export type LabwareMachineType = Interpreter<
   LabwareContext,
@@ -25,6 +25,7 @@ export enum State {
   LOCKED = "locked",
   VALIDATING = "validating",
   SEARCHING = "searching",
+  VALIDATING_FOUND_LABWARE = "validatingFoundLabware"
 }
 
 /**
@@ -55,6 +56,11 @@ export interface LabwareSchema {
      * Using the findLabwareByBarcode service to look up the labware
      */
     [State.SEARCHING]: {};
+
+    /**
+     * Performing validation on found labware before it is added to the table
+     */
+    [State.VALIDATING_FOUND_LABWARE]: {};
   };
 }
 
@@ -68,6 +74,11 @@ export interface LabwareContext {
   currentBarcode: string;
 
   /**
+   * The labware loaded from a scanned barcode
+   */
+  foundLabware: Maybe<Labware>;
+
+  /**
    * The list of sourceLabwares fetched so far
    */
   labwares: Labware[];
@@ -76,6 +87,14 @@ export interface LabwareContext {
    * A {@link https://github.com/jquense/yup#string Yup string schema} to validate the barcode on submission
    */
   validator: Yup.StringSchema;
+
+  /**
+   * A function that checks if the given item of found labware may be added to the given existing labware
+   * @param labwares the labware already entered
+   * @param foundLabware the new labware to be entered
+   * @return a list of any problems identified
+   */
+  foundLabwareCheck: (labwares: Labware[], foundLabware: Labware) => string[];
 
   /**
    * The current success message
@@ -136,6 +155,16 @@ type FindLabwareErrorEvent = {
   data: ApolloError;
 };
 
+type AddFoundLabwareEvent = {
+  type: "done.invoke.validateFoundLabware";
+  data: Labware;
+}
+
+type FoundLabwareCheckErrorEvent = {
+  type: "error.platform.validateFoundLabware";
+  data: string[];
+}
+
 /**
  * All the Events for {@link labwareMachine}
  */
@@ -147,4 +176,6 @@ export type LabwareEvents =
   | UnlockEvent
   | ValidationErrorEvent
   | FindLabwareDoneEvent
-  | FindLabwareErrorEvent;
+  | FindLabwareErrorEvent
+  | AddFoundLabwareEvent
+  | FoundLabwareCheckErrorEvent;
