@@ -98,6 +98,9 @@ export function buildLabwareFragment(labware: Labware): LabwareLayoutFragment {
     __typename: "Labware",
     id: labware.id,
     barcode: labware.barcode,
+    destroyed: labware.destroyed,
+    discarded: labware.discarded,
+    released: labware.released,
     labwareType: {
       __typename: "LabwareType",
       name: labware.labwareType.name,
@@ -111,6 +114,10 @@ export function buildLabwareFragment(labware: Labware): LabwareLayoutFragment {
       labwareId: slot.labwareId,
       samples: slot.samples.map((sample) => ({
         id: sample.id,
+        bioState: {
+          __typename: "BioState",
+          name: sample.bioState.name,
+        },
         tissue: {
           donor: {
             donorName: sample.tissue.donor.donorName,

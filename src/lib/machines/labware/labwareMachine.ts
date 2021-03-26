@@ -73,7 +73,7 @@ export const labwareMachineOptions: Partial<MachineOptions<
       if (e.type !== "done.invoke.findLabware") {
         return;
       }
-      ctx.foundLabware = e.data
+      ctx.foundLabware = e.data;
       ctx.currentBarcode = "";
     }),
 
@@ -116,14 +116,16 @@ export const labwareMachineOptions: Partial<MachineOptions<
       ctx.validator.validate(ctx.currentBarcode),
     [Services.VALIDATE_FOUND_LABWARE]: (ctx: LabwareContext) => {
       return new Promise((resolve, reject) => {
-        const problems = ctx.foundLabware ? ctx.foundLabwareCheck(ctx.labwares, ctx.foundLabware) : ["Labware not loaded."];
+        const problems = ctx.foundLabware
+          ? ctx.foundLabwareCheck(ctx.labwares, ctx.foundLabware)
+          : ["Labware not loaded."];
         if (problems.length === 0) {
           resolve(ctx.foundLabware);
         } else {
           reject(problems);
         }
       });
-    }
+    },
   },
 };
 
@@ -143,14 +145,20 @@ export const labwareMachineOptions: Partial<MachineOptions<
  *   Object.assign({}, labwareMachine.context, { validator: Yup.string().min(3).required("Barcode is required") })
  * )
  */
-export const createLabwareMachine = (labwares: LabwareLayoutFragment[] = [], foundLabwareCheck?: ((labwares: LabwareLayoutFragment[], foundLabware: LabwareLayoutFragment) => string[])) =>
+export const createLabwareMachine = (
+  labwares: LabwareLayoutFragment[] = [],
+  foundLabwareCheck?: (
+    labwares: LabwareLayoutFragment[],
+    foundLabware: LabwareLayoutFragment
+  ) => string[]
+) =>
   Machine<LabwareContext, LabwareSchema, LabwareEvents>(
     {
       context: {
         currentBarcode: "",
         foundLabware: null,
         labwares,
-        foundLabwareCheck: (foundLabwareCheck ?? (() => [])),
+        foundLabwareCheck: foundLabwareCheck ?? (() => []),
         validator: Yup.string().trim().required("Barcode is required"),
         successMessage: null,
         errorMessage: null,
@@ -230,9 +238,9 @@ export const createLabwareMachine = (labwares: LabwareLayoutFragment[] = [], fou
             onError: {
               target: State.ERROR_FQ,
               actions: [Actions.FOUND_LABWARE_CHECK_ERROR],
-            }
-          }
-        }
+            },
+          },
+        },
       },
     },
     labwareMachineOptions

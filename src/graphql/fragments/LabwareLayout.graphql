@@ -1,6 +1,9 @@
 fragment LabwareLayout on Labware {
     id
     barcode
+    destroyed
+    discarded
+    released
     labwareType {
         ...LabwareTypeFields
     }
