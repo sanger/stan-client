@@ -21,7 +21,7 @@ type PageParams = {
  */
 const ToastSuccess = () => <Success message={"Slots copied"} />;
 
-function SlotMapperPage({ title, initialOutputLabware, model }: PageParams) {
+function SlotCopy({ title, initialOutputLabware, model }: PageParams) {
   /**
    * When we get into the "copied" state, show a success message
    */
@@ -86,4 +86,4 @@ function SlotMapperPage({ title, initialOutputLabware, model }: PageParams) {
   );
 }
 
-export default SlotMapperPage;
+export default SlotCopy;

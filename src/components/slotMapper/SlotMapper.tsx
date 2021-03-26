@@ -3,7 +3,7 @@ import Labware, { LabwareImperativeRef } from "../labware/Labware";
 import Pager from "../pagination/Pager";
 import slotMapperMachine from "./slotMapper.machine";
 import { SlotMapperProps } from "./slotMapper.types";
-import { usePresentationModel } from "../../lib/hooks";
+import { usePresentationModel, usePrevious } from "../../lib/hooks";
 import SlotMapperPresentationModel from "./SlotMapperPresentationModel";
 import WhiteButton from "../buttons/WhiteButton";
 import LabwareScanner from "../labwareScanner/LabwareScanner";
@@ -103,11 +103,14 @@ function SlotMapper({
   }, [numberOfInputLabware, setNumberOfPages]);
 
   /**
-   * Whenever the number of input labwares changes, go to the last page
+   * Whenever the number of input labwares increases, go to the last page
    */
+  const previousLength = usePrevious(inputLabware.length);
   useEffect(() => {
-    goToLastPage();
-  }, [inputLabware.length, goToLastPage]);
+    if (previousLength && inputLabware.length > previousLength) {
+      goToLastPage();
+    }
+  }, [inputLabware.length, goToLastPage, previousLength]);
 
   /**
    * Whenever the current page changes, set the current input labware
