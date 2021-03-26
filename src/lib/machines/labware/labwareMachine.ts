@@ -1,4 +1,4 @@
-import {Machine, MachineOptions} from "xstate";
+import { Machine, MachineOptions } from "xstate";
 import * as Yup from "yup";
 import { LabwareLayoutFragment } from "../../../types/graphql";
 import {
