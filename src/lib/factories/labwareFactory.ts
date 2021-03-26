@@ -39,6 +39,9 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
       id: params.id ?? -1,
       barcode: params.barcode ?? null,
       slots: associations.slots ?? [],
+      destroyed: params.destroyed ?? false,
+      discarded: params.discarded ?? false,
+      released: params.released ?? false,
     };
   }
 );

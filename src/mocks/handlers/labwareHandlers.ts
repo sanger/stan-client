@@ -2,7 +2,6 @@ import { graphql } from "msw";
 import {
   FindLabwareQuery,
   FindLabwareQueryVariables,
-  LifeStage,
 } from "../../types/graphql";
 import labwareFactory from "../../lib/factories/labwareFactory";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";

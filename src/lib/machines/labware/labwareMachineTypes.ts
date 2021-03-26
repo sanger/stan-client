@@ -25,7 +25,7 @@ export enum State {
   LOCKED = "locked",
   VALIDATING = "validating",
   SEARCHING = "searching",
-  VALIDATING_FOUND_LABWARE = "validatingFoundLabware"
+  VALIDATING_FOUND_LABWARE = "validatingFoundLabware",
 }
 
 /**
@@ -94,7 +94,10 @@ export interface LabwareContext {
    * @param foundLabware the new labware to be entered
    * @return a list of any problems identified
    */
-  foundLabwareCheck: (labwares: LabwareLayoutFragment[], foundLabware: LabwareLayoutFragment) => string[];
+  foundLabwareCheck: (
+    labwares: LabwareLayoutFragment[],
+    foundLabware: LabwareLayoutFragment
+  ) => string[];
 
   /**
    * The current success message
@@ -147,7 +150,7 @@ type ValidationErrorEvent = {
 
 type FindLabwareDoneEvent = {
   type: "done.invoke.findLabware";
-  data: Labware;
+  data: LabwareLayoutFragment;
 };
 
 type FindLabwareErrorEvent = {
@@ -158,12 +161,12 @@ type FindLabwareErrorEvent = {
 type AddFoundLabwareEvent = {
   type: "done.invoke.validateFoundLabware";
   data: LabwareLayoutFragment;
-}
+};
 
 type FoundLabwareCheckErrorEvent = {
   type: "error.platform.validateFoundLabware";
   data: string[];
-}
+};
 
 /**
  * All the Events for {@link labwareMachine}

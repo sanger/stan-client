@@ -39,37 +39,58 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
   );
 
   const labwareBsContent = (labware: LabwareLayoutFragment) => {
-    const bss = new Set(labware.slots.flatMap(slot => slot.samples).map(sam => sam.bioState.name.toLowerCase()));
+    const bss = new Set(
+      labware.slots
+        .flatMap((slot) => slot.samples)
+        .map((sam) => sam.bioState.name.toLowerCase())
+    );
     if (bss.has("cdna")) {
-      return {cdna:true, other:(bss.size>1)};
+      return { cdna: true, other: bss.size > 1 };
     }
-    return {cdna:false, other:(bss.size>0)};
-  }
+    return { cdna: false, other: bss.size > 0 };
+  };
 
-  const labwareBioStateCheck = (labwares: LabwareLayoutFragment[], foundLabware: LabwareLayoutFragment) => {
+  const labwareBioStateCheck = (
+    labwares: LabwareLayoutFragment[],
+    foundLabware: LabwareLayoutFragment
+  ) => {
     if (foundLabware.released) {
-      return ["Labware "+foundLabware.barcode+" has already been released."];
+      return [
+        "Labware " + foundLabware.barcode + " has already been released.",
+      ];
     }
     if (foundLabware.destroyed) {
-      return ["Labware "+foundLabware.barcode+" has been destroyed."];
+      return ["Labware " + foundLabware.barcode + " has been destroyed."];
     }
     if (foundLabware.discarded) {
-      return ["Labware "+foundLabware.barcode+" has been discarded."];
+      return ["Labware " + foundLabware.barcode + " has been discarded."];
     }
     const newBsContent = labwareBsContent(foundLabware);
     if (!newBsContent.cdna && !newBsContent.other) {
-      return ["Labware "+foundLabware.barcode+" is empty."];
+      return ["Labware " + foundLabware.barcode + " is empty."];
     }
     if (newBsContent.cdna && newBsContent.other) {
-      return ["Labware "+foundLabware.barcode+" contains a mix of bio states that cannot be released together."];
+      return [
+        "Labware " +
+          foundLabware.barcode +
+          " contains a mix of bio states that cannot be released together.",
+      ];
     }
     if (labwares.length > 0) {
       const lwBsContent = labwareBsContent(labwares[0]);
       if (newBsContent.cdna && lwBsContent.other) {
-        return ["Labware " + foundLabware.barcode + " cannot be released with the labware already scanned, because it contains cDNA."];
+        return [
+          "Labware " +
+            foundLabware.barcode +
+            " cannot be released with the labware already scanned, because it contains cDNA.",
+        ];
       }
       if (newBsContent.other && lwBsContent.cdna) {
-        return ["Labware " + foundLabware.barcode + " cannot be released with the labware already scanned, because it does not contain cDNA."];
+        return [
+          "Labware " +
+            foundLabware.barcode +
+            " cannot be released with the labware already scanned, because it does not contain cDNA.",
+        ];
       }
     }
     return [];
@@ -108,6 +129,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
             <LabwareScanner
               onChange={onScanPanelChange}
               locked={model.formLocked}
+              labwareCheckFunction={labwareBioStateCheck}
             >
               <LabwareScanPanel
                 columns={[

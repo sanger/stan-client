@@ -1,6 +1,5 @@
+import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
-import {gql} from '@apollo/client';
-
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -607,7 +606,7 @@ export type MutationSetLocationCustomNameArgs = {
 
 export type LabwareLayoutFragment = (
   { __typename?: 'Labware' }
-  & Pick<Labware, 'id' | 'barcode'>
+  & Pick<Labware, 'id' | 'barcode' | 'destroyed' | 'discarded' | 'released'>
   & { labwareType: (
     { __typename?: 'LabwareType' }
     & LabwareTypeFieldsFragment
@@ -661,6 +660,9 @@ export type SampleFieldsFragment = (
         & Pick<TissueType, 'name'>
       ) }
     ) }
+  ), bioState: (
+    { __typename?: 'BioState' }
+    & Pick<BioState, 'name'>
   ) }
 );
 
@@ -1204,6 +1206,9 @@ export const SampleFieldsFragmentDoc = gql`
     }
     replicate
   }
+  bioState {
+    name
+  }
 }
     `;
 export const SlotFieldsFragmentDoc = gql`
@@ -1219,6 +1224,9 @@ export const LabwareLayoutFragmentDoc = gql`
     fragment LabwareLayout on Labware {
   id
   barcode
+  destroyed
+  discarded
+  released
   labwareType {
     ...LabwareTypeFields
   }

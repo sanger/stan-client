@@ -13,4 +13,7 @@ fragment SampleFields on Sample {
         }
         replicate
     }
+    bioState {
+        name
+    }
 }

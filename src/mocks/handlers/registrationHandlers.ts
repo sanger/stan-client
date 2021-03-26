@@ -1,5 +1,5 @@
-import {graphql} from "msw";
-import {uniqueId} from "lodash";
+import { graphql } from "msw";
+import { uniqueId } from "lodash";
 import {
   GetRegistrationInfoQuery,
   GetRegistrationInfoQueryVariables,
@@ -125,6 +125,9 @@ const registrationHandlers = [
               {
                 id: 1,
                 barcode: "LW_BC_1",
+                released: false,
+                discarded: false,
+                destroyed: false,
                 labwareType: {
                   name: "Proviasette",
                   numRows: 1,
@@ -176,6 +179,9 @@ const registrationHandlers = [
               let labwareId = parseInt(uniqueId());
               return {
                 id: labwareId,
+                released: false,
+                discarded: false,
+                destroyed: false,
                 labwareType: {
                   name: labware.labwareType,
                   // numRows and numColumns not correct but don't need to be for this particular mock
@@ -202,7 +208,7 @@ const registrationHandlers = [
                           donorName: content.donorIdentifier,
                         },
                       },
-                      bioState: { name:"Tissue" }
+                      bioState: { name: "Tissue" },
                     },
                   ],
                 })),

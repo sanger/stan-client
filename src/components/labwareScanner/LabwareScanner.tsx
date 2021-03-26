@@ -11,6 +11,15 @@ type LabwareScannerProps = {
   initialLabwares?: LabwareLayoutFragment[];
 
   locked?: boolean;
+
+  /**
+   * A function to check for problems with new labware because it is added
+   */
+  labwareCheckFunction?: (
+    labwares: LabwareLayoutFragment[],
+    foundLabware: LabwareLayoutFragment
+  ) => string[];
+
   /**
    * Called when labware is added or removed
    * @param labwares the list of current labwares
@@ -29,11 +38,12 @@ type LabwareScannerProps = {
 export default function LabwareScanner({
   initialLabwares = [],
   locked = false,
+  labwareCheckFunction,
   onChange,
   children,
 }: LabwareScannerProps) {
   const [current, send] = useMachine(
-    createLabwareMachine({ labwares: initialLabwares })
+    createLabwareMachine(initialLabwares, labwareCheckFunction)
   );
   const {
     labwares,
