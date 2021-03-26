@@ -1,4 +1,10 @@
-import React, { RefObject, useEffect, useRef, useState } from "react";
+import React, {
+  MutableRefObject,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { MachinePresentationModel } from "../presentationModels/machinePresentationModel";
 import { EventObject, Interpreter, State, StateMachine } from "xstate";
 import { useMachine } from "@xstate/react";
@@ -231,4 +237,17 @@ export function usePrinters() {
     currentPrinter,
     printResult,
   };
+}
+
+/**
+ * Hook for tracking the previous value of state or props
+ */
+export function usePrevious<T>(
+  value: T
+): MutableRefObject<T | undefined>["current"] {
+  const ref = useRef<T>();
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref.current;
 }
