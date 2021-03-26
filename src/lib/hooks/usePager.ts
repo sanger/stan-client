@@ -43,8 +43,8 @@ export function usePager({
     );
   }, [initialCurrentPage, initialNumberOfPages]);
 
-  const pagerMachine = useMemo(() => {
-    return createMachine<typeof pagerModel>({
+  const [current, send] = useMachine(() =>
+    createMachine<typeof pagerModel>({
       context: pagerModel.initialContext,
       initial: "paging",
       states: {
@@ -80,10 +80,9 @@ export function usePager({
           },
         },
       },
-    });
-  }, [pagerModel]);
+    })
+  );
 
-  const [current, send] = useMachine(pagerMachine);
   const { currentPage, numberOfPages } = current.context;
 
   const callbacks = useMemo(() => {
