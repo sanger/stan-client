@@ -39,7 +39,7 @@ export function Slot({
       "transition duration-150 ease-in-out cursor-pointer": onClick,
       "hover:bg-gray-200": onClick && !bgColor,
       [`hover:bg-${brightenColor(bgColor)}`]: onClick && bgColor,
-      [`bg-${bgColor} text-gray-100`]: bgColor,
+      [`${bgColor} text-gray-100`]: bgColor,
       "bg-gray-100 text-gray-800": !bgColor,
       "ring ring-pink-600 ring-offset-2": selected,
       "border border-gray-800": !selected,
