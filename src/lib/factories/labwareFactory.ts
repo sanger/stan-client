@@ -3,7 +3,7 @@ import { GridDirection, Labware } from "../../types/graphql";
 import { labwareTypes } from "./labwareTypeFactory";
 import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
 import { uniqueId } from "lodash";
-import { genAddresses } from "../helpers";
+import { buildAddresses } from "../helpers";
 import { slotFactory } from "./slotFactory";
 
 export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
@@ -13,8 +13,9 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
         return;
       }
 
-      const addresses = Array.from(
-        genAddresses(labware.labwareType, GridDirection.RightDown)
+      const addresses = buildAddresses(
+        labware.labwareType,
+        GridDirection.RightDown
       );
 
       labware.slots = addresses.map((address) =>
