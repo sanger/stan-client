@@ -59,11 +59,11 @@ class SlotMapperPresentationModel extends MachinePresentationModel<
         sourceAddress: address,
       })
     ) {
-      return `${this.colorByBarcode(labware.barcode)}-200`;
+      return `bg-${this.colorByBarcode(labware.barcode)}-200`;
     }
 
     if (slot?.samples?.length) {
-      return `${this.colorByBarcode(labware.barcode)}-500`;
+      return `bg-${this.colorByBarcode(labware.barcode)}-500`;
     }
   }
 
@@ -73,7 +73,7 @@ class SlotMapperPresentationModel extends MachinePresentationModel<
     });
 
     if (scc) {
-      return `${this.colorByBarcode(scc.sourceBarcode)}-500`;
+      return `bg-${this.colorByBarcode(scc.sourceBarcode)}-500`;
     }
   }
 

@@ -13,6 +13,8 @@ import {
   emptySlots,
   filledSlots,
   findSlotByAddress,
+  isSlotEmpty,
+  isSlotFilled,
 } from "../../lib/helpers/slotHelper";
 import { sortDownRight } from "../../lib/helpers/labwareHelper";
 
@@ -210,10 +212,14 @@ const machineOptions: Partial<MachineOptions<
       const lastSelectedAddressIndex = sortedSlots.findIndex(
         (slot) => slot.address === ctx.lastSelectedAddress
       );
+
       const [startSlotIndex, endSlotIndex] = [
         selectedAddressIndex,
         lastSelectedAddressIndex,
-      ].sort();
+        // The default JS sort is stupid, as it converts values to strings, and compares them lexicographically.
+        // e.g. you end up with nonsense like 9 > 80.
+        //  To compare numbers, we must provide our own comparator.
+      ].sort((a, b) => a - b);
 
       let selectedSlots = sortedSlots.slice(startSlotIndex, endSlotIndex + 1);
 
@@ -237,15 +243,13 @@ const machineOptions: Partial<MachineOptions<
   guards: {
     isSelectedEmpty: (ctx, e) => {
       return (
-        "address" in e &&
-        findSlotByAddress(ctx.slots, e.address).samples.length === 0
+        "address" in e && isSlotEmpty(findSlotByAddress(ctx.slots, e.address))
       );
     },
 
     isSelectedNotEmpty: (ctx, e) => {
       return (
-        "address" in e &&
-        findSlotByAddress(ctx.slots, e.address).samples.length >= 0
+        "address" in e && isSlotFilled(findSlotByAddress(ctx.slots, e.address))
       );
     },
 

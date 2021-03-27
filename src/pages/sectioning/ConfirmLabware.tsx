@@ -72,7 +72,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
             slotColor={(address) => {
               const action = layoutPlan.plannedActions.get(address);
               if (action) {
-                return `${layoutPlan.sampleColors.get(action.sampleId)}-600`;
+                return `bg-${layoutPlan.sampleColors.get(action.sampleId)}-600`;
               }
             }}
           />

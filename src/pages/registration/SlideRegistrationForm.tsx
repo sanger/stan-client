@@ -112,10 +112,10 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
                   }}
                   slotColor={(address) => {
                     if (address === currentSlotAddress) {
-                      return "sp-500";
+                      return "bg-sp-500";
                     }
                     if (currentOccupiedSlots.includes(address)) {
-                      return "sdb-200";
+                      return "bg-sdb-200";
                     }
                   }}
                   onSlotClick={handleOnSlotClick}
