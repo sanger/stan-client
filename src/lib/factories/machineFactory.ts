@@ -24,7 +24,7 @@ import {
   LocationMachine,
   StoredItemFragment,
 } from "../machines/locations/locationMachineTypes";
-import { genAddresses } from "../helpers";
+import { buildAddresses } from "../helpers";
 import { ReleaseMachine } from "../machines/release/releaseMachineTypes";
 import createReleaseMachine from "../machines/release/releaseMachine";
 import { LabelPrinterMachine } from "../machines/labelPrinter/labelPrinterMachineTypes";
@@ -99,9 +99,10 @@ export function buildLocationMachine(
   locationSearchParams: Maybe<LocationSearchParams> | undefined
 ): LocationMachine {
   // Create all the possible addresses for this location if it has a size.
-  const locationAddresses = location.size
-    ? Array.from(genAddresses(location.size, location.direction!))
-    : [];
+  const locationAddresses =
+    location.size && location.direction
+      ? buildAddresses(location.size, location.direction)
+      : [];
 
   // Create a map of location addresses to items (or null if empty)
   const addressToItemMap = new Map<string, Maybe<StoredItemFragment>>(

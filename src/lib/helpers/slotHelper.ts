@@ -11,7 +11,11 @@ export function findSlotByAddress(
 ): SlotFieldsFragment {
   const slot = maybeFindSlotByAddress(slots, address);
   if (slot == null) {
-    throw new Error(`No slot could be found with address: ${address}`);
+    throw new Error(
+      `Address ${address} could not be found in slots: ${slots.map(
+        (slot) => slot.address
+      )}`
+    );
   }
   return slot;
 }

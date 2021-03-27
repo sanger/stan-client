@@ -2,7 +2,7 @@ import React, { useEffect, useImperativeHandle } from "react";
 import classNames from "classnames";
 import BarcodeIcon from "../icons/BarcodeIcon";
 import { Slot } from "./Slot";
-import { genAddresses } from "../../lib/helpers";
+import { buildAddresses } from "../../lib/helpers";
 import _ from "lodash";
 import { LabwareLayoutFragment, SlotFieldsFragment } from "../../types/graphql";
 import createLabwareMachine from "./labware.machine";
@@ -158,7 +158,7 @@ const Labware = ({
   return (
     <div onClick={() => onClick?.()} className={labwareClasses}>
       <div className={gridClasses}>
-        {Array.from(genAddresses({ numColumns, numRows })).map((address, i) => (
+        {buildAddresses({ numColumns, numRows }).map((address, i) => (
           <Slot
             key={i}
             address={address}

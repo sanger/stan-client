@@ -6,7 +6,7 @@ import {
 } from "./slotMapper.types";
 import { assign } from "@xstate/immer";
 import { GridDirection, SlotCopyContent } from "../../types/graphql";
-import { cycleColors, genAddresses } from "../../lib/helpers";
+import { buildAddresses, cycleColors } from "../../lib/helpers";
 import { sortWithDirection } from "../../lib/helpers/addressHelper";
 import { find, indexOf, intersection, map } from "lodash";
 
@@ -60,8 +60,9 @@ const machineConfig: Partial<MachineOptions<
       }
 
       // Get all the addresses of the output labware
-      const outputAddresses = Array.from(
-        genAddresses(outputLabware.labwareType, GridDirection.DownRight)
+      const outputAddresses = buildAddresses(
+        outputLabware.labwareType,
+        GridDirection.DownRight
       );
 
       // Get the index of the clicked destination address
