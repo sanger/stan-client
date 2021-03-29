@@ -137,6 +137,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
                   columns.donorId(),
                   columns.labwareType(),
                   columns.externalName(),
+                  columns.bioState(),
                 ]}
               />
             </LabwareScanner>

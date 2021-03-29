@@ -81,6 +81,7 @@ const planHandlers = [
             plan: {
               labware: plan.labware,
               operations: plan.operations,
+              __typename: "PlanResult",
             },
           })
         );
