@@ -36,8 +36,3 @@ jobs:
         uses: actions/upload-artifact@v2.1.4
         with:
           path: client
-
-      - run: yarn deploy-storybook -- --ci --host-token-env-variable=GITHUB_TOKEN
-          
-      
-        
