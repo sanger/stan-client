@@ -43,13 +43,11 @@ interface SelectProps
   emptyOption?: boolean;
 }
 
-export const Select: React.FC<SelectProps> = ({
-  children,
-  emptyOption = false,
-  ...props
-}) => (
-  <select className={defaultClassNames} {...props}>
-    {emptyOption && <option value="" />}
-    {children}
-  </select>
+export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
+  ({ children, emptyOption = false, ...props }, ref) => (
+    <select ref={ref} className={defaultClassNames} {...props}>
+      {emptyOption && <option value="" />}
+      {children}
+    </select>
+  )
 );

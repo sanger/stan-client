@@ -7,12 +7,12 @@ import {
   PlanRequestAction,
   Size,
 } from "./graphql";
-import { ApolloError } from "@apollo/client";
+import {ApolloError} from "@apollo/client";
 
 /**
  * Union of STAN's {@link OperationType} names
  */
-export type OperationTypeName = "Section";
+export type OperationTypeName = "Section" | "Visium cDNA";
 
 /**
  * Enum for all of STAN's {@link LabwareType} names
@@ -23,6 +23,7 @@ export enum LabwareTypeName {
   VISIUM_LP = "Visium LP",
   VISIUM_TO = "Visium TO",
   SLIDE = "Slide",
+  PLATE = "96 well plate",
 }
 
 export type Address = string;
@@ -62,7 +63,7 @@ export function extractServerErrors(e: ApolloError): ServerErrors {
   return {
     message: matchArray !== null ? matchArray[1] : null,
     problems: e.graphQLErrors.reduce<string[]>(
-      (memo, graphQLError, index, original) => {
+      (memo, graphQLError, _index, _original) => {
         if (!graphQLError.extensions?.hasOwnProperty("problems")) {
           return memo;
         }
@@ -165,3 +166,11 @@ export type MachineServiceError<T extends string> = {
   type: `error.platform.${T}`;
   data: ApolloError;
 };
+
+/**
+ * An object with an `address` e.g. a Slot
+ */
+export interface Addressable {
+  address: string;
+  [key: string]: any;
+}

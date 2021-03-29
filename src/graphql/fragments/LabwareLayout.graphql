@@ -1,32 +1,13 @@
 fragment LabwareLayout on Labware {
     id
     barcode
+    destroyed
+    discarded
+    released
     labwareType {
-        name
-        numRows
-        numColumns
-        labelType {
-            name
-        }
+        ...LabwareTypeFields
     }
     slots {
-        address
-        labwareId
-        samples {
-            id
-            tissue {
-                donor {
-                    donorName
-                }
-                externalName
-                spatialLocation {
-                    tissueType {
-                        name
-                    }
-                    code
-                }
-                replicate
-            }
-        }
+        ...SlotFields
     }
 }

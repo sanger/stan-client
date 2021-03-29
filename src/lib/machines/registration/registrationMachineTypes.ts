@@ -3,8 +3,7 @@ import {
   RegisterTissuesMutation,
   RegisterTissuesMutationResult,
 } from "../../../types/graphql";
-import * as Yup from "yup";
-import { LabwareTypeName, ServerErrors } from "../../../types/stan";
+import { ServerErrors } from "../../../types/stan";
 import { ApolloError } from "@apollo/client";
 import { FormValues } from "../../services/registrationService";
 import { Interpreter, State, StateNode } from "xstate";
@@ -25,6 +24,8 @@ export interface RegistrationSchema {
   states: {
     ready: {};
     submitting: {};
+    checkSubmissionClashes: {};
+    clashed: {};
     submissionError: {};
     complete: {};
   };
@@ -38,13 +39,19 @@ export type RegistrationState = State<
 
 export interface RegistrationContext {
   registrationInfo: GetRegistrationInfoQuery;
-  availableLabwareTypes: LabwareTypeName[];
-  registrationSchema: Yup.ObjectSchema;
   registrationResult: RegisterTissuesMutation;
   registrationErrors: ServerErrors;
+  confirmedTissues: Array<string>;
 }
 
-type SubmitFormEvent = { type: "SUBMIT_FORM"; values: FormValues };
+type SubmitFormEvent = {
+  type: "SUBMIT_FORM";
+  values: FormValues;
+};
+
+type EditSubmissionEvent = {
+  type: "EDIT_SUBMISSION";
+};
 
 type SubmittingDoneEvent = {
   type: "done.invoke.submitting";
@@ -58,5 +65,6 @@ type SubmittingErrorEvent = {
 
 export type RegistrationEvent =
   | SubmitFormEvent
+  | EditSubmissionEvent
   | SubmittingDoneEvent
   | SubmittingErrorEvent;

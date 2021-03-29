@@ -1,0 +1,8 @@
+fragment LabwareTypeFields on LabwareType {
+    name
+    numRows
+    numColumns
+    labelType {
+        name
+    }
+}

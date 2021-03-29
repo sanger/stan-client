@@ -6,11 +6,13 @@ import { LabwareContext } from "../../../src/lib/machines/labware";
 
 describe("labwareMachine", () => {
   it("has an initial state of idle.normal", (done) => {
-    const machine = interpret(createLabwareMachine()).onTransition((state) => {
-      if (state.matches("idle.normal")) {
-        done();
+    const machine = interpret(createLabwareMachine({})).onTransition(
+      (state) => {
+        if (state.matches("idle.normal")) {
+          done();
+        }
       }
-    });
+    );
     machine.start();
   });
 
@@ -50,7 +52,7 @@ describe("labwareMachine", () => {
             (state) => {
               if (state.matches("idle.error")) {
                 expect(state.context.errorMessage).to.eq(
-                  '"STAN-123" is already in the table'
+                  '"STAN-123" has already been scanned'
                 );
                 done();
               }

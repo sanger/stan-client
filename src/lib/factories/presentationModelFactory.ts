@@ -33,6 +33,16 @@ import {
   DestroyState,
 } from "../machines/destroy/destroyMachineTypes";
 import DestroyPresentationModel from "../presentationModels/destroyPresentationModel";
+import {
+  SlideRegistrationMachineService,
+  SlideRegistrationState,
+} from "../machines/slideRegistration/slideRegistrationMachineTypes";
+import SlideRegistrationPresentationModel from "../presentationModels/slideRegistrationPresentationModel";
+import {
+  SlotCopyMachineService,
+  SlotCopyState,
+} from "../machines/slotCopy/slotCopyMachineTypes";
+import SlotCopyPresentationModel from "../presentationModels/slotCopyPresentationModel";
 // HYGEN MARKER
 
 export function buildReleasePresentationModel(
@@ -47,6 +57,13 @@ export function buildRegistrationPresentationModel(
   service: RegistrationMachineService
 ) {
   return new RegistrationPresentationModel(current, service);
+}
+
+export function buildSlideRegistrationPresentationModel(
+  current: SlideRegistrationState,
+  service: SlideRegistrationMachineService
+) {
+  return new SlideRegistrationPresentationModel(current, service);
 }
 
 export function buildSectioningModel(
@@ -79,4 +96,10 @@ export function buildDestroyPresentationModel(
   service: DestroyMachineService
 ): DestroyPresentationModel {
   return new DestroyPresentationModel(current, service);
+}
+export function buildSlotCopyPresentationModel(
+  current: SlotCopyState,
+  service: SlotCopyMachineService
+): SlotCopyPresentationModel {
+  return new SlotCopyPresentationModel(current, service);
 }

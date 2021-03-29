@@ -2,7 +2,10 @@ import React, { useEffect } from "react";
 import { Route, Switch } from "react-router-dom";
 import AuthenticatedRoute from "./AuthenticatedRoute";
 import Login from "../pages/Login";
-import { getRegistrationMachine } from "../lib/services/registrationService";
+import {
+  getRegistrationMachine,
+  getSlideRegistrationMachine,
+} from "../lib/services/registrationService";
 import { getSectioningMachine } from "../lib/services/sectioningService";
 import Presenter from "./Presenter";
 import {
@@ -13,6 +16,8 @@ import {
   buildReleasePresentationModel,
   buildSearchPresentationModel,
   buildSectioningModel,
+  buildSlideRegistrationPresentationModel,
+  buildSlotCopyPresentationModel,
 } from "../lib/factories/presentationModelFactory";
 import { getLocationMachine } from "../lib/services/locationService";
 import LocationPresentationModel from "../lib/presentationModels/locationPresentationModel";
@@ -29,7 +34,10 @@ import Release from "../pages/Release";
 import Store from "../pages/Store";
 import Search from "../pages/Search";
 import Destroy from "../pages/Destroy";
-
+import SlideRegistration from "../pages/SlideRegistration";
+import SlotCopy from "../pages/SlotCopy";
+import { plateFactory } from "../lib/factories/labwareFactory";
+import { getVisiumCDNAMachine } from "../lib/services/slotCopyService";
 //HYGEN MARKER
 
 export function Routes() {
@@ -60,6 +68,25 @@ export function Routes() {
         </Presenter>
       </AuthenticatedRoute>
 
+      <AuthenticatedRoute path="/lab/visium_cdna">
+        <Presenter
+          machine={getVisiumCDNAMachine}
+          model={buildSlotCopyPresentationModel}
+        >
+          {(presentationModel) => {
+            const initialOutputLabware = [plateFactory.build()];
+
+            return (
+              <SlotCopy
+                title={"Visium cDNA"}
+                initialOutputLabware={initialOutputLabware}
+                model={presentationModel}
+              />
+            );
+          }}
+        </Presenter>
+      </AuthenticatedRoute>
+
       <AuthenticatedRoute path="/admin/registration">
         <Presenter
           machine={getRegistrationMachine}
@@ -68,6 +95,18 @@ export function Routes() {
           {(presentationModel) => <Registration model={presentationModel} />}
         </Presenter>
       </AuthenticatedRoute>
+
+      <AuthenticatedRoute path="/admin/slide_registration">
+        <Presenter
+          machine={getSlideRegistrationMachine}
+          model={buildSlideRegistrationPresentationModel}
+        >
+          {(presentationModel) => (
+            <SlideRegistration model={presentationModel} />
+          )}
+        </Presenter>
+      </AuthenticatedRoute>
+
       <AuthenticatedRoute path="/admin/release">
         <Presenter
           machine={getReleaseMachine}

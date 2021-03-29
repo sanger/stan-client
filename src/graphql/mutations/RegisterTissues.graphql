@@ -3,5 +3,16 @@ mutation RegisterTissues($request: RegisterRequest!) {
         labware {
             ...LabwareLayout
         }
+        clashes {
+            tissue {
+                externalName
+            }
+            labware {
+                barcode
+                labwareType {
+                    name
+                }
+            }
+        }
     }
 }

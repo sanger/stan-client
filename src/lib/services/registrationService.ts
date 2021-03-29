@@ -1,15 +1,23 @@
 import {
+  BlockRegisterRequest,
   GetRegistrationInfoDocument,
   GetRegistrationInfoQuery,
   LifeStage,
+  RegisterSectionsDocument,
+  RegisterSectionsMutation,
+  RegisterSectionsMutationVariables,
   RegisterTissuesDocument,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
+  SectionRegisterRequest,
 } from "../../types/graphql";
 import client from "../client";
-import * as Yup from "yup";
-import { buildRegistrationMachine } from "../factories/machineFactory";
+import {
+  buildRegistrationMachine,
+  buildSlideRegistrationMachine,
+} from "../factories/machineFactory";
 import { RegistrationMachine } from "../machines/registration/registrationMachineTypes";
+import { SlideRegistrationMachine } from "../machines/slideRegistration/slideRegistrationMachineTypes";
 
 /**
  * Gets the information for registration, then builds a {@link RegistrationMachine} from it
@@ -17,6 +25,16 @@ import { RegistrationMachine } from "../machines/registration/registrationMachin
 export async function getRegistrationMachine(): Promise<RegistrationMachine> {
   const registrationInfo = await getRegistrationInfo();
   return buildRegistrationMachine(registrationInfo);
+}
+
+/**
+ * Gets the information for slide registration, then buidls a {@link SlideRegistrationMachine}
+ */
+export async function getSlideRegistrationMachine(): Promise<
+  SlideRegistrationMachine
+> {
+  const registrationInfo = await getRegistrationInfo();
+  return buildSlideRegistrationMachine(registrationInfo);
 }
 
 /**
@@ -44,97 +62,19 @@ export function registerTissues(
 }
 
 /**
- * Using yup to build the Registration Schema
- * @link https://github.com/jquense/yup
- * @param registrationInfo
+ * Calls the registerSections GraphQL mutation
+ * @param request variables for the registration
  */
-export function buildRegistrationSchema(
-  registrationInfo: GetRegistrationInfoQuery
-): Yup.ObjectSchema {
-  return Yup.object().shape({
-    tissues: Yup.array()
-      .min(1)
-      .of(
-        Yup.object().shape({
-          donorId: Yup.string()
-            .matches(
-              /^[a-z0-9-_]+$/i,
-              "Donor ID contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
-            )
-            .trim()
-            .required()
-            .label("Donor ID"),
-          lifeStage: Yup.string()
-            .oneOf(Object.values(LifeStage))
-            .required()
-            .label("Life Stage"),
-          species: Yup.string()
-            .oneOf(registrationInfo.species.map((s) => s.name))
-            .required()
-            .label("Species"),
-          hmdmc: Yup.string().when("species", {
-            is: "Human",
-            then: Yup.string()
-              .oneOf(registrationInfo.hmdmcs.map((h) => h.hmdmc))
-              .required()
-              .label("HMDMC"),
-            otherwise: Yup.string().length(0),
-          }),
-          tissueType: Yup.string()
-            .oneOf(registrationInfo.tissueTypes.map((tt) => tt.name))
-            .required()
-            .label("Tissue Type"),
-          blocks: Yup.array()
-            .min(1)
-            .of(
-              Yup.object().shape({
-                externalIdentifier: Yup.string()
-                  .trim()
-                  .matches(
-                    /^[a-z0-9-_]+$/i,
-                    "External Identifier contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
-                  )
-                  .required()
-                  .label("External Identifier"),
-                spatialLocation: Yup.number()
-                  .integer()
-                  .min(0)
-                  .max(6)
-                  .required()
-                  .label("Spatial Location"),
-                replicateNumber: Yup.number()
-                  .integer()
-                  .min(1)
-                  .required()
-                  .label("Replicate Number"),
-                lastKnownSectionNumber: Yup.number()
-                  .integer()
-                  .min(0)
-                  .required()
-                  .label("Last Known Section Number"),
-                labwareType: Yup.string()
-                  .oneOf(registrationInfo.labwareTypes.map((lt) => lt.name))
-                  .required()
-                  .label("Labware Type"),
-                fixative: Yup.string()
-                  .oneOf(
-                    registrationInfo.fixatives.map((fixative) => fixative.name)
-                  )
-                  .required()
-                  .label("Fixative"),
-                medium: Yup.string()
-                  .oneOf(registrationInfo.mediums.map((m) => m.name))
-                  .required()
-                  .label("Medium"),
-                mouldSize: Yup.string()
-                  .oneOf(registrationInfo.mouldSizes.map((ms) => ms.name))
-                  .required()
-                  .label("Mould Size"),
-              })
-            ),
-        })
-      ),
+export async function registerSections(request: SectionRegisterRequest) {
+  const response = await client.mutate<
+    RegisterSectionsMutation,
+    RegisterSectionsMutationVariables
+  >({
+    mutation: RegisterSectionsDocument,
+    variables: { request },
   });
+
+  return response.data;
 }
 
 export interface FormBlockValues {
@@ -187,4 +127,53 @@ export function getInitialTissueValues(): FormTissueValues {
     tissueType: "",
     blocks: [getInitialBlockValues()],
   };
+}
+
+/**
+ * Builds the registerTissue mutation variables from the FormValues
+ * @param formValues
+ * @param existingTissues list of tissue external names that the user has confirmed as pre-existing
+ * @return Promise<RegisterTissuesMutationVariables> mutation variables wrapped in a promise
+ */
+export function buildRegisterTissuesMutationVariables(
+  formValues: FormValues,
+  existingTissues: Array<string> = []
+): Promise<RegisterTissuesMutationVariables> {
+  return new Promise((resolve) => {
+    const blocks = formValues.tissues.reduce<BlockRegisterRequest[]>(
+      (memo, tissue) => {
+        return [
+          ...memo,
+          ...tissue.blocks.map<BlockRegisterRequest>((block) => {
+            const blockRegisterRequest: BlockRegisterRequest = {
+              species: tissue.species,
+              donorIdentifier: tissue.donorId,
+              externalIdentifier: block.externalIdentifier,
+              highestSection: block.lastKnownSectionNumber,
+              hmdmc: tissue.hmdmc,
+              labwareType: block.labwareType,
+              lifeStage: tissue.lifeStage,
+              tissueType: tissue.tissueType,
+              spatialLocation: block.spatialLocation,
+              replicateNumber: block.replicateNumber,
+              fixative: block.fixative,
+              medium: block.medium,
+              mouldSize: block.mouldSize,
+            };
+
+            if (
+              existingTissues.includes(blockRegisterRequest.externalIdentifier)
+            ) {
+              blockRegisterRequest.existingTissue = true;
+            }
+
+            return blockRegisterRequest;
+          }),
+        ];
+      },
+      []
+    );
+
+    resolve({ request: { blocks } });
+  });
 }

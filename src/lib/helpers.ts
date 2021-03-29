@@ -83,28 +83,32 @@ export function createAddress(rowNumber: number, columnNumber: number): string {
 }
 
 /**
- * Generator for addresses from a {@link Size}
+ * Creates a list of addresses for a {@link SizeInput}
  * @param size something with `numRows` and `numColumns`
  * @param direction the grid direction
  */
-export function* genAddresses(
+export function buildAddresses(
   size: SizeInput,
   direction: GridDirection = GridDirection.RightDown
-) {
+): Array<string> {
   let directionSize =
     direction === GridDirection.RightDown ? size.numRows : size.numColumns;
   let orthogonalDirectionSize =
     direction === GridDirection.RightDown ? size.numColumns : size.numRows;
 
+  const addresses = new Array<string>();
+
   for (let i = 1, j = directionSize; i <= j; i++) {
     for (let m = 1, n = orthogonalDirectionSize; m <= n; m++) {
       if (direction === GridDirection.RightDown) {
-        yield createAddress(i, m);
+        addresses.push(createAddress(i, m));
       } else {
-        yield createAddress(m, i);
+        addresses.push(createAddress(m, i));
       }
     }
   }
+
+  return addresses;
 }
 
 /**
@@ -121,4 +125,11 @@ export function cleanParams(params: ParsedQuery, allowedKeys: any[]) {
     .omitBy(_.isEmpty)
     .omitBy(_.isArray)
     .value();
+}
+
+/**
+ * Create a generator for cycling through a list of colors
+ */
+export function cycleColors() {
+  return cycle(["red", "green", "indigo", "pink", "blue", "purple"]);
 }

@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+ - Slide Registration ([#24](https://github.com/sanger/stan-client/pull/24))
+ - Shows external name clashes on block registration ([#24](https://github.com/sanger/stan-client/pull/24))
+ - Visium cDNA & Storybook ([#28](https://github.com/sanger/stan-client/pull/28))
+
+### Modified
+ - Renamed name to fixedName for Location ([#23](https://github.com/sanger/stan-client/pull/23))
+ - Renamed Tissue Registration to Block Registration ([#24](https://github.com/sanger/stan-client/pull/24))
+
+## [0.6.1] - 2021-03-01
+### Added
  - Registration page ([#5](https://github.com/sanger/stan-client/pull/5))
  - XState
  - Labware Scan Panel ([#7](https://github.com/sanger/stan-client/pull/7) & [#8](https://github.com/sanger/stan-client/pull/8))
@@ -35,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Everything!
 
-[Unreleased]: https://github.com/sanger/stan-client/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/sanger/stan-client/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/sanger/stan-client/compare/0.1.0...0.6.1
 [0.1.0]: https://github.com/sanger/stan-client/compare/0.0.1...0.1.0
 [0.0.1]: https://github.com/sanger/stan-client/releases/tag/0.0.1

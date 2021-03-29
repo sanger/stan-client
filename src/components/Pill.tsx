@@ -12,7 +12,7 @@ const Pill = ({ color, children }: PillProps) => {
       "bg-sp text-gray-100": color === "pink",
       "bg-sdb-300 text-gray-100": color === "blue",
     },
-    "px-2 rounded-full flex items-center justify-center font-semibold text-sm"
+    "px-2 rounded-full font-semibold text-sm"
   );
 
   return <span className={spanClassName}>{children}</span>;

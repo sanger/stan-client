@@ -4,9 +4,9 @@ import {
 } from "../../../src/types/graphql";
 
 function scanInLabware() {
-  cy.get("#labwareScanInput").type("STAN-1A{enter}");
-  cy.get("#labwareScanInput").type("STAN-2A{enter}");
-  cy.get("#labwareScanInput").type("STAN-3A{enter}");
+  cy.get("#labwareScanInput").type("STAN-011{enter}");
+  cy.get("#labwareScanInput").type("STAN-012{enter}");
+  cy.get("#labwareScanInput").type("STAN-013{enter}");
 }
 
 describe("RNA Extraction", () => {

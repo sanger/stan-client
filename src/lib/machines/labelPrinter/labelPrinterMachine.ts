@@ -30,7 +30,7 @@ export const machineOptions: Partial<MachineOptions<
 
       // Only have available printers of the labwares' label type (if there is one)
       ctx.printers = e.data.printers.filter((printer) =>
-        labwareLabelTypes.has(printer.labelType.name)
+        printer.labelTypes.some((lt) => labwareLabelTypes.has(lt.name))
       );
       ctx.selectedPrinter = ctx.printers[0];
     }),
