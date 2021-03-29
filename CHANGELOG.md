@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Slide Registration ([#24](https://github.com/sanger/stan-client/pull/24))
  - Shows external name clashes on block registration ([#24](https://github.com/sanger/stan-client/pull/24))
+ - Visium cDNA & Storybook ([#28](https://github.com/sanger/stan-client/pull/28))
 
 ### Modified
  - Renamed name to fixedName for Location ([#23](https://github.com/sanger/stan-client/pull/23))
