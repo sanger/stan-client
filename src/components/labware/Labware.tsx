@@ -28,13 +28,23 @@ export interface LabwareProps {
   onClick?: () => void;
 
   /**
-   * What selection mode should the labware be in
+   * What selection mode should the labware be in? This parameter is ignored if `selectable` is `none`.
+   *
+   * <ul>
+   *   <li>`single` - only a single slot can be selected at once</li>
+   *   <li>`multi` - multiple slots can be selected at once</li>
+   * </ul>
    */
   selectionMode?: SelectionMode;
 
   /**
    * Which slots are allowed to be selected?
-   * This is ignored when SelectionMode is NONE
+   * <ul>
+   *   <li>`none` - No slots can be selected</li>
+   *   <li>`any` - Any slots can be selected</li>
+   *   <li>`non_empty` - Only slots with samples in can be selected</li>
+   *   <li>`empty` - Only slots without samples in can be selected</li>
+   * </ul>
    */
   selectable?: Selectable;
 
@@ -86,6 +96,14 @@ export type LabwareImperativeRef = {
   deselectAll: () => void;
 };
 
+/**
+ * Component for displaying an individual piece of labware and its slots.
+ *
+ * Labware will contain a grid of slots, each of which can hold zero to many samples. The colour and text of each slot
+ * can be controlled with callbacks to `slotColor` and `slotText`.
+ *
+ * Selection of slots can be controlled with the `selectionMode` and `selectable` parameters. See the params for more details.
+ */
 const Labware = ({
   labware,
   onClick,
