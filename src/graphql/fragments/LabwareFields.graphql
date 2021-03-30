@@ -1,4 +1,4 @@
-fragment LabwareLayout on Labware {
+fragment LabwareFields on Labware {
     id
     barcode
     destroyed

@@ -5,7 +5,7 @@ import {
   SlotMapperSchema,
 } from "./slotMapper.types";
 import { NewLabwareLayout } from "../../types/stan";
-import { LabwareLayoutFragment, SlotFieldsFragment } from "../../types/graphql";
+import { LabwareFieldsFragment, SlotFieldsFragment } from "../../types/graphql";
 import * as labwareHelper from "../../lib/helpers/labwareHelper";
 import { find, findIndex } from "lodash";
 
@@ -18,7 +18,7 @@ class SlotMapperPresentationModel extends MachinePresentationModel<
     this.updateInputLabware = this.updateInputLabware.bind(this);
   }
 
-  updateInputLabware(labware: Array<LabwareLayoutFragment>) {
+  updateInputLabware(labware: Array<LabwareFieldsFragment>) {
     this.send({ type: "UPDATE_INPUT_LABWARE", labware });
   }
 
@@ -49,7 +49,7 @@ class SlotMapperPresentationModel extends MachinePresentationModel<
   }
 
   getSourceSlotColor(
-    labware: LabwareLayoutFragment,
+    labware: LabwareFieldsFragment,
     address: string,
     slot: SlotFieldsFragment
   ) {

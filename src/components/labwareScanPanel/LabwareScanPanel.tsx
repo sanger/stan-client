@@ -1,5 +1,5 @@
 import React from "react";
-import { LabwareLayoutFragment } from "../../types/graphql";
+import { LabwareFieldsFragment } from "../../types/graphql";
 import { motion } from "framer-motion";
 import { Column, Row } from "react-table";
 import MutedText from "../MutedText";
@@ -15,7 +15,7 @@ interface LabwareScanPanelProps {
   /**
    * The list of columns to display in the table
    */
-  columns: Column<LabwareLayoutFragment>[];
+  columns: Column<LabwareFieldsFragment>[];
 }
 
 const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns }) => {
@@ -25,11 +25,11 @@ const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns }) => {
   const data = React.useMemo(() => labwares, [labwares]);
 
   // Column with actions (such as delete) to add to the end of the labwareScanTableColumns passed in
-  const actionsColumn: Column<LabwareLayoutFragment> = React.useMemo(() => {
+  const actionsColumn: Column<LabwareFieldsFragment> = React.useMemo(() => {
     return {
       Header: "",
       id: "actions",
-      Cell: ({ row }: { row: Row<LabwareLayoutFragment> }) => {
+      Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
         if (locked) {
           return <LockIcon className="block m-2 h-5 w-5 text-gray-800" />;
         }
@@ -48,7 +48,7 @@ const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns }) => {
   /**
    * Merge the columns passed in with the actionsColumn, memoizing the result.
    */
-  const allColumns: Column<LabwareLayoutFragment>[] = [
+  const allColumns: Column<LabwareFieldsFragment>[] = [
     ...columns,
     actionsColumn,
   ];

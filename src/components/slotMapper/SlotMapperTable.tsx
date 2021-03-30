@@ -1,13 +1,13 @@
 import React from "react";
 import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 import {
-  LabwareLayoutFragment,
+  LabwareFieldsFragment,
   SlotCopyContent,
   SlotFieldsFragment,
 } from "../../types/graphql";
 
 type SlotMapperTableProps = {
-  labware: LabwareLayoutFragment;
+  labware: LabwareFieldsFragment;
   slot: SlotFieldsFragment;
   slotCopyContent: Array<SlotCopyContent>;
 };
@@ -44,8 +44,8 @@ export default function SlotMapperTable({
  * Returns the mapped address for a particular labware and slot (or "-" if not mapped)
  */
 function getDestinationAddress(
-  labware: LabwareLayoutFragment,
-  slot: LabwareLayoutFragment["slots"][number],
+  labware: LabwareFieldsFragment,
+  slot: LabwareFieldsFragment["slots"][number],
   slotCopyContent: Array<SlotCopyContent>
 ): string | undefined {
   return slotCopyContent.find(

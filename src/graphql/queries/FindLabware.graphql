@@ -1,5 +1,5 @@
 query FindLabware($barcode: String!) {
     labware(barcode: $barcode) {
-        ...LabwareLayout
+        ...LabwareFields
     }
 }

@@ -1,5 +1,5 @@
 import {
-  LabwareLayoutFragment,
+  LabwareFieldsFragment,
   Maybe,
   PlanRequestAction,
 } from "../../../types/graphql";
@@ -36,7 +36,7 @@ export interface LayoutPlan {
 
 export interface Source {
   sampleId: number;
-  labware: LabwareLayoutFragment;
+  labware: LabwareFieldsFragment;
   address?: Maybe<Address>;
 }
 

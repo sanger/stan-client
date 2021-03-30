@@ -1,7 +1,7 @@
 mutation Plan($request: PlanRequest!) {
     plan(request: $request) {
         labware {
-            ...LabwareLayout
+            ...LabwareFields
         }
         operations {
             operationType {

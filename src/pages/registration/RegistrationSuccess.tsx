@@ -3,7 +3,7 @@ import Success from "../../components/notifications/Success";
 import BlueButton from "../../components/buttons/BlueButton";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LabwareLayoutFragment } from "../../types/graphql";
+import { LabwareFieldsFragment } from "../../types/graphql";
 import variants from "../../lib/motionVariants";
 import DataTable from "../../components/DataTable";
 import LabelPrinter from "../../components/LabelPrinter";
@@ -13,8 +13,8 @@ import AppShell from "../../components/AppShell";
 import { Column } from "react-table";
 
 interface RegistrationSuccessProps {
-  labware: LabwareLayoutFragment[];
-  columns: Column<LabwareLayoutFragment>[];
+  labware: LabwareFieldsFragment[];
+  columns: Column<LabwareFieldsFragment>[];
 }
 
 const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({

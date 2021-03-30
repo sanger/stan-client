@@ -6,7 +6,7 @@ import {
   OperationTypeName,
 } from "../../../types/stan";
 import {
-  LabwareLayoutFragment,
+  LabwareFieldsFragment,
   Maybe,
   SlotCopyContent,
   SlotCopyMutation,
@@ -21,7 +21,7 @@ export interface SlotCopyContext {
   outputLabwareType: LabwareTypeName;
   slotCopyContent: Array<SlotCopyContent>;
   serverErrors: Maybe<ApolloError>;
-  outputLabwares: Array<LabwareLayoutFragment>;
+  outputLabwares: Array<LabwareFieldsFragment>;
 }
 
 /**

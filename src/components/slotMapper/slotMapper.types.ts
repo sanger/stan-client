@@ -1,6 +1,6 @@
 import { NewLabwareLayout } from "../../types/stan";
 import {
-  LabwareLayoutFragment,
+  LabwareFieldsFragment,
   Maybe,
   SlotCopyContent,
 } from "../../types/graphql";
@@ -25,7 +25,7 @@ export interface SlotMapperProps {
   /**
    * Initial input labware
    */
-  initialInputLabware?: Array<LabwareLayoutFragment>;
+  initialInputLabware?: Array<LabwareFieldsFragment>;
 
   /**
    * Initial output labware
@@ -34,7 +34,7 @@ export interface SlotMapperProps {
 }
 
 export interface SlotMapperContext {
-  inputLabware: Array<LabwareLayoutFragment>;
+  inputLabware: Array<LabwareFieldsFragment>;
   outputLabware: Array<NewLabwareLayout>;
   slotCopyContent: Array<SlotCopyContent>;
   colorByBarcode: Map<string, string>;
@@ -49,7 +49,7 @@ export interface SlotMapperSchema {
 
 type UpdateInputLabwareEvent = {
   type: "UPDATE_INPUT_LABWARE";
-  labware: Array<LabwareLayoutFragment>;
+  labware: Array<LabwareFieldsFragment>;
 };
 
 type CopySlotsEvent = {

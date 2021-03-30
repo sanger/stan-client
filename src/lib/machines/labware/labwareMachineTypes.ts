@@ -1,6 +1,6 @@
 import { ActorRef, Interpreter } from "xstate";
 import * as Yup from "yup";
-import { LabwareLayoutFragment, Maybe } from "../../../types/graphql";
+import { LabwareFieldsFragment, Maybe } from "../../../types/graphql";
 import { ApolloError } from "@apollo/client";
 
 export type LabwareMachineType = Interpreter<
@@ -76,12 +76,12 @@ export interface LabwareContext {
   /**
    * The labware loaded from a scanned barcode
    */
-  foundLabware: Maybe<LabwareLayoutFragment>;
+  foundLabware: Maybe<LabwareFieldsFragment>;
 
   /**
    * The list of sourceLabwares fetched so far
    */
-  labwares: LabwareLayoutFragment[];
+  labwares: LabwareFieldsFragment[];
 
   /**
    * A {@link https://github.com/jquense/yup#string Yup string schema} to validate the barcode on submission
@@ -95,8 +95,8 @@ export interface LabwareContext {
    * @return a list of any problems identified
    */
   foundLabwareCheck: (
-    labwares: LabwareLayoutFragment[],
-    foundLabware: LabwareLayoutFragment
+    labwares: LabwareFieldsFragment[],
+    foundLabware: LabwareFieldsFragment
   ) => string[];
 
   /**
@@ -140,7 +140,7 @@ type UnlockEvent = { type: "UNLOCK" };
 
 export type UpdateLabwaresEvent = {
   type: "UPDATE_LABWARES";
-  labwares: LabwareLayoutFragment[];
+  labwares: LabwareFieldsFragment[];
 };
 
 type ValidationErrorEvent = {
@@ -150,7 +150,7 @@ type ValidationErrorEvent = {
 
 type FindLabwareDoneEvent = {
   type: "done.invoke.findLabware";
-  data: LabwareLayoutFragment;
+  data: LabwareFieldsFragment;
 };
 
 type FindLabwareErrorEvent = {
@@ -160,7 +160,7 @@ type FindLabwareErrorEvent = {
 
 type AddFoundLabwareEvent = {
   type: "done.invoke.validateFoundLabware";
-  data: LabwareLayoutFragment;
+  data: LabwareFieldsFragment;
 };
 
 type FoundLabwareCheckErrorEvent = {

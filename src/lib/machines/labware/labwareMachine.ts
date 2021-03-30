@@ -1,6 +1,6 @@
 import { Machine, MachineOptions } from "xstate";
 import * as Yup from "yup";
-import { LabwareLayoutFragment } from "../../../types/graphql";
+import { LabwareFieldsFragment } from "../../../types/graphql";
 import {
   LabwareContext,
   LabwareEvents,
@@ -146,10 +146,10 @@ export const labwareMachineOptions: Partial<MachineOptions<
  * )
  */
 export const createLabwareMachine = (
-  labwares: LabwareLayoutFragment[] = [],
+  labwares: LabwareFieldsFragment[] = [],
   foundLabwareCheck?: (
-    labwares: LabwareLayoutFragment[],
-    foundLabware: LabwareLayoutFragment
+    labwares: LabwareFieldsFragment[],
+    foundLabware: LabwareFieldsFragment
   ) => string[]
 ) =>
   Machine<LabwareContext, LabwareSchema, LabwareEvents>(

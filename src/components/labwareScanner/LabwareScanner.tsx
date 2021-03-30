@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { LabwareLayoutFragment } from "../../types/graphql";
+import { LabwareFieldsFragment } from "../../types/graphql";
 import { useMachine } from "@xstate/react";
 import { createLabwareMachine } from "../../lib/machines/labware/labwareMachine";
 import ScanInput from "../scanInput/ScanInput";
@@ -8,7 +8,7 @@ import Warning from "../notifications/Warning";
 import { isFunction } from "lodash";
 
 type LabwareScannerProps = {
-  initialLabwares?: LabwareLayoutFragment[];
+  initialLabwares?: LabwareFieldsFragment[];
 
   locked?: boolean;
 
@@ -16,15 +16,15 @@ type LabwareScannerProps = {
    * A function to check for problems with new labware because it is added
    */
   labwareCheckFunction?: (
-    labwares: LabwareLayoutFragment[],
-    foundLabware: LabwareLayoutFragment
+    labwares: LabwareFieldsFragment[],
+    foundLabware: LabwareFieldsFragment
   ) => string[];
 
   /**
    * Called when labware is added or removed
    * @param labwares the list of current labwares
    */
-  onChange?: (labwares: LabwareLayoutFragment[]) => void;
+  onChange?: (labwares: LabwareFieldsFragment[]) => void;
 
   /**
    * Children can either be a react node (if using the useLabware hook)
@@ -106,7 +106,7 @@ export default function LabwareScanner({
 
 type LabwareScannerContextType = {
   locked: boolean;
-  labwares: LabwareLayoutFragment[];
+  labwares: LabwareFieldsFragment[];
   removeLabware: (barcode: string) => void;
 };
 

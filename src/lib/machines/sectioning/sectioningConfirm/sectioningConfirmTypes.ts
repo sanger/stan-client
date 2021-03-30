@@ -3,7 +3,7 @@ import { LayoutPlan } from "../../layout/layoutContext";
 import {
   Comment,
   ConfirmOperationLabware,
-  LabwareLayoutFragment as LabwareLayout,
+  LabwareFieldsFragment as LabwareLayout,
 } from "../../../../types/graphql";
 import { Address } from "../../../../types/stan";
 

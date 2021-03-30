@@ -4,7 +4,7 @@ import BarcodeIcon from "../icons/BarcodeIcon";
 import { Slot } from "./Slot";
 import { buildAddresses } from "../../lib/helpers";
 import _ from "lodash";
-import { LabwareLayoutFragment, SlotFieldsFragment } from "../../types/graphql";
+import { LabwareFieldsFragment, SlotFieldsFragment } from "../../types/graphql";
 import createLabwareMachine from "./labware.machine";
 import { Selectable, SelectionMode } from "./labware.types";
 import { usePresentationModel } from "../../lib/hooks";
@@ -15,7 +15,7 @@ export interface LabwareProps {
   /**
    * The labware to display. May be a new piece of labware not yet persisted on core.
    */
-  labware: LabwareLayoutFragment | NewLabwareLayout;
+  labware: LabwareFieldsFragment | NewLabwareLayout;
 
   /**
    * (Optional) Name to be displayed on the labware

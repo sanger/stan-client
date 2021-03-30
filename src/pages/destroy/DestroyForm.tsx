@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Form, FormikProps } from "formik";
-import { DestroyRequest, LabwareLayoutFragment } from "../../types/graphql";
+import { DestroyRequest, LabwareFieldsFragment } from "../../types/graphql";
 import DestroyPresentationModel from "../../lib/presentationModels/destroyPresentationModel";
 import Success from "../../components/notifications/Success";
 import { toast } from "react-toastify";
@@ -27,7 +27,7 @@ const DestroyForm: React.FC<DestroyFormProps> = ({ model, formik }) => {
 
   // Update the formik barcodes field when labware changes in the scan panel
   const onScanPanelChange = React.useCallback(
-    (labwares: LabwareLayoutFragment[]) => {
+    (labwares: LabwareFieldsFragment[]) => {
       setFieldValue(
         "barcodes",
         labwares.map((lw) => lw.barcode)

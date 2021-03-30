@@ -9,7 +9,7 @@ import WhiteButton from "../buttons/WhiteButton";
 import LabwareScanner from "../labwareScanner/LabwareScanner";
 import RemoveButton from "../buttons/RemoveButton";
 import {
-  LabwareLayoutFragment,
+  LabwareFieldsFragment,
   Maybe,
   SlotFieldsFragment,
 } from "../../types/graphql";
@@ -42,7 +42,7 @@ function SlotMapper({
    * State to track the current input labware (for paging)
    */
   const [currentInputLabware, setCurrentInputLabware] = useState<
-    Maybe<LabwareLayoutFragment>
+    Maybe<LabwareFieldsFragment>
   >(() => {
     return initialInputLabware?.length === 0 ? null : initialInputLabware[0];
   });
@@ -187,7 +187,7 @@ function SlotMapper({
    */
   const updateInputLabware = model.updateInputLabware;
   const onLabwareScannerChange = React.useCallback(
-    (labwares: LabwareLayoutFragment[]) => {
+    (labwares: LabwareFieldsFragment[]) => {
       updateInputLabware(labwares);
     },
     [updateInputLabware]

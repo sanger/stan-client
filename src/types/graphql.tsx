@@ -604,7 +604,7 @@ export type MutationSetLocationCustomNameArgs = {
   customName?: Maybe<Scalars['String']>;
 };
 
-export type LabwareLayoutFragment = (
+export type LabwareFieldsFragment = (
   { __typename?: 'Labware' }
   & Pick<Labware, 'id' | 'barcode' | 'destroyed' | 'discarded' | 'released'>
   & { labwareType: (
@@ -686,7 +686,7 @@ export type ConfirmMutation = (
     { __typename?: 'ConfirmOperationResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
-      & LabwareLayoutFragment
+      & LabwareFieldsFragment
     )>, operations: Array<(
       { __typename?: 'Operation' }
       & Pick<Operation, 'performed'>
@@ -744,7 +744,7 @@ export type ExtractMutation = (
     { __typename?: 'OperationResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
-      & LabwareLayoutFragment
+      & LabwareFieldsFragment
     )>, operations: Array<(
       { __typename?: 'Operation' }
       & { operationType: (
@@ -807,7 +807,7 @@ export type PlanMutation = (
     { __typename?: 'PlanResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
-      & LabwareLayoutFragment
+      & LabwareFieldsFragment
     )>, operations: Array<(
       { __typename?: 'PlanOperation' }
       & { operationType?: Maybe<(
@@ -857,7 +857,7 @@ export type RegisterSectionsMutation = (
     { __typename?: 'RegisterResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
-      & LabwareLayoutFragment
+      & LabwareFieldsFragment
     )> }
   ) }
 );
@@ -873,7 +873,7 @@ export type RegisterTissuesMutation = (
     { __typename?: 'RegisterResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
-      & LabwareLayoutFragment
+      & LabwareFieldsFragment
     )>, clashes: Array<(
       { __typename?: 'RegisterClash' }
       & { tissue: (
@@ -942,7 +942,7 @@ export type SlotCopyMutation = (
     { __typename?: 'OperationResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
-      & LabwareLayoutFragment
+      & LabwareFieldsFragment
     )> }
   ) }
 );
@@ -1049,7 +1049,7 @@ export type FindLabwareQuery = (
   { __typename?: 'Query' }
   & { labware: (
     { __typename?: 'Labware' }
-    & LabwareLayoutFragment
+    & LabwareFieldsFragment
   ) }
 );
 
@@ -1220,8 +1220,8 @@ export const SlotFieldsFragmentDoc = gql`
   }
 }
     ${SampleFieldsFragmentDoc}`;
-export const LabwareLayoutFragmentDoc = gql`
-    fragment LabwareLayout on Labware {
+export const LabwareFieldsFragmentDoc = gql`
+    fragment LabwareFields on Labware {
   id
   barcode
   destroyed
@@ -1268,7 +1268,7 @@ export const ConfirmDocument = gql`
     mutation Confirm($request: ConfirmOperationRequest!) {
   confirmOperation(request: $request) {
     labware {
-      ...LabwareLayout
+      ...LabwareFields
     }
     operations {
       operationType {
@@ -1281,7 +1281,7 @@ export const ConfirmDocument = gql`
     }
   }
 }
-    ${LabwareLayoutFragmentDoc}`;
+    ${LabwareFieldsFragmentDoc}`;
 export type ConfirmMutationFn = Apollo.MutationFunction<ConfirmMutation, ConfirmMutationVariables>;
 
 /**
@@ -1382,7 +1382,7 @@ export const ExtractDocument = gql`
     mutation Extract($request: ExtractRequest!) {
   extract(request: $request) {
     labware {
-      ...LabwareLayout
+      ...LabwareFields
     }
     operations {
       operationType {
@@ -1407,7 +1407,7 @@ export const ExtractDocument = gql`
     }
   }
 }
-    ${LabwareLayoutFragmentDoc}`;
+    ${LabwareFieldsFragmentDoc}`;
 export type ExtractMutationFn = Apollo.MutationFunction<ExtractMutation, ExtractMutationVariables>;
 
 /**
@@ -1504,7 +1504,7 @@ export const PlanDocument = gql`
     mutation Plan($request: PlanRequest!) {
   plan(request: $request) {
     labware {
-      ...LabwareLayout
+      ...LabwareFields
     }
     operations {
       operationType {
@@ -1530,7 +1530,7 @@ export const PlanDocument = gql`
     }
   }
 }
-    ${LabwareLayoutFragmentDoc}`;
+    ${LabwareFieldsFragmentDoc}`;
 export type PlanMutationFn = Apollo.MutationFunction<PlanMutation, PlanMutationVariables>;
 
 /**
@@ -1593,11 +1593,11 @@ export const RegisterSectionsDocument = gql`
     mutation RegisterSections($request: SectionRegisterRequest!) {
   registerSections(request: $request) {
     labware {
-      ...LabwareLayout
+      ...LabwareFields
     }
   }
 }
-    ${LabwareLayoutFragmentDoc}`;
+    ${LabwareFieldsFragmentDoc}`;
 export type RegisterSectionsMutationFn = Apollo.MutationFunction<RegisterSectionsMutation, RegisterSectionsMutationVariables>;
 
 /**
@@ -1628,7 +1628,7 @@ export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {
     labware {
-      ...LabwareLayout
+      ...LabwareFields
     }
     clashes {
       tissue {
@@ -1643,7 +1643,7 @@ export const RegisterTissuesDocument = gql`
     }
   }
 }
-    ${LabwareLayoutFragmentDoc}`;
+    ${LabwareFieldsFragmentDoc}`;
 export type RegisterTissuesMutationFn = Apollo.MutationFunction<RegisterTissuesMutation, RegisterTissuesMutationVariables>;
 
 /**
@@ -1755,11 +1755,11 @@ export const SlotCopyDocument = gql`
     mutation SlotCopy($request: SlotCopyRequest!) {
   slotCopy(request: $request) {
     labware {
-      ...LabwareLayout
+      ...LabwareFields
     }
   }
 }
-    ${LabwareLayoutFragmentDoc}`;
+    ${LabwareFieldsFragmentDoc}`;
 export type SlotCopyMutationFn = Apollo.MutationFunction<SlotCopyMutation, SlotCopyMutationVariables>;
 
 /**
@@ -1976,10 +1976,10 @@ export type FindQueryResult = Apollo.QueryResult<FindQuery, FindQueryVariables>;
 export const FindLabwareDocument = gql`
     query FindLabware($barcode: String!) {
   labware(barcode: $barcode) {
-    ...LabwareLayout
+    ...LabwareFields
   }
 }
-    ${LabwareLayoutFragmentDoc}`;
+    ${LabwareFieldsFragmentDoc}`;
 
 /**
  * __useFindLabwareQuery__

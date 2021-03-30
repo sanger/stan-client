@@ -1,6 +1,6 @@
 import {
   Labware,
-  LabwareLayoutFragment,
+  LabwareFieldsFragment,
   SlotFieldsFragment,
 } from "../../types/graphql";
 import { cycleColors } from "../helpers";
@@ -10,9 +10,9 @@ import * as slotHelper from "./slotHelper";
 
 /**
  * Build an array of all {@link Sample samples} in a {@link Labware} along with its {@link Slot} plus the original {@link Labware}
- * @param labware a {@link LabwareLayoutFragment}
+ * @param labware a {@link LabwareFieldsFragment}
  */
-export function labwareSamples(labware: LabwareLayoutFragment) {
+export function labwareSamples(labware: LabwareFieldsFragment) {
   return labware.slots
     .map((slot) => {
       return slot.samples.map((sample) => {
@@ -28,7 +28,7 @@ export function labwareSamples(labware: LabwareLayoutFragment) {
  * @param labwares list of labwares to get colors for
  */
 export function buildSampleColors(
-  labwares: LabwareLayoutFragment[]
+  labwares: LabwareFieldsFragment[]
 ): Map<number, string> {
   const colors = cycleColors();
   const sampleColors = new Map();
@@ -72,28 +72,28 @@ export function sortDownRight<T extends Addressable>(
 
 /**
  * Returns the filled slots for the given labware
- * @param labware a {@link LabwareLayoutFragment}
+ * @param labware a {@link LabwareFieldsFragment}
  */
 export function filledSlots(
-  labware: LabwareLayoutFragment
+  labware: LabwareFieldsFragment
 ): Array<SlotFieldsFragment> {
   return slotHelper.filledSlots(labware.slots);
 }
 
 /**
  * Returns the empty slots for the given labware
- * @param labware a {@link LabwareLayoutFragment}
+ * @param labware a {@link LabwareFieldsFragment}
  */
 export function emptySlots(
-  labware: LabwareLayoutFragment
+  labware: LabwareFieldsFragment
 ): Array<SlotFieldsFragment> {
   return slotHelper.emptySlots(labware.slots);
 }
 
 /**
- * Build a {@type LabwareLayoutFragment} from a {@type Labware}
+ * Build a {@type LabwareFieldsFragment} from a {@type Labware}
  */
-export function buildLabwareFragment(labware: Labware): LabwareLayoutFragment {
+export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
   return {
     __typename: "Labware",
     id: labware.id,

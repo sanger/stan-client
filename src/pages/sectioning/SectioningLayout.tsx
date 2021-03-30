@@ -27,7 +27,7 @@ import {
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
 import DataTable from "../../components/DataTable";
 import { CellProps, Column, Row } from "react-table";
-import { LabwareLayoutFragment } from "../../types/graphql";
+import { LabwareFieldsFragment } from "../../types/graphql";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { Input } from "../../components/forms/Input";
 import { usePrinters } from "../../lib/hooks";
@@ -72,11 +72,11 @@ const SectioningLayout = React.forwardRef<
   const { layoutMachine } = current.children;
 
   // Special kind of column for displaying the sectioning numbers given from a planned operation
-  const sectionsColumn: Column<LabwareLayoutFragment> = React.useMemo(() => {
+  const sectionsColumn: Column<LabwareFieldsFragment> = React.useMemo(() => {
     return {
       Header: "Section Number",
       id: "sections",
-      Cell: ({ row }: { row: Row<LabwareLayoutFragment> }) => {
+      Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
         return plannedOperations.map((operation, j) => {
           const newSections = operation.planActions
             .filter(

@@ -9,7 +9,7 @@ import columns from "../../components/labwareScanPanel/columns";
 import FormikSelect from "../../components/forms/Select";
 import PinkButton from "../../components/buttons/PinkButton";
 import { Form, FormikProps } from "formik";
-import { LabwareLayoutFragment, ReleaseRequest } from "../../types/graphql";
+import { LabwareFieldsFragment, ReleaseRequest } from "../../types/graphql";
 import { FormikErrorMessage } from "../../components/forms";
 import ReleasePresentationModel from "../../lib/presentationModels/releasePresentationModel";
 import Warning from "../../components/notifications/Warning";
@@ -29,7 +29,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
 
   // Update the formik barcodes field when labware changes in the scan panel
   const onScanPanelChange = React.useCallback(
-    (labwares: LabwareLayoutFragment[]) => {
+    (labwares: LabwareFieldsFragment[]) => {
       setFieldValue(
         "barcodes",
         labwares.map((lw) => lw.barcode)
@@ -38,7 +38,7 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
     [setFieldValue]
   );
 
-  const labwareBsContent = (labware: LabwareLayoutFragment) => {
+  const labwareBsContent = (labware: LabwareFieldsFragment) => {
     const bss = new Set(
       labware.slots
         .flatMap((slot) => slot.samples)
@@ -51,8 +51,8 @@ const ReleaseForm: React.FC<ReleaseFormProps> = ({ model, formik }) => {
   };
 
   const labwareBioStateCheck = (
-    labwares: LabwareLayoutFragment[],
-    foundLabware: LabwareLayoutFragment
+    labwares: LabwareFieldsFragment[],
+    foundLabware: LabwareFieldsFragment
   ) => {
     if (foundLabware.released) {
       return [

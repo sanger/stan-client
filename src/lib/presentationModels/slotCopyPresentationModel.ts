@@ -4,7 +4,7 @@ import {
   SlotCopyEvent,
   SlotCopySchema,
 } from "../machines/slotCopy/slotCopyMachineTypes";
-import { LabwareLayoutFragment, SlotCopyContent } from "../../types/graphql";
+import { LabwareFieldsFragment, SlotCopyContent } from "../../types/graphql";
 
 export default class SlotCopyPresentationModel extends MachinePresentationModel<
   SlotCopyContext,
@@ -35,7 +35,7 @@ export default class SlotCopyPresentationModel extends MachinePresentationModel<
     return this.current.matches("copied");
   }
 
-  get outputLabwares(): Array<LabwareLayoutFragment> {
+  get outputLabwares(): Array<LabwareFieldsFragment> {
     return this.context.outputLabwares;
   }
 

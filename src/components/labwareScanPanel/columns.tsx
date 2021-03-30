@@ -1,14 +1,14 @@
 import React from "react";
-import {CellProps, Column} from "react-table";
-import {Labware, LabwareLayoutFragment} from "../../types/graphql";
+import { CellProps, Column } from "react-table";
+import { Labware, LabwareFieldsFragment } from "../../types/graphql";
 import LabelPrinterButton from "../LabelPrinterButton";
-import {buildLabelPrinterMachine} from "../../lib/factories/machineFactory";
+import { buildLabelPrinterMachine } from "../../lib/factories/machineFactory";
 import Circle from "../Circle";
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
  */
-type ColumnFactory<E = any> = (meta?: E) => Column<LabwareLayoutFragment>;
+type ColumnFactory<E = any> = (meta?: E) => Column<LabwareFieldsFragment>;
 
 const color: ColumnFactory<Map<number, any>> = (meta) => {
   return {
@@ -26,8 +26,13 @@ function joinUnique(array: string[]) {
   return Array.from(new Set<string>(array)).join(", ");
 }
 
-function valueFromSamples(labware: LabwareLayoutFragment, sampleFunction: (sample: any) => (string)) {
-  return joinUnique(labware.slots.flatMap(slot => slot.samples).map(sampleFunction));
+function valueFromSamples(
+  labware: LabwareFieldsFragment,
+  sampleFunction: (sample: any) => string
+) {
+  return joinUnique(
+    labware.slots.flatMap((slot) => slot.samples).map(sampleFunction)
+  );
 }
 
 /**
@@ -47,7 +52,7 @@ const donorId: ColumnFactory = () => {
   return {
     Header: "Donor ID",
     accessor: (labware) =>
-        valueFromSamples(labware, (sample) => sample.tissue.donor.donorName),
+      valueFromSamples(labware, (sample) => sample.tissue.donor.donorName),
   };
 };
 
@@ -58,7 +63,10 @@ const tissueType: ColumnFactory = () => {
   return {
     Header: "Tissue type",
     accessor: (labware) =>
-        valueFromSamples(labware, (sample) => sample.tissue.spatialLocation.tissueType.name),
+      valueFromSamples(
+        labware,
+        (sample) => sample.tissue.spatialLocation.tissueType.name
+      ),
   };
 };
 
@@ -69,7 +77,7 @@ const spatialLocation: ColumnFactory = () => {
   return {
     Header: "Spatial location",
     accessor: (labware) =>
-        valueFromSamples(labware, (sample) => sample.tissue.spatialLocation.code),
+      valueFromSamples(labware, (sample) => sample.tissue.spatialLocation.code),
   };
 };
 
@@ -80,7 +88,7 @@ const replicate: ColumnFactory = () => {
   return {
     Header: "Replicate",
     accessor: (labware) =>
-    valueFromSamples(labware, (sample) => sample.tissue.replicate),
+      valueFromSamples(labware, (sample) => sample.tissue.replicate),
   };
 };
 
@@ -119,7 +127,7 @@ const externalName: ColumnFactory = () => {
   return {
     Header: "External ID",
     accessor: (labware) =>
-        valueFromSamples(labware, (sample) => sample.tissue.externalName),
+      valueFromSamples(labware, (sample) => sample.tissue.externalName),
   };
 };
 
@@ -127,7 +135,7 @@ const bioState: ColumnFactory = () => {
   return {
     Header: "Bio state",
     accessor: (labware) =>
-        valueFromSamples(labware, (sample) => sample.bioState.name),
+      valueFromSamples(labware, (sample) => sample.bioState.name),
   };
 };
 

@@ -2,7 +2,7 @@ import {
   GetPrintersQuery,
   LabelType,
   Labware,
-  LabwareLayoutFragment as LabwareLayout,
+  LabwareFieldsFragment,
   Maybe,
   PlanRequestAction,
   Size,
@@ -39,7 +39,7 @@ export type SourcePlanRequestAction = Omit<PlanRequestAction, "address">;
  * Type for when a piece of labware has been created in the client, but has not
  * yet been persisted, and so will not have a barcode yet.
  */
-export type NewLabwareLayout = Nullable<LabwareLayout, "barcode">;
+export type NewLabwareLayout = Nullable<LabwareFieldsFragment, "barcode">;
 
 export interface ServerErrors {
   /**
