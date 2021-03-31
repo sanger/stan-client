@@ -11,6 +11,30 @@ describe("Slide Registration Page", () => {
     cy.get("select").select("Slide");
   });
 
+  describe("Spatial Locations", () => {
+    context(
+      "when updating the tissue type and spatial location for one slide, then adding another slide",
+      () => {
+        before(() => {
+          cy.findByLabelText("Tissue Type").select("Liver");
+          cy.findByLabelText("Spatial Location").select("3");
+          cy.get("#labwareTypesSelect").select("Visium LP");
+          cy.findByText("+ Add Slide").click();
+        });
+
+        after(() => {
+          cy.findByRole("button", { name: "- Remove Slide" }).click();
+        });
+
+        it("should still be set when going back to the first slide", () => {
+          cy.get("#labware-summaries > a").eq(0).click();
+          cy.findByLabelText("Tissue Type").should("have.value", "Liver");
+          cy.findByLabelText("Spatial Location").should("have.value", "3");
+        });
+      }
+    );
+  });
+
   describe("Validation", () => {
     shouldBehaveLikeARegistrationForm();
 
@@ -78,6 +102,24 @@ describe("Slide Registration Page", () => {
         it("should remove a section", () => {
           cy.findByText("1 Section(s)").should("be.visible");
         });
+      });
+    });
+  });
+
+  describe("Adding/Removing multiple sections to the same slot", () => {
+    context("when clicking on 'Add Another Section to A1'", () => {
+      before(() => {
+        cy.findByRole("button", {
+          name: "+ Add Another Section to A1",
+        }).click();
+      });
+
+      after(() => {
+        cy.findAllByRole("button", { name: "- Remove Section" }).eq(0).click();
+      });
+
+      it("should add a new section", () => {
+        cy.findByText("2 Section(s)").should("be.visible");
       });
     });
   });
