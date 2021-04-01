@@ -23,7 +23,7 @@ export function buildConfirmOperationLabware(
   return {
     barcode: labware.barcode,
     cancelled: false,
-    cancelledAddresses: [],
+    cancelledActions: [],
     addressComments: [],
   };
 }

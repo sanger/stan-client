@@ -7,6 +7,7 @@ import {
 } from "../../types/graphql";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import labwareFactory from "../../lib/factories/labwareFactory";
+import { uniqueId } from "lodash";
 
 const planHandlers = [
   graphql.mutation<PlanMutation, PlanMutationVariables>(
@@ -39,7 +40,7 @@ const planHandlers = [
                 const labware = JSON.parse(labwareJson);
 
                 return {
-                  newSection: undefined,
+                  newSection: parseInt(uniqueId()),
                   sample: {
                     id: planAction.sampleId,
                   },

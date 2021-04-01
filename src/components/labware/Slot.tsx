@@ -15,6 +15,7 @@ type SlotProps = {
   onMouseLeave?: LabwareProps["onSlotMouseLeave"];
   color?: LabwareProps["slotColor"];
   text?: LabwareProps["slotText"];
+  secondaryText?: LabwareProps["slotSecondaryText"];
   selected: boolean;
 };
 
@@ -29,9 +30,12 @@ export function Slot({
   onMouseLeave,
   color,
   text,
+  secondaryText,
   selected,
 }: SlotProps) {
   const slotText = (text && text(address, slot)) ?? address;
+  const slotSecondaryText =
+    (secondaryText && secondaryText(address, slot)) ?? null;
   const bgColor = color && color(address, slot);
 
   const slotClassNames = classNames(
@@ -46,7 +50,7 @@ export function Slot({
       "h-20 w-20": size === "large",
       "h-12 w-12": size === "small",
     },
-    "inline-flex items-center justify-center mx-auto rounded-full text-xs font-semibold"
+    "inline-flex flex-col items-center justify-center mx-auto rounded-full text-xs font-semibold"
   );
 
   const onClickHandler = React.useCallback(
@@ -78,6 +82,7 @@ export function Slot({
       className={slotClassNames}
     >
       <p className="truncate">{slotText}</p>
+      {secondaryText && <p className="truncate">{slotSecondaryText}</p>}
     </div>
   );
 }

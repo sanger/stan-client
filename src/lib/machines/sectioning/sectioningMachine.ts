@@ -152,6 +152,7 @@ const sectioningMachineOptions: Partial<MachineOptions<
       if (e.type !== "COMMIT_CONFIRMATION") {
         return;
       }
+
       const confirmationIndex = ctx.confirmOperationRequest.labware.findIndex(
         (lw) => lw.barcode === e.confirmOperationLabware.barcode
       );
@@ -375,7 +376,7 @@ function buildSectioningOutcomeLayoutPlan(
       .filter((planAction) => {
         return planAction.destination.labwareId === labware.id;
       })
-      .reduce<Map<Address, LayoutPlanAction>>((memo, planAction) => {
+      .reduce<Map<Address, Array<LayoutPlanAction>>>((memo, planAction) => {
         const action: LayoutPlanAction = {
           sampleId: planAction.sample.id,
           labware: findSourceLabware(
@@ -383,8 +384,13 @@ function buildSectioningOutcomeLayoutPlan(
             planAction.source.labwareId
           ),
           address: planAction.source.address,
+          newSection: planAction.newSection,
         };
-        memo.set(planAction.destination.address, action);
+        if (memo.has(planAction.destination.address)) {
+          memo.get(planAction.destination.address)?.push(action);
+        } else {
+          memo.set(planAction.destination.address, [action]);
+        }
         return memo;
       }, new Map()),
   };

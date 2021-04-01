@@ -31,6 +31,7 @@ import { LabwareFieldsFragment } from "../../types/graphql";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { Input } from "../../components/forms/Input";
 import { usePrinters } from "../../lib/hooks";
+import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from "./index";
 
 interface SectioningLayoutProps {
   /**
@@ -133,15 +134,11 @@ const SectioningLayout = React.forwardRef<
             labware={sectioningLayout.destinationLabware}
             onClick={() => send(editLayout())}
             name={sectioningLayout.destinationLabware.labwareType.name}
-            slotText={(address) =>
-              layoutPlan.plannedActions.get(address)?.labware.barcode
+            slotText={(address) => buildSlotText(layoutPlan, address)}
+            slotSecondaryText={(address) =>
+              buildSlotSecondaryText(layoutPlan, address)
             }
-            slotColor={(address) => {
-              const action = layoutPlan.plannedActions.get(address);
-              if (action) {
-                return `bg-${layoutPlan.sampleColors.get(action.sampleId)}-600`;
-              }
-            }}
+            slotColor={(address) => buildSlotColor(layoutPlan, address)}
           />
 
           {current.matches("prep") && (

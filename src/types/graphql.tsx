@@ -244,10 +244,16 @@ export type AddressCommentInput = {
   commentId: Scalars['Int'];
 };
 
+export type CancelPlanAction = {
+  destinationAddress: Scalars['Address'];
+  sampleId: Scalars['Int'];
+  newSection?: Maybe<Scalars['Int']>;
+};
+
 export type ConfirmOperationLabware = {
   barcode: Scalars['String'];
   cancelled?: Maybe<Scalars['Boolean']>;
-  cancelledAddresses?: Maybe<Array<Scalars['Address']>>;
+  cancelledActions: Array<CancelPlanAction>;
   addressComments?: Maybe<Array<AddressCommentInput>>;
 };
 

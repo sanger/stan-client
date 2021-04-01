@@ -55,7 +55,6 @@ export const createSectioningConfirmMachine = (
         layoutPlan: cloneDeep(layoutPlan),
         addressToCommentMap: new Map(),
         cancelled: false,
-        cancelledAddresses: [],
       },
       on: {
         SECTIONING_CONFIRMATION_COMPLETE: State.DONE,

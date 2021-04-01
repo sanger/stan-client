@@ -215,14 +215,14 @@ function buildPlanRequestLabware(
   return {
     labwareType: sectioningLayout.destinationLabware.labwareType.name,
     barcode: sectioningLayout.barcode,
-    actions: Array.from(layoutPlan.plannedActions.keys()).map((address) => {
-      const source = layoutPlan.plannedActions.get(address);
+    actions: Array.from(layoutPlan.plannedActions.keys()).flatMap((address) => {
+      const sources = layoutPlan.plannedActions.get(address);
 
-      if (!source) {
+      if (!sources) {
         throw new Error("Source not found from planned actions");
       }
 
-      return {
+      return sources.map((source) => ({
         address,
         sampleThickness: sectioningLayout.sectionThickness,
         sampleId: source.sampleId,
@@ -230,7 +230,7 @@ function buildPlanRequestLabware(
           barcode: source.labware.barcode,
           address: source.address,
         },
-      };
+      }));
     }),
   };
 }

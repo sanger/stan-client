@@ -12,6 +12,11 @@ import {
   selectSource,
   setAllDestinations,
 } from "../lib/machines/layout/layoutEvents";
+import {
+  buildSlotColor,
+  buildSlotSecondaryText,
+  buildSlotText,
+} from "../pages/sectioning/index";
 
 interface LayoutPlannerProps {
   actor: LayoutMachineActorRef;
@@ -34,18 +39,11 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
               name={layoutPlan.destinationLabware.labwareType.name}
               selectable={"none"}
               onSlotClick={(address) => send(selectDestination(address))}
-              slotText={(address) =>
-                layoutPlan.plannedActions.get(address)?.labware.barcode
+              slotText={(address) => buildSlotText(layoutPlan, address)}
+              slotSecondaryText={(address) =>
+                buildSlotSecondaryText(layoutPlan, address)
               }
-              slotColor={(address) => {
-                const action = layoutPlan.plannedActions.get(address);
-                if (action) {
-                  return `bg-${layoutPlan.sampleColors.get(
-                    action.sampleId
-                  )}-600`;
-                }
-                return undefined;
-              }}
+              slotColor={(address) => buildSlotColor(layoutPlan, address)}
             />
           )}
         </div>

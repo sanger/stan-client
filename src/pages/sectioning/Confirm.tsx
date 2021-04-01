@@ -14,6 +14,8 @@ interface ConfirmProps {
   model: SectioningPresentationModel;
 }
 
+const toastSuccess = () => <Success message={"Sectioning Saved"} />;
+
 const Confirm: React.FC<ConfirmProps> = ({ model }) => {
   const [ref, scrollToRef] = useScrollToRef();
 
@@ -30,7 +32,7 @@ const Confirm: React.FC<ConfirmProps> = ({ model }) => {
   // Show a toast notification with a success message when sectioning is complete
   useEffect(() => {
     if (model.isDone()) {
-      toast(<Success message={"Sectioning Saved"} />, {
+      toast(toastSuccess, {
         position: toast.POSITION.TOP_RIGHT,
       });
     }
