@@ -99,16 +99,19 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
                   selectionMode={"single"}
                   selectable={"any"}
                   slotText={(address) => {
-                    if (currentLabware.slots[address]?.length === 1) {
+                    if (currentLabware.slots[address]?.length > 0) {
                       const externalIdentifier =
                         currentLabware.slots[address][0].externalIdentifier;
                       return externalIdentifier !== ""
                         ? externalIdentifier
                         : address;
-                    } else if (currentLabware.slots[address]?.length > 1) {
-                      return `${address}*`;
-                    } else {
-                      return address;
+                    }
+                  }}
+                  slotSecondaryText={(address) => {
+                    const slotSampleLength =
+                      currentLabware.slots[address]?.length;
+                    if (slotSampleLength > 1) {
+                      return `x${slotSampleLength}`;
                     }
                   }}
                   slotColor={(address) => {
