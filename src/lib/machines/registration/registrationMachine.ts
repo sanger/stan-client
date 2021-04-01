@@ -1,140 +1,196 @@
-import { MachineConfig, MachineOptions } from "xstate";
-import {
-  RegistrationContext,
-  RegistrationEvent,
-  RegistrationSchema,
-} from "./registrationMachineTypes";
+import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
-import { extractServerErrors } from "../../../types/stan";
+import { extractServerErrors, ServerErrors } from "../../../types/stan";
 import * as registrationService from "../../services/registrationService";
-import { buildRegisterTissuesMutationVariables } from "../../services/registrationService";
-import { createMachineBuilder } from "../index";
+import {
+  BlockRegisterRequest,
+  GetRegistrationInfoQuery,
+  RegisterTissuesMutation,
+  RegisterTissuesMutationResult,
+  RegisterTissuesMutationVariables,
+} from "../../../types/graphql";
+import { RegistrationFormValues } from "../../../pages/Registration";
+import { ApolloError } from "@apollo/client";
 
-export enum Actions {
-  EMPTY_CONFIRMED_TISSUES = "emptyConfirmedTissues",
-  ASSIGN_LOADING_ERROR = "assignLoadingError",
-  ASSIGN_REGISTRATION_RESULT = "assignRegistrationResult",
-  ASSIGN_REGISTRATION_ERROR = "assignRegistrationError",
+/**
+ * Builds the registerTissue mutation variables from the RegistrationFormValues
+ * @param formValues
+ * @param existingTissues list of tissue external names that the user has confirmed as pre-existing
+ * @return Promise<RegisterTissuesMutationVariables> mutation variables wrapped in a promise
+ */
+export function buildRegisterTissuesMutationVariables(
+  formValues: RegistrationFormValues,
+  existingTissues: Array<string> = []
+): Promise<RegisterTissuesMutationVariables> {
+  return new Promise((resolve) => {
+    const blocks = formValues.tissues.reduce<BlockRegisterRequest[]>(
+      (memo, tissue) => {
+        return [
+          ...memo,
+          ...tissue.blocks.map<BlockRegisterRequest>((block) => {
+            const blockRegisterRequest: BlockRegisterRequest = {
+              species: tissue.species.trim(),
+              donorIdentifier: tissue.donorId.trim(),
+              externalIdentifier: block.externalIdentifier.trim(),
+              highestSection: block.lastKnownSectionNumber,
+              hmdmc: tissue.hmdmc.trim(),
+              labwareType: block.labwareType.trim(),
+              lifeStage: tissue.lifeStage,
+              tissueType: tissue.tissueType.trim(),
+              spatialLocation: block.spatialLocation,
+              replicateNumber: block.replicateNumber,
+              fixative: block.fixative.trim(),
+              medium: block.medium.trim(),
+              mouldSize: block.mouldSize.trim(),
+            };
+
+            if (
+              existingTissues.includes(blockRegisterRequest.externalIdentifier)
+            ) {
+              blockRegisterRequest.existingTissue = true;
+            }
+
+            return blockRegisterRequest;
+          }),
+        ];
+      },
+      []
+    );
+
+    resolve({ request: { blocks } });
+  });
 }
 
-enum Guards {
-  IS_CLASH = "isClash",
+export interface RegistrationContext {
+  registrationInfo: GetRegistrationInfoQuery;
+  registrationResult: RegisterTissuesMutation;
+  registrationErrors: ServerErrors;
+  confirmedTissues: Array<string>;
 }
 
-export enum Services {
-  SUBMIT = "submit",
-}
-
-export const machineOptions: Partial<MachineOptions<
-  RegistrationContext,
-  RegistrationEvent
->> = {
-  actions: {
-    [Actions.EMPTY_CONFIRMED_TISSUES]: assign(
-      (ctx) => (ctx.confirmedTissues = [])
-    ),
-
-    [Actions.ASSIGN_REGISTRATION_RESULT]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.submitting" || !e.data.data) {
-        return;
-      }
-      ctx.registrationResult = e.data.data;
-
-      // Store the clashed tissues to be used for possible user confirmation
-      ctx.confirmedTissues = ctx.registrationResult.register.clashes.map(
-        (clash) => clash.tissue.externalName
-      );
-    }),
-
-    [Actions.ASSIGN_REGISTRATION_ERROR]: assign((ctx, e) => {
-      if (e.type !== "error.platform.submitting") {
-        return;
-      }
-      ctx.registrationErrors = extractServerErrors(e.data);
-    }),
-  },
-
-  guards: {
-    [Guards.IS_CLASH]: (ctx) =>
-      ctx.registrationResult.register.clashes.length > 0,
-  },
-
-  services: {
-    [Services.SUBMIT]: (context, event) => {
-      if (event.type !== "SUBMIT_FORM") {
-        return Promise.reject();
-      }
-      return buildRegisterTissuesMutationVariables(
-        event.values,
-        context.confirmedTissues
-      ).then(registrationService.registerTissues);
-    },
-  },
+type SubmitFormEvent = {
+  type: "SUBMIT_FORM";
+  values: RegistrationFormValues;
 };
+
+type EditSubmissionEvent = {
+  type: "EDIT_SUBMISSION";
+};
+
+type SubmittingDoneEvent = {
+  type: "done.invoke.submitting";
+  data: RegisterTissuesMutationResult;
+};
+
+type SubmittingErrorEvent = {
+  type: "error.platform.submitting";
+  data: ApolloError;
+};
+
+export type RegistrationEvent =
+  | SubmitFormEvent
+  | EditSubmissionEvent
+  | SubmittingDoneEvent
+  | SubmittingErrorEvent;
 
 /**
  * XState state machine for Registration
  */
-
-const machineConfig: MachineConfig<
+const registrationMachine = createMachine<
   RegistrationContext,
-  RegistrationSchema,
   RegistrationEvent
-> = {
-  id: "registration",
-  initial: "ready",
-  states: {
-    ready: {
-      entry: [Actions.EMPTY_CONFIRMED_TISSUES],
-      on: {
-        SUBMIT_FORM: "submitting",
-      },
-    },
-    submitting: {
-      invoke: {
-        id: "submitting",
-        src: "submit",
-        onDone: {
-          target: "checkSubmissionClashes",
-          actions: [Actions.ASSIGN_REGISTRATION_RESULT],
-        },
-        onError: {
-          target: "submissionError",
-          actions: Actions.ASSIGN_REGISTRATION_ERROR,
+>(
+  {
+    id: "registration",
+    initial: "ready",
+    states: {
+      ready: {
+        entry: ["emptyConfirmedTissues"],
+        on: {
+          SUBMIT_FORM: "submitting",
         },
       },
-    },
-    checkSubmissionClashes: {
-      always: [
-        {
-          cond: Guards.IS_CLASH,
-          target: "clashed",
+      submitting: {
+        invoke: {
+          id: "submitting",
+          src: "submit",
+          onDone: {
+            target: "checkSubmissionClashes",
+            actions: ["assignRegistrationResult"],
+          },
+          onError: {
+            target: "submissionError",
+            actions: "assignRegistrationError",
+          },
         },
-        {
-          target: "complete",
+      },
+      checkSubmissionClashes: {
+        always: [
+          {
+            cond: "isClash",
+            target: "clashed",
+          },
+          {
+            target: "complete",
+          },
+        ],
+      },
+      clashed: {
+        on: {
+          EDIT_SUBMISSION: "ready",
+          SUBMIT_FORM: "submitting",
         },
-      ],
-    },
-    clashed: {
-      on: {
-        EDIT_SUBMISSION: "ready",
-        SUBMIT_FORM: "submitting",
       },
-    },
-    submissionError: {
-      on: {
-        SUBMIT_FORM: "submitting",
+      submissionError: {
+        on: {
+          SUBMIT_FORM: "submitting",
+        },
       },
-    },
-    complete: {
-      type: "final",
+      complete: {
+        type: "final",
+      },
     },
   },
-};
+  {
+    actions: {
+      emptyConfirmedTissues: assign((ctx) => (ctx.confirmedTissues = [])),
 
-const createRegistrationMachine = createMachineBuilder(
-  machineConfig,
-  machineOptions
+      assignRegistrationResult: assign((ctx, e) => {
+        if (e.type !== "done.invoke.submitting" || !e.data.data) {
+          return;
+        }
+        ctx.registrationResult = e.data.data;
+
+        // Store the clashed tissues to be used for possible user confirmation
+        ctx.confirmedTissues = ctx.registrationResult.register.clashes.map(
+          (clash) => clash.tissue.externalName
+        );
+      }),
+
+      assignRegistrationError: assign((ctx, e) => {
+        if (e.type !== "error.platform.submitting") {
+          return;
+        }
+        ctx.registrationErrors = extractServerErrors(e.data);
+      }),
+    },
+
+    guards: {
+      isClash: (ctx) => ctx.registrationResult.register.clashes.length > 0,
+    },
+
+    services: {
+      submit: (context, event) => {
+        if (event.type !== "SUBMIT_FORM") {
+          return Promise.reject();
+        }
+        return buildRegisterTissuesMutationVariables(
+          event.values,
+          context.confirmedTissues
+        ).then(registrationService.registerTissues);
+      },
+    },
+  }
 );
 
-export default createRegistrationMachine;
+export default registrationMachine;

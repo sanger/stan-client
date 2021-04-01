@@ -22,36 +22,6 @@ import {
   UnstoreBarcodeMutationVariables,
 } from "../../types/graphql";
 import { QueryOptions } from "@apollo/client";
-import { LocationMachine } from "../machines/locations/locationMachineTypes";
-import { buildLocationMachine } from "../factories/machineFactory";
-import { RouteComponentProps } from "react-router-dom";
-import { safeParseQueryString } from "../helpers";
-import {
-  isLocationSearch,
-  LocationMatchParams,
-  LocationSearchParams,
-} from "../../types/stan";
-
-/**
- * Return a location machine based off the barcode of a location
- * @param locationBarcode barcode of a location
- */
-export async function getLocationMachine(
-  routeProps: RouteComponentProps<LocationMatchParams>
-): Promise<LocationMachine> {
-  let locationSearch = null;
-
-  if (routeProps.location.search) {
-    locationSearch = safeParseQueryString<LocationSearchParams>(
-      routeProps.location.search,
-      isLocationSearch
-    );
-  }
-  const location = await findLocationByBarcode(
-    routeProps.match.params.locationBarcode
-  );
-  return buildLocationMachine(location, locationSearch);
-}
 
 /**
  * Send a request to core to find a Location by barcode

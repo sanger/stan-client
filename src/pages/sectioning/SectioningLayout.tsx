@@ -16,7 +16,7 @@ import {
   editLayout,
   updateSectioningLayout,
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
-import { LabwareTypeName, PrintableLabware } from "../../types/stan";
+import { LabwareTypeName } from "../../types/stan";
 import LabelPrinter, { PrintResult } from "../../components/LabelPrinter";
 import LabelPrinterButton from "../../components/LabelPrinterButton";
 import { cancel, done } from "../../lib/machines/layout/layoutEvents";
@@ -122,7 +122,7 @@ const SectioningLayout = React.forwardRef<
   const printColumn = {
     id: "printer",
     Header: "",
-    Cell: (props: CellProps<PrintableLabware>) => (
+    Cell: (props: CellProps<LabwareFieldsFragment>) => (
       <LabelPrinterButton
         labwares={[props.row.original]}
         selectedPrinter={currentPrinter}

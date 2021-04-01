@@ -72,7 +72,7 @@ function pagerReducer(state: PagerState, action: PagerAction): PagerState {
 }
 
 /**
- * Hook for controller pagination.
+ * Hook for controlling pagination.
  *
  * Plays nicely with the {@link Pager} component.
  */

@@ -1,8 +1,6 @@
 import {
-  BlockRegisterRequest,
   GetRegistrationInfoDocument,
   GetRegistrationInfoQuery,
-  LifeStage,
   RegisterSectionsDocument,
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,
@@ -12,30 +10,6 @@ import {
   SectionRegisterRequest,
 } from "../../types/graphql";
 import client from "../client";
-import {
-  buildRegistrationMachine,
-  buildSlideRegistrationMachine,
-} from "../factories/machineFactory";
-import { RegistrationMachine } from "../machines/registration/registrationMachineTypes";
-import { SlideRegistrationMachine } from "../machines/slideRegistration/slideRegistrationMachineTypes";
-
-/**
- * Gets the information for registration, then builds a {@link RegistrationMachine} from it
- */
-export async function getRegistrationMachine(): Promise<RegistrationMachine> {
-  const registrationInfo = await getRegistrationInfo();
-  return buildRegistrationMachine(registrationInfo);
-}
-
-/**
- * Gets the information for slide registration, then buidls a {@link SlideRegistrationMachine}
- */
-export async function getSlideRegistrationMachine(): Promise<
-  SlideRegistrationMachine
-> {
-  const registrationInfo = await getRegistrationInfo();
-  return buildSlideRegistrationMachine(registrationInfo);
-}
 
 /**
  * Gets all the information necessary for Registration
@@ -75,105 +49,4 @@ export async function registerSections(request: SectionRegisterRequest) {
   });
 
   return response.data;
-}
-
-export interface FormBlockValues {
-  clientId: number;
-  externalIdentifier: string;
-  spatialLocation: number;
-  replicateNumber: number;
-  lastKnownSectionNumber: number;
-  labwareType: string;
-  fixative: string;
-  medium: string;
-  mouldSize: string;
-}
-
-export interface FormTissueValues {
-  clientId: number;
-  donorId: string;
-  lifeStage: LifeStage;
-  species: string;
-  hmdmc: string;
-  tissueType: string;
-  blocks: FormBlockValues[];
-}
-
-export interface FormValues {
-  tissues: FormTissueValues[];
-}
-
-export function getInitialBlockValues(): FormBlockValues {
-  return {
-    clientId: Date.now(),
-    externalIdentifier: "",
-    spatialLocation: -1, // Initialise it as invalid so user has to select something
-    replicateNumber: 0,
-    lastKnownSectionNumber: 0,
-    labwareType: "",
-    fixative: "",
-    medium: "",
-    mouldSize: "",
-  };
-}
-
-export function getInitialTissueValues(): FormTissueValues {
-  return {
-    clientId: Date.now(),
-    donorId: "",
-    species: "",
-    lifeStage: LifeStage.Fetal,
-    hmdmc: "",
-    tissueType: "",
-    blocks: [getInitialBlockValues()],
-  };
-}
-
-/**
- * Builds the registerTissue mutation variables from the FormValues
- * @param formValues
- * @param existingTissues list of tissue external names that the user has confirmed as pre-existing
- * @return Promise<RegisterTissuesMutationVariables> mutation variables wrapped in a promise
- */
-export function buildRegisterTissuesMutationVariables(
-  formValues: FormValues,
-  existingTissues: Array<string> = []
-): Promise<RegisterTissuesMutationVariables> {
-  return new Promise((resolve) => {
-    const blocks = formValues.tissues.reduce<BlockRegisterRequest[]>(
-      (memo, tissue) => {
-        return [
-          ...memo,
-          ...tissue.blocks.map<BlockRegisterRequest>((block) => {
-            const blockRegisterRequest: BlockRegisterRequest = {
-              species: tissue.species.trim(),
-              donorIdentifier: tissue.donorId.trim(),
-              externalIdentifier: block.externalIdentifier.trim(),
-              highestSection: block.lastKnownSectionNumber,
-              hmdmc: tissue.hmdmc.trim(),
-              labwareType: block.labwareType.trim(),
-              lifeStage: tissue.lifeStage,
-              tissueType: tissue.tissueType.trim(),
-              spatialLocation: block.spatialLocation,
-              replicateNumber: block.replicateNumber,
-              fixative: block.fixative.trim(),
-              medium: block.medium.trim(),
-              mouldSize: block.mouldSize.trim(),
-            };
-
-            if (
-              existingTissues.includes(blockRegisterRequest.externalIdentifier)
-            ) {
-              blockRegisterRequest.existingTissue = true;
-            }
-
-            return blockRegisterRequest;
-          }),
-        ];
-      },
-      []
-    );
-
-    resolve({ request: { blocks } });
-  });
 }

@@ -649,6 +649,15 @@ export type LocationFieldsFragment = (
   )> }
 );
 
+export type PrinterFieldsFragment = (
+  { __typename?: 'Printer' }
+  & Pick<Printer, 'name'>
+  & { labelTypes: Array<(
+    { __typename?: 'LabelType' }
+    & Pick<LabelType, 'name'>
+  )> }
+);
+
 export type SampleFieldsFragment = (
   { __typename?: 'Sample' }
   & Pick<Sample, 'id'>
@@ -1106,11 +1115,7 @@ export type GetPrintersQuery = (
   { __typename?: 'Query' }
   & { printers: Array<(
     { __typename?: 'Printer' }
-    & Pick<Printer, 'name'>
-    & { labelTypes: Array<(
-      { __typename?: 'LabelType' }
-      & Pick<LabelType, 'name'>
-    )> }
+    & PrinterFieldsFragment
   )> }
 );
 
@@ -1267,6 +1272,14 @@ export const LocationFieldsFragmentDoc = gql`
     fixedName
     customName
     address
+  }
+}
+    `;
+export const PrinterFieldsFragmentDoc = gql`
+    fragment PrinterFields on Printer {
+  name
+  labelTypes {
+    name
   }
 }
     `;
@@ -2124,13 +2137,10 @@ export type GetDestroyInfoQueryResult = Apollo.QueryResult<GetDestroyInfoQuery, 
 export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
-    name
-    labelTypes {
-      name
-    }
+    ...PrinterFields
   }
 }
-    `;
+    ${PrinterFieldsFragmentDoc}`;
 
 /**
  * __useGetPrintersQuery__

@@ -9,20 +9,23 @@ import React, { useState } from "react";
 import { FormikErrors, FormikTouched, FormikValues, getIn } from "formik";
 import Pill from "../../components/Pill";
 import {
-  FormTissueValues,
-  FormValues,
-} from "../../lib/services/registrationService";
+  RegistrationFormTissue,
+  RegistrationFormValues,
+} from "../Registration";
 
 function getNumberOfBlocks(values: FormikValues) {
-  return values.tissues.reduce((memo: number, tissue: FormTissueValues) => {
-    return memo + tissue.blocks.length;
-  }, 0);
+  return values.tissues.reduce(
+    (memo: number, tissue: RegistrationFormTissue) => {
+      return memo + tissue.blocks.length;
+    },
+    0
+  );
 }
 
 function getNumErrorsPerTissue(
-  tissues: FormTissueValues[],
-  errors: FormikErrors<FormValues>,
-  touched: FormikTouched<FormValues>
+  tissues: RegistrationFormTissue[],
+  errors: FormikErrors<RegistrationFormValues>,
+  touched: FormikTouched<RegistrationFormValues>
 ): { [key: number]: number } {
   return tissues.reduce<{ [key: number]: number }>(
     (memo, tissue, tissueIndex) => {
@@ -54,9 +57,9 @@ function getNumErrorsPerTissue(
 
 interface SummaryBoxParams {
   submitting: boolean;
-  values: FormValues;
-  errors: FormikErrors<FormValues>;
-  touched: FormikTouched<FormValues>;
+  values: RegistrationFormValues;
+  errors: FormikErrors<RegistrationFormValues>;
+  touched: FormikTouched<RegistrationFormValues>;
   onNewTissueButton: () => void;
   currentFormIndex: number;
   setCurrentFormIndex: (n: number) => void;

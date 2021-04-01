@@ -11,6 +11,7 @@ const printers = labwareTypeInstances.reduce<GetPrintersQuery["printers"]>(
   (memo, labwareType) => {
     if (labwareType.labelType?.name) {
       memo.push({
+        __typename: "Printer",
         labelTypes: [
           {
             name: labwareType.labelType.name,
@@ -20,6 +21,7 @@ const printers = labwareTypeInstances.reduce<GetPrintersQuery["printers"]>(
       });
 
       memo.push({
+        __typename: "Printer",
         labelTypes: [
           {
             name: labwareType.labelType.name,

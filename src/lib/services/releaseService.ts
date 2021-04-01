@@ -4,18 +4,9 @@ import {
   ReleaseLabwareDocument,
   ReleaseLabwareMutation,
   ReleaseLabwareMutationVariables,
+  ReleaseRequest,
 } from "../../types/graphql";
 import client from "../client";
-import { ReleaseMachine } from "../machines/release/releaseMachineTypes";
-import { buildReleaseMachine } from "../factories/machineFactory";
-
-/**
- * Fetch the necessary release info, then build a {@link ReleaseMachine} with it
- */
-export async function getReleaseMachine(): Promise<ReleaseMachine> {
-  const releaseInfo = await getReleaseInfo();
-  return buildReleaseMachine(releaseInfo);
-}
 
 /**
  * Fetch information necessary for the Release page
@@ -29,17 +20,14 @@ export async function getReleaseInfo(): Promise<GetReleaseInfoQuery> {
 
 /**
  * Make call to core to release labware
- * @param variables the mutation variables
  */
-export async function releaseLabware(
-  variables: ReleaseLabwareMutationVariables
-) {
+export async function releaseLabware(releaseRequest: ReleaseRequest) {
   const response = await client.mutate<
     ReleaseLabwareMutation,
     ReleaseLabwareMutationVariables
   >({
     mutation: ReleaseLabwareDocument,
-    variables,
+    variables: { releaseRequest },
   });
 
   return response.data;

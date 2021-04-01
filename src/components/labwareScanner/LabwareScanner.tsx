@@ -6,6 +6,7 @@ import ScanInput from "../scanInput/ScanInput";
 import Success from "../notifications/Success";
 import Warning from "../notifications/Warning";
 import { isFunction } from "lodash";
+import { usePrevious } from "../../lib/hooks";
 
 type LabwareScannerProps = {
   initialLabwares?: LabwareFieldsFragment[];
@@ -57,9 +58,12 @@ export default function LabwareScanner({
   }, [send, locked]);
 
   // Call onChange handler whenever labwares change
+  const previousLabwareLength = usePrevious(labwares.length);
   useEffect(() => {
-    onChange?.(labwares);
-  }, [labwares, onChange]);
+    if (labwares.length !== previousLabwareLength) {
+      onChange?.(labwares);
+    }
+  }, [labwares, onChange, previousLabwareLength]);
 
   const ctxValue: LabwareScannerContextType = {
     locked: current.matches("locked"),

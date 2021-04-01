@@ -1,7 +1,5 @@
-import React from "react";
+import React, { useMemo } from "react";
 import AppShell from "../components/AppShell";
-import ExtractionPresentationModel from "../lib/presentationModels/extractionPresentationModel";
-
 import BlueButton from "../components/buttons/BlueButton";
 import Heading from "../components/Heading";
 import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
@@ -22,12 +20,41 @@ import variants from "../lib/motionVariants";
 import { usePrinters } from "../lib/hooks";
 import MutedText from "../components/MutedText";
 import LabwareScanner from "../components/labwareScanner/LabwareScanner";
+import { useMachine } from "@xstate/react";
+import { buildSampleColors } from "../lib/helpers/labwareHelper";
+import { LabwareFieldsFragment } from "../types/graphql";
+import extractionMachine, {
+  ExtractionContext,
+} from "../lib/machines/extraction/extractionMachine";
 
-interface PageParams {
-  model: ExtractionPresentationModel;
+function buildExtractionTableData(ctx: ExtractionContext) {
+  if (!ctx.extraction) return [];
+  const sourceLabwares = ctx.labwares;
+  const destinationLabwares = ctx.extraction.extract.labware;
+  const sampleColors = buildSampleColors(destinationLabwares);
+
+  return ctx.extraction.extract.operations
+    .map((operation) => {
+      return operation.actions.map((action) => {
+        return {
+          sampleColor: sampleColors.get(action.sample.id),
+          sourceLabware: sourceLabwares.find(
+            (lw) => lw.id === action.source.labwareId
+          ),
+          destinationLabware: destinationLabwares.find(
+            (lw) => lw.id === action.destination.labwareId
+          ),
+        };
+      });
+    })
+    .flat();
 }
 
-const Extraction: React.FC<PageParams> = ({ model }) => {
+function Extraction() {
+  const [current, send] = useMachine(() =>
+    extractionMachine.withContext({ labwares: [] })
+  );
+
   const {
     handleOnPrint,
     handleOnPrintError,
@@ -36,14 +63,39 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
     currentPrinter,
   } = usePrinters();
 
-  const columns = [
-    labwareScanTableColumns.color(model.sampleColors),
-    labwareScanTableColumns.barcode(),
-    labwareScanTableColumns.donorId(),
-    labwareScanTableColumns.tissueType(),
-    labwareScanTableColumns.spatialLocation(),
-    labwareScanTableColumns.replicate(),
-  ];
+  const { labwares, serverErrors, extraction } = current.context;
+
+  const sampleColors: Map<number, string> = useMemo(() => {
+    return buildSampleColors(labwares);
+  }, [labwares]);
+
+  const columns = useMemo(
+    () => [
+      labwareScanTableColumns.color(sampleColors),
+      labwareScanTableColumns.barcode(),
+      labwareScanTableColumns.donorId(),
+      labwareScanTableColumns.tissueType(),
+      labwareScanTableColumns.spatialLocation(),
+      labwareScanTableColumns.replicate(),
+    ],
+    [sampleColors]
+  );
+
+  const extractionTableData = useMemo(() => {
+    return buildExtractionTableData(current.context);
+  }, [current]);
+
+  const onLabwareScannerChange = (labwares: Array<LabwareFieldsFragment>) =>
+    send({ type: "UPDATE_LABWARES", labwares });
+
+  const scannerLocked =
+    !current.matches("ready") && !current.matches("extractionFailed");
+  const blueButtonDisabled = !(
+    (current.matches("ready") || current.matches("extractionFailed")) &&
+    labwares.length > 0
+  );
+  const showGrayPanel =
+    current.matches("ready") || current.matches("extractionFailed");
 
   return (
     <AppShell>
@@ -56,14 +108,14 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
             <Heading level={3}>Section Tubes</Heading>
 
             <LabwareScanner
-              onChange={model.updateLabwares}
-              locked={model.isLabwareScanPanelLocked}
+              onChange={onLabwareScannerChange}
+              locked={scannerLocked}
             >
               <LabwareScanPanel columns={columns} />
             </LabwareScanner>
           </div>
 
-          {model.showExtractionTubes && (
+          {current.matches("extracted") && (
             <motion.div
               initial={"hidden"}
               animate={"visible"}
@@ -86,7 +138,7 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
                   </tr>
                 </TableHead>
                 <TableBody>
-                  {model.extractionTableData.map((data) => (
+                  {extractionTableData.map((data) => (
                     <tr key={data.destinationLabware?.barcode}>
                       <TableCell>
                         {data.sampleColor && (
@@ -98,7 +150,7 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
                       <TableCell>
                         {data.destinationLabware && (
                           <LabelPrinterButton
-                            labelsPerBarcode={model.labelsPerBarcode}
+                            labelsPerBarcode={2}
                             labwares={[data.destinationLabware]}
                             selectedPrinter={currentPrinter}
                             onPrint={handleOnPrint}
@@ -115,9 +167,9 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
                 <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
                   {printResult && <PrintResult result={printResult} />}
                   <LabelPrinter
-                    labelsPerBarcode={model.labelsPerBarcode}
+                    labelsPerBarcode={2}
                     showNotifications={false}
-                    labwares={model.destinationLabwares}
+                    labwares={extraction?.extract?.labware ?? []}
                     onPrint={handleOnPrint}
                     onPrintError={handleOnPrintError}
                     onPrinterChange={handleOnPrinterChange}
@@ -132,11 +184,9 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
         </div>
       </AppShell.Main>
 
-      {model.showGrayPanel && (
+      {showGrayPanel && (
         <div className="flex-shrink-0 max-w-screen-xl mx-auto">
-          {model.showServerErrors && (
-            <Warning error={model.context.serverErrors} />
-          )}
+          {serverErrors && <Warning error={serverErrors} />}
 
           <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">
             <p className="my-3 text-gray-800 text-sm leading-normal">
@@ -151,10 +201,10 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
             <div className="flex flex-row items-center justify-center gap-4">
               <BlueButton
                 id="#extract"
-                disabled={!model.isExtractBtnEnabled}
+                disabled={blueButtonDisabled}
                 className="whitespace-nowrap"
                 action={"primary"}
-                onClick={model.extract}
+                onClick={() => send({ type: "EXTRACT" })}
               >
                 Extract
               </BlueButton>
@@ -164,6 +214,6 @@ const Extraction: React.FC<PageParams> = ({ model }) => {
       )}
     </AppShell>
   );
-};
+}
 
 export default Extraction;

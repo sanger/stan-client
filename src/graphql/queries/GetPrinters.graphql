@@ -1,8 +1,5 @@
 query GetPrinters {
     printers {
-        name
-        labelTypes {
-            name
-        }
+        ...PrinterFields
     }
 }

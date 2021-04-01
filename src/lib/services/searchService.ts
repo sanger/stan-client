@@ -8,41 +8,8 @@ import {
 } from "../../types/graphql";
 import client from "../client";
 import { SearchResultsType, SearchResultTableEntry } from "../../types/stan";
-import { SearchMachine } from "../machines/search/searchMachineTypes";
-import { buildSearchMachine } from "../factories/machineFactory";
-import { RouteComponentProps } from "react-router-dom";
-import { cleanParams, parseQueryString } from "../helpers";
-import { ParsedQuery } from "query-string";
 import _ from "lodash";
 import { addressToLocationAddress } from "../helpers/locationHelper";
-
-const findRequestKeys: (keyof FindRequest)[] = [
-  "labwareBarcode",
-  "tissueExternalName",
-  "donorName",
-  "tissueType",
-];
-
-export async function getSearchMachine(
-  routeProps: RouteComponentProps
-): Promise<SearchMachine> {
-  const searchInfo = await getSearchInfo();
-  const params: ParsedQuery = parseQueryString(routeProps.location.search);
-  const findRequest: FindRequest = _.merge(
-    buildFindRequestInitialValues(),
-    cleanParams(params, findRequestKeys)
-  );
-  return buildSearchMachine(searchInfo, findRequest);
-}
-
-function buildFindRequestInitialValues(): FindRequest {
-  return {
-    labwareBarcode: "",
-    tissueExternalName: "",
-    donorName: "",
-    tissueType: "",
-  };
-}
 
 /**
  * Fetch data necessary for the Search page

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { GetRegistrationInfoQuery, LifeStage } from "../../types/graphql";
 import { FieldArray, Form, useFormikContext } from "formik";
 import { AnimatePresence, motion } from "framer-motion";
@@ -15,64 +15,48 @@ import variants from "../../lib/motionVariants";
 import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
 import { useScrollToRef } from "../../lib/hooks";
 import {
-  FormValues,
-  getInitialBlockValues,
-  getInitialTissueValues,
-} from "../../lib/services/registrationService";
-import RegistrationPresentationModel from "../../lib/presentationModels/registrationPresentationModel";
+  getRegistrationFormBlock,
+  getRegistrationFormTissue,
+  RegistrationFormValues,
+} from "../Registration";
+import { LabwareTypeName } from "../../types/stan";
 
 interface RegistrationFormParams {
-  model: RegistrationPresentationModel;
+  registrationInfo: GetRegistrationInfoQuery;
 }
 
-const RegistrationForm = ({ model }: RegistrationFormParams) => {
+const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // The Spatial Location available will be determined by which Tissue Type is selected
-  const [availableSpatialLocations, setAvailableSpatialLocations] = useState<
-    GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"]
-  >([]);
-
-  // HMDMC field is only enabled if "Human" is selected for Species
-  const [isHMDMCEnabled, setIsHMDMCEnabled] = useState(false);
-
   const {
     setFieldValue,
-    validateField,
     values,
     errors,
     touched,
-  } = useFormikContext<FormValues>();
+    isSubmitting,
+  } = useFormikContext<RegistrationFormValues>();
 
-  const currentTissueType = values.tissues[currentIndex].tissueType;
-  useEffect(() => {
-    setAvailableSpatialLocations(
-      model.registrationInfo.tissueTypes.find(
-        (tt) => tt.name === currentTissueType
+  const availableLabwareTypes = useMemo(() => {
+    return registrationInfo.labwareTypes.filter((lt) =>
+      [LabwareTypeName.PROVIASETTE].includes(lt.name as LabwareTypeName)
+    );
+  }, [registrationInfo]);
+
+  // Available spatial locations are determined by the current tissue type
+  const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] = useMemo(() => {
+    return (
+      registrationInfo.tissueTypes.find(
+        (tt) => tt.name === values.tissues[currentIndex].tissueType
       )?.spatialLocations ?? []
     );
-  }, [
-    currentTissueType,
-    model.registrationInfo.tissueTypes,
-    setAvailableSpatialLocations,
-  ]);
+  }, [registrationInfo.tissueTypes, values.tissues, currentIndex]);
 
-  const currentSpecies = values.tissues[currentIndex].species;
+  // Only enable HMDMC when the species is Human
+  const isHMDMCEnabled = values.tissues[currentIndex].species === "Human";
   useEffect(() => {
-    if (currentSpecies !== "Human") {
-      setIsHMDMCEnabled(false);
+    if (!isHMDMCEnabled) {
       setFieldValue(`tissues.${currentIndex}.hmdmc`, "", true);
-    } else {
-      setIsHMDMCEnabled(true);
-      validateField(`tissues.${currentIndex}.hmdmc`);
     }
-  }, [
-    currentSpecies,
-    setFieldValue,
-    currentIndex,
-    setIsHMDMCEnabled,
-    validateField,
-  ]);
+  }, [isHMDMCEnabled, setFieldValue, currentIndex]);
 
   // Reference to the current Tissue being registered
   const tissueRef = useRef<HTMLDivElement>(null);
@@ -132,7 +116,7 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                 emptyOption
                 className="mt-2"
               >
-                {optionValues(model.registrationInfo.species, "name", "name")}
+                {optionValues(registrationInfo.species, "name", "name")}
               </FormikSelect>
             </motion.div>
 
@@ -149,7 +133,7 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                 emptyOption
                 className="mt-2"
               >
-                {optionValues(model.registrationInfo.hmdmcs, "hmdmc", "hmdmc")}
+                {optionValues(registrationInfo.hmdmcs, "hmdmc", "hmdmc")}
               </FormikSelect>
 
               <FormikSelect
@@ -158,11 +142,7 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                 name={`tissues.${currentIndex}.tissueType`}
                 className="mt-2"
               >
-                {optionValues(
-                  model.registrationInfo.tissueTypes,
-                  "name",
-                  "name"
-                )}
+                {optionValues(registrationInfo.tissueTypes, "name", "name")}
               </FormikSelect>
             </motion.div>
 
@@ -233,11 +213,7 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                           label="Labware Type"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.labwareType`}
                         >
-                          {optionValues(
-                            model.availableLabwareTypes,
-                            "name",
-                            "name"
-                          )}
+                          {optionValues(availableLabwareTypes, "name", "name")}
                         </FormikSelect>
 
                         <Heading level={4} showBorder={false} className="mt-4">
@@ -251,7 +227,7 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.fixative`}
                         >
                           {optionValues(
-                            model.registrationInfo.fixatives,
+                            registrationInfo.fixatives,
                             "name",
                             "name"
                           )}
@@ -264,7 +240,7 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.medium`}
                         >
                           {optionValues(
-                            model.registrationInfo.mediums,
+                            registrationInfo.mediums,
                             "name",
                             "name"
                           )}
@@ -274,7 +250,7 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                           label="Mould Size"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.mouldSize`}
                         >
-                          {model.registrationInfo.mouldSizes.map((ms) => {
+                          {registrationInfo.mouldSizes.map((ms) => {
                             return (
                               <RadioButton
                                 key={ms.name}
@@ -319,7 +295,7 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
                     action="secondary"
                     className="mt-4 inline-flex"
                     onClick={() => {
-                      blockHelpers.push(getInitialBlockValues());
+                      blockHelpers.push(getRegistrationFormBlock());
                       scrollToLatestBlock();
                     }}
                   >
@@ -356,14 +332,14 @@ const RegistrationForm = ({ model }: RegistrationFormParams) => {
           <FieldArray name={`tissues`}>
             {(tissueHelpers) => (
               <SummaryBox
-                submitting={model.isSubmitting()}
+                submitting={isSubmitting}
                 values={values}
                 errors={errors}
                 touched={touched}
                 currentFormIndex={currentIndex}
                 setCurrentFormIndex={setCurrentIndex}
                 onNewTissueButton={() => {
-                  tissueHelpers.push(getInitialTissueValues());
+                  tissueHelpers.push(getRegistrationFormTissue());
                   setCurrentIndex(currentIndex + 1);
                   tissueRef.current?.scrollIntoView({
                     behavior: "smooth",

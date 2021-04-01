@@ -1,12 +1,4 @@
-import {
-  GetPrintersQuery,
-  LabelType,
-  Labware,
-  LabwareFieldsFragment,
-  Maybe,
-  PlanRequestAction,
-  Size,
-} from "./graphql";
+import {LabwareFieldsFragment, Maybe, PrinterFieldsFragment, Size,} from "./graphql";
 import {ApolloError} from "@apollo/client";
 
 /**
@@ -29,11 +21,6 @@ export enum LabwareTypeName {
 export type Address = string;
 
 export type SizeInput = Omit<Size, "__typename">;
-
-/**
- * A {@link PlanRequestAction} before it knows where it's going
- */
-export type SourcePlanRequestAction = Omit<PlanRequestAction, "address">;
 
 /**
  * Type for when a piece of labware has been created in the client, but has not
@@ -83,20 +70,11 @@ export function extractServerErrors(e: ApolloError): ServerErrors {
 export type Nullable<T, K extends keyof T> = Omit<T, K> &
   { [P in K]: T[P] | null };
 
-/**
- * A piece of labware than can be printed i.e. has a label type
- */
-export type PrintableLabware = Pick<Labware, "barcode"> & {
-  labwareType: {
-    labelType?: Maybe<Pick<LabelType, "name">>;
-  };
-};
-
 export type PrintResultType = {
   successful: boolean;
   labelsPerBarcode: number;
-  printer: GetPrintersQuery["printers"][number];
-  labwares: Array<PrintableLabware>;
+  printer: PrinterFieldsFragment;
+  labwares: Array<LabwareFieldsFragment>;
 };
 
 export type SearchResultsType = {

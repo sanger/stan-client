@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle } from "react";
+import React, { useCallback, useEffect, useImperativeHandle } from "react";
 import classNames from "classnames";
 import BarcodeIcon from "../icons/BarcodeIcon";
 import { Slot } from "./Slot";
@@ -7,9 +7,8 @@ import _ from "lodash";
 import { LabwareFieldsFragment, SlotFieldsFragment } from "../../types/graphql";
 import createLabwareMachine from "./labware.machine";
 import { Selectable, SelectionMode } from "./labware.types";
-import { usePresentationModel } from "../../lib/hooks";
-import LabwarePresentationModel from "./labwarePresentationModel";
 import { NewLabwareLayout } from "../../types/stan";
+import { useMachine } from "@xstate/react";
 
 export interface LabwareProps {
   /**
@@ -129,14 +128,15 @@ const Labware = ({
   slotColor,
   labwareRef,
 }: React.PropsWithChildren<LabwareProps>) => {
-  const model = usePresentationModel(
+  const [current, send] = useMachine(
     createLabwareMachine({
       selectionMode,
       selectable,
       slots: labware.slots,
-    }),
-    (current, service) => new LabwarePresentationModel(current, service)
+    })
   );
+
+  const { selectedAddresses } = current.context;
 
   const {
     labwareType: { numRows, numColumns },
@@ -145,22 +145,24 @@ const Labware = ({
   } = labware;
 
   useImperativeHandle(labwareRef, () => ({
-    deselectAll: () => model.resetSelected(),
+    deselectAll: () => send({ type: "RESET_SELECTED" }),
   }));
 
-  const setSelectionMode = model.setSelectionMode;
   useEffect(() => {
-    setSelectionMode(selectionMode, selectable);
-  }, [setSelectionMode, selectionMode, selectable]);
-
-  const updateSlots = model.updateSlots;
-  useEffect(() => {
-    updateSlots(slots ?? []);
-  }, [updateSlots, slots]);
+    send({
+      type: "CHANGE_SELECTION_MODE",
+      selectionMode,
+      selectable,
+    });
+  }, [send, selectionMode, selectable]);
 
   useEffect(() => {
-    onSelect?.(Array.from(model.context.selectedAddresses));
-  }, [onSelect, model.context.selectedAddresses]);
+    send({ type: "UPDATE_SLOTS", slots: slots ?? [] });
+  }, [send, slots]);
+
+  useEffect(() => {
+    onSelect?.(Array.from(selectedAddresses));
+  }, [onSelect, selectedAddresses]);
 
   const labwareClasses =
     "inline-block py-2 bg-blue-100 rounded-lg transition duration-300 ease-in-out";
@@ -175,13 +177,26 @@ const Labware = ({
 
   const slotByAddress = _.keyBy(slots, "address");
 
-  const modelOnClick = model.onClick;
   const internalOnClick = React.useCallback(
     (address: string, slot: SlotFieldsFragment) => {
       onSlotClick?.(address, slot);
-      modelOnClick(address);
+      send({ type: "SELECT_SLOT", address });
     },
-    [onSlotClick, modelOnClick]
+    [onSlotClick, send]
+  );
+
+  const onCtrlClick = useCallback(
+    (address: string) => {
+      send({ type: "CTRL_SELECT_SLOT", address });
+    },
+    [send]
+  );
+
+  const onShiftClick = useCallback(
+    (address: string) => {
+      send({ type: "SELECT_TO_SLOT", address });
+    },
+    [send]
   );
 
   return (
@@ -194,14 +209,14 @@ const Labware = ({
             slot={slotByAddress[address]}
             size={numColumns > 6 || numRows > 6 ? "small" : "large"}
             onClick={internalOnClick}
-            onCtrlClick={model.onCtrlClick}
-            onShiftClick={model.onShiftClick}
+            onCtrlClick={onCtrlClick}
+            onShiftClick={onShiftClick}
             onMouseEnter={onSlotMouseEnter}
             onMouseLeave={onSlotMouseLeave}
             text={slotText}
             secondaryText={slotSecondaryText}
             color={slotColor}
-            selected={model.isSlotSelected(address)}
+            selected={selectedAddresses.has(address)}
           />
         ))}
       </div>

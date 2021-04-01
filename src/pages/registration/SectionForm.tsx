@@ -1,7 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
-import SlideRegistrationPresentationModel, {
-  SlideRegistrationFormValues,
-} from "../../lib/presentationModels/slideRegistrationPresentationModel";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { FieldArray, useFormikContext } from "formik";
 import { GetRegistrationInfoQuery, LifeStage } from "../../types/graphql";
 import { useOnScreen } from "../../lib/hooks";
@@ -15,9 +12,13 @@ import { enumKeys } from "../../lib/helpers";
 import FormikSelect from "../../components/forms/Select";
 import { optionValues } from "../../components/forms";
 import PinkButton from "../../components/buttons/PinkButton";
+import {
+  SlideRegistrationContext,
+  SlideRegistrationFormValues,
+} from "../SlideRegistration";
 
 type SectionFormParams = {
-  model: SlideRegistrationPresentationModel;
+  registrationInfo: GetRegistrationInfoQuery;
   /**
    * The address of this slot this section is in e.g. A1
    */
@@ -51,7 +52,7 @@ type SectionFormParams = {
 };
 
 export default function SectionForm({
-  model,
+  registrationInfo,
   slotAddress,
   sectionIndex,
   currentIndex,
@@ -59,6 +60,7 @@ export default function SectionForm({
   showRemoveSectionButton = false,
   scrollIntoView = false,
 }: SectionFormParams) {
+  const { buildSample } = useContext(SlideRegistrationContext);
   const { setFieldValue, values } = useFormikContext<
     SlideRegistrationFormValues
   >();
@@ -88,11 +90,10 @@ export default function SectionForm({
 
   const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] = useMemo(() => {
     return (
-      model.registrationInfo.tissueTypes.find(
-        (tt) => tt.name === selectedTissueType
-      )?.spatialLocations ?? []
+      registrationInfo.tissueTypes.find((tt) => tt.name === selectedTissueType)
+        ?.spatialLocations ?? []
     );
-  }, [model.registrationInfo.tissueTypes, selectedTissueType]);
+  }, [registrationInfo.tissueTypes, selectedTissueType]);
 
   /**
    * Only when the species is "Human", should the HMDMC field be enabled
@@ -143,7 +144,7 @@ export default function SectionForm({
         emptyOption
         className="mt-2"
       >
-        {optionValues(model.registrationInfo.species, "name", "name")}
+        {optionValues(registrationInfo.species, "name", "name")}
       </FormikSelect>
 
       <Heading level={4}>Tissue Information</Heading>
@@ -155,7 +156,7 @@ export default function SectionForm({
         emptyOption
         className="mt-2"
       >
-        {optionValues(model.registrationInfo.hmdmcs, "hmdmc", "hmdmc")}
+        {optionValues(registrationInfo.hmdmcs, "hmdmc", "hmdmc")}
       </FormikSelect>
 
       <FormikSelect
@@ -164,7 +165,7 @@ export default function SectionForm({
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.tissueType`}
         className="mt-2"
       >
-        {optionValues(model.registrationInfo.tissueTypes, "name", "name")}
+        {optionValues(registrationInfo.tissueTypes, "name", "name")}
       </FormikSelect>
 
       <FormikSelect
@@ -206,7 +207,7 @@ export default function SectionForm({
               <PinkButton
                 type="button"
                 action={"tertiary"}
-                onClick={() => samplesHelper.push(model.buildSample())}
+                onClick={() => samplesHelper.push(buildSample())}
               >
                 + Add Another Section to {slotAddress}
               </PinkButton>

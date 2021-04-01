@@ -8,13 +8,6 @@ import {
   PlanRequest,
 } from "../../types/graphql";
 import { OperationTypeName } from "../../types/stan";
-import { SectioningMachine } from "../machines/sectioning/sectioningMachineTypes";
-import { buildSectioningMachine } from "../factories/machineFactory";
-
-export async function getSectioningMachine(): Promise<SectioningMachine> {
-  const sectioningInfo = await getSectioningInfo();
-  return buildSectioningMachine(sectioningInfo);
-}
 
 /**
  * Get information for the Sectioning page

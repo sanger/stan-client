@@ -1,5 +1,3 @@
-import { DestroyMachine } from "../machines/destroy/destroyMachineTypes";
-import { buildDestroyMachine } from "../factories/machineFactory";
 import client from "../client";
 import {
   DestroyDocument,
@@ -11,17 +9,14 @@ import {
   GetDestroyInfoQueryVariables,
 } from "../../types/graphql";
 
-/**
- * Fetch the necessary data for the destroy and return a {@link DestroyMachine}
- */
-export async function getDestroyMachine(): Promise<DestroyMachine> {
+export async function getDestroyInfo() {
   const response = await client.query<
     GetDestroyInfoQuery,
     GetDestroyInfoQueryVariables
   >({
     query: GetDestroyInfoDocument,
   });
-  return Promise.resolve(buildDestroyMachine(response.data));
+  return response.data;
 }
 
 /**

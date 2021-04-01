@@ -1,102 +1,106 @@
-import { MachineConfig, MachineOptions, send } from "xstate";
-import { SearchContext, SearchSchema, SearchEvent } from "./searchMachineTypes";
+import { createMachine, send } from "xstate";
 import { assign } from "@xstate/immer";
-import { createMachineBuilder } from "../index";
 import * as searchService from "../../services/searchService";
 import { castDraft } from "immer";
+import { FindRequest, Maybe } from "../../../types/graphql";
+import { SearchResultsType } from "../../../types/stan";
+import { ApolloError } from "@apollo/client";
 
 /**
- * Search Machine Options
+ * Context for Search Machine
  */
-const machineOptions: Partial<MachineOptions<SearchContext, SearchEvent>> = {
-  actions: {
-    assignSearchResult: assign((ctx, e) => {
-      if (e.type !== "done.invoke.search") {
-        return;
-      }
-      ctx.searchResult = e.data;
-    }),
+export interface SearchContext {
+  findRequest: FindRequest;
+  searchResult?: SearchResultsType;
+  serverError?: Maybe<ApolloError>;
+}
 
-    unassignServerError: assign((ctx, _e) => {
-      ctx.serverError = null;
-    }),
-
-    assignServerError: assign((ctx, e) => {
-      if (e.type !== "error.platform.search") {
-        return;
-      }
-      ctx.serverError = castDraft(e.data);
-    }),
-  },
-  activities: {},
-  delays: {},
-  guards: {},
-  services: {
-    search: (ctx, e) => {
-      if (e.type !== "FIND") {
-        return Promise.reject();
-      }
-      return searchService.search(e.request);
-    },
-  },
+type FindEvent = { type: "FIND"; request: FindRequest };
+type SearchDoneEvent = {
+  type: "done.invoke.search";
+  data: SearchResultsType;
 };
+type SearchErrorEvent = { type: "error.platform.search"; data: ApolloError };
+
+export type SearchEvent = FindEvent | SearchDoneEvent | SearchErrorEvent;
 
 /**
  * Search Machine Config
  */
-export const machineConfig: MachineConfig<
-  SearchContext,
-  SearchSchema,
-  SearchEvent
-> = {
-  id: "search",
-  initial: "unknown",
-  states: {
-    unknown: {
-      always: [
-        {
-          cond: (context) =>
-            Object.values(context.findRequest).some((v) => !!v),
-          target: "ready",
-          actions: send((ctx, _e) => ({
-            type: "FIND",
-            request: ctx.findRequest,
-          })),
-        },
-        { target: "ready" },
-      ],
-    },
-    ready: {
-      on: {
-        FIND: "searching",
+const searchMachine = createMachine<SearchContext, SearchEvent>(
+  {
+    id: "search",
+    initial: "unknown",
+    states: {
+      unknown: {
+        always: [
+          {
+            cond: (context) =>
+              Object.values(context.findRequest).some((v) => !!v),
+            target: "ready",
+            actions: send((ctx, _e) => ({
+              type: "FIND",
+              request: ctx.findRequest,
+            })),
+          },
+          { target: "ready" },
+        ],
       },
-    },
-    searching: {
-      entry: "unassignServerError",
-      invoke: {
-        src: "search",
-        onDone: {
-          target: "searched",
-          actions: "assignSearchResult",
-        },
-        onError: {
-          target: "ready",
-          actions: "assignServerError",
+      ready: {
+        on: {
+          FIND: "searching",
         },
       },
-    },
-    searched: {
-      on: {
-        FIND: "searching",
+      searching: {
+        entry: "unassignServerError",
+        invoke: {
+          src: "search",
+          onDone: {
+            target: "searched",
+            actions: "assignSearchResult",
+          },
+          onError: {
+            target: "ready",
+            actions: "assignServerError",
+          },
+        },
+      },
+      searched: {
+        on: {
+          FIND: "searching",
+        },
       },
     },
   },
-};
+  {
+    actions: {
+      assignSearchResult: assign((ctx, e) => {
+        if (e.type !== "done.invoke.search") {
+          return;
+        }
+        ctx.searchResult = e.data;
+      }),
 
-const createSearchMachine = createMachineBuilder<
-  SearchContext,
-  SearchSchema,
-  SearchEvent
->(machineConfig, machineOptions);
+      unassignServerError: assign((ctx, _e) => {
+        ctx.serverError = null;
+      }),
 
-export default createSearchMachine;
+      assignServerError: assign((ctx, e) => {
+        if (e.type !== "error.platform.search") {
+          return;
+        }
+        ctx.serverError = castDraft(e.data);
+      }),
+    },
+    services: {
+      search: (ctx, e) => {
+        if (e.type !== "FIND") {
+          return Promise.reject();
+        }
+        return searchService.search(e.request);
+      },
+    },
+  }
+);
+
+export default searchMachine;

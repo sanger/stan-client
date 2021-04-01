@@ -1,10 +1,9 @@
 import {
   GetPrintersQuery,
-  LabelType,
-  Labware,
+  LabwareFieldsFragment,
   Maybe,
+  PrinterFieldsFragment,
 } from "../../../types/graphql";
-import { Interpreter, State, StateNode } from "xstate";
 import { ApolloError } from "@apollo/client";
 
 export interface LabelPrinterContext {
@@ -21,18 +20,12 @@ export interface LabelPrinterContext {
   /**
    * The currently selected printer
    */
-  selectedPrinter: Maybe<GetPrintersQuery["printers"][number]>;
+  selectedPrinter: Maybe<PrinterFieldsFragment>;
 
   /**
    * The list of labwares with their labware types, and their labware type's label type (if they have one)
    */
-  labwares: Array<
-    Pick<Labware, "barcode"> & {
-      labwareType: {
-        labelType?: Maybe<Pick<LabelType, "name">>;
-      };
-    }
-  >;
+  labwares: Array<LabwareFieldsFragment>;
 }
 
 /**
@@ -90,21 +83,3 @@ export type LabelPrinterEvent =
   | UpdateSelectedLabelPrinterEvent
   | PrintSuccessEvent
   | PrintErrorEvent;
-
-/**
- * Type of an interpreted LabelPrinter Machine
- */
-type LabelPrinterMachineType = Interpreter<
-  LabelPrinterContext,
-  LabelPrinterSchema,
-  LabelPrinterEvent
->;
-
-/**
- * Type for a LabelPrinter Machine
- */
-export type LabelPrinterMachine = StateNode<
-  LabelPrinterContext,
-  LabelPrinterSchema,
-  LabelPrinterEvent
->;

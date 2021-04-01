@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useMemo, useRef, useState } from "react";
 import Labware from "../../components/labware/Labware";
 import { unregisteredLabwareFactory } from "../../lib/factories/labwareFactory";
 import {
@@ -21,21 +21,29 @@ import EditIcon from "../../components/icons/EditIcon";
 import LabwareIcon from "../../components/icons/LabwareIcon";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { LabwareTypeName } from "../../types/stan";
-import SlideRegistrationPresentationModel, {
-  SlideRegistrationFormValues,
-} from "../../lib/presentationModels/slideRegistrationPresentationModel";
 import { debounce } from "lodash";
 import variants from "../../lib/motionVariants";
 import MutedText from "../../components/MutedText";
 import SectionForm from "./SectionForm";
+import { GetRegistrationInfoQuery } from "../../types/graphql";
+import {
+  SlideRegistrationContext,
+  SlideRegistrationFormValues,
+} from "../SlideRegistration";
 
-interface SlideRegistrationFormProps {
-  model: SlideRegistrationPresentationModel;
-}
+type SlideRegistrationFormParams = {
+  registrationInfo: GetRegistrationInfoQuery;
+};
 
-const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
-  model,
-}) => {
+function SlideRegistrationForm({
+  registrationInfo,
+}: SlideRegistrationFormParams) {
+  const {
+    availableSlides,
+    buildLabware,
+    buildSample,
+    isSubmitting,
+  } = useContext(SlideRegistrationContext);
   const { values, setFieldValue, errors, touched } = useFormikContext<
     SlideRegistrationFormValues
   >();
@@ -49,30 +57,31 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
 
   // Derived states
   const currentLabware = values.labwares[currentIndex];
-  const currentLabwareSectionCount = getSectionsCount(currentLabware);
-  const errorCount = getNumErrorsPerLabware(values.labwares, errors, touched);
-  const totalSections = getTotalSectionsCount(values.labwares);
+  const currentLabwareSectionCount = useMemo(
+    () => getSectionsCount(currentLabware),
+    [currentLabware]
+  );
+  const errorCount = useMemo(
+    () => getNumErrorsPerLabware(values.labwares, errors, touched),
+    [values.labwares, errors, touched]
+  );
+  const totalSections = useMemo(() => getTotalSectionsCount(values.labwares), [
+    values.labwares,
+  ]);
+  const labware = useMemo(() => {
+    const labwareType = registrationInfo.labwareTypes.find(
+      (lt) => lt.name === currentLabware.labwareTypeName
+    );
+    return unregisteredLabwareFactory.build(undefined, {
+      associations: { labwareType },
+    });
+  }, [currentLabware.labwareTypeName, registrationInfo.labwareTypes]);
 
   const debouncedSetCurrentSlot = debounce((slotAddress) => {
     setCurrentSlotAddress(slotAddress);
     setScrollToSlot(null);
   }, 200);
 
-  const currentLabwareType = model.registrationInfo.labwareTypes.find(
-    (lt) => lt.name === currentLabware.labwareTypeName
-  );
-
-  if (!currentLabwareType) {
-    throw new Error(`Unknown Labware Type: ${currentLabware.labwareTypeName}`);
-  }
-
-  const labware = unregisteredLabwareFactory
-    .associations({
-      labwareType: currentLabwareType,
-    })
-    .build();
-
-  const buildSample = model.buildSample;
   const handleOnSlotClick = React.useCallback(
     (address: string) => {
       // If this slot has zero samples, build an initial one
@@ -176,7 +185,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
                 className="block mt-2"
                 name={`labwares.${currentIndex}.fixative`}
               >
-                {optionValues(model.registrationInfo.fixatives, "name", "name")}
+                {optionValues(registrationInfo.fixatives, "name", "name")}
               </FormikSelect>
 
               <FormikSelect
@@ -185,7 +194,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
                 className="block mt-2"
                 name={`labwares.${currentIndex}.medium`}
               >
-                {optionValues(model.registrationInfo.mediums, "name", "name")}
+                {optionValues(registrationInfo.mediums, "name", "name")}
               </FormikSelect>
             </motion.div>
 
@@ -198,7 +207,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
                 <SectionForm
                   key={sample.clientId}
                   sectionIndex={slotIndex}
-                  model={model}
+                  registrationInfo={registrationInfo}
                   currentIndex={currentIndex}
                   slotAddress={slotAddress}
                   scrollIntoView={slotAddress === scrollToSlot}
@@ -280,7 +289,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
 
             <div className="my-2 w-full py-4 px-2 bg-sdb-500 rounded-md flex flex-col space-y-2">
               <Select id="labwareTypesSelect" ref={labwareTypeSelectRef}>
-                {model.availableSlides.map((labwareTypeName) => (
+                {availableSlides.map((labwareTypeName) => (
                   <option key={labwareTypeName} value={labwareTypeName}>
                     {labwareTypeName}
                   </option>
@@ -298,7 +307,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
                       const labwareType = labwareTypeSelectRef.current?.value;
                       const numberOfLabwares = values.labwares.length;
                       labwareHelpers.push(
-                        model.buildLabware(labwareType as LabwareTypeName)
+                        buildLabware(labwareType as LabwareTypeName)
                       );
                       setCurrentSlotAddress(null);
                       setCurrentIndex(numberOfLabwares);
@@ -312,7 +321,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
 
             <div className="w-full flex flex-col">
               <PinkButton
-                disabled={model.isSubmitting}
+                disabled={isSubmitting}
                 type="submit"
                 className="mt-4 w-full"
               >
@@ -324,7 +333,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
       </div>
     </Form>
   );
-};
+}
 
 export default SlideRegistrationForm;
 

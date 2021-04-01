@@ -1,10 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Labware, { LabwareImperativeRef } from "../labware/Labware";
 import Pager from "../pagination/Pager";
 import slotMapperMachine from "./slotMapper.machine";
 import { SlotMapperProps } from "./slotMapper.types";
-import { usePresentationModel, usePrevious } from "../../lib/hooks";
-import SlotMapperPresentationModel from "./SlotMapperPresentationModel";
+import { usePrevious } from "../../lib/hooks";
 import WhiteButton from "../buttons/WhiteButton";
 import LabwareScanner from "../labwareScanner/LabwareScanner";
 import RemoveButton from "../buttons/RemoveButton";
@@ -19,6 +24,9 @@ import Heading from "../Heading";
 import MutedText from "../MutedText";
 import { usePager } from "../../lib/hooks/usePager";
 import { NewLabwareLayout } from "../../types/stan";
+import { useMachine } from "@xstate/react";
+import * as labwareHelper from "../../lib/helpers/labwareHelper";
+import { find, findIndex } from "lodash";
 
 function SlotMapper({
   onChange,
@@ -26,17 +34,76 @@ function SlotMapper({
   initialOutputLabware = [],
   locked = false,
 }: SlotMapperProps) {
-  const model = usePresentationModel(
+  const [current, send] = useMachine(() =>
     slotMapperMachine.withContext({
       inputLabware: initialInputLabware,
       outputLabware: initialOutputLabware,
       slotCopyContent: [],
       colorByBarcode: new Map(),
-    }),
-    (current, service) => new SlotMapperPresentationModel(current, service)
+    })
   );
 
-  const { inputLabware, slotCopyContent } = model.context;
+  const { inputLabware, slotCopyContent, colorByBarcode } = current.context;
+
+  const allSourcesMapped = useMemo(() => {
+    if (inputLabware.length === 0) {
+      return false;
+    }
+
+    // List of [labwareBarcode, slotAddress] tuples for all filled slots of the source labwares
+    const allSources: Array<readonly [string, string]> = inputLabware.flatMap(
+      (lw) => {
+        return labwareHelper
+          .filledSlots(lw)
+          .map((slot) => [lw.barcode, slot.address]);
+      }
+    );
+
+    // Is every source in slotCopyContent?
+    return allSources.every(([sourceBarcode, sourceAddress]) => {
+      return (
+        findIndex(slotCopyContent, {
+          sourceBarcode,
+          sourceAddress,
+        }) !== -1
+      );
+    });
+  }, [inputLabware, slotCopyContent]);
+
+  const getSourceSlotColor = useCallback(
+    (
+      labware: LabwareFieldsFragment,
+      address: string,
+      slot: SlotFieldsFragment
+    ) => {
+      if (
+        find(slotCopyContent, {
+          sourceBarcode: labware.barcode,
+          sourceAddress: address,
+        })
+      ) {
+        return `bg-${colorByBarcode.get(labware.barcode)}-200`;
+      }
+
+      if (slot?.samples?.length) {
+        return `bg-${colorByBarcode.get(labware.barcode)}-500`;
+      }
+    },
+    [slotCopyContent, colorByBarcode]
+  );
+
+  const getDestinationSlotColor = useCallback(
+    (labware: NewLabwareLayout, address: string) => {
+      const scc = find(slotCopyContent, {
+        destinationAddress: address,
+      });
+
+      if (scc) {
+        return `bg-${colorByBarcode.get(scc.sourceBarcode)}-500`;
+      }
+    },
+    [slotCopyContent, colorByBarcode]
+  );
 
   /**
    * State to track the current input labware (for paging)
@@ -130,8 +197,8 @@ function SlotMapper({
    * If `locked` changes, tell the model
    */
   useEffect(() => {
-    locked ? model.lock() : model.unlock();
-  }, [locked, model]);
+    locked ? send({ type: "LOCK" }) : send({ type: "UNLOCK" });
+  }, [locked, send]);
 
   /**
    * These refs are passed into the Labware components so we can imperatively
@@ -146,15 +213,16 @@ function SlotMapper({
   const handleOnOutputLabwareSlotClick = React.useCallback(
     (outputAddress: string) => {
       if (currentInputId && currentOutputId) {
-        model.copySlots(
-          currentInputId,
-          selectedInputAddresses,
-          currentOutputId,
-          outputAddress
-        );
+        send({
+          type: "COPY_SLOTS",
+          inputLabwareId: currentInputId,
+          inputAddresses: selectedInputAddresses,
+          outputLabwareId: currentOutputId,
+          outputAddress,
+        });
       }
     },
-    [model, currentInputId, selectedInputAddresses, currentOutputId]
+    [send, currentInputId, selectedInputAddresses, currentOutputId]
   );
 
   /**
@@ -162,10 +230,14 @@ function SlotMapper({
    */
   const handleOnClickClear = React.useCallback(() => {
     if (currentOutputId) {
-      model.clearSlots(currentOutputId, selectedOutputAddresses);
+      send({
+        type: "CLEAR_SLOTS",
+        outputLabwareId: currentOutputId,
+        outputAddresses: selectedOutputAddresses,
+      });
       outputLabwareRef.current?.deselectAll();
     }
-  }, [model, currentOutputId, selectedOutputAddresses, outputLabwareRef]);
+  }, [send, currentOutputId, selectedOutputAddresses, outputLabwareRef]);
 
   /**
    * Whenever the SlotCopyContent map changes, or the current input labware changes,
@@ -173,24 +245,23 @@ function SlotMapper({
    */
   useEffect(() => {
     inputLabwareRef.current?.deselectAll();
-  }, [model.context.slotCopyContent, currentInputLabware]);
+  }, [slotCopyContent, currentInputLabware]);
 
   /**
    * Whenever the SlotCopyContent map changes, call the onChange handler
    */
   useEffect(() => {
-    onChange?.(model.context.slotCopyContent, model.allSourcesMapped);
-  }, [onChange, model.context.slotCopyContent, model.allSourcesMapped]);
+    onChange?.(slotCopyContent, allSourcesMapped);
+  }, [onChange, slotCopyContent, allSourcesMapped]);
 
   /**
    * Handler for whenever labware is added or removed by the labware scanner
    */
-  const updateInputLabware = model.updateInputLabware;
   const onLabwareScannerChange = React.useCallback(
-    (labwares: LabwareFieldsFragment[]) => {
-      updateInputLabware(labwares);
+    (labware: LabwareFieldsFragment[]) => {
+      send({ type: "UPDATE_INPUT_LABWARE", labware });
     },
-    [updateInputLabware]
+    [send]
   );
 
   return (
@@ -230,7 +301,7 @@ function SlotMapper({
                       selectionMode="multi"
                       labwareRef={inputLabwareRef}
                       slotColor={(address, slot) => {
-                        return model.getSourceSlotColor(
+                        return getSourceSlotColor(
                           currentInputLabware,
                           address,
                           slot
@@ -260,7 +331,7 @@ function SlotMapper({
               onSlotClick={handleOnOutputLabwareSlotClick}
               onSelect={setSelectedOutputAddresses}
               slotColor={(address) =>
-                model.getDestinationSlotColor(currentOutputLabware, address)
+                getDestinationSlotColor(currentOutputLabware, address)
               }
             />
           )}

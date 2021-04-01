@@ -1,47 +1,135 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import AppShell from "../components/AppShell";
 import Warning from "../components/notifications/Warning";
 import RegistrationForm from "./registration/RegistrationForm";
-import RegistrationSuccess from "./registration/RegistrationSuccess";
-import RegistrationPresentationModel from "../lib/presentationModels/registrationPresentationModel";
 import { Formik } from "formik";
-import {
-  FormValues,
-  getInitialTissueValues,
-} from "../lib/services/registrationService";
+import ClashModal from "./registration/ClashModal";
+import { GetRegistrationInfoQuery, LifeStage } from "../types/graphql";
+import * as Yup from "yup";
+import RegistrationValidation from "../lib/validation/registrationValidation";
+import { useMachine } from "@xstate/react";
+import registrationMachine from "../lib/machines/registration/registrationMachine";
+import RegistrationSuccess from "./registration/RegistrationSuccess";
 import columns from "../components/labwareScanPanel/columns";
-import Modal, {
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-} from "../components/Modal";
-import WhiteButton from "../components/buttons/WhiteButton";
-import PinkButton from "../components/buttons/PinkButton";
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-} from "../components/Table";
-import StyledLink from "../components/StyledLink";
-import ExternalIcon from "../components/icons/ExternalIcon";
 
-interface RegistrationParams {
-  model: RegistrationPresentationModel;
+export interface RegistrationFormBlock {
+  clientId: number;
+  externalIdentifier: string;
+  spatialLocation: number;
+  replicateNumber: number;
+  lastKnownSectionNumber: number;
+  labwareType: string;
+  fixative: string;
+  medium: string;
+  mouldSize: string;
 }
 
-const Registration: React.FC<RegistrationParams> = ({ model }) => {
-  const warningRef = useRef<HTMLDivElement>(null);
+export interface RegistrationFormTissue {
+  clientId: number;
+  donorId: string;
+  lifeStage: LifeStage;
+  species: string;
+  hmdmc: string;
+  tissueType: string;
+  blocks: RegistrationFormBlock[];
+}
 
+export interface RegistrationFormValues {
+  tissues: Array<RegistrationFormTissue>;
+}
+
+export function getRegistrationFormBlock(): RegistrationFormBlock {
+  return {
+    clientId: Date.now(),
+    externalIdentifier: "",
+    spatialLocation: -1, // Initialise it as invalid so user has to select something
+    replicateNumber: 0,
+    lastKnownSectionNumber: 0,
+    labwareType: "",
+    fixative: "",
+    medium: "",
+    mouldSize: "",
+  };
+}
+
+export function getRegistrationFormTissue(): RegistrationFormTissue {
+  return {
+    clientId: Date.now(),
+    donorId: "",
+    species: "",
+    lifeStage: LifeStage.Fetal,
+    hmdmc: "",
+    tissueType: "",
+    blocks: [getRegistrationFormBlock()],
+  };
+}
+
+const initialValues: RegistrationFormValues = {
+  tissues: [getRegistrationFormTissue()],
+};
+
+function buildRegistrationSchema(
+  registrationInfo: GetRegistrationInfoQuery
+): Yup.ObjectSchema {
+  const validation = new RegistrationValidation(registrationInfo);
+  return Yup.object().shape({
+    tissues: Yup.array()
+      .min(1)
+      .of(
+        Yup.object().shape({
+          donorId: validation.donorId,
+          lifeStage: validation.lifeStage,
+          species: validation.species,
+          hmdmc: validation.hmdmc,
+          tissueType: validation.tissueType,
+          blocks: Yup.array()
+            .min(1)
+            .of(
+              Yup.object().shape({
+                externalIdentifier: validation.externalIdentifier,
+                spatialLocation: validation.spatialLocation,
+                replicateNumber: validation.replicateNumber,
+                lastKnownSectionNumber: validation.lastKnownSectionNumber,
+                labwareType: validation.labwareType,
+                fixative: validation.fixative,
+                medium: validation.medium,
+                mouldSize: validation.mouldSize,
+              })
+            ),
+        })
+      ),
+  });
+}
+
+interface RegistrationParams {
+  registrationInfo: GetRegistrationInfoQuery;
+}
+
+function Registration({ registrationInfo }: RegistrationParams) {
+  const [current, send] = useMachine(registrationMachine);
+
+  const validationSchema = useMemo(() => {
+    return buildRegistrationSchema(registrationInfo);
+  }, [registrationInfo]);
+
+  const warningRef = useRef<HTMLDivElement>(null);
   // Scroll the error notification into view if it appears
   useEffect(() => {
     warningRef.current?.scrollIntoView({ behavior: "smooth" });
   });
 
-  if (model.isComplete()) {
+  const { registrationResult, registrationErrors } = current.context;
+  const formIsReady = [
+    "ready",
+    "submitting",
+    "clashed",
+    "submissionError",
+  ].some((val) => current.matches(val));
+
+  if (current.matches("complete") && registrationResult) {
     return (
       <RegistrationSuccess
-        labware={model.registrationResult.register.labware}
+        labware={registrationResult.register.labware}
         columns={[
           columns.barcode(),
           columns.labwareType(),
@@ -51,9 +139,6 @@ const Registration: React.FC<RegistrationParams> = ({ model }) => {
     );
   }
 
-  // Initial values provided to Formik
-  const initialValues: FormValues = { tissues: [getInitialTissueValues()] };
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -61,11 +146,11 @@ const Registration: React.FC<RegistrationParams> = ({ model }) => {
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          {model.isSubmissionError() && (
+          {registrationErrors && (
             <div ref={warningRef}>
               <Warning message={"There was a problem registering your tissues"}>
                 <ul className="list-disc list-inside">
-                  {model.registrationErrors.problems.map((problem, index) => {
+                  {registrationErrors.problems.map((problem, index) => {
                     return <li key={index}>{problem}</li>;
                   })}
                 </ul>
@@ -73,88 +158,25 @@ const Registration: React.FC<RegistrationParams> = ({ model }) => {
             </div>
           )}
 
-          {model.isReady() && (
-            <Formik<FormValues>
+          {formIsReady && (
+            <Formik<RegistrationFormValues>
               initialValues={initialValues}
-              validationSchema={model.registrationSchema}
+              validationSchema={validationSchema}
               validateOnChange={false}
               validateOnBlur={true}
-              onSubmit={(values) => {
-                model.submitForm(values);
-              }}
+              onSubmit={async (values) => send({ type: "SUBMIT_FORM", values })}
             >
               {({ values }) => (
                 <>
-                  <RegistrationForm model={model} />
+                  <RegistrationForm registrationInfo={registrationInfo} />
 
-                  <Modal show={model.submissionHasClash()}>
-                    <ModalHeader>External Name Already In Use</ModalHeader>
-                    <ModalBody>
-                      <div className="space-y-8">
-                        <p>
-                          Tissue with the following external identifiers already
-                          exist in the given labware:
-                        </p>
-
-                        <Table>
-                          <TableHead>
-                            <tr>
-                              <TableHeader>External ID</TableHeader>
-                              <TableHeader>Labware Barcode</TableHeader>
-                              <TableHeader>Labware Type</TableHeader>
-                            </tr>
-                          </TableHead>
-                          <TableBody>
-                            {model.registrationResult?.register.clashes.map(
-                              (clash) => {
-                                return clash.labware.map((lw, index) => (
-                                  <tr key={lw.barcode}>
-                                    {index === 0 && (
-                                      <TableCell rowSpan={clash.labware.length}>
-                                        {clash.tissue.externalName}
-                                      </TableCell>
-                                    )}
-                                    <TableCell>
-                                      <StyledLink
-                                        target="_blank"
-                                        to={`/store?labwareBarcode=${lw.barcode}`}
-                                      >
-                                        {lw.barcode}
-                                      </StyledLink>
-                                      <ExternalIcon className="inline-block mb-1 ml-1 h-4 w-4" />
-                                    </TableCell>
-                                    <TableCell>{lw.labwareType.name}</TableCell>
-                                  </tr>
-                                ));
-                              }
-                            )}
-                          </TableBody>
-                        </Table>
-
-                        <p>
-                          Are you sure you want to continue? New labware will be
-                          created for tissues with pre-existing external
-                          identifiers.
-                        </p>
-                      </div>
-                    </ModalBody>
-                    <ModalFooter>
-                      <PinkButton
-                        type="button"
-                        onClick={() => model.submitForm(values)}
-                        className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-                      >
-                        Confirm
-                      </PinkButton>
-                      <WhiteButton
-                        type="button"
-                        onClick={model.editSubmission}
-                        className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                      >
-                        Cancel
-                      </WhiteButton>
-                    </ModalFooter>
-                  </Modal>
+                  {current.matches("clashed") && registrationResult && (
+                    <ClashModal
+                      registrationResult={registrationResult}
+                      onConfirm={() => send({ type: "SUBMIT_FORM", values })}
+                      onCancel={() => send({ type: "EDIT_SUBMISSION" })}
+                    />
+                  )}
                 </>
               )}
             </Formik>
@@ -163,6 +185,6 @@ const Registration: React.FC<RegistrationParams> = ({ model }) => {
       </AppShell.Main>
     </AppShell>
   );
-};
+}
 
 export default Registration;

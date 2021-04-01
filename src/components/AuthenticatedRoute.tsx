@@ -9,11 +9,11 @@ interface AuthenticatedRouteProps extends RouteProps {}
  * If the user is authenticated, acts like a route.
  * If the user is not authenticated, redirects them to the login page.
  */
-function AuthenticatedRoute({ children, ...rest }: AuthenticatedRouteProps) {
+function AuthenticatedRoute({ render, ...rest }: AuthenticatedRouteProps) {
   const auth = useContext(authContext);
 
   if (auth.isAuthenticated()) {
-    return <Route {...rest}>{children}</Route>;
+    return <Route render={render} {...rest} />;
   } else {
     return (
       <Route {...rest}>

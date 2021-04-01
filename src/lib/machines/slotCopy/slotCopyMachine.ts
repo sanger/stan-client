@@ -1,121 +1,138 @@
-import { MachineConfig, MachineOptions } from "xstate";
-import {
-  SlotCopyContext,
-  SlotCopySchema,
-  SlotCopyEvent,
-} from "./slotCopyMachineTypes";
+import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
-import { createMachineBuilder } from "../index";
 import * as slotCopyService from "../../services/slotCopyService";
 import { castDraft } from "immer";
+import {
+  LabwareTypeName,
+  MachineServiceDone,
+  MachineServiceError,
+  OperationTypeName,
+} from "../../../types/stan";
+import {
+  LabwareFieldsFragment,
+  Maybe,
+  SlotCopyContent,
+  SlotCopyMutation,
+} from "../../../types/graphql";
+import { ApolloError } from "@apollo/client";
 
 /**
- * SlotCopy Machine Options
+ * Context for SlotCopy Machine
  */
-const machineOptions: Partial<MachineOptions<
-  SlotCopyContext,
-  SlotCopyEvent
->> = {
-  actions: {
-    assignSCC: assign((ctx, e) => {
-      e.type === "UPDATE_SLOT_COPY_CONTENT" &&
-        (ctx.slotCopyContent = e.slotCopyContent);
-    }),
+export interface SlotCopyContext {
+  operationType: OperationTypeName;
+  outputLabwareType: LabwareTypeName;
+  slotCopyContent: Array<SlotCopyContent>;
+  serverErrors?: Maybe<ApolloError>;
+  outputLabwares: Array<LabwareFieldsFragment>;
+}
 
-    assignResult: assign((ctx, e) => {
-      if (e.type !== "done.invoke.copySlots") {
-        return;
-      }
-      ctx.outputLabwares = e.data.slotCopy.labware;
-    }),
-
-    assignServerError: assign((ctx, e) => {
-      if (e.type !== "error.platform.copySlots") {
-        return;
-      }
-      ctx.serverErrors = castDraft(e.data);
-    }),
-
-    emptyServerError: assign((ctx, e) => {
-      ctx.serverErrors = null;
-    }),
-  },
-  services: {
-    copySlots: (ctx) => {
-      return slotCopyService.copySlots({
-        operationType: ctx.operationType,
-        labwareType: ctx.outputLabwareType,
-        contents: ctx.slotCopyContent,
-      });
-    },
-  },
+type UpdateSlotCopyContentType = {
+  type: "UPDATE_SLOT_COPY_CONTENT";
+  slotCopyContent: Array<SlotCopyContent>;
+  allSourcesMapped: boolean;
 };
+
+type SaveEvent = { type: "SAVE" };
+
+export type SlotCopyEvent =
+  | UpdateSlotCopyContentType
+  | SaveEvent
+  | MachineServiceDone<"copySlots", SlotCopyMutation>
+  | MachineServiceError<"copySlots">;
 
 /**
  * SlotCopy Machine Config
  */
-export const machineConfig: MachineConfig<
-  SlotCopyContext,
-  SlotCopySchema,
-  SlotCopyEvent
-> = {
-  id: "slotCopy",
-  initial: "mapping",
-  states: {
-    mapping: {
-      on: {
-        UPDATE_SLOT_COPY_CONTENT: [
-          {
-            target: "readyToCopy",
-            cond: (ctx, e) => e.allSourcesMapped,
-            actions: ["assignSCC"],
-          },
-          {
-            actions: ["assignSCC"],
-          },
-        ],
+export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
+  {
+    id: "slotCopy",
+    initial: "mapping",
+    states: {
+      mapping: {
+        on: {
+          UPDATE_SLOT_COPY_CONTENT: [
+            {
+              target: "readyToCopy",
+              cond: (ctx, e) => e.allSourcesMapped,
+              actions: ["assignSCC"],
+            },
+            {
+              actions: ["assignSCC"],
+            },
+          ],
+        },
       },
-    },
-    readyToCopy: {
-      on: {
-        UPDATE_SLOT_COPY_CONTENT: [
-          {
-            target: "mapping",
-            cond: (ctx, e) => !e.allSourcesMapped,
-            actions: ["assignSCC"],
-          },
-          {
-            actions: ["assignSCC"],
-          },
-        ],
+      readyToCopy: {
+        on: {
+          UPDATE_SLOT_COPY_CONTENT: [
+            {
+              target: "mapping",
+              cond: (ctx, e) => !e.allSourcesMapped,
+              actions: ["assignSCC"],
+            },
+            {
+              actions: ["assignSCC"],
+            },
+          ],
 
-        SAVE: "copying",
-      },
-    },
-    copying: {
-      entry: ["emptyServerError"],
-      invoke: {
-        src: "copySlots",
-        onDone: {
-          target: "copied",
-          actions: ["assignResult"],
-        },
-        onError: {
-          target: "readyToCopy",
-          actions: ["assignServerError"],
+          SAVE: "copying",
         },
       },
-    },
-    copied: {
-      type: "final",
+      copying: {
+        entry: ["emptyServerError"],
+        invoke: {
+          src: "copySlots",
+          onDone: {
+            target: "copied",
+            actions: ["assignResult"],
+          },
+          onError: {
+            target: "readyToCopy",
+            actions: ["assignServerError"],
+          },
+        },
+      },
+      copied: {
+        type: "final",
+      },
     },
   },
-};
+  {
+    actions: {
+      assignSCC: assign((ctx, e) => {
+        e.type === "UPDATE_SLOT_COPY_CONTENT" &&
+          (ctx.slotCopyContent = e.slotCopyContent);
+      }),
 
-const createSlotCopyMachine = createMachineBuilder<
-  SlotCopyContext,
-  SlotCopySchema,
-  SlotCopyEvent
->(machineConfig, machineOptions);
+      assignResult: assign((ctx, e) => {
+        if (e.type !== "done.invoke.copySlots") {
+          return;
+        }
+        ctx.outputLabwares = e.data.slotCopy.labware;
+      }),
 
-export default createSlotCopyMachine;
+      assignServerError: assign((ctx, e) => {
+        if (e.type !== "error.platform.copySlots") {
+          return;
+        }
+        ctx.serverErrors = castDraft(e.data);
+      }),
+
+      emptyServerError: assign((ctx) => {
+        ctx.serverErrors = null;
+      }),
+    },
+    services: {
+      copySlots: (ctx) => {
+        return slotCopyService.copySlots({
+          operationType: ctx.operationType,
+          labwareType: ctx.outputLabwareType,
+          contents: ctx.slotCopyContent,
+        });
+      },
+    },
+  }
+);
+
+export default slotCopyMachine;

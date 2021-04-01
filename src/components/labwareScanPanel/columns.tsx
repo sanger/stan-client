@@ -1,8 +1,6 @@
 import React from "react";
 import { CellProps, Column } from "react-table";
 import { Labware, LabwareFieldsFragment } from "../../types/graphql";
-import LabelPrinterButton from "../LabelPrinterButton";
-import { buildLabelPrinterMachine } from "../../lib/factories/machineFactory";
 import Circle from "../Circle";
 
 /**
@@ -93,24 +91,6 @@ const replicate: ColumnFactory = () => {
 };
 
 /**
- * Show a {@link LabelPrinterButton}
- */
-const printer: ColumnFactory<Parameters<typeof buildLabelPrinterMachine>> = (
-  params
-) => {
-  return {
-    id: "printer",
-    Header: "",
-    Cell: () => (
-      <LabelPrinterButton
-        labwares={params?.[0] ?? []}
-        selectedPrinter={params?.[1] ?? null}
-      />
-    ),
-  };
-};
-
-/**
  * Labware's labware type
  */
 const labwareType: ColumnFactory = () => {
@@ -146,7 +126,6 @@ const columns = {
   tissueType,
   spatialLocation,
   replicate,
-  printer,
   labwareType,
   externalName,
   bioState,

@@ -10,15 +10,64 @@ import { Cell, Column } from "react-table";
 import StyledLink from "../components/StyledLink";
 import { SearchResultTableEntry } from "../types/stan";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
-import SearchPresentationModel from "../lib/presentationModels/searchPresentationModel";
 import Warning from "../components/notifications/Warning";
 import Heading from "../components/Heading";
+import { FindRequest, GetSearchInfoQuery } from "../types/graphql";
+import { useMachine } from "@xstate/react";
+import searchMachine from "../lib/machines/search/searchMachine";
+import * as Yup from "yup";
+import { history } from "../lib/client";
+import { stringify } from "../lib/helpers";
+
+const validationSchema: Yup.ObjectSchema = Yup.object()
+  .shape({
+    labwareBarcode: Yup.string().ensure(),
+    tissueExternalName: Yup.string().ensure(),
+    donorName: Yup.string().ensure(),
+  })
+  .test({
+    name: "atLeastOneRequired",
+    test: function (value) {
+      const isValid = !!(
+        value?.labwareBarcode.trim() ||
+        value?.tissueExternalName.trim() ||
+        value?.donorName.trim()
+      );
+
+      if (isValid) return true;
+      return this.createError({
+        path: "labwareBarcode | tissueExternalName | donorName",
+        message:
+          "At least one of STAN Barcode, External Identifier, or Donor ID must not be empty.",
+      });
+    },
+  });
 
 type SearchProps = {
-  model: SearchPresentationModel;
+  searchInfo: GetSearchInfoQuery;
+  findRequest: FindRequest;
 };
 
-const Search: React.FC<SearchProps> = ({ model }) => {
+function Search({ searchInfo, findRequest }: SearchProps) {
+  const [current, send] = useMachine(() =>
+    searchMachine.withContext({
+      findRequest,
+    })
+  );
+
+  const { serverError, searchResult } = current.context;
+
+  const showWarning =
+    searchResult && searchResult.numRecords > searchResult.numDisplayed;
+  const showSearchResult =
+    current.matches("searched") && searchResult && searchResult?.numRecords > 0;
+
+  const onFormSubmit = (values: FindRequest) => {
+    send({ type: "FIND", request: values });
+    // Replace instead of push so user doesn't have to go through a load of old searches when going back
+    history.replace(`/search?${stringify(values)}`);
+  };
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -31,12 +80,12 @@ const Search: React.FC<SearchProps> = ({ model }) => {
               Find Stored Labware
             </Heading>
             <Formik
-              initialValues={model.defaultFindRequest}
-              validationSchema={model.validationSchema}
+              initialValues={findRequest}
+              validationSchema={validationSchema}
               validateOnChange={false}
               validateOnBlur={false}
               validateOnMount={false}
-              onSubmit={model.onFormSubmit}
+              onSubmit={onFormSubmit}
             >
               {({ errors, isValid }) => (
                 <Form>
@@ -64,12 +113,15 @@ const Search: React.FC<SearchProps> = ({ model }) => {
                         name="tissueType"
                         emptyOption={true}
                       >
-                        {optionValues(model.tissueTypes, "name", "name")}
+                        {optionValues(searchInfo.tissueTypes, "name", "name")}
                       </FormikSelect>
                     </div>
                   </div>
                   <div className="sm:flex sm:flex-row sm:mt-8 mt-4 items-center justify-end">
-                    <BlueButton disabled={model.isButtonDisabled} type="submit">
+                    <BlueButton
+                      disabled={current.matches("searching")}
+                      type="submit"
+                    >
                       Search
                     </BlueButton>
                   </div>
@@ -79,43 +131,44 @@ const Search: React.FC<SearchProps> = ({ model }) => {
           </div>
 
           <div className="my-10">
-            {model.showLoadingSpinner && (
+            {current.matches("searching") && (
               <div className="flex flex-row justify-center">
                 <LoadingSpinner />
               </div>
             )}
 
             <div>
-              {model.showServerError && (
-                <Warning message="Search Error" error={model.serverError} />
+              {serverError && (
+                <Warning message="Search Error" error={serverError} />
               )}
-              {model.showEmptyNotification && (
-                <Warning
-                  message={
-                    "There were no results for the given search. Please try again."
-                  }
-                />
-              )}
-              {model.showWarning && (
+              {current.matches("searched") &&
+                searchResult?.numRecords === 0 && (
+                  <Warning
+                    message={
+                      "There were no results for the given search. Please try again."
+                    }
+                  />
+                )}
+              {showWarning && (
                 <Warning
                   message={
                     "Not all results can be displayed. Please refine your search."
                   }
                 />
               )}
-              {model.showResults && (
+              {showSearchResult && searchResult && (
                 <div>
                   <div className="mt-6 mb-2 flex flex-row items-center justify-end">
                     <p className="text-sm text-gray-700">
                       Displaying{" "}
                       <span className="font-medium">
                         {" "}
-                        {model.searchResult.numDisplayed}{" "}
+                        {searchResult.numDisplayed}{" "}
                       </span>
                       of
                       <span className="font-medium">
                         {" "}
-                        {model.searchResult.numRecords}{" "}
+                        {searchResult.numRecords}{" "}
                       </span>
                       results
                     </p>
@@ -124,7 +177,7 @@ const Search: React.FC<SearchProps> = ({ model }) => {
                     sortable
                     defaultSort={[{ id: "donorId" }]}
                     columns={columns}
-                    data={model.searchResult.entries}
+                    data={searchResult.entries}
                   />
                 </div>
               )}
@@ -134,7 +187,7 @@ const Search: React.FC<SearchProps> = ({ model }) => {
       </AppShell.Main>
     </AppShell>
   );
-};
+}
 
 export default Search;
 

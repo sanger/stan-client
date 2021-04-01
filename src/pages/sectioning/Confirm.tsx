@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import AppShell from "../../components/AppShell";
 import PinkButton from "../../components/buttons/PinkButton";
 import { sortBy } from "lodash";
@@ -8,15 +8,12 @@ import { useScrollToRef } from "../../lib/hooks";
 import ConfirmByLabwareType from "./ConfirmByLabwareType";
 import { toast } from "react-toastify";
 import Success from "../../components/notifications/Success";
-import SectioningPresentationModel from "../../lib/presentationModels/sectioningPresentationModel";
-
-interface ConfirmProps {
-  model: SectioningPresentationModel;
-}
+import { SectioningPageContext } from "../Sectioning";
 
 const toastSuccess = () => <Success message={"Sectioning Saved"} />;
 
-const Confirm: React.FC<ConfirmProps> = ({ model }) => {
+function Confirm() {
+  const model = useContext(SectioningPageContext)!;
   const [ref, scrollToRef] = useScrollToRef();
 
   // Scroll to the top of the page when this component is first loaded
@@ -24,21 +21,21 @@ const Confirm: React.FC<ConfirmProps> = ({ model }) => {
 
   // When there's an error, make sure the page scrolls to it so it's in view
   useEffect(() => {
-    if (model.isConfirmError()) {
+    if (model.isConfirmError) {
       scrollToRef();
     }
   }, [model, scrollToRef]);
 
   // Show a toast notification with a success message when sectioning is complete
   useEffect(() => {
-    if (model.isDone()) {
+    if (model.isDone) {
       toast(toastSuccess, {
         position: toast.POSITION.TOP_RIGHT,
       });
     }
   }, [model]);
 
-  const { sectioningConfirmMachines } = model.current.context;
+  const { sectioningConfirmMachines } = model.context;
 
   // Sort the sectioning confirmations by having tubes first
   const sortedConfirmMachines = sortBy(
@@ -61,7 +58,7 @@ const Confirm: React.FC<ConfirmProps> = ({ model }) => {
                 labwareTypeName={labwareTypeName}
               />
             ))}
-            {model.isConfirmError() && (
+            {model.isConfirmError && (
               <div ref={ref}>
                 <Warning
                   message={
@@ -78,14 +75,14 @@ const Confirm: React.FC<ConfirmProps> = ({ model }) => {
         <div className="max-w-screen-xl mx-auto">
           <div className="flex flex-row items-center justify-between">
             <PinkButton
-              disabled={model.isDone()}
+              disabled={model.isDone}
               onClick={model.backToPrep}
               action="tertiary"
             >
               Back
             </PinkButton>
             <PinkButton
-              disabled={model.isDone()}
+              disabled={model.isDone}
               onClick={model.confirmOperation}
               action="primary"
             >
@@ -96,6 +93,6 @@ const Confirm: React.FC<ConfirmProps> = ({ model }) => {
       </div>
     </AppShell>
   );
-};
+}
 
 export default Confirm;

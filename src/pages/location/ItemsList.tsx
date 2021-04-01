@@ -7,7 +7,7 @@ import Table, {
   TableHeader,
 } from "../../components/Table";
 import RemoveButton from "../../components/buttons/RemoveButton";
-import { ModelContext } from "../Location";
+import { LocationParentContext } from "../Location";
 import UnstoreBarcodeModal from "./UnstoreBarcodeModal";
 import { Maybe } from "../../types/graphql";
 import { StoredItemFragment } from "../../lib/machines/locations/locationMachineTypes";
@@ -27,8 +27,12 @@ interface ItemsListParams {
 export const ItemsList: React.FC<ItemsListParams> = ({
   freeformAddress = false,
 }) => {
-  const model = useContext(ModelContext)!;
-  const { location, addressToItemMap } = model.context;
+  const {
+    location,
+    addressToItemMap,
+    storeBarcode,
+    unstoreBarcode,
+  } = useContext(LocationParentContext)!;
 
   const [selectedItem, setSelectedItem] = useState<Maybe<StoredItemFragment>>(
     null
@@ -46,7 +50,7 @@ export const ItemsList: React.FC<ItemsListParams> = ({
     ));
 
   const handleOnScan = (barcode: string) => {
-    model.storeBarcode(barcode, selectedAddress);
+    storeBarcode(barcode, selectedAddress);
     if (scanInputRef.current) {
       scanInputRef.current.value = "";
     }
@@ -151,7 +155,7 @@ export const ItemsList: React.FC<ItemsListParams> = ({
           onConfirm={() => {
             const barcode = selectedItem?.barcode;
             if (barcode) {
-              model.unstoreBarcode(barcode);
+              unstoreBarcode(barcode);
             }
             setSelectedItem(null);
           }}

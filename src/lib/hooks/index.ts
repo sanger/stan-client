@@ -5,12 +5,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { MachinePresentationModel } from "../presentationModels/machinePresentationModel";
-import { EventObject, Interpreter, State, StateMachine } from "xstate";
-import { useMachine } from "@xstate/react";
-import { Typestate } from "xstate/lib/types";
-import { GetPrintersQuery, Maybe } from "../../types/graphql";
-import { PrintableLabware, PrintResultType } from "../../types/stan";
+import {
+  GetPrintersQuery,
+  LabwareFieldsFragment,
+  Maybe,
+  PrinterFieldsFragment,
+} from "../../types/graphql";
+import { PrintResultType } from "../../types/stan";
 
 /**
  * Hook to call a side effect after a given delay
@@ -134,43 +135,6 @@ export function useOnScreen<E extends HTMLElement>(
 }
 
 /**
- * Starts interpreting a machine and connects it to a {@link MachinePresentationModel}
- * @param machine a state machine
- * @param initPresentationModel a function that returns a new {@link MachinePresentationModel}
- */
-export function usePresentationModel<
-  E extends MachinePresentationModel<
-    TContext,
-    TStateSchema,
-    TEvent,
-    TTypestate
-  >,
-  TContext,
-  TStateSchema,
-  TEvent extends EventObject,
-  TTypestate extends Typestate<TContext> = { value: any; context: TContext }
->(
-  machine: StateMachine<TContext, TStateSchema, TEvent, TTypestate>,
-  initPresentationModel: (
-    current: State<TContext, TEvent, TStateSchema, TTypestate>,
-    service: Interpreter<TContext, TStateSchema, TEvent, TTypestate>
-  ) => E
-) {
-  // eslint-disable-next-line
-  const [current, _, service] = useMachine(machine);
-  const [model, setModel] = useState(() =>
-    initPresentationModel(current, service)
-  );
-
-  // Whenever the current state changes, set state of the presentation model
-  useEffect(() => {
-    setModel(model.setState(current));
-  }, [model, current]);
-
-  return model;
-}
-
-/**
  * Hook for handling multiple print buttons on a page
  *
  * `handleOnPrint` is a handler for a printer that will set a successful print result
@@ -191,7 +155,7 @@ export function usePresentationModel<
  */
 export function usePrinters() {
   const [currentPrinter, setCurrentPrinter] = useState<
-    Maybe<GetPrintersQuery["printers"][number]>
+    Maybe<PrinterFieldsFragment>
   >(null);
 
   const [printResult, setPrintResult] = useState<Maybe<PrintResultType>>(null);
@@ -206,8 +170,8 @@ export function usePrinters() {
 
   const handleOnPrint = React.useCallback(
     (
-      printer: GetPrintersQuery["printers"][0],
-      labwares: Array<PrintableLabware>,
+      printer: PrinterFieldsFragment,
+      labwares: Array<LabwareFieldsFragment>,
       labelsPerBarcode: number
     ) => {
       setPrintResult({ successful: true, labwares, printer, labelsPerBarcode });
@@ -216,8 +180,8 @@ export function usePrinters() {
   );
   const handleOnPrintError = React.useCallback(
     (
-      printer: GetPrintersQuery["printers"][0],
-      labwares: Array<PrintableLabware>,
+      printer: PrinterFieldsFragment,
+      labwares: Array<LabwareFieldsFragment>,
       labelsPerBarcode: number
     ) => {
       setPrintResult({
