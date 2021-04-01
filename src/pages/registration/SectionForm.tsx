@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import SlideRegistrationPresentationModel, {
   SlideRegistrationFormValues,
 } from "../../lib/presentationModels/slideRegistrationPresentationModel";
@@ -59,17 +59,9 @@ export default function SectionForm({
   showRemoveSectionButton = false,
   scrollIntoView = false,
 }: SectionFormParams) {
-  const { setFieldValue, validateField, values } = useFormikContext<
+  const { setFieldValue, values } = useFormikContext<
     SlideRegistrationFormValues
   >();
-
-  const [availableSpatialLocations, setAvailableSpatialLocations] = useState<
-    GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"]
-  >([]);
-
-  // HMDMC field is only enabled if "Human" is selected for Species
-  const [isHMDMCEnabled, setIsHMDMCEnabled] = useState(false);
-
   const slotRef = useRef<HTMLDivElement>(null);
   const isOnScreen = useOnScreen(slotRef, { threshold: 0.4 });
 
@@ -91,51 +83,33 @@ export default function SectionForm({
     }
   }, [scrollIntoView]);
 
-  /**
-   * When the tissue type changes, update the available spatial locations
-   */
-  const currentTissueType =
+  const selectedTissueType =
     values.labwares[currentIndex].slots[slotAddress][sectionIndex].tissueType;
-  useEffect(() => {
-    setAvailableSpatialLocations(
+
+  const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] = useMemo(() => {
+    return (
       model.registrationInfo.tissueTypes.find(
-        (tt) => tt.name === currentTissueType
+        (tt) => tt.name === selectedTissueType
       )?.spatialLocations ?? []
     );
-  }, [
-    setAvailableSpatialLocations,
-    model.registrationInfo.tissueTypes,
-    currentTissueType,
-  ]);
+  }, [model.registrationInfo.tissueTypes, selectedTissueType]);
 
   /**
-   * When the species is "Human", enable the HMDMC field
+   * Only when the species is "Human", should the HMDMC field be enabled
    */
-  const currentSpecies =
-    values.labwares[currentIndex]?.slots[slotAddress]?.[sectionIndex].species;
+  const isHMDMCEnabled =
+    values.labwares[currentIndex]?.slots[slotAddress]?.[sectionIndex]
+      .species === "Human";
+  const hmdmcField = `labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.hmdmc`;
+
+  /**
+   * When HMDMC fields is disabled, make sure to also unset its value
+   */
   useEffect(() => {
-    if (currentSpecies !== "Human") {
-      setIsHMDMCEnabled(false);
-      setFieldValue(
-        `labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.hmdmc`,
-        "",
-        true
-      );
-    } else {
-      setIsHMDMCEnabled(true);
-      validateField(
-        `labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.hmdmc`
-      );
+    if (!isHMDMCEnabled) {
+      setFieldValue(hmdmcField, "", true);
     }
-  }, [
-    currentSpecies,
-    setFieldValue,
-    currentIndex,
-    sectionIndex,
-    setIsHMDMCEnabled,
-    validateField,
-    slotAddress,
-  ]);
+  }, [isHMDMCEnabled, hmdmcField, setFieldValue]);
 
   return (
     <motion.div
