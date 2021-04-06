@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Labware from "../../components/labware/Labware";
 import { labwareFactories } from "../../lib/factories/labwareFactory";
 import {
@@ -15,9 +15,6 @@ import Heading from "../../components/Heading";
 import FormikSelect, { Select } from "../../components/forms/Select";
 import { optionValues } from "../../components/forms";
 import Pill from "../../components/Pill";
-import RadioGroup, { RadioButton } from "../../components/forms/RadioGroup";
-import { enumKeys } from "../../lib/helpers";
-import { GetRegistrationInfoQuery, LifeStage } from "../../types/graphql";
 import { motion } from "framer-motion";
 import BarcodeIcon from "../../components/icons/BarcodeIcon";
 import EditIcon from "../../components/icons/EditIcon";
@@ -27,10 +24,10 @@ import { LabwareTypeName } from "../../types/stan";
 import SlideRegistrationPresentationModel, {
   SlideRegistrationFormValues,
 } from "../../lib/presentationModels/slideRegistrationPresentationModel";
-import { debounce, omit } from "lodash";
+import { debounce } from "lodash";
 import variants from "../../lib/motionVariants";
-import { useOnScreen } from "../../lib/hooks";
 import MutedText from "../../components/MutedText";
+import SectionForm from "./SectionForm";
 
 interface SlideRegistrationFormProps {
   model: SlideRegistrationPresentationModel;
@@ -52,8 +49,9 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
 
   // Derived states
   const currentLabware = values.labwares[currentIndex];
-  const currentOccupiedSlots = Object.keys(currentLabware.slots);
+  const currentLabwareSectionCount = getSectionsCount(currentLabware);
   const errorCount = getNumErrorsPerLabware(values.labwares, errors, touched);
+  const totalSections = getTotalSectionsCount(values.labwares);
 
   const debouncedSetCurrentSlot = debounce((slotAddress) => {
     setCurrentSlotAddress(slotAddress);
@@ -62,27 +60,24 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
 
   const labware = labwareFactories[currentLabware.labwareTypeName].build();
 
-  const buildSlot = model.buildSlot;
+  const buildSample = model.buildSample;
   const handleOnSlotClick = React.useCallback(
     (address: string) => {
-      // If this is a new slot, build it
-      if (!currentOccupiedSlots.includes(address)) {
+      // If this slot has zero samples, build an initial one
+      if (
+        !currentLabware.slots.hasOwnProperty(address) ||
+        currentLabware.slots[address].length === 0
+      ) {
         setFieldValue(
           `labwares.${currentIndex}.slots`,
           Object.assign({}, currentLabware.slots, {
-            [address]: buildSlot(),
+            [address]: [buildSample()],
           })
         );
       }
       setScrollToSlot(address);
     },
-    [
-      currentOccupiedSlots,
-      setFieldValue,
-      currentLabware.slots,
-      buildSlot,
-      currentIndex,
-    ]
+    [setFieldValue, currentLabware.slots, buildSample, currentIndex]
   );
 
   return (
@@ -104,17 +99,25 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
                   selectionMode={"single"}
                   selectable={"any"}
                   slotText={(address) => {
-                    const externalIdentifier =
-                      currentLabware.slots[address]?.externalIdentifier ?? "";
-                    return externalIdentifier !== ""
-                      ? externalIdentifier
-                      : undefined;
+                    if (currentLabware.slots[address]?.length > 0) {
+                      const externalIdentifier =
+                        currentLabware.slots[address][0].externalIdentifier;
+                      return externalIdentifier !== ""
+                        ? externalIdentifier
+                        : address;
+                    }
+                  }}
+                  slotSecondaryText={(address) => {
+                    const slotSampleLength =
+                      currentLabware.slots[address]?.length;
+                    if (slotSampleLength > 1) {
+                      return `x${slotSampleLength}`;
+                    }
                   }}
                   slotColor={(address) => {
                     if (address === currentSlotAddress) {
                       return "bg-sp-500";
-                    }
-                    if (currentOccupiedSlots.includes(address)) {
+                    } else if (currentLabware.slots?.[address]?.length > 0) {
                       return "bg-sdb-200";
                     }
                   }}
@@ -182,17 +185,23 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
               </FormikSelect>
             </motion.div>
 
-            {Object.keys(values.labwares[currentIndex].slots).map(
-              (slotAddress) => (
-                <SlotForm
-                  key={slotAddress}
+            {Object.keys(
+              values.labwares[currentIndex].slots
+            ).flatMap((slotAddress) =>
+              values.labwares[currentIndex].slots[
+                slotAddress
+              ].map((sample, slotIndex) => (
+                <SectionForm
+                  key={sample.clientId}
+                  sectionIndex={slotIndex}
                   model={model}
                   currentIndex={currentIndex}
                   slotAddress={slotAddress}
                   scrollIntoView={slotAddress === scrollToSlot}
+                  showRemoveSectionButton={currentLabwareSectionCount > 1}
                   onScreen={debouncedSetCurrentSlot}
                 />
-              )
+              ))
             )}
           </motion.div>
         </div>
@@ -206,10 +215,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
               There {values.labwares.length === 1 ? "is" : "are"} currently{" "}
               <span className="font-bold">{values.labwares.length}</span>{" "}
               labware(s) and a total of{" "}
-              <span className="font-bold">
-                {getTotalSections(values.labwares)}
-              </span>{" "}
-              section(s).
+              <span className="font-bold">{totalSections}</span> section(s).
             </p>
 
             <div id="labware-summaries" className="text-gray-100">
@@ -260,7 +266,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
 
                     <div>
                       <span className="text-sm">
-                        {Object.keys(labware.slots).length} Section(s)
+                        {getSectionsCount(labware)} Section(s)
                       </span>
                     </div>
                   </div>
@@ -302,7 +308,7 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
 
             <div className="w-full flex flex-col">
               <PinkButton
-                // loading={submitting}
+                disabled={model.isSubmitting}
                 type="submit"
                 className="mt-4 w-full"
               >
@@ -318,201 +324,6 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
 
 export default SlideRegistrationForm;
 
-interface SlotFormParams {
-  model: SlideRegistrationPresentationModel;
-  slotAddress: string;
-  currentIndex: number;
-  scrollIntoView: boolean;
-  onScreen: (slotAddress: string) => void;
-}
-
-const SlotForm: React.FC<SlotFormParams> = ({
-  model,
-  slotAddress,
-  currentIndex,
-  onScreen,
-  scrollIntoView = false,
-}) => {
-  const { setFieldValue, validateField, values } = useFormikContext<
-    SlideRegistrationFormValues
-  >();
-
-  const [availableSpatialLocations, setAvailableSpatialLocations] = useState<
-    GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"]
-  >([]);
-
-  // HMDMC field is only enabled if "Human" is selected for Species
-  const [isHMDMCEnabled, setIsHMDMCEnabled] = useState(false);
-
-  const slotRef = useRef<HTMLDivElement>(null);
-  const isOnScreen = useOnScreen(slotRef, { threshold: 0.4 });
-
-  useEffect(() => {
-    if (isOnScreen) {
-      onScreen(slotAddress);
-    }
-  }, [isOnScreen, onScreen, slotAddress]);
-
-  useEffect(() => {
-    if (scrollIntoView) {
-      slotRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [scrollIntoView]);
-
-  const currentTissueType =
-    values.labwares[currentIndex]?.slots[slotAddress]?.tissueType;
-  useEffect(() => {
-    setFieldValue(
-      `labwares.${currentIndex}.slots.${slotAddress}.spatialLocation`,
-      "",
-      false
-    );
-
-    setAvailableSpatialLocations(
-      model.registrationInfo.tissueTypes.find(
-        (tt) => tt.name === currentTissueType
-      )?.spatialLocations ?? []
-    );
-  }, [
-    currentIndex,
-    slotAddress,
-    currentTissueType,
-    model.registrationInfo.tissueTypes,
-    setAvailableSpatialLocations,
-    setFieldValue,
-  ]);
-
-  const currentSpecies =
-    values.labwares[currentIndex]?.slots[slotAddress]?.species;
-  useEffect(() => {
-    if (currentSpecies !== "Human") {
-      setIsHMDMCEnabled(false);
-      setFieldValue(
-        `labwares.${currentIndex}.slots.${slotAddress}.hmdmc`,
-        "",
-        true
-      );
-    } else {
-      setIsHMDMCEnabled(true);
-      validateField(`labwares.${currentIndex}.slots.${slotAddress}.hmdmc`);
-    }
-  }, [
-    currentSpecies,
-    setFieldValue,
-    currentIndex,
-    setIsHMDMCEnabled,
-    validateField,
-    slotAddress,
-  ]);
-
-  return (
-    <motion.div
-      variants={variants.fadeInWithLift}
-      ref={slotRef}
-      className="relative p-4 shadow-lg bg-white space-y-4"
-    >
-      <div className="sticky py-2 top-0 bg-white">
-        <Pill color="pink">{slotAddress}</Pill>
-      </div>
-
-      <Heading level={4}>Donor Information</Heading>
-
-      <FormikInput
-        label="Donor ID"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.donorId`}
-      />
-
-      <RadioGroup
-        label="Life Stage"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.lifeStage`}
-      >
-        {enumKeys(LifeStage).map((key, index) => {
-          return <RadioButton key={index} name={key} value={LifeStage[key]} />;
-        })}
-      </RadioGroup>
-
-      <FormikSelect
-        label={"Species"}
-        name={`labwares.${currentIndex}.slots.${slotAddress}.species`}
-        emptyOption
-        className="mt-2"
-      >
-        {optionValues(model.registrationInfo.species, "name", "name")}
-      </FormikSelect>
-
-      <Heading level={4}>Tissue Information</Heading>
-
-      <FormikSelect
-        label="HMDMC"
-        disabled={!isHMDMCEnabled}
-        name={`labwares.${currentIndex}.slots.${slotAddress}.hmdmc`}
-        emptyOption
-        className="mt-2"
-      >
-        {optionValues(model.registrationInfo.hmdmcs, "hmdmc", "hmdmc")}
-      </FormikSelect>
-
-      <FormikSelect
-        label="Tissue Type"
-        emptyOption
-        name={`labwares.${currentIndex}.slots.${slotAddress}.tissueType`}
-        className="mt-2"
-      >
-        {optionValues(model.registrationInfo.tissueTypes, "name", "name")}
-      </FormikSelect>
-
-      <FormikSelect
-        label="Spatial Location"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.spatialLocation`}
-      >
-        {optionValues(availableSpatialLocations, "code", "code")}
-      </FormikSelect>
-
-      <FormikInput
-        label="Replicate Number"
-        type="number"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.replicateNumber`}
-      />
-
-      <Heading level={4}>Section Information</Heading>
-
-      <FormikInput
-        label="Section External Identifier"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.externalIdentifier`}
-      />
-
-      <FormikInput
-        label="Section Number"
-        type="number"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.sectionNumber`}
-      />
-
-      <FormikInput
-        label="Section Thickness"
-        type="number"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.sectionThickness`}
-      />
-
-      <div className="flex flex-row justify-end">
-        {Object.keys(values.labwares[currentIndex].slots).length > 1 && (
-          <PinkButton
-            type="button"
-            action={"tertiary"}
-            onClick={() =>
-              setFieldValue(
-                `labwares.${currentIndex}.slots`,
-                omit(values.labwares[currentIndex].slots, slotAddress)
-              )
-            }
-          >
-            - Remove Section
-          </PinkButton>
-        )}
-      </div>
-    </motion.div>
-  );
-};
-
 function getNumErrorsPerLabware(
   labwares: SlideRegistrationFormValues["labwares"],
   errors: FormikErrors<SlideRegistrationFormValues>,
@@ -522,12 +333,16 @@ function getNumErrorsPerLabware(
     (memo, labware, labwareIndex) => {
       let count = 0;
 
+      // For each slot in the labware, look at each sample, and then look at each field and
+      // check for any validation errors
       Object.keys(labware.slots).forEach((slotAddress) => {
-        Object.keys(labware.slots[slotAddress]).forEach((slotKey) => {
-          const fieldName = `labwares.${labwareIndex}.slots.${slotAddress}.${slotKey}`;
-          if (getIn(touched, fieldName) && getIn(errors, fieldName)) {
-            count++;
-          }
+        labware.slots[slotAddress].forEach((section, sectionIndex) => {
+          Object.keys(section).forEach((sectionKey) => {
+            const fieldName = `labwares.${labwareIndex}.slots.${slotAddress}.${sectionIndex}.${sectionKey}`;
+            if (getIn(touched, fieldName) && getIn(errors, fieldName)) {
+              count++;
+            }
+          });
         });
       });
 
@@ -546,9 +361,26 @@ function getNumErrorsPerLabware(
   );
 }
 
-function getTotalSections(labwares: SlideRegistrationFormValues["labwares"]) {
-  return labwares.reduce((memo, labware) => {
-    memo += Object.keys(labware.slots).length;
+/**
+ * Return the number of sections in this labware
+ */
+function getSectionsCount(
+  labware: SlideRegistrationFormValues["labwares"][number]
+): number {
+  return Object.values(labware.slots).reduce((memo, sections) => {
+    memo += sections.length;
+    return memo;
+  }, 0);
+}
+
+/**
+ * Return the number of sections for a list of labware
+ */
+function getTotalSectionsCount(
+  labwares: SlideRegistrationFormValues["labwares"]
+): number {
+  return labwares.reduce<number>((memo, labware) => {
+    memo += getSectionsCount(labware);
     return memo;
   }, 0);
 }

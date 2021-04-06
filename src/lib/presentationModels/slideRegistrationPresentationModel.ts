@@ -10,7 +10,8 @@ import { LifeStage, SectionRegisterRequest } from "../../types/graphql";
 import _, { uniqueId } from "lodash";
 import { LabwareTypeName } from "../../types/stan";
 
-type SlideRegistrationFormSlot = {
+type SlideRegistrationFormSection = {
+  clientId: string;
   donorId: string;
   lifeStage: LifeStage;
   species: string;
@@ -23,13 +24,13 @@ type SlideRegistrationFormSlot = {
   sectionThickness: number;
 };
 
-type SlideRegistrationFormLabware = {
+export type SlideRegistrationFormLabware = {
   clientId: string;
   labwareTypeName: LabwareTypeName;
   externalSlideBarcode: string;
   fixative: string;
   medium: string;
-  slots: { [key: string]: SlideRegistrationFormSlot };
+  slots: { [key: string]: Array<SlideRegistrationFormSection> };
 };
 
 export type SlideRegistrationFormValues = {
@@ -54,6 +55,10 @@ export default class SlideRegistrationPresentationModel extends MachinePresentat
 
   get showInitialLabwareTypes(): boolean {
     return this.current.matches("selectingInitialLabware");
+  }
+
+  get isSubmitting(): boolean {
+    return this.current.matches("submitting");
   }
 
   selectInitialLabwareType(labwareType: LabwareTypeName) {
@@ -95,12 +100,13 @@ export default class SlideRegistrationPresentationModel extends MachinePresentat
       externalSlideBarcode: "",
       fixative: "",
       medium: "",
-      slots: { A1: this.buildSlot() },
+      slots: { A1: [this.buildSample()] },
     };
   }
 
-  buildSlot(): SlideRegistrationFormSlot {
+  buildSample(): SlideRegistrationFormSection {
     return {
+      clientId: uniqueId("sample_id"),
       donorId: "",
       lifeStage: LifeStage.Adult,
       species: "",
@@ -132,18 +138,20 @@ export default class SlideRegistrationPresentationModel extends MachinePresentat
             slots: Yup.lazy((obj: any) => {
               return Yup.object(
                 _.mapValues(obj, (_value, _key) =>
-                  Yup.object().shape({
-                    donorId: validation.donorId,
-                    lifeStage: validation.lifeStage,
-                    species: validation.species,
-                    hmdmc: validation.hmdmc,
-                    tissueType: validation.tissueType,
-                    externalIdentifier: validation.sectionExternalIdentifier,
-                    spatialLocation: validation.spatialLocation,
-                    replicateNumber: validation.replicateNumber,
-                    sectionNumber: validation.sectionNumber,
-                    sectionThickness: validation.sectionThickness,
-                  })
+                  Yup.array().of(
+                    Yup.object().shape({
+                      donorId: validation.donorId,
+                      lifeStage: validation.lifeStage,
+                      species: validation.species,
+                      hmdmc: validation.hmdmc,
+                      tissueType: validation.tissueType,
+                      externalIdentifier: validation.sectionExternalIdentifier,
+                      spatialLocation: validation.spatialLocation,
+                      replicateNumber: validation.replicateNumber,
+                      sectionNumber: validation.sectionNumber,
+                      sectionThickness: validation.sectionThickness,
+                    })
+                  )
                 )
               );
             }),
@@ -160,23 +168,22 @@ export default class SlideRegistrationPresentationModel extends MachinePresentat
         return {
           externalBarcode: labware.externalSlideBarcode,
           labwareType: labware.labwareTypeName,
-          contents: Object.keys(labware.slots).map((address) => {
-            const slot = labware.slots[address];
-            return {
+          contents: Object.keys(labware.slots).flatMap((address) => {
+            return labware.slots[address].map((sample) => ({
               address,
-              donorIdentifier: slot.donorId,
-              externalIdentifier: slot.externalIdentifier,
+              donorIdentifier: sample.donorId,
+              externalIdentifier: sample.externalIdentifier,
               fixative: labware.fixative,
-              hmdmc: slot.hmdmc,
-              lifeStage: slot.lifeStage,
+              hmdmc: sample.hmdmc,
+              lifeStage: sample.lifeStage,
               medium: labware.medium,
-              replicateNumber: slot.replicateNumber,
-              sectionNumber: slot.sectionNumber,
-              sectionThickness: slot.sectionThickness,
-              spatialLocation: slot.spatialLocation,
-              species: slot.species,
-              tissueType: slot.tissueType,
-            };
+              replicateNumber: sample.replicateNumber,
+              sectionNumber: sample.sectionNumber,
+              sectionThickness: sample.sectionThickness,
+              spatialLocation: sample.spatialLocation,
+              species: sample.species,
+              tissueType: sample.tissueType,
+            }));
           }),
         };
       }),
