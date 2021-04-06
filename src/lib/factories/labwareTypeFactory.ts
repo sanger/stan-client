@@ -26,7 +26,7 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
   [LabwareTypeName.SLIDE]: labwareTypeFactory.params({
     name: LabwareTypeName.SLIDE,
     numRows: 3,
-    numColumns: 1,
+    numColumns: 2,
   }),
   [LabwareTypeName.VISIUM_TO]: labwareTypeFactory.params({
     name: LabwareTypeName.VISIUM_TO,

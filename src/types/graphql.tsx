@@ -1127,7 +1127,7 @@ export type GetRegistrationInfoQuery = (
     & Pick<Hmdmc, 'hmdmc'>
   )>, labwareTypes: Array<(
     { __typename?: 'LabwareType' }
-    & Pick<LabwareType, 'name'>
+    & LabwareTypeFieldsFragment
   )>, tissueTypes: Array<(
     { __typename?: 'TissueType' }
     & Pick<TissueType, 'name'>
@@ -2167,7 +2167,7 @@ export const GetRegistrationInfoDocument = gql`
     hmdmc
   }
   labwareTypes {
-    name
+    ...LabwareTypeFields
   }
   tissueTypes {
     name
@@ -2186,7 +2186,7 @@ export const GetRegistrationInfoDocument = gql`
     name
   }
 }
-    `;
+    ${LabwareTypeFieldsFragmentDoc}`;
 
 /**
  * __useGetRegistrationInfoQuery__

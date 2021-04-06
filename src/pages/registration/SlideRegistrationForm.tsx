@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import Labware from "../../components/labware/Labware";
-import { labwareFactories } from "../../lib/factories/labwareFactory";
+import { unregisteredLabwareFactory } from "../../lib/factories/labwareFactory";
 import {
   FieldArray,
   Form,
@@ -58,7 +58,19 @@ const SlideRegistrationForm: React.FC<SlideRegistrationFormProps> = ({
     setScrollToSlot(null);
   }, 200);
 
-  const labware = labwareFactories[currentLabware.labwareTypeName].build();
+  const currentLabwareType = model.registrationInfo.labwareTypes.find(
+    (lt) => lt.name === currentLabware.labwareTypeName
+  );
+
+  if (!currentLabwareType) {
+    throw new Error(`Unknown Labware Type: ${currentLabware.labwareTypeName}`);
+  }
+
+  const labware = unregisteredLabwareFactory
+    .associations({
+      labwareType: currentLabwareType,
+    })
+    .build();
 
   const buildSample = model.buildSample;
   const handleOnSlotClick = React.useCallback(
