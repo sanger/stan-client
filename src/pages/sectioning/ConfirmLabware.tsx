@@ -124,10 +124,9 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
             <LayoutPlanner actor={layoutMachine}>
               <div className="my-2">
                 <p className="text-gray-900 text-sm leading-normal">
-                  For any slots that were originally intended to contain
-                  sections, but ultimately remained empty, you can click the
-                  relevant slot to empty it. (You can re-add a sample to an
-                  empty slot by clicking it again).
+                  Click a slot to reduce its number of confirmed sections. (You
+                  can return a slot to its original planned value by clicking it
+                  again once it becomes empty).
                 </p>
               </div>
             </LayoutPlanner>

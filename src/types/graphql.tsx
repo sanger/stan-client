@@ -253,7 +253,7 @@ export type CancelPlanAction = {
 export type ConfirmOperationLabware = {
   barcode: Scalars['String'];
   cancelled?: Maybe<Scalars['Boolean']>;
-  cancelledActions: Array<CancelPlanAction>;
+  cancelledActions?: Maybe<Array<CancelPlanAction>>;
   addressComments?: Maybe<Array<AddressCommentInput>>;
 };
 
