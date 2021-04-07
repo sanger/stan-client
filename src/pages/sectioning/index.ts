@@ -13,7 +13,7 @@ export function buildSlotSecondaryText(
 ) {
   const action = layoutPlan.plannedActions.get(address);
   if (action && action.length > 1) {
-    return `x${action.length}`;
+    return `\u00d7${action.length}`;
   }
 }
 
