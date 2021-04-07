@@ -8,6 +8,7 @@ import {
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
 } from "../../types/graphql";
+import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 
 const registrationHandlers = [
   graphql.query<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>(
@@ -27,11 +28,7 @@ const registrationHandlers = [
             { hmdmc: "HMDMC3" },
             { hmdmc: "HMDMC4" },
           ],
-          labwareTypes: [
-            {
-              name: "Proviasette",
-            },
-          ],
+          labwareTypes: labwareTypeInstances,
           tissueTypes: [
             {
               name: "Liver",

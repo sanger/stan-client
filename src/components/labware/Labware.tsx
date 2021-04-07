@@ -83,6 +83,16 @@ export interface LabwareProps {
   slotText?: (address: string, slot: SlotFieldsFragment) => string | undefined;
 
   /**
+   * Callback to customise the secondary text for an individual slot. Secondary text appears under slotText.
+   * @param address the address of the slot to customise secondary text of
+   * @param slot the slot
+   */
+  slotSecondaryText?: (
+    address: string,
+    slot: SlotFieldsFragment
+  ) => string | undefined;
+
+  /**
    * Callback to customise the text for an individual slot
    * @param address the address of the slot
    * @param slot the slot
@@ -115,6 +125,7 @@ const Labware = ({
   onSlotMouseEnter,
   onSlotMouseLeave,
   slotText,
+  slotSecondaryText,
   slotColor,
   labwareRef,
 }: React.PropsWithChildren<LabwareProps>) => {
@@ -188,6 +199,7 @@ const Labware = ({
             onMouseEnter={onSlotMouseEnter}
             onMouseLeave={onSlotMouseLeave}
             text={slotText}
+            secondaryText={slotSecondaryText}
             color={slotColor}
             selected={model.isSlotSelected(address)}
           />

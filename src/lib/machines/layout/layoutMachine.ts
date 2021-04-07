@@ -80,7 +80,7 @@ export const createLayoutMachine = (
         [State.DONE]: {
           type: "final",
           data: {
-            layoutPlan: (ctx: LayoutContext, _e: never) => ctx.layoutPlan,
+            layoutPlan: (ctx: LayoutContext) => ctx.layoutPlan,
           },
         },
         [State.CANCELLED]: {

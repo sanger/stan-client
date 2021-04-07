@@ -31,6 +31,7 @@ import { LabwareFieldsFragment } from "../../types/graphql";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { Input } from "../../components/forms/Input";
 import { usePrinters } from "../../lib/hooks";
+import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from "./index";
 
 interface SectioningLayoutProps {
   /**
@@ -78,20 +79,38 @@ const SectioningLayout = React.forwardRef<
       id: "sections",
       Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
         return plannedOperations.map((operation, j) => {
-          const newSections = operation.planActions
+          const addressToSectionsMap: Map<
+            string,
+            Array<number | null | undefined>
+          > = operation.planActions
             .filter(
               (action) => action.destination.labwareId === row.original.id
             )
-            .map((action, i) => {
-              return (
-                <li key={i} className="text-sm">
-                  <span className="font-semibold">
-                    {action.destination.address}
-                  </span>{" "}
-                  <span className="">{action.newSection}</span>
-                </li>
-              );
-            });
+            .reduce((memo, planAction) => {
+              const addressSections = memo.get(planAction.destination.address);
+              if (!addressSections) {
+                memo.set(planAction.destination.address, [
+                  planAction.newSection,
+                ]);
+              } else {
+                memo.set(planAction.destination.address, [
+                  ...addressSections,
+                  planAction.newSection,
+                ]);
+              }
+              return memo;
+            }, new Map());
+
+          const newSections = Array.from(addressToSectionsMap.keys())
+            .sort()
+            .map((address) => (
+              <li key={address} className="text-sm">
+                <span className="font-semibold">{address}</span>{" "}
+                <span className="">
+                  {addressToSectionsMap.get(address)?.join(", ")}
+                </span>
+              </li>
+            ));
 
           return <ul key={j}>{newSections}</ul>;
         });
@@ -133,15 +152,11 @@ const SectioningLayout = React.forwardRef<
             labware={sectioningLayout.destinationLabware}
             onClick={() => send(editLayout())}
             name={sectioningLayout.destinationLabware.labwareType.name}
-            slotText={(address) =>
-              layoutPlan.plannedActions.get(address)?.labware.barcode
+            slotText={(address) => buildSlotText(layoutPlan, address)}
+            slotSecondaryText={(address) =>
+              buildSlotSecondaryText(layoutPlan, address)
             }
-            slotColor={(address) => {
-              const action = layoutPlan.plannedActions.get(address);
-              if (action) {
-                return `bg-${layoutPlan.sampleColors.get(action.sampleId)}-600`;
-              }
-            }}
+            slotColor={(address) => buildSlotColor(layoutPlan, address)}
           />
 
           {current.matches("prep") && (
@@ -266,7 +281,23 @@ const SectioningLayout = React.forwardRef<
       <Modal show={current.matches("editingLayout")}>
         <ModalBody>
           <Heading level={3}>Set Layout</Heading>
-          {layoutMachine && <LayoutPlanner actor={layoutMachine} />}
+          {layoutMachine && (
+            <LayoutPlanner actor={layoutMachine}>
+              <div className="my-2">
+                <p className="text-gray-900 text-sm leading-normal">
+                  To add sections to a slot, select a source for the buttons on
+                  the right, and then click a destination slot. Multiple
+                  sections may be added to a slot by clicking it multiple times.
+                </p>
+
+                <p className="mt-3 text-gray-900 text-sm leading-normal">
+                  To remove all sections from a slot, first deselect any
+                  selected sources by clicking on it, then select the
+                  destination slot to empty it.
+                </p>
+              </div>
+            </LayoutPlanner>
+          )}
         </ModalBody>
         <ModalFooter>
           <BlueButton

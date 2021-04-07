@@ -32,7 +32,10 @@ export default class RegistrationValidation {
   get donorId() {
     return validation.requiredString({
       label: "Donor ID",
-      restrictChars: validation.DEFAULT_PERMITTED_CHARS,
+      // Don't allow contiguous spaces
+      restrictChars: /^(?!.*\s\s)[a-z0-9-_ ]+$/i,
+      errorMessage:
+        "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, and underscores are permitted",
     });
   }
 

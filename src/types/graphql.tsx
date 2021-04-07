@@ -244,10 +244,16 @@ export type AddressCommentInput = {
   commentId: Scalars['Int'];
 };
 
+export type CancelPlanAction = {
+  destinationAddress: Scalars['Address'];
+  sampleId: Scalars['Int'];
+  newSection?: Maybe<Scalars['Int']>;
+};
+
 export type ConfirmOperationLabware = {
   barcode: Scalars['String'];
   cancelled?: Maybe<Scalars['Boolean']>;
-  cancelledAddresses?: Maybe<Array<Scalars['Address']>>;
+  cancelledActions?: Maybe<Array<CancelPlanAction>>;
   addressComments?: Maybe<Array<AddressCommentInput>>;
 };
 
@@ -1121,7 +1127,7 @@ export type GetRegistrationInfoQuery = (
     & Pick<Hmdmc, 'hmdmc'>
   )>, labwareTypes: Array<(
     { __typename?: 'LabwareType' }
-    & Pick<LabwareType, 'name'>
+    & LabwareTypeFieldsFragment
   )>, tissueTypes: Array<(
     { __typename?: 'TissueType' }
     & Pick<TissueType, 'name'>
@@ -2161,7 +2167,7 @@ export const GetRegistrationInfoDocument = gql`
     hmdmc
   }
   labwareTypes {
-    name
+    ...LabwareTypeFields
   }
   tissueTypes {
     name
@@ -2180,7 +2186,7 @@ export const GetRegistrationInfoDocument = gql`
     name
   }
 }
-    `;
+    ${LabwareTypeFieldsFragmentDoc}`;
 
 /**
  * __useGetRegistrationInfoQuery__

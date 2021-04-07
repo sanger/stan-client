@@ -69,11 +69,6 @@ export interface SectioningConfirmContext {
    * Has this labware been cancelled (relevant only for tubes)
    */
   cancelled: boolean;
-
-  /**
-   * Addresses of slots that for some reason couldn't be used
-   */
-  cancelledAddresses: Array<Address>;
 }
 //endregion
 

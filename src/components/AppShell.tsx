@@ -420,6 +420,10 @@ function AppShell({ children }: AppShellParams) {
                         Slide Registration
                       </StanMobileNavLink>
 
+                      <StanMobileNavLink to="/admin/destroy">
+                        Destroy
+                      </StanMobileNavLink>
+
                       <StanMobileNavLink to="/admin/release">
                         Release
                       </StanMobileNavLink>
