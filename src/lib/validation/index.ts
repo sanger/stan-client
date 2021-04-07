@@ -7,11 +7,13 @@ export const DEFAULT_PERMITTED_CHARS = /^[a-z0-9-_]+$/i;
  * @param params.label the name of the field to validate
  * @param params.oneOf if present, a list of valid strings
  * @param params.restrictChars if present, string much match the given regular expression
+ * @param params.errorMessage if present, will be used for the restrictChars error message
  */
 export function requiredString(params: {
   label: string;
   oneOf?: Array<string>;
   restrictChars?: RegExp;
+  errorMessage?: string;
 }): Yup.StringSchema {
   let validation = Yup.string().required().label(params.label);
   if (params.oneOf) {
@@ -22,7 +24,8 @@ export function requiredString(params: {
       .trim()
       .matches(
         params.restrictChars,
-        `${params.label} contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted`
+        params.errorMessage ??
+          `${params.label} contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted`
       );
   }
   return validation;

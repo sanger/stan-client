@@ -5,11 +5,40 @@ export function shouldBehaveLikeARegistrationForm() {
       cy.findByText("Donor ID is a required field").should("be.visible");
     });
 
-    it("requires Donor ID to only permit certain characters", () => {
-      cy.findByLabelText("Donor ID").type("$DONOR1").blur();
-      cy.findByText(
-        "Donor ID contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
-      ).should("be.visible");
+    context("when Donor ID has contiguous spaces", () => {
+      before(() => cy.findByLabelText("Donor ID").type("DONOR  1").blur());
+
+      it("shows a warning", () => {
+        cy.findByText(
+          "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, and underscores are permitted"
+        );
+      });
+    });
+
+    context("when Donor ID has forbidden characters", () => {
+      before(() => {
+        cy.findByLabelText("Donor ID").clear().blur();
+        cy.findByLabelText("Donor ID").clear().type("$DONOR1").blur();
+      });
+
+      it("shows a warning", () => {
+        cy.findByText(
+          "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, and underscores are permitted"
+        ).should("be.visible");
+      });
+    });
+
+    context("when Donor ID contains single spaces", () => {
+      before(() => {
+        cy.findByLabelText("Donor ID").clear().blur();
+        cy.findByLabelText("Donor ID").type("Donor 1 Is Fine").blur();
+      });
+
+      it("does not show a warning", () => {
+        cy.findByText(
+          "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, and underscores are permitted"
+        ).should("not.exist");
+      });
     });
 
     it("requires Species", () => {

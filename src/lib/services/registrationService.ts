@@ -146,19 +146,19 @@ export function buildRegisterTissuesMutationVariables(
           ...memo,
           ...tissue.blocks.map<BlockRegisterRequest>((block) => {
             const blockRegisterRequest: BlockRegisterRequest = {
-              species: tissue.species,
-              donorIdentifier: tissue.donorId,
-              externalIdentifier: block.externalIdentifier,
+              species: tissue.species.trim(),
+              donorIdentifier: tissue.donorId.trim(),
+              externalIdentifier: block.externalIdentifier.trim(),
               highestSection: block.lastKnownSectionNumber,
-              hmdmc: tissue.hmdmc,
-              labwareType: block.labwareType,
+              hmdmc: tissue.hmdmc.trim(),
+              labwareType: block.labwareType.trim(),
               lifeStage: tissue.lifeStage,
-              tissueType: tissue.tissueType,
+              tissueType: tissue.tissueType.trim(),
               spatialLocation: block.spatialLocation,
               replicateNumber: block.replicateNumber,
-              fixative: block.fixative,
-              medium: block.medium,
-              mouldSize: block.mouldSize,
+              fixative: block.fixative.trim(),
+              medium: block.medium.trim(),
+              mouldSize: block.mouldSize.trim(),
             };
 
             if (

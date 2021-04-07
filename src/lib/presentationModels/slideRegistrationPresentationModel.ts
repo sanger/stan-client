@@ -166,23 +166,23 @@ export default class SlideRegistrationPresentationModel extends MachinePresentat
     return {
       labware: values.labwares.map((labware) => {
         return {
-          externalBarcode: labware.externalSlideBarcode,
+          externalBarcode: labware.externalSlideBarcode.trim(),
           labwareType: labware.labwareTypeName,
           contents: Object.keys(labware.slots).flatMap((address) => {
             return labware.slots[address].map((sample) => ({
               address,
-              donorIdentifier: sample.donorId,
-              externalIdentifier: sample.externalIdentifier,
-              fixative: labware.fixative,
-              hmdmc: sample.hmdmc,
+              donorIdentifier: sample.donorId.trim(),
+              externalIdentifier: sample.externalIdentifier.trim(),
+              fixative: labware.fixative.trim(),
+              hmdmc: sample.hmdmc.trim(),
               lifeStage: sample.lifeStage,
-              medium: labware.medium,
+              medium: labware.medium.trim(),
               replicateNumber: sample.replicateNumber,
               sectionNumber: sample.sectionNumber,
               sectionThickness: sample.sectionThickness,
               spatialLocation: sample.spatialLocation,
-              species: sample.species,
-              tissueType: sample.tissueType,
+              species: sample.species.trim(),
+              tissueType: sample.tissueType.trim(),
             }));
           }),
         };
