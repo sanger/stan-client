@@ -5,7 +5,7 @@ describe("Location Grid View", () => {
   });
 
   it("selects the first available address", () => {
-    cy.findByText("Selected Address: 2").should("be.visible");
+    cy.findByText("Selected Address: 2").should("exist");
   });
 
   context("when scanning in a barcode", () => {
@@ -14,15 +14,15 @@ describe("Location Grid View", () => {
     });
 
     it("stores it", () => {
-      cy.findByText("STAN-2001").should("be.visible");
+      cy.findByText("STAN-2001").should("exist");
     });
 
     it("shows a success message", () => {
-      cy.findByText("Barcode successfully stored").should("be.visible");
+      cy.findByText("Barcode successfully stored").should("exist");
     });
 
     it("selects the next available address", () => {
-      cy.findByText("Selected Address: 3").should("be.visible");
+      cy.findByText("Selected Address: 3").should("exist");
     });
 
     it("empties the value of the ScanInput", () => {
@@ -40,7 +40,7 @@ describe("Location Grid View", () => {
     });
 
     it("shows a delete button", () => {
-      cy.findByTestId("selectedAddress").find("button").should("be.visible");
+      cy.findByTestId("selectedAddress").find("button").should("exist");
     });
 
     context("when clicking the button", () => {
@@ -51,7 +51,7 @@ describe("Location Grid View", () => {
       it("shows a confirmation modal", () => {
         cy.findByTextContent(
           "Are you sure you want to remove STAN-2001 from Box 1 in Rack 1 in Freezer 1 in Room 1234?"
-        ).should("be.visible");
+        ).should("exist");
       });
 
       context("when confirming", () => {
@@ -64,7 +64,7 @@ describe("Location Grid View", () => {
         });
 
         it("shows a success message", () => {
-          cy.findByText("Barcode successfully unstored").should("be.visible");
+          cy.findByText("Barcode successfully unstored").should("exist");
         });
       });
     });

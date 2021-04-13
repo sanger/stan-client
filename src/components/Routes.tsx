@@ -1,13 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { Route, Switch } from "react-router-dom";
 import AuthenticatedRoute from "./AuthenticatedRoute";
 import Login from "../pages/Login";
-import { getRegistrationInfo } from "../lib/services/registrationService";
-import { getSectioningInfo } from "../lib/services/sectioningService";
-import { findLocationByBarcode } from "../lib/services/locationService";
-import { getReleaseInfo } from "../lib/services/releaseService";
-import { getSearchInfo } from "../lib/services/searchService";
-import { getDestroyInfo } from "../lib/services/destroyService";
 import Logout from "../pages/Logout";
 import Location from "../pages/Location";
 import Sectioning from "../pages/Sectioning";
@@ -31,8 +25,11 @@ import { FindRequest, Maybe, UserRole } from "../types/graphql";
 import { ParsedQuery } from "query-string";
 import _ from "lodash";
 import Configuration from "../pages/Configuration";
+import { StanCoreContext } from "../lib/sdk";
 
 export function Routes() {
+  const stanCore = useContext(StanCoreContext);
+
   // Hook to remove any location state after it has been consumed for a component.
   // Turns state into "flashes"
   useEffect(() => {
@@ -50,7 +47,7 @@ export function Routes() {
         render={(routeProps) => (
           <DataFetcher
             key={routeProps.location.key}
-            dataFetcher={getSectioningInfo}
+            dataFetcher={stanCore.GetSectioningInfo}
           >
             {(sectioningInfo) => <Sectioning sectioningInfo={sectioningInfo} />}
           </DataFetcher>
@@ -77,7 +74,7 @@ export function Routes() {
         render={(routeProps) => (
           <DataFetcher
             key={routeProps.location.key}
-            dataFetcher={getRegistrationInfo}
+            dataFetcher={stanCore.GetRegistrationInfo}
           >
             {(registrationInfo) => (
               <Registration registrationInfo={registrationInfo} />
@@ -91,7 +88,7 @@ export function Routes() {
         render={(routeProps) => (
           <DataFetcher
             key={routeProps.location.key}
-            dataFetcher={getRegistrationInfo}
+            dataFetcher={stanCore.GetRegistrationInfo}
           >
             {(registrationInfo) => (
               <SlideRegistration
@@ -108,7 +105,7 @@ export function Routes() {
         render={(routeProps) => (
           <DataFetcher
             key={routeProps.location.key}
-            dataFetcher={getReleaseInfo}
+            dataFetcher={stanCore.GetReleaseInfo}
           >
             {(releaseInfo) => <Release releaseInfo={releaseInfo} />}
           </DataFetcher>
@@ -131,9 +128,11 @@ export function Routes() {
                   );
                 }
 
-                return findLocationByBarcode(
-                  routeProps.match.params.locationBarcode
-                );
+                return stanCore
+                  .FindLocationByBarcode({
+                    barcode: routeProps.match.params.locationBarcode,
+                  })
+                  .then((res) => res.location);
               }}
             >
               {(location) => (
@@ -157,7 +156,7 @@ export function Routes() {
         render={(routeProps) => (
           <DataFetcher
             key={routeProps.location.key}
-            dataFetcher={getDestroyInfo}
+            dataFetcher={stanCore.GetDestroyInfo}
           >
             {(destroyInfo) => <Destroy destroyInfo={destroyInfo} />}
           </DataFetcher>
@@ -167,7 +166,11 @@ export function Routes() {
       <AuthenticatedRoute
         path="/config"
         role={UserRole.Admin}
-        render={() => <Configuration />}
+        render={() => (
+          <DataFetcher dataFetcher={stanCore.GetConfiguration}>
+            {(configuration) => <Configuration configuration={configuration} />}
+          </DataFetcher>
+        )}
       />
 
       <Route
@@ -192,7 +195,7 @@ export function Routes() {
             cleanParams(params, findRequestKeys)
           );
           return (
-            <DataFetcher dataFetcher={getSearchInfo}>
+            <DataFetcher dataFetcher={stanCore.GetSearchInfo}>
               {(searchInfo) => (
                 <Search searchInfo={searchInfo} findRequest={findRequest} />
               )}

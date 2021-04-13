@@ -11,6 +11,6 @@ describe("Logout", () => {
   });
 
   it("shows a success message", () => {
-    cy.findByText("Logout successful").should("be.visible");
+    cy.findByText("Logout successful").should("exist");
   });
 });

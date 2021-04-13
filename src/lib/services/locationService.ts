@@ -6,9 +6,6 @@ import {
   FindLabwareLocationDocument,
   FindLabwareLocationQuery,
   FindLabwareLocationQueryVariables,
-  FindLocationByBarcodeDocument,
-  FindLocationByBarcodeQuery,
-  FindLocationByBarcodeQueryVariables,
   LocationFieldsFragment,
   Maybe,
   SetLocationCustomNameDocument,
@@ -21,34 +18,7 @@ import {
   UnstoreBarcodeMutation,
   UnstoreBarcodeMutationVariables,
 } from "../../types/graphql";
-import { QueryOptions } from "@apollo/client";
-
-/**
- * Send a request to core to find a Location by barcode
- * @param barcode the barcode of the location to find
- * @param options options to pass to the query
- */
-export async function findLocationByBarcode(
-  barcode: string,
-  options?: Omit<
-    QueryOptions<
-      FindLocationByBarcodeQueryVariables,
-      FindLocationByBarcodeQuery
-    >,
-    "query" | "variables"
-  >
-): Promise<LocationFieldsFragment> {
-  const response = await client.query<
-    FindLocationByBarcodeQuery,
-    FindLocationByBarcodeQueryVariables
-  >({
-    query: FindLocationByBarcodeDocument,
-    variables: { barcode },
-    ...options,
-  });
-
-  return response.data.location;
-}
+import { stanCore } from "../sdk";
 
 /**
  * Send a query to core to store a barcode in a location (possibly at a particular address)
@@ -122,9 +92,9 @@ export async function emptyLocation(
     throw new Error("emptyLocation response data was null");
   }
 
-  return findLocationByBarcode(barcode, {
-    fetchPolicy: "network-only",
-  });
+  return stanCore
+    .FindLocationByBarcode({ barcode })
+    .then((res) => res.location);
 }
 
 /**

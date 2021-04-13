@@ -1,0 +1,5 @@
+query GetDestructionReasons($includeDisabled: Boolean) {
+    destructionReasons(includeDisabled: $includeDisabled) {
+        ...DestructionReasonFields
+    }
+}

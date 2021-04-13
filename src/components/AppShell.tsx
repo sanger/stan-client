@@ -16,6 +16,7 @@ import SupportIcon from "./icons/SupportIcon";
 import Warning from "./notifications/Warning";
 import { LocationState } from "../types/stan";
 import Success from "./notifications/Success";
+import { UserRole } from "../types/sdk";
 
 interface AppShellParams {
   children?: React.ReactNode | React.ReactNode[];
@@ -344,6 +345,15 @@ function AppShell({ children }: AppShellParams) {
                         aria-orientation="vertical"
                         aria-labelledby="user-menu"
                       >
+                        <Authenticated role={UserRole.Admin}>
+                          <Link
+                            to="/config"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            role="menuitem"
+                          >
+                            STAN Configuration
+                          </Link>
+                        </Authenticated>
                         <Authenticated>
                           <Link
                             to="/logout"
@@ -460,6 +470,15 @@ function AppShell({ children }: AppShellParams) {
                 </Authenticated>
 
                 <div className="px-2 space-y-1 sm:px-3">
+                  <Authenticated role={UserRole.Admin}>
+                    <Link
+                      to="/config"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700"
+                    >
+                      STAN Configuration
+                    </Link>
+                  </Authenticated>
+
                   <Authenticated>
                     <Link
                       to="/logout"

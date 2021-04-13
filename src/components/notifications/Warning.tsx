@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { ApolloError } from "@apollo/client";
 import { Maybe } from "../../types/graphql";
 import { extractServerErrors, ServerErrors } from "../../types/stan";
+import { ClientError } from "graphql-request";
 
 interface WarningProps
   extends React.DetailedHTMLProps<
@@ -10,7 +11,7 @@ interface WarningProps
     HTMLElement
   > {
   message?: string;
-  error?: Maybe<ApolloError>;
+  error?: Maybe<ApolloError> | Maybe<ClientError>;
 }
 
 const Warning = ({
@@ -25,8 +26,18 @@ const Warning = ({
     className
   );
   let serverErrors: ServerErrors | undefined;
-  if (error) {
+
+  // TypeScript can infer this as ApolloError as "extraInfo" isn't a property of ClientError
+  if (error && "extraInfo" in error) {
     serverErrors = extractServerErrors(error);
+  } else if (error) {
+    serverErrors = {
+      message: null,
+      problems:
+        error.response.errors?.map(
+          (error) => error.message.match(/^.*\s:\s(.*)$/)?.[1] ?? ""
+        ) ?? [],
+    };
   }
   return (
     <section {...rest} className={sectionClasses}>

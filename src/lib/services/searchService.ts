@@ -3,23 +3,11 @@ import {
   FindQuery,
   FindQueryVariables,
   FindRequest,
-  GetSearchInfoDocument,
-  GetSearchInfoQuery,
 } from "../../types/graphql";
 import client from "../client";
 import { SearchResultsType, SearchResultTableEntry } from "../../types/stan";
 import _ from "lodash";
 import { addressToLocationAddress } from "../helpers/locationHelper";
-
-/**
- * Fetch data necessary for the Search page
- */
-export async function getSearchInfo(): Promise<GetSearchInfoQuery> {
-  const response = await client.query<GetSearchInfoQuery>({
-    query: GetSearchInfoDocument,
-  });
-  return response.data;
-}
 
 /**
  * Do a find query on core. Format the response into a list of table rows
