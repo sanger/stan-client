@@ -18,9 +18,16 @@ export type Scalars = {
 
 
 
+export enum UserRole {
+  Disabled = 'disabled',
+  Normal = 'normal',
+  Admin = 'admin'
+}
+
 export type User = {
   __typename?: 'User';
   username: Scalars['String'];
+  role: UserRole;
 };
 
 export type LoginResult = {
@@ -690,6 +697,11 @@ export type SlotFieldsFragment = (
   )> }
 );
 
+export type UserFieldsFragment = (
+  { __typename?: 'User' }
+  & Pick<User, 'username' | 'role'>
+);
+
 export type ConfirmMutationVariables = Exact<{
   request: ConfirmOperationRequest;
 }>;
@@ -798,7 +810,7 @@ export type LoginMutation = (
     { __typename?: 'LoginResult' }
     & { user?: Maybe<(
       { __typename?: 'User' }
-      & Pick<User, 'username'>
+      & UserFieldsFragment
     )> }
   ) }
 );
@@ -1000,7 +1012,7 @@ export type CurrentUserQuery = (
   { __typename?: 'Query' }
   & { user?: Maybe<(
     { __typename?: 'User' }
-    & Pick<User, 'username'>
+    & UserFieldsFragment
   )> }
 );
 
@@ -1283,6 +1295,12 @@ export const PrinterFieldsFragmentDoc = gql`
   }
 }
     `;
+export const UserFieldsFragmentDoc = gql`
+    fragment UserFields on User {
+  username
+  role
+}
+    `;
 export const ConfirmDocument = gql`
     mutation Confirm($request: ConfirmOperationRequest!) {
   confirmOperation(request: $request) {
@@ -1457,11 +1475,11 @@ export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(username: $username, password: $password) {
     user {
-      username
+      ...UserFields
     }
   }
 }
-    `;
+    ${UserFieldsFragmentDoc}`;
 export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
 
 /**
@@ -1883,10 +1901,10 @@ export type UnstoreBarcodeMutationOptions = Apollo.BaseMutationOptions<UnstoreBa
 export const CurrentUserDocument = gql`
     query CurrentUser {
   user {
-    username
+    ...UserFields
   }
 }
-    `;
+    ${UserFieldsFragmentDoc}`;
 
 /**
  * __useCurrentUserQuery__

@@ -28,6 +28,11 @@ import { SetupWorkerApi } from "msw/lib/types/setupWorker/setupWorker";
 // See https://testing-library.com/docs/cypress-testing-library/intro
 import "@testing-library/cypress/add-commands";
 import { graphqlType } from "../../src/types";
+import {
+  CurrentUserQuery,
+  CurrentUserQueryVariables,
+  UserRole,
+} from "../../src/types/graphql";
 
 interface MSW {
   worker: SetupWorkerApi;
@@ -39,6 +44,7 @@ declare global {
     interface Chainable<Subject> {
       msw(): Chainable<MSW>;
       visitAsGuest(url: string): Chainable<ReturnType<typeof cy.visit>>;
+      visitAsAdmin(url: string): Chainable<ReturnType<typeof cy.visit>>;
       findByTextContent(
         textContent: string
       ): Chainable<ReturnType<typeof cy.findByText>>;
@@ -62,13 +68,41 @@ Cypress.Commands.add("visitAsGuest", (url: string) => {
   cy.on("window:before:load", (window) => {
     window.postMSWStart = (worker: SetupWorkerApi, graphql: graphqlType) => {
       worker.use(
-        graphql.query("CurrentUser", (req, res, ctx) => {
-          return res(
-            ctx.data({
-              username: null,
-            })
-          );
-        })
+        graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
+          "CurrentUser",
+          (req, res, ctx) => {
+            return res(
+              ctx.data({
+                user: null,
+              })
+            );
+          }
+        )
+      );
+    };
+  });
+
+  return cy.visit(url);
+});
+
+Cypress.Commands.add("visitAsAdmin", (url: string) => {
+  cy.on("window:before:load", (window) => {
+    window.postMSWStart = (worker: SetupWorkerApi, graphql: graphqlType) => {
+      worker.use(
+        graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
+          "CurrentUser",
+          (req, res, ctx) => {
+            return res(
+              ctx.data({
+                user: {
+                  __typename: "User",
+                  username: "jb1",
+                  role: UserRole.Admin,
+                },
+              })
+            );
+          }
+        )
       );
     };
   });

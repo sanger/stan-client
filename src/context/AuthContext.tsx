@@ -2,20 +2,17 @@ import React, { createContext, useEffect, useState } from "react";
 import { useApolloClient } from "@apollo/client";
 import { useMinimumWait } from "../lib/hooks";
 import Splash from "../pages/Splash";
-import { useCurrentUserLazyQuery, useLogoutMutation } from "../types/graphql";
-
-/**
- * This will probably end up being an interface generated from a GraphQL type
- */
-interface UserInfo {
-  username: string;
-}
+import {
+  useCurrentUserLazyQuery,
+  useLogoutMutation,
+  UserFieldsFragment,
+} from "../types/graphql";
 
 /**
  * Includes other properties the application is interested in for authentication
  */
 interface AuthState {
-  userInfo: UserInfo;
+  user: UserFieldsFragment;
 }
 
 interface AuthContext {
@@ -64,9 +61,7 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   useEffect(() => {
     if (data?.user) {
       setAuthState({
-        userInfo: {
-          username: data.user.username,
-        },
+        user: data.user,
       });
     } else {
       setAuthState(null);
@@ -77,8 +72,8 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
    * Sets the AuthState
    * @param userInfo
    */
-  const setAuthInfo = ({ userInfo }: AuthState) => {
-    setAuthState({ userInfo });
+  const setAuthInfo = ({ user }: AuthState) => {
+    setAuthState({ user });
   };
 
   /**

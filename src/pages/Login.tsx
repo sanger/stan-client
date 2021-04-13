@@ -1,4 +1,3 @@
-import { Location } from "history";
 import React, { useContext, useEffect, useState } from "react";
 import { authContext } from "../context/AuthContext";
 import { Link, Redirect, RouteComponentProps } from "react-router-dom";
@@ -19,16 +18,7 @@ import Logo from "../components/Logo";
 import { useApolloClient } from "@apollo/client";
 import { useLoginMutation } from "../types/graphql";
 import { motion } from "framer-motion";
-
-/**
- * Properties that can be added on to the URL state. Frequently used with react-router's Redirect component.
- */
-type LocationState = {
-  referrer?: Location;
-  success?: string;
-  warning?: string;
-  loggedOut?: boolean;
-};
+import { LocationState } from "../types/stan";
 
 /**
  * Schema used by Formik in the login form.
@@ -95,7 +85,7 @@ const Login = (
       // Allow some time for the user to see the success message before redirecting
       setTimeout(() => {
         auth.setAuthState({
-          userInfo,
+          user: userInfo,
         });
         formikHelpers.setSubmitting(false);
       }, 2500);
