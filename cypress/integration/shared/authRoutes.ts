@@ -60,7 +60,7 @@ describe("Authorized routes", () => {
       });
     });
 
-    context("when visiting an admin user", () => {
+    context("when visiting as an admin user", () => {
       before(() => {
         cy.visitAsAdmin("/config");
       });
