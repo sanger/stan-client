@@ -5,7 +5,7 @@ import { UserRole } from "../types/graphql";
 
 interface AuthenticatedRouteProps extends RouteProps {
   /**
-   * If defined, this is the minimum role a user must be to access to route
+   * If defined, this is the minimum role a user must be to access the route
    */
   role?: UserRole;
 }
