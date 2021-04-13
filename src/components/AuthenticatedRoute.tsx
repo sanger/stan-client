@@ -22,16 +22,8 @@ function AuthenticatedRoute({
 }: AuthenticatedRouteProps) {
   const auth = useContext(authContext);
 
-  if (auth.isAuthenticated()) {
-    if (!role) {
-      return <Route render={render} {...rest} />;
-    }
-
-    const user = auth.authState?.user!;
-
-    // Relying on user roles order from GraphQL schema
-    const userRoles = Object.values(UserRole);
-    if (userRoles.indexOf(user.role) >= userRoles.indexOf(role)) {
+  if (role) {
+    if (auth.userRoleIncludes(role)) {
       return <Route render={render} {...rest} />;
     } else {
       return (
@@ -48,6 +40,8 @@ function AuthenticatedRoute({
         </Route>
       );
     }
+  } else if (auth.isAuthenticated()) {
+    return <Route render={render} {...rest} />;
   } else {
     return (
       <Route {...rest}>

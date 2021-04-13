@@ -5,6 +5,8 @@ import {
   ReleaseLabwareMutation,
   ReleaseLabwareMutationVariables,
 } from "../../types/graphql";
+import releaseDestinationRepository from "../repositories/releaseDestinationRepository";
+import releaseRecipientRepository from "../repositories/releaseRecipientRepository";
 
 const releaseHandlers = [
   graphql.query<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>(
@@ -12,24 +14,12 @@ const releaseHandlers = [
     (req, res, ctx) => {
       return res(
         ctx.data({
-          releaseDestinations: [
-            { name: "Cell Gen wet lab team" },
-            { name: "Teichmann lab" },
-            { name: "Vento lab" },
-            { name: "Bayrakter lab" },
-          ],
-          releaseRecipients: [
-            { username: "et2" },
-            { username: "cm18" },
-            { username: "cs41" },
-            { username: "kr19" },
-            { username: "lb28" },
-            { username: "re5" },
-            { username: "lh7" },
-            { username: "vk8" },
-            { username: "cc36" },
-            { username: "aw24" },
-          ],
+          releaseDestinations: releaseDestinationRepository
+            .findAll()
+            .filter((rd) => rd.enabled),
+          releaseRecipients: releaseRecipientRepository
+            .findAll()
+            .filter((rr) => rr.enabled),
         })
       );
     }

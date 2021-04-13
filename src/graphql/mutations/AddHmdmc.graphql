@@ -1,0 +1,5 @@
+mutation AddHmdmc($hmdmc: String!) {
+    addHmdmc(hmdmc: $hmdmc) {
+        ...HmdmcFields
+    }
+}

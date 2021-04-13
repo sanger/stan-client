@@ -1,24 +1,11 @@
 import client from "../client";
 import {
-  GetSectioningInfoDocument,
-  GetSectioningInfoQuery,
   PlanDocument,
   PlanMutation,
   PlanMutationVariables,
   PlanRequest,
 } from "../../types/graphql";
 import { OperationTypeName } from "../../types/stan";
-
-/**
- * Get information for the Sectioning page
- */
-export async function getSectioningInfo(): Promise<GetSectioningInfoQuery> {
-  const response = await client.query<GetSectioningInfoQuery>({
-    query: GetSectioningInfoDocument,
-  });
-
-  return response.data;
-}
 
 /**
  * Perform the plan part of Sectioning
