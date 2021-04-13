@@ -4,20 +4,7 @@ import {
   DestroyMutation,
   DestroyMutationVariables,
   DestroyRequest,
-  GetDestroyInfoDocument,
-  GetDestroyInfoQuery,
-  GetDestroyInfoQueryVariables,
 } from "../../types/graphql";
-
-export async function getDestroyInfo() {
-  const response = await client.query<
-    GetDestroyInfoQuery,
-    GetDestroyInfoQueryVariables
-  >({
-    query: GetDestroyInfoDocument,
-  });
-  return response.data;
-}
 
 /**
  * Send a request to core to destroy some labware

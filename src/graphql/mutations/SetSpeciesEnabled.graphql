@@ -1,0 +1,5 @@
+mutation SetSpeciesEnabled($name: String!, $enabled: Boolean!) {
+    setSpeciesEnabled(name: $name, enabled: $enabled) {
+        ...SpeciesFields
+    }
+}

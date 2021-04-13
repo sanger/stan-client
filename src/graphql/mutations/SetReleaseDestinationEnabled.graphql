@@ -1,0 +1,5 @@
+mutation SetReleaseDestinationEnabled($name: String!, $enabled: Boolean!) {
+    setReleaseDestinationEnabled(name: $name, enabled: $enabled) {
+        ...ReleaseDestinationFields
+    }
+}

@@ -1,0 +1,4 @@
+fragment SpeciesFields on Species {
+    name
+    enabled
+}

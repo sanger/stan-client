@@ -1,7 +1,9 @@
 import React, { useContext } from "react";
 import { authContext } from "../context/AuthContext";
+import { UserRole } from "../types/sdk";
 
 interface AuthProps {
+  role?: UserRole;
   children: React.ReactNode | React.ReactNode[];
 }
 
@@ -9,8 +11,11 @@ interface AuthProps {
  * Renders children if user is authenticated
  * @param children
  */
-function Authenticated({ children }: AuthProps) {
+function Authenticated({ children, role }: AuthProps) {
   const auth = useContext(authContext);
+  if (role) {
+    return <>{auth.userRoleIncludes(role) && children}</>;
+  }
   return <>{auth.isAuthenticated() && children}</>;
 }
 

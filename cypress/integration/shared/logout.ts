@@ -1,7 +1,7 @@
 describe("Logout", () => {
   before(() => {
     cy.visit("/");
-    cy.wait(500);
+    cy.wait(2000);
     cy.get("#user-menu").click();
     cy.findByText("Sign out").click();
   });
@@ -11,6 +11,6 @@ describe("Logout", () => {
   });
 
   it("shows a success message", () => {
-    cy.findByText("Logout successful").should("be.visible");
+    cy.findByText("Logout successful").should("exist");
   });
 });
