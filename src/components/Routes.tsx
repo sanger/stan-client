@@ -46,8 +46,11 @@ export function Routes() {
 
       <AuthenticatedRoute
         path="/lab/sectioning"
-        render={() => (
-          <DataFetcher dataFetcher={getSectioningInfo}>
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={getSectioningInfo}
+          >
             {(sectioningInfo) => <Sectioning sectioningInfo={sectioningInfo} />}
           </DataFetcher>
         )}
@@ -70,8 +73,11 @@ export function Routes() {
 
       <AuthenticatedRoute
         path="/admin/registration"
-        render={() => (
-          <DataFetcher dataFetcher={getRegistrationInfo}>
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={getRegistrationInfo}
+          >
             {(registrationInfo) => (
               <Registration registrationInfo={registrationInfo} />
             )}
@@ -82,7 +88,10 @@ export function Routes() {
       <AuthenticatedRoute
         path="/admin/slide_registration"
         render={(routeProps) => (
-          <DataFetcher dataFetcher={getRegistrationInfo}>
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={getRegistrationInfo}
+          >
             {(registrationInfo) => (
               <SlideRegistration
                 registrationInfo={registrationInfo}
@@ -95,8 +104,11 @@ export function Routes() {
 
       <AuthenticatedRoute
         path="/admin/release"
-        render={() => (
-          <DataFetcher dataFetcher={getReleaseInfo}>
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={getReleaseInfo}
+          >
             {(releaseInfo) => <Release releaseInfo={releaseInfo} />}
           </DataFetcher>
         )}
@@ -141,8 +153,11 @@ export function Routes() {
 
       <AuthenticatedRoute
         path="/admin/destroy"
-        render={() => (
-          <DataFetcher dataFetcher={getDestroyInfo}>
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={getDestroyInfo}
+          >
             {(destroyInfo) => <Destroy destroyInfo={destroyInfo} />}
           </DataFetcher>
         )}
