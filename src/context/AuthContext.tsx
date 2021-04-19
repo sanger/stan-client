@@ -63,6 +63,9 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       }
       setIsLoading(false);
     },
+    onError: () => {
+      setIsLoading(false);
+    },
   });
   const [logoutMutation] = useLogoutMutation();
   const client = useApolloClient();
