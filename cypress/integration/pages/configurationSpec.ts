@@ -6,7 +6,7 @@ import {
 describe("Configuration Spec", () => {
   before(() => {
     cy.visitAsAdmin("/config");
-    cy.wait(2000);
+    cy.wait(3000);
   });
 
   testEntityManager(
