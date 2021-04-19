@@ -6,6 +6,7 @@ import {
   LoginMutationVariables,
   LogoutMutation,
   LogoutMutationVariables,
+  UserRole,
 } from "../../types/graphql";
 
 const CURRENT_USER_KEY = "currentUser";
@@ -20,7 +21,9 @@ const userHandlers = [
         ctx.data({
           login: {
             user: {
+              __typename: "User",
               username,
+              role: UserRole.Normal,
             },
           },
         })
@@ -52,7 +55,9 @@ const userHandlers = [
         return res(
           ctx.data({
             user: {
+              __typename: "User",
               username: "jb1",
+              role: UserRole.Normal,
             },
           })
         );
@@ -60,7 +65,9 @@ const userHandlers = [
         return res(
           ctx.data({
             user: {
+              __typename: "User",
               username: currentUser,
+              role: UserRole.Normal,
             },
           })
         );

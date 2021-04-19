@@ -1,5 +1,6 @@
 import {LabwareFieldsFragment, Maybe, PrinterFieldsFragment, Size,} from "./graphql";
 import {ApolloError} from "@apollo/client";
+import {Location} from "history";
 
 /**
  * Union of STAN's {@link OperationType} names
@@ -152,3 +153,13 @@ export interface Addressable {
   address: string;
   [key: string]: any;
 }
+
+/**
+ * Properties that can be added on to the URL state. Frequently used with react-router's Redirect component.
+ */
+export type LocationState = {
+  referrer?: Location;
+  success?: string;
+  warning?: string;
+  loggedOut?: boolean;
+};

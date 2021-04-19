@@ -40,4 +40,34 @@ describe("Authorized routes", () => {
       });
     });
   });
+
+  describe("Admin routes", () => {
+    context("when visiting as a normal user", () => {
+      before(() => {
+        cy.visit("/config");
+      });
+
+      it("redirects to the homepage", () => {
+        cy.location().should((location) => {
+          expect(location.pathname).to.eq("/");
+        });
+      });
+
+      it("shows an error", () => {
+        cy.findByText("You are not authorised to access /config").should(
+          "be.visible"
+        );
+      });
+    });
+
+    context("when visiting as an admin user", () => {
+      before(() => {
+        cy.visitAsAdmin("/config");
+      });
+
+      it("navigates to the page", () => {
+        cy.findByText("STAN Configuration").should("be.visible");
+      });
+    });
+  });
 });

@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { Authenticated, Unauthenticated } from "./Authenticated";
 import { StanMobileNavLink, StanNavLink } from "./nav";
 import { useOnClickOutside } from "../lib/hooks";
@@ -13,6 +13,9 @@ import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LabwareIcon from "./icons/LabwareIcon";
 import SupportIcon from "./icons/SupportIcon";
+import Warning from "./notifications/Warning";
+import { LocationState } from "../types/stan";
+import Success from "./notifications/Success";
 
 interface AppShellParams {
   children?: React.ReactNode | React.ReactNode[];
@@ -20,6 +23,7 @@ interface AppShellParams {
 
 function AppShell({ children }: AppShellParams) {
   const auth = useContext(authContext);
+  const location = useLocation<LocationState>();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const labDropdownRef = useRef<HTMLDivElement>(null);
@@ -319,7 +323,7 @@ function AppShell({ children }: AppShellParams) {
                   </Unauthenticated>
                   <Authenticated>
                     <span className="inline-flex items-center justify-center h-10 w-10 p-1 rounded-full text-white bg-sp text-xs">
-                      {auth.authState?.userInfo.username}
+                      {auth.authState?.user.username}
                     </span>
                   </Authenticated>
                 </button>
@@ -439,7 +443,7 @@ function AppShell({ children }: AppShellParams) {
                   <div className="flex items-center px-5 space-x-3 mb-3">
                     <div className="flex-shrink-0">
                       <span className="inline-flex items-center justify-center h-10 w-10 p-1 rounded-full text-white bg-sp text-xs">
-                        {auth.authState?.userInfo.username}
+                        {auth.authState?.user.username}
                       </span>
                     </div>
 
@@ -448,7 +452,7 @@ function AppShell({ children }: AppShellParams) {
                         Logged In
                       </div>
                       <div className="text-sm font-medium leading-none text-gray-400">
-                        {auth.authState?.userInfo.username}
+                        {auth.authState?.user.username}
                         @sanger.ac.uk
                       </div>
                     </div>
@@ -479,6 +483,8 @@ function AppShell({ children }: AppShellParams) {
           )}
         </AnimatePresence>
       </div>
+      {location.state?.warning && <Warning message={location.state.warning} />}
+      {location.state?.success && <Success message={location.state.success} />}
       {children}
       <footer className="border border-t-2 border-sdb-100 h-16 flex-shrink-0 bg-sdb-400" />
     </div>

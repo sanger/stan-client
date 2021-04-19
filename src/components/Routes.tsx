@@ -27,9 +27,10 @@ import {
   safeParseQueryString,
 } from "../lib/helpers";
 import { isLocationSearch, LocationSearchParams } from "../types/stan";
-import { FindRequest, Maybe } from "../types/graphql";
+import { FindRequest, Maybe, UserRole } from "../types/graphql";
 import { ParsedQuery } from "query-string";
 import _ from "lodash";
+import Configuration from "../pages/Configuration";
 
 export function Routes() {
   // Hook to remove any location state after it has been consumed for a component.
@@ -161,6 +162,12 @@ export function Routes() {
             {(destroyInfo) => <Destroy destroyInfo={destroyInfo} />}
           </DataFetcher>
         )}
+      />
+
+      <AuthenticatedRoute
+        path="/config"
+        role={UserRole.Admin}
+        render={() => <Configuration />}
       />
 
       <Route
