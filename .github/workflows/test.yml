@@ -18,19 +18,24 @@ jobs:
       - uses: actions/checkout@v2
         name: Checkout
 
-      - uses: actions/cache@v2
-        with:
-          path: |
-            '**/node_modules'
-            '/AppData/Local/Cypress/Cache/'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+#       - uses: actions/cache@v2
+#         with:
+#           path: |
+#             '**/node_modules'
+#             '/AppData/Local/Cypress/Cache/'
+#           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
-      - uses: actions/setup-node@v1
+#       - uses: actions/setup-node@v1
+#         with:
+#           node-version: '14.x'
+          
+#       - run: yarn install --frozen-lockfile
+#       - run: yarn build:css
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
         with:
-          node-version: '14.x'
-      - run: yarn install --frozen-lockfile
-      - run: yarn build:css
-      - run: yarn test:ci
-        env:
-          PORT: 3001
-          REACT_APP_MOCK_API: msw
+          install-command: yarn --frozen-lockfile --silent
+          build: yarn build:css
+          start: yarn start
+          wait-on: 'http://localhost:3001'
+          env: PORT=3001,REACT_APP_MOCK_API=msw
