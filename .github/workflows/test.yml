@@ -13,6 +13,9 @@ jobs:
   build:
 
     runs-on: windows-latest
+    
+    env:
+      REACT_APP_MOCK_API: msw
 
     steps:
       - uses: actions/checkout@v2
@@ -22,8 +25,9 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           install-command: yarn --frozen-lockfile --silent
-          build: yarn build:css
-          start: yarn start:js
+          build: yarn build
+          start: npx serve -s build -p 3000
           wait-on: 'http://localhost:3000'
           env: REACT_APP_MOCK_API=msw
           config: baseUrl=http://localhost:3000
+          timeout-minutes: 5
