@@ -1,8 +1,9 @@
 describe("Logout", () => {
   before(() => {
     cy.visit("/");
-    cy.wait(2000);
+    cy.wait(3000);
     cy.get("#user-menu").click();
+    cy.findByRole("menu").should("be.visible");
     cy.findByText("Sign out").click();
   });
 
