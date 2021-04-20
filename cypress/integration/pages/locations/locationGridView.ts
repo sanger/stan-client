@@ -5,7 +5,7 @@ describe("Location Grid View", () => {
   });
 
   it("selects the first available address", () => {
-    cy.findByText("Selected Address: 2").should("be.visible");
+    cy.findByText("Selected Address: 2").should("exist");
   });
 
   context("when scanning in a barcode", () => {

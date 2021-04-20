@@ -6,35 +6,69 @@ import {
 describe("Configuration Spec", () => {
   before(() => {
     cy.visitAsAdmin("/config");
-    cy.wait(3000);
   });
 
-  testEntityManager(
-    "Comments - section",
-    "Section Folded",
-    "+ Add Text",
-    "My new comment"
-  );
+  [
+    {
+      name: "Comments - section",
+      field: "Section Folded",
+      buttonName: "+ Add Text",
+      newValue: "My new comment",
+    },
+    {
+      name: "Destruction Reasons",
+      field: "Experiment complete.",
+      buttonName: "+ Add Text",
+      newValue: "My new comment",
+    },
+    {
+      name: "Species",
+      field: "Mouse",
+      buttonName: "+ Add Name",
+      newValue: "Monkey",
+    },
+    {
+      name: "HMDMC Numbers",
+      field: "HMDMC1",
+      buttonName: "+ Add Hmdmc",
+      newValue: "HMDMC9",
+    },
+    {
+      name: "Release Destinations",
+      field: "Vento lab",
+      buttonName: "+ Add Name",
+      newValue: "Fab lab",
+    },
+    {
+      name: "Release Recipients",
+      field: "cs41",
+      buttonName: "+ Add Username",
+      newValue: "az99",
+    },
+  ].forEach((config) => {
+    describe(config.name, () => {
+      it("toggles the enabled field", () => {
+        cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(
+          () => {
+            cy.get(`tr:contains('${config.field}') input`).click();
+            cy.findByText(`"${config.field}" disabled`).should("be.visible");
+            cy.get(`tr:contains('${config.field}') input`).click();
+            cy.findByText(`"${config.field}" enabled`).should("be.visible");
+          }
+        );
+      });
 
-  testEntityManager(
-    "Destruction Reasons",
-    "Experiment complete.",
-    "+ Add Text",
-    "My new comment"
-  );
-
-  testEntityManager("Species", "Mouse", "+ Add Name", "Monkey");
-
-  testEntityManager("HMDMC Numbers", "HMDMC1", "+ Add Hmdmc", "HMDMC9");
-
-  testEntityManager(
-    "Release Destinations",
-    "Vento lab",
-    "+ Add Name",
-    "Fab lab"
-  );
-
-  testEntityManager("Release Recipients", "cs41", "+ Add Username", "az99");
+      it("saves new entites", () => {
+        cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(
+          () => {
+            cy.findByRole("button", { name: config.buttonName }).click();
+            cy.focused().type(`${config.newValue}{enter}`);
+            cy.findByText("Saved").should("be.visible");
+          }
+        );
+      });
+    });
+  });
 
   context("When adding a Release Recipients fails", () => {
     before(() => {
@@ -69,35 +103,3 @@ describe("Configuration Spec", () => {
     });
   });
 });
-
-function testEntityManager(
-  name: string,
-  field: string,
-  buttonName: string,
-  newValue: string
-) {
-  describe(name, () => {
-    beforeEach(() => {
-      cy.get(`div[data-testid="config"]:contains('${name}')`).as(
-        "entityManager"
-      );
-    });
-
-    it("toggles the enabled field", () => {
-      cy.get("@entityManager").within(() => {
-        cy.get(`tr:contains('${field}') input`).click();
-        cy.findByText(`"${field}" disabled`).should("be.visible");
-        cy.get(`tr:contains('${field}') input`).click();
-        cy.findByText(`"${field}" enabled`).should("be.visible");
-      });
-    });
-
-    it("saves new entites", () => {
-      cy.get("@entityManager").within(() => {
-        cy.findByRole("button", { name: buttonName }).click();
-        cy.focused().type(`${newValue}{enter}`);
-        cy.findByText("Saved").should("be.visible");
-      });
-    });
-  });
-}
