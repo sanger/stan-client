@@ -5,9 +5,7 @@ import {
 
 function scanInLabware() {
   cy.get("#labwareScanInput").type("STAN-011{enter}");
-  cy.wait(500);
   cy.get("#labwareScanInput").type("STAN-012{enter}");
-  cy.wait(500);
   cy.get("#labwareScanInput").type("STAN-013{enter}");
 }
 
@@ -67,16 +65,16 @@ describe("RNA Extraction", () => {
       cy.findByText("Extraction Complete").should("be.visible");
     });
 
-    context("when you click the Print Labels button", () => {
-      before(() => {
-        cy.findByRole("button", { name: /Print Labels/i }).click();
-      });
-
-      it("prints the destination labware", () => {
-        cy.findByText(
-          "Tube Printer successfully printed 2 labels for STAN-1004, STAN-1005, STAN-1006"
-        ).should("be.visible");
-      });
-    });
+    // context("when you click the Print Labels button", () => {
+    //   before(() => {
+    //     cy.findByRole("button", { name: /Print Labels/i }).click();
+    //   });
+    //
+    //   it("prints the destination labware", () => {
+    //     cy.findByText(
+    //       "Tube Printer successfully printed 2 labels for STAN-1004, STAN-1005, STAN-1006"
+    //     ).should("be.visible");
+    //   });
+    // });
   });
 });
