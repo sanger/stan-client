@@ -167,4 +167,4 @@ export type LocationState = {
 /**
  * An entity that can be disabled/enabled
  */
-export type DisableableEntity = { enabled: boolean };
+export type HasEnabled = { enabled: boolean };

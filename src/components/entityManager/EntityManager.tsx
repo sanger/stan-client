@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 import { Input } from "../forms/Input";
 import BlueButton from "../buttons/BlueButton";
-import { DisableableEntity } from "../../types/stan";
+import { HasEnabled } from "../../types/stan";
 import { useMachine } from "@xstate/react";
 import { createEntityManagerMachine } from "./entityManager.machine";
 import Success from "../notifications/Success";
@@ -37,7 +37,7 @@ type EntityManagerProps<E> = {
   onCreate(value: string): Promise<E>;
 };
 
-export default function EntityManager<E extends DisableableEntity>({
+export default function EntityManager<E extends HasEnabled>({
   initialEntities,
   displayColumnName,
   onToggle,
@@ -188,7 +188,7 @@ export default function EntityManager<E extends DisableableEntity>({
   );
 }
 
-type EntityRowParams<E extends DisableableEntity> = {
+type EntityRowParams<E extends HasEnabled> = {
   /**
    * The entity to display in this row
    */
@@ -212,7 +212,7 @@ type EntityRowParams<E extends DisableableEntity> = {
   onChange: (entity: E, enabled: boolean) => void;
 };
 
-function EntityRow<E extends DisableableEntity>({
+function EntityRow<E extends HasEnabled>({
   entity,
   displayColumnName,
   disable,

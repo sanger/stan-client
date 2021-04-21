@@ -1,20 +1,20 @@
 import { assign, createMachine } from "xstate";
 import {
-  DisableableEntity,
+  HasEnabled,
   MachineServiceDone,
   MachineServiceError,
 } from "../../types/stan";
 import { Maybe } from "../../types/graphql";
 import { ClientError } from "graphql-request";
 
-interface EntityManagerContext<E extends DisableableEntity> {
+interface EntityManagerContext<E extends HasEnabled> {
   entities: Array<E>;
   field: keyof E;
   successMessage: Maybe<string>;
   error: Maybe<ClientError>;
 }
 
-type EntityManagerEvent<E extends DisableableEntity> =
+type EntityManagerEvent<E extends HasEnabled> =
   | {
       type: "TOGGLE_ENABLED";
       entity: E;
@@ -33,7 +33,7 @@ type EntityManagerEvent<E extends DisableableEntity> =
   | MachineServiceDone<"createEntity", E>
   | MachineServiceError<"createEntity", ClientError>;
 
-export function createEntityManagerMachine<E extends DisableableEntity>(
+export function createEntityManagerMachine<E extends HasEnabled>(
   entities: Array<E>,
   field: keyof E
 ) {
