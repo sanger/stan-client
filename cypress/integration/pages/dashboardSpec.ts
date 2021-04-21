@@ -12,20 +12,6 @@ describe("Dashboard", () => {
     it("does not show the user menu", () => {
       cy.findByRole("menu").should("not.exist");
     });
-
-    context("when clicking the guest icon", () => {
-      before(() => {
-        cy.findByLabelText("User menu").click();
-      });
-
-      it("shows the user menu", () => {
-        cy.findByRole("menu").should("be.visible");
-      });
-
-      it("shows a link to login", () => {
-        cy.findByRole("menu").find("a[href='/login']").should("be.visible");
-      });
-    });
   });
 
   context("when visiting as an authenticated user", () => {

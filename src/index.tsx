@@ -23,7 +23,19 @@ async function prepare() {
     if (window.postMSWStart) {
       window.postMSWStart(worker, graphql);
     }
+    await wait(1000);
   }
+}
+
+/**
+ * Give a little time for all the mocks to load
+ */
+async function wait(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(null);
+    }, ms);
+  });
 }
 
 prepare().then(() => {
