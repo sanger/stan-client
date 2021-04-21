@@ -17,12 +17,14 @@ import Warning from "./notifications/Warning";
 import { LocationState } from "../types/stan";
 import Success from "./notifications/Success";
 import { UserRole } from "../types/sdk";
+import { configContext } from "../context/ConfigContext";
 
 interface AppShellParams {
   children?: React.ReactNode | React.ReactNode[];
 }
 
 function AppShell({ children }: AppShellParams) {
+  const config = useContext(configContext);
   const auth = useContext(authContext);
   const location = useLocation<LocationState>();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
@@ -67,7 +69,7 @@ function AppShell({ children }: AppShellParams) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="relative bg-gradient-to-tr from-sdb to-sdb-400">
+      <div className={`relative ${config?.headerColor}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center py-4 md:justify-start md:space-x-10">
             <div className="flex justify-start">
@@ -505,7 +507,9 @@ function AppShell({ children }: AppShellParams) {
       {location.state?.warning && <Warning message={location.state.warning} />}
       {location.state?.success && <Success message={location.state.success} />}
       {children}
-      <footer className="border border-t-2 border-sdb-100 h-16 flex-shrink-0 bg-sdb-400" />
+      <footer
+        className={`border border-t-2 h-16 flex-shrink-0 ${config?.footerColor}`}
+      />
     </div>
   );
 }
