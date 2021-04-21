@@ -5,7 +5,9 @@ import {
 
 function scanInLabware() {
   cy.get("#labwareScanInput").type("STAN-011{enter}");
+  cy.wait(500);
   cy.get("#labwareScanInput").type("STAN-012{enter}");
+  cy.wait(500);
   cy.get("#labwareScanInput").type("STAN-013{enter}");
 }
 
