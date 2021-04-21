@@ -87,7 +87,8 @@ export default function EntityManager<E extends DisableableEntity>({
       return;
     }
     send({ type: "CREATE_NEW_ENTITY", value });
-  }, [draftValue, send]);
+    setDraftValue("");
+  }, [draftValue, setDraftValue, send]);
 
   /**
    * Callback handler for when an EntityRow changes (i.e. enabled property is toggled)
