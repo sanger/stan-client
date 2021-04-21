@@ -23,7 +23,7 @@ async function prepare() {
     if (window.postMSWStart) {
       window.postMSWStart(worker, graphql);
     }
-    await wait(1000);
+    await wait(2000);
   }
 }
 
