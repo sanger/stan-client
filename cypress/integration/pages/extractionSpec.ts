@@ -57,10 +57,6 @@ describe("RNA Extraction", () => {
       cy.findByText("Extract").click();
     });
 
-    it("locks the labware scan table", () => {
-      cy.get("#labwareScanInput").should("be.disabled");
-    });
-
     it("hides the Extract button", () => {
       cy.findByRole("button", { name: /Extract/i }).should("not.exist");
     });
