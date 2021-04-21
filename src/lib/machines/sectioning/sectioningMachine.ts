@@ -340,7 +340,7 @@ function buildSectioningLayout(ctx: SectioningContext): SectioningLayout {
   const sectioningLayout: SectioningLayout = {
     inputLabwares: ctx.sourceLabwares,
     quantity: 1,
-    sectionThickness: 5,
+    sectionThickness: 0,
     sampleColors: ctx.sampleColors,
     destinationLabware: unregisteredLabwareFactory.build(
       {},

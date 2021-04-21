@@ -174,7 +174,7 @@ export interface SectioningLayout {
   quantity: number;
 
   /**
-   * The thinkness of each section (slice)
+   * The thickness of each section (slice)
    */
   sectionThickness: number;
 
