@@ -1,0 +1,5 @@
+mutation AddReleaseDestination($name: String!) {
+    addReleaseDestination(name: $name) {
+        ...ReleaseDestinationFields
+    }
+}

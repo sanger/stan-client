@@ -1,8 +1,8 @@
 query GetReleaseInfo {
     releaseDestinations {
-        name
+        ...ReleaseDestinationFields
     }
     releaseRecipients {
-        username
+        ...ReleaseRecipientFields
     }
 }

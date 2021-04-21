@@ -1,0 +1,5 @@
+mutation AddSpecies($name: String!) {
+    addSpecies(name: $name) {
+        ...SpeciesFields
+    }
+}

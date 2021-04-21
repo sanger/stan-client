@@ -1,12 +1,13 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useState } from "react";
 import { useApolloClient } from "@apollo/client";
 import { useMinimumWait } from "../lib/hooks";
 import Splash from "../pages/Splash";
 import {
-  useCurrentUserLazyQuery,
+  useCurrentUserQuery,
   useLogoutMutation,
   UserFieldsFragment,
 } from "../types/graphql";
+import { UserRole } from "../types/sdk";
 
 /**
  * Includes other properties the application is interested in for authentication
@@ -21,6 +22,7 @@ interface AuthContext {
   clearAuthState: () => void;
   logout: () => void;
   isAuthenticated: () => boolean;
+  userRoleIncludes: (role: UserRole) => boolean;
 }
 
 /**
@@ -28,6 +30,7 @@ interface AuthContext {
  */
 const initialContext: AuthContext = {
   isAuthenticated: () => false,
+  userRoleIncludes: () => false,
   setAuthState: () => {},
   clearAuthState: () => {},
   logout: () => {},
@@ -46,27 +49,27 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const waitElapsed = useMinimumWait(minimumWait);
   // Set the current auth state. null if user is not logged in.
   const [authState, setAuthState] = useState<AuthState | null>(null);
-  const [currentUser, { data }] = useCurrentUserLazyQuery();
+  // We don't want to render children until the `currentUser` query has completed and
+  // authState has been set
+  const [isLoading, setIsLoading] = useState(true);
+  useCurrentUserQuery({
+    onCompleted: (data) => {
+      if (data?.user) {
+        setAuthState({
+          user: data.user,
+        });
+      } else {
+        setAuthState(null);
+      }
+      setIsLoading(false);
+    },
+    onError: () => {
+      setIsLoading(false);
+    },
+  });
   const [logoutMutation] = useLogoutMutation();
   const client = useApolloClient();
-
-  useEffect(() => {
-    try {
-      currentUser();
-    } catch (e) {
-      console.error(e);
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (data?.user) {
-      setAuthState({
-        user: data.user,
-      });
-    } else {
-      setAuthState(null);
-    }
-  }, [data]);
+  const userRoles = Object.values(UserRole);
 
   /**
    * Sets the AuthState
@@ -104,6 +107,19 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     setAuthState(null);
   };
 
+  /**
+   * Check if the current authenticated user has the given role
+   */
+  const userRoleIncludes = useCallback(
+    (role: UserRole): boolean => {
+      if (!authState?.user) {
+        return false;
+      }
+      return userRoles.indexOf(authState.user.role) >= userRoles.indexOf(role);
+    },
+    [authState, userRoles]
+  );
+
   return (
     <Provider
       value={{
@@ -111,10 +127,11 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         setAuthState: (authState: AuthState) => setAuthInfo(authState),
         clearAuthState,
         isAuthenticated,
+        userRoleIncludes,
         logout,
       }}
     >
-      {!waitElapsed ? <Splash /> : children}
+      {!waitElapsed || isLoading ? <Splash /> : children}
     </Provider>
   );
 };

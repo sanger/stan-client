@@ -13,7 +13,6 @@ describe("RNA Extraction", () => {
   context("when extraction fails", () => {
     before(() => {
       cy.visit("/lab/extraction");
-      cy.wait(2000);
 
       cy.msw().then(({ worker, graphql }) => {
         worker.use(

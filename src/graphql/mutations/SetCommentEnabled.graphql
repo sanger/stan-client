@@ -1,0 +1,5 @@
+mutation SetCommentEnabled($commentId: Int!, $enabled: Boolean!) {
+    setCommentEnabled(commentId: $commentId, enabled: $enabled) {
+        ...CommentFields
+    }
+}

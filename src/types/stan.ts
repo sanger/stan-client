@@ -141,9 +141,9 @@ export type MachineServiceDone<T extends string, E> = {
  * @param <T> the name of the service
  * @see {@link https://xstate.js.org/docs/guides/communication.html#invoking-services XState Services}
  */
-export type MachineServiceError<T extends string> = {
+export type MachineServiceError<T extends string, E = ApolloError> = {
   type: `error.platform.${T}`;
-  data: ApolloError;
+  data: E;
 };
 
 /**
@@ -163,3 +163,8 @@ export type LocationState = {
   warning?: string;
   loggedOut?: boolean;
 };
+
+/**
+ * An entity that can be disabled/enabled
+ */
+export type HasEnabled = { enabled: boolean };

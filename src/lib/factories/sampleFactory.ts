@@ -43,10 +43,10 @@ export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(
 );
 
 export const bioStateFactory: Factory<BioState> = Factory.define<BioState>(
-    ({params, sequence}) => ({
+  ({ params, sequence }) => ({
     __typename: "BioState",
-        name: params.name ?? `BioState ${sequence}`,
-    })
+    name: params.name ?? `BioState ${sequence}`,
+  })
 );
 
 export const fixativeFactory: Factory<Fixative> = Factory.define<Fixative>(
@@ -74,6 +74,7 @@ export const hmdmcFactory: Factory<Hmdmc> = Factory.define<Hmdmc>(
   ({ sequence, params }) => ({
     __typename: "Hmdmc",
     hmdmc: params.hmdmc ?? `${_.random(1, 99)}-${_.random(100, 10000)}`,
+    enabled: params.enabled ?? true,
   })
 );
 
@@ -94,6 +95,7 @@ export const speciesFactory: Factory<Species> = Factory.define<Species>(
   ({ params, sequence }) => ({
     __typename: "Species",
     name: params.name ?? `Species ${sequence}`,
+    enabled: params.enabled ?? true,
   })
 );
 

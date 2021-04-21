@@ -1,0 +1,5 @@
+mutation SetDestructionReasonEnabled($text: String!, $enabled: Boolean!) {
+    setDestructionReasonEnabled(text: $text, enabled: $enabled) {
+        ...DestructionReasonFields
+    }
+}

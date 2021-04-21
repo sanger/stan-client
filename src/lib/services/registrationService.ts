@@ -1,6 +1,4 @@
 import {
-  GetRegistrationInfoDocument,
-  GetRegistrationInfoQuery,
   RegisterSectionsDocument,
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,
@@ -10,14 +8,6 @@ import {
   SectionRegisterRequest,
 } from "../../types/graphql";
 import client from "../client";
-
-/**
- * Gets all the information necessary for Registration
- */
-export async function getRegistrationInfo(): Promise<GetRegistrationInfoQuery> {
-  const response = await client.query({ query: GetRegistrationInfoDocument });
-  return response.data;
-}
 
 /**
  * Calls the register GraphQL mutation

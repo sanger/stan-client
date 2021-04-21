@@ -1,0 +1,20 @@
+query GetConfiguration {
+    destructionReasons(includeDisabled: true) {
+        ...DestructionReasonFields
+    }
+    comments(includeDisabled: true) {
+        ...CommentFields
+    }
+    hmdmcs(includeDisabled: true) {
+        ...HmdmcFields
+    }
+    species(includeDisabled: true) {
+        ...SpeciesFields
+    }
+    releaseDestinations(includeDisabled: true) {
+        ...ReleaseDestinationFields
+    }
+    releaseRecipients(includeDisabled: true) {
+        ...ReleaseRecipientFields
+    }
+}

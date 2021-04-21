@@ -13,6 +13,13 @@ import extractionHandlers from "./handlers/extractionHandlers";
 import findHandlers from "./handlers/findHandlers";
 import destroyHandlers from "./handlers/destroyHandlers";
 import slotCopyHandlers from "./handlers/slotCopyHandlers";
+import destructionReasonHandlers from "./handlers/destructionReasonHandlers";
+import commentHandlers from "./handlers/commentHandlers";
+import hmdmcHandlers from "./handlers/hmdmcHandlers";
+import releaseDestinationHandlers from "./handlers/releaseDestinationHandlers";
+import releaseRecipientHandlers from "./handlers/releaseRecipientHandlers";
+import speciesHandlers from "./handlers/speciesHandlers";
+import configurationHandlers from "./handlers/configurationHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -27,4 +34,11 @@ export const handlers = [
   ...findHandlers,
   ...destroyHandlers,
   ...slotCopyHandlers,
+  ...destructionReasonHandlers,
+  ...commentHandlers,
+  ...hmdmcHandlers,
+  ...releaseDestinationHandlers,
+  ...releaseRecipientHandlers,
+  ...speciesHandlers,
+  ...configurationHandlers,
 ];

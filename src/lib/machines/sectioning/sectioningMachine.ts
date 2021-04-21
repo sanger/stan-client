@@ -9,7 +9,6 @@ import { current } from "immer";
 import { buildSampleColors } from "../../helpers/labwareHelper";
 import { createSectioningLayoutMachine } from "./sectioningLayout/sectioningLayoutMachine";
 import { createSectioningConfirmMachine } from "./sectioningConfirm/sectioningConfirmMachine";
-import * as sectioningService from "../../services/sectioningService";
 import * as confirmService from "../../services/confirmService";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
 import { LabwareFieldsFragment, PlanMutation } from "../../../types/graphql";
@@ -29,6 +28,7 @@ import {
   SectioningLayoutEvent,
 } from "./sectioningLayout/sectioningLayoutTypes";
 import { sectioningConfirmationComplete } from "./sectioningConfirm/sectioningConfirmEvents";
+import { stanCore } from "../../sdk";
 
 export const machineKey = "sectioningMachine";
 
@@ -182,7 +182,7 @@ const sectioningMachineOptions: Partial<MachineOptions<
   },
 
   services: {
-    [Service.GET_SECTIONING_INFO]: sectioningService.getSectioningInfo,
+    [Service.GET_SECTIONING_INFO]: () => stanCore.GetSectioningInfo(),
     [Service.CONFIRM_OPERATION]: (ctx) =>
       confirmService.confirm(ctx.confirmOperationRequest),
   },

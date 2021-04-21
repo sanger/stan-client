@@ -67,6 +67,7 @@ export type SpatialLocation = {
 export type Hmdmc = {
   __typename?: 'Hmdmc';
   hmdmc: Scalars['String'];
+  enabled: Scalars['Boolean'];
 };
 
 export type LabelType = {
@@ -85,6 +86,7 @@ export type LabwareType = {
 export type Species = {
   __typename?: 'Species';
   name: Scalars['String'];
+  enabled: Scalars['Boolean'];
 };
 
 export type Donor = {
@@ -320,16 +322,19 @@ export type Comment = {
   id: Scalars['Int'];
   text: Scalars['String'];
   category: Scalars['String'];
+  enabled: Scalars['Boolean'];
 };
 
 export type ReleaseDestination = {
   __typename?: 'ReleaseDestination';
   name: Scalars['String'];
+  enabled: Scalars['Boolean'];
 };
 
 export type ReleaseRecipient = {
   __typename?: 'ReleaseRecipient';
   username: Scalars['String'];
+  enabled: Scalars['Boolean'];
 };
 
 export type Release = {
@@ -366,6 +371,7 @@ export type DestructionReason = {
   __typename?: 'DestructionReason';
   id: Scalars['Int'];
   text: Scalars['String'];
+  enabled: Scalars['Boolean'];
 };
 
 export type Destruction = {
@@ -488,9 +494,20 @@ export type Query = {
   releaseDestinations: Array<ReleaseDestination>;
   releaseRecipients: Array<ReleaseRecipient>;
   destructionReasons: Array<DestructionReason>;
+  users: Array<User>;
   find: FindResult;
   location: Location;
   stored: Array<StoredItem>;
+};
+
+
+export type QueryHmdmcsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QuerySpeciesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
 };
 
 
@@ -506,6 +523,27 @@ export type QueryPrintersArgs = {
 
 export type QueryCommentsArgs = {
   category?: Maybe<Scalars['String']>;
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryReleaseDestinationsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryReleaseRecipientsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryDestructionReasonsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryUsersArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
 };
 
 
@@ -536,6 +574,20 @@ export type Mutation = {
   extract: OperationResult;
   destroy: DestroyResult;
   slotCopy: OperationResult;
+  addComment: Comment;
+  setCommentEnabled: Comment;
+  addDestructionReason: DestructionReason;
+  setDestructionReasonEnabled: DestructionReason;
+  addHmdmc: Hmdmc;
+  setHmdmcEnabled: Hmdmc;
+  addReleaseDestination: ReleaseDestination;
+  setReleaseDestinationEnabled: ReleaseDestination;
+  addReleaseRecipient: ReleaseRecipient;
+  setReleaseRecipientEnabled: ReleaseRecipient;
+  addSpecies: Species;
+  setSpeciesEnabled: Species;
+  addUser: User;
+  setUserRole: User;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
@@ -595,6 +647,84 @@ export type MutationSlotCopyArgs = {
 };
 
 
+export type MutationAddCommentArgs = {
+  category: Scalars['String'];
+  text: Scalars['String'];
+};
+
+
+export type MutationSetCommentEnabledArgs = {
+  commentId: Scalars['Int'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationAddDestructionReasonArgs = {
+  text: Scalars['String'];
+};
+
+
+export type MutationSetDestructionReasonEnabledArgs = {
+  text: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationAddHmdmcArgs = {
+  hmdmc: Scalars['String'];
+};
+
+
+export type MutationSetHmdmcEnabledArgs = {
+  hmdmc: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationAddReleaseDestinationArgs = {
+  name: Scalars['String'];
+};
+
+
+export type MutationSetReleaseDestinationEnabledArgs = {
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationAddReleaseRecipientArgs = {
+  username: Scalars['String'];
+};
+
+
+export type MutationSetReleaseRecipientEnabledArgs = {
+  username: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationAddSpeciesArgs = {
+  name: Scalars['String'];
+};
+
+
+export type MutationSetSpeciesEnabledArgs = {
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationAddUserArgs = {
+  username: Scalars['String'];
+};
+
+
+export type MutationSetUserRoleArgs = {
+  username: Scalars['String'];
+  role: UserRole;
+};
+
+
 export type MutationStoreBarcodeArgs = {
   barcode: Scalars['String'];
   locationBarcode: Scalars['String'];
@@ -616,6 +746,21 @@ export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
 };
+
+export type CommentFieldsFragment = (
+  { __typename?: 'Comment' }
+  & Pick<Comment, 'id' | 'text' | 'category' | 'enabled'>
+);
+
+export type DestructionReasonFieldsFragment = (
+  { __typename?: 'DestructionReason' }
+  & Pick<DestructionReason, 'id' | 'text' | 'enabled'>
+);
+
+export type HmdmcFieldsFragment = (
+  { __typename?: 'Hmdmc' }
+  & Pick<Hmdmc, 'hmdmc' | 'enabled'>
+);
 
 export type LabwareFieldsFragment = (
   { __typename?: 'Labware' }
@@ -665,6 +810,16 @@ export type PrinterFieldsFragment = (
   )> }
 );
 
+export type ReleaseDestinationFieldsFragment = (
+  { __typename?: 'ReleaseDestination' }
+  & Pick<ReleaseDestination, 'name' | 'enabled'>
+);
+
+export type ReleaseRecipientFieldsFragment = (
+  { __typename?: 'ReleaseRecipient' }
+  & Pick<ReleaseRecipient, 'username' | 'enabled'>
+);
+
 export type SampleFieldsFragment = (
   { __typename?: 'Sample' }
   & Pick<Sample, 'id'>
@@ -697,9 +852,93 @@ export type SlotFieldsFragment = (
   )> }
 );
 
+export type SpeciesFieldsFragment = (
+  { __typename?: 'Species' }
+  & Pick<Species, 'name' | 'enabled'>
+);
+
 export type UserFieldsFragment = (
   { __typename?: 'User' }
   & Pick<User, 'username' | 'role'>
+);
+
+export type AddCommentMutationVariables = Exact<{
+  category: Scalars['String'];
+  text: Scalars['String'];
+}>;
+
+
+export type AddCommentMutation = (
+  { __typename?: 'Mutation' }
+  & { addComment: (
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  ) }
+);
+
+export type AddDestructionReasonMutationVariables = Exact<{
+  text: Scalars['String'];
+}>;
+
+
+export type AddDestructionReasonMutation = (
+  { __typename?: 'Mutation' }
+  & { addDestructionReason: (
+    { __typename?: 'DestructionReason' }
+    & DestructionReasonFieldsFragment
+  ) }
+);
+
+export type AddHmdmcMutationVariables = Exact<{
+  hmdmc: Scalars['String'];
+}>;
+
+
+export type AddHmdmcMutation = (
+  { __typename?: 'Mutation' }
+  & { addHmdmc: (
+    { __typename?: 'Hmdmc' }
+    & HmdmcFieldsFragment
+  ) }
+);
+
+export type AddReleaseDestinationMutationVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type AddReleaseDestinationMutation = (
+  { __typename?: 'Mutation' }
+  & { addReleaseDestination: (
+    { __typename?: 'ReleaseDestination' }
+    & ReleaseDestinationFieldsFragment
+  ) }
+);
+
+export type AddReleaseRecipientMutationVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type AddReleaseRecipientMutation = (
+  { __typename?: 'Mutation' }
+  & { addReleaseRecipient: (
+    { __typename?: 'ReleaseRecipient' }
+    & ReleaseRecipientFieldsFragment
+  ) }
+);
+
+export type AddSpeciesMutationVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type AddSpeciesMutation = (
+  { __typename?: 'Mutation' }
+  & { addSpecies: (
+    { __typename?: 'Species' }
+    & SpeciesFieldsFragment
+  ) }
 );
 
 export type ConfirmMutationVariables = Exact<{
@@ -944,6 +1183,48 @@ export type ReleaseLabwareMutation = (
   ) }
 );
 
+export type SetCommentEnabledMutationVariables = Exact<{
+  commentId: Scalars['Int'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetCommentEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setCommentEnabled: (
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  ) }
+);
+
+export type SetDestructionReasonEnabledMutationVariables = Exact<{
+  text: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetDestructionReasonEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setDestructionReasonEnabled: (
+    { __typename?: 'DestructionReason' }
+    & DestructionReasonFieldsFragment
+  ) }
+);
+
+export type SetHmdmcEnabledMutationVariables = Exact<{
+  hmdmc: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetHmdmcEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setHmdmcEnabled: (
+    { __typename?: 'Hmdmc' }
+    & HmdmcFieldsFragment
+  ) }
+);
+
 export type SetLocationCustomNameMutationVariables = Exact<{
   locationBarcode: Scalars['String'];
   newCustomName: Scalars['String'];
@@ -955,6 +1236,48 @@ export type SetLocationCustomNameMutation = (
   & { setLocationCustomName: (
     { __typename?: 'Location' }
     & LocationFieldsFragment
+  ) }
+);
+
+export type SetReleaseDestinationEnabledMutationVariables = Exact<{
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetReleaseDestinationEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setReleaseDestinationEnabled: (
+    { __typename?: 'ReleaseDestination' }
+    & ReleaseDestinationFieldsFragment
+  ) }
+);
+
+export type SetReleaseRecipientEnabledMutationVariables = Exact<{
+  username: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetReleaseRecipientEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setReleaseRecipientEnabled: (
+    { __typename?: 'ReleaseRecipient' }
+    & ReleaseRecipientFieldsFragment
+  ) }
+);
+
+export type SetSpeciesEnabledMutationVariables = Exact<{
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetSpeciesEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setSpeciesEnabled: (
+    { __typename?: 'Species' }
+    & SpeciesFieldsFragment
   ) }
 );
 
@@ -1109,6 +1432,32 @@ export type FindLocationByBarcodeQuery = (
   ) }
 );
 
+export type GetConfigurationQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetConfigurationQuery = (
+  { __typename?: 'Query' }
+  & { destructionReasons: Array<(
+    { __typename?: 'DestructionReason' }
+    & DestructionReasonFieldsFragment
+  )>, comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )>, hmdmcs: Array<(
+    { __typename?: 'Hmdmc' }
+    & HmdmcFieldsFragment
+  )>, species: Array<(
+    { __typename?: 'Species' }
+    & SpeciesFieldsFragment
+  )>, releaseDestinations: Array<(
+    { __typename?: 'ReleaseDestination' }
+    & ReleaseDestinationFieldsFragment
+  )>, releaseRecipients: Array<(
+    { __typename?: 'ReleaseRecipient' }
+    & ReleaseRecipientFieldsFragment
+  )> }
+);
+
 export type GetDestroyInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1116,7 +1465,20 @@ export type GetDestroyInfoQuery = (
   { __typename?: 'Query' }
   & { destructionReasons: Array<(
     { __typename?: 'DestructionReason' }
-    & Pick<DestructionReason, 'id' | 'text'>
+    & DestructionReasonFieldsFragment
+  )> }
+);
+
+export type GetDestructionReasonsQueryVariables = Exact<{
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+}>;
+
+
+export type GetDestructionReasonsQuery = (
+  { __typename?: 'Query' }
+  & { destructionReasons: Array<(
+    { __typename?: 'DestructionReason' }
+    & DestructionReasonFieldsFragment
   )> }
 );
 
@@ -1171,10 +1533,10 @@ export type GetReleaseInfoQuery = (
   { __typename?: 'Query' }
   & { releaseDestinations: Array<(
     { __typename?: 'ReleaseDestination' }
-    & Pick<ReleaseDestination, 'name'>
+    & ReleaseDestinationFieldsFragment
   )>, releaseRecipients: Array<(
     { __typename?: 'ReleaseRecipient' }
-    & Pick<ReleaseRecipient, 'username'>
+    & ReleaseRecipientFieldsFragment
   )> }
 );
 
@@ -1196,13 +1558,34 @@ export type GetSectioningInfoQuery = (
   { __typename?: 'Query' }
   & { comments: Array<(
     { __typename?: 'Comment' }
-    & Pick<Comment, 'id' | 'text' | 'category'>
+    & CommentFieldsFragment
   )>, labwareTypes: Array<(
     { __typename?: 'LabwareType' }
-    & Pick<LabwareType, 'name' | 'numRows' | 'numColumns'>
+    & LabwareTypeFieldsFragment
   )> }
 );
 
+export const CommentFieldsFragmentDoc = gql`
+    fragment CommentFields on Comment {
+  id
+  text
+  category
+  enabled
+}
+    `;
+export const DestructionReasonFieldsFragmentDoc = gql`
+    fragment DestructionReasonFields on DestructionReason {
+  id
+  text
+  enabled
+}
+    `;
+export const HmdmcFieldsFragmentDoc = gql`
+    fragment HmdmcFields on Hmdmc {
+  hmdmc
+  enabled
+}
+    `;
 export const LabwareTypeFieldsFragmentDoc = gql`
     fragment LabwareTypeFields on LabwareType {
   name
@@ -1295,12 +1678,229 @@ export const PrinterFieldsFragmentDoc = gql`
   }
 }
     `;
+export const ReleaseDestinationFieldsFragmentDoc = gql`
+    fragment ReleaseDestinationFields on ReleaseDestination {
+  name
+  enabled
+}
+    `;
+export const ReleaseRecipientFieldsFragmentDoc = gql`
+    fragment ReleaseRecipientFields on ReleaseRecipient {
+  username
+  enabled
+}
+    `;
+export const SpeciesFieldsFragmentDoc = gql`
+    fragment SpeciesFields on Species {
+  name
+  enabled
+}
+    `;
 export const UserFieldsFragmentDoc = gql`
     fragment UserFields on User {
   username
   role
 }
     `;
+export const AddCommentDocument = gql`
+    mutation AddComment($category: String!, $text: String!) {
+  addComment(category: $category, text: $text) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
+export type AddCommentMutationFn = Apollo.MutationFunction<AddCommentMutation, AddCommentMutationVariables>;
+
+/**
+ * __useAddCommentMutation__
+ *
+ * To run a mutation, you first call `useAddCommentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddCommentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addCommentMutation, { data, loading, error }] = useAddCommentMutation({
+ *   variables: {
+ *      category: // value for 'category'
+ *      text: // value for 'text'
+ *   },
+ * });
+ */
+export function useAddCommentMutation(baseOptions?: Apollo.MutationHookOptions<AddCommentMutation, AddCommentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddCommentMutation, AddCommentMutationVariables>(AddCommentDocument, options);
+      }
+export type AddCommentMutationHookResult = ReturnType<typeof useAddCommentMutation>;
+export type AddCommentMutationResult = Apollo.MutationResult<AddCommentMutation>;
+export type AddCommentMutationOptions = Apollo.BaseMutationOptions<AddCommentMutation, AddCommentMutationVariables>;
+export const AddDestructionReasonDocument = gql`
+    mutation AddDestructionReason($text: String!) {
+  addDestructionReason(text: $text) {
+    ...DestructionReasonFields
+  }
+}
+    ${DestructionReasonFieldsFragmentDoc}`;
+export type AddDestructionReasonMutationFn = Apollo.MutationFunction<AddDestructionReasonMutation, AddDestructionReasonMutationVariables>;
+
+/**
+ * __useAddDestructionReasonMutation__
+ *
+ * To run a mutation, you first call `useAddDestructionReasonMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddDestructionReasonMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addDestructionReasonMutation, { data, loading, error }] = useAddDestructionReasonMutation({
+ *   variables: {
+ *      text: // value for 'text'
+ *   },
+ * });
+ */
+export function useAddDestructionReasonMutation(baseOptions?: Apollo.MutationHookOptions<AddDestructionReasonMutation, AddDestructionReasonMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddDestructionReasonMutation, AddDestructionReasonMutationVariables>(AddDestructionReasonDocument, options);
+      }
+export type AddDestructionReasonMutationHookResult = ReturnType<typeof useAddDestructionReasonMutation>;
+export type AddDestructionReasonMutationResult = Apollo.MutationResult<AddDestructionReasonMutation>;
+export type AddDestructionReasonMutationOptions = Apollo.BaseMutationOptions<AddDestructionReasonMutation, AddDestructionReasonMutationVariables>;
+export const AddHmdmcDocument = gql`
+    mutation AddHmdmc($hmdmc: String!) {
+  addHmdmc(hmdmc: $hmdmc) {
+    ...HmdmcFields
+  }
+}
+    ${HmdmcFieldsFragmentDoc}`;
+export type AddHmdmcMutationFn = Apollo.MutationFunction<AddHmdmcMutation, AddHmdmcMutationVariables>;
+
+/**
+ * __useAddHmdmcMutation__
+ *
+ * To run a mutation, you first call `useAddHmdmcMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddHmdmcMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addHmdmcMutation, { data, loading, error }] = useAddHmdmcMutation({
+ *   variables: {
+ *      hmdmc: // value for 'hmdmc'
+ *   },
+ * });
+ */
+export function useAddHmdmcMutation(baseOptions?: Apollo.MutationHookOptions<AddHmdmcMutation, AddHmdmcMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddHmdmcMutation, AddHmdmcMutationVariables>(AddHmdmcDocument, options);
+      }
+export type AddHmdmcMutationHookResult = ReturnType<typeof useAddHmdmcMutation>;
+export type AddHmdmcMutationResult = Apollo.MutationResult<AddHmdmcMutation>;
+export type AddHmdmcMutationOptions = Apollo.BaseMutationOptions<AddHmdmcMutation, AddHmdmcMutationVariables>;
+export const AddReleaseDestinationDocument = gql`
+    mutation AddReleaseDestination($name: String!) {
+  addReleaseDestination(name: $name) {
+    ...ReleaseDestinationFields
+  }
+}
+    ${ReleaseDestinationFieldsFragmentDoc}`;
+export type AddReleaseDestinationMutationFn = Apollo.MutationFunction<AddReleaseDestinationMutation, AddReleaseDestinationMutationVariables>;
+
+/**
+ * __useAddReleaseDestinationMutation__
+ *
+ * To run a mutation, you first call `useAddReleaseDestinationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddReleaseDestinationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addReleaseDestinationMutation, { data, loading, error }] = useAddReleaseDestinationMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useAddReleaseDestinationMutation(baseOptions?: Apollo.MutationHookOptions<AddReleaseDestinationMutation, AddReleaseDestinationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddReleaseDestinationMutation, AddReleaseDestinationMutationVariables>(AddReleaseDestinationDocument, options);
+      }
+export type AddReleaseDestinationMutationHookResult = ReturnType<typeof useAddReleaseDestinationMutation>;
+export type AddReleaseDestinationMutationResult = Apollo.MutationResult<AddReleaseDestinationMutation>;
+export type AddReleaseDestinationMutationOptions = Apollo.BaseMutationOptions<AddReleaseDestinationMutation, AddReleaseDestinationMutationVariables>;
+export const AddReleaseRecipientDocument = gql`
+    mutation AddReleaseRecipient($username: String!) {
+  addReleaseRecipient(username: $username) {
+    ...ReleaseRecipientFields
+  }
+}
+    ${ReleaseRecipientFieldsFragmentDoc}`;
+export type AddReleaseRecipientMutationFn = Apollo.MutationFunction<AddReleaseRecipientMutation, AddReleaseRecipientMutationVariables>;
+
+/**
+ * __useAddReleaseRecipientMutation__
+ *
+ * To run a mutation, you first call `useAddReleaseRecipientMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddReleaseRecipientMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addReleaseRecipientMutation, { data, loading, error }] = useAddReleaseRecipientMutation({
+ *   variables: {
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useAddReleaseRecipientMutation(baseOptions?: Apollo.MutationHookOptions<AddReleaseRecipientMutation, AddReleaseRecipientMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddReleaseRecipientMutation, AddReleaseRecipientMutationVariables>(AddReleaseRecipientDocument, options);
+      }
+export type AddReleaseRecipientMutationHookResult = ReturnType<typeof useAddReleaseRecipientMutation>;
+export type AddReleaseRecipientMutationResult = Apollo.MutationResult<AddReleaseRecipientMutation>;
+export type AddReleaseRecipientMutationOptions = Apollo.BaseMutationOptions<AddReleaseRecipientMutation, AddReleaseRecipientMutationVariables>;
+export const AddSpeciesDocument = gql`
+    mutation AddSpecies($name: String!) {
+  addSpecies(name: $name) {
+    ...SpeciesFields
+  }
+}
+    ${SpeciesFieldsFragmentDoc}`;
+export type AddSpeciesMutationFn = Apollo.MutationFunction<AddSpeciesMutation, AddSpeciesMutationVariables>;
+
+/**
+ * __useAddSpeciesMutation__
+ *
+ * To run a mutation, you first call `useAddSpeciesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddSpeciesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addSpeciesMutation, { data, loading, error }] = useAddSpeciesMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useAddSpeciesMutation(baseOptions?: Apollo.MutationHookOptions<AddSpeciesMutation, AddSpeciesMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddSpeciesMutation, AddSpeciesMutationVariables>(AddSpeciesDocument, options);
+      }
+export type AddSpeciesMutationHookResult = ReturnType<typeof useAddSpeciesMutation>;
+export type AddSpeciesMutationResult = Apollo.MutationResult<AddSpeciesMutation>;
+export type AddSpeciesMutationOptions = Apollo.BaseMutationOptions<AddSpeciesMutation, AddSpeciesMutationVariables>;
 export const ConfirmDocument = gql`
     mutation Confirm($request: ConfirmOperationRequest!) {
   confirmOperation(request: $request) {
@@ -1751,6 +2351,108 @@ export function useReleaseLabwareMutation(baseOptions?: Apollo.MutationHookOptio
 export type ReleaseLabwareMutationHookResult = ReturnType<typeof useReleaseLabwareMutation>;
 export type ReleaseLabwareMutationResult = Apollo.MutationResult<ReleaseLabwareMutation>;
 export type ReleaseLabwareMutationOptions = Apollo.BaseMutationOptions<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>;
+export const SetCommentEnabledDocument = gql`
+    mutation SetCommentEnabled($commentId: Int!, $enabled: Boolean!) {
+  setCommentEnabled(commentId: $commentId, enabled: $enabled) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
+export type SetCommentEnabledMutationFn = Apollo.MutationFunction<SetCommentEnabledMutation, SetCommentEnabledMutationVariables>;
+
+/**
+ * __useSetCommentEnabledMutation__
+ *
+ * To run a mutation, you first call `useSetCommentEnabledMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetCommentEnabledMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setCommentEnabledMutation, { data, loading, error }] = useSetCommentEnabledMutation({
+ *   variables: {
+ *      commentId: // value for 'commentId'
+ *      enabled: // value for 'enabled'
+ *   },
+ * });
+ */
+export function useSetCommentEnabledMutation(baseOptions?: Apollo.MutationHookOptions<SetCommentEnabledMutation, SetCommentEnabledMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetCommentEnabledMutation, SetCommentEnabledMutationVariables>(SetCommentEnabledDocument, options);
+      }
+export type SetCommentEnabledMutationHookResult = ReturnType<typeof useSetCommentEnabledMutation>;
+export type SetCommentEnabledMutationResult = Apollo.MutationResult<SetCommentEnabledMutation>;
+export type SetCommentEnabledMutationOptions = Apollo.BaseMutationOptions<SetCommentEnabledMutation, SetCommentEnabledMutationVariables>;
+export const SetDestructionReasonEnabledDocument = gql`
+    mutation SetDestructionReasonEnabled($text: String!, $enabled: Boolean!) {
+  setDestructionReasonEnabled(text: $text, enabled: $enabled) {
+    ...DestructionReasonFields
+  }
+}
+    ${DestructionReasonFieldsFragmentDoc}`;
+export type SetDestructionReasonEnabledMutationFn = Apollo.MutationFunction<SetDestructionReasonEnabledMutation, SetDestructionReasonEnabledMutationVariables>;
+
+/**
+ * __useSetDestructionReasonEnabledMutation__
+ *
+ * To run a mutation, you first call `useSetDestructionReasonEnabledMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetDestructionReasonEnabledMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setDestructionReasonEnabledMutation, { data, loading, error }] = useSetDestructionReasonEnabledMutation({
+ *   variables: {
+ *      text: // value for 'text'
+ *      enabled: // value for 'enabled'
+ *   },
+ * });
+ */
+export function useSetDestructionReasonEnabledMutation(baseOptions?: Apollo.MutationHookOptions<SetDestructionReasonEnabledMutation, SetDestructionReasonEnabledMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetDestructionReasonEnabledMutation, SetDestructionReasonEnabledMutationVariables>(SetDestructionReasonEnabledDocument, options);
+      }
+export type SetDestructionReasonEnabledMutationHookResult = ReturnType<typeof useSetDestructionReasonEnabledMutation>;
+export type SetDestructionReasonEnabledMutationResult = Apollo.MutationResult<SetDestructionReasonEnabledMutation>;
+export type SetDestructionReasonEnabledMutationOptions = Apollo.BaseMutationOptions<SetDestructionReasonEnabledMutation, SetDestructionReasonEnabledMutationVariables>;
+export const SetHmdmcEnabledDocument = gql`
+    mutation SetHmdmcEnabled($hmdmc: String!, $enabled: Boolean!) {
+  setHmdmcEnabled(hmdmc: $hmdmc, enabled: $enabled) {
+    ...HmdmcFields
+  }
+}
+    ${HmdmcFieldsFragmentDoc}`;
+export type SetHmdmcEnabledMutationFn = Apollo.MutationFunction<SetHmdmcEnabledMutation, SetHmdmcEnabledMutationVariables>;
+
+/**
+ * __useSetHmdmcEnabledMutation__
+ *
+ * To run a mutation, you first call `useSetHmdmcEnabledMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetHmdmcEnabledMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setHmdmcEnabledMutation, { data, loading, error }] = useSetHmdmcEnabledMutation({
+ *   variables: {
+ *      hmdmc: // value for 'hmdmc'
+ *      enabled: // value for 'enabled'
+ *   },
+ * });
+ */
+export function useSetHmdmcEnabledMutation(baseOptions?: Apollo.MutationHookOptions<SetHmdmcEnabledMutation, SetHmdmcEnabledMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetHmdmcEnabledMutation, SetHmdmcEnabledMutationVariables>(SetHmdmcEnabledDocument, options);
+      }
+export type SetHmdmcEnabledMutationHookResult = ReturnType<typeof useSetHmdmcEnabledMutation>;
+export type SetHmdmcEnabledMutationResult = Apollo.MutationResult<SetHmdmcEnabledMutation>;
+export type SetHmdmcEnabledMutationOptions = Apollo.BaseMutationOptions<SetHmdmcEnabledMutation, SetHmdmcEnabledMutationVariables>;
 export const SetLocationCustomNameDocument = gql`
     mutation SetLocationCustomName($locationBarcode: String!, $newCustomName: String!) {
   setLocationCustomName(
@@ -1788,6 +2490,108 @@ export function useSetLocationCustomNameMutation(baseOptions?: Apollo.MutationHo
 export type SetLocationCustomNameMutationHookResult = ReturnType<typeof useSetLocationCustomNameMutation>;
 export type SetLocationCustomNameMutationResult = Apollo.MutationResult<SetLocationCustomNameMutation>;
 export type SetLocationCustomNameMutationOptions = Apollo.BaseMutationOptions<SetLocationCustomNameMutation, SetLocationCustomNameMutationVariables>;
+export const SetReleaseDestinationEnabledDocument = gql`
+    mutation SetReleaseDestinationEnabled($name: String!, $enabled: Boolean!) {
+  setReleaseDestinationEnabled(name: $name, enabled: $enabled) {
+    ...ReleaseDestinationFields
+  }
+}
+    ${ReleaseDestinationFieldsFragmentDoc}`;
+export type SetReleaseDestinationEnabledMutationFn = Apollo.MutationFunction<SetReleaseDestinationEnabledMutation, SetReleaseDestinationEnabledMutationVariables>;
+
+/**
+ * __useSetReleaseDestinationEnabledMutation__
+ *
+ * To run a mutation, you first call `useSetReleaseDestinationEnabledMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetReleaseDestinationEnabledMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setReleaseDestinationEnabledMutation, { data, loading, error }] = useSetReleaseDestinationEnabledMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      enabled: // value for 'enabled'
+ *   },
+ * });
+ */
+export function useSetReleaseDestinationEnabledMutation(baseOptions?: Apollo.MutationHookOptions<SetReleaseDestinationEnabledMutation, SetReleaseDestinationEnabledMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetReleaseDestinationEnabledMutation, SetReleaseDestinationEnabledMutationVariables>(SetReleaseDestinationEnabledDocument, options);
+      }
+export type SetReleaseDestinationEnabledMutationHookResult = ReturnType<typeof useSetReleaseDestinationEnabledMutation>;
+export type SetReleaseDestinationEnabledMutationResult = Apollo.MutationResult<SetReleaseDestinationEnabledMutation>;
+export type SetReleaseDestinationEnabledMutationOptions = Apollo.BaseMutationOptions<SetReleaseDestinationEnabledMutation, SetReleaseDestinationEnabledMutationVariables>;
+export const SetReleaseRecipientEnabledDocument = gql`
+    mutation SetReleaseRecipientEnabled($username: String!, $enabled: Boolean!) {
+  setReleaseRecipientEnabled(username: $username, enabled: $enabled) {
+    ...ReleaseRecipientFields
+  }
+}
+    ${ReleaseRecipientFieldsFragmentDoc}`;
+export type SetReleaseRecipientEnabledMutationFn = Apollo.MutationFunction<SetReleaseRecipientEnabledMutation, SetReleaseRecipientEnabledMutationVariables>;
+
+/**
+ * __useSetReleaseRecipientEnabledMutation__
+ *
+ * To run a mutation, you first call `useSetReleaseRecipientEnabledMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetReleaseRecipientEnabledMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setReleaseRecipientEnabledMutation, { data, loading, error }] = useSetReleaseRecipientEnabledMutation({
+ *   variables: {
+ *      username: // value for 'username'
+ *      enabled: // value for 'enabled'
+ *   },
+ * });
+ */
+export function useSetReleaseRecipientEnabledMutation(baseOptions?: Apollo.MutationHookOptions<SetReleaseRecipientEnabledMutation, SetReleaseRecipientEnabledMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetReleaseRecipientEnabledMutation, SetReleaseRecipientEnabledMutationVariables>(SetReleaseRecipientEnabledDocument, options);
+      }
+export type SetReleaseRecipientEnabledMutationHookResult = ReturnType<typeof useSetReleaseRecipientEnabledMutation>;
+export type SetReleaseRecipientEnabledMutationResult = Apollo.MutationResult<SetReleaseRecipientEnabledMutation>;
+export type SetReleaseRecipientEnabledMutationOptions = Apollo.BaseMutationOptions<SetReleaseRecipientEnabledMutation, SetReleaseRecipientEnabledMutationVariables>;
+export const SetSpeciesEnabledDocument = gql`
+    mutation SetSpeciesEnabled($name: String!, $enabled: Boolean!) {
+  setSpeciesEnabled(name: $name, enabled: $enabled) {
+    ...SpeciesFields
+  }
+}
+    ${SpeciesFieldsFragmentDoc}`;
+export type SetSpeciesEnabledMutationFn = Apollo.MutationFunction<SetSpeciesEnabledMutation, SetSpeciesEnabledMutationVariables>;
+
+/**
+ * __useSetSpeciesEnabledMutation__
+ *
+ * To run a mutation, you first call `useSetSpeciesEnabledMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetSpeciesEnabledMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setSpeciesEnabledMutation, { data, loading, error }] = useSetSpeciesEnabledMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      enabled: // value for 'enabled'
+ *   },
+ * });
+ */
+export function useSetSpeciesEnabledMutation(baseOptions?: Apollo.MutationHookOptions<SetSpeciesEnabledMutation, SetSpeciesEnabledMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetSpeciesEnabledMutation, SetSpeciesEnabledMutationVariables>(SetSpeciesEnabledDocument, options);
+      }
+export type SetSpeciesEnabledMutationHookResult = ReturnType<typeof useSetSpeciesEnabledMutation>;
+export type SetSpeciesEnabledMutationResult = Apollo.MutationResult<SetSpeciesEnabledMutation>;
+export type SetSpeciesEnabledMutationOptions = Apollo.BaseMutationOptions<SetSpeciesEnabledMutation, SetSpeciesEnabledMutationVariables>;
 export const SlotCopyDocument = gql`
     mutation SlotCopy($request: SlotCopyRequest!) {
   slotCopy(request: $request) {
@@ -2117,14 +2921,67 @@ export function useFindLocationByBarcodeLazyQuery(baseOptions?: Apollo.LazyQuery
 export type FindLocationByBarcodeQueryHookResult = ReturnType<typeof useFindLocationByBarcodeQuery>;
 export type FindLocationByBarcodeLazyQueryHookResult = ReturnType<typeof useFindLocationByBarcodeLazyQuery>;
 export type FindLocationByBarcodeQueryResult = Apollo.QueryResult<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>;
+export const GetConfigurationDocument = gql`
+    query GetConfiguration {
+  destructionReasons(includeDisabled: true) {
+    ...DestructionReasonFields
+  }
+  comments(includeDisabled: true) {
+    ...CommentFields
+  }
+  hmdmcs(includeDisabled: true) {
+    ...HmdmcFields
+  }
+  species(includeDisabled: true) {
+    ...SpeciesFields
+  }
+  releaseDestinations(includeDisabled: true) {
+    ...ReleaseDestinationFields
+  }
+  releaseRecipients(includeDisabled: true) {
+    ...ReleaseRecipientFields
+  }
+}
+    ${DestructionReasonFieldsFragmentDoc}
+${CommentFieldsFragmentDoc}
+${HmdmcFieldsFragmentDoc}
+${SpeciesFieldsFragmentDoc}
+${ReleaseDestinationFieldsFragmentDoc}
+${ReleaseRecipientFieldsFragmentDoc}`;
+
+/**
+ * __useGetConfigurationQuery__
+ *
+ * To run a query within a React component, call `useGetConfigurationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetConfigurationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetConfigurationQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetConfigurationQuery(baseOptions?: Apollo.QueryHookOptions<GetConfigurationQuery, GetConfigurationQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetConfigurationQuery, GetConfigurationQueryVariables>(GetConfigurationDocument, options);
+      }
+export function useGetConfigurationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetConfigurationQuery, GetConfigurationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetConfigurationQuery, GetConfigurationQueryVariables>(GetConfigurationDocument, options);
+        }
+export type GetConfigurationQueryHookResult = ReturnType<typeof useGetConfigurationQuery>;
+export type GetConfigurationLazyQueryHookResult = ReturnType<typeof useGetConfigurationLazyQuery>;
+export type GetConfigurationQueryResult = Apollo.QueryResult<GetConfigurationQuery, GetConfigurationQueryVariables>;
 export const GetDestroyInfoDocument = gql`
     query GetDestroyInfo {
   destructionReasons {
-    id
-    text
+    ...DestructionReasonFields
   }
 }
-    `;
+    ${DestructionReasonFieldsFragmentDoc}`;
 
 /**
  * __useGetDestroyInfoQuery__
@@ -2152,6 +3009,41 @@ export function useGetDestroyInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type GetDestroyInfoQueryHookResult = ReturnType<typeof useGetDestroyInfoQuery>;
 export type GetDestroyInfoLazyQueryHookResult = ReturnType<typeof useGetDestroyInfoLazyQuery>;
 export type GetDestroyInfoQueryResult = Apollo.QueryResult<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>;
+export const GetDestructionReasonsDocument = gql`
+    query GetDestructionReasons($includeDisabled: Boolean) {
+  destructionReasons(includeDisabled: $includeDisabled) {
+    ...DestructionReasonFields
+  }
+}
+    ${DestructionReasonFieldsFragmentDoc}`;
+
+/**
+ * __useGetDestructionReasonsQuery__
+ *
+ * To run a query within a React component, call `useGetDestructionReasonsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDestructionReasonsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDestructionReasonsQuery({
+ *   variables: {
+ *      includeDisabled: // value for 'includeDisabled'
+ *   },
+ * });
+ */
+export function useGetDestructionReasonsQuery(baseOptions?: Apollo.QueryHookOptions<GetDestructionReasonsQuery, GetDestructionReasonsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDestructionReasonsQuery, GetDestructionReasonsQueryVariables>(GetDestructionReasonsDocument, options);
+      }
+export function useGetDestructionReasonsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDestructionReasonsQuery, GetDestructionReasonsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDestructionReasonsQuery, GetDestructionReasonsQueryVariables>(GetDestructionReasonsDocument, options);
+        }
+export type GetDestructionReasonsQueryHookResult = ReturnType<typeof useGetDestructionReasonsQuery>;
+export type GetDestructionReasonsLazyQueryHookResult = ReturnType<typeof useGetDestructionReasonsLazyQuery>;
+export type GetDestructionReasonsQueryResult = Apollo.QueryResult<GetDestructionReasonsQuery, GetDestructionReasonsQueryVariables>;
 export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
@@ -2245,13 +3137,14 @@ export type GetRegistrationInfoQueryResult = Apollo.QueryResult<GetRegistrationI
 export const GetReleaseInfoDocument = gql`
     query GetReleaseInfo {
   releaseDestinations {
-    name
+    ...ReleaseDestinationFields
   }
   releaseRecipients {
-    username
+    ...ReleaseRecipientFields
   }
 }
-    `;
+    ${ReleaseDestinationFieldsFragmentDoc}
+${ReleaseRecipientFieldsFragmentDoc}`;
 
 /**
  * __useGetReleaseInfoQuery__
@@ -2316,17 +3209,14 @@ export type GetSearchInfoQueryResult = Apollo.QueryResult<GetSearchInfoQuery, Ge
 export const GetSectioningInfoDocument = gql`
     query GetSectioningInfo {
   comments(category: "section") {
-    id
-    text
-    category
+    ...CommentFields
   }
   labwareTypes {
-    name
-    numRows
-    numColumns
+    ...LabwareTypeFields
   }
 }
-    `;
+    ${CommentFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}`;
 
 /**
  * __useGetSectioningInfoQuery__
