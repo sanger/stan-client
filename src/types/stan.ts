@@ -168,3 +168,23 @@ export type LocationState = {
  * An entity that can be disabled/enabled
  */
 export type HasEnabled = { enabled: boolean };
+
+/**
+ * Properties that go in the config.js file
+ */
+export type StanConfig = {
+  /**
+   * The name of the current environment
+   */
+  env: string;
+
+  /**
+   * Tailwind color classes that will be applied to the header
+   */
+  headerColor: string;
+
+  /**
+   * Tailwind color classes that will be applied to the footer
+   */
+  footerColor: string;
+};
