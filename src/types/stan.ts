@@ -187,4 +187,14 @@ export type StanConfig = {
    * Tailwind color classes that will be applied to the footer
    */
   footerColor: string;
+
+  /**
+   * Email address for users to get support
+   */
+  supportEmail: string;
+
+  /**
+   * When was this release deployed
+   */
+  deploymentDate: string;
 };
