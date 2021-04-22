@@ -50,7 +50,7 @@
   },
   "scripts": {
     "start": "npm-run-all -p start:css start:js",
-    "start:msw": "REACT_APP_MOCK_API=msw PORT=3001 npm run start",
+    "start:msw": "REACT_APP_MOCK_API=msw npm run start",
     "build": "npm-run-all build:css build:js",
     "start:js": "react-scripts start",
     "build:js": "react-scripts build",
@@ -58,9 +58,8 @@
     "build:css": "postcss src/styles/tailwind.css -o src/styles/index.css --env production",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "test": "start-server-and-test start:msw 3001 cypress:run",
-    "test:ci": "start-server-and-test start 3001 cypress:run",
-    "test:open": "start-server-and-test start:msw 3001 cypress:open",
+    "test": "start-server-and-test start 3000 cypress:run",
+    "test:open": "start-server-and-test start 3000 cypress:open",
     "eject": "react-scripts eject",
     "codegen": "DOTENV_CONFIG_PATH=./.env.local graphql-codegen --config codegen.yml -r dotenv/config",
     "codegen:watch": "DOTENV_CONFIG_PATH=./.env.local graphql-codegen --config codegen.yml -r dotenv/config --watch",
@@ -104,7 +103,7 @@
     "cypress-intellij-reporter": "^0.0.4",
     "faker": "^5.4.0",
     "fishery": "^1.0.1",
-    "msw": "^0.21.2",
+    "msw": "^0.28.2",
     "npm-run-all": "^4.1.5",
     "postcss-cli": "^8.3.0",
     "prettier": "2.1.2",
@@ -112,5 +111,8 @@
   },
   "resolutions": {
     "babel-loader": "8.1.0"
+  },
+  "msw": {
+    "workerDirectory": "public"
   }
 }

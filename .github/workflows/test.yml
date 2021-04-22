@@ -14,9 +14,6 @@ jobs:
 
     runs-on: ubuntu-latest
     
-    env:
-      REACT_APP_MOCK_API: msw
-
     steps:
       - uses: actions/checkout@v2
         name: Checkout
@@ -28,6 +25,5 @@ jobs:
           build: yarn build
           start: npx serve -s build -p 3000
           wait-on: 'http://localhost:3000'
-          env: REACT_APP_MOCK_API=msw
           config: baseUrl=http://localhost:3000
           timeout-minutes: 5

@@ -15,6 +15,19 @@
 
 // Import commands.js using ES2015 syntax:
 import "./commands";
+import { worker } from "../../src/mocks/mswSetup";
+
+before(async () => {
+  await worker.start();
+});
+
+after(() => {
+  worker.stop();
+});
+
+afterEach(() => {
+  worker.resetHandlers();
+});
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

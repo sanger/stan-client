@@ -6,7 +6,6 @@ import {
 describe("Destroy Page", () => {
   before(() => {
     cy.visit("/admin/destroy");
-    cy.wait(2000);
   });
 
   context("when form is submitted without filling in any fields", () => {
@@ -36,7 +35,7 @@ describe("Destroy Page", () => {
   context("when there is a server error", () => {
     before(() => {
       cy.visit("/admin/destroy");
-      cy.wait(2000);
+
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
           graphql.mutation<DestroyMutation, DestroyMutationVariables>(

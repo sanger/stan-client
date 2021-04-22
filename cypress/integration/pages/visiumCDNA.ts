@@ -6,7 +6,6 @@ import {
 describe("Visium cDNA Page", () => {
   before(() => {
     cy.visit("/lab/visium_cdna");
-    cy.wait(2000);
   });
 
   describe("On load", () => {

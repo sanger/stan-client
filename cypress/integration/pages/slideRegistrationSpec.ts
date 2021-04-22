@@ -7,7 +7,6 @@ import {
 describe("Slide Registration Page", () => {
   before(() => {
     cy.visit("/admin/slide_registration");
-    cy.wait(2000);
     cy.get("select").select("Slide");
   });
 

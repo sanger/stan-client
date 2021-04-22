@@ -223,6 +223,7 @@ boxes.forEach((box) => {
 });
 
 [room, ...freezers, ...racks, ...boxes].forEach((location) => {
+  console.log(location);
   locationRepository.save(location);
 });
 

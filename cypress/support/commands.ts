@@ -24,6 +24,8 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 import { SetupWorkerApi } from "msw/lib/types/setupWorker/setupWorker";
+import { graphql } from "msw";
+import { worker } from "../../src/mocks/mswSetup";
 
 // See https://testing-library.com/docs/cypress-testing-library/intro
 import "@testing-library/cypress/add-commands";
@@ -53,58 +55,51 @@ declare global {
 }
 
 Cypress.Commands.add("msw", () => {
-  return cy
-    .window()
-    .its("msw")
-    .then((msw) => {
-      return {
-        worker: msw.worker,
-        graphql: msw.graphql,
-      };
+  return new Cypress.Promise((resolve) => {
+    resolve({
+      worker,
+      graphql,
     });
+  });
 });
 
 Cypress.Commands.add("visitAsGuest", (url: string) => {
-  cy.on("window:before:load", (window) => {
-    window.postMSWStart = (worker: SetupWorkerApi, graphql: graphqlType) => {
-      worker.use(
-        graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
-          "CurrentUser",
-          (req, res, ctx) => {
-            return res(
-              ctx.data({
-                user: null,
-              })
-            );
-          }
-        )
-      );
-    };
+  cy.msw().then(({ worker, graphql }) => {
+    worker.use(
+      graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
+        "CurrentUser",
+        (req, res, ctx) => {
+          return res.once(
+            ctx.data({
+              user: null,
+            })
+          );
+        }
+      )
+    );
   });
 
   return cy.visit(url);
 });
 
 Cypress.Commands.add("visitAsAdmin", (url: string) => {
-  cy.on("window:before:load", (window) => {
-    window.postMSWStart = (worker: SetupWorkerApi, graphql: graphqlType) => {
-      worker.use(
-        graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
-          "CurrentUser",
-          (req, res, ctx) => {
-            return res(
-              ctx.data({
-                user: {
-                  __typename: "User",
-                  username: "jb1",
-                  role: UserRole.Admin,
-                },
-              })
-            );
-          }
-        )
-      );
-    };
+  cy.msw().then(({ worker, graphql }) => {
+    worker.use(
+      graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
+        "CurrentUser",
+        (req, res, ctx) => {
+          return res.once(
+            ctx.data({
+              user: {
+                __typename: "User",
+                username: "jb1",
+                role: UserRole.Admin,
+              },
+            })
+          );
+        }
+      )
+    );
   });
 
   return cy.visit(url);

@@ -10,12 +10,10 @@ import {
   GetSearchInfoQueryVariables,
 } from "../../types/graphql";
 import { findEntryFactory } from "../../lib/factories/findFactory";
-import {
-  sampleFactory,
-  tissueTypeFactory,
-} from "../../lib/factories/sampleFactory";
+import { sampleFactory } from "../../lib/factories/sampleFactory";
 import labwareFactory from "../../lib/factories/labwareFactory";
 import locationFactory from "../../lib/factories/locationFactory";
+import tissueTypeRepository from "../repositories/tissueTypeRepository";
 
 const findHandlers = [
   graphql.query<GetSearchInfoQuery, GetSearchInfoQueryVariables>(
@@ -23,7 +21,7 @@ const findHandlers = [
     (req, res, ctx) => {
       return res(
         ctx.data({
-          tissueTypes: tissueTypeFactory.buildList(5),
+          tissueTypes: tissueTypeRepository.findAll(),
         })
       );
     }

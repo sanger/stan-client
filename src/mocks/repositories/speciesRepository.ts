@@ -9,10 +9,10 @@ const speciesSeeds: Array<SpeciesFieldsFragment> = [
   speciesFactory.build({ name: "Hamster" }),
 ];
 
-const speciesRepo = createSessionStorageRepository(
+const speciesRepository = createSessionStorageRepository(
   "SPECIES",
   "name",
   speciesSeeds
 );
 
-export default speciesRepo;
+export default speciesRepository;

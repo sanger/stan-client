@@ -6,12 +6,13 @@ import {
 describe("Release Page", () => {
   before(() => {
     cy.visit("/admin/release");
-    cy.wait(3000);
   });
 
   context("when form is submitted without filling in any fields", () => {
     before(() => {
-      cy.findByRole("button", { name: /Release Labware/i }).click();
+      cy.findByRole("button", { name: /Release Labware/i })
+        .should("be.visible")
+        .click();
     });
 
     it("shows an error about labwares", () => {
@@ -46,8 +47,6 @@ describe("Release Page", () => {
     "when form is submitted with a labware that has already been released",
     () => {
       before(() => {
-        cy.visit("/admin/release");
-        cy.wait(3000);
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<
@@ -67,6 +66,8 @@ describe("Release Page", () => {
             })
           );
         });
+
+        cy.visit("/admin/release");
 
         fillInForm();
       });

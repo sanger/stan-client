@@ -19,7 +19,7 @@ describe("RNA Extraction", () => {
           graphql.mutation<ExtractMutation, ExtractMutationVariables>(
             "Extract",
             (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     message:
@@ -52,7 +52,6 @@ describe("RNA Extraction", () => {
   context("when extraction is successful", () => {
     before(() => {
       cy.visit("/lab/extraction");
-      cy.wait(2000);
       scanInLabware();
       cy.findByText("Extract").click();
     });
