@@ -86,8 +86,8 @@ describe("Release Page", () => {
 });
 
 function fillInForm() {
-  cy.get("#labwareScanInput").type("STAN-123{enter}");
-  cy.get("#labwareScanInput").type("STAN-456{enter}");
+  cy.get("#labwareScanInput").should("not.be.disabled").type("STAN-123{enter}");
+  cy.get("#labwareScanInput").should("not.be.disabled").type("STAN-456{enter}");
   cy.findByLabelText("Group/Team").select("Vento lab");
   cy.findByLabelText("Contact").select("cs41");
   cy.findByRole("button", { name: /Release Labware/i }).click();
