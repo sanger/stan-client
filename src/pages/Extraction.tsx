@@ -22,7 +22,7 @@ import MutedText from "../components/MutedText";
 import LabwareScanner from "../components/labwareScanner/LabwareScanner";
 import { useMachine } from "@xstate/react";
 import { buildSampleColors } from "../lib/helpers/labwareHelper";
-import { LabwareFieldsFragment } from "../types/graphql";
+import { LabwareFieldsFragment } from "../types/sdk";
 import extractionMachine, {
   ExtractionContext,
 } from "../lib/machines/extraction/extractionMachine";

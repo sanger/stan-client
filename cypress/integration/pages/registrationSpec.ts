@@ -1,7 +1,7 @@
 import {
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 import { shouldBehaveLikeARegistrationForm } from "../shared/registration";
 import { tissueFactory } from "../../../src/lib/factories/sampleFactory";
 import labwareFactory from "../../../src/lib/factories/labwareFactory";

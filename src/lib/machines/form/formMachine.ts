@@ -1,12 +1,12 @@
-import { ApolloError } from "@apollo/client";
 import { MachineServiceDone, MachineServiceError } from "../../../types/stan";
 import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
 import { castDraft } from "immer";
+import { ClientError } from "graphql-request";
 
 export interface FormContext<R> {
   submissionResult?: R;
-  serverError?: ApolloError;
+  serverError?: ClientError;
 }
 
 export type FormEvent<V, R> =

@@ -6,7 +6,7 @@ import {
   GetDestructionReasonsQueryVariables,
   SetDestructionReasonEnabledMutation,
   SetDestructionReasonEnabledMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import destructionReasonRepository from "../repositories/destructionReasonRepository";
 import destructionReasonFactory from "../../lib/factories/destructionReasonFactory";
 

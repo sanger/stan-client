@@ -3,7 +3,7 @@ import Success from "../../components/notifications/Success";
 import BlueButton from "../../components/buttons/BlueButton";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LabwareFieldsFragment } from "../../types/graphql";
+import { LabwareFieldsFragment } from "../../types/sdk";
 import variants from "../../lib/motionVariants";
 import DataTable from "../../components/DataTable";
 import LabelPrinter from "../../components/LabelPrinter";

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import AppShell from "../components/AppShell";
 import { Form, Formik } from "formik";
 import {
@@ -6,7 +6,7 @@ import {
   LabwareFieldsFragment,
   ReleaseLabwareMutation,
   ReleaseRequest,
-} from "../types/graphql";
+} from "../types/sdk";
 import * as Yup from "yup";
 import GrayBox, { Sidebar } from "../components/layouts/GrayBox";
 import { motion } from "framer-motion";
@@ -24,9 +24,9 @@ import WhiteButton from "../components/buttons/WhiteButton";
 import DownloadIcon from "../components/icons/DownloadIcon";
 import { useMachine } from "@xstate/react";
 import createFormMachine from "../lib/machines/form/formMachine";
-import * as releaseService from "../lib/services/releaseService";
 import Success from "../components/notifications/Success";
 import { toast } from "react-toastify";
+import { StanCoreContext } from "../lib/sdk";
 
 const initialValues: ReleaseRequest = {
   barcodes: [],
@@ -104,12 +104,13 @@ interface PageParams {
 }
 
 function Release({ releaseInfo }: PageParams) {
+  const stanCore = useContext(StanCoreContext);
   const [current, send] = useMachine(() =>
     createFormMachine<ReleaseRequest, ReleaseLabwareMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
-          return releaseService.releaseLabware(e.values);
+          return stanCore.ReleaseLabware({ releaseRequest: e.values });
         },
       },
     })

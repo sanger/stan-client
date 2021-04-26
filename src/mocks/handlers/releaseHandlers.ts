@@ -4,7 +4,7 @@ import {
   GetReleaseInfoQueryVariables,
   ReleaseLabwareMutation,
   ReleaseLabwareMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import releaseDestinationRepository from "../repositories/releaseDestinationRepository";
 import releaseRecipientRepository from "../repositories/releaseRecipientRepository";
 

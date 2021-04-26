@@ -1,13 +1,12 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import AppShell from "../components/AppShell";
 import { Form, Formik } from "formik";
 import {
   DestroyMutation,
   DestroyRequest,
   GetDestroyInfoQuery,
-} from "../types/graphql";
+} from "../types/sdk";
 import * as Yup from "yup";
-import * as destroyService from "../lib/services/destroyService";
 import { useMachine } from "@xstate/react";
 import GrayBox, { Sidebar } from "../components/layouts/GrayBox";
 import { motion } from "framer-motion";
@@ -24,6 +23,7 @@ import PinkButton from "../components/buttons/PinkButton";
 import Success from "../components/notifications/Success";
 import { toast } from "react-toastify";
 import createFormMachine from "../lib/machines/form/formMachine";
+import { StanCoreContext } from "../lib/sdk";
 
 const initialValues: DestroyRequest = {
   barcodes: [],
@@ -53,12 +53,13 @@ interface PageParams {
 }
 
 const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
+  const stanCore = useContext(StanCoreContext);
   const [current, send] = useMachine(() =>
     createFormMachine<DestroyRequest, DestroyMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
-          return destroyService.destroy(e.values);
+          return stanCore.Destroy({ request: e.values });
         },
       },
     })

@@ -1,4 +1,4 @@
-import { LabwareFieldsFragment, Maybe } from "../../../types/graphql";
+import { LabwareFieldsFragment, Maybe } from "../../../types/sdk";
 import { Address, NewLabwareLayout } from "../../../types/stan";
 
 export interface LayoutPlan {

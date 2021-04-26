@@ -2,9 +2,9 @@ import { createMachine, send } from "xstate";
 import { assign } from "@xstate/immer";
 import * as searchService from "../../services/searchService";
 import { castDraft } from "immer";
-import { FindRequest, Maybe } from "../../../types/graphql";
+import { FindRequest, Maybe } from "../../../types/sdk";
 import { SearchResultsType } from "../../../types/stan";
-import { ApolloError } from "@apollo/client";
+import { ClientError } from "graphql-request";
 
 /**
  * Context for Search Machine
@@ -12,7 +12,7 @@ import { ApolloError } from "@apollo/client";
 export interface SearchContext {
   findRequest: FindRequest;
   searchResult?: SearchResultsType;
-  serverError?: Maybe<ApolloError>;
+  serverError?: Maybe<ClientError>;
 }
 
 type FindEvent = { type: "FIND"; request: FindRequest };
@@ -20,7 +20,7 @@ type SearchDoneEvent = {
   type: "done.invoke.search";
   data: SearchResultsType;
 };
-type SearchErrorEvent = { type: "error.platform.search"; data: ApolloError };
+type SearchErrorEvent = { type: "error.platform.search"; data: ClientError };
 
 export type SearchEvent = FindEvent | SearchDoneEvent | SearchErrorEvent;
 

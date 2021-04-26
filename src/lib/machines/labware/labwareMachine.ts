@@ -1,6 +1,6 @@
 import { Machine, MachineOptions } from "xstate";
 import * as Yup from "yup";
-import { LabwareFieldsFragment } from "../../../types/graphql";
+import { LabwareFieldsFragment } from "../../../types/sdk";
 import {
   LabwareContext,
   LabwareEvents,
@@ -8,7 +8,7 @@ import {
   State,
 } from "./labwareMachineTypes";
 import { assign } from "@xstate/immer";
-import * as labwareService from "../../services/labwareService";
+import { stanCore } from "../../sdk";
 
 export enum Actions {
   ASSIGN_CURRENT_BARCODE = "assignCurrentBarcode",
@@ -73,7 +73,7 @@ export const labwareMachineOptions: Partial<MachineOptions<
       if (e.type !== "done.invoke.findLabware") {
         return;
       }
-      ctx.foundLabware = e.data;
+      ctx.foundLabware = e.data.labware;
       ctx.currentBarcode = "";
     }),
 
@@ -111,7 +111,7 @@ export const labwareMachineOptions: Partial<MachineOptions<
   },
   services: {
     [Services.FIND_LABWARE_BY_BARCODE]: (ctx: LabwareContext) =>
-      labwareService.findLabwareByBarcode(ctx.currentBarcode),
+      stanCore.FindLabware({ barcode: ctx.currentBarcode }),
     [Services.VALIDATE_BARCODE]: (ctx: LabwareContext) =>
       ctx.validator.validate(ctx.currentBarcode),
     [Services.VALIDATE_FOUND_LABWARE]: (ctx: LabwareContext) => {

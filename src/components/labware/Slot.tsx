@@ -2,7 +2,7 @@ import React from "react";
 import classNames from "classnames";
 import { brightenColor } from "../../lib/helpers/tailwindHelper";
 import { LabwareProps } from "./Labware";
-import { SlotFieldsFragment } from "../../types/graphql";
+import { SlotFieldsFragment } from "../../types/sdk";
 
 type SlotProps = {
   address: string;

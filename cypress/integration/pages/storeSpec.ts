@@ -3,7 +3,7 @@ import {
   FindLabwareLocationQuery,
   FindLabwareLocationQueryVariables,
   StoredItem,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 import { locationRepository } from "../../../src/mocks/repositories/locationRepository";
 
 describe("Store", () => {

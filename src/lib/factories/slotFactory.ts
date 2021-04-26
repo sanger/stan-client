@@ -1,5 +1,5 @@
 import { Factory } from "fishery";
-import { Slot } from "../../types/graphql";
+import { Slot } from "../../types/sdk";
 import { sampleFactory } from "./sampleFactory";
 
 export const slotFactory = Factory.define<Slot>(

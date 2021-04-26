@@ -2,7 +2,7 @@ import { Machine, MachineOptions, sendParent } from "xstate";
 import {
   Comment,
   LabwareFieldsFragment as LabwareLayout,
-} from "../../../../types/graphql";
+} from "../../../../types/sdk";
 import { LayoutPlan } from "../../layout/layoutContext";
 import { cloneDeep } from "@apollo/client/utilities";
 import { LabwareTypeName } from "../../../../types/stan";

@@ -1,7 +1,7 @@
 import {
   ReleaseLabwareMutation,
   ReleaseLabwareMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 
 describe("Release Page", () => {
   before(() => {

@@ -1,4 +1,4 @@
-import { DestructionReasonFieldsFragment } from "../../types/graphql";
+import { DestructionReasonFieldsFragment } from "../../types/sdk";
 import { createSessionStorageRepository } from "./index";
 import destructionReasonFactory from "../../lib/factories/destructionReasonFactory";
 

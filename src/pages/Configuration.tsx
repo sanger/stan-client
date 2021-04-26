@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import AppShell from "../components/AppShell";
-import { GetConfigurationQuery } from "../types/graphql";
+import { GetConfigurationQuery } from "../types/sdk";
 import EntityManager from "../components/entityManager/EntityManager";
 import Heading from "../components/Heading";
 import { groupBy } from "lodash";

@@ -1,6 +1,6 @@
 import * as validation from "./index";
 import * as Yup from "yup";
-import { GetRegistrationInfoQuery, LifeStage } from "../../types/graphql";
+import { GetRegistrationInfoQuery, LifeStage } from "../../types/sdk";
 
 export default class RegistrationValidation {
   private registrationInfo: GetRegistrationInfoQuery;

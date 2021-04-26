@@ -1,14 +1,14 @@
 import { createMachine } from "xstate";
-import * as extractionService from "../../services/extractionService";
 import { assign } from "@xstate/immer";
 import { castDraft } from "immer";
-import { ExtractMutation, LabwareFieldsFragment } from "../../../types/graphql";
-import { ApolloError } from "@apollo/client";
+import { ExtractMutation, LabwareFieldsFragment } from "../../../types/sdk";
+import { ClientError } from "graphql-request";
+import { stanCore } from "../../sdk";
 
 export interface ExtractionContext {
   labwares: LabwareFieldsFragment[];
   extraction?: ExtractMutation;
-  serverErrors?: ApolloError;
+  serverErrors?: ClientError;
 }
 
 type UpdateLabwaresEvent = {
@@ -22,7 +22,7 @@ type ExtractDoneEvent = {
 };
 type ExtractErrorEvent = {
   type: "error.platform.extract";
-  data: ApolloError;
+  data: ClientError;
 };
 
 export type ExtractionEvent =
@@ -96,9 +96,11 @@ export const extractionMachine = createMachine<
 
     services: {
       extract: (ctx, _e) => {
-        return extractionService.extract({
-          labwareType: "Tube",
-          barcodes: ctx.labwares.map((lw) => lw.barcode),
+        return stanCore.Extract({
+          request: {
+            labwareType: "Tube",
+            barcodes: ctx.labwares.map((lw) => lw.barcode),
+          },
         });
       },
     },

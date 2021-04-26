@@ -9,7 +9,7 @@ import {
   StoredItemFragment,
 } from "./locationMachineTypes";
 import * as locationService from "../../services/locationService";
-import { Maybe } from "../../../types/graphql";
+import { Maybe } from "../../../types/sdk";
 import { MachineConfig } from "xstate/lib/types";
 import { createMachineBuilder } from "../index";
 import { castDraft } from "immer";

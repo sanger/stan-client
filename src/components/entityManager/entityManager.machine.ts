@@ -4,7 +4,7 @@ import {
   MachineServiceDone,
   MachineServiceError,
 } from "../../types/stan";
-import { Maybe } from "../../types/graphql";
+import { Maybe } from "../../types/sdk";
 import { ClientError } from "graphql-request";
 
 interface EntityManagerContext<E extends HasEnabled> {

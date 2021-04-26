@@ -4,7 +4,7 @@ import Warning from "../components/notifications/Warning";
 import RegistrationForm from "./registration/RegistrationForm";
 import { Formik } from "formik";
 import ClashModal from "./registration/ClashModal";
-import { GetRegistrationInfoQuery, LifeStage } from "../types/graphql";
+import { GetRegistrationInfoQuery, LifeStage } from "../types/sdk";
 import * as Yup from "yup";
 import RegistrationValidation from "../lib/validation/registrationValidation";
 import { useMachine } from "@xstate/react";

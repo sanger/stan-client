@@ -34,7 +34,7 @@ import {
   CurrentUserQuery,
   CurrentUserQueryVariables,
   UserRole,
-} from "../../src/types/graphql";
+} from "../../src/types/sdk";
 
 interface MSW {
   worker: SetupWorkerApi;

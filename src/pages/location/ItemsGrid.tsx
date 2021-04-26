@@ -4,7 +4,7 @@ import WhiteButton from "../../components/buttons/WhiteButton";
 import { LocationParentContext } from "../Location";
 import UnstoreBarcodeModal from "./UnstoreBarcodeModal";
 import { addressToLocationAddress } from "../../lib/helpers/locationHelper";
-import { GridDirection } from "../../types/graphql";
+import { GridDirection } from "../../types/sdk";
 import classNames from "classnames";
 import BarcodeIcon from "../../components/icons/BarcodeIcon";
 import { Authenticated } from "../../components/Authenticated";

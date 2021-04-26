@@ -2,7 +2,7 @@ import {
   Labware,
   LabwareFieldsFragment,
   SlotFieldsFragment,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { cycleColors } from "../helpers";
 import { orderBy } from "lodash";
 import { Addressable } from "../../types/stan";

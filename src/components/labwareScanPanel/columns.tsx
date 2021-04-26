@@ -1,6 +1,6 @@
 import React from "react";
 import { CellProps, Column } from "react-table";
-import { Labware, LabwareFieldsFragment } from "../../types/graphql";
+import { Labware, LabwareFieldsFragment } from "../../types/sdk";
 import Circle from "../Circle";
 
 /**

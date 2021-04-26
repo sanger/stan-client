@@ -1,7 +1,7 @@
 import {
   ExtractMutation,
   ExtractMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 
 function scanInLabware() {
   cy.get("#labwareScanInput").should("not.be.disabled").type("STAN-011{enter}");

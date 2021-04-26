@@ -1,4 +1,4 @@
-import { Maybe, SlotFieldsFragment } from "../../types/graphql";
+import { Maybe, SlotFieldsFragment } from "../../types/sdk";
 
 export type SelectionMode = "single" | "multi";
 export type Selectable = "none" | "any" | "non_empty" | "empty";

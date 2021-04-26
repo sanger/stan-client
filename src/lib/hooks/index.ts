@@ -10,7 +10,7 @@ import {
   LabwareFieldsFragment,
   Maybe,
   PrinterFieldsFragment,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { PrintResultType } from "../../types/stan";
 
 /**

@@ -27,7 +27,7 @@ import {
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
 import DataTable from "../../components/DataTable";
 import { CellProps, Column, Row } from "react-table";
-import { LabwareFieldsFragment } from "../../types/graphql";
+import { LabwareFieldsFragment } from "../../types/sdk";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { Input } from "../../components/forms/Input";
 import { usePrinters } from "../../lib/hooks";

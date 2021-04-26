@@ -1,23 +1,4 @@
-import client from "../../lib/client";
-import {
-  EmptyLocationDocument,
-  EmptyLocationMutation,
-  EmptyLocationMutationVariables,
-  FindLabwareLocationDocument,
-  FindLabwareLocationQuery,
-  FindLabwareLocationQueryVariables,
-  LocationFieldsFragment,
-  Maybe,
-  SetLocationCustomNameDocument,
-  SetLocationCustomNameMutation,
-  SetLocationCustomNameMutationVariables,
-  StoreBarcodeDocument,
-  StoreBarcodeMutation,
-  StoreBarcodeMutationVariables,
-  UnstoreBarcodeDocument,
-  UnstoreBarcodeMutation,
-  UnstoreBarcodeMutationVariables,
-} from "../../types/graphql";
+import { LocationFieldsFragment, Maybe } from "../../types/sdk";
 import { stanCore } from "../sdk";
 
 /**
@@ -31,23 +12,17 @@ export async function storeBarcode(
   location: LocationFieldsFragment,
   address?: string
 ): Promise<LocationFieldsFragment> {
-  const response = await client.mutate<
-    StoreBarcodeMutation,
-    StoreBarcodeMutationVariables
-  >({
-    mutation: StoreBarcodeDocument,
-    variables: {
-      barcode,
-      locationBarcode: location.barcode,
-      address: address === "" ? null : address,
-    },
+  const response = await stanCore.StoreBarcode({
+    barcode,
+    locationBarcode: location.barcode,
+    address: address === "" ? null : address,
   });
 
-  if (!response.data) {
+  if (!response) {
     throw new Error("storeBarcode response data was null");
   }
 
-  return response.data.storeBarcode.location;
+  return response.storeBarcode.location;
 }
 
 /**
@@ -56,17 +31,9 @@ export async function storeBarcode(
  * @param barcode The barcode to unstore
  */
 export async function unstoreBarcode(barcode: string): Promise<void> {
-  const response = await client.mutate<
-    UnstoreBarcodeMutation,
-    UnstoreBarcodeMutationVariables
-  >({
-    mutation: UnstoreBarcodeDocument,
-    variables: {
-      barcode,
-    },
-  });
+  const response = await stanCore.UnstoreBarcode({ barcode });
 
-  if (!response.data) {
+  if (!response) {
     throw new Error("unstoreBarcode response data was null");
   }
 }
@@ -78,17 +45,9 @@ export async function unstoreBarcode(barcode: string): Promise<void> {
 export async function emptyLocation(
   barcode: string
 ): Promise<LocationFieldsFragment> {
-  const response = await client.mutate<
-    EmptyLocationMutation,
-    EmptyLocationMutationVariables
-  >({
-    mutation: EmptyLocationDocument,
-    variables: {
-      barcode,
-    },
-  });
+  const response = stanCore.EmptyLocation({ barcode });
 
-  if (!response.data) {
+  if (!response) {
     throw new Error("emptyLocation response data was null");
   }
 
@@ -108,20 +67,14 @@ export async function findLabwareLocation(
   let response;
 
   try {
-    response = await client.query<
-      FindLabwareLocationQuery,
-      FindLabwareLocationQueryVariables
-    >({
-      query: FindLabwareLocationDocument,
-      variables: { barcodes: [barcode] },
-    });
+    response = await stanCore.FindLabwareLocation({ barcodes: [barcode] });
   } catch (e) {
     console.error("Error in findLabwareLocation");
     return null;
   }
 
-  return response.data.stored.length === 1
-    ? response.data.stored[0].location.barcode
+  return response.stored.length === 1
+    ? response.stored[0].location.barcode
     : null;
 }
 
@@ -134,21 +87,15 @@ export async function setLocationCustomName(
   locationBarcode: string,
   newCustomName: string
 ): Promise<LocationFieldsFragment> {
-  const response = await client.mutate<
-    SetLocationCustomNameMutation,
-    SetLocationCustomNameMutationVariables
-  >({
-    mutation: SetLocationCustomNameDocument,
-    variables: {
-      locationBarcode,
-      newCustomName,
-    },
+  const { setLocationCustomName } = await stanCore.SetLocationCustomName({
+    locationBarcode,
+    newCustomName,
   });
 
   // I'm not sure why this would be null. I would expect if mutate throws, it would do the throwing.
-  if (!response.data) {
+  if (!setLocationCustomName) {
     throw new Error("setLocationCustomName response data was null");
   }
 
-  return response.data.setLocationCustomName;
+  return setLocationCustomName;
 }

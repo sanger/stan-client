@@ -1,7 +1,7 @@
 import {
   PlanMutation,
   PlanMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 
 describe("Sectioning", () => {
   before(() => {

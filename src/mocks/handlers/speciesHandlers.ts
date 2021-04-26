@@ -4,7 +4,7 @@ import {
   AddSpeciesMutationVariables,
   SetSpeciesEnabledMutation,
   SetSpeciesEnabledMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import speciesFactory from "../../lib/factories/speciesFactory";
 import speciesRepository from "../repositories/speciesRepository";
 

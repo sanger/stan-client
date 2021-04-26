@@ -4,7 +4,7 @@ import {
   AddHmdmcMutationVariables,
   SetHmdmcEnabledMutation,
   SetHmdmcEnabledMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import hmdmcFactory from "../../lib/factories/hmdmcFactory";
 import hmdmcRepository from "../repositories/hmdmcRepository";
 

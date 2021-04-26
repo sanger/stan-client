@@ -1,5 +1,5 @@
 import { Factory } from "fishery";
-import { FindEntry } from "../../types/graphql";
+import { FindEntry } from "../../types/sdk";
 
 export const findEntryFactory = Factory.define<FindEntry>(({ sequence }) => ({
   __typename: "FindEntry",

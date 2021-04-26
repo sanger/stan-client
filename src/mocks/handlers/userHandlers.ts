@@ -7,7 +7,7 @@ import {
   LogoutMutation,
   LogoutMutationVariables,
   UserRole,
-} from "../../types/graphql";
+} from "../../types/sdk";
 
 const CURRENT_USER_KEY = "currentUser";
 

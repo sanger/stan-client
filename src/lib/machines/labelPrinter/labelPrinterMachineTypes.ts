@@ -3,8 +3,8 @@ import {
   LabwareFieldsFragment,
   Maybe,
   PrinterFieldsFragment,
-} from "../../../types/graphql";
-import { ApolloError } from "@apollo/client";
+} from "../../../types/sdk";
+import { ClientError } from "graphql-request";
 
 export interface LabelPrinterContext {
   /**
@@ -15,7 +15,7 @@ export interface LabelPrinterContext {
   /**
    * Error message from core
    */
-  serverErrors: ApolloError;
+  serverErrors: ClientError;
 
   /**
    * The currently selected printer
@@ -54,7 +54,7 @@ type FetchPrintersDoneEvent = {
 
 type FetchPrintersErrorEvent = {
   type: "error.platform.fetchPrinters";
-  data: ApolloError;
+  data: ClientError;
 };
 
 type PrintEvent = { type: "PRINT"; labelsPerBarcode?: number };

@@ -5,7 +5,7 @@ import type {
   Location,
   Size,
   StoredItem,
-} from "../../types/graphql";
+} from "../../types/sdk";
 
 const locationFactory = Factory.define<Location>(
   ({ sequence, params, afterBuild, associations }) => {

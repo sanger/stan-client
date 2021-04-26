@@ -1,13 +1,15 @@
-import React, { createContext, useCallback, useState } from "react";
-import { useApolloClient } from "@apollo/client";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useMinimumWait } from "../lib/hooks";
 import Splash from "../pages/Splash";
-import {
-  useCurrentUserQuery,
-  useLogoutMutation,
-  UserFieldsFragment,
-} from "../types/graphql";
+import { UserFieldsFragment } from "../types/sdk";
 import { UserRole } from "../types/sdk";
+import { StanCoreContext } from "../lib/sdk";
 
 /**
  * Includes other properties the application is interested in for authentication
@@ -52,23 +54,26 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   // We don't want to render children until the `currentUser` query has completed and
   // authState has been set
   const [isLoading, setIsLoading] = useState(true);
-  useCurrentUserQuery({
-    onCompleted: (data) => {
-      if (data?.user) {
-        setAuthState({
-          user: data.user,
-        });
-      } else {
+  const stanCore = useContext(StanCoreContext);
+  useEffect(() => {
+    async function checkCurrentUser() {
+      try {
+        const { user } = await stanCore.CurrentUser();
+        if (user) {
+          setAuthState({ user });
+        } else {
+          setAuthState(null);
+        }
+      } catch (e) {
         setAuthState(null);
+        console.error("Current user query failed");
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    },
-    onError: () => {
-      setIsLoading(false);
-    },
-  });
-  const [logoutMutation] = useLogoutMutation();
-  const client = useApolloClient();
+    }
+    checkCurrentUser();
+  }, [stanCore, setAuthState, setIsLoading]);
+
   const userRoles = Object.values(UserRole);
 
   /**
@@ -92,8 +97,7 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
    */
   const logout = async () => {
     try {
-      await logoutMutation();
-      await client.clearStore();
+      await stanCore.Logout();
       clearAuthState();
     } catch (e) {
       console.error(e);

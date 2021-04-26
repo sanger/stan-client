@@ -7,13 +7,10 @@ config:
     Timestamp: string
 
 generates:
-  src/types/graphql.tsx:
-    plugins:
-      - "typescript"
-      - "typescript-operations"
-      - "typescript-react-apollo"
   src/types/sdk.ts:
     plugins:
       - "typescript"
       - "typescript-operations"
       - "typescript-graphql-request"
+    config:
+      gqlImport: graphql-request#gql

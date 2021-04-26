@@ -25,7 +25,7 @@ import { debounce } from "lodash";
 import variants from "../../lib/motionVariants";
 import MutedText from "../../components/MutedText";
 import SectionForm from "./SectionForm";
-import { GetRegistrationInfoQuery } from "../../types/graphql";
+import { GetRegistrationInfoQuery } from "../../types/sdk";
 import {
   SlideRegistrationContext,
   SlideRegistrationFormValues,

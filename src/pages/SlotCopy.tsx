@@ -9,7 +9,7 @@ import Success from "../components/notifications/Success";
 import { toast } from "react-toastify";
 import { useScrollToRef } from "../lib/hooks";
 import { useMachine } from "@xstate/react";
-import { SlotCopyContent } from "../types/graphql";
+import { SlotCopyContent } from "../types/sdk";
 import slotCopyMachine from "../lib/machines/slotCopy/slotCopyMachine";
 
 type PageParams = {

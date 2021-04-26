@@ -1,5 +1,5 @@
-import React, { useCallback, useContext, useEffect } from "react";
-import { LabwareFieldsFragment } from "../../types/graphql";
+import React, { useContext, useEffect } from "react";
+import { LabwareFieldsFragment } from "../../types/sdk";
 import { useMachine } from "@xstate/react";
 import { createLabwareMachine } from "../../lib/machines/labware/labwareMachine";
 import ScanInput from "../scanInput/ScanInput";

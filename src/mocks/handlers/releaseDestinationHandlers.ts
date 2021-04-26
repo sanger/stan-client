@@ -4,7 +4,7 @@ import {
   AddReleaseDestinationMutationVariables,
   SetReleaseDestinationEnabledMutation,
   SetReleaseDestinationEnabledMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import releaseDestinationFactory from "../../lib/factories/releaseDestinationFactory";
 import releaseDestinationRepository from "../repositories/releaseDestinationRepository";
 

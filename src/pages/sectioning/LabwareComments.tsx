@@ -2,7 +2,7 @@ import React, { ChangeEvent } from "react";
 import MutedText from "../../components/MutedText";
 import { Select } from "../../components/forms/Select";
 import { optionValues } from "../../components/forms";
-import { Comment, LabwareFieldsFragment } from "../../types/graphql";
+import { Comment, LabwareFieldsFragment } from "../../types/sdk";
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 
 interface LabwareCommentsProps {

@@ -1,6 +1,6 @@
 import * as queryString from "query-string";
 import { ParsedQuery } from "query-string";
-import { GridDirection, Maybe } from "../types/graphql";
+import { GridDirection, Maybe } from "../types/sdk";
 import { SizeInput } from "../types/stan";
 import _ from "lodash";
 

@@ -4,7 +4,7 @@ import BarcodeIcon from "../icons/BarcodeIcon";
 import { Slot } from "./Slot";
 import { buildAddresses } from "../../lib/helpers";
 import _ from "lodash";
-import { LabwareFieldsFragment, SlotFieldsFragment } from "../../types/graphql";
+import { LabwareFieldsFragment, SlotFieldsFragment } from "../../types/sdk";
 import createLabwareMachine from "./labware.machine";
 import { Selectable, SelectionMode } from "./labware.types";
 import { NewLabwareLayout } from "../../types/stan";

@@ -1,4 +1,4 @@
-import { GridDirection } from "../../types/graphql";
+import { GridDirection } from "../../types/sdk";
 import { orderBy } from "lodash";
 import { getColumnIndex, getRowIndex } from "./labwareHelper";
 

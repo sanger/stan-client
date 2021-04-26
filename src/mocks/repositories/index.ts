@@ -1,4 +1,4 @@
-import { Maybe } from "../../types/graphql";
+import { Maybe } from "../../types/sdk";
 
 type Repository<T> = {
   save: (entity: T) => T;

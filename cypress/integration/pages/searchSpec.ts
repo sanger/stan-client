@@ -1,4 +1,4 @@
-import { FindQuery, FindQueryVariables } from "../../../src/types/graphql";
+import { FindQuery, FindQueryVariables } from "../../../src/types/sdk";
 import { buildFindResult } from "../../../src/mocks/handlers/findHandlers";
 
 describe("Search", () => {

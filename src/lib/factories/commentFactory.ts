@@ -1,5 +1,5 @@
 import { Factory } from "fishery";
-import { CommentFieldsFragment } from "../../types/graphql";
+import { CommentFieldsFragment } from "../../types/sdk";
 import faker from "faker";
 
 export default Factory.define<CommentFieldsFragment>(

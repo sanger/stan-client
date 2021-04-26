@@ -1,7 +1,7 @@
 import {
   SlotCopyMutation,
   SlotCopyMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 
 describe("Visium cDNA Page", () => {
   before(() => {

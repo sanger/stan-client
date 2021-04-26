@@ -8,7 +8,7 @@ import {
   FindResult,
   GetSearchInfoQuery,
   GetSearchInfoQueryVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { findEntryFactory } from "../../lib/factories/findFactory";
 import { sampleFactory } from "../../lib/factories/sampleFactory";
 import labwareFactory from "../../lib/factories/labwareFactory";

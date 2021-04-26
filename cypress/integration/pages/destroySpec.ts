@@ -1,7 +1,7 @@
 import {
   DestroyMutation,
   DestroyMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 
 describe("Destroy Page", () => {
   before(() => {

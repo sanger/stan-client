@@ -1,5 +1,5 @@
 import { Factory } from "fishery";
-import { SpeciesFieldsFragment } from "../../types/graphql";
+import { SpeciesFieldsFragment } from "../../types/sdk";
 
 export default Factory.define<SpeciesFieldsFragment>(
   ({ params, sequence }) => ({

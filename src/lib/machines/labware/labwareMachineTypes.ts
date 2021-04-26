@@ -1,7 +1,11 @@
 import { ActorRef, Interpreter } from "xstate";
 import * as Yup from "yup";
-import { LabwareFieldsFragment, Maybe } from "../../../types/graphql";
-import { ApolloError } from "@apollo/client";
+import {
+  FindLabwareQuery,
+  LabwareFieldsFragment,
+  Maybe,
+} from "../../../types/sdk";
+import { ClientError } from "graphql-request";
 
 export type LabwareMachineType = Interpreter<
   LabwareContext,
@@ -150,12 +154,12 @@ type ValidationErrorEvent = {
 
 type FindLabwareDoneEvent = {
   type: "done.invoke.findLabware";
-  data: LabwareFieldsFragment;
+  data: FindLabwareQuery;
 };
 
 type FindLabwareErrorEvent = {
   type: "error.platform.findLabware";
-  data: ApolloError;
+  data: ClientError;
 };
 
 type AddFoundLabwareEvent = {

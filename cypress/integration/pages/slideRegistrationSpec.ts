@@ -2,7 +2,7 @@ import { shouldBehaveLikeARegistrationForm } from "../shared/registration";
 import {
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 
 describe("Slide Registration Page", () => {
   before(() => {

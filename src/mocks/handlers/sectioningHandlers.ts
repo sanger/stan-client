@@ -2,7 +2,7 @@ import { graphql } from "msw";
 import {
   GetSectioningInfoQuery,
   GetSectioningInfoQueryVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 
 const sectioningHandlers = [

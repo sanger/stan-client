@@ -6,7 +6,7 @@ import {
   LabwareFieldsFragment,
   LabwareType,
   Maybe,
-} from "../../../types/graphql";
+} from "../../../types/sdk";
 import { Interpreter, State, StateNode } from "xstate";
 import { UpdateLabwaresEvent } from "../labware/labwareMachineTypes";
 import {

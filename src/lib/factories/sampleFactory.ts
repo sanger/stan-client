@@ -13,7 +13,7 @@ import {
   Species,
   Tissue,
   TissueType,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import * as faker from "faker";
 
 export const sampleFactory = Factory.define<Sample>(

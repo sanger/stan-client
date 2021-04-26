@@ -1,4 +1,4 @@
-import { SpeciesFieldsFragment } from "../../types/graphql";
+import { SpeciesFieldsFragment } from "../../types/sdk";
 import { createSessionStorageRepository } from "./index";
 import speciesFactory from "../../lib/factories/speciesFactory";
 

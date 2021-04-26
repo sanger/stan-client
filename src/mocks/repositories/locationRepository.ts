@@ -1,9 +1,4 @@
-import {
-  GridDirection,
-  Location,
-  Maybe,
-  StoredItem,
-} from "../../types/graphql";
+import { GridDirection, Location, Maybe, StoredItem } from "../../types/sdk";
 import locationFactory, {
   buildLinkedLocation,
   locationItemFactory,
@@ -223,7 +218,6 @@ boxes.forEach((box) => {
 });
 
 [room, ...freezers, ...racks, ...boxes].forEach((location) => {
-  console.log(location);
   locationRepository.save(location);
 });
 

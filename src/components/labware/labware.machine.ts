@@ -8,7 +8,7 @@ import {
 } from "./labware.types";
 import { assign } from "@xstate/immer";
 import { pure } from "xstate/lib/actions";
-import { SlotFieldsFragment } from "../../types/graphql";
+import { SlotFieldsFragment } from "../../types/sdk";
 import {
   emptySlots,
   filledSlots,

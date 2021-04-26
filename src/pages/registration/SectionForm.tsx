@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { FieldArray, useFormikContext } from "formik";
-import { GetRegistrationInfoQuery, LifeStage } from "../../types/graphql";
+import { GetRegistrationInfoQuery, LifeStage } from "../../types/sdk";
 import { useOnScreen } from "../../lib/hooks";
 import { motion } from "framer-motion";
 import variants from "../../lib/motionVariants";

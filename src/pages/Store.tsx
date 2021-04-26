@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import AppShell from "../components/AppShell";
 import LocationSearch from "../components/LocationSearch";
 import { RouteComponentProps } from "react-router";
@@ -13,12 +13,10 @@ import Heading from "../components/Heading";
 import storeConfig from "../static/store.json";
 import { Link } from "react-router-dom";
 import BarcodeIcon from "../components/icons/BarcodeIcon";
-import {
-  FindLocationByBarcodeQuery,
-  useFindLocationByBarcodeQuery,
-} from "../types/graphql";
+import { FindLocationByBarcodeQuery } from "../types/sdk";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import { isLocationSearch, LocationSearchParams } from "../types/stan";
+import { StanCoreContext } from "../lib/sdk";
 
 /**
  * RouteComponentProps from react-router allows the props to be passed in
@@ -106,10 +104,28 @@ interface LocationLinkProps {
 }
 
 const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
-  const { data, loading, error } = useFindLocationByBarcodeQuery({
-    variables: { barcode },
-    fetchPolicy: "network-only",
-  });
+  const stanCore = useContext(StanCoreContext);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [location, setLocation] = useState<
+    FindLocationByBarcodeQuery["location"] | null
+  >(null);
+
+  useEffect(() => {
+    async function findLocationByBarcode() {
+      try {
+        const { location } = await stanCore.FindLocationByBarcode({
+          barcode,
+        });
+        setLocation(location);
+      } catch (e) {
+        setError(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    findLocationByBarcode();
+  }, [stanCore, barcode, setLocation, setError, setLoading]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -119,12 +135,6 @@ const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
     return (
       <Warning message={`Failed to load Location ${barcode}`} error={error} />
     );
-  }
-
-  let location: FindLocationByBarcodeQuery["location"] | undefined;
-
-  if (data) {
-    location = data.location;
   }
 
   return (
