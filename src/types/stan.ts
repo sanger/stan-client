@@ -1,4 +1,4 @@
-import {LabwareFieldsFragment, Maybe, PrinterFieldsFragment, Size,} from "./graphql";
+import {LabwareFieldsFragment, Maybe, PrinterFieldsFragment, Size,} from "./sdk";
 import {Location} from "history";
 import {ClientError} from "graphql-request";
 

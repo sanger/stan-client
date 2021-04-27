@@ -106,7 +106,7 @@ describe("Search", () => {
             graphql.query<FindQuery, FindQueryVariables>(
               "Find",
               (req, res, ctx) => {
-                return res(
+                return res.once(
                   ctx.errors([
                     {
                       message:

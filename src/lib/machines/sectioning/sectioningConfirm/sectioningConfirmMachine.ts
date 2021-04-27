@@ -4,7 +4,6 @@ import {
   LabwareFieldsFragment as LabwareLayout,
 } from "../../../../types/sdk";
 import { LayoutPlan } from "../../layout/layoutContext";
-import { cloneDeep } from "@apollo/client/utilities";
 import { LabwareTypeName } from "../../../../types/stan";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../layout/layoutMachine";
@@ -15,6 +14,7 @@ import {
   State,
 } from "./sectioningConfirmTypes";
 import { commitConfirmation } from "./sectioningConfirmEvents";
+import { cloneDeep } from "lodash";
 
 enum Actions {
   ASSIGN_ADDRESS_COMMENT = "assignAddressComment",

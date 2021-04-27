@@ -54,7 +54,7 @@ describe("Release Page", () => {
               ReleaseLabwareMutationVariables
             >("ReleaseLabware", (req, res, ctx) => {
               const { barcodes } = req.variables.releaseRequest;
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     message: `Exception while fetching data (/release) : Labware has already been released: [${barcodes.join(

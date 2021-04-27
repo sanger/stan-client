@@ -16,8 +16,8 @@ import { FindRequest, GetSearchInfoQuery } from "../types/sdk";
 import { useMachine } from "@xstate/react";
 import searchMachine from "../lib/machines/search/searchMachine";
 import * as Yup from "yup";
-import { history } from "../lib/client";
 import { stringify } from "../lib/helpers";
+import { history } from "../lib/sdk";
 
 const validationSchema: Yup.ObjectSchema = Yup.object()
   .shape({

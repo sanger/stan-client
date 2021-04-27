@@ -56,7 +56,7 @@ describe("Visium cDNA Page", () => {
               graphql.mutation<SlotCopyMutation, SlotCopyMutationVariables>(
                 "SlotCopy",
                 (req, res, ctx) => {
-                  return res(
+                  return res.once(
                     ctx.errors([
                       {
                         message:

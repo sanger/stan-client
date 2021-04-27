@@ -50,7 +50,7 @@ describe("Store", () => {
               FindLabwareLocationQuery,
               FindLabwareLocationQueryVariables
             >("FindLabwareLocation", (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.data({
                   stored: [
                     {

@@ -128,7 +128,7 @@ describe("Registration", () => {
               RegisterTissuesMutation,
               RegisterTissuesMutationVariables
             >("RegisterTissues", (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     extensions: {
@@ -168,7 +168,7 @@ describe("Registration", () => {
             RegisterTissuesMutation,
             RegisterTissuesMutationVariables
           >("RegisterTissues", (req, res, ctx) => {
-            return res(
+            return res.once(
               ctx.data({
                 register: {
                   labware: [],

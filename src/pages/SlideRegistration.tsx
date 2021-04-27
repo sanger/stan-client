@@ -5,7 +5,6 @@ import SlideRegistrationForm from "./registration/SlideRegistrationForm";
 import columns from "../components/labwareScanPanel/columns";
 import RegistrationSuccess from "./registration/RegistrationSuccess";
 import Warning from "../components/notifications/Warning";
-import { history } from "../lib/client";
 import {
   GetRegistrationInfoQuery,
   LifeStage,
@@ -20,7 +19,7 @@ import * as Yup from "yup";
 import { useMachine } from "@xstate/react";
 import createFormMachine from "../lib/machines/form/formMachine";
 import { parseQueryString } from "../lib/helpers";
-import { StanCoreContext } from "../lib/sdk";
+import { history, StanCoreContext } from "../lib/sdk";
 
 const availableSlides: Array<LabwareTypeName> = [
   LabwareTypeName.SLIDE,

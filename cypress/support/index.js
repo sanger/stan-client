@@ -25,9 +25,5 @@ after(() => {
   worker.stop();
 });
 
-afterEach(() => {
-  worker.resetHandlers();
-});
-
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

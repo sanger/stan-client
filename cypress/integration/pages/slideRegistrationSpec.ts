@@ -161,7 +161,7 @@ describe("Slide Registration Page", () => {
               RegisterSectionsMutation,
               RegisterSectionsMutationVariables
             >("RegisterSections", (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     extensions: {

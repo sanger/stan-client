@@ -78,7 +78,7 @@ describe("Configuration Spec", () => {
             AddReleaseRecipientMutation,
             AddReleaseRecipientMutationVariables
           >("AddReleaseRecipient", (req, res, ctx) => {
-            return res(
+            return res.once(
               ctx.errors([
                 {
                   message:

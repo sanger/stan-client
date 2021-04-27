@@ -4,7 +4,6 @@ import LocationSearch from "../components/LocationSearch";
 import { RouteComponentProps } from "react-router";
 import { safeParseQueryString } from "../lib/helpers";
 import { findLabwareLocation } from "../lib/services/locationService";
-import { history } from "../lib/client";
 import Warning from "../components/notifications/Warning";
 import MutedText from "../components/MutedText";
 import LocationIcon from "../components/icons/LocationIcon";
@@ -16,7 +15,7 @@ import BarcodeIcon from "../components/icons/BarcodeIcon";
 import { FindLocationByBarcodeQuery } from "../types/sdk";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import { isLocationSearch, LocationSearchParams } from "../types/stan";
-import { StanCoreContext } from "../lib/sdk";
+import { history, StanCoreContext } from "../lib/sdk";
 
 /**
  * RouteComponentProps from react-router allows the props to be passed in
