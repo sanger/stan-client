@@ -47,6 +47,7 @@ module.exports = {
         "hover:bg-purple-300",
         "hover:bg-purple-600",
         "hover:bg-purple-700",
+        "bg-gradient-to-tr",
         "from-green-800",
         "to-green-700",
         "border-green-600",
