@@ -56,13 +56,14 @@ export function Routes() {
 
       <AuthenticatedRoute
         path="/lab/extraction"
-        render={() => <Extraction />}
+        render={(routerProps) => <Extraction key={routerProps.location.key} />}
       />
 
       <AuthenticatedRoute
         path="/lab/visium_cdna"
-        render={() => (
+        render={(routeProps) => (
           <SlotCopy
+            key={routeProps.location.key}
             title={"Visium cDNA"}
             initialOutputLabware={[plateFactory.build()]}
           />

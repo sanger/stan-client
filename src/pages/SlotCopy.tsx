@@ -11,6 +11,8 @@ import { useScrollToRef } from "../lib/hooks";
 import { useMachine } from "@xstate/react";
 import { SlotCopyContent } from "../types/sdk";
 import slotCopyMachine from "../lib/machines/slotCopy/slotCopyMachine";
+import { Link } from "react-router-dom";
+import { reload } from "../lib/sdk";
 
 type PageParams = {
   title: string;
@@ -54,6 +56,8 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     if (current.value === "copied") {
       toast(ToastSuccess, {
         position: toast.POSITION.TOP_RIGHT,
+        autoClose: 4000,
+        hideProgressBar: true,
       });
     }
   }, [current.value]);
@@ -99,12 +103,25 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
       <div className="border border-t-2 border-gray-200 w-full py-4 px-4 sm:px-6 lg:px-8 bg-gray-100 flex-shrink-0">
         <div className="flex flex-row items-center justify-end space-x-2">
-          <BlueButton
-            disabled={!current.matches("readyToCopy")}
-            onClick={handleSave}
-          >
-            Save
-          </BlueButton>
+          {!current.matches("copied") && (
+            <BlueButton
+              disabled={!current.matches("readyToCopy")}
+              onClick={handleSave}
+            >
+              Save
+            </BlueButton>
+          )}
+
+          {current.matches("copied") && (
+            <>
+              <BlueButton onClick={reload} action="tertiary">
+                Reset Form
+              </BlueButton>
+              <Link to={"/"}>
+                <BlueButton action="primary">Return to Dashboard</BlueButton>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </AppShell>

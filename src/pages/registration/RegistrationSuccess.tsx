@@ -60,7 +60,7 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
           <BlueButton action="secondary">Store</BlueButton>
         </Link>
         <Link to={"/"}>
-          <PinkButton action="primary">Return to Dashboard</PinkButton>
+          <PinkButton action="primary">Return Home</PinkButton>
         </Link>
       </ButtonBar>
     </AppShell>

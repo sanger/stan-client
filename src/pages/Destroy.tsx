@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import AppShell from "../components/AppShell";
 import { Form, Formik } from "formik";
 import {
@@ -20,10 +20,9 @@ import columns from "../components/labwareScanPanel/columns";
 import { FormikErrorMessage, optionValues } from "../components/forms";
 import FormikSelect from "../components/forms/Select";
 import PinkButton from "../components/buttons/PinkButton";
-import Success from "../components/notifications/Success";
-import { toast } from "react-toastify";
 import createFormMachine from "../lib/machines/form/formMachine";
-import { StanCoreContext } from "../lib/sdk";
+import { reload, StanCoreContext } from "../lib/sdk";
+import OperationCompleteModal from "../components/modal/OperationCompleteModal";
 
 const initialValues: DestroyRequest = {
   barcodes: [],
@@ -68,16 +67,6 @@ const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
   const validationSchema = useMemo(() => buildValidationSchema(destroyInfo), [
     destroyInfo,
   ]);
-
-  useEffect(() => {
-    if (current.matches("submitted")) {
-      const ToastSuccess = () => <Success message={"Labware(s) Destroyed"} />;
-
-      toast(ToastSuccess, {
-        position: toast.POSITION.TOP_RIGHT,
-      });
-    }
-  }, [current]);
 
   const submitForm = async (values: DestroyRequest) =>
     send({ type: "SUBMIT_FORM", values });
@@ -187,6 +176,17 @@ const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
                     </PinkButton>
                   </Sidebar>
                 </GrayBox>
+
+                <OperationCompleteModal
+                  show={current.matches("submitted")}
+                  message={"Labware(s) Destroyed"}
+                  onReset={reload}
+                >
+                  <p>
+                    If you wish to start the process again, click the "Reset
+                    Form" button, otherwise you can return to the Home screen.
+                  </p>
+                </OperationCompleteModal>
               </Form>
             )}
           </Formik>

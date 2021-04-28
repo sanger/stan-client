@@ -6,11 +6,9 @@ import { LabwareTypeName } from "../../types/stan";
 import Warning from "../../components/notifications/Warning";
 import { useScrollToRef } from "../../lib/hooks";
 import ConfirmByLabwareType from "./ConfirmByLabwareType";
-import { toast } from "react-toastify";
-import Success from "../../components/notifications/Success";
 import { SectioningPageContext } from "../Sectioning";
-
-const toastSuccess = () => <Success message={"Sectioning Saved"} />;
+import OperationCompleteModal from "../../components/modal/OperationCompleteModal";
+import { reload } from "../../lib/sdk";
 
 function Confirm() {
   const model = useContext(SectioningPageContext)!;
@@ -25,15 +23,6 @@ function Confirm() {
       scrollToRef();
     }
   }, [model, scrollToRef]);
-
-  // Show a toast notification with a success message when sectioning is complete
-  useEffect(() => {
-    if (model.isDone) {
-      toast(toastSuccess, {
-        position: toast.POSITION.TOP_RIGHT,
-      });
-    }
-  }, [model]);
 
   const { sectioningConfirmMachines } = model.context;
 
@@ -91,6 +80,17 @@ function Confirm() {
           </div>
         </div>
       </div>
+
+      <OperationCompleteModal
+        message={"Sectioning Saved"}
+        show={model.isDone}
+        onReset={reload}
+      >
+        <p>
+          If you wish to start the process again, click the "Reset Form" button,
+          otherwise you can return to the Home screen.
+        </p>
+      </OperationCompleteModal>
     </AppShell>
   );
 }

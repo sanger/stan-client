@@ -26,6 +26,9 @@ import { LabwareFieldsFragment } from "../types/sdk";
 import extractionMachine, {
   ExtractionContext,
 } from "../lib/machines/extraction/extractionMachine";
+import { Link } from "react-router-dom";
+import ButtonBar from "../components/ButtonBar";
+import { reload } from "../lib/sdk";
 
 function buildExtractionTableData(ctx: ExtractionContext) {
   if (!ctx.extraction) return [];
@@ -211,6 +214,22 @@ function Extraction() {
             </div>
           </div>
         </div>
+      )}
+
+      {current.matches("extracted") && (
+        <ButtonBar>
+          <BlueButton
+            onClick={() => {
+              reload();
+            }}
+            action="tertiary"
+          >
+            Reset Form
+          </BlueButton>
+          <Link to={"/"}>
+            <BlueButton action="primary">Return to Dashboard</BlueButton>
+          </Link>
+        </ButtonBar>
       )}
     </AppShell>
   );
