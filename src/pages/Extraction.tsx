@@ -218,12 +218,7 @@ function Extraction() {
 
       {current.matches("extracted") && (
         <ButtonBar>
-          <BlueButton
-            onClick={() => {
-              reload();
-            }}
-            action="tertiary"
-          >
+          <BlueButton onClick={reload} action="tertiary">
             Reset Form
           </BlueButton>
           <Link to={"/"}>
