@@ -69,6 +69,7 @@ describe("Sectioning", () => {
           cy.findByText("A1").click();
           cy.findByText("Done").click();
         });
+        cy.findByLabelText("Section Thickness").type("5");
       });
 
       after(() => {
@@ -281,6 +282,7 @@ function createLabware() {
     cy.findByText("A1").click();
     cy.findByText("Done").click();
   });
+  cy.findByLabelText("Section Thickness").type("5");
   cy.findByText("Create Labware").click();
 }
 

@@ -5,18 +5,21 @@ import { Routes } from "./components/Routes";
 import { ApolloProvider } from "@apollo/client";
 import client, { history } from "./lib/client";
 import { stanCore, StanCoreContext } from "./lib/sdk";
+import { ConfigProvider } from "./context/ConfigContext";
 
 function App() {
   return (
-    <ApolloProvider client={client}>
-      <StanCoreContext.Provider value={stanCore}>
-        <Router history={history}>
-          <AuthProvider>
-            <Routes />
-          </AuthProvider>
-        </Router>
-      </StanCoreContext.Provider>
-    </ApolloProvider>
+    <ConfigProvider>
+      <ApolloProvider client={client}>
+        <StanCoreContext.Provider value={stanCore}>
+          <Router history={history}>
+            <AuthProvider>
+              <Routes />
+            </AuthProvider>
+          </Router>
+        </StanCoreContext.Provider>
+      </ApolloProvider>
+    </ConfigProvider>
   );
 }
 
