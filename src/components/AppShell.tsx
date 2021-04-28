@@ -507,9 +507,7 @@ function AppShell({ children }: AppShellParams) {
       {location.state?.warning && <Warning message={location.state.warning} />}
       {location.state?.success && <Success message={location.state.success} />}
       {children}
-      <footer
-        className={`border border-t-2 pt-5 pb-3 flex-shrink-0 ${config?.footerColor}`}
-      >
+      <footer className={`border border-t-2 pt-5 pb-3 flex-shrink-0 ${config?.footerColor}`}>
         <div className="max-w-sm mx-auto px-4 sm:px-6">
           <ul className="flex flex-row items-center justify-between my-2 text-xs text-gray-500">
             <li>
