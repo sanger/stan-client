@@ -9,9 +9,8 @@ import { current } from "immer";
 import { buildSampleColors } from "../../helpers/labwareHelper";
 import { createSectioningLayoutMachine } from "./sectioningLayout/sectioningLayoutMachine";
 import { createSectioningConfirmMachine } from "./sectioningConfirm/sectioningConfirmMachine";
-import * as confirmService from "../../services/confirmService";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
-import { LabwareFieldsFragment, PlanMutation } from "../../../types/graphql";
+import { LabwareFieldsFragment, PlanMutation } from "../../../types/sdk";
 import {
   LayoutPlan,
   Source as LayoutPlanAction,
@@ -105,12 +104,12 @@ const sectioningMachineOptions: Partial<MachineOptions<
     }),
 
     [Action.ASSIGN_PLAN]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.planSection" || !e.data.data) {
+      if (e.type !== "done.invoke.planSection" || !e.data) {
         return;
       }
 
       const currentCtx = current(ctx);
-      const { plan } = e.data.data;
+      const { plan } = e.data;
 
       plan.labware.forEach((labware: any) => {
         const labwareTypeName = labware.labwareType.name;
@@ -184,7 +183,7 @@ const sectioningMachineOptions: Partial<MachineOptions<
   services: {
     [Service.GET_SECTIONING_INFO]: () => stanCore.GetSectioningInfo(),
     [Service.CONFIRM_OPERATION]: (ctx) =>
-      confirmService.confirm(ctx.confirmOperationRequest),
+      stanCore.Confirm({ request: ctx.confirmOperationRequest }),
   },
 };
 
@@ -340,7 +339,7 @@ function buildSectioningLayout(ctx: SectioningContext): SectioningLayout {
   const sectioningLayout: SectioningLayout = {
     inputLabwares: ctx.sourceLabwares,
     quantity: 1,
-    sectionThickness: 5,
+    sectionThickness: 0,
     sampleColors: ctx.sampleColors,
     destinationLabware: unregisteredLabwareFactory.build(
       {},

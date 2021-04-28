@@ -17,7 +17,7 @@ import {
   LabwareFieldsFragment,
   Maybe,
   SlotFieldsFragment,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import SlotMapperTable from "./SlotMapperTable";
 import { maybeFindSlotByAddress } from "../../lib/helpers/slotHelper";
 import Heading from "../Heading";

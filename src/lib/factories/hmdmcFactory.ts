@@ -1,5 +1,5 @@
 import { Factory } from "fishery";
-import { HmdmcFieldsFragment } from "../../types/graphql";
+import { HmdmcFieldsFragment } from "../../types/sdk";
 import _ from "lodash";
 
 export default Factory.define<HmdmcFieldsFragment>(({ sequence, params }) => ({

@@ -1,5 +1,5 @@
 import { Factory } from "fishery";
-import { GridDirection, Labware } from "../../types/graphql";
+import { GridDirection, Labware } from "../../types/sdk";
 import { labwareTypes } from "./labwareTypeFactory";
 import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
 import { uniqueId } from "lodash";

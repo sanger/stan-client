@@ -5,7 +5,7 @@ import {
   LabwareFieldsFragment,
   Maybe,
   PrinterFieldsFragment,
-} from "../types/graphql";
+} from "../types/sdk";
 import createLabelPrinterMachine from "../lib/machines/labelPrinter/labelPrinterMachine";
 
 interface LabelPrinterButtonProps {

@@ -5,7 +5,7 @@ import LoadingSpinner from "./icons/LoadingSpinner";
 import Success from "./notifications/Success";
 import Warning from "./notifications/Warning";
 import BlueButton from "./buttons/BlueButton";
-import { LabwareFieldsFragment, PrinterFieldsFragment } from "../types/graphql";
+import { LabwareFieldsFragment, PrinterFieldsFragment } from "../types/sdk";
 import { PrintResultType } from "../types/stan";
 import createLabelPrinterMachine from "../lib/machines/labelPrinter/labelPrinterMachine";
 

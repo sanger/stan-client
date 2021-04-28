@@ -1,6 +1,6 @@
-import {LabwareFieldsFragment, Maybe, PrinterFieldsFragment, Size,} from "./graphql";
-import {ApolloError} from "@apollo/client";
+import {LabwareFieldsFragment, Maybe, PrinterFieldsFragment, Size,} from "./sdk";
 import {Location} from "history";
+import {ClientError} from "graphql-request";
 
 /**
  * Union of STAN's {@link OperationType} names
@@ -41,16 +41,28 @@ export interface ServerErrors {
   problems: string[];
 }
 
-/**
- * Builds a {@link ServerErrors} object from an ApolloError
- * @param e ApolloError
- */
-export function extractServerErrors(e: ApolloError): ServerErrors {
-  const matchArray = e.message.match(/^.*\s:\s(.*)$/);
+type GraphQLErrorWithExtensions = {
+  extensions?: {
+    problems: Array<string>;
+  };
+  message: string;
+  locations: {
+    line: number;
+    column: number;
+  }[];
+  path: string[];
+}
 
+/**
+ * Builds a {@link ServerErrors} object from a ClientError
+ * @param e ClientError
+ */
+export function extractServerErrors(e: ClientError): ServerErrors {
   return {
-    message: matchArray !== null ? matchArray[1] : null,
-    problems: e.graphQLErrors.reduce<string[]>(
+    message: e.response.errors
+      ?.map(error => error?.message?.match(/^.*\s:\s(.*)$/)?.[1])
+      .filter(error => !!error).join("\n") ?? null,
+    problems: (e.response.errors as GraphQLErrorWithExtensions[]).reduce<string[]>(
       (memo, graphQLError, _index, _original) => {
         if (!graphQLError.extensions?.hasOwnProperty("problems")) {
           return memo;
@@ -58,7 +70,7 @@ export function extractServerErrors(e: ApolloError): ServerErrors {
         return [...memo, ...graphQLError.extensions["problems"]];
       },
       []
-    ),
+    ) ?? [],
   };
 }
 
@@ -141,7 +153,7 @@ export type MachineServiceDone<T extends string, E> = {
  * @param <T> the name of the service
  * @see {@link https://xstate.js.org/docs/guides/communication.html#invoking-services XState Services}
  */
-export type MachineServiceError<T extends string, E = ApolloError> = {
+export type MachineServiceError<T extends string, E = ClientError> = {
   type: `error.platform.${T}`;
   data: E;
 };
@@ -168,3 +180,33 @@ export type LocationState = {
  * An entity that can be disabled/enabled
  */
 export type HasEnabled = { enabled: boolean };
+
+/**
+ * Properties that go in the config.js file
+ */
+export type StanConfig = {
+  /**
+   * The name of the current environment
+   */
+  env: string;
+
+  /**
+   * Tailwind color classes that will be applied to the header
+   */
+  headerColor: string;
+
+  /**
+   * Tailwind color classes that will be applied to the footer
+   */
+  footerColor: string;
+
+  /**
+   * Email address for users to get support
+   */
+  supportEmail: string;
+
+  /**
+   * When was this release deployed
+   */
+  deploymentDate: string;
+};

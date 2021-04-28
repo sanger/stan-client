@@ -6,7 +6,7 @@ import Modal, {
 } from "../../components/Modal";
 import PinkButton from "../../components/buttons/PinkButton";
 import WhiteButton from "../../components/buttons/WhiteButton";
-import { FindLocationByBarcodeQuery } from "../../types/graphql";
+import { FindLocationByBarcodeQuery } from "../../types/sdk";
 
 interface UnstoreBarcodeModalProps {
   isOpen: boolean;

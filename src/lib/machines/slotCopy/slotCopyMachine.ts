@@ -1,6 +1,5 @@
 import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
-import * as slotCopyService from "../../services/slotCopyService";
 import { castDraft } from "immer";
 import {
   LabwareTypeName,
@@ -13,8 +12,9 @@ import {
   Maybe,
   SlotCopyContent,
   SlotCopyMutation,
-} from "../../../types/graphql";
-import { ApolloError } from "@apollo/client";
+} from "../../../types/sdk";
+import { stanCore } from "../../sdk";
+import { ClientError } from "graphql-request";
 
 /**
  * Context for SlotCopy Machine
@@ -23,7 +23,7 @@ export interface SlotCopyContext {
   operationType: OperationTypeName;
   outputLabwareType: LabwareTypeName;
   slotCopyContent: Array<SlotCopyContent>;
-  serverErrors?: Maybe<ApolloError>;
+  serverErrors?: Maybe<ClientError>;
   outputLabwares: Array<LabwareFieldsFragment>;
 }
 
@@ -125,10 +125,12 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
     },
     services: {
       copySlots: (ctx) => {
-        return slotCopyService.copySlots({
-          operationType: ctx.operationType,
-          labwareType: ctx.outputLabwareType,
-          contents: ctx.slotCopyContent,
+        return stanCore.SlotCopy({
+          request: {
+            operationType: ctx.operationType,
+            labwareType: ctx.outputLabwareType,
+            contents: ctx.slotCopyContent,
+          },
         });
       },
     },

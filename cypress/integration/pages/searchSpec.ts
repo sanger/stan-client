@@ -1,4 +1,4 @@
-import { FindQuery, FindQueryVariables } from "../../../src/types/graphql";
+import { FindQuery, FindQueryVariables } from "../../../src/types/sdk";
 import { buildFindResult } from "../../../src/mocks/handlers/findHandlers";
 
 describe("Search", () => {
@@ -7,7 +7,6 @@ describe("Search", () => {
       cy.visit(
         "/search?donorName=DNR123&labwareBarcode=STAN-0001F&tissueExternalName=EXT987&tissueType=Tissue Type 1"
       );
-      cy.wait(2000);
     });
 
     it("will set the inputs as values from the query parameters", () => {
@@ -25,7 +24,6 @@ describe("Search", () => {
   context("when URL query params are not set", () => {
     before(() => {
       cy.visit("/search");
-      cy.wait(2000);
     });
 
     it("will not perform a search immediately", () => {
@@ -50,14 +48,13 @@ describe("Search", () => {
     context("when a search has more results than the requested amount", () => {
       before(() => {
         cy.visit("/search");
-        cy.wait(2000);
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.query<FindQuery, FindQueryVariables>(
               "Find",
               (req, res, ctx) => {
-                return res(ctx.data({ find: buildFindResult(50, 40) }));
+                return res.once(ctx.data({ find: buildFindResult(50, 40) }));
               }
             )
           );
@@ -77,14 +74,13 @@ describe("Search", () => {
     context("when a search returns no results", () => {
       before(() => {
         cy.visit("/search");
-        cy.wait(2000);
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.query<FindQuery, FindQueryVariables>(
               "Find",
               (req, res, ctx) => {
-                return res(ctx.data({ find: buildFindResult(0, 40) }));
+                return res.once(ctx.data({ find: buildFindResult(0, 40) }));
               }
             )
           );
@@ -104,14 +100,13 @@ describe("Search", () => {
     context("when a search errors gets an error from the server", () => {
       before(() => {
         cy.visit("/search");
-        cy.wait(2000);
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.query<FindQuery, FindQueryVariables>(
               "Find",
               (req, res, ctx) => {
-                return res(
+                return res.once(
                   ctx.errors([
                     {
                       message:

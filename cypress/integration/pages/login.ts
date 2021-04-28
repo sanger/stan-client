@@ -17,11 +17,9 @@ describe("Login", () => {
           worker.use(
             graphql.mutation("Login", (req, res, ctx) => {
               return res.once(
-                ctx.errors([
-                  {
-                    message: "Username or password incorrect",
-                  },
-                ])
+                ctx.data({
+                  user: null,
+                })
               );
             })
           );
@@ -33,7 +31,9 @@ describe("Login", () => {
       });
 
       it("shows an error message", () => {
-        cy.findByText("Username or password incorrect").should("be.visible");
+        cy.findByTextContent("Username or password is incorrect").should(
+          "be.visible"
+        );
       });
     });
 

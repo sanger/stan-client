@@ -1,4 +1,4 @@
-import { HmdmcFieldsFragment } from "../../types/graphql";
+import { HmdmcFieldsFragment } from "../../types/sdk";
 import { createSessionStorageRepository } from "./index";
 import hmdmcFactory from "../../lib/factories/hmdmcFactory";
 

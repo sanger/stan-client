@@ -7,7 +7,7 @@ import {
   RegisterSectionsMutationVariables,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import speciesRepository from "../repositories/speciesRepository";
 import hmdmcRepository from "../repositories/hmdmcRepository";

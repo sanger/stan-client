@@ -9,7 +9,7 @@ import Table, {
 import RemoveButton from "../../components/buttons/RemoveButton";
 import { LocationParentContext } from "../Location";
 import UnstoreBarcodeModal from "./UnstoreBarcodeModal";
-import { Maybe } from "../../types/graphql";
+import { Maybe } from "../../types/sdk";
 import { StoredItemFragment } from "../../lib/machines/locations/locationMachineTypes";
 import { Select } from "../../components/forms/Select";
 import MutedText from "../../components/MutedText";

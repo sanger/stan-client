@@ -6,11 +6,10 @@ import {
   BlockRegisterRequest,
   GetRegistrationInfoQuery,
   RegisterTissuesMutation,
-  RegisterTissuesMutationResult,
   RegisterTissuesMutationVariables,
-} from "../../../types/graphql";
+} from "../../../types/sdk";
 import { RegistrationFormValues } from "../../../pages/Registration";
-import { ApolloError } from "@apollo/client";
+import { ClientError } from "graphql-request";
 
 /**
  * Builds the registerTissue mutation variables from the RegistrationFormValues
@@ -79,12 +78,12 @@ type EditSubmissionEvent = {
 
 type SubmittingDoneEvent = {
   type: "done.invoke.submitting";
-  data: RegisterTissuesMutationResult;
+  data: RegisterTissuesMutation;
 };
 
 type SubmittingErrorEvent = {
   type: "error.platform.submitting";
-  data: ApolloError;
+  data: ClientError;
 };
 
 export type RegistrationEvent =
@@ -156,10 +155,10 @@ const registrationMachine = createMachine<
       emptyConfirmedTissues: assign((ctx) => (ctx.confirmedTissues = [])),
 
       assignRegistrationResult: assign((ctx, e) => {
-        if (e.type !== "done.invoke.submitting" || !e.data.data) {
+        if (e.type !== "done.invoke.submitting" || !e.data) {
           return;
         }
-        ctx.registrationResult = e.data.data;
+        ctx.registrationResult = e.data;
 
         // Store the clashed tissues to be used for possible user confirmation
         ctx.confirmedTissues = ctx.registrationResult.register.clashes.map(

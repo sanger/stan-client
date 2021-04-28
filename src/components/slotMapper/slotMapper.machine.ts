@@ -5,7 +5,7 @@ import {
   SlotMapperSchema,
 } from "./slotMapper.types";
 import { assign } from "@xstate/immer";
-import { GridDirection, SlotCopyContent } from "../../types/graphql";
+import { GridDirection, SlotCopyContent } from "../../types/sdk";
 import { buildAddresses, cycleColors } from "../../lib/helpers";
 import { sortWithDirection } from "../../lib/helpers/addressHelper";
 import { find, indexOf, intersection, map } from "lodash";

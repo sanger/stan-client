@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { GetRegistrationInfoQuery, LifeStage } from "../../types/graphql";
+import { GetRegistrationInfoQuery, LifeStage } from "../../types/sdk";
 import { FieldArray, Form, useFormikContext } from "formik";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "../../components/Heading";

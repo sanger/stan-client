@@ -2,7 +2,7 @@ import { graphql } from "msw";
 import {
   GetConfigurationQuery,
   GetConfigurationQueryVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import releaseDestinationRepository from "../repositories/releaseDestinationRepository";
 import releaseRecipientRepository from "../repositories/releaseRecipientRepository";
 import commentRepository from "../repositories/commentRepository";

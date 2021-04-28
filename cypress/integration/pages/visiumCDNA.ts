@@ -1,12 +1,11 @@
 import {
   SlotCopyMutation,
   SlotCopyMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 
 describe("Visium cDNA Page", () => {
   before(() => {
     cy.visit("/lab/visium_cdna");
-    cy.wait(2000);
   });
 
   describe("On load", () => {
@@ -57,7 +56,7 @@ describe("Visium cDNA Page", () => {
               graphql.mutation<SlotCopyMutation, SlotCopyMutationVariables>(
                 "SlotCopy",
                 (req, res, ctx) => {
-                  return res(
+                  return res.once(
                     ctx.errors([
                       {
                         message:

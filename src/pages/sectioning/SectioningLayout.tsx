@@ -27,7 +27,7 @@ import {
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
 import DataTable from "../../components/DataTable";
 import { CellProps, Column, Row } from "react-table";
-import { LabwareFieldsFragment } from "../../types/graphql";
+import { LabwareFieldsFragment } from "../../types/sdk";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { Input } from "../../components/forms/Input";
 import { usePrinters } from "../../lib/hooks";
@@ -225,6 +225,7 @@ const SectioningLayout = React.forwardRef<
             )}
 
             <Label name={"Section Thickness"}>
+              {/* When the section thickness is 0, input should be empty */}
               <Input
                 disabled={
                   current.matches("printing") || current.matches("done")
@@ -232,7 +233,11 @@ const SectioningLayout = React.forwardRef<
                 type={"number"}
                 min={1}
                 step={1}
-                value={sectioningLayout.sectionThickness}
+                value={
+                  sectioningLayout.sectionThickness === 0
+                    ? ""
+                    : sectioningLayout.sectionThickness
+                }
                 onChange={(e) => {
                   send(
                     updateSectioningLayout({

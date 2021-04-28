@@ -16,7 +16,7 @@ import {
   StoredItem,
   UnstoreBarcodeMutation,
   UnstoreBarcodeMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { graphql } from "msw";
 
 const locationHandlers = [

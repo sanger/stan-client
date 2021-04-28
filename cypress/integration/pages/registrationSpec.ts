@@ -1,7 +1,7 @@
 import {
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 import { shouldBehaveLikeARegistrationForm } from "../shared/registration";
 import { tissueFactory } from "../../../src/lib/factories/sampleFactory";
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
@@ -9,7 +9,6 @@ import labwareFactory from "../../../src/lib/factories/labwareFactory";
 describe("Registration", () => {
   before(() => {
     cy.visit("/admin/registration");
-    cy.wait(2000);
   });
 
   describe("Validation", () => {
@@ -88,7 +87,6 @@ describe("Registration", () => {
     context("when the fields are invalid", () => {
       before(() => {
         cy.visit("/admin/registration");
-        cy.wait(2000);
         fillInForm();
         cy.findByLabelText("Donor ID").clear();
         cy.findByText("Register").click();
@@ -106,10 +104,7 @@ describe("Registration", () => {
     context("when the submission is successful", () => {
       before(() => {
         cy.visit("/admin/registration");
-        cy.wait(2000);
-
         fillInForm();
-
         cy.findByText("Register").click();
       });
 
@@ -133,7 +128,7 @@ describe("Registration", () => {
               RegisterTissuesMutation,
               RegisterTissuesMutationVariables
             >("RegisterTissues", (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     extensions: {
@@ -148,8 +143,6 @@ describe("Registration", () => {
             })
           );
         });
-
-        cy.wait(2000);
 
         fillInForm();
         cy.findByText("Register").click();
@@ -175,7 +168,7 @@ describe("Registration", () => {
             RegisterTissuesMutation,
             RegisterTissuesMutationVariables
           >("RegisterTissues", (req, res, ctx) => {
-            return res(
+            return res.once(
               ctx.data({
                 register: {
                   labware: [],
@@ -192,7 +185,6 @@ describe("Registration", () => {
         );
       });
 
-      cy.wait(2000);
       fillInForm();
       cy.findByText("Register").click();
     });

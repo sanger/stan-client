@@ -4,7 +4,7 @@ import {
   Comment,
   ConfirmOperationLabware,
   LabwareFieldsFragment as LabwareLayout,
-} from "../../../../types/graphql";
+} from "../../../../types/sdk";
 import { Address } from "../../../../types/stan";
 
 export type SectioningConfirmMachineType = Interpreter<

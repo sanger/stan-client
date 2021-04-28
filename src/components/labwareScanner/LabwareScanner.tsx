@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from "react";
-import { LabwareFieldsFragment } from "../../types/graphql";
+import React, { useCallback, useContext, useEffect } from "react";
+import { LabwareFieldsFragment } from "../../types/sdk";
 import { useMachine } from "@xstate/react";
 import { createLabwareMachine } from "../../lib/machines/labware/labwareMachine";
 import ScanInput from "../scanInput/ScanInput";
@@ -74,6 +74,20 @@ export default function LabwareScanner({
     ),
   };
 
+  const handleOnScanInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      send({
+        type: "UPDATE_CURRENT_BARCODE",
+        value: e.currentTarget.value,
+      });
+    },
+    [send]
+  );
+
+  const handleOnScan = useCallback(() => send({ type: "SUBMIT_BARCODE" }), [
+    send,
+  ]);
+
   return (
     <div className="space-y-4">
       {current.matches("idle.success") && successMessage && (
@@ -86,18 +100,11 @@ export default function LabwareScanner({
       <div className="sm:w-2/3 md:w-1/2">
         <ScanInput
           id="labwareScanInput"
-          value={currentBarcode}
           type="text"
-          disabled={!current.matches("idle")}
-          onChange={(e) => {
-            send({
-              type: "UPDATE_CURRENT_BARCODE",
-              value: e.currentTarget.value,
-            });
-          }}
-          onScan={(_value) => {
-            send({ type: "SUBMIT_BARCODE" });
-          }}
+          value={currentBarcode}
+          disabled={current.matches("locked")}
+          onChange={handleOnScanInputChange}
+          onScan={handleOnScan}
         />
       </div>
 

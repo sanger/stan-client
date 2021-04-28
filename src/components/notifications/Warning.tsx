@@ -1,7 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import { ApolloError } from "@apollo/client";
-import { Maybe } from "../../types/graphql";
+import { Maybe } from "../../types/sdk";
 import { extractServerErrors, ServerErrors } from "../../types/stan";
 import { ClientError } from "graphql-request";
 
@@ -11,7 +10,7 @@ interface WarningProps
     HTMLElement
   > {
   message?: string;
-  error?: Maybe<ApolloError> | Maybe<ClientError>;
+  error?: Maybe<ClientError>;
 }
 
 const Warning = ({
@@ -27,17 +26,8 @@ const Warning = ({
   );
   let serverErrors: ServerErrors | undefined;
 
-  // TypeScript can infer this as ApolloError as "extraInfo" isn't a property of ClientError
-  if (error && "extraInfo" in error) {
+  if (error) {
     serverErrors = extractServerErrors(error);
-  } else if (error) {
-    serverErrors = {
-      message: null,
-      problems:
-        error.response.errors?.map(
-          (error) => error.message.match(/^.*\s:\s(.*)$/)?.[1] ?? ""
-        ) ?? [],
-    };
   }
   return (
     <section {...rest} className={sectionClasses}>

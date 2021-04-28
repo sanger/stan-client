@@ -4,7 +4,7 @@ import {
   DestroyMutationVariables,
   GetDestroyInfoQuery,
   GetDestroyInfoQueryVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import destructionReasonRepository from "../repositories/destructionReasonRepository";
 
 const destroyHandlers = [

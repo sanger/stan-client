@@ -1,4 +1,4 @@
-import { ReleaseDestinationFieldsFragment } from "../../types/graphql";
+import { ReleaseDestinationFieldsFragment } from "../../types/sdk";
 import { createSessionStorageRepository } from "./index";
 import releaseDestinationFactory from "../../lib/factories/releaseDestinationFactory";
 

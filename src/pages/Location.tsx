@@ -26,7 +26,7 @@ import { addressToLocationAddress } from "../lib/helpers/locationHelper";
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
 import { RouteComponentProps } from "react-router-dom";
 import { LocationMatchParams, LocationSearchParams } from "../types/stan";
-import { LocationFieldsFragment, Maybe } from "../types/graphql";
+import { LocationFieldsFragment, Maybe } from "../types/sdk";
 import { useMachine } from "@xstate/react";
 import { buildAddresses } from "../lib/helpers";
 import { StoredItemFragment } from "../lib/machines/locations/locationMachineTypes";

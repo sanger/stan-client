@@ -1,12 +1,12 @@
 import {
   ExtractMutation,
   ExtractMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 
 function scanInLabware() {
-  cy.get("#labwareScanInput").type("STAN-011{enter}");
-  cy.get("#labwareScanInput").type("STAN-012{enter}");
-  cy.get("#labwareScanInput").type("STAN-013{enter}");
+  cy.get("#labwareScanInput").should("not.be.disabled").type("STAN-011{enter}");
+  cy.get("#labwareScanInput").should("not.be.disabled").type("STAN-012{enter}");
+  cy.get("#labwareScanInput").should("not.be.disabled").type("STAN-013{enter}");
 }
 
 describe("RNA Extraction", () => {
@@ -19,7 +19,7 @@ describe("RNA Extraction", () => {
           graphql.mutation<ExtractMutation, ExtractMutationVariables>(
             "Extract",
             (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     message:
@@ -52,7 +52,6 @@ describe("RNA Extraction", () => {
   context("when extraction is successful", () => {
     before(() => {
       cy.visit("/lab/extraction");
-      cy.wait(2000);
       scanInLabware();
       cy.findByText("Extract").click();
     });

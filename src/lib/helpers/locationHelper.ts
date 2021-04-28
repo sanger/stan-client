@@ -1,5 +1,5 @@
 import { Address, SizeInput } from "../../types/stan";
-import { GridDirection } from "../../types/graphql";
+import { GridDirection } from "../../types/sdk";
 
 /**
  * Convert a StoreLight address into a STAN address

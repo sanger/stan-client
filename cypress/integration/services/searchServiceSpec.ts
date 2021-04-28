@@ -1,7 +1,7 @@
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
 import { sampleFactory } from "../../../src/lib/factories/sampleFactory";
 import { formatFindResult } from "../../../src/lib/services/searchService";
-import { FindQuery, GridDirection } from "../../../src/types/graphql";
+import { FindQuery, GridDirection } from "../../../src/types/sdk";
 import locationFactory from "../../../src/lib/factories/locationFactory";
 import { addressToLocationAddress } from "../../../src/lib/helpers/locationHelper";
 

@@ -14,7 +14,7 @@ import StyledLink from "../../components/StyledLink";
 import ExternalIcon from "../../components/icons/ExternalIcon";
 import PinkButton from "../../components/buttons/PinkButton";
 import WhiteButton from "../../components/buttons/WhiteButton";
-import { RegisterTissuesMutation } from "../../types/graphql";
+import { RegisterTissuesMutation } from "../../types/sdk";
 
 type ClashModalProps = {
   registrationResult: RegisterTissuesMutation;

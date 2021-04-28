@@ -4,7 +4,7 @@ import {
   GetPrintersQueryVariables,
   PrintMutation,
   PrintMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 
 const printers = labwareTypeInstances.reduce<GetPrintersQuery["printers"]>(

@@ -12,12 +12,12 @@ import { SearchResultTableEntry } from "../types/stan";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import Warning from "../components/notifications/Warning";
 import Heading from "../components/Heading";
-import { FindRequest, GetSearchInfoQuery } from "../types/graphql";
+import { FindRequest, GetSearchInfoQuery } from "../types/sdk";
 import { useMachine } from "@xstate/react";
 import searchMachine from "../lib/machines/search/searchMachine";
 import * as Yup from "yup";
-import { history } from "../lib/client";
 import { stringify } from "../lib/helpers";
+import { history } from "../lib/sdk";
 
 const validationSchema: Yup.ObjectSchema = Yup.object()
   .shape({

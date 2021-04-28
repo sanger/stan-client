@@ -1,13 +1,8 @@
-import {
-  FindDocument,
-  FindQuery,
-  FindQueryVariables,
-  FindRequest,
-} from "../../types/graphql";
-import client from "../client";
+import { FindQuery, FindRequest } from "../../types/sdk";
 import { SearchResultsType, SearchResultTableEntry } from "../../types/stan";
 import _ from "lodash";
 import { addressToLocationAddress } from "../helpers/locationHelper";
+import { stanCore } from "../sdk";
 
 /**
  * Do a find query on core. Format the response into a list of table rows
@@ -25,17 +20,11 @@ export async function search(
       .mapValues((value: string) => value.trim())
       .value()
   );
-  const response = await client.query<FindQuery, FindQueryVariables>({
-    query: FindDocument,
-    fetchPolicy: "network-only",
-    variables: {
-      request,
-    },
-  });
+  const response = await stanCore.Find({ request });
   return {
-    numDisplayed: response.data.find.entries.length,
-    numRecords: response.data.find.numRecords,
-    entries: formatFindResult(response.data.find),
+    numDisplayed: response.find.entries.length,
+    numRecords: response.find.numRecords,
+    entries: formatFindResult(response.find),
   };
 }
 

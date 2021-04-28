@@ -15,10 +15,9 @@ import LoginButton from "../components/buttons/LoginButton";
 import Warning from "../components/notifications/Warning";
 import Success from "../components/notifications/Success";
 import Logo from "../components/Logo";
-import { useApolloClient } from "@apollo/client";
-import { useLoginMutation } from "../types/graphql";
 import { motion } from "framer-motion";
-import { LocationState } from "../types/stan";
+import { extractServerErrors, LocationState } from "../types/stan";
+import { StanCoreContext } from "../lib/sdk";
 
 /**
  * Schema used by Formik in the login form.
@@ -40,8 +39,7 @@ const Login = (
     }
   }, [auth, props.location]);
 
-  const [login] = useLoginMutation();
-  const client = useApolloClient();
+  const stanCore = useContext(StanCoreContext);
   const [showLoginSuccess, setShowLoginSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -57,30 +55,19 @@ const Login = (
     try {
       setErrorMessage(null);
 
-      const { data, errors } = await login({
-        variables: {
-          username: credentials.username,
-          password: credentials.password,
-        },
+      const { login } = await stanCore.Login({
+        username: credentials.username,
+        password: credentials.password,
       });
 
-      if (errors) {
-        setErrorMessage(errors.join("\n"));
-        formikHelpers.setSubmitting(false);
-        return;
-      }
-
-      if (!data?.login?.user?.username) {
+      if (!login?.user?.username) {
         setErrorMessage("Username or password is incorrect");
         formikHelpers.setSubmitting(false);
         return;
       }
 
-      // Queries are cached by Apollo into its store so it's important to clear it after login state changes
-      // See https://www.apollographql.com/docs/react/networking/authentication/#reset-store-on-logout
-      await client.clearStore();
       setShowLoginSuccess(true);
-      const userInfo = data.login.user;
+      const userInfo = login.user;
 
       // Allow some time for the user to see the success message before redirecting
       setTimeout(() => {
@@ -88,9 +75,9 @@ const Login = (
           user: userInfo,
         });
         formikHelpers.setSubmitting(false);
-      }, 2500);
+      }, 1500);
     } catch (e) {
-      setErrorMessage(e.message);
+      setErrorMessage(extractServerErrors(e).message);
       formikHelpers.setSubmitting(false);
     }
   };

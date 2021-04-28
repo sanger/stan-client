@@ -3,7 +3,7 @@ import {
   LabwareFieldsFragment,
   Maybe,
   SlotCopyContent,
-} from "../../types/graphql";
+} from "../../types/sdk";
 
 export interface SlotMapperProps {
   /**

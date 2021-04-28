@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Redirect, Route, RouteProps } from "react-router-dom";
 import { authContext } from "../context/AuthContext";
-import { UserRole } from "../types/graphql";
+import { UserRole } from "../types/sdk";
 
 interface AuthenticatedRouteProps extends RouteProps {
   /**

@@ -6,7 +6,7 @@ import {
   LabwareFieldsFragment,
   LabwareTypeFieldsFragment,
   Maybe,
-} from "../types/graphql";
+} from "../types/sdk";
 import { LabwareTypeName } from "../types/stan";
 import { sectioningMachine } from "../lib/machines/sectioning/sectioningMachine";
 import { useMachine } from "@xstate/react";

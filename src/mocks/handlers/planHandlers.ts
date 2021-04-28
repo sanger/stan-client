@@ -4,7 +4,7 @@ import {
   ConfirmMutationVariables,
   PlanMutation,
   PlanMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import labwareFactory from "../../lib/factories/labwareFactory";
 import { uniqueId } from "lodash";

@@ -21,7 +21,7 @@ import {
   safeParseQueryString,
 } from "../lib/helpers";
 import { isLocationSearch, LocationSearchParams } from "../types/stan";
-import { FindRequest, Maybe, UserRole } from "../types/graphql";
+import { FindRequest, Maybe, UserRole } from "../types/sdk";
 import { ParsedQuery } from "query-string";
 import _ from "lodash";
 import Configuration from "../pages/Configuration";

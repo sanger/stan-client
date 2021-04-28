@@ -2,7 +2,7 @@ import {
   SectioningConfirmContext,
   SectioningConfirmEvent,
 } from "./sectioningConfirmTypes";
-import { CancelPlanAction } from "../../../../types/graphql";
+import { CancelPlanAction } from "../../../../types/sdk";
 import { Source } from "../../layout/layoutContext";
 import { find } from "lodash";
 

@@ -1,4 +1,4 @@
-import { Maybe, SlotFieldsFragment } from "../../types/graphql";
+import { Maybe, SlotFieldsFragment } from "../../types/sdk";
 
 /**
  * Find a slot by its address. Throws an error if slot can not be found.

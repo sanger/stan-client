@@ -1,17 +1,16 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import AppShell from "../components/AppShell";
 import { Formik } from "formik";
 import SlideRegistrationForm from "./registration/SlideRegistrationForm";
 import columns from "../components/labwareScanPanel/columns";
 import RegistrationSuccess from "./registration/RegistrationSuccess";
 import Warning from "../components/notifications/Warning";
-import { history } from "../lib/client";
 import {
   GetRegistrationInfoQuery,
   LifeStage,
   RegisterSectionsMutation,
   SectionRegisterRequest,
-} from "../types/graphql";
+} from "../types/sdk";
 import { RouteComponentProps } from "react-router";
 import { LabwareTypeName } from "../types/stan";
 import _, { uniqueId } from "lodash";
@@ -19,8 +18,8 @@ import RegistrationValidation from "../lib/validation/registrationValidation";
 import * as Yup from "yup";
 import { useMachine } from "@xstate/react";
 import createFormMachine from "../lib/machines/form/formMachine";
-import * as registrationService from "../lib/services/registrationService";
 import { parseQueryString } from "../lib/helpers";
+import { history, StanCoreContext } from "../lib/sdk";
 
 const availableSlides: Array<LabwareTypeName> = [
   LabwareTypeName.SLIDE,
@@ -186,6 +185,8 @@ export const SlideRegistration: React.FC<PageParams> = ({
     }
   }, [location]);
 
+  const stanCore = useContext(StanCoreContext);
+
   const [current, send] = useMachine(() =>
     createFormMachine<
       SectionRegisterRequest,
@@ -194,7 +195,7 @@ export const SlideRegistration: React.FC<PageParams> = ({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
-          return registrationService.registerSections(e.values);
+          return stanCore.RegisterSections({ request: e.values });
         },
       },
     })

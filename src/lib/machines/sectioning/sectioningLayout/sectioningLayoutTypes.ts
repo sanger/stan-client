@@ -2,14 +2,13 @@ import {
   LabwareFieldsFragment,
   Maybe,
   PlanMutation,
-  PlanMutationResult,
-} from "../../../../types/graphql";
+} from "../../../../types/sdk";
 import { NewLabwareLayout, ServerErrors } from "../../../../types/stan";
 import { ActorRef, Interpreter } from "xstate";
 import * as Yup from "yup";
 import { LayoutMachineActorRef } from "../../layout";
 import { LayoutPlan } from "../../layout/layoutContext";
-import { ApolloError } from "@apollo/client";
+import { ClientError } from "graphql-request";
 
 export type SectioningLayoutMachineType = Interpreter<
   SectioningLayoutContext,
@@ -126,12 +125,12 @@ type UpdateLayoutPlanEvent = {
 
 export type PlanSectionResolveEvent = {
   type: "done.invoke.planSection";
-  data: PlanMutationResult;
+  data: PlanMutation;
 };
 
 type PlanSectionRejectEvent = {
   type: "error.platform.planSection";
-  data: ApolloError;
+  data: ClientError;
 };
 
 export type LayoutMachineDone = {
@@ -174,7 +173,7 @@ export interface SectioningLayout {
   quantity: number;
 
   /**
-   * The thinkness of each section (slice)
+   * The thickness of each section (slice)
    */
   sectionThickness: number;
 

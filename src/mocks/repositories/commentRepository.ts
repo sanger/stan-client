@@ -1,4 +1,4 @@
-import { CommentFieldsFragment } from "../../types/graphql";
+import { CommentFieldsFragment } from "../../types/sdk";
 import { createSessionStorageRepository } from "./index";
 import commentFactory from "../../lib/factories/commentFactory";
 

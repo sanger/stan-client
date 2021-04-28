@@ -4,7 +4,7 @@ import {
   AddReleaseRecipientMutationVariables,
   SetReleaseRecipientEnabledMutation,
   SetReleaseRecipientEnabledMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import releaseRecipientFactory from "../../lib/factories/releaseRecipientFactory";
 import releaseRecipientRepository from "../repositories/releaseRecipientRepository";
 

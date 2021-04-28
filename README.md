@@ -28,8 +28,6 @@ The architecture of the front-end is split into 4 layers:
 
 - **UI (React)** - The user interface are the pages and components that make up the application. Built with React, they contain no application logic.
 
-- **Presentation Model** - Presentation models are designed to encapsulate UI logic and behaviour e.g. should this “Save” button be enabled right now? Should the Print component be visible? It also handles user interface events that need to be forwarded on to the data model e.g. when the “Confirm” button is clicked, send the `confirmOperation` event to the data model. A presentation model has a one-to-one mapping with a page.
-
 - **Data Model (XState)** - STAN client state management uses [XState](https://xstate.js.org/docs/), a library for building StateCharts.
 
 - **Services** - Services handle all communication between STAN client and STAN core.
@@ -51,7 +49,7 @@ It will also watch for any changes in the GraphQL schema, or in the queries and 
 ### `yarn start:msw`
 
 Runs the app in the development mode with MockServiceWorker enabled (see below).<br />
-Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 There is some special behaviour built in for the labware handlers when using MSW. When searching for a piece of labware by barcode, the number after the `-` will determine the labware type returned. The number following that will determine how many samples will be in each slot of the labware.
 
@@ -84,7 +82,7 @@ When the environment variable `REACT_APP_MOCK_API` is set to `msw`, after the ap
 
 By default, when using `cy.visit()` to visit a page in `cypress`, the user is already logged in. To visit as a guest, use `cy.visitAsGuest()` method.
 
-The default handlers for `msw` are in `/src/mocks/handlers.ts`. There is a hook on the `window` object called `postMSWStart` that allows you to add more handlers before React starts. Look in `cypress/support/commands.ts` to see how this is utilized.
+The default handlers for `msw` are in `/src/mocks/handlers.ts`.
 
 If using IntelliJ, install the [Cypress](https://plugins.jetbrains.com/plugin/13819-cypress-support) plugin to allow running tests inside the IDE.
 

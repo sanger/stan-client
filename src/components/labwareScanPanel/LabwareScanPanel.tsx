@@ -1,5 +1,5 @@
 import React from "react";
-import { LabwareFieldsFragment } from "../../types/graphql";
+import { LabwareFieldsFragment } from "../../types/sdk";
 import { motion } from "framer-motion";
 import { Column, Row } from "react-table";
 import MutedText from "../MutedText";

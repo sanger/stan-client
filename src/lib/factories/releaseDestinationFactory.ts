@@ -1,6 +1,6 @@
 import faker from "faker";
 import { Factory } from "fishery";
-import { ReleaseDestinationFieldsFragment } from "../../types/graphql";
+import { ReleaseDestinationFieldsFragment } from "../../types/sdk";
 
 export default Factory.define<ReleaseDestinationFieldsFragment>(
   ({ params, sequence }) => ({

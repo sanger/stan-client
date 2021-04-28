@@ -2,12 +2,11 @@ import { shouldBehaveLikeARegistrationForm } from "../shared/registration";
 import {
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 
 describe("Slide Registration Page", () => {
   before(() => {
     cy.visit("/admin/slide_registration");
-    cy.wait(2000);
     cy.get("select").select("Slide");
   });
 
@@ -162,7 +161,7 @@ describe("Slide Registration Page", () => {
               RegisterSectionsMutation,
               RegisterSectionsMutationVariables
             >("RegisterSections", (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     extensions: {

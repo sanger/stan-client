@@ -2,7 +2,7 @@ import {
   ConfirmOperationLabware,
   ConfirmOperationRequest,
   Labware,
-} from "../../types/graphql";
+} from "../../types/sdk";
 
 /**
  * Builds an empty {@link ConfirmOperationRequest}

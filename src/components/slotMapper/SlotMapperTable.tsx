@@ -4,7 +4,7 @@ import {
   LabwareFieldsFragment,
   SlotCopyContent,
   SlotFieldsFragment,
-} from "../../types/graphql";
+} from "../../types/sdk";
 
 type SlotMapperTableProps = {
   labware: LabwareFieldsFragment;

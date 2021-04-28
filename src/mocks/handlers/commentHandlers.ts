@@ -4,7 +4,7 @@ import {
   AddCommentMutationVariables,
   SetCommentEnabledMutation,
   SetCommentEnabledMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import commentFactory from "../../lib/factories/commentFactory";
 import commentRepository from "../repositories/commentRepository";
 

@@ -1,6 +1,6 @@
 import { Interpreter, State, StateNode } from "xstate";
-import { LocationFieldsFragment, Maybe } from "../../../types/graphql";
-import { ApolloError } from "@apollo/client";
+import { LocationFieldsFragment, Maybe } from "../../../types/sdk";
+import { ClientError } from "graphql-request";
 import { LocationSearchParams } from "../../../types/stan";
 
 /**
@@ -46,7 +46,7 @@ export interface LocationContext {
   /**
    * Error that's come back from a request to core
    */
-  serverError: Maybe<ApolloError>;
+  serverError: Maybe<ClientError>;
 }
 
 /**
@@ -83,7 +83,7 @@ type FetchLocationResolveEvent = {
 
 type FetchLocationErrorEvent = {
   type: "error.platform.fetchLocation";
-  data: ApolloError;
+  data: ClientError;
 };
 
 type StoreBarcodeEvent = {
@@ -99,7 +99,7 @@ type StoreBarcodeResolveEvent = {
 
 type StoreBarcodeErrorEvent = {
   type: "error.platform.storeBarcode";
-  data: ApolloError;
+  data: ClientError;
 };
 
 type UnstoreBarcodeEvent = {
@@ -114,7 +114,7 @@ type UnstoreBarcodeResolveEvent = {
 
 type UnstoreBarcodeErrorEvent = {
   type: "error.platform.unstoreBarcode";
-  data: ApolloError;
+  data: ClientError;
 };
 
 type EmptyLocationEvent = {
@@ -128,7 +128,7 @@ type EmptyLocationResolveEvent = {
 
 type EmptyLocationErrorEvent = {
   type: "error.platform.emptyLocation";
-  data: ApolloError;
+  data: ClientError;
 };
 
 type UpdateLocationEvent = {
