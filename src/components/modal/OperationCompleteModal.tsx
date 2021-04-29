@@ -29,7 +29,7 @@ type OperationCompleteModalProps = {
 
 /**
  * Specialized modal for display at the end of a process. Gives the option of either
- * resetting the form, or returning to
+ * resetting the form, or returning to the home screen
  */
 export default function OperationCompleteModal({
   children,
