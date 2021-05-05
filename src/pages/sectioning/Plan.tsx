@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import AppShell from "../../components/AppShell";
 import Heading from "../../components/Heading";
 import LabwareScanTable from "../../components/labwareScanPanel/LabwareScanPanel";
@@ -10,13 +10,11 @@ import BlueButton from "../../components/buttons/BlueButton";
 import PinkButton from "../../components/buttons/PinkButton";
 import { useScrollToRef } from "../../lib/hooks";
 import ButtonBar from "../../components/ButtonBar";
-import SectioningPresentationModel from "../../lib/presentationModels/sectioningPresentationModel";
+import LabwareScanner from "../../components/labwareScanner/LabwareScanner";
+import { SectioningPageContext } from "../Sectioning";
 
-interface PlanProps {
-  model: SectioningPresentationModel;
-}
-
-const Plan: React.FC<PlanProps> = ({ model }) => {
+function Plan() {
+  const model = useContext(SectioningPageContext)!;
   const [ref, scrollToRef] = useScrollToRef();
 
   const {
@@ -24,7 +22,7 @@ const Plan: React.FC<PlanProps> = ({ model }) => {
     selectedLabwareType,
     sampleColors,
     sectioningLayouts,
-  } = model.current.context;
+  } = model.context;
 
   return (
     <AppShell>
@@ -35,18 +33,21 @@ const Plan: React.FC<PlanProps> = ({ model }) => {
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
           <div className="space-y-4">
             <Heading level={3}>Source Labware</Heading>
-            <LabwareScanTable
-              locked={model.isLabwareTableLocked()}
+            <LabwareScanner
+              locked={model.isLabwareTableLocked}
               onChange={model.updateLabwares}
-              columns={[
-                labwareScanTableColumns.color(sampleColors),
-                labwareScanTableColumns.barcode(),
-                labwareScanTableColumns.donorId(),
-                labwareScanTableColumns.tissueType(),
-                labwareScanTableColumns.spatialLocation(),
-                labwareScanTableColumns.replicate(),
-              ]}
-            />
+            >
+              <LabwareScanTable
+                columns={[
+                  labwareScanTableColumns.color(sampleColors),
+                  labwareScanTableColumns.barcode(),
+                  labwareScanTableColumns.donorId(),
+                  labwareScanTableColumns.tissueType(),
+                  labwareScanTableColumns.spatialLocation(),
+                  labwareScanTableColumns.replicate(),
+                ]}
+              />
+            </LabwareScanner>
           </div>
 
           <div className="space-y-4">
@@ -93,9 +94,9 @@ const Plan: React.FC<PlanProps> = ({ model }) => {
             </select>
             <BlueButton
               id="#addLabware"
-              disabled={!model.isAddLabwareBtnEnabled()}
+              disabled={!model.isAddLabwareBtnEnabled}
               onClick={(_e) => {
-                if (!model.isStarted()) {
+                if (!model.isStarted) {
                   return;
                 }
                 model.addLabwareLayout();
@@ -112,7 +113,7 @@ const Plan: React.FC<PlanProps> = ({ model }) => {
 
       <ButtonBar>
         <PinkButton
-          disabled={!model.isNextBtnEnabled()}
+          disabled={!model.isNextBtnEnabled}
           onClick={model.prepDone}
           action="primary"
         >
@@ -121,6 +122,6 @@ const Plan: React.FC<PlanProps> = ({ model }) => {
       </ButtonBar>
     </AppShell>
   );
-};
+}
 
 export default Plan;

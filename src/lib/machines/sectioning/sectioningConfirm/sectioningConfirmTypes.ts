@@ -3,8 +3,8 @@ import { LayoutPlan } from "../../layout/layoutContext";
 import {
   Comment,
   ConfirmOperationLabware,
-  LabwareLayoutFragment as LabwareLayout,
-} from "../../../../types/graphql";
+  LabwareFieldsFragment as LabwareLayout,
+} from "../../../../types/sdk";
 import { Address } from "../../../../types/stan";
 
 export type SectioningConfirmMachineType = Interpreter<
@@ -69,11 +69,6 @@ export interface SectioningConfirmContext {
    * Has this labware been cancelled (relevant only for tubes)
    */
   cancelled: boolean;
-
-  /**
-   * Addresses of slots that for some reason couldn't be used
-   */
-  cancelledAddresses: Array<Address>;
 }
 //endregion
 

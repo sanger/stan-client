@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { Authenticated, Unauthenticated } from "./Authenticated";
 import { StanMobileNavLink, StanNavLink } from "./nav";
 import { useOnClickOutside } from "../lib/hooks";
@@ -13,13 +13,20 @@ import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LabwareIcon from "./icons/LabwareIcon";
 import SupportIcon from "./icons/SupportIcon";
+import Warning from "./notifications/Warning";
+import { LocationState } from "../types/stan";
+import Success from "./notifications/Success";
+import { UserRole } from "../types/sdk";
+import { configContext } from "../context/ConfigContext";
 
 interface AppShellParams {
   children?: React.ReactNode | React.ReactNode[];
 }
 
 function AppShell({ children }: AppShellParams) {
+  const config = useContext(configContext);
   const auth = useContext(authContext);
+  const location = useLocation<LocationState>();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const labDropdownRef = useRef<HTMLDivElement>(null);
@@ -62,7 +69,7 @@ function AppShell({ children }: AppShellParams) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="relative bg-gradient-to-tr from-sdb to-sdb-400">
+      <div className={`relative ${config?.headerColor}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center py-4 md:justify-start md:space-x-10">
             <div className="flex justify-start">
@@ -175,6 +182,21 @@ function AppShell({ children }: AppShellParams) {
                                 </p>
                               </div>
                             </NavLink>
+                            <NavLink
+                              to="/lab/visium_cdna"
+                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
+                            >
+                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                              <div className="ml-4">
+                                <p className="text-base font-medium text-gray-900">
+                                  Visium cDNA
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  Transfer cDNA from slides onto a new 96 well
+                                  plate.
+                                </p>
+                              </div>
+                            </NavLink>
                           </div>
                           <div className="px-5 py-5 bg-gray-50 space-y-6 sm:flex sm:space-y-0 sm:space-x-10 sm:px-8" />
                         </div>
@@ -227,11 +249,26 @@ function AppShell({ children }: AppShellParams) {
                               <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                               <div className="ml-4">
                                 <p className="text-base font-medium text-gray-900">
-                                  Registration
+                                  Block Registration
                                 </p>
                                 <p className="mt-1 text-sm text-gray-500">
                                   Register blocks of tissue into STAN and obtain
                                   new barcodes for its labware.
+                                </p>
+                              </div>
+                            </Link>
+                            <Link
+                              to="/admin/slide_registration"
+                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
+                            >
+                              <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                              <div className="ml-4">
+                                <p className="text-base font-medium text-gray-900">
+                                  Slide Registration
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  Register sections of tissue on pre-barcoded
+                                  slides into STAN.
                                 </p>
                               </div>
                             </Link>
@@ -289,7 +326,7 @@ function AppShell({ children }: AppShellParams) {
                   </Unauthenticated>
                   <Authenticated>
                     <span className="inline-flex items-center justify-center h-10 w-10 p-1 rounded-full text-white bg-sp text-xs">
-                      {auth.authState?.userInfo.username}
+                      {auth.authState?.user.username}
                     </span>
                   </Authenticated>
                 </button>
@@ -310,6 +347,15 @@ function AppShell({ children }: AppShellParams) {
                         aria-orientation="vertical"
                         aria-labelledby="user-menu"
                       >
+                        <Authenticated role={UserRole.Admin}>
+                          <Link
+                            to="/config"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            role="menuitem"
+                          >
+                            STAN Configuration
+                          </Link>
+                        </Authenticated>
                         <Authenticated>
                           <Link
                             to="/logout"
@@ -370,6 +416,10 @@ function AppShell({ children }: AppShellParams) {
                       <StanMobileNavLink to="/lab/extraction">
                         RNA Extraction
                       </StanMobileNavLink>
+
+                      <StanMobileNavLink to="/lab/visium_cdna">
+                        Visium cDNA
+                      </StanMobileNavLink>
                     </div>
                   </div>
 
@@ -380,6 +430,14 @@ function AppShell({ children }: AppShellParams) {
                     <div className="grid grid-cols-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/admin/registration">
                         Registration
+                      </StanMobileNavLink>
+
+                      <StanMobileNavLink to="/admin/slide_registration">
+                        Slide Registration
+                      </StanMobileNavLink>
+
+                      <StanMobileNavLink to="/admin/destroy">
+                        Destroy
                       </StanMobileNavLink>
 
                       <StanMobileNavLink to="/admin/release">
@@ -397,7 +455,7 @@ function AppShell({ children }: AppShellParams) {
                   <div className="flex items-center px-5 space-x-3 mb-3">
                     <div className="flex-shrink-0">
                       <span className="inline-flex items-center justify-center h-10 w-10 p-1 rounded-full text-white bg-sp text-xs">
-                        {auth.authState?.userInfo.username}
+                        {auth.authState?.user.username}
                       </span>
                     </div>
 
@@ -406,7 +464,7 @@ function AppShell({ children }: AppShellParams) {
                         Logged In
                       </div>
                       <div className="text-sm font-medium leading-none text-gray-400">
-                        {auth.authState?.userInfo.username}
+                        {auth.authState?.user.username}
                         @sanger.ac.uk
                       </div>
                     </div>
@@ -414,6 +472,15 @@ function AppShell({ children }: AppShellParams) {
                 </Authenticated>
 
                 <div className="px-2 space-y-1 sm:px-3">
+                  <Authenticated role={UserRole.Admin}>
+                    <Link
+                      to="/config"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700"
+                    >
+                      STAN Configuration
+                    </Link>
+                  </Authenticated>
+
                   <Authenticated>
                     <Link
                       to="/logout"
@@ -437,8 +504,73 @@ function AppShell({ children }: AppShellParams) {
           )}
         </AnimatePresence>
       </div>
+      {location.state?.warning && <Warning message={location.state.warning} />}
+      {location.state?.success && <Success message={location.state.success} />}
       {children}
-      <footer className="border border-t-2 border-sdb-100 h-16 flex-shrink-0 bg-sdb-400" />
+      <footer className={`border border-t-2 pt-5 pb-3 flex-shrink-0 ${config?.footerColor}`}>
+        <div className="max-w-sm mx-auto px-4 sm:px-6">
+          <ul className="flex flex-row items-center justify-between my-2 text-xs text-gray-500">
+            <li>
+              <div className="flex flex-row items-center justify-start gap-1">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 inline-block"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M2 5a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm14 1a1 1 0 11-2 0 1 1 0 012 0zM2 13a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2zm14 1a1 1 0 11-2 0 1 1 0 012 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Version{" "}
+                <span className="font-bold">
+                  {process.env.REACT_APP_VERSION}
+                </span>
+              </div>
+            </li>
+            <li>
+              <div className="flex flex-row items-center justify-start gap-1">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 inline-block"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Deployed{" "}
+                <span className="font-bold">{config?.deploymentDate}</span>
+              </div>
+            </li>
+            <li>
+              <a
+                className="flex flex-row items-center justify-start gap-1"
+                href={`mailto:${config?.supportEmail}`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 h-4 inline-block"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                Support
+              </a>
+            </li>
+          </ul>
+          <div className="mx-auto my-2 text-center text-xs font-medium text-gray-500">
+            &copy; {new Date().getFullYear()} Genome Research Ltd.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -5,9 +5,12 @@ config:
   scalars:
     Address: string
     Timestamp: string
+
 generates:
-  src/types/graphql.tsx:
+  src/types/sdk.ts:
     plugins:
       - "typescript"
       - "typescript-operations"
-      - "typescript-react-apollo"
+      - "typescript-graphql-request"
+    config:
+      gqlImport: graphql-request#gql

@@ -24,10 +24,17 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 import { SetupWorkerApi } from "msw/lib/types/setupWorker/setupWorker";
+import { graphql } from "msw";
+import { worker } from "../../src/mocks/mswSetup";
 
 // See https://testing-library.com/docs/cypress-testing-library/intro
 import "@testing-library/cypress/add-commands";
 import { graphqlType } from "../../src/types";
+import {
+  CurrentUserQuery,
+  CurrentUserQueryVariables,
+  UserRole,
+} from "../../src/types/sdk";
 
 interface MSW {
   worker: SetupWorkerApi;
@@ -39,6 +46,7 @@ declare global {
     interface Chainable<Subject> {
       msw(): Chainable<MSW>;
       visitAsGuest(url: string): Chainable<ReturnType<typeof cy.visit>>;
+      visitAsAdmin(url: string): Chainable<ReturnType<typeof cy.visit>>;
       findByTextContent(
         textContent: string
       ): Chainable<ReturnType<typeof cy.findByText>>;
@@ -47,30 +55,51 @@ declare global {
 }
 
 Cypress.Commands.add("msw", () => {
-  return cy
-    .window()
-    .its("msw")
-    .then((msw) => {
-      return {
-        worker: msw.worker,
-        graphql: msw.graphql,
-      };
+  return new Cypress.Promise((resolve) => {
+    resolve({
+      worker,
+      graphql,
     });
+  });
 });
 
 Cypress.Commands.add("visitAsGuest", (url: string) => {
-  cy.on("window:before:load", (window) => {
-    window.postMSWStart = (worker: SetupWorkerApi, graphql: graphqlType) => {
-      worker.use(
-        graphql.query("CurrentUser", (req, res, ctx) => {
-          return res(
+  cy.msw().then(({ worker, graphql }) => {
+    worker.use(
+      graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
+        "CurrentUser",
+        (req, res, ctx) => {
+          return res.once(
             ctx.data({
-              username: null,
+              user: null,
             })
           );
-        })
-      );
-    };
+        }
+      )
+    );
+  });
+
+  return cy.visit(url);
+});
+
+Cypress.Commands.add("visitAsAdmin", (url: string) => {
+  cy.msw().then(({ worker, graphql }) => {
+    worker.use(
+      graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
+        "CurrentUser",
+        (req, res, ctx) => {
+          return res.once(
+            ctx.data({
+              user: {
+                __typename: "User",
+                username: "jb1",
+                role: UserRole.Admin,
+              },
+            })
+          );
+        }
+      )
+    );
   });
 
   return cy.visit(url);

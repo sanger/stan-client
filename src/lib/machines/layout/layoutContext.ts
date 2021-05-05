@@ -1,13 +1,5 @@
-import {
-  LabwareLayoutFragment,
-  Maybe,
-  PlanRequestAction,
-} from "../../../types/graphql";
-import {
-  Address,
-  SourcePlanRequestAction,
-  NewLabwareLayout,
-} from "../../../types/stan";
+import { LabwareFieldsFragment, Maybe } from "../../../types/sdk";
+import { Address, NewLabwareLayout } from "../../../types/stan";
 
 export interface LayoutPlan {
   /**
@@ -27,16 +19,14 @@ export interface LayoutPlan {
 
   /**
    * Map of friendly address to planned source
-   *
-   * NOTE: This will probably need to change to a list of {@link PlanRequestAction}
-   * in the future as each address can actually support multiple samples
    */
-  plannedActions: Map<Address, Source>;
+  plannedActions: Map<Address, Array<Source>>;
 }
 
 export interface Source {
   sampleId: number;
-  labware: LabwareLayoutFragment;
+  labware: LabwareFieldsFragment;
+  newSection?: Maybe<number>;
   address?: Maybe<Address>;
 }
 

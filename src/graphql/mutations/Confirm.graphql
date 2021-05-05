@@ -1,7 +1,7 @@
 mutation Confirm($request: ConfirmOperationRequest!) {
     confirmOperation(request: $request) {
         labware {
-            ...LabwareLayout
+            ...LabwareFields
         }
         operations {
             operationType {

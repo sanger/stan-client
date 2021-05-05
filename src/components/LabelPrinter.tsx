@@ -5,24 +5,24 @@ import LoadingSpinner from "./icons/LoadingSpinner";
 import Success from "./notifications/Success";
 import Warning from "./notifications/Warning";
 import BlueButton from "./buttons/BlueButton";
-import { buildLabelPrinterMachine } from "../lib/factories/machineFactory";
-import { GetPrintersQuery } from "../types/graphql";
-import { PrintableLabware, PrintResultType } from "../types/stan";
+import { LabwareFieldsFragment, PrinterFieldsFragment } from "../types/sdk";
+import { PrintResultType } from "../types/stan";
+import createLabelPrinterMachine from "../lib/machines/labelPrinter/labelPrinterMachine";
 
 interface LabelPrinterProps {
-  labwares: Array<PrintableLabware>;
+  labwares: Array<LabwareFieldsFragment>;
   labelsPerBarcode?: number;
   onPrint?: (
-    printer: GetPrintersQuery["printers"][number],
-    labwares: Array<PrintableLabware>,
+    printer: PrinterFieldsFragment,
+    labwares: Array<LabwareFieldsFragment>,
     labelsPerBarcode: number
   ) => void;
   onPrintError?: (
-    printer: GetPrintersQuery["printers"][number],
-    labwares: Array<PrintableLabware>,
+    printer: PrinterFieldsFragment,
+    labwares: Array<LabwareFieldsFragment>,
     labelsPerBarcode: number
   ) => void;
-  onPrinterChange?: (printer: GetPrintersQuery["printers"][number]) => void;
+  onPrinterChange?: (printer: PrinterFieldsFragment) => void;
   showNotifications?: boolean;
 }
 
@@ -35,11 +35,16 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
   showNotifications = true,
 }) => {
   const [current, send, service] = useMachine(
-    buildLabelPrinterMachine(labwares)
+    createLabelPrinterMachine({
+      context: {
+        selectedPrinter: null,
+        labwares,
+      },
+    })
   );
 
   useEffect(() => {
-    service.onTransition((state) => {
+    const subscription = service.subscribe((state) => {
       if (
         state.context.selectedPrinter &&
         state.matches({ ready: "printSuccess" })
@@ -62,6 +67,8 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
         );
       }
     });
+
+    return () => subscription.unsubscribe();
   }, [service, onPrint, onPrintError, labelsPerBarcode]);
 
   useEffect(() => {
@@ -107,14 +114,14 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
           className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 sm:w-1/2"
           onChange={updateSelectedLabelPrinter}
         >
-          {context?.printers.length > 0 &&
+          {context.printers?.length > 0 &&
             optionValues(context.printers, "name", "name")}
         </select>
 
         <div>
           <BlueButton
             disabled={
-              current.matches("printing") || context?.printers.length === 0
+              current.matches("printing") || context.printers?.length === 0
             }
             onClick={printLabels}
             className="flex flex-row items-center justify-center space-x-1"

@@ -3,10 +3,10 @@ import {
   ConfirmOperationRequest,
   ConfirmOperationResult,
   GetSectioningInfoQuery,
-  Labware,
+  LabwareFieldsFragment,
   LabwareType,
   Maybe,
-} from "../../../types/graphql";
+} from "../../../types/sdk";
 import { Interpreter, State, StateNode } from "xstate";
 import { UpdateLabwaresEvent } from "../labware/labwareMachineTypes";
 import {
@@ -118,7 +118,7 @@ export interface SectioningContext {
   /**
    * The input labwares sent up from the labware machine
    */
-  sourceLabwares: Labware[];
+  sourceLabwares: LabwareFieldsFragment[];
 
   /**
    * Spawned sectioningLayoutMachines. SectioningSchema is synced back to this machine.

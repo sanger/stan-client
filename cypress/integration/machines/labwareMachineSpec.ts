@@ -1,16 +1,18 @@
 import { interpret } from "xstate";
-import { FindLabwareQuery } from "../../../src/types/graphql";
+import { FindLabwareQuery } from "../../../src/types/sdk";
 import { log } from "xstate/lib/actions";
 import { createLabwareMachine } from "../../../src/lib/machines/labware/labwareMachine";
-import { LabwareContext } from "../../../src/lib/machines/labware";
+import { LabwareContext } from "../../../src/lib/machines/labware/labwareMachineTypes";
 
 describe("labwareMachine", () => {
   it("has an initial state of idle.normal", (done) => {
-    const machine = interpret(createLabwareMachine()).onTransition((state) => {
-      if (state.matches("idle.normal")) {
-        done();
+    const machine = interpret(createLabwareMachine([])).onTransition(
+      (state) => {
+        if (state.matches("idle.normal")) {
+          done();
+        }
       }
-    });
+    );
     machine.start();
   });
 
@@ -50,7 +52,7 @@ describe("labwareMachine", () => {
             (state) => {
               if (state.matches("idle.error")) {
                 expect(state.context.errorMessage).to.eq(
-                  '"STAN-123" is already in the table'
+                  '"STAN-123" has already been scanned'
                 );
                 done();
               }
@@ -88,38 +90,51 @@ describe("labwareMachine", () => {
             },
             services: {
               findLabwareByBarcode: (_ctx: LabwareContext) => {
-                return new Promise<FindLabwareQuery["labware"]>((resolve) => {
+                return new Promise<FindLabwareQuery>((resolve) => {
                   resolve({
-                    labwareType: {
-                      name: "Proviasette",
-                    },
-                    barcode: "STAN-123",
-                    slots: [
-                      {
-                        block: true,
-                        address: {
-                          row: 1,
-                          column: 1,
-                        },
-                        samples: [
-                          {
-                            id: 1,
-                            tissue: {
-                              replicate: 5,
-                              donor: {
-                                donorName: "Donor 3",
+                    labware: {
+                      id: 1,
+                      destroyed: false,
+                      discarded: false,
+                      released: false,
+                      __typename: "Labware",
+                      labwareType: {
+                        __typename: "LabwareType",
+                        name: "Proviasette",
+                        numRows: 1,
+                        numColumns: 1,
+                      },
+                      barcode: "STAN-123",
+                      slots: [
+                        {
+                          address: "A1",
+                          labwareId: 1,
+                          samples: [
+                            {
+                              __typename: "Sample",
+                              id: 1,
+                              bioState: {
+                                name: "Blah",
                               },
-                              spatialLocation: {
-                                code: 3,
-                                tissueType: {
-                                  name: "Lung",
+                              tissue: {
+                                __typename: "Tissue",
+                                externalName: "External 1",
+                                replicate: 5,
+                                donor: {
+                                  donorName: "Donor 3",
+                                },
+                                spatialLocation: {
+                                  code: 3,
+                                  tissueType: {
+                                    name: "Lung",
+                                  },
                                 },
                               },
                             },
-                          },
-                        ],
-                      },
-                    ],
+                          ],
+                        },
+                      ],
+                    },
                   });
                 });
               },
@@ -145,14 +160,12 @@ describe("labwareMachine", () => {
           const mockLTMachine = createLabwareMachine().withConfig({
             services: {
               findLabwareByBarcode: (_ctx: LabwareContext) => {
-                return new Promise<FindLabwareQuery["labware"]>(
-                  (_resolve, reject) => {
-                    reject({
-                      message:
-                        "Exception while fetching data (/labware) : No labware found with barcode: STAN-321",
-                    });
-                  }
-                );
+                return new Promise<FindLabwareQuery>((_resolve, reject) => {
+                  reject({
+                    message:
+                      "Exception while fetching data (/labware) : No labware found with barcode: STAN-321",
+                  });
+                });
               },
             },
           });

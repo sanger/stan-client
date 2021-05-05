@@ -1,101 +1,110 @@
-import { MachineConfig, MachineOptions } from "xstate";
-import {
-  ExtractionContext,
-  ExtractionEvent,
-  ExtractionSchema,
-} from "./extractionMachineTypes";
-import * as extractionService from "../../services/extractionService";
+import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
-import { createMachineBuilder } from "../index";
 import { castDraft } from "immer";
+import { ExtractMutation, LabwareFieldsFragment } from "../../../types/sdk";
+import { ClientError } from "graphql-request";
+import { stanCore } from "../../sdk";
 
-/**
- * Extraction Machine Options
- */
-const machineOptions: Partial<MachineOptions<
-  ExtractionContext,
-  ExtractionEvent
->> = {
-  actions: {
-    assignLabwares: assign((ctx, e) => {
-      if (e.type !== "UPDATE_LABWARES") {
-        return;
-      }
-      ctx.labwares = e.labwares;
-    }),
+export interface ExtractionContext {
+  labwares: LabwareFieldsFragment[];
+  extraction?: ExtractMutation;
+  serverErrors?: ClientError;
+}
 
-    assignExtraction: assign((ctx, e) => {
-      if (e.type !== "done.invoke.extract") {
-        return;
-      }
-      ctx.extraction = e.data;
-    }),
-
-    assignServerErrors: assign((ctx, e) => {
-      if (e.type !== "error.platform.extract") {
-        return;
-      }
-      ctx.serverErrors = castDraft(e.data);
-    }),
-  },
-
-  guards: {
-    labwaresNotEmpty: (ctx, _e) => ctx.labwares.length > 0,
-  },
-
-  services: {
-    extract: (ctx, _e) => {
-      return extractionService.extract({
-        labwareType: "Tube",
-        barcodes: ctx.labwares.map((lw) => lw.barcode),
-      });
-    },
-  },
+type UpdateLabwaresEvent = {
+  type: "UPDATE_LABWARES";
+  labwares: LabwareFieldsFragment[];
+};
+type ExtractEvent = { type: "EXTRACT" };
+type ExtractDoneEvent = {
+  type: "done.invoke.extract";
+  data: ExtractMutation;
+};
+type ExtractErrorEvent = {
+  type: "error.platform.extract";
+  data: ClientError;
 };
 
-/**
- * Extraction Machine Config
- */
-export const machineConfig: MachineConfig<
+export type ExtractionEvent =
+  | UpdateLabwaresEvent
+  | ExtractEvent
+  | ExtractDoneEvent
+  | ExtractErrorEvent;
+
+export const extractionMachine = createMachine<
   ExtractionContext,
-  ExtractionSchema,
   ExtractionEvent
-> = {
-  id: "extraction",
-  initial: "ready",
-  states: {
-    ready: {
-      on: {
-        UPDATE_LABWARES: { actions: "assignLabwares" },
-        EXTRACT: { target: "extracting", cond: "labwaresNotEmpty" },
-      },
-    },
-    extracting: {
-      invoke: {
-        src: "extract",
-        onDone: {
-          target: "extracted",
-          actions: "assignExtraction",
-        },
-        onError: {
-          target: "extractionFailed",
-          actions: "assignServerErrors",
+>(
+  {
+    id: "extraction",
+    initial: "ready",
+    states: {
+      ready: {
+        on: {
+          UPDATE_LABWARES: { actions: "assignLabwares" },
+          EXTRACT: { target: "extracting", cond: "labwaresNotEmpty" },
         },
       },
-    },
-    extractionFailed: {
-      on: {
-        EXTRACT: { target: "extracting", cond: "labwaresNotEmpty" },
+      extracting: {
+        invoke: {
+          src: "extract",
+          onDone: {
+            target: "extracted",
+            actions: "assignExtraction",
+          },
+          onError: {
+            target: "extractionFailed",
+            actions: "assignServerErrors",
+          },
+        },
       },
+      extractionFailed: {
+        on: {
+          EXTRACT: { target: "extracting", cond: "labwaresNotEmpty" },
+        },
+      },
+      extracted: {},
     },
-    extracted: {},
   },
-};
+  {
+    actions: {
+      assignLabwares: assign((ctx, e) => {
+        if (e.type !== "UPDATE_LABWARES") {
+          return;
+        }
+        ctx.labwares = e.labwares;
+      }),
 
-const createExtractionMachine = createMachineBuilder<
-  ExtractionContext,
-  ExtractionSchema,
-  ExtractionEvent
->(machineConfig, machineOptions);
+      assignExtraction: assign((ctx, e) => {
+        if (e.type !== "done.invoke.extract") {
+          return;
+        }
+        ctx.extraction = e.data;
+      }),
 
-export default createExtractionMachine;
+      assignServerErrors: assign((ctx, e) => {
+        if (e.type !== "error.platform.extract") {
+          return;
+        }
+        ctx.serverErrors = castDraft(e.data);
+      }),
+    },
+
+    guards: {
+      labwaresNotEmpty: (ctx, _e) => ctx.labwares.length > 0,
+    },
+
+    services: {
+      extract: (ctx, _e) => {
+        return stanCore.Extract({
+          request: {
+            labwareType: "Tube",
+            barcodes: ctx.labwares.map((lw) => lw.barcode),
+          },
+        });
+      },
+    },
+  }
+);
+
+export default extractionMachine;

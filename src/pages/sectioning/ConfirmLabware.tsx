@@ -1,7 +1,7 @@
 import React from "react";
 import { useActor } from "@xstate/react";
 import variants from "../../lib/motionVariants";
-import Labware from "../../components/Labware";
+import Labware from "../../components/labware/Labware";
 import PinkButton from "../../components/buttons/PinkButton";
 import Modal, { ModalBody, ModalFooter } from "../../components/Modal";
 import Heading from "../../components/Heading";
@@ -22,10 +22,11 @@ import {
 } from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmTypes";
 import Label from "../../components/forms/Label";
 import WhiteButton from "../../components/buttons/WhiteButton";
-import { rowMajor } from "../../lib/helpers/labwareHelper";
+import { sortRightDown } from "../../lib/helpers/labwareHelper";
 import { Select } from "../../components/forms/Select";
 import LabwareComments from "./LabwareComments";
 import classNames from "classnames";
+import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from "./index";
 
 interface ConfirmLabwareProps {
   actor: SectioningConfirmActorRef;
@@ -64,17 +65,13 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
       <div className="md:grid md:grid-cols-2">
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
-            onClick={() => send(editLayout())}
             labware={labware}
-            slotText={(slot) =>
-              layoutPlan.plannedActions.get(slot.address)?.labware.barcode
+            onClick={() => send(editLayout())}
+            slotText={(address) => buildSlotText(layoutPlan, address)}
+            slotSecondaryText={(address) =>
+              buildSlotSecondaryText(layoutPlan, address)
             }
-            slotColor={(slot) => {
-              const action = layoutPlan.plannedActions.get(slot.address);
-              if (action) {
-                return layoutPlan.sampleColors.get(action.sampleId);
-              }
-            }}
+            slotColor={(address) => buildSlotColor(layoutPlan, address)}
           />
 
           <PinkButton
@@ -91,8 +88,9 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
 
           <div className="w-full space-y-4">
             <div className={gridClassNames}>
-              {rowMajor(labware.slots).map((slot) => (
+              {sortRightDown(labware.slots).map((slot) => (
                 <LabwareComments
+                  key={slot.address}
                   slot={slot}
                   value={addressToCommentMap.get(slot.address) ?? ""}
                   disabled={current.matches("done")}
@@ -126,10 +124,9 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
             <LayoutPlanner actor={layoutMachine}>
               <div className="my-2">
                 <p className="text-gray-900 text-sm leading-normal">
-                  For any slots that were originally intended to contain
-                  sections, but ultimately remained empty, you can click the
-                  relevant slot to empty it. (You can re-add a sample to an
-                  empty slot by clicking it again).
+                  Click a slot to reduce its number of confirmed sections. (You
+                  can return a slot to its original planned value by clicking it
+                  again once it becomes empty).
                 </p>
               </div>
             </LayoutPlanner>

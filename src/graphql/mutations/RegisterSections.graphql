@@ -1,0 +1,7 @@
+mutation RegisterSections($request: SectionRegisterRequest!) {
+    registerSections(request: $request) {
+        labware {
+            ...LabwareFields
+        }
+    }
+}

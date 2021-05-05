@@ -1,25 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { Route, Switch } from "react-router-dom";
 import AuthenticatedRoute from "./AuthenticatedRoute";
 import Login from "../pages/Login";
-import { getRegistrationMachine } from "../lib/services/registrationService";
-import { getSectioningMachine } from "../lib/services/sectioningService";
-import Presenter from "./Presenter";
-import {
-  buildDestroyPresentationModel,
-  buildExtractionPresentationModel,
-  buildLocationPresentationModel,
-  buildRegistrationPresentationModel,
-  buildReleasePresentationModel,
-  buildSearchPresentationModel,
-  buildSectioningModel,
-} from "../lib/factories/presentationModelFactory";
-import { getLocationMachine } from "../lib/services/locationService";
-import LocationPresentationModel from "../lib/presentationModels/locationPresentationModel";
-import { getReleaseMachine } from "../lib/services/releaseService";
-import { getExtractionMachine } from "../lib/services/extractionService";
-import { getSearchMachine } from "../lib/services/searchService";
-import { getDestroyMachine } from "../lib/services/destroyService";
 import Logout from "../pages/Logout";
 import Location from "../pages/Location";
 import Sectioning from "../pages/Sectioning";
@@ -29,10 +11,25 @@ import Release from "../pages/Release";
 import Store from "../pages/Store";
 import Search from "../pages/Search";
 import Destroy from "../pages/Destroy";
-
-//HYGEN MARKER
+import SlideRegistration from "../pages/SlideRegistration";
+import SlotCopy from "../pages/SlotCopy";
+import { plateFactory } from "../lib/factories/labwareFactory";
+import DataFetcher from "./DataFetcher";
+import {
+  cleanParams,
+  parseQueryString,
+  safeParseQueryString,
+} from "../lib/helpers";
+import { isLocationSearch, LocationSearchParams } from "../types/stan";
+import { FindRequest, Maybe, UserRole } from "../types/sdk";
+import { ParsedQuery } from "query-string";
+import _ from "lodash";
+import Configuration from "../pages/Configuration";
+import { StanCoreContext } from "../lib/sdk";
 
 export function Routes() {
+  const stanCore = useContext(StanCoreContext);
+
   // Hook to remove any location state after it has been consumed for a component.
   // Turns state into "flashes"
   useEffect(() => {
@@ -45,76 +42,166 @@ export function Routes() {
         <Logout />
       </Route>
 
-      <AuthenticatedRoute path="/lab/sectioning">
-        <Presenter machine={getSectioningMachine} model={buildSectioningModel}>
-          {(presentationModel) => <Sectioning model={presentationModel} />}
-        </Presenter>
-      </AuthenticatedRoute>
+      <AuthenticatedRoute
+        path="/lab/sectioning"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetSectioningInfo}
+          >
+            {(sectioningInfo) => <Sectioning sectioningInfo={sectioningInfo} />}
+          </DataFetcher>
+        )}
+      />
 
-      <AuthenticatedRoute path="/lab/extraction">
-        <Presenter
-          machine={getExtractionMachine}
-          model={buildExtractionPresentationModel}
-        >
-          {(presentationModel) => <Extraction model={presentationModel} />}
-        </Presenter>
-      </AuthenticatedRoute>
+      <AuthenticatedRoute
+        path="/lab/extraction"
+        render={() => <Extraction />}
+      />
 
-      <AuthenticatedRoute path="/admin/registration">
-        <Presenter
-          machine={getRegistrationMachine}
-          model={buildRegistrationPresentationModel}
-        >
-          {(presentationModel) => <Registration model={presentationModel} />}
-        </Presenter>
-      </AuthenticatedRoute>
-      <AuthenticatedRoute path="/admin/release">
-        <Presenter
-          machine={getReleaseMachine}
-          model={buildReleasePresentationModel}
-        >
-          {(presentationModel) => <Release model={presentationModel} />}
-        </Presenter>
-      </AuthenticatedRoute>
+      <AuthenticatedRoute
+        path="/lab/visium_cdna"
+        render={() => (
+          <SlotCopy
+            title={"Visium cDNA"}
+            initialOutputLabware={[plateFactory.build()]}
+          />
+        )}
+      />
+
+      <AuthenticatedRoute
+        path="/admin/registration"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetRegistrationInfo}
+          >
+            {(registrationInfo) => (
+              <Registration registrationInfo={registrationInfo} />
+            )}
+          </DataFetcher>
+        )}
+      />
+
+      <AuthenticatedRoute
+        path="/admin/slide_registration"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetRegistrationInfo}
+          >
+            {(registrationInfo) => (
+              <SlideRegistration
+                registrationInfo={registrationInfo}
+                {...routeProps}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+
+      <AuthenticatedRoute
+        path="/admin/release"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetReleaseInfo}
+          >
+            {(releaseInfo) => <Release releaseInfo={releaseInfo} />}
+          </DataFetcher>
+        )}
+      />
 
       <Route
         path="/locations/:locationBarcode"
-        render={(routeProps) => (
-          <Presenter
-            key={routeProps.location.key}
-            machine={() => getLocationMachine(routeProps)}
-            model={buildLocationPresentationModel}
-          >
-            {(presentationModel: LocationPresentationModel) => (
-              <Location model={presentationModel} {...routeProps} />
-            )}
-          </Presenter>
-        )}
+        render={(routeProps) => {
+          let locationSearch: Maybe<LocationSearchParams> = null;
+
+          return (
+            <DataFetcher
+              key={routeProps.location.key}
+              dataFetcher={() => {
+                if (routeProps.location.search) {
+                  locationSearch = safeParseQueryString<LocationSearchParams>(
+                    routeProps.location.search,
+                    isLocationSearch
+                  );
+                }
+
+                return stanCore
+                  .FindLocationByBarcode({
+                    barcode: routeProps.match.params.locationBarcode,
+                  })
+                  .then((res) => res.location);
+              }}
+            >
+              {(location) => (
+                <Location
+                  storageLocation={location}
+                  locationSearchParams={locationSearch}
+                  {...routeProps}
+                />
+              )}
+            </DataFetcher>
+          );
+        }}
       />
 
       <Route path="/locations" component={Store} />
       <Route path="/store" component={Store} />
       <Route path="/login" component={Login} />
 
-      <AuthenticatedRoute path="/admin/destroy">
-        <Presenter
-          machine={getDestroyMachine}
-          model={buildDestroyPresentationModel}
-        >
-          {(model) => <Destroy model={model} />}
-        </Presenter>
-      </AuthenticatedRoute>
+      <AuthenticatedRoute
+        path="/admin/destroy"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetDestroyInfo}
+          >
+            {(destroyInfo) => <Destroy destroyInfo={destroyInfo} />}
+          </DataFetcher>
+        )}
+      />
+
+      <AuthenticatedRoute
+        path="/config"
+        role={UserRole.Admin}
+        render={() => (
+          <DataFetcher dataFetcher={stanCore.GetConfiguration}>
+            {(configuration) => <Configuration configuration={configuration} />}
+          </DataFetcher>
+        )}
+      />
 
       <Route
         path={["/", "/search"]}
-        render={(routeProps) => (
-          <Presenter
-            machine={() => getSearchMachine(routeProps)}
-            model={buildSearchPresentationModel}
-          >
-            {(model) => <Search model={model} />}
-          </Presenter>
-        )}
+        render={(routeProps) => {
+          const params: ParsedQuery = parseQueryString(
+            routeProps.location.search
+          );
+          const findRequestKeys: (keyof FindRequest)[] = [
+            "labwareBarcode",
+            "tissueExternalName",
+            "donorName",
+            "tissueType",
+          ];
+          const findRequest: FindRequest = _.merge(
+            {
+              labwareBarcode: "",
+              tissueExternalName: "",
+              donorName: "",
+              tissueType: "",
+            },
+            cleanParams(params, findRequestKeys)
+          );
+          return (
+            <DataFetcher dataFetcher={stanCore.GetSearchInfo}>
+              {(searchInfo) => (
+                <Search searchInfo={searchInfo} findRequest={findRequest} />
+              )}
+            </DataFetcher>
+          );
+        }}
       />
     </Switch>
   );

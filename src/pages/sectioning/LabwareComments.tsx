@@ -2,11 +2,11 @@ import React, { ChangeEvent } from "react";
 import MutedText from "../../components/MutedText";
 import { Select } from "../../components/forms/Select";
 import { optionValues } from "../../components/forms";
-import { Comment, LabwareLayoutFragment } from "../../types/graphql";
+import { Comment, LabwareFieldsFragment } from "../../types/sdk";
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 
 interface LabwareCommentsProps {
-  slot: LabwareLayoutFragment["slots"][number];
+  slot: LabwareFieldsFragment["slots"][number];
   layoutPlan: LayoutPlan;
   comments: Array<Comment>;
   value: string | number | undefined;

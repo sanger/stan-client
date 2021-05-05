@@ -6,7 +6,7 @@ import Modal, {
 } from "../../components/Modal";
 import PinkButton from "../../components/buttons/PinkButton";
 import WhiteButton from "../../components/buttons/WhiteButton";
-import { FindLocationByBarcodeQuery } from "../../types/graphql";
+import { FindLocationByBarcodeQuery } from "../../types/sdk";
 
 interface UnstoreBarcodeModalProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ const UnstoreBarcodeModal: React.FC<UnstoreBarcodeModalProps> = ({
           Are you sure you want to remove{" "}
           <span className="font-semibold">{barcode}</span> from{" "}
           <span className="font-semibold">
-            {location.customName || location.name || location.barcode}
+            {location.customName || location.fixedName || location.barcode}
           </span>
           ?
         </p>

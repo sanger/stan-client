@@ -32,7 +32,7 @@ query Find($request: FindRequest!) {
             id
             barcode
             customName
-            name
+            fixedName
             direction
             size {
                 numRows

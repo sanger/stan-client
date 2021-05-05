@@ -1,58 +1,8 @@
-import {
-  FindDocument,
-  FindQuery,
-  FindQueryVariables,
-  FindRequest,
-  GetSearchInfoDocument,
-  GetSearchInfoQuery,
-} from "../../types/graphql";
-import client from "../client";
+import { FindQuery, FindRequest } from "../../types/sdk";
 import { SearchResultsType, SearchResultTableEntry } from "../../types/stan";
-import { SearchMachine } from "../machines/search/searchMachineTypes";
-import { buildSearchMachine } from "../factories/machineFactory";
-import { RouteComponentProps } from "react-router-dom";
-import { cleanParams, parseQueryString } from "../helpers";
-import { ParsedQuery } from "query-string";
 import _ from "lodash";
 import { addressToLocationAddress } from "../helpers/locationHelper";
-
-const findRequestKeys: (keyof FindRequest)[] = [
-  "labwareBarcode",
-  "tissueExternalName",
-  "donorName",
-  "tissueType",
-];
-
-export async function getSearchMachine(
-  routeProps: RouteComponentProps
-): Promise<SearchMachine> {
-  const searchInfo = await getSearchInfo();
-  const params: ParsedQuery = parseQueryString(routeProps.location.search);
-  const findRequest: FindRequest = _.merge(
-    buildFindRequestInitialValues(),
-    cleanParams(params, findRequestKeys)
-  );
-  return buildSearchMachine(searchInfo, findRequest);
-}
-
-function buildFindRequestInitialValues(): FindRequest {
-  return {
-    labwareBarcode: "",
-    tissueExternalName: "",
-    donorName: "",
-    tissueType: "",
-  };
-}
-
-/**
- * Fetch data necessary for the Search page
- */
-export async function getSearchInfo(): Promise<GetSearchInfoQuery> {
-  const response = await client.query<GetSearchInfoQuery>({
-    query: GetSearchInfoDocument,
-  });
-  return response.data;
-}
+import { stanCore } from "../sdk";
 
 /**
  * Do a find query on core. Format the response into a list of table rows
@@ -70,17 +20,11 @@ export async function search(
       .mapValues((value: string) => value.trim())
       .value()
   );
-  const response = await client.query<FindQuery, FindQueryVariables>({
-    query: FindDocument,
-    fetchPolicy: "network-only",
-    variables: {
-      request,
-    },
-  });
+  const response = await stanCore.Find({ request });
   return {
-    numDisplayed: response.data.find.entries.length,
-    numRecords: response.data.find.numRecords,
-    entries: formatFindResult(response.data.find),
+    numDisplayed: response.find.entries.length,
+    numRecords: response.find.numRecords,
+    entries: formatFindResult(response.find),
   };
 }
 
@@ -135,7 +79,7 @@ export function formatFindResult(
           : {
               barcode: location.barcode,
               displayName:
-                location.customName ?? location.name ?? location.barcode,
+                location.customName ?? location.fixedName ?? location.barcode,
               address:
                 labwareLocation?.address &&
                 location?.direction &&

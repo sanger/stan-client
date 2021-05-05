@@ -16,10 +16,10 @@ To install the dependencies for the project, you can run:
 
 ### `yarn`
 
-In order for `graphql-codegen` to generate TypeScript types to match the GraphQL schema, create a `.env.local` file in the root of the project and include the property `GRAPHQL_SCHEMA_LOCATION`:
+In order for `graphql-codegen` to generate TypeScript types to match the GraphQL schema, create a `.env.local` file in the root of the project and include the property `GRAPHQL_SCHEMA_PATH`:
 
     // .env.local
-    GRAPHQL_SCHEMA_LOCATION=/path/to/schema.graphqls
+    GRAPHQL_SCHEMA_PATH=/path/to/schema.graphqls
 
 ## Front-end Architecture
 The architecture of the front-end is split into 4 layers:
@@ -27,8 +27,6 @@ The architecture of the front-end is split into 4 layers:
 ![Front-end Architecture](public/frontend_architecture.png)
 
 - **UI (React)** - The user interface are the pages and components that make up the application. Built with React, they contain no application logic.
-
-- **Presentation Model** - Presentation models are designed to encapsulate UI logic and behaviour e.g. should this “Save” button be enabled right now? Should the Print component be visible? It also handles user interface events that need to be forwarded on to the data model e.g. when the “Confirm” button is clicked, send the `confirmOperation` event to the data model. A presentation model has a one-to-one mapping with a page.
 
 - **Data Model (XState)** - STAN client state management uses [XState](https://xstate.js.org/docs/), a library for building StateCharts.
 
@@ -51,7 +49,18 @@ It will also watch for any changes in the GraphQL schema, or in the queries and 
 ### `yarn start:msw`
 
 Runs the app in the development mode with MockServiceWorker enabled (see below).<br />
-Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+There is some special behaviour built in for the labware handlers when using MSW. When searching for a piece of labware by barcode, the number after the `-` will determine the labware type returned. The number following that will determine how many samples will be in each slot of the labware.
+
+The current list of labware types and their order can be found in the `labwareTypeFactory.ts`.
+
+Examples:
+
+```
+STAN-1111 // Proviasette (1) with 1 sample in each slot
+STAN-4089 // Visium LP (4) with 0 samples in each slot
+```
 
 ### `yarn codegen`
 
@@ -73,13 +82,17 @@ When the environment variable `REACT_APP_MOCK_API` is set to `msw`, after the ap
 
 By default, when using `cy.visit()` to visit a page in `cypress`, the user is already logged in. To visit as a guest, use `cy.visitAsGuest()` method.
 
-The default handlers for `msw` are in `/src/mocks/handlers.ts`. There is a hook on the `window` object called `postMSWStart` that allows you to add more handlers before React starts. Look in `cypress/support/commands.ts` to see how this is utilized.
+The default handlers for `msw` are in `/src/mocks/handlers.ts`.
 
 If using IntelliJ, install the [Cypress](https://plugins.jetbrains.com/plugin/13819-cypress-support) plugin to allow running tests inside the IDE.
 
 ### `yarn test`
 
 Does the same as `yarn test:open` but runs all `cypress` tests on the command line, instead of using its launcher.
+
+### `yarn storybook`
+
+Runs [Storybook](https://storybook.js.org/docs/react/get-started/introduction). The development server will need to be simultaneously running in a separate process to build the CSS.
 
 ### `yarn build`
 

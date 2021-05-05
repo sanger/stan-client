@@ -18,11 +18,7 @@ enableAllPlugins();
 async function prepare() {
   if (process.env.REACT_APP_MOCK_API === "msw") {
     const { worker } = require("./mocks/mswSetup");
-    const { graphql } = require("msw");
     await worker.start();
-    if (window.postMSWStart) {
-      window.postMSWStart(worker, graphql);
-    }
   }
 }
 

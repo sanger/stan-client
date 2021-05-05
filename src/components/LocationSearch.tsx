@@ -1,8 +1,8 @@
 import React from "react";
-import ScanInput from "./ScanInput";
-import { history } from "../lib/client";
+import ScanInput from "./scanInput/ScanInput";
 import LabwareIcon from "./icons/LabwareIcon";
 import LocationIcon from "./icons/LocationIcon";
+import { history } from "../lib/sdk";
 
 const LocationSearch: React.FC = () => {
   return (

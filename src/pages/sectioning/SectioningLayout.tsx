@@ -7,7 +7,7 @@ import Modal, { ModalBody, ModalFooter } from "../../components/Modal";
 import BlueButton from "../../components/buttons/BlueButton";
 import Heading from "../../components/Heading";
 import LayoutPlanner from "../../components/LayoutPlanner";
-import Labware from "../../components/Labware";
+import Labware from "../../components/labware/Labware";
 import { motion } from "framer-motion";
 import variants from "../../lib/motionVariants";
 import Warning from "../../components/notifications/Warning";
@@ -16,7 +16,7 @@ import {
   editLayout,
   updateSectioningLayout,
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
-import { LabwareTypeName, PrintableLabware } from "../../types/stan";
+import { LabwareTypeName } from "../../types/stan";
 import LabelPrinter, { PrintResult } from "../../components/LabelPrinter";
 import LabelPrinterButton from "../../components/LabelPrinterButton";
 import { cancel, done } from "../../lib/machines/layout/layoutEvents";
@@ -27,10 +27,11 @@ import {
 } from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
 import DataTable from "../../components/DataTable";
 import { CellProps, Column, Row } from "react-table";
-import { LabwareLayoutFragment } from "../../types/graphql";
+import { LabwareFieldsFragment } from "../../types/sdk";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { Input } from "../../components/forms/Input";
 import { usePrinters } from "../../lib/hooks";
+import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from "./index";
 
 interface SectioningLayoutProps {
   /**
@@ -72,26 +73,44 @@ const SectioningLayout = React.forwardRef<
   const { layoutMachine } = current.children;
 
   // Special kind of column for displaying the sectioning numbers given from a planned operation
-  const sectionsColumn: Column<LabwareLayoutFragment> = React.useMemo(() => {
+  const sectionsColumn: Column<LabwareFieldsFragment> = React.useMemo(() => {
     return {
       Header: "Section Number",
       id: "sections",
-      Cell: ({ row }: { row: Row<LabwareLayoutFragment> }) => {
+      Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
         return plannedOperations.map((operation, j) => {
-          const newSections = operation.planActions
+          const addressToSectionsMap: Map<
+            string,
+            Array<number | null | undefined>
+          > = operation.planActions
             .filter(
               (action) => action.destination.labwareId === row.original.id
             )
-            .map((action, i) => {
-              return (
-                <li key={i} className="text-sm">
-                  <span className="font-semibold">
-                    {action.destination.address}
-                  </span>{" "}
-                  <span className="">{action.newSection}</span>
-                </li>
-              );
-            });
+            .reduce((memo, planAction) => {
+              const addressSections = memo.get(planAction.destination.address);
+              if (!addressSections) {
+                memo.set(planAction.destination.address, [
+                  planAction.newSection,
+                ]);
+              } else {
+                memo.set(planAction.destination.address, [
+                  ...addressSections,
+                  planAction.newSection,
+                ]);
+              }
+              return memo;
+            }, new Map());
+
+          const newSections = Array.from(addressToSectionsMap.keys())
+            .sort()
+            .map((address) => (
+              <li key={address} className="text-sm">
+                <span className="font-semibold">{address}</span>{" "}
+                <span className="">
+                  {addressToSectionsMap.get(address)?.join(", ")}
+                </span>
+              </li>
+            ));
 
           return <ul key={j}>{newSections}</ul>;
         });
@@ -103,7 +122,7 @@ const SectioningLayout = React.forwardRef<
   const printColumn = {
     id: "printer",
     Header: "",
-    Cell: (props: CellProps<PrintableLabware>) => (
+    Cell: (props: CellProps<LabwareFieldsFragment>) => (
       <LabelPrinterButton
         labwares={[props.row.original]}
         selectedPrinter={currentPrinter}
@@ -130,17 +149,14 @@ const SectioningLayout = React.forwardRef<
       <div className="md:grid md:grid-cols-2">
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
-            onClick={() => send(editLayout())}
             labware={sectioningLayout.destinationLabware}
-            slotText={(slot) =>
-              layoutPlan.plannedActions.get(slot.address)?.labware.barcode
+            onClick={() => send(editLayout())}
+            name={sectioningLayout.destinationLabware.labwareType.name}
+            slotText={(address) => buildSlotText(layoutPlan, address)}
+            slotSecondaryText={(address) =>
+              buildSlotSecondaryText(layoutPlan, address)
             }
-            slotColor={(slot) => {
-              const action = layoutPlan.plannedActions.get(slot.address);
-              if (action) {
-                return layoutPlan.sampleColors.get(action.sampleId);
-              }
-            }}
+            slotColor={(address) => buildSlotColor(layoutPlan, address)}
           />
 
           {current.matches("prep") && (
@@ -209,6 +225,7 @@ const SectioningLayout = React.forwardRef<
             )}
 
             <Label name={"Section Thickness"}>
+              {/* When the section thickness is 0, input should be empty */}
               <Input
                 disabled={
                   current.matches("printing") || current.matches("done")
@@ -216,7 +233,11 @@ const SectioningLayout = React.forwardRef<
                 type={"number"}
                 min={1}
                 step={1}
-                value={sectioningLayout.sectionThickness}
+                value={
+                  sectioningLayout.sectionThickness === 0
+                    ? ""
+                    : sectioningLayout.sectionThickness
+                }
                 onChange={(e) => {
                   send(
                     updateSectioningLayout({
@@ -265,7 +286,23 @@ const SectioningLayout = React.forwardRef<
       <Modal show={current.matches("editingLayout")}>
         <ModalBody>
           <Heading level={3}>Set Layout</Heading>
-          {layoutMachine && <LayoutPlanner actor={layoutMachine} />}
+          {layoutMachine && (
+            <LayoutPlanner actor={layoutMachine}>
+              <div className="my-2">
+                <p className="text-gray-900 text-sm leading-normal">
+                  To add sections to a slot, select a source for the buttons on
+                  the right, and then click a destination slot. Multiple
+                  sections may be added to a slot by clicking it multiple times.
+                </p>
+
+                <p className="mt-3 text-gray-900 text-sm leading-normal">
+                  To remove all sections from a slot, first deselect any
+                  selected sources by clicking on it, then select the
+                  destination slot to empty it.
+                </p>
+              </div>
+            </LayoutPlanner>
+          )}
         </ModalBody>
         <ModalFooter>
           <BlueButton

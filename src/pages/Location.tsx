@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import AppShell from "../components/AppShell";
 import LocationSearch from "../components/LocationSearch";
 import StripyCard, { StripyCardDetail } from "../components/StripyCard";
@@ -24,9 +24,13 @@ import Warning from "../components/notifications/Warning";
 import { toast } from "react-toastify";
 import { addressToLocationAddress } from "../lib/helpers/locationHelper";
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
-import LocationPresentationModel from "../lib/presentationModels/locationPresentationModel";
 import { RouteComponentProps } from "react-router-dom";
-import { LocationMatchParams } from "../types/stan";
+import { LocationMatchParams, LocationSearchParams } from "../types/stan";
+import { LocationFieldsFragment, Maybe } from "../types/sdk";
+import { useMachine } from "@xstate/react";
+import { buildAddresses } from "../lib/helpers";
+import { StoredItemFragment } from "../lib/machines/locations/locationMachineTypes";
+import createLocationMachine from "../lib/machines/locations/locationMachine";
 
 /**
  * The different ways of displaying stored items
@@ -36,18 +40,73 @@ enum ViewType {
   LIST,
 }
 
-export const ModelContext = React.createContext<
-  LocationPresentationModel | undefined
->(undefined);
+type LocationParentContextType = {
+  location: LocationFieldsFragment;
+  addressToItemMap: Map<string, Maybe<StoredItemFragment>>;
+  storeBarcode: (barcode: string, address?: string) => void;
+  unstoreBarcode: (barcode: string) => void;
+  selectedAddress: Maybe<string>;
+  setSelectedAddress: (address: string) => void;
+  labwareBarcodeToAddressMap: Map<string, string>;
+};
+
+export const LocationParentContext = React.createContext<
+  Maybe<LocationParentContextType>
+>(null);
 
 interface LocationProps extends RouteComponentProps<LocationMatchParams> {
-  model: LocationPresentationModel;
+  storageLocation: LocationFieldsFragment;
+  locationSearchParams: Maybe<LocationSearchParams>;
 }
 
-const Location: React.FC<LocationProps> = ({ model, match }) => {
-  const { location, successMessage, errorMessage } = model.context;
+const Location: React.FC<LocationProps> = ({
+  storageLocation,
+  locationSearchParams,
+  match,
+}) => {
+  const [current, send] = useMachine(() => {
+    // Create all the possible addresses for this location if it has a size.
+    const locationAddresses =
+      storageLocation.size && storageLocation.direction
+        ? buildAddresses(storageLocation.size, storageLocation.direction)
+        : [];
 
-  const locationHasGrid = model.locationHasGrid;
+    // Create a map of location addresses to items (or null if empty)
+    const addressToItemMap = new Map<string, Maybe<StoredItemFragment>>(
+      locationAddresses.map((address) => [
+        address,
+        storageLocation.stored.find((item) => item.address === address) ?? null,
+      ])
+    );
+
+    // Get the first selected address (which is the first empty address)
+    const selectedAddress =
+      locationAddresses.find(
+        (address) => addressToItemMap.get(address) == null
+      ) ?? null;
+
+    return createLocationMachine({
+      context: {
+        location: storageLocation,
+        locationSearchParams,
+        locationAddresses,
+        addressToItemMap,
+        selectedAddress,
+      },
+    });
+  });
+
+  const {
+    location,
+    successMessage,
+    errorMessage,
+    serverError,
+    addressToItemMap,
+    selectedAddress,
+  } = current.context;
+
+  const locationHasGrid = !!location.size;
+
   /**
    * Should the page be displaying the grid or list view of the items
    */
@@ -63,7 +122,6 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
   /**
    * Show a toast notification when success message changes (and isn't null)
    */
-
   useEffect(() => {
     if (successMessage) {
       const SuccessToast = () => {
@@ -84,7 +142,7 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
   useEffect(() => {
     if (errorMessage) {
       const WarningToast = () => (
-        <Warning message={errorMessage} error={model.context.serverError} />
+        <Warning message={errorMessage} error={serverError} />
       );
 
       toast(<WarningToast />, {
@@ -93,7 +151,7 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
         hideProgressBar: true,
       });
     }
-  }, [errorMessage, model.context.serverError]);
+  }, [errorMessage, serverError]);
 
   /**
    * Event handler for the editable custom name
@@ -105,12 +163,50 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
         location.barcode,
         newCustomName
       );
-      model.updateLocation(updatedLocation);
+      send({ type: "UPDATE_LOCATION", location: updatedLocation });
       return newCustomName;
     } catch (e) {
       throw new Error("Failed to update Location");
     }
   };
+
+  const labwareBarcodeToAddressMap: Map<string, string> = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const item of location.stored) {
+      if (
+        item.address &&
+        item.barcode === locationSearchParams?.labwareBarcode
+      ) {
+        map.set(item.barcode, item.address);
+      }
+    }
+    return map;
+  }, [location, locationSearchParams?.labwareBarcode]);
+
+  const locationParentContext: LocationParentContextType = useMemo(
+    () => ({
+      addressToItemMap,
+      location,
+      labwareBarcodeToAddressMap,
+      selectedAddress,
+      storeBarcode: (barcode, address) =>
+        send({ type: "STORE_BARCODE", barcode, address }),
+      unstoreBarcode: (barcode) => send({ type: "UNSTORE_BARCODE", barcode }),
+      setSelectedAddress: (address) =>
+        send({ type: "SET_SELECTED_ADDRESS", address }),
+    }),
+    [
+      addressToItemMap,
+      location,
+      labwareBarcodeToAddressMap,
+      selectedAddress,
+      send,
+    ]
+  );
+
+  const showLocation =
+    ["ready", "updating"].some((activeState) => current.matches(activeState)) &&
+    !!location;
 
   return (
     <AppShell>
@@ -119,8 +215,8 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          {model.labwareBarcodeToAddressMap &&
-            Array.from(model.labwareBarcodeToAddressMap.keys()).map(
+          {labwareBarcodeToAddressMap &&
+            Array.from(labwareBarcodeToAddressMap.keys()).map(
               (labwareBarcode) => (
                 <Success
                   className="mb-5"
@@ -132,19 +228,17 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
                   <span className="font-bold">
                     {location.size && location.direction
                       ? addressToLocationAddress(
-                          model.labwareBarcodeToAddressMap.get(
-                            labwareBarcode
-                          ) ?? "",
+                          labwareBarcodeToAddressMap.get(labwareBarcode) ?? "",
                           location.size,
                           location.direction
                         )
-                      : model.labwareBarcodeToAddressMap.get(labwareBarcode)}
+                      : labwareBarcodeToAddressMap.get(labwareBarcode)}
                   </span>
                 </Success>
               )
             )}
 
-          {model.showWarning() && (
+          {current.matches("notFound") && (
             <Warning
               message={`Location ${match.params.locationBarcode} could not be found`}
             />
@@ -152,7 +246,7 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
 
           <LocationSearch />
 
-          {model.showLocation() && (
+          {showLocation && (
             <>
               <StripyCard
                 heading={
@@ -175,7 +269,7 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
                 description={location.barcode}
               >
                 <StripyCardDetail term={"Name"}>
-                  {location.name ?? <span className="italic">None</span>}
+                  {location.fixedName ?? <span className="italic">None</span>}
                 </StripyCardDetail>
 
                 {location.parent && (
@@ -206,7 +300,9 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
                         return (
                           <li key={child.barcode}>
                             <StyledLink to={`/locations/${child.barcode}`}>
-                              {child.customName ?? child.name ?? child.barcode}
+                              {child.customName ??
+                                child.fixedName ??
+                                child.barcode}
                             </StyledLink>
                           </li>
                         );
@@ -268,14 +364,14 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
                     )}
                   </Heading>
 
-                  <ModelContext.Provider value={model}>
+                  <LocationParentContext.Provider value={locationParentContext}>
                     {currentViewType === ViewType.LIST && (
                       <ItemsList freeformAddress={!locationHasGrid} />
                     )}
                     {locationHasGrid && currentViewType === ViewType.GRID && (
                       <ItemsGrid />
                     )}
-                  </ModelContext.Provider>
+                  </LocationParentContext.Provider>
 
                   <Authenticated>
                     <div className="my-5 flex flex-row items-center justify-end">
@@ -294,7 +390,7 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
                           Are you sure you want to remove all labware from{" "}
                           <span className="font-semibold">
                             {location.customName ??
-                              location.name ??
+                              location.fixedName ??
                               location.barcode}
                           </span>
                           ?
@@ -304,7 +400,7 @@ const Location: React.FC<LocationProps> = ({ model, match }) => {
                         <PinkButton
                           className="sm:ml-3"
                           onClick={() => {
-                            model.emptyLocation();
+                            send({ type: "EMPTY_LOCATION" });
                             setEmptyLocationModalOpen(false);
                           }}
                         >

@@ -9,10 +9,11 @@ import {
   StoredItemFragment,
 } from "./locationMachineTypes";
 import * as locationService from "../../services/locationService";
-import { Maybe } from "../../../types/graphql";
+import { Maybe } from "../../../types/sdk";
 import { MachineConfig } from "xstate/lib/types";
 import { createMachineBuilder } from "../index";
 import { castDraft } from "immer";
+import { stanCore } from "../../sdk";
 
 enum Action {
   ASSIGN_LOCATION = "assignLocation",
@@ -132,9 +133,7 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "FETCH_LOCATION") {
         return Promise.reject();
       }
-      return locationService.findLocationByBarcode(e.barcode, {
-        fetchPolicy: "network-only",
-      });
+      return stanCore.FindLocationByBarcode({ barcode: e.barcode });
     },
 
     [Service.STORE_BARCODE]: (ctx, e) => {
@@ -149,9 +148,9 @@ export const machineOptions: Partial<MachineOptions<
         return Promise.reject();
       }
       await locationService.unstoreBarcode(e.barcode);
-      return locationService.findLocationByBarcode(ctx.location.barcode, {
-        fetchPolicy: "network-only",
-      });
+      return stanCore
+        .FindLocationByBarcode({ barcode: ctx.location.barcode })
+        .then((res) => res.location);
     },
 
     [Service.EMPTY_LOCATION]: (ctx, _e) =>

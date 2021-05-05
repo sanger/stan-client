@@ -1,5 +1,5 @@
 import { graphql } from "msw";
-import { ExtractMutation, ExtractMutationVariables } from "../../types/graphql";
+import { ExtractMutation, ExtractMutationVariables } from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import labwareFactory from "../../lib/factories/labwareFactory";
 

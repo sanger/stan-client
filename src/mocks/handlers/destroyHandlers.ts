@@ -4,7 +4,8 @@ import {
   DestroyMutationVariables,
   GetDestroyInfoQuery,
   GetDestroyInfoQueryVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
+import destructionReasonRepository from "../repositories/destructionReasonRepository";
 
 const destroyHandlers = [
   graphql.query<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>(
@@ -12,11 +13,9 @@ const destroyHandlers = [
     (req, res, ctx) => {
       return res(
         ctx.data({
-          destructionReasons: [
-            { id: 1, text: "No tissue remaining in block." },
-            { id: 2, text: "Operator error." },
-            { id: 3, text: "Experiment complete." },
-          ],
+          destructionReasons: destructionReasonRepository
+            .findAll()
+            .filter((dr) => dr.enabled),
         })
       );
     }

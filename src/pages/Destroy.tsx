@@ -1,14 +1,89 @@
-import React from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import AppShell from "../components/AppShell";
-import DestroyPresentationModel from "../lib/presentationModels/destroyPresentationModel";
-import { Formik } from "formik";
-import DestroyForm from "./destroy/DestroyForm";
+import { Form, Formik } from "formik";
+import {
+  DestroyMutation,
+  DestroyRequest,
+  GetDestroyInfoQuery,
+} from "../types/sdk";
+import * as Yup from "yup";
+import { useMachine } from "@xstate/react";
+import GrayBox, { Sidebar } from "../components/layouts/GrayBox";
+import { motion } from "framer-motion";
+import variants from "../lib/motionVariants";
+import Warning from "../components/notifications/Warning";
+import Heading from "../components/Heading";
+import MutedText from "../components/MutedText";
+import LabwareScanner from "../components/labwareScanner/LabwareScanner";
+import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
+import columns from "../components/labwareScanPanel/columns";
+import { FormikErrorMessage, optionValues } from "../components/forms";
+import FormikSelect from "../components/forms/Select";
+import PinkButton from "../components/buttons/PinkButton";
+import Success from "../components/notifications/Success";
+import { toast } from "react-toastify";
+import createFormMachine from "../lib/machines/form/formMachine";
+import { StanCoreContext } from "../lib/sdk";
 
-interface PageParams {
-  model: DestroyPresentationModel;
+const initialValues: DestroyRequest = {
+  barcodes: [],
+  reasonId: -1,
+};
+
+function buildValidationSchema(
+  destroyInfo: GetDestroyInfoQuery
+): Yup.ObjectSchema {
+  const destructionReasonIds = destroyInfo.destructionReasons.map(
+    (dr) => dr.id
+  );
+  return Yup.object().shape({
+    barcodes: Yup.array()
+      .label("Labware")
+      .min(1, "Please scan in at least 1 labware")
+      .of(Yup.string().required()),
+    reasonId: Yup.number()
+      .required()
+      .oneOf(destructionReasonIds, "Please choose a reason")
+      .label("Reason"),
+  });
 }
 
-const Destroy: React.FC<PageParams> = ({ model }) => {
+interface PageParams {
+  destroyInfo: GetDestroyInfoQuery;
+}
+
+const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
+  const stanCore = useContext(StanCoreContext);
+  const [current, send] = useMachine(() =>
+    createFormMachine<DestroyRequest, DestroyMutation>().withConfig({
+      services: {
+        submitForm: (ctx, e) => {
+          if (e.type !== "SUBMIT_FORM") return Promise.reject();
+          return stanCore.Destroy({ request: e.values });
+        },
+      },
+    })
+  );
+
+  const validationSchema = useMemo(() => buildValidationSchema(destroyInfo), [
+    destroyInfo,
+  ]);
+
+  useEffect(() => {
+    if (current.matches("submitted")) {
+      const ToastSuccess = () => <Success message={"Labware(s) Destroyed"} />;
+
+      toast(ToastSuccess, {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    }
+  }, [current]);
+
+  const submitForm = async (values: DestroyRequest) =>
+    send({ type: "SUBMIT_FORM", values });
+  const serverError = current.context.serverError;
+  const formLocked = !current.matches("fillingOutForm");
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -17,11 +92,103 @@ const Destroy: React.FC<PageParams> = ({ model }) => {
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           <Formik
-            initialValues={model.initialFormValues}
-            validationSchema={model.formSchema}
-            onSubmit={model.onSubmit}
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={submitForm}
           >
-            {(formik) => <DestroyForm model={model} formik={formik} />}
+            {({ values, setFieldValue }) => (
+              <Form>
+                <GrayBox>
+                  <motion.div
+                    variants={variants.fadeInParent}
+                    initial={"hidden"}
+                    animate={"visible"}
+                    exit={"hidden"}
+                    className="md:w-2/3 space-y-10"
+                  >
+                    {serverError && <Warning error={serverError} />}
+
+                    <motion.div
+                      variants={variants.fadeInWithLift}
+                      className="space-y-4"
+                    >
+                      <Heading level={3}>Labware</Heading>
+                      <MutedText>
+                        Please scan in the labware you wish to destroy.
+                      </MutedText>
+
+                      <LabwareScanner
+                        onChange={(labwares) =>
+                          setFieldValue(
+                            "barcodes",
+                            labwares.map((lw) => lw.barcode)
+                          )
+                        }
+                        locked={formLocked}
+                      >
+                        <LabwareScanPanel
+                          columns={[
+                            columns.barcode(),
+                            columns.donorId(),
+                            columns.labwareType(),
+                            columns.externalName(),
+                          ]}
+                        />
+                      </LabwareScanner>
+                      <FormikErrorMessage name={"barcodes"} />
+                    </motion.div>
+
+                    <motion.div
+                      variants={variants.fadeInWithLift}
+                      className="space-y-4"
+                    >
+                      <Heading level={3}>Reason</Heading>
+                      <MutedText>
+                        Please select the reason for destruction.
+                      </MutedText>
+
+                      <FormikSelect
+                        disabled={formLocked}
+                        label={"Reason"}
+                        name={"reasonId"}
+                        emptyOption
+                      >
+                        {optionValues(
+                          destroyInfo.destructionReasons,
+                          "text",
+                          "id"
+                        )}
+                      </FormikSelect>
+                    </motion.div>
+                  </motion.div>
+
+                  <Sidebar>
+                    <Heading level={3} showBorder={false}>
+                      Summary
+                    </Heading>
+
+                    {values.barcodes.length > 0 ? (
+                      <p>
+                        <span className="font-semibold">
+                          {values.barcodes.length}
+                        </span>{" "}
+                        piece(s) of labware will be destroyed.
+                      </p>
+                    ) : (
+                      <p className="italic text-sm">No labwares scanned.</p>
+                    )}
+
+                    <PinkButton
+                      disabled={formLocked}
+                      type="submit"
+                      className="sm:w-full"
+                    >
+                      Destroy Labware
+                    </PinkButton>
+                  </Sidebar>
+                </GrayBox>
+              </Form>
+            )}
           </Formik>
         </div>
       </AppShell.Main>

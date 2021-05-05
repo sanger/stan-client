@@ -1,18 +1,11 @@
-import {
-  GetPrintersQuery,
-  LabelType,
-  Labware,
-  LabwareLayoutFragment as LabwareLayout,
-  Maybe,
-  PlanRequestAction,
-  Size,
-} from "./graphql";
-import { ApolloError } from "@apollo/client";
+import {LabwareFieldsFragment, Maybe, PrinterFieldsFragment, Size,} from "./sdk";
+import {Location} from "history";
+import {ClientError} from "graphql-request";
 
 /**
  * Union of STAN's {@link OperationType} names
  */
-export type OperationTypeName = "Section";
+export type OperationTypeName = "Section" | "Visium cDNA";
 
 /**
  * Enum for all of STAN's {@link LabwareType} names
@@ -23,6 +16,7 @@ export enum LabwareTypeName {
   VISIUM_LP = "Visium LP",
   VISIUM_TO = "Visium TO",
   SLIDE = "Slide",
+  PLATE = "96 well plate",
 }
 
 export type Address = string;
@@ -30,15 +24,10 @@ export type Address = string;
 export type SizeInput = Omit<Size, "__typename">;
 
 /**
- * A {@link PlanRequestAction} before it knows where it's going
- */
-export type SourcePlanRequestAction = Omit<PlanRequestAction, "address">;
-
-/**
  * Type for when a piece of labware has been created in the client, but has not
  * yet been persisted, and so will not have a barcode yet.
  */
-export type NewLabwareLayout = Nullable<LabwareLayout, "barcode">;
+export type NewLabwareLayout = Nullable<LabwareFieldsFragment, "barcode">;
 
 export interface ServerErrors {
   /**
@@ -52,24 +41,36 @@ export interface ServerErrors {
   problems: string[];
 }
 
-/**
- * Builds a {@link ServerErrors} object from an ApolloError
- * @param e ApolloError
- */
-export function extractServerErrors(e: ApolloError): ServerErrors {
-  const matchArray = e.message.match(/^.*\s:\s(.*)$/);
+type GraphQLErrorWithExtensions = {
+  extensions?: {
+    problems: Array<string>;
+  };
+  message: string;
+  locations: {
+    line: number;
+    column: number;
+  }[];
+  path: string[];
+}
 
+/**
+ * Builds a {@link ServerErrors} object from a ClientError
+ * @param e ClientError
+ */
+export function extractServerErrors(e: ClientError): ServerErrors {
   return {
-    message: matchArray !== null ? matchArray[1] : null,
-    problems: e.graphQLErrors.reduce<string[]>(
-      (memo, graphQLError, index, original) => {
+    message: e.response.errors
+      ?.map(error => error?.message?.match(/^.*\s:\s(.*)$/)?.[1])
+      .filter(error => !!error).join("\n") ?? null,
+    problems: (e.response.errors as GraphQLErrorWithExtensions[]).reduce<string[]>(
+      (memo, graphQLError, _index, _original) => {
         if (!graphQLError.extensions?.hasOwnProperty("problems")) {
           return memo;
         }
         return [...memo, ...graphQLError.extensions["problems"]];
       },
       []
-    ),
+    ) ?? [],
   };
 }
 
@@ -82,20 +83,11 @@ export function extractServerErrors(e: ApolloError): ServerErrors {
 export type Nullable<T, K extends keyof T> = Omit<T, K> &
   { [P in K]: T[P] | null };
 
-/**
- * A piece of labware than can be printed i.e. has a label type
- */
-export type PrintableLabware = Pick<Labware, "barcode"> & {
-  labwareType: {
-    labelType?: Maybe<Pick<LabelType, "name">>;
-  };
-};
-
 export type PrintResultType = {
   successful: boolean;
   labelsPerBarcode: number;
-  printer: GetPrintersQuery["printers"][number];
-  labwares: Array<PrintableLabware>;
+  printer: PrinterFieldsFragment;
+  labwares: Array<LabwareFieldsFragment>;
 };
 
 export type SearchResultsType = {
@@ -161,7 +153,60 @@ export type MachineServiceDone<T extends string, E> = {
  * @param <T> the name of the service
  * @see {@link https://xstate.js.org/docs/guides/communication.html#invoking-services XState Services}
  */
-export type MachineServiceError<T extends string> = {
+export type MachineServiceError<T extends string, E = ClientError> = {
   type: `error.platform.${T}`;
-  data: ApolloError;
+  data: E;
+};
+
+/**
+ * An object with an `address` e.g. a Slot
+ */
+export interface Addressable {
+  address: string;
+  [key: string]: any;
+}
+
+/**
+ * Properties that can be added on to the URL state. Frequently used with react-router's Redirect component.
+ */
+export type LocationState = {
+  referrer?: Location;
+  success?: string;
+  warning?: string;
+  loggedOut?: boolean;
+};
+
+/**
+ * An entity that can be disabled/enabled
+ */
+export type HasEnabled = { enabled: boolean };
+
+/**
+ * Properties that go in the config.js file
+ */
+export type StanConfig = {
+  /**
+   * The name of the current environment
+   */
+  env: string;
+
+  /**
+   * Tailwind color classes that will be applied to the header
+   */
+  headerColor: string;
+
+  /**
+   * Tailwind color classes that will be applied to the footer
+   */
+  footerColor: string;
+
+  /**
+   * Email address for users to get support
+   */
+  supportEmail: string;
+
+  /**
+   * When was this release deployed
+   */
+  deploymentDate: string;
 };

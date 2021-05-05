@@ -4,23 +4,29 @@ import {
   GetPrintersQueryVariables,
   PrintMutation,
   PrintMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 
 const printers = labwareTypeInstances.reduce<GetPrintersQuery["printers"]>(
   (memo, labwareType) => {
     if (labwareType.labelType?.name) {
       memo.push({
-        labelType: {
-          name: labwareType.labelType.name,
-        },
+        __typename: "Printer",
+        labelTypes: [
+          {
+            name: labwareType.labelType.name,
+          },
+        ],
         name: `${labwareType.name} Printer`,
       });
 
       memo.push({
-        labelType: {
-          name: labwareType.labelType.name,
-        },
+        __typename: "Printer",
+        labelTypes: [
+          {
+            name: labwareType.labelType.name,
+          },
+        ],
         name: `${labwareType.name} Printer 2`,
       });
     }

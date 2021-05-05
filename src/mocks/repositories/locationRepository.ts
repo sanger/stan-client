@@ -1,9 +1,4 @@
-import {
-  GridDirection,
-  Location,
-  Maybe,
-  StoredItem,
-} from "../../types/graphql";
+import { GridDirection, Location, Maybe, StoredItem } from "../../types/sdk";
 import locationFactory, {
   buildLinkedLocation,
   locationItemFactory,

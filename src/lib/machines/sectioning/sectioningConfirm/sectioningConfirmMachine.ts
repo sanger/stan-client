@@ -1,10 +1,9 @@
 import { Machine, MachineOptions, sendParent } from "xstate";
 import {
   Comment,
-  LabwareLayoutFragment as LabwareLayout,
-} from "../../../../types/graphql";
+  LabwareFieldsFragment as LabwareLayout,
+} from "../../../../types/sdk";
 import { LayoutPlan } from "../../layout/layoutContext";
-import { cloneDeep } from "@apollo/client/utilities";
 import { LabwareTypeName } from "../../../../types/stan";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../layout/layoutMachine";
@@ -15,6 +14,7 @@ import {
   State,
 } from "./sectioningConfirmTypes";
 import { commitConfirmation } from "./sectioningConfirmEvents";
+import { cloneDeep } from "lodash";
 
 enum Actions {
   ASSIGN_ADDRESS_COMMENT = "assignAddressComment",
@@ -55,7 +55,6 @@ export const createSectioningConfirmMachine = (
         layoutPlan: cloneDeep(layoutPlan),
         addressToCommentMap: new Map(),
         cancelled: false,
-        cancelledAddresses: [],
       },
       on: {
         SECTIONING_CONFIRMATION_COMPLETE: State.DONE,

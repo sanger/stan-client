@@ -2,6 +2,9 @@ import {
   SectioningConfirmContext,
   SectioningConfirmEvent,
 } from "./sectioningConfirmTypes";
+import { CancelPlanAction } from "../../../../types/sdk";
+import { Source } from "../../layout/layoutContext";
+import { find } from "lodash";
 
 export function setCommentForAddress(
   address: string,
@@ -37,15 +40,59 @@ export function toggleCancel(): SectioningConfirmEvent {
   return { type: "TOGGLE_CANCEL" };
 }
 
+function buildCancelPlanAction(
+  destinationAddress: string,
+  plannedAction: Source
+): CancelPlanAction {
+  return {
+    destinationAddress,
+    newSection: plannedAction.newSection,
+    sampleId: plannedAction.sampleId,
+  };
+}
+
+function buildCancelPlanActions(
+  destinationAddress: string,
+  plannedActions: Array<Source>
+): Array<CancelPlanAction> {
+  return plannedActions.map((action) =>
+    buildCancelPlanAction(destinationAddress, action)
+  );
+}
+
 export function commitConfirmation(
   ctx: SectioningConfirmContext
 ): SectioningConfirmEvent {
+  const cancelledActions: Array<CancelPlanAction> = [];
+  const confirmPlannedActions = ctx.layoutPlan.plannedActions;
+
+  for (let [
+    destinationAddress,
+    originalPlannedActions,
+  ] of ctx.originalLayoutPlan.plannedActions.entries()) {
+    const plannedActions = confirmPlannedActions.get(destinationAddress) ?? [];
+
+    // Find all the original planned actions that are now missing after layout confirmation
+    let missingOriginalActions: Array<Source> = originalPlannedActions.filter(
+      (action) =>
+        !find(plannedActions, {
+          sampleId: action.sampleId,
+          newSection: action.newSection,
+          address: action.address,
+        })
+    );
+
+    cancelledActions.push(
+      ...buildCancelPlanActions(destinationAddress, missingOriginalActions)
+    );
+  }
+
   return {
     type: "COMMIT_CONFIRMATION",
     confirmOperationLabware: {
       barcode: ctx.labware.barcode,
       cancelled: ctx.cancelled,
-      cancelledAddresses: ctx.cancelledAddresses,
+      cancelledActions,
       addressComments: Array.from(
         ctx.addressToCommentMap.entries()
       ).map(([address, commentId]) => ({ address, commentId })),

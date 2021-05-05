@@ -1,0 +1,6 @@
+fragment PrinterFields on Printer {
+    name
+    labelTypes {
+        name
+    }
+}

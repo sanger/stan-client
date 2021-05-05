@@ -1,8 +1,8 @@
 import React from "react";
 import classNames from "classnames";
-import { ApolloError } from "@apollo/client";
-import { Maybe } from "../../types/graphql";
+import { Maybe } from "../../types/sdk";
 import { extractServerErrors, ServerErrors } from "../../types/stan";
+import { ClientError } from "graphql-request";
 
 interface WarningProps
   extends React.DetailedHTMLProps<
@@ -10,7 +10,7 @@ interface WarningProps
     HTMLElement
   > {
   message?: string;
-  error?: Maybe<ApolloError>;
+  error?: Maybe<ClientError>;
 }
 
 const Warning = ({
@@ -25,6 +25,7 @@ const Warning = ({
     className
   );
   let serverErrors: ServerErrors | undefined;
+
   if (error) {
     serverErrors = extractServerErrors(error);
   }

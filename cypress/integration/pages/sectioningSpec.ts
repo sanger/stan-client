@@ -1,12 +1,11 @@
 import {
   PlanMutation,
   PlanMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
 
 describe("Sectioning", () => {
   before(() => {
     cy.visit("/lab/sectioning");
-    cy.wait(2000);
   });
 
   describe("Add Labware button", () => {
@@ -18,7 +17,7 @@ describe("Sectioning", () => {
 
     context("when there is source labware loaded", () => {
       before(() => {
-        cy.get("#labwareScanInput").type("STAN-123{enter}");
+        cy.get("#labwareScanInput").type("STAN-113{enter}");
       });
 
       it("is enabled", () => {
@@ -66,10 +65,11 @@ describe("Sectioning", () => {
       before(() => {
         cy.findByText("Edit Layout").click();
         cy.findByRole("dialog").within(() => {
-          cy.findByText("STAN-123").click();
+          cy.findByText("STAN-113").click();
           cy.findByText("A1").click();
           cy.findByText("Done").click();
         });
+        cy.findByLabelText("Section Thickness").type("5");
       });
 
       after(() => {
@@ -130,7 +130,6 @@ describe("Sectioning", () => {
     context("when request is successful", () => {
       before(() => {
         cy.visit("/lab/sectioning");
-        cy.wait(2000);
         createLabware();
       });
 
@@ -158,7 +157,7 @@ describe("Sectioning", () => {
             graphql.mutation<PlanMutation, PlanMutationVariables>(
               "Plan",
               (req, res, ctx) => {
-                return res(
+                return res.once(
                   ctx.errors([
                     {
                       extensions: {
@@ -175,7 +174,6 @@ describe("Sectioning", () => {
           );
         });
 
-        cy.wait(2000);
         createLabware();
       });
 
@@ -190,15 +188,12 @@ describe("Sectioning", () => {
     context("when printing succeeds", () => {
       before(() => {
         cy.visit("/lab/sectioning");
-        cy.wait(2000);
         createLabware();
         printLabels();
       });
 
       it("shows a success message", () => {
-        cy.findByText("Tube Printer successfully printed STAN-1002").should(
-          "exist"
-        );
+        cy.findByText(/Tube Printer successfully printed/).should("exist");
       });
     });
 
@@ -208,23 +203,22 @@ describe("Sectioning", () => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation("Print", (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
-                    message: "Tube Printer failed to print STAN-1002",
+                    message: "Tube Printer failed to print",
                   },
                 ])
               );
             })
           );
         });
-        cy.wait(2000);
         createLabware();
         printLabels();
       });
 
       it("shows an error message", () => {
-        cy.findByText("Tube Printer failed to print STAN-1002").should("exist");
+        cy.findByText(/Tube Printer failed to print/).should("exist");
       });
     });
   });
@@ -233,7 +227,6 @@ describe("Sectioning", () => {
     context("when nothing changed from the plan", () => {
       before(() => {
         cy.visit("/lab/sectioning");
-        cy.wait(2000);
         createLabware();
         printLabels();
         cy.findByText("Next >").click();
@@ -252,7 +245,7 @@ describe("Sectioning", () => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation("Confirm", (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     message: "Failed to confirm sectioning",
@@ -263,7 +256,6 @@ describe("Sectioning", () => {
           );
         });
 
-        cy.wait(2000);
         createLabware();
         printLabels();
         cy.findByText("Next >").click();
@@ -280,16 +272,17 @@ describe("Sectioning", () => {
 });
 
 function createLabware() {
-  cy.get("#labwareScanInput").type("STAN-123{enter}");
+  cy.get("#labwareScanInput").type("STAN-113{enter}");
 
   cy.findByRole("combobox").select("Tube");
   cy.findByText("+ Add Labware").click();
   cy.findByText("Edit Layout").click();
   cy.findByRole("dialog").within(() => {
-    cy.findByText("STAN-123").click();
+    cy.findByText("STAN-113").click();
     cy.findByText("A1").click();
     cy.findByText("Done").click();
   });
+  cy.findByLabelText("Section Thickness").type("5");
   cy.findByText("Create Labware").click();
 }
 

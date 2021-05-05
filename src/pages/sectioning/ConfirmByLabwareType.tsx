@@ -26,7 +26,7 @@ const ConfirmByLabwareType: React.FC<ConfirmByLabwareTypeParams> = ({
       )}
 
       {labwareTypeName !== LabwareTypeName.TUBE &&
-        actors.map((actor) => <ConfirmLabware actor={actor} />)}
+        actors.map((actor, i) => <ConfirmLabware key={i} actor={actor} />)}
     </div>
   );
 };

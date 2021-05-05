@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import ScanInput from "../../components/ScanInput";
+import ScanInput from "../../components/scanInput/ScanInput";
 import WhiteButton from "../../components/buttons/WhiteButton";
-import { ModelContext } from "../Location";
+import { LocationParentContext } from "../Location";
 import UnstoreBarcodeModal from "./UnstoreBarcodeModal";
 import { addressToLocationAddress } from "../../lib/helpers/locationHelper";
-import { GridDirection } from "../../types/graphql";
+import { GridDirection } from "../../types/sdk";
 import classNames from "classnames";
 import BarcodeIcon from "../../components/icons/BarcodeIcon";
 import { Authenticated } from "../../components/Authenticated";
@@ -13,9 +13,13 @@ import { Authenticated } from "../../components/Authenticated";
  * Component for showing the stored items for a location in a grid
  */
 export const ItemsGrid: React.FC = () => {
-  const model = useContext(ModelContext)!;
-
-  const { location, selectedAddress, addressToItemMap } = model.context;
+  const {
+    location,
+    selectedAddress,
+    addressToItemMap,
+    storeBarcode,
+    unstoreBarcode,
+  } = useContext(LocationParentContext)!;
 
   const [modalOpen, setModalOpen] = useState(false);
   const scanInputRef = useRef<HTMLInputElement>(null);
@@ -28,7 +32,7 @@ export const ItemsGrid: React.FC = () => {
 
   const handleOnScan = (barcode: string) => {
     if (selectedAddress) {
-      model.storeBarcode(barcode, selectedAddress);
+      storeBarcode(barcode, selectedAddress);
     }
   };
 
@@ -91,7 +95,7 @@ export const ItemsGrid: React.FC = () => {
           onConfirm={() => {
             const barcode = addressToItemMap.get(selectedAddress!)?.barcode;
             if (barcode) {
-              model.unstoreBarcode(barcode);
+              unstoreBarcode(barcode);
             }
             setModalOpen(false);
           }}
@@ -109,18 +113,23 @@ interface GridItemParams {
 }
 
 const GridItem: React.FC<GridItemParams> = ({ address, onButtonClick }) => {
-  const model = useContext(ModelContext)!;
-  const { addressToItemMap, location, selectedAddress } = model.context;
+  const {
+    addressToItemMap,
+    location,
+    selectedAddress,
+    labwareBarcodeToAddressMap,
+    setSelectedAddress,
+  } = useContext(LocationParentContext)!;
 
   const gridItemClassNames = classNames(
     {
-      "border-2 border-blue-800 bg-sdb-100 hover:bg-sp-300 text-gray-300": model.labwareBarcodeToAddressMap.has(
+      "border-2 border-blue-800 bg-sdb-100 hover:bg-sp-300 text-gray-300": labwareBarcodeToAddressMap.has(
         addressToItemMap.get(address)?.barcode ?? ""
       ),
       "bg-blue-800 hover:bg-sp-300 text-gray-300":
         address !== selectedAddress &&
         addressToItemMap.get(address) != null &&
-        !model.labwareBarcodeToAddressMap.has(
+        !labwareBarcodeToAddressMap.has(
           addressToItemMap.get(address)?.barcode ?? ""
         ),
       "bg-blue-100 hover:bg-sp-300 text-gray-800":
@@ -133,7 +142,7 @@ const GridItem: React.FC<GridItemParams> = ({ address, onButtonClick }) => {
   return (
     <div
       data-testid={address === selectedAddress ? "selectedAddress" : null}
-      onClick={() => model.setSelectedAddress(address)}
+      onClick={() => setSelectedAddress(address)}
       className={gridItemClassNames}
     >
       <div className="flex flex-row items-start justify-between">

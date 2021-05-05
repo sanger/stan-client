@@ -1,7 +1,7 @@
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
 import { sampleFactory } from "../../../src/lib/factories/sampleFactory";
 import { formatFindResult } from "../../../src/lib/services/searchService";
-import { FindQuery, GridDirection } from "../../../src/types/graphql";
+import { FindQuery, GridDirection } from "../../../src/types/sdk";
 import locationFactory from "../../../src/lib/factories/locationFactory";
 import { addressToLocationAddress } from "../../../src/lib/helpers/locationHelper";
 
@@ -56,7 +56,7 @@ describe("Search Service", () => {
         tissueType: sample10.tissue.spatialLocation.tissueType.name,
         location: {
           barcode: location100.barcode,
-          displayName: location100.name,
+          displayName: location100.fixedName,
           address: null,
         },
         sectionNumber: sample10.section,
@@ -80,7 +80,7 @@ describe("Search Service", () => {
         tissueType: sample12.tissue.spatialLocation.tissueType.name,
         location: {
           barcode: location102.barcode,
-          displayName: location102.name,
+          displayName: location102.fixedName,
           address: addressToLocationAddress(
             "40,2",
             location102.size!,
@@ -108,7 +108,7 @@ describe("Search Service", () => {
         tissueType: sample14.tissue.spatialLocation.tissueType.name,
         location: {
           barcode: location100.barcode,
-          displayName: location100.name,
+          displayName: location100.fixedName,
           address: location100.address,
         },
         sectionNumber: sample14.section,

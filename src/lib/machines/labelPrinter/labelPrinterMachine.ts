@@ -6,10 +6,9 @@ import {
 } from "./labelPrinterMachineTypes";
 import { find } from "lodash";
 import { assign } from "@xstate/immer";
-import * as printService from "../../services/printService";
 import { createMachineBuilder } from "../index";
-import { getPrinters } from "../../services/printService";
 import { castDraft } from "immer";
+import { stanCore } from "../../sdk";
 
 /**
  * LabelPrinter Machine Options
@@ -30,7 +29,7 @@ export const machineOptions: Partial<MachineOptions<
 
       // Only have available printers of the labwares' label type (if there is one)
       ctx.printers = e.data.printers.filter((printer) =>
-        labwareLabelTypes.has(printer.labelType.name)
+        printer.labelTypes.some((lt) => labwareLabelTypes.has(lt.name))
       );
       ctx.selectedPrinter = ctx.printers[0];
     }),
@@ -55,7 +54,7 @@ export const machineOptions: Partial<MachineOptions<
   },
 
   services: {
-    fetchPrinters: () => getPrinters(),
+    fetchPrinters: () => stanCore.GetPrinters(),
 
     printLabels: (ctx, e) => {
       if (!ctx.selectedPrinter) {
@@ -67,7 +66,7 @@ export const machineOptions: Partial<MachineOptions<
         labelsPerBarcode = e.labelsPerBarcode;
       }
 
-      return printService.printLabels({
+      return stanCore.Print({
         printer: ctx.selectedPrinter.name,
         barcodes: ctx.labwares
           .map((lw) => new Array(labelsPerBarcode).fill(lw.barcode))

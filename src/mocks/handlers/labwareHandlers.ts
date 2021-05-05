@@ -2,87 +2,58 @@ import { graphql } from "msw";
 import {
   FindLabwareQuery,
   FindLabwareQueryVariables,
-  LifeStage,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import labwareFactory from "../../lib/factories/labwareFactory";
+import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
+import { buildLabwareFragment } from "../../lib/helpers/labwareHelper";
 
 const labwareHandlers = [
   graphql.query<FindLabwareQuery, FindLabwareQueryVariables>(
     "FindLabware",
     (req, res, ctx) => {
-      if (!req.variables.barcode.startsWith("STAN-")) {
+      const barcode = req.variables.barcode;
+
+      if (!barcode.startsWith("STAN-")) {
         return res(
           ctx.errors([
             {
-              message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.barcode}`,
+              message: `Exception while fetching data (/labware) : No labware found with barcode: ${barcode}`,
             },
           ])
         );
       }
 
-      const labware = labwareFactory.build({
-        labwareType: {
-          name: "Proviasette",
-          labelType: {
-            name: "tiny",
-          },
+      // The number after STAN- determines what kind of labware will be returned
+      const magicNumber = parseInt(barcode.substr(5, 1));
+      const labwareType =
+        labwareTypeInstances[magicNumber % labwareTypeInstances.length];
+      // The number after that determines how many samples to put in each slot
+      const samplesPerSlot = parseInt(barcode.substr(6, 1));
+
+      const labware = labwareFactory.build(
+        {
+          barcode: barcode,
         },
-        barcode: req.variables.barcode,
-        slots: [
-          {
-            block: true,
-            address: "A1",
-            labwareId: 3,
-            samples: [
-              {
-                id: Math.ceil(Math.random() * 1000),
-                tissue: {
-                  replicate: 5,
-                  externalName: "EXT 1",
-                  hmdmc: {
-                    hmdmc: "HMDMC",
-                  },
-                  mouldSize: {
-                    name: "hUGe",
-                  },
-                  medium: {
-                    name: "Slime",
-                  },
-                  fixative: {
-                    name: "Wax",
-                  },
-                  donor: {
-                    lifeStage: LifeStage.Fetal,
-                    donorName: "Donor 3",
-                    species: {
-                      name: "Species 1",
-                    },
-                  },
-                  spatialLocation: {
-                    name: "Somewhere",
-                    code: 3,
-                    tissueType: {
-                      spatialLocations: [],
-                      name: "Lung",
-                    },
-                  },
-                },
-              },
-            ],
+        {
+          transient: {
+            samplesPerSlot,
           },
-        ],
-      });
+          associations: {
+            labwareType,
+          },
+        }
+      );
 
       sessionStorage.setItem(
         `labware-${labware.barcode}`,
         JSON.stringify(labware)
       );
 
-      return res(
-        ctx.data({
-          labware,
-        })
-      );
+      const payload: FindLabwareQuery = {
+        labware: buildLabwareFragment(labware),
+      };
+
+      return res(ctx.data(payload));
     }
   ),
 ];

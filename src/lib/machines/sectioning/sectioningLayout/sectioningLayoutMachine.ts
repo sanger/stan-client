@@ -1,5 +1,5 @@
 import { forwardTo, Machine, MachineOptions, sendParent } from "xstate";
-import { LabwareType, PlanRequestLabware } from "../../../../types/graphql";
+import { LabwareType, PlanRequestLabware } from "../../../../types/sdk";
 import * as Yup from "yup";
 import { extractServerErrors, LabwareTypeName } from "../../../../types/stan";
 import { labwareSamples } from "../../../helpers/labwareHelper";
@@ -13,8 +13,8 @@ import {
 } from "./sectioningLayoutTypes";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../layout/layoutMachine";
-import * as sectioningService from "../../../services/sectioningService";
 import { prepComplete } from "./sectioningLayoutEvents";
+import { stanCore } from "../../../sdk";
 
 const sectioningLayoutKey = "sectioningLayout";
 
@@ -167,11 +167,11 @@ const sectioningLayoutMachineOptions: Partial<MachineOptions<
     }),
 
     [Action.ASSIGN_PLAN_RESPONSE]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.planSection" || !e.data.data) {
+      if (e.type !== "done.invoke.planSection" || !e.data) {
         return;
       }
-      ctx.plannedOperations = e.data.data.plan.operations;
-      ctx.plannedLabware = e.data.data.plan.labware;
+      ctx.plannedOperations = e.data.plan.operations;
+      ctx.plannedLabware = e.data.plan.labware;
     }),
 
     [Action.ASSIGN_SERVER_ERRORS]: assign((ctx, e) => {
@@ -203,7 +203,7 @@ const sectioningLayoutMachineOptions: Partial<MachineOptions<
       const labware: PlanRequestLabware[] = new Array(
         ctx.sectioningLayout.quantity
       ).fill(planRequestLabware);
-      return sectioningService.planSection({ labware });
+      return stanCore.Plan({ request: { labware, operationType: "Section" } });
     },
   },
 };
@@ -215,14 +215,14 @@ function buildPlanRequestLabware(
   return {
     labwareType: sectioningLayout.destinationLabware.labwareType.name,
     barcode: sectioningLayout.barcode,
-    actions: Array.from(layoutPlan.plannedActions.keys()).map((address) => {
-      const source = layoutPlan.plannedActions.get(address);
+    actions: Array.from(layoutPlan.plannedActions.keys()).flatMap((address) => {
+      const sources = layoutPlan.plannedActions.get(address);
 
-      if (!source) {
+      if (!sources) {
         throw new Error("Source not found from planned actions");
       }
 
-      return {
+      return sources.map((source) => ({
         address,
         sampleThickness: sectioningLayout.sectionThickness,
         sampleId: source.sampleId,
@@ -230,7 +230,7 @@ function buildPlanRequestLabware(
           barcode: source.labware.barcode,
           address: source.address,
         },
-      };
+      }));
     }),
   };
 }

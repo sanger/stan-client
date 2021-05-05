@@ -1,0 +1,7 @@
+fragment SlotFields on Slot {
+    address
+    labwareId
+    samples {
+        ...SampleFields
+    }
+}

@@ -1,6 +1,6 @@
 import { Machine, MachineOptions } from "xstate";
 import * as Yup from "yup";
-import { Labware } from "../../../types/graphql";
+import { LabwareFieldsFragment } from "../../../types/sdk";
 import {
   LabwareContext,
   LabwareEvents,
@@ -8,7 +8,7 @@ import {
   State,
 } from "./labwareMachineTypes";
 import { assign } from "@xstate/immer";
-import * as labwareService from "../../services/labwareService";
+import { stanCore } from "../../sdk";
 
 export enum Actions {
   ASSIGN_CURRENT_BARCODE = "assignCurrentBarcode",
@@ -17,6 +17,8 @@ export enum Actions {
   ASSIGN_VALIDATION_ERROR = "assignValidationError",
   ASSIGN_FOUND_LABWARE = "assignFoundLabware",
   ASSIGN_FIND_LABWARE_ERROR = "assignFindLabwareError",
+  ADD_FOUND_LABWARE = "addFoundLabware",
+  FOUND_LABWARE_CHECK_ERROR = "foundLabwareCheckError",
 }
 
 export enum Activities {}
@@ -30,6 +32,7 @@ export enum Guards {
 export enum Services {
   VALIDATE_BARCODE = "validateBarcode",
   FIND_LABWARE_BY_BARCODE = "findLabwareByBarcode",
+  VALIDATE_FOUND_LABWARE = "validateFoundLabware",
 }
 
 export const labwareMachineOptions: Partial<MachineOptions<
@@ -48,7 +51,7 @@ export const labwareMachineOptions: Partial<MachineOptions<
       if (e.type !== "SUBMIT_BARCODE") {
         return;
       }
-      ctx.errorMessage = `"${ctx.currentBarcode}" is already in the table`;
+      ctx.errorMessage = `"${ctx.currentBarcode}" has already been scanned`;
     }),
 
     [Actions.REMOVE_LABWARE]: assign((ctx, e) => {
@@ -70,8 +73,23 @@ export const labwareMachineOptions: Partial<MachineOptions<
       if (e.type !== "done.invoke.findLabware") {
         return;
       }
-      ctx.labwares.push(e.data);
+      ctx.foundLabware = e.data.labware;
       ctx.currentBarcode = "";
+    }),
+
+    [Actions.ADD_FOUND_LABWARE]: assign((ctx, e) => {
+      if (e.type !== "done.invoke.validateFoundLabware") {
+        return;
+      }
+      ctx.labwares.push(e.data);
+      ctx.foundLabware = null;
+    }),
+
+    [Actions.FOUND_LABWARE_CHECK_ERROR]: assign((ctx, e) => {
+      if (e.type !== "error.platform.validateFoundLabware") {
+        return;
+      }
+      ctx.errorMessage = e.data.join("\n");
     }),
 
     [Actions.ASSIGN_FIND_LABWARE_ERROR]: assign((ctx, e) => {
@@ -93,9 +111,21 @@ export const labwareMachineOptions: Partial<MachineOptions<
   },
   services: {
     [Services.FIND_LABWARE_BY_BARCODE]: (ctx: LabwareContext) =>
-      labwareService.findLabwareByBarcode(ctx.currentBarcode),
+      stanCore.FindLabware({ barcode: ctx.currentBarcode }),
     [Services.VALIDATE_BARCODE]: (ctx: LabwareContext) =>
       ctx.validator.validate(ctx.currentBarcode),
+    [Services.VALIDATE_FOUND_LABWARE]: (ctx: LabwareContext) => {
+      return new Promise((resolve, reject) => {
+        const problems = ctx.foundLabware
+          ? ctx.foundLabwareCheck(ctx.labwares, ctx.foundLabware)
+          : ["Labware not loaded."];
+        if (problems.length === 0) {
+          resolve(ctx.foundLabware);
+        } else {
+          reject(problems);
+        }
+      });
+    },
   },
 };
 
@@ -115,12 +145,20 @@ export const labwareMachineOptions: Partial<MachineOptions<
  *   Object.assign({}, labwareMachine.context, { validator: Yup.string().min(3).required("Barcode is required") })
  * )
  */
-export const createLabwareMachine = (labwares: Labware[] = []) =>
+export const createLabwareMachine = (
+  labwares: LabwareFieldsFragment[] = [],
+  foundLabwareCheck?: (
+    labwares: LabwareFieldsFragment[],
+    foundLabware: LabwareFieldsFragment
+  ) => string[]
+) =>
   Machine<LabwareContext, LabwareSchema, LabwareEvents>(
     {
       context: {
         currentBarcode: "",
+        foundLabware: null,
         labwares,
+        foundLabwareCheck: foundLabwareCheck ?? (() => []),
         validator: Yup.string().trim().required("Barcode is required"),
         successMessage: null,
         errorMessage: null,
@@ -180,12 +218,26 @@ export const createLabwareMachine = (labwares: Labware[] = []) =>
             id: "findLabware",
             src: Services.FIND_LABWARE_BY_BARCODE,
             onDone: {
-              target: State.NORMAL_FQ,
+              target: State.VALIDATING_FOUND_LABWARE,
               actions: [Actions.ASSIGN_FOUND_LABWARE],
             },
             onError: {
               target: State.ERROR_FQ,
               actions: Actions.ASSIGN_FIND_LABWARE_ERROR,
+            },
+          },
+        },
+        [State.VALIDATING_FOUND_LABWARE]: {
+          invoke: {
+            id: "validateFoundLabware",
+            src: Services.VALIDATE_FOUND_LABWARE,
+            onDone: {
+              target: State.NORMAL_FQ,
+              actions: [Actions.ADD_FOUND_LABWARE],
+            },
+            onError: {
+              target: State.ERROR_FQ,
+              actions: [Actions.FOUND_LABWARE_CHECK_ERROR],
             },
           },
         },

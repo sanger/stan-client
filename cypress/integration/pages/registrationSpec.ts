@@ -1,60 +1,18 @@
 import {
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
-} from "../../../src/types/graphql";
+} from "../../../src/types/sdk";
+import { shouldBehaveLikeARegistrationForm } from "../shared/registration";
+import { tissueFactory } from "../../../src/lib/factories/sampleFactory";
+import labwareFactory from "../../../src/lib/factories/labwareFactory";
 
 describe("Registration", () => {
   before(() => {
     cy.visit("/admin/registration");
-    cy.wait(2000);
   });
 
   describe("Validation", () => {
-    it("requires Donor ID", () => {
-      cy.findByLabelText("Donor ID").focus().blur();
-      cy.findByText("Donor ID is a required field").should("be.visible");
-    });
-
-    it("requires Donor ID to only permit certain characters", () => {
-      cy.findByLabelText("Donor ID").type("$DONOR1").blur();
-      cy.findByText(
-        "Donor ID contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
-      ).should("be.visible");
-    });
-
-    it("requires Species", () => {
-      cy.findByLabelText("Species").focus().blur();
-      cy.findByText("Species is a required field").should("be.visible");
-    });
-
-    it("has HMDMC initially disabled", () => {
-      cy.findByLabelText("HMDMC").should("be.disabled");
-    });
-
-    context("when selecting a non-Human Species", () => {
-      before(() => {
-        cy.findByLabelText("Species").select("Pig");
-      });
-
-      it("keeps HMDMC disabled", () => {
-        cy.findByLabelText("HMDMC").should("be.disabled");
-      });
-    });
-
-    context("when selecting Human for Species", () => {
-      before(() => {
-        cy.findByLabelText("Species").select("Human");
-      });
-
-      it("enables the HMDMC field", () => {
-        cy.findByLabelText("HMDMC").should("not.be.disabled");
-      });
-
-      it("requires HMDMC to be set", () => {
-        cy.findByLabelText("HMDMC").focus().blur();
-        cy.findByText("HMDMC is a required field").should("be.visible");
-      });
-    });
+    shouldBehaveLikeARegistrationForm();
 
     it("requires External Identifier", () => {
       cy.findByLabelText("External Identifier").focus().blur();
@@ -63,34 +21,10 @@ describe("Registration", () => {
       );
     });
 
-    it("requires External Identifer to only permit certain characters", () => {
+    it("requires External Identifier to only permit certain characters", () => {
       cy.findByLabelText("External Identifier").type("EXT&99").blur();
       cy.findByText(
         "External Identifier contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
-      ).should("be.visible");
-    });
-
-    it("requires Tissue Type", () => {
-      cy.findByLabelText("Tissue Type").focus().blur();
-      cy.findByText("Tissue Type is a required field").should("be.visible");
-    });
-
-    it("requires Replicate Number", () => {
-      cy.findByLabelText("Replicate Number").clear().blur();
-      cy.findByText("Replicate Number is a required field").should(
-        "be.visible"
-      );
-    });
-
-    it("requires Replicate Number to be an integer", () => {
-      cy.findByLabelText("Replicate Number").type("1.1").blur();
-      cy.findByText("Replicate Number must be an integer").should("be.visible");
-    });
-
-    it("requires Replicate Number to be greater than 0", () => {
-      cy.findByLabelText("Replicate Number").clear().type("-1").blur();
-      cy.findByText(
-        "Replicate Number must be greater than or equal to 1"
       ).should("be.visible");
     });
 
@@ -115,45 +49,9 @@ describe("Registration", () => {
       ).should("be.visible");
     });
 
-    it("requires Replicate Number to be greater than or equal to 1", () => {
-      cy.findByLabelText("Replicate Number").type("0").blur();
-      cy.findByText(
-        "Replicate Number must be greater than or equal to 1"
-      ).should("be.visible");
-    });
-
     it("requires Labware Type", () => {
       cy.findByLabelText("Labware Type").focus().blur();
       cy.findByText("Labware Type is a required field").should("be.visible");
-    });
-
-    it("requires Fixative", () => {
-      cy.findByLabelText("Fixative").focus().blur();
-      cy.findByText("Fixative is a required field").should("be.visible");
-    });
-
-    it("requires Medium", () => {
-      cy.findByLabelText("Medium").focus().blur();
-      cy.findByText("Medium is a required field").should("be.visible");
-    });
-  });
-
-  context("when changing the selected Tissue Type", () => {
-    before(() => {
-      cy.findByLabelText("Tissue Type").select("Kidney");
-    });
-
-    it("updates the available Spatial Location", () => {
-      cy.findByLabelText("Spatial Location")
-        .find("option")
-        .should("have.length", 7); // 6 options plus empty
-
-      cy.findByLabelText("Spatial Location").select("2");
-      cy.findByLabelText("Spatial Location").find(":selected").contains("2");
-      cy.findByLabelText("Tissue Type").select("Liver");
-      cy.findByLabelText("Spatial Location")
-        .find(":selected")
-        .should("have.value", "");
     });
   });
 
@@ -189,7 +87,6 @@ describe("Registration", () => {
     context("when the fields are invalid", () => {
       before(() => {
         cy.visit("/admin/registration");
-        cy.wait(2000);
         fillInForm();
         cy.findByLabelText("Donor ID").clear();
         cy.findByText("Register").click();
@@ -207,17 +104,12 @@ describe("Registration", () => {
     context("when the submission is successful", () => {
       before(() => {
         cy.visit("/admin/registration");
-        cy.wait(2000);
-
         fillInForm();
-
         cy.findByText("Register").click();
       });
 
       it("shows a success message", () => {
-        cy.findByText(
-          "Your tissue blocks have been successfully registered"
-        ).should("be.visible");
+        cy.findByText("Registration complete").should("be.visible");
       });
 
       it("shows the created labware", () => {
@@ -236,7 +128,7 @@ describe("Registration", () => {
               RegisterTissuesMutation,
               RegisterTissuesMutationVariables
             >("RegisterTissues", (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     extensions: {
@@ -252,8 +144,6 @@ describe("Registration", () => {
           );
         });
 
-        cy.wait(2000);
-
         fillInForm();
         cy.findByText("Register").click();
       });
@@ -261,6 +151,48 @@ describe("Registration", () => {
       it("shows the server errors", () => {
         cy.findByText("This thing went wrong").should("be.visible");
         cy.findByText("This other thing went wrong").should("be.visible");
+      });
+    });
+  });
+
+  context("when the submission has clashes", () => {
+    const tissue = tissueFactory.build();
+    const labware = labwareFactory.buildList(2);
+
+    before(() => {
+      cy.visit("/admin/registration");
+
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.mutation<
+            RegisterTissuesMutation,
+            RegisterTissuesMutationVariables
+          >("RegisterTissues", (req, res, ctx) => {
+            return res.once(
+              ctx.data({
+                register: {
+                  labware: [],
+                  clashes: [
+                    {
+                      tissue,
+                      labware,
+                    },
+                  ],
+                },
+              })
+            );
+          })
+        );
+      });
+
+      fillInForm();
+      cy.findByText("Register").click();
+    });
+
+    it("shows a modal with the clashing labware", () => {
+      labware.forEach((lw) => {
+        cy.findByText(lw.barcode).should("be.visible");
+        cy.findAllByText(lw.labwareType.name).should("be.visible");
       });
     });
   });
@@ -278,5 +210,6 @@ function fillInForm() {
   cy.findByLabelText("Labware Type").select("Proviasette");
   cy.findByLabelText("Fixative").select("None");
   cy.findByLabelText("Medium").select("Paraffin");
-  cy.get('[type="radio"]').check("15x15");
+  // Can't figure out why, but for some reason, without { force: true }, this is really temperamental
+  cy.get('[type="radio"]').check("10x10", { force: true });
 }

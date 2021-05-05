@@ -1,7 +1,11 @@
 import { ActorRef, Interpreter } from "xstate";
 import * as Yup from "yup";
-import { Labware, Maybe } from "../../../types/graphql";
-import { ApolloError } from "@apollo/client";
+import {
+  FindLabwareQuery,
+  LabwareFieldsFragment,
+  Maybe,
+} from "../../../types/sdk";
+import { ClientError } from "graphql-request";
 
 export type LabwareMachineType = Interpreter<
   LabwareContext,
@@ -25,6 +29,7 @@ export enum State {
   LOCKED = "locked",
   VALIDATING = "validating",
   SEARCHING = "searching",
+  VALIDATING_FOUND_LABWARE = "validatingFoundLabware",
 }
 
 /**
@@ -55,6 +60,11 @@ export interface LabwareSchema {
      * Using the findLabwareByBarcode service to look up the labware
      */
     [State.SEARCHING]: {};
+
+    /**
+     * Performing validation on found labware before it is added to the table
+     */
+    [State.VALIDATING_FOUND_LABWARE]: {};
   };
 }
 
@@ -68,14 +78,30 @@ export interface LabwareContext {
   currentBarcode: string;
 
   /**
+   * The labware loaded from a scanned barcode
+   */
+  foundLabware: Maybe<LabwareFieldsFragment>;
+
+  /**
    * The list of sourceLabwares fetched so far
    */
-  labwares: Labware[];
+  labwares: LabwareFieldsFragment[];
 
   /**
    * A {@link https://github.com/jquense/yup#string Yup string schema} to validate the barcode on submission
    */
   validator: Yup.StringSchema;
+
+  /**
+   * A function that checks if the given item of found labware may be added to the given existing labware
+   * @param labwares the labware already entered
+   * @param foundLabware the new labware to be entered
+   * @return a list of any problems identified
+   */
+  foundLabwareCheck: (
+    labwares: LabwareFieldsFragment[],
+    foundLabware: LabwareFieldsFragment
+  ) => string[];
 
   /**
    * The current success message
@@ -118,7 +144,7 @@ type UnlockEvent = { type: "UNLOCK" };
 
 export type UpdateLabwaresEvent = {
   type: "UPDATE_LABWARES";
-  labwares: Labware[];
+  labwares: LabwareFieldsFragment[];
 };
 
 type ValidationErrorEvent = {
@@ -128,12 +154,22 @@ type ValidationErrorEvent = {
 
 type FindLabwareDoneEvent = {
   type: "done.invoke.findLabware";
-  data: Labware;
+  data: FindLabwareQuery;
 };
 
 type FindLabwareErrorEvent = {
   type: "error.platform.findLabware";
-  data: ApolloError;
+  data: ClientError;
+};
+
+type AddFoundLabwareEvent = {
+  type: "done.invoke.validateFoundLabware";
+  data: LabwareFieldsFragment;
+};
+
+type FoundLabwareCheckErrorEvent = {
+  type: "error.platform.validateFoundLabware";
+  data: string[];
 };
 
 /**
@@ -147,4 +183,6 @@ export type LabwareEvents =
   | UnlockEvent
   | ValidationErrorEvent
   | FindLabwareDoneEvent
-  | FindLabwareErrorEvent;
+  | FindLabwareErrorEvent
+  | AddFoundLabwareEvent
+  | FoundLabwareCheckErrorEvent;

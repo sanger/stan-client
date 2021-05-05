@@ -1,10 +1,9 @@
 {
   "name": "client",
-  "version": "0.6.1",
+  "version": "1.1.0",
   "private": true,
   "proxy": "http://localhost:8080",
   "dependencies": {
-    "@apollo/client": "^3.2.4",
     "@tailwindcss/aspect-ratio": "^0.2.0",
     "@tailwindcss/typography": "^0.3.1",
     "@testing-library/jest-dom": "^4.2.4",
@@ -31,6 +30,7 @@
     "formik": "^2.2.1",
     "framer-motion": "^2.9.3",
     "graphql": "^15.3.0",
+    "graphql-request": "^3.4.0",
     "immer": "^8.0.0",
     "js-cookie": "^2.2.1",
     "lodash": "^4.17.20",
@@ -44,12 +44,12 @@
     "react-toastify": "^6.2.0",
     "tailwindcss": "~2.0.0",
     "typescript": "4.1",
-    "xstate": "4.15",
+    "xstate": "^4.17.0",
     "yup": "^0.29.3"
   },
   "scripts": {
     "start": "npm-run-all -p start:css start:js",
-    "start:msw": "REACT_APP_MOCK_API=msw PORT=3001 npm run start",
+    "start:msw": "REACT_APP_MOCK_API=msw npm run start",
     "build": "npm-run-all build:css build:js",
     "start:js": "react-scripts start",
     "build:js": "react-scripts build",
@@ -57,13 +57,15 @@
     "build:css": "postcss src/styles/tailwind.css -o src/styles/index.css --env production",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "test": "start-server-and-test start:msw 3001 cypress:run",
-    "test:ci": "start-server-and-test start 3001 cypress:run",
-    "test:open": "start-server-and-test start:msw 3001 cypress:open",
+    "test": "start-server-and-test start 3000 cypress:run",
+    "test:open": "start-server-and-test start 3000 cypress:open",
     "eject": "react-scripts eject",
     "codegen": "DOTENV_CONFIG_PATH=./.env.local graphql-codegen --config codegen.yml -r dotenv/config",
     "codegen:watch": "DOTENV_CONFIG_PATH=./.env.local graphql-codegen --config codegen.yml -r dotenv/config --watch",
-    "codegen:machine": "npx hygen machine new"
+    "codegen:machine": "npx hygen machine new",
+    "storybook": "start-storybook -p 6006 -s public",
+    "build-storybook": "build-storybook -s public",
+    "deploy-storybook": "storybook-to-ghpages"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -81,21 +83,34 @@
     ]
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "1.18.0",
-    "@graphql-codegen/typescript": "1.17.11",
-    "@graphql-codegen/typescript-operations": "1.17.8",
-    "@graphql-codegen/typescript-react-apollo": "2.0.7",
+    "@graphql-codegen/cli": "^1.21.3",
+    "@graphql-codegen/typescript": "^1.21.1",
+    "@graphql-codegen/typescript-graphql-request": "^3.1.0",
+    "@graphql-codegen/typescript-operations": "^1.17.15",
+    "@storybook/addon-actions": "^6.1.21",
+    "@storybook/addon-essentials": "^6.1.21",
+    "@storybook/addon-links": "^6.1.21",
+    "@storybook/node-logger": "^6.1.21",
+    "@storybook/preset-create-react-app": "^3.1.7",
+    "@storybook/react": "^6.1.21",
+    "@storybook/storybook-deployer": "^2.8.7",
     "@tailwindcss/forms": "^0.2.1",
     "@testing-library/cypress": "^7.0.1",
     "@types/faker": "^5.1.6",
-    "cypress": "^6.5.0",
+    "cypress": "7.1.0",
     "cypress-intellij-reporter": "^0.0.4",
     "faker": "^5.4.0",
     "fishery": "^1.0.1",
-    "msw": "^0.21.2",
+    "msw": "^0.28.2",
     "npm-run-all": "^4.1.5",
     "postcss-cli": "^8.3.0",
     "prettier": "2.1.2",
     "start-server-and-test": "^1.11.5"
+  },
+  "resolutions": {
+    "babel-loader": "8.1.0"
+  },
+  "msw": {
+    "workerDirectory": "public"
   }
 }

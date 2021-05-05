@@ -1,0 +1,5 @@
+fragment DestructionReasonFields on DestructionReason {
+    id
+    text
+    enabled
+}

@@ -1,12 +1,8 @@
 query GetSectioningInfo {
     comments(category: "section") {
-        id
-        text
-        category
+        ...CommentFields
     }
     labwareTypes {
-        name
-        numRows
-        numColumns
+        ...LabwareTypeFields
     }
 }

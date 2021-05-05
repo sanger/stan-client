@@ -8,14 +8,12 @@ import {
   FindResult,
   GetSearchInfoQuery,
   GetSearchInfoQueryVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { findEntryFactory } from "../../lib/factories/findFactory";
-import {
-  sampleFactory,
-  tissueTypeFactory,
-} from "../../lib/factories/sampleFactory";
+import { sampleFactory } from "../../lib/factories/sampleFactory";
 import labwareFactory from "../../lib/factories/labwareFactory";
 import locationFactory from "../../lib/factories/locationFactory";
+import tissueTypeRepository from "../repositories/tissueTypeRepository";
 
 const findHandlers = [
   graphql.query<GetSearchInfoQuery, GetSearchInfoQueryVariables>(
@@ -23,7 +21,7 @@ const findHandlers = [
     (req, res, ctx) => {
       return res(
         ctx.data({
-          tissueTypes: tissueTypeFactory.buildList(5),
+          tissueTypes: tissueTypeRepository.findAll(),
         })
       );
     }
@@ -56,7 +54,7 @@ export function buildFindResult(
   const locationCount = _.random(numRecordsReturned);
   const locations = [...Array(locationCount)].map(() =>
     locationFactory.build({
-      name: faker.address.countryCode(),
+      fixedName: faker.address.countryCode(),
       customName: _.sample([faker.address.streetName(), null]),
     })
   );

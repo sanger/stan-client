@@ -1,0 +1,7 @@
+mutation SlotCopy($request: SlotCopyRequest!) {
+    slotCopy(request: $request) {
+        labware {
+            ...LabwareFields
+        }
+    }
+}

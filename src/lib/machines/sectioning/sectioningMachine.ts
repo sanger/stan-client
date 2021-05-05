@@ -9,14 +9,8 @@ import { current } from "immer";
 import { buildSampleColors } from "../../helpers/labwareHelper";
 import { createSectioningLayoutMachine } from "./sectioningLayout/sectioningLayoutMachine";
 import { createSectioningConfirmMachine } from "./sectioningConfirm/sectioningConfirmMachine";
-import * as sectioningService from "../../services/sectioningService";
-import * as confirmService from "../../services/confirmService";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
-import {
-  Labware,
-  LabwareLayoutFragment,
-  PlanMutation,
-} from "../../../types/graphql";
+import { LabwareFieldsFragment, PlanMutation } from "../../../types/sdk";
 import {
   LayoutPlan,
   Source as LayoutPlanAction,
@@ -33,6 +27,7 @@ import {
   SectioningLayoutEvent,
 } from "./sectioningLayout/sectioningLayoutTypes";
 import { sectioningConfirmationComplete } from "./sectioningConfirm/sectioningConfirmEvents";
+import { stanCore } from "../../sdk";
 
 export const machineKey = "sectioningMachine";
 
@@ -109,12 +104,12 @@ const sectioningMachineOptions: Partial<MachineOptions<
     }),
 
     [Action.ASSIGN_PLAN]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.planSection" || !e.data.data) {
+      if (e.type !== "done.invoke.planSection" || !e.data) {
         return;
       }
 
       const currentCtx = current(ctx);
-      const { plan } = e.data.data;
+      const { plan } = e.data;
 
       plan.labware.forEach((labware: any) => {
         const labwareTypeName = labware.labwareType.name;
@@ -156,6 +151,7 @@ const sectioningMachineOptions: Partial<MachineOptions<
       if (e.type !== "COMMIT_CONFIRMATION") {
         return;
       }
+
       const confirmationIndex = ctx.confirmOperationRequest.labware.findIndex(
         (lw) => lw.barcode === e.confirmOperationLabware.barcode
       );
@@ -185,9 +181,9 @@ const sectioningMachineOptions: Partial<MachineOptions<
   },
 
   services: {
-    [Service.GET_SECTIONING_INFO]: sectioningService.getSectioningInfo,
+    [Service.GET_SECTIONING_INFO]: () => stanCore.GetSectioningInfo(),
     [Service.CONFIRM_OPERATION]: (ctx) =>
-      confirmService.confirm(ctx.confirmOperationRequest),
+      stanCore.Confirm({ request: ctx.confirmOperationRequest }),
   },
 };
 
@@ -343,7 +339,7 @@ function buildSectioningLayout(ctx: SectioningContext): SectioningLayout {
   const sectioningLayout: SectioningLayout = {
     inputLabwares: ctx.sourceLabwares,
     quantity: 1,
-    sectionThickness: 5,
+    sectionThickness: 0,
     sampleColors: ctx.sampleColors,
     destinationLabware: unregisteredLabwareFactory.build(
       {},
@@ -364,7 +360,7 @@ function buildSectioningLayout(ctx: SectioningContext): SectioningLayout {
 
 function buildSectioningOutcomeLayoutPlan(
   ctx: SectioningContext,
-  labware: LabwareLayoutFragment,
+  labware: LabwareFieldsFragment,
   operations: PlanMutation["plan"]["operations"]
 ): LayoutPlan {
   const currentCtx = current(ctx);
@@ -379,7 +375,7 @@ function buildSectioningOutcomeLayoutPlan(
       .filter((planAction) => {
         return planAction.destination.labwareId === labware.id;
       })
-      .reduce<Map<Address, LayoutPlanAction>>((memo, planAction) => {
+      .reduce<Map<Address, Array<LayoutPlanAction>>>((memo, planAction) => {
         const action: LayoutPlanAction = {
           sampleId: planAction.sample.id,
           labware: findSourceLabware(
@@ -387,14 +383,22 @@ function buildSectioningOutcomeLayoutPlan(
             planAction.source.labwareId
           ),
           address: planAction.source.address,
+          newSection: planAction.newSection,
         };
-        memo.set(planAction.destination.address, action);
+        if (memo.has(planAction.destination.address)) {
+          memo.get(planAction.destination.address)?.push(action);
+        } else {
+          memo.set(planAction.destination.address, [action]);
+        }
         return memo;
       }, new Map()),
   };
 }
 
-function findSourceLabware(labwares: Labware[], labwareId: number): Labware {
+function findSourceLabware(
+  labwares: LabwareFieldsFragment[],
+  labwareId: number
+): LabwareFieldsFragment {
   const labware = labwares.find((lw) => lw.id === labwareId);
 
   if (!labware) {

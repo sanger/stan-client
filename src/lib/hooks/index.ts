@@ -1,10 +1,17 @@
-import React, { RefObject, useEffect, useRef, useState } from "react";
-import { MachinePresentationModel } from "../presentationModels/machinePresentationModel";
-import { EventObject, Interpreter, State, StateMachine } from "xstate";
-import { useMachine } from "@xstate/react";
-import { Typestate } from "xstate/lib/types";
-import { GetPrintersQuery, Maybe } from "../../types/graphql";
-import { PrintableLabware, PrintResultType } from "../../types/stan";
+import React, {
+  MutableRefObject,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  GetPrintersQuery,
+  LabwareFieldsFragment,
+  Maybe,
+  PrinterFieldsFragment,
+} from "../../types/sdk";
+import { PrintResultType } from "../../types/stan";
 
 /**
  * Hook to call a side effect after a given delay
@@ -90,40 +97,41 @@ export function useScrollToRef() {
 }
 
 /**
- * Starts interpreting a machine and connects it to a {@link MachinePresentationModel}
- * @param machine a state machine
- * @param initPresentationModel a function that returns a new {@link MachinePresentationModel}
+ * Hook that uses an {@code IntersectionObserver} for watching when an element comes on screen.
+ *
+ * @param ref the HTML element to observe
+ * @param options initialisation object for the {@code IntersectionObserver}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver}
+ *
+ * @usage
+ * const ref = useRef<HTMLDivElement>(null);
+ *
+ * // isIntersecting will be true when the whole element is visible
+ * const isIntersecting = useOnScreen(ref, { threshold: 1.0 });
  */
-export function usePresentationModel<
-  E extends MachinePresentationModel<
-    TContext,
-    TStateSchema,
-    TEvent,
-    TTypestate
-  >,
-  TContext,
-  TStateSchema,
-  TEvent extends EventObject,
-  TTypestate extends Typestate<TContext> = { value: any; context: TContext }
->(
-  machine: StateMachine<TContext, TStateSchema, TEvent, TTypestate>,
-  initPresentationModel: (
-    current: State<TContext, TEvent, TStateSchema, TTypestate>,
-    service: Interpreter<TContext, TStateSchema, TEvent, TTypestate>
-  ) => E
+export function useOnScreen<E extends HTMLElement>(
+  ref: React.RefObject<E>,
+  options: IntersectionObserverInit
 ) {
-  // eslint-disable-next-line
-  const [current, _, service] = useMachine(machine);
-  const [model, setModel] = useState(() =>
-    initPresentationModel(current, service)
-  );
+  const [isIntersecting, setIntersecting] = useState(false);
 
-  // Whenever the current state changes, set state of the presentation model
   useEffect(() => {
-    setModel(model.setState(current));
-  }, [model, current]);
+    const observer = new IntersectionObserver(([entry]) => {
+      setIntersecting(entry.isIntersecting);
+    }, options);
 
-  return model;
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    const current = ref.current;
+
+    return () => {
+      current && observer.unobserve(current);
+    };
+  }, [options, ref]);
+
+  return isIntersecting;
 }
 
 /**
@@ -147,7 +155,7 @@ export function usePresentationModel<
  */
 export function usePrinters() {
   const [currentPrinter, setCurrentPrinter] = useState<
-    Maybe<GetPrintersQuery["printers"][number]>
+    Maybe<PrinterFieldsFragment>
   >(null);
 
   const [printResult, setPrintResult] = useState<Maybe<PrintResultType>>(null);
@@ -162,8 +170,8 @@ export function usePrinters() {
 
   const handleOnPrint = React.useCallback(
     (
-      printer: GetPrintersQuery["printers"][0],
-      labwares: Array<PrintableLabware>,
+      printer: PrinterFieldsFragment,
+      labwares: Array<LabwareFieldsFragment>,
       labelsPerBarcode: number
     ) => {
       setPrintResult({ successful: true, labwares, printer, labelsPerBarcode });
@@ -172,8 +180,8 @@ export function usePrinters() {
   );
   const handleOnPrintError = React.useCallback(
     (
-      printer: GetPrintersQuery["printers"][0],
-      labwares: Array<PrintableLabware>,
+      printer: PrinterFieldsFragment,
+      labwares: Array<LabwareFieldsFragment>,
       labelsPerBarcode: number
     ) => {
       setPrintResult({
@@ -193,4 +201,17 @@ export function usePrinters() {
     currentPrinter,
     printResult,
   };
+}
+
+/**
+ * Hook for tracking the previous value of state or props
+ */
+export function usePrevious<T>(
+  value: T
+): MutableRefObject<T | undefined>["current"] {
+  const ref = useRef<T>();
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref.current;
 }

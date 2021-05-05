@@ -2,7 +2,7 @@ import { graphql } from "msw";
 import {
   GetSectioningInfoQuery,
   GetSectioningInfoQueryVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 
 const sectioningHandlers = [
@@ -13,24 +13,32 @@ const sectioningHandlers = [
         ctx.data({
           comments: [
             {
+              __typename: "Comment",
               id: 1,
               text: "Section Folded",
               category: "section",
+              enabled: true,
             },
             {
+              __typename: "Comment",
               id: 2,
               text: "Poor section quality",
               category: "section",
+              enabled: true,
             },
             {
+              __typename: "Comment",
               id: 3,
               text: "Sectioned well",
               category: "section",
+              enabled: true,
             },
             {
+              __typename: "Comment",
               id: 4,
               text: "Section exploded",
               category: "section",
+              enabled: true,
             },
           ],
           labwareTypes: labwareTypeInstances,

@@ -1,7 +1,7 @@
 mutation Extract($request: ExtractRequest!) {
     extract(request: $request) {
         labware {
-            ...LabwareLayout
+            ...LabwareFields
         }
         operations {
             operationType {

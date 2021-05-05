@@ -33,7 +33,7 @@ const Button = ({
     <button {...rest} disabled={disabled} className={buttonClasses}>
       {children}
       {loading && (
-        <span className="absolute right-0 inset-y-0 flex items-center pr-3">
+        <span className="ml-3 -mr-1">
           <LoadingSpinner />
         </span>
       )}

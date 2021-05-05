@@ -2,7 +2,7 @@ import { MachineOptions } from "xstate";
 import { Source, LayoutContext } from "./layoutContext";
 import { LayoutEvents } from "./layoutEvents";
 import { assign } from "@xstate/immer";
-import { isEqual } from "lodash";
+import { find, isEqual, sortBy } from "lodash";
 
 export const layoutMachineKey = "layoutMachine";
 
@@ -24,7 +24,8 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_SOURCE") {
         return;
       }
-      ctx.selected = e.source;
+
+      ctx.selected = isEqual(ctx.selected, e.source) ? null : e.source;
     }),
 
     [Actions.DELETE_DESTINATION_ACTION]: assign((ctx, e) => {
@@ -35,7 +36,12 @@ export const machineOptions: Partial<MachineOptions<
     }),
 
     [Actions.ASSIGN_DESTINATION]: assign((ctx, e) => {
-      if (e.type !== "SELECT_DESTINATION" || !ctx.selected) {
+      if (e.type !== "SELECT_DESTINATION") {
+        return;
+      }
+
+      if (!ctx.selected) {
+        ctx.layoutPlan.plannedActions.delete(e.address);
         return;
       }
 
@@ -45,10 +51,19 @@ export const machineOptions: Partial<MachineOptions<
         labware: ctx.selected.labware,
       };
 
-      if (isEqual(ctx.layoutPlan.plannedActions.get(e.address), action)) {
-        ctx.layoutPlan.plannedActions.delete(e.address);
+      const plannedAddressActions = ctx.layoutPlan.plannedActions.get(
+        e.address
+      );
+
+      // There's no limit to how many sections can be put in a slot right now.
+      // If there needs to be in the future, this is the place to do that.
+      if (plannedAddressActions && find(plannedAddressActions, action)) {
+        ctx.layoutPlan.plannedActions.set(e.address, [
+          ...plannedAddressActions,
+          action,
+        ]);
       } else {
-        ctx.layoutPlan.plannedActions.set(e.address, action);
+        ctx.layoutPlan.plannedActions.set(e.address, [action]);
       }
     }),
 
@@ -66,7 +81,7 @@ export const machineOptions: Partial<MachineOptions<
       }
 
       ctx.layoutPlan.destinationLabware.slots.forEach((slot) => {
-        ctx.layoutPlan.plannedActions.set(slot.address, e.source);
+        ctx.layoutPlan.plannedActions.set(slot.address, [e.source]);
       });
     }),
 
@@ -75,10 +90,23 @@ export const machineOptions: Partial<MachineOptions<
         return;
       }
 
-      if (ctx.layoutPlan.plannedActions.has(e.address)) {
+      // If there was never anything in this slot, do nothing
+      if (ctx.possibleActions && !ctx.possibleActions.has(e.address)) {
+        return;
+      }
+
+      const slotActions = ctx.layoutPlan.plannedActions.get(e.address) ?? [];
+
+      if (slotActions.length > 1) {
+        const newSlotActions = sortBy(slotActions, ["newSection"]);
+        ctx.layoutPlan.plannedActions.set(
+          e.address,
+          newSlotActions.slice(0, -1)
+        );
+      } else if (slotActions.length === 1) {
         ctx.layoutPlan.plannedActions.delete(e.address);
-      } else if (ctx.possibleActions && ctx.possibleActions.has(e.address)) {
-        const source = ctx.possibleActions.get(e.address);
+      } else {
+        const source = ctx.possibleActions?.get(e.address);
         if (source) {
           ctx.layoutPlan.plannedActions.set(e.address, source);
         }

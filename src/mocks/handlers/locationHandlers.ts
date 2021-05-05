@@ -16,7 +16,7 @@ import {
   StoredItem,
   UnstoreBarcodeMutation,
   UnstoreBarcodeMutationVariables,
-} from "../../types/graphql";
+} from "../../types/sdk";
 import { graphql } from "msw";
 
 const locationHandlers = [
@@ -132,7 +132,9 @@ const locationHandlers = [
     "FindLabwareLocation",
     (req, res, ctx) => {
       const storedItems: Array<StoredItem> = locationRepository.findByLabwareBarcode(
-        req.variables.barcodes
+        Array.isArray(req.variables.barcodes)
+          ? req.variables.barcodes
+          : [req.variables.barcodes]
       );
 
       return res(
@@ -180,33 +182,37 @@ export default locationHandlers;
 
 function locationResponse(location: Location): LocationFieldsFragment {
   return {
-    __typename: "Location" as const,
+    __typename: "Location",
     barcode: location.barcode,
-    name: location.name,
+    fixedName: location.fixedName,
     customName: location.customName,
     address: location.address,
     direction: location.direction,
     parent: location.parent
       ? {
+          __typename: "LinkedLocation",
           barcode: location.parent.barcode,
-          name: location.parent.name,
+          fixedName: location.parent.fixedName,
           customName: location.parent.customName,
         }
       : null,
     size: location.size
       ? {
+          __typename: "Size",
           numRows: location.size.numRows,
           numColumns: location.size.numColumns,
         }
       : null,
     stored: location.stored.map((item) => ({
+      __typename: "StoredItem",
       barcode: item.barcode,
       address: item.address,
     })),
     children: location.children.map((child) => {
       return {
+        __typename: "LinkedLocation",
         barcode: child.barcode,
-        name: child.name,
+        fixedName: child.fixedName,
         customName: child.customName,
         address: child.address,
       };

@@ -1,21 +1,21 @@
-import React, { createContext, useEffect, useState } from "react";
-import { useApolloClient } from "@apollo/client";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useMinimumWait } from "../lib/hooks";
 import Splash from "../pages/Splash";
-import { useCurrentUserLazyQuery, useLogoutMutation } from "../types/graphql";
-
-/**
- * This will probably end up being an interface generated from a GraphQL type
- */
-interface UserInfo {
-  username: string;
-}
+import { UserFieldsFragment } from "../types/sdk";
+import { UserRole } from "../types/sdk";
+import { StanCoreContext } from "../lib/sdk";
 
 /**
  * Includes other properties the application is interested in for authentication
  */
 interface AuthState {
-  userInfo: UserInfo;
+  user: UserFieldsFragment;
 }
 
 interface AuthContext {
@@ -24,6 +24,7 @@ interface AuthContext {
   clearAuthState: () => void;
   logout: () => void;
   isAuthenticated: () => boolean;
+  userRoleIncludes: (role: UserRole) => boolean;
 }
 
 /**
@@ -31,6 +32,7 @@ interface AuthContext {
  */
 const initialContext: AuthContext = {
   isAuthenticated: () => false,
+  userRoleIncludes: () => false,
   setAuthState: () => {},
   clearAuthState: () => {},
   logout: () => {},
@@ -49,36 +51,37 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const waitElapsed = useMinimumWait(minimumWait);
   // Set the current auth state. null if user is not logged in.
   const [authState, setAuthState] = useState<AuthState | null>(null);
-  const [currentUser, { data }] = useCurrentUserLazyQuery();
-  const [logoutMutation] = useLogoutMutation();
-  const client = useApolloClient();
-
+  // We don't want to render children until the `currentUser` query has completed and
+  // authState has been set
+  const [isLoading, setIsLoading] = useState(true);
+  const stanCore = useContext(StanCoreContext);
   useEffect(() => {
-    try {
-      currentUser();
-    } catch (e) {
-      console.error(e);
+    async function checkCurrentUser() {
+      try {
+        const { user } = await stanCore.CurrentUser();
+        if (user) {
+          setAuthState({ user });
+        } else {
+          setAuthState(null);
+        }
+      } catch (e) {
+        setAuthState(null);
+        console.error("Current user query failed");
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [currentUser]);
+    checkCurrentUser();
+  }, [stanCore, setAuthState, setIsLoading]);
 
-  useEffect(() => {
-    if (data?.user) {
-      setAuthState({
-        userInfo: {
-          username: data.user.username,
-        },
-      });
-    } else {
-      setAuthState(null);
-    }
-  }, [data]);
+  const userRoles = Object.values(UserRole);
 
   /**
    * Sets the AuthState
    * @param userInfo
    */
-  const setAuthInfo = ({ userInfo }: AuthState) => {
-    setAuthState({ userInfo });
+  const setAuthInfo = ({ user }: AuthState) => {
+    setAuthState({ user });
   };
 
   /**
@@ -94,8 +97,7 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
    */
   const logout = async () => {
     try {
-      await logoutMutation();
-      await client.clearStore();
+      await stanCore.Logout();
       clearAuthState();
     } catch (e) {
       console.error(e);
@@ -109,6 +111,19 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     setAuthState(null);
   };
 
+  /**
+   * Check if the current authenticated user has the given role
+   */
+  const userRoleIncludes = useCallback(
+    (role: UserRole): boolean => {
+      if (!authState?.user) {
+        return false;
+      }
+      return userRoles.indexOf(authState.user.role) >= userRoles.indexOf(role);
+    },
+    [authState, userRoles]
+  );
+
   return (
     <Provider
       value={{
@@ -116,10 +131,11 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         setAuthState: (authState: AuthState) => setAuthInfo(authState),
         clearAuthState,
         isAuthenticated,
+        userRoleIncludes,
         logout,
       }}
     >
-      {!waitElapsed ? <Splash /> : children}
+      {!waitElapsed || isLoading ? <Splash /> : children}
     </Provider>
   );
 };

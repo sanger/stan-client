@@ -1,28 +1,25 @@
 import React, { useEffect } from "react";
 import { useMachine } from "@xstate/react";
 import PrintIcon from "./icons/PrintIcon";
-import { GetPrintersQuery, LabelType, Labware, Maybe } from "../types/graphql";
-import { buildLabelPrinterMachine } from "../lib/factories/machineFactory";
-import { PrintableLabware } from "../types/stan";
+import {
+  LabwareFieldsFragment,
+  Maybe,
+  PrinterFieldsFragment,
+} from "../types/sdk";
+import createLabelPrinterMachine from "../lib/machines/labelPrinter/labelPrinterMachine";
 
 interface LabelPrinterButtonProps {
-  selectedPrinter?: Maybe<GetPrintersQuery["printers"][number]>;
+  selectedPrinter?: Maybe<PrinterFieldsFragment>;
   labelsPerBarcode?: number;
-  labwares: Array<
-    Pick<Labware, "barcode"> & {
-      labwareType: {
-        labelType?: Maybe<Pick<LabelType, "name">>;
-      };
-    }
-  >;
+  labwares: Array<LabwareFieldsFragment>;
   onPrint?: (
-    printer: GetPrintersQuery["printers"][number],
-    labwares: Array<PrintableLabware>,
+    printer: PrinterFieldsFragment,
+    labwares: Array<LabwareFieldsFragment>,
     labelsPerBarcode: number
   ) => void;
   onPrintError?: (
-    printer: GetPrintersQuery["printers"][number],
-    labwares: Array<PrintableLabware>,
+    printer: PrinterFieldsFragment,
+    labwares: Array<LabwareFieldsFragment>,
     labelsPerBarcode: number
   ) => void;
 }
@@ -35,11 +32,16 @@ const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({
   onPrintError,
 }) => {
   const [current, send, service] = useMachine(
-    buildLabelPrinterMachine(labwares, selectedPrinter)
+    createLabelPrinterMachine({
+      context: {
+        selectedPrinter,
+        labwares,
+      },
+    })
   );
 
   useEffect(() => {
-    service.onTransition((state) => {
+    const subscription = service.subscribe((state) => {
       if (
         state.context.selectedPrinter &&
         state.matches({ ready: "printSuccess" })
@@ -62,6 +64,8 @@ const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({
         );
       }
     });
+
+    return () => subscription.unsubscribe();
   }, [service, onPrint, onPrintError, labelsPerBarcode]);
 
   return (
