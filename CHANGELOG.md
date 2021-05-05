@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+
+## [1.1.0]
+### Added
  - User authorization ([#30](https://github.com/sanger/stan-client/pull/30))
  - STAN Configuration ([#34](https://github.com/sanger/stan-client/pull/34))
  - Display info in footer ([#37](https://github.com/sanger/stan-client/pull/37/))
@@ -52,7 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Everything!
 
-[Unreleased]: https://github.com/sanger/stan-client/compare/1.0.0...HEAD
+[Unreleased]: https://github.com/sanger/stan-client/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/sanger/stan-client/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/sanger/stan-client/compare/0.6.1...1.0.0
 [0.6.1]: https://github.com/sanger/stan-client/compare/0.1.0...0.6.1
 [0.1.0]: https://github.com/sanger/stan-client/compare/0.0.1...0.1.0
