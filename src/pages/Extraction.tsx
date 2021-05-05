@@ -222,7 +222,7 @@ function Extraction() {
             Reset Form
           </BlueButton>
           <Link to={"/"}>
-            <BlueButton action="primary">Return to Dashboard</BlueButton>
+            <BlueButton action="primary">Return Home</BlueButton>
           </Link>
         </ButtonBar>
       )}
