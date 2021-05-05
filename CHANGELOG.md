@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 
-## [1.1.0]
+## [1.1.0] - 2021-05-05
 ### Added
  - User authorization ([#30](https://github.com/sanger/stan-client/pull/30))
  - STAN Configuration ([#34](https://github.com/sanger/stan-client/pull/34))
