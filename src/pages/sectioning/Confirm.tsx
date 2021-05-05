@@ -87,8 +87,8 @@ function Confirm() {
         onReset={reload}
       >
         <p>
-          If you wish to start the process again, click the "Reset Form" button,
-          otherwise you can return to the Home screen.
+          If you wish to start the process again, click the "Reset Form" button.
+          Otherwise you can return to the Home screen.
         </p>
       </OperationCompleteModal>
     </AppShell>

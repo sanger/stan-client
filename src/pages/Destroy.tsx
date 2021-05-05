@@ -184,7 +184,7 @@ const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
                 >
                   <p>
                     If you wish to start the process again, click the "Reset
-                    Form" button, otherwise you can return to the Home screen.
+                    Form" button. Otherwise you can return to the Home screen.
                   </p>
                 </OperationCompleteModal>
               </Form>
