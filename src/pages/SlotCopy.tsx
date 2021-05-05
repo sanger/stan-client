@@ -118,7 +118,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
                 Reset Form
               </BlueButton>
               <Link to={"/"}>
-                <BlueButton action="primary">Return to Dashboard</BlueButton>
+                <BlueButton action="primary">Return Home</BlueButton>
               </Link>
             </>
           )}
