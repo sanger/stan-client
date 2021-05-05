@@ -88,7 +88,7 @@ describe("Visium cDNA Page", () => {
             worker.resetHandlers();
           });
 
-          saveButton().click();
+          saveButton().should("not.be.disabled").click();
         });
 
         it("shows a success message", () => {
