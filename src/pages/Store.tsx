@@ -131,9 +131,7 @@ const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
   }
 
   if (error) {
-    return (
-      <Warning message={`Failed to load Location ${barcode}`} error={error} />
-    );
+    return <Warning message={`Failed to load Location ${barcode}`} />;
   }
 
   return (
