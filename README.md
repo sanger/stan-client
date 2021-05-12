@@ -22,15 +22,15 @@ In order for `graphql-codegen` to generate TypeScript types to match the GraphQL
     GRAPHQL_SCHEMA_PATH=/path/to/schema.graphqls
 
 ## Front-end Architecture
-The architecture of the front-end is split into 4 layers:
+The architecture of the front-end is split into 3 layers:
 
-![Front-end Architecture](public/frontend_architecture.png)
+[comment]: <> (![Front-end Architecture]&#40;public/frontend_architecture.png&#41;)
 
 - **UI (React)** - The user interface are the pages and components that make up the application. Built with React, they contain no application logic.
 
 - **Data Model (XState)** - STAN client state management uses [XState](https://xstate.js.org/docs/), a library for building StateCharts.
 
-- **Services** - Services handle all communication between STAN client and STAN core.
+- **Core SDK** - The SDK (which uses [graphql-request](https://github.com/prisma-labs/graphql-request)) is generated as part of `graphql-codegen` described above. handles all communication between STAN client and STAN core.
 
 ## Available Scripts
 
@@ -69,10 +69,6 @@ Runs the [GraphQL Code Generator](https://graphql-code-generator.com/docs/gettin
 GraphQL Code Generator is a CLI tool that can generate TypeScript typings out of a GraphQL schema.
 
 Its configuration lives in `codegen.yml`. Its output goes into the `/types` directory.
-
-### `yarn codegen:machine <name>`
-
-Runs a code generator ([hydra](http://www.hygen.io/docs/quick-start)) to generate an XState state machine with name as the CLI argument `<name>`. Generator template is in `_templates/machine/new`. 
 
 ### `yarn test:open`
 
@@ -122,7 +118,7 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 
 ## Useful Links
 
-- Apollo Client (client for calling GraphQL): https://www.apollographql.com/docs/react/
+- graphql-request: https://github.com/prisma-labs/graphql-request
 - Learn about cypress: https://docs.cypress.io/guides/overview/why-cypress.html#In-a-nutshell
 - Cypress assertions: https://docs.cypress.io/guides/references/assertions.html#Chai
 - Cypress testing library: https://testing-library.com/docs/cypress-testing-library/intro
