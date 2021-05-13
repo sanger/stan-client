@@ -26,6 +26,7 @@ import { ParsedQuery } from "query-string";
 import _ from "lodash";
 import Configuration from "../pages/Configuration";
 import { StanCoreContext } from "../lib/sdk";
+import Users from "../pages/Users";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -38,6 +39,18 @@ export function Routes() {
 
   return (
     <Switch>
+      <AuthenticatedRoute
+        path="/users"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetUsers}
+          >
+            {(usersQuery) => <Users usersQuery={usersQuery} />}
+          </DataFetcher>
+        )}
+      />
+
       <Route path="/logout">
         <Logout />
       </Route>
