@@ -26,7 +26,7 @@ import { useMachine } from "@xstate/react";
 import createFormMachine from "../lib/machines/form/formMachine";
 import Success from "../components/notifications/Success";
 import { toast } from "react-toastify";
-import { StanCoreContext } from "../lib/sdk";
+import { reload, StanCoreContext } from "../lib/sdk";
 
 const initialValues: ReleaseRequest = {
   barcodes: [],
@@ -132,6 +132,8 @@ function Release({ releaseInfo }: PageParams) {
       const ToastSuccess = () => <Success message={"Labware(s) Released"} />;
       toast(ToastSuccess, {
         position: toast.POSITION.TOP_RIGHT,
+        hideProgressBar: true,
+        autoClose: 4000,
       });
     }
   }, [current]);
@@ -282,6 +284,17 @@ function Release({ releaseInfo }: PageParams) {
                           Download Release File
                         </a>
                       </WhiteButton>
+                    )}
+
+                    {current.matches("submitted") && (
+                      <PinkButton
+                        action="tertiary"
+                        onClick={reload}
+                        className="sm:w-full"
+                        type="button"
+                      >
+                        Reset Form
+                      </PinkButton>
                     )}
                   </Sidebar>
                 </GrayBox>
