@@ -8,29 +8,29 @@ Make sure you have first gone through the `Getting Started` section of the [READ
 
 ### Step 0: Start up the servers
 
-Make sure STAN Core is up to date, and start `StanApplication` (it'll most likely start running on port `8080`).
-
 To run the client in development mode, you can use:
 ```shell
-yarn start
+yarn start:msw
 ```
+
+The `:msw` tells the service to start with Mock Service Worker as the API. This means we can use the client without having to start up STAN core.
 
 After a bit of time you should see a "Compiled successfully!" notification, as well as a message about how to view the client (by default it is port `3000`).
 
-`yarn start` starts up a `node` process for watching and compiling TypeScript, as well as a process for watching and compiling the CSS with TailwindCSS.
+`yarn start:msw` starts up a `node` process for watching and compiling TypeScript, as well as a process for watching and compiling the CSS with TailwindCSS.
 
-You should now be able to navigate to [STAN Client](http://localhost:3000).
+You should now be able to navigate to [STAN Client](http://localhost:3001).
 
 ### Step 1: Adding a new "Users" page
 
-Pages in STAN Client are located in `src/pages`. Add a new page in there named `Users.tsx`.
+Pages in STAN Client are located in `src/pages`. Add a new page in there named `Elephants.tsx`.
 
 STAN Client is a React application, so add in a very basic React component:
 
 ```typescript jsx
 import React from "react";
 
-export default function Users() {
+export default function Elephants() {
   return (
     <div>
       <h1>STAN Users</h1>
@@ -50,10 +50,10 @@ Open up `src/components/Routes.tsx`. In there you will find a `<Switch>` `React`
 We want to map the path `/users` to our new Users page. Inside the `<Switch>` component, add the following child:
 
 ```typescript jsx
-<AuthenticatedRoute path="/users" render={(routeProps) => <Users />} />
+<AuthenticatedRoute path="/users" render={(routeProps) => <Elephants />} />
 ```
 
-(Make sure to import the `Users` component at the top of the page also i.e. `import Users from "../pages/Users";`).
+(Make sure to import the `Users` component at the top of the page also i.e. `import Elephants from "../pages/Elephants";`).
 
 This component tells react router to render the Users component whenever an **authenticated** user navigates to `/users`.
 
@@ -63,13 +63,13 @@ If you try it now, and you're not logged in, you will be re-directed to the logi
 
 ### Step 3: Styling the page
 
-All pages in STAN client use the `<AppShell>` component as a wrapper. Add it into `Users.tsx` like so:
+All pages in STAN client use the `<AppShell>` component as a wrapper. Add it into `Elephants.tsx` like so:
 
 ```typescript jsx
 import React from "react";
 import AppShell from "../components/AppShell";
 
-export default function Users() {
+export default function Elephants() {
   return (
     <AppShell>
       <AppShell.Header>
@@ -116,14 +116,14 @@ Within `src/types/sdk.ts`, new TypeScript types for the `GetUsers` query have be
 
 Now, we want to call the newly generated method to fetch the user data. To do this, we use the `<DataFetcher>` component in `Routes.tsx`.
 
-First, ammend the users page to accept a new parameter:
+First, amend the users page to accept a new parameter:
 
 ```typescript jsx
 type UsersParams = {
   usersQuery: GetUsersQuery;
 };
 
-export default function Users({ usersQuery }: UsersParams) {
+export default function Elephants({ usersQuery }: UsersParams) {
   ...
 }
 ```
@@ -138,7 +138,7 @@ Then amend the `Routes` to add a `DataFetcher` that wraps the users page:
         key={routeProps.location.key}
         dataFetcher={stanCore.GetUsers}
       >
-        {(usersQuery) => <Users usersQuery={usersQuery} />}
+        {(usersQuery) => <Elephants usersQuery={usersQuery} />}
       </DataFetcher>
     )}
 />
