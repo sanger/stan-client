@@ -1,16 +1,20 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import Plan from "./sectioning/Plan";
 import Confirm from "./sectioning/Confirm";
 import {
+  ConfirmOperationLabware,
   GetSectioningInfoQuery,
   LabwareFieldsFragment,
   LabwareTypeFieldsFragment,
   Maybe,
+  PlanMutation,
 } from "../types/sdk";
 import { LabwareTypeName } from "../types/stan";
-import { sectioningMachine } from "../lib/machines/sectioning/sectioningMachine";
+import {
+  SectioningContext,
+  sectioningMachine,
+} from "../lib/machines/sectioning/sectioningMachine";
 import { useMachine } from "@xstate/react";
-import { SectioningContext } from "../lib/machines/sectioning/sectioningMachineTypes";
 
 type SectioningPageContextType = {
   isLabwareTableLocked: boolean;
@@ -28,6 +32,11 @@ type SectioningPageContextType = {
   backToPrep: () => void;
   confirmOperation: () => void;
   context: SectioningContext;
+  addPlan(
+    operations: PlanMutation["plan"]["operations"],
+    labware: PlanMutation["plan"]["labware"]
+  ): void;
+  commitConfirmation(confirmOperationLabware: ConfirmOperationLabware): void;
 };
 
 export const SectioningPageContext = React.createContext<
@@ -69,6 +78,23 @@ function Sectioning({ sectioningInfo }: SectioningParams) {
     );
   });
 
+  const addPlan = useCallback(
+    (
+      operations: PlanMutation["plan"]["operations"],
+      labware: PlanMutation["plan"]["labware"]
+    ) => {
+      send({ type: "PLAN_ADDED", operations, labware });
+    },
+    [send]
+  );
+
+  const commitConfirmation = useCallback(
+    (confirmOperationLabware: ConfirmOperationLabware) => {
+      send({ type: "COMMIT_CONFIRMATION", confirmOperationLabware });
+    },
+    [send]
+  );
+
   const sectioningPageContext: SectioningPageContextType = useMemo(() => {
     return {
       addLabwareLayout(): void {
@@ -94,7 +120,7 @@ function Sectioning({ sectioningInfo }: SectioningParams) {
       isNextBtnEnabled:
         current.context.sectioningLayouts.length > 0 &&
         current.context.sectioningLayouts.length ===
-          current.context.numSectioningLayoutsComplete,
+          current.context.plansCompleted,
       isStarted: current.matches("started"),
       prepDone(): void {
         send({ type: "PREP_DONE" });
@@ -108,9 +134,11 @@ function Sectioning({ sectioningInfo }: SectioningParams) {
       updateLabwares(labwares: Array<LabwareFieldsFragment>): void {
         send({ type: "UPDATE_LABWARES", labwares });
       },
+      addPlan,
+      commitConfirmation,
       context: current.context,
     };
-  }, [current, send]);
+  }, [current, send, commitConfirmation, addPlan]);
 
   const showConfirm = current.matches("confirming") || current.matches("done");
 

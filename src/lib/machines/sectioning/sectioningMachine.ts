@@ -1,4 +1,4 @@
-import { actions, Machine, MachineOptions, send, spawn } from "xstate";
+import { createMachine } from "xstate";
 import { Address, LabwareTypeName } from "../../../types/stan";
 import {
   buildConfirmOperationLabware,
@@ -7,199 +7,160 @@ import {
 import { assign } from "@xstate/immer";
 import { current } from "immer";
 import { buildSampleColors } from "../../helpers/labwareHelper";
-import { createSectioningLayoutMachine } from "./sectioningLayout/sectioningLayoutMachine";
-import { createSectioningConfirmMachine } from "./sectioningConfirm/sectioningConfirmMachine";
+import { SectioningLayout } from "./sectioningLayout/sectioningLayoutMachine";
+import { CommitConfirmationEvent } from "./sectioningConfirm/sectioningConfirmMachine";
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
-import { LabwareFieldsFragment, PlanMutation } from "../../../types/sdk";
+import {
+  Comment,
+  ConfirmOperationRequest,
+  ConfirmOperationResult,
+  GetSectioningInfoQuery,
+  LabwareFieldsFragment,
+  LabwareType,
+  Maybe,
+  PlanMutation,
+} from "../../../types/sdk";
+import { stanCore } from "../../sdk";
+import { UpdateLabwaresEvent } from "../labware/labwareMachineTypes";
 import {
   LayoutPlan,
   Source as LayoutPlanAction,
 } from "../layout/layoutContext";
-import {
-  S,
-  SectioningContext,
-  SectioningEvent,
-  SectioningSchema,
-} from "./sectioningMachineTypes";
-import {
-  SectioningLayout,
-  SectioningLayoutContext,
-  SectioningLayoutEvent,
-} from "./sectioningLayout/sectioningLayoutTypes";
-import { sectioningConfirmationComplete } from "./sectioningConfirm/sectioningConfirmEvents";
-import { stanCore } from "../../sdk";
 
-export const machineKey = "sectioningMachine";
+/**
+ * SectioningContext for the sectioningMachine
+ */
+export interface SectioningContext {
+  /**
+   * Allowed input labware types
+   */
+  inputLabwareTypeNames: string[];
 
-enum Action {
-  SELECT_LABWARE_TYPE = "selectLabwareType",
-  UPDATE_LABWARES = "updateLabwares",
-  ADD_LABWARE_LAYOUT = "addLabwareLayout",
-  DELETE_LABWARE_LAYOUT = "deleteLabwareLayout",
-  ASSIGN_PLAN = "assignPlan",
-  UPDATE_CONFIRMATION = "updateConfirmation",
-  UPDATE_SECTIONS_COMPLETED = "updateSectionsCompleted",
-  ASSIGN_CONFIRMED_OPERATION = "assignConfirmedOperation",
-  NOTIFY_COMPLETE = "notifyComplete",
+  /**
+   * Actual input labware types
+   */
+  inputLabwareTypes: GetSectioningInfoQuery["labwareTypes"];
+
+  /**
+   * Allowed output labware types
+   */
+  outputLabwareTypeNames: string[];
+
+  /**
+   * Actual output labware types
+   */
+  outputLabwareTypes: GetSectioningInfoQuery["labwareTypes"];
+
+  /**
+   * Available comments for confirmation
+   */
+  comments: Comment[];
+
+  /**
+   * Labware Type selected by the user
+   */
+  selectedLabwareType: Maybe<LabwareType>;
+
+  /**
+   * The input labwares sent up from the labware machine
+   */
+  sourceLabwares: LabwareFieldsFragment[];
+
+  /**
+   * Spawned sectioningLayoutMachines. SectioningSchema is synced back to this machine.
+   *
+   * @see {@link https://xstate.js.org/docs/guides/actors.html#actors}
+   */
+  sectioningLayouts: Array<SectioningLayout>;
+
+  /**
+   * The number of sectioning layouts that have completed (either successfully printed or just created for Visium LP)
+   */
+  numSectioningLayoutsComplete: number;
+
+  /**
+   * A map of sample ID to a hex color
+   */
+  sampleColors: Map<number, string>;
+
+  /**
+   * The request that will be send to the API at the end of Sectioning
+   */
+  confirmOperationRequest: ConfirmOperationRequest;
+
+  /**
+   * The successful of the Confirm Operation API call
+   */
+  confirmedOperation: Maybe<ConfirmOperationResult>;
+
+  /**
+   * The plans for how blocks will be sectioned
+   */
+  layoutPlans: Array<LayoutPlan>;
+
+  plansCompleted: number;
 }
 
-enum Guard {
-  ALL_LAYOUT_COMPLETE = "allLayoutComplete",
-  NO_SOURCE_LABWARES = "noSourceLabwares",
-  NO_LAYOUTS = "noLayouts",
-}
-
-enum Service {
-  GET_SECTIONING_INFO = "getSectioningInfo",
-  CONFIRM_OPERATION = "confirmOperation",
-}
-
-const sectioningMachineOptions: Partial<MachineOptions<
-  SectioningContext,
-  SectioningEvent
->> = {
-  actions: {
-    [Action.NOTIFY_COMPLETE]: actions.pure((ctx, _e) => {
-      const actors = Array.from(ctx.sectioningConfirmMachines.values()).flat();
-      return actors.map((actor) =>
-        send(sectioningConfirmationComplete(), { to: () => actor })
-      );
-    }),
-
-    [Action.SELECT_LABWARE_TYPE]: assign((ctx, e) => {
-      if (e.type !== "SELECT_LABWARE_TYPE") {
-        return;
-      }
-      ctx.selectedLabwareType = e.labwareType;
-    }),
-
-    [Action.UPDATE_LABWARES]: assign((ctx, e) => {
-      if (e.type !== "UPDATE_LABWARES") {
-        return;
-      }
-      ctx.sourceLabwares = e.labwares;
-      ctx.sampleColors = buildSampleColors(e.labwares);
-    }),
-
-    [Action.ADD_LABWARE_LAYOUT]: assign((ctx, e) => {
-      if (e.type !== "ADD_LABWARE_LAYOUT") {
-        return;
-      }
-      const copy = current(ctx);
-      const sectioningLayout: SectioningLayout = buildSectioningLayout(copy);
-
-      ctx.sectioningLayouts.push({
-        ...sectioningLayout,
-        ref: spawn<SectioningLayoutContext, SectioningLayoutEvent>(
-          createSectioningLayoutMachine(sectioningLayout)
-        ),
-      });
-    }),
-
-    [Action.DELETE_LABWARE_LAYOUT]: assign((ctx, e) => {
-      if (e.type !== "DELETE_LABWARE_LAYOUT") {
-        return;
-      }
-      ctx.sectioningLayouts.splice(e.index, 1);
-    }),
-
-    [Action.ASSIGN_PLAN]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.planSection" || !e.data) {
-        return;
-      }
-
-      const currentCtx = current(ctx);
-      const { plan } = e.data;
-
-      plan.labware.forEach((labware: any) => {
-        const labwareTypeName = labware.labwareType.name;
-
-        // Because JS maps can't have default values :(
-        if (!ctx.sectioningConfirmMachines.has(labwareTypeName)) {
-          ctx.sectioningConfirmMachines.set(labwareTypeName, []);
-        }
-
-        // Add a new ConfirmOperationLabware to ConfirmOperationRequest
-        ctx.confirmOperationRequest.labware.push(
-          buildConfirmOperationLabware(labware)
-        );
-
-        // Spawn a new Sectioning Outcome Machine
-        const sectioningOutComeActorsByType = ctx.sectioningConfirmMachines.get(
-          labwareTypeName
-        );
-        sectioningOutComeActorsByType?.push(
-          spawn(
-            createSectioningConfirmMachine(
-              currentCtx.comments,
-              labware,
-              buildSectioningOutcomeLayoutPlan(ctx, labware, plan.operations)
-            )
-          )
-        );
-      });
-    }),
-
-    [Action.UPDATE_SECTIONS_COMPLETED]: assign((ctx, e) => {
-      if (e.type !== "PREP_COMPLETE") {
-        return;
-      }
-      ctx.numSectioningLayoutsComplete += 1;
-    }),
-
-    [Action.UPDATE_CONFIRMATION]: assign((ctx, e) => {
-      if (e.type !== "COMMIT_CONFIRMATION") {
-        return;
-      }
-
-      const confirmationIndex = ctx.confirmOperationRequest.labware.findIndex(
-        (lw) => lw.barcode === e.confirmOperationLabware.barcode
-      );
-      if (confirmationIndex > -1) {
-        ctx.confirmOperationRequest.labware[confirmationIndex] =
-          e.confirmOperationLabware;
-      }
-    }),
-
-    [Action.ASSIGN_CONFIRMED_OPERATION]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.confirmOperation") {
-        return;
-      }
-      ctx.confirmedOperation = e.data;
-    }),
-  },
-
-  guards: {
-    /**
-     * Are there any sectioning layouts and have they all completed
-     */
-    [Guard.ALL_LAYOUT_COMPLETE]: (ctx) =>
-      ctx.sectioningLayouts.length > 0 &&
-      ctx.sectioningLayouts.length === ctx.numSectioningLayoutsComplete,
-    [Guard.NO_LAYOUTS]: (ctx) => ctx.sectioningLayouts.length === 0,
-    [Guard.NO_SOURCE_LABWARES]: (ctx) => ctx.sourceLabwares.length === 0,
-  },
-
-  services: {
-    [Service.GET_SECTIONING_INFO]: () => stanCore.GetSectioningInfo(),
-    [Service.CONFIRM_OPERATION]: (ctx) =>
-      stanCore.Confirm({ request: ctx.confirmOperationRequest }),
-  },
+type SelectLabwareTypeEvent = {
+  type: "SELECT_LABWARE_TYPE";
+  labwareType: GetSectioningInfoQuery["labwareTypes"][number];
 };
 
+type AddLabwareLayoutEvent = {
+  type: "ADD_LABWARE_LAYOUT";
+};
+
+type DeleteLabwareLayoutEvent = {
+  type: "DELETE_LABWARE_LAYOUT";
+  index: number;
+};
+
+type PlanAddedEvent = {
+  type: "PLAN_ADDED";
+  operations: PlanMutation["plan"]["operations"];
+  labware: PlanMutation["plan"]["labware"];
+};
+
+type PrepDoneEvent = {
+  type: "PREP_DONE";
+};
+
+type BackToPrepEvent = {
+  type: "BACK_TO_PREP";
+};
+
+type ConfirmOperationEvent = {
+  type: "CONFIRM_OPERATION";
+};
+
+type ConfirmOperationResolveEvent = {
+  type: "done.invoke.confirmOperation";
+  data: ConfirmOperationResult;
+};
+
+export type SectioningEvent =
+  | SelectLabwareTypeEvent
+  | AddLabwareLayoutEvent
+  | DeleteLabwareLayoutEvent
+  | UpdateLabwaresEvent
+  | PlanAddedEvent
+  | PrepDoneEvent
+  | BackToPrepEvent
+  | CommitConfirmationEvent
+  | ConfirmOperationEvent
+  | ConfirmOperationResolveEvent;
 /**
  * Machine for controlling the sectioning workflow.
  *
  * @see {@link labwareMachine}
  */
-export const sectioningMachine = Machine<
+export const sectioningMachine = createMachine<
   SectioningContext,
-  SectioningSchema,
   SectioningEvent
 >(
   {
-    key: machineKey,
-    initial: S.UNKNOWN,
+    key: "sectioningMachine",
+    initial: "unknown",
     context: {
       inputLabwareTypeNames: [LabwareTypeName.PROVIASETTE],
       inputLabwareTypes: [],
@@ -216,149 +177,209 @@ export const sectioningMachine = Machine<
       sectioningLayouts: [],
       numSectioningLayoutsComplete: 0,
       sampleColors: new Map(),
-      sectioningConfirmMachines: new Map(),
       confirmOperationRequest: buildConfirmOperationRequest(),
       confirmedOperation: null,
+      layoutPlans: [],
+      plansCompleted: 0,
     },
     states: {
-      [S.ERROR]: {},
-      [S.UNKNOWN]: {
+      error: {},
+      unknown: {
         always: [
           {
-            cond: Guard.NO_SOURCE_LABWARES,
-            target: S.READY,
+            cond: "noSourceLabwares",
+            target: "ready",
           },
           {
-            cond: Guard.NO_LAYOUTS,
-            target: `${S.STARTED}.${S.SOURCE_SCANNING}`,
+            cond: "noLayouts",
+            target: "started.sourceScanning",
           },
-          { target: `${S.STARTED}.${S.PREPARING_LABWARE}` },
+          { target: "started.preparingLabware" },
         ],
       },
-      [S.READY]: {
+      ready: {
         on: {
           UPDATE_LABWARES: {
-            target: S.UNKNOWN,
-            actions: Action.UPDATE_LABWARES,
+            target: "unknown",
+            actions: "updateLabwares",
           },
         },
       },
-      [S.STARTED]: {
+      started: {
         states: {
-          [S.SOURCE_SCANNING]: {
+          sourceScanning: {
             on: {
               UPDATE_LABWARES: {
-                actions: Action.UPDATE_LABWARES,
-                target: `#${machineKey}.${S.UNKNOWN}`,
+                actions: "updateLabwares",
+                target: "#sectioningMachine.unknown",
               },
               ADD_LABWARE_LAYOUT: {
-                actions: Action.ADD_LABWARE_LAYOUT,
-                target: `#${machineKey}.${S.UNKNOWN}`,
+                actions: "addLabwareLayout",
+                target: "#sectioningMachine.unknown",
               },
             },
           },
-          [S.PREPARING_LABWARE]: {
+          preparingLabware: {
             on: {
               DELETE_LABWARE_LAYOUT: {
-                actions: Action.DELETE_LABWARE_LAYOUT,
-                target: `#${machineKey}.${S.UNKNOWN}`,
+                actions: "deleteLabwareLayout",
+                target: "#sectioningMachine.unknown",
               },
               ADD_LABWARE_LAYOUT: {
-                actions: Action.ADD_LABWARE_LAYOUT,
-                target: `#${machineKey}.${S.UNKNOWN}`,
+                actions: "addLabwareLayout",
+                target: "#sectioningMachine.unknown",
               },
-              "done.invoke.planSection": {
-                actions: Action.ASSIGN_PLAN,
-                target: `#${machineKey}.${S.UNKNOWN}`,
-              },
-              PREP_COMPLETE: {
-                actions: Action.UPDATE_SECTIONS_COMPLETED,
+              PLAN_ADDED: {
+                actions: "assignPlan",
+                target: "#sectioningMachine.unknown",
               },
             },
           },
         },
         on: {
           SELECT_LABWARE_TYPE: {
-            actions: Action.SELECT_LABWARE_TYPE,
+            actions: "selectLabwareType",
           },
 
           PREP_DONE: {
-            cond: Guard.ALL_LAYOUT_COMPLETE,
-            target: S.CONFIRMING,
+            cond: "allLayoutComplete",
+            target: "confirming",
           },
         },
       },
-      [S.CONFIRMING]: {
-        initial: S.CONFIRMING_LABWARE,
+      confirming: {
+        initial: "confirmingLabware",
         on: {
           BACK_TO_PREP: {
-            target: S.UNKNOWN,
+            target: "unknown",
           },
           COMMIT_CONFIRMATION: {
-            actions: Action.UPDATE_CONFIRMATION,
+            actions: "updateConfirmation",
           },
           CONFIRM_OPERATION: {
-            target: `${S.CONFIRMING}.${S.CONFIRM_OPERATION}`,
+            target: "confirming.confirmOperation",
           },
         },
         states: {
-          [S.CONFIRMING_LABWARE]: {},
-          [S.CONFIRM_OPERATION]: {
+          confirmingLabware: {},
+          confirmOperation: {
             invoke: {
-              src: Service.CONFIRM_OPERATION,
+              src: "confirmOperation",
               onDone: {
-                actions: Action.ASSIGN_CONFIRMED_OPERATION,
-                target: `#${machineKey}.${S.DONE}`,
+                actions: "assignConfirmedOperation",
+                target: "#sectioningMachine.done",
               },
               onError: {
-                target: S.CONFIRM_ERROR,
+                target: "confirmError",
               },
             },
           },
-          [S.CONFIRM_ERROR]: {},
+          confirmError: {},
         },
       },
-      [S.DONE]: {
-        entry: Action.NOTIFY_COMPLETE,
+      done: {
         type: "final",
       },
     },
   },
-  sectioningMachineOptions
+  {
+    actions: {
+      selectLabwareType: assign((ctx, e) => {
+        if (e.type !== "SELECT_LABWARE_TYPE") {
+          return;
+        }
+        ctx.selectedLabwareType = e.labwareType;
+      }),
+
+      updateLabwares: assign((ctx, e) => {
+        if (e.type !== "UPDATE_LABWARES") {
+          return;
+        }
+        ctx.sourceLabwares = e.labwares;
+        ctx.sampleColors = buildSampleColors(e.labwares);
+      }),
+
+      addLabwareLayout: assign((ctx, e) => {
+        if (e.type !== "ADD_LABWARE_LAYOUT") {
+          return;
+        }
+        const copy = current(ctx);
+        const sectioningLayout: SectioningLayout = buildSectioningLayout(copy);
+
+        ctx.sectioningLayouts.push({
+          ...sectioningLayout,
+        });
+      }),
+
+      deleteLabwareLayout: assign((ctx, e) => {
+        if (e.type !== "DELETE_LABWARE_LAYOUT") {
+          return;
+        }
+        ctx.sectioningLayouts.splice(e.index, 1);
+      }),
+
+      assignPlan: assign((ctx, e) => {
+        if (e.type !== "PLAN_ADDED") {
+          return;
+        }
+
+        ctx.plansCompleted += 1;
+
+        e.labware.forEach((labware: any) => {
+          // Add a new ConfirmOperationLabware to ConfirmOperationRequest
+          ctx.confirmOperationRequest.labware.push(
+            buildConfirmOperationLabware(labware)
+          );
+
+          ctx.layoutPlans.push(buildLayoutPlan(ctx, labware, e.operations));
+        });
+      }),
+
+      updateConfirmation: assign((ctx, e) => {
+        if (e.type !== "COMMIT_CONFIRMATION") {
+          return;
+        }
+
+        const confirmationIndex = ctx.confirmOperationRequest.labware.findIndex(
+          (lw) => lw.barcode === e.confirmOperationLabware.barcode
+        );
+        if (confirmationIndex > -1) {
+          ctx.confirmOperationRequest.labware[confirmationIndex] =
+            e.confirmOperationLabware;
+        }
+      }),
+
+      assignConfirmedOperation: assign((ctx, e) => {
+        if (e.type !== "done.invoke.confirmOperation") {
+          return;
+        }
+        ctx.confirmedOperation = e.data;
+      }),
+    },
+
+    guards: {
+      /**
+       * Are there any sectioning layouts and have they all completed
+       */
+      allLayoutComplete: (ctx) => {
+        return (
+          ctx.sectioningLayouts.length > 0 &&
+          ctx.sectioningLayouts.length === ctx.plansCompleted
+        );
+      },
+      noLayouts: (ctx) => ctx.sectioningLayouts.length === 0,
+      noSourceLabwares: (ctx) => ctx.sourceLabwares.length === 0,
+    },
+
+    services: {
+      getSectioningInfo: () => stanCore.GetSectioningInfo(),
+      confirmOperation: (ctx) =>
+        stanCore.Confirm({ request: ctx.confirmOperationRequest }),
+    },
+  }
 );
 
-/**
- * Build a {@link SectioningLayout} model from the {@link SectioningContext}
- * @param ctx
- */
-function buildSectioningLayout(ctx: SectioningContext): SectioningLayout {
-  if (!ctx.selectedLabwareType) {
-    throw new Error("No Labware Type provided for Sectioning Layout");
-  }
-
-  const sectioningLayout: SectioningLayout = {
-    inputLabwares: ctx.sourceLabwares,
-    quantity: 1,
-    sectionThickness: 0,
-    sampleColors: ctx.sampleColors,
-    destinationLabware: unregisteredLabwareFactory.build(
-      {},
-      {
-        associations: {
-          labwareType: ctx.selectedLabwareType,
-        },
-      }
-    ),
-  };
-
-  if (ctx.selectedLabwareType.name === LabwareTypeName.VISIUM_LP) {
-    sectioningLayout.barcode = "";
-  }
-
-  return sectioningLayout;
-}
-
-function buildSectioningOutcomeLayoutPlan(
+function buildLayoutPlan(
   ctx: SectioningContext,
   labware: LabwareFieldsFragment,
   operations: PlanMutation["plan"]["operations"]
@@ -408,4 +429,35 @@ function findSourceLabware(
   }
 
   return labware;
+}
+
+/**
+ * Build a {@link SectioningLayout} model from the {@link SectioningContext}
+ * @param ctx
+ */
+function buildSectioningLayout(ctx: SectioningContext): SectioningLayout {
+  if (!ctx.selectedLabwareType) {
+    throw new Error("No Labware Type provided for Sectioning Layout");
+  }
+
+  const sectioningLayout: SectioningLayout = {
+    inputLabwares: ctx.sourceLabwares,
+    quantity: 1,
+    sectionThickness: 0,
+    sampleColors: ctx.sampleColors,
+    destinationLabware: unregisteredLabwareFactory.build(
+      {},
+      {
+        associations: {
+          labwareType: ctx.selectedLabwareType,
+        },
+      }
+    ),
+  };
+
+  if (ctx.selectedLabwareType.name === LabwareTypeName.VISIUM_LP) {
+    sectioningLayout.barcode = "";
+  }
+
+  return sectioningLayout;
 }

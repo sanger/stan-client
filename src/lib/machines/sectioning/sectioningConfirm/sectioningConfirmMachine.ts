@@ -1,53 +1,131 @@
-import { Machine, MachineOptions, sendParent } from "xstate";
+import { createMachine } from "xstate";
 import {
+  CancelPlanAction,
   Comment,
-  LabwareFieldsFragment as LabwareLayout,
+  ConfirmOperationLabware,
+  Maybe,
 } from "../../../../types/sdk";
-import { LayoutPlan } from "../../layout/layoutContext";
-import { LabwareTypeName } from "../../../../types/stan";
+import { LayoutPlan, Source } from "../../layout/layoutContext";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../layout/layoutMachine";
-import {
-  SectioningConfirmContext,
-  SectioningConfirmEvent,
-  SectioningConfirmSchema,
-  State,
-} from "./sectioningConfirmTypes";
-import { commitConfirmation } from "./sectioningConfirmEvents";
-import { cloneDeep } from "lodash";
+import { cloneDeep, find } from "lodash";
+import { isTube } from "../../../helpers/labwareHelper";
+import { Address, NewLabwareLayout } from "../../../../types/stan";
 
-enum Actions {
-  ASSIGN_ADDRESS_COMMENT = "assignAddressComment",
-  ASSIGN_ALL_COMMENT = "assignAllComment",
-  ASSIGN_LAYOUT_PLAN = "assignLayoutPlan",
-  TOGGLE_CANCEL = "toggleCancel",
-  COMMIT_CONFIRMATION = "commitConfirmation",
+export interface SectioningConfirmContext {
+  /**
+   * The layout plan created in the plan stage
+   */
+  originalLayoutPlan: LayoutPlan;
+
+  /**
+   * The current layout (some sections may have not been done in the end)
+   */
+  layoutPlan: LayoutPlan;
+
+  /**
+   * The destination labware
+   */
+  labware: NewLabwareLayout;
+
+  /**
+   * All comments available for the outcome confirmation
+   */
+  comments: Array<Comment>;
+
+  /**
+   * Map of labware address to comment ID
+   */
+  addressToCommentMap: Map<Address, number>;
+
+  /**
+   * Has this labware been cancelled (relevant only for tubes)
+   */
+  cancelled: boolean;
+
+  confirmOperationLabware: Maybe<ConfirmOperationLabware>;
 }
 
-enum Guards {
-  IS_TUBE = "isTube",
+type SetCommentForAddressEvent = {
+  type: "SET_COMMENT_FOR_ADDRESS";
+  address: string;
+  commentId: string;
+};
+
+type SetCommentForAllEvent = {
+  type: "SET_COMMENT_FOR_ALL";
+  commentId: string;
+};
+
+type EditLayoutEvent = { type: "EDIT_LAYOUT" };
+type CancelEditLayoutEvent = { type: "CANCEL_EDIT_LAYOUT" };
+type DoneEditLayoutEvent = { type: "DONE_EDIT_LAYOUT" };
+
+export type LayoutMachineDone = {
+  type: "done.invoke.layoutMachine";
+  data: { layoutPlan: LayoutPlan };
+};
+
+type ToggleCancelEvent = { type: "TOGGLE_CANCEL" };
+
+export type CommitConfirmationEvent = {
+  type: "COMMIT_CONFIRMATION";
+  confirmOperationLabware: ConfirmOperationLabware;
+};
+
+export type SectioningConfirmationCompleteEvent = {
+  type: "SECTIONING_CONFIRMATION_COMPLETE";
+};
+
+export type SectioningConfirmEvent =
+  | SetCommentForAddressEvent
+  | SetCommentForAllEvent
+  | EditLayoutEvent
+  | CancelEditLayoutEvent
+  | DoneEditLayoutEvent
+  | LayoutMachineDone
+  | ToggleCancelEvent
+  | CommitConfirmationEvent
+  | SectioningConfirmationCompleteEvent;
+
+function buildCancelPlanAction(
+  destinationAddress: string,
+  plannedAction: Source
+): CancelPlanAction {
+  return {
+    destinationAddress,
+    newSection: plannedAction.newSection,
+    sampleId: plannedAction.sampleId,
+  };
 }
 
-enum Services {
-  LAYOUT_MACHINE = "layoutMachine",
+function buildCancelPlanActions(
+  destinationAddress: string,
+  plannedActions: Array<Source>
+): Array<CancelPlanAction> {
+  return plannedActions.map((action) =>
+    buildCancelPlanAction(destinationAddress, action)
+  );
+}
+
+export function sectioningConfirmationComplete(): SectioningConfirmEvent {
+  return {
+    type: "SECTIONING_CONFIRMATION_COMPLETE",
+  };
 }
 
 /**
- * ConfirmLabware S Machine
+ * ConfirmLabware Machine
  */
 export const createSectioningConfirmMachine = (
   comments: Array<Comment>,
-  labware: LabwareLayout,
+  labware: NewLabwareLayout,
   layoutPlan: LayoutPlan
 ) =>
-  Machine<
-    SectioningConfirmContext,
-    SectioningConfirmSchema,
-    SectioningConfirmEvent
-  >(
+  createMachine<SectioningConfirmContext, SectioningConfirmEvent>(
     {
       id: "sectioningOutcome",
-      initial: State.INIT,
+      initial: "init",
       context: {
         comments,
         labware,
@@ -55,146 +133,173 @@ export const createSectioningConfirmMachine = (
         layoutPlan: cloneDeep(layoutPlan),
         addressToCommentMap: new Map(),
         cancelled: false,
+        confirmOperationLabware: null,
       },
       on: {
-        SECTIONING_CONFIRMATION_COMPLETE: State.DONE,
+        SECTIONING_CONFIRMATION_COMPLETE: "done",
       },
       states: {
-        [State.INIT]: {
+        init: {
           always: [
             {
-              cond: Guards.IS_TUBE,
-              target: State.CANCELLABLE_MODE,
+              cond: "isTube",
+              target: "cancellableMode",
             },
             {
-              target: State.EDITABLE_MODE,
+              target: "editableMode",
             },
           ],
         },
-        [State.CANCELLABLE_MODE]: {
+        cancellableMode: {
           on: {
             TOGGLE_CANCEL: {
-              actions: [Actions.TOGGLE_CANCEL, Actions.COMMIT_CONFIRMATION],
+              actions: ["toggleCancel", "commitConfirmation"],
             },
           },
         },
-        [State.EDITABLE_MODE]: {
+        editableMode: {
           on: {
             SET_COMMENT_FOR_ADDRESS: {
-              actions: [
-                Actions.ASSIGN_ADDRESS_COMMENT,
-                Actions.COMMIT_CONFIRMATION,
-              ],
+              actions: ["assignAddressComment", "commitConfirmation"],
             },
             SET_COMMENT_FOR_ALL: {
-              actions: [
-                Actions.ASSIGN_ALL_COMMENT,
-                Actions.COMMIT_CONFIRMATION,
-              ],
+              actions: ["assignAllComment", "commitConfirmation"],
             },
             EDIT_LAYOUT: {
-              target: State.EDITING_LAYOUT,
+              target: "editingLayout",
             },
           },
         },
-        [State.EDITING_LAYOUT]: {
+        editingLayout: {
           invoke: {
-            src: Services.LAYOUT_MACHINE,
+            src: "layoutMachine",
             onDone: {
-              target: State.EDITABLE_MODE,
-              actions: [
-                Actions.ASSIGN_LAYOUT_PLAN,
-                Actions.COMMIT_CONFIRMATION,
-              ],
+              target: "editableMode",
+              actions: ["assignLayoutPlan", "commitConfirmation"],
             },
           },
         },
-        [State.DONE]: {
+        done: {
           type: "final",
         },
       },
     },
-    machineOptions
+    {
+      actions: {
+        /**
+         * Assign a comment to a particular address
+         */
+        assignAddressComment: assign((ctx, e) => {
+          if (e.type !== "SET_COMMENT_FOR_ADDRESS") {
+            return;
+          }
+
+          if (e.commentId === "") {
+            ctx.addressToCommentMap.delete(e.address);
+          } else {
+            ctx.addressToCommentMap.set(e.address, Number(e.commentId));
+          }
+        }),
+
+        /**
+         * Assign all the addresses with planned actions in the same comment
+         */
+        assignAllComment: assign((ctx, e) => {
+          if (e.type !== "SET_COMMENT_FOR_ALL") {
+            return;
+          }
+          if (e.commentId === "") {
+            ctx.addressToCommentMap.clear();
+          } else {
+            ctx.layoutPlan.plannedActions.forEach((value, key) => {
+              ctx.addressToCommentMap.set(key, Number(e.commentId));
+            });
+          }
+        }),
+
+        /**
+         * Assign the layout plan that comes back from the layout machine.
+         * If there are any comments for slots that have now been removed, removed the comment also
+         */
+        assignLayoutPlan: assign((ctx, e) => {
+          if (e.type !== "done.invoke.layoutMachine" || !e.data) {
+            return;
+          }
+          ctx.layoutPlan = e.data.layoutPlan;
+
+          const unemptyAddresses = new Set(
+            ctx.layoutPlan.plannedActions.keys()
+          );
+          ctx.addressToCommentMap.forEach((_, key) => {
+            if (!unemptyAddresses.has(key)) {
+              ctx.addressToCommentMap.delete(key);
+            }
+          });
+        }),
+
+        /**
+         * Toggles whether this labware was used or not
+         */
+        toggleCancel: assign((ctx, e) => {
+          if (e.type !== "TOGGLE_CANCEL") {
+            return;
+          }
+          ctx.cancelled = !ctx.cancelled;
+        }),
+
+        commitConfirmation: assign((ctx) => {
+          const cancelledActions: Array<CancelPlanAction> = [];
+          const confirmPlannedActions = ctx.layoutPlan.plannedActions;
+
+          for (let [
+            destinationAddress,
+            originalPlannedActions,
+          ] of ctx.originalLayoutPlan.plannedActions.entries()) {
+            const plannedActions =
+              confirmPlannedActions.get(destinationAddress) ?? [];
+
+            // Find all the original planned actions that are now missing after layout confirmation
+            let missingOriginalActions: Array<Source> = originalPlannedActions.filter(
+              (action) =>
+                !find(plannedActions, {
+                  sampleId: action.sampleId,
+                  newSection: action.newSection,
+                  address: action.address,
+                })
+            );
+
+            cancelledActions.push(
+              ...buildCancelPlanActions(
+                destinationAddress,
+                missingOriginalActions
+              )
+            );
+          }
+
+          ctx.confirmOperationLabware = {
+            barcode: ctx.labware.barcode!,
+            cancelled: ctx.cancelled,
+            cancelledActions,
+            addressComments: Array.from(
+              ctx.addressToCommentMap.entries()
+            ).map(([address, commentId]) => ({ address, commentId })),
+          };
+
+          console.log(ctx.confirmOperationLabware);
+        }),
+      },
+      activities: {},
+      delays: {},
+      guards: {
+        isTube: (ctx) => isTube(ctx.labware.labwareType),
+      },
+      services: {
+        layoutMachine: (ctx, _e) => {
+          return createLayoutMachine(
+            ctx.layoutPlan,
+            ctx.originalLayoutPlan.plannedActions
+          );
+        },
+      },
+    }
   );
-
-const machineOptions: Partial<MachineOptions<
-  SectioningConfirmContext,
-  SectioningConfirmEvent
->> = {
-  actions: {
-    /**
-     * Assign a comment to a particular address
-     */
-    [Actions.ASSIGN_ADDRESS_COMMENT]: assign((ctx, e) => {
-      if (e.type !== "SET_COMMENT_FOR_ADDRESS") {
-        return;
-      }
-
-      if (e.commentId === "") {
-        ctx.addressToCommentMap.delete(e.address);
-      } else {
-        ctx.addressToCommentMap.set(e.address, Number(e.commentId));
-      }
-    }),
-
-    /**
-     * Assign all the addresses with planned actions in the same comment
-     */
-    [Actions.ASSIGN_ALL_COMMENT]: assign((ctx, e) => {
-      if (e.type !== "SET_COMMENT_FOR_ALL") {
-        return;
-      }
-      if (e.commentId === "") {
-        ctx.addressToCommentMap.clear();
-      } else {
-        ctx.layoutPlan.plannedActions.forEach((value, key) => {
-          ctx.addressToCommentMap.set(key, Number(e.commentId));
-        });
-      }
-    }),
-
-    /**
-     * Assign the layout plan that comes back from the layout machine.
-     * If there are any comments for slots that have now been removed, removed the comment also
-     */
-    [Actions.ASSIGN_LAYOUT_PLAN]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.layoutMachine" || !e.data) {
-        return;
-      }
-      ctx.layoutPlan = e.data.layoutPlan;
-
-      const unemptyAddresses = new Set(ctx.layoutPlan.plannedActions.keys());
-      ctx.addressToCommentMap.forEach((_, key) => {
-        if (!unemptyAddresses.has(key)) {
-          ctx.addressToCommentMap.delete(key);
-        }
-      });
-    }),
-
-    /**
-     * Toggles whether this labware was used or not
-     */
-    [Actions.TOGGLE_CANCEL]: assign((ctx, e) => {
-      if (e.type !== "TOGGLE_CANCEL") {
-        return;
-      }
-      ctx.cancelled = !ctx.cancelled;
-    }),
-
-    [Actions.COMMIT_CONFIRMATION]: sendParent((ctx) => commitConfirmation(ctx)),
-  },
-  activities: {},
-  delays: {},
-  guards: {
-    [Guards.IS_TUBE]: (ctx) =>
-      ctx.labware.labwareType.name === LabwareTypeName.TUBE,
-  },
-  services: {
-    [Services.LAYOUT_MACHINE]: (ctx, _e) => {
-      return createLayoutMachine(
-        ctx.layoutPlan,
-        ctx.originalLayoutPlan.plannedActions
-      );
-    },
-  },
-};

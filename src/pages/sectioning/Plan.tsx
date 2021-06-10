@@ -59,8 +59,9 @@ function Plan() {
               <SectioningLayout
                 ref={i === sectioningLayouts.length - 1 ? ref : null}
                 key={i}
+                onCreate={model.addPlan}
                 onDelete={() => model.deleteLabwareLayout(i)}
-                actor={sectioningLayout.ref}
+                initialSectioningLayout={sectioningLayout}
               />
             ))}
           </div>

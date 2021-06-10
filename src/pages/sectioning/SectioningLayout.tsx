@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import labwareScanTableColumns from "../../components/labwareScanPanel/columns";
 import PinkButton from "../../components/buttons/PinkButton";
-import { useActor } from "@xstate/react";
+import { useMachine } from "@xstate/react";
 import Label from "../../components/forms/Label";
 import Modal, { ModalBody, ModalFooter } from "../../components/Modal";
 import BlueButton from "../../components/buttons/BlueButton";
@@ -11,33 +11,34 @@ import Labware from "../../components/labware/Labware";
 import { motion } from "framer-motion";
 import variants from "../../lib/motionVariants";
 import Warning from "../../components/notifications/Warning";
-import {
-  createLabware,
-  editLayout,
-  updateSectioningLayout,
-} from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutEvents";
 import { LabwareTypeName } from "../../types/stan";
 import LabelPrinter, { PrintResult } from "../../components/LabelPrinter";
 import LabelPrinterButton from "../../components/LabelPrinterButton";
-import { cancel, done } from "../../lib/machines/layout/layoutEvents";
-import {
-  SectioningLayoutActorRef,
-  SectioningLayoutEvent,
-  SectioningLayoutMachineType,
-} from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutTypes";
 import DataTable from "../../components/DataTable";
 import { CellProps, Column, Row } from "react-table";
-import { LabwareFieldsFragment } from "../../types/sdk";
+import { LabwareFieldsFragment, PlanMutation } from "../../types/sdk";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { Input } from "../../components/forms/Input";
 import { usePrinters } from "../../lib/hooks";
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from "./index";
+import {
+  createSectioningLayoutMachine,
+  SectioningLayout as SectioningLayoutModel,
+} from "../../lib/machines/sectioning/sectioningLayout/sectioningLayoutMachine";
 
 interface SectioningLayoutProps {
   /**
-   * {@link https://xstate.js.org/docs/guides/actors.html#spawning-machines Actor} to that will be passed into `useActor`.
+   * A sectioning layout
    */
-  actor: SectioningLayoutActorRef;
+  initialSectioningLayout: SectioningLayoutModel;
+
+  /**
+   * Callback for when planned labware is created
+   */
+  onCreate: (
+    operations: PlanMutation["plan"]["operations"],
+    labware: PlanMutation["plan"]["labware"]
+  ) => void;
 
   /**
    * Callback to be called when deleting a SectioningLayout
@@ -48,11 +49,20 @@ interface SectioningLayoutProps {
 const SectioningLayout = React.forwardRef<
   HTMLDivElement,
   SectioningLayoutProps
->(({ actor, onDelete }, ref) => {
-  const [current, send] = useActor<
-    SectioningLayoutEvent,
-    SectioningLayoutMachineType["state"]
-  >(actor);
+>(({ initialSectioningLayout, onCreate, onDelete }, ref) => {
+  const [current, send, service] = useMachine(
+    createSectioningLayoutMachine(initialSectioningLayout)
+  );
+
+  useEffect(() => {
+    const subscription = service.subscribe((state) => {
+      if (state.matches("done") || state.matches("printing")) {
+        onCreate(state.context.plannedOperations, state.context.plannedLabware);
+      }
+    });
+
+    return subscription.unsubscribe;
+  }, [service, onCreate]);
 
   const {
     handleOnPrint,
@@ -150,7 +160,7 @@ const SectioningLayout = React.forwardRef<
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
             labware={sectioningLayout.destinationLabware}
-            onClick={() => send(editLayout())}
+            onClick={() => send({ type: "EDIT_LAYOUT" })}
             name={sectioningLayout.destinationLabware.labwareType.name}
             slotText={(address) => buildSlotText(layoutPlan, address)}
             slotSecondaryText={(address) =>
@@ -160,7 +170,7 @@ const SectioningLayout = React.forwardRef<
           />
 
           {current.matches("prep") && (
-            <PinkButton onClick={() => send(editLayout())}>
+            <PinkButton onClick={() => send({ type: "EDIT_LAYOUT" })}>
               Edit Layout
             </PinkButton>
           )}
@@ -192,11 +202,12 @@ const SectioningLayout = React.forwardRef<
                   type="text"
                   value={sectioningLayout.barcode}
                   onChange={(e) =>
-                    send(
-                      updateSectioningLayout({
+                    send({
+                      type: "UPDATE_SECTIONING_LAYOUT",
+                      sectioningLayout: {
                         barcode: e.currentTarget.value.trim(),
-                      })
-                    )
+                      },
+                    })
                   }
                 />
               </Label>
@@ -214,11 +225,12 @@ const SectioningLayout = React.forwardRef<
                   step={1}
                   value={sectioningLayout.quantity}
                   onChange={(e) =>
-                    send(
-                      updateSectioningLayout({
+                    send({
+                      type: "UPDATE_SECTIONING_LAYOUT",
+                      sectioningLayout: {
                         quantity: Number(e.currentTarget.value),
-                      })
-                    )
+                      },
+                    })
                   }
                 />
               </Label>
@@ -239,11 +251,12 @@ const SectioningLayout = React.forwardRef<
                     : sectioningLayout.sectionThickness
                 }
                 onChange={(e) => {
-                  send(
-                    updateSectioningLayout({
+                  send({
+                    type: "UPDATE_SECTIONING_LAYOUT",
+                    sectioningLayout: {
                       sectionThickness: Number(e.currentTarget.value),
-                    })
-                  );
+                    },
+                  });
                 }}
               />
             </Label>
@@ -274,7 +287,7 @@ const SectioningLayout = React.forwardRef<
               <WhiteButton onClick={onDelete}>Delete Layout</WhiteButton>
               <BlueButton
                 disabled={current.matches("prep.invalid")}
-                onClick={() => send(createLabware())}
+                onClick={() => send({ type: "CREATE_LABWARE" })}
               >
                 Create Labware
               </BlueButton>
@@ -306,13 +319,13 @@ const SectioningLayout = React.forwardRef<
         </ModalBody>
         <ModalFooter>
           <BlueButton
-            onClick={() => layoutMachine.send(done())}
+            onClick={() => layoutMachine.send({ type: "DONE" })}
             className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
           >
             Done
           </BlueButton>
           <WhiteButton
-            onClick={() => layoutMachine.send(cancel())}
+            onClick={() => layoutMachine.send({ type: "CANCEL" })}
             className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
           >
             Cancel
