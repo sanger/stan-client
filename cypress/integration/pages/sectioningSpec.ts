@@ -1,7 +1,4 @@
-import {
-  PlanMutation,
-  PlanMutationVariables,
-} from "../../../src/types/sdk";
+import { PlanMutation, PlanMutationVariables } from "../../../src/types/sdk";
 
 describe("Sectioning", () => {
   before(() => {
@@ -244,7 +241,7 @@ describe("Sectioning", () => {
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation("Confirm", (req, res, ctx) => {
+            graphql.mutation("ConfirmSection", (req, res, ctx) => {
               return res.once(
                 ctx.errors([
                   {

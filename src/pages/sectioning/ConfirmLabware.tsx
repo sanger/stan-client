@@ -112,6 +112,18 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                       commentId: e.currentTarget.value,
                     });
                   }}
+                  onSectionNumberChange={(
+                    slotAddress,
+                    sectionIndex,
+                    sectionNumber
+                  ) => {
+                    send({
+                      type: "UPDATE_SECTION_NUMBER",
+                      slotAddress,
+                      sectionIndex,
+                      sectionNumber,
+                    });
+                  }}
                 />
               ))}
             </div>

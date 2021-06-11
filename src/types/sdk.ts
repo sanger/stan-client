@@ -270,6 +270,23 @@ export type ConfirmOperationRequest = {
   labware: Array<ConfirmOperationLabware>;
 };
 
+export type ConfirmSection = {
+  destinationAddress: Scalars['Address'];
+  sampleId: Scalars['Int'];
+  newSection?: Maybe<Scalars['Int']>;
+};
+
+export type ConfirmSectionLabware = {
+  barcode: Scalars['String'];
+  cancelled?: Maybe<Scalars['Boolean']>;
+  confirmSections?: Maybe<Array<ConfirmSection>>;
+  addressComments?: Maybe<Array<AddressCommentInput>>;
+};
+
+export type ConfirmSectionRequest = {
+  labware: Array<ConfirmSectionLabware>;
+};
+
 export type SlotCopyContent = {
   sourceBarcode: Scalars['String'];
   sourceAddress: Scalars['Address'];
@@ -570,6 +587,7 @@ export type Mutation = {
   plan: PlanResult;
   printLabware?: Maybe<Scalars['String']>;
   confirmOperation: ConfirmOperationResult;
+  confirmSection: OperationResult;
   release: ReleaseResult;
   extract: OperationResult;
   destroy: DestroyResult;
@@ -624,6 +642,11 @@ export type MutationPrintLabwareArgs = {
 
 export type MutationConfirmOperationArgs = {
   request: ConfirmOperationRequest;
+};
+
+
+export type MutationConfirmSectionArgs = {
+  request: ConfirmSectionRequest;
 };
 
 
@@ -822,7 +845,7 @@ export type ReleaseRecipientFieldsFragment = (
 
 export type SampleFieldsFragment = (
   { __typename?: 'Sample' }
-  & Pick<Sample, 'id'>
+  & Pick<Sample, 'id' | 'section'>
   & { tissue: (
     { __typename?: 'Tissue' }
     & Pick<Tissue, 'externalName' | 'replicate'>
@@ -950,6 +973,32 @@ export type ConfirmMutation = (
   { __typename?: 'Mutation' }
   & { confirmOperation: (
     { __typename?: 'ConfirmOperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
+);
+
+export type ConfirmSectionMutationVariables = Exact<{
+  request: ConfirmSectionRequest;
+}>;
+
+
+export type ConfirmSectionMutation = (
+  { __typename?: 'Mutation' }
+  & { confirmSection: (
+    { __typename?: 'OperationResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
       & LabwareFieldsFragment
@@ -1599,6 +1648,7 @@ export const LabwareTypeFieldsFragmentDoc = gql`
 export const SampleFieldsFragmentDoc = gql`
     fragment SampleFields on Sample {
   id
+  section
   tissue {
     donor {
       donorName
@@ -1747,6 +1797,24 @@ export const AddSpeciesDocument = gql`
 export const ConfirmDocument = gql`
     mutation Confirm($request: ConfirmOperationRequest!) {
   confirmOperation(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
+export const ConfirmSectionDocument = gql`
+    mutation ConfirmSection($request: ConfirmSectionRequest!) {
+  confirmSection(request: $request) {
     labware {
       ...LabwareFields
     }
@@ -2202,6 +2270,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     Confirm(variables: ConfirmMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmMutation> {
       return withWrapper(() => client.request<ConfirmMutation>(ConfirmDocument, variables, requestHeaders));
+    },
+    ConfirmSection(variables: ConfirmSectionMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmSectionMutation> {
+      return withWrapper(() => client.request<ConfirmSectionMutation>(ConfirmSectionDocument, variables, requestHeaders));
     },
     Destroy(variables: DestroyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DestroyMutation> {
       return withWrapper(() => client.request<DestroyMutation>(DestroyDocument, variables, requestHeaders));

@@ -1,9 +1,13 @@
 import { createMachine } from "xstate";
-import { Address, LabwareTypeName } from "../../../types/stan";
 import {
-  buildConfirmOperationLabware,
-  buildConfirmOperationRequest,
-} from "../../factories/confirmOperationRequest";
+  Address,
+  LabwareTypeName,
+  MachineServiceError,
+} from "../../../types/stan";
+import {
+  buildConfirmSectionLabware,
+  buildConfirmSectionRequest,
+} from "../../factories/confirmSectionRequestFactory";
 import { assign } from "@xstate/immer";
 import { current } from "immer";
 import { buildSampleColors } from "../../helpers/labwareHelper";
@@ -12,12 +16,12 @@ import { CommitConfirmationEvent } from "./sectioningConfirm/sectioningConfirmMa
 import { unregisteredLabwareFactory } from "../../factories/labwareFactory";
 import {
   Comment,
-  ConfirmOperationRequest,
-  ConfirmOperationResult,
+  ConfirmSectionRequest,
   GetSectioningInfoQuery,
   LabwareFieldsFragment,
   LabwareType,
   Maybe,
+  OperationResult,
   PlanMutation,
 } from "../../../types/sdk";
 import { stanCore } from "../../sdk";
@@ -26,6 +30,7 @@ import {
   LayoutPlan,
   Source as LayoutPlanAction,
 } from "../layout/layoutContext";
+import { ClientError } from "graphql-request";
 
 /**
  * SectioningContext for the sectioningMachine
@@ -86,19 +91,27 @@ export interface SectioningContext {
   /**
    * The request that will be send to the API at the end of Sectioning
    */
-  confirmOperationRequest: ConfirmOperationRequest;
+  confirmSectionRequest: ConfirmSectionRequest;
 
   /**
    * The successful of the Confirm Operation API call
    */
-  confirmedOperation: Maybe<ConfirmOperationResult>;
+  confirmedOperation: Maybe<OperationResult>;
 
   /**
    * The plans for how blocks will be sectioned
    */
   layoutPlans: Array<LayoutPlan>;
 
+  /**
+   * Track the number of layout plans completed
+   */
   plansCompleted: number;
+
+  /**
+   * Possible errors that come back from the server
+   */
+  serverErrors?: ClientError;
 }
 
 type SelectLabwareTypeEvent = {
@@ -129,14 +142,16 @@ type BackToPrepEvent = {
   type: "BACK_TO_PREP";
 };
 
-type ConfirmOperationEvent = {
-  type: "CONFIRM_OPERATION";
+type ConfirmSectionEvent = {
+  type: "CONFIRM_SECTION";
 };
 
-type ConfirmOperationResolveEvent = {
-  type: "done.invoke.confirmOperation";
-  data: ConfirmOperationResult;
+type ConfirmSectionResolveEvent = {
+  type: "done.invoke.confirmSection";
+  data: OperationResult;
 };
+
+type ConfirmSectionErrorEvent = MachineServiceError<"confirmSection">;
 
 export type SectioningEvent =
   | SelectLabwareTypeEvent
@@ -147,8 +162,10 @@ export type SectioningEvent =
   | PrepDoneEvent
   | BackToPrepEvent
   | CommitConfirmationEvent
-  | ConfirmOperationEvent
-  | ConfirmOperationResolveEvent;
+  | ConfirmSectionEvent
+  | ConfirmSectionResolveEvent
+  | ConfirmSectionErrorEvent;
+
 /**
  * Machine for controlling the sectioning workflow.
  *
@@ -177,7 +194,7 @@ export const sectioningMachine = createMachine<
       sectioningLayouts: [],
       numSectioningLayoutsComplete: 0,
       sampleColors: new Map(),
-      confirmOperationRequest: buildConfirmOperationRequest(),
+      confirmSectionRequest: buildConfirmSectionRequest(),
       confirmedOperation: null,
       layoutPlans: [],
       plansCompleted: 0,
@@ -256,20 +273,21 @@ export const sectioningMachine = createMachine<
           COMMIT_CONFIRMATION: {
             actions: "updateConfirmation",
           },
-          CONFIRM_OPERATION: {
-            target: "confirming.confirmOperation",
+          CONFIRM_SECTION: {
+            target: "confirming.confirmSection",
           },
         },
         states: {
           confirmingLabware: {},
-          confirmOperation: {
+          confirmSection: {
             invoke: {
-              src: "confirmOperation",
+              src: "confirmSection",
               onDone: {
-                actions: "assignConfirmedOperation",
+                actions: "assignConfirmedSection",
                 target: "#sectioningMachine.done",
               },
               onError: {
+                actions: "assignConfirmError",
                 target: "confirmError",
               },
             },
@@ -327,8 +345,8 @@ export const sectioningMachine = createMachine<
 
         e.labware.forEach((labware: any) => {
           // Add a new ConfirmOperationLabware to ConfirmOperationRequest
-          ctx.confirmOperationRequest.labware.push(
-            buildConfirmOperationLabware(labware)
+          ctx.confirmSectionRequest.labware.push(
+            buildConfirmSectionLabware(labware)
           );
 
           ctx.layoutPlans.push(buildLayoutPlan(ctx, labware, e.operations));
@@ -340,20 +358,27 @@ export const sectioningMachine = createMachine<
           return;
         }
 
-        const confirmationIndex = ctx.confirmOperationRequest.labware.findIndex(
+        const confirmationIndex = ctx.confirmSectionRequest.labware.findIndex(
           (lw) => lw.barcode === e.confirmOperationLabware.barcode
         );
         if (confirmationIndex > -1) {
-          ctx.confirmOperationRequest.labware[confirmationIndex] =
+          ctx.confirmSectionRequest.labware[confirmationIndex] =
             e.confirmOperationLabware;
         }
       }),
 
-      assignConfirmedOperation: assign((ctx, e) => {
-        if (e.type !== "done.invoke.confirmOperation") {
+      assignConfirmedSection: assign((ctx, e) => {
+        if (e.type !== "done.invoke.confirmSection") {
           return;
         }
         ctx.confirmedOperation = e.data;
+      }),
+
+      assignConfirmError: assign((ctx, e) => {
+        if (e.type !== "error.platform.confirmSection") {
+          return;
+        }
+        ctx.serverErrors = e.data;
       }),
     },
 
@@ -373,8 +398,8 @@ export const sectioningMachine = createMachine<
 
     services: {
       getSectioningInfo: () => stanCore.GetSectioningInfo(),
-      confirmOperation: (ctx) =>
-        stanCore.Confirm({ request: ctx.confirmOperationRequest }),
+      confirmSection: (ctx) =>
+        stanCore.ConfirmSection({ request: ctx.confirmSectionRequest }),
     },
   }
 );
@@ -404,7 +429,9 @@ function buildLayoutPlan(
             planAction.source.labwareId
           ),
           address: planAction.source.address,
-          newSection: planAction.newSection,
+
+          // Section number will be assigned by the user at confirm stage
+          newSection: undefined,
         };
         if (memo.has(planAction.destination.address)) {
           memo.get(planAction.destination.address)?.push(action);

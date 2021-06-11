@@ -9,6 +9,8 @@ import { SectioningPageContext } from "../Sectioning";
 import OperationCompleteModal from "../../components/modal/OperationCompleteModal";
 import { reload } from "../../lib/sdk";
 import { LabwareTypeName } from "../../types/stan";
+import DataTable from "../../components/DataTable";
+import columns from "../../components/labwareScanPanel/columns";
 
 function Confirm() {
   const model = useContext(SectioningPageContext)!;
@@ -38,6 +40,11 @@ function Confirm() {
       </AppShell.Header>
       <AppShell.Main>
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
+          <DataTable
+            data={model.context.sourceLabwares}
+            columns={[columns.barcode(), columns.sectionNumber()]}
+          />
+
           <div className="space-y-4">
             {/* Always show tubes first (if there are any) */}
             {layoutPlansByLabwareType?.[LabwareTypeName.TUBE] && (
@@ -63,6 +70,7 @@ function Confirm() {
             {model.isConfirmError && (
               <div ref={ref}>
                 <Warning
+                  error={model.context.serverErrors}
                   message={
                     "There was an error confirming the Sectioning operation"
                   }

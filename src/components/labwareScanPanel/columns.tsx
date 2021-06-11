@@ -1,6 +1,10 @@
 import React from "react";
 import { CellProps, Column } from "react-table";
-import { Labware, LabwareFieldsFragment } from "../../types/sdk";
+import {
+  Labware,
+  LabwareFieldsFragment,
+  SampleFieldsFragment,
+} from "../../types/sdk";
 import Circle from "../Circle";
 
 /**
@@ -26,7 +30,7 @@ function joinUnique(array: string[]) {
 
 function valueFromSamples(
   labware: LabwareFieldsFragment,
-  sampleFunction: (sample: any) => string
+  sampleFunction: (sample: SampleFieldsFragment) => string
 ) {
   return joinUnique(
     labware.slots.flatMap((slot) => slot.samples).map(sampleFunction)
@@ -75,7 +79,9 @@ const spatialLocation: ColumnFactory = () => {
   return {
     Header: "Spatial location",
     accessor: (labware) =>
-      valueFromSamples(labware, (sample) => sample.tissue.spatialLocation.code),
+      valueFromSamples(labware, (sample) =>
+        String(sample.tissue.spatialLocation.code)
+      ),
   };
 };
 
@@ -86,7 +92,7 @@ const replicate: ColumnFactory = () => {
   return {
     Header: "Replicate",
     accessor: (labware) =>
-      valueFromSamples(labware, (sample) => sample.tissue.replicate),
+      valueFromSamples(labware, (sample) => String(sample.tissue.replicate)),
   };
 };
 
@@ -119,6 +125,17 @@ const bioState: ColumnFactory = () => {
   };
 };
 
+/**
+ * Section numbers from all samples on labware
+ */
+const sectionNumber: ColumnFactory = () => {
+  return {
+    Header: "Section Number",
+    accessor: (labware) =>
+      valueFromSamples(labware, (sample) => String(sample.section)),
+  };
+};
+
 const columns = {
   color,
   barcode,
@@ -129,6 +146,7 @@ const columns = {
   labwareType,
   externalName,
   bioState,
+  sectionNumber,
 };
 
 export default columns;
