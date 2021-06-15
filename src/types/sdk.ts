@@ -868,7 +868,7 @@ export type SampleFieldsFragment = (
 
 export type SlotFieldsFragment = (
   { __typename?: 'Slot' }
-  & Pick<Slot, 'address' | 'labwareId'>
+  & Pick<Slot, 'address' | 'labwareId' | 'highestSection'>
   & { samples: Array<(
     { __typename?: 'Sample' }
     & SampleFieldsFragment
@@ -1674,6 +1674,7 @@ export const SlotFieldsFragmentDoc = gql`
   samples {
     ...SampleFields
   }
+  highestSection
 }
     ${SampleFieldsFragmentDoc}`;
 export const LabwareFieldsFragmentDoc = gql`

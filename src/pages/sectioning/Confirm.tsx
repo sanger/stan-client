@@ -42,7 +42,7 @@ function Confirm() {
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
           <DataTable
             data={model.context.sourceLabwares}
-            columns={[columns.barcode(), columns.sectionNumber()]}
+            columns={[columns.barcode(), columns.highestSectionForSlot("A1")]}
           />
 
           <div className="space-y-4">

@@ -6,6 +6,7 @@ import {
   SampleFieldsFragment,
 } from "../../types/sdk";
 import Circle from "../Circle";
+import { maybeFindSlotByAddress } from "../../lib/helpers/slotHelper";
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
@@ -126,13 +127,13 @@ const bioState: ColumnFactory = () => {
 };
 
 /**
- * Section numbers from all samples on labware
+ * Section number for a given slot
  */
-const sectionNumber: ColumnFactory = () => {
+const highestSectionForSlot: ColumnFactory = (slotAddress) => {
   return {
     Header: "Section Number",
     accessor: (labware) =>
-      valueFromSamples(labware, (sample) => String(sample.section)),
+      maybeFindSlotByAddress(labware.slots, slotAddress)?.highestSection ?? "-",
   };
 };
 
@@ -146,7 +147,7 @@ const columns = {
   labwareType,
   externalName,
   bioState,
-  sectionNumber,
+  highestSectionForSlot,
 };
 
 export default columns;
