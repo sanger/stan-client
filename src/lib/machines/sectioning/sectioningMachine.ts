@@ -25,12 +25,13 @@ import {
   PlanMutation,
 } from "../../../types/sdk";
 import { stanCore } from "../../sdk";
-import { UpdateLabwaresEvent } from "../labware/labwareMachineTypes";
 import {
   LayoutPlan,
   Source as LayoutPlanAction,
 } from "../layout/layoutContext";
 import { ClientError } from "graphql-request";
+import { UpdateLabwaresEvent } from "../labware/labwareMachine";
+import { uniqueId } from "lodash";
 
 /**
  * SectioningContext for the sectioningMachine
@@ -104,6 +105,16 @@ export interface SectioningContext {
   layoutPlans: Array<LayoutPlan>;
 
   /**
+   * Sectioning Layout Id to its plan
+   */
+  sectioningLayoutPlans: Map<string, PlanMutation["plan"]>;
+
+  /**
+   * Sectioning Layout Id to its layout plan
+   */
+  sectioningLayoutLayoutPlan: Map<string, LayoutPlan>;
+
+  /**
    * Track the number of layout plans completed
    */
   plansCompleted: number;
@@ -130,8 +141,8 @@ type DeleteLabwareLayoutEvent = {
 
 type PlanAddedEvent = {
   type: "PLAN_ADDED";
-  operations: PlanMutation["plan"]["operations"];
-  labware: PlanMutation["plan"]["labware"];
+  sectioningLayoutId: string;
+  plan: PlanMutation["plan"];
 };
 
 type PrepDoneEvent = {
@@ -197,6 +208,8 @@ export const sectioningMachine = createMachine<
       confirmSectionRequest: buildConfirmSectionRequest(),
       confirmedOperation: null,
       layoutPlans: [],
+      sectioningLayoutPlans: new Map(),
+      sectioningLayoutLayoutPlan: new Map(),
       plansCompleted: 0,
     },
     states: {
@@ -343,13 +356,24 @@ export const sectioningMachine = createMachine<
 
         ctx.plansCompleted += 1;
 
-        e.labware.forEach((labware: any) => {
+        ctx.sectioningLayoutPlans.set(e.sectioningLayoutId, e.plan);
+
+        e.plan.labware.forEach((labware, index) => {
           // Add a new ConfirmOperationLabware to ConfirmOperationRequest
           ctx.confirmSectionRequest.labware.push(
             buildConfirmSectionLabware(labware)
           );
 
-          ctx.layoutPlans.push(buildLayoutPlan(ctx, labware, e.operations));
+          let layoutPlan = buildLayoutPlan(ctx, labware, e.plan.operations);
+
+          if (index === 0) {
+            ctx.sectioningLayoutLayoutPlan.set(
+              e.sectioningLayoutId,
+              layoutPlan
+            );
+          }
+
+          ctx.layoutPlans.push(layoutPlan);
         });
       }),
 
@@ -404,7 +428,7 @@ export const sectioningMachine = createMachine<
   }
 );
 
-function buildLayoutPlan(
+export function buildLayoutPlan(
   ctx: SectioningContext,
   labware: LabwareFieldsFragment,
   operations: PlanMutation["plan"]["operations"]
@@ -468,6 +492,7 @@ function buildSectioningLayout(ctx: SectioningContext): SectioningLayout {
   }
 
   const sectioningLayout: SectioningLayout = {
+    cid: uniqueId("sectioning_layout_"),
     inputLabwares: ctx.sourceLabwares,
     quantity: 1,
     sectionThickness: 0,

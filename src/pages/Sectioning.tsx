@@ -32,10 +32,7 @@ type SectioningPageContextType = {
   backToPrep: () => void;
   confirmOperation: () => void;
   context: SectioningContext;
-  addPlan(
-    operations: PlanMutation["plan"]["operations"],
-    labware: PlanMutation["plan"]["labware"]
-  ): void;
+  addPlan(sectioningLayoutId: string, plan: PlanMutation["plan"]): void;
   commitConfirmation(confirmOperationLabware: ConfirmOperationLabware): void;
 };
 
@@ -79,11 +76,8 @@ function Sectioning({ sectioningInfo }: SectioningParams) {
   });
 
   const addPlan = useCallback(
-    (
-      operations: PlanMutation["plan"]["operations"],
-      labware: PlanMutation["plan"]["labware"]
-    ) => {
-      send({ type: "PLAN_ADDED", operations, labware });
+    (sectioningLayoutId: string, plan: PlanMutation["plan"]) => {
+      send({ type: "PLAN_ADDED", sectioningLayoutId, plan });
     },
     [send]
   );

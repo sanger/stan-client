@@ -71,6 +71,11 @@ export type SectioningLayoutEvent =
  */
 export interface SectioningLayout {
   /**
+   * Client ID to help tracking
+   */
+  cid: string;
+
+  /**
    * The labwares available to section from
    */
   inputLabwares: LabwareFieldsFragment[];
@@ -121,14 +126,9 @@ export interface SectioningLayoutContext {
   validator: Yup.ObjectSchema;
 
   /**
-   * The planner operations returned from the plan mutation
+   * A plan returned from core
    */
-  plannedOperations: PlanMutation["plan"]["operations"];
-
-  /**
-   * The planned labware returned from the plan mutation
-   */
-  plannedLabware: Array<PlanMutation["plan"]["labware"][number]>;
+  plan: Maybe<PlanMutation["plan"]>;
 
   /**
    * Reference to a `LayoutMachine` Actor
@@ -155,7 +155,9 @@ export interface SectioningLayoutContext {
  * Machine for the controlling how samples will be laid out into labware.
  */
 export const createSectioningLayoutMachine = (
-  sectioningLayout: SectioningLayout
+  sectioningLayout: SectioningLayout,
+  plan?: PlanMutation["plan"],
+  layoutPlan?: LayoutPlan
 ) =>
   createMachine<SectioningLayoutContext, SectioningLayoutEvent>(
     {
@@ -166,11 +168,10 @@ export const createSectioningLayoutMachine = (
         validator: buildValidator(
           sectioningLayout.destinationLabware.labwareType
         ),
-        plannedLabware: [],
-        plannedOperations: [],
-        layoutPlan: buildLayoutPlan(sectioningLayout),
+        plan: plan ?? null,
+        layoutPlan: layoutPlan ?? buildInitialLayoutPlan(sectioningLayout),
       },
-      initial: "prep",
+      initial: plan ? "done" : "prep",
       states: {
         prep: {
           initial: "invalid",
@@ -268,8 +269,7 @@ export const createSectioningLayoutMachine = (
           if (e.type !== "done.invoke.planSection" || !e.data) {
             return;
           }
-          ctx.plannedOperations = e.data.plan.operations;
-          ctx.plannedLabware = e.data.plan.labware;
+          ctx.plan = e.data.plan;
         }),
 
         assignServerErrors: assign((ctx, e) => {
@@ -372,7 +372,9 @@ function buildValidator(labwareType: LabwareType): Yup.ObjectSchema {
  * Build a {@link LayoutPlan} from a {@link SectioningLayout} to be used in a {@link LayoutPlanner}
  * @param sectioningLayout the {@link SectioningLayout}
  */
-function buildLayoutPlan(sectioningLayout: SectioningLayout): LayoutPlan {
+function buildInitialLayoutPlan(
+  sectioningLayout: SectioningLayout
+): LayoutPlan {
   return {
     destinationLabware: sectioningLayout.destinationLabware,
     plannedActions: new Map(),
