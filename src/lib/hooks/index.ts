@@ -215,3 +215,39 @@ export function usePrevious<T>(
   }, [value]);
   return ref.current;
 }
+
+/**
+ * Hook for adding/removing a listener to confirm if a user wants to leave a page
+ * if they're part way through an operation.
+ *
+ * @param initialShouldConfirm true if the operation has already started; false otherwise
+ */
+export function useConfirmLeave(initialShouldConfirm = false) {
+  const [shouldConfirm, setShouldConfirm] = useState(initialShouldConfirm);
+
+  useEffect(() => {
+    /**
+     * Note that the browser will probably show its own message, but weirdly you still have to
+     * provide the returnValue property
+     * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event}
+     */
+    const beforeunloadListener = (e: BeforeUnloadEvent) => {
+      if (shouldConfirm) {
+        e.preventDefault();
+        return (e.returnValue =
+          "You have unsaved data. Are you sure you want to leave?");
+      }
+    };
+
+    if (shouldConfirm) {
+      window.addEventListener("beforeunload", beforeunloadListener);
+    } else {
+      window.removeEventListener("beforeunload", beforeunloadListener);
+    }
+
+    return () =>
+      window.removeEventListener("beforeunload", beforeunloadListener);
+  }, [shouldConfirm]);
+
+  return [shouldConfirm, setShouldConfirm] as const;
+}

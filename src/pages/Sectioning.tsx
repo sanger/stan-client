@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import Plan from "./sectioning/Plan";
 import Confirm from "./sectioning/Confirm";
 import {
@@ -15,6 +15,8 @@ import {
   sectioningMachine,
 } from "../lib/machines/sectioning/sectioningMachine";
 import { useMachine } from "@xstate/react";
+import { Prompt } from "react-router-dom";
+import { useConfirmLeave } from "../lib/hooks";
 
 type SectioningPageContextType = {
   isLabwareTableLocked: boolean;
@@ -45,7 +47,7 @@ type SectioningParams = {
 };
 
 function Sectioning({ sectioningInfo }: SectioningParams) {
-  const [current, send] = useMachine(() => {
+  const [current, send, service] = useMachine(() => {
     const inputLabwareTypeNames = [LabwareTypeName.PROVIASETTE];
     const outputLabwareTypeNames = [
       LabwareTypeName.TUBE,
@@ -134,10 +136,29 @@ function Sectioning({ sectioningInfo }: SectioningParams) {
     };
   }, [current, send, commitConfirmation, addPlan]);
 
+  const [inProgress, setInProgress] = useConfirmLeave();
+  useEffect(() => {
+    const subscription = service.subscribe((state) => {
+      if (state.matches("started")) {
+        setInProgress(true);
+      }
+
+      if (state.matches("done")) {
+        setInProgress(false);
+      }
+    });
+
+    return subscription.unsubscribe;
+  }, [service, setInProgress]);
+
   const showConfirm = current.matches("confirming") || current.matches("done");
 
   return (
     <SectioningPageContext.Provider value={sectioningPageContext}>
+      <Prompt
+        when={inProgress}
+        message={"You have unsaved changes. Are you sure you want to leave?"}
+      />
       {showConfirm ? <Confirm /> : <Plan />}
     </SectioningPageContext.Provider>
   );
