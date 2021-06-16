@@ -1,14 +1,15 @@
 import { createMachine } from "xstate";
 import {
-  CancelPlanAction,
   Comment,
   ConfirmOperationLabware,
+  ConfirmSection,
+  ConfirmSectionLabware,
   Maybe,
 } from "../../../../types/sdk";
 import { LayoutPlan, Source } from "../../layout/layoutContext";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../layout/layoutMachine";
-import { cloneDeep, find } from "lodash";
+import { cloneDeep } from "lodash";
 import { isTube } from "../../../helpers/labwareHelper";
 import { Address, NewLabwareLayout } from "../../../../types/stan";
 
@@ -43,7 +44,7 @@ export interface SectioningConfirmContext {
    */
   cancelled: boolean;
 
-  confirmOperationLabware: Maybe<ConfirmOperationLabware>;
+  confirmSectionLabware: Maybe<ConfirmSectionLabware>;
 }
 
 type SetCommentForAddressEvent = {
@@ -68,6 +69,13 @@ export type LayoutMachineDone = {
 
 type ToggleCancelEvent = { type: "TOGGLE_CANCEL" };
 
+type UpdateSectionNumberEvent = {
+  type: "UPDATE_SECTION_NUMBER";
+  slotAddress: string;
+  sectionIndex: number;
+  sectionNumber: number;
+};
+
 export type CommitConfirmationEvent = {
   type: "COMMIT_CONFIRMATION";
   confirmOperationLabware: ConfirmOperationLabware;
@@ -85,13 +93,14 @@ export type SectioningConfirmEvent =
   | DoneEditLayoutEvent
   | LayoutMachineDone
   | ToggleCancelEvent
+  | UpdateSectionNumberEvent
   | CommitConfirmationEvent
   | SectioningConfirmationCompleteEvent;
 
-function buildCancelPlanAction(
+function buildConfirmSection(
   destinationAddress: string,
   plannedAction: Source
-): CancelPlanAction {
+): ConfirmSection {
   return {
     destinationAddress,
     newSection: plannedAction.newSection,
@@ -99,19 +108,13 @@ function buildCancelPlanAction(
   };
 }
 
-function buildCancelPlanActions(
+function buildConfirmSections(
   destinationAddress: string,
   plannedActions: Array<Source>
-): Array<CancelPlanAction> {
+): Array<ConfirmSection> {
   return plannedActions.map((action) =>
-    buildCancelPlanAction(destinationAddress, action)
+    buildConfirmSection(destinationAddress, action)
   );
-}
-
-export function sectioningConfirmationComplete(): SectioningConfirmEvent {
-  return {
-    type: "SECTIONING_CONFIRMATION_COMPLETE",
-  };
 }
 
 /**
@@ -133,7 +136,7 @@ export const createSectioningConfirmMachine = (
         layoutPlan: cloneDeep(layoutPlan),
         addressToCommentMap: new Map(),
         cancelled: false,
-        confirmOperationLabware: null,
+        confirmSectionLabware: null,
       },
       on: {
         SECTIONING_CONFIRMATION_COMPLETE: "done",
@@ -155,6 +158,9 @@ export const createSectioningConfirmMachine = (
             TOGGLE_CANCEL: {
               actions: ["toggleCancel", "commitConfirmation"],
             },
+            UPDATE_SECTION_NUMBER: {
+              actions: ["updateSectionNumber", "commitConfirmation"],
+            },
           },
         },
         editableMode: {
@@ -167,6 +173,9 @@ export const createSectioningConfirmMachine = (
             },
             EDIT_LAYOUT: {
               target: "editingLayout",
+            },
+            UPDATE_SECTION_NUMBER: {
+              actions: ["updateSectionNumber", "commitConfirmation"],
             },
           },
         },
@@ -247,45 +256,45 @@ export const createSectioningConfirmMachine = (
           ctx.cancelled = !ctx.cancelled;
         }),
 
+        updateSectionNumber: assign((ctx, e) => {
+          if (e.type !== "UPDATE_SECTION_NUMBER") {
+            return;
+          }
+
+          const plannedAction = ctx.layoutPlan.plannedActions.get(
+            e.slotAddress
+          );
+
+          if (plannedAction && plannedAction[e.sectionIndex]) {
+            plannedAction[e.sectionIndex].newSection = e.sectionNumber;
+          }
+        }),
+
         commitConfirmation: assign((ctx) => {
-          const cancelledActions: Array<CancelPlanAction> = [];
-          const confirmPlannedActions = ctx.layoutPlan.plannedActions;
+          const confirmSections: Array<ConfirmSection> = [];
 
           for (let [
             destinationAddress,
             originalPlannedActions,
-          ] of ctx.originalLayoutPlan.plannedActions.entries()) {
-            const plannedActions =
-              confirmPlannedActions.get(destinationAddress) ?? [];
-
-            // Find all the original planned actions that are now missing after layout confirmation
-            let missingOriginalActions: Array<Source> = originalPlannedActions.filter(
-              (action) =>
-                !find(plannedActions, {
-                  sampleId: action.sampleId,
-                  newSection: action.newSection,
-                  address: action.address,
-                })
-            );
-
-            cancelledActions.push(
-              ...buildCancelPlanActions(
+          ] of ctx.layoutPlan.plannedActions.entries()) {
+            confirmSections.push(
+              ...buildConfirmSections(
                 destinationAddress,
-                missingOriginalActions
+                originalPlannedActions
               )
             );
           }
 
-          ctx.confirmOperationLabware = {
+          ctx.confirmSectionLabware = {
             barcode: ctx.labware.barcode!,
             cancelled: ctx.cancelled,
-            cancelledActions,
+            confirmSections,
             addressComments: Array.from(
               ctx.addressToCommentMap.entries()
             ).map(([address, commentId]) => ({ address, commentId })),
           };
 
-          console.log(ctx.confirmOperationLabware);
+          console.log(ctx.confirmSectionLabware);
         }),
       },
       activities: {},

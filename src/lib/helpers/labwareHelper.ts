@@ -124,6 +124,7 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
       labwareId: slot.labwareId,
       samples: slot.samples.map((sample) => ({
         id: sample.id,
+        section: sample.section,
         bioState: {
           __typename: "BioState",
           name: sample.bioState.name,

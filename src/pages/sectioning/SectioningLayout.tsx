@@ -15,7 +15,7 @@ import { LabwareTypeName } from "../../types/stan";
 import LabelPrinter, { PrintResult } from "../../components/LabelPrinter";
 import LabelPrinterButton from "../../components/LabelPrinterButton";
 import DataTable from "../../components/DataTable";
-import { CellProps, Column, Row } from "react-table";
+import { CellProps } from "react-table";
 import { LabwareFieldsFragment, PlanMutation } from "../../types/sdk";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { Input } from "../../components/forms/Input";
@@ -75,58 +75,11 @@ const SectioningLayout = React.forwardRef<
   const {
     serverErrors,
     plannedLabware,
-    plannedOperations,
     sectioningLayout,
     layoutPlan,
   } = current.context;
 
   const { layoutMachine } = current.children;
-
-  // Special kind of column for displaying the sectioning numbers given from a planned operation
-  const sectionsColumn: Column<LabwareFieldsFragment> = React.useMemo(() => {
-    return {
-      Header: "Section Number",
-      id: "sections",
-      Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
-        return plannedOperations.map((operation, j) => {
-          const addressToSectionsMap: Map<
-            string,
-            Array<number | null | undefined>
-          > = operation.planActions
-            .filter(
-              (action) => action.destination.labwareId === row.original.id
-            )
-            .reduce((memo, planAction) => {
-              const addressSections = memo.get(planAction.destination.address);
-              if (!addressSections) {
-                memo.set(planAction.destination.address, [
-                  planAction.newSection,
-                ]);
-              } else {
-                memo.set(planAction.destination.address, [
-                  ...addressSections,
-                  planAction.newSection,
-                ]);
-              }
-              return memo;
-            }, new Map());
-
-          const newSections = Array.from(addressToSectionsMap.keys())
-            .sort()
-            .map((address) => (
-              <li key={address} className="text-sm">
-                <span className="font-semibold">{address}</span>{" "}
-                <span className="">
-                  {addressToSectionsMap.get(address)?.join(", ")}
-                </span>
-              </li>
-            ));
-
-          return <ul key={j}>{newSections}</ul>;
-        });
-      },
-    };
-  }, [plannedOperations]);
 
   // Special case column that renders a label printer button for each row
   const printColumn = {
@@ -142,11 +95,7 @@ const SectioningLayout = React.forwardRef<
     ),
   };
 
-  const columns = [
-    labwareScanTableColumns.barcode(),
-    sectionsColumn,
-    printColumn,
-  ];
+  const columns = [labwareScanTableColumns.barcode(), printColumn];
 
   return (
     <motion.div

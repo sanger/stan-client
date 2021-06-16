@@ -2,7 +2,7 @@ import { MachineOptions } from "xstate";
 import { Source, LayoutContext } from "./layoutContext";
 import { LayoutEvents } from "./layoutEvents";
 import { assign } from "@xstate/immer";
-import { find, isEqual, sortBy } from "lodash";
+import { find, isEqual } from "lodash";
 
 export const layoutMachineKey = "layoutMachine";
 
@@ -98,11 +98,7 @@ export const machineOptions: Partial<MachineOptions<
       const slotActions = ctx.layoutPlan.plannedActions.get(e.address) ?? [];
 
       if (slotActions.length > 1) {
-        const newSlotActions = sortBy(slotActions, ["newSection"]);
-        ctx.layoutPlan.plannedActions.set(
-          e.address,
-          newSlotActions.slice(0, -1)
-        );
+        slotActions.pop();
       } else if (slotActions.length === 1) {
         ctx.layoutPlan.plannedActions.delete(e.address);
       } else {

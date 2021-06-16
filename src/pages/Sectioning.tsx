@@ -104,7 +104,7 @@ function Sectioning({ sectioningInfo }: SectioningParams) {
         send({ type: "BACK_TO_PREP" });
       },
       confirmOperation(): void {
-        send({ type: "CONFIRM_OPERATION" });
+        send({ type: "CONFIRM_SECTION" });
       },
       deleteLabwareLayout(index: number): void {
         send({

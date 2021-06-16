@@ -4,4 +4,5 @@ fragment SlotFields on Slot {
     samples {
         ...SampleFields
     }
+    highestSection
 }

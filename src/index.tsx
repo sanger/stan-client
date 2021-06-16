@@ -4,6 +4,12 @@ import { enableAllPlugins } from "immer";
 import "./styles/index.css";
 import App from "./App";
 
+// To use the XState Inspector, uncomment the following lines
+// import { inspect } from "@xstate/inspect";
+// inspect({
+//   iframe: false,
+// });
+
 /**
  * Enable all immer plugins
  * {@link https://immerjs.github.io/immer/docs/installation}

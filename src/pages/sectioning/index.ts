@@ -29,4 +29,4 @@ export function buildSlotColor(layoutPlan: LayoutPlan, address: string) {
 
 export const selectConfirmOperationLabware = (
   state: State<SectioningConfirmContext>
-) => state.context.confirmOperationLabware;
+) => state.context.confirmSectionLabware;

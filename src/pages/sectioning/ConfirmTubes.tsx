@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect } from "react";
 import { useMachine, useSelector } from "@xstate/react";
 import classNames from "classnames";
 import Table, {
@@ -12,6 +12,7 @@ import { createSectioningConfirmMachine } from "../../lib/machines/sectioning/se
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 import { SectioningPageContext } from "../Sectioning";
 import { selectConfirmOperationLabware } from "./index";
+import { Input } from "../../components/forms/Input";
 
 interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
@@ -32,6 +33,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({ layoutPlans }) => {
           <TableHead>
             <tr>
               <TableHeader>Tube Barcode</TableHeader>
+              <TableHeader>Section Number</TableHeader>
               <TableHeader />
             </tr>
           </TableHead>
@@ -84,13 +86,42 @@ const TubeRow: React.FC<TubeRowProps> = ({ layoutPlan }) => {
     "cursor-pointer hover:opacity-90 text-sm tracking-wide"
   );
 
+  const handleOnClick = useCallback(() => {
+    send({ type: "TOGGLE_CANCEL" });
+  }, [send]);
+
+  const handleOnChange = useCallback(
+    (slotAddress: string, sectionNumber: number, sectionIndex: number) => {
+      send({
+        type: "UPDATE_SECTION_NUMBER",
+        slotAddress,
+        sectionNumber,
+        sectionIndex,
+      });
+    },
+    [send]
+  );
+
   return (
-    <tr
-      className={rowClassnames}
-      onClick={() => send({ type: "TOGGLE_CANCEL" })}
-    >
+    <tr className={rowClassnames} onClick={handleOnClick}>
       <TableCell>
         <span className="">{layoutPlan.destinationLabware.barcode}</span>
+      </TableCell>
+      <TableCell>
+        {layoutPlan.plannedActions.get("A1")?.map((source, index) => (
+          <Input
+            key={source.address + String(index)}
+            type="number"
+            defaultValue={source.newSection ?? undefined}
+            min={1}
+            disabled={cancelled}
+            // So the row click handler doesn't get triggered
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) =>
+              handleOnChange("A1", Number(e.target.value), index)
+            }
+          />
+        ))}
       </TableCell>
       <TableCell>
         <RemoveIcon className="h-4 w-4 text-red-500" />
