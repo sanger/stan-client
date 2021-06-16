@@ -1,212 +1,313 @@
-import { forwardTo, Machine, MachineOptions, sendParent } from "xstate";
-import { LabwareType, PlanRequestLabware } from "../../../../types/sdk";
+import { createMachine } from "xstate";
+import {
+  LabwareFieldsFragment,
+  LabwareType,
+  Maybe,
+  PlanMutation,
+  PlanRequestLabware,
+} from "../../../../types/sdk";
 import * as Yup from "yup";
-import { extractServerErrors, LabwareTypeName } from "../../../../types/stan";
+import {
+  extractServerErrors,
+  LabwareTypeName,
+  NewLabwareLayout,
+  ServerErrors,
+} from "../../../../types/stan";
 import { labwareSamples } from "../../../helpers/labwareHelper";
 import { LayoutPlan, Source } from "../../layout/layoutContext";
-import {
-  SectioningLayout,
-  SectioningLayoutContext,
-  SectioningLayoutEvent,
-  SectioningLayoutSchema,
-  State,
-} from "./sectioningLayoutTypes";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../layout/layoutMachine";
-import { prepComplete } from "./sectioningLayoutEvents";
 import { stanCore } from "../../../sdk";
+import { ClientError } from "graphql-request";
+import { LayoutMachineActorRef } from "../../layout";
 
-const sectioningLayoutKey = "sectioningLayout";
+//region Events
+type UpdateSectioningLayoutEvent = {
+  type: "UPDATE_SECTIONING_LAYOUT";
+  sectioningLayout: Partial<SectioningLayout>;
+};
 
-enum Action {
-  UPDATE_SECTIONING_LAYOUT = "updateSectioningLayout",
-  SPAWN_LAYOUT_PLAN = "spawnLayoutPlan",
-  ASSIGN_LAYOUT_PLAN = "assignLayoutPlan",
-  ASSIGN_PLAN_RESPONSE = "assignPlanResponse",
-  NOTIFY_PARENT_PLAN = "notifyParentPlan",
-  ASSIGN_SERVER_ERRORS = "assignServerErrors",
+type EditLayoutEvent = { type: "EDIT_LAYOUT" };
+
+type CancelEditLayoutEvent = { type: "CANCEL_EDIT_LAYOUT" };
+
+type DoneEditLayoutEvent = { type: "DONE_EDIT_LAYOUT" };
+
+type CreateLabwareEvent = { type: "CREATE_LABWARE" };
+
+type UpdateLayoutPlanEvent = {
+  type: "UPDATE_LAYOUT_PLAN";
+  layoutPlan: LayoutPlan;
+};
+
+export type PlanSectionResolveEvent = {
+  type: "done.invoke.planSection";
+  data: PlanMutation;
+};
+
+type PlanSectionRejectEvent = {
+  type: "error.platform.planSection";
+  data: ClientError;
+};
+
+export type LayoutMachineDone = {
+  type: "done.invoke.layoutMachine";
+  data: { layoutPlan: LayoutPlan };
+};
+
+export type SectioningLayoutEvent =
+  | UpdateSectioningLayoutEvent
+  | EditLayoutEvent
+  | CancelEditLayoutEvent
+  | DoneEditLayoutEvent
+  | CreateLabwareEvent
+  | UpdateLayoutPlanEvent
+  | PlanSectionResolveEvent
+  | PlanSectionRejectEvent
+  | LayoutMachineDone;
+
+/**
+ * Model of a sectioning layout
+ */
+export interface SectioningLayout {
+  /**
+   * Client ID to help tracking
+   */
+  cid: string;
+
+  /**
+   * The labwares available to section from
+   */
+  inputLabwares: LabwareFieldsFragment[];
+
+  /**
+   * The new labware we are sectioning on to
+   */
+  destinationLabware: NewLabwareLayout;
+
+  /**
+   * How many labwares of this layout will we be sectioning on to
+   */
+  quantity: number;
+
+  /**
+   * The thickness of each section (slice)
+   */
+  sectionThickness: number;
+
+  /**
+   * Map of sampleId to colors
+   */
+  sampleColors: Map<number, string>;
+
+  /**
+   * The barcode of the labware we're sectioning on to (for Visium LP slides)
+   */
+  barcode?: string;
 }
 
-enum Guards {
-  IS_VISIUM_LP = "isVisiumLP",
-}
+/**
+ * Context for a {@link SectioningLayout} machine
+ */
+export interface SectioningLayoutContext {
+  /**
+   * Errors returned from the server
+   */
+  serverErrors: Maybe<ServerErrors>;
 
-enum Services {
-  LAYOUT_MACHINE = "layoutMachine",
+  /**
+   * A sectioning layout
+   */
+  sectioningLayout: SectioningLayout;
+
+  /**
+   * Yup validator for validating the sectioning layout
+   */
+  validator: Yup.ObjectSchema;
+
+  /**
+   * A plan returned from core
+   */
+  plan: Maybe<PlanMutation["plan"]>;
+
+  /**
+   * Reference to a `LayoutMachine` Actor
+   */
+  layoutPlanRef?: LayoutMachineActorRef;
+
+  /**
+   * A layout plan
+   */
+  layoutPlan: LayoutPlan;
+
+  /**
+   * Message from the label printer containing details of the printer's success
+   */
+  printSuccessMessage?: string;
+
+  /**
+   * Message from the label printer containing details of how the printer failed
+   */
+  printErrorMessage?: string;
 }
 
 /**
  * Machine for the controlling how samples will be laid out into labware.
  */
 export const createSectioningLayoutMachine = (
-  sectioningLayout: SectioningLayout
+  sectioningLayout: SectioningLayout,
+  plan?: PlanMutation["plan"],
+  layoutPlan?: LayoutPlan
 ) =>
-  Machine<
-    SectioningLayoutContext,
-    SectioningLayoutSchema,
-    SectioningLayoutEvent
-  >(
+  createMachine<SectioningLayoutContext, SectioningLayoutEvent>(
     {
-      key: sectioningLayoutKey,
+      key: "sectioningLayout",
       context: {
         sectioningLayout,
         serverErrors: null,
         validator: buildValidator(
           sectioningLayout.destinationLabware.labwareType
         ),
-        plannedLabware: [],
-        plannedOperations: [],
-        layoutPlan: buildLayoutPlan(sectioningLayout),
+        plan: plan ?? null,
+        layoutPlan: layoutPlan ?? buildInitialLayoutPlan(sectioningLayout),
       },
-      initial: State.PREP,
+      initial: plan ? "done" : "prep",
       states: {
-        [State.PREP]: {
-          initial: State.INVALID,
+        prep: {
+          initial: "invalid",
           states: {
-            [State.VALID]: {
+            valid: {
               on: {
                 CREATE_LABWARE: {
-                  target: `#${sectioningLayoutKey}.${State.CREATING}`,
+                  target: `#sectioningLayout.creating`,
                 },
               },
             },
-            [State.INVALID]: {},
-            [State.ERROR]: {
+            invalid: {},
+            error: {
               on: {
                 CREATE_LABWARE: {
-                  target: `#${sectioningLayoutKey}.${State.CREATING}`,
+                  target: `#sectioningLayout.creating`,
                 },
               },
             },
           },
           on: {
             UPDATE_SECTIONING_LAYOUT: {
-              target: State.VALIDATING,
-              actions: Action.UPDATE_SECTIONING_LAYOUT,
+              target: "validating",
+              actions: "updateSectioningLayout",
             },
-            EDIT_LAYOUT: State.EDITING_LAYOUT,
+            EDIT_LAYOUT: "editingLayout",
           },
         },
-        [State.EDITING_LAYOUT]: {
+        editingLayout: {
           invoke: {
-            src: Services.LAYOUT_MACHINE,
+            src: "layoutMachine",
             onDone: {
-              target: State.VALIDATING,
-              actions: Action.ASSIGN_LAYOUT_PLAN,
+              target: "validating",
+              actions: "assignLayoutPlan",
             },
           },
         },
-        [State.VALIDATING]: {
+        validating: {
           invoke: {
             id: "validating",
             src: "validateLayout",
             onDone: {
-              target: `${State.PREP}.${State.VALID}`,
+              target: "prep.valid",
             },
             onError: {
-              target: `${State.PREP}.${State.INVALID}`,
+              target: "prep.invalid",
             },
           },
         },
-        [State.CREATING]: {
+        creating: {
           invoke: {
             id: "planSection",
             src: "planSection",
             onDone: [
               {
-                cond: Guards.IS_VISIUM_LP,
-                target: State.DONE,
-                actions: [
-                  Action.ASSIGN_PLAN_RESPONSE,
-                  forwardTo("sectioningMachine"),
-                  sendParent(prepComplete()),
-                ],
+                cond: "isVisiumLP",
+                target: "done",
+                actions: ["assignPlanResponse"],
               },
               {
-                target: State.PRINTING,
-                actions: [
-                  Action.ASSIGN_PLAN_RESPONSE,
-                  forwardTo("sectioningMachine"),
-                  sendParent(prepComplete()),
-                ],
+                target: "printing",
+                actions: ["assignPlanResponse"],
               },
             ],
             onError: {
-              target: `${State.PREP}.${State.ERROR}`,
-              actions: Action.ASSIGN_SERVER_ERRORS,
+              target: "prep.error",
+              actions: "assignServerErrors",
             },
           },
         },
-        [State.PRINTING]: {},
-        [State.DONE]: {},
+        printing: {},
+        done: {},
       },
     },
-    sectioningLayoutMachineOptions
+    {
+      actions: {
+        updateSectioningLayout: assign((ctx, e) => {
+          if (e.type !== "UPDATE_SECTIONING_LAYOUT") {
+            return;
+          }
+          ctx.sectioningLayout = Object.assign(
+            ctx.sectioningLayout,
+            e.sectioningLayout
+          );
+        }),
+
+        assignLayoutPlan: assign((ctx, e) => {
+          if (e.type !== "done.invoke.layoutMachine" || !e.data) {
+            return;
+          }
+          ctx.layoutPlan = e.data.layoutPlan;
+        }),
+
+        assignPlanResponse: assign((ctx, e) => {
+          if (e.type !== "done.invoke.planSection" || !e.data) {
+            return;
+          }
+          ctx.plan = e.data.plan;
+        }),
+
+        assignServerErrors: assign((ctx, e) => {
+          if (e.type !== "error.platform.planSection") {
+            return;
+          }
+          ctx.serverErrors = extractServerErrors(e.data);
+        }),
+      },
+
+      guards: {
+        isVisiumLP: (ctx) =>
+          ctx.sectioningLayout.destinationLabware.labwareType.name ===
+          LabwareTypeName.VISIUM_LP,
+      },
+
+      services: {
+        layoutMachine: (ctx, _e) => {
+          return createLayoutMachine(ctx.layoutPlan);
+        },
+
+        validateLayout: (ctx) => ctx.validator.validate(ctx),
+
+        planSection: (ctx) => {
+          const planRequestLabware = buildPlanRequestLabware(
+            ctx.sectioningLayout,
+            ctx.layoutPlan
+          );
+          const labware: PlanRequestLabware[] = new Array(
+            ctx.sectioningLayout.quantity
+          ).fill(planRequestLabware);
+          return stanCore.Plan({
+            request: { labware, operationType: "Section" },
+          });
+        },
+      },
+    }
   );
-
-const sectioningLayoutMachineOptions: Partial<MachineOptions<
-  SectioningLayoutContext,
-  SectioningLayoutEvent
->> = {
-  actions: {
-    [Action.UPDATE_SECTIONING_LAYOUT]: assign((ctx, e) => {
-      if (e.type !== "UPDATE_SECTIONING_LAYOUT") {
-        return;
-      }
-      ctx.sectioningLayout = Object.assign(
-        ctx.sectioningLayout,
-        e.sectioningLayout
-      );
-    }),
-
-    [Action.ASSIGN_LAYOUT_PLAN]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.layoutMachine" || !e.data) {
-        return;
-      }
-      ctx.layoutPlan = e.data.layoutPlan;
-    }),
-
-    [Action.ASSIGN_PLAN_RESPONSE]: assign((ctx, e) => {
-      if (e.type !== "done.invoke.planSection" || !e.data) {
-        return;
-      }
-      ctx.plannedOperations = e.data.plan.operations;
-      ctx.plannedLabware = e.data.plan.labware;
-    }),
-
-    [Action.ASSIGN_SERVER_ERRORS]: assign((ctx, e) => {
-      if (e.type !== "error.platform.planSection") {
-        return;
-      }
-      ctx.serverErrors = extractServerErrors(e.data);
-    }),
-  },
-
-  guards: {
-    [Guards.IS_VISIUM_LP]: (ctx) =>
-      ctx.sectioningLayout.destinationLabware.labwareType.name ===
-      LabwareTypeName.VISIUM_LP,
-  },
-
-  services: {
-    [Services.LAYOUT_MACHINE]: (ctx, _e) => {
-      return createLayoutMachine(ctx.layoutPlan);
-    },
-
-    validateLayout: (ctx) => ctx.validator.validate(ctx),
-
-    planSection: (ctx) => {
-      const planRequestLabware = buildPlanRequestLabware(
-        ctx.sectioningLayout,
-        ctx.layoutPlan
-      );
-      const labware: PlanRequestLabware[] = new Array(
-        ctx.sectioningLayout.quantity
-      ).fill(planRequestLabware);
-      return stanCore.Plan({ request: { labware, operationType: "Section" } });
-    },
-  },
-};
 
 function buildPlanRequestLabware(
   sectioningLayout: SectioningLayout,
@@ -271,7 +372,9 @@ function buildValidator(labwareType: LabwareType): Yup.ObjectSchema {
  * Build a {@link LayoutPlan} from a {@link SectioningLayout} to be used in a {@link LayoutPlanner}
  * @param sectioningLayout the {@link SectioningLayout}
  */
-function buildLayoutPlan(sectioningLayout: SectioningLayout): LayoutPlan {
+function buildInitialLayoutPlan(
+  sectioningLayout: SectioningLayout
+): LayoutPlan {
   return {
     destinationLabware: sectioningLayout.destinationLabware,
     plannedActions: new Map(),

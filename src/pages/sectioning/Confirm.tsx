@@ -1,14 +1,16 @@
 import React, { useContext, useEffect } from "react";
 import AppShell from "../../components/AppShell";
 import PinkButton from "../../components/buttons/PinkButton";
-import { sortBy } from "lodash";
-import { LabwareTypeName } from "../../types/stan";
+import { groupBy } from "lodash";
 import Warning from "../../components/notifications/Warning";
 import { useScrollToRef } from "../../lib/hooks";
 import ConfirmByLabwareType from "./ConfirmByLabwareType";
 import { SectioningPageContext } from "../Sectioning";
 import OperationCompleteModal from "../../components/modal/OperationCompleteModal";
 import { reload } from "../../lib/sdk";
+import { LabwareTypeName } from "../../types/stan";
+import DataTable from "../../components/DataTable";
+import columns from "../../components/labwareScanPanel/columns";
 
 function Confirm() {
   const model = useContext(SectioningPageContext)!;
@@ -24,12 +26,11 @@ function Confirm() {
     }
   }, [model, scrollToRef]);
 
-  const { sectioningConfirmMachines } = model.context;
+  const { layoutPlans } = model.context;
 
-  // Sort the sectioning confirmations by having tubes first
-  const sortedConfirmMachines = sortBy(
-    Array.from(sectioningConfirmMachines.keys()),
-    (labwareTypeName) => labwareTypeName !== LabwareTypeName.TUBE
+  const layoutPlansByLabwareType = groupBy(
+    layoutPlans,
+    (lp) => lp.destinationLabware.labwareType.name
   );
 
   return (
@@ -39,17 +40,37 @@ function Confirm() {
       </AppShell.Header>
       <AppShell.Main>
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
+          <DataTable
+            data={model.context.sourceLabwares}
+            columns={[columns.barcode(), columns.highestSectionForSlot("A1")]}
+          />
+
           <div className="space-y-4">
-            {sortedConfirmMachines.map((labwareTypeName, i) => (
+            {/* Always show tubes first (if there are any) */}
+            {layoutPlansByLabwareType?.[LabwareTypeName.TUBE] && (
               <ConfirmByLabwareType
-                key={i}
-                actors={sectioningConfirmMachines.get(labwareTypeName)}
-                labwareTypeName={labwareTypeName}
+                labwareTypeName={LabwareTypeName.TUBE}
+                layoutPlans={layoutPlansByLabwareType[LabwareTypeName.TUBE]}
               />
-            ))}
+            )}
+
+            {/* Filter out tubes as they've been shown above */}
+            {Object.entries(layoutPlansByLabwareType)
+              .filter(
+                ([labwareTypeName, _]) =>
+                  labwareTypeName !== LabwareTypeName.TUBE
+              )
+              .map(([labwareTypeName, lps], i) => (
+                <ConfirmByLabwareType
+                  key={i}
+                  layoutPlans={lps}
+                  labwareTypeName={labwareTypeName}
+                />
+              ))}
             {model.isConfirmError && (
               <div ref={ref}>
                 <Warning
+                  error={model.context.serverErrors}
                   message={
                     "There was an error confirming the Sectioning operation"
                   }

@@ -1,5 +1,7 @@
 import { graphql } from "msw";
 import {
+  ConfirmSectionMutation,
+  ConfirmSectionMutationVariables,
   GetSectioningInfoQuery,
   GetSectioningInfoQueryVariables,
 } from "../../types/sdk";
@@ -42,6 +44,20 @@ const sectioningHandlers = [
             },
           ],
           labwareTypes: labwareTypeInstances,
+        })
+      );
+    }
+  ),
+
+  graphql.mutation<ConfirmSectionMutation, ConfirmSectionMutationVariables>(
+    "ConfirmSection",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          confirmSection: {
+            labware: [],
+            operations: [],
+          },
         })
       );
     }

@@ -35,6 +35,7 @@ function Plan() {
             <Heading level={3}>Source Labware</Heading>
             <LabwareScanner
               locked={model.isLabwareTableLocked}
+              initialLabwares={model.context.sourceLabwares}
               onChange={model.updateLabwares}
             >
               <LabwareScanTable
@@ -59,8 +60,15 @@ function Plan() {
               <SectioningLayout
                 ref={i === sectioningLayouts.length - 1 ? ref : null}
                 key={i}
+                onCreate={model.addPlan}
                 onDelete={() => model.deleteLabwareLayout(i)}
-                actor={sectioningLayout.ref}
+                initialSectioningLayout={sectioningLayout}
+                initialPlan={model.context.sectioningLayoutPlans.get(
+                  sectioningLayout.cid
+                )}
+                initialLayoutPlan={model.context.sectioningLayoutLayoutPlan.get(
+                  sectioningLayout.cid
+                )}
               />
             ))}
           </div>
