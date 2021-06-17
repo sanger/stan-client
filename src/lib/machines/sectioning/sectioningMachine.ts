@@ -327,12 +327,24 @@ export function createSectioningMachine(
             e.sectioningLayout,
           ];
 
-          e.sectioningLayout?.plan?.labware.forEach((labware) => {
-            // Add a new ConfirmOperationLabware to ConfirmOperationRequest
-            ctx.confirmSectionRequest.labware.push(
-              buildConfirmSectionLabware(labware)
-            );
-          });
+          const newLabware = e.sectioningLayout?.plan?.labware;
+
+          if (!newLabware) return;
+
+          const newBarcodes = new Set(newLabware.map((lw) => lw.barcode));
+
+          const confirmSectionRequestLabware = ctx.confirmSectionRequest.labware.filter(
+            (lw) => !newBarcodes.has(lw.barcode)
+          );
+
+          const newConfirmSectionLabwares = newLabware.map(
+            buildConfirmSectionLabware
+          );
+
+          ctx.confirmSectionRequest.labware = [
+            ...confirmSectionRequestLabware,
+            ...newConfirmSectionLabwares,
+          ];
         }),
 
         updateConfirmation: assign((ctx, e) => {
