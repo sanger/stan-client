@@ -26,7 +26,8 @@ function Confirm() {
     }
   }, [model, scrollToRef]);
 
-  const { layoutPlans } = model.context;
+  const { sectioningLayouts } = model.context;
+  const layoutPlans = sectioningLayouts.flatMap((sl) => sl.coreLayoutPlans);
 
   const layoutPlansByLabwareType = groupBy(
     layoutPlans,

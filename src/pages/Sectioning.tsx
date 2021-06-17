@@ -7,14 +7,13 @@ import {
   LabwareFieldsFragment,
   LabwareTypeFieldsFragment,
   Maybe,
-  PlanMutation,
 } from "../types/sdk";
-import { LabwareTypeName } from "../types/stan";
 import {
+  createSectioningMachine,
   SectioningContext,
-  sectioningMachine,
 } from "../lib/machines/sectioning/sectioningMachine";
 import { useMachine } from "@xstate/react";
+import { SectioningLayout } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutMachine";
 
 type SectioningPageContextType = {
   isLabwareTableLocked: boolean;
@@ -32,7 +31,7 @@ type SectioningPageContextType = {
   backToPrep: () => void;
   confirmOperation: () => void;
   context: SectioningContext;
-  addPlan(sectioningLayoutId: string, plan: PlanMutation["plan"]): void;
+  addPlan(sectioningLayout: SectioningLayout): void;
   commitConfirmation(confirmOperationLabware: ConfirmOperationLabware): void;
 };
 
@@ -45,39 +44,11 @@ type SectioningParams = {
 };
 
 function Sectioning({ sectioningInfo }: SectioningParams) {
-  const [current, send] = useMachine(() => {
-    const inputLabwareTypeNames = [LabwareTypeName.PROVIASETTE];
-    const outputLabwareTypeNames = [
-      LabwareTypeName.TUBE,
-      LabwareTypeName.SLIDE,
-      LabwareTypeName.VISIUM_TO,
-      LabwareTypeName.VISIUM_LP,
-    ];
-
-    const inputLabwareTypes = sectioningInfo.labwareTypes.filter((lt) =>
-      inputLabwareTypeNames.includes(lt.name as LabwareTypeName)
-    );
-    const outputLabwareTypes = sectioningInfo.labwareTypes.filter((lt) =>
-      outputLabwareTypeNames.includes(lt.name as LabwareTypeName)
-    );
-    const selectedLabwareType = outputLabwareTypes[0];
-    const comments = sectioningInfo.comments;
-
-    return sectioningMachine.withContext(
-      Object.assign({}, sectioningMachine.context, {
-        inputLabwareTypeNames,
-        outputLabwareTypeNames,
-        inputLabwareTypes,
-        outputLabwareTypes,
-        selectedLabwareType,
-        comments,
-      })
-    );
-  });
+  const [current, send] = useMachine(createSectioningMachine(sectioningInfo));
 
   const addPlan = useCallback(
-    (sectioningLayoutId: string, plan: PlanMutation["plan"]) => {
-      send({ type: "PLAN_ADDED", sectioningLayoutId, plan });
+    (sectioningLayout: SectioningLayout) => {
+      send({ type: "PLAN_ADDED", sectioningLayout });
     },
     [send]
   );
@@ -113,8 +84,7 @@ function Sectioning({ sectioningInfo }: SectioningParams) {
       isLabwareTableLocked: current.context.sectioningLayouts.length > 0,
       isNextBtnEnabled:
         current.context.sectioningLayouts.length > 0 &&
-        current.context.sectioningLayouts.length ===
-          current.context.plansCompleted,
+        current.context.sectioningLayouts.every((sl) => sl.plan != null),
       isStarted: current.matches("started"),
       prepDone(): void {
         send({ type: "PREP_DONE" });
