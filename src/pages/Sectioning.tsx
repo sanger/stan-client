@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useEffect } from "react";
 import Plan from "./sectioning/Plan";
 import Confirm from "./sectioning/Confirm";
 import {
@@ -46,7 +46,9 @@ type SectioningParams = {
 };
 
 function Sectioning({ sectioningInfo }: SectioningParams) {
-  const [current, send, service] = useMachine(createSectioningMachine(sectioningInfo));
+  const [current, send, service] = useMachine(
+    createSectioningMachine(sectioningInfo)
+  );
 
   const addPlan = useCallback(
     (sectioningLayout: SectioningLayout) => {
