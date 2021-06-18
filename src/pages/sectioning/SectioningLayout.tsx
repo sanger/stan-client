@@ -251,14 +251,8 @@ const SectioningLayout = React.forwardRef<
               <div className="my-2">
                 <p className="text-gray-900 text-sm leading-normal">
                   To add sections to a slot, select a source for the buttons on
-                  the right, and then click a destination slot. Multiple
-                  sections may be added to a slot by clicking it multiple times.
-                </p>
-
-                <p className="mt-3 text-gray-900 text-sm leading-normal">
-                  To remove all sections from a slot, first deselect any
-                  selected sources by clicking on it, then select the
-                  destination slot to empty it.
+                  the right, and then click a destination slot. Clicking a
+                  filled slot will empty it.
                 </p>
               </div>
             </LayoutPlanner>

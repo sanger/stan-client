@@ -55,6 +55,13 @@ export interface LabwareProps {
   onSlotClick?: (address: string, slot: SlotFieldsFragment) => void;
 
   /**
+   * Callback for when a slot is clicked with Ctrl button held
+   * @param address the address of the clicked slot
+   * @param slot the slot
+   */
+  onSlotCtrlClick?: (address: string, slot: SlotFieldsFragment) => void;
+
+  /**
    * Callback for when slots are selected
    * @param selected the addresses of the selected slots
    */
@@ -117,6 +124,7 @@ const Labware = ({
   labware,
   onClick,
   onSlotClick,
+  onSlotCtrlClick,
   selectionMode = "single",
   selectable = "none",
   name,
@@ -186,10 +194,11 @@ const Labware = ({
   );
 
   const onCtrlClick = useCallback(
-    (address: string) => {
+    (address: string, slot: SlotFieldsFragment) => {
+      onSlotCtrlClick?.(address, slot);
       send({ type: "CTRL_SELECT_SLOT", address });
     },
-    [send]
+    [send, onSlotCtrlClick]
   );
 
   const onShiftClick = useCallback(

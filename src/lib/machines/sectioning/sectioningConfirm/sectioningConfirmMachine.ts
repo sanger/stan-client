@@ -10,7 +10,6 @@ import { LayoutPlan, Source } from "../../layout/layoutContext";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../layout/layoutMachine";
 import { cloneDeep } from "lodash";
-import { isTube } from "../../../helpers/labwareHelper";
 import { Address, NewLabwareLayout } from "../../../../types/stan";
 
 export interface SectioningConfirmContext {
@@ -128,7 +127,7 @@ export const createSectioningConfirmMachine = (
   createMachine<SectioningConfirmContext, SectioningConfirmEvent>(
     {
       id: "sectioningOutcome",
-      initial: "init",
+      initial: "editableMode",
       context: {
         comments,
         labware,
@@ -142,29 +141,11 @@ export const createSectioningConfirmMachine = (
         SECTIONING_CONFIRMATION_COMPLETE: "done",
       },
       states: {
-        init: {
-          always: [
-            {
-              cond: "isTube",
-              target: "cancellableMode",
-            },
-            {
-              target: "editableMode",
-            },
-          ],
-        },
-        cancellableMode: {
+        editableMode: {
           on: {
             TOGGLE_CANCEL: {
               actions: ["toggleCancel", "commitConfirmation"],
             },
-            UPDATE_SECTION_NUMBER: {
-              actions: ["updateSectionNumber", "commitConfirmation"],
-            },
-          },
-        },
-        editableMode: {
-          on: {
             SET_COMMENT_FOR_ADDRESS: {
               actions: ["assignAddressComment", "commitConfirmation"],
             },
@@ -288,19 +269,12 @@ export const createSectioningConfirmMachine = (
           ctx.confirmSectionLabware = {
             barcode: ctx.labware.barcode!,
             cancelled: ctx.cancelled,
-            confirmSections,
+            confirmSections: ctx.cancelled ? undefined : confirmSections,
             addressComments: Array.from(
               ctx.addressToCommentMap.entries()
             ).map(([address, commentId]) => ({ address, commentId })),
           };
-
-          console.log(ctx.confirmSectionLabware);
         }),
-      },
-      activities: {},
-      delays: {},
-      guards: {
-        isTube: (ctx) => isTube(ctx.labware.labwareType),
       },
       services: {
         layoutMachine: (ctx, _e) => {

@@ -107,10 +107,6 @@ type PrepDoneEvent = {
   type: "PREP_DONE";
 };
 
-type BackToPrepEvent = {
-  type: "BACK_TO_PREP";
-};
-
 type ConfirmSectionEvent = {
   type: "CONFIRM_SECTION";
 };
@@ -129,7 +125,6 @@ export type SectioningEvent =
   | UpdateLabwaresEvent
   | PlanAddedEvent
   | PrepDoneEvent
-  | BackToPrepEvent
   | CommitConfirmationEvent
   | ConfirmSectionEvent
   | ConfirmSectionResolveEvent
@@ -244,9 +239,6 @@ export function createSectioningMachine(
         confirming: {
           initial: "confirmingLabware",
           on: {
-            BACK_TO_PREP: {
-              target: "unknown",
-            },
             COMMIT_CONFIRMATION: {
               actions: "updateConfirmation",
             },
@@ -461,6 +453,7 @@ function buildInitialLayoutPlan(
           return {
             sampleId: labwareSample.sample.id,
             address: labwareSample.slot.address,
+            newSection: 0,
             labware,
           };
         }),

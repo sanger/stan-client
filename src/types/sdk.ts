@@ -273,7 +273,7 @@ export type ConfirmOperationRequest = {
 export type ConfirmSection = {
   destinationAddress: Scalars['Address'];
   sampleId: Scalars['Int'];
-  newSection?: Maybe<Scalars['Int']>;
+  newSection: Scalars['Int'];
 };
 
 export type ConfirmSectionLabware = {

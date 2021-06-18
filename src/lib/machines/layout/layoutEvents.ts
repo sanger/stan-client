@@ -36,6 +36,18 @@ export function selectDestination(address: Address): SelectDestinationEvent {
   };
 }
 
+export type RemoveSectionEvent = {
+  type: "REMOVE_SECTION";
+  address: Address;
+};
+
+export function removeSection(address: Address): RemoveSectionEvent {
+  return {
+    type: "REMOVE_SECTION",
+    address,
+  };
+}
+
 export type RequestLayoutPlanEvent = {
   type: "REQUEST_LAYOUT_PLAN";
 };
@@ -56,4 +68,5 @@ export type LayoutEvents =
   | SetAllDestinationsEvent
   | RequestLayoutPlanEvent
   | CancelEvent
-  | DoneEvent;
+  | DoneEvent
+  | RemoveSectionEvent;
