@@ -8,13 +8,16 @@ import {
 } from "../../../../types/sdk";
 import * as Yup from "yup";
 import {
+  Address,
   extractServerErrors,
   LabwareTypeName,
   NewLabwareLayout,
   ServerErrors,
 } from "../../../../types/stan";
-import { labwareSamples } from "../../../helpers/labwareHelper";
-import { LayoutPlan, Source } from "../../layout/layoutContext";
+import {
+  LayoutPlan,
+  Source as LayoutPlanAction,
+} from "../../layout/layoutContext";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../layout/layoutMachine";
 import { stanCore } from "../../../sdk";
@@ -104,6 +107,21 @@ export interface SectioningLayout {
    * The barcode of the labware we're sectioning on to (for Visium LP slides)
    */
   barcode?: string;
+
+  /**
+   * A plan for how input samples will be put onto the output labware
+   */
+  layoutPlan: LayoutPlan;
+
+  /**
+   * A plan returned from core
+   */
+  plan: Maybe<PlanMutation["plan"]>;
+
+  /**
+   * Layout plans built from core "plan"
+   */
+  coreLayoutPlans: Array<LayoutPlan>;
 }
 
 /**
@@ -126,19 +144,9 @@ export interface SectioningLayoutContext {
   validator: Yup.ObjectSchema;
 
   /**
-   * A plan returned from core
-   */
-  plan: Maybe<PlanMutation["plan"]>;
-
-  /**
    * Reference to a `LayoutMachine` Actor
    */
   layoutPlanRef?: LayoutMachineActorRef;
-
-  /**
-   * A layout plan
-   */
-  layoutPlan: LayoutPlan;
 
   /**
    * Message from the label printer containing details of the printer's success
@@ -151,13 +159,26 @@ export interface SectioningLayoutContext {
   printErrorMessage?: string;
 }
 
+function getInitialState(sectioningLayout: SectioningLayout) {
+  if (!sectioningLayout.plan) {
+    return "prep";
+  }
+
+  if (
+    sectioningLayout.destinationLabware.labwareType.name ===
+    LabwareTypeName.VISIUM_LP
+  ) {
+    return "printing";
+  }
+
+  return "done";
+}
+
 /**
  * Machine for the controlling how samples will be laid out into labware.
  */
 export const createSectioningLayoutMachine = (
-  sectioningLayout: SectioningLayout,
-  plan?: PlanMutation["plan"],
-  layoutPlan?: LayoutPlan
+  sectioningLayout: SectioningLayout
 ) =>
   createMachine<SectioningLayoutContext, SectioningLayoutEvent>(
     {
@@ -168,10 +189,8 @@ export const createSectioningLayoutMachine = (
         validator: buildValidator(
           sectioningLayout.destinationLabware.labwareType
         ),
-        plan: plan ?? null,
-        layoutPlan: layoutPlan ?? buildInitialLayoutPlan(sectioningLayout),
       },
-      initial: plan ? "done" : "prep",
+      initial: getInitialState(sectioningLayout),
       states: {
         prep: {
           initial: "invalid",
@@ -262,14 +281,25 @@ export const createSectioningLayoutMachine = (
           if (e.type !== "done.invoke.layoutMachine" || !e.data) {
             return;
           }
-          ctx.layoutPlan = e.data.layoutPlan;
+          ctx.sectioningLayout.layoutPlan = e.data.layoutPlan;
         }),
 
         assignPlanResponse: assign((ctx, e) => {
           if (e.type !== "done.invoke.planSection" || !e.data) {
             return;
           }
-          ctx.plan = e.data.plan;
+          ctx.sectioningLayout.plan = e.data.plan;
+
+          ctx.sectioningLayout.plan.labware.forEach((labware) => {
+            ctx.sectioningLayout.coreLayoutPlans.push(
+              buildLayoutPlan(
+                labware,
+                e.data.plan.operations,
+                ctx.sectioningLayout.inputLabwares,
+                ctx.sectioningLayout.sampleColors
+              )
+            );
+          });
         }),
 
         assignServerErrors: assign((ctx, e) => {
@@ -288,15 +318,14 @@ export const createSectioningLayoutMachine = (
 
       services: {
         layoutMachine: (ctx, _e) => {
-          return createLayoutMachine(ctx.layoutPlan);
+          return createLayoutMachine(ctx.sectioningLayout.layoutPlan);
         },
 
         validateLayout: (ctx) => ctx.validator.validate(ctx),
 
         planSection: (ctx) => {
           const planRequestLabware = buildPlanRequestLabware(
-            ctx.sectioningLayout,
-            ctx.layoutPlan
+            ctx.sectioningLayout
           );
           const labware: PlanRequestLabware[] = new Array(
             ctx.sectioningLayout.quantity
@@ -310,14 +339,15 @@ export const createSectioningLayoutMachine = (
   );
 
 function buildPlanRequestLabware(
-  sectioningLayout: SectioningLayout,
-  layoutPlan: LayoutPlan
+  sectioningLayout: SectioningLayout
 ): PlanRequestLabware {
   return {
     labwareType: sectioningLayout.destinationLabware.labwareType.name,
     barcode: sectioningLayout.barcode,
-    actions: Array.from(layoutPlan.plannedActions.keys()).flatMap((address) => {
-      const sources = layoutPlan.plannedActions.get(address);
+    actions: Array.from(
+      sectioningLayout.layoutPlan.plannedActions.keys()
+    ).flatMap((address) => {
+      const sources = sectioningLayout.layoutPlan.plannedActions.get(address);
 
       if (!sources) {
         throw new Error("Source not found from planned actions");
@@ -344,6 +374,11 @@ function buildValidator(labwareType: LabwareType): Yup.ObjectSchema {
   let formShape = {
     quantity: Yup.number().required().integer().min(1).max(99),
     sectionThickness: Yup.number().required().integer().min(1),
+    layoutPlan: Yup.mixed()
+      .test("layoutPlan", "LayoutPlan is invalid", (value) => {
+        return value.plannedActions.size > 0;
+      })
+      .defined(),
   };
 
   let sectioningLayout: Yup.ObjectSchema;
@@ -358,41 +393,60 @@ function buildValidator(labwareType: LabwareType): Yup.ObjectSchema {
 
   return Yup.object()
     .shape({
-      layoutPlan: Yup.mixed()
-        .test("layoutPlan", "LayoutPlan is invalid", (value) => {
-          return value.plannedActions.size > 0;
-        })
-        .defined(),
       sectioningLayout,
     })
     .defined();
 }
 
-/**
- * Build a {@link LayoutPlan} from a {@link SectioningLayout} to be used in a {@link LayoutPlanner}
- * @param sectioningLayout the {@link SectioningLayout}
- */
-function buildInitialLayoutPlan(
-  sectioningLayout: SectioningLayout
+export function buildLayoutPlan(
+  destinationLabware: LabwareFieldsFragment,
+  operations: PlanMutation["plan"]["operations"],
+  sourceLabwares: LabwareFieldsFragment[],
+  sampleColors: Map<number, string>
 ): LayoutPlan {
   return {
-    destinationLabware: sectioningLayout.destinationLabware,
-    plannedActions: new Map(),
-    sampleColors: sectioningLayout.sampleColors,
-    sources: sectioningLayout.inputLabwares.reduce<Array<Source>>(
-      (memo, labware) => {
-        return [
-          ...memo,
-          ...labwareSamples(labware).map<Source>((labwareSample) => {
-            return {
-              sampleId: labwareSample.sample.id,
-              address: labwareSample.slot.address,
-              labware,
-            };
-          }),
-        ];
-      },
-      []
-    ),
+    destinationLabware: destinationLabware,
+    // As we're only allowing removing an existing planned source, no source actions should be available
+    sources: [],
+    sampleColors,
+
+    plannedActions: operations[0].planActions
+      .filter((planAction) => {
+        return planAction.destination.labwareId === destinationLabware.id;
+      })
+      .reduce<Map<Address, Array<LayoutPlanAction>>>((memo, planAction) => {
+        const action: LayoutPlanAction = {
+          sampleId: planAction.sample.id,
+          labware: findSourceLabware(
+            sourceLabwares,
+            planAction.source.labwareId
+          ),
+          address: planAction.source.address,
+
+          // Section number will be assigned by the user at confirm stage
+          newSection: undefined,
+        };
+        if (memo.has(planAction.destination.address)) {
+          memo.get(planAction.destination.address)?.push(action);
+        } else {
+          memo.set(planAction.destination.address, [action]);
+        }
+        return memo;
+      }, new Map()),
   };
+}
+
+function findSourceLabware(
+  labwares: LabwareFieldsFragment[],
+  labwareId: number
+): LabwareFieldsFragment {
+  const labware = labwares.find((lw) => lw.id === labwareId);
+
+  if (!labware) {
+    throw new Error(
+      `Plan returned an unrecognised source labware: ${labwareId}`
+    );
+  }
+
+  return labware;
 }

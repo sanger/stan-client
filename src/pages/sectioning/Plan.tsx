@@ -63,12 +63,6 @@ function Plan() {
                 onCreate={model.addPlan}
                 onDelete={() => model.deleteLabwareLayout(i)}
                 initialSectioningLayout={sectioningLayout}
-                initialPlan={model.context.sectioningLayoutPlans.get(
-                  sectioningLayout.cid
-                )}
-                initialLayoutPlan={model.context.sectioningLayoutLayoutPlan.get(
-                  sectioningLayout.cid
-                )}
               />
             ))}
           </div>
