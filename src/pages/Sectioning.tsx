@@ -30,7 +30,6 @@ type SectioningPageContextType = {
   selectLabwareType: (labwareType: LabwareTypeFieldsFragment) => void;
   addLabwareLayout: () => void;
   prepDone: () => void;
-  backToPrep: () => void;
   confirmOperation: () => void;
   context: SectioningContext;
   addPlan(sectioningLayout: SectioningLayout): void;
@@ -68,9 +67,6 @@ function Sectioning({ sectioningInfo }: SectioningParams) {
     return {
       addLabwareLayout(): void {
         send({ type: "ADD_LABWARE_LAYOUT" });
-      },
-      backToPrep(): void {
-        send({ type: "BACK_TO_PREP" });
       },
       confirmOperation(): void {
         send({ type: "CONFIRM_SECTION" });

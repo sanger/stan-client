@@ -8,6 +8,7 @@ import {
   LayoutMachineType,
 } from "../lib/machines/layout";
 import {
+  removeSection,
   selectDestination,
   selectSource,
   setAllDestinations,
@@ -39,6 +40,7 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
               name={layoutPlan.destinationLabware.labwareType.name}
               selectable={"none"}
               onSlotClick={(address) => send(selectDestination(address))}
+              onSlotCtrlClick={(address) => send(removeSection(address))}
               slotText={(address) => buildSlotText(layoutPlan, address)}
               slotSecondaryText={(address) =>
                 buildSlotSecondaryText(layoutPlan, address)

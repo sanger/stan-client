@@ -424,7 +424,7 @@ export function buildLayoutPlan(
           address: planAction.source.address,
 
           // Section number will be assigned by the user at confirm stage
-          newSection: undefined,
+          newSection: 0,
         };
         if (memo.has(planAction.destination.address)) {
           memo.get(planAction.destination.address)?.push(action);

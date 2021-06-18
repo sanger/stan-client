@@ -152,9 +152,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             <LayoutPlanner actor={layoutMachine}>
               <div className="my-2">
                 <p className="text-gray-900 text-sm leading-normal">
-                  Click a slot to reduce its number of confirmed sections. (You
-                  can return a slot to its original planned value by clicking it
-                  again once it becomes empty).
+                  Click a slot to increase the number of sections in that slot.
+                </p>
+                <p>
+                  To reduce the number of sections in a slot, use Ctrl-Click.
                 </p>
               </div>
             </LayoutPlanner>

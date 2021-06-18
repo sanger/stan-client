@@ -39,7 +39,9 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
           <Input
             key={source.address + String(index)}
             type="number"
-            defaultValue={source.newSection ?? undefined}
+            defaultValue={
+              source.newSection === 0 ? "" : String(source.newSection)
+            }
             min={1}
             onChange={(e) =>
               onSectionNumberChange(slot.address, index, Number(e.target.value))
