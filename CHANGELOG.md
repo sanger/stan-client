@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Prevent accidental abandons ([#44](https://github.com/sanger/stan-client/pull/44))
+
+### Modified
+- Allow user to specify section numbers for slots on Sectioning confirm ([#43](https://github.com/sanger/stan-client/pull/43))
+
+## [1.1.1] - 2021-05-13
+### Added
 
 ### Modified
 - Where possible, navigate back home once an operation is complete ([#38](https://github.com/sanger/stan-client/pull/38))
@@ -58,7 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Everything!
 
-[Unreleased]: https://github.com/sanger/stan-client/compare/1.1.0...HEAD
+[Unreleased]: https://github.com/sanger/stan-client/compare/1.1.1...HEAD
+[1.1.1]: https://github.com/sanger/stan-client/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/sanger/stan-client/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/sanger/stan-client/compare/0.6.1...1.0.0
 [0.6.1]: https://github.com/sanger/stan-client/compare/0.1.0...0.6.1

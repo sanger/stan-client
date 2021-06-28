@@ -1,8 +1,8 @@
 import { MachineOptions } from "xstate";
-import { Source, LayoutContext } from "./layoutContext";
+import { LayoutContext, Source } from "./layoutContext";
 import { LayoutEvents } from "./layoutEvents";
 import { assign } from "@xstate/immer";
-import { find, isEqual, sortBy } from "lodash";
+import { isEqual } from "lodash";
 
 export const layoutMachineKey = "layoutMachine";
 
@@ -13,6 +13,8 @@ export enum Actions {
   REMOVE_PLANNED_ACTION = "layoutMachine.removePlannedAction",
   ASSIGN_DESTINATION_ACTIONS = "layoutMachine.assignDestinationActions",
   TOGGLE_DESTINATION = "layoutMachine.toggleDestination",
+  ADD_SECTION = "layoutMachine.addSection",
+  REMOVE_SECTION = "layoutMachine.removeSection",
 }
 
 export const machineOptions: Partial<MachineOptions<
@@ -40,30 +42,16 @@ export const machineOptions: Partial<MachineOptions<
         return;
       }
 
-      if (!ctx.selected) {
-        ctx.layoutPlan.plannedActions.delete(e.address);
-        return;
-      }
+      const plannedActions = ctx.layoutPlan.plannedActions;
 
-      const action: Source = {
-        sampleId: ctx.selected.sampleId,
-        address: ctx.selected.address,
-        labware: ctx.selected.labware,
-      };
-
-      const plannedAddressActions = ctx.layoutPlan.plannedActions.get(
-        e.address
-      );
-
-      // There's no limit to how many sections can be put in a slot right now.
-      // If there needs to be in the future, this is the place to do that.
-      if (plannedAddressActions && find(plannedAddressActions, action)) {
-        ctx.layoutPlan.plannedActions.set(e.address, [
-          ...plannedAddressActions,
-          action,
-        ]);
+      if (
+        !ctx.selected ||
+        ctx.selected.sampleId === plannedActions.get(e.address)?.[0].sampleId
+      ) {
+        plannedActions.delete(e.address);
       } else {
-        ctx.layoutPlan.plannedActions.set(e.address, [action]);
+        const action: Source = Object.assign({}, ctx.selected);
+        plannedActions.set(e.address, [action]);
       }
     }),
 
@@ -85,6 +73,48 @@ export const machineOptions: Partial<MachineOptions<
       });
     }),
 
+    [Actions.ADD_SECTION]: assign((ctx, e) => {
+      if (e.type !== "SELECT_DESTINATION") {
+        return;
+      }
+
+      if (!ctx.possibleActions?.has(e.address)) {
+        return;
+      }
+
+      const slotActions = ctx.possibleActions?.get(e.address)!;
+      const plannedActionsForSlot = ctx.layoutPlan.plannedActions.get(
+        e.address
+      );
+
+      if (!plannedActionsForSlot) {
+        ctx.layoutPlan.plannedActions.set(e.address, slotActions);
+      } else {
+        ctx.layoutPlan.plannedActions.set(e.address, [
+          ...plannedActionsForSlot,
+          ...slotActions,
+        ]);
+      }
+    }),
+
+    [Actions.REMOVE_SECTION]: assign((ctx, e) => {
+      if (e.type !== "REMOVE_SECTION") {
+        return;
+      }
+
+      if (!ctx.possibleActions?.has(e.address)) {
+        return;
+      }
+
+      const slotActions = ctx.layoutPlan.plannedActions.get(e.address) ?? [];
+
+      if (slotActions.length > 1) {
+        slotActions.pop();
+      } else if (slotActions.length === 1) {
+        ctx.layoutPlan.plannedActions.delete(e.address);
+      }
+    }),
+
     [Actions.TOGGLE_DESTINATION]: assign((ctx, e) => {
       if (e.type !== "SELECT_DESTINATION") {
         return;
@@ -98,11 +128,7 @@ export const machineOptions: Partial<MachineOptions<
       const slotActions = ctx.layoutPlan.plannedActions.get(e.address) ?? [];
 
       if (slotActions.length > 1) {
-        const newSlotActions = sortBy(slotActions, ["newSection"]);
-        ctx.layoutPlan.plannedActions.set(
-          e.address,
-          newSlotActions.slice(0, -1)
-        );
+        slotActions.pop();
       } else if (slotActions.length === 1) {
         ctx.layoutPlan.plannedActions.delete(e.address);
       } else {

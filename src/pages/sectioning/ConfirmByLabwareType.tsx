@@ -2,19 +2,19 @@ import React from "react";
 import Heading from "../../components/Heading";
 import { LabwareTypeName } from "../../types/stan";
 import ConfirmLabware from "./ConfirmLabware";
-import { SectioningConfirmActorRef } from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmTypes";
 import ConfirmTubes from "./ConfirmTubes";
+import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 
 interface ConfirmByLabwareTypeParams {
   labwareTypeName: string;
-  actors: Array<SectioningConfirmActorRef> | undefined;
+  layoutPlans: Array<LayoutPlan>;
 }
 
 const ConfirmByLabwareType: React.FC<ConfirmByLabwareTypeParams> = ({
   labwareTypeName,
-  actors,
+  layoutPlans,
 }) => {
-  if (!actors || actors.length === 0) {
+  if (layoutPlans.length === 0) {
     return null;
   }
   return (
@@ -22,11 +22,16 @@ const ConfirmByLabwareType: React.FC<ConfirmByLabwareTypeParams> = ({
       <Heading level={3}>{labwareTypeName}</Heading>
 
       {labwareTypeName === LabwareTypeName.TUBE && (
-        <ConfirmTubes actors={actors} />
+        <ConfirmTubes layoutPlans={layoutPlans} />
       )}
 
       {labwareTypeName !== LabwareTypeName.TUBE &&
-        actors.map((actor, i) => <ConfirmLabware key={i} actor={actor} />)}
+        layoutPlans.map((layoutPlan) => (
+          <ConfirmLabware
+            key={layoutPlan.destinationLabware.id}
+            originalLayoutPlan={layoutPlan}
+          />
+        ))}
     </div>
   );
 };

@@ -1,8 +1,10 @@
 import { interpret } from "xstate";
 import { FindLabwareQuery } from "../../../src/types/sdk";
 import { log } from "xstate/lib/actions";
-import { createLabwareMachine } from "../../../src/lib/machines/labware/labwareMachine";
-import { LabwareContext } from "../../../src/lib/machines/labware/labwareMachineTypes";
+import {
+  createLabwareMachine,
+  LabwareContext,
+} from "../../../src/lib/machines/labware/labwareMachine";
 
 describe("labwareMachine", () => {
   it("has an initial state of idle.normal", (done) => {

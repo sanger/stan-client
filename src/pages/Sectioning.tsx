@@ -1,16 +1,21 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useEffect } from "react";
 import Plan from "./sectioning/Plan";
 import Confirm from "./sectioning/Confirm";
 import {
+  ConfirmOperationLabware,
   GetSectioningInfoQuery,
   LabwareFieldsFragment,
   LabwareTypeFieldsFragment,
   Maybe,
 } from "../types/sdk";
-import { LabwareTypeName } from "../types/stan";
-import { sectioningMachine } from "../lib/machines/sectioning/sectioningMachine";
+import {
+  createSectioningMachine,
+  SectioningContext,
+} from "../lib/machines/sectioning/sectioningMachine";
 import { useMachine } from "@xstate/react";
-import { SectioningContext } from "../lib/machines/sectioning/sectioningMachineTypes";
+import { Prompt } from "react-router-dom";
+import { useConfirmLeave } from "../lib/hooks";
+import { SectioningLayout } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutMachine";
 
 type SectioningPageContextType = {
   isLabwareTableLocked: boolean;
@@ -25,9 +30,10 @@ type SectioningPageContextType = {
   selectLabwareType: (labwareType: LabwareTypeFieldsFragment) => void;
   addLabwareLayout: () => void;
   prepDone: () => void;
-  backToPrep: () => void;
   confirmOperation: () => void;
   context: SectioningContext;
+  addPlan(sectioningLayout: SectioningLayout): void;
+  commitConfirmation(confirmOperationLabware: ConfirmOperationLabware): void;
 };
 
 export const SectioningPageContext = React.createContext<
@@ -39,46 +45,31 @@ type SectioningParams = {
 };
 
 function Sectioning({ sectioningInfo }: SectioningParams) {
-  const [current, send] = useMachine(() => {
-    const inputLabwareTypeNames = [LabwareTypeName.PROVIASETTE];
-    const outputLabwareTypeNames = [
-      LabwareTypeName.TUBE,
-      LabwareTypeName.SLIDE,
-      LabwareTypeName.VISIUM_TO,
-      LabwareTypeName.VISIUM_LP,
-    ];
+  const [current, send, service] = useMachine(
+    createSectioningMachine(sectioningInfo)
+  );
 
-    const inputLabwareTypes = sectioningInfo.labwareTypes.filter((lt) =>
-      inputLabwareTypeNames.includes(lt.name as LabwareTypeName)
-    );
-    const outputLabwareTypes = sectioningInfo.labwareTypes.filter((lt) =>
-      outputLabwareTypeNames.includes(lt.name as LabwareTypeName)
-    );
-    const selectedLabwareType = outputLabwareTypes[0];
-    const comments = sectioningInfo.comments;
+  const addPlan = useCallback(
+    (sectioningLayout: SectioningLayout) => {
+      send({ type: "PLAN_ADDED", sectioningLayout });
+    },
+    [send]
+  );
 
-    return sectioningMachine.withContext(
-      Object.assign({}, sectioningMachine.context, {
-        inputLabwareTypeNames,
-        outputLabwareTypeNames,
-        inputLabwareTypes,
-        outputLabwareTypes,
-        selectedLabwareType,
-        comments,
-      })
-    );
-  });
+  const commitConfirmation = useCallback(
+    (confirmOperationLabware: ConfirmOperationLabware) => {
+      send({ type: "COMMIT_CONFIRMATION", confirmOperationLabware });
+    },
+    [send]
+  );
 
   const sectioningPageContext: SectioningPageContextType = useMemo(() => {
     return {
       addLabwareLayout(): void {
         send({ type: "ADD_LABWARE_LAYOUT" });
       },
-      backToPrep(): void {
-        send({ type: "BACK_TO_PREP" });
-      },
       confirmOperation(): void {
-        send({ type: "CONFIRM_OPERATION" });
+        send({ type: "CONFIRM_SECTION" });
       },
       deleteLabwareLayout(index: number): void {
         send({
@@ -93,8 +84,7 @@ function Sectioning({ sectioningInfo }: SectioningParams) {
       isLabwareTableLocked: current.context.sectioningLayouts.length > 0,
       isNextBtnEnabled:
         current.context.sectioningLayouts.length > 0 &&
-        current.context.sectioningLayouts.length ===
-          current.context.numSectioningLayoutsComplete,
+        current.context.sectioningLayouts.every((sl) => sl.plan != null),
       isStarted: current.matches("started"),
       prepDone(): void {
         send({ type: "PREP_DONE" });
@@ -108,14 +98,35 @@ function Sectioning({ sectioningInfo }: SectioningParams) {
       updateLabwares(labwares: Array<LabwareFieldsFragment>): void {
         send({ type: "UPDATE_LABWARES", labwares });
       },
+      addPlan,
+      commitConfirmation,
       context: current.context,
     };
-  }, [current, send]);
+  }, [current, send, commitConfirmation, addPlan]);
+
+  const [inProgress, setInProgress] = useConfirmLeave();
+  useEffect(() => {
+    const subscription = service.subscribe((state) => {
+      if (state.matches("started")) {
+        setInProgress(true);
+      }
+
+      if (state.matches("done")) {
+        setInProgress(false);
+      }
+    });
+
+    return subscription.unsubscribe;
+  }, [service, setInProgress]);
 
   const showConfirm = current.matches("confirming") || current.matches("done");
 
   return (
     <SectioningPageContext.Provider value={sectioningPageContext}>
+      <Prompt
+        when={inProgress}
+        message={"You have unsaved changes. Are you sure you want to leave?"}
+      />
       {showConfirm ? <Confirm /> : <Plan />}
     </SectioningPageContext.Provider>
   );

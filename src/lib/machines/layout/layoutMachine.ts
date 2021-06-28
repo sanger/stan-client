@@ -73,7 +73,10 @@ export const createLayoutMachine = (
         [State.DEST_ONLY_MODE]: {
           on: {
             SELECT_DESTINATION: {
-              actions: Actions.TOGGLE_DESTINATION,
+              actions: Actions.ADD_SECTION,
+            },
+            REMOVE_SECTION: {
+              actions: Actions.REMOVE_SECTION,
             },
           },
         },

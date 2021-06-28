@@ -26,7 +26,7 @@ export interface LayoutPlan {
 export interface Source {
   sampleId: number;
   labware: LabwareFieldsFragment;
-  newSection?: Maybe<number>;
+  newSection: number;
   address?: Maybe<Address>;
 }
 

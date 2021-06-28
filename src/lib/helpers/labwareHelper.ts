@@ -1,12 +1,22 @@
 import {
   Labware,
   LabwareFieldsFragment,
+  LabwareType,
   SlotFieldsFragment,
 } from "../../types/sdk";
 import { cycleColors } from "../helpers";
 import { orderBy } from "lodash";
-import { Addressable } from "../../types/stan";
+import { Addressable, LabwareTypeName } from "../../types/stan";
 import * as slotHelper from "./slotHelper";
+
+/**
+ * Determines whether a labware type is a tube or not.
+ * @param maybeTube the labware type that might be a tube
+ * @return true if maybeTube is a tube; false otherwise
+ */
+export function isTube(maybeTube: Pick<LabwareType, "name">): boolean {
+  return maybeTube.name === LabwareTypeName.TUBE;
+}
 
 /**
  * Build an array of all {@link Sample samples} in a {@link Labware} along with its {@link Slot} plus the original {@link Labware}
@@ -114,6 +124,7 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
       labwareId: slot.labwareId,
       samples: slot.samples.map((sample) => ({
         id: sample.id,
+        section: sample.section,
         bioState: {
           __typename: "BioState",
           name: sample.bioState.name,

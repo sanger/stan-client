@@ -11,6 +11,8 @@ import { useMachine } from "@xstate/react";
 import registrationMachine from "../lib/machines/registration/registrationMachine";
 import RegistrationSuccess from "./registration/RegistrationSuccess";
 import columns from "../components/labwareScanPanel/columns";
+import { useConfirmLeave } from "../lib/hooks";
+import { Prompt } from "react-router-dom";
 
 export interface RegistrationFormBlock {
   clientId: number;
@@ -106,7 +108,17 @@ interface RegistrationParams {
 }
 
 function Registration({ registrationInfo }: RegistrationParams) {
-  const [current, send] = useMachine(registrationMachine);
+  const [current, send, service] = useMachine(registrationMachine);
+
+  const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
+  useEffect(() => {
+    const subscription = service.subscribe((state) => {
+      if (state.matches("complete")) {
+        setShouldConfirm(false);
+      }
+    });
+    return subscription.unsubscribe;
+  }, [service, setShouldConfirm]);
 
   const validationSchema = useMemo(() => {
     return buildRegistrationSchema(registrationInfo);
@@ -146,6 +158,13 @@ function Registration({ registrationInfo }: RegistrationParams) {
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
+          <Prompt
+            when={shouldConfirm}
+            message={
+              "You have unsaved changes. Are you sure you want to leave?"
+            }
+          />
+
           {registrationErrors && (
             <div ref={warningRef}>
               <Warning message={"There was a problem registering your tissues"}>

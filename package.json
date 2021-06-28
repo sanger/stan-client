@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "private": true,
   "proxy": "http://localhost:8080",
   "dependencies": {
@@ -34,7 +34,7 @@
     "immer": "^8.0.0",
     "js-cookie": "^2.2.1",
     "lodash": "^4.17.20",
-    "postcss": "^8.1.9",
+    "postcss": "^8.2.10",
     "query-string": "^6.13.8",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -97,6 +97,7 @@
     "@tailwindcss/forms": "^0.2.1",
     "@testing-library/cypress": "^7.0.1",
     "@types/faker": "^5.1.6",
+    "@xstate/inspect": "^0.4.1",
     "cypress": "7.1.0",
     "cypress-intellij-reporter": "^0.0.4",
     "faker": "^5.4.0",

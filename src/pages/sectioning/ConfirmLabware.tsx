@@ -1,5 +1,5 @@
-import React from "react";
-import { useActor } from "@xstate/react";
+import React, { useContext, useEffect } from "react";
+import { useMachine, useSelector } from "@xstate/react";
 import variants from "../../lib/motionVariants";
 import Labware from "../../components/labware/Labware";
 import PinkButton from "../../components/buttons/PinkButton";
@@ -8,42 +8,51 @@ import Heading from "../../components/Heading";
 import BlueButton from "../../components/buttons/BlueButton";
 import { motion } from "framer-motion";
 import { optionValues } from "../../components/forms";
-import {
-  editLayout,
-  setCommentForAddress,
-  setCommentForAll,
-} from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmEvents";
 import LayoutPlanner from "../../components/LayoutPlanner";
-import { cancel, done } from "../../lib/machines/layout/layoutEvents";
-import {
-  SectioningConfirmActorRef,
-  SectioningConfirmEvent,
-  SectioningConfirmMachineType,
-} from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmTypes";
 import Label from "../../components/forms/Label";
 import WhiteButton from "../../components/buttons/WhiteButton";
 import { sortRightDown } from "../../lib/helpers/labwareHelper";
 import { Select } from "../../components/forms/Select";
 import LabwareComments from "./LabwareComments";
 import classNames from "classnames";
-import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from "./index";
+import {
+  buildSlotColor,
+  buildSlotSecondaryText,
+  buildSlotText,
+  selectConfirmOperationLabware,
+} from "./index";
+import { createSectioningConfirmMachine } from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmMachine";
+import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
+import { SectioningPageContext } from "../Sectioning";
 
 interface ConfirmLabwareProps {
-  actor: SectioningConfirmActorRef;
+  originalLayoutPlan: LayoutPlan;
 }
 
-const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
-  const [current, send] = useActor<
-    SectioningConfirmEvent,
-    SectioningConfirmMachineType["state"]
-  >(actor);
+const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
+  originalLayoutPlan,
+}) => {
+  const model = useContext(SectioningPageContext)!;
+  const [current, send, service] = useMachine(
+    createSectioningConfirmMachine(
+      model.context.comments,
+      originalLayoutPlan.destinationLabware,
+      originalLayoutPlan
+    )
+  );
+  const confirmOperationLabware = useSelector(
+    service,
+    selectConfirmOperationLabware
+  );
 
-  const {
-    layoutPlan,
-    labware,
-    comments,
-    addressToCommentMap,
-  } = current.context;
+  const commitConfirmation = model.commitConfirmation;
+  useEffect(() => {
+    if (confirmOperationLabware) {
+      commitConfirmation(confirmOperationLabware);
+    }
+  }, [commitConfirmation, confirmOperationLabware]);
+
+  const { addressToCommentMap, labware, layoutPlan } = current.context;
 
   const { layoutMachine } = current.children;
 
@@ -66,7 +75,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
             labware={labware}
-            onClick={() => send(editLayout())}
+            onClick={() => send({ type: "EDIT_LAYOUT" })}
             slotText={(address) => buildSlotText(layoutPlan, address)}
             slotSecondaryText={(address) =>
               buildSlotSecondaryText(layoutPlan, address)
@@ -76,7 +85,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
 
           <PinkButton
             disabled={current.matches("done")}
-            onClick={() => send(editLayout())}
+            onClick={() => send({ type: "EDIT_LAYOUT" })}
           >
             Edit Layout
           </PinkButton>
@@ -94,12 +103,26 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
                   slot={slot}
                   value={addressToCommentMap.get(slot.address) ?? ""}
                   disabled={current.matches("done")}
-                  comments={comments}
+                  comments={model.context.comments}
                   layoutPlan={layoutPlan}
                   onCommentChange={(e) => {
-                    send(
-                      setCommentForAddress(slot.address, e.currentTarget.value)
-                    );
+                    send({
+                      type: "SET_COMMENT_FOR_ADDRESS",
+                      address: slot.address,
+                      commentId: e.currentTarget.value,
+                    });
+                  }}
+                  onSectionNumberChange={(
+                    slotAddress,
+                    sectionIndex,
+                    sectionNumber
+                  ) => {
+                    send({
+                      type: "UPDATE_SECTION_NUMBER",
+                      slotAddress,
+                      sectionIndex,
+                      sectionNumber,
+                    });
                   }}
                 />
               ))}
@@ -108,10 +131,15 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
           <Label name={"All slots:"}>
             <Select
               disabled={current.matches("done")}
-              onChange={(e) => send(setCommentForAll(e.currentTarget.value))}
+              onChange={(e) =>
+                send({
+                  type: "SET_COMMENT_FOR_ALL",
+                  commentId: e.currentTarget.value,
+                })
+              }
             >
               <option />
-              {optionValues(comments, "text", "id")}
+              {optionValues(model.context.comments, "text", "id")}
             </Select>
           </Label>
         </div>
@@ -124,9 +152,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
             <LayoutPlanner actor={layoutMachine}>
               <div className="my-2">
                 <p className="text-gray-900 text-sm leading-normal">
-                  Click a slot to reduce its number of confirmed sections. (You
-                  can return a slot to its original planned value by clicking it
-                  again once it becomes empty).
+                  Click a slot to increase the number of sections in that slot.
+                </p>
+                <p>
+                  To reduce the number of sections in a slot, use Ctrl-Click.
                 </p>
               </div>
             </LayoutPlanner>
@@ -134,13 +163,13 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({ actor }) => {
         </ModalBody>
         <ModalFooter>
           <BlueButton
-            onClick={() => layoutMachine.send(done())}
+            onClick={() => layoutMachine.send({ type: "DONE" })}
             className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
           >
             Done
           </BlueButton>
           <WhiteButton
-            onClick={() => layoutMachine.send(cancel())}
+            onClick={() => layoutMachine.send({ type: "CANCEL" })}
             className="mt-3 w-full sm:mt-0 sm:ml-3"
           >
             Cancel
