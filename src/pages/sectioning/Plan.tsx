@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import AppShell from "../../components/AppShell";
 import Heading from "../../components/Heading";
 import LabwareScanTable from "../../components/labwareScanPanel/LabwareScanPanel";
-import labwareScanTableColumns from "../../components/labwareScanPanel/columns";
+import labwareScanTableColumns from "../../components/dataTable/labwareColumns";
 import SectioningLayout from "./SectioningLayout";
 import { find } from "lodash";
 import { optionValues } from "../../components/forms";

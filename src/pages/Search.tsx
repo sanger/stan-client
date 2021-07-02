@@ -194,7 +194,10 @@ export default Search;
 const columns: Column<SearchResultTableEntry>[] = [
   {
     Header: "Barcode",
-    accessor: "barcode",
+    Cell: (props: Cell<SearchResultTableEntry>) => {
+      const barcode = props.row.original.barcode;
+      return <StyledLink to={`/labware/${barcode}`}>{barcode}</StyledLink>;
+    },
   },
   {
     Header: "Labware Type",

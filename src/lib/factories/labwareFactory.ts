@@ -1,5 +1,5 @@
 import { Factory } from "fishery";
-import { GridDirection, Labware } from "../../types/sdk";
+import { GridDirection, Labware, LabwareState } from "../../types/sdk";
 import { labwareTypes } from "./labwareTypeFactory";
 import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
 import { uniqueId } from "lodash";
@@ -43,6 +43,8 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
       destroyed: params.destroyed ?? false,
       discarded: params.discarded ?? false,
       released: params.released ?? false,
+      created: params.created ?? new Date().toISOString(),
+      state: params.state ?? LabwareState.Active,
     };
   }
 );

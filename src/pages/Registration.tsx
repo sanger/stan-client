@@ -10,7 +10,7 @@ import RegistrationValidation from "../lib/validation/registrationValidation";
 import { useMachine } from "@xstate/react";
 import registrationMachine from "../lib/machines/registration/registrationMachine";
 import RegistrationSuccess from "./registration/RegistrationSuccess";
-import columns from "../components/labwareScanPanel/columns";
+import columns from "../components/dataTable/labwareColumns";
 import { useConfirmLeave } from "../lib/hooks";
 import { Prompt } from "react-router-dom";
 

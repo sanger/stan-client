@@ -1,6 +1,7 @@
 import {
   Labware,
   LabwareFieldsFragment,
+  LabwareState,
   LabwareType,
   SlotFieldsFragment,
 } from "../../types/sdk";
@@ -111,6 +112,8 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
     destroyed: labware.destroyed,
     discarded: labware.discarded,
     released: labware.released,
+    created: labware.created,
+    state: labware.state,
     labwareType: {
       __typename: "LabwareType",
       name: labware.labwareType.name,
@@ -132,6 +135,7 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
         tissue: {
           donor: {
             donorName: sample.tissue.donor.donorName,
+            lifeStage: sample.tissue.donor.lifeStage,
             __typename: "Donor",
           },
           externalName: sample.tissue.externalName,
@@ -150,4 +154,11 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
       })),
     })),
   };
+}
+
+/**
+ * Returns true if a piece of labware is usable; false otherwise.
+ */
+export function isLabwareUsable(labware: Pick<Labware, "state">): boolean {
+  return [LabwareState.Empty, LabwareState.Active].includes(labware.state);
 }

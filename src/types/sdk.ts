@@ -24,6 +24,14 @@ export enum UserRole {
   Admin = 'admin'
 }
 
+export enum LabwareState {
+  Empty = 'empty',
+  Active = 'active',
+  Discarded = 'discarded',
+  Released = 'released',
+  Destroyed = 'destroyed'
+}
+
 export type User = {
   __typename?: 'User';
   username: Scalars['String'];
@@ -139,6 +147,8 @@ export type Labware = {
   released: Scalars['Boolean'];
   destroyed: Scalars['Boolean'];
   discarded: Scalars['Boolean'];
+  state: LabwareState;
+  created: Scalars['Timestamp'];
 };
 
 export enum LifeStage {
@@ -787,7 +797,7 @@ export type HmdmcFieldsFragment = (
 
 export type LabwareFieldsFragment = (
   { __typename?: 'Labware' }
-  & Pick<Labware, 'id' | 'barcode' | 'destroyed' | 'discarded' | 'released'>
+  & Pick<Labware, 'id' | 'barcode' | 'destroyed' | 'discarded' | 'released' | 'state' | 'created'>
   & { labwareType: (
     { __typename?: 'LabwareType' }
     & LabwareTypeFieldsFragment
@@ -851,7 +861,7 @@ export type SampleFieldsFragment = (
     & Pick<Tissue, 'externalName' | 'replicate'>
     & { donor: (
       { __typename?: 'Donor' }
-      & Pick<Donor, 'donorName'>
+      & Pick<Donor, 'donorName' | 'lifeStage'>
     ), spatialLocation: (
       { __typename?: 'SpatialLocation' }
       & Pick<SpatialLocation, 'code'>
@@ -1652,6 +1662,7 @@ export const SampleFieldsFragmentDoc = gql`
   tissue {
     donor {
       donorName
+      lifeStage
     }
     externalName
     spatialLocation {
@@ -1684,6 +1695,8 @@ export const LabwareFieldsFragmentDoc = gql`
   destroyed
   discarded
   released
+  state
+  created
   labwareType {
     ...LabwareTypeFields
   }
