@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import AppShell from "../components/AppShell";
 import { Form, Formik } from "formik";
 import FormikInput from "../components/forms/Input";
@@ -26,6 +26,7 @@ import { history } from "../lib/sdk";
 import WhiteButton from "../components/buttons/WhiteButton";
 import { ParsedQuery } from "query-string";
 import { merge } from "lodash";
+import { configContext } from "../context/ConfigContext";
 
 const validationSchema: Yup.ObjectSchema = Yup.object()
   .shape({
@@ -83,10 +84,11 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
     cleanParams(params, emptyFindRequestKeys)
   );
 
+  const config = useContext(configContext)!;
   const [current, send] = useMachine(() =>
     searchMachine.withContext({
       findRequest,
-      maxRecords: 150,
+      maxRecords: config.maxSearchRecords,
     })
   );
 
