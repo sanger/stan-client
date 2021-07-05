@@ -16,7 +16,7 @@ import Heading from "../components/Heading";
 import MutedText from "../components/MutedText";
 import LabwareScanner from "../components/labwareScanner/LabwareScanner";
 import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
-import columns from "../components/labwareScanPanel/columns";
+import columns from "../components/dataTable/labwareColumns";
 import { FormikErrorMessage, optionValues } from "../components/forms";
 import FormikSelect from "../components/forms/Select";
 import PinkButton from "../components/buttons/PinkButton";

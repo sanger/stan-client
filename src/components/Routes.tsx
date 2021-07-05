@@ -26,6 +26,7 @@ import { ParsedQuery } from "query-string";
 import _ from "lodash";
 import Configuration from "../pages/Configuration";
 import { StanCoreContext } from "../lib/sdk";
+import LabwareDetails from "../pages/LabwareDetails";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -172,6 +173,26 @@ export function Routes() {
             {(configuration) => <Configuration configuration={configuration} />}
           </DataFetcher>
         )}
+      />
+
+      <Route
+        path="/labware/:barcode"
+        render={(routeProps) => {
+          return (
+            <DataFetcher
+              key={routeProps.location.key}
+              dataFetcher={() => {
+                return stanCore.FindLabware({
+                  barcode: routeProps.match.params.barcode,
+                });
+              }}
+            >
+              {(findLabwareQuery) => (
+                <LabwareDetails labware={findLabwareQuery.labware} />
+              )}
+            </DataFetcher>
+          );
+        }}
       />
 
       <Route

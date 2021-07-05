@@ -3,7 +3,7 @@ import { Meta, Story } from "@storybook/react";
 
 import LabwareScanner, { useLabwareContext } from "./LabwareScanner";
 import LabwareScanPanel from "../labwareScanPanel/LabwareScanPanel";
-import columns from "../labwareScanPanel/columns";
+import columns from "../dataTable/labwareColumns";
 
 const meta: Meta = {
   title: "LabwareScanner",

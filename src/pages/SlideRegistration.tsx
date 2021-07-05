@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useRef } from "react";
 import AppShell from "../components/AppShell";
 import { Formik } from "formik";
 import SlideRegistrationForm from "./registration/SlideRegistrationForm";
-import columns from "../components/labwareScanPanel/columns";
+import columns from "../components/dataTable/labwareColumns";
 import RegistrationSuccess from "./registration/RegistrationSuccess";
 import Warning from "../components/notifications/Warning";
 import {

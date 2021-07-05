@@ -3,6 +3,8 @@ import { uniqueId } from "lodash";
 import {
   GetRegistrationInfoQuery,
   GetRegistrationInfoQueryVariables,
+  LabwareState,
+  LifeStage,
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,
   RegisterTissuesMutation,
@@ -134,6 +136,8 @@ const registrationHandlers = [
                 released: false,
                 discarded: false,
                 destroyed: false,
+                state: LabwareState.Active,
+                created: new Date().toISOString(),
                 labwareType: {
                   name: "Proviasette",
                   numRows: 1,
@@ -154,6 +158,7 @@ const registrationHandlers = [
                           replicate: 5,
                           donor: {
                             donorName: "Donor 3",
+                            lifeStage: LifeStage.Adult,
                           },
                           spatialLocation: {
                             code: 3,
@@ -188,6 +193,8 @@ const registrationHandlers = [
                 released: false,
                 discarded: false,
                 destroyed: false,
+                state: LabwareState.Active,
+                created: Date(),
                 labwareType: {
                   name: labware.labwareType,
                   // numRows and numColumns not correct but don't need to be for this particular mock
@@ -212,6 +219,7 @@ const registrationHandlers = [
                         replicate: content.replicateNumber,
                         donor: {
                           donorName: content.donorIdentifier,
+                          lifeStage: content.lifeStage,
                         },
                       },
                       bioState: { name: "Tissue" },

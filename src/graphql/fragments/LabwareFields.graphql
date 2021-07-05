@@ -4,6 +4,8 @@ fragment LabwareFields on Labware {
     destroyed
     discarded
     released
+    state
+    created
     labwareType {
         ...LabwareTypeFields
     }

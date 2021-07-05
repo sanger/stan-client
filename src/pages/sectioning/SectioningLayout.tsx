@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import labwareScanTableColumns from "../../components/labwareScanPanel/columns";
+import labwareScanTableColumns from "../../components/dataTable/labwareColumns";
 import PinkButton from "../../components/buttons/PinkButton";
 import { useMachine } from "@xstate/react";
 import Label from "../../components/forms/Label";
