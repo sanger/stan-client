@@ -125,6 +125,7 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
       __typename: "Slot",
       address: slot.address,
       labwareId: slot.labwareId,
+      blockHighestSection: slot.blockHighestSection,
       samples: slot.samples.map((sample) => ({
         id: sample.id,
         section: sample.section,

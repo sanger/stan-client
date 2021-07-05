@@ -12,6 +12,7 @@ export const slotFactory = Factory.define<Slot>(
         associations.samples ??
         sampleFactory.buildList(transientParams.numberOfSamples ?? 0),
       labwareId: params.labwareId ?? 1,
+      blockHighestSection: Math.ceil(Math.random() * 20),
     };
   }
 );
