@@ -1,7 +1,11 @@
 import { Column } from "react-table";
-import { SampleDataTableRow } from "../../types/stan";
-import { LabwareFieldsFragment } from "../../types/sdk";
+import { LabwareFieldsFragment, SampleFieldsFragment } from "../../types/sdk";
 import { capitalize } from "lodash";
+
+/**
+ * Type that can be used for displaying a Sample in a table row, along with its slot address
+ */
+type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string };
 
 type ColumnFactory<E = any> = (meta?: E) => Column<SampleDataTableRow>;
 

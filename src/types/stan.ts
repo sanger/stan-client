@@ -1,4 +1,4 @@
-import {LabwareFieldsFragment, Maybe, PrinterFieldsFragment, SampleFieldsFragment, Size,} from "./sdk";
+import {LabwareFieldsFragment, Maybe, PrinterFieldsFragment, Size,} from "./sdk";
 import {Location} from "history";
 import {ClientError} from "graphql-request";
 
@@ -211,7 +211,3 @@ export type StanConfig = {
   deploymentDate: string;
 };
 
-/**
- * Type that can be used for displaying a Sample in a table row, along with its slot address
- */
-export type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string}
