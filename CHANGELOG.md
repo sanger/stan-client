@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Labware details page ([#45](https://github.com/sanger/stan-client/pull/45))
 
 ### Modified
 
