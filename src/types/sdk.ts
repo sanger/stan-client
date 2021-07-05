@@ -135,7 +135,7 @@ export type Slot = {
   labwareId: Scalars['Int'];
   samples: Array<Sample>;
   block: Scalars['Boolean'];
-  highestSection?: Maybe<Scalars['Int']>;
+  blockHighestSection?: Maybe<Scalars['Int']>;
 };
 
 export type Labware = {
@@ -878,7 +878,7 @@ export type SampleFieldsFragment = (
 
 export type SlotFieldsFragment = (
   { __typename?: 'Slot' }
-  & Pick<Slot, 'address' | 'labwareId' | 'highestSection'>
+  & Pick<Slot, 'address' | 'labwareId' | 'blockHighestSection'>
   & { samples: Array<(
     { __typename?: 'Sample' }
     & SampleFieldsFragment
@@ -1685,7 +1685,7 @@ export const SlotFieldsFragmentDoc = gql`
   samples {
     ...SampleFields
   }
-  highestSection
+  blockHighestSection
 }
     ${SampleFieldsFragmentDoc}`;
 export const LabwareFieldsFragmentDoc = gql`
