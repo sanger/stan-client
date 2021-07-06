@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+
+### Modified
+
+## [1.2.0] - 2021-06-28
+### Added
 - Prevent accidental abandons ([#44](https://github.com/sanger/stan-client/pull/44))
 
 ### Modified
@@ -65,7 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Everything!
 
-[Unreleased]: https://github.com/sanger/stan-client/compare/1.1.1...HEAD
+[Unreleased]: https://github.com/sanger/stan-client/compare/1.2.0...HEAD
+[1.2.0]: https://github.com/sanger/stan-client/compare/1.1.1...1.2.0
 [1.1.1]: https://github.com/sanger/stan-client/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/sanger/stan-client/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/sanger/stan-client/compare/0.6.1...1.0.0

@@ -131,9 +131,10 @@ const bioState: ColumnFactory = () => {
  */
 const highestSectionForSlot: ColumnFactory = (slotAddress) => {
   return {
-    Header: "Section Number",
+    Header: "Highest Section for Block",
     accessor: (labware) =>
-      maybeFindSlotByAddress(labware.slots, slotAddress)?.highestSection ?? "-",
+      maybeFindSlotByAddress(labware.slots, slotAddress)?.blockHighestSection ??
+      "-",
   };
 };
 
