@@ -14,7 +14,9 @@ export type Scalars = {
   Float: number;
   Address: string;
   Timestamp: string;
+  Date: string;
 };
+
 
 
 
@@ -458,6 +460,7 @@ export type Location = {
   stored: Array<StoredItem>;
   children: Array<LinkedLocation>;
   direction?: Maybe<GridDirection>;
+  qualifiedNameWithFirstBarcode: Scalars['String'];
 };
 
 export type LinkedLocation = {
@@ -502,6 +505,8 @@ export type FindRequest = {
   donorName?: Maybe<Scalars['String']>;
   tissueExternalName?: Maybe<Scalars['String']>;
   tissueType?: Maybe<Scalars['String']>;
+  createdMin?: Maybe<Scalars['Timestamp']>;
+  createdMax?: Maybe<Scalars['Timestamp']>;
   maxRecords?: Maybe<Scalars['Int']>;
 };
 
@@ -1426,18 +1431,21 @@ export type FindQuery = (
         ), donor: (
           { __typename?: 'Donor' }
           & Pick<Donor, 'donorName'>
+        ), medium: (
+          { __typename?: 'Medium' }
+          & Pick<Medium, 'name'>
         ) }
       ) }
     )>, labware: Array<(
       { __typename?: 'Labware' }
-      & Pick<Labware, 'id' | 'barcode'>
+      & Pick<Labware, 'id' | 'barcode' | 'created'>
       & { labwareType: (
         { __typename?: 'LabwareType' }
         & Pick<LabwareType, 'name'>
       ) }
     )>, locations: Array<(
       { __typename?: 'Location' }
-      & Pick<Location, 'id' | 'barcode' | 'customName' | 'fixedName' | 'direction'>
+      & Pick<Location, 'id' | 'barcode' | 'customName' | 'fixedName' | 'direction' | 'qualifiedNameWithFirstBarcode'>
       & { size?: Maybe<(
         { __typename?: 'Size' }
         & Pick<Size, 'numRows' | 'numColumns'>
@@ -2100,11 +2108,15 @@ export const FindDocument = gql`
         donor {
           donorName
         }
+        medium {
+          name
+        }
       }
     }
     labware {
       id
       barcode
+      created
       labwareType {
         name
       }
@@ -2119,6 +2131,7 @@ export const FindDocument = gql`
         numRows
         numColumns
       }
+      qualifiedNameWithFirstBarcode
     }
     labwareLocations {
       labwareId

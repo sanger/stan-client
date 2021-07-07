@@ -16,14 +16,26 @@ import { FindRequest, GetSearchInfoQuery } from "../types/sdk";
 import { useMachine } from "@xstate/react";
 import searchMachine from "../lib/machines/search/searchMachine";
 import * as Yup from "yup";
-import { stringify } from "../lib/helpers";
+import {
+  cleanParams,
+  objectKeys,
+  parseQueryString,
+  stringify,
+} from "../lib/helpers";
 import { history } from "../lib/sdk";
+import WhiteButton from "../components/buttons/WhiteButton";
+import { ParsedQuery } from "query-string";
+import { merge } from "lodash";
 
 const validationSchema: Yup.ObjectSchema = Yup.object()
   .shape({
+    // ensure transforms undefined and null to empty strings which is easier for extra validation later
     labwareBarcode: Yup.string().ensure(),
     tissueExternalName: Yup.string().ensure(),
     donorName: Yup.string().ensure(),
+    tissueType: Yup.string().ensure(),
+    createdAfter: Yup.date().notRequired(),
+    createdBefore: Yup.date().notRequired(),
   })
   .test({
     name: "atLeastOneRequired",
@@ -31,27 +43,50 @@ const validationSchema: Yup.ObjectSchema = Yup.object()
       const isValid = !!(
         value?.labwareBarcode.trim() ||
         value?.tissueExternalName.trim() ||
-        value?.donorName.trim()
+        value?.donorName.trim() ||
+        value?.tissueType.trim()
       );
 
       if (isValid) return true;
       return this.createError({
-        path: "labwareBarcode | tissueExternalName | donorName",
+        path: "labwareBarcode | tissueExternalName | donorName | tissueType",
         message:
-          "At least one of STAN Barcode, External Identifier, or Donor ID must not be empty.",
+          "At least one of STAN Barcode, External Identifier, Donor ID, or Tissue Type must not be empty.",
       });
     },
   });
 
-type SearchProps = {
-  searchInfo: GetSearchInfoQuery;
-  findRequest: FindRequest;
+const emptyFindRequest: FindRequest = {
+  createdMin: "",
+  createdMax: "",
+  donorName: "",
+  labwareBarcode: "",
+  tissueExternalName: "",
+  tissueType: "",
 };
 
-function Search({ searchInfo, findRequest }: SearchProps) {
+const emptyFindRequestKeys: Array<keyof FindRequest> = objectKeys(
+  emptyFindRequest
+);
+
+type SearchProps = {
+  searchInfo: GetSearchInfoQuery;
+  urlParamsString: string;
+};
+
+function Search({ searchInfo, urlParamsString }: SearchProps) {
+  const params: ParsedQuery = parseQueryString(urlParamsString);
+
+  const findRequest: FindRequest = merge(
+    {},
+    emptyFindRequest,
+    cleanParams(params, emptyFindRequestKeys)
+  );
+
   const [current, send] = useMachine(() =>
     searchMachine.withContext({
       findRequest,
+      maxRecords: 150,
     })
   );
 
@@ -74,8 +109,8 @@ function Search({ searchInfo, findRequest }: SearchProps) {
         <AppShell.Title>Search</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        <div className="mx-auto max-w-screen-xl">
-          <div className="mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
+        <div className="mx-auto">
+          <div className="mx-auto max-w-screen-xl mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
             <Heading level={3} showBorder={false}>
               Find Stored Labware
             </Heading>
@@ -87,15 +122,15 @@ function Search({ searchInfo, findRequest }: SearchProps) {
               validateOnMount={false}
               onSubmit={onFormSubmit}
             >
-              {({ errors, isValid }) => (
+              {({ errors, isValid, resetForm }) => (
                 <Form>
                   {!isValid && (
                     <Warning className={"mb-5"} message={"Validation Error"}>
                       {Object.values(errors)}
                     </Warning>
                   )}
-                  <div className="md:grid md:grid-cols-2 md:space-y-0 md:gap-4 space-y-2">
-                    <div className="">
+                  <div className="md:grid md:grid-cols-3 md:space-y-0 md:gap-4 space-y-2">
+                    <div>
                       <FormikInput name="labwareBarcode" label="STAN Barcode" />
                     </div>
                     <div className="">
@@ -108,6 +143,20 @@ function Search({ searchInfo, findRequest }: SearchProps) {
                       <FormikInput name="donorName" label="Donor ID" />
                     </div>
                     <div>
+                      <FormikInput
+                        type="date"
+                        name="createdMin"
+                        label="Created After"
+                      />
+                    </div>
+                    <div>
+                      <FormikInput
+                        type="date"
+                        name="createdMax"
+                        label="Created Before"
+                      />
+                    </div>
+                    <div>
                       <FormikSelect
                         label="Tissue Type"
                         name="tissueType"
@@ -118,6 +167,14 @@ function Search({ searchInfo, findRequest }: SearchProps) {
                     </div>
                   </div>
                   <div className="sm:flex sm:flex-row sm:mt-8 mt-4 items-center justify-end">
+                    <WhiteButton
+                      className="mr-4"
+                      type="button"
+                      onClick={() => resetForm({ values: emptyFindRequest })}
+                    >
+                      Reset
+                    </WhiteButton>
+
                     <BlueButton
                       disabled={current.matches("searching")}
                       type="submit"
@@ -200,6 +257,16 @@ const columns: Column<SearchResultTableEntry>[] = [
     },
   },
   {
+    Header: "Created",
+    accessor: (originalRow) => originalRow.labwareCreated.toLocaleDateString(),
+    sortType: (rowA, rowB) => {
+      return (
+        rowA.original.labwareCreated.getTime() -
+        rowB.original.labwareCreated.getTime()
+      );
+    },
+  },
+  {
     Header: "Labware Type",
     accessor: "labwareType",
   },
@@ -258,5 +325,9 @@ const columns: Column<SearchResultTableEntry>[] = [
   {
     Header: "Replicate",
     accessor: "replicate",
+  },
+  {
+    Header: "Embedding Medium",
+    accessor: "embeddingMedium",
   },
 ];
