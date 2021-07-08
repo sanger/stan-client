@@ -5,7 +5,7 @@ describe("Search", () => {
   context("when URL query params are set", () => {
     before(() => {
       cy.visit(
-        "/search?donorName=DNR123&labwareBarcode=STAN-0001F&tissueExternalName=EXT987&tissueType=Tissue Type 1" +
+        "/search?donorName=DNR123&labwareBarcode=STAN-0001F&tissueExternalName=EXT987&tissueTypeName=Tissue Type 1" +
           "&createdMin=2021-07-01&createdMax=2021-07-31"
       );
     });
