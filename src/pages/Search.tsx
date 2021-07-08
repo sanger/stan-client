@@ -33,7 +33,7 @@ const validationSchema: Yup.ObjectSchema = Yup.object()
     labwareBarcode: Yup.string().ensure(),
     tissueExternalName: Yup.string().ensure(),
     donorName: Yup.string().ensure(),
-    tissueType: Yup.string().ensure(),
+    tissueTypeName: Yup.string().ensure(),
     createdAfter: Yup.date().notRequired(),
     createdBefore: Yup.date().notRequired(),
   })
@@ -44,12 +44,13 @@ const validationSchema: Yup.ObjectSchema = Yup.object()
         value?.labwareBarcode.trim() ||
         value?.tissueExternalName.trim() ||
         value?.donorName.trim() ||
-        value?.tissueType.trim()
+        value?.tissueTypeName.trim()
       );
 
       if (isValid) return true;
       return this.createError({
-        path: "labwareBarcode | tissueExternalName | donorName | tissueType",
+        path:
+          "labwareBarcode | tissueExternalName | donorName | tissueTypeName",
         message:
           "At least one of STAN Barcode, External Identifier, Donor ID, or Tissue Type must not be empty.",
       });
@@ -62,7 +63,7 @@ const emptyFindRequest: FindRequest = {
   donorName: "",
   labwareBarcode: "",
   tissueExternalName: "",
-  tissueType: "",
+  tissueTypeName: "",
 };
 
 const emptyFindRequestKeys: Array<keyof FindRequest> = objectKeys(
@@ -159,7 +160,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                     <div>
                       <FormikSelect
                         label="Tissue Type"
-                        name="tissueType"
+                        name="tissueTypeName"
                         emptyOption={true}
                       >
                         {optionValues(searchInfo.tissueTypes, "name", "name")}

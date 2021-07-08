@@ -504,10 +504,10 @@ export type FindRequest = {
   labwareBarcode?: Maybe<Scalars['String']>;
   donorName?: Maybe<Scalars['String']>;
   tissueExternalName?: Maybe<Scalars['String']>;
-  tissueType?: Maybe<Scalars['String']>;
-  createdMin?: Maybe<Scalars['Timestamp']>;
-  createdMax?: Maybe<Scalars['Timestamp']>;
+  tissueTypeName?: Maybe<Scalars['String']>;
   maxRecords?: Maybe<Scalars['Int']>;
+  createdMin?: Maybe<Scalars['Date']>;
+  createdMax?: Maybe<Scalars['Date']>;
 };
 
 export type Query = {
