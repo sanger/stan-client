@@ -1,6 +1,6 @@
 import React from "react";
 import Label from "./Label";
-import { Field } from "formik";
+import { Field, FieldAttributes } from "formik";
 import { FormikErrorMessage } from "./index";
 import classNames from "classnames";
 
@@ -10,10 +10,16 @@ const defaultInputClassNames =
 interface FormikInputProps {
   label: string;
   name: string;
-  type?: string;
+  type: string;
+  [key: string]: string | boolean | number | symbol;
 }
 
-const FormikInput = ({ label, name, type = "text" }: FormikInputProps) => {
+const FormikInput = ({
+  label,
+  name,
+  type = "text",
+  ...rest
+}: FormikInputProps) => {
   const inputClassNames = classNames(
     {
       "w-full disabled:bg-gray-200": type !== "checkbox",
@@ -23,7 +29,7 @@ const FormikInput = ({ label, name, type = "text" }: FormikInputProps) => {
   return (
     <>
       <Label name={label}>
-        <Field type={type} className={inputClassNames} name={name} />
+        <Field type={type} className={inputClassNames} name={name} {...rest} />
       </Label>
       <FormikErrorMessage name={name} />
     </>

@@ -1,7 +1,7 @@
 import React from "react";
 
 /**
- * A layout for a big gray box that can have sidebar
+ * A layout for a big gray box that can have a sidebar
  */
 const GrayBox: React.FC = ({ children }) => {
   return (

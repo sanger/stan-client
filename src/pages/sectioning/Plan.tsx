@@ -3,7 +3,7 @@ import AppShell from "../../components/AppShell";
 import Heading from "../../components/Heading";
 import LabwareScanTable from "../../components/labwareScanPanel/LabwareScanPanel";
 import labwareScanTableColumns from "../../components/dataTable/labwareColumns";
-import SectioningLayout from "./SectioningLayout";
+import LabwarePlan from "../../components/planning/LabwarePlan";
 import { find } from "lodash";
 import { optionValues } from "../../components/forms";
 import BlueButton from "../../components/buttons/BlueButton";
@@ -57,7 +57,7 @@ function Plan() {
             )}
 
             {sectioningLayouts.map((sectioningLayout, i) => (
-              <SectioningLayout
+              <LabwarePlan
                 ref={i === sectioningLayouts.length - 1 ? ref : null}
                 key={i}
                 onCreate={model.addPlan}
