@@ -5,13 +5,12 @@ import { SizeInput } from "../types/stan";
 import _ from "lodash";
 
 /**
- * Utility for retrieving a list of enum keys.
- * Useful for being able to iterate over enum values in a typesafe way.
- * @param e enum to retrieve keys from
+ * Utility for retrieving a list of correctly typed object keys.
+ * As TypeScript enums are really just objects, this can be used from them also.
+ * @param o object to retrieve keys from
  */
-
-export function enumKeys<E>(e: E): (keyof E)[] {
-  return Object.keys(e) as (keyof E)[];
+export function objectKeys<E>(o: E): (keyof E)[] {
+  return Object.keys(o) as (keyof E)[];
 }
 
 /**
@@ -116,9 +115,12 @@ export function buildAddresses(
  * removing nil (null or undefined), empty values, and values that are arrays
  *
  * @param params the URL params
- * @param allowedKeys
+ * @param allowedKeys list of keys to pick from params
  */
-export function cleanParams(params: ParsedQuery, allowedKeys: any[]) {
+export function cleanParams<T>(
+  params: ParsedQuery<T>,
+  allowedKeys: Array<string>
+) {
   return _(params)
     .pick(allowedKeys)
     .omitBy(_.isNil)

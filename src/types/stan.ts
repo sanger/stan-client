@@ -108,6 +108,8 @@ export type SearchResultTableEntry = {
   location: Maybe<SearchResultTableEntryLocation>;
   sectionNumber?: Maybe<number>;
   replicate: number;
+  labwareCreated: Date;
+  embeddingMedium: string;
 };
 
 export type SearchResultTableEntryLocation = {

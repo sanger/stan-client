@@ -5,6 +5,7 @@ config:
   scalars:
     Address: string
     Timestamp: string
+    Date: string
 
 generates:
   src/types/sdk.ts:

@@ -23,6 +23,8 @@ const locationFactory = Factory.define<Location>(
       size: null,
       direction: params.direction ?? null,
       parent: params.parent == null ? null : (params.parent as LinkedLocation),
+      qualifiedNameWithFirstBarcode:
+        params.qualifiedNameWithFirstBarcode ?? `FakeParent / ${barcode}`,
     };
 
     if (params.size) {

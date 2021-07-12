@@ -56,11 +56,13 @@ describe("Search Service", () => {
         tissueType: sample10.tissue.spatialLocation.tissueType.name,
         location: {
           barcode: location100.barcode,
-          displayName: location100.fixedName,
+          displayName: location100.qualifiedNameWithFirstBarcode,
           address: null,
         },
         sectionNumber: sample10.section,
         replicate: sample10.tissue.replicate,
+        labwareCreated: new Date(labware1.created),
+        embeddingMedium: sample10.tissue.medium.name,
       },
       {
         barcode: labware2.barcode,
@@ -71,6 +73,8 @@ describe("Search Service", () => {
         location: null,
         sectionNumber: sample11.section,
         replicate: sample11.tissue.replicate,
+        labwareCreated: new Date(labware2.created),
+        embeddingMedium: sample11.tissue.medium.name,
       },
       {
         barcode: labware3.barcode,
@@ -80,7 +84,7 @@ describe("Search Service", () => {
         tissueType: sample12.tissue.spatialLocation.tissueType.name,
         location: {
           barcode: location102.barcode,
-          displayName: location102.fixedName,
+          displayName: location102.qualifiedNameWithFirstBarcode,
           address: addressToLocationAddress(
             "40,2",
             location102.size!,
@@ -89,6 +93,8 @@ describe("Search Service", () => {
         },
         sectionNumber: sample12.section,
         replicate: sample12.tissue.replicate,
+        labwareCreated: new Date(labware3.created),
+        embeddingMedium: sample12.tissue.medium.name,
       },
       {
         barcode: labware2.barcode,
@@ -99,6 +105,8 @@ describe("Search Service", () => {
         location: null,
         sectionNumber: sample13.section,
         replicate: sample13.tissue.replicate,
+        labwareCreated: new Date(labware2.created),
+        embeddingMedium: sample13.tissue.medium.name,
       },
       {
         barcode: labware1.barcode,
@@ -108,11 +116,13 @@ describe("Search Service", () => {
         tissueType: sample14.tissue.spatialLocation.tissueType.name,
         location: {
           barcode: location100.barcode,
-          displayName: location100.fixedName,
+          displayName: location100.qualifiedNameWithFirstBarcode,
           address: location100.address,
         },
         sectionNumber: sample14.section,
         replicate: sample14.tissue.replicate,
+        labwareCreated: new Date(labware1.created),
+        embeddingMedium: sample14.tissue.medium.name,
       },
     ];
 

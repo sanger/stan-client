@@ -11,6 +11,7 @@ import { ClientError } from "graphql-request";
  */
 export interface SearchContext {
   findRequest: FindRequest;
+  maxRecords: number;
   searchResult?: SearchResultsType;
   serverError?: Maybe<ClientError>;
 }
@@ -97,7 +98,10 @@ const searchMachine = createMachine<SearchContext, SearchEvent>(
         if (e.type !== "FIND") {
           return Promise.reject();
         }
-        return searchService.search(e.request);
+        return searchService.search({
+          ...e.request,
+          maxRecords: ctx.maxRecords,
+        });
       },
     },
   }
