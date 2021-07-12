@@ -1,134 +1,122 @@
-import React, { useCallback, useMemo, useEffect } from "react";
-import Plan from "./sectioning/Plan";
-import Confirm from "./sectioning/Confirm";
-import {
-  ConfirmOperationLabware,
-  GetSectioningInfoQuery,
-  LabwareFieldsFragment,
-  LabwareTypeFieldsFragment,
-  Maybe,
-} from "../types/sdk";
-import {
-  createSectioningMachine,
-  SectioningContext,
-} from "../lib/machines/sectioning/sectioningMachine";
-import { useMachine } from "@xstate/react";
-import { Prompt } from "react-router-dom";
-import { useConfirmLeave } from "../lib/hooks";
-import { SectioningLayout } from "../lib/machines/sectioning/sectioningLayout/sectioningLayoutMachine";
+import React, { useCallback, useState } from "react";
+import { GetSectioningInfoQuery, LabwareFieldsFragment } from "../types/sdk";
+import AppShell from "../components/AppShell";
+import Heading from "../components/Heading";
+import LabwareScanner from "../components/labwareScanner/LabwareScanner";
+import LabwareScanTable from "../components/labwareScanPanel/LabwareScanPanel";
+import labwareScanTableColumns from "../components/dataTable/labwareColumns";
+import Planner from "../components/planning/Planner";
+import { LabwareTypeName } from "../types/stan";
+import { buildSampleColors } from "../lib/helpers/labwareHelper";
+import { identity } from "lodash";
+import PinkButton from "../components/buttons/PinkButton";
+import ButtonBar from "../components/ButtonBar";
 
-type SectioningPageContextType = {
-  isLabwareTableLocked: boolean;
-  isAddLabwareBtnEnabled: boolean;
-  isNextBtnEnabled: boolean;
-  isConfirming: boolean;
-  isStarted: boolean;
-  isConfirmError: boolean;
-  isDone: boolean;
-  updateLabwares: (labwares: Array<LabwareFieldsFragment>) => void;
-  deleteLabwareLayout: (index: number) => void;
-  selectLabwareType: (labwareType: LabwareTypeFieldsFragment) => void;
-  addLabwareLayout: () => void;
-  prepDone: () => void;
-  confirmOperation: () => void;
-  context: SectioningContext;
-  addPlan(sectioningLayout: SectioningLayout): void;
-  commitConfirmation(confirmOperationLabware: ConfirmOperationLabware): void;
-};
-
-export const SectioningPageContext = React.createContext<
-  Maybe<SectioningPageContextType>
->(null);
+/**
+ * Types of labware the user is allowed to section onto
+ */
+const allowedLabwareTypeNames: Array<LabwareTypeName> = [
+  LabwareTypeName.TUBE,
+  LabwareTypeName.SLIDE,
+  LabwareTypeName.VISIUM_TO,
+  LabwareTypeName.VISIUM_LP,
+];
 
 type SectioningParams = {
   readonly sectioningInfo: GetSectioningInfoQuery;
 };
 
 function Sectioning({ sectioningInfo }: SectioningParams) {
-  const [current, send, service] = useMachine(
-    createSectioningMachine(sectioningInfo)
-  );
+  const [sourceLabware, setSourceLabware] = useState<
+    Array<LabwareFieldsFragment>
+  >([]);
+  /**
+   * State to track whether the labware scanner should be locked or not.
+   * Once a user has started adding plans, source labware should not change.
+   */
+  const [isLabwareScannerLocked, setIsLabwareScannerLocked] = useState(false);
 
-  const addPlan = useCallback(
-    (sectioningLayout: SectioningLayout) => {
-      send({ type: "PLAN_ADDED", sectioningLayout });
+  /**
+   * The next button should only be enabled when each of the plans has completed.
+   */
+  const [isNextButtonEnabled, setIsNextButtonEnabled] = useState(false);
+
+  /**
+   * Callback for when a user adds or removes a plan.
+   */
+  const handlePlanChange = useCallback(
+    (numberOfPlans: number, numberOfPlansCompleted: number) => {
+      setIsLabwareScannerLocked(numberOfPlans > 0);
+      setIsNextButtonEnabled(
+        numberOfPlansCompleted > 0 && numberOfPlans === numberOfPlansCompleted
+      );
     },
-    [send]
+    [setIsLabwareScannerLocked]
   );
 
-  const commitConfirmation = useCallback(
-    (confirmOperationLabware: ConfirmOperationLabware) => {
-      send({ type: "COMMIT_CONFIRMATION", confirmOperationLabware });
-    },
-    [send]
+  /**
+   * A map of sample ID to Tailwind CSS colours.
+   * Used by various components to keep the same samples the same colours within different components.
+   */
+  const sampleColors: Map<number, string> = buildSampleColors(sourceLabware);
+
+  /**
+   * Limit the labware types the user can Section on to.
+   */
+  const allowedLabwareTypes = sectioningInfo.labwareTypes.filter((lw) =>
+    allowedLabwareTypeNames.includes(lw.name as LabwareTypeName)
   );
-
-  const sectioningPageContext: SectioningPageContextType = useMemo(() => {
-    return {
-      addLabwareLayout(): void {
-        send({ type: "ADD_LABWARE_LAYOUT" });
-      },
-      confirmOperation(): void {
-        send({ type: "CONFIRM_SECTION" });
-      },
-      deleteLabwareLayout(index: number): void {
-        send({
-          type: "DELETE_LABWARE_LAYOUT",
-          index,
-        });
-      },
-      isAddLabwareBtnEnabled: current.matches("started"),
-      isConfirmError: current.matches({ confirming: "confirmError" }),
-      isConfirming: current.matches("confirming") || current.matches("done"),
-      isDone: current.matches("done"),
-      isLabwareTableLocked: current.context.sectioningLayouts.length > 0,
-      isNextBtnEnabled:
-        current.context.sectioningLayouts.length > 0 &&
-        current.context.sectioningLayouts.every((sl) => sl.plan != null),
-      isStarted: current.matches("started"),
-      prepDone(): void {
-        send({ type: "PREP_DONE" });
-      },
-      selectLabwareType(labwareType: LabwareTypeFieldsFragment): void {
-        send({
-          type: "SELECT_LABWARE_TYPE",
-          labwareType,
-        });
-      },
-      updateLabwares(labwares: Array<LabwareFieldsFragment>): void {
-        send({ type: "UPDATE_LABWARES", labwares });
-      },
-      addPlan,
-      commitConfirmation,
-      context: current.context,
-    };
-  }, [current, send, commitConfirmation, addPlan]);
-
-  const [inProgress, setInProgress] = useConfirmLeave();
-  useEffect(() => {
-    const subscription = service.subscribe((state) => {
-      if (state.matches("started")) {
-        setInProgress(true);
-      }
-
-      if (state.matches("done")) {
-        setInProgress(false);
-      }
-    });
-
-    return subscription.unsubscribe;
-  }, [service, setInProgress]);
-
-  const showConfirm = current.matches("confirming") || current.matches("done");
 
   return (
-    <SectioningPageContext.Provider value={sectioningPageContext}>
-      <Prompt
-        when={inProgress}
-        message={"You have unsaved changes. Are you sure you want to leave?"}
-      />
-      {showConfirm ? <Confirm /> : <Plan />}
-    </SectioningPageContext.Provider>
+    <AppShell>
+      <AppShell.Header>
+        <AppShell.Title>Sectioning - Plan</AppShell.Title>
+      </AppShell.Header>
+      <AppShell.Main>
+        <div className="my-4 mx-auto max-w-screen-xl space-y-16">
+          <div className="space-y-4">
+            <Heading level={3}>Source Labware</Heading>
+            <LabwareScanner
+              locked={isLabwareScannerLocked}
+              onChange={setSourceLabware}
+            >
+              <LabwareScanTable
+                columns={[
+                  labwareScanTableColumns.color(sampleColors),
+                  labwareScanTableColumns.barcode(),
+                  labwareScanTableColumns.donorId(),
+                  labwareScanTableColumns.tissueType(),
+                  labwareScanTableColumns.spatialLocation(),
+                  labwareScanTableColumns.replicate(),
+                ]}
+              />
+            </LabwareScanner>
+          </div>
+
+          <div className="space-y-4">
+            <Planner
+              operationType={"Section"}
+              allowedLabwareTypes={allowedLabwareTypes}
+              sourceLabware={sourceLabware}
+              showSectionThickness={true}
+              sampleColors={sampleColors}
+              onPlanChanged={handlePlanChange}
+              onPlanCompleted={identity}
+            />
+          </div>
+        </div>
+      </AppShell.Main>
+
+      <ButtonBar>
+        <PinkButton
+          disabled={!isNextButtonEnabled}
+          // onClick={model.prepDone}
+          action="primary"
+        >
+          Next {">"}
+        </PinkButton>
+      </ButtonBar>
+    </AppShell>
   );
 }
 

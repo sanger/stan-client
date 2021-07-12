@@ -1,6 +1,6 @@
 import React from "react";
 import Label from "./Label";
-import { Field, FieldAttributes } from "formik";
+import { Field } from "formik";
 import { FormikErrorMessage } from "./index";
 import classNames from "classnames";
 
@@ -10,8 +10,8 @@ const defaultInputClassNames =
 interface FormikInputProps {
   label: string;
   name: string;
-  type: string;
-  [key: string]: string | boolean | number | symbol;
+  type?: string;
+  [key: string]: string | boolean | number | symbol | undefined;
 }
 
 const FormikInput = ({

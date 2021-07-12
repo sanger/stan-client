@@ -80,7 +80,7 @@ interface LabwarePlanContext {
   /**
    * A plan returned from core
    */
-  plan?: PlanResult;
+  plan?: PlanMutation;
 
   /**
    * Message from the label printer containing details of the printer's success
@@ -99,7 +99,7 @@ interface LabwarePlanContext {
 export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
   createMachine<LabwarePlanContext, LabwarePlanEvent>(
     {
-      key: "sectioningLayout",
+      key: "labwarePlan",
       context: {
         serverErrors: null,
         layoutPlan: initialLayoutPlan,
@@ -107,21 +107,35 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
       initial: "prep",
       states: {
         prep: {
+          initial: "invalid",
+          states: {
+            valid: {
+              on: {
+                CREATE_LABWARE: {
+                  target: "#labwarePlan.creating",
+                },
+              },
+            },
+            invalid: {},
+          },
           on: {
             EDIT_LAYOUT: "editingLayout",
-            CREATE_LABWARE: {
-              target: `#sectioningLayout.creating`,
-            },
           },
         },
         editingLayout: {
           invoke: {
             src: "layoutMachine",
             onDone: {
-              target: "prep",
+              target: "validatingLayout",
               actions: "assignLayoutPlan",
             },
           },
+        },
+        validatingLayout: {
+          always: [
+            { cond: "isLayoutValid", target: "prep.valid" },
+            { target: "prep.invalid" },
+          ],
         },
         creating: {
           invoke: {
@@ -139,7 +153,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
               },
             ],
             onError: {
-              target: "prep.error",
+              target: "prep",
               actions: "assignServerErrors",
             },
           },
@@ -161,18 +175,8 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           if (e.type !== "done.invoke.planSection" || !e.data) {
             return;
           }
-          // ctx.sectioningLayout.plan = e.data.plan;
 
-          // ctx.sectioningLayout.plan.labware.forEach((labware) => {
-          //   ctx.sectioningLayout.coreLayoutPlans.push(
-          //     buildLayoutPlan(
-          //       labware,
-          //       e.data.plan.operations,
-          //       ctx.sectioningLayout.inputLabwares,
-          //       ctx.sectioningLayout.sampleColors
-          //     )
-          //   );
-          // });
+          ctx.plan = e.data;
         }),
 
         assignServerErrors: assign((ctx, e) => {
@@ -187,6 +191,8 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
         isVisiumLP: (ctx) =>
           ctx.layoutPlan.destinationLabware.labwareType.name ===
           LabwareTypeName.VISIUM_LP,
+
+        isLayoutValid: (ctx) => ctx.layoutPlan.plannedActions.size > 0,
       },
 
       services: {
@@ -248,57 +254,4 @@ function buildPlanRequestLabware({
       }));
     }),
   };
-}
-
-export function buildLayoutPlan(
-  destinationLabware: LabwareFieldsFragment,
-  operations: PlanMutation["plan"]["operations"],
-  sourceLabwares: LabwareFieldsFragment[],
-  sampleColors: Map<number, string>
-): LayoutPlan {
-  return {
-    destinationLabware: destinationLabware,
-    // As we're only allowing removing an existing planned source, no source actions should be available
-    sources: [],
-    sampleColors,
-
-    plannedActions: operations[0].planActions
-      .filter((planAction) => {
-        return planAction.destination.labwareId === destinationLabware.id;
-      })
-      .reduce<Map<Address, Array<LayoutPlanAction>>>((memo, planAction) => {
-        const action: LayoutPlanAction = {
-          sampleId: planAction.sample.id,
-          labware: findSourceLabware(
-            sourceLabwares,
-            planAction.source.labwareId
-          ),
-          address: planAction.source.address,
-
-          // Section number will be assigned by the user at confirm stage
-          newSection: 0,
-        };
-        if (memo.has(planAction.destination.address)) {
-          memo.get(planAction.destination.address)?.push(action);
-        } else {
-          memo.set(planAction.destination.address, [action]);
-        }
-        return memo;
-      }, new Map()),
-  };
-}
-
-function findSourceLabware(
-  labwares: LabwareFieldsFragment[],
-  labwareId: number
-): LabwareFieldsFragment {
-  const labware = labwares.find((lw) => lw.id === labwareId);
-
-  if (!labware) {
-    throw new Error(
-      `Plan returned an unrecognised source labware: ${labwareId}`
-    );
-  }
-
-  return labware;
 }

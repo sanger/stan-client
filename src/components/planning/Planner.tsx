@@ -1,11 +1,17 @@
-import React, { createContext, useCallback, useReducer, useRef } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+} from "react";
 import {
   LabwareFieldsFragment,
   LabwareTypeFieldsFragment,
   Maybe,
-  PlanResult,
+  PlanMutation,
 } from "../../types/sdk";
-import { find, uniqueId } from "lodash";
+import { uniqueId } from "lodash";
 import { optionValues } from "../forms";
 import BlueButton from "../buttons/BlueButton";
 import { NewLabwareLayout } from "../../types/stan";
@@ -17,7 +23,7 @@ type PlannerProps = {
   /**
    * The operation the user is planning for. Will be sent to core in the plan request.
    */
-  operationType: string;
+  operationType: "Section";
 
   /**
    * List of labware types that can be planned for.
@@ -41,17 +47,12 @@ type PlannerProps = {
   sampleColors: Map<number, string>;
 
   /**
-   * Called when a new plan is added in the {@link Planner}
-   */
-  onPlanAdded: (numberOfPlans: number, numberOfCompletedPlans: number) => void;
-
-  /**
-   * Called when an incomplete plan is removed from the {@link Planner}. Note that once complete, plans can not be
+   * Called when an plan is added or removed from the {@link Planner}. Note that once complete, plans can not be
    * removed.
    * @param numberOfPlans the total number of plans in the planner
    * @param numberOfCompletedPlans the number of completed plans
    */
-  onPlanDeleted: (
+  onPlanChanged: (
     numberOfPlans: number,
     numberOfCompletedPlans: number
   ) => void;
@@ -62,8 +63,8 @@ type PlannerProps = {
    * @param numberOfCompletedPlans the number of completed plans
    */
   onPlanCompleted: (
-    completedPlan: PlanResult,
-    allPlans: Array<PlanResult>,
+    completedPlan: PlanMutation,
+    allPlans: Array<PlanMutation>,
     numberOfPlans: number,
     numberOfCompletedPlans: number
   ) => void;
@@ -99,14 +100,21 @@ type PlannerState = {
    * Map of client ID to labware
    */
   labwarePlans: Map<string, NewLabwareLayout>;
+
+  /**
+   * Map of client ID to completed plans
+   */
+  completedPlans: Map<string, PlanMutation>;
 };
 
 type Action =
   | { type: "ADD_LABWARE_PLAN"; labwareType: LabwareTypeFieldsFragment }
-  | { type: "REMOVE_LABWARE_PLAN"; cid: string };
+  | { type: "REMOVE_LABWARE_PLAN"; cid: string }
+  | { type: "PLAN_COMPLETE"; cid: string; plan: PlanMutation };
 
 const initialState: PlannerState = {
   labwarePlans: new Map(),
+  completedPlans: new Map(),
 };
 
 function reducer(state: PlannerState, action: Action): PlannerState {
@@ -130,6 +138,10 @@ function reducer(state: PlannerState, action: Action): PlannerState {
         draft.labwarePlans.delete(action.cid);
         break;
 
+      case "PLAN_COMPLETE":
+        draft.completedPlans.set(action.cid, action.plan);
+        break;
+
       default:
         return draft;
     }
@@ -141,15 +153,18 @@ function reducer(state: PlannerState, action: Action): PlannerState {
  */
 export default function Planner({
   allowedLabwareTypes,
-  onPlanAdded,
+  onPlanChanged,
   onPlanCompleted,
-  onPlanDeleted,
   operationType,
   sampleColors,
   showSectionThickness,
   sourceLabware,
 }: PlannerProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    onPlanChanged(state.labwarePlans.size, state.completedPlans.size);
+  }, [state.labwarePlans, state.completedPlans, onPlanChanged]);
 
   /**
    * Used so we can get the current value of the select element when "Add Labware" is clicked
@@ -183,6 +198,22 @@ export default function Planner({
     [dispatch]
   );
 
+  /**
+   * Handler for when a labware plan is completed
+   */
+  const onLabwarePlanComplete = useCallback(
+    (cid: string, plan: PlanMutation) => {
+      dispatch({ type: "PLAN_COMPLETE", cid, plan });
+      onPlanCompleted(
+        plan,
+        Array.from(state.completedPlans.values()),
+        state.labwarePlans.size,
+        state.completedPlans.size
+      );
+    },
+    [dispatch]
+  );
+
   const labwarePlans = Array.from(state.labwarePlans.entries()).map(
     ([cid, newLabwareLayout]) => {
       return (
@@ -191,7 +222,7 @@ export default function Planner({
           cid={cid}
           outputLabware={newLabwareLayout}
           onDeleteButtonClick={onLabwarePlanDelete}
-          onComplete={() => {}}
+          onComplete={onLabwarePlanComplete}
         />
       );
     }

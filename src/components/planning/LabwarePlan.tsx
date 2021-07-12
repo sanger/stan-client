@@ -18,6 +18,8 @@ import { CellProps } from "react-table";
 import {
   LabwareFieldsFragment,
   LabwareType,
+  LabwareTypeFieldsFragment,
+  PlanMutation,
   PlanResult,
 } from "../../types/sdk";
 import WhiteButton from "../buttons/WhiteButton";
@@ -55,16 +57,29 @@ type LabwarePlanProps = {
    * @param cid the client ID of the {@link LabwarePlan}
    * @param planResult the created plan
    */
-  onComplete: (cid: string, planResult: PlanResult) => void;
+  onComplete: (cid: string, planResult: PlanMutation) => void;
 };
 
 const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
   ({ cid, outputLabware, onDeleteButtonClick, onComplete }, ref) => {
-    const ctx = useContext(PlannerContext)!;
+    const { sampleColors, operationType, sourceLabware } = useContext(
+      PlannerContext
+    )!;
     const [current, send, service] = useMachine(
       createLabwarePlanMachine({
-        sources: [],
-        sampleColors: ctx.sampleColors,
+        sources: sourceLabware.flatMap((lw) => {
+          return lw.slots.flatMap((slot) => {
+            return slot.samples.flatMap((sample) => {
+              return {
+                sampleId: sample.id,
+                labware: lw,
+                newSection: 0,
+                address: slot.address,
+              };
+            });
+          });
+        }),
+        sampleColors,
         destinationLabware: outputLabware,
         plannedActions: new Map(),
       })
@@ -72,13 +87,16 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
     useEffect(() => {
       const subscription = service.subscribe((state) => {
-        if (state.matches("done") || state.matches("printing")) {
-          onComplete(cid, state.context.plan!);
+        if (
+          state.context.plan &&
+          (state.matches("done") || state.matches("printing"))
+        ) {
+          onComplete(cid, state.context.plan);
         }
       });
 
       return subscription.unsubscribe;
-    }, [service, onComplete]);
+    }, [service, onComplete, cid]);
 
     const formValidationSchema = buildValidator(outputLabware.labwareType);
 
@@ -92,7 +110,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
     const { serverErrors, layoutPlan, plan } = current.context;
 
-    const plannedLabware = plan?.labware ?? [];
+    const plannedLabware = plan?.plan.labware ?? [];
 
     const { layoutMachine } = current.children;
 
@@ -120,31 +138,35 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
         animate={"visible"}
         className="relative p-3 shadow"
       >
-        <Formik
-          onSubmit={() => {}}
-          initialValues={{}}
+        <Formik<FormValues>
+          onSubmit={async (values) => {
+            send({ type: "CREATE_LABWARE", ...values });
+          }}
+          initialValues={buildInitialValues(
+            operationType,
+            outputLabware.labwareType
+          )}
           validationSchema={formValidationSchema}
-          className="md:grid md:grid-cols-2"
         >
-          <div className="py-4 flex flex-col items-center justify-between space-y-8">
-            <Labware
-              labware={outputLabware}
-              onClick={() => send({ type: "EDIT_LAYOUT" })}
-              name={outputLabware.labwareType.name}
-              slotText={(address) => buildSlotText(layoutPlan, address)}
-              slotSecondaryText={(address) =>
-                buildSlotSecondaryText(layoutPlan, address)
-              }
-              slotColor={(address) => buildSlotColor(layoutPlan, address)}
-            />
+          <Form className="md:grid md:grid-cols-2 border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow">
+            <div className="py-4 flex flex-col items-center justify-between space-y-8">
+              <Labware
+                labware={outputLabware}
+                onClick={() => send({ type: "EDIT_LAYOUT" })}
+                name={outputLabware.labwareType.name}
+                slotText={(address) => buildSlotText(layoutPlan, address)}
+                slotSecondaryText={(address) =>
+                  buildSlotSecondaryText(layoutPlan, address)
+                }
+                slotColor={(address) => buildSlotColor(layoutPlan, address)}
+              />
 
-            {current.matches("prep") && (
-              <PinkButton onClick={() => send({ type: "EDIT_LAYOUT" })}>
-                Edit Layout
-              </PinkButton>
-            )}
-          </div>
-          <Form className="border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow">
+              {current.matches("prep") && (
+                <PinkButton onClick={() => send({ type: "EDIT_LAYOUT" })}>
+                  Edit Layout
+                </PinkButton>
+              )}
+            </div>
             <div className="py-4 px-8 w-full space-y-4">
               {current.matches("prep.error") && (
                 <Warning
@@ -165,7 +187,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                 label={""}
                 type={"hidden"}
                 name={"operationType"}
-                value={ctx.operationType}
+                value={operationType}
               />
 
               {outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP && (
@@ -181,8 +203,8 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
               {outputLabware.labwareType.name !== LabwareTypeName.VISIUM_LP && (
                 <FormikInput
-                  name={"Quantity"}
-                  label={"quantity"}
+                  label={"Quantity"}
+                  name={"quantity"}
                   type={"number"}
                   min={1}
                   step={1}
@@ -192,7 +214,6 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                 />
               )}
 
-              {/* When the section thickness is 0, input should be empty */}
               <FormikInput
                 disabled={
                   current.matches("printing") || current.matches("done")
@@ -202,33 +223,28 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                 type={"number"}
                 min={1}
                 step={1}
-                // value={
-                //   sectioningLayout.sectionThickness === 0
-                //     ? ""
-                //     : sectioningLayout.sectionThickness
-                // }
               />
+
+              {plannedLabware.length > 0 && (
+                <div className="w-full space-y-4 py-4 px-8">
+                  <DataTable columns={columns} data={plannedLabware} />
+
+                  {printResult && <PrintResult result={printResult} />}
+                </div>
+              )}
+
+              {current.matches("printing") && (
+                <div className="w-full border-t-2 border-gray-200 py-3 px-4 space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
+                  <LabelPrinter
+                    labwares={plannedLabware}
+                    showNotifications={false}
+                    onPrinterChange={handleOnPrinterChange}
+                    onPrint={handleOnPrint}
+                    onPrintError={handleOnPrintError}
+                  />
+                </div>
+              )}
             </div>
-
-            {plannedLabware.length > 0 && (
-              <div className="w-full space-y-4 py-4 px-8">
-                <DataTable columns={columns} data={plannedLabware} />
-
-                {printResult && <PrintResult result={printResult} />}
-              </div>
-            )}
-
-            {current.matches("printing") && (
-              <div className="w-full border-t-2 border-gray-200 py-3 px-4 space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
-                <LabelPrinter
-                  labwares={plannedLabware}
-                  showNotifications={false}
-                  onPrinterChange={handleOnPrinterChange}
-                  onPrint={handleOnPrint}
-                  onPrintError={handleOnPrintError}
-                />
-              </div>
-            )}
 
             {current.matches("prep") && (
               <div className="w-full border-t-2 border-gray-200 py-3 px-4 sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
@@ -284,33 +300,71 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 export default LabwarePlan;
 
 /**
+ * Used as Formik's values
+ */
+type FormValues = {
+  /**
+   * The operation being planned for
+   */
+  operationType: string;
+
+  /**
+   * Only required for Visium LP slides
+   */
+  barcode?: string;
+
+  /**
+   * The number of this labware type that will be created
+   */
+  quantity: number;
+
+  /**
+   * The thickness of the sections being taken, in micrometres
+   */
+  sectionThickness?: number;
+};
+
+/**
+ *
+ * @param operationType
+ * @param labwareType
+ */
+function buildInitialValues(
+  operationType: string,
+  labwareType: LabwareTypeFieldsFragment
+): FormValues {
+  let formValues: FormValues = {
+    operationType,
+    quantity: 1,
+    sectionThickness: 0,
+  };
+
+  if (labwareType.name === LabwareTypeName.VISIUM_LP) {
+    formValues.barcode = "";
+  }
+
+  return formValues;
+}
+
+/**
  * Builds a yup validator for the labware plan form
  * @param labwareType the labware type of the labware plan
  */
 function buildValidator(labwareType: LabwareType): Yup.ObjectSchema {
-  let formShape = {
-    quantity: Yup.number().required().integer().min(1).max(99),
-    sectionThickness: Yup.number().required().integer().min(1),
-    layoutPlan: Yup.mixed()
-      .test("layoutPlan", "LayoutPlan is invalid", (value) => {
-        return value.plannedActions.size > 0;
-      })
-      .defined(),
+  type FormShape = {
+    quantity: Yup.NumberSchema;
+    sectionThickness: Yup.NumberSchema;
+    barcode?: Yup.StringSchema;
   };
 
-  let sectioningLayout: Yup.ObjectSchema;
+  let formShape: FormShape = {
+    quantity: Yup.number().required().integer().min(1).max(99),
+    sectionThickness: Yup.number().required().integer().min(1),
+  };
 
   if (labwareType.name === LabwareTypeName.VISIUM_LP) {
-    sectioningLayout = Yup.object()
-      .shape({ barcode: Yup.string().required().min(14), ...formShape })
-      .defined();
-  } else {
-    sectioningLayout = Yup.object().shape(formShape).defined();
+    formShape.barcode = Yup.string().required().min(14);
   }
 
-  return Yup.object()
-    .shape({
-      sectioningLayout,
-    })
-    .defined();
+  return Yup.object().shape(formShape).defined();
 }
