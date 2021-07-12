@@ -211,5 +211,10 @@ export type StanConfig = {
    * When was this release deployed
    */
   deploymentDate: string;
+
+  /**
+   * The maximum number of rows to display on the Search page
+   */
+  maxSearchRecords: number
 };
 
