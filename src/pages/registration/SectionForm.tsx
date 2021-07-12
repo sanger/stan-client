@@ -8,7 +8,7 @@ import Pill from "../../components/Pill";
 import Heading from "../../components/Heading";
 import FormikInput from "../../components/forms/Input";
 import RadioGroup, { RadioButton } from "../../components/forms/RadioGroup";
-import { enumKeys } from "../../lib/helpers";
+import { objectKeys } from "../../lib/helpers";
 import FormikSelect from "../../components/forms/Select";
 import { optionValues } from "../../components/forms";
 import PinkButton from "../../components/buttons/PinkButton";
@@ -133,7 +133,7 @@ export default function SectionForm({
         label="Life Stage"
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.lifeStage`}
       >
-        {enumKeys(LifeStage).map((key, index) => {
+        {objectKeys(LifeStage).map((key, index) => {
           return <RadioButton key={index} name={key} value={LifeStage[key]} />;
         })}
       </RadioGroup>

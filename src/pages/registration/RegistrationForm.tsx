@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Heading from "../../components/Heading";
 import FormikInput from "../../components/forms/Input";
 import RadioGroup, { RadioButton } from "../../components/forms/RadioGroup";
-import { enumKeys } from "../../lib/helpers";
+import { objectKeys } from "../../lib/helpers";
 import FormikSelect from "../../components/forms/Select";
 import { optionValues } from "../../components/forms";
 import PinkButton from "../../components/buttons/PinkButton";
@@ -99,7 +99,7 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
                 label="Life Stage"
                 name={`tissues.${currentIndex}.lifeStage`}
               >
-                {enumKeys(LifeStage).map((key, index) => {
+                {objectKeys(LifeStage).map((key, index) => {
                   return (
                     <RadioButton
                       key={index}

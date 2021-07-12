@@ -5,7 +5,8 @@ describe("Search", () => {
   context("when URL query params are set", () => {
     before(() => {
       cy.visit(
-        "/search?donorName=DNR123&labwareBarcode=STAN-0001F&tissueExternalName=EXT987&tissueType=Tissue Type 1"
+        "/search?donorName=DNR123&labwareBarcode=STAN-0001F&tissueExternalName=EXT987&tissueTypeName=Tissue Type 1" +
+          "&createdMin=2021-07-01&createdMax=2021-07-31"
       );
     });
 
@@ -14,10 +15,27 @@ describe("Search", () => {
       cy.findByLabelText("External Identifier").should("have.value", "EXT987");
       cy.findByLabelText("Donor ID").should("have.value", "DNR123");
       cy.findByLabelText("Tissue Type").should("have.value", "Tissue Type 1");
+      cy.findByLabelText("Created After").should("have.value", "2021-07-01");
+      cy.findByLabelText("Created Before").should("have.value", "2021-07-31");
     });
 
     it("will perform a search immediately", () => {
       cy.findByRole("table").should("be.visible");
+    });
+
+    context("when the Reset button is pressed", () => {
+      before(() => {
+        cy.findByRole("button", { name: /Reset/i }).click();
+      });
+
+      it("clears the search criteria", () => {
+        cy.findByLabelText("STAN Barcode").should("have.value", "");
+        cy.findByLabelText("External Identifier").should("have.value", "");
+        cy.findByLabelText("Donor ID").should("have.value", "");
+        cy.findByLabelText("Tissue Type").should("have.value", "");
+        cy.findByLabelText("Created After").should("have.value", "");
+        cy.findByLabelText("Created Before").should("have.value", "");
+      });
     });
   });
 
@@ -31,7 +49,7 @@ describe("Search", () => {
     });
 
     context(
-      "when trying to search without a STAN Barcode, External Identifier, or Donor ID set",
+      "when trying to search without a STAN Barcode, External Identifier, Donor ID, or Tissue Type set",
       () => {
         before(() => {
           cy.findByRole("button", { name: /Search/i }).click();
@@ -39,7 +57,7 @@ describe("Search", () => {
 
         it("will show an error", () => {
           cy.findByText(
-            "At least one of STAN Barcode, External Identifier, or Donor ID must not be empty."
+            "At least one of STAN Barcode, External Identifier, Donor ID, or Tissue Type must not be empty."
           ).should("be.visible");
         });
       }
@@ -54,7 +72,7 @@ describe("Search", () => {
             graphql.query<FindQuery, FindQueryVariables>(
               "Find",
               (req, res, ctx) => {
-                return res.once(ctx.data({ find: buildFindResult(50, 40) }));
+                return res.once(ctx.data({ find: buildFindResult(200, 150) }));
               }
             )
           );
@@ -97,7 +115,7 @@ describe("Search", () => {
       });
     });
 
-    context("when a search errors gets an error from the server", () => {
+    context("when a search gets an error from the server", () => {
       before(() => {
         cy.visit("/search");
 
