@@ -4,7 +4,7 @@ import AuthenticatedRoute from "./AuthenticatedRoute";
 import Login from "../pages/Login";
 import Logout from "../pages/Logout";
 import Location from "../pages/Location";
-import Sectioning from "../pages/Sectioning";
+import Sectioning from "../pages/sectioning/Sectioning";
 import Extraction from "../pages/Extraction";
 import Registration from "../pages/Registration";
 import Release from "../pages/Release";

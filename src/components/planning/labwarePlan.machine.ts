@@ -1,21 +1,11 @@
 import { createMachine } from "xstate";
+import { Maybe, PlanMutation, PlanRequestLabware } from "../../types/sdk";
 import {
-  LabwareFieldsFragment,
-  Maybe,
-  PlanMutation,
-  PlanRequestLabware,
-  PlanResult,
-} from "../../types/sdk";
-import {
-  Address,
   extractServerErrors,
   LabwareTypeName,
   ServerErrors,
 } from "../../types/stan";
-import {
-  LayoutPlan,
-  Source as LayoutPlanAction,
-} from "../../lib/machines/layout/layoutContext";
+import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../lib/machines/layout/layoutMachine";
 import { stanCore } from "../../lib/sdk";
@@ -60,6 +50,7 @@ type LabwarePlanEvent =
   | PlanSectionResolveEvent
   | PlanSectionRejectEvent
   | LayoutMachineDone;
+//endregion Events
 
 /**
  * Context for a {@link LabwarePlan} machine
@@ -70,6 +61,9 @@ interface LabwarePlanContext {
    */
   serverErrors: Maybe<ServerErrors>;
 
+  /**
+   * The plan for how sources will be mapped onto a piece of labware
+   */
   layoutPlan: LayoutPlan;
 
   /**
@@ -199,8 +193,6 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
         layoutMachine: (ctx, _e) => {
           return createLayoutMachine(ctx.layoutPlan);
         },
-
-        // validateLayout: (ctx) => ctx.validator.validate(ctx),
 
         planSection: (ctx, e) => {
           if (e.type !== "CREATE_LABWARE") {

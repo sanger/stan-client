@@ -20,7 +20,6 @@ import {
   LabwareType,
   LabwareTypeFieldsFragment,
   PlanMutation,
-  PlanResult,
 } from "../../types/sdk";
 import WhiteButton from "../buttons/WhiteButton";
 import FormikInput from "../forms/Input";
@@ -148,117 +147,123 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
           )}
           validationSchema={formValidationSchema}
         >
-          <Form className="md:grid md:grid-cols-2 border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow">
-            <div className="py-4 flex flex-col items-center justify-between space-y-8">
-              <Labware
-                labware={outputLabware}
-                onClick={() => send({ type: "EDIT_LAYOUT" })}
-                name={outputLabware.labwareType.name}
-                slotText={(address) => buildSlotText(layoutPlan, address)}
-                slotSecondaryText={(address) =>
-                  buildSlotSecondaryText(layoutPlan, address)
-                }
-                slotColor={(address) => buildSlotColor(layoutPlan, address)}
-              />
-
-              {current.matches("prep") && (
-                <PinkButton onClick={() => send({ type: "EDIT_LAYOUT" })}>
-                  Edit Layout
-                </PinkButton>
-              )}
-            </div>
-            <div className="py-4 px-8 w-full space-y-4">
-              {current.matches("prep.error") && (
-                <Warning
-                  message={
-                    serverErrors?.message ??
-                    "There was an error creating the Labware"
+          <Form>
+            <div className="md:grid md:grid-cols-2">
+              <div className="py-4 flex flex-col items-center justify-between space-y-8">
+                <Labware
+                  labware={outputLabware}
+                  onClick={() => send({ type: "EDIT_LAYOUT" })}
+                  name={outputLabware.labwareType.name}
+                  slotText={(address) => buildSlotText(layoutPlan, address)}
+                  slotSecondaryText={(address) =>
+                    buildSlotSecondaryText(layoutPlan, address)
                   }
-                >
-                  <ul className="list-disc list-inside">
-                    {serverErrors?.problems.map((problem, index) => {
-                      return <li key={index}>{problem}</li>;
-                    })}
-                  </ul>
-                </Warning>
-              )}
-
-              <FormikInput
-                label={""}
-                type={"hidden"}
-                name={"operationType"}
-                value={operationType}
-              />
-
-              {outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP && (
-                <FormikInput
-                  name={"barcode"}
-                  label={"Barcode"}
-                  type={"text"}
-                  disabled={
-                    current.matches("printing") || current.matches("done")
-                  }
+                  slotColor={(address) => buildSlotColor(layoutPlan, address)}
                 />
-              )}
 
-              {outputLabware.labwareType.name !== LabwareTypeName.VISIUM_LP && (
-                <FormikInput
-                  label={"Quantity"}
-                  name={"quantity"}
-                  type={"number"}
-                  min={1}
-                  step={1}
-                  disabled={
-                    current.matches("printing") || current.matches("done")
-                  }
-                />
-              )}
+                {current.matches("prep") && (
+                  <PinkButton onClick={() => send({ type: "EDIT_LAYOUT" })}>
+                    Edit Layout
+                  </PinkButton>
+                )}
+              </div>
+              <div className="border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow">
+                <div className="py-4 px-8 w-full space-y-4">
+                  {current.matches("prep.error") && (
+                    <Warning
+                      message={
+                        serverErrors?.message ??
+                        "There was an error creating the Labware"
+                      }
+                    >
+                      <ul className="list-disc list-inside">
+                        {serverErrors?.problems.map((problem, index) => {
+                          return <li key={index}>{problem}</li>;
+                        })}
+                      </ul>
+                    </Warning>
+                  )}
 
-              <FormikInput
-                disabled={
-                  current.matches("printing") || current.matches("done")
-                }
-                label={"Section Thickness"}
-                name={"sectionThickness"}
-                type={"number"}
-                min={1}
-                step={1}
-              />
+                  <FormikInput
+                    label={""}
+                    type={"hidden"}
+                    name={"operationType"}
+                    value={operationType}
+                  />
 
-              {plannedLabware.length > 0 && (
-                <div className="w-full space-y-4 py-4 px-8">
-                  <DataTable columns={columns} data={plannedLabware} />
+                  {outputLabware.labwareType.name ===
+                    LabwareTypeName.VISIUM_LP && (
+                    <FormikInput
+                      name={"barcode"}
+                      label={"Barcode"}
+                      type={"text"}
+                      disabled={
+                        current.matches("printing") || current.matches("done")
+                      }
+                    />
+                  )}
 
-                  {printResult && <PrintResult result={printResult} />}
-                </div>
-              )}
+                  {outputLabware.labwareType.name !==
+                    LabwareTypeName.VISIUM_LP && (
+                    <FormikInput
+                      label={"Quantity"}
+                      name={"quantity"}
+                      type={"number"}
+                      min={1}
+                      step={1}
+                      disabled={
+                        current.matches("printing") || current.matches("done")
+                      }
+                    />
+                  )}
 
-              {current.matches("printing") && (
-                <div className="w-full border-t-2 border-gray-200 py-3 px-4 space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
-                  <LabelPrinter
-                    labwares={plannedLabware}
-                    showNotifications={false}
-                    onPrinterChange={handleOnPrinterChange}
-                    onPrint={handleOnPrint}
-                    onPrintError={handleOnPrintError}
+                  <FormikInput
+                    disabled={
+                      current.matches("printing") || current.matches("done")
+                    }
+                    label={"Section Thickness"}
+                    name={"sectionThickness"}
+                    type={"number"}
+                    min={1}
+                    step={1}
                   />
                 </div>
-              )}
-            </div>
 
-            {current.matches("prep") && (
-              <div className="w-full border-t-2 border-gray-200 py-3 px-4 sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
-                <WhiteButton onClick={() => onDeleteButtonClick(cid)}>
-                  Delete Layout
-                </WhiteButton>
-                <BlueButton
-                  type="submit"
-                  disabled={current.matches("prep.invalid")}
-                >
-                  Create Labware
-                </BlueButton>
+                {plannedLabware.length > 0 && (
+                  <div className="w-full space-y-4 py-4 px-8">
+                    <DataTable columns={columns} data={plannedLabware} />
+
+                    {printResult && <PrintResult result={printResult} />}
+                  </div>
+                )}
+
+                {current.matches("printing") && (
+                  <div className="w-full border-t-2 border-gray-200 py-3 px-4 space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
+                    <LabelPrinter
+                      labwares={plannedLabware}
+                      showNotifications={false}
+                      onPrinterChange={handleOnPrinterChange}
+                      onPrint={handleOnPrint}
+                      onPrintError={handleOnPrintError}
+                    />
+                  </div>
+                )}
+
+                {current.matches("prep") && (
+                  <div className="w-full border-t-2 border-gray-200 py-3 px-4 sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
+                    <WhiteButton onClick={() => onDeleteButtonClick(cid)}>
+                      Delete Layout
+                    </WhiteButton>
+                    <BlueButton
+                      type="submit"
+                      disabled={current.matches("prep.invalid")}
+                    >
+                      Create Labware
+                    </BlueButton>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </Form>
         </Formik>
 
