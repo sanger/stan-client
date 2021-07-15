@@ -5,10 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.5.0] - 2021-07-15
 ### Added
 - Labware details page ([#45](https://github.com/sanger/stan-client/pull/45))
-
-### Modified
+- More available search criteria ([#47](https://github.com/sanger/stan-client/pull/47))
 
 ## [1.3.0] - 2021-07-08
 ### Fixed
@@ -75,7 +76,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Everything!
 
-[Unreleased]: https://github.com/sanger/stan-client/compare/1.2.0...HEAD
+[Unreleased]: https://github.com/sanger/stan-client/compare/1.5.0...HEAD
+[1.5.0]: https://github.com/sanger/stan-client/compare/1.3.0...1.5.0
 [1.3.0]: https://github.com/sanger/stan-client/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/sanger/stan-client/compare/1.1.1...1.2.0
 [1.1.1]: https://github.com/sanger/stan-client/compare/1.1.0...1.1.1
