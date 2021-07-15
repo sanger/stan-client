@@ -13,7 +13,7 @@ export async function search(
 ): Promise<SearchResultsType> {
   // Tidy up the search parameters e.g. removing undefined and null values
   const request: FindRequest = _(findRequest)
-    .omitBy(_.isEmpty)
+    .omitBy((val) => (typeof val === "number" ? val === 0 : _.isEmpty(val)))
     .mapValues((value: any) =>
       typeof value === "string" ? value.trim() : value
     )
