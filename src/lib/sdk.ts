@@ -20,4 +20,6 @@ export const history = createBrowserHistory();
 /**
  * Forces react-router to refresh the current route
  */
-export const reload = () => history.replace(history.location);
+export const reload = () => {
+  history.replace(history.location.pathname, {});
+};

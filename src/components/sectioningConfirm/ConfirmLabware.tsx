@@ -1,41 +1,47 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useMachine, useSelector } from "@xstate/react";
 import variants from "../../lib/motionVariants";
-import Labware from "../../components/labware/Labware";
-import PinkButton from "../../components/buttons/PinkButton";
-import Modal, { ModalBody, ModalFooter } from "../../components/Modal";
-import Heading from "../../components/Heading";
-import BlueButton from "../../components/buttons/BlueButton";
+import Labware from "../labware/Labware";
+import PinkButton from "../buttons/PinkButton";
+import Modal, { ModalBody, ModalFooter } from "../Modal";
+import Heading from "../Heading";
+import BlueButton from "../buttons/BlueButton";
 import { motion } from "framer-motion";
-import { optionValues } from "../../components/forms";
-import LayoutPlanner from "../../components/LayoutPlanner";
-import Label from "../../components/forms/Label";
-import WhiteButton from "../../components/buttons/WhiteButton";
+import { optionValues } from "../forms";
+import LayoutPlanner from "../LayoutPlanner";
+import Label from "../forms/Label";
+import WhiteButton from "../buttons/WhiteButton";
 import { sortRightDown } from "../../lib/helpers/labwareHelper";
-import { Select } from "../../components/forms/Select";
+import { Select } from "../forms/Select";
 import LabwareComments from "./LabwareComments";
 import classNames from "classnames";
 import {
   buildSlotColor,
   buildSlotSecondaryText,
   buildSlotText,
-  selectConfirmOperationLabware,
-} from "./index";
-import { createSectioningConfirmMachine } from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmMachine";
+} from "../../pages/sectioning";
+import { createConfirmLabwareMachine } from "./confirmLabware.machine";
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
-import { SectioningPageContext } from "../Sectioning";
+import { CommentFieldsFragment, ConfirmSectionLabware } from "../../types/sdk";
+import { selectConfirmOperationLabware } from "./index";
+import RemoveButton from "../buttons/RemoveButton";
 
 interface ConfirmLabwareProps {
   originalLayoutPlan: LayoutPlan;
+  comments: Array<CommentFieldsFragment>;
+  onChange: (labware: ConfirmSectionLabware) => void;
+  onRemoveClick: (labwareId: number) => void;
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   originalLayoutPlan,
+  comments,
+  onChange,
+  onRemoveClick,
 }) => {
-  const model = useContext(SectioningPageContext)!;
   const [current, send, service] = useMachine(
-    createSectioningConfirmMachine(
-      model.context.comments,
+    createConfirmLabwareMachine(
+      comments,
       originalLayoutPlan.destinationLabware,
       originalLayoutPlan
     )
@@ -45,12 +51,11 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     selectConfirmOperationLabware
   );
 
-  const commitConfirmation = model.commitConfirmation;
   useEffect(() => {
     if (confirmOperationLabware) {
-      commitConfirmation(confirmOperationLabware);
+      onChange(confirmOperationLabware);
     }
-  }, [commitConfirmation, confirmOperationLabware]);
+  }, [onChange, confirmOperationLabware]);
 
   const { addressToCommentMap, labware, layoutPlan } = current.context;
 
@@ -71,6 +76,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       animate={"visible"}
       className="relative p-3 shadow"
     >
+      <RemoveButton onClick={() => onRemoveClick(labware.id)} />
       <div className="md:grid md:grid-cols-2">
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
@@ -96,14 +102,14 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
           </Heading>
 
           <div className="w-full space-y-4">
-            <div className={gridClassNames}>
+            <div data-testid="labware-comments" className={gridClassNames}>
               {sortRightDown(labware.slots).map((slot) => (
                 <LabwareComments
                   key={slot.address}
                   slot={slot}
                   value={addressToCommentMap.get(slot.address) ?? ""}
                   disabled={current.matches("done")}
-                  comments={model.context.comments}
+                  comments={comments}
                   layoutPlan={layoutPlan}
                   onCommentChange={(e) => {
                     send({
@@ -139,7 +145,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
               }
             >
               <option />
-              {optionValues(model.context.comments, "text", "id")}
+              {optionValues(comments, "text", "id")}
             </Select>
           </Label>
         </div>

@@ -1,10 +1,6 @@
 import { createMachine } from "xstate";
 import { Maybe, PlanMutation, PlanRequestLabware } from "../../types/sdk";
-import {
-  extractServerErrors,
-  LabwareTypeName,
-  ServerErrors,
-} from "../../types/stan";
+import { LabwareTypeName } from "../../types/stan";
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../lib/machines/layout/layoutMachine";
@@ -59,7 +55,7 @@ interface LabwarePlanContext {
   /**
    * Errors returned from the server
    */
-  serverErrors: Maybe<ServerErrors>;
+  serverErrors: Maybe<ClientError>;
 
   /**
    * The plan for how sources will be mapped onto a piece of labware
@@ -110,6 +106,13 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
                 },
               },
             },
+            errored: {
+              on: {
+                CREATE_LABWARE: {
+                  target: "#labwarePlan.creating",
+                },
+              },
+            },
             invalid: {},
           },
           on: {
@@ -147,7 +150,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
               },
             ],
             onError: {
-              target: "prep",
+              target: "prep.errored",
               actions: "assignServerErrors",
             },
           },
@@ -177,7 +180,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           if (e.type !== "error.platform.planSection") {
             return;
           }
-          ctx.serverErrors = extractServerErrors(e.data);
+          ctx.serverErrors = e.data;
         }),
       },
 

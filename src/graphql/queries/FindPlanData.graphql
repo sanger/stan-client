@@ -1,9 +1,12 @@
-mutation Plan($request: PlanRequest!) {
-    plan(request: $request) {
-        labware {
+query FindPlanData($barcode: String!) {
+    planData(barcode: $barcode) {
+        sources {
             ...LabwareFields
         }
-        operations {
+        destination {
+            ...LabwareFields
+        }
+        plan {
             operationType {
                 name
             }
