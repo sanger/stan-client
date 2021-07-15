@@ -15,17 +15,12 @@ import SlideRegistration from "../pages/SlideRegistration";
 import SlotCopy from "../pages/SlotCopy";
 import { plateFactory } from "../lib/factories/labwareFactory";
 import DataFetcher from "./DataFetcher";
-import {
-  cleanParams,
-  parseQueryString,
-  safeParseQueryString,
-} from "../lib/helpers";
+import { safeParseQueryString } from "../lib/helpers";
 import { isLocationSearch, LocationSearchParams } from "../types/stan";
-import { FindRequest, Maybe, UserRole } from "../types/sdk";
-import { ParsedQuery } from "query-string";
-import _ from "lodash";
+import { Maybe, UserRole } from "../types/sdk";
 import Configuration from "../pages/Configuration";
 import { StanCoreContext } from "../lib/sdk";
+import LabwareDetails from "../pages/LabwareDetails";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -175,30 +170,35 @@ export function Routes() {
       />
 
       <Route
+        path="/labware/:barcode"
+        render={(routeProps) => {
+          return (
+            <DataFetcher
+              key={routeProps.location.key}
+              dataFetcher={() => {
+                return stanCore.FindLabware({
+                  barcode: routeProps.match.params.barcode,
+                });
+              }}
+            >
+              {(findLabwareQuery) => (
+                <LabwareDetails labware={findLabwareQuery.labware} />
+              )}
+            </DataFetcher>
+          );
+        }}
+      />
+
+      <Route
         path={["/", "/search"]}
         render={(routeProps) => {
-          const params: ParsedQuery = parseQueryString(
-            routeProps.location.search
-          );
-          const findRequestKeys: (keyof FindRequest)[] = [
-            "labwareBarcode",
-            "tissueExternalName",
-            "donorName",
-            "tissueType",
-          ];
-          const findRequest: FindRequest = _.merge(
-            {
-              labwareBarcode: "",
-              tissueExternalName: "",
-              donorName: "",
-              tissueType: "",
-            },
-            cleanParams(params, findRequestKeys)
-          );
           return (
             <DataFetcher dataFetcher={stanCore.GetSearchInfo}>
               {(searchInfo) => (
-                <Search searchInfo={searchInfo} findRequest={findRequest} />
+                <Search
+                  searchInfo={searchInfo}
+                  urlParamsString={routeProps.location.search}
+                />
               )}
             </DataFetcher>
           );

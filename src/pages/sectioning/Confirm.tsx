@@ -10,7 +10,7 @@ import OperationCompleteModal from "../../components/modal/OperationCompleteModa
 import { reload } from "../../lib/sdk";
 import { LabwareTypeName } from "../../types/stan";
 import DataTable from "../../components/DataTable";
-import columns from "../../components/labwareScanPanel/columns";
+import columns from "../../components/dataTable/labwareColumns";
 
 function Confirm() {
   const model = useContext(SectioningPageContext)!;

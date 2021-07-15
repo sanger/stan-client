@@ -4,6 +4,7 @@ fragment SampleFields on Sample {
     tissue {
         donor {
             donorName
+            lifeStage
         }
         externalName
         spatialLocation {

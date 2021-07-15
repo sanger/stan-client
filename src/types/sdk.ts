@@ -14,7 +14,9 @@ export type Scalars = {
   Float: number;
   Address: string;
   Timestamp: string;
+  Date: string;
 };
+
 
 
 
@@ -22,6 +24,14 @@ export enum UserRole {
   Disabled = 'disabled',
   Normal = 'normal',
   Admin = 'admin'
+}
+
+export enum LabwareState {
+  Empty = 'empty',
+  Active = 'active',
+  Discarded = 'discarded',
+  Released = 'released',
+  Destroyed = 'destroyed'
 }
 
 export type User = {
@@ -139,6 +149,8 @@ export type Labware = {
   released: Scalars['Boolean'];
   destroyed: Scalars['Boolean'];
   discarded: Scalars['Boolean'];
+  state: LabwareState;
+  created: Scalars['Timestamp'];
 };
 
 export enum LifeStage {
@@ -448,6 +460,7 @@ export type Location = {
   stored: Array<StoredItem>;
   children: Array<LinkedLocation>;
   direction?: Maybe<GridDirection>;
+  qualifiedNameWithFirstBarcode: Scalars['String'];
 };
 
 export type LinkedLocation = {
@@ -491,8 +504,10 @@ export type FindRequest = {
   labwareBarcode?: Maybe<Scalars['String']>;
   donorName?: Maybe<Scalars['String']>;
   tissueExternalName?: Maybe<Scalars['String']>;
-  tissueType?: Maybe<Scalars['String']>;
+  tissueTypeName?: Maybe<Scalars['String']>;
   maxRecords?: Maybe<Scalars['Int']>;
+  createdMin?: Maybe<Scalars['Date']>;
+  createdMax?: Maybe<Scalars['Date']>;
 };
 
 export type Query = {
@@ -787,7 +802,7 @@ export type HmdmcFieldsFragment = (
 
 export type LabwareFieldsFragment = (
   { __typename?: 'Labware' }
-  & Pick<Labware, 'id' | 'barcode' | 'destroyed' | 'discarded' | 'released'>
+  & Pick<Labware, 'id' | 'barcode' | 'destroyed' | 'discarded' | 'released' | 'state' | 'created'>
   & { labwareType: (
     { __typename?: 'LabwareType' }
     & LabwareTypeFieldsFragment
@@ -851,7 +866,7 @@ export type SampleFieldsFragment = (
     & Pick<Tissue, 'externalName' | 'replicate'>
     & { donor: (
       { __typename?: 'Donor' }
-      & Pick<Donor, 'donorName'>
+      & Pick<Donor, 'donorName' | 'lifeStage'>
     ), spatialLocation: (
       { __typename?: 'SpatialLocation' }
       & Pick<SpatialLocation, 'code'>
@@ -1416,18 +1431,21 @@ export type FindQuery = (
         ), donor: (
           { __typename?: 'Donor' }
           & Pick<Donor, 'donorName'>
+        ), medium: (
+          { __typename?: 'Medium' }
+          & Pick<Medium, 'name'>
         ) }
       ) }
     )>, labware: Array<(
       { __typename?: 'Labware' }
-      & Pick<Labware, 'id' | 'barcode'>
+      & Pick<Labware, 'id' | 'barcode' | 'created'>
       & { labwareType: (
         { __typename?: 'LabwareType' }
         & Pick<LabwareType, 'name'>
       ) }
     )>, locations: Array<(
       { __typename?: 'Location' }
-      & Pick<Location, 'id' | 'barcode' | 'customName' | 'fixedName' | 'direction'>
+      & Pick<Location, 'id' | 'barcode' | 'customName' | 'fixedName' | 'direction' | 'qualifiedNameWithFirstBarcode'>
       & { size?: Maybe<(
         { __typename?: 'Size' }
         & Pick<Size, 'numRows' | 'numColumns'>
@@ -1652,6 +1670,7 @@ export const SampleFieldsFragmentDoc = gql`
   tissue {
     donor {
       donorName
+      lifeStage
     }
     externalName
     spatialLocation {
@@ -1684,6 +1703,8 @@ export const LabwareFieldsFragmentDoc = gql`
   destroyed
   discarded
   released
+  state
+  created
   labwareType {
     ...LabwareTypeFields
   }
@@ -2087,11 +2108,15 @@ export const FindDocument = gql`
         donor {
           donorName
         }
+        medium {
+          name
+        }
       }
     }
     labware {
       id
       barcode
+      created
       labwareType {
         name
       }
@@ -2106,6 +2131,7 @@ export const FindDocument = gql`
         numRows
         numColumns
       }
+      qualifiedNameWithFirstBarcode
     }
     labwareLocations {
       labwareId

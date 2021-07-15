@@ -6,8 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Labware details page ([#45](https://github.com/sanger/stan-client/pull/45))
 
 ### Modified
+
+## [1.3.0] - 2021-07-08
+### Fixed
+- Highest section bug ([#46](https://github.com/sanger/stan-client/pull/46))
 
 ## [1.2.0] - 2021-06-28
 ### Added
@@ -71,6 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Everything!
 
 [Unreleased]: https://github.com/sanger/stan-client/compare/1.2.0...HEAD
+[1.3.0]: https://github.com/sanger/stan-client/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/sanger/stan-client/compare/1.1.1...1.2.0
 [1.1.1]: https://github.com/sanger/stan-client/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/sanger/stan-client/compare/1.0.0...1.1.0

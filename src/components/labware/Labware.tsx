@@ -9,6 +9,7 @@ import createLabwareMachine from "./labware.machine";
 import { Selectable, SelectionMode } from "./labware.types";
 import { NewLabwareLayout } from "../../types/stan";
 import { useMachine } from "@xstate/react";
+import * as slotHelper from "../../lib/helpers/slotHelper";
 
 export interface LabwareProps {
   /**
@@ -173,7 +174,7 @@ const Labware = ({
   }, [onSelect, selectedAddresses]);
 
   const labwareClasses =
-    "inline-block py-2 bg-blue-100 rounded-lg transition duration-300 ease-in-out";
+    "inline-block border border-sdb py-2 bg-blue-100 rounded-lg transition duration-300 ease-in-out";
 
   const gridClasses = classNames(
     {
@@ -182,6 +183,17 @@ const Labware = ({
     },
     `grid grid-rows-${numRows} grid-cols-${numColumns} py-4 select-none`
   );
+
+  // Give slots some default styles if some haven't been passed in
+  const _slotColor =
+    slotColor ??
+    ((address, slot) => {
+      if (slotHelper.hasMultipleSamples(slot)) {
+        return "bg-gradient-to-r from-purple-400 via-pink-500 to-red-500";
+      } else if (slotHelper.isSlotFilled(slot)) {
+        return "bg-sdb-300";
+      }
+    });
 
   const slotByAddress = _.keyBy(slots, "address");
 
@@ -224,7 +236,7 @@ const Labware = ({
             onMouseLeave={onSlotMouseLeave}
             text={slotText}
             secondaryText={slotSecondaryText}
-            color={slotColor}
+            color={_slotColor}
             selected={selectedAddresses.has(address)}
           />
         ))}

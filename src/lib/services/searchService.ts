@@ -11,15 +11,13 @@ import { stanCore } from "../sdk";
 export async function search(
   findRequest: FindRequest
 ): Promise<SearchResultsType> {
-  // Have a default of 40 records is max isn't supplied
-  const request = _.defaults(
-    { maxRecords: 40 },
-    // Strip any empty string values from the provided request
-    _(findRequest)
-      .omitBy(_.isEmpty)
-      .mapValues((value: string) => value.trim())
-      .value()
-  );
+  // Tidy up the search parameters e.g. removing undefined and null values
+  const request: FindRequest = _(findRequest)
+    .omitBy((val) => (typeof val === "number" ? val === 0 : _.isEmpty(val)))
+    .mapValues((value: any) =>
+      typeof value === "string" ? value.trim() : value
+    )
+    .value();
   const response = await stanCore.Find({ request });
   return {
     numDisplayed: response.find.entries.length,
@@ -78,8 +76,7 @@ export function formatFindResult(
           ? null
           : {
               barcode: location.barcode,
-              displayName:
-                location.customName ?? location.fixedName ?? location.barcode,
+              displayName: location.qualifiedNameWithFirstBarcode,
               address:
                 labwareLocation?.address &&
                 location?.direction &&
@@ -93,6 +90,8 @@ export function formatFindResult(
             },
       sectionNumber: sample.section,
       replicate: sample.tissue.replicate,
+      labwareCreated: new Date(labware.created),
+      embeddingMedium: sample.tissue.medium.name,
     };
   });
 }
