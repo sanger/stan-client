@@ -140,6 +140,7 @@ export const createSectioningConfirmMachine = (
       on: {
         SECTIONING_CONFIRMATION_COMPLETE: "done",
       },
+      entry: "commitConfirmation",
       states: {
         editableMode: {
           on: {
