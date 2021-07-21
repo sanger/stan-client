@@ -87,6 +87,10 @@ export const plateFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.PLATE].build(),
 });
 
+export const cassetteFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.CASSETTE].build(),
+});
+
 export const labwareFactories: Record<
   LabwareTypeName,
   Factory<NewLabwareLayout>
@@ -97,4 +101,5 @@ export const labwareFactories: Record<
   [LabwareTypeName.VISIUM_TO]: visiumTOFactory,
   [LabwareTypeName.VISIUM_LP]: visiumLPFactory,
   [LabwareTypeName.PLATE]: plateFactory,
+  [LabwareTypeName.CASSETTE]: cassetteFactory,
 };
