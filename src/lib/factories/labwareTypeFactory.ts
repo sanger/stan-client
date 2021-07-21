@@ -49,6 +49,12 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numRows: 8,
     numColumns: 12,
   }),
+  [LabwareTypeName.CASSETTE]: labwareTypeFactory.params({
+    __typename: "LabwareType",
+    name: LabwareTypeName.CASSETTE,
+    numRows: 1,
+    numColumns: 1,
+  }),
 };
 
 export const labwareTypeInstances = Object.keys(labwareTypes).map((lt) =>

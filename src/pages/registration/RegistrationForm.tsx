@@ -37,7 +37,7 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
 
   const availableLabwareTypes = useMemo(() => {
     return registrationInfo.labwareTypes.filter((lt) =>
-      [LabwareTypeName.PROVIASETTE].includes(lt.name as LabwareTypeName)
+      [LabwareTypeName.PROVIASETTE, LabwareTypeName.CASSETTE].includes(lt.name as LabwareTypeName)
     );
   }, [registrationInfo]);
 
