@@ -2,12 +2,19 @@ import { graphql } from "msw";
 import {
   ConfirmMutation,
   ConfirmMutationVariables,
+  FindPlanDataQuery,
+  FindPlanDataQueryVariables,
   PlanMutation,
   PlanMutationVariables,
 } from "../../types/sdk";
-import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
+import {
+  labwareTypeInstances,
+  labwareTypes,
+} from "../../lib/factories/labwareTypeFactory";
 import labwareFactory from "../../lib/factories/labwareFactory";
 import { uniqueId } from "lodash";
+import { buildLabwareFragment } from "../../lib/helpers/labwareHelper";
+import { LabwareTypeName } from "../../types/stan";
 
 const planHandlers = [
   graphql.mutation<PlanMutation, PlanMutationVariables>(
@@ -87,6 +94,69 @@ const planHandlers = [
           })
         );
       }
+    }
+  ),
+
+  graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>(
+    "FindPlanData",
+    (req, res, ctx) => {
+      const sourceLabware = labwareFactory.build(
+        { barcode: "STAN-2021" },
+        {
+          associations: {
+            labwareType: labwareTypes[LabwareTypeName.PROVIASETTE].build(),
+          },
+        }
+      );
+
+      const destinationLabware = labwareFactory.build(
+        { barcode: req.variables.barcode },
+        {
+          associations: {
+            labwareType: labwareTypes[LabwareTypeName.SLIDE].build(),
+          },
+        }
+      );
+
+      return res(
+        ctx.data({
+          planData: {
+            sources: [buildLabwareFragment(sourceLabware)],
+            destination: buildLabwareFragment(destinationLabware),
+            plan: {
+              operationType: {
+                __typename: "OperationType",
+                name: "Section",
+              },
+              planActions: [
+                {
+                  __typename: "PlanAction",
+                  source: {
+                    __typename: "Slot",
+                    address: "A1",
+                    samples: [
+                      {
+                        __typename: "Sample",
+                        id: sourceLabware.slots[0].samples[0].id,
+                      },
+                    ],
+                    labwareId: sourceLabware.id,
+                  },
+                  destination: {
+                    __typename: "Slot",
+                    labwareId: destinationLabware.id,
+                    address: "A1",
+                  },
+                  sample: {
+                    __typename: "Sample",
+                    id: sourceLabware.slots[0].samples[0].id,
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
     }
   ),
 

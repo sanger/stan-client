@@ -1,36 +1,37 @@
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useMachine, useSelector } from "@xstate/react";
 import classNames from "classnames";
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-} from "../../components/Table";
-import RemoveIcon from "../../components/icons/RemoveIcon";
-import { createSectioningConfirmMachine } from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmMachine";
+import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
+import RemoveIcon from "../icons/RemoveIcon";
+import { createConfirmLabwareMachine } from "./confirmLabware.machine";
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
-import { SectioningPageContext } from "../Sectioning";
 import {
   buildSlotColor,
   buildSlotSecondaryText,
   buildSlotText,
-  selectConfirmOperationLabware,
-} from "./index";
-import { Input } from "../../components/forms/Input";
-import Modal, { ModalBody, ModalFooter } from "../../components/Modal";
-import Heading from "../../components/Heading";
-import LayoutPlanner from "../../components/LayoutPlanner";
-import BlueButton from "../../components/buttons/BlueButton";
-import WhiteButton from "../../components/buttons/WhiteButton";
-import PinkButton from "../../components/buttons/PinkButton";
-import Labware from "../../components/labware/Labware";
+} from "../../pages/sectioning";
+import { Input } from "../forms/Input";
+import Modal, { ModalBody, ModalFooter } from "../Modal";
+import Heading from "../Heading";
+import LayoutPlanner from "../LayoutPlanner";
+import BlueButton from "../buttons/BlueButton";
+import WhiteButton from "../buttons/WhiteButton";
+import PinkButton from "../buttons/PinkButton";
+import Labware from "../labware/Labware";
+import { CommentFieldsFragment, ConfirmSectionLabware } from "../../types/sdk";
+import { selectConfirmOperationLabware } from "./index";
 
 interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
+  comments: Array<CommentFieldsFragment>;
+  onChange: (labware: ConfirmSectionLabware) => void;
 }
 
-const ConfirmTubes: React.FC<ConfirmTubesProps> = ({ layoutPlans }) => {
+const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
+  layoutPlans,
+  comments,
+  onChange,
+}) => {
   return (
     <div className="p-4 lg:w-2/3 lg:mx-auto rounded-lg bg-gray-100 space-y-4">
       <div>
@@ -53,7 +54,12 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({ layoutPlans }) => {
           </TableHead>
           <TableBody>
             {layoutPlans.map((layoutPlan, i) => (
-              <TubeRow key={i} initialLayoutPlan={layoutPlan} />
+              <TubeRow
+                key={i}
+                initialLayoutPlan={layoutPlan}
+                comments={comments}
+                onChange={onChange}
+              />
             ))}
           </TableBody>
         </Table>
@@ -66,13 +72,18 @@ export default ConfirmTubes;
 
 interface TubeRowProps {
   initialLayoutPlan: LayoutPlan;
+  comments: Array<CommentFieldsFragment>;
+  onChange: (labware: ConfirmSectionLabware) => void;
 }
 
-const TubeRow: React.FC<TubeRowProps> = ({ initialLayoutPlan }) => {
-  const model = useContext(SectioningPageContext)!;
+const TubeRow: React.FC<TubeRowProps> = ({
+  initialLayoutPlan,
+  comments,
+  onChange,
+}) => {
   const [current, send, service] = useMachine(
-    createSectioningConfirmMachine(
-      model.context.comments,
+    createConfirmLabwareMachine(
+      comments,
       initialLayoutPlan.destinationLabware,
       initialLayoutPlan
     )
@@ -83,13 +94,11 @@ const TubeRow: React.FC<TubeRowProps> = ({ initialLayoutPlan }) => {
     selectConfirmOperationLabware
   );
 
-  const commitConfirmation = model.commitConfirmation;
-
   useEffect(() => {
     if (confirmOperationLabware) {
-      commitConfirmation(confirmOperationLabware);
+      onChange(confirmOperationLabware);
     }
-  }, [commitConfirmation, confirmOperationLabware]);
+  }, [onChange, confirmOperationLabware]);
 
   const { cancelled, layoutPlan, labware } = current.context;
   const { layoutMachine } = current.children;

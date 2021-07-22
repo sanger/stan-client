@@ -1,6 +1,4 @@
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
-import { State } from "xstate";
-import { SectioningConfirmContext } from "../../lib/machines/sectioning/sectioningConfirm/sectioningConfirmMachine";
 
 export function buildSlotText(layoutPlan: LayoutPlan, address: string) {
   const action = layoutPlan.plannedActions.get(address);
@@ -26,7 +24,3 @@ export function buildSlotColor(layoutPlan: LayoutPlan, address: string) {
   }
   return undefined;
 }
-
-export const selectConfirmOperationLabware = (
-  state: State<SectioningConfirmContext>
-) => state.context.confirmSectionLabware;

@@ -1,0 +1,17 @@
+fragment PlanActionFields on PlanAction {
+    newSection
+    sample {
+        id
+    }
+    source {
+        address
+        labwareId
+        samples {
+            id
+        }
+    }
+    destination {
+        address
+        labwareId
+    }
+}

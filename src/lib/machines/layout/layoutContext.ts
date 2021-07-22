@@ -18,7 +18,7 @@ export interface LayoutPlan {
   sampleColors: Map<number, string>;
 
   /**
-   * Map of friendly address to planned source
+   * Map of destination slot friendly address to planned source
    */
   plannedActions: Map<Address, Array<Source>>;
 }

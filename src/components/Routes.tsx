@@ -4,7 +4,8 @@ import AuthenticatedRoute from "./AuthenticatedRoute";
 import Login from "../pages/Login";
 import Logout from "../pages/Logout";
 import Location from "../pages/Location";
-import Sectioning from "../pages/sectioning/Sectioning";
+import Plan from "../pages/sectioning/Plan";
+import Confirm from "../pages/sectioning/Confirm";
 import Extraction from "../pages/Extraction";
 import Registration from "../pages/Registration";
 import Release from "../pages/Release";
@@ -38,13 +39,27 @@ export function Routes() {
       </Route>
 
       <AuthenticatedRoute
+        path="/lab/sectioning/confirm"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetSectioningConfirmInfo}
+          >
+            {(sectioningInfo) => (
+              <Confirm sectioningConfirmInfo={sectioningInfo} />
+            )}
+          </DataFetcher>
+        )}
+      />
+
+      <AuthenticatedRoute
         path="/lab/sectioning"
         render={(routeProps) => (
           <DataFetcher
             key={routeProps.location.key}
             dataFetcher={stanCore.GetSectioningInfo}
           >
-            {(sectioningInfo) => <Sectioning sectioningInfo={sectioningInfo} />}
+            {(sectioningInfo) => <Plan sectioningInfo={sectioningInfo} />}
           </DataFetcher>
         )}
       />

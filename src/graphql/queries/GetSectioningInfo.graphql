@@ -1,7 +1,4 @@
 query GetSectioningInfo {
-    comments(category: "section") {
-        ...CommentFields
-    }
     labwareTypes {
         ...LabwareTypeFields
     }

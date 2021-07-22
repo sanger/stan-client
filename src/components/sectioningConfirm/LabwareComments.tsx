@@ -1,10 +1,10 @@
 import React, { ChangeEvent } from "react";
-import MutedText from "../../components/MutedText";
-import { Select } from "../../components/forms/Select";
-import { optionValues } from "../../components/forms";
+import MutedText from "../MutedText";
+import { Select } from "../forms/Select";
+import { optionValues } from "../forms";
 import { Comment, LabwareFieldsFragment } from "../../types/sdk";
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
-import { Input } from "../../components/forms/Input";
+import { Input } from "../forms/Input";
 
 interface LabwareCommentsProps {
   slot: LabwareFieldsFragment["slots"][number];

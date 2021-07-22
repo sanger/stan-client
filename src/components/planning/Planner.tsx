@@ -23,6 +23,7 @@ import labwareScanTableColumns from "../dataTable/labwareColumns";
 import LabwareScanner from "../labwareScanner/LabwareScanner";
 import { buildSampleColors } from "../../lib/helpers/labwareHelper";
 import Heading from "../Heading";
+import { useScrollToRef } from "../../lib/hooks";
 
 type PlannerProps = {
   /**
@@ -38,13 +39,14 @@ type PlannerProps = {
   /**
    * Called when an plan is added or removed from the {@link Planner}. Note that once complete, plans can not be
    * removed.
-   * @param numberOfPlans the total number of plans in the planner
-   * @param numberOfCompletedPlans the number of completed plans
    */
-  onPlanChanged: (
-    numberOfPlans: number,
-    numberOfCompletedPlans: number
-  ) => void;
+  onPlanChanged: (props: PlanChangedProps) => void;
+};
+
+export type PlanChangedProps = {
+  numberOfPlans: number;
+  completedPlans: Array<PlanMutation>;
+  sourceLabware: Array<LabwareFieldsFragment>;
 };
 
 type PlannerContextType = {
@@ -161,13 +163,27 @@ export default function Planner({
   // Whenever any of the labware plans are added, removed, or completed,
   // call the passed in onPlanChanged callback
   useEffect(() => {
-    onPlanChanged(state.labwarePlans.size, state.completedPlans.size);
-  }, [state.labwarePlans, state.completedPlans, onPlanChanged]);
+    onPlanChanged({
+      completedPlans: Array.from(state.completedPlans.values()),
+      sourceLabware: state.sourceLabware,
+      numberOfPlans: state.labwarePlans.size,
+    });
+  }, [
+    state.labwarePlans,
+    state.completedPlans,
+    state.sourceLabware,
+    onPlanChanged,
+  ]);
 
   /**
    * Used so we can get the current value of the select element when "Add Labware" is clicked
    */
   const labwareTypeSelectRef = useRef<HTMLSelectElement>(null);
+
+  /**
+   * Ref for the latest labware plan so it can be scrolled to when added to the page
+   */
+  const [latestLabwarePlanRef, scrollToRef] = useScrollToRef();
 
   /**
    * Handler for LabwareScanner's onChange event
@@ -194,7 +210,8 @@ export default function Planner({
       type: "ADD_LABWARE_PLAN",
       labwareType: selectedLabwareType,
     });
-  }, [labwareTypeSelectRef, allowedLabwareTypes, dispatch]);
+    scrollToRef();
+  }, [labwareTypeSelectRef, allowedLabwareTypes, dispatch, scrollToRef]);
 
   /**
    * Handler for the onDeleteButtonClick event of a LabwarePlan
@@ -224,9 +241,10 @@ export default function Planner({
   );
 
   const labwarePlans = Array.from(state.labwarePlans.entries()).map(
-    ([cid, newLabwareLayout]) => {
+    ([cid, newLabwareLayout], i) => {
       return (
         <LabwarePlan
+          ref={i === state.labwarePlans.size - 1 ? latestLabwarePlanRef : null}
           key={cid}
           cid={cid}
           outputLabware={newLabwareLayout}
