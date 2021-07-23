@@ -1,0 +1,9 @@
+fragment HistoryEntryFields on HistoryEntry {
+    destinationLabwareId
+    details
+    eventId
+    sampleId
+    sourceLabwareId
+    time
+    type
+}

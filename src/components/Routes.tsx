@@ -14,6 +14,7 @@ import Search from "../pages/Search";
 import Destroy from "../pages/Destroy";
 import SlideRegistration from "../pages/SlideRegistration";
 import SlotCopy from "../pages/SlotCopy";
+import History from "../pages/History";
 import { plateFactory } from "../lib/factories/labwareFactory";
 import DataFetcher from "./DataFetcher";
 import { safeParseQueryString } from "../lib/helpers";
@@ -203,6 +204,8 @@ export function Routes() {
           );
         }}
       />
+
+      <Route path={"/history"} component={History} />
 
       <Route
         path={["/", "/search"]}

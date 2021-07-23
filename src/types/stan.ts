@@ -1,6 +1,7 @@
-import {LabwareFieldsFragment, Maybe, PrinterFieldsFragment, Size,} from "./sdk";
+import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size,} from "./sdk";
 import {Location} from "history";
 import {ClientError} from "graphql-request";
+import * as Yup from "yup";
 
 /**
  * Union of STAN's {@link OperationType} names
@@ -219,3 +220,55 @@ export type StanConfig = {
   maxSearchRecords: number
 };
 
+/**
+ * Describes the columns of the History component table
+ */
+export type HistoryTableEntry = {
+  date: string;
+  sourceBarcode: string;
+  destinationBarcode: string;
+  sampleID?: Maybe<number>;
+  externalName?: string;
+  sectionNumber?: number;
+  eventType: string;
+  biologicalState?: string;
+  processState: LabwareState;
+  details: Array<string>;
+}
+
+const historyStrKeys = ["externalName", "donorName", "labwareBarcode"] as const;
+type HistoryStrKeys = typeof historyStrKeys[number];
+const historyNumKeys = ["sampleId"] as const;
+type HistoryNumKeys = typeof historyNumKeys[number];
+type HistoryStrProps = {
+  kind: HistoryStrKeys;
+  value: string;
+};
+type HistoryNumProps = {
+  kind: HistoryNumKeys;
+  value: number;
+};
+export const historySchema = Yup.object({
+  kind: Yup.string()
+    .oneOf([...historyStrKeys, ...historyNumKeys])
+    .required(),
+  value: Yup.mixed()
+    .when("kind", {
+      is: (val) => val === "sampleId",
+      then: Yup.number().integer().positive().required(),
+      else: Yup.string().required(),
+    })
+    .required(),
+}).required();
+
+/**
+ * User-defined type guard for {@link HistoryProps}
+ * Uses a Yup schema to determine if {@code x} has the right shape
+ * @param x value to check type
+ * @see {@link https://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards}
+ */
+export function isHistoryProps(x: any): x is HistoryProps {
+  return historySchema.isValidSync(x);
+}
+
+export type HistoryProps = HistoryStrProps | HistoryNumProps;

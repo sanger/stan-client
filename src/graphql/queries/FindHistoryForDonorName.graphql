@@ -1,0 +1,5 @@
+query FindHistoryForDonorName($donorName: String!) {
+    historyForDonorName(donorName: $donorName) {
+        ...HistoryFields
+    }
+}
