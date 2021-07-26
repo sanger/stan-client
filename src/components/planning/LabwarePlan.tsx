@@ -91,7 +91,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
       currentPrinter,
     } = usePrinters();
 
-    const { serverErrors, layoutPlan, plan } = current.context;
+    const { requestError, layoutPlan, plan } = current.context;
 
     const plannedLabware = plan?.plan.labware ?? [];
 
@@ -157,10 +157,10 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                     {current.matches("prep.errored") && (
                       <Warning
                         message={
-                          serverErrors?.message ??
+                          requestError?.message ??
                           "There was an error creating the Labware"
                         }
-                        error={serverErrors}
+                        error={requestError}
                       />
                     )}
 

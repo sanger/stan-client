@@ -23,7 +23,7 @@ type PlanFinderContext = {
   /**
    * Error returned from a core request
    */
-  serverError: Maybe<ClientError>;
+  requestError: Maybe<ClientError>;
 };
 
 type PlanFinderEvent =
@@ -43,7 +43,7 @@ export const planFinderMachine = createMachine<
       barcode: "",
       plans: new Map(),
       validationError: null,
-      serverError: null,
+      requestError: null,
     },
     states: {
       idle: {
@@ -75,7 +75,7 @@ export const planFinderMachine = createMachine<
           },
           onError: {
             target: "idle",
-            actions: "assignServerError",
+            actions: "assignRequestError",
           },
         },
       },
@@ -88,7 +88,7 @@ export const planFinderMachine = createMachine<
         ctx.barcode = e.barcode;
       }),
 
-      assignDuplicationError: assign((ctx, e) => {
+      assignDuplicationError: assign((ctx) => {
         ctx.validationError = `Plan has already been found for ${ctx.barcode}`;
       }),
 
@@ -97,13 +97,13 @@ export const planFinderMachine = createMachine<
         ctx.plans.set(ctx.barcode, e.data);
       }),
 
-      assignServerError: assign((ctx, e) => {
+      assignRequestError: assign((ctx, e) => {
         if (e.type !== "error.platform.findPlan") return;
-        ctx.serverError = e.data;
+        ctx.requestError = e.data;
       }),
 
       clearErrors: assign((ctx) => {
-        ctx.serverError = null;
+        ctx.requestError = null;
         ctx.validationError = null;
       }),
 

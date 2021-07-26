@@ -55,7 +55,7 @@ interface LabwarePlanContext {
   /**
    * Errors returned from the server
    */
-  serverErrors: Maybe<ClientError>;
+  requestError: Maybe<ClientError>;
 
   /**
    * The plan for how sources will be mapped onto a piece of labware
@@ -91,7 +91,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
     {
       key: "labwarePlan",
       context: {
-        serverErrors: null,
+        requestError: null,
         layoutPlan: initialLayoutPlan,
       },
       initial: "prep",
@@ -151,7 +151,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
             ],
             onError: {
               target: "prep.errored",
-              actions: "assignServerErrors",
+              actions: "assignRequestErrors",
             },
           },
         },
@@ -176,11 +176,11 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           ctx.plan = e.data;
         }),
 
-        assignServerErrors: assign((ctx, e) => {
+        assignRequestErrors: assign((ctx, e) => {
           if (e.type !== "error.platform.planSection") {
             return;
           }
-          ctx.serverErrors = e.data;
+          ctx.requestError = e.data;
         }),
       },
 

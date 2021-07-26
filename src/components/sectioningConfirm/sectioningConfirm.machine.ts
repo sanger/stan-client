@@ -48,7 +48,7 @@ type SectioningConfirmContext = {
   /**
    * Possible errors returned from stan core after a confirmSection request
    */
-  serverErrors: Maybe<ClientError>;
+  requestError: Maybe<ClientError>;
 };
 
 type SectioningConfirmEvent =
@@ -77,7 +77,7 @@ export function createSectioningConfirmMachine() {
         isConfirmSectionLabwareValid: false,
         layoutPlansByLabwareType: {},
         sourceLabware: [],
-        serverErrors: null,
+        requestError: null,
       },
       initial: "ready",
       entry: ["assignSourceLabware", "assignLayoutPlans"],
@@ -132,7 +132,7 @@ export function createSectioningConfirmMachine() {
             },
             onError: {
               target: "ready.valid",
-              actions: "assignServerError",
+              actions: "assignRequestError",
             },
           },
         },
@@ -176,9 +176,9 @@ export function createSectioningConfirmMachine() {
             .value();
         }),
 
-        assignServerError: assign((ctx, e) => {
+        assignRequestError: assign((ctx, e) => {
           if (e.type !== "error.platform.confirmSection") return;
-          ctx.serverErrors = e.data;
+          ctx.requestError = e.data;
         }),
 
         removeConfirmSectionLabware: assign((ctx, e) => {
@@ -218,6 +218,19 @@ export function createSectioningConfirmMachine() {
   );
 }
 
+/**
+ * Convert the structure that comes back from core into lists of {@link LayoutPlan LayoutPlans}, grouped by their
+ * labware type name (so that they're grouped when displayed on the page).
+ *
+ * @example
+ * {
+ *   tube: [layoutPlan1, layoutPlan2],
+ *   slide: [layoutPlan3],
+ * }
+ *
+ * @param plans the list of plans to confirm
+ * @param sourceLabwares the list of all source labware
+ */
 function buildLayoutPlansByLabwareType(
   plans: Array<FindPlanDataQuery>,
   sourceLabwares: Array<LabwareFieldsFragment>
@@ -255,6 +268,11 @@ function buildLayoutPlansByLabwareType(
 
         return memo;
       }, new Map()),
+
+      /**
+       * Layout planner doesn't need to show any sources when doing section confirmation.
+       * User will only be able to add or remove the number of sections in a slot.
+       */
       sources: [],
     };
   });

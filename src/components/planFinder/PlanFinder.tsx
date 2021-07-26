@@ -38,8 +38,8 @@ export function PlanFinder({ initialPlans, onChange }: PlanFinderParams) {
       plans: planMap,
     })
   );
-  const { barcode, plans, serverError, validationError } = current.context;
-  const showError = serverError || validationError;
+  const { barcode, plans, requestError, validationError } = current.context;
+  const showError = requestError || validationError;
 
   /**
    * Whenever the plans are updated, call the onChange callback
@@ -69,7 +69,7 @@ export function PlanFinder({ initialPlans, onChange }: PlanFinderParams) {
       {showError && (
         <Warning
           message={validationError ?? "Plan Search Error"}
-          error={serverError}
+          error={requestError}
         />
       )}
       <div className="mt-2 sm:w-2/3 md:w-1/2">

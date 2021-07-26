@@ -13,11 +13,26 @@ import { createSectioningConfirmMachine } from "./sectioningConfirm.machine";
 import Warning from "../notifications/Warning";
 
 type SectioningConfirmProps = {
+  /**
+   * The list of comments that will be available for the user to choose for each section
+   */
   comments: Array<CommentFieldsFragment>;
+
+  /**
+   * The initial list of plans
+   */
   initialPlans: Array<FindPlanDataQuery>;
+
+  /**
+   * Callback for when sections have been successfully confirmed
+   */
   onConfirmed: () => void;
 };
 
+/**
+ * Component for managing the confirmation of a list of Sectioning Plans.
+ * Responsible for calling core with the {@code confirmSection} request.
+ */
 export default function SectioningConfirm({
   comments,
   initialPlans,
@@ -25,6 +40,9 @@ export default function SectioningConfirm({
 }: SectioningConfirmProps) {
   const [current, send, service] = useMachine(createSectioningConfirmMachine());
 
+  /**
+   * Call the {@code onConfirmed} callback when machine reaches the {@code confirmed} state
+   */
   useEffect(() => {
     const subscription = service.subscribe((state) => {
       if (state.matches("confirmed")) {
@@ -37,9 +55,12 @@ export default function SectioningConfirm({
   const {
     sourceLabware,
     layoutPlansByLabwareType,
-    serverErrors,
+    requestError,
   } = current.context;
 
+  /**
+   * Callback for when the {@link PlanFinder} updates its list of plans
+   */
   const handlePlanChange = useCallback(
     (plans: Array<FindPlanDataQuery>) => {
       send({ type: "UPDATE_PLANS", plans });
@@ -47,6 +68,10 @@ export default function SectioningConfirm({
     [send]
   );
 
+  /**
+   * Callback for when a {@link ConfirmLabware} or {@link ConfirmTubes} updates
+   * e.g. sections are added, comments are made against sections
+   */
   const handleConfirmChange = useCallback(
     (confirmSectionLabware) => {
       send({ type: "UPDATE_CONFIRM_SECTION_LABWARE", confirmSectionLabware });
@@ -54,6 +79,9 @@ export default function SectioningConfirm({
     [send]
   );
 
+  /**
+   * Callback for when a remove button is clicked on a {@link ConfirmLabware} or {@link ConfirmTubes}
+   */
   const handleRemoveClick = useCallback(
     (labwareId) => send({ type: "REMOVE_CONFIRM_SECTION_LABWARE", labwareId }),
     [send]
@@ -114,10 +142,10 @@ export default function SectioningConfirm({
               ))}
             </div>
           ))}
-        {serverErrors && (
+        {requestError && (
           <div>
             <Warning
-              error={serverErrors}
+              error={requestError}
               message={"There was an error confirming the Sectioning operation"}
             />
           </div>
