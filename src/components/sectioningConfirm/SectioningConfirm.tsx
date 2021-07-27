@@ -79,14 +79,6 @@ export default function SectioningConfirm({
     [send]
   );
 
-  /**
-   * Callback for when a remove button is clicked on a {@link ConfirmLabware} or {@link ConfirmTubes}
-   */
-  const handleRemoveClick = useCallback(
-    (labwareId) => send({ type: "REMOVE_CONFIRM_SECTION_LABWARE", labwareId }),
-    [send]
-  );
-
   return (
     <div className="my-4 mx-auto max-w-screen-xl space-y-12">
       <div>
@@ -98,70 +90,82 @@ export default function SectioningConfirm({
         </p>
 
         <div className="mt-4">
-          <PlanFinder initialPlans={initialPlans} onChange={handlePlanChange} />
+          <PlanFinder initialPlans={initialPlans} onChange={handlePlanChange}>
+            {({ removePlanByBarcode }) => (
+              <div className="mt-8 space-y-12">
+                {Object.keys(layoutPlansByLabwareType).length > 0 && (
+                  <div className="space-y-4">
+                    <Heading level={3}>Source Labware</Heading>
+                    <DataTable
+                      data={sourceLabware}
+                      columns={[
+                        columns.barcode(),
+                        columns.highestSectionForSlot("A1"),
+                      ]}
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  {/* Always show tubes first (if there are any) */}
+                  {layoutPlansByLabwareType?.[LabwareTypeName.TUBE] && (
+                    <ConfirmTubes
+                      onChange={handleConfirmChange}
+                      layoutPlans={
+                        layoutPlansByLabwareType[LabwareTypeName.TUBE]
+                      }
+                      comments={comments}
+                    />
+                  )}
+
+                  {/* Filter out tubes as they've been shown above */}
+                  {Object.entries(layoutPlansByLabwareType)
+                    .filter(
+                      ([labwareTypeName, _]) =>
+                        labwareTypeName !== LabwareTypeName.TUBE
+                    )
+                    .map(([labwareTypeName, lps]) => (
+                      <div key={labwareTypeName} className="space-y-4">
+                        <Heading level={3}>{labwareTypeName}</Heading>
+
+                        {lps.map((layoutPlan) => (
+                          <ConfirmLabware
+                            onChange={handleConfirmChange}
+                            onRemoveClick={removePlanByBarcode}
+                            key={layoutPlan.destinationLabware.barcode}
+                            originalLayoutPlan={layoutPlan}
+                            comments={comments}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  {requestError && (
+                    <div>
+                      <Warning
+                        error={requestError}
+                        message={
+                          "There was an error confirming the Sectioning operation"
+                        }
+                      />
+                    </div>
+                  )}
+
+                  {Object.keys(layoutPlansByLabwareType).length > 0 && (
+                    <div className="flex flex-row items-center justify-end">
+                      <PinkButton
+                        disabled={!current.matches({ ready: "valid" })}
+                        onClick={() => send("CONFIRM")}
+                        action="primary"
+                      >
+                        Save
+                      </PinkButton>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </PlanFinder>
         </div>
-      </div>
-
-      {Object.keys(layoutPlansByLabwareType).length > 0 && (
-        <div className="space-y-4">
-          <Heading level={3}>Source Labware</Heading>
-          <DataTable
-            data={sourceLabware}
-            columns={[columns.barcode(), columns.highestSectionForSlot("A1")]}
-          />
-        </div>
-      )}
-
-      <div className="space-y-4">
-        {/* Always show tubes first (if there are any) */}
-        {layoutPlansByLabwareType?.[LabwareTypeName.TUBE] && (
-          <ConfirmTubes
-            onChange={handleConfirmChange}
-            layoutPlans={layoutPlansByLabwareType[LabwareTypeName.TUBE]}
-            comments={comments}
-          />
-        )}
-
-        {/* Filter out tubes as they've been shown above */}
-        {Object.entries(layoutPlansByLabwareType)
-          .filter(
-            ([labwareTypeName, _]) => labwareTypeName !== LabwareTypeName.TUBE
-          )
-          .map(([labwareTypeName, lps]) => (
-            <div key={labwareTypeName} className="space-y-4">
-              <Heading level={3}>{labwareTypeName}</Heading>
-
-              {lps.map((layoutPlan) => (
-                <ConfirmLabware
-                  onChange={handleConfirmChange}
-                  onRemoveClick={handleRemoveClick}
-                  key={layoutPlan.destinationLabware.barcode}
-                  originalLayoutPlan={layoutPlan}
-                  comments={comments}
-                />
-              ))}
-            </div>
-          ))}
-        {requestError && (
-          <div>
-            <Warning
-              error={requestError}
-              message={"There was an error confirming the Sectioning operation"}
-            />
-          </div>
-        )}
-
-        {Object.keys(layoutPlansByLabwareType).length > 0 && (
-          <div className="flex flex-row items-center justify-end">
-            <PinkButton
-              disabled={!current.matches({ ready: "valid" })}
-              onClick={() => send("CONFIRM")}
-              action="primary"
-            >
-              Save
-            </PinkButton>
-          </div>
-        )}
       </div>
     </div>
   );

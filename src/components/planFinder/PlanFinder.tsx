@@ -16,12 +16,37 @@ type PlanFinderParams = {
    * @param plans the current list of plans
    */
   onChange: (plans: Array<FindPlanDataQuery>) => void;
+
+  /**
+   * React function child
+   */
+  children: (props: PlanFinderChildrenProps) => React.ReactNode;
+};
+
+/**
+ * Props passed to the children of PlanFinder
+ */
+type PlanFinderChildrenProps = {
+  /**
+   * The current list of plans
+   */
+  plans: Array<FindPlanDataQuery>;
+
+  /**
+   * A function that will remove a plan for a labware barcode
+   * @param barcode a labware barcode
+   */
+  removePlanByBarcode: (barcode: string) => void;
 };
 
 /**
  * A component for finding plans (from core) via scanning labware barcodes
  */
-export function PlanFinder({ initialPlans, onChange }: PlanFinderParams) {
+export function PlanFinder({
+  initialPlans,
+  onChange,
+  children,
+}: PlanFinderParams) {
   // Plans are kept as a map of destination barcode to plan
   // by the planFinderMachine so we need to convert the initial plans list first
   const planMap = initialPlans.reduce<Map<string, FindPlanDataQuery>>(
@@ -64,21 +89,30 @@ export function PlanFinder({ initialPlans, onChange }: PlanFinderParams) {
     send,
   ]);
 
+  /**
+   * Callback for removing a plan by barcode
+   */
+  const removePlanByBarcode = useCallback(
+    (barcode: string) => send({ type: "REMOVE_PLAN_BY_BARCODE", barcode }),
+    [send]
+  );
+
   return (
-    <div data-testid="plan-finder">
+    <div>
       {showError && (
         <Warning
           message={validationError ?? "Plan Search Error"}
           error={requestError}
         />
       )}
-      <div className="mt-2 sm:w-2/3 md:w-1/2">
+      <div data-testid="plan-finder" className="mt-2 sm:w-2/3 md:w-1/2">
         <ScanInput
           value={barcode}
           onChange={handleOnChange}
           onScan={handleOnScan}
         />
       </div>
+      {children({ plans: Array.from(plans.values()), removePlanByBarcode })}
     </div>
   );
 }

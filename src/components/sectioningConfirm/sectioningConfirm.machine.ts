@@ -60,7 +60,6 @@ type SectioningConfirmEvent =
       type: "UPDATE_CONFIRM_SECTION_LABWARE";
       confirmSectionLabware: ConfirmSectionLabware;
     }
-  | { type: "REMOVE_CONFIRM_SECTION_LABWARE"; labwareId: number }
   | { type: "IS_VALID" }
   | { type: "IS_INVALID" }
   | { type: "CONFIRM" }
@@ -86,6 +85,7 @@ export function createSectioningConfirmMachine() {
           initial: "invalid",
           on: {
             UPDATE_PLANS: {
+              target: "validating",
               actions: [
                 "assignPlans",
                 "assignSourceLabware",
@@ -95,14 +95,6 @@ export function createSectioningConfirmMachine() {
             UPDATE_CONFIRM_SECTION_LABWARE: {
               target: "validating",
               actions: ["assignConfirmSectionLabware"],
-            },
-            REMOVE_CONFIRM_SECTION_LABWARE: {
-              target: "validating",
-              actions: [
-                "removeConfirmSectionLabware",
-                "assignSourceLabware",
-                "assignLayoutPlans",
-              ],
             },
           },
           states: {
@@ -167,6 +159,17 @@ export function createSectioningConfirmMachine() {
         assignPlans: assign((ctx, e) => {
           if (e.type !== "UPDATE_PLANS") return;
           ctx.plans = e.plans;
+
+          /**
+           * If a plan has been removed, make sure to also remove the ConfirmSectionLabware for that plan
+           */
+          const destinationBarcodes = new Set(
+            ctx.plans.map((plan) => plan.planData.destination.barcode)
+          );
+
+          ctx.confirmSectionLabware = ctx.confirmSectionLabware.filter((csl) =>
+            destinationBarcodes.has(csl.barcode)
+          );
         }),
 
         assignSourceLabware: assign((ctx) => {
@@ -179,16 +182,6 @@ export function createSectioningConfirmMachine() {
         assignRequestError: assign((ctx, e) => {
           if (e.type !== "error.platform.confirmSection") return;
           ctx.requestError = e.data;
-        }),
-
-        removeConfirmSectionLabware: assign((ctx, e) => {
-          if (e.type !== "REMOVE_CONFIRM_SECTION_LABWARE") return;
-          const planIndex = ctx.plans.findIndex(
-            (plan) => plan.planData.destination.id === e.labwareId
-          );
-          if (planIndex >= 0) {
-            ctx.plans.splice(planIndex, 1);
-          }
         }),
       },
 

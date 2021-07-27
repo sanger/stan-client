@@ -30,7 +30,7 @@ interface ConfirmLabwareProps {
   originalLayoutPlan: LayoutPlan;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
-  onRemoveClick: (labwareId: number) => void;
+  onRemoveClick: (labwareBarcode: string) => void;
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
@@ -76,7 +76,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       animate={"visible"}
       className="relative p-3 shadow"
     >
-      <RemoveButton onClick={() => onRemoveClick(labware.id)} />
+      <RemoveButton onClick={() => onRemoveClick(labware.barcode!)} />
       <div className="md:grid md:grid-cols-2">
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware

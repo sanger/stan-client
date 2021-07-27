@@ -29,6 +29,7 @@ type PlanFinderContext = {
 type PlanFinderEvent =
   | { type: "UPDATE_BARCODE"; barcode: string }
   | { type: "SUBMIT_BARCODE" }
+  | { type: "REMOVE_PLAN_BY_BARCODE"; barcode: string }
   | { type: "done.invoke.findPlan"; data: FindPlanDataQuery }
   | { type: "error.platform.findPlan"; data: ClientError };
 
@@ -49,6 +50,7 @@ export const planFinderMachine = createMachine<
       idle: {
         on: {
           UPDATE_BARCODE: { actions: "assignBarcode" },
+          REMOVE_PLAN_BY_BARCODE: { actions: "removePlanByBarcode" },
           SUBMIT_BARCODE: {
             target: "validatingBarcode",
             actions: "clearErrors",
@@ -105,6 +107,11 @@ export const planFinderMachine = createMachine<
       clearErrors: assign((ctx) => {
         ctx.requestError = null;
         ctx.validationError = null;
+      }),
+
+      removePlanByBarcode: assign((ctx, e) => {
+        if (e.type !== "REMOVE_PLAN_BY_BARCODE") return;
+        ctx.plans.delete(e.barcode);
       }),
 
       resetBarcode: assign((ctx) => (ctx.barcode = "")),
