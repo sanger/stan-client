@@ -186,7 +186,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                     {outputLabware.labwareType.name !==
                       LabwareTypeName.VISIUM_LP && (
                       <FormikInput
-                        label={"Quantity"}
+                        label={"Number of Labware"}
                         name={"quantity"}
                         type={"number"}
                         min={1}

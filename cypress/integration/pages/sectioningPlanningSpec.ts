@@ -95,13 +95,13 @@ describe("Sectioning Planning", () => {
         cy.findByText("Create Labware").should("not.be.disabled");
       });
 
-      context("when Quantity is invalid", () => {
+      context("when Number of Labware is invalid", () => {
         before(() => {
-          cy.findByLabelText("Quantity").clear();
+          cy.findByLabelText("Number of Labware").clear();
         });
 
         after(() => {
-          cy.findByLabelText("Quantity").clear().type("1");
+          cy.findByLabelText("Number of Labware").clear().type("1");
         });
 
         it("disabled the Create Labware button", () => {
@@ -133,7 +133,7 @@ describe("Sectioning Planning", () => {
       });
 
       it("shows Barcode and Sectioning Thickness", () => {
-        cy.findByLabelText("Quantity").should("not.exist");
+        cy.findByLabelText("Number of Labware").should("not.exist");
         cy.findByLabelText("Barcode").should("be.visible");
         cy.findByLabelText("Section Thickness").should("be.visible");
         cy.findByText("Create Labware").should("be.disabled");
@@ -154,7 +154,7 @@ describe("Sectioning Planning", () => {
       });
 
       it("disables the form inputs", () => {
-        cy.findByLabelText("Quantity").should("be.disabled");
+        cy.findByLabelText("Number of Labware").should("be.disabled");
         cy.findByLabelText("Section Thickness").should("be.disabled");
       });
 
