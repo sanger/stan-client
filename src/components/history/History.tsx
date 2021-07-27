@@ -131,10 +131,10 @@ const historyColumns: Array<Column<HistoryTableEntry>> = [
     accessor: "biologicalState",
   },
   {
-    Header: "Process State",
-    accessor: "processState",
+    Header: "Labware State",
+    accessor: "labwareState",
     Cell: (props: Cell<HistoryTableEntry>) => (
-      <LabwareStatePill labware={{ state: props.row.original.processState }} />
+      <LabwareStatePill labware={{ state: props.row.original.labwareState }} />
     ),
   },
   {

@@ -63,7 +63,7 @@ export async function findHistory(
       sectionNumber: sample?.section ?? undefined,
       eventType: entry.type,
       biologicalState: sample?.bioState?.name ?? undefined,
-      processState: destinationLabware.state,
+      labwareState: destinationLabware.state,
       details: entry.details,
     };
   });
