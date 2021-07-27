@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Modified
 - Split Sectioning into separate Plan and Confirm pages([#50](https://github.com/sanger/stan-client/pull/50))
 
+### Added
+- History page ([#51](https://github.com/sanger/stan-client/pull/51))
+
 ## [1.5.0] - 2021-07-15
 ### Added
 - Labware details page ([#45](https://github.com/sanger/stan-client/pull/45))
