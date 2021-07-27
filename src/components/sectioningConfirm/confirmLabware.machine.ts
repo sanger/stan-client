@@ -5,14 +5,14 @@ import {
   ConfirmSection,
   ConfirmSectionLabware,
   Maybe,
-} from "../../../../types/sdk";
-import { LayoutPlan, Source } from "../../layout/layoutContext";
+} from "../../types/sdk";
+import { LayoutPlan, Source } from "../../lib/machines/layout/layoutContext";
 import { assign } from "@xstate/immer";
-import { createLayoutMachine } from "../../layout/layoutMachine";
+import { createLayoutMachine } from "../../lib/machines/layout/layoutMachine";
 import { cloneDeep } from "lodash";
-import { Address, NewLabwareLayout } from "../../../../types/stan";
+import { Address, NewLabwareLayout } from "../../types/stan";
 
-export interface SectioningConfirmContext {
+export interface ConfirmLabwareContext {
   /**
    * The layout plan created in the plan stage
    */
@@ -84,7 +84,7 @@ export type SectioningConfirmationCompleteEvent = {
   type: "SECTIONING_CONFIRMATION_COMPLETE";
 };
 
-export type SectioningConfirmEvent =
+export type ConfirmLabwareEvent =
   | SetCommentForAddressEvent
   | SetCommentForAllEvent
   | EditLayoutEvent
@@ -119,12 +119,12 @@ function buildConfirmSections(
 /**
  * ConfirmLabware Machine
  */
-export const createSectioningConfirmMachine = (
+export const createConfirmLabwareMachine = (
   comments: Array<Comment>,
   labware: NewLabwareLayout,
   layoutPlan: LayoutPlan
 ) =>
-  createMachine<SectioningConfirmContext, SectioningConfirmEvent>(
+  createMachine<ConfirmLabwareContext, ConfirmLabwareEvent>(
     {
       id: "sectioningOutcome",
       initial: "editableMode",

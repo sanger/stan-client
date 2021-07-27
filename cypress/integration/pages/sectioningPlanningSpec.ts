@@ -1,6 +1,6 @@
 import { PlanMutation, PlanMutationVariables } from "../../../src/types/sdk";
 
-describe("Sectioning", () => {
+describe("Sectioning Planning", () => {
   before(() => {
     cy.visit("/lab/sectioning");
   });
@@ -56,6 +56,24 @@ describe("Sectioning", () => {
           "be.disabled"
         );
       });
+
+      it("doesn't enable the Next button", () => {
+        cy.findByRole("button", { name: /Next/i }).should("be.disabled");
+      });
+
+      context("when I try and leave the page", () => {
+        it("shows a confirm box", () => {
+          cy.on("window:confirm", (str) => {
+            expect(str).to.equal(
+              "You have unsaved changes. Are you sure you want to leave?"
+            );
+            // Returning false cancels the event
+            return false;
+          });
+
+          cy.findByText("Search").click();
+        });
+      });
     });
 
     context("when adding a layout", () => {
@@ -77,13 +95,13 @@ describe("Sectioning", () => {
         cy.findByText("Create Labware").should("not.be.disabled");
       });
 
-      context("when Quantity is invalid", () => {
+      context("when Number of Labware is invalid", () => {
         before(() => {
-          cy.findByLabelText("Quantity").clear();
+          cy.findByLabelText("Number of Labware").clear();
         });
 
         after(() => {
-          cy.findByLabelText("Quantity").clear().type("1");
+          cy.findByLabelText("Number of Labware").clear().type("1");
         });
 
         it("disabled the Create Labware button", () => {
@@ -115,7 +133,7 @@ describe("Sectioning", () => {
       });
 
       it("shows Barcode and Sectioning Thickness", () => {
-        cy.findByLabelText("Quantity").should("not.exist");
+        cy.findByLabelText("Number of Labware").should("not.exist");
         cy.findByLabelText("Barcode").should("be.visible");
         cy.findByLabelText("Section Thickness").should("be.visible");
         cy.findByText("Create Labware").should("be.disabled");
@@ -136,12 +154,40 @@ describe("Sectioning", () => {
       });
 
       it("disables the form inputs", () => {
-        cy.findByLabelText("Quantity").should("be.disabled");
+        cy.findByLabelText("Number of Labware").should("be.disabled");
         cy.findByLabelText("Section Thickness").should("be.disabled");
       });
 
       it("shows the LabelPrinter", () => {
         cy.findByText("Print Labels").should("be.visible");
+      });
+
+      it("enables the Next button", () => {
+        cy.findByRole("button", { name: /Next/i }).should("be.enabled");
+      });
+
+      context("when I click Next", () => {
+        before(() => {
+          // Store the barcode of the created labware
+          cy.findByTestId("plan-destination-labware").within(() => {
+            cy.get("td:first-child").invoke("text").as("destinationBarcode");
+          });
+          cy.findByRole("button", { name: /Next/i }).click();
+        });
+
+        it("takes me to the Sectioning Confirmation page", () => {
+          cy.url().should("include", "/lab/sectioning/confirm");
+        });
+
+        it("displays the source labware", () => {
+          cy.findAllByText("STAN-113").its("length").should("be.gte", 1);
+        });
+
+        it("displays the destination labware", function () {
+          cy.findAllByText(this.destinationBarcode)
+            .its("length")
+            .should("be.gte", 1);
+        });
       });
     });
 
@@ -177,6 +223,10 @@ describe("Sectioning", () => {
       it("shows the errors", () => {
         cy.findByText("This thing went wrong").should("be.visible");
         cy.findByText("This other thing went wrong").should("be.visible");
+      });
+
+      it("doesn't enable the Next button", () => {
+        cy.findByRole("button", { name: /Next/i }).should("not.be.enabled");
       });
     });
   });
@@ -216,53 +266,6 @@ describe("Sectioning", () => {
 
       it("shows an error message", () => {
         cy.findByText(/Tube Printer failed to print/).should("exist");
-      });
-    });
-  });
-
-  describe("Confirming", () => {
-    context("when nothing changed from the plan", () => {
-      before(() => {
-        cy.visit("/lab/sectioning");
-        createLabware();
-        printLabels();
-        cy.findByText("Next >").click();
-        cy.findByText("Save").click();
-      });
-
-      it("shows a success message", () => {
-        cy.findByText("Sectioning Saved").should("exist");
-      });
-    });
-
-    context("when the Confirm mutation fails", () => {
-      before(() => {
-        cy.visit("/lab/sectioning");
-
-        cy.msw().then(({ worker, graphql }) => {
-          worker.use(
-            graphql.mutation("ConfirmSection", (req, res, ctx) => {
-              return res.once(
-                ctx.errors([
-                  {
-                    message: "Failed to confirm sectioning",
-                  },
-                ])
-              );
-            })
-          );
-        });
-
-        createLabware();
-        printLabels();
-        cy.findByText("Next >").click();
-        cy.findByText("Save").click();
-      });
-
-      it("shows an error message", () => {
-        cy.findByText(
-          "There was an error confirming the Sectioning operation"
-        ).should("exist");
       });
     });
   });

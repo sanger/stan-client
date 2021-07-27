@@ -460,7 +460,7 @@ export type Location = {
   stored: Array<StoredItem>;
   children: Array<LinkedLocation>;
   direction?: Maybe<GridDirection>;
-  qualifiedNameWithFirstBarcode: Scalars['String'];
+  qualifiedNameWithFirstBarcode?: Maybe<Scalars['String']>;
 };
 
 export type LinkedLocation = {
@@ -510,6 +510,13 @@ export type FindRequest = {
   createdMax?: Maybe<Scalars['Date']>;
 };
 
+export type PlanData = {
+  __typename?: 'PlanData';
+  sources: Array<Labware>;
+  plan: PlanOperation;
+  destination: Labware;
+};
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -528,6 +535,7 @@ export type Query = {
   destructionReasons: Array<DestructionReason>;
   users: Array<User>;
   find: FindResult;
+  planData: PlanData;
   location: Location;
   stored: Array<StoredItem>;
 };
@@ -581,6 +589,11 @@ export type QueryUsersArgs = {
 
 export type QueryFindArgs = {
   request: FindRequest;
+};
+
+
+export type QueryPlanDataArgs = {
+  barcode: Scalars['String'];
 };
 
 
@@ -837,6 +850,25 @@ export type LocationFieldsFragment = (
     { __typename?: 'LinkedLocation' }
     & Pick<LinkedLocation, 'barcode' | 'fixedName' | 'customName' | 'address'>
   )> }
+);
+
+export type PlanActionFieldsFragment = (
+  { __typename?: 'PlanAction' }
+  & Pick<PlanAction, 'newSection'>
+  & { sample: (
+    { __typename?: 'Sample' }
+    & Pick<Sample, 'id'>
+  ), source: (
+    { __typename?: 'Slot' }
+    & Pick<Slot, 'address' | 'labwareId'>
+    & { samples: Array<(
+      { __typename?: 'Sample' }
+      & Pick<Sample, 'id'>
+    )> }
+  ), destination: (
+    { __typename?: 'Slot' }
+    & Pick<Slot, 'address' | 'labwareId'>
+  ) }
 );
 
 export type PrinterFieldsFragment = (
@@ -1145,21 +1177,7 @@ export type PlanMutation = (
         & Pick<OperationType, 'name'>
       )>, planActions: Array<(
         { __typename?: 'PlanAction' }
-        & Pick<PlanAction, 'newSection'>
-        & { sample: (
-          { __typename?: 'Sample' }
-          & Pick<Sample, 'id'>
-        ), source: (
-          { __typename?: 'Slot' }
-          & Pick<Slot, 'address' | 'labwareId'>
-          & { samples: Array<(
-            { __typename?: 'Sample' }
-            & Pick<Sample, 'id'>
-          )> }
-        ), destination: (
-          { __typename?: 'Slot' }
-          & Pick<Slot, 'address' | 'labwareId'>
-        ) }
+        & PlanActionFieldsFragment
       )> }
     )> }
   ) }
@@ -1499,6 +1517,34 @@ export type FindLocationByBarcodeQuery = (
   ) }
 );
 
+export type FindPlanDataQueryVariables = Exact<{
+  barcode: Scalars['String'];
+}>;
+
+
+export type FindPlanDataQuery = (
+  { __typename?: 'Query' }
+  & { planData: (
+    { __typename?: 'PlanData' }
+    & { sources: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, destination: (
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    ), plan: (
+      { __typename?: 'PlanOperation' }
+      & { operationType?: Maybe<(
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      )>, planActions: Array<(
+        { __typename?: 'PlanAction' }
+        & PlanActionFieldsFragment
+      )> }
+    ) }
+  ) }
+);
+
 export type GetConfigurationQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1618,15 +1664,23 @@ export type GetSearchInfoQuery = (
   )> }
 );
 
+export type GetSectioningConfirmInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSectioningConfirmInfoQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
 export type GetSectioningInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetSectioningInfoQuery = (
   { __typename?: 'Query' }
-  & { comments: Array<(
-    { __typename?: 'Comment' }
-    & CommentFieldsFragment
-  )>, labwareTypes: Array<(
+  & { labwareTypes: Array<(
     { __typename?: 'LabwareType' }
     & LabwareTypeFieldsFragment
   )> }
@@ -1739,6 +1793,25 @@ export const LocationFieldsFragmentDoc = gql`
     fixedName
     customName
     address
+  }
+}
+    `;
+export const PlanActionFieldsFragmentDoc = gql`
+    fragment PlanActionFields on PlanAction {
+  newSection
+  sample {
+    id
+  }
+  source {
+    address
+    labwareId
+    samples {
+      id
+    }
+  }
+  destination {
+    address
+    labwareId
   }
 }
     `;
@@ -1925,26 +1998,13 @@ export const PlanDocument = gql`
         name
       }
       planActions {
-        newSection
-        sample {
-          id
-        }
-        source {
-          address
-          labwareId
-          samples {
-            id
-          }
-        }
-        destination {
-          address
-          labwareId
-        }
+        ...PlanActionFields
       }
     }
   }
 }
-    ${LabwareFieldsFragmentDoc}`;
+    ${LabwareFieldsFragmentDoc}
+${PlanActionFieldsFragmentDoc}`;
 export const PrintDocument = gql`
     mutation Print($barcodes: [String!]!, $printer: String!) {
   printLabware(barcodes: $barcodes, printer: $printer)
@@ -2164,6 +2224,27 @@ export const FindLocationByBarcodeDocument = gql`
   }
 }
     ${LocationFieldsFragmentDoc}`;
+export const FindPlanDataDocument = gql`
+    query FindPlanData($barcode: String!) {
+  planData(barcode: $barcode) {
+    sources {
+      ...LabwareFields
+    }
+    destination {
+      ...LabwareFields
+    }
+    plan {
+      operationType {
+        name
+      }
+      planActions {
+        ...PlanActionFields
+      }
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}
+${PlanActionFieldsFragmentDoc}`;
 export const GetConfigurationDocument = gql`
     query GetConfiguration {
   destructionReasons(includeDisabled: true) {
@@ -2259,17 +2340,20 @@ export const GetSearchInfoDocument = gql`
   }
 }
     `;
-export const GetSectioningInfoDocument = gql`
-    query GetSectioningInfo {
+export const GetSectioningConfirmInfoDocument = gql`
+    query GetSectioningConfirmInfo {
   comments(category: "section") {
     ...CommentFields
   }
+}
+    ${CommentFieldsFragmentDoc}`;
+export const GetSectioningInfoDocument = gql`
+    query GetSectioningInfo {
   labwareTypes {
     ...LabwareTypeFields
   }
 }
-    ${CommentFieldsFragmentDoc}
-${LabwareTypeFieldsFragmentDoc}`;
+    ${LabwareTypeFieldsFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
@@ -2376,6 +2460,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     FindLocationByBarcode(variables: FindLocationByBarcodeQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLocationByBarcodeQuery> {
       return withWrapper(() => client.request<FindLocationByBarcodeQuery>(FindLocationByBarcodeDocument, variables, requestHeaders));
     },
+    FindPlanData(variables: FindPlanDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPlanDataQuery> {
+      return withWrapper(() => client.request<FindPlanDataQuery>(FindPlanDataDocument, variables, requestHeaders));
+    },
     GetConfiguration(variables?: GetConfigurationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetConfigurationQuery> {
       return withWrapper(() => client.request<GetConfigurationQuery>(GetConfigurationDocument, variables, requestHeaders));
     },
@@ -2396,6 +2483,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetSearchInfo(variables?: GetSearchInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSearchInfoQuery> {
       return withWrapper(() => client.request<GetSearchInfoQuery>(GetSearchInfoDocument, variables, requestHeaders));
+    },
+    GetSectioningConfirmInfo(variables?: GetSectioningConfirmInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSectioningConfirmInfoQuery> {
+      return withWrapper(() => client.request<GetSectioningConfirmInfoQuery>(GetSectioningConfirmInfoDocument, variables, requestHeaders));
     },
     GetSectioningInfo(variables?: GetSectioningInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSectioningInfoQuery> {
       return withWrapper(() => client.request<GetSectioningInfoQuery>(GetSectioningInfoDocument, variables, requestHeaders));

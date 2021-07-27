@@ -76,7 +76,8 @@ export function formatFindResult(
           ? null
           : {
               barcode: location.barcode,
-              displayName: location.qualifiedNameWithFirstBarcode,
+              displayName:
+                location.qualifiedNameWithFirstBarcode ?? location.barcode,
               address:
                 labwareLocation?.address &&
                 location?.direction &&

@@ -1,10 +1,6 @@
 import { createMachine } from "xstate";
 import { Maybe, PlanMutation, PlanRequestLabware } from "../../types/sdk";
-import {
-  extractServerErrors,
-  LabwareTypeName,
-  ServerErrors,
-} from "../../types/stan";
+import { LabwareTypeName } from "../../types/stan";
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../lib/machines/layout/layoutMachine";
@@ -59,7 +55,7 @@ interface LabwarePlanContext {
   /**
    * Errors returned from the server
    */
-  serverErrors: Maybe<ServerErrors>;
+  requestError: Maybe<ClientError>;
 
   /**
    * The plan for how sources will be mapped onto a piece of labware
@@ -95,7 +91,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
     {
       key: "labwarePlan",
       context: {
-        serverErrors: null,
+        requestError: null,
         layoutPlan: initialLayoutPlan,
       },
       initial: "prep",
@@ -104,6 +100,13 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           initial: "invalid",
           states: {
             valid: {
+              on: {
+                CREATE_LABWARE: {
+                  target: "#labwarePlan.creating",
+                },
+              },
+            },
+            errored: {
               on: {
                 CREATE_LABWARE: {
                   target: "#labwarePlan.creating",
@@ -147,8 +150,8 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
               },
             ],
             onError: {
-              target: "prep",
-              actions: "assignServerErrors",
+              target: "prep.errored",
+              actions: "assignRequestErrors",
             },
           },
         },
@@ -173,11 +176,11 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           ctx.plan = e.data;
         }),
 
-        assignServerErrors: assign((ctx, e) => {
+        assignRequestErrors: assign((ctx, e) => {
           if (e.type !== "error.platform.planSection") {
             return;
           }
-          ctx.serverErrors = extractServerErrors(e.data);
+          ctx.requestError = e.data;
         }),
       },
 

@@ -2,6 +2,8 @@ import { graphql } from "msw";
 import {
   ConfirmSectionMutation,
   ConfirmSectionMutationVariables,
+  GetSectioningConfirmInfoQuery,
+  GetSectioningConfirmInfoQueryVariables,
   GetSectioningInfoQuery,
   GetSectioningInfoQueryVariables,
 } from "../../types/sdk";
@@ -13,41 +15,51 @@ const sectioningHandlers = [
     (req, res, ctx) => {
       return res(
         ctx.data({
-          comments: [
-            {
-              __typename: "Comment",
-              id: 1,
-              text: "Section Folded",
-              category: "section",
-              enabled: true,
-            },
-            {
-              __typename: "Comment",
-              id: 2,
-              text: "Poor section quality",
-              category: "section",
-              enabled: true,
-            },
-            {
-              __typename: "Comment",
-              id: 3,
-              text: "Sectioned well",
-              category: "section",
-              enabled: true,
-            },
-            {
-              __typename: "Comment",
-              id: 4,
-              text: "Section exploded",
-              category: "section",
-              enabled: true,
-            },
-          ],
           labwareTypes: labwareTypeInstances,
         })
       );
     }
   ),
+
+  graphql.query<
+    GetSectioningConfirmInfoQuery,
+    GetSectioningConfirmInfoQueryVariables
+  >("GetSectioningConfirmInfo", (req, res, ctx) => {
+    return res(
+      ctx.data({
+        comments: [
+          {
+            __typename: "Comment",
+            id: 1,
+            text: "Section Folded",
+            category: "section",
+            enabled: true,
+          },
+          {
+            __typename: "Comment",
+            id: 2,
+            text: "Poor section quality",
+            category: "section",
+            enabled: true,
+          },
+          {
+            __typename: "Comment",
+            id: 3,
+            text: "Sectioned well",
+            category: "section",
+            enabled: true,
+          },
+          {
+            __typename: "Comment",
+            id: 4,
+            text: "Section exploded",
+            category: "section",
+            enabled: true,
+          },
+        ],
+      })
+    );
+  }),
 
   graphql.mutation<ConfirmSectionMutation, ConfirmSectionMutationVariables>(
     "ConfirmSection",

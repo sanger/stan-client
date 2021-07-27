@@ -159,11 +159,27 @@ function AppShell({ children }: AppShellParams) {
                               <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                               <div className="ml-4">
                                 <p className="text-base font-medium text-gray-900">
-                                  Sectioning
+                                  Sectioning Planning
                                 </p>
                                 <p className="mt-1 text-sm text-gray-500">
                                   Slice up some tissue and place sections into
                                   pre-labelled pieces of labware.
+                                </p>
+                              </div>
+                            </NavLink>
+                            <NavLink
+                              to="/lab/sectioning/confirm"
+                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
+                            >
+                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                              <div className="ml-4">
+                                <p className="text-base font-medium text-gray-900">
+                                  Sectioning Confirmation
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  Confirm the number of sections taken, along
+                                  with section numbers and comments,
+                                  post-sectioning.
                                 </p>
                               </div>
                             </NavLink>
@@ -410,7 +426,11 @@ function AppShell({ children }: AppShellParams) {
                     </h3>
                     <div className="grid grid-cols-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/sectioning">
-                        Sectioning
+                        Sectioning Planning
+                      </StanMobileNavLink>
+
+                      <StanMobileNavLink to="/lab/sectioning/confirm">
+                        Sectioning Confirmation
                       </StanMobileNavLink>
 
                       <StanMobileNavLink to="/lab/extraction">
@@ -507,7 +527,9 @@ function AppShell({ children }: AppShellParams) {
       {location.state?.warning && <Warning message={location.state.warning} />}
       {location.state?.success && <Success message={location.state.success} />}
       {children}
-      <footer className={`border border-t-2 pt-5 pb-3 flex-shrink-0 ${config?.footerColor}`}>
+      <footer
+        className={`border border-t-2 pt-5 pb-3 flex-shrink-0 ${config?.footerColor}`}
+      >
         <div className="max-w-sm mx-auto px-4 sm:px-6">
           <ul className="flex flex-row items-center justify-between my-2 text-xs text-gray-500">
             <li>

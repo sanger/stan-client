@@ -18,6 +18,8 @@ export const StanCoreContext = React.createContext(stanCore);
 export const history = createBrowserHistory();
 
 /**
- * Forces react-router to refresh the current route
+ * Forces react-router to refresh the current route, resetting any state that may have been set
  */
-export const reload = () => history.replace(history.location);
+export const reload = () => {
+  history.replace(history.location.pathname, {});
+};
