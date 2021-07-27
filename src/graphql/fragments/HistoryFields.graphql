@@ -1,0 +1,11 @@
+fragment HistoryFields on History {
+    labware {
+        ...LabwareFields
+    }
+    samples {
+        ...SampleFields
+    }
+    entries {
+        ...HistoryEntryFields
+    }
+}

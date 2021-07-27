@@ -1,0 +1,5 @@
+query FindHistoryForLabwareBarcode($barcode: String!) {
+    historyForLabwareBarcode(barcode: $barcode) {
+        ...HistoryFields
+    }
+}

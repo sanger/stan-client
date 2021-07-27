@@ -32,19 +32,23 @@ export function* cycle(list: any[]) {
 /**
  * Safe parse URL params into given object
  *
- * @param <T> generic param for type to try and convert to
  * @param query the URL's query string
  * @param guard the user-defined type guard function
+ * @param transform (optional) a function to modify the result of the parsed query string
  */
 export function safeParseQueryString<T>(
   query: string,
-  guard: (s: any) => s is T
+  guard: (s: any) => s is T,
+  transform?: (s: any) => any
 ): Maybe<T> {
-  const parsed = parseQueryString(query, {
+  let parsed = parseQueryString(query, {
     arrayFormat: "bracket",
     parseNumbers: false,
     parseBooleans: true,
   });
+  if (transform) {
+    parsed = transform(parsed);
+  }
   return guard(parsed) ? parsed : null;
 }
 
@@ -134,4 +138,17 @@ export function cleanParams<T>(
  */
 export function cycleColors() {
   return cycle(["red", "green", "indigo", "pink", "blue", "purple"]);
+}
+
+/**
+ * Get a timestamp in the format yyyyMMddHHmmss
+ */
+export function getTimestampStr(date?: Date) {
+  if (!date) {
+    date = new Date();
+  }
+  return date
+    .toISOString()
+    .split(".")[0]
+    .replace(/[^0-9]+/g, "");
 }

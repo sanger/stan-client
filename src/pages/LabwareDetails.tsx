@@ -6,10 +6,11 @@ import StripyCard, { StripyCardDetail } from "../components/StripyCard";
 import Heading from "../components/Heading";
 import LabelPrinter from "../components/LabelPrinter";
 import DataTable from "../components/DataTable";
-import Pill from "../components/Pill";
 import * as sampleColumns from "../components/dataTable/sampleColumns";
 import { Authenticated } from "../components/Authenticated";
 import { isLabwareUsable } from "../lib/helpers/labwareHelper";
+import History from "../components/history/History";
+import { LabwareStatePill } from "../components/LabwareStatePill";
 
 /**
  * Props passed in to the {@link LabwareDetails} page
@@ -49,9 +50,7 @@ export default function LabwareDetails({ labware }: LabwareDetailsProps) {
                   </StripyCardDetail>
 
                   <StripyCardDetail term={"State"}>
-                    <Pill color={isLabwareUsable(labware) ? "blue" : "pink"}>
-                      {labware.state.toUpperCase()}
-                    </Pill>
+                    <LabwareStatePill labware={labware} />
                   </StripyCardDetail>
                 </StripyCard>
               </div>
@@ -83,6 +82,11 @@ export default function LabwareDetails({ labware }: LabwareDetailsProps) {
               ]}
               data={sampleColumns.buildSampleDataTableRows(labware)}
             />
+          </div>
+
+          <div className="space-y-4">
+            <Heading level={2}>Labware History</Heading>
+            <History kind={"labwareBarcode"} value={labware.barcode} />
           </div>
         </div>
       </AppShell.Main>

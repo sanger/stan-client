@@ -20,6 +20,7 @@ import releaseDestinationHandlers from "./handlers/releaseDestinationHandlers";
 import releaseRecipientHandlers from "./handlers/releaseRecipientHandlers";
 import speciesHandlers from "./handlers/speciesHandlers";
 import configurationHandlers from "./handlers/configurationHandlers";
+import historyHandlers from "./handlers/historyHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -41,4 +42,5 @@ export const handlers = [
   ...releaseRecipientHandlers,
   ...speciesHandlers,
   ...configurationHandlers,
+  ...historyHandlers,
 ];

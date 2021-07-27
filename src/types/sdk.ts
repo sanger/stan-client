@@ -510,6 +510,24 @@ export type FindRequest = {
   createdMax?: Maybe<Scalars['Date']>;
 };
 
+export type HistoryEntry = {
+  __typename?: 'HistoryEntry';
+  eventId: Scalars['Int'];
+  type: Scalars['String'];
+  time: Scalars['Timestamp'];
+  sourceLabwareId: Scalars['Int'];
+  destinationLabwareId: Scalars['Int'];
+  sampleId?: Maybe<Scalars['Int']>;
+  details: Array<Scalars['String']>;
+};
+
+export type History = {
+  __typename?: 'History';
+  entries: Array<HistoryEntry>;
+  labware: Array<Labware>;
+  samples: Array<Sample>;
+};
+
 export type PlanData = {
   __typename?: 'PlanData';
   sources: Array<Labware>;
@@ -536,6 +554,10 @@ export type Query = {
   users: Array<User>;
   find: FindResult;
   planData: PlanData;
+  historyForSampleId: History;
+  historyForExternalName: History;
+  historyForDonorName: History;
+  historyForLabwareBarcode: History;
   location: Location;
   stored: Array<StoredItem>;
 };
@@ -593,6 +615,26 @@ export type QueryFindArgs = {
 
 
 export type QueryPlanDataArgs = {
+  barcode: Scalars['String'];
+};
+
+
+export type QueryHistoryForSampleIdArgs = {
+  sampleId: Scalars['Int'];
+};
+
+
+export type QueryHistoryForExternalNameArgs = {
+  externalName: Scalars['String'];
+};
+
+
+export type QueryHistoryForDonorNameArgs = {
+  donorName: Scalars['String'];
+};
+
+
+export type QueryHistoryForLabwareBarcodeArgs = {
   barcode: Scalars['String'];
 };
 
@@ -806,6 +848,25 @@ export type CommentFieldsFragment = (
 export type DestructionReasonFieldsFragment = (
   { __typename?: 'DestructionReason' }
   & Pick<DestructionReason, 'id' | 'text' | 'enabled'>
+);
+
+export type HistoryEntryFieldsFragment = (
+  { __typename?: 'HistoryEntry' }
+  & Pick<HistoryEntry, 'destinationLabwareId' | 'details' | 'eventId' | 'sampleId' | 'sourceLabwareId' | 'time' | 'type'>
+);
+
+export type HistoryFieldsFragment = (
+  { __typename?: 'History' }
+  & { labware: Array<(
+    { __typename?: 'Labware' }
+    & LabwareFieldsFragment
+  )>, samples: Array<(
+    { __typename?: 'Sample' }
+    & SampleFieldsFragment
+  )>, entries: Array<(
+    { __typename?: 'HistoryEntry' }
+    & HistoryEntryFieldsFragment
+  )> }
 );
 
 export type HmdmcFieldsFragment = (
@@ -1475,6 +1536,58 @@ export type FindQuery = (
   ) }
 );
 
+export type FindHistoryForDonorNameQueryVariables = Exact<{
+  donorName: Scalars['String'];
+}>;
+
+
+export type FindHistoryForDonorNameQuery = (
+  { __typename?: 'Query' }
+  & { historyForDonorName: (
+    { __typename?: 'History' }
+    & HistoryFieldsFragment
+  ) }
+);
+
+export type FindHistoryForExternalNameQueryVariables = Exact<{
+  externalName: Scalars['String'];
+}>;
+
+
+export type FindHistoryForExternalNameQuery = (
+  { __typename?: 'Query' }
+  & { historyForExternalName: (
+    { __typename?: 'History' }
+    & HistoryFieldsFragment
+  ) }
+);
+
+export type FindHistoryForLabwareBarcodeQueryVariables = Exact<{
+  barcode: Scalars['String'];
+}>;
+
+
+export type FindHistoryForLabwareBarcodeQuery = (
+  { __typename?: 'Query' }
+  & { historyForLabwareBarcode: (
+    { __typename?: 'History' }
+    & HistoryFieldsFragment
+  ) }
+);
+
+export type FindHistoryForSampleIdQueryVariables = Exact<{
+  sampleId: Scalars['Int'];
+}>;
+
+
+export type FindHistoryForSampleIdQuery = (
+  { __typename?: 'Query' }
+  & { historyForSampleId: (
+    { __typename?: 'History' }
+    & HistoryFieldsFragment
+  ) }
+);
+
 export type FindLabwareQueryVariables = Exact<{
   barcode: Scalars['String'];
 }>;
@@ -1701,12 +1814,6 @@ export const DestructionReasonFieldsFragmentDoc = gql`
   enabled
 }
     `;
-export const HmdmcFieldsFragmentDoc = gql`
-    fragment HmdmcFields on Hmdmc {
-  hmdmc
-  enabled
-}
-    `;
 export const LabwareTypeFieldsFragmentDoc = gql`
     fragment LabwareTypeFields on LabwareType {
   name
@@ -1768,6 +1875,38 @@ export const LabwareFieldsFragmentDoc = gql`
 }
     ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}`;
+export const HistoryEntryFieldsFragmentDoc = gql`
+    fragment HistoryEntryFields on HistoryEntry {
+  destinationLabwareId
+  details
+  eventId
+  sampleId
+  sourceLabwareId
+  time
+  type
+}
+    `;
+export const HistoryFieldsFragmentDoc = gql`
+    fragment HistoryFields on History {
+  labware {
+    ...LabwareFields
+  }
+  samples {
+    ...SampleFields
+  }
+  entries {
+    ...HistoryEntryFields
+  }
+}
+    ${LabwareFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}
+${HistoryEntryFieldsFragmentDoc}`;
+export const HmdmcFieldsFragmentDoc = gql`
+    fragment HmdmcFields on Hmdmc {
+  hmdmc
+  enabled
+}
+    `;
 export const LocationFieldsFragmentDoc = gql`
     fragment LocationFields on Location {
   barcode
@@ -2201,6 +2340,34 @@ export const FindDocument = gql`
   }
 }
     `;
+export const FindHistoryForDonorNameDocument = gql`
+    query FindHistoryForDonorName($donorName: String!) {
+  historyForDonorName(donorName: $donorName) {
+    ...HistoryFields
+  }
+}
+    ${HistoryFieldsFragmentDoc}`;
+export const FindHistoryForExternalNameDocument = gql`
+    query FindHistoryForExternalName($externalName: String!) {
+  historyForExternalName(externalName: $externalName) {
+    ...HistoryFields
+  }
+}
+    ${HistoryFieldsFragmentDoc}`;
+export const FindHistoryForLabwareBarcodeDocument = gql`
+    query FindHistoryForLabwareBarcode($barcode: String!) {
+  historyForLabwareBarcode(barcode: $barcode) {
+    ...HistoryFields
+  }
+}
+    ${HistoryFieldsFragmentDoc}`;
+export const FindHistoryForSampleIdDocument = gql`
+    query FindHistoryForSampleId($sampleId: Int!) {
+  historyForSampleId(sampleId: $sampleId) {
+    ...HistoryFields
+  }
+}
+    ${HistoryFieldsFragmentDoc}`;
 export const FindLabwareDocument = gql`
     query FindLabware($barcode: String!) {
   labware(barcode: $barcode) {
@@ -2450,6 +2617,18 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     Find(variables: FindQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindQuery> {
       return withWrapper(() => client.request<FindQuery>(FindDocument, variables, requestHeaders));
+    },
+    FindHistoryForDonorName(variables: FindHistoryForDonorNameQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForDonorNameQuery> {
+      return withWrapper(() => client.request<FindHistoryForDonorNameQuery>(FindHistoryForDonorNameDocument, variables, requestHeaders));
+    },
+    FindHistoryForExternalName(variables: FindHistoryForExternalNameQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForExternalNameQuery> {
+      return withWrapper(() => client.request<FindHistoryForExternalNameQuery>(FindHistoryForExternalNameDocument, variables, requestHeaders));
+    },
+    FindHistoryForLabwareBarcode(variables: FindHistoryForLabwareBarcodeQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForLabwareBarcodeQuery> {
+      return withWrapper(() => client.request<FindHistoryForLabwareBarcodeQuery>(FindHistoryForLabwareBarcodeDocument, variables, requestHeaders));
+    },
+    FindHistoryForSampleId(variables: FindHistoryForSampleIdQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForSampleIdQuery> {
+      return withWrapper(() => client.request<FindHistoryForSampleIdQuery>(FindHistoryForSampleIdDocument, variables, requestHeaders));
     },
     FindLabware(variables: FindLabwareQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLabwareQuery> {
       return withWrapper(() => client.request<FindLabwareQuery>(FindLabwareDocument, variables, requestHeaders));

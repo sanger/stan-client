@@ -115,6 +115,7 @@ function AppShell({ children }: AppShellParams) {
                 Search
               </StanNavLink>
               <StanNavLink to="/store">Store</StanNavLink>
+              <StanNavLink to="/history">History</StanNavLink>
               <Authenticated>
                 <div className="relative">
                   <button
@@ -414,6 +415,7 @@ function AppShell({ children }: AppShellParams) {
               >
                 <StanMobileNavLink to="/search">Search</StanMobileNavLink>
                 <StanMobileNavLink to="/store">Store</StanMobileNavLink>
+                <StanMobileNavLink to="/history">History</StanMobileNavLink>
               </motion.div>
               <Authenticated>
                 <motion.div

@@ -1,0 +1,5 @@
+query FindHistoryForExternalName($externalName: String!) {
+    historyForExternalName(externalName: $externalName) {
+        ...HistoryFields
+    }
+}
