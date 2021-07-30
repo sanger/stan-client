@@ -64,6 +64,7 @@ export async function findHistory(
       eventType: entry.type,
       biologicalState: sample?.bioState?.name ?? undefined,
       labwareState: destinationLabware.state,
+      username: entry.username,
       details: entry.details,
     };
   });

@@ -518,6 +518,7 @@ export type HistoryEntry = {
   sourceLabwareId: Scalars['Int'];
   destinationLabwareId: Scalars['Int'];
   sampleId?: Maybe<Scalars['Int']>;
+  username: Scalars['String'];
   details: Array<Scalars['String']>;
 };
 
@@ -852,7 +853,7 @@ export type DestructionReasonFieldsFragment = (
 
 export type HistoryEntryFieldsFragment = (
   { __typename?: 'HistoryEntry' }
-  & Pick<HistoryEntry, 'destinationLabwareId' | 'details' | 'eventId' | 'sampleId' | 'sourceLabwareId' | 'time' | 'type'>
+  & Pick<HistoryEntry, 'destinationLabwareId' | 'details' | 'eventId' | 'sampleId' | 'sourceLabwareId' | 'time' | 'type' | 'username'>
 );
 
 export type HistoryFieldsFragment = (
@@ -1884,6 +1885,7 @@ export const HistoryEntryFieldsFragmentDoc = gql`
   sourceLabwareId
   time
   type
+  username
 }
     `;
 export const HistoryFieldsFragmentDoc = gql`
