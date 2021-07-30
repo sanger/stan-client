@@ -1,8 +1,8 @@
 import * as queryString from "query-string";
 import { ParsedQuery } from "query-string";
 import { GridDirection, Maybe } from "../types/sdk";
-import { SizeInput } from "../types/stan";
 import _ from "lodash";
+import { SizeInput } from "../types/stan";
 
 /**
  * Utility for retrieving a list of correctly typed object keys.
@@ -87,7 +87,7 @@ export function createAddress(rowNumber: number, columnNumber: number): string {
 
 /**
  * Creates a list of addresses for a {@link SizeInput}
- * @param size something with `numRows` and `numColumns`
+ * @param size an object with `numRows` and `numColumns` properties
  * @param direction the grid direction
  */
 export function buildAddresses(
