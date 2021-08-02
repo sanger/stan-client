@@ -233,6 +233,7 @@ export type HistoryTableEntry = {
   eventType: string;
   biologicalState?: string;
   labwareState: LabwareState;
+  username: string;
   details: Array<string>;
 }
 

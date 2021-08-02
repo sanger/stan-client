@@ -29,6 +29,7 @@ function buildHistory(): HistoryFieldsFragment {
       sampleId: sample.id,
       time: new Date().toISOString(),
       type: "Eat",
+      username: "user1",
       details: ["Taste: Great", "Monkey: Foo"],
     },
   ];
