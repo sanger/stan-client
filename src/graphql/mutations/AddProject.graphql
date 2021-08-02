@@ -1,0 +1,5 @@
+mutation AddProject($name: String!) {
+    addProject(name: $name) {
+        ...ProjectFields
+    }
+}

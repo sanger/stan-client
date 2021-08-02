@@ -561,6 +561,10 @@ export type Query = {
   historyForLabwareBarcode: History;
   location: Location;
   stored: Array<StoredItem>;
+  projects: Array<Project>;
+  costCodes: Array<CostCode>;
+  sasNumbers: Array<SasNumber>;
+  sasNumber: SasNumber;
 };
 
 
@@ -649,6 +653,26 @@ export type QueryStoredArgs = {
   barcodes: Array<Scalars['String']>;
 };
 
+
+export type QueryProjectsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryCostCodesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QuerySasNumbersArgs = {
+  status?: Maybe<Array<SasStatus>>;
+};
+
+
+export type QuerySasNumberArgs = {
+  sasNumber: Scalars['String'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   login: LoginResult;
@@ -681,6 +705,12 @@ export type Mutation = {
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
   setLocationCustomName: Location;
+  addProject: Project;
+  setProjectEnabled: Project;
+  addCostCode: CostCode;
+  setCostCodeEnabled: CostCode;
+  createSasNumber: SasNumber;
+  updateSasNumberStatus: SasNumber;
 };
 
 
@@ -841,9 +871,76 @@ export type MutationSetLocationCustomNameArgs = {
   customName?: Maybe<Scalars['String']>;
 };
 
+
+export type MutationAddProjectArgs = {
+  name: Scalars['String'];
+};
+
+
+export type MutationSetProjectEnabledArgs = {
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationAddCostCodeArgs = {
+  code: Scalars['String'];
+};
+
+
+export type MutationSetCostCodeEnabledArgs = {
+  code: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationCreateSasNumberArgs = {
+  project: Scalars['String'];
+  costCode: Scalars['String'];
+};
+
+
+export type MutationUpdateSasNumberStatusArgs = {
+  sasNumber: Scalars['String'];
+  status: SasStatus;
+  commentId?: Maybe<Scalars['Int']>;
+};
+
+export type Project = {
+  __typename?: 'Project';
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type CostCode = {
+  __typename?: 'CostCode';
+  code: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export enum SasStatus {
+  Active = 'active',
+  Paused = 'paused',
+  Completed = 'completed',
+  Failed = 'failed'
+}
+
+export type SasNumber = {
+  __typename?: 'SasNumber';
+  project: Project;
+  costCode: CostCode;
+  sasNumber: Scalars['String'];
+  status: SasStatus;
+};
+
 export type CommentFieldsFragment = (
   { __typename?: 'Comment' }
   & Pick<Comment, 'id' | 'text' | 'category' | 'enabled'>
+);
+
+export type CostCodeFieldsFragment = (
+  { __typename?: 'CostCode' }
+  & Pick<CostCode, 'code' | 'enabled'>
 );
 
 export type DestructionReasonFieldsFragment = (
@@ -853,7 +950,7 @@ export type DestructionReasonFieldsFragment = (
 
 export type HistoryEntryFieldsFragment = (
   { __typename?: 'HistoryEntry' }
-  & Pick<HistoryEntry, 'destinationLabwareId' | 'details' | 'eventId' | 'sampleId' | 'sourceLabwareId' | 'time' | 'type' | 'username'>
+  & Pick<HistoryEntry, 'destinationLabwareId' | 'details' | 'eventId' | 'sampleId' | 'sourceLabwareId' | 'time' | 'username' | 'type'>
 );
 
 export type HistoryFieldsFragment = (
@@ -942,6 +1039,11 @@ export type PrinterFieldsFragment = (
   )> }
 );
 
+export type ProjectFieldsFragment = (
+  { __typename?: 'Project' }
+  & Pick<Project, 'name' | 'enabled'>
+);
+
 export type ReleaseDestinationFieldsFragment = (
   { __typename?: 'ReleaseDestination' }
   & Pick<ReleaseDestination, 'name' | 'enabled'>
@@ -1008,6 +1110,19 @@ export type AddCommentMutation = (
   ) }
 );
 
+export type AddCostCodeMutationVariables = Exact<{
+  code: Scalars['String'];
+}>;
+
+
+export type AddCostCodeMutation = (
+  { __typename?: 'Mutation' }
+  & { addCostCode: (
+    { __typename?: 'CostCode' }
+    & CostCodeFieldsFragment
+  ) }
+);
+
 export type AddDestructionReasonMutationVariables = Exact<{
   text: Scalars['String'];
 }>;
@@ -1031,6 +1146,19 @@ export type AddHmdmcMutation = (
   & { addHmdmc: (
     { __typename?: 'Hmdmc' }
     & HmdmcFieldsFragment
+  ) }
+);
+
+export type AddProjectMutationVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type AddProjectMutation = (
+  { __typename?: 'Mutation' }
+  & { addProject: (
+    { __typename?: 'Project' }
+    & ProjectFieldsFragment
   ) }
 );
 
@@ -1341,6 +1469,20 @@ export type SetCommentEnabledMutation = (
   ) }
 );
 
+export type SetCostCodeEnabledMutationVariables = Exact<{
+  code: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetCostCodeEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setCostCodeEnabled: (
+    { __typename?: 'CostCode' }
+    & CostCodeFieldsFragment
+  ) }
+);
+
 export type SetDestructionReasonEnabledMutationVariables = Exact<{
   text: Scalars['String'];
   enabled: Scalars['Boolean'];
@@ -1380,6 +1522,20 @@ export type SetLocationCustomNameMutation = (
   & { setLocationCustomName: (
     { __typename?: 'Location' }
     & LocationFieldsFragment
+  ) }
+);
+
+export type SetProjectEnabledMutationVariables = Exact<{
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetProjectEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setProjectEnabled: (
+    { __typename?: 'Project' }
+    & ProjectFieldsFragment
   ) }
 );
 
@@ -1682,6 +1838,12 @@ export type GetConfigurationQuery = (
   )>, releaseRecipients: Array<(
     { __typename?: 'ReleaseRecipient' }
     & ReleaseRecipientFieldsFragment
+  )>, projects: Array<(
+    { __typename?: 'Project' }
+    & ProjectFieldsFragment
+  )>, costCodes: Array<(
+    { __typename?: 'CostCode' }
+    & CostCodeFieldsFragment
   )> }
 );
 
@@ -1808,6 +1970,12 @@ export const CommentFieldsFragmentDoc = gql`
   enabled
 }
     `;
+export const CostCodeFieldsFragmentDoc = gql`
+    fragment CostCodeFields on CostCode {
+  code
+  enabled
+}
+    `;
 export const DestructionReasonFieldsFragmentDoc = gql`
     fragment DestructionReasonFields on DestructionReason {
   id
@@ -1884,8 +2052,8 @@ export const HistoryEntryFieldsFragmentDoc = gql`
   sampleId
   sourceLabwareId
   time
-  type
   username
+  type
 }
     `;
 export const HistoryFieldsFragmentDoc = gql`
@@ -1964,6 +2132,12 @@ export const PrinterFieldsFragmentDoc = gql`
   }
 }
     `;
+export const ProjectFieldsFragmentDoc = gql`
+    fragment ProjectFields on Project {
+  name
+  enabled
+}
+    `;
 export const ReleaseDestinationFieldsFragmentDoc = gql`
     fragment ReleaseDestinationFields on ReleaseDestination {
   name
@@ -1995,6 +2169,13 @@ export const AddCommentDocument = gql`
   }
 }
     ${CommentFieldsFragmentDoc}`;
+export const AddCostCodeDocument = gql`
+    mutation AddCostCode($code: String!) {
+  addCostCode(code: $code) {
+    ...CostCodeFields
+  }
+}
+    ${CostCodeFieldsFragmentDoc}`;
 export const AddDestructionReasonDocument = gql`
     mutation AddDestructionReason($text: String!) {
   addDestructionReason(text: $text) {
@@ -2009,6 +2190,13 @@ export const AddHmdmcDocument = gql`
   }
 }
     ${HmdmcFieldsFragmentDoc}`;
+export const AddProjectDocument = gql`
+    mutation AddProject($name: String!) {
+  addProject(name: $name) {
+    ...ProjectFields
+  }
+}
+    ${ProjectFieldsFragmentDoc}`;
 export const AddReleaseDestinationDocument = gql`
     mutation AddReleaseDestination($name: String!) {
   addReleaseDestination(name: $name) {
@@ -2205,6 +2393,13 @@ export const SetCommentEnabledDocument = gql`
   }
 }
     ${CommentFieldsFragmentDoc}`;
+export const SetCostCodeEnabledDocument = gql`
+    mutation SetCostCodeEnabled($code: String!, $enabled: Boolean!) {
+  setCostCodeEnabled(code: $code, enabled: $enabled) {
+    ...CostCodeFields
+  }
+}
+    ${CostCodeFieldsFragmentDoc}`;
 export const SetDestructionReasonEnabledDocument = gql`
     mutation SetDestructionReasonEnabled($text: String!, $enabled: Boolean!) {
   setDestructionReasonEnabled(text: $text, enabled: $enabled) {
@@ -2229,6 +2424,13 @@ export const SetLocationCustomNameDocument = gql`
   }
 }
     ${LocationFieldsFragmentDoc}`;
+export const SetProjectEnabledDocument = gql`
+    mutation SetProjectEnabled($name: String!, $enabled: Boolean!) {
+  setProjectEnabled(name: $name, enabled: $enabled) {
+    ...ProjectFields
+  }
+}
+    ${ProjectFieldsFragmentDoc}`;
 export const SetReleaseDestinationEnabledDocument = gql`
     mutation SetReleaseDestinationEnabled($name: String!, $enabled: Boolean!) {
   setReleaseDestinationEnabled(name: $name, enabled: $enabled) {
@@ -2434,13 +2636,21 @@ export const GetConfigurationDocument = gql`
   releaseRecipients(includeDisabled: true) {
     ...ReleaseRecipientFields
   }
+  projects(includeDisabled: true) {
+    ...ProjectFields
+  }
+  costCodes(includeDisabled: true) {
+    ...CostCodeFields
+  }
 }
     ${DestructionReasonFieldsFragmentDoc}
 ${CommentFieldsFragmentDoc}
 ${HmdmcFieldsFragmentDoc}
 ${SpeciesFieldsFragmentDoc}
 ${ReleaseDestinationFieldsFragmentDoc}
-${ReleaseRecipientFieldsFragmentDoc}`;
+${ReleaseRecipientFieldsFragmentDoc}
+${ProjectFieldsFragmentDoc}
+${CostCodeFieldsFragmentDoc}`;
 export const GetDestroyInfoDocument = gql`
     query GetDestroyInfo {
   destructionReasons {
@@ -2533,11 +2743,17 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AddComment(variables: AddCommentMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddCommentMutation> {
       return withWrapper(() => client.request<AddCommentMutation>(AddCommentDocument, variables, requestHeaders));
     },
+    AddCostCode(variables: AddCostCodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddCostCodeMutation> {
+      return withWrapper(() => client.request<AddCostCodeMutation>(AddCostCodeDocument, variables, requestHeaders));
+    },
     AddDestructionReason(variables: AddDestructionReasonMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddDestructionReasonMutation> {
       return withWrapper(() => client.request<AddDestructionReasonMutation>(AddDestructionReasonDocument, variables, requestHeaders));
     },
     AddHmdmc(variables: AddHmdmcMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddHmdmcMutation> {
       return withWrapper(() => client.request<AddHmdmcMutation>(AddHmdmcDocument, variables, requestHeaders));
+    },
+    AddProject(variables: AddProjectMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddProjectMutation> {
+      return withWrapper(() => client.request<AddProjectMutation>(AddProjectDocument, variables, requestHeaders));
     },
     AddReleaseDestination(variables: AddReleaseDestinationMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddReleaseDestinationMutation> {
       return withWrapper(() => client.request<AddReleaseDestinationMutation>(AddReleaseDestinationDocument, variables, requestHeaders));
@@ -2587,6 +2803,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     SetCommentEnabled(variables: SetCommentEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetCommentEnabledMutation> {
       return withWrapper(() => client.request<SetCommentEnabledMutation>(SetCommentEnabledDocument, variables, requestHeaders));
     },
+    SetCostCodeEnabled(variables: SetCostCodeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetCostCodeEnabledMutation> {
+      return withWrapper(() => client.request<SetCostCodeEnabledMutation>(SetCostCodeEnabledDocument, variables, requestHeaders));
+    },
     SetDestructionReasonEnabled(variables: SetDestructionReasonEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetDestructionReasonEnabledMutation> {
       return withWrapper(() => client.request<SetDestructionReasonEnabledMutation>(SetDestructionReasonEnabledDocument, variables, requestHeaders));
     },
@@ -2595,6 +2814,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     SetLocationCustomName(variables: SetLocationCustomNameMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetLocationCustomNameMutation> {
       return withWrapper(() => client.request<SetLocationCustomNameMutation>(SetLocationCustomNameDocument, variables, requestHeaders));
+    },
+    SetProjectEnabled(variables: SetProjectEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetProjectEnabledMutation> {
+      return withWrapper(() => client.request<SetProjectEnabledMutation>(SetProjectEnabledDocument, variables, requestHeaders));
     },
     SetReleaseDestinationEnabled(variables: SetReleaseDestinationEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetReleaseDestinationEnabledMutation> {
       return withWrapper(() => client.request<SetReleaseDestinationEnabledMutation>(SetReleaseDestinationEnabledDocument, variables, requestHeaders));
