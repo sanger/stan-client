@@ -13,6 +13,16 @@ const seeds: Array<CommentFieldsFragment> = [
     category: "blah",
     enabled: false,
   }),
+  commentFactory.build({ text: "RIN number too low", category: "SAS status" }),
+  commentFactory.build({ text: "Poor quality tissue", category: "SAS status" }),
+  commentFactory.build({
+    text: "Waiting for reagents",
+    category: "SAS status",
+  }),
+  commentFactory.build({
+    text: "Waiting for customer",
+    category: "SAS status",
+  }),
 ];
 
 const commentRepository = createSessionStorageRepository(

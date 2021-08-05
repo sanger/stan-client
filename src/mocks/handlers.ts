@@ -23,6 +23,7 @@ import configurationHandlers from "./handlers/configurationHandlers";
 import historyHandlers from "./handlers/historyHandlers";
 import projectHandlers from "./handlers/projectHandlers";
 import costCodeHandlers from "./handlers/costCodeHandlers";
+import sasNumberHandlers from "./handlers/sasNumberHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -47,4 +48,5 @@ export const handlers = [
   ...historyHandlers,
   ...projectHandlers,
   ...costCodeHandlers,
+  ...sasNumberHandlers,
 ];

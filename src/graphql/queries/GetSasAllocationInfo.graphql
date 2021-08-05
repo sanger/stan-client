@@ -1,0 +1,14 @@
+query GetSasAllocationInfo($commentCategory: String!) {
+    projects(includeDisabled: false) {
+        ...ProjectFields
+    }
+    costCodes(includeDisabled: false) {
+        ...CostCodeFields
+    }
+    sasNumbers {
+        ...SasNumberFields
+    }
+    comments(category: $commentCategory, includeDisabled: false) {
+        ...CommentFields
+    }
+}

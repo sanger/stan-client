@@ -1,0 +1,10 @@
+fragment SasNumberFields on SasNumber {
+    sasNumber
+    status
+    project {
+        ...ProjectFields
+    }
+    costCode {
+        ...CostCodeFields
+    }
+}

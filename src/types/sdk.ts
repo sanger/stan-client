@@ -895,6 +895,7 @@ export type MutationSetCostCodeEnabledArgs = {
 
 
 export type MutationCreateSasNumberArgs = {
+  prefix: Scalars['String'];
   project: Scalars['String'];
   costCode: Scalars['String'];
 };
@@ -1077,6 +1078,18 @@ export type SampleFieldsFragment = (
   ) }
 );
 
+export type SasNumberFieldsFragment = (
+  { __typename?: 'SasNumber' }
+  & Pick<SasNumber, 'sasNumber' | 'status'>
+  & { project: (
+    { __typename?: 'Project' }
+    & ProjectFieldsFragment
+  ), costCode: (
+    { __typename?: 'CostCode' }
+    & CostCodeFieldsFragment
+  ) }
+);
+
 export type SlotFieldsFragment = (
   { __typename?: 'Slot' }
   & Pick<Slot, 'address' | 'labwareId' | 'blockHighestSection'>
@@ -1250,6 +1263,21 @@ export type ConfirmSectionMutation = (
         & Pick<User, 'username'>
       ) }
     )> }
+  ) }
+);
+
+export type CreateSasNumberMutationVariables = Exact<{
+  prefix: Scalars['String'];
+  project: Scalars['String'];
+  costCode: Scalars['String'];
+}>;
+
+
+export type CreateSasNumberMutation = (
+  { __typename?: 'Mutation' }
+  & { createSasNumber: (
+    { __typename?: 'SasNumber' }
+    & SasNumberFieldsFragment
   ) }
 );
 
@@ -1628,6 +1656,21 @@ export type UnstoreBarcodeMutation = (
   )> }
 );
 
+export type UpdateSasNumberStatusMutationVariables = Exact<{
+  sasNumber: Scalars['String'];
+  status: SasStatus;
+  commentId?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type UpdateSasNumberStatusMutation = (
+  { __typename?: 'Mutation' }
+  & { updateSasNumberStatus: (
+    { __typename?: 'SasNumber' }
+    & SasNumberFieldsFragment
+  ) }
+);
+
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1929,6 +1972,28 @@ export type GetReleaseInfoQuery = (
   )> }
 );
 
+export type GetSasAllocationInfoQueryVariables = Exact<{
+  commentCategory: Scalars['String'];
+}>;
+
+
+export type GetSasAllocationInfoQuery = (
+  { __typename?: 'Query' }
+  & { projects: Array<(
+    { __typename?: 'Project' }
+    & ProjectFieldsFragment
+  )>, costCodes: Array<(
+    { __typename?: 'CostCode' }
+    & CostCodeFieldsFragment
+  )>, sasNumbers: Array<(
+    { __typename?: 'SasNumber' }
+    & SasNumberFieldsFragment
+  )>, comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
 export type GetSearchInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1967,12 +2032,6 @@ export const CommentFieldsFragmentDoc = gql`
   id
   text
   category
-  enabled
-}
-    `;
-export const CostCodeFieldsFragmentDoc = gql`
-    fragment CostCodeFields on CostCode {
-  code
   enabled
 }
     `;
@@ -2132,12 +2191,6 @@ export const PrinterFieldsFragmentDoc = gql`
   }
 }
     `;
-export const ProjectFieldsFragmentDoc = gql`
-    fragment ProjectFields on Project {
-  name
-  enabled
-}
-    `;
 export const ReleaseDestinationFieldsFragmentDoc = gql`
     fragment ReleaseDestinationFields on ReleaseDestination {
   name
@@ -2150,6 +2203,31 @@ export const ReleaseRecipientFieldsFragmentDoc = gql`
   enabled
 }
     `;
+export const ProjectFieldsFragmentDoc = gql`
+    fragment ProjectFields on Project {
+  name
+  enabled
+}
+    `;
+export const CostCodeFieldsFragmentDoc = gql`
+    fragment CostCodeFields on CostCode {
+  code
+  enabled
+}
+    `;
+export const SasNumberFieldsFragmentDoc = gql`
+    fragment SasNumberFields on SasNumber {
+  sasNumber
+  status
+  project {
+    ...ProjectFields
+  }
+  costCode {
+    ...CostCodeFields
+  }
+}
+    ${ProjectFieldsFragmentDoc}
+${CostCodeFieldsFragmentDoc}`;
 export const SpeciesFieldsFragmentDoc = gql`
     fragment SpeciesFields on Species {
   name
@@ -2254,6 +2332,13 @@ export const ConfirmSectionDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const CreateSasNumberDocument = gql`
+    mutation CreateSasNumber($prefix: String!, $project: String!, $costCode: String!) {
+  createSasNumber(prefix: $prefix, project: $project, costCode: $costCode) {
+    ...SasNumberFields
+  }
+}
+    ${SasNumberFieldsFragmentDoc}`;
 export const DestroyDocument = gql`
     mutation Destroy($request: DestroyRequest!) {
   destroy(request: $request) {
@@ -2482,6 +2567,17 @@ export const UnstoreBarcodeDocument = gql`
   }
 }
     `;
+export const UpdateSasNumberStatusDocument = gql`
+    mutation UpdateSasNumberStatus($sasNumber: String!, $status: SasStatus!, $commentId: Int) {
+  updateSasNumberStatus(
+    sasNumber: $sasNumber
+    status: $status
+    commentId: $commentId
+  ) {
+    ...SasNumberFields
+  }
+}
+    ${SasNumberFieldsFragmentDoc}`;
 export const CurrentUserDocument = gql`
     query CurrentUser {
   user {
@@ -2712,6 +2808,25 @@ export const GetReleaseInfoDocument = gql`
 }
     ${ReleaseDestinationFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}`;
+export const GetSasAllocationInfoDocument = gql`
+    query GetSasAllocationInfo($commentCategory: String!) {
+  projects(includeDisabled: false) {
+    ...ProjectFields
+  }
+  costCodes(includeDisabled: false) {
+    ...CostCodeFields
+  }
+  sasNumbers {
+    ...SasNumberFields
+  }
+  comments(category: $commentCategory, includeDisabled: false) {
+    ...CommentFields
+  }
+}
+    ${ProjectFieldsFragmentDoc}
+${CostCodeFieldsFragmentDoc}
+${SasNumberFieldsFragmentDoc}
+${CommentFieldsFragmentDoc}`;
 export const GetSearchInfoDocument = gql`
     query GetSearchInfo {
   tissueTypes {
@@ -2769,6 +2884,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     ConfirmSection(variables: ConfirmSectionMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmSectionMutation> {
       return withWrapper(() => client.request<ConfirmSectionMutation>(ConfirmSectionDocument, variables, requestHeaders));
+    },
+    CreateSasNumber(variables: CreateSasNumberMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateSasNumberMutation> {
+      return withWrapper(() => client.request<CreateSasNumberMutation>(CreateSasNumberDocument, variables, requestHeaders));
     },
     Destroy(variables: DestroyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DestroyMutation> {
       return withWrapper(() => client.request<DestroyMutation>(DestroyDocument, variables, requestHeaders));
@@ -2836,6 +2954,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     UnstoreBarcode(variables: UnstoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnstoreBarcodeMutation> {
       return withWrapper(() => client.request<UnstoreBarcodeMutation>(UnstoreBarcodeDocument, variables, requestHeaders));
     },
+    UpdateSasNumberStatus(variables: UpdateSasNumberStatusMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateSasNumberStatusMutation> {
+      return withWrapper(() => client.request<UpdateSasNumberStatusMutation>(UpdateSasNumberStatusDocument, variables, requestHeaders));
+    },
     CurrentUser(variables?: CurrentUserQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CurrentUserQuery> {
       return withWrapper(() => client.request<CurrentUserQuery>(CurrentUserDocument, variables, requestHeaders));
     },
@@ -2883,6 +3004,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetReleaseInfo(variables?: GetReleaseInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetReleaseInfoQuery> {
       return withWrapper(() => client.request<GetReleaseInfoQuery>(GetReleaseInfoDocument, variables, requestHeaders));
+    },
+    GetSasAllocationInfo(variables: GetSasAllocationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSasAllocationInfoQuery> {
+      return withWrapper(() => client.request<GetSasAllocationInfoQuery>(GetSasAllocationInfoDocument, variables, requestHeaders));
     },
     GetSearchInfo(variables?: GetSearchInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSearchInfoQuery> {
       return withWrapper(() => client.request<GetSearchInfoQuery>(GetSearchInfoDocument, variables, requestHeaders));

@@ -4,6 +4,7 @@ import { createSessionStorageRepository } from "./index";
 
 const seeds: Array<ProjectFieldsFragment> = projectFactory.buildList(5);
 seeds.push(projectFactory.build({ enabled: false }));
+seeds.push(projectFactory.build({ name: "TEST999" }));
 
 const projectRepository = createSessionStorageRepository(
   "PROJECTS",
