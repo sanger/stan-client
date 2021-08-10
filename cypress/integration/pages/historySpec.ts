@@ -1,9 +1,4 @@
-import {
-  FindHistoryForLabwareBarcodeQuery,
-  FindHistoryForLabwareBarcodeQueryVariables,
-  ReleaseLabwareMutation,
-  ReleaseLabwareMutationVariables,
-} from "../../../src/types/sdk";
+import {FindHistoryForLabwareBarcodeQuery, FindHistoryForLabwareBarcodeQueryVariables,} from "../../../src/types/sdk";
 
 describe("History Page", () => {
   context("when I visit the page with no URL params", () => {
@@ -47,11 +42,6 @@ describe("History Page", () => {
   describe("By Sample ID", () => {
     context("when I visit the page with good URL params", () => {
       before(() => cy.visit("/history?kind=sampleId&value=10"));
-
-      it("uses the params to fill in the form", () => {
-        cy.get("input[name='value']").invoke("val").should("eq", "10");
-        cy.get("select[name='kind']").invoke("val").should("eq", "sampleId");
-      });
 
       it("does performs a history search", () => {
         cy.findByTestId("history").should("exist");

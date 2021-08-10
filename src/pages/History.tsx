@@ -1,16 +1,14 @@
 import React from "react";
 import AppShell from "../components/AppShell";
-import { Form, Formik } from "formik";
+import {Form, Formik} from "formik";
 import FormikInput from "../components/forms/Input";
 import FormikSelect from "../components/forms/Select";
 import BlueButton from "../components/buttons/BlueButton";
-import { useLocation } from "react-router-dom";
-import { objectKeys, safeParseQueryString, stringify } from "../lib/helpers";
-import HistoryComponent, {
-  historyDisplayValues,
-} from "../components/history/History";
-import { history } from "../lib/sdk";
-import { HistoryProps, historySchema, isHistoryProps } from "../types/stan";
+import {useLocation} from "react-router-dom";
+import {objectKeys, safeParseQueryString, stringify} from "../lib/helpers";
+import HistoryComponent, {historyDisplayValues,} from "../components/history/History";
+import {history} from "../lib/sdk";
+import {HistoryProps, historySchema, isHistoryProps} from "../types/stan";
 import Heading from "../components/Heading";
 
 export default function History() {
@@ -48,7 +46,7 @@ export default function History() {
 
                   <div className="md:flex-grow">
                     <FormikSelect label="" name="kind">
-                      {objectKeys(historyDisplayValues).map((selectValue) => (
+                      {objectKeys(historyDisplayValues).filter((selectValue) => selectValue!=="sampleId").map((selectValue) => (
                         <option value={selectValue} key={selectValue}>
                           {historyDisplayValues[selectValue]}
                         </option>
