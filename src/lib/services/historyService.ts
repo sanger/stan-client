@@ -1,11 +1,7 @@
-import { stanCore } from "../sdk";
-import { HistoryProps, HistoryTableEntry } from "../../types/stan";
-import {
-  HistoryFieldsFragment,
-  LabwareFieldsFragment,
-  SampleFieldsFragment,
-} from "../../types/sdk";
-import { Column } from "react-table";
+import {stanCore} from "../sdk";
+import {HistoryProps, HistoryTableEntry} from "../../types/stan";
+import {HistoryFieldsFragment, LabwareFieldsFragment, SampleFieldsFragment,} from "../../types/sdk";
+import {Column} from "react-table";
 
 /**
  * Retrieves the history for the given History props.
@@ -59,6 +55,7 @@ export async function findHistory(
       sourceBarcode: sourceLabware.barcode,
       destinationBarcode: destinationLabware.barcode,
       sampleID: entry.sampleId,
+      donorName: sample?.tissue?.donor?.donorName ?? undefined,
       externalName: sample?.tissue?.externalName ?? undefined,
       sectionNumber: sample?.section ?? undefined,
       eventType: entry.type,
