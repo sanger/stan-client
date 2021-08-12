@@ -235,6 +235,7 @@ export type HistoryTableEntry = {
   biologicalState?: string;
   labwareState: LabwareState;
   username: string;
+  workNumber?: Maybe<string>;
   details: Array<string>;
 }
 

@@ -1,6 +1,6 @@
-import { GraphQLClient } from 'graphql-request';
+import {gql, GraphQLClient} from 'graphql-request';
 import * as Dom from 'graphql-request/dist/types.dom';
-import { gql } from 'graphql-request';
+
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -519,6 +519,7 @@ export type HistoryEntry = {
   destinationLabwareId: Scalars['Int'];
   sampleId?: Maybe<Scalars['Int']>;
   username: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
   details: Array<Scalars['String']>;
 };
 
@@ -853,7 +854,7 @@ export type DestructionReasonFieldsFragment = (
 
 export type HistoryEntryFieldsFragment = (
   { __typename?: 'HistoryEntry' }
-  & Pick<HistoryEntry, 'destinationLabwareId' | 'details' | 'eventId' | 'sampleId' | 'sourceLabwareId' | 'time' | 'type' | 'username'>
+  & Pick<HistoryEntry, 'destinationLabwareId' | 'details' | 'eventId' | 'sampleId' | 'sourceLabwareId' | 'time' | 'type' | 'username' | 'workNumber'>
 );
 
 export type HistoryFieldsFragment = (
@@ -1886,6 +1887,7 @@ export const HistoryEntryFieldsFragmentDoc = gql`
   time
   type
   username
+  workNumber
 }
     `;
 export const HistoryFieldsFragmentDoc = gql`

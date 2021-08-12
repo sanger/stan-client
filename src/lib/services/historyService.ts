@@ -62,6 +62,7 @@ export async function findHistory(
       biologicalState: sample?.bioState?.name ?? undefined,
       labwareState: destinationLabware.state,
       username: entry.username,
+      workNumber: entry.workNumber ?? undefined,
       details: entry.details,
     };
   });

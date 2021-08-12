@@ -99,6 +99,10 @@ const historyColumns: Array<Column<HistoryTableEntry>> = [
     accessor: "eventType",
   },
   {
+    Header: "Work number",
+    accessor: "workNumber",
+  },
+  {
     Header: "User",
     accessor: "username",
   },
