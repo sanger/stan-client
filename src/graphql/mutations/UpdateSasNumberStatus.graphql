@@ -1,5 +1,0 @@
-mutation UpdateSasNumberStatus($sasNumber: String!, $status: SasStatus!, $commentId: Int) {
-    updateSasNumberStatus(sasNumber: $sasNumber, status: $status, commentId: $commentId) {
-        ...SasNumberFields
-    }
-}

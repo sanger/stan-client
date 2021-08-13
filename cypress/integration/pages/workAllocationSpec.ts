@@ -1,14 +1,18 @@
-describe("SAS Allocation", () => {
+describe("Work Allocation", () => {
   before(() => {
-    cy.visit("/sas");
+    cy.visit("/sgp");
   });
 
-  describe("Allocating an SAS", () => {
+  describe("Allocating Work", () => {
     context(
-      "when I submit the form without selecting a project or cost code",
+      "when I submit the form without selecting a work type, project, or cost code",
       () => {
         before(() => {
           cy.findByRole("button", { name: /Submit/i }).click();
+        });
+
+        it("says the work type is required", () => {
+          cy.findByText("Work Type is a required field").should("exist");
         });
 
         it("says project is required", () => {
@@ -22,24 +26,25 @@ describe("SAS Allocation", () => {
     );
 
     context(
-      "when I select a project and cost code and then submit the form",
+      "when I select a work type, project, and cost code and then submit the form",
       () => {
         before(() => {
+          cy.findByLabelText("Work Type").select("Work Type 1");
           cy.findByLabelText("Project").select("TEST999");
           cy.findByLabelText("Cost Code").select("S999");
           cy.findByRole("button", { name: /Submit/i }).click();
         });
 
-        it("allocates a new SAS", () => {
+        it("allocates new Work", () => {
           cy.findByText(
-            /Assigned SAS\d+ to project TEST999 and cost code S999/
+            /Assigned SGP\d+ \(Work Type 1\) to project TEST999 and cost code S999/
           ).should("exist");
         });
       }
     );
   });
 
-  describe("Editing the status of an SAS number", () => {
+  describe("Editing the status of Work", () => {
     context("when I click the Edit Status button", () => {
       before(() => {
         cy.findAllByRole("button", { name: /Edit Status/i }).then(
@@ -89,15 +94,15 @@ describe("SAS Allocation", () => {
       });
     });
 
-    describe("Saving the SAS status", () => {
+    describe("Saving the Work status", () => {
       context("when I click save", () => {
         before(() => {
           cy.findByLabelText("New Status").select("Complete");
           cy.findByRole("button", { name: /Save/i }).click();
         });
 
-        it("updates the SAS status", () => {
-          cy.findByTestId("sas-allocation-table").within(() => {
+        it("updates the Work status", () => {
+          cy.findByTestId("work-allocation-table").within(() => {
             cy.findByText(/COMPLETED/i).should("exist");
           });
         });

@@ -1,5 +1,0 @@
-mutation CreateSasNumber($prefix: String!, $project: String!, $costCode: String!) {
-    createSasNumber(prefix: $prefix, project: $project, costCode: $costCode) {
-        ...SasNumberFields
-    }
-}

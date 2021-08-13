@@ -1,0 +1,5 @@
+mutation AddWorkType($name: String!) {
+    addWorkType(name: $name) {
+        ...WorkTypeFields
+    }
+}

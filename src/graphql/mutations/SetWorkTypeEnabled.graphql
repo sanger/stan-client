@@ -1,0 +1,5 @@
+mutation SetWorkTypeEnabled($name: String!, $enabled: Boolean!) {
+    setWorkTypeEnabled(name: $name, enabled: $enabled) {
+        ...WorkTypeFields
+    }
+}

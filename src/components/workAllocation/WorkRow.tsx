@@ -1,11 +1,8 @@
 import React from "react";
 import { TableCell } from "../Table";
-import {
-  CommentFieldsFragment,
-  SasNumberFieldsFragment,
-} from "../../types/sdk";
+import { CommentFieldsFragment, WorkFieldsFragment } from "../../types/sdk";
 import { useMachine } from "@xstate/react";
-import createSasRowMachine, { SasRowEvent } from "./sasRow.machine";
+import createWorkRowMachine, { WorkRowEvent } from "./workRow.machine";
 import { optionValues } from "../forms";
 import WhiteButton from "../buttons/WhiteButton";
 import BlueButton from "../buttons/BlueButton";
@@ -21,39 +18,39 @@ type FormValues = {
   /**
    * A union of the machine's event types
    */
-  type: SasRowEvent["type"];
+  type: WorkRowEvent["type"];
 
   /**
-   * ID of a comment about why a SAS number was changed
+   * ID of a comment about why Work status changed
    */
   commentId: number;
 };
 
-type SasRowProps = {
+type WorkRowProps = {
   /**
-   * An SAS number
+   * A {@link Work} to be possibly edited
    */
-  initialSasNumber: SasNumberFieldsFragment;
+  initialWork: WorkFieldsFragment;
 
   /**
-   * The comments available for the user to select when updating an SAS number's status
+   * The comments available for the user to select when updating Work status
    */
   availableComments: Array<CommentFieldsFragment>;
 };
 
 /**
- * Component for displaying information about an SAS number in a table row, as well as the ability
+ * Component for displaying information about Work in a table row, as well as the ability
  * to edit its status
  */
-export default function SasRow({
-  initialSasNumber,
+export default function WorkRow({
+  initialWork,
   availableComments,
-}: SasRowProps) {
+}: WorkRowProps) {
   const [current, send] = useMachine(
-    createSasRowMachine({ sasNumber: initialSasNumber })
+    createWorkRowMachine({ work: initialWork })
   );
 
-  const { editModeEnabled, sasNumber } = current.context;
+  const { editModeEnabled, work } = current.context;
 
   /**
    * Should the edit button by displayed to the user right now
@@ -71,7 +68,7 @@ export default function SasRow({
    * The comment will only be shown if the selected next status requires one
    */
   const initialValues: FormValues = {
-    type: nextStatuses[0] as SasRowEvent["type"],
+    type: nextStatuses[0] as WorkRowEvent["type"],
     commentId: availableComments[0].id,
   };
 
@@ -89,12 +86,13 @@ export default function SasRow({
 
   return (
     <tr>
-      <TableCell>{sasNumber.sasNumber}</TableCell>
-      <TableCell>{sasNumber.project.name}</TableCell>
-      <TableCell>{sasNumber.costCode.code}</TableCell>
+      <TableCell>{work.workNumber}</TableCell>
+      <TableCell>{work.workType.name}</TableCell>
+      <TableCell>{work.project.name}</TableCell>
+      <TableCell>{work.costCode.code}</TableCell>
       {!editModeEnabled && (
         <TableCell>
-          <span className="uppercase">{sasNumber.status}</span>
+          <span className="uppercase">{work.status}</span>
         </TableCell>
       )}
 
@@ -165,8 +163,8 @@ export default function SasRow({
 
 /**
  * Determines if the type of event requires a comment
- * @param type an {@link SasRowEvent} type
+ * @param type an {@link WorkRowEvent} type
  */
-function requiresComment(type: SasRowEvent["type"]): boolean {
+function requiresComment(type: WorkRowEvent["type"]): boolean {
   return ["PAUSE", "FAIL"].includes(type);
 }

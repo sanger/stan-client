@@ -1,10 +1,13 @@
-fragment SasNumberFields on SasNumber {
-    sasNumber
+fragment WorkFields on Work {
+    workNumber
     status
     project {
         ...ProjectFields
     }
     costCode {
         ...CostCodeFields
+    }
+    workType {
+        ...WorkTypeFields
     }
 }

@@ -11,6 +11,7 @@ import speciesRepository from "../repositories/speciesRepository";
 import destructionReasonRepository from "../repositories/destructionReasonRepository";
 import projectRepository from "../repositories/projectRepository";
 import costCodeRepository from "../repositories/costCodeRepository";
+import workTypeRepository from "../repositories/workTypeRepository";
 
 const configurationHandlers = [
   graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>(
@@ -26,6 +27,7 @@ const configurationHandlers = [
           species: speciesRepository.findAll(),
           projects: projectRepository.findAll(),
           costCodes: costCodeRepository.findAll(),
+          workTypes: workTypeRepository.findAll(),
         })
       );
     }

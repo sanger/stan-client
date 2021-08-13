@@ -23,4 +23,7 @@ query GetConfiguration {
     costCodes(includeDisabled: true) {
         ...CostCodeFields
     }
+    workTypes(includeDisabled: true) {
+        ...WorkTypeFields
+    }
 }

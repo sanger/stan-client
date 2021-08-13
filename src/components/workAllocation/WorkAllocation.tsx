@@ -4,9 +4,9 @@ import { Formik, Form } from "formik";
 import FormikInput from "../forms/Input";
 import FormikSelect from "../forms/Select";
 import BlueButton from "../buttons/BlueButton";
-import createSasAllocationMachine, {
-  SasAllocationFormValues,
-} from "./sasAllocation.machine";
+import createWorkAllocationMachine, {
+  WorkAllocationFormValues,
+} from "./workAllocation.machine";
 import { useMachine } from "@xstate/react";
 import { optionValues } from "../forms";
 import LoadingSpinner from "../icons/LoadingSpinner";
@@ -14,21 +14,23 @@ import Table, { TableBody, TableHead, TableHeader } from "../Table";
 import Success from "../notifications/Success";
 import Warning from "../notifications/Warning";
 import * as Yup from "yup";
-import SasRow from "./SasRow";
+import WorkRow from "./WorkRow";
 
-const initialValues: SasAllocationFormValues = {
+const initialValues: WorkAllocationFormValues = {
+  workType: "",
   costCode: "",
   project: "",
   isRnD: false,
 };
 
-export default function SasAllocation() {
-  const [current, send] = useMachine(createSasAllocationMachine());
+export default function WorkAllocation() {
+  const [current, send] = useMachine(createWorkAllocationMachine());
 
   const {
     projects,
     costCodes,
-    sasNumbers,
+    works,
+    workTypes,
     availableComments,
     requestError,
     successMessage,
@@ -38,6 +40,10 @@ export default function SasAllocation() {
    * Form validation schema
    */
   const validationSchema: Yup.ObjectSchema = Yup.object().shape({
+    workType: Yup.string()
+      .oneOf(workTypes.map((wt) => wt.name))
+      .required()
+      .label("Work Type"),
     project: Yup.string()
       .oneOf(projects.map((p) => p.name))
       .required()
@@ -54,22 +60,32 @@ export default function SasAllocation() {
       <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
         {successMessage && <Success message={successMessage} />}
         {requestError && (
-          <Warning message={"SAS Request Error"} error={requestError} />
+          <Warning message={"SGP Request Error"} error={requestError} />
         )}
 
         <Heading level={3} showBorder={false}>
-          Allocate a new SAS number
+          Allocate a new SGP number
         </Heading>
 
-        <Formik<SasAllocationFormValues>
+        <Formik<WorkAllocationFormValues>
           initialValues={initialValues}
           onSubmit={async (values) => {
-            send({ type: "ALLOCATE_SAS", values });
+            send({ type: "ALLOCATE_WORK", values });
           }}
           validationSchema={validationSchema}
         >
           <Form>
             <div className="space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
+              <div className="md:flex-grow">
+                <FormikSelect
+                  label="Work Type"
+                  name="workType"
+                  emptyOption={true}
+                >
+                  {optionValues(workTypes, "name", "name")}
+                </FormikSelect>
+              </div>
+
               <div className="md:flex-grow">
                 <FormikSelect label="Project" name="project" emptyOption={true}>
                   {optionValues(projects, "name", "name")}
@@ -106,10 +122,11 @@ export default function SasAllocation() {
             <LoadingSpinner />
           </div>
         ) : (
-          <Table data-testid="sas-allocation-table">
+          <Table data-testid="work-allocation-table">
             <TableHead>
               <tr>
-                <TableHeader>SAS Number</TableHeader>
+                <TableHeader>SGP Number</TableHeader>
+                <TableHeader>Work Type</TableHeader>
                 <TableHeader>Project</TableHeader>
                 <TableHeader>Cost Code</TableHeader>
                 <TableHeader>Status</TableHeader>
@@ -117,11 +134,11 @@ export default function SasAllocation() {
               </tr>
             </TableHead>
             <TableBody>
-              {sasNumbers.map((sasNumber) => (
-                <SasRow
-                  initialSasNumber={sasNumber}
+              {works.map((work) => (
+                <WorkRow
+                  initialWork={work}
                   availableComments={availableComments}
-                  key={sasNumber.sasNumber}
+                  key={work.workNumber}
                 />
               ))}
             </TableBody>

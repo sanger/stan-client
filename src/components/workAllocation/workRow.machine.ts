@@ -1,45 +1,45 @@
 import { createMachine } from "xstate";
 import {
-  SasNumberFieldsFragment,
-  SasStatus,
-  UpdateSasNumberStatusMutation,
+  WorkFieldsFragment,
+  WorkStatus,
+  UpdateWorkStatusMutation,
 } from "../../types/sdk";
 import { MachineServiceDone } from "../../types/stan";
 import { stanCore } from "../../lib/sdk";
 import { assign } from "@xstate/immer";
 
-type SasRowMachineContext = {
+type WorkRowMachineContext = {
   /**
-   * An SAS number
+   * Work...
    */
-  sasNumber: SasNumberFieldsFragment;
+  work: WorkFieldsFragment;
 
   /**
-   * Is the user currently editing the SAS status?
+   * Is the user currently editing the Work status?
    */
   editModeEnabled: boolean;
 };
 
-export type SasRowEvent =
+export type WorkRowEvent =
   | { type: "EDIT" }
   | { type: "PAUSE"; commentId: number }
   | { type: "COMPLETE"; commentId: undefined }
   | { type: "FAIL"; commentId: number }
   | { type: "REACTIVATE"; commentId: undefined }
-  | MachineServiceDone<"updateSasNumberStatus", UpdateSasNumberStatusMutation>;
+  | MachineServiceDone<"updateWorkStatus", UpdateWorkStatusMutation>;
 
-type CreateSasRowMachineParams = {
-  sasNumber: SasNumberFieldsFragment;
+type CreateWorkRowMachineParams = {
+  work: WorkFieldsFragment;
 };
 
-export default function createSasRowMachine({
-  sasNumber,
-}: CreateSasRowMachineParams) {
-  return createMachine<SasRowMachineContext, SasRowEvent>(
+export default function createWorkRowMachine({
+  work,
+}: CreateWorkRowMachineParams) {
+  return createMachine<WorkRowMachineContext, WorkRowEvent>(
     {
-      id: "sasRowMachine",
+      id: "workRowMachine",
       context: {
-        sasNumber,
+        work,
         editModeEnabled: false,
       },
       initial: "deciding",
@@ -72,9 +72,9 @@ export default function createSasRowMachine({
         failed: {},
         updating: {
           invoke: {
-            src: "updateSasNumberStatus",
+            src: "updateWorkStatus",
             onDone: {
-              actions: ["assignSasNumber", "toggleEditMode"],
+              actions: ["assignSgpNumber", "toggleEditMode"],
               target: "deciding",
             },
             onError: { target: "deciding" },
@@ -84,9 +84,9 @@ export default function createSasRowMachine({
     },
     {
       actions: {
-        assignSasNumber: assign((ctx, e) => {
-          if (e.type !== "done.invoke.updateSasNumberStatus") return;
-          ctx.sasNumber = e.data.updateSasNumberStatus;
+        assignSgpNumber: assign((ctx, e) => {
+          if (e.type !== "done.invoke.updateWorkStatus") return;
+          ctx.work = e.data.updateWorkStatus;
         }),
 
         toggleEditMode: assign(
@@ -95,10 +95,10 @@ export default function createSasRowMachine({
       },
 
       services: {
-        updateSasNumberStatus: (ctx, e) => {
-          return stanCore.UpdateSasNumberStatus({
-            sasNumber: ctx.sasNumber.sasNumber,
-            status: getSasStatusFromEventType(e),
+        updateWorkStatus: (ctx, e) => {
+          return stanCore.UpdateWorkStatus({
+            workNumber: ctx.work.workNumber,
+            status: getWorkStatusFromEventType(e),
             commentId: "commentId" in e ? e.commentId : undefined,
           });
         },
@@ -108,32 +108,32 @@ export default function createSasRowMachine({
 }
 
 /**
- * Determine the next {@link SasStatus} from a given event
- * @param e an {@link SasRowEvent}
+ * Determine the next {@link WorkStatus} from a given event
+ * @param e an {@link WorkRowEvent}
  */
-function getSasStatusFromEventType(e: SasRowEvent): SasStatus {
+function getWorkStatusFromEventType(e: WorkRowEvent): WorkStatus {
   switch (e.type) {
     case "COMPLETE":
-      return SasStatus.Completed;
+      return WorkStatus.Completed;
     case "FAIL":
-      return SasStatus.Failed;
+      return WorkStatus.Failed;
     case "PAUSE":
-      return SasStatus.Paused;
+      return WorkStatus.Paused;
     case "REACTIVATE":
-      return SasStatus.Active;
+      return WorkStatus.Active;
   }
 
-  throw new Error(`Can not determine next SasStatus from event ${e.type}`);
+  throw new Error(`Can not determine next WorkStatus from event ${e.type}`);
 }
 
 /**
- * Action creator for determining which state to go to next, based on an SAS number's status
+ * Action creator for determining which state to go to next, based on some Work's status
  * @param status the status to check
  */
 function maybeGoToStatus(status: string) {
   return {
     target: status,
-    cond: (ctx: SasRowMachineContext) =>
-      ctx.sasNumber.status.toLowerCase() === status.toLowerCase(),
+    cond: (ctx: WorkRowMachineContext) =>
+      ctx.work.status.toLowerCase() === status.toLowerCase(),
   };
 }

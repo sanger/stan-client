@@ -170,6 +170,26 @@ export default function Configuration({ configuration }: ConfigurationParams) {
             </div>
 
             <div data-testid="config">
+              <Heading level={2}>Work Types</Heading>
+              <p className="mt-3 mb-6 text-lg" />
+              <EntityManager
+                initialEntities={configuration.workTypes}
+                displayColumnName={"name"}
+                onToggle={(entity, enabled) =>
+                  stanCore
+                    .SetWorkTypeEnabled({
+                      enabled,
+                      name: entity.name,
+                    })
+                    .then((res) => res.setWorkTypeEnabled)
+                }
+                onCreate={(name) =>
+                  stanCore.AddWorkType({ name }).then((res) => res.addWorkType)
+                }
+              />
+            </div>
+
+            <div data-testid="config">
               <Heading level={2}>Projects</Heading>
               <p className="mt-3 mb-6 text-lg" />
               <EntityManager

@@ -1,0 +1,4 @@
+fragment WorkTypeFields on WorkType {
+    name
+    enabled
+}

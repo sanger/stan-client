@@ -445,7 +445,11 @@ export enum GridDirection {
   /** Right across the top row, then down to the next row, etc. */
   RightDown = 'RightDown',
   /** Down the leftmost column, then right to the next column, etc. */
-  DownRight = 'DownRight'
+  DownRight = 'DownRight',
+  /** Right across the bottom row, then up to the next row, etc. */
+  RightUp = 'RightUp',
+  /** Up the leftmost column, then right to the next column, etc. */
+  UpRight = 'UpRight'
 }
 
 export type Location = {
@@ -536,6 +540,40 @@ export type PlanData = {
   destination: Labware;
 };
 
+export type Project = {
+  __typename?: 'Project';
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type CostCode = {
+  __typename?: 'CostCode';
+  code: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type WorkType = {
+  __typename?: 'WorkType';
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export enum WorkStatus {
+  Active = 'active',
+  Paused = 'paused',
+  Completed = 'completed',
+  Failed = 'failed'
+}
+
+export type Work = {
+  __typename?: 'Work';
+  workType: WorkType;
+  project: Project;
+  costCode: CostCode;
+  workNumber: Scalars['String'];
+  status: WorkStatus;
+};
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -552,6 +590,11 @@ export type Query = {
   releaseDestinations: Array<ReleaseDestination>;
   releaseRecipients: Array<ReleaseRecipient>;
   destructionReasons: Array<DestructionReason>;
+  projects: Array<Project>;
+  costCodes: Array<CostCode>;
+  workTypes: Array<WorkType>;
+  works: Array<Work>;
+  work: Work;
   users: Array<User>;
   find: FindResult;
   planData: PlanData;
@@ -561,10 +604,6 @@ export type Query = {
   historyForLabwareBarcode: History;
   location: Location;
   stored: Array<StoredItem>;
-  projects: Array<Project>;
-  costCodes: Array<CostCode>;
-  sasNumbers: Array<SasNumber>;
-  sasNumber: SasNumber;
 };
 
 
@@ -606,6 +645,31 @@ export type QueryReleaseRecipientsArgs = {
 
 export type QueryDestructionReasonsArgs = {
   includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryProjectsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryCostCodesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryWorkTypesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryWorksArgs = {
+  status?: Maybe<Array<WorkStatus>>;
+};
+
+
+export type QueryWorkArgs = {
+  workNumber: Scalars['String'];
 };
 
 
@@ -653,26 +717,6 @@ export type QueryStoredArgs = {
   barcodes: Array<Scalars['String']>;
 };
 
-
-export type QueryProjectsArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryCostCodesArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QuerySasNumbersArgs = {
-  status?: Maybe<Array<SasStatus>>;
-};
-
-
-export type QuerySasNumberArgs = {
-  sasNumber: Scalars['String'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
   login: LoginResult;
@@ -699,18 +743,20 @@ export type Mutation = {
   setReleaseRecipientEnabled: ReleaseRecipient;
   addSpecies: Species;
   setSpeciesEnabled: Species;
+  addProject: Project;
+  setProjectEnabled: Project;
+  addCostCode: CostCode;
+  setCostCodeEnabled: CostCode;
+  addWorkType: WorkType;
+  setWorkTypeEnabled: WorkType;
+  createWork: Work;
+  updateWorkStatus: Work;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
   setLocationCustomName: Location;
-  addProject: Project;
-  setProjectEnabled: Project;
-  addCostCode: CostCode;
-  setCostCodeEnabled: CostCode;
-  createSasNumber: SasNumber;
-  updateSasNumberStatus: SasNumber;
 };
 
 
@@ -838,6 +884,54 @@ export type MutationSetSpeciesEnabledArgs = {
 };
 
 
+export type MutationAddProjectArgs = {
+  name: Scalars['String'];
+};
+
+
+export type MutationSetProjectEnabledArgs = {
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationAddCostCodeArgs = {
+  code: Scalars['String'];
+};
+
+
+export type MutationSetCostCodeEnabledArgs = {
+  code: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationAddWorkTypeArgs = {
+  name: Scalars['String'];
+};
+
+
+export type MutationSetWorkTypeEnabledArgs = {
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationCreateWorkArgs = {
+  prefix: Scalars['String'];
+  workType: Scalars['String'];
+  project: Scalars['String'];
+  costCode: Scalars['String'];
+};
+
+
+export type MutationUpdateWorkStatusArgs = {
+  workNumber: Scalars['String'];
+  status: WorkStatus;
+  commentId?: Maybe<Scalars['Int']>;
+};
+
+
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -869,69 +963,6 @@ export type MutationEmptyArgs = {
 export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
-};
-
-
-export type MutationAddProjectArgs = {
-  name: Scalars['String'];
-};
-
-
-export type MutationSetProjectEnabledArgs = {
-  name: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-
-export type MutationAddCostCodeArgs = {
-  code: Scalars['String'];
-};
-
-
-export type MutationSetCostCodeEnabledArgs = {
-  code: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-
-export type MutationCreateSasNumberArgs = {
-  prefix: Scalars['String'];
-  project: Scalars['String'];
-  costCode: Scalars['String'];
-};
-
-
-export type MutationUpdateSasNumberStatusArgs = {
-  sasNumber: Scalars['String'];
-  status: SasStatus;
-  commentId?: Maybe<Scalars['Int']>;
-};
-
-export type Project = {
-  __typename?: 'Project';
-  name: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export type CostCode = {
-  __typename?: 'CostCode';
-  code: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export enum SasStatus {
-  Active = 'active',
-  Paused = 'paused',
-  Completed = 'completed',
-  Failed = 'failed'
-}
-
-export type SasNumber = {
-  __typename?: 'SasNumber';
-  project: Project;
-  costCode: CostCode;
-  sasNumber: Scalars['String'];
-  status: SasStatus;
 };
 
 export type CommentFieldsFragment = (
@@ -1078,18 +1109,6 @@ export type SampleFieldsFragment = (
   ) }
 );
 
-export type SasNumberFieldsFragment = (
-  { __typename?: 'SasNumber' }
-  & Pick<SasNumber, 'sasNumber' | 'status'>
-  & { project: (
-    { __typename?: 'Project' }
-    & ProjectFieldsFragment
-  ), costCode: (
-    { __typename?: 'CostCode' }
-    & CostCodeFieldsFragment
-  ) }
-);
-
 export type SlotFieldsFragment = (
   { __typename?: 'Slot' }
   & Pick<Slot, 'address' | 'labwareId' | 'blockHighestSection'>
@@ -1107,6 +1126,26 @@ export type SpeciesFieldsFragment = (
 export type UserFieldsFragment = (
   { __typename?: 'User' }
   & Pick<User, 'username' | 'role'>
+);
+
+export type WorkFieldsFragment = (
+  { __typename?: 'Work' }
+  & Pick<Work, 'workNumber' | 'status'>
+  & { project: (
+    { __typename?: 'Project' }
+    & ProjectFieldsFragment
+  ), costCode: (
+    { __typename?: 'CostCode' }
+    & CostCodeFieldsFragment
+  ), workType: (
+    { __typename?: 'WorkType' }
+    & WorkTypeFieldsFragment
+  ) }
+);
+
+export type WorkTypeFieldsFragment = (
+  { __typename?: 'WorkType' }
+  & Pick<WorkType, 'name' | 'enabled'>
 );
 
 export type AddCommentMutationVariables = Exact<{
@@ -1214,6 +1253,19 @@ export type AddSpeciesMutation = (
   ) }
 );
 
+export type AddWorkTypeMutationVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type AddWorkTypeMutation = (
+  { __typename?: 'Mutation' }
+  & { addWorkType: (
+    { __typename?: 'WorkType' }
+    & WorkTypeFieldsFragment
+  ) }
+);
+
 export type ConfirmMutationVariables = Exact<{
   request: ConfirmOperationRequest;
 }>;
@@ -1266,18 +1318,19 @@ export type ConfirmSectionMutation = (
   ) }
 );
 
-export type CreateSasNumberMutationVariables = Exact<{
+export type CreateWorkMutationVariables = Exact<{
   prefix: Scalars['String'];
+  workType: Scalars['String'];
   project: Scalars['String'];
   costCode: Scalars['String'];
 }>;
 
 
-export type CreateSasNumberMutation = (
+export type CreateWorkMutation = (
   { __typename?: 'Mutation' }
-  & { createSasNumber: (
-    { __typename?: 'SasNumber' }
-    & SasNumberFieldsFragment
+  & { createWork: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
   ) }
 );
 
@@ -1609,6 +1662,20 @@ export type SetSpeciesEnabledMutation = (
   ) }
 );
 
+export type SetWorkTypeEnabledMutationVariables = Exact<{
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetWorkTypeEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setWorkTypeEnabled: (
+    { __typename?: 'WorkType' }
+    & WorkTypeFieldsFragment
+  ) }
+);
+
 export type SlotCopyMutationVariables = Exact<{
   request: SlotCopyRequest;
 }>;
@@ -1656,18 +1723,18 @@ export type UnstoreBarcodeMutation = (
   )> }
 );
 
-export type UpdateSasNumberStatusMutationVariables = Exact<{
-  sasNumber: Scalars['String'];
-  status: SasStatus;
+export type UpdateWorkStatusMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  status: WorkStatus;
   commentId?: Maybe<Scalars['Int']>;
 }>;
 
 
-export type UpdateSasNumberStatusMutation = (
+export type UpdateWorkStatusMutation = (
   { __typename?: 'Mutation' }
-  & { updateSasNumberStatus: (
-    { __typename?: 'SasNumber' }
-    & SasNumberFieldsFragment
+  & { updateWorkStatus: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
   ) }
 );
 
@@ -1887,6 +1954,9 @@ export type GetConfigurationQuery = (
   )>, costCodes: Array<(
     { __typename?: 'CostCode' }
     & CostCodeFieldsFragment
+  )>, workTypes: Array<(
+    { __typename?: 'WorkType' }
+    & WorkTypeFieldsFragment
   )> }
 );
 
@@ -1972,28 +2042,6 @@ export type GetReleaseInfoQuery = (
   )> }
 );
 
-export type GetSasAllocationInfoQueryVariables = Exact<{
-  commentCategory: Scalars['String'];
-}>;
-
-
-export type GetSasAllocationInfoQuery = (
-  { __typename?: 'Query' }
-  & { projects: Array<(
-    { __typename?: 'Project' }
-    & ProjectFieldsFragment
-  )>, costCodes: Array<(
-    { __typename?: 'CostCode' }
-    & CostCodeFieldsFragment
-  )>, sasNumbers: Array<(
-    { __typename?: 'SasNumber' }
-    & SasNumberFieldsFragment
-  )>, comments: Array<(
-    { __typename?: 'Comment' }
-    & CommentFieldsFragment
-  )> }
-);
-
 export type GetSearchInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2024,6 +2072,31 @@ export type GetSectioningInfoQuery = (
   & { labwareTypes: Array<(
     { __typename?: 'LabwareType' }
     & LabwareTypeFieldsFragment
+  )> }
+);
+
+export type GetWorkAllocationInfoQueryVariables = Exact<{
+  commentCategory: Scalars['String'];
+}>;
+
+
+export type GetWorkAllocationInfoQuery = (
+  { __typename?: 'Query' }
+  & { projects: Array<(
+    { __typename?: 'Project' }
+    & ProjectFieldsFragment
+  )>, costCodes: Array<(
+    { __typename?: 'CostCode' }
+    & CostCodeFieldsFragment
+  )>, works: Array<(
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
+  )>, workTypes: Array<(
+    { __typename?: 'WorkType' }
+    & WorkTypeFieldsFragment
+  )>, comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
   )> }
 );
 
@@ -2203,31 +2276,6 @@ export const ReleaseRecipientFieldsFragmentDoc = gql`
   enabled
 }
     `;
-export const ProjectFieldsFragmentDoc = gql`
-    fragment ProjectFields on Project {
-  name
-  enabled
-}
-    `;
-export const CostCodeFieldsFragmentDoc = gql`
-    fragment CostCodeFields on CostCode {
-  code
-  enabled
-}
-    `;
-export const SasNumberFieldsFragmentDoc = gql`
-    fragment SasNumberFields on SasNumber {
-  sasNumber
-  status
-  project {
-    ...ProjectFields
-  }
-  costCode {
-    ...CostCodeFields
-  }
-}
-    ${ProjectFieldsFragmentDoc}
-${CostCodeFieldsFragmentDoc}`;
 export const SpeciesFieldsFragmentDoc = gql`
     fragment SpeciesFields on Species {
   name
@@ -2240,6 +2288,41 @@ export const UserFieldsFragmentDoc = gql`
   role
 }
     `;
+export const ProjectFieldsFragmentDoc = gql`
+    fragment ProjectFields on Project {
+  name
+  enabled
+}
+    `;
+export const CostCodeFieldsFragmentDoc = gql`
+    fragment CostCodeFields on CostCode {
+  code
+  enabled
+}
+    `;
+export const WorkTypeFieldsFragmentDoc = gql`
+    fragment WorkTypeFields on WorkType {
+  name
+  enabled
+}
+    `;
+export const WorkFieldsFragmentDoc = gql`
+    fragment WorkFields on Work {
+  workNumber
+  status
+  project {
+    ...ProjectFields
+  }
+  costCode {
+    ...CostCodeFields
+  }
+  workType {
+    ...WorkTypeFields
+  }
+}
+    ${ProjectFieldsFragmentDoc}
+${CostCodeFieldsFragmentDoc}
+${WorkTypeFieldsFragmentDoc}`;
 export const AddCommentDocument = gql`
     mutation AddComment($category: String!, $text: String!) {
   addComment(category: $category, text: $text) {
@@ -2296,6 +2379,13 @@ export const AddSpeciesDocument = gql`
   }
 }
     ${SpeciesFieldsFragmentDoc}`;
+export const AddWorkTypeDocument = gql`
+    mutation AddWorkType($name: String!) {
+  addWorkType(name: $name) {
+    ...WorkTypeFields
+  }
+}
+    ${WorkTypeFieldsFragmentDoc}`;
 export const ConfirmDocument = gql`
     mutation Confirm($request: ConfirmOperationRequest!) {
   confirmOperation(request: $request) {
@@ -2332,13 +2422,18 @@ export const ConfirmSectionDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
-export const CreateSasNumberDocument = gql`
-    mutation CreateSasNumber($prefix: String!, $project: String!, $costCode: String!) {
-  createSasNumber(prefix: $prefix, project: $project, costCode: $costCode) {
-    ...SasNumberFields
+export const CreateWorkDocument = gql`
+    mutation CreateWork($prefix: String!, $workType: String!, $project: String!, $costCode: String!) {
+  createWork(
+    prefix: $prefix
+    workType: $workType
+    project: $project
+    costCode: $costCode
+  ) {
+    ...WorkFields
   }
 }
-    ${SasNumberFieldsFragmentDoc}`;
+    ${WorkFieldsFragmentDoc}`;
 export const DestroyDocument = gql`
     mutation Destroy($request: DestroyRequest!) {
   destroy(request: $request) {
@@ -2537,6 +2632,13 @@ export const SetSpeciesEnabledDocument = gql`
   }
 }
     ${SpeciesFieldsFragmentDoc}`;
+export const SetWorkTypeEnabledDocument = gql`
+    mutation SetWorkTypeEnabled($name: String!, $enabled: Boolean!) {
+  setWorkTypeEnabled(name: $name, enabled: $enabled) {
+    ...WorkTypeFields
+  }
+}
+    ${WorkTypeFieldsFragmentDoc}`;
 export const SlotCopyDocument = gql`
     mutation SlotCopy($request: SlotCopyRequest!) {
   slotCopy(request: $request) {
@@ -2567,17 +2669,17 @@ export const UnstoreBarcodeDocument = gql`
   }
 }
     `;
-export const UpdateSasNumberStatusDocument = gql`
-    mutation UpdateSasNumberStatus($sasNumber: String!, $status: SasStatus!, $commentId: Int) {
-  updateSasNumberStatus(
-    sasNumber: $sasNumber
+export const UpdateWorkStatusDocument = gql`
+    mutation UpdateWorkStatus($workNumber: String!, $status: WorkStatus!, $commentId: Int) {
+  updateWorkStatus(
+    workNumber: $workNumber
     status: $status
     commentId: $commentId
   ) {
-    ...SasNumberFields
+    ...WorkFields
   }
 }
-    ${SasNumberFieldsFragmentDoc}`;
+    ${WorkFieldsFragmentDoc}`;
 export const CurrentUserDocument = gql`
     query CurrentUser {
   user {
@@ -2738,6 +2840,9 @@ export const GetConfigurationDocument = gql`
   costCodes(includeDisabled: true) {
     ...CostCodeFields
   }
+  workTypes(includeDisabled: true) {
+    ...WorkTypeFields
+  }
 }
     ${DestructionReasonFieldsFragmentDoc}
 ${CommentFieldsFragmentDoc}
@@ -2746,7 +2851,8 @@ ${SpeciesFieldsFragmentDoc}
 ${ReleaseDestinationFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}
 ${ProjectFieldsFragmentDoc}
-${CostCodeFieldsFragmentDoc}`;
+${CostCodeFieldsFragmentDoc}
+${WorkTypeFieldsFragmentDoc}`;
 export const GetDestroyInfoDocument = gql`
     query GetDestroyInfo {
   destructionReasons {
@@ -2808,25 +2914,6 @@ export const GetReleaseInfoDocument = gql`
 }
     ${ReleaseDestinationFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}`;
-export const GetSasAllocationInfoDocument = gql`
-    query GetSasAllocationInfo($commentCategory: String!) {
-  projects(includeDisabled: false) {
-    ...ProjectFields
-  }
-  costCodes(includeDisabled: false) {
-    ...CostCodeFields
-  }
-  sasNumbers {
-    ...SasNumberFields
-  }
-  comments(category: $commentCategory, includeDisabled: false) {
-    ...CommentFields
-  }
-}
-    ${ProjectFieldsFragmentDoc}
-${CostCodeFieldsFragmentDoc}
-${SasNumberFieldsFragmentDoc}
-${CommentFieldsFragmentDoc}`;
 export const GetSearchInfoDocument = gql`
     query GetSearchInfo {
   tissueTypes {
@@ -2848,6 +2935,29 @@ export const GetSectioningInfoDocument = gql`
   }
 }
     ${LabwareTypeFieldsFragmentDoc}`;
+export const GetWorkAllocationInfoDocument = gql`
+    query GetWorkAllocationInfo($commentCategory: String!) {
+  projects(includeDisabled: false) {
+    ...ProjectFields
+  }
+  costCodes(includeDisabled: false) {
+    ...CostCodeFields
+  }
+  works {
+    ...WorkFields
+  }
+  workTypes {
+    ...WorkTypeFields
+  }
+  comments(category: $commentCategory, includeDisabled: false) {
+    ...CommentFields
+  }
+}
+    ${ProjectFieldsFragmentDoc}
+${CostCodeFieldsFragmentDoc}
+${WorkFieldsFragmentDoc}
+${WorkTypeFieldsFragmentDoc}
+${CommentFieldsFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
@@ -2879,14 +2989,17 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AddSpecies(variables: AddSpeciesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSpeciesMutation> {
       return withWrapper(() => client.request<AddSpeciesMutation>(AddSpeciesDocument, variables, requestHeaders));
     },
+    AddWorkType(variables: AddWorkTypeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddWorkTypeMutation> {
+      return withWrapper(() => client.request<AddWorkTypeMutation>(AddWorkTypeDocument, variables, requestHeaders));
+    },
     Confirm(variables: ConfirmMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmMutation> {
       return withWrapper(() => client.request<ConfirmMutation>(ConfirmDocument, variables, requestHeaders));
     },
     ConfirmSection(variables: ConfirmSectionMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmSectionMutation> {
       return withWrapper(() => client.request<ConfirmSectionMutation>(ConfirmSectionDocument, variables, requestHeaders));
     },
-    CreateSasNumber(variables: CreateSasNumberMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateSasNumberMutation> {
-      return withWrapper(() => client.request<CreateSasNumberMutation>(CreateSasNumberDocument, variables, requestHeaders));
+    CreateWork(variables: CreateWorkMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateWorkMutation> {
+      return withWrapper(() => client.request<CreateWorkMutation>(CreateWorkDocument, variables, requestHeaders));
     },
     Destroy(variables: DestroyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DestroyMutation> {
       return withWrapper(() => client.request<DestroyMutation>(DestroyDocument, variables, requestHeaders));
@@ -2945,6 +3058,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     SetSpeciesEnabled(variables: SetSpeciesEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSpeciesEnabledMutation> {
       return withWrapper(() => client.request<SetSpeciesEnabledMutation>(SetSpeciesEnabledDocument, variables, requestHeaders));
     },
+    SetWorkTypeEnabled(variables: SetWorkTypeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetWorkTypeEnabledMutation> {
+      return withWrapper(() => client.request<SetWorkTypeEnabledMutation>(SetWorkTypeEnabledDocument, variables, requestHeaders));
+    },
     SlotCopy(variables: SlotCopyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SlotCopyMutation> {
       return withWrapper(() => client.request<SlotCopyMutation>(SlotCopyDocument, variables, requestHeaders));
     },
@@ -2954,8 +3070,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     UnstoreBarcode(variables: UnstoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnstoreBarcodeMutation> {
       return withWrapper(() => client.request<UnstoreBarcodeMutation>(UnstoreBarcodeDocument, variables, requestHeaders));
     },
-    UpdateSasNumberStatus(variables: UpdateSasNumberStatusMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateSasNumberStatusMutation> {
-      return withWrapper(() => client.request<UpdateSasNumberStatusMutation>(UpdateSasNumberStatusDocument, variables, requestHeaders));
+    UpdateWorkStatus(variables: UpdateWorkStatusMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkStatusMutation> {
+      return withWrapper(() => client.request<UpdateWorkStatusMutation>(UpdateWorkStatusDocument, variables, requestHeaders));
     },
     CurrentUser(variables?: CurrentUserQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CurrentUserQuery> {
       return withWrapper(() => client.request<CurrentUserQuery>(CurrentUserDocument, variables, requestHeaders));
@@ -3005,9 +3121,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     GetReleaseInfo(variables?: GetReleaseInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetReleaseInfoQuery> {
       return withWrapper(() => client.request<GetReleaseInfoQuery>(GetReleaseInfoDocument, variables, requestHeaders));
     },
-    GetSasAllocationInfo(variables: GetSasAllocationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSasAllocationInfoQuery> {
-      return withWrapper(() => client.request<GetSasAllocationInfoQuery>(GetSasAllocationInfoDocument, variables, requestHeaders));
-    },
     GetSearchInfo(variables?: GetSearchInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSearchInfoQuery> {
       return withWrapper(() => client.request<GetSearchInfoQuery>(GetSearchInfoDocument, variables, requestHeaders));
     },
@@ -3016,6 +3129,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetSectioningInfo(variables?: GetSectioningInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSectioningInfoQuery> {
       return withWrapper(() => client.request<GetSectioningInfoQuery>(GetSectioningInfoDocument, variables, requestHeaders));
+    },
+    GetWorkAllocationInfo(variables: GetWorkAllocationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkAllocationInfoQuery> {
+      return withWrapper(() => client.request<GetWorkAllocationInfoQuery>(GetWorkAllocationInfoDocument, variables, requestHeaders));
     }
   };
 }
