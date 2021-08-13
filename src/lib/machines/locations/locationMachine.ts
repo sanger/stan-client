@@ -6,14 +6,13 @@ import {
   LocationSchema,
   setErrorMessage,
   setSuccessMessage,
-  StoredItemFragment,
 } from "./locationMachineTypes";
 import * as locationService from "../../services/locationService";
-import { Maybe } from "../../../types/sdk";
 import { MachineConfig } from "xstate/lib/types";
 import { createMachineBuilder } from "../index";
 import { castDraft } from "immer";
 import { stanCore } from "../../sdk";
+import { findNextAvailableAddress } from "../../helpers/locationHelper";
 
 enum Action {
   ASSIGN_LOCATION = "assignLocation",
@@ -67,25 +66,19 @@ export const machineOptions: Partial<MachineOptions<
       // Set the location
       ctx.location = e.type === "UPDATE_LOCATION" ? e.location : e.data;
 
-      ctx.addressToItemMap = new Map<string, Maybe<StoredItemFragment>>(
-        ctx.locationAddresses.map((address) => [
-          address,
-          ctx.location.stored.find((item) => item.address === address) ?? null,
-        ])
-      );
+      ctx.addressToItemMap.clear();
 
-      // Determine the next address
-      let selectedAddressIndex = 0;
-      if (ctx.selectedAddress !== null) {
-        selectedAddressIndex = Array.from(ctx.locationAddresses).indexOf(
-          ctx.selectedAddress
-        );
-      }
+      ctx.location.stored.forEach((storedItem) => {
+        if (storedItem.address) {
+          ctx.addressToItemMap.set(storedItem.address, storedItem);
+        }
+      });
 
-      ctx.selectedAddress =
-        ctx.locationAddresses
-          .filter((address, index) => index >= selectedAddressIndex)
-          .find((address) => ctx.addressToItemMap.get(address) == null) ?? null;
+      ctx.selectedAddress = findNextAvailableAddress({
+        locationAddresses: ctx.locationAddresses,
+        addressToItemMap: ctx.addressToItemMap,
+        minimumAddress: ctx.selectedAddress,
+      });
     }),
 
     [Action.ASSIGN_SELECTED_ADDRESS]: assign((ctx, e) => {

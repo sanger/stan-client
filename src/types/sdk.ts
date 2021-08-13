@@ -445,7 +445,9 @@ export enum GridDirection {
   /** Right across the top row, then down to the next row, etc. */
   RightDown = 'RightDown',
   /** Down the leftmost column, then right to the next column, etc. */
-  DownRight = 'DownRight'
+  DownRight = 'DownRight',
+  RightUp = 'RightUp',
+  UpRight = 'UpRight'
 }
 
 export type Location = {

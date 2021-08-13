@@ -154,10 +154,10 @@ racks.forEach((rack, index) => {
     locationFactory.build({
       customName: `Box 3 in ${rack.customName}`,
       size: {
-        numRows: 25,
-        numColumns: 1,
+        numRows: 5,
+        numColumns: 5,
       },
-      direction: GridDirection.DownRight,
+      direction: GridDirection.RightUp,
       parent: buildLinkedLocation(rack),
     })
   );
@@ -166,10 +166,10 @@ racks.forEach((rack, index) => {
     locationFactory.build({
       customName: `Box 4 in ${rack.customName}`,
       size: {
-        numRows: 1,
-        numColumns: 14,
+        numRows: 5,
+        numColumns: 5,
       },
-      direction: GridDirection.RightDown,
+      direction: GridDirection.UpRight,
       parent: buildLinkedLocation(rack),
     })
   );

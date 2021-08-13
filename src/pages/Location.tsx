@@ -22,13 +22,16 @@ import EditableText from "../components/EditableText";
 import { setLocationCustomName } from "../lib/services/locationService";
 import Warning from "../components/notifications/Warning";
 import { toast } from "react-toastify";
-import { addressToLocationAddress } from "../lib/helpers/locationHelper";
+import {
+  addressToLocationAddress,
+  buildOrderedAddresses,
+  findNextAvailableAddress,
+} from "../lib/helpers/locationHelper";
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
 import { RouteComponentProps } from "react-router-dom";
 import { LocationMatchParams, LocationSearchParams } from "../types/stan";
 import { LocationFieldsFragment, Maybe } from "../types/sdk";
 import { useMachine } from "@xstate/react";
-import { buildAddresses } from "../lib/helpers";
 import { StoredItemFragment } from "../lib/machines/locations/locationMachineTypes";
 import createLocationMachine from "../lib/machines/locations/locationMachine";
 
@@ -42,7 +45,8 @@ enum ViewType {
 
 type LocationParentContextType = {
   location: LocationFieldsFragment;
-  addressToItemMap: Map<string, Maybe<StoredItemFragment>>;
+  locationAddresses: Map<string, number>;
+  addressToItemMap: Map<string, StoredItemFragment>;
   storeBarcode: (barcode: string, address?: string) => void;
   unstoreBarcode: (barcode: string) => void;
   selectedAddress: Maybe<string>;
@@ -66,24 +70,24 @@ const Location: React.FC<LocationProps> = ({
 }) => {
   const [current, send] = useMachine(() => {
     // Create all the possible addresses for this location if it has a size.
-    const locationAddresses =
+    const locationAddresses: Map<string, number> =
       storageLocation.size && storageLocation.direction
-        ? buildAddresses(storageLocation.size, storageLocation.direction)
-        : [];
+        ? buildOrderedAddresses(storageLocation.size, storageLocation.direction)
+        : new Map<string, number>();
 
-    // Create a map of location addresses to items (or null if empty)
-    const addressToItemMap = new Map<string, Maybe<StoredItemFragment>>(
-      locationAddresses.map((address) => [
-        address,
-        storageLocation.stored.find((item) => item.address === address) ?? null,
-      ])
-    );
+    // Create a map of location address to item
+    const addressToItemMap = new Map<string, StoredItemFragment>();
+    storageLocation.stored.forEach((storedItem) => {
+      if (storedItem.address) {
+        addressToItemMap.set(storedItem.address, storedItem);
+      }
+    });
 
     // Get the first selected address (which is the first empty address)
-    const selectedAddress =
-      locationAddresses.find(
-        (address) => addressToItemMap.get(address) == null
-      ) ?? null;
+    const selectedAddress = findNextAvailableAddress({
+      locationAddresses: locationAddresses,
+      addressToItemMap: addressToItemMap,
+    });
 
     return createLocationMachine({
       context: {
@@ -98,6 +102,7 @@ const Location: React.FC<LocationProps> = ({
 
   const {
     location,
+    locationAddresses,
     successMessage,
     errorMessage,
     serverError,
@@ -187,6 +192,7 @@ const Location: React.FC<LocationProps> = ({
     () => ({
       addressToItemMap,
       location,
+      locationAddresses,
       labwareBarcodeToAddressMap,
       selectedAddress,
       storeBarcode: (barcode, address) =>
@@ -198,6 +204,7 @@ const Location: React.FC<LocationProps> = ({
     [
       addressToItemMap,
       location,
+      locationAddresses,
       labwareBarcodeToAddressMap,
       selectedAddress,
       send,
