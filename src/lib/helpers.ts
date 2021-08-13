@@ -87,7 +87,7 @@ export function createAddress(rowNumber: number, columnNumber: number): string {
 
 /**
  * Creates a list of addresses for a {@link SizeInput}
- * @param size something with `numRows` and `numColumns`
+ * @param size an object with `numRows` and `numColumns` properties
  * @param direction the grid direction
  */
 export function buildAddresses(

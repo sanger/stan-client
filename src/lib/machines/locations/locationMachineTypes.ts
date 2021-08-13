@@ -20,12 +20,12 @@ export interface LocationContext {
   /**
    * The list of possible addresses for this location
    */
-  locationAddresses: Array<string>;
+  locationAddresses: Map<string, number>;
 
   /**
-   * A map of location address to stored item (or null if address is empty)
+   * A map of location address to stored item
    */
-  addressToItemMap: Map<string, Maybe<StoredItemFragment>>;
+  addressToItemMap: Map<string, StoredItemFragment>;
 
   /**
    * If this location has a size, this is the currently selected address.

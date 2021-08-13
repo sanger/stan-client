@@ -4,7 +4,6 @@ import WhiteButton from "../../components/buttons/WhiteButton";
 import { LocationParentContext } from "../Location";
 import UnstoreBarcodeModal from "./UnstoreBarcodeModal";
 import { addressToLocationAddress } from "../../lib/helpers/locationHelper";
-import { GridDirection } from "../../types/sdk";
 import classNames from "classnames";
 import BarcodeIcon from "../../components/icons/BarcodeIcon";
 import { Authenticated } from "../../components/Authenticated";
@@ -15,6 +14,7 @@ import { Authenticated } from "../../components/Authenticated";
 export const ItemsGrid: React.FC = () => {
   const {
     location,
+    locationAddresses,
     selectedAddress,
     addressToItemMap,
     storeBarcode,
@@ -53,7 +53,9 @@ export const ItemsGrid: React.FC = () => {
             )}
 
             <ScanInput
-              disabled={addressToItemMap.get(selectedAddress!) !== null}
+              disabled={
+                !selectedAddress || addressToItemMap.has(selectedAddress)
+              }
               placeholder="Labware barcode..."
               ref={scanInputRef}
               onScan={handleOnScan}
@@ -66,20 +68,18 @@ export const ItemsGrid: React.FC = () => {
           <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
             <div className="p-2 shadow overflow-hidden border-b border-gray-200">
               <div
-                className={`min-w-full grid justify-center grid-flow-${
-                  location.direction === GridDirection.RightDown ? "row" : "col"
-                }
-                gap-2 grid-rows-${location.size?.numRows} grid-cols-location-${
-                  location.size?.numColumns
-                }`}
+                className={`min-w-full grid justify-center grid-flow-row gap-2 grid-cols-location-${location.size?.numColumns}`}
               >
-                {Array.from(addressToItemMap.keys()).map((address: string) => (
-                  <GridItem
-                    address={address}
-                    onButtonClick={() => setModalOpen(true)}
-                    key={address}
-                  />
-                ))}
+                {Array.from(locationAddresses.entries()).map(
+                  (locationAddress) => (
+                    <GridItem
+                      storelightAddress={locationAddress[0]}
+                      stanAddress={locationAddress[1]}
+                      onButtonClick={() => setModalOpen(true)}
+                      key={locationAddress[0]}
+                    />
+                  )
+                )}
               </div>
             </div>
           </div>
@@ -108,14 +108,18 @@ export const ItemsGrid: React.FC = () => {
 export default ItemsGrid;
 
 interface GridItemParams {
-  address: string;
+  storelightAddress: string;
+  stanAddress: number;
   onButtonClick: () => void;
 }
 
-const GridItem: React.FC<GridItemParams> = ({ address, onButtonClick }) => {
+const GridItem: React.FC<GridItemParams> = ({
+  storelightAddress,
+  stanAddress,
+  onButtonClick,
+}) => {
   const {
     addressToItemMap,
-    location,
     selectedAddress,
     labwareBarcodeToAddressMap,
     setSelectedAddress,
@@ -124,40 +128,37 @@ const GridItem: React.FC<GridItemParams> = ({ address, onButtonClick }) => {
   const gridItemClassNames = classNames(
     {
       "border-2 border-blue-800 bg-sdb-100 hover:bg-sp-300 text-gray-300": labwareBarcodeToAddressMap.has(
-        addressToItemMap.get(address)?.barcode ?? ""
+        addressToItemMap.get(storelightAddress)?.barcode ?? ""
       ),
       "bg-blue-800 hover:bg-sp-300 text-gray-300":
-        address !== selectedAddress &&
-        addressToItemMap.get(address) != null &&
+        storelightAddress !== selectedAddress &&
+        addressToItemMap.get(storelightAddress) != null &&
         !labwareBarcodeToAddressMap.has(
-          addressToItemMap.get(address)?.barcode ?? ""
+          addressToItemMap.get(storelightAddress)?.barcode ?? ""
         ),
       "bg-blue-100 hover:bg-sp-300 text-gray-800":
-        address !== selectedAddress && addressToItemMap.get(address) == null,
-      "bg-sp-400": address === selectedAddress,
+        storelightAddress !== selectedAddress &&
+        addressToItemMap.get(storelightAddress) == null,
+      "bg-sp-400": storelightAddress === selectedAddress,
     },
     "p-2 h-24 box-border flex flex-col justify-between cursor-pointer text-md font-semibold hover:text-gray-800 hover:opacity-75"
   );
 
   return (
     <div
-      data-testid={address === selectedAddress ? "selectedAddress" : null}
-      onClick={() => setSelectedAddress(address)}
+      data-testid={
+        storelightAddress === selectedAddress ? "selectedAddress" : null
+      }
+      onClick={() => setSelectedAddress(storelightAddress)}
       className={gridItemClassNames}
     >
       <div className="flex flex-row items-start justify-between">
-        <span>
-          {addressToLocationAddress(
-            address,
-            location.size!,
-            location.direction!
-          )}
-        </span>
+        <span>{stanAddress}</span>
 
         <div>
           <Authenticated>
-            {addressToItemMap.get(address) != null &&
-              address === selectedAddress && (
+            {addressToItemMap.get(storelightAddress) != null &&
+              storelightAddress === selectedAddress && (
                 <WhiteButton
                   className="float-right"
                   onClick={() => onButtonClick()}
@@ -170,10 +171,10 @@ const GridItem: React.FC<GridItemParams> = ({ address, onButtonClick }) => {
       </div>
 
       <div className="flex flex-row items-center justify-center gap-1">
-        {addressToItemMap.get(address)?.barcode && (
+        {addressToItemMap.get(storelightAddress)?.barcode && (
           <BarcodeIcon className="inline-block h-4" />
         )}
-        <div>{addressToItemMap.get(address)?.barcode}</div>
+        <div>{addressToItemMap.get(storelightAddress)?.barcode}</div>
       </div>
     </div>
   );
