@@ -1,7 +1,7 @@
 import * as queryString from "query-string";
 import { ParsedQuery } from "query-string";
 import { GridDirection, Maybe } from "../types/sdk";
-import { SizeInput } from "../types/stan";
+import { HasEnabled, SizeInput } from "../types/stan";
 import _ from "lodash";
 
 /**
@@ -87,7 +87,7 @@ export function createAddress(rowNumber: number, columnNumber: number): string {
 
 /**
  * Creates a list of addresses for a {@link SizeInput}
- * @param size something with `numRows` and `numColumns`
+ * @param size an object with `numRows` and `numColumns` properties
  * @param direction the grid direction
  */
 export function buildAddresses(
@@ -141,9 +141,10 @@ export function cycleColors() {
 }
 
 /**
- * Get a timestamp in the format yyyyMMddHHmmss
+ * Get a timestamp as a string
+ * @return timestamp in the format yyyyMMddHHmmss
  */
-export function getTimestampStr(date?: Date) {
+export function getTimestampStr(date?: Date): string {
   if (!date) {
     date = new Date();
   }
@@ -151,4 +152,13 @@ export function getTimestampStr(date?: Date) {
     .toISOString()
     .split(".")[0]
     .replace(/[^0-9]+/g, "");
+}
+
+/**
+ * Predicate to check if an enablelable entity is currently enabled
+ * @param enablelable an object with an {@code enabled} property
+ * @return true if the entity is enabled; false otherwise
+ */
+export function isEnabled(enablelable: HasEnabled): boolean {
+  return enablelable.enabled;
 }

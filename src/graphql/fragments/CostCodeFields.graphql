@@ -1,0 +1,4 @@
+fragment CostCodeFields on CostCode {
+    code
+    enabled
+}

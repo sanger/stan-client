@@ -1,0 +1,27 @@
+import { Factory } from "fishery";
+import { WorkFieldsFragment, WorkStatus } from "../../types/sdk";
+import costCodeFactory from "./costCodeFactory";
+import projectFactory from "./projectFactory";
+import workTypeFactory from "./workTypeFactory";
+
+export default Factory.define<WorkFieldsFragment, { isRnD: boolean }>(
+  ({ params, sequence, associations, transientParams }) => {
+    let workNumber: string;
+    if (params.workNumber) {
+      workNumber = params.workNumber;
+    } else {
+      workNumber = transientParams.isRnD
+        ? `R&D${sequence + 1000}`
+        : `SGP${sequence + 1000}`;
+    }
+
+    return {
+      __typename: "Work",
+      workType: associations.workType ?? workTypeFactory.build(),
+      costCode: associations.costCode ?? costCodeFactory.build(),
+      project: associations.project ?? projectFactory.build(),
+      status: params.status ?? WorkStatus.Active,
+      workNumber: workNumber,
+    };
+  }
+);

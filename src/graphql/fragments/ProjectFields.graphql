@@ -1,0 +1,4 @@
+fragment ProjectFields on Project {
+    name
+    enabled
+}
