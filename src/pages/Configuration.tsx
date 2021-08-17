@@ -168,6 +168,66 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                 }
               />
             </div>
+
+            <div data-testid="config">
+              <Heading level={2}>Work Types</Heading>
+              <p className="mt-3 mb-6 text-lg" />
+              <EntityManager
+                initialEntities={configuration.workTypes}
+                displayColumnName={"name"}
+                onToggle={(entity, enabled) =>
+                  stanCore
+                    .SetWorkTypeEnabled({
+                      enabled,
+                      name: entity.name,
+                    })
+                    .then((res) => res.setWorkTypeEnabled)
+                }
+                onCreate={(name) =>
+                  stanCore.AddWorkType({ name }).then((res) => res.addWorkType)
+                }
+              />
+            </div>
+
+            <div data-testid="config">
+              <Heading level={2}>Projects</Heading>
+              <p className="mt-3 mb-6 text-lg" />
+              <EntityManager
+                initialEntities={configuration.projects}
+                displayColumnName={"name"}
+                onToggle={(entity, enabled) =>
+                  stanCore
+                    .SetProjectEnabled({
+                      enabled,
+                      name: entity.name,
+                    })
+                    .then((res) => res.setProjectEnabled)
+                }
+                onCreate={(name) =>
+                  stanCore.AddProject({ name }).then((res) => res.addProject)
+                }
+              />
+            </div>
+
+            <div data-testid="config">
+              <Heading level={2}>Cost Codes</Heading>
+              <p className="mt-3 mb-6 text-lg" />
+              <EntityManager
+                initialEntities={configuration.costCodes}
+                displayColumnName={"code"}
+                onToggle={(entity, enabled) =>
+                  stanCore
+                    .SetCostCodeEnabled({
+                      enabled,
+                      code: entity.code,
+                    })
+                    .then((res) => res.setCostCodeEnabled)
+                }
+                onCreate={(code) =>
+                  stanCore.AddCostCode({ code }).then((res) => res.addCostCode)
+                }
+              />
+            </div>
           </div>
         </div>
       </AppShell.Main>

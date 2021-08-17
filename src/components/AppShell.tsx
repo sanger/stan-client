@@ -364,6 +364,15 @@ function AppShell({ children }: AppShellParams) {
                         aria-orientation="vertical"
                         aria-labelledby="user-menu"
                       >
+                        <Authenticated>
+                          <Link
+                            to="/sgp"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            role="menuitem"
+                          >
+                            SGP Management
+                          </Link>
+                        </Authenticated>
                         <Authenticated role={UserRole.Admin}>
                           <Link
                             to="/config"
@@ -494,6 +503,15 @@ function AppShell({ children }: AppShellParams) {
                 </Authenticated>
 
                 <div className="px-2 space-y-1 sm:px-3">
+                  <Authenticated>
+                    <Link
+                      to="/sgp"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700"
+                    >
+                      SGP Management
+                    </Link>
+                  </Authenticated>
+
                   <Authenticated role={UserRole.Admin}>
                     <Link
                       to="/config"

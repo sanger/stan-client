@@ -17,4 +17,13 @@ query GetConfiguration {
     releaseRecipients(includeDisabled: true) {
         ...ReleaseRecipientFields
     }
+    projects(includeDisabled: true) {
+        ...ProjectFields
+    }
+    costCodes(includeDisabled: true) {
+        ...CostCodeFields
+    }
+    workTypes(includeDisabled: true) {
+        ...WorkTypeFields
+    }
 }

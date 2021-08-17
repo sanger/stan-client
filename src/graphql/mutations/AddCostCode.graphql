@@ -1,0 +1,5 @@
+mutation AddCostCode($code: String!) {
+    addCostCode(code: $code) {
+        ...CostCodeFields
+    }
+}

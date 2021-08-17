@@ -1,0 +1,5 @@
+mutation CreateWork($prefix: String!, $workType: String!, $project: String!, $costCode: String!) {
+    createWork(prefix: $prefix, workType: $workType, project: $project, costCode: $costCode) {
+        ...WorkFields
+    }
+}

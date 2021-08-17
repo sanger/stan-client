@@ -1,0 +1,5 @@
+mutation UpdateWorkStatus($workNumber: String!, $status: WorkStatus!, $commentId: Int) {
+    updateWorkStatus(workNumber: $workNumber, status: $status, commentId: $commentId) {
+        ...WorkFields
+    }
+}

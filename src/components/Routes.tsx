@@ -23,6 +23,7 @@ import { Maybe, UserRole } from "../types/sdk";
 import Configuration from "../pages/Configuration";
 import { StanCoreContext } from "../lib/sdk";
 import LabwareDetails from "../pages/LabwareDetails";
+import SGP from "../pages/SGP";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -206,6 +207,7 @@ export function Routes() {
       />
 
       <Route path={"/history"} component={History} />
+      <AuthenticatedRoute path={"/sgp"} component={SGP} />
 
       <Route
         path={["/", "/search"]}
