@@ -13,15 +13,18 @@ const seeds: Array<CommentFieldsFragment> = [
     category: "blah",
     enabled: false,
   }),
-  commentFactory.build({ text: "RIN number too low", category: "SGP status" }),
-  commentFactory.build({ text: "Poor quality tissue", category: "SGP status" }),
+  commentFactory.build({ text: "RIN number too low", category: "Work status" }),
+  commentFactory.build({
+    text: "Poor quality tissue",
+    category: "Work status",
+  }),
   commentFactory.build({
     text: "Waiting for reagents",
-    category: "SGP status",
+    category: "Work status",
   }),
   commentFactory.build({
     text: "Waiting for customer",
-    category: "SGP status",
+    category: "Work status",
   }),
 ];
 

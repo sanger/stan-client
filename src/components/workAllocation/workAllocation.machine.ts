@@ -164,7 +164,7 @@ export default function createWorkAllocationMachine() {
         },
 
         loadWorkAllocationInfo: () =>
-          stanCore.GetWorkAllocationInfo({ commentCategory: "SGP status" }),
+          stanCore.GetWorkAllocationInfo({ commentCategory: "Work status" }),
       },
     }
   );
