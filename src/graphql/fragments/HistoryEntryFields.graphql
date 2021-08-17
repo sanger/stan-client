@@ -7,4 +7,5 @@ fragment HistoryEntryFields on HistoryEntry {
     time
     username
     type
+    workNumber
 }
