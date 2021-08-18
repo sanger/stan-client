@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import AppShell from "../components/AppShell";
 import BlueButton from "../components/buttons/BlueButton";
 import Heading from "../components/Heading";
@@ -29,6 +29,7 @@ import extractionMachine, {
 import { Link } from "react-router-dom";
 import ButtonBar from "../components/ButtonBar";
 import { reload } from "../lib/sdk";
+import WorkNumberSelect from "../components/WorkNumberSelect";
 
 function buildExtractionTableData(ctx: ExtractionContext) {
   if (!ctx.extraction) return [];
@@ -88,6 +89,13 @@ function Extraction() {
     return buildExtractionTableData(current.context);
   }, [current]);
 
+  const handleWorkNumberChange = useCallback(
+    (workNumber?: string) => {
+      send({ type: "UPDATE_WORK_NUMBER", workNumber });
+    },
+    [send]
+  );
+
   const onLabwareScannerChange = (labwares: Array<LabwareFieldsFragment>) =>
     send({ type: "UPDATE_LABWARES", labwares });
 
@@ -107,7 +115,18 @@ function Extraction() {
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          <div className="space-y-4">
+          <div>
+            <Heading level={3}>SGP Number</Heading>
+            <p className="mt-2">
+              You may optionally select an SGP number to associate with this
+              extraction.
+            </p>
+            <div className="mt-4 md:w-1/2">
+              <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
+            </div>
+          </div>
+
+          <div className="mt-8 space-y-4">
             <Heading level={3}>Section Tubes</Heading>
 
             <LabwareScanner

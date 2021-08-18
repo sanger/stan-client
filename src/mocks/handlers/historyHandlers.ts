@@ -31,6 +31,7 @@ function buildHistory(): HistoryFieldsFragment {
       type: "Eat",
       username: "user1",
       details: ["Taste: Great", "Monkey: Foo"],
+      workNumber: "SGP123",
     },
   ];
 

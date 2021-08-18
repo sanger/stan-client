@@ -20,6 +20,11 @@ import { ClientError } from "graphql-request";
 
 type SectioningConfirmContext = {
   /**
+   * The work number to associate with this confirm operation
+   */
+  workNumber?: string;
+
+  /**
    * The list of plans found after scanning in labware
    */
   plans: Array<FindPlanDataQuery>;
@@ -52,6 +57,7 @@ type SectioningConfirmContext = {
 };
 
 type SectioningConfirmEvent =
+  | { type: "UPDATE_WORK_NUMBER"; workNumber?: string }
   | {
       type: "UPDATE_PLANS";
       plans: Array<FindPlanDataQuery>;
@@ -84,6 +90,7 @@ export function createSectioningConfirmMachine() {
         ready: {
           initial: "invalid",
           on: {
+            UPDATE_WORK_NUMBER: { actions: "assignWorkNumber" },
             UPDATE_PLANS: {
               target: "validating",
               actions: [
@@ -183,12 +190,20 @@ export function createSectioningConfirmMachine() {
           if (e.type !== "error.platform.confirmSection") return;
           ctx.requestError = e.data;
         }),
+
+        assignWorkNumber: assign((ctx, e) => {
+          if (e.type !== "UPDATE_WORK_NUMBER") return;
+          ctx.workNumber = e.workNumber;
+        }),
       },
 
       services: {
         confirmSection: (context) => {
           return stanCore.ConfirmSection({
-            request: { labware: context.confirmSectionLabware },
+            request: {
+              labware: context.confirmSectionLabware,
+              workNumber: context.workNumber,
+            },
           });
         },
 

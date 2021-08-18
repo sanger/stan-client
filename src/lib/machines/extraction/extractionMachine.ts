@@ -6,6 +6,7 @@ import { ClientError } from "graphql-request";
 import { stanCore } from "../../sdk";
 
 export interface ExtractionContext {
+  workNumber?: string;
   labwares: LabwareFieldsFragment[];
   extraction?: ExtractMutation;
   serverErrors?: ClientError;
@@ -26,6 +27,7 @@ type ExtractErrorEvent = {
 };
 
 export type ExtractionEvent =
+  | { type: "UPDATE_WORK_NUMBER"; workNumber?: string }
   | UpdateLabwaresEvent
   | ExtractEvent
   | ExtractDoneEvent
@@ -41,6 +43,7 @@ export const extractionMachine = createMachine<
     states: {
       ready: {
         on: {
+          UPDATE_WORK_NUMBER: { actions: "assignWorkNumber" },
           UPDATE_LABWARES: { actions: "assignLabwares" },
           EXTRACT: { target: "extracting", cond: "labwaresNotEmpty" },
         },
@@ -88,6 +91,11 @@ export const extractionMachine = createMachine<
         }
         ctx.serverErrors = castDraft(e.data);
       }),
+
+      assignWorkNumber: assign((ctx, e) => {
+        if (e.type !== "UPDATE_WORK_NUMBER") return;
+        ctx.workNumber = e.workNumber;
+      }),
     },
 
     guards: {
@@ -98,6 +106,7 @@ export const extractionMachine = createMachine<
       extract: (ctx, _e) => {
         return stanCore.Extract({
           request: {
+            workNumber: ctx.workNumber,
             labwareType: "Tube",
             barcodes: ctx.labwares.map((lw) => lw.barcode),
           },

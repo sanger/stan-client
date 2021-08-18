@@ -20,6 +20,10 @@ import { ClientError } from "graphql-request";
  * Context for SlotCopy Machine
  */
 export interface SlotCopyContext {
+  /**
+   * The work number associated with this operation
+   */
+  workNumber?: string;
   operationType: OperationTypeName;
   outputLabwareType: LabwareTypeName;
   slotCopyContent: Array<SlotCopyContent>;
@@ -36,6 +40,7 @@ type UpdateSlotCopyContentType = {
 type SaveEvent = { type: "SAVE" };
 
 export type SlotCopyEvent =
+  | { type: "UPDATE_WORK_NUMBER"; workNumber?: string }
   | UpdateSlotCopyContentType
   | SaveEvent
   | MachineServiceDone<"copySlots", SlotCopyMutation>
@@ -51,6 +56,9 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
     states: {
       mapping: {
         on: {
+          UPDATE_WORK_NUMBER: {
+            actions: "assignWorkNumber",
+          },
           UPDATE_SLOT_COPY_CONTENT: [
             {
               target: "readyToCopy",
@@ -65,6 +73,9 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       },
       readyToCopy: {
         on: {
+          UPDATE_WORK_NUMBER: {
+            actions: "assignWorkNumber",
+          },
           UPDATE_SLOT_COPY_CONTENT: [
             {
               target: "mapping",
@@ -119,6 +130,11 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         ctx.serverErrors = castDraft(e.data);
       }),
 
+      assignWorkNumber: assign((ctx, e) => {
+        if (e.type !== "UPDATE_WORK_NUMBER") return;
+        ctx.workNumber = e.workNumber;
+      }),
+
       emptyServerError: assign((ctx) => {
         ctx.serverErrors = null;
       }),
@@ -127,6 +143,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       copySlots: (ctx) => {
         return stanCore.SlotCopy({
           request: {
+            workNumber: ctx.workNumber,
             operationType: ctx.operationType,
             labwareType: ctx.outputLabwareType,
             contents: ctx.slotCopyContent,
