@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- SGP Management ([#54](https://github.com/sanger/stan-client/pull/54))
+
+### Modified
+- Support for more Storelight grid directions ([#53](https://github.com/sanger/stan-client/pull/53))
+- Add username to the History table ([#52](https://github.com/sanger/stan-client/pull/52))
+- Add work numbers to the History table ([#57](https://github.com/sanger/stan-client/pull/57))
+
+### Removed
+- Sample ID from History table ([#55](https://github.com/sanger/stan-client/pull/55))
 
 ## [1.6.0] - 2021-08-13
 ### Modified
