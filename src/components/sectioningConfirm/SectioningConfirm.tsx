@@ -11,6 +11,7 @@ import { CommentFieldsFragment, FindPlanDataQuery } from "../../types/sdk";
 import { useMachine } from "@xstate/react";
 import { createSectioningConfirmMachine } from "./sectioningConfirm.machine";
 import Warning from "../notifications/Warning";
+import WorkNumberSelect from "../WorkNumberSelect";
 
 type SectioningConfirmProps = {
   /**
@@ -59,6 +60,16 @@ export default function SectioningConfirm({
   } = current.context;
 
   /**
+   * Callback for when the work number select changes
+   */
+  const handleWorkNumberChange = useCallback(
+    (workNumber?: string) => {
+      send({ type: "UPDATE_WORK_NUMBER", workNumber });
+    },
+    [send]
+  );
+
+  /**
    * Callback for when the {@link PlanFinder} updates its list of plans
    */
   const handlePlanChange = useCallback(
@@ -81,6 +92,17 @@ export default function SectioningConfirm({
 
   return (
     <div className="my-4 mx-auto max-w-screen-xl space-y-12">
+      <div>
+        <Heading level={3}>SGP Number</Heading>
+        <p className="mt-2">
+          You may optionally select an SGP number to associate with this
+          confirmation.
+        </p>
+        <div className="mt-4 md:w-1/2">
+          <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
+        </div>
+      </div>
+
       <div>
         <Heading level={3}>Find Plans</Heading>
 

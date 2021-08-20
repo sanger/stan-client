@@ -6,8 +6,11 @@ import {
   GetSectioningConfirmInfoQueryVariables,
   GetSectioningInfoQuery,
   GetSectioningInfoQueryVariables,
+  WorkStatus,
 } from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
+import commentRepository from "../repositories/commentRepository";
+import workRepository from "../repositories/workRepository";
 
 const sectioningHandlers = [
   graphql.query<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(
@@ -27,36 +30,12 @@ const sectioningHandlers = [
   >("GetSectioningConfirmInfo", (req, res, ctx) => {
     return res(
       ctx.data({
-        comments: [
-          {
-            __typename: "Comment",
-            id: 1,
-            text: "Section Folded",
-            category: "section",
-            enabled: true,
-          },
-          {
-            __typename: "Comment",
-            id: 2,
-            text: "Poor section quality",
-            category: "section",
-            enabled: true,
-          },
-          {
-            __typename: "Comment",
-            id: 3,
-            text: "Sectioned well",
-            category: "section",
-            enabled: true,
-          },
-          {
-            __typename: "Comment",
-            id: 4,
-            text: "Section exploded",
-            category: "section",
-            enabled: true,
-          },
-        ],
+        comments: commentRepository
+          .findAll()
+          .filter((c) => c.category === "section"),
+        works: workRepository
+          .findAll()
+          .filter((w) => w.status === WorkStatus.Active),
       })
     );
   }),

@@ -29,7 +29,7 @@ describe("Work Allocation", () => {
       "when I select a work type, project, and cost code and then submit the form",
       () => {
         before(() => {
-          cy.findByLabelText("Work Type").select("Work Type 1");
+          cy.findByLabelText("Work Type").select("TEST_WT_1");
           cy.findByLabelText("Project").select("TEST999");
           cy.findByLabelText("Cost Code").select("S999");
           cy.findByRole("button", { name: /Submit/i }).click();
@@ -37,7 +37,7 @@ describe("Work Allocation", () => {
 
         it("allocates new Work", () => {
           cy.findByText(
-            /Assigned SGP\d+ \(Work Type 1\) to project TEST999 and cost code S999/
+            /Assigned SGP\d+ \(TEST_WT_1\) to project TEST999 and cost code S999/
           ).should("exist");
         });
       }

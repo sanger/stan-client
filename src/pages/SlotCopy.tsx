@@ -13,6 +13,8 @@ import { SlotCopyContent } from "../types/sdk";
 import slotCopyMachine from "../lib/machines/slotCopy/slotCopyMachine";
 import { Link } from "react-router-dom";
 import { reload } from "../lib/sdk";
+import WorkNumberSelect from "../components/WorkNumberSelect";
+import Heading from "../components/Heading";
 
 type PageParams = {
   title: string;
@@ -43,6 +45,13 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
         slotCopyContent,
         allSourcesMapped,
       });
+    },
+    [send]
+  );
+
+  const handleWorkNumberChange = useCallback(
+    (workNumber?: string) => {
+      send({ type: "UPDATE_WORK_NUMBER", workNumber });
     },
     [send]
   );
@@ -84,6 +93,17 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
               <Warning error={serverErrors} />
             </div>
           )}
+
+          <div className="mb-8">
+            <Heading level={3}>SGP Number</Heading>
+            <p className="mt-2">
+              You may optionally select an SGP number to associate with this
+              operation.
+            </p>
+            <div className="my-4 md:w-1/2">
+              <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
+            </div>
+          </div>
 
           <SlotMapper
             locked={current.matches("copied")}

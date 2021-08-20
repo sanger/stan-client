@@ -2,6 +2,8 @@ import { graphql } from "msw";
 import {
   CreateWorkMutation,
   CreateWorkMutationVariables,
+  FindWorkNumbersQuery,
+  FindWorkNumbersQueryVariables,
   GetWorkAllocationInfoQuery,
   GetWorkAllocationInfoQueryVariables,
   UpdateWorkStatusMutation,
@@ -107,6 +109,19 @@ const workHandlers = [
       return res(
         ctx.data({
           updateWorkStatus: work,
+        })
+      );
+    }
+  ),
+
+  graphql.query<FindWorkNumbersQuery, FindWorkNumbersQueryVariables>(
+    "FindWorkNumbers",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          works: workRepository
+            .findAll()
+            .filter((w) => w.status === req.variables.status),
         })
       );
     }

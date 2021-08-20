@@ -1,9 +1,29 @@
 import { graphql } from "msw";
-import { ExtractMutation, ExtractMutationVariables } from "../../types/sdk";
+import {
+  ExtractMutation,
+  ExtractMutationVariables,
+  GetExtractionInfoQuery,
+  GetExtractionInfoQueryVariables,
+  WorkStatus,
+} from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import labwareFactory from "../../lib/factories/labwareFactory";
+import workRepository from "../repositories/workRepository";
 
 const extractionHandlers = [
+  graphql.query<GetExtractionInfoQuery, GetExtractionInfoQueryVariables>(
+    "GetExtractionInfo",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          works: workRepository
+            .findAll()
+            .filter((w) => w.status === WorkStatus.Active),
+        })
+      );
+    }
+  ),
+
   graphql.mutation<ExtractMutation, ExtractMutationVariables>(
     "Extract",
     (req, res, ctx) => {

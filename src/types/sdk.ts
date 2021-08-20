@@ -297,6 +297,7 @@ export type ConfirmSectionLabware = {
 
 export type ConfirmSectionRequest = {
   labware: Array<ConfirmSectionLabware>;
+  workNumber?: Maybe<Scalars['String']>;
 };
 
 export type SlotCopyContent = {
@@ -309,6 +310,7 @@ export type SlotCopyRequest = {
   labwareType: Scalars['String'];
   operationType: Scalars['String'];
   contents: Array<SlotCopyContent>;
+  workNumber?: Maybe<Scalars['String']>;
 };
 
 export type Action = {
@@ -388,6 +390,7 @@ export type ReleaseRequest = {
 export type ExtractRequest = {
   barcodes: Array<Scalars['String']>;
   labwareType: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
 };
 
 export type OperationResult = {
@@ -983,7 +986,7 @@ export type DestructionReasonFieldsFragment = (
 
 export type HistoryEntryFieldsFragment = (
   { __typename?: 'HistoryEntry' }
-  & Pick<HistoryEntry, 'destinationLabwareId' | 'details' | 'eventId' | 'sampleId' | 'sourceLabwareId' | 'time' | 'type' | 'username' | 'workNumber'>
+  & Pick<HistoryEntry, 'destinationLabwareId' | 'details' | 'eventId' | 'sampleId' | 'sourceLabwareId' | 'time' | 'username' | 'type' | 'workNumber'>
 );
 
 export type HistoryFieldsFragment = (
@@ -1926,6 +1929,19 @@ export type FindPlanDataQuery = (
   ) }
 );
 
+export type FindWorkNumbersQueryVariables = Exact<{
+  status: WorkStatus;
+}>;
+
+
+export type FindWorkNumbersQuery = (
+  { __typename?: 'Query' }
+  & { works: Array<(
+    { __typename?: 'Work' }
+    & Pick<Work, 'workNumber'>
+  )> }
+);
+
 export type GetConfigurationQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1982,6 +1998,17 @@ export type GetDestructionReasonsQuery = (
   & { destructionReasons: Array<(
     { __typename?: 'DestructionReason' }
     & DestructionReasonFieldsFragment
+  )> }
+);
+
+export type GetExtractionInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetExtractionInfoQuery = (
+  { __typename?: 'Query' }
+  & { works: Array<(
+    { __typename?: 'Work' }
+    & Pick<Work, 'workNumber'>
   )> }
 );
 
@@ -2062,6 +2089,9 @@ export type GetSectioningConfirmInfoQuery = (
   & { comments: Array<(
     { __typename?: 'Comment' }
     & CommentFieldsFragment
+  )>, works: Array<(
+    { __typename?: 'Work' }
+    & Pick<Work, 'workNumber'>
   )> }
 );
 
@@ -2185,8 +2215,8 @@ export const HistoryEntryFieldsFragmentDoc = gql`
   sampleId
   sourceLabwareId
   time
-  type
   username
+  type
   workNumber
 }
     `;
@@ -2816,6 +2846,13 @@ export const FindPlanDataDocument = gql`
 }
     ${LabwareFieldsFragmentDoc}
 ${PlanActionFieldsFragmentDoc}`;
+export const FindWorkNumbersDocument = gql`
+    query FindWorkNumbers($status: WorkStatus!) {
+  works(status: [$status]) {
+    workNumber
+  }
+}
+    `;
 export const GetConfigurationDocument = gql`
     query GetConfiguration {
   destructionReasons(includeDisabled: true) {
@@ -2869,6 +2906,13 @@ export const GetDestructionReasonsDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
+export const GetExtractionInfoDocument = gql`
+    query GetExtractionInfo {
+  works(status: [active]) {
+    workNumber
+  }
+}
+    `;
 export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
@@ -2927,6 +2971,9 @@ export const GetSectioningConfirmInfoDocument = gql`
     query GetSectioningConfirmInfo {
   comments(category: "section") {
     ...CommentFields
+  }
+  works(status: [active]) {
+    workNumber
   }
 }
     ${CommentFieldsFragmentDoc}`;
@@ -3105,6 +3152,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     FindPlanData(variables: FindPlanDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPlanDataQuery> {
       return withWrapper(() => client.request<FindPlanDataQuery>(FindPlanDataDocument, variables, requestHeaders));
     },
+    FindWorkNumbers(variables: FindWorkNumbersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkNumbersQuery> {
+      return withWrapper(() => client.request<FindWorkNumbersQuery>(FindWorkNumbersDocument, variables, requestHeaders));
+    },
     GetConfiguration(variables?: GetConfigurationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetConfigurationQuery> {
       return withWrapper(() => client.request<GetConfigurationQuery>(GetConfigurationDocument, variables, requestHeaders));
     },
@@ -3113,6 +3163,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetDestructionReasons(variables?: GetDestructionReasonsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestructionReasonsQuery> {
       return withWrapper(() => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, requestHeaders));
+    },
+    GetExtractionInfo(variables?: GetExtractionInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetExtractionInfoQuery> {
+      return withWrapper(() => client.request<GetExtractionInfoQuery>(GetExtractionInfoDocument, variables, requestHeaders));
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
       return withWrapper(() => client.request<GetPrintersQuery>(GetPrintersDocument, variables, requestHeaders));
