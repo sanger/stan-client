@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for more Storelight grid directions ([#53](https://github.com/sanger/stan-client/pull/53))
 - Add username to the History table ([#52](https://github.com/sanger/stan-client/pull/52))
 - Add work numbers to the History table ([#57](https://github.com/sanger/stan-client/pull/57))
+- Removed max number validation for spatial locations at registration ([#59](https://github.com/sanger/stan-client/pull/59))
 
 ### Removed
 - Sample ID from History table ([#55](https://github.com/sanger/stan-client/pull/55))
