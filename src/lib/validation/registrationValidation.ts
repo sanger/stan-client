@@ -89,7 +89,6 @@ export default class RegistrationValidation {
     return validation.requiredNumber({
       label: "Spatial Location",
       min: 0,
-      max: 6,
     });
   }
 
