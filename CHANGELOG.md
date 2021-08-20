@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - SGP Management ([#54](https://github.com/sanger/stan-client/pull/54))
+- SGP numbers for required operations ([#58](https://github.com/sanger/stan-client/pull/58))
 
 ### Modified
 - Support for more Storelight grid directions ([#53](https://github.com/sanger/stan-client/pull/53))
