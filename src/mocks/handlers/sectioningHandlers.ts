@@ -6,11 +6,9 @@ import {
   GetSectioningConfirmInfoQueryVariables,
   GetSectioningInfoQuery,
   GetSectioningInfoQueryVariables,
-  WorkStatus,
 } from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import commentRepository from "../repositories/commentRepository";
-import workRepository from "../repositories/workRepository";
 
 const sectioningHandlers = [
   graphql.query<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(
@@ -33,9 +31,6 @@ const sectioningHandlers = [
         comments: commentRepository
           .findAll()
           .filter((c) => c.category === "section"),
-        works: workRepository
-          .findAll()
-          .filter((w) => w.status === WorkStatus.Active),
       })
     );
   }),
