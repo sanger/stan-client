@@ -2001,17 +2001,6 @@ export type GetDestructionReasonsQuery = (
   )> }
 );
 
-export type GetExtractionInfoQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetExtractionInfoQuery = (
-  { __typename?: 'Query' }
-  & { works: Array<(
-    { __typename?: 'Work' }
-    & Pick<Work, 'workNumber'>
-  )> }
-);
-
 export type GetPrintersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2089,9 +2078,6 @@ export type GetSectioningConfirmInfoQuery = (
   & { comments: Array<(
     { __typename?: 'Comment' }
     & CommentFieldsFragment
-  )>, works: Array<(
-    { __typename?: 'Work' }
-    & Pick<Work, 'workNumber'>
   )> }
 );
 
@@ -2906,13 +2892,6 @@ export const GetDestructionReasonsDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
-export const GetExtractionInfoDocument = gql`
-    query GetExtractionInfo {
-  works(status: [active]) {
-    workNumber
-  }
-}
-    `;
 export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
@@ -2971,9 +2950,6 @@ export const GetSectioningConfirmInfoDocument = gql`
     query GetSectioningConfirmInfo {
   comments(category: "section") {
     ...CommentFields
-  }
-  works(status: [active]) {
-    workNumber
   }
 }
     ${CommentFieldsFragmentDoc}`;
@@ -3163,9 +3139,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetDestructionReasons(variables?: GetDestructionReasonsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestructionReasonsQuery> {
       return withWrapper(() => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, requestHeaders));
-    },
-    GetExtractionInfo(variables?: GetExtractionInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetExtractionInfoQuery> {
-      return withWrapper(() => client.request<GetExtractionInfoQuery>(GetExtractionInfoDocument, variables, requestHeaders));
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
       return withWrapper(() => client.request<GetPrintersQuery>(GetPrintersDocument, variables, requestHeaders));
