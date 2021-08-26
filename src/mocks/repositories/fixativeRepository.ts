@@ -8,7 +8,7 @@ const fixativeSeeds: Array<FixativeFieldsFragment> = [
 ];
 
 const fixativeRepository = createSessionStorageRepository(
-  "SPECIES",
+  "FIXATIVES",
   "name",
   fixativeSeeds
 );
