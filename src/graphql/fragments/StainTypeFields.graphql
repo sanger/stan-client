@@ -1,0 +1,4 @@
+fragment StainTypeFields on StainType {
+    name
+    measurementTypes
+}

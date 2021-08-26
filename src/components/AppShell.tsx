@@ -214,6 +214,20 @@ function AppShell({ children }: AppShellParams) {
                                 </p>
                               </div>
                             </NavLink>
+                            <NavLink
+                              to="/lab/staining"
+                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
+                            >
+                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                              <div className="ml-4">
+                                <p className="text-base font-medium text-gray-900">
+                                  Staining
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  Stain slides and record incubation details.
+                                </p>
+                              </div>
+                            </NavLink>
                           </div>
                           <div className="px-5 py-5 bg-gray-50 space-y-6 sm:flex sm:space-y-0 sm:space-x-10 sm:px-8" />
                         </div>
@@ -450,6 +464,10 @@ function AppShell({ children }: AppShellParams) {
 
                       <StanMobileNavLink to="/lab/visium_cdna">
                         Visium cDNA
+                      </StanMobileNavLink>
+
+                      <StanMobileNavLink to="/lab/staining">
+                        Staining
                       </StanMobileNavLink>
                     </div>
                   </div>

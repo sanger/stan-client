@@ -24,6 +24,7 @@ import Configuration from "../pages/Configuration";
 import { StanCoreContext } from "../lib/sdk";
 import LabwareDetails from "../pages/LabwareDetails";
 import SGP from "../pages/SGP";
+import Staining from "../pages/Staining";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -79,6 +80,18 @@ export function Routes() {
             title={"Visium cDNA"}
             initialOutputLabware={[plateFactory.build()]}
           />
+        )}
+      />
+
+      <AuthenticatedRoute
+        path="/lab/staining"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetStainInfo}
+          >
+            {(stainingInfo) => <Staining stainingInfo={stainingInfo} />}
+          </DataFetcher>
         )}
       />
 
