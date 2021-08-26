@@ -53,6 +53,7 @@ export const fixativeFactory: Factory<Fixative> = Factory.define<Fixative>(
   ({ params, sequence }) => ({
     __typename: "Fixative",
     name: params.name ?? `Fixative ${sequence}`,
+    enabled: params.enabled ?? true,
   })
 );
 

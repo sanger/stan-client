@@ -8,6 +8,7 @@ import releaseRecipientRepository from "../repositories/releaseRecipientReposito
 import commentRepository from "../repositories/commentRepository";
 import hmdmcRepository from "../repositories/hmdmcRepository";
 import speciesRepository from "../repositories/speciesRepository";
+import fixativeRepository from "../repositories/fixativeRepository";
 import destructionReasonRepository from "../repositories/destructionReasonRepository";
 import projectRepository from "../repositories/projectRepository";
 import costCodeRepository from "../repositories/costCodeRepository";
@@ -25,6 +26,7 @@ const configurationHandlers = [
           releaseDestinations: releaseDestinationRepository.findAll(),
           hmdmcs: hmdmcRepository.findAll(),
           species: speciesRepository.findAll(),
+          fixatives: fixativeRepository.findAll(),
           projects: projectRepository.findAll(),
           costCodes: costCodeRepository.findAll(),
           workTypes: workTypeRepository.findAll(),

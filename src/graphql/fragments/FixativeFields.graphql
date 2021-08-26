@@ -1,0 +1,4 @@
+fragment FixativeFields on Fixative {
+    name
+    enabled
+}
