@@ -117,6 +117,9 @@ function AppShell({ children }: AppShellParams) {
               <StanNavLink to="/store">Store</StanNavLink>
               <StanNavLink to="/history">History</StanNavLink>
               <Authenticated>
+                <StanNavLink to="/sgp">SGP Management</StanNavLink>
+              </Authenticated>
+              <Authenticated>
                 <div className="relative">
                   <button
                     ref={labButtonRef}
@@ -364,15 +367,6 @@ function AppShell({ children }: AppShellParams) {
                         aria-orientation="vertical"
                         aria-labelledby="user-menu"
                       >
-                        <Authenticated>
-                          <Link
-                            to="/sgp"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            role="menuitem"
-                          >
-                            SGP Management
-                          </Link>
-                        </Authenticated>
                         <Authenticated role={UserRole.Admin}>
                           <Link
                             to="/config"
@@ -425,6 +419,11 @@ function AppShell({ children }: AppShellParams) {
                 <StanMobileNavLink to="/search">Search</StanMobileNavLink>
                 <StanMobileNavLink to="/store">Store</StanMobileNavLink>
                 <StanMobileNavLink to="/history">History</StanMobileNavLink>
+                <Authenticated>
+                  <StanMobileNavLink to="/sgp">
+                    SGP Management
+                  </StanMobileNavLink>
+                </Authenticated>
               </motion.div>
               <Authenticated>
                 <motion.div
@@ -503,15 +502,6 @@ function AppShell({ children }: AppShellParams) {
                 </Authenticated>
 
                 <div className="px-2 space-y-1 sm:px-3">
-                  <Authenticated>
-                    <Link
-                      to="/sgp"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700"
-                    >
-                      SGP Management
-                    </Link>
-                  </Authenticated>
-
                   <Authenticated role={UserRole.Admin}>
                     <Link
                       to="/config"
