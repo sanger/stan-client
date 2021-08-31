@@ -92,6 +92,35 @@ export default function Configuration({ configuration }: ConfigurationParams) {
               />
             </div>
 
+
+            <div data-testid="config">
+              <Heading level={2}>Fixatives</Heading>
+              <p className="mt-3 mb-6 text-lg">
+                Fixatives are available on the{" "}
+                <StyledLink to={"/admin/registration"}>
+                  Block Registration
+                </StyledLink>{" "}
+                and{" "}
+                <StyledLink to={"/admin/slide_registration"}>
+                  Slide Registration
+                </StyledLink>{" "}
+                pages.
+              </p>
+              <EntityManager
+                  initialEntities={configuration.fixatives}
+                  displayColumnName={"name"}
+                  onToggle={(entity, enabled) =>
+                      stanCore
+                          .SetFixativeEnabled({ enabled, name: entity.name })
+                          .then((res) => res.setFixativeEnabled)
+                  }
+                  onCreate={(name) =>
+                      stanCore.AddFixative({ name }).then((res) => res.addFixative)
+                  }
+              />
+            </div>
+
+
             <div data-testid="config">
               <Heading level={2}>HMDMC Numbers</Heading>
               <p className="mt-3 mb-6 text-lg">

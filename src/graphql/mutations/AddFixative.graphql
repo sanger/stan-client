@@ -1,0 +1,5 @@
+mutation AddFixative($name: String!) {
+    addFixative(name: $name) {
+        ...FixativeFields
+    }
+}

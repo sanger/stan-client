@@ -11,6 +11,9 @@ query GetConfiguration {
     species(includeDisabled: true) {
         ...SpeciesFields
     }
+    fixatives(includeDisabled: true) {
+        ...FixativeFields
+    }
     releaseDestinations(includeDisabled: true) {
         ...ReleaseDestinationFields
     }

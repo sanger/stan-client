@@ -54,6 +54,7 @@ export type Medium = {
 export type Fixative = {
   __typename?: 'Fixative';
   name: Scalars['String'];
+  enabled: Scalars['Boolean'];
 };
 
 export type MouldSize = {
@@ -616,6 +617,11 @@ export type QueryHmdmcsArgs = {
 };
 
 
+export type QueryFixativesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
 export type QuerySpeciesArgs = {
   includeDisabled?: Maybe<Scalars['Boolean']>;
 };
@@ -751,6 +757,8 @@ export type Mutation = {
   setProjectEnabled: Project;
   addCostCode: CostCode;
   setCostCodeEnabled: CostCode;
+  addFixative: Fixative;
+  setFixativeEnabled: Fixative;
   addWorkType: WorkType;
   setWorkTypeEnabled: WorkType;
   createWork: Work;
@@ -910,6 +918,17 @@ export type MutationSetCostCodeEnabledArgs = {
 };
 
 
+export type MutationAddFixativeArgs = {
+  name: Scalars['String'];
+};
+
+
+export type MutationSetFixativeEnabledArgs = {
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
 export type MutationAddWorkTypeArgs = {
   name: Scalars['String'];
 };
@@ -982,6 +1001,11 @@ export type CostCodeFieldsFragment = (
 export type DestructionReasonFieldsFragment = (
   { __typename?: 'DestructionReason' }
   & Pick<DestructionReason, 'id' | 'text' | 'enabled'>
+);
+
+export type FixativeFieldsFragment = (
+  { __typename?: 'Fixative' }
+  & Pick<Fixative, 'name' | 'enabled'>
 );
 
 export type HistoryEntryFieldsFragment = (
@@ -1189,6 +1213,19 @@ export type AddDestructionReasonMutation = (
   & { addDestructionReason: (
     { __typename?: 'DestructionReason' }
     & DestructionReasonFieldsFragment
+  ) }
+);
+
+export type AddFixativeMutationVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type AddFixativeMutation = (
+  { __typename?: 'Mutation' }
+  & { addFixative: (
+    { __typename?: 'Fixative' }
+    & FixativeFieldsFragment
   ) }
 );
 
@@ -1582,6 +1619,20 @@ export type SetDestructionReasonEnabledMutation = (
   ) }
 );
 
+export type SetFixativeEnabledMutationVariables = Exact<{
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetFixativeEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setFixativeEnabled: (
+    { __typename?: 'Fixative' }
+    & FixativeFieldsFragment
+  ) }
+);
+
 export type SetHmdmcEnabledMutationVariables = Exact<{
   hmdmc: Scalars['String'];
   enabled: Scalars['Boolean'];
@@ -1959,6 +2010,9 @@ export type GetConfigurationQuery = (
   )>, species: Array<(
     { __typename?: 'Species' }
     & SpeciesFieldsFragment
+  )>, fixatives: Array<(
+    { __typename?: 'Fixative' }
+    & FixativeFieldsFragment
   )>, releaseDestinations: Array<(
     { __typename?: 'ReleaseDestination' }
     & ReleaseDestinationFieldsFragment
@@ -1998,17 +2052,6 @@ export type GetDestructionReasonsQuery = (
   & { destructionReasons: Array<(
     { __typename?: 'DestructionReason' }
     & DestructionReasonFieldsFragment
-  )> }
-);
-
-export type GetExtractionInfoQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetExtractionInfoQuery = (
-  { __typename?: 'Query' }
-  & { works: Array<(
-    { __typename?: 'Work' }
-    & Pick<Work, 'workNumber'>
   )> }
 );
 
@@ -2089,9 +2132,6 @@ export type GetSectioningConfirmInfoQuery = (
   & { comments: Array<(
     { __typename?: 'Comment' }
     & CommentFieldsFragment
-  )>, works: Array<(
-    { __typename?: 'Work' }
-    & Pick<Work, 'workNumber'>
   )> }
 );
 
@@ -2143,6 +2183,12 @@ export const DestructionReasonFieldsFragmentDoc = gql`
     fragment DestructionReasonFields on DestructionReason {
   id
   text
+  enabled
+}
+    `;
+export const FixativeFieldsFragmentDoc = gql`
+    fragment FixativeFields on Fixative {
+  name
   enabled
 }
     `;
@@ -2376,6 +2422,13 @@ export const AddDestructionReasonDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
+export const AddFixativeDocument = gql`
+    mutation AddFixative($name: String!) {
+  addFixative(name: $name) {
+    ...FixativeFields
+  }
+}
+    ${FixativeFieldsFragmentDoc}`;
 export const AddHmdmcDocument = gql`
     mutation AddHmdmc($hmdmc: String!) {
   addHmdmc(hmdmc: $hmdmc) {
@@ -2619,6 +2672,13 @@ export const SetDestructionReasonEnabledDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
+export const SetFixativeEnabledDocument = gql`
+    mutation SetFixativeEnabled($name: String!, $enabled: Boolean!) {
+  setFixativeEnabled(name: $name, enabled: $enabled) {
+    ...FixativeFields
+  }
+}
+    ${FixativeFieldsFragmentDoc}`;
 export const SetHmdmcEnabledDocument = gql`
     mutation SetHmdmcEnabled($hmdmc: String!, $enabled: Boolean!) {
   setHmdmcEnabled(hmdmc: $hmdmc, enabled: $enabled) {
@@ -2867,6 +2927,9 @@ export const GetConfigurationDocument = gql`
   species(includeDisabled: true) {
     ...SpeciesFields
   }
+  fixatives(includeDisabled: true) {
+    ...FixativeFields
+  }
   releaseDestinations(includeDisabled: true) {
     ...ReleaseDestinationFields
   }
@@ -2887,6 +2950,7 @@ export const GetConfigurationDocument = gql`
 ${CommentFieldsFragmentDoc}
 ${HmdmcFieldsFragmentDoc}
 ${SpeciesFieldsFragmentDoc}
+${FixativeFieldsFragmentDoc}
 ${ReleaseDestinationFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}
 ${ProjectFieldsFragmentDoc}
@@ -2906,13 +2970,6 @@ export const GetDestructionReasonsDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
-export const GetExtractionInfoDocument = gql`
-    query GetExtractionInfo {
-  works(status: [active]) {
-    workNumber
-  }
-}
-    `;
 export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
@@ -2972,9 +3029,6 @@ export const GetSectioningConfirmInfoDocument = gql`
   comments(category: "section") {
     ...CommentFields
   }
-  works(status: [active]) {
-    workNumber
-  }
 }
     ${CommentFieldsFragmentDoc}`;
 export const GetSectioningInfoDocument = gql`
@@ -3022,6 +3076,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     AddDestructionReason(variables: AddDestructionReasonMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddDestructionReasonMutation> {
       return withWrapper(() => client.request<AddDestructionReasonMutation>(AddDestructionReasonDocument, variables, requestHeaders));
+    },
+    AddFixative(variables: AddFixativeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddFixativeMutation> {
+      return withWrapper(() => client.request<AddFixativeMutation>(AddFixativeDocument, variables, requestHeaders));
     },
     AddHmdmc(variables: AddHmdmcMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddHmdmcMutation> {
       return withWrapper(() => client.request<AddHmdmcMutation>(AddHmdmcDocument, variables, requestHeaders));
@@ -3088,6 +3145,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     SetDestructionReasonEnabled(variables: SetDestructionReasonEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetDestructionReasonEnabledMutation> {
       return withWrapper(() => client.request<SetDestructionReasonEnabledMutation>(SetDestructionReasonEnabledDocument, variables, requestHeaders));
+    },
+    SetFixativeEnabled(variables: SetFixativeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetFixativeEnabledMutation> {
+      return withWrapper(() => client.request<SetFixativeEnabledMutation>(SetFixativeEnabledDocument, variables, requestHeaders));
     },
     SetHmdmcEnabled(variables: SetHmdmcEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetHmdmcEnabledMutation> {
       return withWrapper(() => client.request<SetHmdmcEnabledMutation>(SetHmdmcEnabledDocument, variables, requestHeaders));
@@ -3163,9 +3223,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetDestructionReasons(variables?: GetDestructionReasonsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestructionReasonsQuery> {
       return withWrapper(() => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, requestHeaders));
-    },
-    GetExtractionInfo(variables?: GetExtractionInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetExtractionInfoQuery> {
-      return withWrapper(() => client.request<GetExtractionInfoQuery>(GetExtractionInfoDocument, variables, requestHeaders));
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
       return withWrapper(() => client.request<GetPrintersQuery>(GetPrintersDocument, variables, requestHeaders));
