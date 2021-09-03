@@ -1,0 +1,7 @@
+mutation Stain($request: StainRequest!) {
+    stain(request: $request) {
+        operations {
+            id
+        }
+    }
+}
