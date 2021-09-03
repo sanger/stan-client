@@ -25,6 +25,7 @@ import projectHandlers from "./handlers/projectHandlers";
 import costCodeHandlers from "./handlers/costCodeHandlers";
 import workHandlers from "./handlers/workHandlers";
 import workTypeHandlers from "./handlers/workTypeHandlers";
+import stainingHandlers from "./handlers/stainingHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -51,4 +52,5 @@ export const handlers = [
   ...costCodeHandlers,
   ...workHandlers,
   ...workTypeHandlers,
+  ...stainingHandlers,
 ];

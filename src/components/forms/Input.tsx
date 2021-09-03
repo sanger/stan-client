@@ -11,7 +11,7 @@ interface FormikInputProps {
   label: string;
   name: string;
   type?: string;
-  [key: string]: string | boolean | number | symbol | undefined;
+  [key: string]: any;
 }
 
 const FormikInput = ({
