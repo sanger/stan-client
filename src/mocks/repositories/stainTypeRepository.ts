@@ -5,7 +5,7 @@ import { createSessionStorageRepository } from "./index";
 const stainTypeSeeds: Array<StainTypeFieldsFragment> = [
   stainTypeFactory.build({
     name: "H&E",
-    measurementTypes: ["Haematoxylin", "Eosin", "Blueing"],
+    measurementTypes: ["Haematoxylin", "Blueing", "Eosin"],
   }),
   stainTypeFactory.build({ name: "Masson's Trichrome" }),
 ];
