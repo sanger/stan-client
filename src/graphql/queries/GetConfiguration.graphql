@@ -29,4 +29,7 @@ query GetConfiguration {
     workTypes(includeDisabled: true) {
         ...WorkTypeFields
     }
+    equipments(includeDisabled: true) {
+        ...EquipmentFields
+    }
 }

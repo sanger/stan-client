@@ -14,6 +14,7 @@ type ConfigurationParams = {
 export default function Configuration({ configuration }: ConfigurationParams) {
   const stanCore = useContext(StanCoreContext);
   const groupedComments = groupBy(configuration.comments, "category");
+  const groupedEquipments = groupBy(configuration.equipments, "category");
 
   return (
     <AppShell>
@@ -92,7 +93,6 @@ export default function Configuration({ configuration }: ConfigurationParams) {
               />
             </div>
 
-
             <div data-testid="config">
               <Heading level={2}>Fixatives</Heading>
               <p className="mt-3 mb-6 text-lg">
@@ -107,19 +107,18 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                 pages.
               </p>
               <EntityManager
-                  initialEntities={configuration.fixatives}
-                  displayColumnName={"name"}
-                  onToggle={(entity, enabled) =>
-                      stanCore
-                          .SetFixativeEnabled({ enabled, name: entity.name })
-                          .then((res) => res.setFixativeEnabled)
-                  }
-                  onCreate={(name) =>
-                      stanCore.AddFixative({ name }).then((res) => res.addFixative)
-                  }
+                initialEntities={configuration.fixatives}
+                displayColumnName={"name"}
+                onToggle={(entity, enabled) =>
+                  stanCore
+                    .SetFixativeEnabled({ enabled, name: entity.name })
+                    .then((res) => res.setFixativeEnabled)
+                }
+                onCreate={(name) =>
+                  stanCore.AddFixative({ name }).then((res) => res.addFixative)
+                }
               />
             </div>
-
 
             <div data-testid="config">
               <Heading level={2}>HMDMC Numbers</Heading>
@@ -257,6 +256,26 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                 }
               />
             </div>
+
+            {Object.keys(groupedEquipments).map((category) => (
+              <div key={category} data-testid="config" className="space-y-3">
+                <Heading level={2}>Equipment - {category}</Heading>
+                <EntityManager
+                  initialEntities={groupedEquipments[category]}
+                  displayColumnName={"name"}
+                  onToggle={(entity, enabled) => {
+                    return stanCore
+                      .SetEquipmentEnabled({ equipmentId: entity.id, enabled })
+                      .then((res) => res.setEquipmentEnabled);
+                  }}
+                  onCreate={(name) =>
+                    stanCore
+                      .AddEquipment({ category, name })
+                      .then((res) => res.addEquipment)
+                  }
+                />
+              </div>
+            ))}
           </div>
         </div>
       </AppShell.Main>

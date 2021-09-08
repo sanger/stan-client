@@ -1,0 +1,5 @@
+mutation SetEquipmentEnabled($equipmentId: Int!, $enabled: Boolean!) {
+    setEquipmentEnabled(equipmentId: $equipmentId, enabled: $enabled) {
+        ...EquipmentFields
+    }
+}

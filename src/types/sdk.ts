@@ -314,6 +314,13 @@ export type SlotCopyRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
+export type InPlaceOpRequest = {
+  operationType: Scalars['String'];
+  barcodes: Array<Scalars['String']>;
+  equipmentId?: Maybe<Scalars['Int']>;
+  workNumber?: Maybe<Scalars['String']>;
+};
+
 export type Action = {
   __typename?: 'Action';
   source: Slot;
@@ -353,6 +360,14 @@ export type Comment = {
   __typename?: 'Comment';
   id: Scalars['Int'];
   text: Scalars['String'];
+  category: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type Equipment = {
+  __typename?: 'Equipment';
+  id: Scalars['Int'];
+  name: Scalars['String'];
   category: Scalars['String'];
   enabled: Scalars['Boolean'];
 };
@@ -610,6 +625,7 @@ export type Query = {
   labware: Labware;
   printers: Array<Printer>;
   comments: Array<Comment>;
+  equipments: Array<Equipment>;
   releaseDestinations: Array<ReleaseDestination>;
   releaseRecipients: Array<ReleaseRecipient>;
   destructionReasons: Array<DestructionReason>;
@@ -657,6 +673,12 @@ export type QueryPrintersArgs = {
 
 
 export type QueryCommentsArgs = {
+  category?: Maybe<Scalars['String']>;
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryEquipmentsArgs = {
   category?: Maybe<Scalars['String']>;
   includeDisabled?: Maybe<Scalars['Boolean']>;
 };
@@ -762,6 +784,8 @@ export type Mutation = {
   slotCopy: OperationResult;
   addComment: Comment;
   setCommentEnabled: Comment;
+  addEquipment: Equipment;
+  setEquipmentEnabled: Equipment;
   addDestructionReason: DestructionReason;
   setDestructionReasonEnabled: DestructionReason;
   addHmdmc: Hmdmc;
@@ -783,6 +807,7 @@ export type Mutation = {
   createWork: Work;
   updateWorkStatus: Work;
   stain: OperationResult;
+  recordInPlace: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
@@ -857,6 +882,18 @@ export type MutationAddCommentArgs = {
 
 export type MutationSetCommentEnabledArgs = {
   commentId: Scalars['Int'];
+  enabled: Scalars['Boolean'];
+};
+
+
+export type MutationAddEquipmentArgs = {
+  category: Scalars['String'];
+  name: Scalars['String'];
+};
+
+
+export type MutationSetEquipmentEnabledArgs = {
+  equipmentId: Scalars['Int'];
   enabled: Scalars['Boolean'];
 };
 
@@ -980,6 +1017,11 @@ export type MutationStainArgs = {
 };
 
 
+export type MutationRecordInPlaceArgs = {
+  request: InPlaceOpRequest;
+};
+
+
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1026,6 +1068,11 @@ export type CostCodeFieldsFragment = (
 export type DestructionReasonFieldsFragment = (
   { __typename?: 'DestructionReason' }
   & Pick<DestructionReason, 'id' | 'text' | 'enabled'>
+);
+
+export type EquipmentFieldsFragment = (
+  { __typename?: 'Equipment' }
+  & Pick<Equipment, 'id' | 'name' | 'category' | 'enabled'>
 );
 
 export type FixativeFieldsFragment = (
@@ -1243,6 +1290,20 @@ export type AddDestructionReasonMutation = (
   & { addDestructionReason: (
     { __typename?: 'DestructionReason' }
     & DestructionReasonFieldsFragment
+  ) }
+);
+
+export type AddEquipmentMutationVariables = Exact<{
+  category: Scalars['String'];
+  name: Scalars['String'];
+}>;
+
+
+export type AddEquipmentMutation = (
+  { __typename?: 'Mutation' }
+  & { addEquipment: (
+    { __typename?: 'Equipment' }
+    & EquipmentFieldsFragment
   ) }
 );
 
@@ -1536,6 +1597,22 @@ export type PrintMutation = (
   & Pick<Mutation, 'printLabware'>
 );
 
+export type RecordInPlaceMutationVariables = Exact<{
+  request: InPlaceOpRequest;
+}>;
+
+
+export type RecordInPlaceMutation = (
+  { __typename?: 'Mutation' }
+  & { recordInPlace: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )> }
+  ) }
+);
+
 export type RegisterSectionsMutationVariables = Exact<{
   request: SectionRegisterRequest;
 }>;
@@ -1646,6 +1723,20 @@ export type SetDestructionReasonEnabledMutation = (
   & { setDestructionReasonEnabled: (
     { __typename?: 'DestructionReason' }
     & DestructionReasonFieldsFragment
+  ) }
+);
+
+export type SetEquipmentEnabledMutationVariables = Exact<{
+  equipmentId: Scalars['Int'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetEquipmentEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setEquipmentEnabled: (
+    { __typename?: 'Equipment' }
+    & EquipmentFieldsFragment
   ) }
 );
 
@@ -2074,6 +2165,9 @@ export type GetConfigurationQuery = (
   )>, workTypes: Array<(
     { __typename?: 'WorkType' }
     & WorkTypeFieldsFragment
+  )>, equipments: Array<(
+    { __typename?: 'Equipment' }
+    & EquipmentFieldsFragment
   )> }
 );
 
@@ -2109,6 +2203,17 @@ export type GetPrintersQuery = (
   & { printers: Array<(
     { __typename?: 'Printer' }
     & PrinterFieldsFragment
+  )> }
+);
+
+export type GetRecordInPlaceInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetRecordInPlaceInfoQuery = (
+  { __typename?: 'Query' }
+  & { equipments: Array<(
+    { __typename?: 'Equipment' }
+    & EquipmentFieldsFragment
   )> }
 );
 
@@ -2240,6 +2345,14 @@ export const DestructionReasonFieldsFragmentDoc = gql`
     fragment DestructionReasonFields on DestructionReason {
   id
   text
+  enabled
+}
+    `;
+export const EquipmentFieldsFragmentDoc = gql`
+    fragment EquipmentFields on Equipment {
+  id
+  name
+  category
   enabled
 }
     `;
@@ -2485,6 +2598,13 @@ export const AddDestructionReasonDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
+export const AddEquipmentDocument = gql`
+    mutation AddEquipment($category: String!, $name: String!) {
+  addEquipment(category: $category, name: $name) {
+    ...EquipmentFields
+  }
+}
+    ${EquipmentFieldsFragmentDoc}`;
 export const AddFixativeDocument = gql`
     mutation AddFixative($name: String!) {
   addFixative(name: $name) {
@@ -2667,6 +2787,15 @@ export const PrintDocument = gql`
   printLabware(barcodes: $barcodes, printer: $printer)
 }
     `;
+export const RecordInPlaceDocument = gql`
+    mutation RecordInPlace($request: InPlaceOpRequest!) {
+  recordInPlace(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const RegisterSectionsDocument = gql`
     mutation RegisterSections($request: SectionRegisterRequest!) {
   registerSections(request: $request) {
@@ -2735,6 +2864,13 @@ export const SetDestructionReasonEnabledDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
+export const SetEquipmentEnabledDocument = gql`
+    mutation SetEquipmentEnabled($equipmentId: Int!, $enabled: Boolean!) {
+  setEquipmentEnabled(equipmentId: $equipmentId, enabled: $enabled) {
+    ...EquipmentFields
+  }
+}
+    ${EquipmentFieldsFragmentDoc}`;
 export const SetFixativeEnabledDocument = gql`
     mutation SetFixativeEnabled($name: String!, $enabled: Boolean!) {
   setFixativeEnabled(name: $name, enabled: $enabled) {
@@ -3017,6 +3153,9 @@ export const GetConfigurationDocument = gql`
   workTypes(includeDisabled: true) {
     ...WorkTypeFields
   }
+  equipments(includeDisabled: true) {
+    ...EquipmentFields
+  }
 }
     ${DestructionReasonFieldsFragmentDoc}
 ${CommentFieldsFragmentDoc}
@@ -3027,7 +3166,8 @@ ${ReleaseDestinationFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}
 ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
-${WorkTypeFieldsFragmentDoc}`;
+${WorkTypeFieldsFragmentDoc}
+${EquipmentFieldsFragmentDoc}`;
 export const GetDestroyInfoDocument = gql`
     query GetDestroyInfo {
   destructionReasons {
@@ -3049,6 +3189,13 @@ export const GetPrintersDocument = gql`
   }
 }
     ${PrinterFieldsFragmentDoc}`;
+export const GetRecordInPlaceInfoDocument = gql`
+    query GetRecordInPlaceInfo {
+  equipments(includeDisabled: false) {
+    ...EquipmentFields
+  }
+}
+    ${EquipmentFieldsFragmentDoc}`;
 export const GetRegistrationInfoDocument = gql`
     query GetRegistrationInfo {
   species {
@@ -3156,6 +3303,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AddDestructionReason(variables: AddDestructionReasonMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddDestructionReasonMutation> {
       return withWrapper(() => client.request<AddDestructionReasonMutation>(AddDestructionReasonDocument, variables, requestHeaders));
     },
+    AddEquipment(variables: AddEquipmentMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddEquipmentMutation> {
+      return withWrapper(() => client.request<AddEquipmentMutation>(AddEquipmentDocument, variables, requestHeaders));
+    },
     AddFixative(variables: AddFixativeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddFixativeMutation> {
       return withWrapper(() => client.request<AddFixativeMutation>(AddFixativeDocument, variables, requestHeaders));
     },
@@ -3207,6 +3357,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     Print(variables: PrintMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PrintMutation> {
       return withWrapper(() => client.request<PrintMutation>(PrintDocument, variables, requestHeaders));
     },
+    RecordInPlace(variables: RecordInPlaceMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordInPlaceMutation> {
+      return withWrapper(() => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, requestHeaders));
+    },
     RegisterSections(variables: RegisterSectionsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterSectionsMutation> {
       return withWrapper(() => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, requestHeaders));
     },
@@ -3224,6 +3377,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     SetDestructionReasonEnabled(variables: SetDestructionReasonEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetDestructionReasonEnabledMutation> {
       return withWrapper(() => client.request<SetDestructionReasonEnabledMutation>(SetDestructionReasonEnabledDocument, variables, requestHeaders));
+    },
+    SetEquipmentEnabled(variables: SetEquipmentEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetEquipmentEnabledMutation> {
+      return withWrapper(() => client.request<SetEquipmentEnabledMutation>(SetEquipmentEnabledDocument, variables, requestHeaders));
     },
     SetFixativeEnabled(variables: SetFixativeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetFixativeEnabledMutation> {
       return withWrapper(() => client.request<SetFixativeEnabledMutation>(SetFixativeEnabledDocument, variables, requestHeaders));
@@ -3308,6 +3464,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
       return withWrapper(() => client.request<GetPrintersQuery>(GetPrintersDocument, variables, requestHeaders));
+    },
+    GetRecordInPlaceInfo(variables?: GetRecordInPlaceInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordInPlaceInfoQuery> {
+      return withWrapper(() => client.request<GetRecordInPlaceInfoQuery>(GetRecordInPlaceInfoDocument, variables, requestHeaders));
     },
     GetRegistrationInfo(variables?: GetRegistrationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRegistrationInfoQuery> {
       return withWrapper(() => client.request<GetRegistrationInfoQuery>(GetRegistrationInfoDocument, variables, requestHeaders));
