@@ -25,6 +25,7 @@ import { StanCoreContext } from "../lib/sdk";
 import LabwareDetails from "../pages/LabwareDetails";
 import SGP from "../pages/SGP";
 import Staining from "../pages/Staining";
+import RecordInPlace from "../pages/RecordInPlace";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -91,6 +92,26 @@ export function Routes() {
             dataFetcher={stanCore.GetStainInfo}
           >
             {(stainingInfo) => <Staining stainingInfo={stainingInfo} />}
+          </DataFetcher>
+        )}
+      />
+
+      <AuthenticatedRoute
+        path="/lab/imaging"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() =>
+              stanCore.GetRecordInPlaceInfo({ category: "scanner" })
+            }
+          >
+            {(recordInPlaceInfo) => (
+              <RecordInPlace
+                title={"Imaging"}
+                operationType={"image"}
+                equipment={recordInPlaceInfo.equipments}
+              />
+            )}
           </DataFetcher>
         )}
       />

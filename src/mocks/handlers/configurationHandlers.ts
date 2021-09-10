@@ -13,6 +13,7 @@ import destructionReasonRepository from "../repositories/destructionReasonReposi
 import projectRepository from "../repositories/projectRepository";
 import costCodeRepository from "../repositories/costCodeRepository";
 import workTypeRepository from "../repositories/workTypeRepository";
+import equipmentRepository from "../repositories/equipmentRepository";
 
 const configurationHandlers = [
   graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>(
@@ -30,6 +31,7 @@ const configurationHandlers = [
           projects: projectRepository.findAll(),
           costCodes: costCodeRepository.findAll(),
           workTypes: workTypeRepository.findAll(),
+          equipments: equipmentRepository.findAll(),
         })
       );
     }

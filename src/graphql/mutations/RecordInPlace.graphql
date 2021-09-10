@@ -1,0 +1,7 @@
+mutation RecordInPlace($request: InPlaceOpRequest!) {
+    recordInPlace(request: $request) {
+        labware {
+            ...LabwareFields
+        }
+    }
+}

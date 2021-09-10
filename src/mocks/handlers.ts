@@ -26,6 +26,8 @@ import costCodeHandlers from "./handlers/costCodeHandlers";
 import workHandlers from "./handlers/workHandlers";
 import workTypeHandlers from "./handlers/workTypeHandlers";
 import stainingHandlers from "./handlers/stainingHandlers";
+import equipmentHandlers from "./handlers/equipmentHandlers";
+import recordInPlaceHandlers from "./handlers/recordInPlaceHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -53,4 +55,6 @@ export const handlers = [
   ...workHandlers,
   ...workTypeHandlers,
   ...stainingHandlers,
+  ...equipmentHandlers,
+  ...recordInPlaceHandlers,
 ];

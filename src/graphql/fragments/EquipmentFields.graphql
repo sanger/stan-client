@@ -1,0 +1,6 @@
+fragment EquipmentFields on Equipment {
+    id
+    name
+    category
+    enabled
+}
