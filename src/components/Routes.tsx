@@ -101,7 +101,9 @@ export function Routes() {
         render={(routeProps) => (
           <DataFetcher
             key={routeProps.location.key}
-            dataFetcher={stanCore.GetRecordInPlaceInfo}
+            dataFetcher={() =>
+              stanCore.GetRecordInPlaceInfo({ category: "scanner" })
+            }
           >
             {(recordInPlaceInfo) => (
               <RecordInPlace

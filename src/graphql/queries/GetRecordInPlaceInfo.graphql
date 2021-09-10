@@ -1,5 +1,5 @@
-query GetRecordInPlaceInfo {
-    equipments(includeDisabled: false) {
+query GetRecordInPlaceInfo($category: String) {
+    equipments(includeDisabled: false, category: $category) {
         ...EquipmentFields
     }
 }

@@ -2206,7 +2206,9 @@ export type GetPrintersQuery = (
   )> }
 );
 
-export type GetRecordInPlaceInfoQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetRecordInPlaceInfoQueryVariables = Exact<{
+  category?: Maybe<Scalars['String']>;
+}>;
 
 
 export type GetRecordInPlaceInfoQuery = (
@@ -3190,8 +3192,8 @@ export const GetPrintersDocument = gql`
 }
     ${PrinterFieldsFragmentDoc}`;
 export const GetRecordInPlaceInfoDocument = gql`
-    query GetRecordInPlaceInfo {
-  equipments(includeDisabled: false) {
+    query GetRecordInPlaceInfo($category: String) {
+  equipments(includeDisabled: false, category: $category) {
     ...EquipmentFields
   }
 }

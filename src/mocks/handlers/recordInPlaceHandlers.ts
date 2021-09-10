@@ -12,9 +12,17 @@ const recordInPlaceHandlers = [
   graphql.query<GetRecordInPlaceInfoQuery, GetRecordInPlaceInfoQueryVariables>(
     "GetRecordInPlaceInfo",
     (req, res, ctx) => {
+      let equipments = equipmentRepository.findAll().filter(isEnabled);
+
+      if (req.variables.category) {
+        equipments = equipments.filter(
+          (equipment) => equipment.category === req.variables.category
+        );
+      }
+
       return res(
         ctx.data({
-          equipments: equipmentRepository.findAll().filter(isEnabled),
+          equipments,
         })
       );
     }
