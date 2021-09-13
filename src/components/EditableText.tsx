@@ -34,8 +34,8 @@ const EditableText: React.FC<EditableTextProps> = ({ onChange, children }) => {
     setIsEditing(false);
     const updatedText = e.currentTarget.value;
 
-    // If it's empty or hasn't changed let's ignore it
-    if (updatedText === "" || updatedText === children) {
+    // If it hasn't changed let's ignore it
+    if (updatedText === children) {
       return;
     }
 

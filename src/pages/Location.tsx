@@ -258,19 +258,17 @@ const Location: React.FC<LocationProps> = ({
               <StripyCard
                 heading={
                   <Heading level={3} showBorder={false}>
-                    {location.customName ? (
+                    {
                       <>
                         <Authenticated>
                           <EditableText onChange={onCustomNameChange}>
-                            {location.customName}
+                            {location.customName || location.barcode}
                           </EditableText>
                         </Authenticated>
 
-                        <Unauthenticated>{location.customName}</Unauthenticated>
+                        <Unauthenticated>{location.customName || location.barcode}</Unauthenticated>
                       </>
-                    ) : (
-                      location.barcode
-                    )}
+                    }
                   </Heading>
                 }
                 description={location.barcode}
