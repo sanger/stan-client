@@ -261,7 +261,7 @@ const Location: React.FC<LocationProps> = ({
                     {
                       <>
                         <Authenticated>
-                          <EditableText onChange={onCustomNameChange}>
+                          <EditableText onChange={onCustomNameChange} defaultValue={location.customName || ''}>
                             {location.customName || location.barcode}
                           </EditableText>
                         </Authenticated>
