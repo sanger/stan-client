@@ -10,7 +10,7 @@ export function shouldBehaveLikeARegistrationForm() {
 
       it("shows a warning", () => {
         cy.findByText(
-          "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, and underscores are permitted"
+            "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, slashes, backslashes, commas, colons, semicolons, full stops and underscores are permitted."
         );
       });
     });
@@ -23,7 +23,7 @@ export function shouldBehaveLikeARegistrationForm() {
 
       it("shows a warning", () => {
         cy.findByText(
-          "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, and underscores are permitted"
+            "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, slashes, backslashes, commas, colons, semicolons, full stops and underscores are permitted."
         ).should("be.visible");
       });
     });
