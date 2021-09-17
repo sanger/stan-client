@@ -6,9 +6,10 @@ import LoadingSpinner from "./icons/LoadingSpinner";
 interface EditableTextProps {
   children: string;
   onChange: (updatedText: string) => Promise<string>;
+  defaultValue: string;
 }
 
-const EditableText: React.FC<EditableTextProps> = ({ onChange, children }) => {
+const EditableText: React.FC<EditableTextProps> = ({ onChange, children, defaultValue}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editableText, setEditableText] = useState<string | null>(null);
@@ -34,8 +35,8 @@ const EditableText: React.FC<EditableTextProps> = ({ onChange, children }) => {
     setIsEditing(false);
     const updatedText = e.currentTarget.value;
 
-    // If it's empty or hasn't changed let's ignore it
-    if (updatedText === "" || updatedText === children) {
+    // If it hasn't changed let's ignore it
+    if (updatedText === children) {
       return;
     }
 
@@ -63,7 +64,7 @@ const EditableText: React.FC<EditableTextProps> = ({ onChange, children }) => {
               e.currentTarget.blur();
             }
           }}
-          defaultValue={children}
+          defaultValue={defaultValue}
         />
       ) : (
         <div
