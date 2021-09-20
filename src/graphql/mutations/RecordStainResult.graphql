@@ -1,0 +1,7 @@
+mutation RecordStainResult($request: ResultRequest!) {
+    recordStainResult(request: $request) {
+        operations {
+            id
+        }
+    }
+}
