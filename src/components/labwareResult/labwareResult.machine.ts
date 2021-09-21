@@ -20,7 +20,7 @@ export type LabwareResultProps = {
 };
 
 type SampleResult = {
-  result: PassFail | undefined;
+  result: PassFail;
   commentId: number | undefined;
 };
 
@@ -45,7 +45,13 @@ type LabwareResultContext = {
   sampleResults: Map<string, SampleResult>;
 };
 
-type LabwareResultEvent = { type: "PASS_ALL" } | { type: "FAIL_ALL" };
+type LabwareResultEvent =
+  | { type: "PASS_ALL" }
+  | { type: "FAIL_ALL" }
+  | { type: "PASS"; address: string }
+  | { type: "FAIL"; address: string }
+  | { type: "SET_COMMENT"; address: string; commentId: number }
+  | { type: "SET_ALL_COMMENTS"; commentId: number };
 
 export default function createLabwareResultMachine({
   availableComments,
@@ -65,6 +71,9 @@ export default function createLabwareResultMachine({
             PASS_ALL: {
               actions: "assignAllPassed",
             },
+            FAIL: {
+              actions: "assignSlotFailed",
+            },
           },
         },
       },
@@ -81,6 +90,15 @@ export default function createLabwareResultMachine({
             });
           }
         }),
+
+        assignSlotFailed: assign((ctx, e) => {
+          if (e.type !== "FAIL") return;
+
+          ctx.sampleResults.set(e.address, {
+            result: PassFail.Fail,
+            commentId: undefined,
+          });
+        }),
       },
     }
   );
@@ -95,9 +113,9 @@ function buildInitialSampleResults(
 ): Map<string, SampleResult> {
   const sampleResults: Map<string, SampleResult> = new Map();
 
-  labwareSamples(labware).forEach(({ sample, slot }) => {
+  labwareSamples(labware).forEach(({ slot }) => {
     sampleResults.set(slot.address, {
-      result: undefined,
+      result: PassFail.Fail,
       commentId: undefined,
     });
   });
