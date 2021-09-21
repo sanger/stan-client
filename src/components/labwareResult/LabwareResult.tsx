@@ -48,7 +48,10 @@ export default function LabwareResult({
         <div>
           <div className={gridClassNames}>
             {sortRightDown(labware.slots).map((slot) => (
-              <div className="flex flex-row items-center justify-between gap-x-2">
+              <div
+                key={slot.address}
+                className="flex flex-row items-center justify-between gap-x-2"
+              >
                 <div className="font-medium text-gray-800 tracking-wide">
                   {slot.address}
                 </div>
@@ -67,6 +70,9 @@ export default function LabwareResult({
                         }`}
                         viewBox="0 0 20 20"
                         fill="currentColor"
+                        onClick={() => {
+                          send({ type: "PASS", address: slot.address });
+                        }}
                       >
                         <path
                           fillRule="evenodd"
@@ -103,8 +109,22 @@ export default function LabwareResult({
                 <div>
                   {isSlotFilled(slot) && (
                     <Select
-                      defaultValue={sampleResults.get(slot.address)!.commentId}
+                      disabled={
+                        sampleResults.get(slot.address)!.result ===
+                        PassFail.Pass
+                      }
+                      value={sampleResults.get(slot.address)!.commentId ?? ""}
                       emptyOption={true}
+                      onChange={(e) =>
+                        send({
+                          type: "SET_COMMENT",
+                          address: slot.address,
+                          commentId:
+                            e.currentTarget.value !== ""
+                              ? Number(e.currentTarget.value)
+                              : undefined,
+                        })
+                      }
                     >
                       {optionValues(availableComments, "text", "id")}
                     </Select>
@@ -117,8 +137,22 @@ export default function LabwareResult({
             <BlueButton onClick={() => send({ type: "PASS_ALL" })}>
               Pass All
             </BlueButton>
-            <PinkButton>Fail All</PinkButton>
-            <Select>{optionValues(availableComments, "text", "id")}</Select>
+            <PinkButton onClick={() => send({ type: "FAIL_ALL" })}>
+              Fail All
+            </PinkButton>
+            <Select
+              onChange={(e) =>
+                send({
+                  type: "SET_ALL_COMMENTS",
+                  commentId:
+                    e.currentTarget.value !== ""
+                      ? Number(e.currentTarget.value)
+                      : undefined,
+                })
+              }
+            >
+              {optionValues(availableComments, "text", "id")}
+            </Select>
           </div>
         </div>
       </div>
