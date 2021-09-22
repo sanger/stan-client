@@ -2,6 +2,8 @@ import { graphql } from "msw";
 import {
   GetStainingQcInfoQuery,
   GetStainingQcInfoQueryVariables,
+  RecordStainResultMutationVariables,
+  RecordStainResultMutation,
 } from "../../types/sdk";
 import commentRepository from "../repositories/commentRepository";
 
@@ -20,6 +22,23 @@ const stainingQCHandlers = [
       );
     }
   ),
+
+  graphql.mutation<
+    RecordStainResultMutation,
+    RecordStainResultMutationVariables
+  >("RecordStainResult", (req, res, ctx) => {
+    return res(
+      ctx.data({
+        recordStainResult: {
+          operations: [
+            {
+              id: 1,
+            },
+          ],
+        },
+      })
+    );
+  }),
 ];
 
 export default stainingQCHandlers;

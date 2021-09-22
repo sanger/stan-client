@@ -619,7 +619,6 @@ export type StainRequest = {
 
 export type SampleResult = {
   address: Scalars['Address'];
-  sampleId: Scalars['Int'];
   result: PassFail;
   commentId?: Maybe<Scalars['Int']>;
 };

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   GetStainingQcInfoQuery,
   LabwareFieldsFragment,
@@ -9,6 +9,8 @@ import WorkNumberSelect from "../components/WorkNumberSelect";
 import LabwareScanner from "../components/labwareScanner/LabwareScanner";
 import LabwareResult from "../components/labwareResult/LabwareResult";
 import { pick } from "lodash";
+import WhiteButton from "../components/buttons/WhiteButton";
+import { StanCoreContext } from "../lib/sdk";
 
 type StainingQCProps = {
   info: GetStainingQcInfoQuery;
@@ -20,10 +22,11 @@ export default function StainingQC({ info }: StainingQCProps) {
   const [labwareResults, setLabwareResults] = useState<{
     [key: string]: CoreLabwareResult;
   }>({});
-
+  const stanCore = useContext(StanCoreContext);
   /**
    * Update labwareResults whenever labwares changes (e.g. labware may have been deleted)
    */
+
   useEffect(() => {
     const labwareBarcodes = labwares.map((lw) => lw.barcode);
     setLabwareResults((labwareResults) => {
@@ -69,6 +72,21 @@ export default function StainingQC({ info }: StainingQCProps) {
               ))
             }
           </LabwareScanner>
+          <div className={"flex flex-row items-center justify-end"}>
+            <WhiteButton
+              disabled={labwares.length <= 0}
+              onClick={() =>
+                stanCore.RecordStainResult({
+                  request: {
+                    labwareResults: Object.values(labwareResults),
+                    workNumber: workNumber,
+                  },
+                })
+              }
+            >
+              Save
+            </WhiteButton>
+          </div>
         </div>
       </AppShell.Main>
     </AppShell>
