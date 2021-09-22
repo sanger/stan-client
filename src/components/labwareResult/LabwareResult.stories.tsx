@@ -16,7 +16,14 @@ export default meta;
 const Template: Story<ComponentProps<typeof LabwareResult>> = ({
   labware,
   availableComments,
-}) => <LabwareResult labware={labware} availableComments={availableComments} />;
+}) => (
+  <LabwareResult
+    labware={labware}
+    availableComments={availableComments}
+    onRemoveClick={(barcode) => {}}
+    onChange={(labwareResult) => {}}
+  />
+);
 
 export const Primary = Template.bind({});
 

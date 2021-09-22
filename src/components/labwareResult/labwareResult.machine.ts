@@ -163,7 +163,7 @@ function buildInitialSampleResults(
 
   labwareSamples(labware).forEach(({ slot }) => {
     sampleResults.set(slot.address, {
-      result: PassFail.Fail,
+      result: PassFail.Pass,
       commentId: undefined,
     });
   });

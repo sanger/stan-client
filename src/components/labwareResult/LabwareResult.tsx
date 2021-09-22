@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Labware from "../labware/Labware";
 import { sortRightDown } from "../../lib/helpers/labwareHelper";
 import { Select } from "../forms/Select";
@@ -10,8 +10,28 @@ import createLabwareResultMachine, {
   LabwareResultProps,
 } from "./labwareResult.machine";
 import { useMachine } from "@xstate/react";
-import { PassFail } from "../../types/sdk";
+import {
+  PassFail,
+  LabwareResult as CoreLabwareResult,
+  SampleResult,
+} from "../../types/sdk";
 import { isSlotFilled } from "../../lib/helpers/slotHelper";
+import RemoveButton from "../buttons/RemoveButton";
+
+type LabwareResultComponentProps = LabwareResultProps & {
+  /**
+   * Callback to be called when the remove button is clicked
+   * @param barcode the barcode of the labware
+   */
+  onRemoveClick: (barcode: string) => void;
+
+  /**
+   * Callback that is called whenever the labware results change e.g. pass/fail
+   * Slots will default to pass.
+   * @param labwareResult a {@code LabwareResult}
+   */
+  onChange: (labwareResult: CoreLabwareResult) => void;
+};
 
 /**
  * Component to manage recording pass/fail results on each sample
@@ -19,14 +39,31 @@ import { isSlotFilled } from "../../lib/helpers/slotHelper";
 export default function LabwareResult({
   labware,
   availableComments,
-}: LabwareResultProps) {
+  onRemoveClick,
+  onChange,
+}: LabwareResultComponentProps) {
   const [current, send] = useMachine(
     createLabwareResultMachine({ labware, availableComments })
   );
 
-  console.log(current.context);
-
   const { sampleResults } = current.context;
+
+  useEffect(() => {
+    // Need to transform LabwareResult internal structure to Core structure
+    const labwareSampleResults: Array<SampleResult> = Array.from(
+      sampleResults.keys()
+    ).map((address) => {
+      const sampleResult = sampleResults.get(address)!;
+      return {
+        // TODO: Talk to David
+        sampleId: 1,
+        address,
+        ...sampleResult,
+      };
+    });
+
+    onChange({ barcode: labware.barcode, sampleResults: labwareSampleResults });
+  }, [labware, sampleResults, onChange]);
 
   const gridClassNames = classNames(
     {
@@ -38,6 +75,9 @@ export default function LabwareResult({
 
   return (
     <div>
+      <div className="flex flex-row items-center justify-end">
+        <RemoveButton onClick={() => onRemoveClick(labware.barcode)} />
+      </div>
       <div className="flex flex-row items-center justify-between">
         {/* Display the layout of the labware */}
         <div className="bg-blue-100">
