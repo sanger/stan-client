@@ -18,7 +18,6 @@ To install the dependencies for the project, you can run:
 
 In order for `graphql-codegen` to generate TypeScript types to match the GraphQL schema, create a `.env.local` file in the root of the project and include the property `GRAPHQL_SCHEMA_PATH`:
 
-    // .env.local
     GRAPHQL_SCHEMA_PATH=/path/to/schema.graphqls
 
 ## Front-end Architecture
