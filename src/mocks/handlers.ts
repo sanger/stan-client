@@ -29,6 +29,7 @@ import stainingHandlers from "./handlers/stainingHandlers";
 import equipmentHandlers from "./handlers/equipmentHandlers";
 import recordInPlaceHandlers from "./handlers/recordInPlaceHandlers";
 import stainingQCHandlers from "./handlers/stainingQCHandlers";
+import unreleaseHandlers from "./handlers/unreleaseHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -59,4 +60,5 @@ export const handlers = [
   ...equipmentHandlers,
   ...recordInPlaceHandlers,
   ...stainingQCHandlers,
+  ...unreleaseHandlers,
 ];
