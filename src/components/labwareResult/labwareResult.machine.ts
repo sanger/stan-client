@@ -4,8 +4,8 @@ import {
   LabwareFieldsFragment,
   PassFail,
 } from "../../types/sdk";
-import { labwareSamples } from "../../lib/helpers/labwareHelper";
 import { assign } from "@xstate/immer";
+import { isSlotFilled } from "../../lib/helpers/slotHelper";
 
 export type LabwareResultProps = {
   /**
@@ -26,22 +26,6 @@ type SampleResult = {
 
 type LabwareResultContext = {
   availableComments: Array<CommentFieldsFragment>;
-
-  /**
-   * {
-   *   "A1": {
-   *     sampleId: 1,
-   *     result: undefined,
-   *     commentId: undefined,
-   *   },
-   *
-   *   "A1": {
-   *     sampleId: 1,
-   *     result: PassFail.FAIL,
-   *     commentId: 3,
-   *   }
-   * }
-   */
   sampleResults: Map<string, SampleResult>;
 };
 
@@ -153,7 +137,8 @@ export default function createLabwareResultMachine({
 }
 
 /**
- * Build the initial sample results for a given labware
+ * Build the initial sample results for a given labware's filled slots.
+ * All slots will default to passed.
  * @param labware a piece of labware
  */
 function buildInitialSampleResults(
@@ -161,7 +146,7 @@ function buildInitialSampleResults(
 ): Map<string, SampleResult> {
   const sampleResults: Map<string, SampleResult> = new Map();
 
-  labwareSamples(labware).forEach(({ slot }) => {
+  labware.slots.filter(isSlotFilled).forEach((slot) => {
     sampleResults.set(slot.address, {
       result: PassFail.Pass,
       commentId: undefined,

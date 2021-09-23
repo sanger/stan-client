@@ -55,8 +55,6 @@ export default function LabwareResult({
     ).map((address) => {
       const sampleResult = sampleResults.get(address)!;
       return {
-        // TODO: Talk to David
-        sampleId: 1,
         address,
         ...sampleResult,
       };
@@ -78,7 +76,7 @@ export default function LabwareResult({
       <div className="flex flex-row items-center justify-end">
         <RemoveButton onClick={() => onRemoveClick(labware.barcode)} />
       </div>
-      <div className="flex flex-row items-center justify-between">
+      <div className="flex flex-row items-center justify-around">
         {/* Display the layout of the labware */}
         <div className="bg-blue-100">
           <Labware labware={labware} />
@@ -86,7 +84,7 @@ export default function LabwareResult({
 
         {/* Display the list of pass/fail comments */}
         <div>
-          <div className={gridClassNames}>
+          <div data-testid={"passFailComments"} className={gridClassNames}>
             {sortRightDown(labware.slots).map((slot) => (
               <div
                 key={slot.address}
@@ -102,7 +100,8 @@ export default function LabwareResult({
                       {/* Tick button */}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-5 w-5 ${
+                        data-testid={"passIcon"}
+                        className={`h-6 w-6 cursor-pointer ${
                           sampleResults.get(slot.address)!.result ===
                           PassFail.Pass
                             ? "text-green-700"
@@ -124,7 +123,8 @@ export default function LabwareResult({
                       {/* Cross button */}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-5 w-5 cursor-pointer ${
+                        data-testid={"failIcon"}
+                        className={`h-6 w-6 cursor-pointer ${
                           sampleResults.get(slot.address)!.result ===
                           PassFail.Fail
                             ? "text-red-700"
@@ -173,11 +173,17 @@ export default function LabwareResult({
               </div>
             ))}
           </div>
-          <div>
-            <BlueButton onClick={() => send({ type: "PASS_ALL" })}>
+          <div className="mt-4 flex flex-row items-center justify-between gap-x-2">
+            <BlueButton
+              className="flex-shrink-0"
+              onClick={() => send({ type: "PASS_ALL" })}
+            >
               Pass All
             </BlueButton>
-            <PinkButton onClick={() => send({ type: "FAIL_ALL" })}>
+            <PinkButton
+              className="flex-shrink-0"
+              onClick={() => send({ type: "FAIL_ALL" })}
+            >
               Fail All
             </PinkButton>
             <Select
