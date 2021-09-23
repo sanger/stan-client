@@ -187,6 +187,7 @@ export default function LabwareResult({
               Fail All
             </PinkButton>
             <Select
+              data-testid={"commentAll"}
               onChange={(e) =>
                 send({
                   type: "SET_ALL_COMMENTS",
