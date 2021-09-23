@@ -6,9 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.1] - 2021-09-23
 ### Added
 - Added "Fixatives" to the config page ([#61](https://github.com/sanger/stan-client/pull/61))
 - Staining ([#60](https://github.com/sanger/stan-client/pull/60))
+- Imaging ([#64](https://github.com/sanger/stan-client/pull/64))
+
+### Modified
+- Support editing the custom name of any location ([#65](https://github.com/sanger/stan-client/pull/65))
+- Support a wider array of weird characters in the donor name ([#66](https://github.com/sanger/stan-client/pull/66))
 
 ## [1.7.0] - 2021-09-02
 ### Added
@@ -101,7 +107,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Everything!
 
-[Unreleased]: https://github.com/sanger/stan-client/compare/1.7.0...HEAD
+[Unreleased]: https://github.com/sanger/stan-client/compare/1.8.1...HEAD
+[1.8.1]: https://github.com/sanger/stan-client/compare/1.7.0...1.8.1
 [1.7.0]: https://github.com/sanger/stan-client/compare/1.6.0...1.7.0
 [1.6.0]: https://github.com/sanger/stan-client/compare/1.5.0...1.6.0
 [1.5.0]: https://github.com/sanger/stan-client/compare/1.3.0...1.5.0
