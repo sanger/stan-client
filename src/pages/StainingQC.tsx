@@ -1,8 +1,9 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   GetStainingQcInfoQuery,
   LabwareFieldsFragment,
   LabwareResult as CoreLabwareResult,
+  PassFail,
   RecordStainResultMutation,
   ResultRequest,
 } from "../types/sdk";
@@ -10,7 +11,6 @@ import AppShell from "../components/AppShell";
 import WorkNumberSelect from "../components/WorkNumberSelect";
 import LabwareScanner from "../components/labwareScanner/LabwareScanner";
 import LabwareResult from "../components/labwareResult/LabwareResult";
-import { pick } from "lodash";
 import { reload, StanCoreContext } from "../lib/sdk";
 import createFormMachine from "../lib/machines/form/formMachine";
 import { useMachine } from "@xstate/react";
@@ -19,6 +19,8 @@ import Warning from "../components/notifications/Warning";
 import BlueButton from "../components/buttons/BlueButton";
 import Heading from "../components/Heading";
 import Panel from "../components/Panel";
+import { useCollection } from "../lib/hooks/useCollection";
+import { isSlotFilled } from "../lib/helpers/slotHelper";
 
 type StainingQCProps = {
   info: GetStainingQcInfoQuery;
@@ -26,10 +28,10 @@ type StainingQCProps = {
 
 export default function StainingQC({ info }: StainingQCProps) {
   const [workNumber, setWorkNumber] = useState<string | undefined>();
-  const [labwares, setLabwares] = useState<Array<LabwareFieldsFragment>>([]);
-  const [labwareResults, setLabwareResults] = useState<{
-    [key: string]: CoreLabwareResult;
-  }>({});
+  const labwareResults = useCollection<CoreLabwareResult>({
+    getKey: (item) => item.barcode,
+  });
+
   const stanCore = useContext(StanCoreContext);
 
   const [current, send] = useMachine(
@@ -47,31 +49,18 @@ export default function StainingQC({ info }: StainingQCProps) {
 
   const { serverError } = current.context;
 
-  /**
-   * Update labwareResults whenever labwares changes (e.g. labware may have been deleted)
-   */
-
-  useEffect(() => {
-    const labwareBarcodes = labwares.map((lw) => lw.barcode);
-    setLabwareResults((labwareResults) => {
-      return pick(labwareResults, labwareBarcodes);
-    });
-  }, [labwares]);
-
-  /**
-   * Callback to handle when one of the LabwareResult components changes.
-   * Will replace single LabwareResult in list, leaving others untouched.
-   */
-  const handleLabwareResultChange = useCallback(
-    (labwareResult: CoreLabwareResult) => {
-      setLabwareResults((labwareResults) => {
-        return {
-          ...labwareResults,
-          ...{ [labwareResult.barcode]: labwareResult },
-        };
-      });
+  const onAddLabware = useCallback(
+    (labware: LabwareFieldsFragment) => {
+      labwareResults.append(buildLabwareResult(labware));
     },
-    []
+    [labwareResults]
+  );
+
+  const onRemoveLabware = useCallback(
+    (labware: LabwareFieldsFragment) => {
+      labwareResults.remove(labware.barcode);
+    },
+    [labwareResults]
   );
 
   return (
@@ -99,15 +88,20 @@ export default function StainingQC({ info }: StainingQCProps) {
 
             <p>Please scan in any slides you wish to QC.</p>
 
-            <LabwareScanner onChange={setLabwares}>
+            <LabwareScanner onAdd={onAddLabware} onRemove={onRemoveLabware}>
               {({ labwares, removeLabware }) =>
                 labwares.map((labware) => (
                   <Panel key={labware.barcode}>
                     <LabwareResult
+                      initialLabwareResult={
+                        labwareResults.getItem(labware.barcode)!
+                      }
                       labware={labware}
                       availableComments={info.comments}
                       onRemoveClick={removeLabware}
-                      onChange={handleLabwareResultChange}
+                      onChange={(labwareResult) =>
+                        labwareResults.update(labwareResult)
+                      }
                     />
                   </Panel>
                 ))
@@ -124,13 +118,13 @@ export default function StainingQC({ info }: StainingQCProps) {
 
           <div className={"mt-4 flex flex-row items-center justify-end"}>
             <BlueButton
-              disabled={labwares.length <= 0}
+              disabled={labwareResults.items.length <= 0}
               onClick={() =>
                 send({
                   type: "SUBMIT_FORM",
                   values: {
                     workNumber,
-                    labwareResults: Object.values(labwareResults),
+                    labwareResults: labwareResults.items,
                   },
                 })
               }
@@ -153,4 +147,14 @@ export default function StainingQC({ info }: StainingQCProps) {
       </AppShell.Main>
     </AppShell>
   );
+}
+
+function buildLabwareResult(labware: LabwareFieldsFragment) {
+  return {
+    barcode: labware.barcode,
+    sampleResults: labware.slots.filter(isSlotFilled).map((slot) => ({
+      address: slot.address,
+      result: PassFail.Pass,
+    })),
+  };
 }

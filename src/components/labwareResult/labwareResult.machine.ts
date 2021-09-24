@@ -1,32 +1,21 @@
 import { createMachine } from "xstate";
 import {
   CommentFieldsFragment,
-  LabwareFieldsFragment,
+  LabwareResult as CoreLabwareResult,
   PassFail,
 } from "../../types/sdk";
 import { assign } from "@xstate/immer";
-import { isSlotFilled } from "../../lib/helpers/slotHelper";
 
-export type LabwareResultProps = {
+export type LabwareResultContext = {
   /**
-   * Labware to provide a result for
+   * The initial LabwareResult
    */
-  labware: LabwareFieldsFragment;
+  labwareResult: CoreLabwareResult;
 
   /**
    * List of comments to display on failed samples
    */
   availableComments: Array<CommentFieldsFragment>;
-};
-
-type SampleResult = {
-  result: PassFail;
-  commentId: number | undefined;
-};
-
-type LabwareResultContext = {
-  availableComments: Array<CommentFieldsFragment>;
-  sampleResults: Map<string, SampleResult>;
 };
 
 type LabwareResultEvent =
@@ -39,15 +28,15 @@ type LabwareResultEvent =
 
 export default function createLabwareResultMachine({
   availableComments,
-  labware,
-}: LabwareResultProps) {
+  labwareResult,
+}: LabwareResultContext) {
   return createMachine<LabwareResultContext, LabwareResultEvent>(
     {
       id: "labwareResultMachine",
       initial: "ready",
       context: {
         availableComments,
-        sampleResults: buildInitialSampleResults(labware),
+        labwareResult,
       },
       states: {
         ready: {
@@ -79,79 +68,70 @@ export default function createLabwareResultMachine({
         assignAllPassed: assign((ctx, e) => {
           if (e.type !== "PASS_ALL") return;
 
-          for (let address of ctx.sampleResults.keys()) {
-            ctx.sampleResults.set(address, {
-              result: PassFail.Pass,
-              commentId: undefined,
-            });
-          }
+          ctx.labwareResult.sampleResults.forEach((sr) => {
+            sr.result = PassFail.Pass;
+            sr.commentId = undefined;
+          });
         }),
 
         assignAllFailed: assign((ctx, e) => {
           if (e.type !== "FAIL_ALL") return;
-          for (let address of ctx.sampleResults.keys()) {
-            ctx.sampleResults.set(address, {
-              result: PassFail.Fail,
-              commentId: undefined,
-            });
-          }
+          ctx.labwareResult.sampleResults.forEach((sr) => {
+            sr.result = PassFail.Fail;
+            sr.commentId = undefined;
+          });
         }),
 
         assignSlotPassed: assign((ctx, e) => {
           if (e.type !== "PASS") return;
-          ctx.sampleResults.set(e.address, {
-            result: PassFail.Pass,
-            commentId: undefined,
-          });
+
+          const sampleResult = ctx.labwareResult.sampleResults.find(
+            (sr) => sr.address === e.address
+          );
+
+          if (sampleResult) {
+            sampleResult.result = PassFail.Pass;
+            sampleResult.commentId = undefined;
+          }
         }),
 
         assignSlotFailed: assign((ctx, e) => {
           if (e.type !== "FAIL") return;
 
-          ctx.sampleResults.set(e.address, {
-            result: PassFail.Fail,
-            commentId: undefined,
-          });
+          const sampleResult = ctx.labwareResult.sampleResults.find(
+            (sr) => sr.address === e.address
+          );
+
+          if (sampleResult) {
+            sampleResult.result = PassFail.Fail;
+            sampleResult.commentId = undefined;
+          }
         }),
 
         assignSlotComment: assign((ctx, e) => {
           if (e.type !== "SET_COMMENT") return;
-          if (ctx.sampleResults.get(e.address)!.result !== PassFail.Fail)
+
+          const sampleResult = ctx.labwareResult.sampleResults.find(
+            (sr) => sr.address === e.address
+          );
+
+          if (sampleResult?.result !== PassFail.Fail) {
             return;
-          ctx.sampleResults.set(e.address, {
-            result: PassFail.Fail,
-            commentId: e.commentId,
-          });
+          }
+
+          sampleResult.commentId = e.commentId;
         }),
 
         assignAllComments: assign((ctx, e) => {
           if (e.type !== "SET_ALL_COMMENTS") return;
-          for (let address of ctx.sampleResults.keys()) {
-            if (ctx.sampleResults.get(address)!.result === PassFail.Fail)
-              ctx.sampleResults.get(address)!.commentId = e.commentId;
-          }
+
+          ctx.labwareResult.sampleResults.forEach((sr) => {
+            if (sr.result === PassFail.Fail) {
+              sr.commentId = e.commentId;
+            }
+          });
         }),
       },
     }
   );
-}
-
-/**
- * Build the initial sample results for a given labware's filled slots.
- * All slots will default to passed.
- * @param labware a piece of labware
- */
-function buildInitialSampleResults(
-  labware: LabwareFieldsFragment
-): Map<string, SampleResult> {
-  const sampleResults: Map<string, SampleResult> = new Map();
-
-  labware.slots.filter(isSlotFilled).forEach((slot) => {
-    sampleResults.set(slot.address, {
-      result: PassFail.Pass,
-      commentId: undefined,
-    });
-  });
-
-  return sampleResults;
 }

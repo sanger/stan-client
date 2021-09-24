@@ -6,19 +6,23 @@ import { optionValues } from "../forms";
 import classNames from "classnames";
 import BlueButton from "../buttons/BlueButton";
 import PinkButton from "../buttons/PinkButton";
-import createLabwareResultMachine, {
-  LabwareResultProps,
-} from "./labwareResult.machine";
+import createLabwareResultMachine from "./labwareResult.machine";
 import { useMachine } from "@xstate/react";
 import {
-  PassFail,
+  CommentFieldsFragment,
+  LabwareFieldsFragment,
   LabwareResult as CoreLabwareResult,
-  SampleResult,
+  PassFail,
 } from "../../types/sdk";
 import { isSlotFilled } from "../../lib/helpers/slotHelper";
 import RemoveButton from "../buttons/RemoveButton";
+import { mapify } from "../../lib/helpers";
 
-type LabwareResultComponentProps = LabwareResultProps & {
+type LabwareResultComponentProps = {
+  labware: LabwareFieldsFragment;
+  initialLabwareResult: CoreLabwareResult;
+  availableComments: Array<CommentFieldsFragment>;
+
   /**
    * Callback to be called when the remove button is clicked
    * @param barcode the barcode of the labware
@@ -38,30 +42,24 @@ type LabwareResultComponentProps = LabwareResultProps & {
  */
 export default function LabwareResult({
   labware,
+  initialLabwareResult,
   availableComments,
   onRemoveClick,
   onChange,
 }: LabwareResultComponentProps) {
   const [current, send] = useMachine(
-    createLabwareResultMachine({ labware, availableComments })
+    createLabwareResultMachine({
+      labwareResult: initialLabwareResult,
+      availableComments,
+    })
   );
 
-  const { sampleResults } = current.context;
+  const { labwareResult } = current.context;
+  const sampleResults = mapify(labwareResult.sampleResults, "address");
 
   useEffect(() => {
-    // Need to transform LabwareResult internal structure to Core structure
-    const labwareSampleResults: Array<SampleResult> = Array.from(
-      sampleResults.keys()
-    ).map((address) => {
-      const sampleResult = sampleResults.get(address)!;
-      return {
-        address,
-        ...sampleResult,
-      };
-    });
-
-    onChange({ barcode: labware.barcode, sampleResults: labwareSampleResults });
-  }, [labware, sampleResults, onChange]);
+    onChange(labwareResult);
+  }, [labwareResult, onChange]);
 
   const gridClassNames = classNames(
     {

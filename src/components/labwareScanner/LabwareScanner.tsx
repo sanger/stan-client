@@ -9,8 +9,14 @@ import { isFunction } from "lodash";
 import { usePrevious } from "../../lib/hooks";
 
 type LabwareScannerProps = {
+  /**
+   * The initial list of labwares the scanner should be displaying
+   */
   initialLabwares?: LabwareFieldsFragment[];
 
+  /**
+   * True is the scanner should be locked; false otherwise
+   */
   locked?: boolean;
 
   /**
@@ -28,6 +34,18 @@ type LabwareScannerProps = {
   onChange?: (labwares: LabwareFieldsFragment[]) => void;
 
   /**
+   * Callback for when a labware is added
+   * @param labware the added labware
+   */
+  onAdd?: (labware: LabwareFieldsFragment) => void;
+
+  /**
+   * Callback for when a labware is removed
+   * @param labware the removed labware
+   */
+  onRemove?: (labware: LabwareFieldsFragment) => void;
+
+  /**
    * Children can either be a react node (if using the useLabware hook)
    * Or it can be a function that will have the context passed in
    */
@@ -41,11 +59,26 @@ export default function LabwareScanner({
   locked = false,
   labwareCheckFunction,
   onChange,
+  onAdd,
+  onRemove,
   children,
 }: LabwareScannerProps) {
   const [current, send] = useMachine(
-    createLabwareMachine(initialLabwares, labwareCheckFunction)
+    createLabwareMachine(initialLabwares, labwareCheckFunction).withConfig({
+      actions: {
+        foundEvent: (ctx, e) => {
+          if (e.type !== "done.invoke.validateFoundLabware") return;
+          onAdd?.(e.data);
+        },
+        removeEvent: (ctx, e) => {
+          if (e.type !== "REMOVE_LABWARE") return;
+          const labware = ctx.labwares.find((lw) => lw.barcode === e.value);
+          labware && onRemove?.(labware);
+        },
+      },
+    })
   );
+
   const {
     labwares,
     successMessage,
