@@ -1,4 +1,4 @@
-import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size,} from "./sdk";
+import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size} from "./sdk";
 import {Location} from "history";
 import {ClientError} from "graphql-request";
 import * as Yup from "yup";
@@ -119,6 +119,14 @@ export type SearchResultTableEntryLocation = {
   displayName: string;
   address?: Maybe<number>;
 };
+
+export type GenericSearchResultsType = {
+  numDisplayed?: number;
+  numRecords?: number;
+  entries: any[];
+}
+
+
 
 /**
  * Type for possible location URL params

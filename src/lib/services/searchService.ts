@@ -53,7 +53,6 @@ export function formatFindResult(
   findResult.labwareLocations.forEach((ll) =>
     labwareLocationMap.set(ll.labwareId, ll)
   );
-
   return findResult.entries.map((entry) => {
     const { labwareId, sampleId } = entry;
     const labware = labwareMap.get(labwareId)!;

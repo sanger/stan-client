@@ -26,6 +26,7 @@ import LabwareDetails from "../pages/LabwareDetails";
 import SGP from "../pages/SGP";
 import Staining from "../pages/Staining";
 import RecordInPlace from "../pages/RecordInPlace";
+import WorkProgress from "../pages/WorkProgress";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -197,7 +198,6 @@ export function Routes() {
       <Route path="/locations" component={Store} />
       <Route path="/store" component={Store} />
       <Route path="/login" component={Login} />
-
       <AuthenticatedRoute
         path="/admin/destroy"
         render={(routeProps) => (
@@ -244,7 +244,7 @@ export function Routes() {
       <AuthenticatedRoute path={"/sgp"} component={SGP} />
 
       <Route
-        path={["/", "/search"]}
+        path={"/search"}
         render={(routeProps) => {
           return (
             <DataFetcher dataFetcher={stanCore.GetSearchInfo}>
@@ -258,6 +258,8 @@ export function Routes() {
           );
         }}
       />
+
+      <Route path="/" component={WorkProgress} />
     </Switch>
   );
 }

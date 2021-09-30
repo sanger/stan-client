@@ -2,10 +2,13 @@ import { graphql } from "msw";
 import {
   AddWorkTypeMutation,
   AddWorkTypeMutationVariables,
+  GetWorkTypesQuery,
+  GetWorkTypesQueryVariables,
   SetWorkTypeEnabledMutation,
   SetWorkTypeEnabledMutationVariables,
 } from "../../types/sdk";
 import workTypeRepository from "../repositories/workTypeRepository";
+import workRepository from "../repositories/workRepository";
 
 const workTypeHandlers = [
   graphql.mutation<AddWorkTypeMutation, AddWorkTypeMutationVariables>(
@@ -48,6 +51,20 @@ const workTypeHandlers = [
       );
     }
   }),
+
+  graphql.query<GetWorkTypesQuery, GetWorkTypesQueryVariables>(
+    "GetWorkTypes",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: "Query",
+          workTypes: workTypeRepository
+            .findAll()
+            .concat(workRepository.findAll().map((work) => work.workType)),
+        })
+      );
+    }
+  ),
 ];
 
 export default workTypeHandlers;

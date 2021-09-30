@@ -600,6 +600,18 @@ export type StainType = {
   measurementTypes: Array<Scalars['String']>;
 };
 
+export type WorkProgressTimestamp = {
+  __typename?: 'WorkProgressTimestamp';
+  type: Scalars['String'];
+  timestamp: Scalars['Timestamp'];
+};
+
+export type WorkProgress = {
+  __typename?: 'WorkProgress';
+  work: Work;
+  timestamps: Array<WorkProgressTimestamp>;
+};
+
 export type TimeMeasurement = {
   name: Scalars['String'];
   seconds: Scalars['Int'];
@@ -608,7 +620,7 @@ export type TimeMeasurement = {
 export type StainRequest = {
   stainType: Scalars['String'];
   barcodes: Array<Scalars['String']>;
-  timeMeasurements?: Maybe<Array<TimeMeasurement>>;
+  timeMeasurements: Array<TimeMeasurement>;
   workNumber?: Maybe<Scalars['String']>;
 };
 
@@ -642,6 +654,7 @@ export type Query = {
   historyForExternalName: History;
   historyForDonorName: History;
   historyForLabwareBarcode: History;
+  workProgress: Array<WorkProgress>;
   location: Location;
   stored: Array<StoredItem>;
 };
@@ -756,6 +769,13 @@ export type QueryHistoryForDonorNameArgs = {
 
 export type QueryHistoryForLabwareBarcodeArgs = {
   barcode: Scalars['String'];
+};
+
+
+export type QueryWorkProgressArgs = {
+  workNumber?: Maybe<Scalars['String']>;
+  workType?: Maybe<Scalars['String']>;
+  status?: Maybe<WorkStatus>;
 };
 
 
@@ -1246,6 +1266,22 @@ export type WorkFieldsFragment = (
     { __typename?: 'WorkType' }
     & WorkTypeFieldsFragment
   ) }
+);
+
+export type WorkProgressFieldsFragment = (
+  { __typename?: 'WorkProgress' }
+  & { work: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
+  ), timestamps: Array<(
+    { __typename?: 'WorkProgressTimestamp' }
+    & WorkProgressTimeStampFieldFragment
+  )> }
+);
+
+export type WorkProgressTimeStampFieldFragment = (
+  { __typename?: 'WorkProgressTimestamp' }
+  & Pick<WorkProgressTimestamp, 'type' | 'timestamp'>
 );
 
 export type WorkTypeFieldsFragment = (
@@ -2130,6 +2166,21 @@ export type FindWorkNumbersQuery = (
   )> }
 );
 
+export type FindWorkProgressQueryVariables = Exact<{
+  workNumber?: Maybe<Scalars['String']>;
+  workType?: Maybe<Scalars['String']>;
+  status?: Maybe<WorkStatus>;
+}>;
+
+
+export type FindWorkProgressQuery = (
+  { __typename?: 'Query' }
+  & { workProgress: Array<(
+    { __typename?: 'WorkProgress' }
+    & WorkProgressFieldsFragment
+  )> }
+);
+
 export type GetConfigurationQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2332,6 +2383,17 @@ export type GetWorkAllocationInfoQuery = (
   )>, comments: Array<(
     { __typename?: 'Comment' }
     & CommentFieldsFragment
+  )> }
+);
+
+export type GetWorkTypesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetWorkTypesQuery = (
+  { __typename?: 'Query' }
+  & { workTypes: Array<(
+    { __typename?: 'WorkType' }
+    & Pick<WorkType, 'name'>
   )> }
 );
 
@@ -2579,6 +2641,23 @@ export const WorkFieldsFragmentDoc = gql`
     ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}`;
+export const WorkProgressTimeStampFieldFragmentDoc = gql`
+    fragment WorkProgressTimeStampField on WorkProgressTimestamp {
+  type
+  timestamp
+}
+    `;
+export const WorkProgressFieldsFragmentDoc = gql`
+    fragment WorkProgressFields on WorkProgress {
+  work {
+    ...WorkFields
+  }
+  timestamps {
+    ...WorkProgressTimeStampField
+  }
+}
+    ${WorkFieldsFragmentDoc}
+${WorkProgressTimeStampFieldFragmentDoc}`;
 export const AddCommentDocument = gql`
     mutation AddComment($category: String!, $text: String!) {
   addComment(category: $category, text: $text) {
@@ -3123,6 +3202,13 @@ export const FindWorkNumbersDocument = gql`
   }
 }
     `;
+export const FindWorkProgressDocument = gql`
+    query FindWorkProgress($workNumber: String, $workType: String, $status: WorkStatus) {
+  workProgress(workNumber: $workNumber, workType: $workType, status: $status) {
+    ...WorkProgressFields
+  }
+}
+    ${WorkProgressFieldsFragmentDoc}`;
 export const GetConfigurationDocument = gql`
     query GetConfiguration {
   destructionReasons(includeDisabled: true) {
@@ -3289,6 +3375,13 @@ ${CostCodeFieldsFragmentDoc}
 ${WorkFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}
 ${CommentFieldsFragmentDoc}`;
+export const GetWorkTypesDocument = gql`
+    query GetWorkTypes {
+  workTypes(includeDisabled: true) {
+    name
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
@@ -3455,6 +3548,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     FindWorkNumbers(variables: FindWorkNumbersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkNumbersQuery> {
       return withWrapper(() => client.request<FindWorkNumbersQuery>(FindWorkNumbersDocument, variables, requestHeaders));
     },
+    FindWorkProgress(variables?: FindWorkProgressQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkProgressQuery> {
+      return withWrapper(() => client.request<FindWorkProgressQuery>(FindWorkProgressDocument, variables, requestHeaders));
+    },
     GetConfiguration(variables?: GetConfigurationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetConfigurationQuery> {
       return withWrapper(() => client.request<GetConfigurationQuery>(GetConfigurationDocument, variables, requestHeaders));
     },
@@ -3490,6 +3586,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetWorkAllocationInfo(variables: GetWorkAllocationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkAllocationInfoQuery> {
       return withWrapper(() => client.request<GetWorkAllocationInfoQuery>(GetWorkAllocationInfoDocument, variables, requestHeaders));
+    },
+    GetWorkTypes(variables?: GetWorkTypesQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkTypesQuery> {
+      return withWrapper(() => client.request<GetWorkTypesQuery>(GetWorkTypesDocument, variables, requestHeaders));
     }
   };
 }

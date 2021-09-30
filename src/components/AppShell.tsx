@@ -111,6 +111,9 @@ function AppShell({ children }: AppShellParams) {
               </button>
             </div>
             <nav className="hidden md:flex space-x-10">
+              <StanNavLink exact to="/">
+                Home
+              </StanNavLink>
               <StanNavLink exact to="/search">
                 Search
               </StanNavLink>
@@ -445,6 +448,7 @@ function AppShell({ children }: AppShellParams) {
                 variants={variants.menuItemVariants}
                 className="px-2 pt-2 space-y-1 sm:px-3"
               >
+                <StanMobileNavLink to="/">Home</StanMobileNavLink>
                 <StanMobileNavLink to="/search">Search</StanMobileNavLink>
                 <StanMobileNavLink to="/store">Store</StanMobileNavLink>
                 <StanMobileNavLink to="/history">History</StanMobileNavLink>
