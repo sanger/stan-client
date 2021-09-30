@@ -15,6 +15,4 @@ type ExtractResultDataTableRow = LabwareFieldsFragment & {
 /**
  * Defined type for a function that returns a column that displays some property of Labware
  */
-export type ColumnFactory<E = any> = (
-  meta?: E
-) => Column<ExtractResultDataTableRow>;
+type ColumnFactory<E = any> = (meta?: E) => Column<ExtractResultDataTableRow>;

@@ -2,81 +2,144 @@ import {
   ExtractResultQuery,
   LabwareFieldsFragment,
   RecordRnaAnalysisMutation,
+  RnaAnalysisRequest,
 } from "../../../types/sdk";
 import { ClientError } from "graphql-request";
 import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
 import { stanCore } from "../../sdk";
-import {ExtractionResultType} from "../../../pages/RnaAnalysis";
+import { castDraft } from "immer";
 
 export interface AnalysisContext {
-  workNumber?: string;
-  labwares: LabwareFieldsFragment[];
-  extractionResult?: ExtractionResultType[];
+  labware: LabwareFieldsFragment | undefined;
+  extractionResult: ExtractResultQuery[];
+  analysisRequest?: RnaAnalysisRequest;
   analysis?: RecordRnaAnalysisMutation;
   serverErrors?: ClientError;
 }
 
 type UpdateLabwaresEvent = {
   type: "UPDATE_LABWARES";
-  labwares: LabwareFieldsFragment[];
+  labware: LabwareFieldsFragment;
 };
-type UpdateWorkNumberEvent = {
-  type: "UPDATE_WORK_NUMBER";
-  workNumber?: string;
+type ExtractionResultSuccess = {
+  type: "done.invoke.extractresult";
+  data: ExtractResultQuery;
 };
-type AnalyseInitEvent = {
-  type: "ANALYSE_INITIALIZE";
+type ExtractionResultFailure = {
+  type: "error.platform.extractresult";
+  data: ClientError;
+};
+
+type AnalyseEvent = {
+  type: "ANALYSE";
+  data: RnaAnalysisRequest;
 };
 type AnalyseDoneEvent = {
   type: "done.invoke.analyse";
   data: RecordRnaAnalysisMutation;
 };
 type AnalyseErrorEvent = {
-  type: "error.platform.analyse";
+  type: "error.platform.analysis";
   data: ClientError;
 };
 
-export type AnalysisEvent =
-  | UpdateWorkNumberEvent
+export type RNAAnalysisEvent =
   | UpdateLabwaresEvent
-  | AnalyseInitEvent
+  | ExtractionResultSuccess
+  | ExtractionResultFailure
+  | AnalyseEvent
   | AnalyseDoneEvent
   | AnalyseErrorEvent;
 
-export const rnaAnalysisMachine = createMachine<AnalysisContext, AnalysisEvent>(
+export const rnaAnalysisMachine = createMachine<
+  AnalysisContext,
+  RNAAnalysisEvent
+>(
   {
     id: "rna_analysis",
     initial: "ready",
     states: {
       ready: {
         on: {
-          UPDATE_WORK_NUMBER: { actions: "assignWorkNumber" },
-          UPDATE_LABWARES: { actions: "assignLabwares" },
-          ANALYSE_INITIALIZE: { target: "analysing", cond: "LabwaresNotEmpty" },
+          UPDATE_LABWARES: { target: "updatingLabware" },
         },
       },
-      analysing: {},
+      updatingLabware: {
+        invoke: {
+          src: "extractResult",
+          onDone: {
+            target: "extractionResultSuccess",
+            actions: "assignExtractionResult",
+          },
+          onError: {
+            target: "extractionResultFailure",
+            actions: "assignServerError",
+          },
+        },
+      },
+      extractionResultSuccess: {
+        on: {
+          ANALYSE: {
+            target: "recordingAnalysis",
+            cond: "ExtractionResultNotEmpty",
+          },
+        },
+      },
+      extractionResultFailure: {
+        on: {
+          ANALYSE: {
+            target: "recordingAnalysis",
+            cond: "ExtractionResultNotEmpty",
+          },
+        },
+      },
+      recordingAnalysis: {
+        invoke: {
+          src: "recordAnalysis",
+          onDone: {
+            target: "ready",
+          },
+          onError: {
+            target: "ready",
+            actions: "assignServerError",
+          },
+        },
+      },
     },
   },
   {
     actions: {
-      assignWorkNumber: assign((ctx, e) => {
-        if (e.type !== "UPDATE_WORK_NUMBER") return;
-        ctx.workNumber = e.workNumber;
+      assignExtractionResult: assign((ctx, e) => {
+        if (e.type !== "done.invoke.extractresult") return;
+        debugger;
+        ctx.extractionResult.push(e.data);
       }),
-      assignLabwares: assign((ctx, e) => {
-        if (e.type !== "UPDATE_LABWARES") return;
-        ctx.labwares = e.labwares;
+      assignedAnalyseData: assign((ctx, e) => {}),
+      assignServerErrors: assign((ctx, e) => {
+        if (e.type !== "error.platform.analysis") {
+          return;
+        }
+        ctx.serverErrors = castDraft(e.data);
       }),
     },
 
     guards: {
-      labwaresNotEmpty: (ctx, e) => ctx.labwares.length > 0,
+      ExtractionResultNotEmpty: (ctx, e) =>
+        ctx.extractionResult && ctx.extractionResult.length > 0,
     },
     services: {
-      /*analyse: (ctx,e) => {
-      }*/
+      extractResult: (ctx, evt) => {
+        debugger;
+        return stanCore.ExtractResult({
+          barcode: ctx.labware!.barcode,
+        });
+      },
+      recordAnalysis: (ctx, evt) => {
+        return stanCore.RecordRNAAnalysis({
+          request: ctx.analysisRequest!,
+        });
+      },
     },
   }
 );
