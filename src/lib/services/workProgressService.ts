@@ -8,9 +8,13 @@ import _ from "lodash";
 import { stanCore } from "../sdk";
 import { GenericSearchService } from "./genericSearchService";
 
+/**
+ * The overriden result for WorkProgress
+ */
 export type WorkProgressResultsType = GenericSearchResultsType & {
   entries: WorkProgressResultTableEntry[];
 };
+
 /**
  * A single row on the results table of the Work Progress page
  */
@@ -22,7 +26,9 @@ export type WorkProgressResultTableEntry = {
   lastRNAExtractionDate: Date | undefined;
   lastCDNADate: Date | undefined;
 };
-
+/**
+ * The keys to store the timestamp data
+ */
 export type WorkProgressTimeStampType =
   | "Section"
   | "Stain"
@@ -31,13 +37,12 @@ export type WorkProgressTimeStampType =
 
 export class WorkProgressService implements GenericSearchService {
   /**
-   * Do a find query on core. Format the response into a list of table rows
+   * Do a findWorkProgress query on core. Format the response into a list of table rows
    * @param workProgressRequest the variables that go into a FindWorkProgress query
    */
   search = async (
     workProgressRequest: FindWorkProgressQueryVariables
   ): Promise<WorkProgressResultsType> => {
-    debugger;
     // Tidy up the search parameters e.g. removing undefined and null values
     const request: FindWorkProgressQueryVariables = _(workProgressRequest)
       .omitBy((val) => (typeof val === "number" ? val === 0 : _.isEmpty(val)))
@@ -54,7 +59,7 @@ export class WorkProgressService implements GenericSearchService {
 
   /**
    * Convert the result of a FindWorkProgress query into data for the table rows
-   * @param findResult the result of the search on core
+   * @param findResult the result of the findWorkProgress on core
    */
   formatFindResult = (
     findResult?: FindWorkProgressQuery["workProgress"]

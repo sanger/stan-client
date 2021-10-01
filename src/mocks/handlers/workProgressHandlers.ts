@@ -3,6 +3,7 @@ import {
   FindWorkProgressQuery,
   FindWorkProgressQueryVariables,
   WorkProgressTimestamp,
+  WorkStatus,
 } from "../../types/sdk";
 import workRepository from "../repositories/workRepository";
 
@@ -22,10 +23,21 @@ const workProgressHandlers = [
       const { workNumber, workType, status } = req.variables;
       debugger;
       if (workNumber) {
+        const works = workRepository.findAll().map((work, indx) => {
+          const status =
+            indx % 2 === 0
+              ? WorkStatus.Active
+              : indx % 3 === 1
+              ? WorkStatus.Completed
+              : WorkStatus.Paused;
+          const newWork = { ...work, status: status };
+          console.log("Status=" + newWork.status);
+          return newWork;
+        });
         return res(
           ctx.data({
             __typename: "Query",
-            workProgress: workRepository.findAll().map((work) => {
+            workProgress: works.map((work) => {
               return {
                 __typename: "WorkProgress",
                 work: work,
@@ -53,7 +65,6 @@ const workProgressHandlers = [
         );
       }
       if (status) {
-        debugger;
         return res(
           ctx.data({
             __typename: "Query",
@@ -70,14 +81,12 @@ const workProgressHandlers = [
           })
         );
       }
-      {
-        return res(
-          ctx.data({
-            __typename: "Query",
-            workProgress: [],
-          })
-        );
-      }
+      return res(
+        ctx.data({
+          __typename: "Query",
+          workProgress: [],
+        })
+      );
     }
   ),
 ];

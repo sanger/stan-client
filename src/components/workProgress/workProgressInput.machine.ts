@@ -14,15 +14,14 @@ export type WorkProgressInputContext = {
    * The initial WorkProgressInput
    */
   workProgressInput: WorkProgressInputData;
+  /**
+   * Error returned by server
+   */
   serverError?: Maybe<ClientError>;
 };
+
 type SelectWorkNumberEvent = {
   type: "WORK_NUMBER_SELECTION";
-};
-
-type ErrorEvent = {
-  type: "error.platform.worktype";
-  data: ClientError;
 };
 type SelectWorkTypeEvent = {
   type: "WORK_TYPE_SELECTION";
@@ -38,6 +37,11 @@ type SelectValueEvent = {
   type: "VALUE_SELECTION";
   value: string;
 };
+type ErrorEvent = {
+  type: "error.platform.worktype";
+  data: ClientError;
+};
+
 type WorkProgressInputEvent =
   | SelectWorkNumberEvent
   | SelectWorkTypeEvent
@@ -105,7 +109,6 @@ export default function createWorkProgressInputMachine({
           ctx.workProgressInput.selectedValue = statusArr[0];
         }),
         assignValue: assign((ctx, e) => {
-          debugger;
           if (e.type !== "VALUE_SELECTION") return;
           ctx.workProgressInput.selectedValue = e.value;
         }),

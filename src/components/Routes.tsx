@@ -259,7 +259,12 @@ export function Routes() {
         }}
       />
 
-      <Route path="/" component={WorkProgress} />
+      <Route
+        path="/"
+        render={(routeProps) => (
+          <WorkProgress urlParamsString={routeProps.location.search} />
+        )}
+      />
     </Switch>
   );
 }
