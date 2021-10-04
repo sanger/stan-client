@@ -26,6 +26,7 @@ import LabwareDetails from "../pages/LabwareDetails";
 import SGP from "../pages/SGP";
 import Staining from "../pages/Staining";
 import RecordInPlace from "../pages/RecordInPlace";
+import StainingQC from "../pages/StainingQC";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -92,6 +93,18 @@ export function Routes() {
             dataFetcher={stanCore.GetStainInfo}
           >
             {(stainingInfo) => <Staining stainingInfo={stainingInfo} />}
+          </DataFetcher>
+        )}
+      />
+
+      <AuthenticatedRoute
+        path="/lab/staining_qc"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetStainingQCInfo}
+          >
+            {(stainingQcInfo) => <StainingQC info={stainingQcInfo} />}
           </DataFetcher>
         )}
       />

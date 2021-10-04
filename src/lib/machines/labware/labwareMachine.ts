@@ -185,7 +185,7 @@ export const createLabwareMachine = (
             ],
             REMOVE_LABWARE: {
               target: "#labwareScanner.idle.success",
-              actions: ["removeLabware"],
+              actions: ["removeEvent", "removeLabware"],
             },
             LOCK: "locked",
           },
@@ -226,7 +226,7 @@ export const createLabwareMachine = (
             src: "validateFoundLabware",
             onDone: {
               target: "#labwareScanner.idle.normal",
-              actions: "addFoundLabware",
+              actions: ["foundEvent", "addFoundLabware"],
             },
             onError: {
               target: "#labwareScanner.idle.error",
@@ -282,6 +282,9 @@ export const createLabwareMachine = (
           ctx.labwares.push(e.data);
           ctx.foundLabware = null;
         }),
+
+        // No-op. Can be overidden when creating the machine.
+        foundEvent: () => {},
 
         foundLabwareCheckError: assign((ctx, e) => {
           if (e.type !== "error.platform.validateFoundLabware") {

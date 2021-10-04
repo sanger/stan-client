@@ -34,6 +34,11 @@ export enum LabwareState {
   Destroyed = 'destroyed'
 }
 
+export enum PassFail {
+  Pass = 'pass',
+  Fail = 'fail'
+}
+
 export type User = {
   __typename?: 'User';
   username: Scalars['String'];
@@ -612,6 +617,22 @@ export type StainRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
+export type SampleResult = {
+  address: Scalars['Address'];
+  result: PassFail;
+  commentId?: Maybe<Scalars['Int']>;
+};
+
+export type LabwareResult = {
+  barcode: Scalars['String'];
+  sampleResults: Array<SampleResult>;
+};
+
+export type ResultRequest = {
+  labwareResults: Array<LabwareResult>;
+  workNumber?: Maybe<Scalars['String']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -808,6 +829,7 @@ export type Mutation = {
   updateWorkStatus: Work;
   stain: OperationResult;
   recordInPlace: OperationResult;
+  recordStainResult: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
@@ -1019,6 +1041,11 @@ export type MutationStainArgs = {
 
 export type MutationRecordInPlaceArgs = {
   request: InPlaceOpRequest;
+};
+
+
+export type MutationRecordStainResultArgs = {
+  request: ResultRequest;
 };
 
 
@@ -1609,6 +1636,22 @@ export type RecordInPlaceMutation = (
     & { labware: Array<(
       { __typename?: 'Labware' }
       & LabwareFieldsFragment
+    )> }
+  ) }
+);
+
+export type RecordStainResultMutationVariables = Exact<{
+  request: ResultRequest;
+}>;
+
+
+export type RecordStainResultMutation = (
+  { __typename?: 'Mutation' }
+  & { recordStainResult: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
     )> }
   ) }
 );
@@ -2310,6 +2353,17 @@ export type GetStainInfoQuery = (
   )> }
 );
 
+export type GetStainingQcInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetStainingQcInfoQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
 export type GetWorkAllocationInfoQueryVariables = Exact<{
   commentCategory: Scalars['String'];
 }>;
@@ -2798,6 +2852,15 @@ export const RecordInPlaceDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const RecordStainResultDocument = gql`
+    mutation RecordStainResult($request: ResultRequest!) {
+  recordStainResult(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const RegisterSectionsDocument = gql`
     mutation RegisterSections($request: SectionRegisterRequest!) {
   registerSections(request: $request) {
@@ -3266,6 +3329,13 @@ export const GetStainInfoDocument = gql`
   }
 }
     ${StainTypeFieldsFragmentDoc}`;
+export const GetStainingQcInfoDocument = gql`
+    query GetStainingQCInfo {
+  comments(includeDisabled: false, category: "result") {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetWorkAllocationInfoDocument = gql`
     query GetWorkAllocationInfo($commentCategory: String!) {
   projects(includeDisabled: false) {
@@ -3361,6 +3431,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     RecordInPlace(variables: RecordInPlaceMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordInPlaceMutation> {
       return withWrapper(() => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, requestHeaders));
+    },
+    RecordStainResult(variables: RecordStainResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordStainResultMutation> {
+      return withWrapper(() => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, requestHeaders));
     },
     RegisterSections(variables: RegisterSectionsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterSectionsMutation> {
       return withWrapper(() => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, requestHeaders));
@@ -3487,6 +3560,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetStainInfo(variables?: GetStainInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainInfoQuery> {
       return withWrapper(() => client.request<GetStainInfoQuery>(GetStainInfoDocument, variables, requestHeaders));
+    },
+    GetStainingQCInfo(variables?: GetStainingQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainingQcInfoQuery> {
+      return withWrapper(() => client.request<GetStainingQcInfoQuery>(GetStainingQcInfoDocument, variables, requestHeaders));
     },
     GetWorkAllocationInfo(variables: GetWorkAllocationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkAllocationInfoQuery> {
       return withWrapper(() => client.request<GetWorkAllocationInfoQuery>(GetWorkAllocationInfoDocument, variables, requestHeaders));

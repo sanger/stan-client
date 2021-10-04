@@ -232,6 +232,20 @@ function AppShell({ children }: AppShellParams) {
                               </div>
                             </NavLink>
                             <NavLink
+                              to="/lab/staining_qc"
+                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
+                            >
+                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                              <div className="ml-4">
+                                <p className="text-base font-medium text-gray-900">
+                                  Staining QC
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  Pass or fail samples on a stained slide.
+                                </p>
+                              </div>
+                            </NavLink>
+                            <NavLink
                               to="/lab/imaging"
                               className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
                             >
@@ -482,6 +496,10 @@ function AppShell({ children }: AppShellParams) {
 
                       <StanMobileNavLink to="/lab/staining">
                         Staining
+                      </StanMobileNavLink>
+
+                      <StanMobileNavLink to="/lab/staining_qc">
+                        Staining QC
                       </StanMobileNavLink>
 
                       <StanMobileNavLink to="/lab/imaging">

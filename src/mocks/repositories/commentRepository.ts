@@ -26,6 +26,19 @@ const seeds: Array<CommentFieldsFragment> = [
     text: "Waiting for customer",
     category: "Work status",
   }),
+  commentFactory.build({
+    category: "result",
+    text: "Slide damaged",
+  }),
+  commentFactory.build({
+    category: "result",
+    text: "Wrong morphology",
+  }),
+  commentFactory.build({
+    category: "result",
+    text: "Section invisible",
+    enabled: false,
+  }),
 ];
 
 const commentRepository = createSessionStorageRepository(
