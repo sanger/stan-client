@@ -21,19 +21,17 @@ const workProgressHandlers = [
     "FindWorkProgress",
     (req, res, ctx) => {
       const { workNumber, workType, status } = req.variables;
-      debugger;
+      const works = workRepository.findAll().map((work, indx) => {
+        const status =
+          indx % 2 === 0
+            ? WorkStatus.Active
+            : indx % 3 === 1
+            ? WorkStatus.Completed
+            : WorkStatus.Paused;
+        return { ...work, status: status };
+      });
+
       if (workNumber) {
-        const works = workRepository.findAll().map((work, indx) => {
-          const status =
-            indx % 2 === 0
-              ? WorkStatus.Active
-              : indx % 3 === 1
-              ? WorkStatus.Completed
-              : WorkStatus.Paused;
-          const newWork = { ...work, status: status };
-          console.log("Status=" + newWork.status);
-          return newWork;
-        });
         return res(
           ctx.data({
             __typename: "Query",
@@ -51,8 +49,7 @@ const workProgressHandlers = [
         return res(
           ctx.data({
             __typename: "Query",
-            workProgress: workRepository
-              .findAll()
+            workProgress: works
               .filter((work) => work.workType.name === workType)
               .map((work) => {
                 return {
@@ -68,8 +65,7 @@ const workProgressHandlers = [
         return res(
           ctx.data({
             __typename: "Query",
-            workProgress: workRepository
-              .findAll()
+            workProgress: works
               .filter((work) => work.status === status)
               .map((work) => {
                 return {
@@ -81,11 +77,13 @@ const workProgressHandlers = [
           })
         );
       }
+
       return res(
-        ctx.data({
-          __typename: "Query",
-          workProgress: [],
-        })
+        ctx.errors([
+          {
+            message: `Could not find Work progress}"`,
+          },
+        ])
       );
     }
   ),

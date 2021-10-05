@@ -171,6 +171,7 @@ export default function WorkProgressInput({
                 <FormikSelect
                   label=""
                   name="type"
+                  data-testid={"type"}
                   value={selectedType}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     setFieldValue(
@@ -193,6 +194,7 @@ export default function WorkProgressInput({
                   <FormikInput
                     name="workNumber"
                     label=""
+                    data-testid={"valueInput"}
                     value={selectedValue}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       setFieldValue(
@@ -207,6 +209,7 @@ export default function WorkProgressInput({
                   <FormikSelect
                     label=""
                     name="value"
+                    data-testid={"valueSelect"}
                     value={selectedValue ? selectedValue : ""}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       setFieldValue(

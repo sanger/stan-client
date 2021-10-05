@@ -18,6 +18,7 @@ export type WorkProgressInputContext = {
    * Error returned by server
    */
   serverError?: Maybe<ClientError>;
+  workTypes?: string[];
 };
 
 type SelectWorkNumberEvent = {
@@ -25,6 +26,10 @@ type SelectWorkNumberEvent = {
 };
 type SelectWorkTypeEvent = {
   type: "WORK_TYPE_SELECTION";
+};
+
+type InitializeEvent = {
+  type: "xstate.init";
 };
 type LoadWorkTypeDoneEvent = {
   type: "done.invoke.loadWorkTypes";
@@ -43,6 +48,7 @@ type ErrorEvent = {
 };
 
 type WorkProgressInputEvent =
+  | InitializeEvent
   | SelectWorkNumberEvent
   | SelectWorkTypeEvent
   | SelectStatusEvent
@@ -56,17 +62,25 @@ export default function createWorkProgressInputMachine({
   return createMachine<WorkProgressInputContext, WorkProgressInputEvent>(
     {
       id: "workProgressMachine",
-      initial: "ready",
       context: {
         workProgressInput,
       },
+      initial: "loading",
       states: {
+        loading: {
+          invoke: {
+            src: "loadWorkTypes",
+            onDone: { actions: "initializeValueArray", target: "ready" },
+            onError: { target: "ready", actions: "assignServerError" },
+          },
+        },
+
         ready: {
           on: {
             WORK_NUMBER_SELECTION: {
               actions: "assignWorkNumber",
             },
-            WORK_TYPE_SELECTION: "workTypeSelection",
+            WORK_TYPE_SELECTION: { actions: "assignWorkType" },
             STATUS_SELECTION: {
               actions: "assignStatus",
             },
@@ -75,18 +89,28 @@ export default function createWorkProgressInputMachine({
             },
           },
         },
-        workTypeSelection: {
-          entry: "unassignServerError",
-          invoke: {
-            src: "loadWorkTypes",
-            onDone: { actions: "assignWorkType", target: "ready" },
-            onError: { target: "ready", actions: "assignServerError" },
-          },
-        },
       },
     },
     {
       actions: {
+        initializeValueArray: assign((ctx, e) => {
+          if (e.type !== "done.invoke.loadWorkTypes") return;
+          //store all work types
+          ctx.workTypes = e.data;
+          //if a type is already selected on initializing (query parameters), load corresponding values for that type
+          if (ctx.workProgressInput) {
+            if (
+              ctx.workProgressInput.selectedType ===
+              WorkProgressInputTypeField.WorkType
+            )
+              ctx.workProgressInput.values = ctx.workTypes;
+            else if (
+              ctx.workProgressInput.selectedType ===
+              WorkProgressInputTypeField.Status
+            )
+              ctx.workProgressInput.values = Object.values(WorkStatus);
+          }
+        }),
         assignWorkNumber: assign((ctx, e) => {
           if (e.type !== "WORK_NUMBER_SELECTION") return;
           ctx.workProgressInput.selectedType =
@@ -94,11 +118,13 @@ export default function createWorkProgressInputMachine({
           ctx.workProgressInput.selectedValue = "";
         }),
         assignWorkType: assign((ctx, e) => {
-          if (e.type !== "done.invoke.loadWorkTypes") return;
+          if (e.type !== "WORK_TYPE_SELECTION" && !ctx.workTypes) return;
           ctx.workProgressInput.selectedType =
             WorkProgressInputTypeField.WorkType;
-          ctx.workProgressInput.values = e.data;
-          ctx.workProgressInput.selectedValue = e.data[0];
+          if (ctx.workTypes && ctx.workTypes.length > 0) {
+            ctx.workProgressInput.values = ctx.workTypes;
+            ctx.workProgressInput.selectedValue = ctx.workTypes[0];
+          }
         }),
         assignStatus: assign((ctx, e) => {
           if (e.type !== "STATUS_SELECTION") return;
@@ -125,7 +151,7 @@ export default function createWorkProgressInputMachine({
       },
       services: {
         loadWorkTypes: async (ctx, e) => {
-          if (e.type !== "WORK_TYPE_SELECTION") {
+          if (e.type !== "xstate.init") {
             return Promise.reject();
           }
           const response = await stanCore.GetWorkTypes();
