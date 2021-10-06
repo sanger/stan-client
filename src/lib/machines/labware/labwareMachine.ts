@@ -187,7 +187,7 @@ export const createLabwareMachine = (
             ],
             REMOVE_LABWARE: {
               target: "#labwareScanner.idle.success",
-              actions: ["removeLabware", "removeEvent"],
+              actions: ["removeLabware"],
             },
             LOCK: "locked",
           },

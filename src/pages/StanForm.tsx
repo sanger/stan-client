@@ -46,6 +46,9 @@ type StanFormParams<V, R> = {
   children: (props: FormikProps<V>) => React.ReactNode;
 };
 
+/**
+ * A component to act as a generic parent for a page that requires a simple form
+ */
 export default function StanForm<V, R>({
   title,
   onSubmit,

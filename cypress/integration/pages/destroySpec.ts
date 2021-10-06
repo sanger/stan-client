@@ -3,7 +3,7 @@ import {
   DestroyMutationVariables,
 } from "../../../src/types/sdk";
 
-describe("StanForm Page", () => {
+describe("Destroy Page", () => {
   before(() => {
     cy.visit("/admin/destroy");
   });
