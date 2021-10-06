@@ -90,21 +90,24 @@ export default function StainingQC({ info }: StainingQCProps) {
 
             <LabwareScanner onAdd={onAddLabware} onRemove={onRemoveLabware}>
               {({ labwares, removeLabware }) =>
-                labwares.map((labware) => (
-                  <Panel key={labware.barcode}>
-                    <LabwareResult
-                      initialLabwareResult={
-                        labwareResults.getItem(labware.barcode)!
-                      }
-                      labware={labware}
-                      availableComments={info.comments}
-                      onRemoveClick={removeLabware}
-                      onChange={(labwareResult) =>
-                        labwareResults.update(labwareResult)
-                      }
-                    />
-                  </Panel>
-                ))
+                labwares.map(
+                  (labware) =>
+                    labwareResults.getItem(labware.barcode) && (
+                      <Panel key={labware.barcode}>
+                        <LabwareResult
+                          initialLabwareResult={
+                            labwareResults.getItem(labware.barcode)!
+                          }
+                          labware={labware}
+                          availableComments={info.comments}
+                          onRemoveClick={removeLabware}
+                          onChange={(labwareResult) =>
+                            labwareResults.update(labwareResult)
+                          }
+                        />
+                      </Panel>
+                    )
+                )
               }
             </LabwareScanner>
           </div>
@@ -149,7 +152,7 @@ export default function StainingQC({ info }: StainingQCProps) {
   );
 }
 
-function buildLabwareResult(labware: LabwareFieldsFragment) {
+function buildLabwareResult(labware: LabwareFieldsFragment): CoreLabwareResult {
   return {
     barcode: labware.barcode,
     sampleResults: labware.slots.filter(isSlotFilled).map((slot) => ({
