@@ -34,11 +34,6 @@ export enum LabwareState {
   Destroyed = 'destroyed'
 }
 
-export enum PassFail {
-  Pass = 'pass',
-  Fail = 'fail'
-}
-
 export type User = {
   __typename?: 'User';
   username: Scalars['String'];
@@ -584,6 +579,7 @@ export type WorkType = {
 };
 
 export enum WorkStatus {
+  Unstarted = 'unstarted',
   Active = 'active',
   Paused = 'paused',
   Completed = 'completed',
@@ -597,6 +593,8 @@ export type Work = {
   costCode: CostCode;
   workNumber: Scalars['String'];
   status: WorkStatus;
+  numBlocks?: Maybe<Scalars['Int']>;
+  numSlides?: Maybe<Scalars['Int']>;
 };
 
 export type StainType = {
@@ -632,6 +630,11 @@ export type ResultRequest = {
   labwareResults: Array<LabwareResult>;
   workNumber?: Maybe<Scalars['String']>;
 };
+
+export enum PassFail {
+  Pass = 'pass',
+  Fail = 'fail'
+}
 
 export type Query = {
   __typename?: 'Query';
@@ -827,15 +830,17 @@ export type Mutation = {
   setWorkTypeEnabled: WorkType;
   createWork: Work;
   updateWorkStatus: Work;
+  updateWorkNumBlocks: Work;
+  updateWorkNumSlides: Work;
   stain: OperationResult;
   recordInPlace: OperationResult;
-  recordStainResult: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
   setLocationCustomName: Location;
+  recordStainResult: OperationResult;
 };
 
 
@@ -1024,6 +1029,8 @@ export type MutationCreateWorkArgs = {
   workType: Scalars['String'];
   project: Scalars['String'];
   costCode: Scalars['String'];
+  numBlocks?: Maybe<Scalars['Int']>;
+  numSlides?: Maybe<Scalars['Int']>;
 };
 
 
@@ -1034,6 +1041,18 @@ export type MutationUpdateWorkStatusArgs = {
 };
 
 
+export type MutationUpdateWorkNumBlocksArgs = {
+  workNumber: Scalars['String'];
+  numBlocks?: Maybe<Scalars['Int']>;
+};
+
+
+export type MutationUpdateWorkNumSlidesArgs = {
+  workNumber: Scalars['String'];
+  numSlides?: Maybe<Scalars['Int']>;
+};
+
+
 export type MutationStainArgs = {
   request: StainRequest;
 };
@@ -1041,11 +1060,6 @@ export type MutationStainArgs = {
 
 export type MutationRecordInPlaceArgs = {
   request: InPlaceOpRequest;
-};
-
-
-export type MutationRecordStainResultArgs = {
-  request: ResultRequest;
 };
 
 
@@ -1080,6 +1094,11 @@ export type MutationEmptyArgs = {
 export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
+};
+
+
+export type MutationRecordStainResultArgs = {
+  request: ResultRequest;
 };
 
 export type CommentFieldsFragment = (
@@ -1262,7 +1281,7 @@ export type UserFieldsFragment = (
 
 export type WorkFieldsFragment = (
   { __typename?: 'Work' }
-  & Pick<Work, 'workNumber' | 'status'>
+  & Pick<Work, 'workNumber' | 'status' | 'numBlocks' | 'numSlides'>
   & { project: (
     { __typename?: 'Project' }
     & ProjectFieldsFragment
@@ -1482,6 +1501,8 @@ export type CreateWorkMutationVariables = Exact<{
   workType: Scalars['String'];
   project: Scalars['String'];
   costCode: Scalars['String'];
+  numBlocks?: Maybe<Scalars['Int']>;
+  numSlides?: Maybe<Scalars['Int']>;
 }>;
 
 
@@ -2629,6 +2650,8 @@ export const WorkFieldsFragmentDoc = gql`
   workType {
     ...WorkTypeFields
   }
+  numBlocks
+  numSlides
 }
     ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
@@ -2747,12 +2770,14 @@ export const ConfirmSectionDocument = gql`
 }
     ${LabwareFieldsFragmentDoc}`;
 export const CreateWorkDocument = gql`
-    mutation CreateWork($prefix: String!, $workType: String!, $project: String!, $costCode: String!) {
+    mutation CreateWork($prefix: String!, $workType: String!, $project: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int) {
   createWork(
     prefix: $prefix
     workType: $workType
     project: $project
     costCode: $costCode
+    numBlocks: $numBlocks
+    numSlides: $numSlides
   ) {
     ...WorkFields
   }

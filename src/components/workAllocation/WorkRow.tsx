@@ -95,7 +95,27 @@ export default function WorkRow({
           <span className="uppercase">{work.status}</span>
         </TableCell>
       )}
-
+      <TableCell>
+        <input
+          style={{ border: "none" }}
+          type="text"
+          min="0"
+          max="200"
+          step="1"
+          value={work.numBlocks ?? "N/A"}
+        />
+      </TableCell>
+      <TableCell>
+        {" "}
+        <input
+          type="text"
+          min="0"
+          max="200"
+          step="1"
+          onInput={() => send}
+          value={work.numSlides ?? "N/A"}
+        />
+      </TableCell>
       <TableCell colSpan={showEditButton ? 1 : 2}>
         {showEditButton && (
           <PinkButton

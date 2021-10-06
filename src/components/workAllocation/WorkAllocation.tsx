@@ -5,6 +5,7 @@ import FormikInput from "../forms/Input";
 import FormikSelect from "../forms/Select";
 import BlueButton from "../buttons/BlueButton";
 import createWorkAllocationMachine, {
+  NUMBER_TYPE_FIELD,
   WorkAllocationFormValues,
 } from "./workAllocation.machine";
 import { useMachine } from "@xstate/react";
@@ -21,11 +22,12 @@ const initialValues: WorkAllocationFormValues = {
   costCode: "",
   project: "",
   isRnD: false,
+  numType: NUMBER_TYPE_FIELD.BLOCKS,
+  numValue: undefined,
 };
 
 export default function WorkAllocation() {
   const [current, send] = useMachine(createWorkAllocationMachine());
-
   const {
     projects,
     costCodes,
@@ -53,6 +55,10 @@ export default function WorkAllocation() {
       .required()
       .label("Cost Code"),
     isRnD: Yup.boolean().required(),
+    numType: Yup.string().oneOf(
+      Object.values(NUMBER_TYPE_FIELD).map((cc) => cc)
+    ),
+    numValue: Yup.number().max(200).required(),
   });
 
   return (
@@ -75,7 +81,7 @@ export default function WorkAllocation() {
           validationSchema={validationSchema}
         >
           <Form>
-            <div className="space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
+            <div className="space-y-2 md:grid md:grid-cols-3 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
               <div className="md:flex-grow">
                 <FormikSelect
                   label="Work Type"
@@ -100,6 +106,30 @@ export default function WorkAllocation() {
                 >
                   {optionValues(costCodes, "code", "code")}
                 </FormikSelect>
+              </div>
+            </div>
+            <div className="sm:flex sm:flex-row md:px-10">
+              <div className="md:space-y-0 mt-4 flex-shrink">
+                <FormikSelect
+                  label="Blocks/Samples"
+                  name="numType"
+                  emptyOption={false}
+                >
+                  {Object.values(NUMBER_TYPE_FIELD).map((val) => (
+                    <option key={val} value={val}>
+                      {val}
+                    </option>
+                  ))}
+                </FormikSelect>
+              </div>
+
+              <div className="mt-10 mx-2">
+                <FormikInput
+                  label={""}
+                  name={"numValue"}
+                  type={"number"}
+                  maxLength={"200"}
+                />
               </div>
             </div>
 
@@ -130,6 +160,8 @@ export default function WorkAllocation() {
                 <TableHeader>Project</TableHeader>
                 <TableHeader>Cost Code</TableHeader>
                 <TableHeader>Status</TableHeader>
+                <TableHeader>Number of Blocks</TableHeader>
+                <TableHeader>Number of Samples</TableHeader>
                 <TableHeader />
               </tr>
             </TableHead>

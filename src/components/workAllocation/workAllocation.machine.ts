@@ -13,6 +13,11 @@ import { stanCore } from "../../lib/sdk";
 import { assign } from "@xstate/immer";
 import { ClientError } from "graphql-request";
 
+export enum NUMBER_TYPE_FIELD {
+  BLOCKS = "Number of blocks",
+  SLIDES = "Number of slides",
+}
+
 export type WorkAllocationFormValues = {
   /**
    * The Work Type for this Work
@@ -28,6 +33,16 @@ export type WorkAllocationFormValues = {
    * Cost code
    */
   costCode: string;
+
+  /**
+   * numValue contains Number of blocks or Number of Samples
+   */
+  numType: NUMBER_TYPE_FIELD;
+
+  /**
+   * Value associated with Number of blocks or Number of Samples
+   */
+  numValue: number | undefined;
 
   /**
    * Whether or not an R&D number is being created. Will use a different prefix on call to core.
@@ -142,7 +157,7 @@ export default function createWorkAllocationMachine() {
         assignSuccessMessage: assign((ctx, e) => {
           if (e.type !== "done.invoke.allocateWork") return;
           const { workNumber, workType, project, costCode } = e.data.createWork;
-          ctx.successMessage = `Assigned ${workNumber} (${workType.name}) to project ${project.name} and cost code ${costCode.code}`;
+          ctx.successMessage = `Assigned ${workNumber} (${workType.name}) to project ${project.name} and cost code ${costCode.code} }`;
         }),
 
         clearNotifications: assign((ctx) => {
@@ -154,12 +169,25 @@ export default function createWorkAllocationMachine() {
       services: {
         allocateWork: (ctx, e) => {
           if (e.type !== "ALLOCATE_WORK") return Promise.reject();
-          const { workType, project, costCode, isRnD } = e.values;
+          const {
+            workType,
+            project,
+            costCode,
+            isRnD,
+            numType,
+            numValue,
+          } = e.values;
+          const numBlocks =
+            numType === NUMBER_TYPE_FIELD.BLOCKS ? numValue : undefined;
+          const numSlides =
+            numType === NUMBER_TYPE_FIELD.SLIDES ? numValue : undefined;
           return stanCore.CreateWork({
             workType,
             project,
             costCode,
             prefix: isRnD ? "R&D" : "SGP",
+            numBlocks,
+            numSlides,
           });
         },
 

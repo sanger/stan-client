@@ -179,3 +179,14 @@ export function mapify<K extends string, T extends Mapify<K>>(
 ): Map<Key, T> {
   return new Map<Key, T>(items.map((item) => [item[key], item] as const));
 }
+
+/**
+ *
+ */
+
+export function getEnumKeyByEnumValue<T extends { [index: string]: string }>(
+  enumType: T,
+  enumValue: string
+): keyof T | undefined {
+  return Object.keys(enumType).find((x) => enumType[x] == enumValue);
+}
