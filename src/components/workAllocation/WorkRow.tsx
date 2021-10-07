@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { TableCell } from "../Table";
 import { CommentFieldsFragment, WorkFieldsFragment } from "../../types/sdk";
 import { useMachine } from "@xstate/react";
@@ -10,6 +10,7 @@ import { capitalize } from "lodash";
 import FormikSelect from "../forms/Select";
 import { Form, Formik } from "formik";
 import PinkButton from "../buttons/PinkButton";
+import { MAX_NUM_BLOCKANDSLIDES } from "./WorkAllocation";
 
 /**
  * The type of values for the edit form
@@ -84,38 +85,61 @@ export default function WorkRow({
     });
   };
 
+  /**
+   * Callback for when the user edits Number of blocks or slides in the table/>
+   */
+  const handleWorkNumValueChange = useCallback(
+    (workNumValue: string | number, workNumValueType: string) => {
+      let value = workNumValue === "" ? undefined : Number(workNumValue);
+      if (value && value > MAX_NUM_BLOCKANDSLIDES)
+        value = MAX_NUM_BLOCKANDSLIDES;
+      debugger;
+      if (workNumValueType === "Blocks") {
+        send({ type: "UPDATE_NUM_BLOCKS", numBlocks: value });
+      } else {
+        send({ type: "UPDATE_NUM_SLIDES", numSlides: value });
+      }
+    },
+    [send]
+  );
+
+  const renderWorkNumValueField = (
+    workNumValue: number | undefined,
+    workNumValueType: string
+  ) => {
+    return (
+      <input
+        className={"border-0 border-gray-100 "}
+        type="number"
+        min="0"
+        max={MAX_NUM_BLOCKANDSLIDES}
+        step="1"
+        onChange={(e) => {
+          handleWorkNumValueChange(e.currentTarget.value, workNumValueType);
+        }}
+        value={workNumValue ?? ""}
+      />
+    );
+  };
+
   return (
     <tr>
       <TableCell>{work.workNumber}</TableCell>
       <TableCell>{work.workType.name}</TableCell>
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
+      <TableCell>
+        {renderWorkNumValueField(work.numBlocks ?? undefined, "Blocks")}
+      </TableCell>
+      <TableCell>
+        {renderWorkNumValueField(work.numSlides ?? undefined, "Slides")}
+      </TableCell>
       {!editModeEnabled && (
         <TableCell>
           <span className="uppercase">{work.status}</span>
         </TableCell>
       )}
-      <TableCell>
-        <input
-          style={{ border: "none" }}
-          type="text"
-          min="0"
-          max="200"
-          step="1"
-          value={work.numBlocks ?? "N/A"}
-        />
-      </TableCell>
-      <TableCell>
-        {" "}
-        <input
-          type="text"
-          min="0"
-          max="200"
-          step="1"
-          onInput={() => send}
-          value={work.numSlides ?? "N/A"}
-        />
-      </TableCell>
+
       <TableCell colSpan={showEditButton ? 1 : 2}>
         {showEditButton && (
           <PinkButton

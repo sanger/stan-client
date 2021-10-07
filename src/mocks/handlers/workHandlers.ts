@@ -8,6 +8,10 @@ import {
   GetWorkAllocationInfoQueryVariables,
   UpdateWorkStatusMutation,
   UpdateWorkStatusMutationVariables,
+  UpdateWorkNumBlocksMutation,
+  UpdateWorkNumBlocksMutationVariables,
+  UpdateWorkNumSlidesMutation,
+  UpdateWorkNumSlidesMutationVariables,
 } from "../../types/sdk";
 import costCodeRepository from "../repositories/costCodeRepository";
 import projectRepository from "../repositories/projectRepository";
@@ -74,10 +78,16 @@ const workHandlers = [
         );
       }
 
-      const createWork = workFactory.build(undefined, {
-        associations: { workType, costCode, project },
-        transient: { isRnD: req.variables.prefix === "R&D" },
-      });
+      const createWork = workFactory.build(
+        {
+          numSlides: req.variables.numSlides,
+          numBlocks: req.variables.numBlocks,
+        },
+        {
+          associations: { workType, costCode, project },
+          transient: { isRnD: req.variables.prefix === "R&D" },
+        }
+      );
 
       workRepository.save(createWork);
 
@@ -113,6 +123,53 @@ const workHandlers = [
       );
     }
   ),
+  graphql.mutation<
+    UpdateWorkNumBlocksMutation,
+    UpdateWorkNumBlocksMutationVariables
+  >("UpdateWorkNumBlocks", (req, res, ctx) => {
+    const work = workRepository.find("workNumber", req.variables.workNumber);
+    debugger;
+    if (!work) {
+      return res(
+        ctx.errors([
+          {
+            message: `Work ${req.variables.workNumber} not found`,
+          },
+        ])
+      );
+    }
+    work.numBlocks = req.variables.numBlocks;
+    workRepository.save(work);
+    return res(
+      ctx.data({
+        updateWorkNumBlocks: work,
+      })
+    );
+  }),
+
+  graphql.mutation<
+    UpdateWorkNumSlidesMutation,
+    UpdateWorkNumSlidesMutationVariables
+  >("UpdateWorkNumSlides", (req, res, ctx) => {
+    debugger;
+    const work = workRepository.find("workNumber", req.variables.workNumber);
+    if (!work) {
+      return res(
+        ctx.errors([
+          {
+            message: `Work ${req.variables.workNumber} not found`,
+          },
+        ])
+      );
+    }
+    work.numSlides = req.variables.numSlides;
+    workRepository.save(work);
+    return res(
+      ctx.data({
+        updateWorkNumSlides: work,
+      })
+    );
+  }),
 
   graphql.query<FindWorkNumbersQuery, FindWorkNumbersQueryVariables>(
     "FindWorkNumbers",

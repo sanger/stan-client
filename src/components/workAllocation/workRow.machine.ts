@@ -3,6 +3,8 @@ import {
   WorkFieldsFragment,
   WorkStatus,
   UpdateWorkStatusMutation,
+  UpdateWorkNumBlocksMutation,
+  UpdateWorkNumSlidesMutation,
 } from "../../types/sdk";
 import { MachineServiceDone } from "../../types/stan";
 import { stanCore } from "../../lib/sdk";
@@ -26,7 +28,12 @@ export type WorkRowEvent =
   | { type: "COMPLETE"; commentId: undefined }
   | { type: "FAIL"; commentId: number }
   | { type: "REACTIVATE"; commentId: undefined }
-  | MachineServiceDone<"updateWorkStatus", UpdateWorkStatusMutation>;
+  | { type: "ACTIVE"; commentId: undefined }
+  | { type: "UPDATE_NUM_BLOCKS"; numBlocks: number | undefined }
+  | { type: "UPDATE_NUM_SLIDES"; numSlides: number | undefined }
+  | MachineServiceDone<"updateWorkStatus", UpdateWorkStatusMutation>
+  | MachineServiceDone<"updateWorkNumBlocks", UpdateWorkNumBlocksMutation>
+  | MachineServiceDone<"updateWorkNumSlides", UpdateWorkNumSlidesMutation>;
 
 type CreateWorkRowMachineParams = {
   work: WorkFieldsFragment;
@@ -46,11 +53,20 @@ export default function createWorkRowMachine({
       states: {
         deciding: {
           always: [
+            maybeGoToStatus("unstarted"),
             maybeGoToStatus("active"),
             maybeGoToStatus("paused"),
             maybeGoToStatus("completed"),
             maybeGoToStatus("failed"),
           ],
+        },
+        unstarted: {
+          on: {
+            EDIT: { actions: "toggleEditMode" },
+            ACTIVE: "updating",
+            UPDATE_NUM_BLOCKS: "editNumberBlocks",
+            UPDATE_NUM_SLIDES: "editNumberSlides",
+          },
         },
         active: {
           on: {
@@ -58,6 +74,8 @@ export default function createWorkRowMachine({
             PAUSE: "updating",
             COMPLETE: "updating",
             FAIL: "updating",
+            UPDATE_NUM_BLOCKS: "editNumberBlocks",
+            UPDATE_NUM_SLIDES: "editNumberSlides",
           },
         },
         paused: {
@@ -66,6 +84,8 @@ export default function createWorkRowMachine({
             REACTIVATE: "updating",
             COMPLETE: "updating",
             FAIL: "updating",
+            UPDATE_NUM_BLOCKS: "editNumberBlocks",
+            UPDATE_NUM_SLIDES: "editNumberSlides",
           },
         },
         completed: {},
@@ -80,6 +100,26 @@ export default function createWorkRowMachine({
             onError: { target: "deciding" },
           },
         },
+        editNumberBlocks: {
+          invoke: {
+            src: "updateWorkNumBlocks",
+            onDone: {
+              actions: "assignWorkNumBlocks",
+              target: "deciding",
+            },
+            onError: { target: "deciding" },
+          },
+        },
+        editNumberSlides: {
+          invoke: {
+            src: "updateWorkNumSlides",
+            onDone: {
+              actions: "assignWorkNumSlides",
+              target: "deciding",
+            },
+            onError: { target: "deciding" },
+          },
+        },
       },
     },
     {
@@ -88,7 +128,15 @@ export default function createWorkRowMachine({
           if (e.type !== "done.invoke.updateWorkStatus") return;
           ctx.work = e.data.updateWorkStatus;
         }),
-
+        assignWorkNumBlocks: assign((ctx, e) => {
+          if (e.type !== "done.invoke.updateWorkNumBlocks") return;
+          ctx.work = e.data.updateWorkNumBlocks;
+        }),
+        assignWorkNumSlides: assign((ctx, e) => {
+          debugger;
+          if (e.type !== "done.invoke.updateWorkNumSlides") return;
+          ctx.work = e.data.updateWorkNumSlides;
+        }),
         toggleEditMode: assign(
           (ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled)
         ),
@@ -101,6 +149,25 @@ export default function createWorkRowMachine({
             status: getWorkStatusFromEventType(e),
             commentId: "commentId" in e ? e.commentId : undefined,
           });
+        },
+        updateWorkNumBlocks: (ctx, e) => {
+          let params: { workNumber: string; numBlocks?: number } = {
+            workNumber: ctx.work.workNumber,
+          };
+          if ("numBlocks" in e && e.numBlocks)
+            params["numBlocks"] = e.numBlocks;
+
+          return stanCore.UpdateWorkNumBlocks(params);
+        },
+        updateWorkNumSlides: (ctx, e) => {
+          debugger;
+          let params: { workNumber: string; numSlides?: number } = {
+            workNumber: ctx.work.workNumber,
+          };
+          if ("numSlides" in e && e.numSlides)
+            params["numSlides"] = e.numSlides;
+
+          return stanCore.UpdateWorkNumSlides(params);
         },
       },
     }
@@ -120,6 +187,8 @@ function getWorkStatusFromEventType(e: WorkRowEvent): WorkStatus {
     case "PAUSE":
       return WorkStatus.Paused;
     case "REACTIVATE":
+      return WorkStatus.Active;
+    case "ACTIVE":
       return WorkStatus.Active;
   }
 

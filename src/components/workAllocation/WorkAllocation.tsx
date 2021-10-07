@@ -5,7 +5,6 @@ import FormikInput from "../forms/Input";
 import FormikSelect from "../forms/Select";
 import BlueButton from "../buttons/BlueButton";
 import createWorkAllocationMachine, {
-  NUMBER_TYPE_FIELD,
   WorkAllocationFormValues,
 } from "./workAllocation.machine";
 import { useMachine } from "@xstate/react";
@@ -22,9 +21,10 @@ const initialValues: WorkAllocationFormValues = {
   costCode: "",
   project: "",
   isRnD: false,
-  numType: NUMBER_TYPE_FIELD.BLOCKS,
-  numValue: undefined,
+  numSlides: undefined,
+  numBlocks: undefined,
 };
+export const MAX_NUM_BLOCKANDSLIDES = 200;
 
 export default function WorkAllocation() {
   const [current, send] = useMachine(createWorkAllocationMachine());
@@ -55,10 +55,15 @@ export default function WorkAllocation() {
       .required()
       .label("Cost Code"),
     isRnD: Yup.boolean().required(),
-    numType: Yup.string().oneOf(
-      Object.values(NUMBER_TYPE_FIELD).map((cc) => cc)
-    ),
-    numValue: Yup.number().max(200).required(),
+    numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
+    numSlides: Yup.number()
+      .max(MAX_NUM_BLOCKANDSLIDES)
+      .when("numBlocks", (numBlocks: any, schema: any) => {
+        if (!numBlocks) {
+          return schema.required("Number of blocks or slides required");
+        }
+        return schema;
+      }),
   });
 
   return (
@@ -107,28 +112,21 @@ export default function WorkAllocation() {
                   {optionValues(costCodes, "code", "code")}
                 </FormikSelect>
               </div>
-            </div>
-            <div className="sm:flex sm:flex-row md:px-10">
-              <div className="md:space-y-0 mt-4 flex-shrink">
-                <FormikSelect
-                  label="Blocks/Samples"
-                  name="numType"
-                  emptyOption={false}
-                >
-                  {Object.values(NUMBER_TYPE_FIELD).map((val) => (
-                    <option key={val} value={val}>
-                      {val}
-                    </option>
-                  ))}
-                </FormikSelect>
-              </div>
 
-              <div className="mt-10 mx-2">
+              <div className="md:flex-grow">
                 <FormikInput
-                  label={""}
-                  name={"numValue"}
+                  label={"Number of blocks"}
+                  name={"numBlocks"}
                   type={"number"}
-                  maxLength={"200"}
+                  maxLength={MAX_NUM_BLOCKANDSLIDES}
+                />
+              </div>
+              <div className="md:flex-grow">
+                <FormikInput
+                  label={"Number of slides"}
+                  name={"numSlides"}
+                  type={"number"}
+                  maxLength={MAX_NUM_BLOCKANDSLIDES}
                 />
               </div>
             </div>
@@ -159,9 +157,9 @@ export default function WorkAllocation() {
                 <TableHeader>Work Type</TableHeader>
                 <TableHeader>Project</TableHeader>
                 <TableHeader>Cost Code</TableHeader>
-                <TableHeader>Status</TableHeader>
                 <TableHeader>Number of Blocks</TableHeader>
-                <TableHeader>Number of Samples</TableHeader>
+                <TableHeader>Number of Slides</TableHeader>
+                <TableHeader>Status</TableHeader>
                 <TableHeader />
               </tr>
             </TableHead>

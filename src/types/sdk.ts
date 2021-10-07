@@ -1979,6 +1979,34 @@ export type UnstoreBarcodeMutation = (
   )> }
 );
 
+export type UpdateWorkNumBlocksMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  numBlocks?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type UpdateWorkNumBlocksMutation = (
+  { __typename?: 'Mutation' }
+  & { updateWorkNumBlocks: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
+  ) }
+);
+
+export type UpdateWorkNumSlidesMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  numSlides?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type UpdateWorkNumSlidesMutation = (
+  { __typename?: 'Mutation' }
+  & { updateWorkNumSlides: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
+  ) }
+);
+
 export type UpdateWorkStatusMutationVariables = Exact<{
   workNumber: Scalars['String'];
   status: WorkStatus;
@@ -3059,6 +3087,20 @@ export const UnstoreBarcodeDocument = gql`
   }
 }
     `;
+export const UpdateWorkNumBlocksDocument = gql`
+    mutation UpdateWorkNumBlocks($workNumber: String!, $numBlocks: Int) {
+  updateWorkNumBlocks(workNumber: $workNumber, numBlocks: $numBlocks) {
+    ...WorkFields
+  }
+}
+    ${WorkFieldsFragmentDoc}`;
+export const UpdateWorkNumSlidesDocument = gql`
+    mutation UpdateWorkNumSlides($workNumber: String!, $numSlides: Int) {
+  updateWorkNumSlides(workNumber: $workNumber, numSlides: $numSlides) {
+    ...WorkFields
+  }
+}
+    ${WorkFieldsFragmentDoc}`;
 export const UpdateWorkStatusDocument = gql`
     mutation UpdateWorkStatus($workNumber: String!, $status: WorkStatus!, $commentId: Int) {
   updateWorkStatus(
@@ -3516,6 +3558,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     UnstoreBarcode(variables: UnstoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnstoreBarcodeMutation> {
       return withWrapper(() => client.request<UnstoreBarcodeMutation>(UnstoreBarcodeDocument, variables, requestHeaders));
+    },
+    UpdateWorkNumBlocks(variables: UpdateWorkNumBlocksMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumBlocksMutation> {
+      return withWrapper(() => client.request<UpdateWorkNumBlocksMutation>(UpdateWorkNumBlocksDocument, variables, requestHeaders));
+    },
+    UpdateWorkNumSlides(variables: UpdateWorkNumSlidesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumSlidesMutation> {
+      return withWrapper(() => client.request<UpdateWorkNumSlidesMutation>(UpdateWorkNumSlidesDocument, variables, requestHeaders));
     },
     UpdateWorkStatus(variables: UpdateWorkStatusMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkStatusMutation> {
       return withWrapper(() => client.request<UpdateWorkStatusMutation>(UpdateWorkStatusDocument, variables, requestHeaders));

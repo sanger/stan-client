@@ -188,5 +188,5 @@ export function getEnumKeyByEnumValue<T extends { [index: string]: string }>(
   enumType: T,
   enumValue: string
 ): keyof T | undefined {
-  return Object.keys(enumType).find((x) => enumType[x] == enumValue);
+  return Object.keys(enumType).find((x) => enumType[x] === enumValue);
 }

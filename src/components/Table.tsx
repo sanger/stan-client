@@ -70,7 +70,7 @@ export const TableCell: React.FC<React.DetailedHTMLProps<
   HTMLTableDataCellElement
 >> = ({ children, ...rest }) => {
   return (
-    <td className="px-6 py-4 whitespace-nowrap editable" {...rest}>
+    <td className="px-6 py-4 whitespace-nowrap" {...rest}>
       {children}
     </td>
   );

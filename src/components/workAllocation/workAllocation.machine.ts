@@ -35,14 +35,13 @@ export type WorkAllocationFormValues = {
   costCode: string;
 
   /**
-   * numValue contains Number of blocks or Number of Samples
+   * Number of blocks
    */
-  numType: NUMBER_TYPE_FIELD;
-
+  numBlocks: number | undefined;
   /**
-   * Value associated with Number of blocks or Number of Samples
+   * Number of Samples
    */
-  numValue: number | undefined;
+  numSlides: number | undefined;
 
   /**
    * Whether or not an R&D number is being created. Will use a different prefix on call to core.
@@ -157,7 +156,7 @@ export default function createWorkAllocationMachine() {
         assignSuccessMessage: assign((ctx, e) => {
           if (e.type !== "done.invoke.allocateWork") return;
           const { workNumber, workType, project, costCode } = e.data.createWork;
-          ctx.successMessage = `Assigned ${workNumber} (${workType.name}) to project ${project.name} and cost code ${costCode.code} }`;
+          ctx.successMessage = `Assigned ${workNumber} (${workType.name}) to project ${project.name} and cost code ${costCode.code} `;
         }),
 
         clearNotifications: assign((ctx) => {
@@ -174,13 +173,10 @@ export default function createWorkAllocationMachine() {
             project,
             costCode,
             isRnD,
-            numType,
-            numValue,
+            numBlocks,
+            numSlides,
           } = e.values;
-          const numBlocks =
-            numType === NUMBER_TYPE_FIELD.BLOCKS ? numValue : undefined;
-          const numSlides =
-            numType === NUMBER_TYPE_FIELD.SLIDES ? numValue : undefined;
+
           return stanCore.CreateWork({
             workType,
             project,

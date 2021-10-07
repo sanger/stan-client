@@ -1,0 +1,5 @@
+mutation UpdateWorkNumSlides($workNumber:String!,$numSlides:Int) {
+updateWorkNumSlides(workNumber: $workNumber,numSlides: $numSlides) {
+    ...WorkFields
+}
+}
