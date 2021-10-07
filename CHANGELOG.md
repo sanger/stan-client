@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.8.2] - 2021-10-07
 ### Modified
-### Modified
 - Support editing the custom name of any location ([#65](https://github.com/sanger/stan-client/pull/65))
 - Support a wider array of weird characters in the donor name ([#66](https://github.com/sanger/stan-client/pull/66))
 
