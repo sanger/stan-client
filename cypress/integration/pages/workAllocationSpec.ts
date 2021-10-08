@@ -48,38 +48,6 @@ describe("Work Allocation", () => {
       }
     );
   });
-  describe("Editing the number of blocks and slides column for Work ", () => {
-    context("Entering a value in 'Number of blocks' cell in table", () => {
-      before(() => {
-        cy.get("td").eq(4).type("8");
-        //change the focus
-        cy.findAllByRole("button", { name: /Edit Status/i }).then(
-          (editButtons) => {
-            editButtons[0].focus();
-          }
-        );
-      });
-
-      it("updates the number of blocks", () => {
-        cy.get("td").eq(4).should("contain.value", 8);
-      });
-    });
-    context("Entering a value in 'Number of slides' cell in table", () => {
-      before(() => {
-        cy.get("td").eq(5).type("3");
-        //change the focus
-        cy.findAllByRole("button", { name: /Edit Status/i }).then(
-          (editButtons) => {
-            editButtons[0].focus();
-          }
-        );
-      });
-
-      it("updates the number of slides", () => {
-        cy.get("td").eq(5).should("contain.value", 3);
-      });
-    });
-  });
 
   describe("Editing the status of Work", () => {
     context("when I click the Edit Status button", () => {
