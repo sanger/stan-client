@@ -121,8 +121,8 @@ export default function WorkProgressInput({
   };
 
   //Send Events to State machine
-  const sendEvents = (eventType: string, value?: string) => {
-    if (eventType === "VALUE_SELECTION" && value) {
+  const sendEvents = (eventType: string, value: string) => {
+    if (eventType === "VALUE_SELECTION") {
       send({ type: "VALUE_SELECTION", value: value });
       return;
     }
@@ -178,7 +178,7 @@ export default function WorkProgressInput({
                       "searchType",
                       e.target.value === ""
                         ? undefined
-                        : sendEvents(e.target.value)
+                        : sendEvents(e.target.value, "")
                     );
                   }}
                 >
@@ -197,12 +197,7 @@ export default function WorkProgressInput({
                     data-testid={"valueInput"}
                     value={selectedValue}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      setFieldValue(
-                        "searchValue",
-                        e.target.value === ""
-                          ? undefined
-                          : sendEvents("VALUE_SELECTION", e.target.value)
-                      );
+                      sendEvents("VALUE_SELECTION", e.target.value);
                     }}
                   />
                 ) : (
@@ -212,12 +207,7 @@ export default function WorkProgressInput({
                     data-testid={"valueSelect"}
                     value={selectedValue ? selectedValue : ""}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      setFieldValue(
-                        "searchValue",
-                        e.target.value === ""
-                          ? undefined
-                          : sendEvents("VALUE_SELECTION", e.target.value)
-                      );
+                      sendEvents("VALUE_SELECTION", e.target.value);
                     }}
                   >
                     {values ? (
