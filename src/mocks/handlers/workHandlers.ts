@@ -128,7 +128,6 @@ const workHandlers = [
     UpdateWorkNumBlocksMutationVariables
   >("UpdateWorkNumBlocks", (req, res, ctx) => {
     const work = workRepository.find("workNumber", req.variables.workNumber);
-    debugger;
     if (!work) {
       return res(
         ctx.errors([
@@ -151,7 +150,6 @@ const workHandlers = [
     UpdateWorkNumSlidesMutation,
     UpdateWorkNumSlidesMutationVariables
   >("UpdateWorkNumSlides", (req, res, ctx) => {
-    debugger;
     const work = workRepository.find("workNumber", req.variables.workNumber);
     if (!work) {
       return res(

@@ -155,8 +155,23 @@ export default function createWorkAllocationMachine() {
 
         assignSuccessMessage: assign((ctx, e) => {
           if (e.type !== "done.invoke.allocateWork") return;
-          const { workNumber, workType, project, costCode } = e.data.createWork;
-          ctx.successMessage = `Assigned ${workNumber} (${workType.name}) to project ${project.name} and cost code ${costCode.code} `;
+          const {
+            workNumber,
+            workType,
+            project,
+            costCode,
+            numBlocks,
+            numSlides,
+          } = e.data.createWork;
+          const blockMessage = numBlocks ? `${numBlocks} blocks` : undefined;
+          const slideMessage = numSlides ? `${numSlides} slides` : undefined;
+          const blockSlideMsg =
+            blockMessage && slideMessage
+              ? `${blockMessage} and ${slideMessage}`
+              : blockMessage
+              ? blockMessage
+              : slideMessage;
+          ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideMsg}) to project ${project.name} and cost code ${costCode.code} `;
         }),
 
         clearNotifications: assign((ctx) => {

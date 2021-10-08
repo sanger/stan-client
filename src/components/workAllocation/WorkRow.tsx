@@ -62,7 +62,10 @@ export default function WorkRow({
   /**
    * List of possible events that can change the current status (excluding edit)
    */
-  const nextStatuses = current.nextEvents.filter((e) => e !== "EDIT");
+  const nextStatuses = current.nextEvents.filter(
+    (e) =>
+      e !== "EDIT" && e !== "UPDATE_NUM_SLIDES" && e !== "UPDATE_NUM_BLOCKS"
+  );
 
   /**
    * Set the initial values for the form to the first next status and first available comment
@@ -93,8 +96,7 @@ export default function WorkRow({
       let value = workNumValue === "" ? undefined : Number(workNumValue);
       if (value && value > MAX_NUM_BLOCKANDSLIDES)
         value = MAX_NUM_BLOCKANDSLIDES;
-      debugger;
-      if (workNumValueType === "Blocks") {
+      if (workNumValueType === "block") {
         send({ type: "UPDATE_NUM_BLOCKS", numBlocks: value });
       } else {
         send({ type: "UPDATE_NUM_SLIDES", numSlides: value });
@@ -109,6 +111,7 @@ export default function WorkRow({
   ) => {
     return (
       <input
+        data-testid={workNumValueType}
         className={"border-0 border-gray-100 "}
         type="number"
         min="0"
@@ -129,10 +132,10 @@ export default function WorkRow({
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
-        {renderWorkNumValueField(work.numBlocks ?? undefined, "Blocks")}
+        {renderWorkNumValueField(work.numBlocks ?? undefined, "block")}
       </TableCell>
       <TableCell>
-        {renderWorkNumValueField(work.numSlides ?? undefined, "Slides")}
+        {renderWorkNumValueField(work.numSlides ?? undefined, "slide")}
       </TableCell>
       {!editModeEnabled && (
         <TableCell>

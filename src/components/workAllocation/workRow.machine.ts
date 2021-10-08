@@ -133,7 +133,6 @@ export default function createWorkRowMachine({
           ctx.work = e.data.updateWorkNumBlocks;
         }),
         assignWorkNumSlides: assign((ctx, e) => {
-          debugger;
           if (e.type !== "done.invoke.updateWorkNumSlides") return;
           ctx.work = e.data.updateWorkNumSlides;
         }),
@@ -160,7 +159,6 @@ export default function createWorkRowMachine({
           return stanCore.UpdateWorkNumBlocks(params);
         },
         updateWorkNumSlides: (ctx, e) => {
-          debugger;
           let params: { workNumber: string; numSlides?: number } = {
             workNumber: ctx.work.workNumber,
           };
