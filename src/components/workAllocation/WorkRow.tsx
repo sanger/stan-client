@@ -106,12 +106,13 @@ export default function WorkRow({
   );
 
   const renderWorkNumValueField = (
+    workNumber: string,
     workNumValue: number | undefined,
     workNumValueType: string
   ) => {
     return (
       <input
-        data-testid={workNumValueType}
+        data-testid={workNumber + "-" + workNumValueType}
         className={"border-0 border-gray-100 "}
         type="number"
         min="0"
@@ -132,10 +133,18 @@ export default function WorkRow({
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
-        {renderWorkNumValueField(work.numBlocks ?? undefined, "block")}
+        {renderWorkNumValueField(
+          work.workNumber,
+          work.numBlocks ?? undefined,
+          "block"
+        )}
       </TableCell>
       <TableCell>
-        {renderWorkNumValueField(work.numSlides ?? undefined, "slide")}
+        {renderWorkNumValueField(
+          work.workNumber,
+          work.numSlides ?? undefined,
+          "slide"
+        )}
       </TableCell>
       {!editModeEnabled && (
         <TableCell>
