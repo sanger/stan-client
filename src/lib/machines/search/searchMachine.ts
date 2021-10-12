@@ -16,20 +16,23 @@ export interface SearchContext<E, T> {
   serverError?: Maybe<ClientError>;
 }
 
-type FindEvent = { type: "FIND"; request: Object };
+type FindEvent<E> = { type: "FIND"; request: E };
 type SearchDoneEvent<T> = {
   type: "done.invoke.search";
   data: SearchResultsType<T>;
 };
 type SearchErrorEvent = { type: "error.platform.search"; data: ClientError };
 
-export type SearchEvent = FindEvent | SearchErrorEvent;
+export type SearchEvent = SearchErrorEvent;
 
 /**
  * Search Machine Config
  */
 function searchMachine<E, T>(searchService: SearchServiceInterface<E, T>) {
-  return createMachine<SearchContext<E, T>, SearchEvent | SearchDoneEvent<T>>(
+  return createMachine<
+    SearchContext<E, T>,
+    SearchEvent | FindEvent<E> | SearchDoneEvent<T>
+  >(
     {
       id: "search",
       initial: "unknown",
@@ -100,7 +103,7 @@ function searchMachine<E, T>(searchService: SearchServiceInterface<E, T>) {
             return Promise.reject();
           }
           return searchService.search({
-            ...(e.request as E),
+            ...e.request,
             maxRecords: ctx.maxRecords,
           });
         },
