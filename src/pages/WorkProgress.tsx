@@ -1,5 +1,9 @@
 import React from "react";
-import { FindWorkProgressQueryVariables as WorkProgressQueryInput } from "../types/sdk";
+import {
+  FindWorkProgressQueryVariables,
+  FindWorkProgressQueryVariables as WorkProgressQueryInput,
+  WorkStatus,
+} from "../types/sdk";
 
 import AppShell from "../components/AppShell";
 import { ParsedQuery } from "query-string";
@@ -10,11 +14,10 @@ import {
   stringify,
 } from "../lib/helpers";
 import { merge } from "lodash";
-import genericSearchMachine from "../lib/machines/workProgress/genericSearchMachine";
+import searchMachine from "../lib/machines/search/searchMachine";
 import { useMachine } from "@xstate/react";
 import Warning from "../components/notifications/Warning";
 import {
-  WorkProgressResultsType,
   WorkProgressResultTableEntry,
   WorkProgressService,
 } from "../lib/services/workProgressService";
@@ -25,6 +28,7 @@ import { Column } from "react-table";
 import { history } from "../lib/sdk";
 import WorkProgressInput from "../components/workProgress/WorkProgressInput";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
+import { SearchResultsType } from "../types/stan";
 
 type WorkProgressProps = {
   urlParamsString: string;
@@ -43,7 +47,10 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
     defaultInitialValues,
     cleanParams(params, objectKeys(defaultInitialValues))
   );
-  const workProgressMachine = genericSearchMachine(new WorkProgressService());
+  const workProgressMachine = searchMachine<
+    FindWorkProgressQueryVariables,
+    WorkProgressResultTableEntry
+  >(new WorkProgressService());
   const [current, send] = useMachine(() =>
     workProgressMachine.withContext({
       findRequest: workProgressQueryInput,
@@ -54,7 +61,7 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
     searchResult,
   }: {
     serverError?: ClientError | undefined | null;
-    searchResult?: WorkProgressResultsType;
+    searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
 
   const handleSubmission = (workProgressInput: WorkProgressQueryInput) => {
@@ -152,8 +159,13 @@ const getDateSortType = (
  * @param rowAStatus
  * @param rowBStatus
  */
-const getStatusSortType = (rowAStatus: string, rowBStatus: string) => {
-  const statusArray: string[] = ["active", "completed", "paused", "failed"];
+const getStatusSortType = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
+  const statusArray: WorkStatus[] = [
+    WorkStatus.Active,
+    WorkStatus.Completed,
+    WorkStatus.Paused,
+    WorkStatus.Failed,
+  ];
   return (
     statusArray.findIndex((val) => val === rowAStatus) -
     statusArray.findIndex((val) => val === rowBStatus)

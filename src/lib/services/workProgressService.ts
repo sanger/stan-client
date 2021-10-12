@@ -3,17 +3,10 @@ import {
   FindWorkProgressQueryVariables,
   WorkStatus,
 } from "../../types/sdk";
-import { GenericSearchResultsType } from "../../types/stan";
+import { SearchResultsType } from "../../types/stan";
 import _ from "lodash";
 import { stanCore } from "../sdk";
-import { GenericSearchService } from "./genericSearchService";
-
-/**
- * The overriden result for WorkProgress
- */
-export type WorkProgressResultsType = GenericSearchResultsType & {
-  entries: WorkProgressResultTableEntry[];
-};
+import { SearchServiceInterface } from "./searchServiceInterface";
 
 /**
  * A single row on the results table of the Work Progress page
@@ -35,14 +28,19 @@ export type WorkProgressTimeStampType =
   | "Extract"
   | "Visium cDNA";
 
-export class WorkProgressService implements GenericSearchService {
+export class WorkProgressService
+  implements
+    SearchServiceInterface<
+      FindWorkProgressQueryVariables,
+      WorkProgressResultTableEntry
+    > {
   /**
    * Do a findWorkProgress query on core. Format the response into a list of table rows
    * @param workProgressRequest the variables that go into a FindWorkProgress query
    */
   search = async (
     workProgressRequest: FindWorkProgressQueryVariables
-  ): Promise<WorkProgressResultsType> => {
+  ): Promise<SearchResultsType<WorkProgressResultTableEntry>> => {
     // Tidy up the search parameters e.g. removing undefined and null values
     const request: FindWorkProgressQueryVariables = _(workProgressRequest)
       .omitBy((val) => (typeof val === "number" ? val === 0 : _.isEmpty(val)))

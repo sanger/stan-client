@@ -156,7 +156,7 @@ export default function WorkProgressInput({
         validateOnMount={false}
         onSubmit={onFormSubmit}
       >
-        {({ errors, isValid, setFieldValue }) => (
+        {({ errors, isValid }) => (
           <Form>
             {!isValid && (
               <Warning className={"mb-5"} message={"Validation Error"}>
@@ -174,12 +174,7 @@ export default function WorkProgressInput({
                   data-testid={"type"}
                   value={selectedType}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    setFieldValue(
-                      "searchType",
-                      e.target.value === ""
-                        ? undefined
-                        : sendEvents(e.target.value, "")
-                    );
+                    sendEvents(e.target.value, "");
                   }}
                 >
                   {types.map((val) => (
