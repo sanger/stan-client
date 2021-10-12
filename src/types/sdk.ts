@@ -34,11 +34,6 @@ export enum LabwareState {
   Destroyed = 'destroyed'
 }
 
-export enum PassFail {
-  Pass = 'pass',
-  Fail = 'fail'
-}
-
 export type User = {
   __typename?: 'User';
   username: Scalars['String'];
@@ -617,20 +612,13 @@ export type StainRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
-export type SampleResult = {
-  address: Scalars['Address'];
-  result: PassFail;
-  commentId?: Maybe<Scalars['Int']>;
-};
-
-export type LabwareResult = {
+export type UnreleaseLabware = {
   barcode: Scalars['String'];
-  sampleResults: Array<SampleResult>;
+  highestSection?: Maybe<Scalars['Int']>;
 };
 
-export type ResultRequest = {
-  labwareResults: Array<LabwareResult>;
-  workNumber?: Maybe<Scalars['String']>;
+export type UnreleaseRequest = {
+  labware: Array<UnreleaseLabware>;
 };
 
 export type Query = {
@@ -830,6 +818,7 @@ export type Mutation = {
   stain: OperationResult;
   recordInPlace: OperationResult;
   recordStainResult: OperationResult;
+  unrelease: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
@@ -1049,6 +1038,11 @@ export type MutationRecordStainResultArgs = {
 };
 
 
+export type MutationUnreleaseArgs = {
+  request: UnreleaseRequest;
+};
+
+
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1081,6 +1075,27 @@ export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
 };
+
+export type SampleResult = {
+  address: Scalars['Address'];
+  result: PassFail;
+  commentId?: Maybe<Scalars['Int']>;
+};
+
+export type LabwareResult = {
+  barcode: Scalars['String'];
+  sampleResults: Array<SampleResult>;
+};
+
+export type ResultRequest = {
+  labwareResults: Array<LabwareResult>;
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export enum PassFail {
+  Pass = 'pass',
+  Fail = 'fail'
+}
 
 export type CommentFieldsFragment = (
   { __typename?: 'Comment' }
@@ -1238,7 +1253,7 @@ export type SampleFieldsFragment = (
 
 export type SlotFieldsFragment = (
   { __typename?: 'Slot' }
-  & Pick<Slot, 'address' | 'labwareId' | 'blockHighestSection'>
+  & Pick<Slot, 'address' | 'labwareId' | 'blockHighestSection' | 'block'>
   & { samples: Array<(
     { __typename?: 'Sample' }
     & SampleFieldsFragment
@@ -1945,6 +1960,22 @@ export type StoreBarcodeMutation = (
   ) }
 );
 
+export type UnreleaseMutationVariables = Exact<{
+  request: UnreleaseRequest;
+}>;
+
+
+export type UnreleaseMutation = (
+  { __typename?: 'Mutation' }
+  & { unrelease: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
+);
+
 export type UnstoreBarcodeMutationVariables = Exact<{
   barcode: Scalars['String'];
 }>;
@@ -2459,6 +2490,7 @@ export const SlotFieldsFragmentDoc = gql`
     ...SampleFields
   }
   blockHighestSection
+  block
 }
     ${SampleFieldsFragmentDoc}`;
 export const LabwareFieldsFragmentDoc = gql`
@@ -3026,6 +3058,15 @@ export const StoreBarcodeDocument = gql`
   }
 }
     ${LocationFieldsFragmentDoc}`;
+export const UnreleaseDocument = gql`
+    mutation Unrelease($request: UnreleaseRequest!) {
+  unrelease(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const UnstoreBarcodeDocument = gql`
     mutation UnstoreBarcode($barcode: String!) {
   unstoreBarcode(barcode: $barcode) {
@@ -3488,6 +3529,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     StoreBarcode(variables: StoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StoreBarcodeMutation> {
       return withWrapper(() => client.request<StoreBarcodeMutation>(StoreBarcodeDocument, variables, requestHeaders));
+    },
+    Unrelease(variables: UnreleaseMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnreleaseMutation> {
+      return withWrapper(() => client.request<UnreleaseMutation>(UnreleaseDocument, variables, requestHeaders));
     },
     UnstoreBarcode(variables: UnstoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnstoreBarcodeMutation> {
       return withWrapper(() => client.request<UnstoreBarcodeMutation>(UnstoreBarcodeDocument, variables, requestHeaders));

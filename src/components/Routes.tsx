@@ -27,6 +27,7 @@ import SGP from "../pages/SGP";
 import Staining from "../pages/Staining";
 import RecordInPlace from "../pages/RecordInPlace";
 import StainingQC from "../pages/StainingQC";
+import Unrelease from "../pages/Unrelease";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -170,6 +171,11 @@ export function Routes() {
             {(releaseInfo) => <Release releaseInfo={releaseInfo} />}
           </DataFetcher>
         )}
+      />
+
+      <AuthenticatedRoute
+        path="/admin/unrelease"
+        render={(routeProps) => <Unrelease key={routeProps.location.key} />}
       />
 
       <Route

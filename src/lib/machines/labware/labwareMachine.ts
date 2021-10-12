@@ -8,6 +8,7 @@ import {
 import { assign } from "@xstate/immer";
 import { stanCore } from "../../sdk";
 import { ClientError } from "graphql-request";
+import { findIndex } from "lodash";
 
 export interface LabwareContext {
   /**
@@ -24,6 +25,11 @@ export interface LabwareContext {
    * The list of sourceLabwares fetched so far
    */
   labwares: LabwareFieldsFragment[];
+
+  /**
+   * The most recently removed labware
+   */
+  removedLabware: Maybe<{ labware: LabwareFieldsFragment; index: number }>;
 
   /**
    * A {@link https://github.com/jquense/yup#string Yup string schema} to validate the barcode on submission
@@ -79,11 +85,6 @@ type LockEvent = { type: "LOCK" };
  * Event to unlock the machine
  */
 type UnlockEvent = { type: "UNLOCK" };
-
-export type UpdateLabwaresEvent = {
-  type: "UPDATE_LABWARES";
-  labwares: LabwareFieldsFragment[];
-};
 
 type ValidationErrorEvent = {
   type: "error.platform.validateBarcode";
@@ -151,6 +152,7 @@ export const createLabwareMachine = (
         currentBarcode: "",
         foundLabware: null,
         labwares,
+        removedLabware: null,
         foundLabwareCheck: foundLabwareCheck ?? (() => []),
         validator: Yup.string().trim().required("Barcode is required"),
         successMessage: null,
@@ -185,7 +187,7 @@ export const createLabwareMachine = (
             ],
             REMOVE_LABWARE: {
               target: "#labwareScanner.idle.success",
-              actions: ["removeEvent", "removeLabware"],
+              actions: ["removeLabware"],
             },
             LOCK: "locked",
           },
@@ -256,7 +258,17 @@ export const createLabwareMachine = (
           if (e.type !== "REMOVE_LABWARE") {
             return;
           }
-          ctx.labwares = ctx.labwares.filter((lw) => lw.barcode !== e.value);
+          const removeLabwareIndex = findIndex(ctx.labwares, {
+            barcode: e.value,
+          });
+
+          if (removeLabwareIndex < 0) return;
+
+          ctx.removedLabware = {
+            labware: ctx.labwares[removeLabwareIndex],
+            index: removeLabwareIndex,
+          };
+          ctx.labwares.splice(removeLabwareIndex, 1);
           ctx.successMessage = `"${e.value}" removed`;
         }),
 

@@ -36,6 +36,7 @@ const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns }) => {
 
         return (
           <RemoveButton
+            type={"button"}
             onClick={() => {
               row.original.barcode && removeLabware(row.original.barcode);
             }}
