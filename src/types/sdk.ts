@@ -3372,7 +3372,7 @@ export const GetStainInfoDocument = gql`
     ${StainTypeFieldsFragmentDoc}`;
 export const GetStainingQcInfoDocument = gql`
     query GetStainingQCInfo {
-  comments(includeDisabled: false, category: "result") {
+  comments(includeDisabled: false, category: "stain QC") {
     ...CommentFields
   }
 }

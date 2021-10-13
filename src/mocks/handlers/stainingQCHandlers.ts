@@ -16,7 +16,7 @@ const stainingQCHandlers = [
           comments: commentRepository
             .findAll()
             .filter(
-              (comment) => comment.category === "result" && comment.enabled
+              (comment) => comment.category === "stain QC" && comment.enabled
             ),
         })
       );
