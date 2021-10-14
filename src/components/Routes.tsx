@@ -27,6 +27,7 @@ import SGP from "../pages/SGP";
 import Staining from "../pages/Staining";
 import RecordInPlace from "../pages/RecordInPlace";
 import StainingQC from "../pages/StainingQC";
+import RnaAnalysis from "../pages/RnaAnalysis";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -72,6 +73,10 @@ export function Routes() {
       <AuthenticatedRoute
         path="/lab/extraction"
         render={(routerProps) => <Extraction key={routerProps.location.key} />}
+      />
+      <AuthenticatedRoute
+        path="/lab/rna_analysis"
+        render={(routerProps) => <RnaAnalysis key={routerProps.location.key} />}
       />
 
       <AuthenticatedRoute

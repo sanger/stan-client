@@ -633,6 +633,42 @@ export type ResultRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
+export type ExtractResultLabware = {
+  barcode: Scalars['String'];
+  result: PassFail;
+  concentration?: Maybe<Scalars['String']>;
+  commentId?: Maybe<Scalars['Int']>;
+};
+
+export type ExtractResultRequest = {
+  labware: Array<ExtractResultLabware>;
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export type ExtractResult = {
+  __typename?: 'ExtractResult';
+  labware: Labware;
+  result?: Maybe<PassFail>;
+  concentration?: Maybe<Scalars['String']>;
+};
+
+export type StringMeasurement = {
+  name: Scalars['String'];
+  value: Scalars['String'];
+};
+
+export type RnaAnalysisLabware = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  commentId?: Maybe<Scalars['Int']>;
+  measurements: Array<StringMeasurement>;
+};
+
+export type RnaAnalysisRequest = {
+  operationType: Scalars['String'];
+  labware: Array<RnaAnalysisLabware>;
+};
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -659,6 +695,7 @@ export type Query = {
   find: FindResult;
   planData: PlanData;
   stainTypes: Array<StainType>;
+  extractResult: ExtractResult;
   historyForSampleId: History;
   historyForExternalName: History;
   historyForDonorName: History;
@@ -760,6 +797,11 @@ export type QueryPlanDataArgs = {
 };
 
 
+export type QueryExtractResultArgs = {
+  barcode: Scalars['String'];
+};
+
+
 export type QueryHistoryForSampleIdArgs = {
   sampleId: Scalars['Int'];
 };
@@ -830,6 +872,8 @@ export type Mutation = {
   stain: OperationResult;
   recordInPlace: OperationResult;
   recordStainResult: OperationResult;
+  recordExtractResult: OperationResult;
+  recordRNAAnalysis: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
@@ -1049,6 +1093,16 @@ export type MutationRecordStainResultArgs = {
 };
 
 
+export type MutationRecordExtractResultArgs = {
+  request: ExtractResultRequest;
+};
+
+
+export type MutationRecordRnaAnalysisArgs = {
+  request: RnaAnalysisRequest;
+};
+
+
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1229,6 +1283,12 @@ export type SampleFieldsFragment = (
         { __typename?: 'TissueType' }
         & Pick<TissueType, 'name'>
       ) }
+    ), medium: (
+      { __typename?: 'Medium' }
+      & Pick<Medium, 'name'>
+    ), fixative: (
+      { __typename?: 'Fixative' }
+      & Pick<Fixative, 'name' | 'enabled'>
     ) }
   ), bioState: (
     { __typename?: 'BioState' }
@@ -1640,6 +1700,22 @@ export type RecordInPlaceMutation = (
   ) }
 );
 
+export type RecordRnaAnalysisMutationVariables = Exact<{
+  request: RnaAnalysisRequest;
+}>;
+
+
+export type RecordRnaAnalysisMutation = (
+  { __typename?: 'Mutation' }
+  & { recordRNAAnalysis: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
+);
+
 export type RecordStainResultMutationVariables = Exact<{
   request: ResultRequest;
 }>;
@@ -1982,6 +2058,23 @@ export type CurrentUserQuery = (
     { __typename?: 'User' }
     & UserFieldsFragment
   )> }
+);
+
+export type ExtractResultQueryVariables = Exact<{
+  barcode: Scalars['String'];
+}>;
+
+
+export type ExtractResultQuery = (
+  { __typename?: 'Query' }
+  & { extractResult: (
+    { __typename?: 'ExtractResult' }
+    & Pick<ExtractResult, 'result' | 'concentration'>
+    & { labware: (
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    ) }
+  ) }
 );
 
 export type FindQueryVariables = Exact<{
@@ -2445,6 +2538,13 @@ export const SampleFieldsFragmentDoc = gql`
       code
     }
     replicate
+    medium {
+      name
+    }
+    fixative {
+      name
+      enabled
+    }
   }
   bioState {
     name
@@ -2852,6 +2952,15 @@ export const RecordInPlaceDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const RecordRnaAnalysisDocument = gql`
+    mutation RecordRNAAnalysis($request: RNAAnalysisRequest!) {
+  recordRNAAnalysis(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const RecordStainResultDocument = gql`
     mutation RecordStainResult($request: ResultRequest!) {
   recordStainResult(request: $request) {
@@ -3052,6 +3161,17 @@ export const CurrentUserDocument = gql`
   }
 }
     ${UserFieldsFragmentDoc}`;
+export const ExtractResultDocument = gql`
+    query ExtractResult($barcode: String!) {
+  extractResult(barcode: $barcode) {
+    result
+    concentration
+    labware {
+      ...LabwareFields
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const FindDocument = gql`
     query Find($request: FindRequest!) {
   find(request: $request) {
@@ -3432,6 +3552,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     RecordInPlace(variables: RecordInPlaceMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordInPlaceMutation> {
       return withWrapper(() => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, requestHeaders));
     },
+    RecordRNAAnalysis(variables: RecordRnaAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordRnaAnalysisMutation> {
+      return withWrapper(() => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, requestHeaders));
+    },
     RecordStainResult(variables: RecordStainResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordStainResultMutation> {
       return withWrapper(() => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, requestHeaders));
     },
@@ -3497,6 +3620,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     CurrentUser(variables?: CurrentUserQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CurrentUserQuery> {
       return withWrapper(() => client.request<CurrentUserQuery>(CurrentUserDocument, variables, requestHeaders));
+    },
+    ExtractResult(variables: ExtractResultQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ExtractResultQuery> {
+      return withWrapper(() => client.request<ExtractResultQuery>(ExtractResultDocument, variables, requestHeaders));
     },
     Find(variables: FindQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindQuery> {
       return withWrapper(() => client.request<FindQuery>(FindDocument, variables, requestHeaders));
