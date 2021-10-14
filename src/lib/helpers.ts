@@ -3,6 +3,7 @@ import { ParsedQuery } from "query-string";
 import { GridDirection, Maybe } from "../types/sdk";
 import { HasEnabled, SizeInput } from "../types/stan";
 import _ from "lodash";
+import { Key } from "react";
 
 /**
  * Utility for retrieving a list of correctly typed object keys.
@@ -161,4 +162,20 @@ export function getTimestampStr(date?: Date): string {
  */
 export function isEnabled(enablelable: HasEnabled): boolean {
   return enablelable.enabled;
+}
+
+type Mapify<K extends string> = {
+  [key in K]: Key;
+};
+
+/**
+ * Convert a list to a map with one of the items properties used as the key
+ * @param items the list of items to convert to a map
+ * @param key the name of the property to use as the map's key
+ */
+export function mapify<K extends string, T extends Mapify<K>>(
+  items: T[],
+  key: K
+): Map<Key, T> {
+  return new Map<Key, T>(items.map((item) => [item[key], item] as const));
 }

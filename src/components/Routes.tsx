@@ -27,6 +27,8 @@ import SGP from "../pages/SGP";
 import Staining from "../pages/Staining";
 import RecordInPlace from "../pages/RecordInPlace";
 import WorkProgress from "../pages/WorkProgress";
+import StainingQC from "../pages/StainingQC";
+import Unrelease from "../pages/Unrelease";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -98,6 +100,18 @@ export function Routes() {
       />
 
       <AuthenticatedRoute
+        path="/lab/staining_qc"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetStainingQCInfo}
+          >
+            {(stainingQcInfo) => <StainingQC info={stainingQcInfo} />}
+          </DataFetcher>
+        )}
+      />
+
+      <AuthenticatedRoute
         path="/lab/imaging"
         render={(routeProps) => (
           <DataFetcher
@@ -158,6 +172,11 @@ export function Routes() {
             {(releaseInfo) => <Release releaseInfo={releaseInfo} />}
           </DataFetcher>
         )}
+      />
+
+      <AuthenticatedRoute
+        path="/admin/unrelease"
+        render={(routeProps) => <Unrelease key={routeProps.location.key} />}
       />
 
       <Route

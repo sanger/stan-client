@@ -1,0 +1,7 @@
+mutation Unrelease($request: UnreleaseRequest!) {
+    unrelease(request: $request) {
+        operations {
+            id
+        }
+    }
+}

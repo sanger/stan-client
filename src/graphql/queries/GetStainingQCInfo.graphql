@@ -1,0 +1,5 @@
+query GetStainingQCInfo {
+    comments(includeDisabled: false, category: "stain QC") {
+        ...CommentFields
+    }
+}

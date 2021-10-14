@@ -624,6 +624,15 @@ export type StainRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
+export type UnreleaseLabware = {
+  barcode: Scalars['String'];
+  highestSection?: Maybe<Scalars['Int']>;
+};
+
+export type UnreleaseRequest = {
+  labware: Array<UnreleaseLabware>;
+};
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -828,6 +837,8 @@ export type Mutation = {
   updateWorkStatus: Work;
   stain: OperationResult;
   recordInPlace: OperationResult;
+  recordStainResult: OperationResult;
+  unrelease: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
@@ -1042,6 +1053,16 @@ export type MutationRecordInPlaceArgs = {
 };
 
 
+export type MutationRecordStainResultArgs = {
+  request: ResultRequest;
+};
+
+
+export type MutationUnreleaseArgs = {
+  request: UnreleaseRequest;
+};
+
+
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1074,6 +1095,27 @@ export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
 };
+
+export type SampleResult = {
+  address: Scalars['Address'];
+  result: PassFail;
+  commentId?: Maybe<Scalars['Int']>;
+};
+
+export type LabwareResult = {
+  barcode: Scalars['String'];
+  sampleResults: Array<SampleResult>;
+};
+
+export type ResultRequest = {
+  labwareResults: Array<LabwareResult>;
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export enum PassFail {
+  Pass = 'pass',
+  Fail = 'fail'
+}
 
 export type CommentFieldsFragment = (
   { __typename?: 'Comment' }
@@ -1231,7 +1273,7 @@ export type SampleFieldsFragment = (
 
 export type SlotFieldsFragment = (
   { __typename?: 'Slot' }
-  & Pick<Slot, 'address' | 'labwareId' | 'blockHighestSection'>
+  & Pick<Slot, 'address' | 'labwareId' | 'blockHighestSection' | 'block'>
   & { samples: Array<(
     { __typename?: 'Sample' }
     & SampleFieldsFragment
@@ -1649,6 +1691,22 @@ export type RecordInPlaceMutation = (
   ) }
 );
 
+export type RecordStainResultMutationVariables = Exact<{
+  request: ResultRequest;
+}>;
+
+
+export type RecordStainResultMutation = (
+  { __typename?: 'Mutation' }
+  & { recordStainResult: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
+);
+
 export type RegisterSectionsMutationVariables = Exact<{
   request: SectionRegisterRequest;
 }>;
@@ -1935,6 +1993,22 @@ export type StoreBarcodeMutation = (
       { __typename?: 'Location' }
       & LocationFieldsFragment
     ) }
+  ) }
+);
+
+export type UnreleaseMutationVariables = Exact<{
+  request: UnreleaseRequest;
+}>;
+
+
+export type UnreleaseMutation = (
+  { __typename?: 'Mutation' }
+  & { unrelease: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
   ) }
 );
 
@@ -2361,6 +2435,17 @@ export type GetStainInfoQuery = (
   )> }
 );
 
+export type GetStainingQcInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetStainingQcInfoQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
 export type GetWorkAllocationInfoQueryVariables = Exact<{
   commentCategory: Scalars['String'];
 }>;
@@ -2467,6 +2552,7 @@ export const SlotFieldsFragmentDoc = gql`
     ...SampleFields
   }
   blockHighestSection
+  block
 }
     ${SampleFieldsFragmentDoc}`;
 export const LabwareFieldsFragmentDoc = gql`
@@ -2877,6 +2963,15 @@ export const RecordInPlaceDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const RecordStainResultDocument = gql`
+    mutation RecordStainResult($request: ResultRequest!) {
+  recordStainResult(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const RegisterSectionsDocument = gql`
     mutation RegisterSections($request: SectionRegisterRequest!) {
   registerSections(request: $request) {
@@ -3042,6 +3137,15 @@ export const StoreBarcodeDocument = gql`
   }
 }
     ${LocationFieldsFragmentDoc}`;
+export const UnreleaseDocument = gql`
+    mutation Unrelease($request: UnreleaseRequest!) {
+  unrelease(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const UnstoreBarcodeDocument = gql`
     mutation UnstoreBarcode($barcode: String!) {
   unstoreBarcode(barcode: $barcode) {
@@ -3352,6 +3456,13 @@ export const GetStainInfoDocument = gql`
   }
 }
     ${StainTypeFieldsFragmentDoc}`;
+export const GetStainingQcInfoDocument = gql`
+    query GetStainingQCInfo {
+  comments(includeDisabled: false, category: "stain QC") {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetWorkAllocationInfoDocument = gql`
     query GetWorkAllocationInfo($commentCategory: String!) {
   projects(includeDisabled: false) {
@@ -3455,6 +3566,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     RecordInPlace(variables: RecordInPlaceMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordInPlaceMutation> {
       return withWrapper(() => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, requestHeaders));
     },
+    RecordStainResult(variables: RecordStainResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordStainResultMutation> {
+      return withWrapper(() => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, requestHeaders));
+    },
     RegisterSections(variables: RegisterSectionsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterSectionsMutation> {
       return withWrapper(() => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, requestHeaders));
     },
@@ -3508,6 +3622,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     StoreBarcode(variables: StoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StoreBarcodeMutation> {
       return withWrapper(() => client.request<StoreBarcodeMutation>(StoreBarcodeDocument, variables, requestHeaders));
+    },
+    Unrelease(variables: UnreleaseMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnreleaseMutation> {
+      return withWrapper(() => client.request<UnreleaseMutation>(UnreleaseDocument, variables, requestHeaders));
     },
     UnstoreBarcode(variables: UnstoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnstoreBarcodeMutation> {
       return withWrapper(() => client.request<UnstoreBarcodeMutation>(UnstoreBarcodeDocument, variables, requestHeaders));
@@ -3583,6 +3700,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetStainInfo(variables?: GetStainInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainInfoQuery> {
       return withWrapper(() => client.request<GetStainInfoQuery>(GetStainInfoDocument, variables, requestHeaders));
+    },
+    GetStainingQCInfo(variables?: GetStainingQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainingQcInfoQuery> {
+      return withWrapper(() => client.request<GetStainingQcInfoQuery>(GetStainingQcInfoDocument, variables, requestHeaders));
     },
     GetWorkAllocationInfo(variables: GetWorkAllocationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkAllocationInfoQuery> {
       return withWrapper(() => client.request<GetWorkAllocationInfoQuery>(GetWorkAllocationInfoDocument, variables, requestHeaders));
