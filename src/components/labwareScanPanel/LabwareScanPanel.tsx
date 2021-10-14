@@ -11,24 +11,20 @@ import { useLabwareContext } from "../labwareScanner/LabwareScanner";
 /**
  * Props for {@link LabwareScanPanel}
  */
-interface LabwareScanPanelProps<T extends object> {
+interface LabwareScanPanelProps {
   /**
    * The list of columns to display in the table
    */
-  columns: Column<T>[];
+  columns: Column<LabwareFieldsFragment>[];
 }
-function LabwareScanPanel<T extends object>({
-  columns,
-}: React.PropsWithChildren<LabwareScanPanelProps<T>>): React.ReactElement<
-  LabwareScanPanelProps<T>
-> {
+const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns }) => {
   const { labwares, removeLabware, locked } = useLabwareContext();
 
   // Memoize the data for the table
   const data = React.useMemo(() => labwares, [labwares]);
 
   // Column with actions (such as delete) to add to the end of the labwareScanTableColumns passed in
-  const actionsColumn: Column<T> = React.useMemo(() => {
+  const actionsColumn = React.useMemo(() => {
     return {
       Header: "",
       id: "actions",
@@ -51,7 +47,10 @@ function LabwareScanPanel<T extends object>({
   /**
    * Merge the columns passed in with the actionsColumn, memoizing the result.
    */
-  const allColumns: Column<T>[] = [...columns, actionsColumn];
+  const allColumns: Column<LabwareFieldsFragment>[] = [
+    ...columns,
+    actionsColumn,
+  ];
 
   return (
     <div>
@@ -70,6 +69,6 @@ function LabwareScanPanel<T extends object>({
       )}
     </div>
   );
-}
+};
 
 export default LabwareScanPanel;
