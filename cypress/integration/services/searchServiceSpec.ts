@@ -1,9 +1,9 @@
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
 import { sampleFactory } from "../../../src/lib/factories/sampleFactory";
-import { formatFindResult } from "../../../src/lib/services/searchService";
 import { FindQuery, GridDirection } from "../../../src/types/sdk";
 import locationFactory from "../../../src/lib/factories/locationFactory";
 import { addressToLocationAddress } from "../../../src/lib/helpers/locationHelper";
+import SearchService from "../../../src/lib/services/searchService";
 
 describe("Search Service", () => {
   describe("#formatFindResult", () => {
@@ -127,7 +127,8 @@ describe("Search Service", () => {
     ];
 
     it("formats FindResult into a SearchResultsType", () => {
-      const result = formatFindResult(findResult);
+      const service = new SearchService();
+      const result = service.formatFindResult(findResult);
       expect(result).to.deep.equal(expected);
     });
   });

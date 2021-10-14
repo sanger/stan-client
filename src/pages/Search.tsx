@@ -14,7 +14,6 @@ import Warning from "../components/notifications/Warning";
 import Heading from "../components/Heading";
 import { FindRequest, GetSearchInfoQuery } from "../types/sdk";
 import { useMachine } from "@xstate/react";
-import searchMachine from "../lib/machines/search/searchMachine";
 import * as Yup from "yup";
 import {
   cleanParams,
@@ -27,6 +26,8 @@ import WhiteButton from "../components/buttons/WhiteButton";
 import { ParsedQuery } from "query-string";
 import { merge } from "lodash";
 import { configContext } from "../context/ConfigContext";
+import searchMachine from "../lib/machines/search/searchMachine";
+import SearchService from "../lib/services/searchService";
 
 const validationSchema: Yup.ObjectSchema = Yup.object()
   .shape({
@@ -86,8 +87,11 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   );
 
   const config = useContext(configContext)!;
+  const search = searchMachine<FindRequest, SearchResultTableEntry>(
+    new SearchService()
+  );
   const [current, send] = useMachine(() =>
-    searchMachine.withContext({
+    search.withContext({
       findRequest,
       maxRecords: config.maxSearchRecords,
     })
@@ -96,9 +100,11 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   const { serverError, searchResult } = current.context;
 
   const showWarning =
-    searchResult && searchResult.numRecords > searchResult.numDisplayed;
+    searchResult && searchResult.numRecords! > searchResult.numDisplayed!;
   const showSearchResult =
-    current.matches("searched") && searchResult && searchResult?.numRecords > 0;
+    current.matches("searched") &&
+    searchResult &&
+    searchResult?.numRecords! > 0;
 
   const onFormSubmit = (values: FindRequest) => {
     send({ type: "FIND", request: values });

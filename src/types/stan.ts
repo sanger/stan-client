@@ -1,4 +1,4 @@
-import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size,} from "./sdk";
+import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size} from "./sdk";
 import {Location} from "history";
 import {ClientError} from "graphql-request";
 import * as Yup from "yup";
@@ -92,11 +92,11 @@ export type PrintResultType = {
   labwares: Array<LabwareFieldsFragment>;
 };
 
-export type SearchResultsType = {
-  numDisplayed: number;
-  numRecords: number;
-  entries: SearchResultTableEntry[];
-};
+export type SearchResultsType<T> = {
+  numDisplayed?: number;
+  numRecords?: number;
+  entries: T[];
+}
 
 /**
  * A single row on the results table of the Search page
@@ -119,6 +119,9 @@ export type SearchResultTableEntryLocation = {
   displayName: string;
   address?: Maybe<number>;
 };
+
+
+
 
 /**
  * Type for possible location URL params
