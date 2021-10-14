@@ -1,21 +1,28 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { optionValues } from "./forms";
-import { Select } from "./forms/Select";
+import FormikSelect, { Select } from "./forms/Select";
 import { Work, WorkStatus } from "../types/sdk";
 import { stanCore } from "../lib/sdk";
 
 type WorkSelectProps = {
   /**
+   * The name that will be used for the formik select
+   * @default work_number
+   */
+  name?: string;
+
+  /**
    * Callback for when the work number changes in the select
    * @param workNumber the new work number (or undefined if none are selected)
    */
-  onWorkNumberChange: (workNumber: string | undefined) => void;
+  onWorkNumberChange?: (workNumber: string | undefined) => void;
 };
 
 /**
  * Component for displaying a list of active work numbers
  */
 export default function WorkNumberSelect({
+  name,
   onWorkNumberChange,
 }: WorkSelectProps) {
   /**
@@ -41,14 +48,21 @@ export default function WorkNumberSelect({
    */
   const handleWorkNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      onWorkNumberChange(e.target.value === "" ? undefined : e.target.value);
+      onWorkNumberChange?.(e.target.value === "" ? undefined : e.target.value);
     },
     [onWorkNumberChange]
   );
 
+  const SelectElement = name ? FormikSelect : Select;
+
   return (
-    <Select onChange={handleWorkNumberChange} emptyOption={true}>
+    <SelectElement
+      label={""}
+      name={name ?? ""}
+      onChange={handleWorkNumberChange}
+      emptyOption={true}
+    >
       {optionValues(works, "workNumber", "workNumber")}
-    </Select>
+    </SelectElement>
   );
 }

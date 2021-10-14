@@ -1,7 +1,15 @@
 import { graphql } from "msw";
-import { ExtractMutation, ExtractMutationVariables } from "../../types/sdk";
+import {
+  ExtractMutation,
+  ExtractMutationVariables,
+  GetRecordExtractResultInfoQuery,
+  GetRecordExtractResultInfoQueryVariables,
+  RecordExtractResultMutation,
+  RecordExtractResultMutationVariables,
+} from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import labwareFactory from "../../lib/factories/labwareFactory";
+import commentRepository from "../repositories/commentRepository";
 
 const extractionHandlers = [
   graphql.mutation<ExtractMutation, ExtractMutationVariables>(
@@ -72,6 +80,36 @@ const extractionHandlers = [
       );
     }
   ),
+
+  graphql.query<
+    GetRecordExtractResultInfoQuery,
+    GetRecordExtractResultInfoQueryVariables
+  >("GetRecordExtractResultInfo", (req, res, ctx) => {
+    return res(
+      ctx.data({
+        comments: commentRepository
+          .findAll()
+          .filter((c) => c.category === "extract result"),
+      })
+    );
+  }),
+
+  graphql.mutation<
+    RecordExtractResultMutation,
+    RecordExtractResultMutationVariables
+  >("RecordExtractResult", (req, res, ctx) => {
+    return res(
+      ctx.data({
+        recordExtractResult: {
+          operations: [
+            {
+              id: 1,
+            },
+          ],
+        },
+      })
+    );
+  }),
 ];
 
 export default extractionHandlers;
