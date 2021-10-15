@@ -21,6 +21,9 @@ type ExtractResultLabwareTableProps = {
   availableComments: Array<CommentFieldsFragment>;
 };
 
+/**
+ * Component to build an {@link ExtractResultLabware}. Must be used inside a Formik form.
+ */
 export function ExtractResultLabwareTable({
   availableComments,
 }: ExtractResultLabwareTableProps) {

@@ -6,13 +6,12 @@ import { stanCore } from "../lib/sdk";
 
 type WorkSelectProps = {
   /**
-   * The name that will be used for the formik select
-   * @default work_number
+   * Optional. If set, the name that will be used for the formik select
    */
   name?: string;
 
   /**
-   * Callback for when the work number changes in the select
+   * Optional. Callback for when the work number changes in the select
    * @param workNumber the new work number (or undefined if none are selected)
    */
   onWorkNumberChange?: (workNumber: string | undefined) => void;

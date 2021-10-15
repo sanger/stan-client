@@ -52,7 +52,11 @@ type FormikPassFailInputProps = PassFailInputProps & {
   name: string;
 };
 
-export function FormikPassPailInput({ value, name }: FormikPassFailInputProps) {
+/**
+ * Component that displays {@link PassFailInput} within a Formik form, and automatically setting the supplied
+ * fieldName when the value changes
+ */
+export function FormikPassFailInput({ value, name }: FormikPassFailInputProps) {
   const { setFieldValue } = useFormikContext();
 
   const handleOnChange = useCallback(
