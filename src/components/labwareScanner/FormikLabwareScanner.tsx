@@ -29,6 +29,14 @@ type FormikLabwareScannerProps<T> = {
 
 /**
  * Component for managing a list of labware within a Formik form. Integrates with Formik's {@code FieldArray}.
+ *
+ * @example
+ * <FormikLabwareScanner<ExtractResultLabware>
+     initialLabware={initialLabware}
+     buildLabware={buildExtractResultLabware}
+   >
+     <ExtractResultLabwareTable availableComments={info.comments} />
+   </FormikLabwareScanner>
  */
 export function FormikLabwareScanner<T>({
   initialLabware = [],
