@@ -1,6 +1,6 @@
 import {
-  ExtractResultQuery,
-  LabwareFieldsFragment,
+  ExtractResult,
+  PassFail,
   RecordRnaAnalysisMutation,
   RnaAnalysisRequest,
 } from "../../../types/sdk";
@@ -11,46 +11,50 @@ import { stanCore } from "../../sdk";
 import { castDraft } from "immer";
 
 export interface AnalysisContext {
-  labware: LabwareFieldsFragment | undefined;
-  extractionResult: ExtractResultQuery[];
-  analysisRequest?: RnaAnalysisRequest;
+  extractResults: ExtractResult[];
   analysis?: RecordRnaAnalysisMutation;
-  serverErrors?: ClientError;
+  serverError?: ClientError;
+  scanErrorMessage?: string;
 }
 
-type UpdateLabwaresEvent = {
-  type: "UPDATE_LABWARES";
-  labware: LabwareFieldsFragment;
+type ScanLabwareEvent = {
+  type: "SCAN_LABWARE";
+  barcode: string;
 };
-type ExtractionResultSuccess = {
-  type: "done.invoke.extractresult";
-  data: ExtractResultQuery;
+type ExtractResultSuccess = {
+  type: "done.invoke.extractResult";
+  data: ExtractResult;
 };
-type ExtractionResultFailure = {
-  type: "error.platform.extractresult";
+type ExtractResultFailure = {
+  type: "error.platform.extractResult";
   data: ClientError;
 };
+type RemoveExtractResultEvent = {
+  type: "REMOVE_EXTRACT_RESULT";
+  barcode: string;
+};
 
-type AnalyseEvent = {
-  type: "ANALYSE";
+type AnalysisEvent = {
+  type: "ANALYSIS";
   data: RnaAnalysisRequest;
 };
-type AnalyseDoneEvent = {
-  type: "done.invoke.analyse";
+type AnalysisDoneEvent = {
+  type: "done.invoke.analysis";
   data: RecordRnaAnalysisMutation;
 };
-type AnalyseErrorEvent = {
+type AnalysisErrorEvent = {
   type: "error.platform.analysis";
   data: ClientError;
 };
 
 export type RNAAnalysisEvent =
-  | UpdateLabwaresEvent
-  | ExtractionResultSuccess
-  | ExtractionResultFailure
-  | AnalyseEvent
-  | AnalyseDoneEvent
-  | AnalyseErrorEvent;
+  | ScanLabwareEvent
+  | ExtractResultSuccess
+  | ExtractResultFailure
+  | RemoveExtractResultEvent
+  | AnalysisEvent
+  | AnalysisDoneEvent
+  | AnalysisErrorEvent;
 
 export const rnaAnalysisMachine = createMachine<
   AnalysisContext,
@@ -62,43 +66,48 @@ export const rnaAnalysisMachine = createMachine<
     states: {
       ready: {
         on: {
-          UPDATE_LABWARES: { target: "updatingLabware" },
+          SCAN_LABWARE: { target: "scanningLabware" },
         },
       },
-      updatingLabware: {
+      scanningLabware: {
+        onEntry: ["unassignServerError", "unassignErrorMessage"],
         invoke: {
           src: "extractResult",
           onDone: {
-            target: "extractionResultSuccess",
-            actions: "assignExtractionResult",
+            target: "extractResultSuccess",
+            actions: "assignExtractResult",
           },
           onError: {
-            target: "extractionResultFailure",
+            target: "extractResultFailed",
             actions: "assignServerError",
           },
         },
       },
-      extractionResultSuccess: {
+      extractResultSuccess: {
         on: {
-          ANALYSE: {
+          SCAN_LABWARE: { target: "scanningLabware" },
+          REMOVE_EXTRACT_RESULT: { actions: "removeExtractResult" },
+          ANALYSIS: {
             target: "recordingAnalysis",
-            cond: "ExtractionResultNotEmpty",
+            cond: "ExtractResultNotEmpty",
           },
         },
       },
-      extractionResultFailure: {
+      extractResultFailed: {
         on: {
-          ANALYSE: {
-            target: "recordingAnalysis",
-            cond: "ExtractionResultNotEmpty",
+          SCAN_LABWARE: {
+            target: "scanningLabware",
           },
         },
       },
+
       recordingAnalysis: {
+        onEntry: ["unassignServerError"],
         invoke: {
           src: "recordAnalysis",
           onDone: {
-            target: "ready",
+            //final done state
+            actions: "assignedAnalyseData",
           },
           onError: {
             target: "ready",
@@ -110,36 +119,65 @@ export const rnaAnalysisMachine = createMachine<
   },
   {
     actions: {
-      assignExtractionResult: assign((ctx, e) => {
-        if (e.type !== "done.invoke.extractresult") return;
-        debugger;
-        ctx.extractionResult.push(e.data);
-      }),
-      assignedAnalyseData: assign((ctx, e) => {}),
-      assignServerErrors: assign((ctx, e) => {
-        if (e.type !== "error.platform.analysis") {
+      assignExtractResult: assign((ctx, e) => {
+        if (e.type !== "done.invoke.extractResult") return;
+        if (e.data.result === PassFail.Fail) {
+          ctx.scanErrorMessage = "Extraction result failed for tube!";
           return;
         }
-        ctx.serverErrors = castDraft(e.data);
+        ctx.extractResults.push(e.data);
+      }),
+      removeExtractResult: assign((ctx, e) => {
+        if (e.type !== "REMOVE_EXTRACT_RESULT") return;
+        ctx.extractResults = ctx.extractResults.filter(
+          (res) => res.labware.barcode !== e.barcode
+        );
+      }),
+      assignedAnalyseData: assign((ctx, e) => {
+        if (e.type !== "done.invoke.analysis") return;
+        ctx.analysis = e.data;
+      }),
+      assignServerErrors: assign((ctx, e) => {
+        if (
+          !(
+            e.type === "error.platform.analysis" ||
+            e.type === "error.platform.extractResult"
+          )
+        ) {
+          return;
+        }
+        ctx.serverError = castDraft(e.data);
+      }),
+      unassignServerError: assign((ctx, _e) => {
+        ctx.serverError = undefined;
+      }),
+      unassignErrorMessage: assign((ctx, e) => {
+        ctx.scanErrorMessage = "";
       }),
     },
 
     guards: {
-      ExtractionResultNotEmpty: (ctx, e) =>
-        ctx.extractionResult && ctx.extractionResult.length > 0,
+      ExtractResultNotEmpty: (ctx, e) =>
+        ctx.extractResults && ctx.extractResults.length > 0,
     },
     services: {
-      extractResult: (ctx, evt) => {
-        debugger;
-        return stanCore.ExtractResult({
-          barcode: ctx.labware!.barcode,
-        });
-      },
-      recordAnalysis: (ctx, evt) => {
-        return stanCore.RecordRNAAnalysis({
-          request: ctx.analysisRequest!,
-        });
-      },
+      extractResult: (ctx, evt) =>
+        new Promise((resolve, reject) => {
+          if (evt.type !== "SCAN_LABWARE") return reject("Invalid event");
+          debugger;
+          return resolve(
+            stanCore.ExtractResult({
+              barcode: evt.barcode,
+            })
+          );
+        }),
+      recordAnalysis: (ctx, evt) =>
+        new Promise((resolve, reject) => {
+          if (evt.type !== "ANALYSIS") return reject("Invalid event");
+          return stanCore.RecordRNAAnalysis({
+            request: evt.data,
+          });
+        }),
     },
   }
 );

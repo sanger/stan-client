@@ -159,7 +159,6 @@ const fixative: ColumnFactory = () => {
   };
 };
 
-
 const columns = {
   color,
   barcode,
