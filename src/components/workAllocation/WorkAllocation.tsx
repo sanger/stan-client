@@ -119,6 +119,7 @@ export default function WorkAllocation() {
                   name={"numBlocks"}
                   type={"number"}
                   maxLength={MAX_NUM_BLOCKANDSLIDES}
+                  min={0}
                 />
               </div>
               <div className="md:flex-grow">
@@ -127,6 +128,7 @@ export default function WorkAllocation() {
                   name={"numSlides"}
                   type={"number"}
                   maxLength={MAX_NUM_BLOCKANDSLIDES}
+                  min={0}
                 />
               </div>
             </div>
