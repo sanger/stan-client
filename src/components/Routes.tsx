@@ -29,6 +29,7 @@ import RecordInPlace from "../pages/RecordInPlace";
 import WorkProgress from "../pages/WorkProgress";
 import StainingQC from "../pages/StainingQC";
 import Unrelease from "../pages/Unrelease";
+import ExtractionResult from "../pages/ExtractionResult";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -74,6 +75,18 @@ export function Routes() {
       <AuthenticatedRoute
         path="/lab/extraction"
         render={(routerProps) => <Extraction key={routerProps.location.key} />}
+      />
+
+      <AuthenticatedRoute
+        path="/lab/extraction_result"
+        render={(routerProps) => (
+          <DataFetcher
+            key={routerProps.location.key}
+            dataFetcher={stanCore.GetRecordExtractResultInfo}
+          >
+            {(info) => <ExtractionResult info={info} />}
+          </DataFetcher>
+        )}
       />
 
       <AuthenticatedRoute

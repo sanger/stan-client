@@ -34,6 +34,11 @@ export enum LabwareState {
   Destroyed = 'destroyed'
 }
 
+export enum PassFail {
+  Pass = 'pass',
+  Fail = 'fail'
+}
+
 export type User = {
   __typename?: 'User';
   username: Scalars['String'];
@@ -624,13 +629,32 @@ export type StainRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
-export type UnreleaseLabware = {
-  barcode: Scalars['String'];
-  highestSection?: Maybe<Scalars['Int']>;
+export type SampleResult = {
+  address: Scalars['Address'];
+  result: PassFail;
+  commentId?: Maybe<Scalars['Int']>;
 };
 
-export type UnreleaseRequest = {
-  labware: Array<UnreleaseLabware>;
+export type LabwareResult = {
+  barcode: Scalars['String'];
+  sampleResults: Array<SampleResult>;
+};
+
+export type ResultRequest = {
+  labwareResults: Array<LabwareResult>;
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export type ExtractResultLabware = {
+  barcode: Scalars['String'];
+  result: PassFail;
+  concentration?: Maybe<Scalars['String']>;
+  commentId?: Maybe<Scalars['Int']>;
+};
+
+export type ExtractResultRequest = {
+  labware: Array<ExtractResultLabware>;
+  workNumber?: Maybe<Scalars['String']>;
 };
 
 export type Query = {
@@ -838,13 +862,14 @@ export type Mutation = {
   stain: OperationResult;
   recordInPlace: OperationResult;
   recordStainResult: OperationResult;
-  unrelease: OperationResult;
+  recordExtractResult: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
   setLocationCustomName: Location;
+  unrelease: OperationResult;
 };
 
 
@@ -1058,8 +1083,8 @@ export type MutationRecordStainResultArgs = {
 };
 
 
-export type MutationUnreleaseArgs = {
-  request: UnreleaseRequest;
+export type MutationRecordExtractResultArgs = {
+  request: ExtractResultRequest;
 };
 
 
@@ -1096,26 +1121,19 @@ export type MutationSetLocationCustomNameArgs = {
   customName?: Maybe<Scalars['String']>;
 };
 
-export type SampleResult = {
-  address: Scalars['Address'];
-  result: PassFail;
-  commentId?: Maybe<Scalars['Int']>;
+
+export type MutationUnreleaseArgs = {
+  request: UnreleaseRequest;
 };
 
-export type LabwareResult = {
+export type UnreleaseLabware = {
   barcode: Scalars['String'];
-  sampleResults: Array<SampleResult>;
+  highestSection?: Maybe<Scalars['Int']>;
 };
 
-export type ResultRequest = {
-  labwareResults: Array<LabwareResult>;
-  workNumber?: Maybe<Scalars['String']>;
+export type UnreleaseRequest = {
+  labware: Array<UnreleaseLabware>;
 };
-
-export enum PassFail {
-  Pass = 'pass',
-  Fail = 'fail'
-}
 
 export type CommentFieldsFragment = (
   { __typename?: 'Comment' }
@@ -1673,6 +1691,22 @@ export type PrintMutationVariables = Exact<{
 export type PrintMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'printLabware'>
+);
+
+export type RecordExtractResultMutationVariables = Exact<{
+  request: ExtractResultRequest;
+}>;
+
+
+export type RecordExtractResultMutation = (
+  { __typename?: 'Mutation' }
+  & { recordExtractResult: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
 );
 
 export type RecordInPlaceMutationVariables = Exact<{
@@ -2331,6 +2365,17 @@ export type GetPrintersQuery = (
   )> }
 );
 
+export type GetRecordExtractResultInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetRecordExtractResultInfoQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
 export type GetRecordInPlaceInfoQueryVariables = Exact<{
   category?: Maybe<Scalars['String']>;
 }>;
@@ -2954,6 +2999,15 @@ export const PrintDocument = gql`
   printLabware(barcodes: $barcodes, printer: $printer)
 }
     `;
+export const RecordExtractResultDocument = gql`
+    mutation RecordExtractResult($request: ExtractResultRequest!) {
+  recordExtractResult(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const RecordInPlaceDocument = gql`
     mutation RecordInPlace($request: InPlaceOpRequest!) {
   recordInPlace(request: $request) {
@@ -3381,6 +3435,13 @@ export const GetPrintersDocument = gql`
   }
 }
     ${PrinterFieldsFragmentDoc}`;
+export const GetRecordExtractResultInfoDocument = gql`
+    query GetRecordExtractResultInfo {
+  comments(category: "extract result", includeDisabled: false) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetRecordInPlaceInfoDocument = gql`
     query GetRecordInPlaceInfo($category: String) {
   equipments(includeDisabled: false, category: $category) {
@@ -3563,6 +3624,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     Print(variables: PrintMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PrintMutation> {
       return withWrapper(() => client.request<PrintMutation>(PrintDocument, variables, requestHeaders));
     },
+    RecordExtractResult(variables: RecordExtractResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordExtractResultMutation> {
+      return withWrapper(() => client.request<RecordExtractResultMutation>(RecordExtractResultDocument, variables, requestHeaders));
+    },
     RecordInPlace(variables: RecordInPlaceMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordInPlaceMutation> {
       return withWrapper(() => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, requestHeaders));
     },
@@ -3679,6 +3743,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
       return withWrapper(() => client.request<GetPrintersQuery>(GetPrintersDocument, variables, requestHeaders));
+    },
+    GetRecordExtractResultInfo(variables?: GetRecordExtractResultInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordExtractResultInfoQuery> {
+      return withWrapper(() => client.request<GetRecordExtractResultInfoQuery>(GetRecordExtractResultInfoDocument, variables, requestHeaders));
     },
     GetRecordInPlaceInfo(variables?: GetRecordInPlaceInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordInPlaceInfoQuery> {
       return withWrapper(() => client.request<GetRecordInPlaceInfoQuery>(GetRecordInPlaceInfoDocument, variables, requestHeaders));
