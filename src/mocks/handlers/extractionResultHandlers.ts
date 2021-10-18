@@ -5,9 +5,7 @@ import {
   PassFail,
 } from "../../types/sdk";
 import labwareFactory from "../../lib/factories/labwareFactory";
-import { find } from "lodash";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
-import { buildLabwareFragment } from "../../lib/helpers/labwareHelper";
 import { LabwareTypeName } from "../../types/stan";
 
 const extractionResultHandlers = [
@@ -28,7 +26,6 @@ const extractionResultHandlers = [
         labwareType,
       });
       newLabware.barcode = req.variables.barcode;
-      debugger;
       return res(
         ctx.data({
           result: PassFail.Pass,

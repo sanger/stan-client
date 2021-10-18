@@ -56,10 +56,7 @@ export type RNAAnalysisEvent =
   | AnalysisDoneEvent
   | AnalysisErrorEvent;
 
-export const rnaAnalysisMachine = createMachine<
-  AnalysisContext,
-  RNAAnalysisEvent
->(
+export const analysisMachine = createMachine<AnalysisContext, RNAAnalysisEvent>(
   {
     id: "rna_analysis",
     initial: "ready",
@@ -151,20 +148,19 @@ export const rnaAnalysisMachine = createMachine<
       unassignServerError: assign((ctx, _e) => {
         ctx.serverError = undefined;
       }),
-      unassignErrorMessage: assign((ctx, e) => {
+      unassignErrorMessage: assign((ctx) => {
         ctx.scanErrorMessage = "";
       }),
     },
 
     guards: {
-      ExtractResultNotEmpty: (ctx, e) =>
+      ExtractResultNotEmpty: (ctx) =>
         ctx.extractResults && ctx.extractResults.length > 0,
     },
     services: {
       extractResult: (ctx, evt) =>
         new Promise((resolve, reject) => {
           if (evt.type !== "SCAN_LABWARE") return reject("Invalid event");
-          debugger;
           return resolve(
             stanCore.ExtractResult({
               barcode: evt.barcode,

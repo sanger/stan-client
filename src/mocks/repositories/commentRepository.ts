@@ -8,11 +8,11 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({ text: "Sectioned well", category: "section" }),
   commentFactory.build({ text: "Section exploded", category: "section" }),
   commentFactory.build({ text: "This is good", category: "blah" }),
-  commentFactory.build({ text: "Optimal", category: "Analysis" }),
-  commentFactory.build({ text: "Potential to work", category: "Analysis" }),
+  commentFactory.build({ text: "Optimal", category: "analysis" }),
+  commentFactory.build({ text: "Potential to work", category: "analysis" }),
   commentFactory.build({
     text: " Not recommended to proceed",
-    category: "Analysis",
+    category: "analysis",
   }),
 
   commentFactory.build({

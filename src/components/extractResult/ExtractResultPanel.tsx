@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { ExtractResult, LabwareFieldsFragment } from "../../types/sdk";
+import { ExtractResult } from "../../types/sdk";
 import { motion } from "framer-motion";
 import MutedText from "../MutedText";
 import LockIcon from "../icons/LockIcon";
@@ -8,31 +8,50 @@ import RemoveButton from "../buttons/RemoveButton";
 import extractResultColumn from "../dataTable/extractResultColumn";
 import { Row } from "react-table";
 import { useMachine } from "@xstate/react";
-import { rnaAnalysisMachine } from "../../lib/machines/analysis/rnaAnalysisMachine";
 import { extractResultMachine } from "./extractResult.machine";
 import Warning from "../notifications/Warning";
 import ScanInput from "../scanInput/ScanInput";
 
 /**
- * Props for {@link LabwareScanPanel}
+ * Props for {@link ExtractResultPanel}
  */
-interface ExtractResultPanelProps {}
+type ExtractResultPanelProps = {
+  /**
+   * Called when extraction result is added or removed
+   * @param resultArr the list of current extraction results
+   */
+  onChange?: (resultArr: ExtractResult[]) => void;
 
-const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({}) => {
+  /**
+   * True is the scanner should be locked; false otherwise
+   */
+  locked: boolean;
+};
+
+const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
+  onChange,
+  locked,
+}) => {
   const [current, send] = useMachine(() =>
     extractResultMachine.withContext({ extractResults: [], currentBarcode: "" })
   );
+
   const {
     serverError,
     extractResults,
     scanErrorMessage,
     currentBarcode,
   } = current.context;
+
   const scanError = scanErrorMessage
     ? scanErrorMessage
     : current.matches("extractResultFailure") && serverError
     ? serverError.message
     : undefined;
+
+  React.useEffect(() => {
+    onChange && onChange(extractResults);
+  }, [extractResults]);
 
   const onRemoveExtractResult = React.useCallback((barcode: string) => {
     send({ type: "REMOVE_EXTRACT_RESULT", barcode: barcode });
@@ -40,7 +59,6 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({}) => {
 
   const handleOnScanInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      debugger;
       send({
         type: "UPDATE_BARCODE",
         barcode: e.currentTarget.value,
@@ -49,8 +67,7 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({}) => {
     [send]
   );
 
-  const locked = false;
-  // Column with actions (such as delete) to add to the end of the labwareScanTableColumns passed in
+  // Column with actions (such as delete) to add to the end of the extraxtResultColumns
   const actionsColumn = React.useMemo(() => {
     return {
       Header: "",

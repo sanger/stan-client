@@ -3,9 +3,8 @@ import { ClientError } from "graphql-request";
 import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
 import { stanCore } from "../../lib/sdk";
-import React, { useCallback } from "react";
 
-export interface AnalysisContext {
+export interface ExtractResultContext {
   extractResults: ExtractResult[];
   serverError?: ClientError;
   scanErrorMessage?: string;
@@ -41,7 +40,7 @@ export type RNAAnalysisEvent =
   | RemoveExtractResultEvent;
 
 export const extractResultMachine = createMachine<
-  AnalysisContext,
+  ExtractResultContext,
   RNAAnalysisEvent
 >(
   {
@@ -102,19 +101,16 @@ export const extractResultMachine = createMachine<
   {
     actions: {
       assignBarcode: assign((ctx, e) => {
-        debugger;
         if (!(e.type === "UPDATE_BARCODE" || e.type === "SUBMIT_BARCODE"))
           return;
 
         ctx.currentBarcode = e.barcode;
       }),
       assignSubmitBarcodeError: assign((ctx, e) => {
-        debugger;
         if (e.type !== "SUBMIT_BARCODE") return;
         ctx.scanErrorMessage = `"${e.barcode}" has already been scanned`;
       }),
       assignExtractResult: assign((ctx, e) => {
-        debugger;
         if (e.type !== "done.invoke.extractResult") return;
         if (e.data.result === PassFail.Fail) {
           ctx.scanErrorMessage = "Extraction result failed for tube!";
@@ -132,34 +128,31 @@ export const extractResultMachine = createMachine<
       unassignServerError: assign((ctx, _e) => {
         ctx.serverError = undefined;
       }),
-      unassignErrorMessage: assign((ctx, e) => {
+      unassignErrorMessage: assign((ctx) => {
         ctx.scanErrorMessage = "";
       }),
     },
 
     guards: {
-      SubmitBarcodeValid: (ctx, e) => {
-        debugger;
+      SubmitBarcodeValid: (ctx) => {
         return (
           ctx.extractResults.filter(
             (result) => result.labware.barcode === ctx.currentBarcode
           ).length <= 0
         );
       },
-      SubmitBarcodeInvalid: (ctx, e) => {
-        debugger;
+      SubmitBarcodeInvalid: (ctx) => {
         return (
           ctx.extractResults.filter(
             (result) => result.labware.barcode === ctx.currentBarcode
           ).length > 0
         );
       },
-      ExtractResultNotEmpty: (ctx, e) =>
+      ExtractResultNotEmpty: (ctx) =>
         ctx.extractResults && ctx.extractResults.length > 0,
     },
     services: {
-      extractResult: (ctx, evt) => {
-        debugger;
+      extractResult: (ctx) => {
         return stanCore.ExtractResult({
           barcode: ctx.currentBarcode,
         });
