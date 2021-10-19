@@ -10,4 +10,6 @@ fragment WorkFields on Work {
     workType {
         ...WorkTypeFields
     }
+    numBlocks
+    numSlides
 }

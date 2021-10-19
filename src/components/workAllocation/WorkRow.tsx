@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { TableCell } from "../Table";
 import { CommentFieldsFragment, WorkFieldsFragment } from "../../types/sdk";
 import { useMachine } from "@xstate/react";
@@ -10,6 +10,7 @@ import { capitalize } from "lodash";
 import FormikSelect from "../forms/Select";
 import { Form, Formik } from "formik";
 import PinkButton from "../buttons/PinkButton";
+import { MAX_NUM_BLOCKANDSLIDES } from "./WorkAllocation";
 
 /**
  * The type of values for the edit form
@@ -61,7 +62,10 @@ export default function WorkRow({
   /**
    * List of possible events that can change the current status (excluding edit)
    */
-  const nextStatuses = current.nextEvents.filter((e) => e !== "EDIT");
+  const nextStatuses = current.nextEvents.filter(
+    (e) =>
+      e !== "EDIT" && e !== "UPDATE_NUM_SLIDES" && e !== "UPDATE_NUM_BLOCKS"
+  );
 
   /**
    * Set the initial values for the form to the first next status and first available comment
@@ -84,12 +88,64 @@ export default function WorkRow({
     });
   };
 
+  /**
+   * Callback for when the user edits Number of blocks or slides in the table/>
+   */
+  const handleWorkNumValueChange = useCallback(
+    (workNumValue: string | number, workNumValueType: string) => {
+      let value = workNumValue === "" ? undefined : Number(workNumValue);
+      if (value && value > MAX_NUM_BLOCKANDSLIDES)
+        value = MAX_NUM_BLOCKANDSLIDES;
+      if (workNumValueType === "block") {
+        send({ type: "UPDATE_NUM_BLOCKS", numBlocks: value });
+      } else {
+        send({ type: "UPDATE_NUM_SLIDES", numSlides: value });
+      }
+    },
+    [send]
+  );
+
+  const renderWorkNumValueField = (
+    workNumber: string,
+    workNumValue: number | undefined,
+    workNumValueType: string
+  ) => {
+    return (
+      <input
+        data-testid={workNumber + "-" + workNumValueType}
+        className={"border-0 border-gray-100 "}
+        type="number"
+        min="0"
+        max={MAX_NUM_BLOCKANDSLIDES}
+        step="1"
+        onChange={(e) => {
+          handleWorkNumValueChange(e.currentTarget.value, workNumValueType);
+        }}
+        defaultValue={""}
+      />
+    );
+  };
+
   return (
     <tr>
       <TableCell>{work.workNumber}</TableCell>
       <TableCell>{work.workType.name}</TableCell>
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
+      <TableCell>
+        {renderWorkNumValueField(
+          work.workNumber,
+          work.numBlocks ?? undefined,
+          "block"
+        )}
+      </TableCell>
+      <TableCell>
+        {renderWorkNumValueField(
+          work.workNumber,
+          work.numSlides ?? undefined,
+          "slide"
+        )}
+      </TableCell>
       {!editModeEnabled && (
         <TableCell>
           <span className="uppercase">{work.status}</span>

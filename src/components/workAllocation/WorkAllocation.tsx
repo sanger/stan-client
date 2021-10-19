@@ -21,11 +21,13 @@ const initialValues: WorkAllocationFormValues = {
   costCode: "",
   project: "",
   isRnD: false,
+  numSlides: undefined,
+  numBlocks: undefined,
 };
+export const MAX_NUM_BLOCKANDSLIDES = 200;
 
 export default function WorkAllocation() {
   const [current, send] = useMachine(createWorkAllocationMachine());
-
   const {
     projects,
     costCodes,
@@ -53,6 +55,15 @@ export default function WorkAllocation() {
       .required()
       .label("Cost Code"),
     isRnD: Yup.boolean().required(),
+    numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
+    numSlides: Yup.number()
+      .max(MAX_NUM_BLOCKANDSLIDES)
+      .when("numBlocks", (numBlocks: any, schema: any) => {
+        if (!numBlocks) {
+          return schema.required("Number of blocks or slides required");
+        }
+        return schema;
+      }),
   });
 
   return (
@@ -75,7 +86,7 @@ export default function WorkAllocation() {
           validationSchema={validationSchema}
         >
           <Form>
-            <div className="space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
+            <div className="space-y-2 md:grid md:grid-cols-3 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
               <div className="md:flex-grow">
                 <FormikSelect
                   label="Work Type"
@@ -100,6 +111,25 @@ export default function WorkAllocation() {
                 >
                   {optionValues(costCodes, "code", "code")}
                 </FormikSelect>
+              </div>
+
+              <div className="md:flex-grow">
+                <FormikInput
+                  label={"Number of blocks"}
+                  name={"numBlocks"}
+                  type={"number"}
+                  maxLength={MAX_NUM_BLOCKANDSLIDES}
+                  min={0}
+                />
+              </div>
+              <div className="md:flex-grow">
+                <FormikInput
+                  label={"Number of slides"}
+                  name={"numSlides"}
+                  type={"number"}
+                  maxLength={MAX_NUM_BLOCKANDSLIDES}
+                  min={0}
+                />
               </div>
             </div>
 
@@ -129,6 +159,8 @@ export default function WorkAllocation() {
                 <TableHeader>Work Type</TableHeader>
                 <TableHeader>Project</TableHeader>
                 <TableHeader>Cost Code</TableHeader>
+                <TableHeader>Number of Blocks</TableHeader>
+                <TableHeader>Number of Slides</TableHeader>
                 <TableHeader>Status</TableHeader>
                 <TableHeader />
               </tr>
