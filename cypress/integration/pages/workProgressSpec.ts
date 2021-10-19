@@ -23,8 +23,8 @@ describe("Work Progress", () => {
         before(() => {
           cy.findByTestId("type").select("Status");
         });
-        it("shows a drop down box with value active ", () => {
-          cy.get("[data-testid=valueSelect]").should("have.value", "active");
+        it("shows a drop down box with value unstarted ", () => {
+          cy.get("[data-testid=valueSelect]").should("have.value", "unstarted");
         });
       });
       context(" when WorkType is selected in dropdown for type", () => {
