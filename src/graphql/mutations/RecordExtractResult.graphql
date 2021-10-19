@@ -1,0 +1,7 @@
+mutation RecordExtractResult($request: ExtractResultRequest!) {
+    recordExtractResult(request: $request) {
+        operations {
+            id
+        }
+    }
+}

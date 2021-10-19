@@ -1,0 +1,8 @@
+fragment WorkProgressFields on WorkProgress {
+    work {
+        ...WorkFields
+    }
+    timestamps {
+        ...WorkProgressTimeStampField
+    }
+}

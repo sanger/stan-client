@@ -41,7 +41,7 @@ describe("RNA Extraction", () => {
     });
 
     it("doesn't disable the Extract button", () => {
-      cy.findByRole("button", { name: /Extract/i }).should("not.be.disabled");
+      cy.findByRole("button", { name: "Extract" }).should("not.be.disabled");
     });
 
     it("shows an error message", () => {
@@ -53,27 +53,15 @@ describe("RNA Extraction", () => {
     before(() => {
       cy.visit("/lab/extraction");
       scanInLabware();
-      cy.findByText("Extract").click();
+      cy.findByRole("button", { name: "Extract" }).click();
     });
 
     it("hides the Extract button", () => {
-      cy.findByRole("button", { name: /Extract/i }).should("not.exist");
+      cy.findByRole("button", { name: "Extract" }).should("not.exist");
     });
 
     it("shows a success message", () => {
       cy.findByText("Extraction Complete").should("be.visible");
     });
-
-    // context("when you click the Print Labels button", () => {
-    //   before(() => {
-    //     cy.findByRole("button", { name: /Print Labels/i }).click();
-    //   });
-    //
-    //   it("prints the destination labware", () => {
-    //     cy.findByText(
-    //       "Tube Printer successfully printed 2 labels for STAN-1004, STAN-1005, STAN-1006"
-    //     ).should("be.visible");
-    //   });
-    // });
   });
 });
