@@ -20,7 +20,7 @@ type ExtractResultPanelProps = {
    * Called when extraction result is added or removed
    * @param resultArr the list of current extraction results
    */
-  onChange?: (resultArr: ExtractResult[]) => void;
+  onChangeExtractResults?: (resultArr: ExtractResult[]) => void;
 
   /**
    * True is the scanner should be locked; false otherwise
@@ -29,7 +29,7 @@ type ExtractResultPanelProps = {
 };
 
 const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
-  onChange,
+  onChangeExtractResults,
   locked,
 }) => {
   const [current, send] = useMachine(() =>
@@ -50,7 +50,7 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
     : undefined;
 
   React.useEffect(() => {
-    onChange && onChange(extractResults);
+    onChangeExtractResults && onChangeExtractResults(extractResults);
   }, [extractResults]);
 
   const onRemoveExtractResult = React.useCallback((barcode: string) => {
@@ -69,6 +69,7 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
 
   // Column with actions (such as delete) to add to the end of the extraxtResultColumns
   const actionsColumn = React.useMemo(() => {
+    debugger;
     return {
       Header: "",
       id: "actions",
@@ -92,14 +93,14 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
   const columns = useMemo(
     () => [
       extractResultColumn.barcode(),
-      extractResultColumn.externalName(),
+      extractResultColumn.externalBarcode(),
       extractResultColumn.tissueType(),
       extractResultColumn.medium(),
       extractResultColumn.fixative(),
       extractResultColumn.nanodropResult(),
       actionsColumn,
     ],
-    []
+    [locked]
   );
 
   return (
@@ -114,6 +115,7 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
           onScan={(value) => send({ type: "SUBMIT_BARCODE", barcode: value })}
           value={currentBarcode}
           onChange={handleOnScanInputChange}
+          disabled={locked}
         />
       </div>
 

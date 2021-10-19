@@ -150,6 +150,7 @@ export type Labware = {
   __typename?: 'Labware';
   id: Scalars['Int'];
   barcode: Scalars['String'];
+  externalBarcode?: Maybe<Scalars['String']>;
   labwareType: LabwareType;
   slots: Array<Slot>;
   released: Scalars['Boolean'];
@@ -617,6 +618,15 @@ export type StainRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
+export type UnreleaseLabware = {
+  barcode: Scalars['String'];
+  highestSection?: Maybe<Scalars['Int']>;
+};
+
+export type UnreleaseRequest = {
+  labware: Array<UnreleaseLabware>;
+};
+
 export type SampleResult = {
   address: Scalars['Address'];
   result: PassFail;
@@ -871,6 +881,7 @@ export type Mutation = {
   updateWorkStatus: Work;
   stain: OperationResult;
   recordInPlace: OperationResult;
+  unrelease: OperationResult;
   recordStainResult: OperationResult;
   recordExtractResult: OperationResult;
   recordRNAAnalysis: OperationResult;
@@ -1088,6 +1099,11 @@ export type MutationRecordInPlaceArgs = {
 };
 
 
+export type MutationUnreleaseArgs = {
+  request: UnreleaseRequest;
+};
+
+
 export type MutationRecordStainResultArgs = {
   request: ResultRequest;
 };
@@ -1187,7 +1203,7 @@ export type HmdmcFieldsFragment = (
 
 export type LabwareFieldsFragment = (
   { __typename?: 'Labware' }
-  & Pick<Labware, 'id' | 'barcode' | 'destroyed' | 'discarded' | 'released' | 'state' | 'created'>
+  & Pick<Labware, 'id' | 'barcode' | 'externalBarcode' | 'destroyed' | 'discarded' | 'released' | 'state' | 'created'>
   & { labwareType: (
     { __typename?: 'LabwareType' }
     & LabwareTypeFieldsFragment
@@ -2579,6 +2595,7 @@ export const LabwareFieldsFragmentDoc = gql`
     fragment LabwareFields on Labware {
   id
   barcode
+  externalBarcode
   destroyed
   discarded
   released

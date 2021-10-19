@@ -8,47 +8,45 @@ import { motion } from "framer-motion";
 import DataTable from "../DataTable";
 import { useMachine } from "@xstate/react";
 import { analysisLabwareMachine } from "./analysisLabware.machine";
-import { enumValue } from "../../lib/helpers";
+import { measurementColumn } from "./measurementColumn";
 
 type RecordAnalysisProps = {
   barcodes: string[];
   comments: CommentFieldsFragment[];
   analysisLabwares: RnaAnalysisLabware[];
+  onChangeLabwareData: (
+    operationType: string,
+    labwares: RnaAnalysisLabware[]
+  ) => void;
 };
-export enum AnalysisType {
+export enum OperationType {
   RIN = "RIN",
   DV200 = "DV200",
-}
-
-export enum AnalysisMeasurementType {
-  RIN = "RIN",
-  DV200 = "DV200",
-  DV200_LOWER = "DV200 lower",
-  DV200_UPPER = "DV200 upper",
-}
-export enum DV200ValueTypes {
-  SINGLE_VALUE_TYPE = "Value",
-  RANGE_VALUE_TYPE = "Range",
 }
 
 export default function AnalysisLabware({
   barcodes,
   comments,
+  onChangeLabwareData,
 }: RecordAnalysisProps) {
   const defaultLabwareValues = barcodes.map((barcode) => {
     return {
       barcode: barcode,
-      measurements: [{ name: AnalysisType.RIN, value: "" }],
+      measurements: [{ name: OperationType.RIN, value: "" }],
     };
   });
 
   const [current, send] = useMachine(() =>
     analysisLabwareMachine.withContext({
       analysisLabwares: defaultLabwareValues,
-      analysisType: AnalysisType.RIN,
+      operationType: OperationType.RIN,
     })
   );
-  const { analysisType, analysisLabwares } = current.context;
+  const { operationType, analysisLabwares } = current.context;
+
+  React.useEffect(() => {
+    onChangeLabwareData(operationType, analysisLabwares);
+  }, [analysisLabwares]);
 
   const handleOnChange = (
     barcode: string,
@@ -56,7 +54,6 @@ export default function AnalysisLabware({
     value: string,
     measurementType?: string
   ) => {
-    debugger;
     send({
       type: "UPDATE_LABWARE_DATA",
       labware: {
@@ -67,37 +64,16 @@ export default function AnalysisLabware({
       },
     });
   };
-
-  const MeasurementInput = ({
-    barcode,
-    value,
-    measurementType,
-  }: {
-    barcode: string;
-    value: string;
-    measurementType: string;
-  }) => {
-    return (
-      <input
-        type="number"
-        value={value}
-        onChange={(e) =>
-          handleOnChange(
-            barcode,
-            "measurements",
-            e.currentTarget.value,
-            measurementType
-          )
-        }
-        step={isRange(measurementType) ? "1" : ".01"}
-      />
-    );
+  const onChangeMeasurementCategory = (barcode: string, value: string) => {
+    debugger;
+    send({ type: "UPDATE_MEASUREMENT_TYPE", barcode: barcode, value: value });
   };
-  const isRange = (measurementType: string) => {
-    return (
-      measurementType === AnalysisMeasurementType.DV200_LOWER ||
-      measurementType === AnalysisMeasurementType.DV200_UPPER
-    );
+  const onChangeMeasurementValue = (
+    barcode: string,
+    value: string,
+    type: string
+  ) => {
+    handleOnChange(barcode, "measurements", value, type);
   };
 
   const columns = React.useMemo(() => {
@@ -126,63 +102,24 @@ export default function AnalysisLabware({
           );
         },
       },
-      {
-        Header: `${analysisType} Value`,
-        id: "analysisType",
-        Cell: ({ row }: { row: Row<RnaAnalysisLabware> }) => {
-          return (
-            <div className="flex flex-row">
-              <div className={"p-2"}>
-                {analysisType !== AnalysisType.RIN && (
-                  <select
-                    onChange={(e) =>
-                      send({
-                        type: "INIT_MEASUREMENT_TYPE",
-                        value: e.currentTarget.value,
-                      })
-                    }
-                  >
-                    {Object.keys(DV200ValueTypes).map((key) => (
-                      <option value={key} key={key}>
-                        {enumValue(DV200ValueTypes, key)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
-
-              <div className={"p-2"}>
-                <MeasurementInput
-                  barcode={row.original.barcode}
-                  value={row.original.measurements[0].value}
-                  measurementType={row.original.measurements[0].name}
-                />
-              </div>
-              <div className={"p-2"}>
-                {isRange(row.original.measurements[0].name) && (
-                  <MeasurementInput
-                    barcode={row.original.barcode}
-                    value={
-                      row.original.measurements.length > 1
-                        ? row.original.measurements[1].value
-                        : ""
-                    }
-                    measurementType={AnalysisMeasurementType.DV200_UPPER}
-                  />
-                )}
-              </div>
-            </div>
-          );
-        },
-      },
+      measurementColumn(
+        operationType,
+        onChangeMeasurementCategory,
+        onChangeMeasurementValue
+      ),
       {
         Header: "Comment",
         id: "comment",
         Cell: ({ row }: { row: Row<RnaAnalysisLabware> }) => {
+          debugger;
           return (
-            <select>
+            <select value={row.original.commentId ?? ""}>
               {comments.map((comment) => (
-                <option value={comment.id} key={comment.id}>
+                <option
+                  value={comment.id}
+                  key={comment.id}
+                  selected={comment.id === row.original.commentId}
+                >
                   {comment.text}
                 </option>
               ))}
@@ -199,7 +136,7 @@ export default function AnalysisLabware({
         },
       },
     ];
-  }, [analysisType]);
+  }, [operationType]);
 
   return (
     <div className="max-w-screen-xl mx-auto">
@@ -219,7 +156,7 @@ export default function AnalysisLabware({
                   })
                 }
               >
-                {Object.values(AnalysisType).map((type) => (
+                {Object.values(OperationType).map((type) => (
                   <option value={type} key={type}>
                     {type}
                   </option>
@@ -231,6 +168,12 @@ export default function AnalysisLabware({
                 label={"Comment"}
                 name={"comment"}
                 emptyOption={false}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                  send({
+                    type: "UPDATE_ALL_COMMENTS_TYPE",
+                    commentId: e.currentTarget.value,
+                  })
+                }
               >
                 {comments.map((comment) => (
                   <option value={comment.id} key={comment.id}>
@@ -246,7 +189,7 @@ export default function AnalysisLabware({
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-3"
+          className="mt-4"
         >
           <DataTable columns={columns} data={analysisLabwares} />
         </motion.div>

@@ -4,13 +4,21 @@ import Heading from "../components/Heading";
 import {
   CommentFieldsFragment,
   ExtractResult,
+  RecordRnaAnalysisMutation,
   RnaAnalysisLabware,
+  RnaAnalysisRequest,
 } from "../types/sdk";
 import ExtractResultPanel from "../components/extractResult/ExtractResultPanel";
 import BlueButton from "../components/buttons/BlueButton";
 import variants from "../lib/motionVariants";
 import { motion } from "framer-motion";
 import AnalysisLabware from "../components/analysisLabware/analysisLabware";
+import createFormMachine from "../lib/machines/form/formMachine";
+import { useMachine } from "@xstate/react";
+import { reload, stanCore } from "../lib/sdk";
+import ButtonBar from "../components/ButtonBar";
+import OperationCompleteModal from "../components/modal/OperationCompleteModal";
+import Warning from "../components/notifications/Warning";
 
 type AnalysisProps = {
   /***
@@ -26,13 +34,37 @@ function Analysis({ comments }: AnalysisProps) {
   const [analysisLabwares, setAnalysisLabwares] = React.useState<
     RnaAnalysisLabware[]
   >([]);
+  const [operationType, setOperationType] = React.useState("");
   const [analysisMode, setAnalysisMode] = React.useState(false);
 
-  const onChange = useCallback(
-    (result: ExtractResult[]) => {
-      setExtractResults(result);
+  const [current, send] = useMachine(
+    createFormMachine<
+      RnaAnalysisRequest,
+      RecordRnaAnalysisMutation
+    >().withConfig({
+      services: {
+        submitForm: (ctx, e) => {
+          debugger;
+          if (e.type !== "SUBMIT_FORM") return Promise.reject();
+          return stanCore.RecordRNAAnalysis({
+            request: e.values,
+          });
+        },
+      },
+    })
+  );
+  const { serverError } = current.context;
+
+  const onChangeExtractResults = useCallback((result: ExtractResult[]) => {
+    setExtractResults(result);
+  }, []);
+
+  const onChangeLabwareData = useCallback(
+    (operationType: string, labwares: RnaAnalysisLabware[]) => {
+      setAnalysisLabwares(labwares);
+      setOperationType(operationType);
     },
-    [extractResults]
+    []
   );
 
   return (
@@ -44,7 +76,10 @@ function Analysis({ comments }: AnalysisProps) {
         <div className="max-w-screen-xl mx-auto">
           <div className="mt-8 space-y-4">
             <Heading level={3}> Section Tubes </Heading>
-            <ExtractResultPanel onChange={onChange} locked={false} />
+            <ExtractResultPanel
+              onChangeExtractResults={onChangeExtractResults}
+              locked={analysisMode}
+            />
           </div>
         </div>
         {analysisMode && (
@@ -58,12 +93,13 @@ function Analysis({ comments }: AnalysisProps) {
               barcodes={extractResults.map((result) => result.labware.barcode)}
               comments={comments}
               analysisLabwares={analysisLabwares}
+              onChangeLabwareData={onChangeLabwareData}
             />
           </motion.div>
         )}
       </AppShell.Main>
 
-      {!analysisMode && (
+      {!analysisMode ? (
         <div className="flex-shrink-0 max-w-screen-xl mx-auto">
           <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">
             <p className="my-3 text-gray-800 text-sm leading-normal">
@@ -86,7 +122,41 @@ function Analysis({ comments }: AnalysisProps) {
             </div>
           </div>
         </div>
+      ) : (
+        <div>
+          {serverError && (
+            <Warning
+              message={"Failed to record Staining QC"}
+              error={serverError}
+            />
+          )}
+          <ButtonBar>
+            <BlueButton
+              onClick={() =>
+                send({
+                  type: "SUBMIT_FORM",
+                  values: {
+                    operationType: operationType,
+                    labware: analysisLabwares,
+                  },
+                })
+              }
+            >
+              Save
+            </BlueButton>
+          </ButtonBar>
+        </div>
       )}
+      <OperationCompleteModal
+        show={current.matches("submitted")}
+        message={"RNA Analysis data saved"}
+        onReset={reload}
+      >
+        <p>
+          If you wish to start the process again, click the "Reset Form" button.
+          Otherwise you can return to the Home screen.
+        </p>
+      </OperationCompleteModal>
     </AppShell>
   );
 }

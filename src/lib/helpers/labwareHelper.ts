@@ -109,6 +109,7 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
     __typename: "Labware",
     id: labware.id,
     barcode: labware.barcode,
+    externalBarcode: labware.externalBarcode,
     destroyed: labware.destroyed,
     discarded: labware.discarded,
     released: labware.released,

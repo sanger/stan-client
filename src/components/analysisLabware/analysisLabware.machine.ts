@@ -1,10 +1,13 @@
-import { RnaAnalysisLabware } from "../../types/sdk";
-import { AnalysisMeasurementType, DV200ValueTypes } from "./analysisLabware";
+import { RnaAnalysisLabware, StringMeasurement } from "../../types/sdk";
 import { createMachine } from "xstate";
+import {
+  AnalysisMeasurementType,
+  MeasurementValueCategory,
+} from "./measurementColumn";
 
 export type AnalysisLabwareContext = {
   analysisLabwares: RnaAnalysisLabware[];
-  analysisType: string;
+  operationType: string;
 };
 
 type UpdateAnalysisTypeEvent = {
@@ -21,16 +24,21 @@ type UpdateLabwareDataEvent = {
     measurementType?: string;
   };
 };
-
-type InitializeMeasurementRangeTypeEvent = {
-  type: "INIT_MEASUREMENT_TYPE";
+type UpdateMeasurementTypeEvent = {
+  type: "UPDATE_MEASUREMENT_TYPE";
+  barcode: string;
   value: string;
+};
+type UpdateAllCommentTypeEvent = {
+  type: "UPDATE_ALL_COMMENTS_TYPE";
+  commentId: string;
 };
 
 type AnalysisLabwareEvent =
   | UpdateAnalysisTypeEvent
   | UpdateLabwareDataEvent
-  | InitializeMeasurementRangeTypeEvent;
+  | UpdateMeasurementTypeEvent
+  | UpdateAllCommentTypeEvent;
 
 export const analysisLabwareMachine = createMachine<
   AnalysisLabwareContext,
@@ -50,9 +58,13 @@ export const analysisLabwareMachine = createMachine<
             target: "ready",
             actions: "assignLabwareData",
           },
-          INIT_MEASUREMENT_TYPE: {
+          UPDATE_MEASUREMENT_TYPE: {
             target: "ready",
-            actions: "assignMeasurementRangeType",
+            actions: "assignMeasurementType",
+          },
+          UPDATE_ALL_COMMENTS_TYPE: {
+            target: "ready",
+            actions: "assignComments",
           },
         },
       },
@@ -63,43 +75,11 @@ export const analysisLabwareMachine = createMachine<
       assignAnalysisType: (ctx, e) => {
         debugger;
         if (e.type !== "UPDATE_ANALYSIS_TYPE") return;
-        ctx.analysisType = e.value;
-
-        //Change analysis type in all labwares
-        ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
-          return {
-            ...labware,
-            measurements: [
-              {
-                name: e.value,
-                value: "",
-              },
-            ],
-          };
-        });
-      },
-      assignMeasurementRangeType: (ctx, e) => {
-        if (e.type !== "INIT_MEASUREMENT_TYPE") return;
-        debugger;
-        //Change analysis type in all labwares to DV200_LOWER and DV200_UPPER
-        const measurements =
-          e.value === DV200ValueTypes.SINGLE_VALUE_TYPE
-            ? [
-                {
-                  name: AnalysisMeasurementType.DV200,
-                  value: "",
-                },
-              ]
-            : [
-                {
-                  name: AnalysisMeasurementType.DV200_LOWER,
-                  value: "",
-                },
-                {
-                  name: AnalysisMeasurementType.DV200_UPPER,
-                  value: "",
-                },
-              ];
+        ctx.operationType = e.value;
+        const measurements = buildMeasurementFields(
+          MeasurementValueCategory.SINGLE_VALUE_TYPE
+        );
+        //Change measurement data in all labwares
         ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
           return {
             ...labware,
@@ -107,9 +87,26 @@ export const analysisLabwareMachine = createMachine<
           };
         });
       },
+      assignMeasurementType: (ctx, e) => {
+        debugger;
+        if (e.type !== "UPDATE_MEASUREMENT_TYPE") return;
+        const indx = ctx.analysisLabwares.findIndex(
+          (labware) => labware.barcode === e.barcode
+        );
+        if (indx < 0) return;
+
+        const updateAnalysisLabware = {
+          ...ctx.analysisLabwares[indx],
+          measurements: buildMeasurementFields(e.value),
+        };
+        ctx.analysisLabwares = [
+          ...ctx.analysisLabwares.slice(0, indx),
+          updateAnalysisLabware,
+          ...ctx.analysisLabwares.slice(indx + 1),
+        ];
+      },
       assignLabwareData: (ctx, e) => {
         if (e.type !== "UPDATE_LABWARE_DATA") return;
-        debugger;
         const indx = ctx.analysisLabwares.findIndex(
           (labware) => labware.barcode === e.labware.barcode
         );
@@ -156,6 +153,45 @@ export const analysisLabwareMachine = createMachine<
           ...ctx.analysisLabwares.slice(indx + 1),
         ];
       },
+      assignComments: (ctx, e) => {
+        if (e.type !== "UPDATE_ALL_COMMENTS_TYPE") return;
+        //Change measurement data in all labwares
+        debugger;
+        ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
+          return {
+            ...labware,
+            commentId: Number(e.commentId),
+          };
+        });
+      },
     },
   }
 );
+const buildMeasurementFields = (valueCategory: string) => {
+  let measurements: StringMeasurement[] = [
+    {
+      name: "",
+      value: "",
+    },
+  ];
+  if (valueCategory === MeasurementValueCategory.SINGLE_VALUE_TYPE) {
+    measurements = [
+      {
+        name: AnalysisMeasurementType.DV200,
+        value: "",
+      },
+    ];
+  } else if (valueCategory === MeasurementValueCategory.RANGE_VALUE_TYPE) {
+    measurements = [
+      {
+        name: AnalysisMeasurementType.DV200_LOWER,
+        value: "",
+      },
+      {
+        name: AnalysisMeasurementType.DV200_UPPER,
+        value: "",
+      },
+    ];
+  }
+  return measurements;
+};
