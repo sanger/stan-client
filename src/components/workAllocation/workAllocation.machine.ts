@@ -6,12 +6,13 @@ import {
   CreateWorkMutation,
   GetWorkAllocationInfoQuery,
   ProjectFieldsFragment,
-  WorkFieldsFragment,
   WorkTypeFieldsFragment,
+  WorkWithCommentFieldsFragment,
 } from "../../types/sdk";
 import { stanCore } from "../../lib/sdk";
 import { assign } from "@xstate/immer";
 import { ClientError } from "graphql-request";
+import { WorkAllocationUrlParams } from "./WorkAllocation";
 
 export enum NUMBER_TYPE_FIELD {
   BLOCKS = "Number of blocks",
@@ -57,13 +58,14 @@ type WorkAllocationEvent =
   | {
       type: "ALLOCATE_WORK";
       values: WorkAllocationFormValues;
-    };
+    }
+  | { type: "UPDATE_URL_PARAMS"; urlParams: WorkAllocationUrlParams };
 
 type WorkAllocationContext = {
   /**
-   * List of created Work
+   * List of created Work with potential associated comment
    */
-  works: Array<WorkFieldsFragment>;
+  workWithComments: Array<WorkWithCommentFieldsFragment>;
 
   /**
    * List of enabled Work Types
@@ -91,21 +93,33 @@ type WorkAllocationContext = {
   successMessage?: string;
 
   /**
+   * URL params to filter the SGP numbers on
+   */
+  urlParams: WorkAllocationUrlParams;
+
+  /**
    * An error caused by a request to core
    */
   requestError?: ClientError;
 };
 
-export default function createWorkAllocationMachine() {
+type CreateWorkAllocationMachineParams = {
+  urlParams: WorkAllocationUrlParams;
+};
+
+export default function createWorkAllocationMachine({
+  urlParams,
+}: CreateWorkAllocationMachineParams) {
   return createMachine<WorkAllocationContext, WorkAllocationEvent>(
     {
       id: "workAllocation",
       context: {
-        works: [],
+        workWithComments: [],
         workTypes: [],
         projects: [],
         costCodes: [],
         availableComments: [],
+        urlParams,
       },
       initial: "loading",
       states: {
@@ -120,6 +134,10 @@ export default function createWorkAllocationMachine() {
           exit: "clearNotifications",
           on: {
             ALLOCATE_WORK: "allocating",
+            UPDATE_URL_PARAMS: {
+              actions: "assignUrlParams",
+              target: "loading",
+            },
           },
         },
         allocating: {
@@ -133,12 +151,23 @@ export default function createWorkAllocationMachine() {
     },
     {
       actions: {
+        assignUrlParams: assign((ctx, e) => {
+          if (e.type !== "UPDATE_URL_PARAMS") return;
+          ctx.urlParams = e.urlParams;
+        }),
+
         assignWorkAllocationInfo: assign((ctx, e) => {
           if (e.type !== "done.invoke.loadWorkAllocationInfo") return;
-          const { comments, projects, works, workTypes, costCodes } = e.data;
+          const {
+            comments,
+            projects,
+            worksWithComments,
+            workTypes,
+            costCodes,
+          } = e.data;
           ctx.availableComments = comments;
           ctx.projects = projects;
-          ctx.works = works;
+          ctx.workWithComments = worksWithComments;
           ctx.workTypes = workTypes;
           ctx.costCodes = costCodes;
         }),
@@ -202,8 +231,11 @@ export default function createWorkAllocationMachine() {
           });
         },
 
-        loadWorkAllocationInfo: () =>
-          stanCore.GetWorkAllocationInfo({ commentCategory: "Work status" }),
+        loadWorkAllocationInfo: (ctx) =>
+          stanCore.GetWorkAllocationInfo({
+            commentCategory: "Work status",
+            workStatuses: ctx.urlParams.status,
+          }),
       },
     }
   );
