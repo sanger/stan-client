@@ -45,17 +45,20 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
 
   const scanError = scanErrorMessage
     ? scanErrorMessage
-    : current.matches("extractResultFailure") && serverError
+    : serverError
     ? serverError.message
     : undefined;
 
   React.useEffect(() => {
     onChangeExtractResults && onChangeExtractResults(extractResults);
-  }, [extractResults]);
+  }, [extractResults, onChangeExtractResults]);
 
-  const onRemoveExtractResult = React.useCallback((barcode: string) => {
-    send({ type: "REMOVE_EXTRACT_RESULT", barcode: barcode });
-  }, []);
+  const onRemoveExtractResult = React.useCallback(
+    (barcode: string) => {
+      send({ type: "REMOVE_EXTRACT_RESULT", barcode: barcode });
+    },
+    [send]
+  );
 
   const handleOnScanInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +72,6 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
 
   // Column with actions (such as delete) to add to the end of the extraxtResultColumns
   const actionsColumn = React.useMemo(() => {
-    debugger;
     return {
       Header: "",
       id: "actions",
@@ -88,7 +90,7 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
         );
       },
     };
-  }, [locked]);
+  }, [locked, onRemoveExtractResult]);
 
   const columns = useMemo(
     () => [
@@ -100,7 +102,7 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
       extractResultColumn.nanodropResult(),
       actionsColumn,
     ],
-    [locked]
+    [actionsColumn]
   );
 
   return (

@@ -19,6 +19,7 @@ import { reload, stanCore } from "../lib/sdk";
 import ButtonBar from "../components/ButtonBar";
 import OperationCompleteModal from "../components/modal/OperationCompleteModal";
 import Warning from "../components/notifications/Warning";
+import { Link } from "react-router-dom";
 
 type AnalysisProps = {
   /***
@@ -126,11 +127,17 @@ function Analysis({ comments }: AnalysisProps) {
         <div>
           {serverError && (
             <Warning
-              message={"Failed to record Staining QC"}
+              message={"Failed to record RNA Analysis results"}
               error={serverError}
             />
           )}
           <ButtonBar>
+            <BlueButton onClick={reload} action="tertiary">
+              Reset Form
+            </BlueButton>
+            <Link to={"/"}>
+              <BlueButton action="primary">Return Home</BlueButton>
+            </Link>
             <BlueButton
               onClick={() =>
                 send({

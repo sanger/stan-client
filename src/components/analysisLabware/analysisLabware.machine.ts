@@ -125,7 +125,7 @@ export const analysisLabwareMachine = createMachine<
             };
             if (
               e.labware.measurementType === AnalysisMeasurementType.RIN ||
-              e.labware.measurementType == AnalysisMeasurementType.DV200
+              e.labware.measurementType === AnalysisMeasurementType.DV200
             )
               updateAnalysisLabware.measurements = [measurement];
             else {
@@ -156,7 +156,6 @@ export const analysisLabwareMachine = createMachine<
       assignComments: (ctx, e) => {
         if (e.type !== "UPDATE_ALL_COMMENTS_TYPE") return;
         //Change measurement data in all labwares
-        debugger;
         ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
           return {
             ...labware,
@@ -168,12 +167,7 @@ export const analysisLabwareMachine = createMachine<
   }
 );
 const buildMeasurementFields = (valueCategory: string) => {
-  let measurements: StringMeasurement[] = [
-    {
-      name: "",
-      value: "",
-    },
-  ];
+  let measurements: StringMeasurement[] = [];
   if (valueCategory === MeasurementValueCategory.SINGLE_VALUE_TYPE) {
     measurements = [
       {

@@ -12,11 +12,6 @@ const extractionResultHandlers = [
   graphql.query<ExtractResult, ExtractResultQueryVariables>(
     "ExtractResult",
     (req, res, ctx) => {
-      /*  throw new Error(
-          `Couldn't find labware with barcode ${req.variables.barcode} in sessionStorage`
-        );
-      */
-
       // Assign a labware type
       const labwareType = labwareTypeInstances.find(
         (lt) => lt.name === LabwareTypeName.TUBE
@@ -26,6 +21,7 @@ const extractionResultHandlers = [
         labwareType,
       });
       newLabware.barcode = req.variables.barcode;
+
       return res(
         ctx.data({
           result: PassFail.Pass,
@@ -33,6 +29,14 @@ const extractionResultHandlers = [
           concentration: "1.3",
         })
       );
+      /* if (req.variables.barcode === "STAN-3111")
+        return res(
+          ctx.errors([
+            {
+              message: `Couldn't find labware with barcode ${req.variables.barcode} in sessionStorage`,
+            },
+          ])
+        );*/
     }
   ),
 ];

@@ -1,5 +1,5 @@
 import { Form, Formik } from "formik";
-import React from "react";
+import React, { useCallback } from "react";
 import Heading from "../Heading";
 import FormikSelect from "../forms/Select";
 import { CommentFieldsFragment, RnaAnalysisLabware } from "../../types/sdk";
@@ -46,35 +46,40 @@ export default function AnalysisLabware({
 
   React.useEffect(() => {
     onChangeLabwareData(operationType, analysisLabwares);
-  }, [analysisLabwares]);
+  }, [analysisLabwares, onChangeLabwareData, operationType]);
 
-  const handleOnChange = (
-    barcode: string,
-    fieldname: string,
-    value: string,
-    measurementType?: string
-  ) => {
-    send({
-      type: "UPDATE_LABWARE_DATA",
-      labware: {
-        barcode: barcode,
-        field: fieldname,
-        value: value,
-        measurementType: measurementType,
-      },
-    });
-  };
-  const onChangeMeasurementCategory = (barcode: string, value: string) => {
-    debugger;
-    send({ type: "UPDATE_MEASUREMENT_TYPE", barcode: barcode, value: value });
-  };
-  const onChangeMeasurementValue = (
-    barcode: string,
-    value: string,
-    type: string
-  ) => {
-    handleOnChange(barcode, "measurements", value, type);
-  };
+  const handleOnChange = useCallback(
+    (
+      barcode: string,
+      fieldname: string,
+      value: string,
+      measurementType?: string
+    ) => {
+      send({
+        type: "UPDATE_LABWARE_DATA",
+        labware: {
+          barcode: barcode,
+          field: fieldname,
+          value: value,
+          measurementType: measurementType,
+        },
+      });
+    },
+    [send]
+  );
+  const onChangeMeasurementCategory = useCallback(
+    (barcode: string, value: string) => {
+      send({ type: "UPDATE_MEASUREMENT_TYPE", barcode: barcode, value: value });
+    },
+    [send]
+  );
+
+  const onChangeMeasurementValue = useCallback(
+    (barcode: string, value: string, type: string) => {
+      handleOnChange(barcode, "measurements", value, type);
+    },
+    [handleOnChange]
+  );
 
   const columns = React.useMemo(() => {
     return [
@@ -89,6 +94,7 @@ export default function AnalysisLabware({
         Cell: ({ row }: { row: Row<RnaAnalysisLabware> }) => {
           return (
             <input
+              className={"rounded-md"}
               type="text"
               value={row.original.workNumber ?? ""}
               onChange={(e) =>
@@ -111,32 +117,35 @@ export default function AnalysisLabware({
         Header: "Comment",
         id: "comment",
         Cell: ({ row }: { row: Row<RnaAnalysisLabware> }) => {
-          debugger;
           return (
-            <select value={row.original.commentId ?? ""}>
-              {comments.map((comment) => (
-                <option
-                  value={comment.id}
-                  key={comment.id}
-                  selected={comment.id === row.original.commentId}
-                >
-                  {comment.text}
-                </option>
-              ))}
-              onChange=
-              {(e: React.ChangeEvent<HTMLSelectElement>) =>
+            <select
+              className={"rounded-md"}
+              value={row.original.commentId ?? ""}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                 handleOnChange(
                   row.original.barcode,
                   "comment",
                   e.currentTarget.value
                 )
               }
+            >
+              {comments.map((comment) => (
+                <option value={comment.id} key={comment.id}>
+                  {comment.text}
+                </option>
+              ))}
             </select>
           );
         },
       },
     ];
-  }, [operationType]);
+  }, [
+    operationType,
+    comments,
+    handleOnChange,
+    onChangeMeasurementCategory,
+    onChangeMeasurementValue,
+  ]);
 
   return (
     <div className="max-w-screen-xl mx-auto">

@@ -9,7 +9,13 @@ const recordRnaAnalysisHandlers = [
     RecordRnaAnalysisMutation,
     RecordRnaAnalysisMutationVariables
   >("RecordRNAAnalysis", (req, res, ctx) => {
-    debugger;
+    /*return res(
+      ctx.errors([
+        {
+          message: `Couldn't Record labware with barcode ${req.variables.request.labware[0].barcode} in sessionStorage`,
+        },
+      ])
+    );*/
     return res(ctx.data({ recordRNAAnalysis: { operations: [] } }));
   }),
 ];

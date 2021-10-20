@@ -11,9 +11,9 @@ export enum AnalysisMeasurementType {
   DV200_UPPER = "DV200 upper",
 }
 export enum MeasurementValueCategory {
-  SINGLE_VALUE_TYPE = "Value",
+  SINGLE_VALUE_TYPE = "Single",
   RANGE_VALUE_TYPE = "Range",
-  NA_TYPE = "N/a",
+  NA_TYPE = "N/A",
 }
 export const measurementColumn = (
   operationType: string,
@@ -30,7 +30,7 @@ export const measurementColumn = (
     } else {
       return Object.keys(MeasurementValueCategory).filter(
         (key) =>
-          enumValue(MeasurementValueCategory, key) !=
+          enumValue(MeasurementValueCategory, key) !==
           MeasurementValueCategory.RANGE_VALUE_TYPE
       );
     }
@@ -47,6 +47,7 @@ export const measurementColumn = (
   }) => {
     return (
       <select
+        className={"rounded-md"}
         onChange={(e) =>
           onChangeMeasurementCategory(
             barcode,
@@ -65,10 +66,11 @@ export const measurementColumn = (
     );
   };
 
-  const isRangeType = (measurementType: string) => {
+  const isRangeType = (measurements: StringMeasurement[]) => {
+    if (!measurements || measurements.length <= 0) return false;
     return (
-      measurementType === AnalysisMeasurementType.DV200_LOWER ||
-      measurementType === AnalysisMeasurementType.DV200_UPPER
+      measurements[0].name === AnalysisMeasurementType.DV200_LOWER ||
+      measurements[0].name === AnalysisMeasurementType.DV200_UPPER
     );
   };
 
@@ -76,40 +78,58 @@ export const measurementColumn = (
     barcode,
     measurement,
     onChangeMeasurementValue,
-    disabled,
+    labelText,
+    min,
   }: {
     barcode: string;
-    measurement: StringMeasurement;
+    measurement: StringMeasurement | undefined;
     onChangeMeasurementValue: (
       barcode: string,
       value: string,
       type: string
     ) => void;
-    disabled?: boolean;
+    labelText?: string;
+    min?: number;
   }) => {
     return (
-      <input
-        className={`rounded-sm ${disabled && "bg-gray-200 border-gray-50"}`}
-        type="number"
-        value={measurement.value}
-        defaultValue={""}
-        onChange={(e) =>
-          onChangeMeasurementValue(
-            barcode,
-            e.currentTarget.value,
-            measurement.name
-          )
-        }
-        disabled={disabled}
-        step={isRangeType(measurement.name) ? "1" : ".1"}
-        min={0}
-      />
+      <>
+        {labelText && (
+          <label className="text-gray-400 text-xs mr-2 ">{labelText}</label>
+        )}
+        <input
+          className={`rounded-md ${
+            !measurement && "bg-gray-200 border-gray-50"
+          }`}
+          type="number"
+          defaultValue={measurement?.value}
+          onFocus={(e) => {
+            e.target.style.color = "black";
+            if (min && Number(e.currentTarget.value) < min) {
+              e.target.style.color = "red";
+            }
+          }}
+          onChange={(e) => {
+            e.target.style.color = "black";
+            if (min && Number(e.currentTarget.value) < min) {
+              e.target.style.color = "red";
+            }
+            onChangeMeasurementValue(
+              barcode,
+              e.currentTarget.value,
+              measurement ? measurement.name : ""
+            );
+          }}
+          disabled={!measurement}
+          step={".1"}
+          min={min ?? 0}
+        />
+      </>
     );
   };
 
   return {
     Header: `${operationType} Value`,
-    id: "analysisType",
+    id: "value",
     columns: [
       {
         Header: "Type",
@@ -125,35 +145,49 @@ export const measurementColumn = (
         },
       },
       {
-        Header: "Value",
-        id: "range",
+        Header: "Result",
+        id: "result",
         Cell: ({ row }: { row: Row<RnaAnalysisLabware> }) => {
           return (
-            <div className={"flex flex-row border-solid"}>
-              <div className="flex flex-col mr-4">
-                {isRangeType(row.original.measurements[0].name) && (
-                  <label className="text-gray-400 text-xs ">
-                    Lower bound (%)
-                  </label>
-                )}
+            <div className={"flex flex-col"}>
+              <div
+                className={`${row.original.measurements.length > 1 && "mt-2"}`}
+              >
                 <MeasurementInput
                   barcode={row.original.barcode}
-                  measurement={row.original.measurements[0]}
+                  measurement={
+                    row.original.measurements.length > 0
+                      ? row.original.measurements[0]
+                      : undefined
+                  }
                   onChangeMeasurementValue={onChangeMeasurementValue}
-                  disabled={row.original.measurements[0].name === ""}
+                  labelText={
+                    isRangeType(row.original.measurements)
+                      ? "Lower bound (%)"
+                      : undefined
+                  }
                 />
               </div>
-              {isRangeType(row.original.measurements[0].name) && (
-                <div className="flex flex-col mr-4">
-                  {isRangeType(row.original.measurements[0].name) && (
-                    <label className="text-gray-400 text-xs ">
-                      Upper bound (%)
-                    </label>
-                  )}
+              {isRangeType(row.original.measurements) && (
+                <div className={"mt-2"}>
                   <MeasurementInput
                     barcode={row.original.barcode}
-                    measurement={row.original.measurements[1]}
+                    measurement={
+                      row.original.measurements.length > 1
+                        ? row.original.measurements[1]
+                        : undefined
+                    }
                     onChangeMeasurementValue={onChangeMeasurementValue}
+                    labelText={
+                      isRangeType(row.original.measurements)
+                        ? "Upper bound (%)"
+                        : undefined
+                    }
+                    min={
+                      row.original.measurements.length > 1
+                        ? Number(row.original.measurements[0].value) + 1
+                        : 0
+                    }
                   />
                 </div>
               )}

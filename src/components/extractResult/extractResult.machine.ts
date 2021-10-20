@@ -3,6 +3,7 @@ import { ClientError } from "graphql-request";
 import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
 import { stanCore } from "../../lib/sdk";
+import { castDraft } from "immer";
 
 export interface ExtractResultContext {
   extractResults: ExtractResult[];
@@ -85,17 +86,21 @@ export const extractResultMachine = createMachine<
       },
       submitBarcodeFailed: {
         entry: "assignSubmitBarcodeError",
-        on: {
-          "": {
-            actions: "assignBarcode",
-            target: "ready",
-          },
+        always: {
+          actions: "assignBarcode",
+          target: "ready",
         },
       },
       extractResultSuccess: {
-        on: { "": "ready" },
+        always: {
+          target: "ready",
+        },
       },
-      extractResultFailed: { on: { "": "ready" } },
+      extractResultFailed: {
+        always: {
+          target: "ready",
+        },
+      },
     },
   },
   {
@@ -124,6 +129,10 @@ export const extractResultMachine = createMachine<
         ctx.extractResults = ctx.extractResults.filter(
           (res) => res.labware.barcode !== e.barcode
         );
+      }),
+      assignServerError: assign((ctx, e) => {
+        if (e.type !== "error.platform.extractResult") return;
+        ctx.serverError = castDraft(e.data);
       }),
       unassignServerError: assign((ctx, _e) => {
         ctx.serverError = undefined;
