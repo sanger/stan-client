@@ -1,4 +1,5 @@
 import * as queryString from "query-string";
+import * as Yup from "yup";
 import { ParsedQuery } from "query-string";
 import { GridDirection, Maybe } from "../types/sdk";
 import { HasEnabled, SizeInput } from "../types/stan";
@@ -7,7 +8,7 @@ import { Key } from "react";
 
 /**
  * Utility for retrieving a list of correctly typed object keys.
- * As TypeScript enums are really just objects, this can be used from them also.
+ * As TypeScript enums are really just objects, this can be used for them also.
  * @param o object to retrieve keys from
  */
 export function objectKeys<E>(o: E): (keyof E)[] {
@@ -57,26 +58,66 @@ export function* cycle(list: any[]) {
   }
 }
 
+type GuardAndTransformParams<T> = {
+  /**
+   * A URL query string
+   * @example "foo=bar&baz[]=fiz"
+   */
+  query: string;
+
+  /**
+   * A user-defined type guard to check the parsed URL query
+   * @param s the parsed URL query
+   */
+  guard: (s: any) => s is T;
+
+  /**
+   * An optional function to transform parsed query string before it is given to the type guard
+   * @param s the parsed URL query
+   */
+  transform?: (s: any) => any;
+};
+type SchemaParams = {
+  /**
+   * A URL query string
+   */
+  query: string;
+
+  /**
+   * A Yup schema. Used to cast and validate the parsed URL query string.
+   */
+  schema: Yup.Schema<any>;
+};
+type SafeParseQueryStringParams<T> = GuardAndTransformParams<T> | SchemaParams;
+
 /**
- * Safe parse URL params into given object
- *
- * @param query the URL's query string
- * @param guard the user-defined type guard function
- * @param transform (optional) a function to modify the result of the parsed query string
+ * Will attempt to deserialize a URL query string into a given type <T>
+ * @return T if query can be parsed and conforms to the type guard or schema; null otherwise
  */
 export function safeParseQueryString<T>(
-  query: string,
-  guard: (s: any) => s is T,
-  transform?: (s: any) => any
+  params: SafeParseQueryStringParams<T>
 ): Maybe<T> {
-  let parsed = parseQueryString(query, {
+  let parsed = parseQueryString(params.query, {
     arrayFormat: "bracket",
     parseNumbers: false,
     parseBooleans: true,
   });
+
+  if ("schema" in params) {
+    try {
+      const castValue = params.schema.cast(parsed);
+      return params.schema.isValidSync(castValue) ? castValue : null;
+    } catch {
+      return null;
+    }
+  }
+
+  const { transform, guard } = params;
+
   if (transform) {
     parsed = transform(parsed);
   }
+
   return guard(parsed) ? parsed : null;
 }
 
@@ -91,7 +132,10 @@ export const parseQueryString = queryString.parse;
  * @param obj the object to stringify
  */
 export function stringify(obj: object): string {
-  return queryString.stringify(obj, { skipEmptyString: true });
+  return queryString.stringify(obj, {
+    skipEmptyString: true,
+    arrayFormat: "bracket",
+  });
 }
 
 /**
@@ -205,4 +249,15 @@ export function mapify<K extends string, T extends Mapify<K>>(
   key: K
 ): Map<Key, T> {
   return new Map<Key, T>(items.map((item) => [item[key], item] as const));
+}
+
+/**
+ *
+ */
+
+export function getEnumKeyByEnumValue<T extends { [index: string]: string }>(
+  enumType: T,
+  enumValue: string
+): keyof T | undefined {
+  return Object.keys(enumType).find((x) => enumType[x] === enumValue);
 }

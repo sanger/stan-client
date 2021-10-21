@@ -42,8 +42,9 @@ type LabwareScannerProps = {
   /**
    * Callback for when a labware is removed
    * @param labware the removed labware
+   * @param index the index of the removed labware
    */
-  onRemove?: (labware: LabwareFieldsFragment) => void;
+  onRemove?: (labware: LabwareFieldsFragment, index: number) => void;
 
   /**
    * Children can either be a react node (if using the useLabware hook)
@@ -64,23 +65,12 @@ export default function LabwareScanner({
   children,
 }: LabwareScannerProps) {
   const [current, send] = useMachine(
-    createLabwareMachine(initialLabwares, labwareCheckFunction).withConfig({
-      actions: {
-        foundEvent: (ctx, e) => {
-          if (e.type !== "done.invoke.validateFoundLabware") return;
-          onAdd?.(e.data);
-        },
-        removeEvent: (ctx, e) => {
-          if (e.type !== "REMOVE_LABWARE") return;
-          const labware = ctx.labwares.find((lw) => lw.barcode === e.value);
-          labware && onRemove?.(labware);
-        },
-      },
-    })
+    createLabwareMachine(initialLabwares, labwareCheckFunction)
   );
 
   const {
     labwares,
+    removedLabware,
     successMessage,
     errorMessage,
     currentBarcode,
@@ -90,13 +80,31 @@ export default function LabwareScanner({
     send(locked ? { type: "LOCK" } : { type: "UNLOCK" });
   }, [send, locked]);
 
-  // Call onChange handler whenever labwares change
+  // Call relevant handlers whenever labwares change
   const previousLabwareLength = usePrevious(labwares.length);
   useEffect(() => {
+    if (typeof previousLabwareLength === "undefined") return;
+
     if (labwares.length !== previousLabwareLength) {
       onChange?.(labwares);
     }
-  }, [labwares, onChange, previousLabwareLength]);
+
+    if (labwares.length > previousLabwareLength) {
+      onAdd?.(labwares[labwares.length - 1]);
+    }
+
+    if (labwares.length < previousLabwareLength) {
+      removedLabware &&
+        onRemove?.(removedLabware.labware, removedLabware.index);
+    }
+  }, [
+    labwares,
+    onChange,
+    onAdd,
+    removedLabware,
+    onRemove,
+    previousLabwareLength,
+  ]);
 
   const ctxValue: LabwareScannerContextType = {
     locked: current.matches("locked"),

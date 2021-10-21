@@ -1,0 +1,4 @@
+fragment WorkProgressTimeStampField on WorkProgressTimestamp {
+    type
+    timestamp
+}

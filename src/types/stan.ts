@@ -1,4 +1,4 @@
-import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size,} from "./sdk";
+import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size} from "./sdk";
 import {Location} from "history";
 import {ClientError} from "graphql-request";
 import * as Yup from "yup";
@@ -92,11 +92,11 @@ export type PrintResultType = {
   labwares: Array<LabwareFieldsFragment>;
 };
 
-export type SearchResultsType = {
-  numDisplayed: number;
-  numRecords: number;
-  entries: SearchResultTableEntry[];
-};
+export type SearchResultsType<T> = {
+  numDisplayed?: number;
+  numRecords?: number;
+  entries: T[];
+}
 
 /**
  * A single row on the results table of the Search page
@@ -119,6 +119,9 @@ export type SearchResultTableEntryLocation = {
   displayName: string;
   address?: Maybe<number>;
 };
+
+
+
 
 /**
  * Type for possible location URL params
@@ -263,15 +266,5 @@ export const historySchema = Yup.object({
     })
     .required(),
 }).required();
-
-/**
- * User-defined type guard for {@link HistoryProps}
- * Uses a Yup schema to determine if {@code x} has the right shape
- * @param x value to check type
- * @see {@link https://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards}
- */
-export function isHistoryProps(x: any): x is HistoryProps {
-  return historySchema.isValidSync(x);
-}
 
 export type HistoryProps = HistoryStrProps | HistoryNumProps;

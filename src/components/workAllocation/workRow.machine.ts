@@ -1,8 +1,10 @@
 import { createMachine } from "xstate";
 import {
-  WorkFieldsFragment,
-  WorkStatus,
+  UpdateWorkNumBlocksMutation,
+  UpdateWorkNumSlidesMutation,
   UpdateWorkStatusMutation,
+  WorkStatus,
+  WorkWithCommentFieldsFragment,
 } from "../../types/sdk";
 import { MachineServiceDone } from "../../types/stan";
 import { stanCore } from "../../lib/sdk";
@@ -10,9 +12,9 @@ import { assign } from "@xstate/immer";
 
 type WorkRowMachineContext = {
   /**
-   * Work...
+   * Work with possible comment
    */
-  work: WorkFieldsFragment;
+  workWithComment: WorkWithCommentFieldsFragment;
 
   /**
    * Is the user currently editing the Work status?
@@ -26,31 +28,46 @@ export type WorkRowEvent =
   | { type: "COMPLETE"; commentId: undefined }
   | { type: "FAIL"; commentId: number }
   | { type: "REACTIVATE"; commentId: undefined }
-  | MachineServiceDone<"updateWorkStatus", UpdateWorkStatusMutation>;
+  | { type: "ACTIVE"; commentId: undefined }
+  | { type: "UPDATE_NUM_BLOCKS"; numBlocks: number | undefined }
+  | { type: "UPDATE_NUM_SLIDES"; numSlides: number | undefined }
+  | MachineServiceDone<"updateWorkStatus", UpdateWorkStatusMutation>
+  | MachineServiceDone<"updateWorkNumBlocks", UpdateWorkNumBlocksMutation>
+  | MachineServiceDone<"updateWorkNumSlides", UpdateWorkNumSlidesMutation>;
 
-type CreateWorkRowMachineParams = {
-  work: WorkFieldsFragment;
-};
+type CreateWorkRowMachineParams = Pick<
+  WorkRowMachineContext,
+  "workWithComment"
+>;
 
 export default function createWorkRowMachine({
-  work,
+  workWithComment,
 }: CreateWorkRowMachineParams) {
   return createMachine<WorkRowMachineContext, WorkRowEvent>(
     {
       id: "workRowMachine",
       context: {
-        work,
+        workWithComment,
         editModeEnabled: false,
       },
       initial: "deciding",
       states: {
         deciding: {
           always: [
+            maybeGoToStatus("unstarted"),
             maybeGoToStatus("active"),
             maybeGoToStatus("paused"),
             maybeGoToStatus("completed"),
             maybeGoToStatus("failed"),
           ],
+        },
+        unstarted: {
+          on: {
+            EDIT: { actions: "toggleEditMode" },
+            ACTIVE: "updating",
+            UPDATE_NUM_BLOCKS: "editNumberBlocks",
+            UPDATE_NUM_SLIDES: "editNumberSlides",
+          },
         },
         active: {
           on: {
@@ -58,6 +75,8 @@ export default function createWorkRowMachine({
             PAUSE: "updating",
             COMPLETE: "updating",
             FAIL: "updating",
+            UPDATE_NUM_BLOCKS: "editNumberBlocks",
+            UPDATE_NUM_SLIDES: "editNumberSlides",
           },
         },
         paused: {
@@ -66,6 +85,8 @@ export default function createWorkRowMachine({
             REACTIVATE: "updating",
             COMPLETE: "updating",
             FAIL: "updating",
+            UPDATE_NUM_BLOCKS: "editNumberBlocks",
+            UPDATE_NUM_SLIDES: "editNumberSlides",
           },
         },
         completed: {},
@@ -80,15 +101,42 @@ export default function createWorkRowMachine({
             onError: { target: "deciding" },
           },
         },
+        editNumberBlocks: {
+          invoke: {
+            src: "updateWorkNumBlocks",
+            onDone: {
+              actions: "assignWorkNumBlocks",
+              target: "deciding",
+            },
+            onError: { target: "deciding" },
+          },
+        },
+        editNumberSlides: {
+          invoke: {
+            src: "updateWorkNumSlides",
+            onDone: {
+              actions: "assignWorkNumSlides",
+              target: "deciding",
+            },
+            onError: { target: "deciding" },
+          },
+        },
       },
     },
     {
       actions: {
         assignSgpNumber: assign((ctx, e) => {
           if (e.type !== "done.invoke.updateWorkStatus") return;
-          ctx.work = e.data.updateWorkStatus;
+          ctx.workWithComment = e.data.updateWorkStatus;
         }),
-
+        assignWorkNumBlocks: assign((ctx, e) => {
+          if (e.type !== "done.invoke.updateWorkNumBlocks") return;
+          ctx.workWithComment.work = e.data.updateWorkNumBlocks;
+        }),
+        assignWorkNumSlides: assign((ctx, e) => {
+          if (e.type !== "done.invoke.updateWorkNumSlides") return;
+          ctx.workWithComment.work = e.data.updateWorkNumSlides;
+        }),
         toggleEditMode: assign(
           (ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled)
         ),
@@ -97,10 +145,28 @@ export default function createWorkRowMachine({
       services: {
         updateWorkStatus: (ctx, e) => {
           return stanCore.UpdateWorkStatus({
-            workNumber: ctx.work.workNumber,
+            workNumber: ctx.workWithComment.work.workNumber,
             status: getWorkStatusFromEventType(e),
             commentId: "commentId" in e ? e.commentId : undefined,
           });
+        },
+        updateWorkNumBlocks: (ctx, e) => {
+          let params: { workNumber: string; numBlocks?: number } = {
+            workNumber: ctx.workWithComment.work.workNumber,
+          };
+          if ("numBlocks" in e && e.numBlocks)
+            params["numBlocks"] = e.numBlocks;
+
+          return stanCore.UpdateWorkNumBlocks(params);
+        },
+        updateWorkNumSlides: (ctx, e) => {
+          let params: { workNumber: string; numSlides?: number } = {
+            workNumber: ctx.workWithComment.work.workNumber,
+          };
+          if ("numSlides" in e && e.numSlides)
+            params["numSlides"] = e.numSlides;
+
+          return stanCore.UpdateWorkNumSlides(params);
         },
       },
     }
@@ -109,7 +175,7 @@ export default function createWorkRowMachine({
 
 /**
  * Determine the next {@link WorkStatus} from a given event
- * @param e an {@link WorkRowEvent}
+ * @param e a {@link WorkRowEvent}
  */
 function getWorkStatusFromEventType(e: WorkRowEvent): WorkStatus {
   switch (e.type) {
@@ -120,6 +186,8 @@ function getWorkStatusFromEventType(e: WorkRowEvent): WorkStatus {
     case "PAUSE":
       return WorkStatus.Paused;
     case "REACTIVATE":
+      return WorkStatus.Active;
+    case "ACTIVE":
       return WorkStatus.Active;
   }
 
@@ -134,6 +202,6 @@ function maybeGoToStatus(status: string) {
   return {
     target: status,
     cond: (ctx: WorkRowMachineContext) =>
-      ctx.work.status.toLowerCase() === status.toLowerCase(),
+      ctx.workWithComment.work.status.toLowerCase() === status.toLowerCase(),
   };
 }

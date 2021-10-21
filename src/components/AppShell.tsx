@@ -111,6 +111,9 @@ function AppShell({ children }: AppShellParams) {
               </button>
             </div>
             <nav className="hidden md:flex space-x-10">
+              <StanNavLink exact to="/">
+                Home
+              </StanNavLink>
               <StanNavLink exact to="/search">
                 Search
               </StanNavLink>
@@ -381,6 +384,21 @@ function AppShell({ children }: AppShellParams) {
                                 </p>
                               </div>
                             </Link>
+                            <Link
+                              to="/admin/unrelease"
+                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
+                            >
+                              <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                              <div className="ml-4">
+                                <p className="text-base font-medium text-gray-900">
+                                  Unrelease
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  Re-use STAN labware that has previously been
+                                  released.
+                                </p>
+                              </div>
+                            </Link>
                           </div>
                           <div className="px-5 py-5 bg-gray-50 sm:px-8 sm:py-8" />
                         </div>
@@ -475,6 +493,7 @@ function AppShell({ children }: AppShellParams) {
                 variants={variants.menuItemVariants}
                 className="px-2 pt-2 space-y-1 sm:px-3"
               >
+                <StanMobileNavLink to="/">Home</StanMobileNavLink>
                 <StanMobileNavLink to="/search">Search</StanMobileNavLink>
                 <StanMobileNavLink to="/store">Store</StanMobileNavLink>
                 <StanMobileNavLink to="/history">History</StanMobileNavLink>
@@ -543,6 +562,10 @@ function AppShell({ children }: AppShellParams) {
 
                       <StanMobileNavLink to="/admin/release">
                         Release
+                      </StanMobileNavLink>
+
+                      <StanMobileNavLink to="/admin/unrelease">
+                        Unrelease
                       </StanMobileNavLink>
                     </div>
                   </div>

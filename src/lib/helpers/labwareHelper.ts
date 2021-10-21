@@ -127,6 +127,7 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
       address: slot.address,
       labwareId: slot.labwareId,
       blockHighestSection: slot.blockHighestSection,
+      block: slot.block,
       samples: slot.samples.map((sample) => ({
         id: sample.id,
         section: sample.section,
@@ -172,4 +173,16 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
  */
 export function isLabwareUsable(labware: Pick<Labware, "state">): boolean {
   return [LabwareState.Empty, LabwareState.Active].includes(labware.state);
+}
+
+/**
+ * Determines whether a piece of labware has one slot which contains a block
+ * e.g. a non-empty Proviasette
+ * @param labware the labware to check
+ * @return true if labware has one slot with a block inside; false otherwise
+ */
+export function hasBlock(
+  labware: Pick<LabwareFieldsFragment, "slots">
+): boolean {
+  return labware.slots.length === 1 && labware.slots[0].block;
 }

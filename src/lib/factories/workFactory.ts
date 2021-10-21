@@ -20,7 +20,9 @@ export default Factory.define<WorkFieldsFragment, { isRnD: boolean }>(
       workType: associations.workType ?? workTypeFactory.build(),
       costCode: associations.costCode ?? costCodeFactory.build(),
       project: associations.project ?? projectFactory.build(),
-      status: params.status ?? WorkStatus.Active,
+      status: params.status ?? WorkStatus.Unstarted,
+      numBlocks: params.numBlocks,
+      numSlides: params.numSlides,
       workNumber: workNumber,
     };
   }

@@ -585,6 +585,7 @@ export type WorkType = {
 };
 
 export enum WorkStatus {
+  Unstarted = 'unstarted',
   Active = 'active',
   Paused = 'paused',
   Completed = 'completed',
@@ -598,12 +599,32 @@ export type Work = {
   costCode: CostCode;
   workNumber: Scalars['String'];
   status: WorkStatus;
+  numBlocks?: Maybe<Scalars['Int']>;
+  numSlides?: Maybe<Scalars['Int']>;
 };
 
 export type StainType = {
   __typename?: 'StainType';
   name: Scalars['String'];
   measurementTypes: Array<Scalars['String']>;
+};
+
+export type WorkWithComment = {
+  __typename?: 'WorkWithComment';
+  work: Work;
+  comment?: Maybe<Scalars['String']>;
+};
+
+export type WorkProgressTimestamp = {
+  __typename?: 'WorkProgressTimestamp';
+  type: Scalars['String'];
+  timestamp: Scalars['Timestamp'];
+};
+
+export type WorkProgress = {
+  __typename?: 'WorkProgress';
+  work: Work;
+  timestamps: Array<WorkProgressTimestamp>;
 };
 
 export type TimeMeasurement = {
@@ -614,7 +635,7 @@ export type TimeMeasurement = {
 export type StainRequest = {
   stainType: Scalars['String'];
   barcodes: Array<Scalars['String']>;
-  timeMeasurements?: Maybe<Array<TimeMeasurement>>;
+  timeMeasurements: Array<TimeMeasurement>;
   workNumber?: Maybe<Scalars['String']>;
 };
 
@@ -654,7 +675,6 @@ export type ExtractResultRequest = {
   labware: Array<ExtractResultLabware>;
   workNumber?: Maybe<Scalars['String']>;
 };
-
 export type ExtractResult = {
   __typename?: 'ExtractResult';
   labware: Labware;
@@ -678,7 +698,6 @@ export type RnaAnalysisRequest = {
   operationType: Scalars['String'];
   labware: Array<RnaAnalysisLabware>;
 };
-
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -701,6 +720,7 @@ export type Query = {
   workTypes: Array<WorkType>;
   works: Array<Work>;
   work: Work;
+  worksWithComments: Array<WorkWithComment>;
   users: Array<User>;
   find: FindResult;
   planData: PlanData;
@@ -710,6 +730,7 @@ export type Query = {
   historyForExternalName: History;
   historyForDonorName: History;
   historyForLabwareBarcode: History;
+  workProgress: Array<WorkProgress>;
   location: Location;
   stored: Array<StoredItem>;
 };
@@ -792,6 +813,11 @@ export type QueryWorkArgs = {
 };
 
 
+export type QueryWorksWithCommentsArgs = {
+  status?: Maybe<Array<WorkStatus>>;
+};
+
+
 export type QueryUsersArgs = {
   includeDisabled?: Maybe<Scalars['Boolean']>;
 };
@@ -829,6 +855,13 @@ export type QueryHistoryForDonorNameArgs = {
 
 export type QueryHistoryForLabwareBarcodeArgs = {
   barcode: Scalars['String'];
+};
+
+
+export type QueryWorkProgressArgs = {
+  workNumber?: Maybe<Scalars['String']>;
+  workType?: Maybe<Scalars['String']>;
+  status?: Maybe<WorkStatus>;
 };
 
 
@@ -878,7 +911,9 @@ export type Mutation = {
   addWorkType: WorkType;
   setWorkTypeEnabled: WorkType;
   createWork: Work;
-  updateWorkStatus: Work;
+  updateWorkStatus: WorkWithComment;
+  updateWorkNumBlocks: Work;
+  updateWorkNumSlides: Work;
   stain: OperationResult;
   recordInPlace: OperationResult;
   unrelease: OperationResult;
@@ -1079,6 +1114,8 @@ export type MutationCreateWorkArgs = {
   workType: Scalars['String'];
   project: Scalars['String'];
   costCode: Scalars['String'];
+  numBlocks?: Maybe<Scalars['Int']>;
+  numSlides?: Maybe<Scalars['Int']>;
 };
 
 
@@ -1086,6 +1123,18 @@ export type MutationUpdateWorkStatusArgs = {
   workNumber: Scalars['String'];
   status: WorkStatus;
   commentId?: Maybe<Scalars['Int']>;
+};
+
+
+export type MutationUpdateWorkNumBlocksArgs = {
+  workNumber: Scalars['String'];
+  numBlocks?: Maybe<Scalars['Int']>;
+};
+
+
+export type MutationUpdateWorkNumSlidesArgs = {
+  workNumber: Scalars['String'];
+  numSlides?: Maybe<Scalars['Int']>;
 };
 
 
@@ -1117,8 +1166,6 @@ export type MutationRecordExtractResultArgs = {
 export type MutationRecordRnaAnalysisArgs = {
   request: RnaAnalysisRequest;
 };
-
-
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1314,7 +1361,7 @@ export type SampleFieldsFragment = (
 
 export type SlotFieldsFragment = (
   { __typename?: 'Slot' }
-  & Pick<Slot, 'address' | 'labwareId' | 'blockHighestSection'>
+  & Pick<Slot, 'address' | 'labwareId' | 'blockHighestSection' | 'block'>
   & { samples: Array<(
     { __typename?: 'Sample' }
     & SampleFieldsFragment
@@ -1338,7 +1385,7 @@ export type UserFieldsFragment = (
 
 export type WorkFieldsFragment = (
   { __typename?: 'Work' }
-  & Pick<Work, 'workNumber' | 'status'>
+  & Pick<Work, 'workNumber' | 'status' | 'numBlocks' | 'numSlides'>
   & { project: (
     { __typename?: 'Project' }
     & ProjectFieldsFragment
@@ -1351,9 +1398,34 @@ export type WorkFieldsFragment = (
   ) }
 );
 
+export type WorkProgressFieldsFragment = (
+  { __typename?: 'WorkProgress' }
+  & { work: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
+  ), timestamps: Array<(
+    { __typename?: 'WorkProgressTimestamp' }
+    & WorkProgressTimeStampFieldFragment
+  )> }
+);
+
+export type WorkProgressTimeStampFieldFragment = (
+  { __typename?: 'WorkProgressTimestamp' }
+  & Pick<WorkProgressTimestamp, 'type' | 'timestamp'>
+);
+
 export type WorkTypeFieldsFragment = (
   { __typename?: 'WorkType' }
   & Pick<WorkType, 'name' | 'enabled'>
+);
+
+export type WorkWithCommentFieldsFragment = (
+  { __typename?: 'WorkWithComment' }
+  & Pick<WorkWithComment, 'comment'>
+  & { work: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
+  ) }
 );
 
 export type AddCommentMutationVariables = Exact<{
@@ -1558,6 +1630,8 @@ export type CreateWorkMutationVariables = Exact<{
   workType: Scalars['String'];
   project: Scalars['String'];
   costCode: Scalars['String'];
+  numBlocks?: Maybe<Scalars['Int']>;
+  numSlides?: Maybe<Scalars['Int']>;
 }>;
 
 
@@ -1698,6 +1772,22 @@ export type PrintMutationVariables = Exact<{
 export type PrintMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'printLabware'>
+);
+
+export type RecordExtractResultMutationVariables = Exact<{
+  request: ExtractResultRequest;
+}>;
+
+
+export type RecordExtractResultMutation = (
+  { __typename?: 'Mutation' }
+  & { recordExtractResult: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
 );
 
 export type RecordInPlaceMutationVariables = Exact<{
@@ -2037,6 +2127,22 @@ export type StoreBarcodeMutation = (
   ) }
 );
 
+export type UnreleaseMutationVariables = Exact<{
+  request: UnreleaseRequest;
+}>;
+
+
+export type UnreleaseMutation = (
+  { __typename?: 'Mutation' }
+  & { unrelease: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
+);
+
 export type UnstoreBarcodeMutationVariables = Exact<{
   barcode: Scalars['String'];
 }>;
@@ -2050,6 +2156,34 @@ export type UnstoreBarcodeMutation = (
   )> }
 );
 
+export type UpdateWorkNumBlocksMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  numBlocks?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type UpdateWorkNumBlocksMutation = (
+  { __typename?: 'Mutation' }
+  & { updateWorkNumBlocks: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
+  ) }
+);
+
+export type UpdateWorkNumSlidesMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  numSlides?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type UpdateWorkNumSlidesMutation = (
+  { __typename?: 'Mutation' }
+  & { updateWorkNumSlides: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
+  ) }
+);
+
 export type UpdateWorkStatusMutationVariables = Exact<{
   workNumber: Scalars['String'];
   status: WorkStatus;
@@ -2060,8 +2194,8 @@ export type UpdateWorkStatusMutationVariables = Exact<{
 export type UpdateWorkStatusMutation = (
   { __typename?: 'Mutation' }
   & { updateWorkStatus: (
-    { __typename?: 'Work' }
-    & WorkFieldsFragment
+    { __typename?: 'WorkWithComment' }
+    & WorkWithCommentFieldsFragment
   ) }
 );
 
@@ -2281,7 +2415,6 @@ export type FindWorkNumbersQuery = (
     & Pick<Work, 'workNumber'>
   )> }
 );
-
 export type GetCommentsQueryVariables = Exact<{
   commentCategory?: Maybe<Scalars['String']>;
   includeDisabled?: Maybe<Scalars['Boolean']>;
@@ -2293,6 +2426,18 @@ export type GetCommentsQuery = (
   & { comments: Array<(
     { __typename?: 'Comment' }
     & CommentFieldsFragment
+export type FindWorkProgressQueryVariables = Exact<{
+  workNumber?: Maybe<Scalars['String']>;
+  workType?: Maybe<Scalars['String']>;
+  status?: Maybe<WorkStatus>;
+}>;
+
+
+export type FindWorkProgressQuery = (
+  { __typename?: 'Query' }
+  & { workProgress: Array<(
+    { __typename?: 'WorkProgress' }
+    & WorkProgressFieldsFragment
   )> }
 );
 
@@ -2369,6 +2514,17 @@ export type GetPrintersQuery = (
   & { printers: Array<(
     { __typename?: 'Printer' }
     & PrinterFieldsFragment
+  )> }
+);
+
+export type GetRecordExtractResultInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetRecordExtractResultInfoQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
   )> }
 );
 
@@ -2489,6 +2645,7 @@ export type GetStainingQcInfoQuery = (
 
 export type GetWorkAllocationInfoQueryVariables = Exact<{
   commentCategory: Scalars['String'];
+  workStatuses?: Maybe<Array<WorkStatus> | WorkStatus>;
 }>;
 
 
@@ -2500,15 +2657,26 @@ export type GetWorkAllocationInfoQuery = (
   )>, costCodes: Array<(
     { __typename?: 'CostCode' }
     & CostCodeFieldsFragment
-  )>, works: Array<(
-    { __typename?: 'Work' }
-    & WorkFieldsFragment
+  )>, worksWithComments: Array<(
+    { __typename?: 'WorkWithComment' }
+    & WorkWithCommentFieldsFragment
   )>, workTypes: Array<(
     { __typename?: 'WorkType' }
     & WorkTypeFieldsFragment
   )>, comments: Array<(
     { __typename?: 'Comment' }
     & CommentFieldsFragment
+  )> }
+);
+
+export type GetWorkTypesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetWorkTypesQuery = (
+  { __typename?: 'Query' }
+  & { workTypes: Array<(
+    { __typename?: 'WorkType' }
+    & Pick<WorkType, 'name'>
   )> }
 );
 
@@ -2589,6 +2757,7 @@ export const SlotFieldsFragmentDoc = gql`
     ...SampleFields
   }
   blockHighestSection
+  block
 }
     ${SampleFieldsFragmentDoc}`;
 export const LabwareFieldsFragmentDoc = gql`
@@ -2760,10 +2929,37 @@ export const WorkFieldsFragmentDoc = gql`
   workType {
     ...WorkTypeFields
   }
+  numBlocks
+  numSlides
 }
     ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}`;
+export const WorkProgressTimeStampFieldFragmentDoc = gql`
+    fragment WorkProgressTimeStampField on WorkProgressTimestamp {
+  type
+  timestamp
+}
+    `;
+export const WorkProgressFieldsFragmentDoc = gql`
+    fragment WorkProgressFields on WorkProgress {
+  work {
+    ...WorkFields
+  }
+  timestamps {
+    ...WorkProgressTimeStampField
+  }
+}
+    ${WorkFieldsFragmentDoc}
+${WorkProgressTimeStampFieldFragmentDoc}`;
+export const WorkWithCommentFieldsFragmentDoc = gql`
+    fragment WorkWithCommentFields on WorkWithComment {
+  work {
+    ...WorkFields
+  }
+  comment
+}
+    ${WorkFieldsFragmentDoc}`;
 export const AddCommentDocument = gql`
     mutation AddComment($category: String!, $text: String!) {
   addComment(category: $category, text: $text) {
@@ -2878,12 +3074,14 @@ export const ConfirmSectionDocument = gql`
 }
     ${LabwareFieldsFragmentDoc}`;
 export const CreateWorkDocument = gql`
-    mutation CreateWork($prefix: String!, $workType: String!, $project: String!, $costCode: String!) {
+    mutation CreateWork($prefix: String!, $workType: String!, $project: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int) {
   createWork(
     prefix: $prefix
     workType: $workType
     project: $project
     costCode: $costCode
+    numBlocks: $numBlocks
+    numSlides: $numSlides
   ) {
     ...WorkFields
   }
@@ -2972,6 +3170,15 @@ ${PlanActionFieldsFragmentDoc}`;
 export const PrintDocument = gql`
     mutation Print($barcodes: [String!]!, $printer: String!) {
   printLabware(barcodes: $barcodes, printer: $printer)
+}
+    `;
+export const RecordExtractResultDocument = gql`
+    mutation RecordExtractResult($request: ExtractResultRequest!) {
+  recordExtractResult(request: $request) {
+    operations {
+      id
+    }
+  }
 }
     `;
 export const RecordInPlaceDocument = gql`
@@ -3166,6 +3373,15 @@ export const StoreBarcodeDocument = gql`
   }
 }
     ${LocationFieldsFragmentDoc}`;
+export const UnreleaseDocument = gql`
+    mutation Unrelease($request: UnreleaseRequest!) {
+  unrelease(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const UnstoreBarcodeDocument = gql`
     mutation UnstoreBarcode($barcode: String!) {
   unstoreBarcode(barcode: $barcode) {
@@ -3174,6 +3390,20 @@ export const UnstoreBarcodeDocument = gql`
   }
 }
     `;
+export const UpdateWorkNumBlocksDocument = gql`
+    mutation UpdateWorkNumBlocks($workNumber: String!, $numBlocks: Int) {
+  updateWorkNumBlocks(workNumber: $workNumber, numBlocks: $numBlocks) {
+    ...WorkFields
+  }
+}
+    ${WorkFieldsFragmentDoc}`;
+export const UpdateWorkNumSlidesDocument = gql`
+    mutation UpdateWorkNumSlides($workNumber: String!, $numSlides: Int) {
+  updateWorkNumSlides(workNumber: $workNumber, numSlides: $numSlides) {
+    ...WorkFields
+  }
+}
+    ${WorkFieldsFragmentDoc}`;
 export const UpdateWorkStatusDocument = gql`
     mutation UpdateWorkStatus($workNumber: String!, $status: WorkStatus!, $commentId: Int) {
   updateWorkStatus(
@@ -3181,10 +3411,10 @@ export const UpdateWorkStatusDocument = gql`
     status: $status
     commentId: $commentId
   ) {
-    ...WorkFields
+    ...WorkWithCommentFields
   }
 }
-    ${WorkFieldsFragmentDoc}`;
+    ${WorkWithCommentFieldsFragmentDoc}`;
 export const CurrentUserDocument = gql`
     query CurrentUser {
   user {
@@ -3344,6 +3574,13 @@ export const GetCommentsDocument = gql`
   }
 }
     ${CommentFieldsFragmentDoc}`;
+export const FindWorkProgressDocument = gql`
+    query FindWorkProgress($workNumber: String, $workType: String, $status: WorkStatus) {
+  workProgress(workNumber: $workNumber, workType: $workType, status: $status) {
+    ...WorkProgressFields
+  }
+}
+    ${WorkProgressFieldsFragmentDoc}`;
 export const GetConfigurationDocument = gql`
     query GetConfiguration {
   destructionReasons(includeDisabled: true) {
@@ -3412,6 +3649,13 @@ export const GetPrintersDocument = gql`
   }
 }
     ${PrinterFieldsFragmentDoc}`;
+export const GetRecordExtractResultInfoDocument = gql`
+    query GetRecordExtractResultInfo {
+  comments(category: "extract result", includeDisabled: false) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetRecordInPlaceInfoDocument = gql`
     query GetRecordInPlaceInfo($category: String) {
   equipments(includeDisabled: false, category: $category) {
@@ -3489,21 +3733,21 @@ export const GetStainInfoDocument = gql`
     ${StainTypeFieldsFragmentDoc}`;
 export const GetStainingQcInfoDocument = gql`
     query GetStainingQCInfo {
-  comments(includeDisabled: false, category: "result") {
+  comments(includeDisabled: false, category: "stain QC") {
     ...CommentFields
   }
 }
     ${CommentFieldsFragmentDoc}`;
 export const GetWorkAllocationInfoDocument = gql`
-    query GetWorkAllocationInfo($commentCategory: String!) {
+    query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatus!]) {
   projects(includeDisabled: false) {
     ...ProjectFields
   }
   costCodes(includeDisabled: false) {
     ...CostCodeFields
   }
-  works {
-    ...WorkFields
+  worksWithComments(status: $workStatuses) {
+    ...WorkWithCommentFields
   }
   workTypes {
     ...WorkTypeFields
@@ -3514,9 +3758,16 @@ export const GetWorkAllocationInfoDocument = gql`
 }
     ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
-${WorkFieldsFragmentDoc}
+${WorkWithCommentFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}
 ${CommentFieldsFragmentDoc}`;
+export const GetWorkTypesDocument = gql`
+    query GetWorkTypes {
+  workTypes(includeDisabled: true) {
+    name
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
@@ -3587,6 +3838,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     Print(variables: PrintMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PrintMutation> {
       return withWrapper(() => client.request<PrintMutation>(PrintDocument, variables, requestHeaders));
     },
+    RecordExtractResult(variables: RecordExtractResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordExtractResultMutation> {
+      return withWrapper(() => client.request<RecordExtractResultMutation>(RecordExtractResultDocument, variables, requestHeaders));
+    },
     RecordInPlace(variables: RecordInPlaceMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordInPlaceMutation> {
       return withWrapper(() => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, requestHeaders));
     },
@@ -3650,8 +3904,17 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     StoreBarcode(variables: StoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StoreBarcodeMutation> {
       return withWrapper(() => client.request<StoreBarcodeMutation>(StoreBarcodeDocument, variables, requestHeaders));
     },
+    Unrelease(variables: UnreleaseMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnreleaseMutation> {
+      return withWrapper(() => client.request<UnreleaseMutation>(UnreleaseDocument, variables, requestHeaders));
+    },
     UnstoreBarcode(variables: UnstoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnstoreBarcodeMutation> {
       return withWrapper(() => client.request<UnstoreBarcodeMutation>(UnstoreBarcodeDocument, variables, requestHeaders));
+    },
+    UpdateWorkNumBlocks(variables: UpdateWorkNumBlocksMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumBlocksMutation> {
+      return withWrapper(() => client.request<UpdateWorkNumBlocksMutation>(UpdateWorkNumBlocksDocument, variables, requestHeaders));
+    },
+    UpdateWorkNumSlides(variables: UpdateWorkNumSlidesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumSlidesMutation> {
+      return withWrapper(() => client.request<UpdateWorkNumSlidesMutation>(UpdateWorkNumSlidesDocument, variables, requestHeaders));
     },
     UpdateWorkStatus(variables: UpdateWorkStatusMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkStatusMutation> {
       return withWrapper(() => client.request<UpdateWorkStatusMutation>(UpdateWorkStatusDocument, variables, requestHeaders));
@@ -3694,6 +3957,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetComments(variables?: GetCommentsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetCommentsQuery> {
       return withWrapper(() => client.request<GetCommentsQuery>(GetCommentsDocument, variables, requestHeaders));
+    FindWorkProgress(variables?: FindWorkProgressQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkProgressQuery> {
+      return withWrapper(() => client.request<FindWorkProgressQuery>(FindWorkProgressDocument, variables, requestHeaders));
     },
     GetConfiguration(variables?: GetConfigurationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetConfigurationQuery> {
       return withWrapper(() => client.request<GetConfigurationQuery>(GetConfigurationDocument, variables, requestHeaders));
@@ -3706,6 +3971,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
       return withWrapper(() => client.request<GetPrintersQuery>(GetPrintersDocument, variables, requestHeaders));
+    },
+    GetRecordExtractResultInfo(variables?: GetRecordExtractResultInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordExtractResultInfoQuery> {
+      return withWrapper(() => client.request<GetRecordExtractResultInfoQuery>(GetRecordExtractResultInfoDocument, variables, requestHeaders));
     },
     GetRecordInPlaceInfo(variables?: GetRecordInPlaceInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordInPlaceInfoQuery> {
       return withWrapper(() => client.request<GetRecordInPlaceInfoQuery>(GetRecordInPlaceInfoDocument, variables, requestHeaders));
@@ -3733,6 +4001,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetWorkAllocationInfo(variables: GetWorkAllocationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkAllocationInfoQuery> {
       return withWrapper(() => client.request<GetWorkAllocationInfoQuery>(GetWorkAllocationInfoDocument, variables, requestHeaders));
+    },
+    GetWorkTypes(variables?: GetWorkTypesQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkTypesQuery> {
+      return withWrapper(() => client.request<GetWorkTypesQuery>(GetWorkTypesDocument, variables, requestHeaders));
     }
   };
 }

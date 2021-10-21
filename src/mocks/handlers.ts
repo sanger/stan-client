@@ -28,9 +28,11 @@ import workTypeHandlers from "./handlers/workTypeHandlers";
 import stainingHandlers from "./handlers/stainingHandlers";
 import equipmentHandlers from "./handlers/equipmentHandlers";
 import recordInPlaceHandlers from "./handlers/recordInPlaceHandlers";
+import workProgressHandlers from "./handlers/workProgressHandlers";
 import stainingQCHandlers from "./handlers/stainingQCHandlers";
 import extractionResultHandlers from "./handlers/extractionResultHandlers";
 import recordRnaAnalysisHandlers from "./handlers/recordRnaAnalysisHandlers";
+import unreleaseHandlers from "./handlers/unreleaseHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -60,7 +62,9 @@ export const handlers = [
   ...stainingHandlers,
   ...equipmentHandlers,
   ...recordInPlaceHandlers,
+  ...workProgressHandlers,
   ...stainingQCHandlers,
   ...extractionResultHandlers,
   ...recordRnaAnalysisHandlers,
+  ...unreleaseHandlers,
 ];

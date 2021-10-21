@@ -26,8 +26,11 @@ import LabwareDetails from "../pages/LabwareDetails";
 import SGP from "../pages/SGP";
 import Staining from "../pages/Staining";
 import RecordInPlace from "../pages/RecordInPlace";
+import WorkProgress from "../pages/WorkProgress";
 import StainingQC from "../pages/StainingQC";
 import Analysis from "../pages/Analysis";
+import Unrelease from "../pages/Unrelease";
+import ExtractionResult from "../pages/ExtractionResult";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -87,6 +90,18 @@ export function Routes() {
             }
           >
             {(commentInfo) => <Analysis comments={commentInfo.comments} />}
+          </DataFetcher>
+        )}
+      />
+
+      <AuthenticatedRoute
+        path="/lab/extraction_result"
+        render={(routerProps) => (
+          <DataFetcher
+            key={routerProps.location.key}
+            dataFetcher={stanCore.GetRecordExtractResultInfo}
+          >
+            {(info) => <ExtractionResult info={info} />}
           </DataFetcher>
         )}
       />
@@ -189,6 +204,11 @@ export function Routes() {
         )}
       />
 
+      <AuthenticatedRoute
+        path="/admin/unrelease"
+        render={(routeProps) => <Unrelease key={routeProps.location.key} />}
+      />
+
       <Route
         path="/locations/:locationBarcode"
         render={(routeProps) => {
@@ -199,10 +219,10 @@ export function Routes() {
               key={routeProps.location.key}
               dataFetcher={() => {
                 if (routeProps.location.search) {
-                  locationSearch = safeParseQueryString<LocationSearchParams>(
-                    routeProps.location.search,
-                    isLocationSearch
-                  );
+                  locationSearch = safeParseQueryString<LocationSearchParams>({
+                    query: routeProps.location.search,
+                    guard: isLocationSearch,
+                  });
                 }
 
                 return stanCore
@@ -227,7 +247,6 @@ export function Routes() {
       <Route path="/locations" component={Store} />
       <Route path="/store" component={Store} />
       <Route path="/login" component={Login} />
-
       <AuthenticatedRoute
         path="/admin/destroy"
         render={(routeProps) => (
@@ -274,7 +293,7 @@ export function Routes() {
       <AuthenticatedRoute path={"/sgp"} component={SGP} />
 
       <Route
-        path={["/", "/search"]}
+        path={"/search"}
         render={(routeProps) => {
           return (
             <DataFetcher dataFetcher={stanCore.GetSearchInfo}>
@@ -287,6 +306,13 @@ export function Routes() {
             </DataFetcher>
           );
         }}
+      />
+
+      <Route
+        path="/"
+        render={(routeProps) => (
+          <WorkProgress urlParamsString={routeProps.location.search} />
+        )}
       />
     </Switch>
   );

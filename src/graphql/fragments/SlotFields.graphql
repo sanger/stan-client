@@ -5,4 +5,5 @@ fragment SlotFields on Slot {
         ...SampleFields
     }
     blockHighestSection
+    block
 }
