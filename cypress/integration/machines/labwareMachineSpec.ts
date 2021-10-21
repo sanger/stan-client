@@ -1,5 +1,9 @@
 import { interpret } from "xstate";
-import { FindLabwareQuery } from "../../../src/types/sdk";
+import {
+  FindLabwareQuery,
+  LabwareState,
+  LifeStage,
+} from "../../../src/types/sdk";
 import { log } from "xstate/lib/actions";
 import {
   createLabwareMachine,
@@ -107,6 +111,9 @@ describe("labwareMachine", () => {
                         numColumns: 1,
                       },
                       barcode: "STAN-123",
+                      externalBarcode: "EXTERNAL-1",
+                      state: LabwareState.Empty,
+                      created: "",
                       slots: [
                         {
                           address: "A1",
@@ -124,6 +131,14 @@ describe("labwareMachine", () => {
                                 replicate: 5,
                                 donor: {
                                   donorName: "Donor 3",
+                                  lifeStage: LifeStage.Adult,
+                                },
+                                medium: {
+                                  name: "None",
+                                },
+                                fixative: {
+                                  name: "None",
+                                  enabled: false,
                                 },
                                 spatialLocation: {
                                   code: 3,

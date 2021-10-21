@@ -117,8 +117,12 @@ export const extractResultMachine = createMachine<
       }),
       assignExtractResult: assign((ctx, e) => {
         if (e.type !== "done.invoke.extractResult") return;
+        if (!e.data || !(e.data.result || e.data.concentration)) {
+          ctx.scanErrorMessage = `No extraction recorded for the tube ${ctx.currentBarcode}`;
+          return;
+        }
         if (e.data.result === PassFail.Fail) {
-          ctx.scanErrorMessage = "Extraction result failed for tube!";
+          ctx.scanErrorMessage = `Extraction failed for the tube ${ctx.currentBarcode}`;
           return;
         }
         ctx.extractResults.push(e.data);

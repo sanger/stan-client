@@ -156,6 +156,7 @@ export default function AnalysisLabware({
             <div className="">
               <FormikSelect
                 label={"Type"}
+                data-testid={"analysisType"}
                 name={"type"}
                 emptyOption={false}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
@@ -176,6 +177,7 @@ export default function AnalysisLabware({
               <FormikSelect
                 label={"Comment"}
                 name={"comment"}
+                data-testid={"comment"}
                 emptyOption={false}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   send({

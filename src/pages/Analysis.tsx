@@ -110,7 +110,7 @@ function Analysis({ comments }: AnalysisProps) {
 
             <div className="flex flex-row items-center justify-center gap-4">
               <BlueButton
-                id="#extract"
+                id="analysis"
                 disabled={extractResults.length < 1}
                 className="whitespace-nowrap"
                 action={"primary"}

@@ -77,11 +77,17 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
       id: "actions",
       Cell: ({ row }: { row: Row<ExtractResult> }) => {
         if (locked) {
-          return <LockIcon className="block m-2 h-5 w-5 text-gray-800" />;
+          return (
+            <LockIcon
+              data-testid="lock"
+              className="block m-2 h-5 w-5 text-gray-800"
+            />
+          );
         }
 
         return (
           <RemoveButton
+            data-testid="remove"
             onClick={() => {
               row.original.labware.barcode &&
                 onRemoveExtractResult(row.original.labware.barcode);
@@ -113,7 +119,7 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
       {scanError && <Warning className="mt-2 my-2 mb-4" message={scanError} />}
       <div className="sm:w-2/3 md:w-1/2 mb-4">
         <ScanInput
-          id={"extractionScanInput"}
+          id={"labwareScanInput"}
           onScan={(value) => send({ type: "SUBMIT_BARCODE", barcode: value })}
           value={currentBarcode}
           onChange={handleOnScanInputChange}

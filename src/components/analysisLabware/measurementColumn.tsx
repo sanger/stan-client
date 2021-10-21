@@ -56,6 +56,7 @@ export const measurementColumn = (
               : e.currentTarget.value
           )
         }
+        data-testid={"measurementType"}
       >
         {getValueCategoryKeys(operationType).map((key) => (
           <option value={enumValue(MeasurementValueCategory, key)} key={key}>
@@ -101,6 +102,7 @@ export const measurementColumn = (
             !measurement && "bg-gray-200 border-gray-50"
           }`}
           type="number"
+          data-testid={"measurementValue"}
           defaultValue={measurement?.value}
           onFocus={(e) => {
             e.target.style.color = "black";
@@ -163,7 +165,7 @@ export const measurementColumn = (
                   onChangeMeasurementValue={onChangeMeasurementValue}
                   labelText={
                     isRangeType(row.original.measurements)
-                      ? "Lower bound (%)"
+                      ? "Lower bound:"
                       : undefined
                   }
                 />
@@ -180,7 +182,7 @@ export const measurementColumn = (
                     onChangeMeasurementValue={onChangeMeasurementValue}
                     labelText={
                       isRangeType(row.original.measurements)
-                        ? "Upper bound (%)"
+                        ? "Upper bound:"
                         : undefined
                     }
                     min={

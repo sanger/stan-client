@@ -16,7 +16,7 @@ const extractionResultHandlers = [
       const labwareType = labwareTypeInstances.find(
         (lt) => lt.name === LabwareTypeName.TUBE
       );
-      // Create the new bit of destination labware using the same slots and samples as the source
+      // Create the new bit of labware
       const newLabware = labwareFactory.build({
         labwareType,
       });
