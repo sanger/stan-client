@@ -202,10 +202,10 @@ export function Routes() {
               key={routeProps.location.key}
               dataFetcher={() => {
                 if (routeProps.location.search) {
-                  locationSearch = safeParseQueryString<LocationSearchParams>(
-                    routeProps.location.search,
-                    isLocationSearch
-                  );
+                  locationSearch = safeParseQueryString<LocationSearchParams>({
+                    query: routeProps.location.search,
+                    guard: isLocationSearch,
+                  });
                 }
 
                 return stanCore

@@ -1,6 +1,8 @@
 describe("Work Allocation", () => {
   before(() => {
-    cy.visit("/sgp");
+    cy.visit(
+      "/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused"
+    );
   });
 
   describe("Allocating Work", () => {

@@ -1,6 +1,9 @@
 import React, { useCallback } from "react";
 import { TableCell } from "../Table";
-import { CommentFieldsFragment, WorkFieldsFragment } from "../../types/sdk";
+import {
+  CommentFieldsFragment,
+  WorkWithCommentFieldsFragment,
+} from "../../types/sdk";
 import { useMachine } from "@xstate/react";
 import createWorkRowMachine, { WorkRowEvent } from "./workRow.machine";
 import { optionValues } from "../forms";
@@ -29,9 +32,9 @@ type FormValues = {
 
 type WorkRowProps = {
   /**
-   * A {@link Work} to be possibly edited
+   * A {@link WorkWithCommentFieldsFragment} to be possibly edited
    */
-  initialWork: WorkFieldsFragment;
+  initialWork: WorkWithCommentFieldsFragment;
 
   /**
    * The comments available for the user to select when updating Work status
@@ -48,10 +51,13 @@ export default function WorkRow({
   availableComments,
 }: WorkRowProps) {
   const [current, send] = useMachine(
-    createWorkRowMachine({ work: initialWork })
+    createWorkRowMachine({ workWithComment: initialWork })
   );
 
-  const { editModeEnabled, work } = current.context;
+  const {
+    editModeEnabled,
+    workWithComment: { work, comment },
+  } = current.context;
 
   /**
    * Should the edit button by displayed to the user right now
@@ -148,7 +154,8 @@ export default function WorkRow({
       </TableCell>
       {!editModeEnabled && (
         <TableCell>
-          <span className="uppercase">{work.status}</span>
+          <div className="uppercase">{work.status}</div>
+          {comment && <div className="font-medium">{comment}</div>}
         </TableCell>
       )}
 

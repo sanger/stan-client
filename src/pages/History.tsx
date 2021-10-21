@@ -1,23 +1,24 @@
 import React from "react";
 import AppShell from "../components/AppShell";
-import {Form, Formik} from "formik";
+import { Form, Formik } from "formik";
 import FormikInput from "../components/forms/Input";
 import FormikSelect from "../components/forms/Select";
 import BlueButton from "../components/buttons/BlueButton";
-import {useLocation} from "react-router-dom";
-import {objectKeys, safeParseQueryString, stringify} from "../lib/helpers";
-import HistoryComponent, {historyDisplayValues,} from "../components/history/History";
-import {history} from "../lib/sdk";
-import {HistoryProps, historySchema, isHistoryProps} from "../types/stan";
+import { useLocation } from "react-router-dom";
+import { objectKeys, safeParseQueryString, stringify } from "../lib/helpers";
+import HistoryComponent, {
+  historyDisplayValues,
+} from "../components/history/History";
+import { history } from "../lib/sdk";
+import { HistoryProps, historySchema } from "../types/stan";
 import Heading from "../components/Heading";
 
 export default function History() {
   const location = useLocation();
-  const historyProps = safeParseQueryString(
-    location.search,
-    isHistoryProps,
-    castSearchProps
-  );
+  const historyProps = safeParseQueryString<HistoryProps>({
+    query: location.search,
+    schema: historySchema,
+  });
   // If the URL parameters don't parse to valid HistoryProps use the default values
   const initialValues = historyProps ?? defaultInitialValues;
 
@@ -46,11 +47,13 @@ export default function History() {
 
                   <div className="md:flex-grow">
                     <FormikSelect label="" name="kind">
-                      {objectKeys(historyDisplayValues).filter((selectValue) => selectValue!=="sampleId").map((selectValue) => (
-                        <option value={selectValue} key={selectValue}>
-                          {historyDisplayValues[selectValue]}
-                        </option>
-                      ))}
+                      {objectKeys(historyDisplayValues)
+                        .filter((selectValue) => selectValue !== "sampleId")
+                        .map((selectValue) => (
+                          <option value={selectValue} key={selectValue}>
+                            {historyDisplayValues[selectValue]}
+                          </option>
+                        ))}
                     </FormikSelect>
                   </div>
 
@@ -75,16 +78,3 @@ const defaultInitialValues: HistoryProps = {
   kind: "labwareBarcode",
   value: "",
 };
-
-/**
- * Attempt to cast {@code val} to {@link HistoryProps} using its schema.
- * If it fails to do so (e.g. due to URL params being malformed), returns {@code val}
- * @param val the value to try and cast to {@link HistoryProps}
- */
-function castSearchProps(val: any) {
-  try {
-    return historySchema.cast(val);
-  } catch (e) {
-    return val;
-  }
-}

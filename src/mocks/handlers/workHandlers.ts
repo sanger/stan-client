@@ -6,12 +6,13 @@ import {
   FindWorkNumbersQueryVariables,
   GetWorkAllocationInfoQuery,
   GetWorkAllocationInfoQueryVariables,
-  UpdateWorkStatusMutation,
-  UpdateWorkStatusMutationVariables,
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumBlocksMutationVariables,
   UpdateWorkNumSlidesMutation,
   UpdateWorkNumSlidesMutationVariables,
+  UpdateWorkStatusMutation,
+  UpdateWorkStatusMutationVariables,
+  WorkStatus,
 } from "../../types/sdk";
 import costCodeRepository from "../repositories/costCodeRepository";
 import projectRepository from "../repositories/projectRepository";
@@ -20,24 +21,48 @@ import workRepository from "../repositories/workRepository";
 import workFactory from "../../lib/factories/workFactory";
 import { isEnabled } from "../../lib/helpers";
 import workTypeRepository from "../repositories/workTypeRepository";
+import { sample } from "lodash";
 
 const workHandlers = [
   graphql.query<
     GetWorkAllocationInfoQuery,
     GetWorkAllocationInfoQueryVariables
   >("GetWorkAllocationInfo", (req, res, ctx) => {
+    const comments = commentRepository
+      .findAll()
+      .filter(
+        (comment) =>
+          comment.category === req.variables.commentCategory &&
+          isEnabled(comment)
+      );
+
+    let works = workRepository.findAll();
+
+    if (req.variables.workStatuses) {
+      let workStatuses = Array.isArray(req.variables.workStatuses)
+        ? req.variables.workStatuses
+        : [req.variables.workStatuses];
+
+      if (workStatuses.length > 0) {
+        works = works.filter((work) => workStatuses.includes(work.status));
+      }
+    }
+
     return res(
       ctx.data({
         costCodes: costCodeRepository.findAll().filter(isEnabled),
         projects: projectRepository.findAll().filter(isEnabled),
-        comments: commentRepository
-          .findAll()
-          .filter(
-            (comment) =>
-              comment.category === req.variables.commentCategory &&
-              isEnabled(comment)
-          ),
-        works: workRepository.findAll(),
+        comments,
+        worksWithComments: works.map((work) => {
+          return {
+            work,
+            comment: [WorkStatus.Failed, WorkStatus.Paused].includes(
+              work.status
+            )
+              ? sample(comments)?.text
+              : undefined,
+          };
+        }),
         workTypes: workTypeRepository.findAll().filter(isEnabled),
       })
     );
@@ -103,6 +128,13 @@ const workHandlers = [
     "UpdateWorkStatus",
     (req, res, ctx) => {
       const work = workRepository.find("workNumber", req.variables.workNumber);
+
+      let comment = null;
+
+      if (req.variables.commentId) {
+        comment = commentRepository.find("id", req.variables.commentId)?.text;
+      }
+
       if (!work) {
         return res(
           ctx.errors([
@@ -118,7 +150,10 @@ const workHandlers = [
 
       return res(
         ctx.data({
-          updateWorkStatus: work,
+          updateWorkStatus: {
+            work,
+            comment,
+          },
         })
       );
     }
