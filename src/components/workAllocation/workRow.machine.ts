@@ -1,10 +1,10 @@
 import { createMachine } from "xstate";
 import {
-  WorkFieldsFragment,
-  WorkStatus,
-  UpdateWorkStatusMutation,
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumSlidesMutation,
+  UpdateWorkStatusMutation,
+  WorkStatus,
+  WorkWithCommentFieldsFragment,
 } from "../../types/sdk";
 import { MachineServiceDone } from "../../types/stan";
 import { stanCore } from "../../lib/sdk";
@@ -12,9 +12,9 @@ import { assign } from "@xstate/immer";
 
 type WorkRowMachineContext = {
   /**
-   * Work...
+   * Work with possible comment
    */
-  work: WorkFieldsFragment;
+  workWithComment: WorkWithCommentFieldsFragment;
 
   /**
    * Is the user currently editing the Work status?
@@ -35,18 +35,19 @@ export type WorkRowEvent =
   | MachineServiceDone<"updateWorkNumBlocks", UpdateWorkNumBlocksMutation>
   | MachineServiceDone<"updateWorkNumSlides", UpdateWorkNumSlidesMutation>;
 
-type CreateWorkRowMachineParams = {
-  work: WorkFieldsFragment;
-};
+type CreateWorkRowMachineParams = Pick<
+  WorkRowMachineContext,
+  "workWithComment"
+>;
 
 export default function createWorkRowMachine({
-  work,
+  workWithComment,
 }: CreateWorkRowMachineParams) {
   return createMachine<WorkRowMachineContext, WorkRowEvent>(
     {
       id: "workRowMachine",
       context: {
-        work,
+        workWithComment,
         editModeEnabled: false,
       },
       initial: "deciding",
@@ -126,15 +127,15 @@ export default function createWorkRowMachine({
       actions: {
         assignSgpNumber: assign((ctx, e) => {
           if (e.type !== "done.invoke.updateWorkStatus") return;
-          ctx.work = e.data.updateWorkStatus;
+          ctx.workWithComment = e.data.updateWorkStatus;
         }),
         assignWorkNumBlocks: assign((ctx, e) => {
           if (e.type !== "done.invoke.updateWorkNumBlocks") return;
-          ctx.work = e.data.updateWorkNumBlocks;
+          ctx.workWithComment.work = e.data.updateWorkNumBlocks;
         }),
         assignWorkNumSlides: assign((ctx, e) => {
           if (e.type !== "done.invoke.updateWorkNumSlides") return;
-          ctx.work = e.data.updateWorkNumSlides;
+          ctx.workWithComment.work = e.data.updateWorkNumSlides;
         }),
         toggleEditMode: assign(
           (ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled)
@@ -144,14 +145,14 @@ export default function createWorkRowMachine({
       services: {
         updateWorkStatus: (ctx, e) => {
           return stanCore.UpdateWorkStatus({
-            workNumber: ctx.work.workNumber,
+            workNumber: ctx.workWithComment.work.workNumber,
             status: getWorkStatusFromEventType(e),
             commentId: "commentId" in e ? e.commentId : undefined,
           });
         },
         updateWorkNumBlocks: (ctx, e) => {
           let params: { workNumber: string; numBlocks?: number } = {
-            workNumber: ctx.work.workNumber,
+            workNumber: ctx.workWithComment.work.workNumber,
           };
           if ("numBlocks" in e && e.numBlocks)
             params["numBlocks"] = e.numBlocks;
@@ -160,7 +161,7 @@ export default function createWorkRowMachine({
         },
         updateWorkNumSlides: (ctx, e) => {
           let params: { workNumber: string; numSlides?: number } = {
-            workNumber: ctx.work.workNumber,
+            workNumber: ctx.workWithComment.work.workNumber,
           };
           if ("numSlides" in e && e.numSlides)
             params["numSlides"] = e.numSlides;
@@ -174,7 +175,7 @@ export default function createWorkRowMachine({
 
 /**
  * Determine the next {@link WorkStatus} from a given event
- * @param e an {@link WorkRowEvent}
+ * @param e a {@link WorkRowEvent}
  */
 function getWorkStatusFromEventType(e: WorkRowEvent): WorkStatus {
   switch (e.type) {
@@ -201,6 +202,6 @@ function maybeGoToStatus(status: string) {
   return {
     target: status,
     cond: (ctx: WorkRowMachineContext) =>
-      ctx.work.status.toLowerCase() === status.toLowerCase(),
+      ctx.workWithComment.work.status.toLowerCase() === status.toLowerCase(),
   };
 }

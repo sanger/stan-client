@@ -1,12 +1,12 @@
-query GetWorkAllocationInfo($commentCategory: String!) {
+query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatus!]) {
     projects(includeDisabled: false) {
         ...ProjectFields
     }
     costCodes(includeDisabled: false) {
         ...CostCodeFields
     }
-    works {
-        ...WorkFields
+    worksWithComments(status: $workStatuses) {
+        ...WorkWithCommentFields
     }
     workTypes {
         ...WorkTypeFields

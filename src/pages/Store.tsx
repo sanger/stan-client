@@ -45,10 +45,10 @@ const Store: React.FC<StoreProps> = ({ location }) => {
     }
 
     if (location.search) {
-      const locationSearchParams = safeParseQueryString<LocationSearchParams>(
-        location.search,
-        isLocationSearch
-      );
+      const locationSearchParams = safeParseQueryString<LocationSearchParams>({
+        query: location.search,
+        guard: isLocationSearch,
+      });
 
       if (locationSearchParams) {
         invokeFindLabwareLocation(locationSearchParams.labwareBarcode.trim());
