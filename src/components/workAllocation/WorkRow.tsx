@@ -121,7 +121,7 @@ export default function WorkRow({
         onChange={(e) => {
           handleWorkNumValueChange(e.currentTarget.value, workNumValueType);
         }}
-        defaultValue={""}
+        defaultValue={workNumValue ?? ""}
       />
     );
   };
