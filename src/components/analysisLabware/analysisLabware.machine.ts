@@ -73,7 +73,6 @@ export const analysisLabwareMachine = createMachine<
   {
     actions: {
       assignAnalysisType: (ctx, e) => {
-        debugger;
         if (e.type !== "UPDATE_ANALYSIS_TYPE") return;
         ctx.operationType = e.value;
         const measurements = buildMeasurementFields(
@@ -88,7 +87,6 @@ export const analysisLabwareMachine = createMachine<
         });
       },
       assignMeasurementType: (ctx, e) => {
-        debugger;
         if (e.type !== "UPDATE_MEASUREMENT_TYPE") return;
         const indx = ctx.analysisLabwares.findIndex(
           (labware) => labware.barcode === e.barcode

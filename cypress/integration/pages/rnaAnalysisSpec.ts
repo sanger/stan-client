@@ -1,13 +1,12 @@
 import {
   ExtractResultQuery,
   ExtractResultQueryVariables,
-  PassFail,
+  RecordRnaAnalysisMutation,
+  RecordRnaAnalysisMutationVariables,
 } from "../../../src/types/sdk";
 import { labwareTypeInstances } from "../../../src/lib/factories/labwareTypeFactory";
 import { LabwareTypeName } from "../../../src/types/stan";
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
-import { extractResultMachine } from "../../../src/components/extractResult/extractResult.machine";
-
 function scanLabware(barcode: string) {
   cy.get("#labwareScanInput")
     .should("not.be.disabled")
@@ -139,8 +138,74 @@ describe("RNA Analysis", () => {
       cy.findByTestId("measurementType").select("Range");
     });
     it("should display two text fields for maesurement value", () => {
-      cy.findByText("Upper bound").should("be.visible");
-      cy.findByText("Lower bound").should("be.visible");
+      cy.findByText("Upper bound:").should("be.visible");
+      cy.findByText("Lower bound:").should("be.visible");
+    });
+  });
+  context("when 'N/A' is selected in mesaurement type", () => {
+    before(() => {
+      cy.findByTestId("measurementType").select("N/A");
+    });
+    it("should disable the text field in table", () => {
+      cy.findByTestId("measurementValue").should("be.disabled");
+    });
+  });
+  context("when a comment is selected for all labwares", () => {
+    before(() => {
+      cy.findByTestId("comment").select("Potential to work");
+    });
+    it("should display the selected comment in comment column of table", () => {
+      cy.findAllByRole("table")
+        .should("have.length", 2)
+        .eq(1)
+        .contains("Potential to work");
+    });
+  });
+
+  context("when submit button is clicked and it return an error", () => {
+    before(() => {
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.mutation<
+            RecordRnaAnalysisMutation,
+            RecordRnaAnalysisMutationVariables
+          >("RecordRNAAnalysis", (req, res, ctx) => {
+            return res(
+              ctx.errors([
+                {
+                  message: `Failed to record RNA Analysis results`,
+                },
+              ])
+            );
+          })
+        );
+      });
+
+      cy.findByText("Save").click();
+    });
+    it("should display Submit failure message", () => {
+      cy.findByText("Failed to record RNA Analysis results").should(
+        "be.visible"
+      );
+    });
+  });
+
+  context("when submit button is clicked", () => {
+    before(() => {
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.mutation<
+            RecordRnaAnalysisMutation,
+            RecordRnaAnalysisMutationVariables
+          >("RecordRNAAnalysis", (req, res, ctx) => {
+            return res(ctx.data({ recordRNAAnalysis: { operations: [] } }));
+          })
+        );
+      });
+      cy.findByText("Save").click();
+    });
+    it("should display Submit success message", () => {
+      cy.findByText("RNA Analysis data saved").should("be.visible");
     });
   });
 });

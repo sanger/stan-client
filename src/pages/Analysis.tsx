@@ -45,7 +45,6 @@ function Analysis({ comments }: AnalysisProps) {
     >().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          debugger;
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
           return stanCore.RecordRNAAnalysis({
             request: e.values,
@@ -125,11 +124,22 @@ function Analysis({ comments }: AnalysisProps) {
         </div>
       ) : (
         <div>
-          {serverError && (
+          {serverError ? (
             <Warning
               message={"Failed to record RNA Analysis results"}
               error={serverError}
             />
+          ) : (
+            <OperationCompleteModal
+              show={current.matches("submitted")}
+              message={"RNA Analysis data saved"}
+              onReset={reload}
+            >
+              <p>
+                If you wish to start the process again, click the "Reset Form"
+                button. Otherwise you can return to the Home screen.
+              </p>
+            </OperationCompleteModal>
           )}
           <ButtonBar>
             <BlueButton onClick={reload} action="tertiary">
@@ -154,16 +164,6 @@ function Analysis({ comments }: AnalysisProps) {
           </ButtonBar>
         </div>
       )}
-      <OperationCompleteModal
-        show={current.matches("submitted")}
-        message={"RNA Analysis data saved"}
-        onReset={reload}
-      >
-        <p>
-          If you wish to start the process again, click the "Reset Form" button.
-          Otherwise you can return to the Home screen.
-        </p>
-      </OperationCompleteModal>
     </AppShell>
   );
 }
