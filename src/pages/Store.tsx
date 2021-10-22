@@ -32,6 +32,7 @@ const Store: React.FC<StoreProps> = ({ location }) => {
    */
   useEffect(() => {
     async function invokeFindLabwareLocation(labwareBarcode: string) {
+      debugger;
       const locationBarcode = await findLabwareLocation(labwareBarcode);
 
       if (locationBarcode) {

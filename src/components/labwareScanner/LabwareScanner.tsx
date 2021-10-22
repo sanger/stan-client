@@ -53,6 +53,8 @@ type LabwareScannerProps = {
   children:
     | React.ReactNode
     | ((props: LabwareScannerContextType) => React.ReactNode);
+
+  enableLocationScanner?: boolean;
 };
 
 export default function LabwareScanner({
@@ -63,6 +65,7 @@ export default function LabwareScanner({
   onAdd,
   onRemove,
   children,
+  enableLocationScanner,
 }: LabwareScannerProps) {
   const [current, send] = useMachine(
     createLabwareMachine(initialLabwares, labwareCheckFunction)
@@ -129,6 +132,10 @@ export default function LabwareScanner({
     send,
   ]);
 
+  const handleOnScan = useCallback(() => send({ type: "SUBMIT_BARCODE" }), [
+    send,
+  ]);
+
   return (
     <div className="space-y-4">
       {current.matches("idle.success") && successMessage && (
@@ -137,16 +144,42 @@ export default function LabwareScanner({
       {current.matches("idle.error") && errorMessage && (
         <Warning className="my-2" message={errorMessage} />
       )}
-
-      <div className="sm:w-2/3 md:w-1/2">
-        <ScanInput
-          id="labwareScanInput"
-          type="text"
-          value={currentBarcode}
-          disabled={current.matches("locked")}
-          onChange={handleOnScanInputChange}
-          onScan={handleOnScan}
-        />
+      <div className="flex flex-row">
+        {enableLocationScanner && (
+          <div className={"sm:w-2/3 md:w-1/2 mr-4 space-y-2"}>
+            <label
+              htmlFor={"locationScanInput"}
+              className={"w-full ml-2 font-sans font-medium text-gray-700"}
+            >
+              Location:
+            </label>
+            <ScanInput
+              id="locationScanInput"
+              type="text"
+              disabled={current.matches("locked")}
+              onChange={handleOnScanInputChange}
+              onScan={handleOnScan}
+            />
+          </div>
+        )}
+        <div className="sm:w-2/3 md:w-1/2 space-y-2">
+          {enableLocationScanner && (
+            <label
+              htmlFor={"locationScanInput"}
+              className={"w-full ml-2 font-sans font-medium text-gray-700"}
+            >
+              Labware:
+            </label>
+          )}
+          <ScanInput
+            id="labwareScanInput"
+            type="text"
+            value={currentBarcode}
+            disabled={current.matches("locked")}
+            onChange={handleOnScanInputChange}
+            onScan={handleOnScan}
+          />
+        </div>
       </div>
 
       <LabwareScannerContext.Provider value={ctxValue}>

@@ -1,0 +1,5 @@
+query GetLabwareInLocation($locationBarcode:String!) {
+    labwareInLocation(locationBarcode:$locationBarcode) {
+        ...LabwareFields
+    }
+}

@@ -56,6 +56,11 @@ export interface LabwareContext {
    * The current error message
    */
   errorMessage: Maybe<string>;
+
+  /**
+   * Flag for Location barcode scan. If true, it will be  a location barcode scan, else a labware scan
+   */
+  isLocationScan?: boolean;
 }
 
 /**
@@ -64,6 +69,7 @@ export interface LabwareContext {
 type UpdateCurrentBarcodeEvent = {
   type: "UPDATE_CURRENT_BARCODE";
   value: string;
+  isLocationBarcode?: boolean;
 };
 
 /**
@@ -199,9 +205,11 @@ export const createLabwareMachine = (
           invoke: {
             id: "validateBarcode",
             src: "validateBarcode",
-            onDone: {
-              target: "searching",
-            },
+            onDone: [
+              { target: "searching", cond: "locationScan" },
+              { target: "searchingLocation", cond: "" },
+            ],
+
             onError: {
               target: "#labwareScanner.idle.error",
               actions: "assignValidationError",
@@ -245,6 +253,9 @@ export const createLabwareMachine = (
             return;
           }
           ctx.currentBarcode = e.value.replace(/\s+/g, "");
+          if (e.isLocationBarcode) {
+            ctx.isLocationScan = true;
+          }
         }),
 
         assignErrorMessage: assign((ctx, e) => {
@@ -290,8 +301,7 @@ export const createLabwareMachine = (
         addFoundLabware: assign((ctx, e) => {
           if (e.type !== "done.invoke.validateFoundLabware") {
             return;
-          }
-          ctx.labwares.push(e.data);
+          } else ctx.labwares.push(e.data);
           ctx.foundLabware = null;
         }),
 
@@ -321,10 +331,20 @@ export const createLabwareMachine = (
             .map((lw) => lw.barcode)
             .includes(ctx.currentBarcode);
         },
+        locationScan: (ctx: LabwareContext, e) => {
+          return ctx.isLocationScan ? true : false;
+        },
       },
       services: {
-        findLabwareByBarcode: (ctx: LabwareContext) =>
-          stanCore.FindLabware({ barcode: ctx.currentBarcode }),
+        findLabwareByBarcode: (ctx: LabwareContext) => {
+          if (ctx.isLocationScan) {
+            return stanCore.GetLabwareInLocation({
+              locationBarcode: ctx.currentBarcode,
+            });
+          } else {
+            return stanCore.FindLabware({ barcode: ctx.currentBarcode });
+          }
+        },
         validateBarcode: (ctx: LabwareContext) =>
           ctx.validator.validate(ctx.currentBarcode),
         validateFoundLabware: (ctx: LabwareContext) => {
