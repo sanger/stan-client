@@ -3958,10 +3958,11 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     FindWorkNumbers(variables: FindWorkNumbersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkNumbersQuery> {
       return withWrapper(() => client.request<FindWorkNumbersQuery>(FindWorkNumbersDocument, variables, requestHeaders));
     },
-    GetComments(variables?: GetCommentsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetCommentsQuery> {
-      return withWrapper(() => client.request<GetCommentsQuery>(GetCommentsDocument, variables, requestHeaders));
     FindWorkProgress(variables?: FindWorkProgressQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkProgressQuery> {
       return withWrapper(() => client.request<FindWorkProgressQuery>(FindWorkProgressDocument, variables, requestHeaders));
+    },
+    GetComments(variables?: GetCommentsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetCommentsQuery> {
+      return withWrapper(() => client.request<GetCommentsQuery>(GetCommentsDocument, variables, requestHeaders));
     },
     GetConfiguration(variables?: GetConfigurationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetConfigurationQuery> {
       return withWrapper(() => client.request<GetConfigurationQuery>(GetConfigurationDocument, variables, requestHeaders));
