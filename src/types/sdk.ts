@@ -2426,6 +2426,9 @@ export type GetCommentsQuery = (
   & { comments: Array<(
     { __typename?: 'Comment' }
     & CommentFieldsFragment
+  )> }
+);
+
 export type FindWorkProgressQueryVariables = Exact<{
   workNumber?: Maybe<Scalars['String']>;
   workType?: Maybe<Scalars['String']>;
