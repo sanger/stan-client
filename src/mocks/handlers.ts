@@ -31,6 +31,7 @@ import recordInPlaceHandlers from "./handlers/recordInPlaceHandlers";
 import workProgressHandlers from "./handlers/workProgressHandlers";
 import stainingQCHandlers from "./handlers/stainingQCHandlers";
 import unreleaseHandlers from "./handlers/unreleaseHandlers";
+import { labwareLocationHandlers } from "./handlers/labwareLocationHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -63,4 +64,5 @@ export const handlers = [
   ...workProgressHandlers,
   ...stainingQCHandlers,
   ...unreleaseHandlers,
+  ...labwareLocationHandlers,
 ];

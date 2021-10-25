@@ -77,6 +77,7 @@ export default function LabwareScanner({
     successMessage,
     errorMessage,
     currentBarcode,
+    locationScan,
   } = current.context;
 
   useEffect(() => {
@@ -119,18 +120,15 @@ export default function LabwareScanner({
   };
 
   const handleOnScanInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>, locationScan = false) => {
       send({
         type: "UPDATE_CURRENT_BARCODE",
         value: e.currentTarget.value,
+        locationScan: locationScan,
       });
     },
     [send]
   );
-
-  const handleOnScan = useCallback(() => send({ type: "SUBMIT_BARCODE" }), [
-    send,
-  ]);
 
   const handleOnScan = useCallback(() => send({ type: "SUBMIT_BARCODE" }), [
     send,
@@ -141,9 +139,11 @@ export default function LabwareScanner({
       {current.matches("idle.success") && successMessage && (
         <Success className="my-2" message={successMessage} />
       )}
-      {current.matches("idle.error") && errorMessage && (
-        <Warning className="my-2" message={errorMessage} />
-      )}
+
+      {(current.matches("idle.error") && errorMessage) ||
+        (locationScan && errorMessage && (
+          <Warning className="my-2" message={errorMessage} />
+        ))}
       <div className="flex flex-row">
         {enableLocationScanner && (
           <div className={"sm:w-2/3 md:w-1/2 mr-4 space-y-2"}>
@@ -156,8 +156,9 @@ export default function LabwareScanner({
             <ScanInput
               id="locationScanInput"
               type="text"
+              value={locationScan ? currentBarcode : ""}
               disabled={current.matches("locked")}
-              onChange={handleOnScanInputChange}
+              onChange={(e) => handleOnScanInputChange(e, true)}
               onScan={handleOnScan}
             />
           </div>
@@ -165,7 +166,7 @@ export default function LabwareScanner({
         <div className="sm:w-2/3 md:w-1/2 space-y-2">
           {enableLocationScanner && (
             <label
-              htmlFor={"locationScanInput"}
+              htmlFor={"labwareScanInput"}
               className={"w-full ml-2 font-sans font-medium text-gray-700"}
             >
               Labware:
@@ -174,7 +175,7 @@ export default function LabwareScanner({
           <ScanInput
             id="labwareScanInput"
             type="text"
-            value={currentBarcode}
+            value={locationScan ? "" : currentBarcode}
             disabled={current.matches("locked")}
             onChange={handleOnScanInputChange}
             onScan={handleOnScan}

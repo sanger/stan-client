@@ -15,7 +15,7 @@ const createLabware = (barcode: string): Labware => {
   // The number after that determines how many samples to put in each slot
   const samplesPerSlot = parseInt(barcode.substr(6, 1));
 
-  const labware = labwareFactory.build(
+  return labwareFactory.build(
     {
       barcode: barcode,
     },
@@ -28,14 +28,12 @@ const createLabware = (barcode: string): Labware => {
       },
     }
   );
-  return labware;
 };
-const labwareLocationHandlers = [
+export const labwareLocationHandlers = [
   graphql.query<GetLabwareInLocationQuery, GetLabwareInLocationQueryVariables>(
-    "GetLabwaresInLocation",
+    "GetLabwareInLocation",
     (req, res, ctx) => {
       // The number after STAN- determines what kind of labware will be returned
-
       const labwaresBarcodes: string[] = [
         "STAN-3111",
         "STAN-3112",
@@ -53,7 +51,13 @@ const labwareLocationHandlers = [
       const payload: GetLabwareInLocationQuery = {
         labwareInLocation: labwares,
       };
-
+      /*return res(
+        ctx.errors([
+          {
+            message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.locationBarcode}`,
+          },
+        ])
+      );*/
       return res(ctx.data(payload));
     }
   ),

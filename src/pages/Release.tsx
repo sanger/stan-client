@@ -27,7 +27,6 @@ import createFormMachine from "../lib/machines/form/formMachine";
 import Success from "../components/notifications/Success";
 import { toast } from "react-toastify";
 import { reload, StanCoreContext } from "../lib/sdk";
-import LocationSearch from "../components/LocationSearch";
 
 const initialValues: ReleaseRequest = {
   barcodes: [],

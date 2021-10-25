@@ -2,6 +2,7 @@ import { createMachine } from "xstate";
 import * as Yup from "yup";
 import {
   FindLabwareQuery,
+  GetLabwareInLocationQuery,
   LabwareFieldsFragment,
   Maybe,
 } from "../../../types/sdk";
@@ -60,7 +61,7 @@ export interface LabwareContext {
   /**
    * Flag for Location barcode scan. If true, it will be  a location barcode scan, else a labware scan
    */
-  isLocationScan?: boolean;
+  locationScan?: boolean;
 }
 
 /**
@@ -69,7 +70,7 @@ export interface LabwareContext {
 type UpdateCurrentBarcodeEvent = {
   type: "UPDATE_CURRENT_BARCODE";
   value: string;
-  isLocationBarcode?: boolean;
+  locationScan?: boolean;
 };
 
 /**
@@ -97,6 +98,15 @@ type ValidationErrorEvent = {
   data: Yup.ValidationError;
 };
 
+type FindLocationDoneEvent = {
+  type: "done.invoke.findLocation";
+  data: GetLabwareInLocationQuery;
+};
+
+type FindLocationErrorEvent = {
+  type: "error.platform.findLocation";
+  data: ClientError;
+};
 type FindLabwareDoneEvent = {
   type: "done.invoke.findLabware";
   data: FindLabwareQuery;
@@ -126,6 +136,8 @@ export type LabwareEvents =
   | ValidationErrorEvent
   | FindLabwareDoneEvent
   | FindLabwareErrorEvent
+  | FindLocationDoneEvent
+  | FindLocationErrorEvent
   | AddFoundLabwareEvent
   | FoundLabwareCheckErrorEvent;
 
@@ -163,6 +175,7 @@ export const createLabwareMachine = (
         validator: Yup.string().trim().required("Barcode is required"),
         successMessage: null,
         errorMessage: null,
+        locationScan: false,
       },
       id: "labwareScanner",
       initial: "idle",
@@ -206,8 +219,14 @@ export const createLabwareMachine = (
             id: "validateBarcode",
             src: "validateBarcode",
             onDone: [
-              { target: "searching", cond: "locationScan" },
-              { target: "searchingLocation", cond: "" },
+              //If it is location barcode then transition to 'searchingLocation' otherwise to 'searching'
+              {
+                target: "searching",
+                cond: (ctx) => ctx.locationScan === false,
+              },
+              {
+                target: "searchingLocation",
+              },
             ],
 
             onError: {
@@ -226,7 +245,21 @@ export const createLabwareMachine = (
             },
             onError: {
               target: "#labwareScanner.idle.error",
-              actions: "assignFindLabwareError",
+              actions: "assignFindError",
+            },
+          },
+        },
+        searchingLocation: {
+          invoke: {
+            id: "findLocation",
+            src: "findLabwareInLocation",
+            onDone: {
+              target: "#labwareScanner.idle.normal",
+              actions: ["assignFoundLocationLabwareIfValid"],
+            },
+            onError: {
+              target: "#labwareScanner.idle.error",
+              actions: "assignFindError",
             },
           },
         },
@@ -253,9 +286,14 @@ export const createLabwareMachine = (
             return;
           }
           ctx.currentBarcode = e.value.replace(/\s+/g, "");
-          if (e.isLocationBarcode) {
-            ctx.isLocationScan = true;
+
+          //change of scanning type between location and labware, so initialise the listed labware, if any as well error messages.
+          if (ctx.locationScan !== e.locationScan) {
+            ctx.labwares = [];
+            ctx.errorMessage = "";
           }
+
+          ctx.locationScan = e.locationScan;
         }),
 
         assignErrorMessage: assign((ctx, e) => {
@@ -305,6 +343,28 @@ export const createLabwareMachine = (
           ctx.foundLabware = null;
         }),
 
+        assignFoundLocationLabwareIfValid: assign((ctx, e) => {
+          if (e.type !== "done.invoke.findLocation") {
+            return;
+          }
+          const problems: string[] = [];
+          /*Validate all the labwares in the location using the validation function passed.
+           If validation is success, add that labware to the list of labwares, otherwise add the error message
+           for failure in context */
+          e.data.labwareInLocation.forEach((labware) => {
+            const problem = ctx.foundLabwareCheck(
+              e.data.labwareInLocation,
+              labware
+            );
+            if (problem.length !== 0) problems.push(problem.join("\n"));
+            else ctx.labwares.push(labware);
+          });
+          if (problems.length > 0) {
+            ctx.errorMessage = problems.join("\n");
+          }
+          ctx.currentBarcode = "";
+        }),
+
         // No-op. Can be overidden when creating the machine.
         foundEvent: () => {},
 
@@ -315,8 +375,11 @@ export const createLabwareMachine = (
           ctx.errorMessage = e.data.join("\n");
         }),
 
-        assignFindLabwareError: assign((ctx, e) => {
-          if (e.type !== "error.platform.findLabware") {
+        assignFindError: assign((ctx, e) => {
+          if (
+            e.type !== "error.platform.findLabware" &&
+            e.type !== "error.platform.findLocation"
+          ) {
             return;
           }
           const matchResult = e.data.message.match(/^.*\s:\s(.*)$/);
@@ -331,19 +394,15 @@ export const createLabwareMachine = (
             .map((lw) => lw.barcode)
             .includes(ctx.currentBarcode);
         },
-        locationScan: (ctx: LabwareContext, e) => {
-          return ctx.isLocationScan ? true : false;
-        },
       },
       services: {
         findLabwareByBarcode: (ctx: LabwareContext) => {
-          if (ctx.isLocationScan) {
-            return stanCore.GetLabwareInLocation({
-              locationBarcode: ctx.currentBarcode,
-            });
-          } else {
-            return stanCore.FindLabware({ barcode: ctx.currentBarcode });
-          }
+          return stanCore.FindLabware({ barcode: ctx.currentBarcode });
+        },
+        findLabwareInLocation: (ctx: LabwareContext) => {
+          return stanCore.GetLabwareInLocation({
+            locationBarcode: ctx.currentBarcode,
+          });
         },
         validateBarcode: (ctx: LabwareContext) =>
           ctx.validator.validate(ctx.currentBarcode),
