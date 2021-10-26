@@ -206,6 +206,21 @@ function AppShell({ children }: AppShellParams) {
                               </div>
                             </NavLink>
                             <NavLink
+                              to="/lab/extraction_result"
+                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
+                            >
+                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                              <div className="ml-4">
+                                <p className="text-base font-medium text-gray-900">
+                                  RNA Extraction Result
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  Record pass/fail results and concentration for
+                                  RNA extractions.
+                                </p>
+                              </div>
+                            </NavLink>
+                            <NavLink
                               to="/lab/visium_cdna"
                               className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
                             >
@@ -507,6 +522,10 @@ function AppShell({ children }: AppShellParams) {
 
                       <StanMobileNavLink to="/lab/extraction">
                         RNA Extraction
+                      </StanMobileNavLink>
+
+                      <StanMobileNavLink to="/lab/extraction_result">
+                        RNA Extraction Result
                       </StanMobileNavLink>
 
                       <StanMobileNavLink to="/lab/visium_cdna">
