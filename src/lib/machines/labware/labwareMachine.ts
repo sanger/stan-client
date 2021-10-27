@@ -294,7 +294,7 @@ export const createLabwareMachine = (
           if (e.type !== "SUBMIT_BARCODE") {
             return;
           }
-          ctx.errorMessage = `"${ctx.currentBarcode}" has already been scanned`;
+          ctx.errorMessage = alreadyScannedBarcodeError(ctx.currentBarcode);
         }),
 
         removeLabware: assign((ctx, e) => {
@@ -342,16 +342,38 @@ export const createLabwareMachine = (
             return;
           }
           const problems: string[] = [];
-          /*Validate all the labwares in the location using the validation function passed.
-           If validation is success, add that labware to the list of labwares, otherwise add the error message
-           for failure in context */
+
+          e.data.labwareInLocation.filter(
+            (labware) =>
+              ctx.labwares.findIndex(
+                (ctxLabware) => ctxLabware.barcode === labware.barcode
+              ) === -1
+          );
+
+          //Validate all labwares in the location
           e.data.labwareInLocation.forEach((labware) => {
-            const problem = ctx.foundLabwareCheck(
-              e.data.labwareInLocation,
-              labware
-            );
-            if (problem.length !== 0) problems.push(problem.join("\n"));
-            else ctx.labwares.push(labware);
+            //check whether this labware is already scanned, if not add to labware list, otherwise update error message
+            let problem: string[] = [];
+            if (
+              ctx.labwares.find(
+                (ctxLabware) => ctxLabware.barcode === labware.barcode
+              )
+            ) {
+              problem.push(alreadyScannedBarcodeError(labware.barcode));
+            } else {
+              /*Validate all the labwares in the location using the validation function passed.
+               If validation is success, add that labware to the list of labwares, otherwise add the error message
+               for failure*/
+              problem = ctx.foundLabwareCheck(
+                e.data.labwareInLocation,
+                labware
+              );
+            }
+            if (problem.length !== 0) {
+              problems.push(problem.join("\n"));
+            } else {
+              ctx.labwares.push(labware);
+            }
           });
           if (problems.length > 0) {
             ctx.errorMessage = problems.join("\n");
@@ -415,3 +437,7 @@ export const createLabwareMachine = (
       },
     }
   );
+
+const alreadyScannedBarcodeError = (barcode: string) => {
+  return `"${barcode}" has already been scanned`;
+};

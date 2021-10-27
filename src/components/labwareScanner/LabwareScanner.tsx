@@ -140,10 +140,10 @@ export default function LabwareScanner({
         <Success className="my-2" message={successMessage} />
       )}
 
-      {(current.matches("idle.error") && errorMessage) ||
-        (locationScan && errorMessage && (
-          <Warning className="my-2" message={errorMessage} />
-        ))}
+      {((current.matches("idle.error") && errorMessage) ||
+        (locationScan && errorMessage)) && (
+        <Warning className="my-2" message={errorMessage} />
+      )}
       <div className="flex flex-row">
         {enableLocationScanner && (
           <div className={"sm:w-2/3 md:w-1/2 mr-4 space-y-2"}>
