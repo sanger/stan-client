@@ -286,13 +286,7 @@ export const createLabwareMachine = (
             return;
           }
           ctx.currentBarcode = e.value.replace(/\s+/g, "");
-
-          //change of scanning type between location and labware, so initialise the listed labware, if any as well error messages.
-          if (ctx.locationScan !== e.locationScan) {
-            ctx.labwares = [];
-            ctx.errorMessage = "";
-          }
-
+          ctx.errorMessage = "";
           ctx.locationScan = e.locationScan;
         }),
 
