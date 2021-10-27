@@ -1,7 +1,6 @@
 describe("Unrelease Page", () => {
   before(() => {
     cy.visit("/admin/unrelease");
-    cy.wait(1000);
   });
 
   describe("Validation", () => {

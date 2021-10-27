@@ -54,6 +54,63 @@ declare global {
   }
 }
 
+let appHasStarted: boolean = false;
+
+function spyOnAddEventListener(win) {
+  // win = window object in our application
+  const addListener = win.EventTarget.prototype.addEventListener;
+  win.EventTarget.prototype.addEventListener = function (name) {
+    if (name === "change") {
+      // web app added an event listener to the input box -
+      // that means the web application has started
+      appHasStarted = true;
+      // restore the original event listener
+      win.EventTarget.prototype.addEventListener = addListener;
+    }
+    return addListener.apply(this, arguments);
+  };
+}
+
+function waitForAppStart() {
+  // keeps rechecking "appHasStarted" variable
+  return new Cypress.Promise((resolve, reject) => {
+    const isReady = () => {
+      if (appHasStarted) {
+        return resolve();
+      }
+      setTimeout(isReady, 0);
+    };
+    isReady();
+  });
+}
+
+Cypress.Commands.overwrite("visit", (originalFn, url, options) => {
+  // originalFn is the existing `visit` command that you need to call
+  // and it will receive whatever you pass in here.
+  //
+  // make sure to add a return here!
+  let appHasStarted: boolean = false;
+
+  let newOptions = Object.assign({}, options, {
+    onBeforeLoad: (win) => {
+      win.addEventListener("reactRenderComplete", () => (appHasStarted = true));
+    },
+  });
+
+  return originalFn(url, newOptions).then(() => {
+    // keeps rechecking "appHasStarted" variable
+    return new Cypress.Promise((resolve, reject) => {
+      const isReady = () => {
+        if (appHasStarted) {
+          return resolve();
+        }
+        setTimeout(isReady, 0);
+      };
+      isReady();
+    });
+  });
+});
+
 Cypress.Commands.add("msw", () => {
   return new Cypress.Promise((resolve) => {
     resolve({

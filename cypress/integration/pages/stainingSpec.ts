@@ -1,7 +1,6 @@
 describe("Staining Page", () => {
   before(() => {
     cy.visit("/lab/staining");
-    cy.wait(1000);
   });
 
   describe("Showing measurements", () => {

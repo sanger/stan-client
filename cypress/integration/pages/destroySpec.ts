@@ -41,7 +41,7 @@ describe("Destroy Page", () => {
           graphql.mutation<DestroyMutation, DestroyMutationVariables>(
             "Destroy",
             (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     message: `Exception while fetching data (/destroy) : Something went wrong`,

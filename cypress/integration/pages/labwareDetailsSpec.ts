@@ -9,7 +9,6 @@ describe("Labware Info Page", () => {
   context("when I visit as a guest", () => {
     before(() => {
       cy.visitAsGuest("/labware/STAN-0001F");
-      cy.wait(2000);
     });
 
     it("does not show the label printer", () => {
@@ -20,7 +19,6 @@ describe("Labware Info Page", () => {
   context("when I visit as a logged in user and the labware is usable", () => {
     before(() => {
       cy.visit("/labware/STAN-0001F");
-      cy.wait(2000);
     });
 
     it("does not show the label printer", () => {
@@ -39,7 +37,7 @@ describe("Labware Info Page", () => {
             graphql.query<FindLabwareQuery, FindLabwareQueryVariables>(
               "FindLabware",
               (req, res, ctx) => {
-                return res(
+                return res.once(
                   ctx.data({
                     labware: labwareFactory.build({
                       state: LabwareState.Destroyed,
@@ -50,8 +48,6 @@ describe("Labware Info Page", () => {
             )
           );
         });
-
-        cy.wait(2000);
       });
 
       it("does not show the label printer", () => {
