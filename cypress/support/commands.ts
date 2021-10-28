@@ -54,54 +54,36 @@ declare global {
   }
 }
 
-let appHasStarted: boolean = false;
-
-function spyOnAddEventListener(win) {
-  // win = window object in our application
-  const addListener = win.EventTarget.prototype.addEventListener;
-  win.EventTarget.prototype.addEventListener = function (name) {
-    if (name === "change") {
-      // web app added an event listener to the input box -
-      // that means the web application has started
-      appHasStarted = true;
-      // restore the original event listener
-      win.EventTarget.prototype.addEventListener = addListener;
-    }
-    return addListener.apply(this, arguments);
-  };
-}
-
-function waitForAppStart() {
-  // keeps rechecking "appHasStarted" variable
-  return new Cypress.Promise((resolve, reject) => {
-    const isReady = () => {
-      if (appHasStarted) {
-        return resolve();
-      }
-      setTimeout(isReady, 0);
-    };
-    isReady();
-  });
-}
-
+/**
+ * Overwrite the default `cy.visit()` so that it waits for React to finish rendering before resolving.
+ * This helps prevent tests from starting to run before the page is ready (or at least React is done, there may still be stuff happening on the page e.g. network requests).
+ *
+ * The "reactRenderComplete" custom event is dispatched to the window when React has finished rendering.
+ *
+ * @see {@link https://www.cypress.io/blog/2018/02/05/when-can-the-test-start/}
+ */
 Cypress.Commands.overwrite("visit", (originalFn, url, options) => {
-  // originalFn is the existing `visit` command that you need to call
-  // and it will receive whatever you pass in here.
-  //
-  // make sure to add a return here!
-  let appHasStarted: boolean = false;
+  let reactHasRendered: boolean = false;
 
+  // Add a onBeforeLoad callback to listen for the "reactRenderComplete" event
   let newOptions = Object.assign({}, options, {
     onBeforeLoad: (win) => {
-      win.addEventListener("reactRenderComplete", () => (appHasStarted = true));
+      win.addEventListener(
+        "reactRenderComplete",
+        () => (reactHasRendered = true)
+      );
     },
   });
 
+  // Call the original visit function with the new options
   return originalFn(url, newOptions).then(() => {
-    // keeps rechecking "appHasStarted" variable
-    return new Cypress.Promise((resolve, reject) => {
+    /**
+     * Return a promise that keeps rechecking "reactHasRendered", and only resolves once it's true.
+     * Note: Cypress Promises have a default timeout of 60 seconds
+     */
+    return new Cypress.Promise((resolve) => {
       const isReady = () => {
-        if (appHasStarted) {
+        if (reactHasRendered) {
           return resolve();
         }
         setTimeout(isReady, 0);

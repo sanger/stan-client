@@ -34,7 +34,6 @@ prepare().then(() => {
       <App />
     </React.StrictMode>,
     document.getElementById("root"),
-
     () => window.dispatchEvent(new CustomEvent("reactRenderComplete"))
   );
 });
