@@ -52,6 +52,7 @@ describe("Release Page", () => {
     "when form is submitted with a labware that has already been released",
     () => {
       before(() => {
+        cy.visit("/admin/release");
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<
@@ -71,8 +72,6 @@ describe("Release Page", () => {
             })
           );
         });
-
-        cy.visit("/admin/release");
 
         fillInForm();
       });
@@ -160,14 +159,8 @@ describe("Release Page", () => {
   });
 });
 function fillInForm() {
-  cy.get("#labwareScanInput")
-    .should("not.be.disabled")
-    .wait(1000)
-    .type("STAN-123{enter}");
-  cy.get("#labwareScanInput")
-    .should("not.be.disabled")
-    .wait(1000)
-    .type("STAN-456{enter}");
+  cy.get("#labwareScanInput").type("STAN-123{enter}");
+  cy.get("#labwareScanInput").type("STAN-456{enter}");
   cy.findByLabelText("Group/Team").select("Vento lab");
   cy.findByLabelText("Contact").select("cs41");
   cy.findByRole("button", { name: /Release Labware/i }).click();

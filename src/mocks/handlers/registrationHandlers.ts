@@ -157,6 +157,13 @@ const registrationHandlers = [
                         tissue: {
                           externalName: "EXT1",
                           replicate: 5,
+                          fixative: {
+                            name: "Formalin",
+                            enabled: true,
+                          },
+                          medium: {
+                            name: "Paraffin",
+                          },
                           donor: {
                             donorName: "Donor 3",
                             lifeStage: LifeStage.Adult,
@@ -219,6 +226,13 @@ const registrationHandlers = [
                         },
                         externalName: content.externalIdentifier,
                         replicate: content.replicateNumber,
+                        medium: {
+                          name: content.medium,
+                        },
+                        fixative: {
+                          name: content.fixative,
+                          enabled: true,
+                        },
                         donor: {
                           donorName: content.donorIdentifier,
                           lifeStage: content.lifeStage,

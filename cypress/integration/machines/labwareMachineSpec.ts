@@ -140,6 +140,9 @@ describe("labwareMachine", () => {
                         numColumns: 1,
                       },
                       barcode: "STAN-123",
+                      externalBarcode: "EXTERNAL-1",
+                      state: LabwareState.Empty,
+                      created: "",
                       slots: [
                         {
                           address: "A1",
@@ -159,6 +162,13 @@ describe("labwareMachine", () => {
                                 donor: {
                                   donorName: "Donor 3",
                                   lifeStage: LifeStage.Adult,
+                                },
+                                medium: {
+                                  name: "None",
+                                },
+                                fixative: {
+                                  name: "None",
+                                  enabled: false,
                                 },
                                 spatialLocation: {
                                   code: 3,

@@ -1,7 +1,6 @@
 describe("Location Grid View", () => {
   before(() => {
     cy.visit("/locations/STO-014");
-    cy.wait(2000);
   });
 
   it("selects the first available address", () => {
@@ -22,7 +21,7 @@ describe("Location Grid View", () => {
     });
 
     it("selects the next available address", () => {
-      cy.findByText("Selected Address: 3").should("be.visible");
+      cy.findByText("Selected Address: 3").should("exist");
     });
 
     it("empties the value of the ScanInput", () => {

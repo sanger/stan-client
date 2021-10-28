@@ -14,6 +14,13 @@ fragment SampleFields on Sample {
             code
         }
         replicate
+        medium {
+            name
+        }
+        fixative {
+            name
+            enabled
+        }
     }
     bioState {
         name

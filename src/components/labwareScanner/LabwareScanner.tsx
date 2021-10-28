@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { LabwareFieldsFragment } from "../../types/sdk";
 import { useMachine } from "@xstate/react";
 import { createLabwareMachine } from "../../lib/machines/labware/labwareMachine";
@@ -67,7 +67,7 @@ export default function LabwareScanner({
   children,
   enableLocationScanner,
 }: LabwareScannerProps) {
-  const [current, send] = useMachine(
+  const [current, send, service] = useMachine(
     createLabwareMachine(initialLabwares, labwareCheckFunction)
   );
 
@@ -79,6 +79,19 @@ export default function LabwareScanner({
     currentBarcode,
     locationScan,
   } = current.context;
+
+  /**
+   * After transition into the "idle" state, focus the scan input
+   */
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const subscription = service.subscribe((observer) => {
+      if (observer.matches("idle")) {
+        inputRef.current?.focus();
+      }
+    });
+    return subscription.unsubscribe;
+  }, [service]);
 
   useEffect(() => {
     send(locked ? { type: "LOCK" } : { type: "UNLOCK" });
@@ -157,7 +170,7 @@ export default function LabwareScanner({
               id="locationScanInput"
               type="text"
               value={locationScan ? currentBarcode : ""}
-              disabled={current.matches("locked")}
+              disabled={!current.matches("idle")}
               onChange={(e) => handleOnScanInputChange(e, true)}
               onScan={handleOnScan}
             />

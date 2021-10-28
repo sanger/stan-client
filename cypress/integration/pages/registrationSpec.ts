@@ -86,7 +86,7 @@ describe("Registration", () => {
   describe("submission", () => {
     context("when the fields are invalid", () => {
       before(() => {
-        cy.visit("/admin/registration");
+        cy.reload();
         fillInForm();
         cy.findByLabelText("Donor ID").clear();
         cy.findByText("Register").click();
@@ -103,7 +103,7 @@ describe("Registration", () => {
 
     context("when the submission is successful", () => {
       before(() => {
-        cy.visit("/admin/registration");
+        cy.reload();
         fillInForm();
         cy.findByText("Register").click();
       });
@@ -120,7 +120,7 @@ describe("Registration", () => {
 
     context("when the submission fails server side", () => {
       before(() => {
-        cy.visit("/admin/registration");
+        cy.reload();
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
@@ -160,7 +160,7 @@ describe("Registration", () => {
     const labware = labwareFactory.buildList(2);
 
     before(() => {
-      cy.visit("/admin/registration");
+      cy.reload();
 
       cy.msw().then(({ worker, graphql }) => {
         worker.use(

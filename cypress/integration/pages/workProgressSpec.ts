@@ -41,7 +41,6 @@ describe("Work Progress", () => {
   // TESTCASES for  Work Number Search action
   describe("Testcases for  Work Number based search action", () => {
     before(() => {
-      cy.visit("./");
       cy.findByTestId("type").select("SGP/R&D Number");
     });
     context("no value is entered", () => {
@@ -87,7 +86,6 @@ describe("Work Progress", () => {
   //TESTCASES for WorkType based search
   describe("Testcases for WorkType based search", () => {
     before(() => {
-      cy.visit("/");
       cy.findByTestId("type").select("Work Type");
     });
     context("when a value is given ", () => {
@@ -114,11 +112,9 @@ describe("Work Progress", () => {
 
   //TESTCASES for Status based search
   describe("Test cases for Status based search", () => {
-    before(() => {
-      cy.findByTestId("type").select("Status");
-    });
     context("when a value is given", () => {
       before(() => {
+        cy.findByTestId("type").select("Status");
         cy.findByTestId("valueSelect").select("active");
         cy.findByRole("button", { name: /Search/i }).click();
       });
@@ -214,7 +210,7 @@ describe("Work Progress", () => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.query("FindWorkProgress", (req, res, ctx) => {
-              return res(
+              return res.once(
                 ctx.errors([
                   {
                     message:

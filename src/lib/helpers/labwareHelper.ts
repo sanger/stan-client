@@ -109,6 +109,7 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
     __typename: "Labware",
     id: labware.id,
     barcode: labware.barcode,
+    externalBarcode: labware.externalBarcode,
     destroyed: labware.destroyed,
     discarded: labware.discarded,
     released: labware.released,
@@ -150,6 +151,15 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
             __typename: "SpatialLocation",
           },
           replicate: sample.tissue.replicate,
+          medium: {
+            name: sample.tissue.medium.name,
+            __typename: "Medium",
+          },
+          fixative: {
+            name: sample.tissue.fixative.name,
+            enabled: sample.tissue.fixative.enabled,
+            __typename: "Fixative",
+          },
           __typename: "Tissue",
         },
         __typename: "Sample",

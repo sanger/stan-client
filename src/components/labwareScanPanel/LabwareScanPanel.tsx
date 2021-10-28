@@ -17,7 +17,6 @@ interface LabwareScanPanelProps {
    */
   columns: Column<LabwareFieldsFragment>[];
 }
-
 const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns }) => {
   const { labwares, removeLabware, locked } = useLabwareContext();
 
@@ -25,7 +24,7 @@ const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns }) => {
   const data = React.useMemo(() => labwares, [labwares]);
 
   // Column with actions (such as delete) to add to the end of the labwareScanTableColumns passed in
-  const actionsColumn: Column<LabwareFieldsFragment> = React.useMemo(() => {
+  const actionsColumn = React.useMemo(() => {
     return {
       Header: "",
       id: "actions",
