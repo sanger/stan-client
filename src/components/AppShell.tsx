@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Authenticated, Unauthenticated } from "./Authenticated";
 import { StanMobileNavLink, StanNavLink } from "./nav";
 import { useOnClickOutside } from "../lib/hooks";
@@ -18,6 +18,8 @@ import { LocationState } from "../types/stan";
 import Success from "./notifications/Success";
 import { UserRole } from "../types/sdk";
 import { configContext } from "../context/ConfigContext";
+import NavLinkMenuItem from "./menu/NavlinkMenuItem";
+import Menu from "./menu/Menu";
 
 interface AppShellParams {
   children?: React.ReactNode | React.ReactNode[];
@@ -29,8 +31,6 @@ function AppShell({ children }: AppShellParams) {
   const location = useLocation<LocationState>();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
-  const labDropdownRef = useRef<HTMLDivElement>(null);
-  const labButtonRef = useRef<HTMLButtonElement>(null);
   const adminDropdownRef = useRef<HTMLDivElement>(null);
   const adminButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -45,14 +45,6 @@ function AppShell({ children }: AppShellParams) {
 
   useOnClickOutside(
     () => {
-      setLabDropdownOpen(false);
-    },
-    labDropdownRef,
-    labButtonRef
-  );
-
-  useOnClickOutside(
-    () => {
       setAdminDropdownOpen(false);
     },
     adminDropdownRef,
@@ -61,11 +53,14 @@ function AppShell({ children }: AppShellParams) {
 
   // Should the profile dropdown be open
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [labDropdownOpen, setLabDropdownOpen] = useState(false);
   const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
 
   // Should the mobile menu be open
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const labwareIcon = () => (
+    <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+  );
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -123,168 +118,86 @@ function AppShell({ children }: AppShellParams) {
                 <StanNavLink to="/sgp">SGP Management</StanNavLink>
               </Authenticated>
               <Authenticated>
-                <div className="relative">
-                  <button
-                    ref={labButtonRef}
-                    onClick={() => setLabDropdownOpen(!labDropdownOpen)}
-                    type="button"
-                    className="group rounded-md inline-flex items-center px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-gray-700 text-gray-100 hover:text-white hover:bg-gray-700"
+                <Menu caption={"Lab Work"} topMostMenu={true}>
+                  <Menu
+                    caption={"Sectioning"}
+                    icon={labwareIcon()}
+                    description={"Planning and confirmation of tissue slicing"}
                   >
-                    <span>Lab Work</span>
-
-                    <svg
-                      className="ml-2 h-5 w-5 text-gray-400 group-hover:text-gray-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-
-                  {labDropdownOpen && (
-                    <AnimatePresence>
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.1 }}
-                        ref={labDropdownRef}
-                        className="absolute z-10 -ml-4 mt-3 transform px-2 w-screen max-w-md sm:px-0 lg:ml-0 lg:left-1/2 lg:-translate-x-1/2"
-                      >
-                        <div className="rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden">
-                          <div className="relative grid gap-6 bg-white px-5 py-6 sm:gap-8 sm:p-8">
-                            <NavLink
-                              to="/lab/sectioning"
-                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
-                            >
-                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                              <div className="ml-4">
-                                <p className="text-base font-medium text-gray-900">
-                                  Sectioning Planning
-                                </p>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  Slice up some tissue and place sections into
-                                  pre-labelled pieces of labware.
-                                </p>
-                              </div>
-                            </NavLink>
-                            <NavLink
-                              to="/lab/sectioning/confirm"
-                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
-                            >
-                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                              <div className="ml-4">
-                                <p className="text-base font-medium text-gray-900">
-                                  Sectioning Confirmation
-                                </p>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  Confirm the number of sections taken, along
-                                  with section numbers and comments,
-                                  post-sectioning.
-                                </p>
-                              </div>
-                            </NavLink>
-                            <NavLink
-                              to="/lab/extraction"
-                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
-                            >
-                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                              <div className="ml-4">
-                                <p className="text-base font-medium text-gray-900">
-                                  RNA Extraction
-                                </p>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  Extract RNA from scraps obtained from
-                                  Sectioning.
-                                </p>
-                              </div>
-                            </NavLink>
-                            <NavLink
-                              to="/lab/extraction_result"
-                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
-                            >
-                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                              <div className="ml-4">
-                                <p className="text-base font-medium text-gray-900">
-                                  RNA Extraction Result
-                                </p>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  Record pass/fail results and concentration for
-                                  RNA extractions.
-                                </p>
-                              </div>
-                            </NavLink>
-                            <NavLink
-                              to="/lab/visium_cdna"
-                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
-                            >
-                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                              <div className="ml-4">
-                                <p className="text-base font-medium text-gray-900">
-                                  Visium cDNA
-                                </p>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  Transfer cDNA from slides onto a new 96 well
-                                  plate.
-                                </p>
-                              </div>
-                            </NavLink>
-                            <NavLink
-                              to="/lab/staining"
-                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
-                            >
-                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                              <div className="ml-4">
-                                <p className="text-base font-medium text-gray-900">
-                                  Staining
-                                </p>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  Stain slides and record incubation details.
-                                </p>
-                              </div>
-                            </NavLink>
-                            <NavLink
-                              to="/lab/staining_qc"
-                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
-                            >
-                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                              <div className="ml-4">
-                                <p className="text-base font-medium text-gray-900">
-                                  Staining QC
-                                </p>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  Pass or fail samples on a stained slide.
-                                </p>
-                              </div>
-                            </NavLink>
-                            <NavLink
-                              to="/lab/imaging"
-                              className="-m-3 p-3 flex items-start rounded-lg hover:bg-gray-50"
-                            >
-                              <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                              <div className="ml-4">
-                                <p className="text-base font-medium text-gray-900">
-                                  Imaging
-                                </p>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  Record that images have been taken for a batch
-                                  of labware.
-                                </p>
-                              </div>
-                            </NavLink>
-                          </div>
-                          <div className="px-5 py-5 bg-gray-50 space-y-6 sm:flex sm:space-y-0 sm:space-x-10 sm:px-8" />
-                        </div>
-                      </motion.div>
-                    </AnimatePresence>
-                  )}
-                </div>
+                    <NavLinkMenuItem
+                      caption={"Planning"}
+                      path={"/lab/sectioning"}
+                      icon={labwareIcon()}
+                      description={
+                        "Slice up some tissue and place sections into pre-labelled pieces of labware."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"Confirmation"}
+                      path={"/lab/sectioning/confirm"}
+                      icon={labwareIcon()}
+                      description={
+                        "Confirm the number of sections taken, along with section numbers and comments, post-sectioning."
+                      }
+                    />
+                  </Menu>
+                  <Menu
+                    caption={"RNA"}
+                    icon={labwareIcon()}
+                    description={"Recording RNA extraction and analysis"}
+                  >
+                    <NavLinkMenuItem
+                      caption={"Extraction Result"}
+                      path={"/lab/extraction_result"}
+                      icon={labwareIcon()}
+                      description={
+                        "Record pass/fail results and concentration for RNA extractions."
+                      }
+                    />
+                  </Menu>
+                  <Menu
+                    caption={"Staining"}
+                    description={"Recording staining slides and QC"}
+                    icon={labwareIcon()}
+                  >
+                    <NavLinkMenuItem
+                      caption={"Stain slides"}
+                      path={"/lab/staining"}
+                      icon={labwareIcon()}
+                      description={
+                        "Stain slides and record incubation details."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"Staining QC"}
+                      path={"/lab/staining_qc"}
+                      icon={labwareIcon()}
+                      description={"Pass or fail samples on a stained slide."}
+                    />
+                  </Menu>
+                  <Menu
+                    caption={"Visium"}
+                    icon={labwareIcon()}
+                    description={"Recording Visium process"}
+                  >
+                    <NavLinkMenuItem
+                      caption={"Visium cDNA"}
+                      path={"/lab/visium_cdna"}
+                      icon={labwareIcon()}
+                      description={
+                        "Transfer cDNA from slides onto a new 96 well plate."
+                      }
+                    />
+                  </Menu>
+                  <NavLinkMenuItem
+                    caption={"Imaging"}
+                    path={"/lab/imaging"}
+                    icon={labwareIcon()}
+                    description={
+                      "Record that images have been taken for a batch of labware."
+                    }
+                  />
+                </Menu>
               </Authenticated>
 
               <Authenticated>
