@@ -1,6 +1,7 @@
 import { interpret } from "xstate";
 import {
   FindLabwareQuery,
+  GetLabwareInLocationQuery,
   LabwareState,
   LifeStage,
 } from "../../../src/types/sdk";
@@ -28,7 +29,8 @@ describe("labwareMachine", () => {
         (state) => {
           if (
             state.matches("idle.normal") &&
-            state.context.currentBarcode == "STAN-123"
+            state.context.currentBarcode == "STAN-123" &&
+            !state.context.locationScan
           ) {
             done();
           }
@@ -39,6 +41,27 @@ describe("labwareMachine", () => {
     });
   });
 
+  describe("UPDATE_CURRENT_BARCODE for Location scan", () => {
+    it("updates the current barcode for location", (done) => {
+      const machine = interpret(createLabwareMachine()).onTransition(
+        (state) => {
+          if (
+            state.matches("idle.normal") &&
+            state.context.currentBarcode === "STO-123" &&
+            state.context.locationScan
+          ) {
+            done();
+          }
+        }
+      );
+      machine.start();
+      machine.send({
+        type: "UPDATE_CURRENT_BARCODE",
+        value: "STO-123",
+        locationScan: true,
+      });
+    });
+  });
   describe("BARCODE_SCANNED", () => {
     context(
       "when the labware with this barcode is already in the table",
@@ -65,7 +88,11 @@ describe("labwareMachine", () => {
             }
           );
           machine.start();
-          machine.send({ type: "UPDATE_CURRENT_BARCODE", value: "STAN-123" });
+          machine.send({
+            type: "UPDATE_CURRENT_BARCODE",
+            value: "STAN-123",
+            locationScan: false,
+          });
           machine.send({ type: "SUBMIT_BARCODE" });
         });
       }
@@ -103,6 +130,8 @@ describe("labwareMachine", () => {
                       destroyed: false,
                       discarded: false,
                       released: false,
+                      created: new Date().toISOString(),
+                      state: LabwareState.Active,
                       __typename: "Labware",
                       labwareType: {
                         __typename: "LabwareType",
@@ -118,6 +147,7 @@ describe("labwareMachine", () => {
                         {
                           address: "A1",
                           labwareId: 1,
+                          block: false,
                           samples: [
                             {
                               __typename: "Sample",
@@ -167,7 +197,11 @@ describe("labwareMachine", () => {
             }
           });
           machine.start();
-          machine.send({ type: "UPDATE_CURRENT_BARCODE", value: "STAN-123" });
+          machine.send({
+            type: "UPDATE_CURRENT_BARCODE",
+            value: "STAN-123",
+            locationScan: false,
+          });
           machine.send({ type: "SUBMIT_BARCODE" });
         });
       });
@@ -196,9 +230,101 @@ describe("labwareMachine", () => {
             }
           });
           machine.start();
-          machine.send({ type: "UPDATE_CURRENT_BARCODE", value: "STAN-321" });
+          machine.send({
+            type: "UPDATE_CURRENT_BARCODE",
+            value: "STAN-321",
+            locationScan: false,
+          });
           machine.send({ type: "SUBMIT_BARCODE" });
         });
+      });
+    });
+  });
+
+  describe("BARCODE_SCANNED FOR LOCATION", () => {
+    context("when barcode is valid for location scan", () => {
+      it("will look up for labware in location via a service", (done) => {
+        const labwareMachine = createLabwareMachine();
+        const mockLTMachine = labwareMachine.withConfig({
+          actions: {
+            notifyParent: log("stubbed update labwares"),
+          },
+          services: {
+            findLabwareInLocation: (_ctx: LabwareContext) => {
+              return new Promise<GetLabwareInLocationQuery>((resolve) => {
+                resolve({
+                  labwareInLocation: ["STAN-1111", "STAN-2222"].map(
+                    (barcode) => {
+                      return {
+                        id: 1,
+                        destroyed: false,
+                        discarded: false,
+                        released: false,
+                        created: new Date().toISOString(),
+                        state: LabwareState.Active,
+                        __typename: "Labware",
+                        labwareType: {
+                          __typename: "LabwareType",
+                          name: "Proviasette",
+                          numRows: 1,
+                          numColumns: 1,
+                        },
+                        barcode: `${barcode}`,
+                        slots: [
+                          {
+                            address: "A1",
+                            labwareId: 1,
+                            block: false,
+                            samples: [
+                              {
+                                __typename: "Sample",
+                                id: 1,
+                                bioState: {
+                                  name: "Blah",
+                                },
+                                tissue: {
+                                  __typename: "Tissue",
+                                  externalName: "External 1",
+                                  replicate: 5,
+                                  donor: {
+                                    donorName: "Donor 3",
+                                    lifeStage: LifeStage.Adult,
+                                  },
+                                  spatialLocation: {
+                                    code: 3,
+                                    tissueType: {
+                                      name: "Lung",
+                                    },
+                                  },
+                                },
+                              },
+                            ],
+                          },
+                        ],
+                      };
+                    }
+                  ),
+                });
+              });
+            },
+          },
+        });
+        const machine = interpret(mockLTMachine).onTransition((state) => {
+          if (
+            state.matches("idle.normal") &&
+            state.context.labwares.length > 0
+          ) {
+            expect(state.context.labwares.length).to.eq(2);
+            done();
+          }
+        });
+        machine.start();
+        machine.send({
+          type: "UPDATE_CURRENT_BARCODE",
+          value: "STO-123",
+          locationScan: true,
+        });
+        machine.send({ type: "SUBMIT_BARCODE" });
       });
     });
   });

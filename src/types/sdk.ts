@@ -733,6 +733,7 @@ export type Query = {
   workProgress: Array<WorkProgress>;
   location: Location;
   stored: Array<StoredItem>;
+  labwareInLocation: Array<Labware>;
 };
 
 
@@ -872,6 +873,11 @@ export type QueryLocationArgs = {
 
 export type QueryStoredArgs = {
   barcodes: Array<Scalars['String']>;
+};
+
+
+export type QueryLabwareInLocationArgs = {
+  locationBarcode: Scalars['String'];
 };
 
 export type Mutation = {
@@ -2509,6 +2515,19 @@ export type GetDestructionReasonsQuery = (
   )> }
 );
 
+export type GetLabwareInLocationQueryVariables = Exact<{
+  locationBarcode: Scalars['String'];
+}>;
+
+
+export type GetLabwareInLocationQuery = (
+  { __typename?: 'Query' }
+  & { labwareInLocation: Array<(
+    { __typename?: 'Labware' }
+    & LabwareFieldsFragment
+  )> }
+);
+
 export type GetPrintersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -3645,6 +3664,13 @@ export const GetDestructionReasonsDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
+export const GetLabwareInLocationDocument = gql`
+    query GetLabwareInLocation($locationBarcode: String!) {
+  labwareInLocation(locationBarcode: $locationBarcode) {
+    ...LabwareFields
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
@@ -3972,6 +3998,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetDestructionReasons(variables?: GetDestructionReasonsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestructionReasonsQuery> {
       return withWrapper(() => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, requestHeaders));
+    },
+    GetLabwareInLocation(variables: GetLabwareInLocationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetLabwareInLocationQuery> {
+      return withWrapper(() => client.request<GetLabwareInLocationQuery>(GetLabwareInLocationDocument, variables, requestHeaders));
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
       return withWrapper(() => client.request<GetPrintersQuery>(GetPrintersDocument, variables, requestHeaders));
