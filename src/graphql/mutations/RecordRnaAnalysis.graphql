@@ -1,0 +1,7 @@
+mutation RecordRNAAnalysis($request:RNAAnalysisRequest!) {
+    recordRNAAnalysis(request: $request) {
+        operations {
+            id
+        }
+    }
+}

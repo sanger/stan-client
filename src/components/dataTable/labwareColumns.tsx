@@ -11,7 +11,9 @@ import { maybeFindSlotByAddress } from "../../lib/helpers/slotHelper";
 /**
  * Defined type for a function that returns a column that displays some property of Labware
  */
-type ColumnFactory<E = any> = (meta?: E) => Column<LabwareFieldsFragment>;
+export type ColumnFactory<E = any> = (
+  meta?: E
+) => Column<LabwareFieldsFragment>;
 
 const color: ColumnFactory<Map<number, any>> = (meta) => {
   return {
@@ -126,15 +128,32 @@ const bioState: ColumnFactory = () => {
   };
 };
 
-/**
- * Section number for a given slot
- */
 const highestSectionForSlot: ColumnFactory = (slotAddress) => {
   return {
     Header: "Highest Section for Block",
     accessor: (labware) =>
       maybeFindSlotByAddress(labware.slots, slotAddress)?.blockHighestSection ??
       "-",
+  };
+};
+
+/**
+ * medium of the tissue of the first sample in the first slot of the labware
+ */
+const medium: ColumnFactory = () => {
+  return {
+    Header: "Medium",
+    accessor: (labware) => labware.slots[0].samples[0].tissue.medium.name,
+  };
+};
+
+/**
+ * Name of the fixative of the tissue of the first sample in the first slot of the labware
+ */
+const fixative: ColumnFactory = () => {
+  return {
+    Header: "Fixative",
+    accessor: (labware) => labware.slots[0].samples[0].tissue.fixative.name,
   };
 };
 
@@ -149,6 +168,8 @@ const columns = {
   externalName,
   bioState,
   highestSectionForSlot,
+  medium,
+  fixative,
 };
 
 export default columns;

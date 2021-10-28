@@ -2,11 +2,14 @@ import { graphql } from "msw";
 import {
   AddCommentMutation,
   AddCommentMutationVariables,
+  GetCommentsQuery,
+  GetCommentsQueryVariables,
   SetCommentEnabledMutation,
   SetCommentEnabledMutationVariables,
 } from "../../types/sdk";
 import commentFactory from "../../lib/factories/commentFactory";
 import commentRepository from "../repositories/commentRepository";
+import { isEnabled } from "../../lib/helpers";
 
 const commentHandlers = [
   graphql.mutation<AddCommentMutation, AddCommentMutationVariables>(
@@ -39,6 +42,23 @@ const commentHandlers = [
       );
     }
   }),
+
+  graphql.query<GetCommentsQuery, GetCommentsQueryVariables>(
+    "GetComments",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          comments: commentRepository
+            .findAll()
+            .filter(
+              (comment) =>
+                comment.category === req.variables.commentCategory &&
+                (req.variables.includeDisabled ? true : isEnabled(comment))
+            ),
+        })
+      );
+    }
+  ),
 ];
 
 export default commentHandlers;
