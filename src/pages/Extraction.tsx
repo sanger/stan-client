@@ -243,18 +243,18 @@ function Extraction() {
           <Link to={"/"}>
             <BlueButton action="primary">Return Home</BlueButton>
           </Link>
-          {/*<div className={""}>*/}
-          {/*  <Link*/}
-          {/*    to={{*/}
-          {/*      pathname: "/lab/extraction_result",*/}
-          {/*      state: { labware: extraction?.extract?.labware },*/}
-          {/*    }}*/}
-          {/*  >*/}
-          {/*    <BlueButton action="primary">*/}
-          {/*      Go to Extraction Result &gt;*/}
-          {/*    </BlueButton>*/}
-          {/*  </Link>*/}
-          {/*</div>*/}
+          <div className={""}>
+            <Link
+              to={{
+                pathname: "/lab/extraction_result",
+                state: { labware: extraction?.extract?.labware },
+              }}
+            >
+              <BlueButton action="primary">
+                Go to Extraction Result &gt;
+              </BlueButton>
+            </Link>
+          </div>
         </ButtonBar>
       )}
     </AppShell>
