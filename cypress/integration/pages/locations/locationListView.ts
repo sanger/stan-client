@@ -1,7 +1,6 @@
 describe("Location - List View", () => {
   before(() => {
     cy.visit("/locations/STO-014");
-    cy.wait(2000);
     cy.findByTestId("listIcon").click();
   });
 

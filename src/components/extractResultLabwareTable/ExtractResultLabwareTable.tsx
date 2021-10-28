@@ -100,7 +100,7 @@ function ExtractResultLabwareRow({
         setFieldValue(`labware.${index}`, {
           barcode: labware.barcode,
           commentId: availableComments[0].id,
-          concentration: "",
+          concentration: undefined,
           result: PassFail.Fail,
         });
       }
@@ -127,7 +127,16 @@ function ExtractResultLabwareRow({
       </TableCell>
       <TableCell>
         {!!labware.commentId ? (
-          <FormikSelect label={""} name={`labware.${index}.commentId`}>
+          <FormikSelect
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setFieldValue(
+                `labware.${index}.commentId`,
+                parseInt(e.currentTarget.value)
+              )
+            }
+            label={""}
+            name={`labware.${index}.commentId`}
+          >
             {optionValues(availableComments, "text", "id")}
           </FormikSelect>
         ) : (

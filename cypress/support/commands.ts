@@ -54,6 +54,45 @@ declare global {
   }
 }
 
+/**
+ * Overwrite the default `cy.visit()` so that it waits for React to finish rendering before resolving.
+ * This helps prevent tests from starting to run before the page is ready (or at least React is done, there may still be stuff happening on the page e.g. network requests).
+ *
+ * The "reactRenderComplete" custom event is dispatched to the window when React has finished rendering.
+ *
+ * @see {@link https://www.cypress.io/blog/2018/02/05/when-can-the-test-start/}
+ */
+Cypress.Commands.overwrite("visit", (originalFn, url, options) => {
+  let reactHasRendered: boolean = false;
+
+  // Add a onBeforeLoad callback to listen for the "reactRenderComplete" event
+  let newOptions = Object.assign({}, options, {
+    onBeforeLoad: (win) => {
+      win.addEventListener(
+        "reactRenderComplete",
+        () => (reactHasRendered = true)
+      );
+    },
+  });
+
+  // Call the original visit function with the new options
+  return originalFn(url, newOptions).then(() => {
+    /**
+     * Return a promise that keeps rechecking "reactHasRendered", and only resolves once it's true.
+     * Note: Cypress Promises have a default timeout of 60 seconds
+     */
+    return new Cypress.Promise((resolve) => {
+      const isReady = () => {
+        if (reactHasRendered) {
+          return resolve();
+        }
+        setTimeout(isReady, 0);
+      };
+      isReady();
+    });
+  });
+});
+
 Cypress.Commands.add("msw", () => {
   return new Cypress.Promise((resolve) => {
     resolve({
