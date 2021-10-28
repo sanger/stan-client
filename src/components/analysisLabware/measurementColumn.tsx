@@ -1,5 +1,5 @@
 import { OperationType } from "./analysisLabware";
-import { enumValue } from "../../lib/helpers";
+import { objectKeys } from "../../lib/helpers";
 import React from "react";
 import { RnaAnalysisLabware, StringMeasurement } from "../../types/sdk";
 import { Row } from "react-table";
@@ -26,11 +26,11 @@ export const measurementColumn = (
 ) => {
   const getValueCategoryKeys = (operationType: string) => {
     if (operationType === OperationType.DV200) {
-      return Object.keys(MeasurementValueCategory);
+      return objectKeys(MeasurementValueCategory);
     } else {
-      return Object.keys(MeasurementValueCategory).filter(
+      return objectKeys(MeasurementValueCategory).filter(
         (key) =>
-          enumValue(MeasurementValueCategory, key) !==
+          MeasurementValueCategory[key] !==
           MeasurementValueCategory.RANGE_VALUE_TYPE
       );
     }
@@ -59,8 +59,8 @@ export const measurementColumn = (
         data-testid={"measurementType"}
       >
         {getValueCategoryKeys(operationType).map((key) => (
-          <option value={enumValue(MeasurementValueCategory, key)} key={key}>
-            {enumValue(MeasurementValueCategory, key)}
+          <option value={MeasurementValueCategory[key]} key={key}>
+            {MeasurementValueCategory[key]}
           </option>
         ))}
       </select>
@@ -187,7 +187,7 @@ export const measurementColumn = (
                     }
                     min={
                       row.original.measurements.length > 1
-                        ? Number(row.original.measurements[0].value) + 1
+                        ? Number(row.original.measurements[0].value)
                         : 0
                     }
                   />

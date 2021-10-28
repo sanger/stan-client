@@ -46,7 +46,6 @@ const commentHandlers = [
   graphql.query<GetCommentsQuery, GetCommentsQueryVariables>(
     "GetComments",
     (req, res, ctx) => {
-      commentFactory.build();
       return res(
         ctx.data({
           comments: commentRepository
@@ -54,7 +53,7 @@ const commentHandlers = [
             .filter(
               (comment) =>
                 comment.category === req.variables.commentCategory &&
-                isEnabled(comment)
+                (req.variables.includeDisabled ? true : isEnabled(comment))
             ),
         })
       );

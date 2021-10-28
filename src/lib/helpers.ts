@@ -24,22 +24,7 @@ export function enumKey<E extends { [index: string]: string }>(
   enumObject: E,
   enumVal: string
 ): keyof E | undefined {
-  const keys = Object.keys(enumObject).filter(
-    (key) => enumObject[key] === enumVal
-  );
-  return keys.length > 0 ? keys[0] : undefined;
-}
-
-/**
- * Utility to return the string value from a string enum
- * @param enumObject enum to get the value
- * @param key key for which the value to be returned
- */
-export function enumValue<E extends { [index: string]: string }>(
-  enumObject: E,
-  key: keyof E | string
-): string {
-  return enumObject[key];
+  return Object.keys(enumObject).find((key) => enumObject[key] === enumVal);
 }
 
 /**

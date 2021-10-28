@@ -138,13 +138,12 @@ const highestSectionForSlot: ColumnFactory = (slotAddress) => {
 };
 
 /**
- * Name of the medium of the tissue of the first sample in the first slot of the labware
+ * medium of the tissue of the first sample in the first slot of the labware
  */
 const medium: ColumnFactory = () => {
   return {
     Header: "Medium",
-    accessor: (labware) =>
-      valueFromSamples(labware, (sample) => sample.tissue.medium.name),
+    accessor: (labware) => labware.slots[0].samples[0].tissue.medium.name,
   };
 };
 
@@ -154,8 +153,7 @@ const medium: ColumnFactory = () => {
 const fixative: ColumnFactory = () => {
   return {
     Header: "Fixative",
-    accessor: (labware) =>
-      valueFromSamples(labware, (sample) => sample.tissue.fixative.name),
+    accessor: (labware) => labware.slots[0].samples[0].tissue.fixative.name,
   };
 };
 
