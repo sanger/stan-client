@@ -58,10 +58,6 @@ function AppShell({ children }: AppShellParams) {
   // Should the mobile menu be open
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const labwareIcon = () => (
-    <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-  );
-
   return (
     <div className="flex flex-col min-h-screen">
       <div className={`relative ${config?.headerColor}`}>
@@ -121,13 +117,17 @@ function AppShell({ children }: AppShellParams) {
                 <Menu caption={"Lab Work"} topMostMenu={true}>
                   <Menu
                     caption={"Sectioning"}
-                    icon={labwareIcon()}
+                    icon={
+                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
                     description={"Planning and confirmation of tissue slicing"}
                   >
                     <NavLinkMenuItem
                       caption={"Planning"}
                       path={"/lab/sectioning"}
-                      icon={labwareIcon()}
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
                       description={
                         "Slice up some tissue and place sections into pre-labelled pieces of labware."
                       }
@@ -135,7 +135,9 @@ function AppShell({ children }: AppShellParams) {
                     <NavLinkMenuItem
                       caption={"Confirmation"}
                       path={"/lab/sectioning/confirm"}
-                      icon={labwareIcon()}
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
                       description={
                         "Confirm the number of sections taken, along with section numbers and comments, post-sectioning."
                       }
@@ -143,13 +145,17 @@ function AppShell({ children }: AppShellParams) {
                   </Menu>
                   <Menu
                     caption={"RNA"}
-                    icon={labwareIcon()}
+                    icon={
+                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
                     description={"Recording RNA extraction and analysis"}
                   >
                     <NavLinkMenuItem
                       caption={"Extraction Result"}
                       path={"/lab/extraction_result"}
-                      icon={labwareIcon()}
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
                       description={
                         "Record pass/fail results and concentration for RNA extractions."
                       }
@@ -158,12 +164,16 @@ function AppShell({ children }: AppShellParams) {
                   <Menu
                     caption={"Staining"}
                     description={"Recording staining slides and QC"}
-                    icon={labwareIcon()}
+                    icon={
+                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
                   >
                     <NavLinkMenuItem
                       caption={"Stain slides"}
                       path={"/lab/staining"}
-                      icon={labwareIcon()}
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
                       description={
                         "Stain slides and record incubation details."
                       }
@@ -171,19 +181,25 @@ function AppShell({ children }: AppShellParams) {
                     <NavLinkMenuItem
                       caption={"Staining QC"}
                       path={"/lab/staining_qc"}
-                      icon={labwareIcon()}
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
                       description={"Pass or fail samples on a stained slide."}
                     />
                   </Menu>
                   <Menu
                     caption={"Visium"}
-                    icon={labwareIcon()}
+                    icon={
+                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
                     description={"Recording Visium process"}
                   >
                     <NavLinkMenuItem
                       caption={"Visium cDNA"}
                       path={"/lab/visium_cdna"}
-                      icon={labwareIcon()}
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
                       description={
                         "Transfer cDNA from slides onto a new 96 well plate."
                       }
@@ -192,9 +208,65 @@ function AppShell({ children }: AppShellParams) {
                   <NavLinkMenuItem
                     caption={"Imaging"}
                     path={"/lab/imaging"}
-                    icon={labwareIcon()}
+                    icon={
+                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
                     description={
                       "Record that images have been taken for a batch of labware."
+                    }
+                  />
+                </Menu>
+              </Authenticated>
+              <Authenticated>
+                <Menu caption={"Admin"} topMostMenu={true}>
+                  <NavLinkMenuItem
+                    caption={"Block Registration"}
+                    path={"/admin/registration"}
+                    icon={
+                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
+                    description={
+                      "Register blocks of tissue into STAN and obtain new barcodes for its labware."
+                    }
+                  />
+                  <NavLinkMenuItem
+                    caption={"Slide Registration"}
+                    path={"/admin/slide_registration"}
+                    icon={
+                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
+                    description={
+                      "Register sections of tissue on pre-barcoded slides into STAN."
+                    }
+                  />
+                  <NavLinkMenuItem
+                    caption={"Destroy"}
+                    path={"/admin/destroy"}
+                    icon={
+                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
+                    description={
+                      "Destroy multiple pieces of labware and have STAN remove them from storage."
+                    }
+                  />
+                  <NavLinkMenuItem
+                    caption={"Release"}
+                    path={"/admin/release"}
+                    icon={
+                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
+                    description={
+                      "Release samples in STAN to teams within the Institute."
+                    }
+                  />
+                  <NavLinkMenuItem
+                    caption={"Unrelease"}
+                    path={"/admin/unrelease"}
+                    icon={
+                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
+                    description={
+                      " Re-use STAN labware that has previously been released."
                     }
                   />
                 </Menu>

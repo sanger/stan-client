@@ -31,6 +31,7 @@ const Menu: React.FC<MenuProps> = ({
   const buttonClass = topMostMenu
     ? "group rounded-md inline-flex  items-center px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-gray-700 text-gray-100 hover:text-white hover:bg-gray-700"
     : "w-full rounded-md inline-flex ml-4 justify-between outline-none focus:outline-none hover:bg-gray-50";
+
   const MenuDropDownIcon: React.FC<{ open: boolean }> = ({ open }) => {
     debugger;
     let rotatePos = open ? "180" : "0";
@@ -54,7 +55,7 @@ const Menu: React.FC<MenuProps> = ({
 
   const subMenuLayout = topMostMenu
     ? "relative"
-    : "relative rounded-lg hover:bg-gray-50 mb-8";
+    : "relative rounded-lg hover:bg-gray-50";
   return (
     <div className={subMenuLayout}>
       <div className={"flex"}>
@@ -94,7 +95,7 @@ const Menu: React.FC<MenuProps> = ({
                   "rounded-lg shadow-lg ring-1 ring-black ring-opacity-5"
                 }`}
               >
-                <div className="bg-white gap-6 px-5 py-6 sm:gap-8 sm:p-8 ">
+                <div className="bg-white grid gap-6 px-5 py-6 sm:gap-8 sm:p-8 ">
                   {children}
                 </div>
               </div>
