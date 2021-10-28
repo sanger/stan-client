@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+
+### Modified
+
+## [1.9.0] - 2021-10-28
+### Added
 - Staining QC page ([#69](https://github.com/sanger/stan-client/pull/69))
 - Homepage dashboard (Seena's first solo story 🥳) ([#70](https://github.com/sanger/stan-client/pull/70))
 
@@ -114,7 +119,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Everything!
 
-[Unreleased]: https://github.com/sanger/stan-client/compare/1.8.2...HEAD
+[Unreleased]: https://github.com/sanger/stan-client/compare/1.9.0...HEAD
+[1.9.0]: https://github.com/sanger/stan-client/compare/1.8.2...1.9.0
 [1.8.2]: https://github.com/sanger/stan-client/compare/1.8.1...1.8.2
 [1.8.1]: https://github.com/sanger/stan-client/compare/1.7.0...1.8.1
 [1.7.0]: https://github.com/sanger/stan-client/compare/1.6.0...1.7.0
