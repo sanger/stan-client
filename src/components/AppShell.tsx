@@ -139,8 +139,18 @@ function AppShell({ children }: AppShellParams) {
                     icon={
                       <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                     }
-                    description={"Recording RNA extraction and analysis"}
+                    description={"Recording RNA extraction and results"}
                   >
+                    <NavLinkMenuItem
+                      caption={"Extraction"}
+                      path="/lab/extraction"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Extract RNA from scraps obtained from Sectioning."
+                      }
+                    />
                     <NavLinkMenuItem
                       caption={"Extraction Result"}
                       path={"/lab/extraction_result"}
@@ -364,38 +374,54 @@ function AppShell({ children }: AppShellParams) {
                   className="py-6 px-2 space-y-6"
                 >
                   <div className="pt-4 border-t border-gray-700">
-                    <h3 className="px-3 text-sm font-medium text-sp-600">
+                    <h3 className="px-3 text-sm font-bold text-sp-600">
                       Lab Work
                     </h3>
-                    <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                    <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">
+                      Sectioning
+                    </h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/sectioning">
-                        Sectioning Planning
+                        Planning
                       </StanMobileNavLink>
 
                       <StanMobileNavLink to="/lab/sectioning/confirm">
-                        Sectioning Confirmation
+                        Confirmation
                       </StanMobileNavLink>
-
+                    </div>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">
+                      RNA
+                    </h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/extraction">
-                        RNA Extraction
+                        Extraction
                       </StanMobileNavLink>
 
                       <StanMobileNavLink to="/lab/extraction_result">
-                        RNA Extraction Result
+                        Extraction Result
                       </StanMobileNavLink>
-
-                      <StanMobileNavLink to="/lab/visium_cdna">
-                        Visium cDNA
-                      </StanMobileNavLink>
-
+                    </div>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">
+                      Staining
+                    </h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/staining">
-                        Staining
+                        Stain slides
                       </StanMobileNavLink>
 
                       <StanMobileNavLink to="/lab/staining_qc">
                         Staining QC
                       </StanMobileNavLink>
-
+                    </div>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">
+                      Visium
+                    </h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/visium_cdna">
+                        Visium cDNA
+                      </StanMobileNavLink>
+                    </div>
+                    <div className="grid grid-cols-2 mt-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/imaging">
                         Imaging
                       </StanMobileNavLink>
@@ -403,7 +429,7 @@ function AppShell({ children }: AppShellParams) {
                   </div>
 
                   <div className="pt-4 border-t border-gray-700">
-                    <h3 className="px-3 text-sm font-medium text-sp-600">
+                    <h3 className="px-3 text-sm font-bold text-sp-600">
                       Admin
                     </h3>
                     <div className="grid grid-cols-2 gap-y-4 gap-x-8">

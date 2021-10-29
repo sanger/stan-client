@@ -27,13 +27,8 @@ const Menu: React.FC<MenuProps> = ({
     menuButtonRef,
     menuDropdownRef
   );
-  // ml-4 text-base font-medium text-gray-900
-  const buttonClass = topMostMenu
-    ? "group rounded-md inline-flex  items-center px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-gray-700 text-gray-100 hover:text-white hover:bg-gray-700"
-    : "w-full rounded-md inline-flex ml-4 justify-between outline-none focus:outline-none hover:bg-gray-50";
 
   const MenuDropDownIcon: React.FC<{ open: boolean }> = ({ open }) => {
-    debugger;
     let rotatePos = open ? "180" : "0";
     return (
       <svg
@@ -53,11 +48,12 @@ const Menu: React.FC<MenuProps> = ({
     );
   };
 
-  const subMenuLayout = topMostMenu
-    ? "relative"
-    : "relative rounded-lg hover:bg-gray-50";
   return (
-    <div className={subMenuLayout}>
+    <div
+      className={`${
+        topMostMenu ? "relative" : "relative rounded-lg hover:bg-gray-50"
+      }`}
+    >
       <div className={"flex"}>
         <div className="flex flex-row w-full">
           {icon}
@@ -65,7 +61,11 @@ const Menu: React.FC<MenuProps> = ({
             ref={menuButtonRef}
             onClick={() => setMenuDropdownOpen(!menuDropdownOpen)}
             type="button"
-            className={buttonClass}
+            className={`rounded-md inline-flex focus:outline-none ${
+              topMostMenu
+                ? "group items-center px-3 py-2 rounded-md text-sm font-medium focus:text-white focus:bg-gray-700 text-gray-100 hover:text-white hover:bg-gray-700"
+                : "w-full ml-4 justify-between outline-none hover:bg-gray-50"
+            }`}
           >
             <div className={"flex flex-col"}>
               <span className={"text-left"}>{caption}</span>
@@ -90,12 +90,16 @@ const Menu: React.FC<MenuProps> = ({
               className="absolute z-10 left-1/2 transform -translate-x-1/2 mt-3 px-2 w-screen max-w-md sm:px-0"
             >
               <div
-                className={`overflow-hidden ${
-                  topMostMenu &&
-                  "rounded-lg shadow-lg ring-1 ring-black ring-opacity-5"
-                }`}
+                className={`rounded-lg  border-2 border-white
+                  ${
+                    topMostMenu
+                      ? "shadow-lg ring-black ring-1 ring-opacity-5"
+                      : "shadow-xl"
+                  }`}
               >
-                <div className="bg-white grid gap-6 px-5 py-6 sm:gap-8 sm:p-8 ">
+                <div
+                  className={`bg-white grid gap-6 px-5 py-6 sm:gap-8 sm:p-8`}
+                >
                   {children}
                 </div>
               </div>
