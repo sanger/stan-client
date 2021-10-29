@@ -139,7 +139,7 @@ function AppShell({ children }: AppShellParams) {
                     icon={
                       <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                     }
-                    description={"Recording RNA extraction and results"}
+                    description={"Recording RNA extraction and analysis"}
                   >
                     <NavLinkMenuItem
                       caption={"Extraction"}
@@ -159,6 +159,16 @@ function AppShell({ children }: AppShellParams) {
                       }
                       description={
                         "Record pass/fail results and concentration for RNA extractions."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"Analysis"}
+                      path={"/lab/rna_analysis"}
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Record RNA Analysis on tubes from RNA Extraction"
                       }
                     />
                   </Menu>
@@ -399,6 +409,9 @@ function AppShell({ children }: AppShellParams) {
 
                       <StanMobileNavLink to="/lab/extraction_result">
                         Extraction Result
+                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/rna_analysis">
+                        Analysis
                       </StanMobileNavLink>
                     </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">
