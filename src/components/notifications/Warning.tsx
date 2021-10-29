@@ -46,7 +46,7 @@ const Warning = ({
         />
       </svg>
       <div className="ml-2 flex-grow">
-        <p className="font-medium">{message}</p>
+        <p className="font-medium whitespace-pre-wrap">{message}</p>
 
         {serverErrors?.message && (
           <p className="mt-2">{serverErrors.message}</p>

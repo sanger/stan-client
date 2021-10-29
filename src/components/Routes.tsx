@@ -28,6 +28,7 @@ import Staining from "../pages/Staining";
 import RecordInPlace from "../pages/RecordInPlace";
 import WorkProgress from "../pages/WorkProgress";
 import StainingQC from "../pages/StainingQC";
+import Analysis from "../pages/Analysis";
 import Unrelease from "../pages/Unrelease";
 import ExtractionResult from "../pages/ExtractionResult";
 
@@ -75,6 +76,22 @@ export function Routes() {
       <AuthenticatedRoute
         path="/lab/extraction"
         render={(routerProps) => <Extraction key={routerProps.location.key} />}
+      />
+      <AuthenticatedRoute
+        path="/lab/rna_analysis"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() =>
+              stanCore.GetComments({
+                commentCategory: "analysis",
+                includeDisabled: true,
+              })
+            }
+          >
+            {(commentInfo) => <Analysis comments={commentInfo.comments} />}
+          </DataFetcher>
+        )}
       />
 
       <AuthenticatedRoute

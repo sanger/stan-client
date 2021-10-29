@@ -1,6 +1,7 @@
 fragment LabwareFields on Labware {
     id
     barcode
+    externalBarcode
     destroyed
     discarded
     released

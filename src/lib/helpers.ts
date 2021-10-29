@@ -16,6 +16,18 @@ export function objectKeys<E>(o: E): (keyof E)[] {
 }
 
 /**
+ * Utility to get the key from value for  a string enum
+ * @param enumObject enum to retrieve the key
+ * @param enumVal value for which the key to be retrieved
+ */
+export function enumKey<E extends { [index: string]: string }>(
+  enumObject: E,
+  enumVal: string
+): keyof E | undefined {
+  return Object.keys(enumObject).find((key) => enumObject[key] === enumVal);
+}
+
+/**
  * Generator for cycling through a list. Returns to the start once list is exhausted.
  * @param list list of anything
  */

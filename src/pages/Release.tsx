@@ -158,17 +158,17 @@ function Release({ releaseInfo }: PageParams) {
                     initial={"hidden"}
                     animate={"visible"}
                     exit={"hidden"}
-                    className="md:w-2/3 space-y-10"
+                    className="md:w-3/4 space-x-4 space-y-10"
                   >
                     {serverError && <Warning error={serverError} />}
-
                     <motion.div
                       variants={variants.fadeInWithLift}
-                      className="space-y-4"
+                      className="space-y-4 "
                     >
                       <Heading level={3}>Labware</Heading>
                       <MutedText>
-                        Please scan in the labware you wish to release.
+                        Please scan either the location or a piece of labware
+                        you wish to release.
                       </MutedText>
 
                       <LabwareScanner
@@ -180,6 +180,7 @@ function Release({ releaseInfo }: PageParams) {
                         }
                         locked={formLocked}
                         labwareCheckFunction={labwareBioStateCheck}
+                        enableLocationScanner={true}
                       >
                         <LabwareScanPanel
                           columns={[
@@ -191,6 +192,7 @@ function Release({ releaseInfo }: PageParams) {
                           ]}
                         />
                       </LabwareScanner>
+
                       <FormikErrorMessage name={"barcodes"} />
                     </motion.div>
 

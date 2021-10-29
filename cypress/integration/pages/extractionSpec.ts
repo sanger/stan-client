@@ -4,9 +4,9 @@ import {
 } from "../../../src/types/sdk";
 
 function scanInLabware() {
-  cy.get("#labwareScanInput").should("not.be.disabled").type("STAN-011{enter}");
-  cy.get("#labwareScanInput").should("not.be.disabled").type("STAN-012{enter}");
-  cy.get("#labwareScanInput").should("not.be.disabled").type("STAN-013{enter}");
+  cy.get("#labwareScanInput").type("STAN-011{enter}");
+  cy.get("#labwareScanInput").type("STAN-012{enter}");
+  cy.get("#labwareScanInput").type("STAN-013{enter}");
 }
 
 describe("RNA Extraction", () => {

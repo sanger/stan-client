@@ -2,6 +2,7 @@ import { createMachine } from "xstate";
 import * as Yup from "yup";
 import {
   FindLabwareQuery,
+  GetLabwareInLocationQuery,
   LabwareFieldsFragment,
   Maybe,
 } from "../../../types/sdk";
@@ -56,6 +57,11 @@ export interface LabwareContext {
    * The current error message
    */
   errorMessage: Maybe<string>;
+
+  /**
+   * Flag for Location barcode scan. If true, it will be  a location barcode scan, else a labware scan
+   */
+  locationScan?: boolean;
 }
 
 /**
@@ -64,6 +70,7 @@ export interface LabwareContext {
 type UpdateCurrentBarcodeEvent = {
   type: "UPDATE_CURRENT_BARCODE";
   value: string;
+  locationScan?: boolean;
 };
 
 /**
@@ -91,6 +98,15 @@ type ValidationErrorEvent = {
   data: Yup.ValidationError;
 };
 
+type FindLocationDoneEvent = {
+  type: "done.invoke.findLocation";
+  data: GetLabwareInLocationQuery;
+};
+
+type FindLocationErrorEvent = {
+  type: "error.platform.findLocation";
+  data: ClientError;
+};
 type FindLabwareDoneEvent = {
   type: "done.invoke.findLabware";
   data: FindLabwareQuery;
@@ -120,6 +136,8 @@ export type LabwareEvents =
   | ValidationErrorEvent
   | FindLabwareDoneEvent
   | FindLabwareErrorEvent
+  | FindLocationDoneEvent
+  | FindLocationErrorEvent
   | AddFoundLabwareEvent
   | FoundLabwareCheckErrorEvent;
 
@@ -157,6 +175,7 @@ export const createLabwareMachine = (
         validator: Yup.string().trim().required("Barcode is required"),
         successMessage: null,
         errorMessage: null,
+        locationScan: false,
       },
       id: "labwareScanner",
       initial: "idle",
@@ -199,9 +218,17 @@ export const createLabwareMachine = (
           invoke: {
             id: "validateBarcode",
             src: "validateBarcode",
-            onDone: {
-              target: "searching",
-            },
+            onDone: [
+              //If it is location barcode then transition to 'searchingLocation' otherwise to 'searching'
+              {
+                target: "searching",
+                cond: (ctx) => ctx.locationScan === false,
+              },
+              {
+                target: "searchingLocation",
+              },
+            ],
+
             onError: {
               target: "#labwareScanner.idle.error",
               actions: "assignValidationError",
@@ -218,7 +245,21 @@ export const createLabwareMachine = (
             },
             onError: {
               target: "#labwareScanner.idle.error",
-              actions: "assignFindLabwareError",
+              actions: "assignFindError",
+            },
+          },
+        },
+        searchingLocation: {
+          invoke: {
+            id: "findLocation",
+            src: "findLabwareInLocation",
+            onDone: {
+              target: "#labwareScanner.idle.normal",
+              actions: ["assignFoundLocationLabwareIfValid"],
+            },
+            onError: {
+              target: "#labwareScanner.idle.error",
+              actions: "assignFindError",
             },
           },
         },
@@ -245,13 +286,15 @@ export const createLabwareMachine = (
             return;
           }
           ctx.currentBarcode = e.value.replace(/\s+/g, "");
+          ctx.errorMessage = "";
+          ctx.locationScan = e.locationScan;
         }),
 
         assignErrorMessage: assign((ctx, e) => {
           if (e.type !== "SUBMIT_BARCODE") {
             return;
           }
-          ctx.errorMessage = `"${ctx.currentBarcode}" has already been scanned`;
+          ctx.errorMessage = alreadyScannedBarcodeError(ctx.currentBarcode);
         }),
 
         removeLabware: assign((ctx, e) => {
@@ -290,9 +333,52 @@ export const createLabwareMachine = (
         addFoundLabware: assign((ctx, e) => {
           if (e.type !== "done.invoke.validateFoundLabware") {
             return;
-          }
-          ctx.labwares.push(e.data);
+          } else ctx.labwares.push(e.data);
           ctx.foundLabware = null;
+        }),
+
+        assignFoundLocationLabwareIfValid: assign((ctx, e) => {
+          if (e.type !== "done.invoke.findLocation") {
+            return;
+          }
+          const problems: string[] = [];
+
+          e.data.labwareInLocation.filter(
+            (labware) =>
+              ctx.labwares.findIndex(
+                (ctxLabware) => ctxLabware.barcode === labware.barcode
+              ) === -1
+          );
+
+          //Validate all labwares in the location
+          e.data.labwareInLocation.forEach((labware) => {
+            //check whether this labware is already scanned, if not add to labware list, otherwise update error message
+            let problem: string[] = [];
+            if (
+              ctx.labwares.find(
+                (ctxLabware) => ctxLabware.barcode === labware.barcode
+              )
+            ) {
+              problem.push(alreadyScannedBarcodeError(labware.barcode));
+            } else {
+              /*Validate all the labwares in the location using the validation function passed.
+               If validation is success, add that labware to the list of labwares, otherwise add the error message
+               for failure*/
+              problem = ctx.foundLabwareCheck(
+                e.data.labwareInLocation,
+                labware
+              );
+            }
+            if (problem.length !== 0) {
+              problems.push(problem.join("\n"));
+            } else {
+              ctx.labwares.push(labware);
+            }
+          });
+          if (problems.length > 0) {
+            ctx.errorMessage = problems.join("\n");
+          }
+          ctx.currentBarcode = "";
         }),
 
         // No-op. Can be overidden when creating the machine.
@@ -305,8 +391,11 @@ export const createLabwareMachine = (
           ctx.errorMessage = e.data.join("\n");
         }),
 
-        assignFindLabwareError: assign((ctx, e) => {
-          if (e.type !== "error.platform.findLabware") {
+        assignFindError: assign((ctx, e) => {
+          if (
+            e.type !== "error.platform.findLabware" &&
+            e.type !== "error.platform.findLocation"
+          ) {
             return;
           }
           const matchResult = e.data.message.match(/^.*\s:\s(.*)$/);
@@ -323,8 +412,14 @@ export const createLabwareMachine = (
         },
       },
       services: {
-        findLabwareByBarcode: (ctx: LabwareContext) =>
-          stanCore.FindLabware({ barcode: ctx.currentBarcode }),
+        findLabwareByBarcode: (ctx: LabwareContext) => {
+          return stanCore.FindLabware({ barcode: ctx.currentBarcode });
+        },
+        findLabwareInLocation: (ctx: LabwareContext) => {
+          return stanCore.GetLabwareInLocation({
+            locationBarcode: ctx.currentBarcode,
+          });
+        },
         validateBarcode: (ctx: LabwareContext) =>
           ctx.validator.validate(ctx.currentBarcode),
         validateFoundLabware: (ctx: LabwareContext) => {
@@ -342,3 +437,7 @@ export const createLabwareMachine = (
       },
     }
   );
+
+const alreadyScannedBarcodeError = (barcode: string) => {
+  return `"${barcode}" has already been scanned`;
+};

@@ -150,6 +150,7 @@ export type Labware = {
   __typename?: 'Labware';
   id: Scalars['Int'];
   barcode: Scalars['String'];
+  externalBarcode?: Maybe<Scalars['String']>;
   labwareType: LabwareType;
   slots: Array<Slot>;
   released: Scalars['Boolean'];
@@ -674,7 +675,29 @@ export type ExtractResultRequest = {
   labware: Array<ExtractResultLabware>;
   workNumber?: Maybe<Scalars['String']>;
 };
+export type ExtractResult = {
+  __typename?: 'ExtractResult';
+  labware: Labware;
+  result?: Maybe<PassFail>;
+  concentration?: Maybe<Scalars['String']>;
+};
 
+export type StringMeasurement = {
+  name: Scalars['String'];
+  value: Scalars['String'];
+};
+
+export type RnaAnalysisLabware = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  commentId?: Maybe<Scalars['Int']>;
+  measurements: Array<StringMeasurement>;
+};
+
+export type RnaAnalysisRequest = {
+  operationType: Scalars['String'];
+  labware: Array<RnaAnalysisLabware>;
+};
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -702,6 +725,7 @@ export type Query = {
   find: FindResult;
   planData: PlanData;
   stainTypes: Array<StainType>;
+  extractResult: ExtractResult;
   historyForSampleId: History;
   historyForExternalName: History;
   historyForDonorName: History;
@@ -709,6 +733,7 @@ export type Query = {
   workProgress: Array<WorkProgress>;
   location: Location;
   stored: Array<StoredItem>;
+  labwareInLocation: Array<Labware>;
 };
 
 
@@ -809,6 +834,11 @@ export type QueryPlanDataArgs = {
 };
 
 
+export type QueryExtractResultArgs = {
+  barcode: Scalars['String'];
+};
+
+
 export type QueryHistoryForSampleIdArgs = {
   sampleId: Scalars['Int'];
 };
@@ -843,6 +873,11 @@ export type QueryLocationArgs = {
 
 export type QueryStoredArgs = {
   barcodes: Array<Scalars['String']>;
+};
+
+
+export type QueryLabwareInLocationArgs = {
+  locationBarcode: Scalars['String'];
 };
 
 export type Mutation = {
@@ -890,6 +925,7 @@ export type Mutation = {
   unrelease: OperationResult;
   recordStainResult: OperationResult;
   recordExtractResult: OperationResult;
+  recordRNAAnalysis: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
@@ -1133,6 +1169,9 @@ export type MutationRecordExtractResultArgs = {
 };
 
 
+export type MutationRecordRnaAnalysisArgs = {
+  request: RnaAnalysisRequest;
+};
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1217,7 +1256,7 @@ export type HmdmcFieldsFragment = (
 
 export type LabwareFieldsFragment = (
   { __typename?: 'Labware' }
-  & Pick<Labware, 'id' | 'barcode' | 'destroyed' | 'discarded' | 'released' | 'state' | 'created'>
+  & Pick<Labware, 'id' | 'barcode' | 'externalBarcode' | 'destroyed' | 'discarded' | 'released' | 'state' | 'created'>
   & { labwareType: (
     { __typename?: 'LabwareType' }
     & LabwareTypeFieldsFragment
@@ -1313,6 +1352,12 @@ export type SampleFieldsFragment = (
         { __typename?: 'TissueType' }
         & Pick<TissueType, 'name'>
       ) }
+    ), medium: (
+      { __typename?: 'Medium' }
+      & Pick<Medium, 'name'>
+    ), fixative: (
+      { __typename?: 'Fixative' }
+      & Pick<Fixative, 'name' | 'enabled'>
     ) }
   ), bioState: (
     { __typename?: 'BioState' }
@@ -1767,6 +1812,22 @@ export type RecordInPlaceMutation = (
   ) }
 );
 
+export type RecordRnaAnalysisMutationVariables = Exact<{
+  request: RnaAnalysisRequest;
+}>;
+
+
+export type RecordRnaAnalysisMutation = (
+  { __typename?: 'Mutation' }
+  & { recordRNAAnalysis: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
+);
+
 export type RecordStainResultMutationVariables = Exact<{
   request: ResultRequest;
 }>;
@@ -2155,6 +2216,23 @@ export type CurrentUserQuery = (
   )> }
 );
 
+export type ExtractResultQueryVariables = Exact<{
+  barcode: Scalars['String'];
+}>;
+
+
+export type ExtractResultQuery = (
+  { __typename?: 'Query' }
+  & { extractResult: (
+    { __typename?: 'ExtractResult' }
+    & Pick<ExtractResult, 'result' | 'concentration'>
+    & { labware: (
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    ) }
+  ) }
+);
+
 export type FindQueryVariables = Exact<{
   request: FindRequest;
 }>;
@@ -2343,6 +2421,19 @@ export type FindWorkNumbersQuery = (
     & Pick<Work, 'workNumber'>
   )> }
 );
+export type GetCommentsQueryVariables = Exact<{
+  commentCategory?: Maybe<Scalars['String']>;
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+}>;
+
+
+export type GetCommentsQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
 
 export type FindWorkProgressQueryVariables = Exact<{
   workNumber?: Maybe<Scalars['String']>;
@@ -2421,6 +2512,19 @@ export type GetDestructionReasonsQuery = (
   & { destructionReasons: Array<(
     { __typename?: 'DestructionReason' }
     & DestructionReasonFieldsFragment
+  )> }
+);
+
+export type GetLabwareInLocationQueryVariables = Exact<{
+  locationBarcode: Scalars['String'];
+}>;
+
+
+export type GetLabwareInLocationQuery = (
+  { __typename?: 'Query' }
+  & { labwareInLocation: Array<(
+    { __typename?: 'Labware' }
+    & LabwareFieldsFragment
   )> }
 );
 
@@ -2654,6 +2758,13 @@ export const SampleFieldsFragmentDoc = gql`
       code
     }
     replicate
+    medium {
+      name
+    }
+    fixative {
+      name
+      enabled
+    }
   }
   bioState {
     name
@@ -2675,6 +2786,7 @@ export const LabwareFieldsFragmentDoc = gql`
     fragment LabwareFields on Labware {
   id
   barcode
+  externalBarcode
   destroyed
   discarded
   released
@@ -3100,6 +3212,15 @@ export const RecordInPlaceDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const RecordRnaAnalysisDocument = gql`
+    mutation RecordRNAAnalysis($request: RNAAnalysisRequest!) {
+  recordRNAAnalysis(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const RecordStainResultDocument = gql`
     mutation RecordStainResult($request: ResultRequest!) {
   recordStainResult(request: $request) {
@@ -3323,6 +3444,17 @@ export const CurrentUserDocument = gql`
   }
 }
     ${UserFieldsFragmentDoc}`;
+export const ExtractResultDocument = gql`
+    query ExtractResult($barcode: String!) {
+  extractResult(barcode: $barcode) {
+    result
+    concentration
+    labware {
+      ...LabwareFields
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const FindDocument = gql`
     query Find($request: FindRequest!) {
   find(request: $request) {
@@ -3457,6 +3589,13 @@ export const FindWorkNumbersDocument = gql`
   }
 }
     `;
+export const GetCommentsDocument = gql`
+    query GetComments($commentCategory: String, $includeDisabled: Boolean) {
+  comments(category: $commentCategory, includeDisabled: $includeDisabled) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const FindWorkProgressDocument = gql`
     query FindWorkProgress($workNumber: String, $workType: String, $status: WorkStatus) {
   workProgress(workNumber: $workNumber, workType: $workType, status: $status) {
@@ -3525,6 +3664,13 @@ export const GetDestructionReasonsDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
+export const GetLabwareInLocationDocument = gql`
+    query GetLabwareInLocation($locationBarcode: String!) {
+  labwareInLocation(locationBarcode: $locationBarcode) {
+    ...LabwareFields
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
@@ -3727,6 +3873,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     RecordInPlace(variables: RecordInPlaceMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordInPlaceMutation> {
       return withWrapper(() => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, requestHeaders));
     },
+    RecordRNAAnalysis(variables: RecordRnaAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordRnaAnalysisMutation> {
+      return withWrapper(() => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, requestHeaders));
+    },
     RecordStainResult(variables: RecordStainResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordStainResultMutation> {
       return withWrapper(() => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, requestHeaders));
     },
@@ -3802,6 +3951,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     CurrentUser(variables?: CurrentUserQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CurrentUserQuery> {
       return withWrapper(() => client.request<CurrentUserQuery>(CurrentUserDocument, variables, requestHeaders));
     },
+    ExtractResult(variables: ExtractResultQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ExtractResultQuery> {
+      return withWrapper(() => client.request<ExtractResultQuery>(ExtractResultDocument, variables, requestHeaders));
+    },
     Find(variables: FindQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindQuery> {
       return withWrapper(() => client.request<FindQuery>(FindDocument, variables, requestHeaders));
     },
@@ -3835,6 +3987,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     FindWorkProgress(variables?: FindWorkProgressQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkProgressQuery> {
       return withWrapper(() => client.request<FindWorkProgressQuery>(FindWorkProgressDocument, variables, requestHeaders));
     },
+    GetComments(variables?: GetCommentsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetCommentsQuery> {
+      return withWrapper(() => client.request<GetCommentsQuery>(GetCommentsDocument, variables, requestHeaders));
+    },
     GetConfiguration(variables?: GetConfigurationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetConfigurationQuery> {
       return withWrapper(() => client.request<GetConfigurationQuery>(GetConfigurationDocument, variables, requestHeaders));
     },
@@ -3843,6 +3998,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetDestructionReasons(variables?: GetDestructionReasonsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestructionReasonsQuery> {
       return withWrapper(() => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, requestHeaders));
+    },
+    GetLabwareInLocation(variables: GetLabwareInLocationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetLabwareInLocationQuery> {
+      return withWrapper(() => client.request<GetLabwareInLocationQuery>(GetLabwareInLocationDocument, variables, requestHeaders));
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
       return withWrapper(() => client.request<GetPrintersQuery>(GetPrintersDocument, variables, requestHeaders));

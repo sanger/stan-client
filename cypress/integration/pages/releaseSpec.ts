@@ -1,7 +1,12 @@
 import {
+  GetLabwareInLocationQuery,
+  GetLabwareInLocationQueryVariables,
   ReleaseLabwareMutation,
   ReleaseLabwareMutationVariables,
 } from "../../../src/types/sdk";
+import { buildLabwareFragment } from "../../../src/lib/helpers/labwareHelper";
+import { labwareTypeInstances } from "../../../src/lib/factories/labwareTypeFactory";
+import labwareFactory from "../../../src/lib/factories/labwareFactory";
 
 describe("Release Page", () => {
   before(() => {
@@ -47,6 +52,7 @@ describe("Release Page", () => {
     "when form is submitted with a labware that has already been released",
     () => {
       before(() => {
+        cy.visit("/admin/release");
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<
@@ -67,8 +73,6 @@ describe("Release Page", () => {
           );
         });
 
-        cy.visit("/admin/release");
-
         fillInForm();
       });
 
@@ -83,17 +87,80 @@ describe("Release Page", () => {
       });
     }
   );
-});
 
+  context(
+    "when location barcode is scanned with a labware which is already released",
+    () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<
+              GetLabwareInLocationQuery,
+              GetLabwareInLocationQueryVariables
+            >("GetLabwareInLocation", (req, res, ctx) => {
+              // The number after STAN- determines what kind of labware will be returned
+              const labwaresBarcodes: string[] = [
+                "STAN-3111",
+                "STAN-3112",
+                "STAN-3113",
+              ];
+              const labwares = labwaresBarcodes.map((barcode) => {
+                const magicNumber = parseInt(barcode.substr(5, 1));
+                const labwareType =
+                  labwareTypeInstances[
+                    magicNumber % labwareTypeInstances.length
+                  ];
+                // The number after that determines how many samples to put in each slot
+                const samplesPerSlot = parseInt(barcode.substr(6, 1));
+
+                const labware = labwareFactory.build(
+                  {
+                    barcode: barcode,
+                  },
+                  {
+                    transient: {
+                      samplesPerSlot,
+                    },
+                    associations: {
+                      labwareType,
+                    },
+                  }
+                );
+                return buildLabwareFragment(labware);
+              });
+              labwares[0].released = true;
+              return res(
+                ctx.data({
+                  labwareInLocation: labwares,
+                })
+              );
+            })
+          );
+        });
+        cy.get("#locationScanInput").clear().type("STO-111{enter}");
+      });
+      it("should display a table with STAN-3112", () => {
+        cy.findByRole("table").should("contain.text", "STAN-3112");
+      });
+      it("should display warning message that STAN-3111 is released", () => {
+        cy.findByText("Labware STAN-3111 has already been released.").should(
+          "exist"
+        );
+      });
+    }
+  );
+  context("when location barcode is scanned", () => {
+    before(() => {
+      cy.get("#locationScanInput").clear().type("STO-11{enter}");
+    });
+    it("should display a table", () => {
+      cy.findByRole("table").should("exist");
+    });
+  });
+});
 function fillInForm() {
-  cy.get("#labwareScanInput")
-    .should("not.be.disabled")
-    .wait(1000)
-    .type("STAN-123{enter}");
-  cy.get("#labwareScanInput")
-    .should("not.be.disabled")
-    .wait(1000)
-    .type("STAN-456{enter}");
+  cy.get("#labwareScanInput").type("STAN-123{enter}");
+  cy.get("#labwareScanInput").type("STAN-456{enter}");
   cy.findByLabelText("Group/Team").select("Vento lab");
   cy.findByLabelText("Contact").select("cs41");
   cy.findByRole("button", { name: /Release Labware/i }).click();
