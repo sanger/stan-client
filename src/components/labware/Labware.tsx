@@ -243,7 +243,7 @@ const Labware = ({
       slotColumns[index % numColumns].push(slot);
     });
     return slotColumns;
-  }, [numColumns, slots, slotBuilder]);
+  }, [numColumns, slots]);
 
   /***
    * Component to display a column of slot fields that contains a label with slot address and component returned by SlotBuilder callback
