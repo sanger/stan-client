@@ -229,7 +229,7 @@ const Labware = ({
   );
 
   /***
-   * This creates an array of slots with the same column layout as of labware type
+   * This creates an array of slots with the same column layout as of the labware type
    */
   const slotColumns = React.useMemo(() => {
     if (numColumns > 2) return [];
@@ -281,7 +281,6 @@ const Labware = ({
           numRows={numRows}
         />
       )}
-
       <div onClick={() => onClick?.()} className={labwareClasses}>
         <div className={gridClasses}>
           {buildAddresses({ numColumns, numRows }).map((address, i) => (
