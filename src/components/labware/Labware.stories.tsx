@@ -5,7 +5,10 @@ import * as slotHelper from "../../lib/helpers/slotHelper";
 import Labware from "./Labware";
 import {
   plateFactory,
+  slideFactory,
+  tubeFactory,
   visiumLPFactory,
+  visiumTOFactory,
 } from "../../lib/factories/labwareFactory";
 import {
   emptySlotFactory,
@@ -54,4 +57,35 @@ Plate.args = {
 export const VisiumLP = Template.bind({});
 VisiumLP.args = {
   labware: visiumLPFactory.build(),
+};
+
+export const TUBE = Template.bind({});
+const tube = tubeFactory.build();
+
+const slotBuilder = () => {
+  return (
+    <select>
+      <option value="Fail">Fail</option>
+      <option value="Success">Success</option>
+    </select>
+  );
+};
+TUBE.args = {
+  labware: tube,
+  slotBuilder: slotBuilder,
+};
+
+export const SLIDE = Template.bind({});
+const slide = slideFactory.build();
+
+SLIDE.args = {
+  labware: slide,
+  slotBuilder: slotBuilder,
+};
+
+export const VISIUMTO = Template.bind({});
+const visiumTO = visiumTOFactory.build();
+VISIUMTO.args = {
+  labware: visiumTO,
+  slotBuilder: slotBuilder,
 };

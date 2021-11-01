@@ -107,6 +107,13 @@ export interface LabwareProps {
   slotColor?: (address: string, slot: SlotFieldsFragment) => string | undefined;
 
   labwareRef?: React.RefObject<LabwareImperativeRef>;
+
+  /**
+   * A callback that will be called for each slot in the labware. Must return a react component that will be placed
+   * in the labelled slot beside the component
+   * @param slot a slot on the given labware
+   */
+  slotBuilder?: (slot: SlotFieldsFragment) => React.ReactNode;
 }
 
 export type LabwareImperativeRef = {
@@ -136,6 +143,7 @@ const Labware = ({
   slotSecondaryText,
   slotColor,
   labwareRef,
+  slotBuilder,
 }: React.PropsWithChildren<LabwareProps>) => {
   const [current, send] = useMachine(
     createLabwareMachine({
@@ -220,37 +228,98 @@ const Labware = ({
     [send]
   );
 
-  return (
-    <div onClick={() => onClick?.()} className={labwareClasses}>
+  /***
+   * This creates an array of slots with the same column layout as of labware type
+   */
+  const slotColumns = React.useMemo(() => {
+    if (numColumns > 2) return [];
+    const slotColumns: Array<SlotFieldsFragment[]> = new Array<
+      SlotFieldsFragment[]
+    >(numColumns);
+    slots.map((slot, index) => {
+      const colIndex = index % numColumns;
+      if (!slotColumns[colIndex])
+        slotColumns[colIndex] = new Array<SlotFieldsFragment>();
+      slotColumns[index % numColumns].push(slot);
+    });
+    return slotColumns;
+  }, [numColumns, slots, slotBuilder]);
+
+  /***
+   * Component to display a column of slot fields that contains a label with slot address and component returned by SlotBuilder callback
+   */
+  const SlotColumnInfo = ({
+    slotColumn,
+    slotBuilder,
+    numRows,
+    alignRight = false,
+  }: {
+    slotColumn: SlotFieldsFragment[];
+    slotBuilder: (slot: SlotFieldsFragment) => React.ReactNode;
+    numRows: number;
+    alignRight?: boolean;
+  }) => {
+    const gridClasses = `px-10 pt-4 gap-4 content-center grid grid-rows-${numRows} grid-cols-1 py-4 select-none`;
+    return (
       <div className={gridClasses}>
-        {buildAddresses({ numColumns, numRows }).map((address, i) => (
-          <Slot
-            key={i}
-            address={address}
-            slot={slotByAddress[address]}
-            size={numColumns > 6 || numRows > 6 ? "small" : "large"}
-            onClick={internalOnClick}
-            onCtrlClick={onCtrlClick}
-            onShiftClick={onShiftClick}
-            onMouseEnter={onSlotMouseEnter}
-            onMouseLeave={onSlotMouseLeave}
-            text={slotText}
-            secondaryText={slotSecondaryText}
-            color={_slotColor}
-            selected={selectedAddresses.has(address)}
-          />
+        {slotColumn.map((slot) => (
+          <div className={`flex flex-col ${alignRight && "items-end"}`}>
+            <div className={"flex"}>{slot.address}</div>
+            <div className={"flex"}>{slotBuilder(slot)}</div>
+          </div>
         ))}
       </div>
+    );
+  };
 
-      <div className="flex flex-col items-start justify-between py-1 px-2 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-        {name && <span>{name}</span>}
-        {barcode && (
-          <span className="inline-flex">
-            <BarcodeIcon className="mr-1 h-4 w-4 text-gray-500" />
-            {barcode}
-          </span>
-        )}
+  return (
+    <div className={"flex flex-row"}>
+      {slotColumns.length > 0 && slotBuilder && (
+        <SlotColumnInfo
+          slotColumn={slotColumns[0]}
+          slotBuilder={slotBuilder}
+          numRows={numRows}
+        />
+      )}
+
+      <div onClick={() => onClick?.()} className={labwareClasses}>
+        <div className={gridClasses}>
+          {buildAddresses({ numColumns, numRows }).map((address, i) => (
+            <Slot
+              key={i}
+              address={address}
+              slot={slotByAddress[address]}
+              size={numColumns > 6 || numRows > 6 ? "small" : "large"}
+              onClick={internalOnClick}
+              onCtrlClick={onCtrlClick}
+              onShiftClick={onShiftClick}
+              onMouseEnter={onSlotMouseEnter}
+              onMouseLeave={onSlotMouseLeave}
+              text={slotText}
+              secondaryText={slotSecondaryText}
+              color={_slotColor}
+              selected={selectedAddresses.has(address)}
+            />
+          ))}
+        </div>
+
+        <div className="flex flex-col items-start justify-between py-1 px-2 text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+          {name && <span>{name}</span>}
+          {barcode && (
+            <span className="inline-flex">
+              <BarcodeIcon className="mr-1 h-4 w-4 text-gray-500" />
+              {barcode}
+            </span>
+          )}
+        </div>
       </div>
+      {slotColumns.length > 1 && slotBuilder && (
+        <SlotColumnInfo
+          slotColumn={slotColumns[1]}
+          slotBuilder={slotBuilder}
+          numRows={numRows}
+        />
+      )}
     </div>
   );
 };
