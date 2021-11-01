@@ -8,7 +8,7 @@ import Warning from "../notifications/Warning";
 import { isFunction } from "lodash";
 import { usePrevious } from "../../lib/hooks";
 
-type LabwareScannerProps = {
+export type LabwareScannerProps = {
   /**
    * The initial list of labwares the scanner should be displaying
    */
@@ -18,6 +18,11 @@ type LabwareScannerProps = {
    * True is the scanner should be locked; false otherwise
    */
   locked?: boolean;
+
+  /**
+   * The maximum number of labwares the scanner should be able to have scanned in at one time
+   */
+  limit?: number;
 
   /**
    * A function to check for problems with new labware because it is added
@@ -60,6 +65,7 @@ type LabwareScannerProps = {
 export default function LabwareScanner({
   initialLabwares = [],
   locked = false,
+  limit,
   labwareCheckFunction,
   onChange,
   onAdd,
@@ -67,8 +73,12 @@ export default function LabwareScanner({
   children,
   enableLocationScanner,
 }: LabwareScannerProps) {
+  if (limit && initialLabwares.length > limit) {
+    initialLabwares = initialLabwares.slice(0, limit);
+  }
+
   const [current, send, service] = useMachine(
-    createLabwareMachine(initialLabwares, labwareCheckFunction)
+    createLabwareMachine(initialLabwares, labwareCheckFunction, limit)
   );
 
   const {
@@ -189,7 +199,7 @@ export default function LabwareScanner({
             id="labwareScanInput"
             type="text"
             value={locationScan ? "" : currentBarcode}
-            disabled={current.matches("locked")}
+            disabled={current.matches("locked") || current.matches("full")}
             onChange={handleOnScanInputChange}
             onScan={handleOnScan}
           />

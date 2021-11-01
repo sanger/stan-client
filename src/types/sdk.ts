@@ -39,6 +39,11 @@ export enum PassFail {
   Fail = 'fail'
 }
 
+export enum ControlType {
+  Positive = 'positive',
+  Negative = 'negative'
+}
+
 export type User = {
   __typename?: 'User';
   username: Scalars['String'];
@@ -675,29 +680,19 @@ export type ExtractResultRequest = {
   labware: Array<ExtractResultLabware>;
   workNumber?: Maybe<Scalars['String']>;
 };
-export type ExtractResult = {
-  __typename?: 'ExtractResult';
-  labware: Labware;
-  result?: Maybe<PassFail>;
-  concentration?: Maybe<Scalars['String']>;
+
+export type PermData = {
+  address: Scalars['Address'];
+  seconds?: Maybe<Scalars['Int']>;
+  controlType?: Maybe<ControlType>;
 };
 
-export type StringMeasurement = {
-  name: Scalars['String'];
-  value: Scalars['String'];
-};
-
-export type RnaAnalysisLabware = {
+export type RecordPermRequest = {
   barcode: Scalars['String'];
   workNumber?: Maybe<Scalars['String']>;
-  commentId?: Maybe<Scalars['Int']>;
-  measurements: Array<StringMeasurement>;
+  permData: Array<PermData>;
 };
 
-export type RnaAnalysisRequest = {
-  operationType: Scalars['String'];
-  labware: Array<RnaAnalysisLabware>;
-};
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -725,7 +720,6 @@ export type Query = {
   find: FindResult;
   planData: PlanData;
   stainTypes: Array<StainType>;
-  extractResult: ExtractResult;
   historyForSampleId: History;
   historyForExternalName: History;
   historyForDonorName: History;
@@ -733,6 +727,7 @@ export type Query = {
   workProgress: Array<WorkProgress>;
   location: Location;
   stored: Array<StoredItem>;
+  extractResult: ExtractResult;
   labwareInLocation: Array<Labware>;
 };
 
@@ -834,11 +829,6 @@ export type QueryPlanDataArgs = {
 };
 
 
-export type QueryExtractResultArgs = {
-  barcode: Scalars['String'];
-};
-
-
 export type QueryHistoryForSampleIdArgs = {
   sampleId: Scalars['Int'];
 };
@@ -876,12 +866,18 @@ export type QueryStoredArgs = {
 };
 
 
+export type QueryExtractResultArgs = {
+  barcode: Scalars['String'];
+};
+
+
 export type QueryLabwareInLocationArgs = {
   locationBarcode: Scalars['String'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
+  recordRNAAnalysis: OperationResult;
   login: LoginResult;
   logout?: Maybe<Scalars['String']>;
   register: RegisterResult;
@@ -925,13 +921,18 @@ export type Mutation = {
   unrelease: OperationResult;
   recordStainResult: OperationResult;
   recordExtractResult: OperationResult;
-  recordRNAAnalysis: OperationResult;
+  recordPerm: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
   setLocationCustomName: Location;
+};
+
+
+export type MutationRecordRnaAnalysisArgs = {
+  request: RnaAnalysisRequest;
 };
 
 
@@ -1169,9 +1170,11 @@ export type MutationRecordExtractResultArgs = {
 };
 
 
-export type MutationRecordRnaAnalysisArgs = {
-  request: RnaAnalysisRequest;
+export type MutationRecordPermArgs = {
+  request: RecordPermRequest;
 };
+
+
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1203,6 +1206,30 @@ export type MutationEmptyArgs = {
 export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
+};
+
+export type ExtractResult = {
+  __typename?: 'ExtractResult';
+  labware: Labware;
+  result?: Maybe<PassFail>;
+  concentration?: Maybe<Scalars['String']>;
+};
+
+export type StringMeasurement = {
+  name: Scalars['String'];
+  value: Scalars['String'];
+};
+
+export type RnaAnalysisLabware = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  commentId?: Maybe<Scalars['Int']>;
+  measurements: Array<StringMeasurement>;
+};
+
+export type RnaAnalysisRequest = {
+  operationType: Scalars['String'];
+  labware: Array<RnaAnalysisLabware>;
 };
 
 export type CommentFieldsFragment = (
@@ -1808,6 +1835,22 @@ export type RecordInPlaceMutation = (
     & { labware: Array<(
       { __typename?: 'Labware' }
       & LabwareFieldsFragment
+    )> }
+  ) }
+);
+
+export type RecordPermMutationVariables = Exact<{
+  request: RecordPermRequest;
+}>;
+
+
+export type RecordPermMutation = (
+  { __typename?: 'Mutation' }
+  & { recordPerm: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
     )> }
   ) }
 );
@@ -2421,19 +2464,6 @@ export type FindWorkNumbersQuery = (
     & Pick<Work, 'workNumber'>
   )> }
 );
-export type GetCommentsQueryVariables = Exact<{
-  commentCategory?: Maybe<Scalars['String']>;
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-}>;
-
-
-export type GetCommentsQuery = (
-  { __typename?: 'Query' }
-  & { comments: Array<(
-    { __typename?: 'Comment' }
-    & CommentFieldsFragment
-  )> }
-);
 
 export type FindWorkProgressQueryVariables = Exact<{
   workNumber?: Maybe<Scalars['String']>;
@@ -2447,6 +2477,20 @@ export type FindWorkProgressQuery = (
   & { workProgress: Array<(
     { __typename?: 'WorkProgress' }
     & WorkProgressFieldsFragment
+  )> }
+);
+
+export type GetCommentsQueryVariables = Exact<{
+  commentCategory?: Maybe<Scalars['String']>;
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+}>;
+
+
+export type GetCommentsQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
   )> }
 );
 
@@ -3212,6 +3256,15 @@ export const RecordInPlaceDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const RecordPermDocument = gql`
+    mutation RecordPerm($request: RecordPermRequest!) {
+  recordPerm(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const RecordRnaAnalysisDocument = gql`
     mutation RecordRNAAnalysis($request: RNAAnalysisRequest!) {
   recordRNAAnalysis(request: $request) {
@@ -3589,13 +3642,6 @@ export const FindWorkNumbersDocument = gql`
   }
 }
     `;
-export const GetCommentsDocument = gql`
-    query GetComments($commentCategory: String, $includeDisabled: Boolean) {
-  comments(category: $commentCategory, includeDisabled: $includeDisabled) {
-    ...CommentFields
-  }
-}
-    ${CommentFieldsFragmentDoc}`;
 export const FindWorkProgressDocument = gql`
     query FindWorkProgress($workNumber: String, $workType: String, $status: WorkStatus) {
   workProgress(workNumber: $workNumber, workType: $workType, status: $status) {
@@ -3603,6 +3649,13 @@ export const FindWorkProgressDocument = gql`
   }
 }
     ${WorkProgressFieldsFragmentDoc}`;
+export const GetCommentsDocument = gql`
+    query GetComments($commentCategory: String, $includeDisabled: Boolean) {
+  comments(category: $commentCategory, includeDisabled: $includeDisabled) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetConfigurationDocument = gql`
     query GetConfiguration {
   destructionReasons(includeDisabled: true) {
@@ -3872,6 +3925,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     RecordInPlace(variables: RecordInPlaceMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordInPlaceMutation> {
       return withWrapper(() => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, requestHeaders));
+    },
+    RecordPerm(variables: RecordPermMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordPermMutation> {
+      return withWrapper(() => client.request<RecordPermMutation>(RecordPermDocument, variables, requestHeaders));
     },
     RecordRNAAnalysis(variables: RecordRnaAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordRnaAnalysisMutation> {
       return withWrapper(() => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, requestHeaders));
