@@ -2198,6 +2198,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   font-family: Helvetica Neue, Arial, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+.font-normal {
+  font-weight: 400;
+}
+
 .font-medium {
   font-weight: 500;
 }
@@ -2473,10 +2477,6 @@ svg.logo.loading rect:nth-child(3n+1) {
 
 .-mr-2 {
   margin-right: -0.5rem;
-}
-
-.-ml-4 {
-  margin-left: -1rem;
 }
 
 .-mt-px {
@@ -3514,12 +3514,6 @@ svg.logo.loading rect:nth-child(3n+1) {
     margin-left: calc(0.75rem * calc(1 - var(--tw-space-x-reverse)));
   }
 
-  .sm\:space-x-10 > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-x-reverse: 0;
-    margin-right: calc(2.5rem * var(--tw-space-x-reverse));
-    margin-left: calc(2.5rem * calc(1 - var(--tw-space-x-reverse)));
-  }
-
   .sm\:space-x-12 > :not([hidden]) ~ :not([hidden]) {
     --tw-space-x-reverse: 0;
     margin-right: calc(3rem * var(--tw-space-x-reverse));
@@ -3626,16 +3620,6 @@ svg.logo.loading rect:nth-child(3n+1) {
   .sm\:px-6 {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
-  }
-
-  .sm\:py-8 {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-  }
-
-  .sm\:px-8 {
-    padding-left: 2rem;
-    padding-right: 2rem;
   }
 
   .sm\:pb-4 {
@@ -4031,10 +4015,6 @@ svg.logo.loading rect:nth-child(3n+1) {
     margin-right: -2rem;
   }
 
-  .lg\:ml-0 {
-    margin-left: 0;
-  }
-
   .lg\:px-8 {
     padding-left: 2rem;
     padding-right: 2rem;
@@ -4078,10 +4058,6 @@ svg.logo.loading rect:nth-child(3n+1) {
     --tw-scale-y: 1;
     -webkit-transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
             transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-  }
-
-  .lg\:-translate-x-1\/2 {
-    --tw-translate-x: -50%;
   }
 
   .lg\:translate-x-1\/2 {
@@ -4311,4 +4287,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.fcac3219.chunk.css.map*/
+/*# sourceMappingURL=main.13b5d354.chunk.css.map*/
