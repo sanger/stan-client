@@ -236,7 +236,7 @@ const Labware = ({
     const slotColumns: Array<SlotFieldsFragment[]> = new Array<
       SlotFieldsFragment[]
     >(numColumns);
-    slots.map((slot, index) => {
+    slots.forEach((slot, index) => {
       const colIndex = index % numColumns;
       if (!slotColumns[colIndex])
         slotColumns[colIndex] = new Array<SlotFieldsFragment>();
