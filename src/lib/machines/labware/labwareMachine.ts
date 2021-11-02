@@ -212,7 +212,13 @@ export const createLabwareMachine = (
           },
         },
         locked: {
-          on: { UNLOCK: "idle" },
+          on: {
+            UNLOCK: "idle",
+            REMOVE_LABWARE: {
+              target: "#labwareScanner.idle.success",
+              actions: ["removeLabware"],
+            },
+          },
         },
         validating: {
           invoke: {

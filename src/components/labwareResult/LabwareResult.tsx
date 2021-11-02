@@ -1,9 +1,7 @@
 import React, { useEffect } from "react";
 import Labware from "../labware/Labware";
-import { sortRightDown } from "../../lib/helpers/labwareHelper";
 import { Select } from "../forms/Select";
 import { optionValues } from "../forms";
-import classNames from "classnames";
 import BlueButton from "../buttons/BlueButton";
 import PinkButton from "../buttons/PinkButton";
 import createLabwareResultMachine from "./labwareResult.machine";
@@ -13,6 +11,7 @@ import {
   LabwareFieldsFragment,
   LabwareResult as CoreLabwareResult,
   PassFail,
+  SlotFieldsFragment,
 } from "../../types/sdk";
 import { isSlotFilled } from "../../lib/helpers/slotHelper";
 import RemoveButton from "../buttons/RemoveButton";
@@ -63,115 +62,48 @@ export default function LabwareResult({
     onChange(labwareResult);
   }, [labwareResult, onChange]);
 
-  const gridClassNames = classNames(
-    {
-      "sm:grid-cols-1": labware.labwareType.numColumns === 1,
-      "sm:grid-cols-2": labware.labwareType.numColumns === 2,
-    },
-    "grid grid-cols-1 gap-x-8 gap-y-2"
-  );
-
-  return (
-    <div>
-      <div className="flex flex-row items-center justify-end">
-        <RemoveButton onClick={() => onRemoveClick(labware.barcode)} />
-      </div>
-      <div className="flex flex-row items-center justify-around">
-        {/* Display the layout of the labware */}
-        <div className="bg-blue-100">
-          <Labware labware={labware} />
-        </div>
-
-        {/* Display the list of pass/fail comments */}
+  const slotBuilder = (slot: SlotFieldsFragment): React.ReactNode => {
+    return (
+      <div className="flex flex-row items-center justify-between gap-x-2">
         <div>
-          <div data-testid={"passFailComments"} className={gridClassNames}>
-            {sortRightDown(labware.slots).map((slot) => (
-              <div
-                key={slot.address}
-                className="flex flex-row items-center justify-between gap-x-2"
-              >
-                <div className="font-medium text-gray-800 tracking-wide">
-                  {slot.address}
-                </div>
+          {isSlotFilled(slot) && (
+            <div className="flex flex-row items-center justify-between">
+              <PassIcon
+                data-testid={"passIcon"}
+                className={`h-6 w-6 cursor-pointer ${
+                  sampleResults.get(slot.address)!.result === PassFail.Pass
+                    ? "text-green-700"
+                    : "text-gray-500"
+                }`}
+                onClick={() => {
+                  send({ type: "PASS", address: slot.address });
+                }}
+              />
 
-                <div>
-                  {isSlotFilled(slot) && (
-                    <div className="flex flex-row items-center justify-between">
-                      <PassIcon
-                        data-testid={"passIcon"}
-                        className={`h-6 w-6 cursor-pointer ${
-                          sampleResults.get(slot.address)!.result ===
-                          PassFail.Pass
-                            ? "text-green-700"
-                            : "text-gray-500"
-                        }`}
-                        onClick={() => {
-                          send({ type: "PASS", address: slot.address });
-                        }}
-                      />
-
-                      <FailIcon
-                        data-testid={"failIcon"}
-                        className={`h-6 w-6 cursor-pointer ${
-                          sampleResults.get(slot.address)!.result ===
-                          PassFail.Fail
-                            ? "text-red-700"
-                            : "text-gray-500"
-                        }`}
-                        onClick={() =>
-                          send({ type: "FAIL", address: slot.address })
-                        }
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  {isSlotFilled(slot) && (
-                    <Select
-                      disabled={
-                        sampleResults.get(slot.address)!.result ===
-                        PassFail.Pass
-                      }
-                      value={sampleResults.get(slot.address)!.commentId ?? ""}
-                      emptyOption={true}
-                      onChange={(e) =>
-                        send({
-                          type: "SET_COMMENT",
-                          address: slot.address,
-                          commentId:
-                            e.currentTarget.value !== ""
-                              ? Number(e.currentTarget.value)
-                              : undefined,
-                        })
-                      }
-                    >
-                      {optionValues(availableComments, "text", "id")}
-                    </Select>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex flex-row items-center justify-between gap-x-2">
-            <BlueButton
-              className="flex-shrink-0"
-              onClick={() => send({ type: "PASS_ALL" })}
-            >
-              Pass All
-            </BlueButton>
-            <PinkButton
-              className="flex-shrink-0"
-              onClick={() => send({ type: "FAIL_ALL" })}
-            >
-              Fail All
-            </PinkButton>
+              <FailIcon
+                data-testid={"failIcon"}
+                className={`h-6 w-6 cursor-pointer ${
+                  sampleResults.get(slot.address)!.result === PassFail.Fail
+                    ? "text-red-700"
+                    : "text-gray-500"
+                }`}
+                onClick={() => send({ type: "FAIL", address: slot.address })}
+              />
+            </div>
+          )}
+        </div>
+        <div>
+          {isSlotFilled(slot) && (
             <Select
-              data-testid={"commentAll"}
-              emptyOption
+              disabled={
+                sampleResults.get(slot.address)!.result === PassFail.Pass
+              }
+              value={sampleResults.get(slot.address)!.commentId ?? ""}
+              emptyOption={true}
               onChange={(e) =>
                 send({
-                  type: "SET_ALL_COMMENTS",
+                  type: "SET_COMMENT",
+                  address: slot.address,
                   commentId:
                     e.currentTarget.value !== ""
                       ? Number(e.currentTarget.value)
@@ -181,7 +113,52 @@ export default function LabwareResult({
             >
               {optionValues(availableComments, "text", "id")}
             </Select>
-          </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      <div className="flex flex-row items-center justify-end">
+        {<RemoveButton onClick={() => onRemoveClick(labware.barcode)} />}
+      </div>
+      <div className="flex flex-col items-center justify-around">
+        {/* Display the layout of the labware */}
+        <div className="bg-blue-100">
+          <Labware labware={labware} slotBuilder={slotBuilder} />
+        </div>
+
+        {/* Display the list of pass/fail comments */}
+        <div className="mt-8 flex flex-row items-end justify-between gap-x-4">
+          <BlueButton
+            className="flex-shrink-0"
+            onClick={() => send({ type: "PASS_ALL" })}
+          >
+            Pass All
+          </BlueButton>
+          <PinkButton
+            className="flex-shrink-0"
+            onClick={() => send({ type: "FAIL_ALL" })}
+          >
+            Fail All
+          </PinkButton>
+          <Select
+            data-testid={"commentAll"}
+            emptyOption
+            onChange={(e) =>
+              send({
+                type: "SET_ALL_COMMENTS",
+                commentId:
+                  e.currentTarget.value !== ""
+                    ? Number(e.currentTarget.value)
+                    : undefined,
+              })
+            }
+          >
+            {optionValues(availableComments, "text", "id")}
+          </Select>
         </div>
       </div>
     </div>

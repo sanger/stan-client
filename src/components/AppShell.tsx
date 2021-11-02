@@ -215,6 +215,14 @@ function AppShell({ children }: AppShellParams) {
                         "Transfer cDNA from slides onto a new 96 well plate."
                       }
                     />
+                    <NavLinkMenuItem
+                      caption={"Visium QC"}
+                      path={"/lab/visium_qc"}
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={"Pass or fail samples on a visium slide."}
+                    />
                   </Menu>
                   <NavLinkMenuItem
                     caption={"Imaging"}

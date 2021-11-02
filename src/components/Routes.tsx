@@ -31,6 +31,7 @@ import StainingQC from "../pages/StainingQC";
 import Analysis from "../pages/Analysis";
 import Unrelease from "../pages/Unrelease";
 import ExtractionResult from "../pages/ExtractionResult";
+import VisiumQC from "../pages/VisiumQC";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -116,7 +117,17 @@ export function Routes() {
           />
         )}
       />
-
+      <AuthenticatedRoute
+        path="/lab/visium_qc"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetStainingQCInfo}
+          >
+            {(stainingQcInfo) => <VisiumQC info={stainingQcInfo} />}
+          </DataFetcher>
+        )}
+      />
       <AuthenticatedRoute
         path="/lab/staining"
         render={(routeProps) => (
