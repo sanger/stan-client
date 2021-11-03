@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from "react";
+import React, { ChangeEvent, useCallback, useContext, useState } from "react";
 import {
   GetStainingQcInfoQuery,
   LabwareFieldsFragment,
@@ -21,13 +21,23 @@ import Heading from "../components/Heading";
 import Panel from "../components/Panel";
 import { useCollection } from "../lib/hooks/useCollection";
 import { isSlotFilled } from "../lib/helpers/slotHelper";
+import { objectKeys } from "../lib/helpers";
+import { Select } from "../components/forms/Select";
 
 type VisiumQCProps = {
   info: GetStainingQcInfoQuery;
 };
 
+enum QCType {
+  SLIDE_PROCESSING = "Slide Processing",
+  cDNA_AMPLIFICATION = "cDNA amplification",
+  cDNA_BIOANALYZER = "cDNA bioanalyzer",
+}
+
 export default function VisiumQC({ info }: VisiumQCProps) {
   const [workNumber, setWorkNumber] = useState<string | undefined>();
+  const [qcType, setQCType] = useState<string>(QCType.SLIDE_PROCESSING);
+
   const labwareResults = useCollection<CoreLabwareResult>({
     getKey: (item) => item.barcode,
   });
@@ -66,11 +76,11 @@ export default function VisiumQC({ info }: VisiumQCProps) {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Staining QC</AppShell.Title>
+        <AppShell.Title>Visium QC</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          <div className="space-y-2">
+          <div className="space-y-2 mb-4 ">
             <Heading level={2}>SGP Number</Heading>
 
             <p>
@@ -81,6 +91,25 @@ export default function VisiumQC({ info }: VisiumQCProps) {
             <div className="mt-4 md:w-1/2">
               <WorkNumberSelect onWorkNumberChange={setWorkNumber} />
             </div>
+          </div>
+
+          <Heading level={2}>QC Type</Heading>
+          <div className="mt-4 md:w-1/2">
+            <Select
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                setQCType(e.currentTarget.value)
+              }
+              emptyOption={true}
+              value={qcType}
+            >
+              {objectKeys(QCType).map((qcType) => {
+                return (
+                  <option key={qcType} value={QCType[qcType]}>
+                    {QCType[qcType]}
+                  </option>
+                );
+              })}
+            </Select>
           </div>
 
           <div className="mt-8 space-y-2">

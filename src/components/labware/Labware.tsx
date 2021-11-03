@@ -264,7 +264,7 @@ const Labware = ({
       <div className={gridClasses}>
         {slotColumn.map((slot) => (
           <div className={`flex flex-col ${alignRight && "items-end"}`}>
-            <div className={"flex"}>{slot.address}</div>
+            <div className={"flex font-medium"}>{slot.address}</div>
             <div className={"flex"}>{slotBuilder(slot)}</div>
           </div>
         ))}
@@ -317,6 +317,7 @@ const Labware = ({
           slotColumn={slotColumns[1]}
           slotBuilder={slotBuilder}
           numRows={numRows}
+          alignRight={true}
         />
       )}
     </div>
