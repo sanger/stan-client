@@ -6,6 +6,10 @@ import { useLabwareContext } from "./LabwareScanner";
 import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 import { valueFromSamples } from "../dataTable/index";
 
+/**
+ * Table that shows all slots in a Labware. Can only be used within a {@link LabwareScanner}.
+ * Unfortunately doesn't use ReactTable as that doesn't support a way to use {@code rowSpan}s, which we need here.
+ */
 export default function LabwareScannerSlotsTable() {
   const { labwares, removeLabware, locked } = useLabwareContext();
 

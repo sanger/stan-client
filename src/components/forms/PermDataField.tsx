@@ -9,16 +9,23 @@ import { FormikErrorMessage } from "./index";
 
 type PermDataFieldProps = {
   /**
-   * The name of the Formik field
+   * The name of the Formik field. Will be used as the prefix for {@link PermData PermData's} properties
+   * e.g. a name of {@code "permData.0"} will produce properties such as {@code "permData.0.address"}
    */
   name: string;
 };
 
+/**
+ * {@link PermData} Formik input
+ */
 export default function PermDataField<T>({ name }: PermDataFieldProps) {
   const { setFieldValue, getFieldProps } = useFormikContext<T>();
   const [isControl, setIsControl] = useState(false);
   const permData = getFieldProps<PermData>(name).value;
 
+  /**
+   * When the control checkbox is checked, set/unset seconds and controlType
+   */
   function onIsControlChange(e: React.ChangeEvent<HTMLInputElement>) {
     const isChecked = e.target.checked;
 
@@ -71,7 +78,7 @@ export default function PermDataField<T>({ name }: PermDataFieldProps) {
                       Number(e.currentTarget.value)
                     )
                   }
-                  value={field.value ?? ""}
+                  value={field.value ?? ""} // Stops react complaining about "controlled/uncontrolled" inputs
                 />
               )}
             </Field>

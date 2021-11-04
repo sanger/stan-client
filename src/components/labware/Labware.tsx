@@ -112,9 +112,8 @@ export interface LabwareProps {
    * A callback that will be called for each slot in the labware. Must return a react component that will be placed
    * in the labelled slot beside the component
    * @param slot a slot on the given labware
-   * @param index the index of the slot
    */
-  slotBuilder?: (slot: SlotFieldsFragment, index: number) => React.ReactNode;
+  slotBuilder?: (slot: SlotFieldsFragment) => React.ReactNode;
 }
 
 export type LabwareImperativeRef = {
@@ -316,13 +315,13 @@ const SlotColumnInfo = ({
   const gridClasses = `px-10 pt-4 gap-4 content-center grid grid-rows-${numRows} grid-cols-1 py-4 select-none`;
   return (
     <div className={gridClasses}>
-      {slotColumn.map((slot, i) => (
+      {slotColumn.map((slot) => (
         <div
           key={slot.address}
           className={`flex flex-col ${alignRight && "items-end"}`}
         >
           <div className={"flex font-medium"}>{slot.address}</div>
-          <div className={"flex"}>{slotBuilder(slot, i)}</div>
+          <div className={"flex"}>{slotBuilder(slot)}</div>
         </div>
       ))}
     </div>

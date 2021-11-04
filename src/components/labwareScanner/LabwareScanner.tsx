@@ -20,7 +20,7 @@ export type LabwareScannerProps = {
   locked?: boolean;
 
   /**
-   * The maximum number of labwares the scanner should be able to have scanned in at one time
+   * The maximum number of labware the scanner should be able to have scanned in at one time
    */
   limit?: number;
 

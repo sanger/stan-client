@@ -64,7 +64,7 @@ export interface LabwareContext {
   locationScan?: boolean;
 
   /**
-   * The maximum number of labwares to hold in context
+   * The maximum number of labware to hold in context
    */
   limit?: number;
 }

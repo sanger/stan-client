@@ -64,6 +64,7 @@ export default function VisiumPerm() {
   const onSubmit = async (values: RecordPermRequest) => {
     values.permData = values.permData.map((pm) => {
       if (pm.seconds) {
+        // Form actually displays time as minutes, so we need to convert to seconds.
         return Object.assign({}, pm, { seconds: pm.seconds * 60 });
       } else {
         return pm;
