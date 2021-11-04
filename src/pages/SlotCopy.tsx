@@ -39,11 +39,11 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
   const { serverErrors, outputLabwares } = current.context;
 
   const handleOnSlotMapperChange = useCallback(
-    (slotCopyContent: Array<SlotCopyContent>, allSourcesMapped: boolean) => {
+    (slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
       send({
         type: "UPDATE_SLOT_COPY_CONTENT",
         slotCopyContent,
-        allSourcesMapped,
+        anySourceMapped,
       });
     },
     [send]

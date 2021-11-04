@@ -34,7 +34,7 @@ export interface SlotCopyContext {
 type UpdateSlotCopyContentType = {
   type: "UPDATE_SLOT_COPY_CONTENT";
   slotCopyContent: Array<SlotCopyContent>;
-  allSourcesMapped: boolean;
+  anySourceMapped: boolean;
 };
 
 type SaveEvent = { type: "SAVE" };
@@ -62,7 +62,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           UPDATE_SLOT_COPY_CONTENT: [
             {
               target: "readyToCopy",
-              cond: (ctx, e) => e.allSourcesMapped,
+              cond: (ctx, e) => e.anySourceMapped,
               actions: ["assignSCC"],
             },
             {
@@ -79,7 +79,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           UPDATE_SLOT_COPY_CONTENT: [
             {
               target: "mapping",
-              cond: (ctx, e) => !e.allSourcesMapped,
+              cond: (ctx, e) => !e.anySourceMapped,
               actions: ["assignSCC"],
             },
             {

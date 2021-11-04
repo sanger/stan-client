@@ -25,8 +25,7 @@ import MutedText from "../MutedText";
 import { usePager } from "../../lib/hooks/usePager";
 import { NewLabwareLayout } from "../../types/stan";
 import { useMachine } from "@xstate/react";
-import * as labwareHelper from "../../lib/helpers/labwareHelper";
-import { find, findIndex } from "lodash";
+import { find } from "lodash";
 
 function SlotMapper({
   onChange,
@@ -45,29 +44,11 @@ function SlotMapper({
 
   const { inputLabware, slotCopyContent, colorByBarcode } = current.context;
 
-  const allSourcesMapped = useMemo(() => {
+  const anySourceMapped = useMemo(() => {
     if (inputLabware.length === 0) {
       return false;
     }
-
-    // List of [labwareBarcode, slotAddress] tuples for all filled slots of the source labwares
-    const allSources: Array<readonly [string, string]> = inputLabware.flatMap(
-      (lw) => {
-        return labwareHelper
-          .filledSlots(lw)
-          .map((slot) => [lw.barcode, slot.address]);
-      }
-    );
-
-    // Is every source in slotCopyContent?
-    return allSources.every(([sourceBarcode, sourceAddress]) => {
-      return (
-        findIndex(slotCopyContent, {
-          sourceBarcode,
-          sourceAddress,
-        }) !== -1
-      );
-    });
+    return slotCopyContent.length > 0;
   }, [inputLabware, slotCopyContent]);
 
   const getSourceSlotColor = useCallback(
@@ -212,6 +193,14 @@ function SlotMapper({
    */
   const handleOnOutputLabwareSlotClick = React.useCallback(
     (outputAddress: string) => {
+      if (currentInputLabware) {
+        selectedInputSlot = maybeFindSlotByAddress(
+          currentInputLabware.slots,
+          selectedInputAddresses[0]
+        );
+        // if(selectedInputSlot && selectedInputSlot.)
+      }
+
       if (currentInputId && currentOutputId) {
         send({
           type: "COPY_SLOTS",
@@ -222,7 +211,13 @@ function SlotMapper({
         });
       }
     },
-    [send, currentInputId, selectedInputAddresses, currentOutputId]
+    [
+      send,
+      currentInputId,
+      selectedInputAddresses,
+      currentOutputId,
+      currentInputLabware,
+    ]
   );
 
   /**
@@ -251,8 +246,8 @@ function SlotMapper({
    * Whenever the SlotCopyContent map changes, call the onChange handler
    */
   useEffect(() => {
-    onChange?.(slotCopyContent, allSourcesMapped);
-  }, [onChange, slotCopyContent, allSourcesMapped]);
+    onChange?.(slotCopyContent, anySourceMapped);
+  }, [onChange, slotCopyContent, anySourceMapped]);
 
   /**
    * Handler for whenever labware is added or removed by the labware scanner
