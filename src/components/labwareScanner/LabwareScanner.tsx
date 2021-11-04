@@ -199,7 +199,7 @@ export default function LabwareScanner({
             id="labwareScanInput"
             type="text"
             value={locationScan ? "" : currentBarcode}
-            disabled={current.matches("locked") || current.matches("full")}
+            disabled={!current.matches("idle")}
             onChange={handleOnScanInputChange}
             onScan={handleOnScan}
           />

@@ -217,13 +217,13 @@ function AppShell({ children }: AppShellParams) {
                     />
 
                     <NavLinkMenuItem
-                      caption={"Visium Permibilisation"}
+                      caption={"Visium Permabilisation"}
                       path={"/lab/visium_perm"}
                       icon={
                         <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                       }
                       description={
-                        "Record permibilisation times for each slot of a stained slide."
+                        "Record permabilisation times for each slot of a stained slide."
                       }
                     />
                   </Menu>
@@ -445,7 +445,7 @@ function AppShell({ children }: AppShellParams) {
                         Visium cDNA
                       </StanMobileNavLink>
                       <StanMobileNavLink to="/lab/visium_perm">
-                        Visium Permibilisation
+                        Visium Permabilisation
                       </StanMobileNavLink>
                     </div>
                     <div className="grid grid-cols-2 mt-2 gap-y-4 gap-x-8">
