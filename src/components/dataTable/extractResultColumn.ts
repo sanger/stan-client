@@ -1,10 +1,10 @@
 import { Column } from "react-table";
-import { ExtractResult } from "../../types/sdk";
+import { ExtractResultQuery } from "../../types/sdk";
 
 /**
  * Defined type for a function that returns a column that displays some property of ExtractResultQuery
  */
-type ColumnFactory<E = any> = (meta?: E) => Column<ExtractResult>;
+type ColumnFactory<E = any> = (meta?: E) => Column<ExtractResultQuery>;
 
 /**
  * Barcode of the labware
@@ -12,7 +12,7 @@ type ColumnFactory<E = any> = (meta?: E) => Column<ExtractResult>;
 const barcode: ColumnFactory = () => {
   return {
     Header: "Barcode",
-    accessor: (result) => result.labware.barcode,
+    accessor: (result) => result.extractResult.labware.barcode,
   };
 };
 
@@ -22,7 +22,7 @@ const barcode: ColumnFactory = () => {
 const externalBarcode: ColumnFactory = () => {
   return {
     Header: "External Barcode",
-    accessor: (result) => result.labware.externalBarcode,
+    accessor: (result) => result.extractResult.labware.externalBarcode,
   };
 };
 
@@ -33,7 +33,8 @@ const tissueType: ColumnFactory = () => {
   return {
     Header: "Tissue type",
     accessor: (result) =>
-      result.labware.slots[0].samples[0].tissue.spatialLocation.tissueType.name,
+      result.extractResult.labware.slots[0].samples[0].tissue.spatialLocation
+        .tissueType.name,
   };
 };
 
@@ -43,7 +44,8 @@ const tissueType: ColumnFactory = () => {
 const medium: ColumnFactory = () => {
   return {
     Header: "Medium",
-    accessor: (result) => result.labware.slots[0].samples[0].tissue.medium.name,
+    accessor: (result) =>
+      result.extractResult.labware.slots[0].samples[0].tissue.medium.name,
   };
 };
 
@@ -54,7 +56,7 @@ const fixative: ColumnFactory = () => {
   return {
     Header: "Fixative",
     accessor: (result) =>
-      result.labware.slots[0].samples[0].tissue.fixative.name,
+      result.extractResult.labware.slots[0].samples[0].tissue.fixative.name,
   };
 };
 
@@ -64,7 +66,7 @@ const fixative: ColumnFactory = () => {
 const nanodropResult: ColumnFactory = () => {
   return {
     Header: "Nanodrop Result",
-    accessor: (result) => result.concentration,
+    accessor: (result) => result.extractResult.concentration,
   };
 };
 

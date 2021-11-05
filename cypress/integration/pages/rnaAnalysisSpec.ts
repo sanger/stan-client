@@ -85,9 +85,9 @@ describe("RNA Analysis", () => {
       scanLabware("STAN-3112");
     });
     it("displays a warning message", () => {
-      cy.findByText("No extraction recorded for the tube STAN-3112").should(
-        "be.visible"
-      );
+      cy.findByText(
+        "No result recorded for extraction of the tube STAN-3112"
+      ).should("be.visible");
     });
     it("will not display STAN-3112 in table", () => {
       cy.findByRole("table").get("STAN-3112").should("not.exist");

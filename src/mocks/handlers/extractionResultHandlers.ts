@@ -1,6 +1,6 @@
 import { graphql } from "msw";
 import {
-  ExtractResult,
+  ExtractResultQuery,
   ExtractResultQueryVariables,
   PassFail,
 } from "../../types/sdk";
@@ -9,7 +9,7 @@ import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import { LabwareTypeName } from "../../types/stan";
 
 const extractionResultHandlers = [
-  graphql.query<ExtractResult, ExtractResultQueryVariables>(
+  graphql.query<ExtractResultQuery, ExtractResultQueryVariables>(
     "ExtractResult",
     (req, res, ctx) => {
       // Assign a labware type
@@ -24,9 +24,11 @@ const extractionResultHandlers = [
 
       return res(
         ctx.data({
-          result: PassFail.Pass,
-          labware: newLabware,
-          concentration: "1.3",
+          extractResult: {
+            result: PassFail.Pass,
+            labware: newLabware,
+            concentration: "1.3",
+          },
         })
       );
       /* if (req.variables.barcode === "STAN-3111")
