@@ -675,6 +675,7 @@ export type ExtractResultRequest = {
   labware: Array<ExtractResultLabware>;
   workNumber?: Maybe<Scalars['String']>;
 };
+
 export type ExtractResult = {
   __typename?: 'ExtractResult';
   labware: Labware;
@@ -698,6 +699,7 @@ export type RnaAnalysisRequest = {
   operationType: Scalars['String'];
   labware: Array<RnaAnalysisLabware>;
 };
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -1172,6 +1174,8 @@ export type MutationRecordExtractResultArgs = {
 export type MutationRecordRnaAnalysisArgs = {
   request: RnaAnalysisRequest;
 };
+
+
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -2421,19 +2425,6 @@ export type FindWorkNumbersQuery = (
     & Pick<Work, 'workNumber'>
   )> }
 );
-export type GetCommentsQueryVariables = Exact<{
-  commentCategory?: Maybe<Scalars['String']>;
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-}>;
-
-
-export type GetCommentsQuery = (
-  { __typename?: 'Query' }
-  & { comments: Array<(
-    { __typename?: 'Comment' }
-    & CommentFieldsFragment
-  )> }
-);
 
 export type FindWorkProgressQueryVariables = Exact<{
   workNumber?: Maybe<Scalars['String']>;
@@ -2447,6 +2438,20 @@ export type FindWorkProgressQuery = (
   & { workProgress: Array<(
     { __typename?: 'WorkProgress' }
     & WorkProgressFieldsFragment
+  )> }
+);
+
+export type GetCommentsQueryVariables = Exact<{
+  commentCategory?: Maybe<Scalars['String']>;
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+}>;
+
+
+export type GetCommentsQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
   )> }
 );
 
@@ -3589,13 +3594,6 @@ export const FindWorkNumbersDocument = gql`
   }
 }
     `;
-export const GetCommentsDocument = gql`
-    query GetComments($commentCategory: String, $includeDisabled: Boolean) {
-  comments(category: $commentCategory, includeDisabled: $includeDisabled) {
-    ...CommentFields
-  }
-}
-    ${CommentFieldsFragmentDoc}`;
 export const FindWorkProgressDocument = gql`
     query FindWorkProgress($workNumber: String, $workType: String, $status: WorkStatus) {
   workProgress(workNumber: $workNumber, workType: $workType, status: $status) {
@@ -3603,6 +3601,13 @@ export const FindWorkProgressDocument = gql`
   }
 }
     ${WorkProgressFieldsFragmentDoc}`;
+export const GetCommentsDocument = gql`
+    query GetComments($commentCategory: String, $includeDisabled: Boolean) {
+  comments(category: $commentCategory, includeDisabled: $includeDisabled) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetConfigurationDocument = gql`
     query GetConfiguration {
   destructionReasons(includeDisabled: true) {

@@ -1,4 +1,4 @@
-import { ExtractResult, PassFail } from "../../types/sdk";
+import { ExtractResultQuery, PassFail } from "../../types/sdk";
 import { ClientError } from "graphql-request";
 import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
@@ -6,7 +6,7 @@ import { stanCore } from "../../lib/sdk";
 import { castDraft } from "immer";
 
 export interface ExtractResultContext {
-  extractResults: ExtractResult[];
+  extractResults: ExtractResultQuery[];
   serverError?: ClientError;
   scanErrorMessage?: string;
   currentBarcode: string;
@@ -22,7 +22,7 @@ type UpdateBarcodeEvent = {
 };
 type ExtractResultSuccess = {
   type: "done.invoke.extractResult";
-  data: ExtractResult;
+  data: ExtractResultQuery;
 };
 type ExtractResultFailure = {
   type: "error.platform.extractResult";
@@ -117,12 +117,17 @@ export const extractResultMachine = createMachine<
       }),
       assignExtractResult: assign((ctx, e) => {
         if (e.type !== "done.invoke.extractResult") return;
-        if (!e.data || !(e.data.result || e.data.concentration)) {
+        if (!e.data.extractResult) {
           ctx.scanErrorMessage = `No extraction recorded for the tube ${ctx.currentBarcode}`;
           return;
         }
-        if (e.data.result === PassFail.Fail) {
-          ctx.scanErrorMessage = `Extraction failed for the tube ${ctx.currentBarcode}`;
+        if (!e.data.extractResult.result) {
+          ctx.scanErrorMessage = `No result recorded for extraction of the tube ${ctx.currentBarcode}`;
+          return;
+        }
+
+        if (e.data.extractResult.result === PassFail.Fail) {
+          ctx.scanErrorMessage = `Extraction result is 'FAIL' for the tube ${ctx.currentBarcode}`;
           return;
         }
         ctx.extractResults.push(e.data);
@@ -131,7 +136,7 @@ export const extractResultMachine = createMachine<
       removeExtractResult: assign((ctx, e) => {
         if (e.type !== "REMOVE_EXTRACT_RESULT") return;
         ctx.extractResults = ctx.extractResults.filter(
-          (res) => res.labware.barcode !== e.barcode
+          (res) => res.extractResult.labware.barcode !== e.barcode
         );
       }),
       assignServerError: assign((ctx, e) => {
@@ -150,14 +155,16 @@ export const extractResultMachine = createMachine<
       SubmitBarcodeValid: (ctx) => {
         return (
           ctx.extractResults.filter(
-            (result) => result.labware.barcode === ctx.currentBarcode
+            (result) =>
+              result.extractResult.labware.barcode === ctx.currentBarcode
           ).length <= 0
         );
       },
       SubmitBarcodeInvalid: (ctx) => {
         return (
           ctx.extractResults.filter(
-            (result) => result.labware.barcode === ctx.currentBarcode
+            (result) =>
+              result.extractResult.labware.barcode === ctx.currentBarcode
           ).length > 0
         );
       },
