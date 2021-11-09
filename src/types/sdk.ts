@@ -1220,13 +1220,6 @@ export type MutationSetLocationCustomNameArgs = {
   customName?: Maybe<Scalars['String']>;
 };
 
-export type ExtractResult = {
-  __typename?: 'ExtractResult';
-  labware: Labware;
-  result?: Maybe<PassFail>;
-  concentration?: Maybe<Scalars['String']>;
-};
-
 export type StringMeasurement = {
   name: Scalars['String'];
   value: Scalars['String'];
