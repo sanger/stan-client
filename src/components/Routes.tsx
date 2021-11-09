@@ -84,8 +84,8 @@ export function Routes() {
             key={routeProps.location.key}
             dataFetcher={() =>
               stanCore.GetComments({
-                commentCategory: "analysis",
-                includeDisabled: true,
+                commentCategory: "RNA analysis",
+                includeDisabled: false,
               })
             }
           >
@@ -242,6 +242,7 @@ export function Routes() {
             </DataFetcher>
           );
         }}
+        labwareBarcode={}
       />
 
       <Route path="/locations" component={Store} />
