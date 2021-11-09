@@ -242,7 +242,6 @@ export function Routes() {
             </DataFetcher>
           );
         }}
-        labwareBarcode={}
       />
 
       <Route path="/locations" component={Store} />
