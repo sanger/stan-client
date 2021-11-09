@@ -700,11 +700,6 @@ export type RecordPermRequest = {
   permData: Array<PermData>;
 };
 
-export type RnaAnalysisRequest = {
-  operationType: Scalars['String'];
-  labware: Array<RnaAnalysisLabware>;
-};
-
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
