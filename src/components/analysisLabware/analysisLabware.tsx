@@ -9,6 +9,7 @@ import DataTable from "../DataTable";
 import { useMachine } from "@xstate/react";
 import { analysisLabwareMachine } from "./analysisLabware.machine";
 import { measurementColumn } from "./measurementColumn";
+import { objectKeys } from "../../lib/helpers";
 
 type RecordAnalysisProps = {
   barcodes: string[];
@@ -20,8 +21,8 @@ type RecordAnalysisProps = {
   ) => void;
 };
 export enum OperationType {
-  RIN = "RIN",
-  DV200 = "DV200",
+  RIN = "RIN analysis",
+  DV200 = "DV200 analysis",
 }
 
 export default function AnalysisLabware({
@@ -166,8 +167,8 @@ export default function AnalysisLabware({
                   })
                 }
               >
-                {Object.values(OperationType).map((type) => (
-                  <option value={type} key={type}>
+                {objectKeys(OperationType).map((type) => (
+                  <option value={OperationType[type]} key={type}>
                     {type}
                   </option>
                 ))}
