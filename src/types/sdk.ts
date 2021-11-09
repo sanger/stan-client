@@ -681,6 +681,13 @@ export type ExtractResultRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
+export type ExtractResult = {
+  __typename?: 'ExtractResult';
+  labware: Labware;
+  result?: Maybe<PassFail>;
+  concentration?: Maybe<Scalars['String']>;
+};
+
 export type PermData = {
   address: Scalars['Address'];
   seconds?: Maybe<Scalars['Int']>;
@@ -691,6 +698,11 @@ export type RecordPermRequest = {
   barcode: Scalars['String'];
   workNumber?: Maybe<Scalars['String']>;
   permData: Array<PermData>;
+};
+
+export type RnaAnalysisRequest = {
+  operationType: Scalars['String'];
+  labware: Array<RnaAnalysisLabware>;
 };
 
 export type Query = {
