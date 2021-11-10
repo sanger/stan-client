@@ -13,6 +13,7 @@ import {
   measurementColumn,
 } from "./measurementColumn";
 import { objectKeys } from "../../lib/helpers";
+import WorkNumberSelect from "../WorkNumberSelect";
 
 type RecordAnalysisProps = {
   barcodes: string[];
@@ -86,6 +87,7 @@ export default function AnalysisLabware({
   );
 
   const columns = React.useMemo(() => {
+    debugger;
     return [
       {
         Header: "Barcode",
@@ -97,16 +99,16 @@ export default function AnalysisLabware({
         id: "workNumber",
         Cell: ({ row }: { row: Row<RnaAnalysisLabware> }) => {
           return (
-            <input
-              className={"rounded-md"}
-              type="text"
-              value={row.original.workNumber ?? ""}
-              onChange={(e) =>
+            <WorkNumberSelect
+              onWorkNumberChange={(workNumber) =>
                 handleOnChange(
                   row.original.barcode,
                   "workNumber",
-                  e.currentTarget.value
+                  workNumber ?? ""
                 )
+              }
+              workNumber={
+                row.original.workNumber ? row.original.workNumber : ""
               }
             />
           );
@@ -124,7 +126,7 @@ export default function AnalysisLabware({
           return (
             <select
               className={"rounded-md"}
-              value={row.original.commentId ?? ""}
+              value={row.original.commentId || ""}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                 handleOnChange(
                   row.original.barcode,
@@ -133,6 +135,7 @@ export default function AnalysisLabware({
                 )
               }
             >
+              <option value="" />
               {comments.map((comment) => (
                 <option value={comment.id} key={comment.id}>
                   {comment.text}
@@ -156,7 +159,7 @@ export default function AnalysisLabware({
       <Heading level={3}> Analysis</Heading>
       <Formik initialValues={barcodes} onSubmit={() => {}}>
         <Form>
-          <div className="md:grid mt-4 md:grid-cols-2 md:space-y-0 md:gap-4 space-y-2">
+          <div className="md:grid mt-4 md:grid-cols-3 md:space-y-0 md:gap-4 space-y-2 mb-8">
             <div className="">
               <FormikSelect
                 label={"Type"}
@@ -177,12 +180,23 @@ export default function AnalysisLabware({
                 ))}
               </FormikSelect>
             </div>
+
+            <WorkNumberSelect
+              onWorkNumberChange={(workNumber) => {
+                send({
+                  type: "UPDATE_ALL_WORKNUMBERS",
+                  workNumber: workNumber ?? "",
+                });
+              }}
+              name={"workNumber"}
+              label={"SGP Number"}
+            />
             <div className="">
               <FormikSelect
                 label={"Comment"}
                 name={"comment"}
                 data-testid={"comment"}
-                emptyOption={false}
+                emptyOption={true}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   send({
                     type: "UPDATE_ALL_COMMENTS_TYPE",
