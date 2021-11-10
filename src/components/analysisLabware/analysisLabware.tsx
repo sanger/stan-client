@@ -8,7 +8,10 @@ import { motion } from "framer-motion";
 import DataTable from "../DataTable";
 import { useMachine } from "@xstate/react";
 import { analysisLabwareMachine } from "./analysisLabware.machine";
-import { measurementColumn } from "./measurementColumn";
+import {
+  AnalysisMeasurementType,
+  measurementColumn,
+} from "./measurementColumn";
 import { objectKeys } from "../../lib/helpers";
 
 type RecordAnalysisProps = {
@@ -33,7 +36,7 @@ export default function AnalysisLabware({
   const defaultLabwareValues = barcodes.map((barcode) => {
     return {
       barcode: barcode,
-      measurements: [{ name: OperationType.RIN, value: "" }],
+      measurements: [{ name: AnalysisMeasurementType.RIN, value: "" }],
     };
   });
 
