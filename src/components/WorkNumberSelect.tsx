@@ -62,7 +62,7 @@ export default function WorkNumberSelect({
     if (work) {
       setSelectedWorkNumber(workNumber);
     }
-  }, [workNumber]);
+  }, [workNumber, works]);
 
   /**
    * Callback for when the select changes
