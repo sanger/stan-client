@@ -45,7 +45,6 @@ function Analysis({ comments }: AnalysisProps) {
     >().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          debugger;
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
           return stanCore.RecordRNAAnalysis({
             request: e.values,

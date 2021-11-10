@@ -57,7 +57,6 @@ export default function WorkNumberSelect({
   }, [setWorks]);
 
   useEffect(() => {
-    debugger;
     if (!workNumber) setSelectedWorkNumber("");
     const work = works.find((work) => work.workNumber === workNumber);
     if (work) {

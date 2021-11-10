@@ -153,7 +153,8 @@ export const analysisLabwareMachine = createMachine<
             break;
           }
           case "comment": {
-            updateAnalysisLabware.commentId = Number(e.labware.value);
+            updateAnalysisLabware.commentId =
+              e.labware.value !== "" ? Number(e.labware.value) : undefined;
             break;
           }
         }
@@ -169,7 +170,7 @@ export const analysisLabwareMachine = createMachine<
         ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
           return {
             ...labware,
-            commentId: Number(e.commentId),
+            commentId: e.commentId !== "" ? Number(e.commentId) : undefined,
           };
         });
       },

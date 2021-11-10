@@ -87,7 +87,6 @@ export default function AnalysisLabware({
   );
 
   const columns = React.useMemo(() => {
-    debugger;
     return [
       {
         Header: "Barcode",
