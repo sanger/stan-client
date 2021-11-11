@@ -141,7 +141,6 @@ export const extractResultMachine = createMachine<
       }),
       assignServerError: assign((ctx, e) => {
         if (e.type !== "error.platform.extractResult") return;
-        debugger;
         ctx.serverError = castDraft(e.data);
       }),
       unassignServerError: assign((ctx, _e) => {
