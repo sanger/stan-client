@@ -1,77 +1,90 @@
-import React, { ChangeEvent, useCallback, useContext, useState } from "react";
+import React, { ChangeEvent, useCallback, useState } from "react";
 import {
+  CommentFieldsFragment,
   GetStainingQcInfoQuery,
   LabwareFieldsFragment,
-  LabwareResult as CoreLabwareResult,
-  PassFail,
-  RecordStainResultMutation,
-  ResultRequest,
 } from "../types/sdk";
 import AppShell from "../components/AppShell";
 import WorkNumberSelect from "../components/WorkNumberSelect";
 import LabwareScanner from "../components/labwareScanner/LabwareScanner";
-import LabwareResult from "../components/labwareResult/LabwareResult";
-import { reload, StanCoreContext } from "../lib/sdk";
-import createFormMachine from "../lib/machines/form/formMachine";
-import { useMachine } from "@xstate/react";
-import OperationCompleteModal from "../components/modal/OperationCompleteModal";
-import Warning from "../components/notifications/Warning";
-import BlueButton from "../components/buttons/BlueButton";
 import Heading from "../components/Heading";
-import Panel from "../components/Panel";
 import { useCollection } from "../lib/hooks/useCollection";
-import { isSlotFilled } from "../lib/helpers/slotHelper";
 import { objectKeys } from "../lib/helpers";
 import { Select } from "../components/forms/Select";
+import SlideProcessing from "../components/visiumQC/SlideProcessing";
+import BlueButton from "../components/buttons/BlueButton";
 
 type VisiumQCProps = {
   info: GetStainingQcInfoQuery;
 };
-
 enum QCType {
   SLIDE_PROCESSING = "Slide Processing",
-  cDNA_AMPLIFICATION = "cDNA amplification",
-  cDNA_BIOANALYZER = "cDNA bioanalyzer",
+}
+export type VisiumQCTypeProps = {
+  workNumber: string | undefined;
+  comments: CommentFieldsFragment[];
+  labwares: LabwareFieldsFragment[];
+  removeLabware: (barcode: string) => void;
+  recordResult: boolean;
+  notify;
+};
+export enum RecordResultStatus {
+  SUCCESS,
+  FAILURE,
+  UNDEFINED,
 }
 
 export default function VisiumQC({ info }: VisiumQCProps) {
   const [workNumber, setWorkNumber] = useState<string | undefined>();
+  const [recordResult, setRecordResult] = useState<boolean>(false);
   const [qcType, setQCType] = useState<string>(QCType.SLIDE_PROCESSING);
-
-  const labwareResults = useCollection<CoreLabwareResult>({
+  const [recordStatus, setRecordStatus] = useState<RecordResultStatus>(
+    RecordResultStatus.UNDEFINED
+  );
+  const labwares = useCollection<LabwareFieldsFragment>({
     getKey: (item) => item.barcode,
   });
-
-  const stanCore = useContext(StanCoreContext);
-
-  const [current, send] = useMachine(
-    createFormMachine<ResultRequest, RecordStainResultMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== "SUBMIT_FORM") return Promise.reject();
-          return stanCore.RecordStainResult({
-            request: e.values,
-          });
-        },
-      },
-    })
-  );
-
-  const { serverError } = current.context;
-
   const onAddLabware = useCallback(
     (labware: LabwareFieldsFragment) => {
-      labwareResults.append(buildLabwareResult(labware));
+      labwares.append(labware);
     },
-    [labwareResults]
+    [labwares]
   );
 
   const onRemoveLabware = useCallback(
     (labware: LabwareFieldsFragment) => {
-      labwareResults.remove(labware.barcode);
+      labwares.remove(labware.barcode);
     },
-    [labwareResults]
+    [labwares]
   );
+
+  const QCTypeComponent = ({
+    qcType,
+    comments,
+    labwares,
+    removeLabware,
+  }: {
+    qcType: string;
+    comments: CommentFieldsFragment[];
+    labwares: LabwareFieldsFragment[];
+    removeLabware: (barcode: string) => void;
+    recordResult: boolean;
+  }) => {
+    switch (qcType) {
+      case QCType.SLIDE_PROCESSING: {
+        return (
+          <SlideProcessing
+            workNumber={workNumber}
+            comments={comments}
+            labwares={labwares}
+            removeLabware={removeLabware}
+            recordResult={recordResult}
+          />
+        );
+      }
+    }
+    return <></>;
+  };
 
   return (
     <AppShell>
@@ -120,57 +133,38 @@ export default function VisiumQC({ info }: VisiumQCProps) {
             <LabwareScanner
               onAdd={onAddLabware}
               onRemove={onRemoveLabware}
-              locked={labwareResults.items.length > 0}
+              locked={labwares.items.length > 0}
             >
-              {({ labwares, removeLabware }) =>
-                labwares.map(
-                  (labware) =>
-                    labwareResults.getItem(labware.barcode) && (
-                      <Panel key={labware.barcode}>
-                        <LabwareResult
-                          initialLabwareResult={
-                            labwareResults.getItem(labware.barcode)!
-                          }
-                          labware={labware}
-                          availableComments={info.comments}
-                          onRemoveClick={removeLabware}
-                          onChange={(labwareResult) =>
-                            labwareResults.update(labwareResult)
-                          }
-                        />
-                      </Panel>
-                    )
-                )
-              }
+              {({ labwares, removeLabware }) => (
+                <QCTypeComponent
+                  qcType={qcType}
+                  labwares={labwares}
+                  removeLabware={removeLabware}
+                  comments={info.comments}
+                  recordResult={recordResult}
+                />
+              )}
             </LabwareScanner>
           </div>
 
-          {serverError && (
+          {/*serverError && (
             <Warning
               message={"Failed to record Staining QC"}
               error={serverError}
             />
-          )}
+          )*/}
 
           <div className={"mt-4 flex flex-row items-center justify-end"}>
             <BlueButton
-              disabled={labwareResults.items.length <= 0}
-              onClick={() =>
-                send({
-                  type: "SUBMIT_FORM",
-                  values: {
-                    workNumber,
-                    labwareResults: labwareResults.items,
-                  },
-                })
-              }
+              disabled={labwares.items.length <= 0}
+              onClick={() => setRecordResult(true)}
             >
               Save
             </BlueButton>
           </div>
         </div>
 
-        <OperationCompleteModal
+        {/*<OperationCompleteModal
           show={current.matches("submitted")}
           message={"Stain QC complete"}
           onReset={reload}
@@ -179,18 +173,8 @@ export default function VisiumQC({ info }: VisiumQCProps) {
             If you wish to start the process again, click the "Reset Form"
             button. Otherwise you can return to the Home screen.
           </p>
-        </OperationCompleteModal>
+        </OperationCompleteModal>*/}
       </AppShell.Main>
     </AppShell>
   );
-}
-
-function buildLabwareResult(labware: LabwareFieldsFragment): CoreLabwareResult {
-  return {
-    barcode: labware.barcode,
-    sampleResults: labware.slots.filter(isSlotFilled).map((slot) => ({
-      address: slot.address,
-      result: PassFail.Pass,
-    })),
-  };
 }

@@ -122,9 +122,9 @@ export function Routes() {
         render={(routeProps) => (
           <DataFetcher
             key={routeProps.location.key}
-            dataFetcher={stanCore.GetStainingQCInfo}
+            dataFetcher={stanCore.GetVisiumQCInfo}
           >
-            {(stainingQcInfo) => <VisiumQC info={stainingQcInfo} />}
+            {(visiumQCInfo) => <VisiumQC info={visiumQCInfo} />}
           </DataFetcher>
         )}
       />

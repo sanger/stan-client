@@ -39,6 +39,11 @@ export enum PassFail {
   Fail = 'fail'
 }
 
+export enum ControlType {
+  Positive = 'positive',
+  Negative = 'negative'
+}
+
 export type User = {
   __typename?: 'User';
   username: Scalars['String'];
@@ -660,6 +665,7 @@ export type LabwareResult = {
 };
 
 export type ResultRequest = {
+  operationType?: Maybe<Scalars['String']>;
   labwareResults: Array<LabwareResult>;
   workNumber?: Maybe<Scalars['String']>;
 };
@@ -675,6 +681,40 @@ export type ExtractResultRequest = {
   labware: Array<ExtractResultLabware>;
   workNumber?: Maybe<Scalars['String']>;
 };
+
+export type PermData = {
+  address: Scalars['Address'];
+  seconds?: Maybe<Scalars['Int']>;
+  controlType?: Maybe<ControlType>;
+};
+
+export type RecordPermRequest = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  permData: Array<PermData>;
+};
+
+export type AddressPermData = {
+  __typename?: 'AddressPermData';
+  address: Scalars['Address'];
+  seconds?: Maybe<Scalars['Int']>;
+  controlType?: Maybe<ControlType>;
+  selected: Scalars['Boolean'];
+};
+
+export type VisiumPermData = {
+  __typename?: 'VisiumPermData';
+  labware: Labware;
+  addressPermData: Array<AddressPermData>;
+};
+
+export type VisiumAnalysisRequest = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  selectedAddress: Scalars['Address'];
+  selectedTime: Scalars['Int'];
+};
+
 export type ExtractResult = {
   __typename?: 'ExtractResult';
   labware: Labware;
@@ -698,6 +738,7 @@ export type RnaAnalysisRequest = {
   operationType: Scalars['String'];
   labware: Array<RnaAnalysisLabware>;
 };
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -725,6 +766,7 @@ export type Query = {
   find: FindResult;
   planData: PlanData;
   stainTypes: Array<StainType>;
+  visiumPermData: VisiumPermData;
   extractResult: ExtractResult;
   historyForSampleId: History;
   historyForExternalName: History;
@@ -834,6 +876,11 @@ export type QueryPlanDataArgs = {
 };
 
 
+export type QueryVisiumPermDataArgs = {
+  barcode: Scalars['String'];
+};
+
+
 export type QueryExtractResultArgs = {
   barcode: Scalars['String'];
 };
@@ -925,7 +972,10 @@ export type Mutation = {
   unrelease: OperationResult;
   recordStainResult: OperationResult;
   recordExtractResult: OperationResult;
+  recordPerm: OperationResult;
+  visiumAnalysis: OperationResult;
   recordRNAAnalysis: OperationResult;
+  recordVisiumQC: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
@@ -1169,9 +1219,26 @@ export type MutationRecordExtractResultArgs = {
 };
 
 
+export type MutationRecordPermArgs = {
+  request: RecordPermRequest;
+};
+
+
+export type MutationVisiumAnalysisArgs = {
+  request: VisiumAnalysisRequest;
+};
+
+
 export type MutationRecordRnaAnalysisArgs = {
   request: RnaAnalysisRequest;
 };
+
+
+export type MutationRecordVisiumQcArgs = {
+  request: ResultRequest;
+};
+
+
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1844,6 +1911,22 @@ export type RecordStainResultMutation = (
   ) }
 );
 
+export type RecordVisiumQcMutationVariables = Exact<{
+  request: ResultRequest;
+}>;
+
+
+export type RecordVisiumQcMutation = (
+  { __typename?: 'Mutation' }
+  & { recordVisiumQC: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
+);
+
 export type RegisterSectionsMutationVariables = Exact<{
   request: SectionRegisterRequest;
 }>;
@@ -2421,19 +2504,6 @@ export type FindWorkNumbersQuery = (
     & Pick<Work, 'workNumber'>
   )> }
 );
-export type GetCommentsQueryVariables = Exact<{
-  commentCategory?: Maybe<Scalars['String']>;
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-}>;
-
-
-export type GetCommentsQuery = (
-  { __typename?: 'Query' }
-  & { comments: Array<(
-    { __typename?: 'Comment' }
-    & CommentFieldsFragment
-  )> }
-);
 
 export type FindWorkProgressQueryVariables = Exact<{
   workNumber?: Maybe<Scalars['String']>;
@@ -2447,6 +2517,20 @@ export type FindWorkProgressQuery = (
   & { workProgress: Array<(
     { __typename?: 'WorkProgress' }
     & WorkProgressFieldsFragment
+  )> }
+);
+
+export type GetCommentsQueryVariables = Exact<{
+  commentCategory?: Maybe<Scalars['String']>;
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+}>;
+
+
+export type GetCommentsQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
   )> }
 );
 
@@ -2658,6 +2742,17 @@ export type GetStainingQcInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetStainingQcInfoQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
+export type GetVisiumQcInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetVisiumQcInfoQuery = (
   { __typename?: 'Query' }
   & { comments: Array<(
     { __typename?: 'Comment' }
@@ -3230,6 +3325,15 @@ export const RecordStainResultDocument = gql`
   }
 }
     `;
+export const RecordVisiumQcDocument = gql`
+    mutation RecordVisiumQC($request: ResultRequest!) {
+  recordVisiumQC(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const RegisterSectionsDocument = gql`
     mutation RegisterSections($request: SectionRegisterRequest!) {
   registerSections(request: $request) {
@@ -3589,13 +3693,6 @@ export const FindWorkNumbersDocument = gql`
   }
 }
     `;
-export const GetCommentsDocument = gql`
-    query GetComments($commentCategory: String, $includeDisabled: Boolean) {
-  comments(category: $commentCategory, includeDisabled: $includeDisabled) {
-    ...CommentFields
-  }
-}
-    ${CommentFieldsFragmentDoc}`;
 export const FindWorkProgressDocument = gql`
     query FindWorkProgress($workNumber: String, $workType: String, $status: WorkStatus) {
   workProgress(workNumber: $workNumber, workType: $workType, status: $status) {
@@ -3603,6 +3700,13 @@ export const FindWorkProgressDocument = gql`
   }
 }
     ${WorkProgressFieldsFragmentDoc}`;
+export const GetCommentsDocument = gql`
+    query GetComments($commentCategory: String, $includeDisabled: Boolean) {
+  comments(category: $commentCategory, includeDisabled: $includeDisabled) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetConfigurationDocument = gql`
     query GetConfiguration {
   destructionReasons(includeDisabled: true) {
@@ -3767,6 +3871,13 @@ export const GetStainingQcInfoDocument = gql`
   }
 }
     ${CommentFieldsFragmentDoc}`;
+export const GetVisiumQcInfoDocument = gql`
+    query GetVisiumQCInfo {
+  comments(includeDisabled: false, category: "Visium QC") {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetWorkAllocationInfoDocument = gql`
     query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatus!]) {
   projects(includeDisabled: false) {
@@ -3878,6 +3989,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     RecordStainResult(variables: RecordStainResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordStainResultMutation> {
       return withWrapper(() => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, requestHeaders));
+    },
+    RecordVisiumQC(variables: RecordVisiumQcMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordVisiumQcMutation> {
+      return withWrapper(() => client.request<RecordVisiumQcMutation>(RecordVisiumQcDocument, variables, requestHeaders));
     },
     RegisterSections(variables: RegisterSectionsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterSectionsMutation> {
       return withWrapper(() => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, requestHeaders));
@@ -4031,6 +4145,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetStainingQCInfo(variables?: GetStainingQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainingQcInfoQuery> {
       return withWrapper(() => client.request<GetStainingQcInfoQuery>(GetStainingQcInfoDocument, variables, requestHeaders));
+    },
+    GetVisiumQCInfo(variables?: GetVisiumQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetVisiumQcInfoQuery> {
+      return withWrapper(() => client.request<GetVisiumQcInfoQuery>(GetVisiumQcInfoDocument, variables, requestHeaders));
     },
     GetWorkAllocationInfo(variables: GetWorkAllocationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkAllocationInfoQuery> {
       return withWrapper(() => client.request<GetWorkAllocationInfoQuery>(GetWorkAllocationInfoDocument, variables, requestHeaders));
