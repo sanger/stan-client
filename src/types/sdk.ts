@@ -715,6 +715,7 @@ export type VisiumAnalysisRequest = {
   selectedTime: Scalars['Int'];
 };
 
+
 export type ExtractResult = {
   __typename?: 'ExtractResult';
   labware: Labware;
@@ -1237,6 +1238,8 @@ export type MutationRecordRnaAnalysisArgs = {
 export type MutationRecordVisiumQcArgs = {
   request: ResultRequest;
 };
+
+
 
 
 export type MutationAddUserArgs = {

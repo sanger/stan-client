@@ -4,6 +4,7 @@ import {
   AnalysisMeasurementType,
   MeasurementValueCategory,
 } from "./measurementColumn";
+import { OperationType } from "./analysisLabware";
 
 export type AnalysisLabwareContext = {
   analysisLabwares: RnaAnalysisLabware[];
@@ -76,7 +77,8 @@ export const analysisLabwareMachine = createMachine<
         if (e.type !== "UPDATE_ANALYSIS_TYPE") return;
         ctx.operationType = e.value;
         const measurements = buildMeasurementFields(
-          MeasurementValueCategory.SINGLE_VALUE_TYPE
+          MeasurementValueCategory.SINGLE_VALUE_TYPE,
+          ctx.operationType
         );
         //Change measurement data in all labwares
         ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
@@ -95,7 +97,7 @@ export const analysisLabwareMachine = createMachine<
 
         const updateAnalysisLabware = {
           ...ctx.analysisLabwares[indx],
-          measurements: buildMeasurementFields(e.value),
+          measurements: buildMeasurementFields(e.value, ctx.operationType),
         };
         ctx.analysisLabwares = [
           ...ctx.analysisLabwares.slice(0, indx),
@@ -164,12 +166,18 @@ export const analysisLabwareMachine = createMachine<
     },
   }
 );
-const buildMeasurementFields = (valueCategory: string) => {
+const buildMeasurementFields = (
+  valueCategory: string,
+  operationType: string
+) => {
   let measurements: StringMeasurement[] = [];
   if (valueCategory === MeasurementValueCategory.SINGLE_VALUE_TYPE) {
     measurements = [
       {
-        name: AnalysisMeasurementType.DV200,
+        name:
+          operationType === OperationType.RIN
+            ? AnalysisMeasurementType.RIN
+            : AnalysisMeasurementType.DV200,
         value: "",
       },
     ];
