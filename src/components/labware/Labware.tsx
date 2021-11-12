@@ -10,6 +10,7 @@ import { Selectable, SelectionMode } from "./labware.types";
 import { NewLabwareLayout } from "../../types/stan";
 import { useMachine } from "@xstate/react";
 import * as slotHelper from "../../lib/helpers/slotHelper";
+import SlotColumnInfo from "./SlotColumnInfo";
 
 export interface LabwareProps {
   /**
@@ -244,33 +245,6 @@ const Labware = ({
     });
     return slotColumns;
   }, [numColumns, slots]);
-
-  /***
-   * Component to display a column of slot fields that contains a label with slot address and component returned by SlotBuilder callback
-   */
-  const SlotColumnInfo = ({
-    slotColumn,
-    slotBuilder,
-    numRows,
-    alignRight = false,
-  }: {
-    slotColumn: SlotFieldsFragment[];
-    slotBuilder: (slot: SlotFieldsFragment) => React.ReactNode;
-    numRows: number;
-    alignRight?: boolean;
-  }) => {
-    const gridClasses = `px-10 pt-4 gap-4 content-center grid grid-rows-${numRows} grid-cols-1 py-4 select-none`;
-    return (
-      <div className={gridClasses}>
-        {slotColumn.map((slot) => (
-          <div className={`flex flex-col ${alignRight && "items-end"}`}>
-            <div className={"flex font-medium"}>{slot.address}</div>
-            <div className={"flex"}>{slotBuilder(slot)}</div>
-          </div>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className={"flex flex-row"}>

@@ -9,18 +9,20 @@ import {
 import LabwareResult from "../labwareResult/LabwareResult";
 import { isSlotFilled } from "../../lib/helpers/slotHelper";
 import Panel from "../Panel";
-import { QCType, VisiumQCTypeProps } from "../../pages/VisiumQC";
+import { QCType } from "../../pages/VisiumQC";
 import { StanCoreContext } from "../../lib/sdk";
 import { useMachine } from "@xstate/react";
 import createFormMachine from "../../lib/machines/form/formMachine";
+import BlueButton from "../buttons/BlueButton";
+import { VisiumQCTypeProps } from "./VisiumQCType";
 
 const SlideProcessing = ({
   workNumber,
   labware,
   removeLabware,
   comments,
-  saveResult,
-  notifySaveStatus,
+  onSave,
+  onError,
 }: VisiumQCTypeProps) => {
   const [labwareResult, setLabwareResult] = useState<CoreLabwareResult>();
   const stanCore = useContext(StanCoreContext);
@@ -40,23 +42,6 @@ const SlideProcessing = ({
   const { serverError } = current.context;
 
   /***
-   * recordResult indicate whether the user has clicked the submit button.
-   * Call the SUBMIT_FORM event
-   */
-  useEffect(() => {
-    if (saveResult && labwareResult) {
-      send({
-        type: "SUBMIT_FORM",
-        values: {
-          workNumber,
-          labwareResults: [labwareResult],
-          operationType: QCType.SLIDE_PROCESSING,
-        },
-      });
-    }
-  }, [saveResult, labwareResult, send, workNumber]);
-
-  /***
    * When labwares changes ,the labwareResults has to be updated accordingly
    */
   useEffect(() => {
@@ -69,12 +54,12 @@ const SlideProcessing = ({
    */
   useEffect(() => {
     if (current.matches("submitted")) {
-      notifySaveStatus({ status: "Success" });
+      onSave();
     }
     if (serverError) {
-      notifySaveStatus({ status: "Fail", error: serverError });
+      onError(serverError);
     }
-  }, [current, serverError, notifySaveStatus]);
+  }, [current, serverError, onSave, onError]);
 
   function buildLabwareResult(
     labware: LabwareFieldsFragment
@@ -101,6 +86,25 @@ const SlideProcessing = ({
           />
         </Panel>
       )}
+
+      <div className={"mt-4 flex flex-row items-center justify-end"}>
+        <BlueButton
+          disabled={!labware}
+          onClick={() => {
+            labwareResult &&
+              send({
+                type: "SUBMIT_FORM",
+                values: {
+                  workNumber,
+                  labwareResults: [labwareResult],
+                  operationType: QCType.SLIDE_PROCESSING,
+                },
+              });
+          }}
+        >
+          Save
+        </BlueButton>
+      </div>
     </>
   );
 };

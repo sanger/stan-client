@@ -123,11 +123,16 @@ export default function LabwareResult({
   return (
     <div>
       <div className="flex flex-row items-center justify-end">
-        {<RemoveButton onClick={() => onRemoveClick(labware.barcode)} />}
+        {
+          <RemoveButton
+            data-testid={"remove"}
+            onClick={() => onRemoveClick(labware.barcode)}
+          />
+        }
       </div>
       <div className="flex flex-col items-center justify-around">
         {/* Display the layout of the labware */}
-        <div className="bg-blue-100">
+        <div className="bg-blue-100" data-testid={"passFailComments"}>
           <Labware labware={labware} slotBuilder={slotBuilder} />
         </div>
 
