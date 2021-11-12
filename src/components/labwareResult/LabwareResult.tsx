@@ -100,6 +100,7 @@ export default function LabwareResult({
               }
               value={sampleResults.get(slot.address)!.commentId ?? ""}
               emptyOption={true}
+              data-testid={"comment"}
               onChange={(e) =>
                 send({
                   type: "SET_COMMENT",
@@ -134,12 +135,14 @@ export default function LabwareResult({
         <div className="mt-8 flex flex-row items-end justify-between gap-x-4">
           <BlueButton
             className="flex-shrink-0"
+            data-testid={"passAll"}
             onClick={() => send({ type: "PASS_ALL" })}
           >
             Pass All
           </BlueButton>
           <PinkButton
             className="flex-shrink-0"
+            data-testid={"failAll"}
             onClick={() => send({ type: "FAIL_ALL" })}
           >
             Fail All

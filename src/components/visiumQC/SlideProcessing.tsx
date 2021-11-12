@@ -1,64 +1,80 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   LabwareFieldsFragment,
   LabwareResult as CoreLabwareResult,
   PassFail,
-  RecordStainResultMutation,
+  RecordVisiumQcMutation,
   ResultRequest,
 } from "../../types/sdk";
-import { useCollection } from "../../lib/hooks/useCollection";
 import LabwareResult from "../labwareResult/LabwareResult";
 import { isSlotFilled } from "../../lib/helpers/slotHelper";
 import Panel from "../Panel";
-import { VisiumQCTypeProps } from "../../pages/VisiumQC";
+import { QCType, VisiumQCTypeProps } from "../../pages/VisiumQC";
 import { StanCoreContext } from "../../lib/sdk";
 import { useMachine } from "@xstate/react";
 import createFormMachine from "../../lib/machines/form/formMachine";
 
 const SlideProcessing = ({
   workNumber,
-  labwares,
+  labware,
   removeLabware,
   comments,
-  recordResult,
+  saveResult,
+  notifySaveStatus,
 }: VisiumQCTypeProps) => {
-  const labwareResults = useCollection<CoreLabwareResult>({
-    getKey: (item) => item.barcode,
-  });
-
+  const [labwareResult, setLabwareResult] = useState<CoreLabwareResult>();
   const stanCore = useContext(StanCoreContext);
 
   const [current, send] = useMachine(
-    createFormMachine<ResultRequest, RecordStainResultMutation>().withConfig({
+    createFormMachine<ResultRequest, RecordVisiumQcMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
-          return stanCore.RecordStainResult({
+          return stanCore.RecordVisiumQC({
             request: e.values,
           });
         },
       },
     })
   );
+  const { serverError } = current.context;
 
+  /***
+   * recordResult indicate whether the user has clicked the submit button.
+   * Call the SUBMIT_FORM event
+   */
   useEffect(() => {
-    debugger;
-    if (recordResult) {
+    if (saveResult && labwareResult) {
       send({
         type: "SUBMIT_FORM",
         values: {
           workNumber,
-          labwareResults: labwareResults.items,
+          labwareResults: [labwareResult],
+          operationType: QCType.SLIDE_PROCESSING,
         },
       });
     }
-  }, [recordResult]);
+  }, [saveResult, labwareResult, send, workNumber]);
 
+  /***
+   * When labwares changes ,the labwareResults has to be updated accordingly
+   */
   useEffect(() => {
-    labwares.map((labware) => {
-      labwareResults.append(buildLabwareResult(labware));
-    });
-  }, [labwares]);
+    setLabwareResult(labware ? buildLabwareResult(labware) : undefined);
+  }, [labware, setLabwareResult]);
+
+  /***
+   * Save(/Recording) operation completed.
+   * Notify the parent component with the outcome of Save operation
+   */
+  useEffect(() => {
+    if (current.matches("submitted")) {
+      notifySaveStatus({ status: "Success" });
+    }
+    if (serverError) {
+      notifySaveStatus({ status: "Fail", error: serverError });
+    }
+  }, [current, serverError, notifySaveStatus]);
 
   function buildLabwareResult(
     labware: LabwareFieldsFragment
@@ -74,23 +90,16 @@ const SlideProcessing = ({
 
   return (
     <>
-      {labwares.map(
-        (labware) =>
-          labwareResults.getItem(labware.barcode) && (
-            <Panel key={labware.barcode}>
-              <LabwareResult
-                initialLabwareResult={
-                  labwareResults.getItem(labwares[0].barcode)!
-                }
-                labware={labware}
-                availableComments={comments}
-                onRemoveClick={removeLabware}
-                onChange={(labwareResult) =>
-                  labwareResults.update(labwareResult)
-                }
-              />
-            </Panel>
-          )
+      {labwareResult && labware && (
+        <Panel key={labware.barcode}>
+          <LabwareResult
+            initialLabwareResult={labwareResult}
+            labware={labware}
+            availableComments={comments}
+            onRemoveClick={removeLabware}
+            onChange={(labwareResult) => setLabwareResult(labwareResult)}
+          />
+        </Panel>
       )}
     </>
   );

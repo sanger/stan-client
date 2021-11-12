@@ -1,84 +1,116 @@
 import React, { ChangeEvent, useCallback, useState } from "react";
 import {
   CommentFieldsFragment,
-  GetStainingQcInfoQuery,
+  GetVisiumQcInfoQuery,
   LabwareFieldsFragment,
 } from "../types/sdk";
 import AppShell from "../components/AppShell";
 import WorkNumberSelect from "../components/WorkNumberSelect";
 import LabwareScanner from "../components/labwareScanner/LabwareScanner";
 import Heading from "../components/Heading";
-import { useCollection } from "../lib/hooks/useCollection";
 import { objectKeys } from "../lib/helpers";
 import { Select } from "../components/forms/Select";
 import SlideProcessing from "../components/visiumQC/SlideProcessing";
 import BlueButton from "../components/buttons/BlueButton";
+import OperationCompleteModal from "../components/modal/OperationCompleteModal";
+import Warning from "../components/notifications/Warning";
+import { ClientError } from "graphql-request";
+import { reload } from "../lib/sdk";
 
-type VisiumQCProps = {
-  info: GetStainingQcInfoQuery;
-};
-enum QCType {
+export enum QCType {
   SLIDE_PROCESSING = "Slide Processing",
 }
-export type VisiumQCTypeProps = {
-  workNumber: string | undefined;
-  comments: CommentFieldsFragment[];
-  labwares: LabwareFieldsFragment[];
-  removeLabware: (barcode: string) => void;
-  recordResult: boolean;
-  notify;
+type SaveResultStatus = {
+  status: "Success" | "Fail" | "None";
+  message?: string;
+  error?: ClientError | undefined;
 };
-export enum RecordResultStatus {
-  SUCCESS,
-  FAILURE,
-  UNDEFINED,
-}
+
+type VisiumQCProps = {
+  info: GetVisiumQcInfoQuery;
+};
+
+export type VisiumQCTypeProps = {
+  /***
+   * Work Number
+   */
+  workNumber: string | undefined;
+
+  /***
+   * Comments
+   */
+  comments: CommentFieldsFragment[];
+
+  /***
+   * Labware scanned
+   */
+  labware: LabwareFieldsFragment | undefined;
+
+  /***
+   * Handler for closing labware display panel
+   * @param barcode Barcode of the labware removed
+   */
+  removeLabware: (barcode: string) => void;
+
+  /***
+   * Status to indicate that save result action is initiated in parent.
+   * useEffect hook can used on this to call stanCore API to record result.
+   */
+  saveResult: boolean;
+
+  /**
+   * Callback to indicate the outcome of saving result to parent.
+   * This need to be called when save operation is completed.
+   * @param status Status of result recording
+   */
+  notifySaveStatus: (status: SaveResultStatus) => void;
+};
 
 export default function VisiumQC({ info }: VisiumQCProps) {
   const [workNumber, setWorkNumber] = useState<string | undefined>();
-  const [recordResult, setRecordResult] = useState<boolean>(false);
+  const [saveResult, setSaveResult] = useState<boolean>(false);
   const [qcType, setQCType] = useState<string>(QCType.SLIDE_PROCESSING);
-  const [recordStatus, setRecordStatus] = useState<RecordResultStatus>(
-    RecordResultStatus.UNDEFINED
-  );
-  const labwares = useCollection<LabwareFieldsFragment>({
-    getKey: (item) => item.barcode,
+  const [saveStatus, setSaveStatus] = useState<SaveResultStatus>({
+    status: "None",
   });
+  const [labware, setLabware] = useState<LabwareFieldsFragment>();
+
   const onAddLabware = useCallback(
     (labware: LabwareFieldsFragment) => {
-      labwares.append(labware);
+      setLabware(labware);
     },
-    [labwares]
+    [setLabware]
   );
 
-  const onRemoveLabware = useCallback(
-    (labware: LabwareFieldsFragment) => {
-      labwares.remove(labware.barcode);
+  const onRemoveLabware = useCallback(() => {
+    setLabware(undefined);
+  }, [setLabware]);
+
+  const notifySaveStatus = useCallback(
+    (status: SaveResultStatus) => {
+      setSaveStatus(status);
+      setSaveResult(false);
     },
-    [labwares]
+    [setSaveResult, setSaveStatus]
   );
 
   const QCTypeComponent = ({
     qcType,
-    comments,
-    labwares,
-    removeLabware,
+    qcTypeProps,
   }: {
     qcType: string;
-    comments: CommentFieldsFragment[];
-    labwares: LabwareFieldsFragment[];
-    removeLabware: (barcode: string) => void;
-    recordResult: boolean;
+    qcTypeProps: VisiumQCTypeProps;
   }) => {
     switch (qcType) {
       case QCType.SLIDE_PROCESSING: {
         return (
           <SlideProcessing
-            workNumber={workNumber}
-            comments={comments}
-            labwares={labwares}
-            removeLabware={removeLabware}
-            recordResult={recordResult}
+            workNumber={qcTypeProps.workNumber}
+            comments={qcTypeProps.comments}
+            labware={qcTypeProps.labware}
+            removeLabware={qcTypeProps.removeLabware}
+            saveResult={qcTypeProps.saveResult}
+            notifySaveStatus={qcTypeProps.notifySaveStatus}
           />
         );
       }
@@ -92,7 +124,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
         <AppShell.Title>Visium QC</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        <div className="max-w-screen-xl mx-auto">
+        <div className="max-w-screen-xl mx-auto mb-4">
           <div className="space-y-2 mb-4 ">
             <Heading level={2}>SGP Number</Heading>
 
@@ -112,6 +144,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
               onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                 setQCType(e.currentTarget.value)
               }
+              data-testid={"qcType"}
               emptyOption={true}
               value={qcType}
             >
@@ -126,54 +159,55 @@ export default function VisiumQC({ info }: VisiumQCProps) {
           </div>
 
           <div className="mt-8 space-y-2">
-            <Heading level={2}>Slides</Heading>
+            <Heading level={2}>Slide</Heading>
 
             <p>Please scan in any slides you wish to QC.</p>
 
             <LabwareScanner
               onAdd={onAddLabware}
               onRemove={onRemoveLabware}
-              locked={labwares.items.length > 0}
+              locked={labware !== undefined}
             >
               {({ labwares, removeLabware }) => (
                 <QCTypeComponent
                   qcType={qcType}
-                  labwares={labwares}
-                  removeLabware={removeLabware}
-                  comments={info.comments}
-                  recordResult={recordResult}
+                  qcTypeProps={{
+                    workNumber: workNumber,
+                    labware: labwares[0],
+                    removeLabware: removeLabware,
+                    comments: info.comments,
+                    saveResult: saveResult,
+                    notifySaveStatus: notifySaveStatus,
+                  }}
                 />
               )}
             </LabwareScanner>
           </div>
 
-          {/*serverError && (
+          {saveStatus.status === "Fail" && (
             <Warning
-              message={"Failed to record Staining QC"}
-              error={serverError}
+              message={"Failed to record Visium QC"}
+              error={saveStatus.error}
             />
-          )*/}
+          )}
 
           <div className={"mt-4 flex flex-row items-center justify-end"}>
-            <BlueButton
-              disabled={labwares.items.length <= 0}
-              onClick={() => setRecordResult(true)}
-            >
+            <BlueButton disabled={!labware} onClick={() => setSaveResult(true)}>
               Save
             </BlueButton>
           </div>
         </div>
 
-        {/*<OperationCompleteModal
-          show={current.matches("submitted")}
-          message={"Stain QC complete"}
+        <OperationCompleteModal
+          show={saveStatus.status === "Success"}
+          message={"Visium QC complete"}
           onReset={reload}
         >
           <p>
             If you wish to start the process again, click the "Reset Form"
             button. Otherwise you can return to the Home screen.
           </p>
-        </OperationCompleteModal>*/}
+        </OperationCompleteModal>
       </AppShell.Main>
     </AppShell>
   );
