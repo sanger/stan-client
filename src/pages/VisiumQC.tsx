@@ -29,7 +29,6 @@ type SaveResultStatus = {
 type VisiumQCProps = {
   info: GetVisiumQcInfoQuery;
 };
-
 export type VisiumQCTypeProps = {
   /***
    * Work Number
