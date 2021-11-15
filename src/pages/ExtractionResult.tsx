@@ -110,7 +110,7 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
                   <Heading level={3}>Labware</Heading>
 
                   <FormikLabwareScanner<ExtractResultLabware>
-                    initialLabware={initialLabware}
+                    initialLabwares={initialLabware}
                     buildLabware={buildExtractResultLabware}
                   >
                     <ExtractResultLabwareTable

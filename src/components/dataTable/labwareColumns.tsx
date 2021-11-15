@@ -1,12 +1,9 @@
 import React from "react";
 import { CellProps, Column } from "react-table";
-import {
-  Labware,
-  LabwareFieldsFragment,
-  SampleFieldsFragment,
-} from "../../types/sdk";
+import { Labware, LabwareFieldsFragment } from "../../types/sdk";
 import Circle from "../Circle";
 import { maybeFindSlotByAddress } from "../../lib/helpers/slotHelper";
+import { valueFromSamples } from "./index";
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
@@ -26,19 +23,6 @@ const color: ColumnFactory<Map<number, any>> = (meta) => {
     ),
   };
 };
-
-function joinUnique(array: string[]) {
-  return Array.from(new Set<string>(array)).join(", ");
-}
-
-function valueFromSamples(
-  labware: LabwareFieldsFragment,
-  sampleFunction: (sample: SampleFieldsFragment) => string
-) {
-  return joinUnique(
-    labware.slots.flatMap((slot) => slot.samples).map(sampleFunction)
-  );
-}
 
 /**
  * Barcode of the labware
