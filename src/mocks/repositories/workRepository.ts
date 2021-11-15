@@ -3,10 +3,11 @@ import workFactory from "../../lib/factories/workFactory";
 import { createSessionStorageRepository } from "./index";
 
 const workSeeds: Array<WorkFieldsFragment> = [
-  ...workFactory.buildList(3),
+  ...workFactory.buildList(4),
   workFactory.build(undefined, { transient: { isRnD: true } }),
   workFactory.build({ status: WorkStatus.Paused }),
   workFactory.build({ status: WorkStatus.Failed }),
+  workFactory.build({ status: WorkStatus.Active }),
 ];
 
 const workRepository = createSessionStorageRepository(

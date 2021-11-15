@@ -4,6 +4,7 @@ import {
   AnalysisMeasurementType,
   MeasurementValueCategory,
 } from "./measurementColumn";
+import { OperationType } from "./analysisLabware";
 
 export type AnalysisLabwareContext = {
   analysisLabwares: RnaAnalysisLabware[];
@@ -33,12 +34,17 @@ type UpdateAllCommentTypeEvent = {
   type: "UPDATE_ALL_COMMENTS_TYPE";
   commentId: string;
 };
+type UpdateAllWorkNUmbersEvent = {
+  type: "UPDATE_ALL_WORKNUMBERS";
+  workNumber: string;
+};
 
 type AnalysisLabwareEvent =
   | UpdateAnalysisTypeEvent
   | UpdateLabwareDataEvent
   | UpdateMeasurementTypeEvent
-  | UpdateAllCommentTypeEvent;
+  | UpdateAllCommentTypeEvent
+  | UpdateAllWorkNUmbersEvent;
 
 export const analysisLabwareMachine = createMachine<
   AnalysisLabwareContext,
@@ -66,6 +72,10 @@ export const analysisLabwareMachine = createMachine<
             target: "ready",
             actions: "assignComments",
           },
+          UPDATE_ALL_WORKNUMBERS: {
+            target: "ready",
+            actions: "assignWorkNumbers",
+          },
         },
       },
     },
@@ -76,7 +86,8 @@ export const analysisLabwareMachine = createMachine<
         if (e.type !== "UPDATE_ANALYSIS_TYPE") return;
         ctx.operationType = e.value;
         const measurements = buildMeasurementFields(
-          MeasurementValueCategory.SINGLE_VALUE_TYPE
+          MeasurementValueCategory.SINGLE_VALUE_TYPE,
+          ctx.operationType
         );
         //Change measurement data in all labwares
         ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
@@ -95,7 +106,7 @@ export const analysisLabwareMachine = createMachine<
 
         const updateAnalysisLabware = {
           ...ctx.analysisLabwares[indx],
-          measurements: buildMeasurementFields(e.value),
+          measurements: buildMeasurementFields(e.value, ctx.operationType),
         };
         ctx.analysisLabwares = [
           ...ctx.analysisLabwares.slice(0, indx),
@@ -112,7 +123,8 @@ export const analysisLabwareMachine = createMachine<
         const updateAnalysisLabware = { ...ctx.analysisLabwares[indx] };
         switch (e.labware.field) {
           case "workNumber": {
-            updateAnalysisLabware.workNumber = e.labware.value as string;
+            updateAnalysisLabware.workNumber =
+              e.labware.value !== "" ? e.labware.value : undefined;
             break;
           }
           case "measurements": {
@@ -141,7 +153,8 @@ export const analysisLabwareMachine = createMachine<
             break;
           }
           case "comment": {
-            updateAnalysisLabware.commentId = Number(e.labware.value);
+            updateAnalysisLabware.commentId =
+              e.labware.value !== "" ? Number(e.labware.value) : undefined;
             break;
           }
         }
@@ -157,22 +170,43 @@ export const analysisLabwareMachine = createMachine<
         ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
           return {
             ...labware,
-            commentId: Number(e.commentId),
+            commentId: e.commentId !== "" ? Number(e.commentId) : undefined,
+          };
+        });
+      },
+      assignWorkNumbers: (ctx, e) => {
+        if (e.type !== "UPDATE_ALL_WORKNUMBERS") return;
+        //Change measurement data in all labwares
+        ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
+          return {
+            ...labware,
+            workNumber: e.workNumber !== "" ? e.workNumber : undefined,
           };
         });
       },
     },
   }
 );
-const buildMeasurementFields = (valueCategory: string) => {
+const buildMeasurementFields = (
+  valueCategory: string,
+  operationType: string
+) => {
   let measurements: StringMeasurement[] = [];
   if (valueCategory === MeasurementValueCategory.SINGLE_VALUE_TYPE) {
-    measurements = [
-      {
-        name: AnalysisMeasurementType.DV200,
-        value: "",
-      },
-    ];
+    measurements =
+      operationType === OperationType.RIN
+        ? [
+            {
+              name: AnalysisMeasurementType.RIN,
+              value: "",
+            },
+          ]
+        : [
+            {
+              name: AnalysisMeasurementType.DV200,
+              value: "",
+            },
+          ];
   } else if (valueCategory === MeasurementValueCategory.RANGE_VALUE_TYPE) {
     measurements = [
       {
