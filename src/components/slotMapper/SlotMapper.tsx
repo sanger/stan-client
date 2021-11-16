@@ -127,10 +127,19 @@ function SlotMapper({
     Array<string>
   >([]);
 
+  /**
+   * State to track the failed ones in selected input slots
+   */
   const [failedSelectSlots, setFailedSelectSlots] = useState<
     SlotPassFailFieldsFragment[]
   >([]);
-  const [outputAddress, setOutputAddress] = useState<string | undefined>();
+
+  /**
+   * State to keep the output address clicked to transfer from input
+   */
+  const [destinationAddress, setDestinationAddress] = useState<
+    string | undefined
+  >();
   /**
    * If there's only one input slot selected, store it here
    * Will be used for the slop map table
@@ -208,9 +217,11 @@ function SlotMapper({
    * Callback for sending the actual copy slots event
    */
   const handleCopySlots = React.useCallback(
-    (destAddress?: string) => {
+    (givenDestinationAddress?: string) => {
       setFailedSelectSlots([]);
-      const address = outputAddress ? outputAddress : destAddress;
+      const address = destinationAddress
+        ? destinationAddress
+        : givenDestinationAddress;
       if (currentInputId && currentOutputId && address) {
         send({
           type: "COPY_SLOTS",
@@ -220,20 +231,23 @@ function SlotMapper({
           outputAddress: address,
         });
       }
-      setOutputAddress(undefined);
+      setDestinationAddress(undefined);
     },
     [
       currentInputId,
       currentOutputId,
-      outputAddress,
+      destinationAddress,
       selectedInputAddresses,
       send,
     ]
   );
 
+  /**
+   * Callback to handle click on destination address for tranferring slots
+   */
   const handleOnOutputLabwareSlotClick = React.useCallback(
     (outputAddress: string) => {
-      setOutputAddress(outputAddress);
+      setDestinationAddress(outputAddress);
       //Check whether any selected input slots are failed in QC
       if (currentInputLabware) {
         const slotFails = failedSlots.get(currentInputLabware.barcode);
