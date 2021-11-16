@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { ExtractResult } from "../../types/sdk";
+import { ExtractResultQuery } from "../../types/sdk";
 import { motion } from "framer-motion";
 import MutedText from "../MutedText";
 import LockIcon from "../icons/LockIcon";
@@ -20,7 +20,7 @@ type ExtractResultPanelProps = {
    * Called when extraction result is added or removed
    * @param resultArr the list of current extraction results
    */
-  onChangeExtractResults?: (resultArr: ExtractResult[]) => void;
+  onChangeExtractResults?: (resultArr: ExtractResultQuery[]) => void;
 
   /**
    * True is the scanner should be locked; false otherwise
@@ -75,7 +75,7 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
     return {
       Header: "",
       id: "actions",
-      Cell: ({ row }: { row: Row<ExtractResult> }) => {
+      Cell: ({ row }: { row: Row<ExtractResultQuery> }) => {
         if (locked) {
           return (
             <LockIcon
@@ -89,8 +89,10 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
           <RemoveButton
             data-testid="remove"
             onClick={() => {
-              row.original.labware.barcode &&
-                onRemoveExtractResult(row.original.labware.barcode);
+              row.original.extractResult.labware.barcode &&
+                onRemoveExtractResult(
+                  row.original.extractResult.labware.barcode
+                );
             }}
           />
         );

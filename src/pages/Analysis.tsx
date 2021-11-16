@@ -3,7 +3,7 @@ import AppShell from "../components/AppShell";
 import Heading from "../components/Heading";
 import {
   CommentFieldsFragment,
-  ExtractResult,
+  ExtractResultQuery,
   RecordRnaAnalysisMutation,
   RnaAnalysisLabware,
   RnaAnalysisRequest,
@@ -29,9 +29,9 @@ type AnalysisProps = {
 };
 
 function Analysis({ comments }: AnalysisProps) {
-  const [extractResults, setExtractResults] = React.useState<ExtractResult[]>(
-    []
-  );
+  const [extractResults, setExtractResults] = React.useState<
+    ExtractResultQuery[]
+  >([]);
   const [analysisLabwares, setAnalysisLabwares] = React.useState<
     RnaAnalysisLabware[]
   >([]);
@@ -55,7 +55,7 @@ function Analysis({ comments }: AnalysisProps) {
   );
   const { serverError } = current.context;
 
-  const onChangeExtractResults = useCallback((result: ExtractResult[]) => {
+  const onChangeExtractResults = useCallback((result: ExtractResultQuery[]) => {
     setExtractResults(result);
   }, []);
 
@@ -90,7 +90,9 @@ function Analysis({ comments }: AnalysisProps) {
             className="mt-12  space-y-4"
           >
             <AnalysisLabware
-              barcodes={extractResults.map((result) => result.labware.barcode)}
+              barcodes={extractResults.map(
+                (result) => result.extractResult.labware.barcode
+              )}
               comments={comments}
               analysisLabwares={analysisLabwares}
               onChangeLabwareData={onChangeLabwareData}

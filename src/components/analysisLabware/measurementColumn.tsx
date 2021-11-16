@@ -25,7 +25,7 @@ export const measurementColumn = (
   ) => void
 ) => {
   const getValueCategoryKeys = (operationType: string) => {
-    if (operationType === OperationType.DV200) {
+    if (operationType === AnalysisMeasurementType.DV200) {
       return objectKeys(MeasurementValueCategory);
     } else {
       return objectKeys(MeasurementValueCategory).filter(
@@ -128,9 +128,13 @@ export const measurementColumn = (
       </>
     );
   };
+  const measurementType =
+    operationType === OperationType.RIN
+      ? AnalysisMeasurementType.RIN
+      : AnalysisMeasurementType.DV200;
 
   return {
-    Header: `${operationType} Value`,
+    Header: `${measurementType} Value`,
     id: "value",
     columns: [
       {
@@ -140,7 +144,7 @@ export const measurementColumn = (
           return (
             <MeasurementCategoryTypeSelect
               barcode={row.original.barcode}
-              operationType={operationType}
+              operationType={measurementType}
               onChangeMeasurementCategory={onChangeMeasurementCategory}
             />
           );
