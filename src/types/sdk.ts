@@ -39,6 +39,11 @@ export enum PassFail {
   Fail = 'fail'
 }
 
+export enum ControlType {
+  Positive = 'positive',
+  Negative = 'negative'
+}
+
 export type User = {
   __typename?: 'User';
   username: Scalars['String'];
@@ -660,6 +665,7 @@ export type LabwareResult = {
 };
 
 export type ResultRequest = {
+  operationType?: Maybe<Scalars['String']>;
   labwareResults: Array<LabwareResult>;
   workNumber?: Maybe<Scalars['String']>;
 };
@@ -675,6 +681,53 @@ export type ExtractResultRequest = {
   labware: Array<ExtractResultLabware>;
   workNumber?: Maybe<Scalars['String']>;
 };
+
+export type PermData = {
+  address: Scalars['Address'];
+  seconds?: Maybe<Scalars['Int']>;
+  controlType?: Maybe<ControlType>;
+};
+
+export type RecordPermRequest = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  permData: Array<PermData>;
+};
+
+export type AddressPermData = {
+  __typename?: 'AddressPermData';
+  address: Scalars['Address'];
+  seconds?: Maybe<Scalars['Int']>;
+  controlType?: Maybe<ControlType>;
+  selected: Scalars['Boolean'];
+};
+
+export type VisiumPermData = {
+  __typename?: 'VisiumPermData';
+  labware: Labware;
+  addressPermData: Array<AddressPermData>;
+};
+
+export type VisiumAnalysisRequest = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  selectedAddress: Scalars['Address'];
+  selectedTime: Scalars['Int'];
+};
+
+export type SlotPassFail = {
+  __typename?: 'SlotPassFail';
+  address: Scalars['Address'];
+  result: PassFail;
+  comment?: Maybe<Scalars['String']>;
+};
+
+export type OpPassFail = {
+  __typename?: 'OpPassFail';
+  operation: Operation;
+  slotPassFails: Array<SlotPassFail>;
+};
+
 export type ExtractResult = {
   __typename?: 'ExtractResult';
   labware: Labware;
@@ -698,6 +751,7 @@ export type RnaAnalysisRequest = {
   operationType: Scalars['String'];
   labware: Array<RnaAnalysisLabware>;
 };
+
 export type Query = {
   __typename?: 'Query';
   user?: Maybe<User>;
@@ -725,7 +779,9 @@ export type Query = {
   find: FindResult;
   planData: PlanData;
   stainTypes: Array<StainType>;
+  visiumPermData: VisiumPermData;
   extractResult: ExtractResult;
+  passFails: Array<OpPassFail>;
   historyForSampleId: History;
   historyForExternalName: History;
   historyForDonorName: History;
@@ -834,8 +890,19 @@ export type QueryPlanDataArgs = {
 };
 
 
+export type QueryVisiumPermDataArgs = {
+  barcode: Scalars['String'];
+};
+
+
 export type QueryExtractResultArgs = {
   barcode: Scalars['String'];
+};
+
+
+export type QueryPassFailsArgs = {
+  barcode: Scalars['String'];
+  operationType: Scalars['String'];
 };
 
 
@@ -925,7 +992,10 @@ export type Mutation = {
   unrelease: OperationResult;
   recordStainResult: OperationResult;
   recordExtractResult: OperationResult;
+  recordPerm: OperationResult;
+  visiumAnalysis: OperationResult;
   recordRNAAnalysis: OperationResult;
+  recordVisiumQC: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
@@ -1169,9 +1239,26 @@ export type MutationRecordExtractResultArgs = {
 };
 
 
+export type MutationRecordPermArgs = {
+  request: RecordPermRequest;
+};
+
+
+export type MutationVisiumAnalysisArgs = {
+  request: VisiumAnalysisRequest;
+};
+
+
 export type MutationRecordRnaAnalysisArgs = {
   request: RnaAnalysisRequest;
 };
+
+
+export type MutationRecordVisiumQcArgs = {
+  request: ResultRequest;
+};
+
+
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1204,6 +1291,21 @@ export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
 };
+
+export type ActionFieldsFragment = (
+  { __typename?: 'Action' }
+  & Pick<Action, 'operationId'>
+  & { source: (
+    { __typename?: 'Slot' }
+    & SlotFieldsFragment
+  ), destination: (
+    { __typename?: 'Slot' }
+    & SlotFieldsFragment
+  ), sample: (
+    { __typename?: 'Sample' }
+    & SampleFieldsFragment
+  ) }
+);
 
 export type CommentFieldsFragment = (
   { __typename?: 'Comment' }
@@ -1293,6 +1395,21 @@ export type LocationFieldsFragment = (
   )> }
 );
 
+export type OperationFieldsFragment = (
+  { __typename?: 'Operation' }
+  & Pick<Operation, 'id' | 'performed'>
+  & { operationType: (
+    { __typename?: 'OperationType' }
+    & Pick<OperationType, 'name'>
+  ), actions: Array<(
+    { __typename?: 'Action' }
+    & ActionFieldsFragment
+  )>, user: (
+    { __typename?: 'User' }
+    & UserFieldsFragment
+  ) }
+);
+
 export type PlanActionFieldsFragment = (
   { __typename?: 'PlanAction' }
   & Pick<PlanAction, 'newSection'>
@@ -1372,6 +1489,11 @@ export type SlotFieldsFragment = (
     { __typename?: 'Sample' }
     & SampleFieldsFragment
   )> }
+);
+
+export type SlotPassFailFieldsFragment = (
+  { __typename?: 'SlotPassFail' }
+  & Pick<SlotPassFail, 'address' | 'result' | 'comment'>
 );
 
 export type SpeciesFieldsFragment = (
@@ -2381,6 +2503,26 @@ export type FindLocationByBarcodeQuery = (
   ) }
 );
 
+export type FindPassFailsQueryVariables = Exact<{
+  barcode: Scalars['String'];
+  operationType: Scalars['String'];
+}>;
+
+
+export type FindPassFailsQuery = (
+  { __typename?: 'Query' }
+  & { passFails: Array<(
+    { __typename?: 'OpPassFail' }
+    & { operation: (
+      { __typename?: 'Operation' }
+      & OperationFieldsFragment
+    ), slotPassFails: Array<(
+      { __typename?: 'SlotPassFail' }
+      & SlotPassFailFieldsFragment
+    )> }
+  )> }
+);
+
 export type FindPlanDataQueryVariables = Exact<{
   barcode: Scalars['String'];
 }>;
@@ -2421,19 +2563,6 @@ export type FindWorkNumbersQuery = (
     & Pick<Work, 'workNumber'>
   )> }
 );
-export type GetCommentsQueryVariables = Exact<{
-  commentCategory?: Maybe<Scalars['String']>;
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-}>;
-
-
-export type GetCommentsQuery = (
-  { __typename?: 'Query' }
-  & { comments: Array<(
-    { __typename?: 'Comment' }
-    & CommentFieldsFragment
-  )> }
-);
 
 export type FindWorkProgressQueryVariables = Exact<{
   workNumber?: Maybe<Scalars['String']>;
@@ -2447,6 +2576,20 @@ export type FindWorkProgressQuery = (
   & { workProgress: Array<(
     { __typename?: 'WorkProgress' }
     & WorkProgressFieldsFragment
+  )> }
+);
+
+export type GetCommentsQueryVariables = Exact<{
+  commentCategory?: Maybe<Scalars['String']>;
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+}>;
+
+
+export type GetCommentsQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
   )> }
 );
 
@@ -2863,6 +3006,43 @@ export const LocationFieldsFragmentDoc = gql`
   }
 }
     `;
+export const ActionFieldsFragmentDoc = gql`
+    fragment ActionFields on Action {
+  source {
+    ...SlotFields
+  }
+  destination {
+    ...SlotFields
+  }
+  operationId
+  sample {
+    ...SampleFields
+  }
+}
+    ${SlotFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}`;
+export const UserFieldsFragmentDoc = gql`
+    fragment UserFields on User {
+  username
+  role
+}
+    `;
+export const OperationFieldsFragmentDoc = gql`
+    fragment OperationFields on Operation {
+  id
+  operationType {
+    name
+  }
+  actions {
+    ...ActionFields
+  }
+  user {
+    ...UserFields
+  }
+  performed
+}
+    ${ActionFieldsFragmentDoc}
+${UserFieldsFragmentDoc}`;
 export const PlanActionFieldsFragmentDoc = gql`
     fragment PlanActionFields on PlanAction {
   newSection
@@ -2902,6 +3082,13 @@ export const ReleaseRecipientFieldsFragmentDoc = gql`
   enabled
 }
     `;
+export const SlotPassFailFieldsFragmentDoc = gql`
+    fragment SlotPassFailFields on SlotPassFail {
+  address
+  result
+  comment
+}
+    `;
 export const SpeciesFieldsFragmentDoc = gql`
     fragment SpeciesFields on Species {
   name
@@ -2912,12 +3099,6 @@ export const StainTypeFieldsFragmentDoc = gql`
     fragment StainTypeFields on StainType {
   name
   measurementTypes
-}
-    `;
-export const UserFieldsFragmentDoc = gql`
-    fragment UserFields on User {
-  username
-  role
 }
     `;
 export const ProjectFieldsFragmentDoc = gql`
@@ -3561,6 +3742,19 @@ export const FindLocationByBarcodeDocument = gql`
   }
 }
     ${LocationFieldsFragmentDoc}`;
+export const FindPassFailsDocument = gql`
+    query FindPassFails($barcode: String!, $operationType: String!) {
+  passFails(barcode: $barcode, operationType: $operationType) {
+    operation {
+      ...OperationFields
+    }
+    slotPassFails {
+      ...SlotPassFailFields
+    }
+  }
+}
+    ${OperationFieldsFragmentDoc}
+${SlotPassFailFieldsFragmentDoc}`;
 export const FindPlanDataDocument = gql`
     query FindPlanData($barcode: String!) {
   planData(barcode: $barcode) {
@@ -3589,13 +3783,6 @@ export const FindWorkNumbersDocument = gql`
   }
 }
     `;
-export const GetCommentsDocument = gql`
-    query GetComments($commentCategory: String, $includeDisabled: Boolean) {
-  comments(category: $commentCategory, includeDisabled: $includeDisabled) {
-    ...CommentFields
-  }
-}
-    ${CommentFieldsFragmentDoc}`;
 export const FindWorkProgressDocument = gql`
     query FindWorkProgress($workNumber: String, $workType: String, $status: WorkStatus) {
   workProgress(workNumber: $workNumber, workType: $workType, status: $status) {
@@ -3603,6 +3790,13 @@ export const FindWorkProgressDocument = gql`
   }
 }
     ${WorkProgressFieldsFragmentDoc}`;
+export const GetCommentsDocument = gql`
+    query GetComments($commentCategory: String, $includeDisabled: Boolean) {
+  comments(category: $commentCategory, includeDisabled: $includeDisabled) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetConfigurationDocument = gql`
     query GetConfiguration {
   destructionReasons(includeDisabled: true) {
@@ -3977,6 +4171,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     FindLocationByBarcode(variables: FindLocationByBarcodeQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLocationByBarcodeQuery> {
       return withWrapper(() => client.request<FindLocationByBarcodeQuery>(FindLocationByBarcodeDocument, variables, requestHeaders));
+    },
+    FindPassFails(variables: FindPassFailsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPassFailsQuery> {
+      return withWrapper(() => client.request<FindPassFailsQuery>(FindPassFailsDocument, variables, requestHeaders));
     },
     FindPlanData(variables: FindPlanDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPlanDataQuery> {
       return withWrapper(() => client.request<FindPlanDataQuery>(FindPlanDataDocument, variables, requestHeaders));

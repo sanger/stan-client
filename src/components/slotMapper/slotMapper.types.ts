@@ -1,9 +1,11 @@
 import { NewLabwareLayout } from "../../types/stan";
 import {
+  FindPassFailsQuery,
   LabwareFieldsFragment,
-  Maybe,
   SlotCopyContent,
+  SlotPassFailFieldsFragment,
 } from "../../types/sdk";
+import { ClientError } from "graphql-request";
 
 export interface SlotMapperProps {
   /**
@@ -38,12 +40,15 @@ export interface SlotMapperContext {
   outputLabware: Array<NewLabwareLayout>;
   slotCopyContent: Array<SlotCopyContent>;
   colorByBarcode: Map<string, string>;
+  failedSlots: Map<string, SlotPassFailFieldsFragment[]>;
+  errors: Map<string, ClientError>;
 }
 
 export interface SlotMapperSchema {
   states: {
     ready: {};
     locked: {};
+    updatingLabware: {};
   };
 }
 
@@ -66,6 +71,18 @@ type ClearSlotsEvent = {
   outputAddresses: Array<string>;
 };
 
+type SlotPassFailEvent = {
+  type: "done.invoke.passFailsSlots";
+  data: {
+    barcode: string;
+    result: FindPassFailsQuery;
+  };
+};
+type SlotPassFailErrorEvent = {
+  type: "error.platform.passFailsSlots";
+  barcode: string;
+  error: ClientError;
+};
 type LockEvent = { type: "LOCK" };
 type UnlockEvent = { type: "UNLOCK" };
 
@@ -74,4 +91,6 @@ export type SlotMapperEvent =
   | CopySlotsEvent
   | ClearSlotsEvent
   | LockEvent
-  | UnlockEvent;
+  | UnlockEvent
+  | SlotPassFailEvent
+  | SlotPassFailErrorEvent;

@@ -17,6 +17,7 @@ import {
   LabwareFieldsFragment,
   Maybe,
   SlotFieldsFragment,
+  SlotPassFailFieldsFragment,
 } from "../../types/sdk";
 import SlotMapperTable from "./SlotMapperTable";
 import { maybeFindSlotByAddress } from "../../lib/helpers/slotHelper";
@@ -26,6 +27,9 @@ import { usePager } from "../../lib/hooks/usePager";
 import { NewLabwareLayout } from "../../types/stan";
 import { useMachine } from "@xstate/react";
 import { find } from "lodash";
+import { ConfirmationModal } from "../modal/ConfirmationModal";
+import Warning from "../notifications/Warning";
+import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 
 function SlotMapper({
   onChange,
@@ -39,10 +43,18 @@ function SlotMapper({
       outputLabware: initialOutputLabware,
       slotCopyContent: [],
       colorByBarcode: new Map(),
+      failedSlots: new Map(),
+      errors: new Map(),
     })
   );
 
-  const { inputLabware, slotCopyContent, colorByBarcode } = current.context;
+  const {
+    inputLabware,
+    slotCopyContent,
+    colorByBarcode,
+    failedSlots,
+    errors,
+  } = current.context;
 
   const anySourceMapped = useMemo(() => {
     if (inputLabware.length === 0) {
@@ -115,6 +127,10 @@ function SlotMapper({
     Array<string>
   >([]);
 
+  const [failedSelectSlots, setFailedSelectSlots] = useState<
+    SlotPassFailFieldsFragment[]
+  >([]);
+  const [outputAddress, setOutputAddress] = useState<string | undefined>();
   /**
    * If there's only one input slot selected, store it here
    * Will be used for the slop map table
@@ -191,33 +207,52 @@ function SlotMapper({
   /**
    * Callback for sending the actual copy slots event
    */
-  const handleOnOutputLabwareSlotClick = React.useCallback(
-    (outputAddress: string) => {
-      if (currentInputLabware) {
-        selectedInputSlot = maybeFindSlotByAddress(
-          currentInputLabware.slots,
-          selectedInputAddresses[0]
-        );
-        // if(selectedInputSlot && selectedInputSlot.)
-      }
-
-      if (currentInputId && currentOutputId) {
+  const handleCopySlots = React.useCallback(
+    (destAddress?: string) => {
+      setFailedSelectSlots([]);
+      const address = outputAddress ? outputAddress : destAddress;
+      if (currentInputId && currentOutputId && address) {
         send({
           type: "COPY_SLOTS",
           inputLabwareId: currentInputId,
           inputAddresses: selectedInputAddresses,
           outputLabwareId: currentOutputId,
-          outputAddress,
+          outputAddress: address,
         });
       }
+      setOutputAddress(undefined);
     },
     [
-      send,
       currentInputId,
-      selectedInputAddresses,
       currentOutputId,
-      currentInputLabware,
+      outputAddress,
+      selectedInputAddresses,
+      send,
     ]
+  );
+
+  const handleOnOutputLabwareSlotClick = React.useCallback(
+    (outputAddress: string) => {
+      setOutputAddress(outputAddress);
+      //Check whether any selected input slots are failed in QC
+      if (currentInputLabware) {
+        const slotFails = failedSlots.get(currentInputLabware.barcode);
+        if (slotFails) {
+          const failedSelectSlots = slotFails.filter(
+            (slot) =>
+              selectedInputAddresses.findIndex(
+                (address) => address === slot.address
+              ) !== -1
+          );
+          setFailedSelectSlots(failedSelectSlots);
+          if (failedSelectSlots.length === 0) {
+            handleCopySlots(outputAddress);
+            return;
+          }
+        }
+      }
+    },
+    [currentInputLabware, handleCopySlots, failedSlots]
   );
 
   /**
@@ -359,6 +394,51 @@ function SlotMapper({
           />
         </div>
       )}
+      {
+        <ConfirmationModal
+          show={failedSelectSlots.length > 0}
+          header={"Slot transfer"}
+          message={{ type: "Warning", text: "Failed slot(s)" }}
+          confirmOptions={[
+            {
+              label: "Cancel",
+              action: () => {
+                setFailedSelectSlots([]);
+              },
+            },
+            { label: "Continue", action: handleCopySlots },
+          ]}
+        >
+          <p className={"font-bold mt-8"}>
+            {`Following slot(s) failed in slide processing : `}
+          </p>
+          <Table className={"mt-4 w-full"}>
+            <TableHead>
+              <tr>
+                <TableHeader>Address</TableHeader>
+                <TableHeader>Comment</TableHeader>
+              </tr>
+            </TableHead>
+            <TableBody>
+              {failedSelectSlots.map((slot) => (
+                <tr key={slot.address}>
+                  <TableCell>{slot.address}</TableCell>
+                  <TableCell>{slot.comment}</TableCell>
+                </tr>
+              ))}
+            </TableBody>
+          </Table>
+
+          <p className={"mt-6 font-bold"}>Do you wish to continue or cancel?</p>
+        </ConfirmationModal>
+      }
+      <div className={"flex flex-col w-full"}>
+        {errors.size > 0 && (
+          <Warning
+            message={`There is an error while fetching pass/fail status for the slots in ${currentInputLabware?.barcode}.`}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -1,0 +1,11 @@
+query FindPassFails ($barcode:String!,$operationType:String!) {
+    passFails(barcode:$barcode, operationType: $operationType){
+        operation {
+            ...OperationFields
+        }
+        slotPassFails {
+            ...SlotPassFailFields
+        }
+
+    }
+}
