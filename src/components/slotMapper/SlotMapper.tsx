@@ -266,7 +266,7 @@ function SlotMapper({
         }
       }
     },
-    [currentInputLabware, handleCopySlots, failedSlots]
+    [currentInputLabware, handleCopySlots, failedSlots, selectedInputAddresses]
   );
 
   /**
