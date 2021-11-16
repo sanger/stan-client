@@ -31,6 +31,7 @@ import StainingQC from "../pages/StainingQC";
 import Analysis from "../pages/Analysis";
 import Unrelease from "../pages/Unrelease";
 import ExtractionResult from "../pages/ExtractionResult";
+import VisiumPerm from "../pages/VisiumPerm";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -115,6 +116,11 @@ export function Routes() {
             initialOutputLabware={[plateFactory.build()]}
           />
         )}
+      />
+
+      <AuthenticatedRoute
+        path="/lab/visium_perm"
+        render={(routeProps) => <VisiumPerm key={routeProps.location.key} />}
       />
 
       <AuthenticatedRoute

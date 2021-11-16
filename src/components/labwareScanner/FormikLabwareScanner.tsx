@@ -1,14 +1,12 @@
 import { LabwareFieldsFragment } from "../../types/sdk";
 import React from "react";
 import { FieldArray } from "formik";
-import LabwareScanner from "./LabwareScanner";
+import LabwareScanner, { LabwareScannerProps } from "./LabwareScanner";
 
-type FormikLabwareScannerProps<T> = {
-  /**
-   * Optional: The initial labware to display in the form
-   */
-  initialLabware?: Array<LabwareFieldsFragment>;
-
+type FormikLabwareScannerProps<T> = Omit<
+  LabwareScannerProps,
+  "children" | "onAdd" | "onRemove"
+> & {
   /**
    * Optional: The name of the Formik field
    * @default labware
@@ -39,18 +37,18 @@ type FormikLabwareScannerProps<T> = {
    </FormikLabwareScanner>
  */
 export function FormikLabwareScanner<T>({
-  initialLabware = [],
   name = "labware",
   buildLabware,
   children,
+  ...props
 }: FormikLabwareScannerProps<T>) {
   return (
     <FieldArray name={name}>
       {({ push, remove }) => (
         <LabwareScanner
-          initialLabwares={initialLabware}
           onAdd={(labware) => push(buildLabware(labware))}
           onRemove={(_, index) => remove(index)}
+          {...props}
         >
           {children}
         </LabwareScanner>
