@@ -735,16 +735,21 @@ export type ExtractResult = {
   concentration?: Maybe<Scalars['String']>;
 };
 
-export type PermData = {
-  address: Scalars['Address'];
-  seconds?: Maybe<Scalars['Int']>;
-  controlType?: Maybe<ControlType>;
+export type StringMeasurement = {
+  name: Scalars['String'];
+  value: Scalars['String'];
 };
 
-export type RecordPermRequest = {
+export type RnaAnalysisLabware = {
   barcode: Scalars['String'];
   workNumber?: Maybe<Scalars['String']>;
-  permData: Array<PermData>;
+  commentId?: Maybe<Scalars['Int']>;
+  measurements: Array<StringMeasurement>;
+};
+
+export type RnaAnalysisRequest = {
+  operationType: Scalars['String'];
+  labware: Array<RnaAnalysisLabware>;
 };
 
 export type Query = {
@@ -784,7 +789,6 @@ export type Query = {
   workProgress: Array<WorkProgress>;
   location: Location;
   stored: Array<StoredItem>;
-  extractResult: ExtractResult;
   labwareInLocation: Array<Labware>;
 };
 
@@ -885,6 +889,7 @@ export type QueryPlanDataArgs = {
   barcode: Scalars['String'];
 };
 
+
 export type QueryVisiumPermDataArgs = {
   barcode: Scalars['String'];
 };
@@ -899,6 +904,7 @@ export type QueryPassFailsArgs = {
   barcode: Scalars['String'];
   operationType: Scalars['String'];
 };
+
 
 export type QueryHistoryForSampleIdArgs = {
   sampleId: Scalars['Int'];
@@ -937,18 +943,12 @@ export type QueryStoredArgs = {
 };
 
 
-export type QueryExtractResultArgs = {
-  barcode: Scalars['String'];
-};
-
-
 export type QueryLabwareInLocationArgs = {
   locationBarcode: Scalars['String'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  recordRNAAnalysis: OperationResult;
   login: LoginResult;
   logout?: Maybe<Scalars['String']>;
   register: RegisterResult;
@@ -1002,11 +1002,6 @@ export type Mutation = {
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
   setLocationCustomName: Location;
-};
-
-
-export type MutationRecordRnaAnalysisArgs = {
-  request: RnaAnalysisRequest;
 };
 
 
@@ -1246,7 +1241,6 @@ export type MutationRecordExtractResultArgs = {
 
 export type MutationRecordPermArgs = {
   request: RecordPermRequest;
-
 };
 
 
@@ -1312,22 +1306,6 @@ export type ActionFieldsFragment = (
     & SampleFieldsFragment
   ) }
 );
-export type StringMeasurement = {
-  name: Scalars['String'];
-  value: Scalars['String'];
-};
-
-export type RnaAnalysisLabware = {
-  barcode: Scalars['String'];
-  workNumber?: Maybe<Scalars['String']>;
-  commentId?: Maybe<Scalars['Int']>;
-  measurements: Array<StringMeasurement>;
-};
-
-export type RnaAnalysisRequest = {
-  operationType: Scalars['String'];
-  labware: Array<RnaAnalysisLabware>;
-};
 
 export type CommentFieldsFragment = (
   { __typename?: 'Comment' }
