@@ -1,7 +1,7 @@
 import { Interpreter } from "xstate";
 
 /**
- * The type of an interpreted DataFetcher Machine
+ * The type of an interpreted DataFetcherPage Machine
  */
 export type DataFetcherMachineType = Interpreter<
   DataFetcherContext,
@@ -10,7 +10,7 @@ export type DataFetcherMachineType = Interpreter<
 >;
 
 /**
- * State Schema for a DataFetcher Machine
+ * State Schema for a DataFetcherPage Machine
  */
 export interface DataFetcherSchema {
   states: {
@@ -21,7 +21,7 @@ export interface DataFetcherSchema {
 }
 
 /**
- * Context for a DataFetcher Machine
+ * Context for a DataFetcherPage Machine
  */
 export interface DataFetcherContext<> {
   dataFetcher: () => Promise<any>;

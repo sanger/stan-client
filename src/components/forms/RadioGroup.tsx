@@ -5,7 +5,7 @@ import { FormikErrorMessage } from "./index";
 interface RadioGroupProps {
   label: string;
   name: string;
-  children: JSX.Element[];
+  children: React.ReactNode;
 }
 
 const RadioGroupContext = React.createContext({ name: "" });

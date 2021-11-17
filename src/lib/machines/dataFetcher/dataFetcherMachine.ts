@@ -8,7 +8,7 @@ import { assign } from "@xstate/immer";
 import { createMachineBuilder } from "../index";
 
 /**
- * DataFetcher Machine Options
+ * DataFetcherPage Machine Options
  */
 export const machineOptions: Partial<MachineOptions<
   DataFetcherContext,
@@ -20,7 +20,7 @@ export const machineOptions: Partial<MachineOptions<
 };
 
 /**
- * DataFetcher Machine Config
+ * DataFetcherPage Machine Config
  */
 export const machineConfig: MachineConfig<
   DataFetcherContext,

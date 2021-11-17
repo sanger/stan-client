@@ -681,13 +681,6 @@ export type ExtractResultRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
-export type ExtractResult = {
-  __typename?: 'ExtractResult';
-  labware: Labware;
-  result?: Maybe<PassFail>;
-  concentration?: Maybe<Scalars['String']>;
-};
-
 export type PermData = {
   address: Scalars['Address'];
   seconds?: Maybe<Scalars['Int']>;
@@ -698,6 +691,51 @@ export type RecordPermRequest = {
   barcode: Scalars['String'];
   workNumber?: Maybe<Scalars['String']>;
   permData: Array<PermData>;
+};
+
+export type AddressPermData = {
+  __typename?: 'AddressPermData';
+  address: Scalars['Address'];
+  seconds?: Maybe<Scalars['Int']>;
+  controlType?: Maybe<ControlType>;
+  selected: Scalars['Boolean'];
+};
+
+export type VisiumPermData = {
+  __typename?: 'VisiumPermData';
+  labware: Labware;
+  addressPermData: Array<AddressPermData>;
+};
+
+export type VisiumAnalysisRequest = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  selectedAddress: Scalars['Address'];
+  selectedTime: Scalars['Int'];
+};
+
+export type ExtractResult = {
+  __typename?: 'ExtractResult';
+  labware: Labware;
+  result?: Maybe<PassFail>;
+  concentration?: Maybe<Scalars['String']>;
+};
+
+export type StringMeasurement = {
+  name: Scalars['String'];
+  value: Scalars['String'];
+};
+
+export type RnaAnalysisLabware = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  commentId?: Maybe<Scalars['Int']>;
+  measurements: Array<StringMeasurement>;
+};
+
+export type RnaAnalysisRequest = {
+  operationType: Scalars['String'];
+  labware: Array<RnaAnalysisLabware>;
 };
 
 export type Query = {
@@ -727,6 +765,8 @@ export type Query = {
   find: FindResult;
   planData: PlanData;
   stainTypes: Array<StainType>;
+  visiumPermData: VisiumPermData;
+  extractResult: ExtractResult;
   historyForSampleId: History;
   historyForExternalName: History;
   historyForDonorName: History;
@@ -734,7 +774,6 @@ export type Query = {
   workProgress: Array<WorkProgress>;
   location: Location;
   stored: Array<StoredItem>;
-  extractResult: ExtractResult;
   labwareInLocation: Array<Labware>;
 };
 
@@ -836,6 +875,16 @@ export type QueryPlanDataArgs = {
 };
 
 
+export type QueryVisiumPermDataArgs = {
+  barcode: Scalars['String'];
+};
+
+
+export type QueryExtractResultArgs = {
+  barcode: Scalars['String'];
+};
+
+
 export type QueryHistoryForSampleIdArgs = {
   sampleId: Scalars['Int'];
 };
@@ -873,18 +922,12 @@ export type QueryStoredArgs = {
 };
 
 
-export type QueryExtractResultArgs = {
-  barcode: Scalars['String'];
-};
-
-
 export type QueryLabwareInLocationArgs = {
   locationBarcode: Scalars['String'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  recordRNAAnalysis: OperationResult;
   login: LoginResult;
   logout?: Maybe<Scalars['String']>;
   register: RegisterResult;
@@ -929,17 +972,14 @@ export type Mutation = {
   recordStainResult: OperationResult;
   recordExtractResult: OperationResult;
   recordPerm: OperationResult;
+  visiumAnalysis: OperationResult;
+  recordRNAAnalysis: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
   setLocationCustomName: Location;
-};
-
-
-export type MutationRecordRnaAnalysisArgs = {
-  request: RnaAnalysisRequest;
 };
 
 
@@ -1182,6 +1222,16 @@ export type MutationRecordPermArgs = {
 };
 
 
+export type MutationVisiumAnalysisArgs = {
+  request: VisiumAnalysisRequest;
+};
+
+
+export type MutationRecordRnaAnalysisArgs = {
+  request: RnaAnalysisRequest;
+};
+
+
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1213,23 +1263,6 @@ export type MutationEmptyArgs = {
 export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
-};
-
-export type StringMeasurement = {
-  name: Scalars['String'];
-  value: Scalars['String'];
-};
-
-export type RnaAnalysisLabware = {
-  barcode: Scalars['String'];
-  workNumber?: Maybe<Scalars['String']>;
-  commentId?: Maybe<Scalars['Int']>;
-  measurements: Array<StringMeasurement>;
-};
-
-export type RnaAnalysisRequest = {
-  operationType: Scalars['String'];
-  labware: Array<RnaAnalysisLabware>;
 };
 
 export type CommentFieldsFragment = (
@@ -2248,6 +2281,22 @@ export type UpdateWorkStatusMutation = (
   ) }
 );
 
+export type VisiumAnalysisMutationVariables = Exact<{
+  request: VisiumAnalysisRequest;
+}>;
+
+
+export type VisiumAnalysisMutation = (
+  { __typename?: 'Mutation' }
+  & { visiumAnalysis: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
+);
+
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2421,6 +2470,25 @@ export type FindLocationByBarcodeQuery = (
   & { location: (
     { __typename?: 'Location' }
     & LocationFieldsFragment
+  ) }
+);
+
+export type FindPermDataQueryVariables = Exact<{
+  barcode: Scalars['String'];
+}>;
+
+
+export type FindPermDataQuery = (
+  { __typename?: 'Query' }
+  & { visiumPermData: (
+    { __typename?: 'VisiumPermData' }
+    & { labware: (
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    ), addressPermData: Array<(
+      { __typename?: 'AddressPermData' }
+      & Pick<AddressPermData, 'address' | 'controlType' | 'seconds' | 'selected'>
+    )> }
   ) }
 );
 
@@ -3490,6 +3558,15 @@ export const UpdateWorkStatusDocument = gql`
   }
 }
     ${WorkWithCommentFieldsFragmentDoc}`;
+export const VisiumAnalysisDocument = gql`
+    mutation VisiumAnalysis($request: VisiumAnalysisRequest!) {
+  visiumAnalysis(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const CurrentUserDocument = gql`
     query CurrentUser {
   user {
@@ -3614,6 +3691,21 @@ export const FindLocationByBarcodeDocument = gql`
   }
 }
     ${LocationFieldsFragmentDoc}`;
+export const FindPermDataDocument = gql`
+    query FindPermData($barcode: String!) {
+  visiumPermData(barcode: $barcode) {
+    labware {
+      ...LabwareFields
+    }
+    addressPermData {
+      address
+      controlType
+      seconds
+      selected
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const FindPlanDataDocument = gql`
     query FindPlanData($barcode: String!) {
   planData(barcode: $barcode) {
@@ -4004,6 +4096,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     UpdateWorkStatus(variables: UpdateWorkStatusMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkStatusMutation> {
       return withWrapper(() => client.request<UpdateWorkStatusMutation>(UpdateWorkStatusDocument, variables, requestHeaders));
     },
+    VisiumAnalysis(variables: VisiumAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<VisiumAnalysisMutation> {
+      return withWrapper(() => client.request<VisiumAnalysisMutation>(VisiumAnalysisDocument, variables, requestHeaders));
+    },
     CurrentUser(variables?: CurrentUserQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CurrentUserQuery> {
       return withWrapper(() => client.request<CurrentUserQuery>(CurrentUserDocument, variables, requestHeaders));
     },
@@ -4033,6 +4128,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     FindLocationByBarcode(variables: FindLocationByBarcodeQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLocationByBarcodeQuery> {
       return withWrapper(() => client.request<FindLocationByBarcodeQuery>(FindLocationByBarcodeDocument, variables, requestHeaders));
+    },
+    FindPermData(variables: FindPermDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPermDataQuery> {
+      return withWrapper(() => client.request<FindPermDataQuery>(FindPermDataDocument, variables, requestHeaders));
     },
     FindPlanData(variables: FindPlanDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPlanDataQuery> {
       return withWrapper(() => client.request<FindPlanDataQuery>(FindPlanDataDocument, variables, requestHeaders));
