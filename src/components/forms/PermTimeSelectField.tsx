@@ -15,6 +15,9 @@ type PermSelectFieldProps = {
   barcode: string;
 };
 
+/**
+ * Formik input for allowing a user to select the best perm time for a slide.
+ */
 export default function PermTimeSelectField({ barcode }: PermSelectFieldProps) {
   return (
     <DataLoader loader={() => stanCore.FindPermData({ barcode })}>
@@ -37,12 +40,18 @@ function PermTimeSelectFieldInner({ data }: PermSelectFieldInnerProps) {
     (apd) => apd.selected
   )?.address;
 
+  /**
+   * If there's an initial selected address, make sure it's already selected in the form
+   */
   useEffect(() => {
     if (initialSelectedAddress) {
       setFieldValue("selectedAddress", initialSelectedAddress);
     }
   }, [initialSelectedAddress, setFieldValue]);
 
+  /**
+   * When a new slot is selected, set the selected time for that slot
+   */
   useEffect(() => {
     setFieldValue(
       "selectedTime",
@@ -62,6 +71,8 @@ function PermTimeSelectFieldInner({ data }: PermSelectFieldInnerProps) {
             return <RadioButton name={name} value={addressPermData.address} />;
           }}
         />
+
+        {/* Display a warning if a slide already has a selected perm time, and a new one has been chosen */}
         {values.selectedAddress !== "" &&
           initialSelectedAddress &&
           values.selectedAddress !== initialSelectedAddress && (

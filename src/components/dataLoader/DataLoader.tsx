@@ -6,11 +6,25 @@ import Warning from "../notifications/Warning";
 import WhiteButton from "../buttons/WhiteButton";
 
 export type DataLoaderProps<E> = {
+  /**
+   * A function that asynchronously fetches the data
+   */
   loader: () => Promise<E>;
+
+  /**
+   * A function that will be passed the data once loaded
+   */
   children: (data: E) => React.ReactNode;
+
+  /**
+   * Optional: error message to display to the user if loading fails
+   */
   errorMessage?: string;
 };
 
+/**
+ * Container component that will fetch data, showing a loading spinner in the mean time.
+ */
 export default function DataLoader<E>({
   loader,
   children,
