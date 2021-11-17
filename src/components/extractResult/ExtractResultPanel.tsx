@@ -43,10 +43,21 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
     currentBarcode,
   } = current.context;
 
+  const formatErrorMessage = (message: string) => {
+    const firstcolonIndx = message.indexOf(":");
+    const secondcolonIndx = message.indexOf(":", firstcolonIndx + 1);
+    if (firstcolonIndx > 0 && secondcolonIndx > 0)
+      return message.substr(
+        firstcolonIndx + 1,
+        secondcolonIndx - firstcolonIndx - 1
+      );
+    else return message;
+  };
+
   const scanError = scanErrorMessage
     ? scanErrorMessage
     : serverError
-    ? serverError.message
+    ? formatErrorMessage(serverError.message)
     : undefined;
 
   React.useEffect(() => {

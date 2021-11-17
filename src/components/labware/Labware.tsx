@@ -245,33 +245,6 @@ const Labware = ({
     return slotColumns;
   }, [numColumns, slots]);
 
-  /***
-   * Component to display a column of slot fields that contains a label with slot address and component returned by SlotBuilder callback
-   */
-  const SlotColumnInfo = ({
-    slotColumn,
-    slotBuilder,
-    numRows,
-    alignRight = false,
-  }: {
-    slotColumn: SlotFieldsFragment[];
-    slotBuilder: (slot: SlotFieldsFragment) => React.ReactNode;
-    numRows: number;
-    alignRight?: boolean;
-  }) => {
-    const gridClasses = `px-10 pt-4 gap-4 content-center grid grid-rows-${numRows} grid-cols-1 py-4 select-none`;
-    return (
-      <div className={gridClasses}>
-        {slotColumn.map((slot) => (
-          <div className={`flex flex-col ${alignRight && "items-end"}`}>
-            <div className={"flex"}>{slot.address}</div>
-            <div className={"flex"}>{slotBuilder(slot)}</div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className={"flex flex-row"}>
       {slotColumns.length > 0 && slotBuilder && (
@@ -324,3 +297,33 @@ const Labware = ({
 };
 
 export default Labware;
+
+/***
+ * Component to display a column of slot fields that contains a label with slot address and component returned by SlotBuilder callback
+ */
+const SlotColumnInfo = ({
+  slotColumn,
+  slotBuilder,
+  numRows,
+  alignRight = false,
+}: {
+  slotColumn: SlotFieldsFragment[];
+  slotBuilder: Required<LabwareProps>["slotBuilder"];
+  numRows: number;
+  alignRight?: boolean;
+}) => {
+  const gridClasses = `px-10 pt-4 gap-4 content-center grid grid-rows-${numRows} grid-cols-1 py-4 select-none`;
+  return (
+    <div className={gridClasses}>
+      {slotColumn.map((slot) => (
+        <div
+          key={slot.address}
+          className={`flex flex-col ${alignRight && "items-end"}`}
+        >
+          <div className={"flex font-medium"}>{slot.address}</div>
+          <div className={"flex"}>{slotBuilder(slot)}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
