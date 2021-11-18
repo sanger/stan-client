@@ -88,6 +88,21 @@ describe("Visium QC Page", () => {
     });
   });
   describe("On Save", () => {
+    context("When there is no server error", () => {
+      before(() => {
+        cy.findByRole("button", { name: /Save/i })
+          .should("not.be.disabled")
+          .click();
+      });
+
+      it("shows a success message", () => {
+        cy.findByText("Visium QC complete").should("be.visible");
+      });
+
+      after(() => {
+        cy.findByRole("button", { name: /Reset/i }).click();
+      });
+    });
     context("When there is a server error", () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
@@ -110,28 +125,12 @@ describe("Visium QC Page", () => {
             })
           );
         });
+        cy.get("#labwareScanInput").type("STAN-2100{enter}");
         cy.findByRole("button", { name: /Save/i }).click();
       });
 
       it("shows an error", () => {
         cy.findByText("Failed to record Visium QC").should("be.visible");
-      });
-    });
-
-    context("When there is no server error", () => {
-      before(() => {
-        cy.msw().then(({ worker }) => {
-          worker.resetHandlers();
-        });
-        cy.findByTestId("remove").click();
-        cy.get("#labwareScanInput").type("STAN-2100{enter}");
-        cy.findByRole("button", { name: /Save/i })
-          .should("not.be.disabled")
-          .click();
-      });
-
-      it("shows a success message", () => {
-        cy.findByText("Visium QC complete").should("be.visible");
       });
     });
   });
