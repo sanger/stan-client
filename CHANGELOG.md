@@ -6,8 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-
 ### Modified
+
+## [1.10.2] - 2021-11-18
+### Added
+- Fix Cypress tests ([#79](https://github.com/sanger/stan-client/pull/79))
+- Split labware menu ([#80](https://github.com/sanger/stan-client/pull/80))
+- Record extract results page ([#75](https://github.com/sanger/stan-client/pull/75))
+- Support releasing a box of stored labware ([#78] (https://github.com/sanger/stan-client/pull/78))
+- Visium permabilisation page ([#83](https://github.com/sanger/stan-client/pull/83))
+- RNA analysis page ([#77](https://github.com/sanger/stan-client/pull/77))
 
 ## [1.9.0] - 2021-10-28
 ### Added
@@ -119,7 +127,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Everything!
 
-[Unreleased]: https://github.com/sanger/stan-client/compare/1.9.0...HEAD
+[Unreleased]: https://github.com/sanger/stan-client/compare/master...HEAD
+[1.10.2]: https://github.com/sanger/stan-client/compare/1.9.0...1.10.2
 [1.9.0]: https://github.com/sanger/stan-client/compare/1.8.2...1.9.0
 [1.8.2]: https://github.com/sanger/stan-client/compare/1.8.1...1.8.2
 [1.8.1]: https://github.com/sanger/stan-client/compare/1.7.0...1.8.1

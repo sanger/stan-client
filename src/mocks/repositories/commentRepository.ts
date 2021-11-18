@@ -63,6 +63,19 @@ const seeds: Array<CommentFieldsFragment> = [
     text: "Extra-Terrestrial error",
     enabled: false,
   }),
+  commentFactory.build({
+    category: "Visium QC",
+    text: "Section invisible",
+    enabled: false,
+  }),
+  commentFactory.build({
+    category: "Visium QC",
+    text: "Wrong morphology for Visium",
+  }),
+  commentFactory.build({
+    category: "Visium QC",
+    text: "Slide damaged",
+  }),
 ];
 
 const commentRepository = createSessionStorageRepository(

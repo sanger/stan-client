@@ -193,20 +193,15 @@ const buildMeasurementFields = (
 ) => {
   let measurements: StringMeasurement[] = [];
   if (valueCategory === MeasurementValueCategory.SINGLE_VALUE_TYPE) {
-    measurements =
-      operationType === OperationType.RIN
-        ? [
-            {
-              name: AnalysisMeasurementType.RIN,
-              value: "",
-            },
-          ]
-        : [
-            {
-              name: AnalysisMeasurementType.DV200,
-              value: "",
-            },
-          ];
+    measurements = [
+      {
+        name:
+          operationType === OperationType.RIN
+            ? AnalysisMeasurementType.RIN
+            : AnalysisMeasurementType.DV200,
+        value: "",
+      },
+    ];
   } else if (valueCategory === MeasurementValueCategory.RANGE_VALUE_TYPE) {
     measurements = [
       {

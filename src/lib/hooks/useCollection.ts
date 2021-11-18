@@ -3,7 +3,7 @@ import { useImmer } from "use-immer";
 import { castDraft } from "immer";
 import { Maybe } from "../../types/sdk";
 
-interface Collection<T> {
+export interface Collection<T> {
   /**
    * The current list of items
    */

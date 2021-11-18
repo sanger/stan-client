@@ -215,6 +215,14 @@ function AppShell({ children }: AppShellParams) {
                         "Transfer cDNA from slides onto a new 96 well plate."
                       }
                     />
+                    <NavLinkMenuItem
+                      caption={"Visium QC"}
+                      path={"/lab/visium_qc"}
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={"Pass or fail samples on a visium slide."}
+                    />
 
                     <NavLinkMenuItem
                       caption={"Visium Permabilisation"}
@@ -459,6 +467,11 @@ function AppShell({ children }: AppShellParams) {
                       </StanMobileNavLink>
                       <StanMobileNavLink to="/lab/visium_analysis">
                         Visium Analysis
+                      </StanMobileNavLink>
+                    </div>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/visium_qc">
+                        Visium QC
                       </StanMobileNavLink>
                     </div>
                     <div className="grid grid-cols-2 mt-2 gap-y-4 gap-x-8">
