@@ -4,6 +4,7 @@ import { Meta, Story } from "@storybook/react";
 import LabwareScanner, { useLabwareContext } from "./LabwareScanner";
 import LabwareScanPanel from "../labwareScanPanel/LabwareScanPanel";
 import columns from "../dataTable/labwareColumns";
+import LabwareScannerSlotsTable from "./LabwareScannerSlotsTable";
 
 const meta: Meta = {
   title: "LabwareScanner",
@@ -53,6 +54,16 @@ export const LabwareScannerTable: Story<ComponentProps<
           columns.labwareType(),
         ]}
       />
+    </LabwareScanner>
+  );
+};
+
+export const LabwareScannerSlotsTableStory: Story<ComponentProps<
+  typeof LabwareScanner
+>> = (args) => {
+  return (
+    <LabwareScanner {...args}>
+      <LabwareScannerSlotsTable />
     </LabwareScanner>
   );
 };

@@ -62,6 +62,11 @@ export interface LabwareContext {
    * Flag for Location barcode scan. If true, it will be  a location barcode scan, else a labware scan
    */
   locationScan?: boolean;
+
+  /**
+   * The maximum number of labware to hold in context
+   */
+  limit?: number;
 }
 
 /**
@@ -162,7 +167,8 @@ export const createLabwareMachine = (
   foundLabwareCheck?: (
     labwares: LabwareFieldsFragment[],
     foundLabware: LabwareFieldsFragment
-  ) => string[]
+  ) => string[],
+  limit?: number
 ) =>
   createMachine<LabwareContext, LabwareEvents>(
     {
@@ -176,10 +182,30 @@ export const createLabwareMachine = (
         successMessage: null,
         errorMessage: null,
         locationScan: false,
+        limit,
       },
       id: "labwareScanner",
-      initial: "idle",
+      initial: "checking_full",
       states: {
+        checking_full: {
+          always: [
+            {
+              cond: (ctx) => ctx.labwares.length === ctx.limit,
+              target: "full",
+            },
+            { target: "idle" },
+          ],
+        },
+
+        full: {
+          on: {
+            REMOVE_LABWARE: {
+              target: "#labwareScanner.idle.success",
+              actions: ["removeLabware"],
+            },
+          },
+        },
+
         idle: {
           initial: "normal",
           states: {
@@ -212,13 +238,7 @@ export const createLabwareMachine = (
           },
         },
         locked: {
-          on: {
-            UNLOCK: "idle",
-            REMOVE_LABWARE: {
-              target: "#labwareScanner.idle.success",
-              actions: ["removeLabware"],
-            },
-          },
+          on: { UNLOCK: "checking_full" },
         },
         validating: {
           invoke: {
@@ -274,7 +294,7 @@ export const createLabwareMachine = (
             id: "validateFoundLabware",
             src: "validateFoundLabware",
             onDone: {
-              target: "#labwareScanner.idle.normal",
+              target: "#labwareScanner.checking_full",
               actions: ["foundEvent", "addFoundLabware"],
             },
             onError: {

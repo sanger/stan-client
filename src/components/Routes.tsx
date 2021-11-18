@@ -32,6 +32,7 @@ import Analysis from "../pages/Analysis";
 import Unrelease from "../pages/Unrelease";
 import ExtractionResult from "../pages/ExtractionResult";
 import VisiumQC from "../pages/VisiumQC";
+import VisiumPerm from "../pages/VisiumPerm";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -128,6 +129,11 @@ export function Routes() {
           </DataFetcher>
         )}
       />
+      <AuthenticatedRoute
+        path="/lab/visium_perm"
+        render={(routeProps) => <VisiumPerm key={routeProps.location.key} />}
+      />
+
       <AuthenticatedRoute
         path="/lab/staining"
         render={(routeProps) => (
