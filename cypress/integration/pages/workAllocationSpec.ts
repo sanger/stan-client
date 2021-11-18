@@ -109,7 +109,7 @@ describe("Work Allocation", () => {
       });
       it("updates the Work status", () => {
         cy.findByTestId("work-allocation-table").within(() => {
-          cy.findByText(/ACTIVE/i).should("exist");
+          cy.findAllByText(/ACTIVE/i).should("have.length.above", 0);
         });
       });
     });

@@ -34,6 +34,7 @@ import extractionResultHandlers from "./handlers/extractionResultHandlers";
 import recordRnaAnalysisHandlers from "./handlers/recordRnaAnalysisHandlers";
 import unreleaseHandlers from "./handlers/unreleaseHandlers";
 import { labwareLocationHandlers } from "./handlers/labwareLocationHandlers";
+import visiumQCHandlers from "./handlers/visiumQCHandlers";
 import visiumHandlers from "./handlers/visiumHandlers";
 
 export const handlers = [
@@ -70,5 +71,6 @@ export const handlers = [
   ...recordRnaAnalysisHandlers,
   ...unreleaseHandlers,
   ...labwareLocationHandlers,
+  ...visiumQCHandlers,
   ...visiumHandlers,
 ];
