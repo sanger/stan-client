@@ -18,20 +18,20 @@ describe("Visium cDNA Page", () => {
     });
   });
 
-  context("When a user scans in a LP Slide", () => {
+  context("When a user scans in a TP Slide", () => {
     before(() => {
-      cy.get("#labwareScanInput").type("STAN-4100{enter}");
+      cy.get("#labwareScanInput").type("STAN-3100{enter}");
     });
 
     it("shows it on the page", () => {
-      cy.findByText("STAN-4100").should("be.visible");
+      cy.findByText("STAN-3100").should("be.visible");
     });
 
     it("keeps the Save button disabled", () => {
       saveButton().should("be.disabled");
     });
 
-    context("When user maps all source slots", () => {
+    context("When user maps some source slots", () => {
       before(() => {
         cy.get("#inputLabwares").within(() => {
           cy.findByText("A1").click();
@@ -47,6 +47,26 @@ describe("Visium cDNA Page", () => {
         saveButton().should("not.be.disabled");
       });
     });
+    context(
+      "When user maps slots that failed in Visium QC- Slide processing",
+      () => {
+        before(() => {
+          cy.get("#inputLabwares").within(() => {
+            cy.findByText("A2").click();
+          });
+
+          cy.get("#outputLabwares").within(() => {
+            cy.findByText("G1").click();
+          });
+        });
+        it("display the notification to user about failed slots", () => {
+          cy.findByText("Failed slot(s)").should("be.visible");
+        });
+        after(() => {
+          cy.findByRole("button", { name: /Cancel/i }).click();
+        });
+      }
+    );
 
     describe("On save", () => {
       context("When there is a server error", () => {

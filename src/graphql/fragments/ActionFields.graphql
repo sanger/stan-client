@@ -1,0 +1,12 @@
+fragment ActionFields on  Action {
+    source {
+        ...SlotFields
+    }
+    destination {
+        ...SlotFields
+    }
+    operationId,
+    sample {
+        ...SampleFields
+    }
+}

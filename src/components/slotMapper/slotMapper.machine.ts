@@ -5,10 +5,11 @@ import {
   SlotMapperSchema,
 } from "./slotMapper.types";
 import { assign } from "@xstate/immer";
-import { GridDirection, SlotCopyContent } from "../../types/sdk";
+import { GridDirection, PassFail, SlotCopyContent } from "../../types/sdk";
 import { buildAddresses, cycleColors } from "../../lib/helpers";
 import { sortWithDirection } from "../../lib/helpers/addressHelper";
 import { find, indexOf, intersection, map } from "lodash";
+import { stanCore } from "../../lib/sdk";
 
 const colors = cycleColors();
 
@@ -19,6 +20,21 @@ const machineConfig: Partial<MachineOptions<
   actions: {
     assignInputLabware: assign((ctx, e) => {
       e.type === "UPDATE_INPUT_LABWARE" && (ctx.inputLabware = e.labware);
+      //update the failedSlots array  if it  has entries for any removed labware
+      let keys = Array.from(ctx.failedSlots.keys()).filter(
+        (key: string) =>
+          ctx.inputLabware.findIndex((labware) => labware.barcode === key) ===
+          -1
+      );
+      keys.forEach((key) => ctx.failedSlots.delete(key));
+
+      //update the error array  if it  has entries for any removed labware
+      keys = Array.from(ctx.errors.keys()).filter(
+        (key: string) =>
+          ctx.inputLabware.findIndex((labware) => labware.barcode === key) ===
+          -1
+      );
+      keys.forEach((key) => ctx.errors.delete(key));
     }),
 
     assignLabwareColors: assign((ctx) => {
@@ -124,6 +140,48 @@ const machineConfig: Partial<MachineOptions<
         // Then add on the newly created slot copy content
         .concat(newSlotCopyContent);
     }),
+    assignFailedSlots: assign((ctx, e) => {
+      if (e.type !== "done.invoke.passFailsSlots") return;
+
+      /*If there are multiple slide processing performed on same labware, check the latest matching operation recorded
+       which would be the last one in the array.
+       */
+      if (e.data.result.passFails && e.data.result.passFails.length > 0) {
+        const slotPassFails =
+          e.data.result.passFails[e.data.result.passFails.length - 1]
+            .slotPassFails;
+        if (slotPassFails) {
+          const failedAddresses = slotPassFails.filter(
+            (slotPassFail) => slotPassFail.result === PassFail.Fail
+          );
+          if (failedAddresses.length > 0) {
+            ctx.failedSlots.set(e.data.barcode, failedAddresses);
+          }
+        }
+      }
+    }),
+    assignPassFailError: assign((ctx, e) => {
+      if (e.type !== "error.platform.passFailsSlots") return;
+      ctx.errors.set(e.barcode, e.error);
+    }),
+  },
+  services: {
+    passFailsSlots: async (ctx, e) => {
+      if (e.type !== "UPDATE_INPUT_LABWARE") {
+        return Promise.reject();
+      }
+      if (e.labware.length <= 0) {
+        return Promise.reject("No labwares scanned");
+      }
+      const response = await stanCore.FindPassFails({
+        barcode: e.labware[e.labware.length - 1].barcode,
+        operationType: "Slide processing",
+      });
+      return {
+        barcode: e.labware[e.labware.length - 1].barcode,
+        result: response,
+      };
+    },
   },
 };
 
@@ -138,14 +196,16 @@ const slotMapperMachine = Machine<
     states: {
       ready: {
         entry: "assignLabwareColors",
+
         on: {
           COPY_SLOTS: {
-            actions: ["copySlots"],
+            actions: "copySlots",
           },
           CLEAR_SLOTS: {
             actions: ["clearSlots"],
           },
           UPDATE_INPUT_LABWARE: {
+            target: "updatingLabware",
             actions: [
               "assignInputLabware",
               "assignLabwareColors",
@@ -153,6 +213,19 @@ const slotMapperMachine = Machine<
             ],
           },
           LOCK: "locked",
+        },
+      },
+      updatingLabware: {
+        invoke: {
+          src: "passFailsSlots",
+          onDone: {
+            target: "ready",
+            actions: "assignFailedSlots",
+          },
+          onError: {
+            target: "ready",
+            actions: "assignPassFailError",
+          },
         },
       },
       locked: {

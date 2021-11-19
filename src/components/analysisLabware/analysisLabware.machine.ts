@@ -202,6 +202,20 @@ const buildMeasurementFields = (
         value: "",
       },
     ];
+    measurements =
+      operationType === OperationType.RIN
+        ? [
+            {
+              name: AnalysisMeasurementType.RIN,
+              value: "",
+            },
+          ]
+        : [
+            {
+              name: AnalysisMeasurementType.DV200,
+              value: "",
+            },
+          ];
   } else if (valueCategory === MeasurementValueCategory.RANGE_VALUE_TYPE) {
     measurements = [
       {

@@ -1,0 +1,13 @@
+fragment OperationFields on Operation {
+    id
+    operationType {
+        name
+    }
+    actions {
+        ...ActionFields
+    }
+    user {
+        ...UserFields
+    }
+    performed
+}
