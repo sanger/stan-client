@@ -1,30 +1,16 @@
 import SlideProcessing from "./SlideProcessing";
 import React from "react";
-import { QCType } from "../../pages/VisiumQC";
-import { CommentFieldsFragment, LabwareFieldsFragment } from "../../types/sdk";
+import { QCType, VisiumQCData } from "../../pages/VisiumQC";
+import { CommentFieldsFragment } from "../../types/sdk";
 import { ClientError } from "graphql-request";
+import CDNAAmplification from "./CDNAAmplification";
+import { useFormikContext } from "formik";
 
 export type VisiumQCTypeProps = {
   /***
-   * Work Number
-   */
-  workNumber: string | undefined;
-
-  /***
    * Comments
    */
-  comments: CommentFieldsFragment[];
-
-  /***
-   * Labware scanned
-   */
-  labware: LabwareFieldsFragment | undefined;
-
-  /***
-   * Handler for closing labware display panel
-   * @param barcode Barcode of the labware removed
-   */
-  removeLabware: (barcode: string) => void;
+  comments?: CommentFieldsFragment[];
 
   /**
    * Callback to indicate the success of saving result.
@@ -36,21 +22,21 @@ export type VisiumQCTypeProps = {
   onError: (error: ClientError) => void;
 };
 
-const VisiumQCType = ({
-  qcType,
-  qcTypeProps,
-}: {
-  qcType: string;
-  qcTypeProps: VisiumQCTypeProps;
-}) => {
-  switch (qcType) {
+const VisiumQCType = ({ qcTypeProps }: { qcTypeProps: VisiumQCTypeProps }) => {
+  const { values } = useFormikContext<VisiumQCData>();
+  switch (values.qcType) {
     case QCType.SLIDE_PROCESSING: {
       return (
         <SlideProcessing
-          workNumber={qcTypeProps.workNumber}
           comments={qcTypeProps.comments}
-          labware={qcTypeProps.labware}
-          removeLabware={qcTypeProps.removeLabware}
+          onSave={qcTypeProps.onSave}
+          onError={qcTypeProps.onError}
+        />
+      );
+    }
+    case QCType.CDNA_AMPLIFIFACTION: {
+      return (
+        <CDNAAmplification
           onSave={qcTypeProps.onSave}
           onError={qcTypeProps.onError}
         />
