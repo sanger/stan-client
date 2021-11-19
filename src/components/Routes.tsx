@@ -31,7 +31,9 @@ import StainingQC from "../pages/StainingQC";
 import Analysis from "../pages/Analysis";
 import Unrelease from "../pages/Unrelease";
 import ExtractionResult from "../pages/ExtractionResult";
+import VisiumQC from "../pages/VisiumQC";
 import VisiumPerm from "../pages/VisiumPerm";
+import VisiumAnalysis from "../pages/VisiumAnalysis";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -117,10 +119,27 @@ export function Routes() {
           />
         )}
       />
-
+      <AuthenticatedRoute
+        path="/lab/visium_qc"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetVisiumQCInfo}
+          >
+            {(visiumQCInfo) => <VisiumQC info={visiumQCInfo} />}
+          </DataFetcher>
+        )}
+      />
       <AuthenticatedRoute
         path="/lab/visium_perm"
         render={(routeProps) => <VisiumPerm key={routeProps.location.key} />}
+      />
+
+      <AuthenticatedRoute
+        path="/lab/visium_analysis"
+        render={(routeProps) => (
+          <VisiumAnalysis key={routeProps.location.key} />
+        )}
       />
 
       <AuthenticatedRoute
