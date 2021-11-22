@@ -124,6 +124,7 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
           return (
             <input
               className={"rounded-md"}
+              data-testid={"cqInput"}
               type={"number"}
               onChange={(e) =>
                 handleChangeCQValue(
@@ -150,7 +151,7 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
   return (
     <div className="max-w-screen-xl mx-auto">
       {labwares.length > 0 && (
-        <div className={"flex flex-col mt-8"}>
+        <div className={"flex flex-col mt-2"}>
           <Panel>
             <div className="flex flex-row items-center justify-end">
               {
@@ -160,24 +161,25 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
                 />
               }
             </div>
-            <div className={"flex flex-row items-center ml-4"}>
+            <div className={"flex flex-col w-1/4"}>
               <label> CQ Value</label>
               <input
-                className={"ml-4 rounded-md"}
+                className={"rounded-md"}
                 type={"number"}
+                data-testid={"cqInputAll"}
                 onChange={(e) =>
                   handleChangeAllCQValue(Number(e.currentTarget.value))
                 }
               />
             </div>
-            <div className={"flex flex-row mt-4 justify-between"}>
+            <div className={"flex flex-row mt-8 justify-between"}>
               {labwareResult && (
                 <DataTable
                   columns={columns}
                   data={labwareResult.sampleResults}
                 />
               )}
-              <div className="flex flex-col mt-2">
+              <div className="flex flex-col" data-testid={"labware"}>
                 <Labware
                   labware={labwares[0]}
                   selectable="non_empty"
