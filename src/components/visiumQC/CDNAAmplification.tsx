@@ -1,6 +1,5 @@
 import { VisiumQCTypeProps } from "./VisiumQCType";
 import Panel from "../Panel";
-import LabwareResult from "../labwareResult/LabwareResult";
 import BlueButton from "../buttons/BlueButton";
 import { QCType, VisiumQCData } from "../../pages/VisiumQC";
 import React, { useContext, useEffect, useState } from "react";
