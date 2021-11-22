@@ -50,6 +50,11 @@ export default function VisiumQC({ info }: VisiumQCProps) {
     [setError]
   );
 
+  const initializeOnQCTypeSelection = useCallback(() => {
+    setSuccess(false);
+    setError(undefined);
+  }, [setSuccess, setError]);
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -88,9 +93,10 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                 <Heading level={2}>QC Type</Heading>
                 <div className="mt-4 md:w-1/2">
                   <FormikSelect
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                      setFieldValue("qcType", e.currentTarget.value)
-                    }
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                      setFieldValue("qcType", e.currentTarget.value);
+                      initializeOnQCTypeSelection();
+                    }}
                     data-testid={"qcType"}
                     emptyOption={true}
                     label={""}
