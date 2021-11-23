@@ -59,7 +59,7 @@ const locationHandlers = [
         return res(
           ctx.errors([
             {
-              message: e.message,
+              message: (e as Error).message,
             },
           ])
         );
@@ -85,7 +85,7 @@ const locationHandlers = [
         return res(
           ctx.errors([
             {
-              message: e.message,
+              message: (e as Error).message,
             },
           ])
         );
@@ -114,7 +114,7 @@ const locationHandlers = [
         return res(
           ctx.errors([
             {
-              message: e.message,
+              message: (e as Error).message,
             },
           ])
         );
