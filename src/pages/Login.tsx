@@ -18,6 +18,7 @@ import Logo from "../components/Logo";
 import { motion } from "framer-motion";
 import { extractServerErrors, LocationState } from "../types/stan";
 import { StanCoreContext } from "../lib/sdk";
+import { ClientError } from "graphql-request";
 
 /**
  * Schema used by Formik in the login form.
@@ -77,7 +78,7 @@ const Login = (
         formikHelpers.setSubmitting(false);
       }, 1500);
     } catch (e) {
-      setErrorMessage(extractServerErrors(e).message);
+      setErrorMessage(extractServerErrors(e as ClientError).message);
       formikHelpers.setSubmitting(false);
     }
   };

@@ -12,10 +12,11 @@ import Heading from "../components/Heading";
 import storeConfig from "../static/store.json";
 import { Link } from "react-router-dom";
 import BarcodeIcon from "../components/icons/BarcodeIcon";
-import { FindLocationByBarcodeQuery } from "../types/sdk";
+import { FindLocationByBarcodeQuery, Maybe } from "../types/sdk";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import { isLocationSearch, LocationSearchParams } from "../types/stan";
 import { history, StanCoreContext } from "../lib/sdk";
+import { ClientError } from "graphql-request";
 
 /**
  * RouteComponentProps from react-router allows the props to be passed in
@@ -105,7 +106,7 @@ interface LocationLinkProps {
 const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
   const stanCore = useContext(StanCoreContext);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<Maybe<ClientError>>(null);
   const [location, setLocation] = useState<
     FindLocationByBarcodeQuery["location"] | null
   >(null);
@@ -118,7 +119,7 @@ const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
         });
         setLocation(location);
       } catch (e) {
-        setError(e);
+        setError(e as ClientError);
       } finally {
         setLoading(false);
       }
