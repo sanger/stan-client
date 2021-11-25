@@ -91,7 +91,6 @@ const SlideProcessing = ({ comments, onSave, onError }: VisiumQCTypeProps) => {
         <BlueButton
           disabled={labwares.length <= 0}
           onClick={() => {
-            alert("Worknumber:" + values.workNumber);
             labwareResult &&
               send({
                 type: "SUBMIT_FORM",

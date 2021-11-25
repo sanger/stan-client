@@ -2,6 +2,8 @@ import { graphql } from "msw";
 import {
   GetVisiumQcInfoQuery,
   GetVisiumQcInfoQueryVariables,
+  RecordOpWithSlotMeasurementsMutation,
+  RecordOpWithSlotMeasurementsMutationVariables,
   RecordVisiumQcMutation,
   RecordVisiumQcMutationVariables,
 } from "../../types/sdk";
@@ -38,6 +40,23 @@ const visiumQCHandllers = [
       );
     }
   ),
+
+  graphql.mutation<
+    RecordOpWithSlotMeasurementsMutation,
+    RecordOpWithSlotMeasurementsMutationVariables
+  >("RecordOpWithSlotMeasurements", (req, res, ctx) => {
+    return res(
+      ctx.data({
+        recordOpWithSlotMeasurements: {
+          operations: [
+            {
+              id: 1,
+            },
+          ],
+        },
+      })
+    );
+  }),
 ];
 
 export default visiumQCHandllers;

@@ -5,8 +5,8 @@ import { QCType, VisiumQCData } from "../../pages/VisiumQC";
 import React, { useContext, useEffect, useState } from "react";
 import {
   LabwareFieldsFragment,
-  RecordVisiumQcMutation,
-  ResultRequest,
+  OpWithSlotMeasurementsRequest,
+  RecordOpWithSlotMeasurementsMutation,
 } from "../../types/sdk";
 import { StanCoreContext } from "../../lib/sdk";
 import { useMachine } from "@xstate/react";
@@ -18,28 +18,30 @@ import { Row } from "react-table";
 import RemoveButton from "../buttons/RemoveButton";
 import { useLabwareContext } from "../labwareScanner/LabwareScanner";
 import { useFormikContext } from "formik";
-type SampleResult = {
+type SlotMeasurementRequest = {
   address: string;
-  cqValue: number | undefined;
-};
-
-type LabwareResult = {
-  barcode: String;
-  sampleResults: Array<SampleResult>;
+  name: string;
+  value: string;
 };
 
 const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
   const { values } = useFormikContext<VisiumQCData>();
-  const [labwareResult, setLabwareResult] = useState<LabwareResult>();
+  const [slotMeasurements, setSlotMeasurements] = useState<
+    SlotMeasurementRequest[]
+  >([]);
   const { labwares, removeLabware } = useLabwareContext();
   const stanCore = useContext(StanCoreContext);
 
+  const measurementName = "Cq value";
   const [current, send] = useMachine(
-    createFormMachine<ResultRequest, RecordVisiumQcMutation>().withConfig({
+    createFormMachine<
+      OpWithSlotMeasurementsRequest,
+      RecordOpWithSlotMeasurementsMutation
+    >().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
-          return stanCore.RecordVisiumQC({
+          return stanCore.RecordOpWithSlotMeasurements({
             request: e.values,
           });
         },
@@ -52,10 +54,10 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
    * When labwares changes ,the labwareResults has to be updated accordingly
    */
   useEffect(() => {
-    setLabwareResult(
-      labwares.length > 0 ? buildLabwareResult(labwares[0]) : undefined
+    setSlotMeasurements(
+      labwares.length > 0 ? buildSlotMeasurements(labwares[0]) : []
     );
-  }, [labwares, setLabwareResult]);
+  }, [labwares, setSlotMeasurements]);
 
   /***
    * Save(/Recording) operation completed.
@@ -70,44 +72,52 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
     }
   }, [current, serverError, onSave, onError]);
 
-  function buildLabwareResult(labware: LabwareFieldsFragment): LabwareResult {
-    return {
-      barcode: labware.barcode,
-      sampleResults: labware.slots.filter(isSlotFilled).map((slot) => ({
-        address: slot.address,
-        cqValue: undefined,
-      })),
-    };
+  function buildSlotMeasurements(
+    labware: LabwareFieldsFragment
+  ): SlotMeasurementRequest[] {
+    return labware.slots.filter(isSlotFilled).map((slot) => ({
+      address: slot.address,
+      name: measurementName,
+      value: "",
+    }));
   }
+
   const handleChangeCQValue = React.useCallback(
     (address: string, cqValue: number) => {
-      setLabwareResult((prevLaqbwareResult) => {
-        if (!prevLaqbwareResult) return { barcode: "", sampleResults: [] };
-        let sampleResults = [...prevLaqbwareResult.sampleResults];
-        const indx = sampleResults.findIndex(
-          (result) => result.address === address
+      setSlotMeasurements((prevSlotMeasurements) => {
+        if (!prevSlotMeasurements) return [];
+        let slotMeasurements = [...prevSlotMeasurements];
+        const indx = slotMeasurements.findIndex(
+          (measurement) => measurement.address === address
         );
         if (indx >= 0) {
-          sampleResults[indx].cqValue = cqValue;
+          slotMeasurements[indx].value = String(cqValue);
+          slotMeasurements[indx].name = measurementName;
         } else {
-          sampleResults.push({ address: address, cqValue: cqValue });
+          slotMeasurements.push({
+            address: address,
+            value: String(cqValue),
+            name: measurementName,
+          });
         }
-        return { ...prevLaqbwareResult, sampleResults: sampleResults };
+        return { ...slotMeasurements };
       });
     },
-    [setLabwareResult]
+    [setSlotMeasurements]
   );
 
   const handleChangeAllCQValue = React.useCallback(
     (cqValue: number) => {
-      if (!labwareResult) return;
-      let sampleResults = [...labwareResult.sampleResults];
-      sampleResults.forEach((sampleResult) => {
-        sampleResult.cqValue = cqValue;
+      debugger;
+      setSlotMeasurements((prevSlotMeasurements) => {
+        let slotMeasurements = [...prevSlotMeasurements];
+        slotMeasurements.forEach((measurement) => {
+          measurement.value = String(cqValue);
+        });
+        return [...slotMeasurements];
       });
-      setLabwareResult({ ...labwareResult, sampleResults: sampleResults });
     },
-    [labwareResult, setLabwareResult]
+    [setSlotMeasurements]
   );
 
   const columns = React.useMemo(() => {
@@ -115,12 +125,12 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
       {
         Header: "Address",
         id: "address",
-        accessor: (result: SampleResult) => result.address,
+        accessor: (measurement: SlotMeasurementRequest) => measurement.address,
       },
       {
         Header: "CQ",
         id: "cq",
-        Cell: ({ row }: { row: Row<SampleResult> }) => {
+        Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
           return (
             <input
               className={"rounded-md"}
@@ -132,7 +142,9 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
                   Number(e.currentTarget.value)
                 )
               }
-              value={row.original.cqValue}
+              value={
+                row.original.value !== "" ? Number(row.original.value) : ""
+              }
             />
           );
         },
@@ -140,11 +152,10 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
     ];
   }, [handleChangeCQValue]);
 
-  const isEmptyCQValueExists = (labwareResult: LabwareResult) => {
-    const val = labwareResult.sampleResults.filter(
-      (sampleResult) =>
-        sampleResult.cqValue === undefined ||
-        String(sampleResult.cqValue) === ""
+  const isEmptyCQValueExists = (slotMeasurements: SlotMeasurementRequest[]) => {
+    debugger;
+    const val = slotMeasurements.filter(
+      (measurement) => measurement.value === ""
     );
     return val.length > 0;
   };
@@ -173,11 +184,8 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
               />
             </div>
             <div className={"flex flex-row mt-8 justify-between"}>
-              {labwareResult && (
-                <DataTable
-                  columns={columns}
-                  data={labwareResult.sampleResults}
-                />
+              {slotMeasurements && slotMeasurements.length > 0 && (
+                <DataTable columns={columns} data={slotMeasurements} />
               )}
               <div className="flex flex-col" data-testid={"labware"}>
                 <Labware
@@ -196,16 +204,17 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
         <BlueButton
           disabled={
             labwares.length <= 0 ||
-            !labwareResult ||
-            isEmptyCQValueExists(labwareResult)
+            !slotMeasurements ||
+            isEmptyCQValueExists(slotMeasurements)
           }
           onClick={() => {
             send({
               type: "SUBMIT_FORM",
               values: {
                 workNumber: values.workNumber,
-                labwareResults: [],
-                operationType: QCType.SLIDE_PROCESSING,
+                barcode: labwares[0].barcode,
+                slotMeasurements: slotMeasurements ?? [],
+                operationType: QCType.CDNA_AMPLIFIFACTION,
               },
             });
           }}

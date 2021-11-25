@@ -22,7 +22,11 @@ export type VisiumQCTypeProps = {
   onError: (error: ClientError) => void;
 };
 
-const VisiumQCType = ({ qcTypeProps }: { qcTypeProps: VisiumQCTypeProps }) => {
+export const VisiumQCType = ({
+  qcTypeProps,
+}: {
+  qcTypeProps: VisiumQCTypeProps;
+}) => {
   const { values } = useFormikContext<VisiumQCData>();
   switch (values.qcType) {
     case QCType.SLIDE_PROCESSING: {
@@ -45,5 +49,3 @@ const VisiumQCType = ({ qcTypeProps }: { qcTypeProps: VisiumQCTypeProps }) => {
   }
   return <></>;
 };
-
-export default VisiumQCType;

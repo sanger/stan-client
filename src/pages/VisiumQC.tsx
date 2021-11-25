@@ -10,9 +10,9 @@ import OperationCompleteModal from "../components/modal/OperationCompleteModal";
 import Warning from "../components/notifications/Warning";
 import { ClientError } from "graphql-request";
 import { reload } from "../lib/sdk";
-import VisiumQCType from "../components/visiumQC/VisiumQCType";
 import * as Yup from "yup";
 import { Form, Formik } from "formik";
+import { VisiumQCType } from "../components/visiumQC/VisiumQCType";
 
 export enum QCType {
   SLIDE_PROCESSING = "Slide Processing",

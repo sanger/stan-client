@@ -16,10 +16,10 @@ describe("Visium QC Page", () => {
       cy.findByText("QC Type").should("be.visible");
     });
     it("shows Slide Processing in QC Type dropdown", () => {
-      cy.findByTestId("qcType").should("have.text", "Slide Processing");
+      cy.findByTestId("qcType").should("have.value", "Slide Processing");
     });
-    it("show Slides section", () => {
-      cy.findByText("Slide").should("be.visible");
+    it("show Labware section", () => {
+      cy.findByText("Labware").should("be.visible");
     });
   });
 
@@ -116,9 +116,9 @@ describe("Visium QC Page", () => {
                   ctx.errors([
                     {
                       message:
-                        "Exception while fetching data (/slotCopy) : The operation could not be validated.",
+                        "Exception while fetching data : The operation could not be validated.",
                       extensions: {
-                        problems: ["Labware is discarded: [STAN-4100]"],
+                        problems: ["Labware is discarded: [STAN-2100]"],
                       },
                     },
                   ])
@@ -132,6 +132,62 @@ describe("Visium QC Page", () => {
 
         it("shows an error", () => {
           cy.findByText("Failed to record Visium QC").should("be.visible");
+        });
+      });
+    });
+  });
+  describe("On Visium QCType as cDNA Amplification", () => {
+    before(() => {
+      cy.findByTestId("remove").click();
+      cy.findByTestId("qcType").select("cDNA Amplification");
+    });
+
+    context("When user scans in a 96 well plate ", () => {
+      before(() => {
+        cy.get("#labwareScanInput").type("STAN-5100{enter}");
+      });
+      it("displays the labware layout  on the page", () => {
+        cy.findByText("STAN-5100").should("be.visible");
+      });
+
+      it("display slots having samples as highlighted", () => {
+        cy.findByTestId("labware").within(() => {
+          cy.findByText("A1")
+            .parent()
+            .then(($slot) => {
+              $slot.each((i, slotElement) => {
+                const classList = Array.from(slotElement.classList);
+                expect(classList).to.includes("bg-sdb-300");
+              });
+            });
+        });
+      });
+
+      it("display text boxes to enter cq value for all slots with samples", () => {
+        cy.findByRole("table").within(() => {
+          cy.findByText("A1").should("be.visible");
+        });
+      });
+    });
+    context("When user enters a value in CQ value text box", () => {
+      before(() => {
+        cy.findByTestId("cqInputAll").type("5");
+      });
+      it("shows cq value in all text fields in CQ column of table", () => {
+        cy.findAllByTestId("cqInput").should("have.value", 5);
+      });
+    });
+
+    describe("On Save", () => {
+      context("When there is no server error", () => {
+        before(() => {
+          cy.findByRole("button", { name: /Save/i })
+            .should("not.be.disabled")
+            .click();
+        });
+
+        it("shows a success message", () => {
+          cy.findByText("Visium QC complete").should("be.visible");
         });
       });
     });
