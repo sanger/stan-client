@@ -103,9 +103,7 @@ Cypress.Commands.add("msw", () => {
 });
 
 Cypress.Commands.add("visitAsGuest", (url: string) => {
-  cy.visit(url);
-
-  return cy.msw().then(({ worker, graphql }) => {
+  cy.msw().then(({ worker, graphql }) => {
     worker.use(
       graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
         "CurrentUser",
@@ -119,12 +117,12 @@ Cypress.Commands.add("visitAsGuest", (url: string) => {
       )
     );
   });
+
+  return cy.visit(url);
 });
 
 Cypress.Commands.add("visitAsAdmin", (url: string) => {
-  cy.visit(url);
-
-  return cy.msw().then(({ worker, graphql }) => {
+  cy.msw().then(({ worker, graphql }) => {
     worker.use(
       graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
         "CurrentUser",
@@ -142,6 +140,8 @@ Cypress.Commands.add("visitAsAdmin", (url: string) => {
       )
     );
   });
+
+  return cy.visit(url);
 });
 
 /**

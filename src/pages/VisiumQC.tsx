@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useCallback, useState } from "react";
-import { GetVisiumQcInfoQuery } from "../types/sdk";
+import { GetVisiumQcInfoQuery, SlotMeasurementRequest } from "../types/sdk";
 import AppShell from "../components/AppShell";
 import WorkNumberSelect from "../components/WorkNumberSelect";
 import LabwareScanner from "../components/labwareScanner/LabwareScanner";
@@ -17,6 +17,7 @@ import { Form, Formik } from "formik";
 export enum QCType {
   SLIDE_PROCESSING = "Slide Processing",
   CDNA_AMPLIFIFACTION = "cDNA Amplification",
+  CDNA_ANALYSIS = "cDNA Analysis",
 }
 
 type VisiumQCProps = {
@@ -31,8 +32,9 @@ const validationSchema = Yup.object().shape({
 
 export interface VisiumQCData {
   workNumber?: string;
-  qcType: string;
+  qcType: QCType;
   barcode: string;
+  slotMeasurements: Array<SlotMeasurementRequest>;
 }
 
 export default function VisiumQC({ info }: VisiumQCProps) {
@@ -67,6 +69,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
               barcode: "",
               workNumber: undefined,
               qcType: QCType.SLIDE_PROCESSING,
+              slotMeasurements: [],
             }}
             validationSchema={validationSchema}
             onSubmit={onSave}

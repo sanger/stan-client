@@ -55,3 +55,8 @@ export function optionValues<
     );
   });
 }
+
+export function formikName(prefix: string, name: string): string {
+  if (prefix === "") return name;
+  return [prefix, name].join(".");
+}
