@@ -7,6 +7,7 @@ import {
   LabwareFieldsFragment,
   OpWithSlotMeasurementsRequest,
   RecordOpWithSlotMeasurementsMutation,
+  SlotMeasurementRequest,
 } from "../../types/sdk";
 import { StanCoreContext } from "../../lib/sdk";
 import { useMachine } from "@xstate/react";
@@ -18,11 +19,6 @@ import { Row } from "react-table";
 import RemoveButton from "../buttons/RemoveButton";
 import { useLabwareContext } from "../labwareScanner/LabwareScanner";
 import { useFormikContext } from "formik";
-type SlotMeasurementRequest = {
-  address: string;
-  name: string;
-  value: string;
-};
 
 const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
   const { values } = useFormikContext<VisiumQCData>();
