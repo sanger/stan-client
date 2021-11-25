@@ -35,6 +35,21 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
           }
         )
       );
+
+      /***
+       * To be removed
+       */
+      if (labware.labwareType.name === LabwareTypeName.PLATE) {
+        // Include some empty, some filled, and a few with multiple samples in
+        labware.slots = labware.slots.map((slot, i) => {
+          if (i % 2 === 1 || i > 16) {
+            return {
+              ...slot,
+              samples: [],
+            };
+          } else return slot;
+        });
+      }
     });
 
     return {
