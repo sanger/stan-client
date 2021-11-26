@@ -263,6 +263,9 @@ function SlotMapper({
             handleCopySlots(outputAddress);
             return;
           }
+        } else {
+          handleCopySlots(outputAddress);
+          return;
         }
       }
     },
