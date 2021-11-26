@@ -5,7 +5,7 @@ import Label from "./Label";
 import FormikSelect from "./Select";
 import { ControlType, PermData } from "../../types/sdk";
 import { objectKeys } from "../../lib/helpers";
-import { FormikErrorMessage } from "./index";
+import { FormikErrorMessage, formikName } from "./index";
 
 type PermDataFieldProps = {
   /**
@@ -88,8 +88,4 @@ export default function PermDataField<T>({ name }: PermDataFieldProps) {
       )}
     </div>
   );
-}
-
-function formikName(prefix: string, name: string): string {
-  return [prefix, name].join(".");
 }

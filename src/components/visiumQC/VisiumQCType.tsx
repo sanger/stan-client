@@ -5,6 +5,7 @@ import { CommentFieldsFragment } from "../../types/sdk";
 import { ClientError } from "graphql-request";
 import CDNAAmplification from "./CDNAAmplification";
 import { useFormikContext } from "formik";
+import CDNAAnalysis from "./CDNAAnalysis";
 
 export type VisiumQCTypeProps = {
   /***
@@ -46,6 +47,8 @@ export const VisiumQCType = ({
         />
       );
     }
+    case QCType.CDNA_ANALYSIS:
+      return <CDNAAnalysis />;
   }
   return <></>;
 };
