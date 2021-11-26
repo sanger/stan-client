@@ -16,8 +16,8 @@ import { VisiumQCType } from "../components/visiumQC/VisiumQCType";
 
 export enum QCType {
   SLIDE_PROCESSING = "Slide Processing",
-  CDNA_AMPLIFIFACTION = "cDNA Amplification",
-  CDNA_ANALYSIS = "cDNA Analysis",
+  CDNA_AMPLIFICATION = "cDNA amplification",
+  CDNA_ANALYSIS = "cDNA analysis",
 }
 
 type VisiumQCProps = {
@@ -28,8 +28,16 @@ const validationSchema = Yup.object().shape({
   workNumber: Yup.string().optional().label("SGP number"),
   qcType: Yup.string().required().oneOf(Object.values(QCType)).label("QC Type"),
   barcode: Yup.string().required().label("Barcode"),
+  slotMeasurements: Yup.array()
+    .of(
+      Yup.object().shape({
+        address: Yup.string().required(),
+        name: Yup.string().oneOf(["Cq value", "Concentration"]),
+        value: Yup.string().required(),
+      })
+    )
+    .optional(),
 });
-
 export interface VisiumQCData {
   workNumber?: string;
   qcType: QCType;
@@ -76,7 +84,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
           >
             {({ setFieldValue }) => (
               <Form>
-                <div className="space-y-2 mb-4 ">
+                <div className="space-y-2 mb-8 ">
                   <Heading level={2}>SGP Number</Heading>
 
                   <p>

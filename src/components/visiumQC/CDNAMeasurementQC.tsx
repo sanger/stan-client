@@ -1,7 +1,6 @@
-import { VisiumQCTypeProps } from "./VisiumQCType";
 import Panel from "../Panel";
 import BlueButton from "../buttons/BlueButton";
-import { QCType, VisiumQCData } from "../../pages/VisiumQC";
+import { VisiumQCData } from "../../pages/VisiumQC";
 import React, { useContext, useEffect, useState } from "react";
 import {
   LabwareFieldsFragment,
@@ -14,21 +13,36 @@ import { useMachine } from "@xstate/react";
 import createFormMachine from "../../lib/machines/form/formMachine";
 import Labware from "../labware/Labware";
 import { isSlotFilled } from "../../lib/helpers/slotHelper";
-import DataTable from "../DataTable";
-import { Row } from "react-table";
 import RemoveButton from "../buttons/RemoveButton";
 import { useLabwareContext } from "../labwareScanner/LabwareScanner";
 import { useFormikContext } from "formik";
+import SlotMeasurements from "../slotMeasurement/SlotMeasurements";
+import { ClientError } from "graphql-request";
 
-const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
-  const { values } = useFormikContext<VisiumQCData>();
+const CDNAMeasurementQC = ({
+  onSave,
+  onError,
+  measurementName,
+  qcType,
+  applySameValueForAlMeasurements,
+  initialMeasurementVal,
+  validateMeasurementValue,
+}: {
+  onSave: () => void;
+  onError: (error: ClientError) => void;
+  measurementName: string;
+  qcType: string;
+  applySameValueForAlMeasurements: boolean;
+  initialMeasurementVal?: string;
+  validateMeasurementValue?: (value: string) => void;
+}) => {
+  const { values, errors } = useFormikContext<VisiumQCData>();
   const [slotMeasurements, setSlotMeasurements] = useState<
     SlotMeasurementRequest[]
   >([]);
   const { labwares, removeLabware } = useLabwareContext();
   const stanCore = useContext(StanCoreContext);
 
-  const measurementName = "Cq value";
   const [current, send] = useMachine(
     createFormMachine<
       OpWithSlotMeasurementsRequest,
@@ -46,14 +60,25 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
   );
   const { serverError } = current.context;
 
+  const buildSlotMeasurements = React.useCallback(
+    (labware: LabwareFieldsFragment): SlotMeasurementRequest[] => {
+      return labware.slots.filter(isSlotFilled).map((slot) => ({
+        address: slot.address,
+        name: measurementName,
+        value: initialMeasurementVal ?? "",
+      }));
+    },
+    [initialMeasurementVal, measurementName]
+  );
+
   /***
-   * When labwares changes ,the labwareResults has to be updated accordingly
+   * When labwares changes, the labwareResults has to be updated accordingly
    */
   useEffect(() => {
     setSlotMeasurements(
       labwares.length > 0 ? buildSlotMeasurements(labwares[0]) : []
     );
-  }, [labwares, setSlotMeasurements]);
+  }, [labwares, setSlotMeasurements, buildSlotMeasurements]);
 
   /***
    * Save(/Recording) operation completed.
@@ -68,18 +93,8 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
     }
   }, [current, serverError, onSave, onError]);
 
-  function buildSlotMeasurements(
-    labware: LabwareFieldsFragment
-  ): SlotMeasurementRequest[] {
-    return labware.slots.filter(isSlotFilled).map((slot) => ({
-      address: slot.address,
-      name: measurementName,
-      value: "",
-    }));
-  }
-
-  const handleChangeCQValue = React.useCallback(
-    (address: string, cqValue: number) => {
+  const handleChangeMeasurement = React.useCallback(
+    (address: string, measurementValue: string) => {
       setSlotMeasurements((prevSlotMeasurements) => {
         if (!prevSlotMeasurements) return [];
         let slotMeasurements = [...prevSlotMeasurements];
@@ -87,28 +102,27 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
           (measurement) => measurement.address === address
         );
         if (indx >= 0) {
-          slotMeasurements[indx].value = String(cqValue);
+          slotMeasurements[indx].value = measurementValue;
           slotMeasurements[indx].name = measurementName;
         } else {
           slotMeasurements.push({
             address: address,
-            value: String(cqValue),
+            value: measurementValue,
             name: measurementName,
           });
         }
-        return { ...slotMeasurements };
+        return [...slotMeasurements];
       });
     },
-    [setSlotMeasurements]
+    [setSlotMeasurements, measurementName]
   );
 
-  const handleChangeAllCQValue = React.useCallback(
-    (cqValue: number) => {
-      debugger;
+  const handleChangeAllMeasurements = React.useCallback(
+    (measurementValue: string) => {
       setSlotMeasurements((prevSlotMeasurements) => {
         let slotMeasurements = [...prevSlotMeasurements];
         slotMeasurements.forEach((measurement) => {
-          measurement.value = String(cqValue);
+          measurement.value = measurementValue;
         });
         return [...slotMeasurements];
       });
@@ -116,40 +130,7 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
     [setSlotMeasurements]
   );
 
-  const columns = React.useMemo(() => {
-    return [
-      {
-        Header: "Address",
-        id: "address",
-        accessor: (measurement: SlotMeasurementRequest) => measurement.address,
-      },
-      {
-        Header: "CQ",
-        id: "cq",
-        Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
-          return (
-            <input
-              className={"rounded-md"}
-              data-testid={"cqInput"}
-              type={"number"}
-              onChange={(e) =>
-                handleChangeCQValue(
-                  row.original.address,
-                  Number(e.currentTarget.value)
-                )
-              }
-              value={
-                row.original.value !== "" ? Number(row.original.value) : ""
-              }
-            />
-          );
-        },
-      },
-    ];
-  }, [handleChangeCQValue]);
-
   const isEmptyCQValueExists = (slotMeasurements: SlotMeasurementRequest[]) => {
-    debugger;
     const val = slotMeasurements.filter(
       (measurement) => measurement.value === ""
     );
@@ -168,20 +149,27 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
                 />
               }
             </div>
-            <div className={"flex flex-col w-1/4"}>
-              <label> CQ Value</label>
-              <input
-                className={"rounded-md"}
-                type={"number"}
-                data-testid={"cqInputAll"}
-                onChange={(e) =>
-                  handleChangeAllCQValue(Number(e.currentTarget.value))
-                }
-              />
-            </div>
+            {applySameValueForAlMeasurements && (
+              <div className={"flex flex-col w-1/4"}>
+                <label> {measurementName}</label>
+                <input
+                  className={"rounded-md"}
+                  type={"number"}
+                  data-testid={"allMeasurementValue"}
+                  onChange={(e) =>
+                    handleChangeAllMeasurements(e.currentTarget.value)
+                  }
+                />
+              </div>
+            )}
             <div className={"flex flex-row mt-8 justify-between"}>
               {slotMeasurements && slotMeasurements.length > 0 && (
-                <DataTable columns={columns} data={slotMeasurements} />
+                <SlotMeasurements
+                  slotMeasurements={slotMeasurements}
+                  measurementName={measurementName}
+                  onChangeMeasurement={handleChangeMeasurement}
+                  validateValue={validateMeasurementValue}
+                />
               )}
               <div className="flex flex-col" data-testid={"labware"}>
                 <Labware
@@ -201,7 +189,10 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
           disabled={
             labwares.length <= 0 ||
             !slotMeasurements ||
-            isEmptyCQValueExists(slotMeasurements)
+            isEmptyCQValueExists(slotMeasurements) ||
+            (errors.slotMeasurements
+              ? errors.slotMeasurements.length > 0
+              : false)
           }
           onClick={() => {
             send({
@@ -210,7 +201,7 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
                 workNumber: values.workNumber,
                 barcode: labwares[0].barcode,
                 slotMeasurements: slotMeasurements ?? [],
-                operationType: QCType.CDNA_AMPLIFIFACTION,
+                operationType: qcType,
               },
             });
           }}
@@ -221,4 +212,4 @@ const CDNAAmplification = ({ onSave, onError }: VisiumQCTypeProps) => {
     </div>
   );
 };
-export default CDNAAmplification;
+export default CDNAMeasurementQC;
