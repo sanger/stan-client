@@ -202,6 +202,7 @@ export default function LabwareScanner({
             disabled={!current.matches("idle")}
             onChange={handleOnScanInputChange}
             onScan={handleOnScan}
+            ref={inputRef}
           />
         </div>
       </div>
