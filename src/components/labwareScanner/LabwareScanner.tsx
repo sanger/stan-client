@@ -96,7 +96,7 @@ export default function LabwareScanner({
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const subscription = service.subscribe((observer) => {
-      if (observer.matches("idle")) {
+      if (observer.matches("idle") && !observer.context.locationScan) {
         inputRef.current?.focus();
       }
     });
@@ -202,6 +202,7 @@ export default function LabwareScanner({
             disabled={!current.matches("idle")}
             onChange={handleOnScanInputChange}
             onScan={handleOnScan}
+            ref={inputRef}
           />
         </div>
       </div>
