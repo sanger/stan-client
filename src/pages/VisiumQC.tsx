@@ -66,6 +66,9 @@ export default function VisiumQC({ info }: VisiumQCProps) {
     setError(undefined);
   }, [setSuccess, setError]);
 
+
+
+
   return (
     <AppShell>
       <AppShell.Header>

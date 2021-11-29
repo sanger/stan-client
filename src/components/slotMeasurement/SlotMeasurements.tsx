@@ -55,11 +55,12 @@ const SlotMeasurements = ({
                   e.currentTarget.value
                 );
               }}
+
               value={
                 row.original.value !== "" ? Number(row.original.value) : ""
               }
               validate={() => {
-                if(validateValue) { validateValue(row.original.value)}
+                if(validateValue) { return validateValue(row.original.value)}
               }
               }
               min={0}

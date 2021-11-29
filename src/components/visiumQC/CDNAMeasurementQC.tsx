@@ -20,25 +20,27 @@ import SlotMeasurements from "../slotMeasurement/SlotMeasurements";
 import { ClientError } from "graphql-request";
 
 const CDNAMeasurementQC = ({
-  onSave,
-  onError,
   measurementName,
   qcType,
+   onSave,
+   onError,
   applySameValueForAlMeasurements, stepIncrement,
   initialMeasurementVal,
   validateMeasurementValue,
 
+
 }: {
-  onSave: () => void;
-  onError: (error: ClientError) => void;
+
   measurementName: string;
   qcType: string;
+  onSave: () => void;
+  onError: (error: ClientError) => void;
   applySameValueForAlMeasurements: boolean;
   stepIncrement?:string;
   initialMeasurementVal?: string;
   validateMeasurementValue?: (value: string) => void;
 }) => {
-  const { values, errors } = useFormikContext<VisiumQCData>();
+  const { values, errors,setTouched ,validateForm,setErrors} = useFormikContext<VisiumQCData>();
   const [slotMeasurements, setSlotMeasurements] = useState<
     SlotMeasurementRequest[]
   >([]);
@@ -97,6 +99,36 @@ const CDNAMeasurementQC = ({
     }
   }, [current, serverError, onSave, onError]);
 
+  /***
+   * Reset form errors on QCType chnage
+   */
+ useEffect(()=> {
+   if(!qcType)
+     return;
+
+   setErrors({})
+ },[qcType,setErrors])
+
+  const handleSave = async () => {
+      const touchedFields = slotMeasurements.reduce((obj:{
+        [key: string]: boolean,
+      }, item,indx) => ({...obj, [`slotMeasurements.${indx}.value`] : true}) ,{});
+      setTouched(touchedFields,true)
+      await validateForm();
+      if(errors.slotMeasurements && errors.slotMeasurements.length > 0) {
+        return
+      }
+      send({
+          type: "SUBMIT_FORM",
+          values: {
+            workNumber: values.workNumber,
+            barcode: labwares[0].barcode,
+            slotMeasurements: slotMeasurements ?? [],
+            operationType: qcType,
+          },
+      });
+  }
+
   const handleChangeMeasurement = React.useCallback(
     (address: string, measurementValue: string) => {
       setSlotMeasurements((prevSlotMeasurements) => {
@@ -123,6 +155,7 @@ const CDNAMeasurementQC = ({
 
   const handleChangeAllMeasurements = React.useCallback(
     (measurementValue: string) => {
+      setErrors({})
       setSlotMeasurements((prevSlotMeasurements) => {
         let slotMeasurements = [...prevSlotMeasurements];
         slotMeasurements.forEach((measurement) => {
@@ -131,7 +164,7 @@ const CDNAMeasurementQC = ({
         return [...slotMeasurements];
       });
     },
-    [setSlotMeasurements]
+    [setSlotMeasurements,setErrors]
   );
 
   const isEmptyCQValueExists = (slotMeasurements: SlotMeasurementRequest[]) => {
@@ -200,20 +233,8 @@ const CDNAMeasurementQC = ({
             !slotMeasurements ||
             isEmptyCQValueExists(slotMeasurements)
           }
-          onClick={() => {
-            if(errors.slotMeasurements && errors.slotMeasurements.length > 0) {
-              return;
-            }
-              send({
-                type: "SUBMIT_FORM",
-                values: {
-                  workNumber: values.workNumber,
-                  barcode: labwares[0].barcode,
-                  slotMeasurements: slotMeasurements ?? [],
-                  operationType: qcType,
-                },
-              });
-          }}
+          type = {"submit"}
+          onClick={handleSave}
         >
           Save
         </BlueButton>

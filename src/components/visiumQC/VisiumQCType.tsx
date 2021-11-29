@@ -11,7 +11,6 @@ export type VisiumQCTypeProps = {
    * Comments
    */
   comments?: CommentFieldsFragment[];
-
   /**
    * Callback to indicate the success of saving result.
    */
@@ -20,6 +19,8 @@ export type VisiumQCTypeProps = {
    * Callback to indicate the failure/error in saving result.
    */
   onError: (error: ClientError) => void;
+
+
 };
 
 export const VisiumQCType = ({
@@ -29,6 +30,10 @@ export const VisiumQCType = ({
 }) => {
   const { values } = useFormikContext<VisiumQCData>();
 
+  /***
+   *  Acceptable values are 0 and decimal numbers of format ###.##
+   * @param value
+   */
   function validateAnalysisMeasurementValue(value: string) {
     let error;
     if (value==="") {
@@ -43,6 +48,12 @@ export const VisiumQCType = ({
     }
     return error;
   }
+
+  /***
+   * Only acceptable integer values
+   * @param value
+   */
+
   function validateAmplificationMeasurementValue(value: string) {
     let error;
     if (value==="") {
