@@ -29,14 +29,28 @@ export const VisiumQCType = ({
 }) => {
   const { values } = useFormikContext<VisiumQCData>();
 
-  function validateMeasurementValue(value: string) {
+  function validateAnalysisMeasurementValue(value: string) {
     let error;
-    if (!value) {
+    if (value==="") {
       error = "Required";
     } else {
-      const val = /^\d{1,3}(\.\d{2})?$/.test(value);
-      if (!val) {
-        error = "Invalid number format (Required ###.##)";
+      if(Number(value)!==0) {
+        const isFormatted = /^\d{3}(\.\d{2})$/.test(value);
+        if (!isFormatted) {
+          error = "Invalid number format (Required ###.##)";
+        }
+      }
+    }
+    return error;
+  }
+  function validateAmplificationMeasurementValue(value: string) {
+    let error;
+    if (value==="") {
+      error = "Required";
+    } else {
+      if (!Number.isInteger(Number(value)))
+      {
+        error = "Invalid number format : Integer value required";
       }
     }
     return error;
@@ -73,10 +87,11 @@ export const VisiumQCType = ({
               values.qcType === QCType.CDNA_AMPLIFICATION
             }
             validateMeasurementValue={
-              values.qcType === QCType.CDNA_ANALYSIS
-                ? validateMeasurementValue
-                : undefined
+              values.qcType === QCType.CDNA_AMPLIFICATION
+                ? validateAmplificationMeasurementValue
+                : validateAnalysisMeasurementValue
             }
+            stepIncrement= {values.qcType === QCType.CDNA_AMPLIFICATION?"1":".01"}
           />
         </>
       );

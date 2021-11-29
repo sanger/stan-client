@@ -7,24 +7,29 @@ import FormikInput from "../forms/Input";
 type SlotMeasurementProps = {
   slotMeasurements: SlotMeasurementRequest[];
   measurementName: string;
+  stepIncrement:string ,
   onChangeMeasurement: (address: string, value: string) => void;
   validateValue?: (value: string) => void;
 };
 
 /**
- * Component to display SlotMeasurements as a table
+ * Component to display SlotMeasurements as a table with two columns - slot address & measurement value
+ *
  * @param slotMeasurements - SlotMeasurement data
- * @param measurementName  - name of the measurement
- * @param onChangeMeasurement - callback for measurementValue
- * @param validateValue - validation to run when measurement Value changes
+ * @param measurementName  - Name of the measurement
+ * @param stepIncrement - Measurement value increment step
+ * @param onChangeMeasurement - Callback for measurementValue
+ * @param validateValue - Validation to run when measurement value changes
  *
  */
 
 const SlotMeasurements = ({
   slotMeasurements,
   measurementName,
+  stepIncrement ,
   onChangeMeasurement,
   validateValue,
+
 }: SlotMeasurementProps) => {
   const columns = React.useMemo(() => {
     return [
@@ -40,7 +45,7 @@ const SlotMeasurements = ({
           return (
             <FormikInput
               className={"rounded-md"}
-              data-testid={"measurementValue"}
+              data-testid={`measurementValue${row.index}`}
               type={"number"}
               label={""}
               name={`slotMeasurements.${row.index}.value`}
@@ -53,16 +58,18 @@ const SlotMeasurements = ({
               value={
                 row.original.value !== "" ? Number(row.original.value) : ""
               }
-              validate={() =>
-                validateValue ? validateValue(row.original.value) : ""
+              validate={() => {
+                if(validateValue) { validateValue(row.original.value)}
+              }
               }
               min={0}
+              step={stepIncrement}
             />
           );
         },
       },
     ];
-  }, [measurementName, onChangeMeasurement, validateValue]);
+  }, [measurementName, onChangeMeasurement, validateValue,stepIncrement]);
 
   return (
     <>

@@ -24,15 +24,17 @@ const CDNAMeasurementQC = ({
   onError,
   measurementName,
   qcType,
-  applySameValueForAlMeasurements,
+  applySameValueForAlMeasurements, stepIncrement,
   initialMeasurementVal,
   validateMeasurementValue,
+
 }: {
   onSave: () => void;
   onError: (error: ClientError) => void;
   measurementName: string;
   qcType: string;
   applySameValueForAlMeasurements: boolean;
+  stepIncrement?:string;
   initialMeasurementVal?: string;
   validateMeasurementValue?: (value: string) => void;
 }) => {
@@ -70,6 +72,8 @@ const CDNAMeasurementQC = ({
     },
     [initialMeasurementVal, measurementName]
   );
+
+
 
   /***
    * When labwares changes, the labwareResults has to be updated accordingly
@@ -150,15 +154,18 @@ const CDNAMeasurementQC = ({
               }
             </div>
             {applySameValueForAlMeasurements && (
-              <div className={"flex flex-col w-1/4"}>
-                <label> {measurementName}</label>
+              <div className={"flex flex-row w-1/4 ml-2"}>
+                <label className={" mt-2"}>{measurementName}</label>
                 <input
-                  className={"rounded-md"}
+                  className={"rounded-md ml-3"}
                   type={"number"}
                   data-testid={"allMeasurementValue"}
-                  onChange={(e) =>
+                  onChange={(e:any) => {
+                    if(!Number.isInteger(Number(e.currentTarget.value)))
+                      return;
                     handleChangeAllMeasurements(e.currentTarget.value)
-                  }
+                  }}
+                  min={0}
                 />
               </div>
             )}
@@ -169,6 +176,7 @@ const CDNAMeasurementQC = ({
                   measurementName={measurementName}
                   onChangeMeasurement={handleChangeMeasurement}
                   validateValue={validateMeasurementValue}
+                  stepIncrement ={stepIncrement??"1"}
                 />
               )}
               <div className="flex flex-col" data-testid={"labware"}>
@@ -184,26 +192,27 @@ const CDNAMeasurementQC = ({
         </div>
       )}
 
+
       <div className={"mt-4 flex flex-row items-center justify-end"}>
         <BlueButton
           disabled={
             labwares.length <= 0 ||
             !slotMeasurements ||
-            isEmptyCQValueExists(slotMeasurements) ||
-            (errors.slotMeasurements
-              ? errors.slotMeasurements.length > 0
-              : false)
+            isEmptyCQValueExists(slotMeasurements)
           }
           onClick={() => {
-            send({
-              type: "SUBMIT_FORM",
-              values: {
-                workNumber: values.workNumber,
-                barcode: labwares[0].barcode,
-                slotMeasurements: slotMeasurements ?? [],
-                operationType: qcType,
-              },
-            });
+            if(errors.slotMeasurements && errors.slotMeasurements.length > 0) {
+              return;
+            }
+              send({
+                type: "SUBMIT_FORM",
+                values: {
+                  workNumber: values.workNumber,
+                  barcode: labwares[0].barcode,
+                  slotMeasurements: slotMeasurements ?? [],
+                  operationType: qcType,
+                },
+              });
           }}
         >
           Save

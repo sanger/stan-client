@@ -139,7 +139,7 @@ describe("Visium QC Page", () => {
   describe("On Visium QCType as cDNA Amplification", () => {
     before(() => {
       cy.findByTestId("remove").click();
-      cy.findByTestId("qcType").select("cDNA Amplification");
+      cy.findByTestId("qcType").select("cDNA amplification");
     });
 
     context("When user scans in a 96 well plate ", () => {
@@ -171,10 +171,10 @@ describe("Visium QC Page", () => {
     });
     context("When user enters a value in CQ value text box", () => {
       before(() => {
-        cy.findByTestId("cqInputAll").type("5");
+        cy.findByTestId("allMeasurementValue").type("5");
       });
       it("shows cq value in all text fields in CQ column of table", () => {
-        cy.findAllByTestId("cqInput").should("have.value", 5);
+        cy.findAllByTestId("measurementValue1").should("have.value", 5);
       });
     });
 
@@ -189,7 +189,48 @@ describe("Visium QC Page", () => {
         it("shows a success message", () => {
           cy.findByText("Visium QC complete").should("be.visible");
         });
+        after(() => {
+          cy.findByRole("button", { name: /Reset/i }).click();
+        });
       });
     });
   });
+
+  describe("On Visium QCType as cDNA Analysis", () => {
+    before(() => {
+      cy.findByTestId("qcType").select("cDNA analysis");
+    });
+
+    context("When user scans in a 96 well plate ", () => {
+      before(() => {
+        cy.get("#labwareScanInput").type("STAN-5100{enter}");
+      });
+      it("displays the labware layout  on the page", () => {
+        cy.findByText("STAN-5100").should("be.visible");
+      });
+
+      it("display text boxes to enter concentration value for all slots with samples", () => {
+        cy.findByRole("table").within(() => {
+          cy.findByText("A1").should("be.visible");
+        });
+      });
+    });
+
+    describe("On Save", () => {
+
+      context("When all values are valid and there is no server error", () => {
+        before(() => {
+          cy.findByTestId("measurementValue0").clear().type("300.45");
+          saveButton().click();
+        });
+
+        it("shows a success message", () => {
+          cy.findByText("Visium QC complete").should("be.visible");
+        });
+      });
+    });
+  });
+  function saveButton() {
+    return cy.findByRole("button", { name: /Save/i });
+  }
 });
