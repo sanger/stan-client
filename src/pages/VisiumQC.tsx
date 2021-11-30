@@ -239,11 +239,11 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                   </LabwareScanner>
                 </div>
 
-                {getServerError(values.qcType, values.barcode) && (
+                {getServerError(values.qcType) && (
                   <Warning
                     className={"mt-4"}
                     message={"Failed to record Visium QC"}
-                    error={getServerError(values.qcType, values.barcode)}
+                    error={getServerError(values.qcType)}
                   />
                 )}
                 <div className={"sm:flex mt-4 sm:flex-row justify-end"}>
