@@ -19,8 +19,6 @@ export type VisiumQCTypeProps = {
    * Callback to indicate the failure/error in saving result.
    */
   onError: (error: ClientError) => void;
-
-
 };
 
 export const VisiumQCType = ({
@@ -31,15 +29,15 @@ export const VisiumQCType = ({
   const { values } = useFormikContext<VisiumQCData>();
 
   /***
-   *  Acceptable values are 0 and decimal numbers of format ###.##
+   *  Accept only  0 and decimal numbers of format ###.##
    * @param value
    */
   function validateAnalysisMeasurementValue(value: string) {
     let error;
-    if (value==="") {
+    if (value === "") {
       error = "Required";
     } else {
-      if(Number(value)!==0) {
+      if (Number(value) !== 0) {
         const isFormatted = /^\d{3}(\.\d{2})$/.test(value);
         if (!isFormatted) {
           error = "Invalid number format (Required ###.##)";
@@ -50,17 +48,16 @@ export const VisiumQCType = ({
   }
 
   /***
-   * Only acceptable integer values
+   * Accept only integer values
    * @param value
    */
 
   function validateAmplificationMeasurementValue(value: string) {
     let error;
-    if (value==="") {
+    if (value === "") {
       error = "Required";
     } else {
-      if (!Number.isInteger(Number(value)))
-      {
+      if (!Number.isInteger(Number(value))) {
         error = "Invalid number format : Integer value required";
       }
     }
@@ -102,7 +99,9 @@ export const VisiumQCType = ({
                 ? validateAmplificationMeasurementValue
                 : validateAnalysisMeasurementValue
             }
-            stepIncrement= {values.qcType === QCType.CDNA_AMPLIFICATION?"1":".01"}
+            stepIncrement={
+              values.qcType === QCType.CDNA_AMPLIFICATION ? "1" : ".01"
+            }
           />
         </>
       );

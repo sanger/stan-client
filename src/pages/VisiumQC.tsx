@@ -60,14 +60,10 @@ export default function VisiumQC({ info }: VisiumQCProps) {
     [setError]
   );
 
-
   const initializeOnQCTypeSelection = useCallback(() => {
     setSuccess(false);
     setError(undefined);
   }, [setSuccess, setError]);
-
-
-
 
   return (
     <AppShell>
