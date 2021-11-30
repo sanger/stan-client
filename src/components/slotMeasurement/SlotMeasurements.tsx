@@ -7,8 +7,12 @@ import FormikInput from "../forms/Input";
 type SlotMeasurementProps = {
   slotMeasurements: SlotMeasurementRequest[];
   measurementName: string;
-  stepIncrement:string ,
-  onChangeMeasurement: (address: string, value: string) => void;
+  stepIncrement: string;
+  onChangeMeasurement: (
+    address: string,
+    fieldName: string,
+    value: string
+  ) => void;
   validateValue?: (value: string) => void;
 };
 
@@ -19,17 +23,16 @@ type SlotMeasurementProps = {
  * @param measurementName  - Name of the measurement
  * @param stepIncrement - Measurement value increment step
  * @param onChangeMeasurement - Callback for measurementValue
- * @param validateValue - Validation to run when measurement value changes
+ * @param validateValue - Function validate the format of data in value field
  *
  */
 
 const SlotMeasurements = ({
   slotMeasurements,
   measurementName,
-  stepIncrement ,
+  stepIncrement,
   onChangeMeasurement,
   validateValue,
-
 }: SlotMeasurementProps) => {
   const columns = React.useMemo(() => {
     return [
@@ -52,17 +55,11 @@ const SlotMeasurements = ({
               onChange={(e: any) => {
                 onChangeMeasurement(
                   row.original.address,
+                  `slotMeasurements.${row.index}.value`,
                   e.currentTarget.value
                 );
               }}
-
-              value={
-                row.original.value !== "" ? Number(row.original.value) : ""
-              }
-              validate={() => {
-                if(validateValue) { return validateValue(row.original.value)}
-              }
-              }
+              validate={validateValue}
               min={0}
               step={stepIncrement}
             />
@@ -70,7 +67,7 @@ const SlotMeasurements = ({
         },
       },
     ];
-  }, [measurementName, onChangeMeasurement, validateValue,stepIncrement]);
+  }, [measurementName, onChangeMeasurement, validateValue, stepIncrement]);
 
   return (
     <>

@@ -1,249 +1,149 @@
 import Panel from "../Panel";
-import BlueButton from "../buttons/BlueButton";
-import { VisiumQCData } from "../../pages/VisiumQC";
-import React, { useContext, useEffect, useState } from "react";
-import {
-  LabwareFieldsFragment,
-  OpWithSlotMeasurementsRequest,
-  RecordOpWithSlotMeasurementsMutation,
-  SlotMeasurementRequest,
-} from "../../types/sdk";
-import { StanCoreContext } from "../../lib/sdk";
-import { useMachine } from "@xstate/react";
-import createFormMachine from "../../lib/machines/form/formMachine";
+import { QCType } from "../../pages/VisiumQC";
+import React from "react";
+import { LabwareFieldsFragment, SlotMeasurementRequest } from "../../types/sdk";
 import Labware from "../labware/Labware";
 import { isSlotFilled } from "../../lib/helpers/slotHelper";
 import RemoveButton from "../buttons/RemoveButton";
-import { useLabwareContext } from "../labwareScanner/LabwareScanner";
-import { FormikErrors, useFormikContext } from "formik";
 import SlotMeasurements from "../slotMeasurement/SlotMeasurements";
-import { ClientError } from "graphql-request";
-import Warning from "../notifications/Warning";
+import { useFormikContext } from "formik";
 
-/***
- * Component to handle cDNAAmplification and cDNAAnalysis QCTypes
- * @param measurementName - Name of slot measurement to be recorded
- * @param qcType - QC Type
- * @param onSuccess - Callback to notify parent on save
- * @param onError - Callback to notify parent on srror
- * @param applySameValueForAlMeasurements - Flag to indicate whether an input is required to set all measurement values
- * @param stepIncrement - Step increment for measurement value
- * @param initialMeasurementVal - initial value for measurement value
- * @param validateMeasurementValue - Validate function for measurement value
- * @constructor
- */
-const CDNAMeasurementQC = ({
-  measurementName,
-  qcType,
-  onSave,
-  onError,
-  applySameValueForAlMeasurements,
-  stepIncrement,
-  initialMeasurementVal,
-  validateMeasurementValue,
-}: {
-  measurementName: string;
+type CDNAMeasurementQCProps = {
   qcType: string;
-  onSave: () => void;
-  onError: (error: ClientError) => void;
-  applySameValueForAlMeasurements: boolean;
-  stepIncrement?: string;
-  initialMeasurementVal?: string;
-  validateMeasurementValue?: (value: string) => void;
-}) => {
-  const { values, errors, validateForm, setErrors } = useFormikContext<
-    VisiumQCData
-  >();
+  labware: LabwareFieldsFragment;
+  slotMeasurements: SlotMeasurementRequest[] | undefined;
+  removeLabware: (barcode: string) => void;
+};
 
-  const { labwares, removeLabware } = useLabwareContext();
+const CDNAMeasurementQC = ({
+  qcType,
+  labware,
+  slotMeasurements,
+  removeLabware,
+}: CDNAMeasurementQCProps) => {
+  const { setErrors, setTouched, setFieldValue } = useFormikContext();
 
-  const stanCore = useContext(StanCoreContext);
-
-  const [slotMeasurements, setSlotMeasurements] = useState<
-    SlotMeasurementRequest[]
-  >([]);
-  const [validationError, setValidationError] = useState("");
-
-  /***State machine**/
-  const [current, send] = useMachine(
-    createFormMachine<
-      OpWithSlotMeasurementsRequest,
-      RecordOpWithSlotMeasurementsMutation
-    >().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== "SUBMIT_FORM") return Promise.reject();
-          return stanCore.RecordOpWithSlotMeasurements({
-            request: e.values,
-          });
-        },
-      },
-    })
-  );
-  const { serverError } = current.context;
+  const measurementConfigMemo = React.useMemo(() => {
+    return {
+      measurementName:
+        qcType === QCType.CDNA_AMPLIFICATION ? "Cq value" : "Concentration",
+      stepIncrement: qcType === QCType.CDNA_AMPLIFICATION ? "1" : ".01",
+      initialMeasurementVal: qcType === QCType.CDNA_AMPLIFICATION ? "" : "0",
+      validateFunction:
+        qcType === QCType.CDNA_AMPLIFICATION
+          ? validateAmplificationMeasurementValue
+          : validateAnalysisMeasurementValue,
+      isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION,
+    };
+  }, [qcType]);
 
   /***
-   * Initializing SlotMeasurement values
-   * **/
-  const buildSlotMeasurements = React.useCallback(
-    (labware: LabwareFieldsFragment): SlotMeasurementRequest[] => {
-      return labware.slots.filter(isSlotFilled).map((slot) => ({
-        address: slot.address,
-        name: measurementName,
-        value: initialMeasurementVal ?? "",
-      }));
-    },
-    [initialMeasurementVal, measurementName]
-  );
-
-  /***
-   * When labwares changes, slotMeasurements need to be updated
+   * When labwares changes, the slotMeasurements has to be initialized accordingly
    */
-  useEffect(() => {
-    setSlotMeasurements(
-      labwares.length > 0 ? buildSlotMeasurements(labwares[0]) : []
-    );
-  }, [labwares, setSlotMeasurements, buildSlotMeasurements]);
-
-  /***
-   * Save(/Recording) operation completed.
-   * Notify the parent component with the outcome of Save operation
-   */
-  useEffect(() => {
-    if (current.matches("submitted")) {
-      onSave();
-    }
-    if (serverError) {
-      onError(serverError);
-    }
-  }, [current, serverError, onSave, onError]);
-
-  /***
-   * Reset form errors on QCType chnage
-   */
-  useEffect(() => {
-    if (!qcType) return;
-
+  React.useEffect(() => {
+    //Reset Errors
     setErrors({});
-  }, [qcType, setErrors]);
+    setTouched({});
 
-  /***
-   * Callback to handle Save action
-   * **/
-  const handleSave = async () => {
-    //Validate form as the Save button is not implemented as a typical Formit Submit button
-    await validateForm();
-
-    //If errors are in form data, notify user
-    if (errors.slotMeasurements && errors.slotMeasurements.length > 0) {
-      if (Array.isArray(errors.slotMeasurements)) {
-        const failedIndices: number[] = [];
-        errors.slotMeasurements.forEach(
-          (
-            val: FormikErrors<SlotMeasurementRequest> | string,
-            indx: number
-          ) => {
-            if (val) {
-              failedIndices.push(indx);
-            }
-          }
-        );
-        const addresses = failedIndices
-          .map((failedIndx) => slotMeasurements[failedIndx].address)
-          .join(",");
-        setValidationError(`Invalid value format for: ${addresses}`);
-      }
+    if (!labware || !qcType) {
       return;
     }
-    //No errors,save the result
-    send({
-      type: "SUBMIT_FORM",
-      values: {
-        workNumber: values.workNumber,
-        barcode: labwares[0].barcode,
-        slotMeasurements: slotMeasurements ?? [],
-        operationType: qcType,
-      },
-    });
-  };
-
-  /***
-   * Callback to handle change in measurement value
-   * **/
-  const handleChangeMeasurement = React.useCallback(
-    (address: string, measurementValue: string) => {
-      //reset errors fom previous edit
-      setValidationError("");
-
-      setSlotMeasurements((prevSlotMeasurements) => {
-        if (!prevSlotMeasurements) return [];
-        let slotMeasurements = [...prevSlotMeasurements];
-        const indx = slotMeasurements.findIndex(
-          (measurement) => measurement.address === address
-        );
-        if (indx >= 0) {
-          slotMeasurements[indx].value = measurementValue;
-          slotMeasurements[indx].name = measurementName;
-        } else {
-          slotMeasurements.push({
-            address: address,
-            value: measurementValue,
-            name: measurementName,
-          });
-        }
-        return [...slotMeasurements];
+    setFieldValue("barcode", labware.barcode);
+    const slotMeasurements: SlotMeasurementRequest[] = labware.slots
+      .filter(isSlotFilled)
+      .map((slot) => {
+        return {
+          address: slot.address,
+          name: measurementConfigMemo.measurementName,
+          value: measurementConfigMemo.initialMeasurementVal,
+        };
       });
+    setFieldValue("slotMeasurements", slotMeasurements);
+  }, [
+    labware,
+    measurementConfigMemo.measurementName,
+    measurementConfigMemo.initialMeasurementVal,
+    qcType,
+    setErrors,
+    setTouched,
+    setFieldValue,
+  ]);
+
+  const handleChangeMeasurement = React.useCallback(
+    (address: string, fieldName: string, measurementValue: string) => {
+      setFieldValue(fieldName, measurementValue, true);
     },
-    [setSlotMeasurements, measurementName, setValidationError]
+    [setFieldValue]
   );
 
-  /***
-   * Callback to handle change in all measurement values
-   * **/
   const handleChangeAllMeasurements = React.useCallback(
     (measurementValue: string) => {
-      //Reset errors from previous edits
-      setValidationError("");
+      //Reset Errors
       setErrors({});
+      setTouched({});
 
-      setSlotMeasurements((prevSlotMeasurements) => {
-        let slotMeasurements = [...prevSlotMeasurements];
-        slotMeasurements.forEach((measurement) => {
-          measurement.value = measurementValue;
-        });
-        return [...slotMeasurements];
+      if (!slotMeasurements) return;
+      slotMeasurements.forEach((measurement) => {
+        measurement.value = measurementValue;
       });
+      setFieldValue("slotMeasurements", slotMeasurements);
     },
-    [setSlotMeasurements, setErrors, setValidationError]
+    [slotMeasurements, setErrors, setTouched, setFieldValue]
   );
 
   /***
-   * Utility function to check for empty slot measurement values
-   * @param slotMeasurements
+   *  Only acceptable 0 and decimal numbers of format ###.## for cDNA Analysis
+   * @param value
    */
-  const isEmptyCQValueExists = (slotMeasurements: SlotMeasurementRequest[]) => {
-    const val = slotMeasurements.filter(
-      (measurement) => measurement.value === ""
-    );
-    return val.length > 0;
-  };
+  function validateAnalysisMeasurementValue(value: string) {
+    let error;
+    if (value === "") {
+      error = "Required";
+    } else {
+      if (Number(value) !== 0) {
+        const isFormatted = /^\d{3}(\.\d{2})$/.test(value);
+        if (!isFormatted) {
+          error = "Invalid number format (Required ###.##)";
+        }
+      }
+    }
+    return error;
+  }
+
+  /***
+   * Only accept integer values for cDNA Amplification
+   * @param value
+   */
+  function validateAmplificationMeasurementValue(value: string) {
+    let error;
+    if (value === "") {
+      error = "Required";
+    } else {
+      if (!Number.isInteger(Number(value))) {
+        error = "Invalid number format : Integer value required";
+      }
+    }
+    return error;
+  }
 
   return (
     <div className="max-w-screen-xl mx-auto">
-      {labwares.length > 0 && (
+      {labware && (
         <div className={"flex flex-col mt-2"}>
           <Panel>
             <div className="flex flex-row items-center justify-end">
               {
                 <RemoveButton
                   data-testid={"remove"}
-                  onClick={() => removeLabware(labwares[0].barcode)}
+                  onClick={() => removeLabware(labware.barcode)}
                 />
               }
             </div>
-            {applySameValueForAlMeasurements && (
+            {measurementConfigMemo.isApplySameValueForAllMeasurements && (
               <div className={"flex flex-row w-1/4 ml-2"}>
-                <label className={" mt-2"}>{measurementName}</label>
+                <label className={" mt-2"}>
+                  {measurementConfigMemo.measurementName}
+                </label>
                 <input
                   className={"rounded-md ml-3"}
                   type={"number"}
@@ -261,42 +161,24 @@ const CDNAMeasurementQC = ({
               {slotMeasurements && slotMeasurements.length > 0 && (
                 <SlotMeasurements
                   slotMeasurements={slotMeasurements}
-                  measurementName={measurementName}
+                  measurementName={measurementConfigMemo.measurementName}
                   onChangeMeasurement={handleChangeMeasurement}
-                  validateValue={validateMeasurementValue}
-                  stepIncrement={stepIncrement ?? "1"}
+                  validateValue={measurementConfigMemo.validateFunction}
+                  stepIncrement={measurementConfigMemo.stepIncrement}
                 />
               )}
               <div className="flex flex-col" data-testid={"labware"}>
                 <Labware
-                  labware={labwares[0]}
+                  labware={labware}
                   selectable="non_empty"
                   selectionMode="multi"
-                  name={labwares[0].labwareType.name}
+                  name={labware.labwareType.name}
                 />
               </div>
             </div>
           </Panel>
         </div>
       )}
-      {validationError && (
-        <Warning message={`Error in ${measurementName} fields`}>
-          {validationError}
-        </Warning>
-      )}
-      <div className={"mt-4 flex flex-row items-center justify-end"}>
-        <BlueButton
-          disabled={
-            labwares.length <= 0 ||
-            !slotMeasurements ||
-            isEmptyCQValueExists(slotMeasurements)
-          }
-          type={"submit"}
-          onClick={handleSave}
-        >
-          Save
-        </BlueButton>
-      </div>
     </div>
   );
 };
