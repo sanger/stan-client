@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useContext, useState } from "react";
+import React, { ChangeEvent, useContext } from "react";
 import {
   GetVisiumQcInfoQuery,
   LabwareResult as CoreLabwareResult,
@@ -43,26 +43,32 @@ export interface VisiumQCFormData {
   labwareResult?: CoreLabwareResult;
 }
 
-export default function VisiumQC({ info }: VisiumQCProps) {
-  const [labwareResult, setLabwareResult] = useState<
-    CoreLabwareResult | undefined
-  >(undefined);
-  const stanCore = useContext(StanCoreContext);
+const validationSchema = Yup.object().shape({
+  workNumber: Yup.string().optional().label("SGP number"),
+  barcode: Yup.string().optional(),
+  qcType: Yup.string().required().label("QC Type"),
+  labwareResult: Yup.object().when("qcType", {
+    is: (value: string) => value === QCType.SLIDE_PROCESSING,
+    then: Yup.object().required(),
+    otherwise: Yup.object().notRequired(),
+  }),
+  slotMeasurements: Yup.array()
+    .of(
+      Yup.object().shape({
+        address: Yup.string().required(),
+        name: Yup.string().required(),
+        value: Yup.string().required(),
+      })
+    )
+    .when("qcType", {
+      is: (value: string) => value === QCType.SLIDE_PROCESSING,
+      then: Yup.array().notRequired(),
+      otherwise: Yup.array().required(),
+    }),
+});
 
-  const validationSchema = Yup.object().shape({
-    workNumber: Yup.string().optional().label("SGP number"),
-    qcType: Yup.string().required().label("QC Type"),
-    barcode: Yup.string().optional(),
-    slotMeasurements: Yup.array()
-      .of(
-        Yup.object().shape({
-          address: Yup.string(),
-          name: Yup.string(),
-          value: Yup.string(),
-        })
-      )
-      .optional(),
-  });
+export default function VisiumQC({ info }: VisiumQCProps) {
+  const stanCore = useContext(StanCoreContext);
   const [currentSlideProcessing, sendSlideProcessing] = useMachine(
     createFormMachine<ResultRequest, RecordVisiumQcMutation>().withConfig({
       services: {
@@ -98,12 +104,12 @@ export default function VisiumQC({ info }: VisiumQCProps) {
   const { serverError: serverErrorCDNA } = currentCDNA.context;
 
   const onSubmit = (values: VisiumQCFormData) => {
-    if (values.qcType === QCType.SLIDE_PROCESSING && labwareResult) {
+    if (values.qcType === QCType.SLIDE_PROCESSING && values.labwareResult) {
       sendSlideProcessing({
         type: "SUBMIT_FORM",
         values: {
           workNumber: values.workNumber,
-          labwareResults: [labwareResult],
+          labwareResults: [values.labwareResult],
           operationType: QCType.SLIDE_PROCESSING,
         },
       });
@@ -136,24 +142,24 @@ export default function VisiumQC({ info }: VisiumQCProps) {
         return val.length <= 0;
       } else return false;
     } else {
-      return !!labwareResult;
+      return !!value.labwareResult;
     }
   };
 
-  const getServerError = (qcType: QCType) => {
+  const getServerError = (value: VisiumQCFormData) => {
     if (
-      (qcType === QCType.CDNA_AMPLIFICATION ||
-        qcType === QCType.CDNA_ANALYSIS) &&
-      serverErrorCDNA
+      value.qcType === QCType.CDNA_AMPLIFICATION ||
+      value.qcType === QCType.CDNA_ANALYSIS
     ) {
-      return serverErrorCDNA;
-    } else if (
-      qcType === QCType.SLIDE_PROCESSING &&
-      serverErrorSlideProcessing
-    ) {
-      return serverErrorSlideProcessing;
-    } else return undefined;
+      return value.slotMeasurements && value.slotMeasurements.length > 0
+        ? serverErrorCDNA
+        : undefined;
+    } else if (value.qcType === QCType.SLIDE_PROCESSING) {
+      return value.labwareResult ? serverErrorSlideProcessing : undefined;
+    }
+    return undefined;
   };
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -167,6 +173,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
               workNumber: undefined,
               qcType: QCType.SLIDE_PROCESSING,
               slotMeasurements: [],
+              labwareResult: undefined,
             }}
             onSubmit={onSubmit}
             validationSchema={validationSchema}
@@ -221,8 +228,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                             labware={labwares[0]}
                             removeLabware={removeLabware}
                             comments={info.comments}
-                            labwareResult={labwareResult}
-                            setLabwareResult={setLabwareResult}
+                            labwareResult={values.labwareResult}
                           />
                         );
                       } else {
@@ -239,11 +245,11 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                   </LabwareScanner>
                 </div>
 
-                {getServerError(values.qcType) && (
+                {getServerError(values) && (
                   <Warning
                     className={"mt-4"}
                     message={"Failed to record Visium QC"}
-                    error={getServerError(values.qcType)}
+                    error={getServerError(values)}
                   />
                 )}
                 <div className={"sm:flex mt-4 sm:flex-row justify-end"}>

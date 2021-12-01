@@ -103,7 +103,7 @@ const CDNAMeasurementQC = ({
       if (Number(value) !== 0) {
         const isFormatted = /^\d{3}(\.\d{2})$/.test(value);
         if (!isFormatted) {
-          error = "Invalid number format (Required ###.##)";
+          error = "Invalid number format: Required ###.##";
         }
       }
     }
@@ -120,7 +120,7 @@ const CDNAMeasurementQC = ({
       error = "Required";
     } else {
       if (!Number.isInteger(Number(value))) {
-        error = "Invalid number format : Integer value required";
+        error = "Invalid number format: Integer value required";
       }
     }
     return error;
@@ -168,12 +168,7 @@ const CDNAMeasurementQC = ({
                 />
               )}
               <div className="flex flex-col" data-testid={"labware"}>
-                <Labware
-                  labware={labware}
-                  selectable="non_empty"
-                  selectionMode="multi"
-                  name={labware.labwareType.name}
-                />
+                <Labware labware={labware} name={labware.labwareType.name} />
               </div>
             </div>
           </Panel>

@@ -8,38 +8,47 @@ import {
 import { isSlotFilled } from "../../lib/helpers/slotHelper";
 import Panel from "../Panel";
 import LabwareResult from "../labwareResult/LabwareResult";
+import { useFormikContext } from "formik";
+import { VisiumQCFormData } from "../../pages/VisiumQC";
 
 type SlideProcessingProps = {
   comments: CommentFieldsFragment[];
   labware: LabwareFieldsFragment;
   labwareResult: CoreLabwareResult | undefined;
-  setLabwareResult: (labwareResults: CoreLabwareResult | undefined) => void;
   removeLabware: (barcode: string) => void;
 };
 const SlideProcessing = ({
   comments,
   labware,
   labwareResult,
-  setLabwareResult,
   removeLabware,
 }: SlideProcessingProps) => {
+  const { setFieldValue } = useFormikContext<VisiumQCFormData>();
   /***
    * When labwares changes, the labwareResults has to be initialized accordingly
    */
 
+  const [labwareResultTest, setLabwareResult] = React.useState<
+    CoreLabwareResult | undefined
+  >(labwareResult);
+
   React.useEffect(() => {
     if (!labware) {
-      setLabwareResult(undefined);
+      setFieldValue("labwareResult", undefined);
       return;
     }
-    setLabwareResult({
+    setFieldValue("labwareResult", {
       barcode: labware.barcode,
       sampleResults: labware.slots.filter(isSlotFilled).map((slot) => ({
         address: slot.address,
         result: PassFail.Pass,
       })),
     });
-  }, [setLabwareResult, labware]);
+  }, [setFieldValue, labware]);
+
+  React.useEffect(() => {
+    setFieldValue("labwareResult", labwareResultTest);
+  }, [labwareResultTest, setFieldValue]);
 
   return (
     <>

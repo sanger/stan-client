@@ -42,7 +42,7 @@ const SlotMeasurements = ({
         accessor: (measurement: SlotMeasurementRequest) => measurement.address,
       },
       {
-        Header: `${measurementName}`,
+        Header: measurementName,
         id: measurementName,
         Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
           return (
@@ -52,7 +52,7 @@ const SlotMeasurements = ({
               type={"number"}
               label={""}
               name={`slotMeasurements.${row.index}.value`}
-              onChange={(e: any) => {
+              onChange={(e: React.FormEvent<HTMLInputElement>) => {
                 onChangeMeasurement(
                   row.original.address,
                   `slotMeasurements.${row.index}.value`,
