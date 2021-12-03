@@ -8,10 +8,7 @@ import createWorkProgressInputMachine from "./workProgressInput.machine";
 import BlueButton from "../buttons/BlueButton";
 import FormikSelect from "../forms/Select";
 import FormikInput from "../forms/Input";
-import {
-  FindWorkProgressQueryVariables as WorkProgressQueryInput,
-  WorkStatus,
-} from "../../types/sdk";
+import { FindWorkProgressQueryVariables as WorkProgressQueryInput } from "../../types/sdk";
 
 /**
  * Enum to fill the Type field
@@ -53,41 +50,28 @@ const mergeFieldTypes = (workProgressInput: WorkProgressQueryInput) => {
     };
   }
 };
+
 /**
- * Convert the data associated with the form to query input data structure.
- * @param workProgressInputFields
+ * Form validation schema
  */
-const formatFieldData = (
-  workProgressInputFields: WorkProgressInputData
-): WorkProgressQueryInput => {
-  const queryInput: WorkProgressQueryInput = {
-    workNumber: undefined,
-    workType: undefined,
-    status: undefined,
-  };
-  switch (workProgressInputFields.selectedType) {
-    case WorkProgressInputTypeField.WorkNumber: {
-      queryInput.workNumber = workProgressInputFields.selectedValue;
-      break;
-    }
-    case WorkProgressInputTypeField.WorkType: {
-      queryInput.workType = workProgressInputFields.selectedValue;
-      break;
-    }
-    case WorkProgressInputTypeField.Status: {
-      queryInput.status = workProgressInputFields.selectedValue as WorkStatus;
-      break;
-    }
-  }
-  return queryInput;
-};
+const validationSchema: Yup.ObjectSchema = Yup.object().shape({
+  selectedType: Yup.string()
+    .oneOf(Object.values(WorkProgressInputTypeField))
+    .required(),
+  selectedValue: Yup.string().ensure(),
+});
 
 export default function WorkProgressInput({
   initialValue,
   onSubmitAction,
+  onInputChange,
 }: {
   initialValue: WorkProgressQueryInput;
-  onSubmitAction: (submitData: WorkProgressQueryInput) => void;
+  onSubmitAction: (
+    submitData: WorkProgressInputData,
+    workTypes?: string[]
+  ) => void;
+  onInputChange: () => void;
 }) {
   //Initialize form data
   const defaultInitialValues: WorkProgressInputData = {
@@ -105,19 +89,12 @@ export default function WorkProgressInput({
 
   const {
     workProgressInput: { types, values, selectedType, selectedValue },
+    workTypes,
     serverError,
   } = current.context;
 
-  /**
-   * Form validation schema
-   */
-  const validationSchema: Yup.ObjectSchema = Yup.object().shape({
-    type: Yup.string().ensure(),
-    value: Yup.string().ensure(),
-  });
-
   const onFormSubmit = () => {
-    onSubmitAction(formatFieldData(current.context.workProgressInput));
+    onSubmitAction(current.context.workProgressInput, workTypes);
   };
 
   //Send Events to State machine
@@ -170,10 +147,11 @@ export default function WorkProgressInput({
               <div className="md:flex-grow">
                 <FormikSelect
                   label=""
-                  name="type"
+                  name="selectedType"
                   data-testid={"type"}
                   value={selectedType}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    onInputChange();
                     sendEvents(e.target.value, "");
                   }}
                 >
@@ -187,21 +165,23 @@ export default function WorkProgressInput({
               <div className="md:flex-grow">
                 {selectedType === WorkProgressInputTypeField.WorkNumber ? (
                   <FormikInput
-                    name="workNumber"
+                    name="selectedValue"
                     label=""
                     data-testid={"valueInput"}
                     value={selectedValue}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      onInputChange();
                       sendEvents("VALUE_SELECTION", e.target.value);
                     }}
                   />
                 ) : (
                   <FormikSelect
                     label=""
-                    name="value"
+                    name="selectedValue"
                     data-testid={"valueSelect"}
                     value={selectedValue ? selectedValue : ""}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      onInputChange();
                       sendEvents("VALUE_SELECTION", e.target.value);
                     }}
                   >

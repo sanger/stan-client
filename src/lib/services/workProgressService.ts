@@ -13,6 +13,8 @@ import { SearchServiceInterface } from "./searchServiceInterface";
  */
 export type WorkProgressResultTableEntry = {
   workNumber: string;
+  workType: string;
+  project: string;
   status: WorkStatus;
   lastSectionDate: Date | undefined;
   lastStainingDate: Date | undefined;
@@ -80,6 +82,8 @@ export class WorkProgressService
       const lastCDNADate = timeStampMap.get("Visium cDNA");
       return {
         workNumber: entry.work.workNumber,
+        workType: entry.work.workType.name,
+        project: entry.work.project.name,
         status: entry.work.status,
         lastSectionDate:
           lastSectionDate && new Date(lastSectionDate.toString()),
