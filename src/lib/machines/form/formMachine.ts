@@ -14,6 +14,7 @@ export type FormEvent<V, R> =
       type: "SUBMIT_FORM";
       values: V;
     }
+  | { type: "RESET" }
   | MachineServiceDone<"submitForm", R>
   | MachineServiceError<"submitForm">;
 
@@ -48,19 +49,30 @@ export default function createFormMachine<V, R>() {
           },
         },
         submitted: {
-          type: "final",
+          on: {
+            RESET: {
+              target: "fillingOutForm",
+              actions: "unsetSubmissionResult",
+            },
+          },
         },
       },
     },
     {
       actions: {
         unsetServerError: assign((ctx) => (ctx.serverError = undefined)),
+
+        unsetSubmissionResult: assign(
+          (ctx) => (ctx.submissionResult = undefined)
+        ),
+
         assignSubmissionResult: assign((ctx, e) => {
           if (e.type !== "done.invoke.submitForm") {
             return;
           }
           ctx.submissionResult = castDraft(e.data);
         }),
+
         assignSubmissionError: assign((ctx, e) => {
           if (e.type !== "error.platform.submitForm") {
             return;
