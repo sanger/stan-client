@@ -3,6 +3,7 @@ import { useMachine } from "@xstate/react";
 import createFormMachine from "../../lib/machines/form/formMachine";
 import {
   GetStainInfoQuery,
+  LabwareFieldsFragment,
   StainMutation,
   StainRequest,
 } from "../../types/sdk";
@@ -58,9 +59,16 @@ type StainFormValues = Omit<StainRequest, "timeMeasurements"> & {
 type StainFormProps = {
   stainType: string;
   stainingInfo: GetStainInfoQuery;
+  initialLabware: LabwareFieldsFragment[];
+  onLabwareChange: (labware: LabwareFieldsFragment[]) => void;
 };
 
-export default function StainForm({ stainType, stainingInfo }: StainFormProps) {
+export default function StainForm({
+  stainType,
+  stainingInfo,
+  initialLabware,
+  onLabwareChange,
+}: StainFormProps) {
   const [current, send] = useMachine(
     createFormMachine<StainRequest, StainMutation>().withConfig({
       services: {
@@ -115,21 +123,19 @@ export default function StainForm({ stainType, stainingInfo }: StainFormProps) {
    */
   const timeMeasurements = stainTypeMap.get(stainType) ?? [];
 
-  const initialValues: StainFormValues = {
-    barcodes: [],
-    stainType,
-    timeMeasurements: timeMeasurements.map((name) => ({
-      name,
-      _minutes: 0,
-      _seconds: 0,
-      seconds: 0,
-    })),
-    workNumber: undefined,
-  };
-
   return (
     <Formik<StainFormValues>
-      initialValues={initialValues}
+      initialValues={{
+        barcodes: initialLabware.map((lw) => lw.barcode),
+        stainType,
+        timeMeasurements: timeMeasurements.map((name) => ({
+          name,
+          _minutes: 0,
+          _seconds: 0,
+          seconds: 0,
+        })),
+        workNumber: undefined,
+      }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
         // Convert the StainForm into a StainRequest (i.e. remove _minutes and _seconds)
@@ -186,12 +192,14 @@ export default function StainForm({ stainType, stainingInfo }: StainFormProps) {
                 </MutedText>
 
                 <LabwareScanner
-                  onChange={(labwares) =>
+                  initialLabwares={initialLabware}
+                  onChange={(labwares) => {
                     setFieldValue(
                       "barcodes",
                       labwares.map((lw) => lw.barcode)
-                    )
-                  }
+                    );
+                    onLabwareChange(labwares);
+                  }}
                   locked={current.matches("submitted")}
                 >
                   <LabwareScanPanel

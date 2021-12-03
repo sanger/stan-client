@@ -1,6 +1,7 @@
 import React from "react";
 import {
   ComplexStainRequest,
+  LabwareFieldsFragment,
   RecordComplexStainMutation,
   StainPanel,
 } from "../../types/sdk";
@@ -30,14 +31,21 @@ import Table, {
 import WorkNumberSelect from "../../components/WorkNumberSelect";
 import OperationCompleteModal from "../../components/modal/OperationCompleteModal";
 import Warning from "../../components/notifications/Warning";
+import WhiteButton from "../../components/buttons/WhiteButton";
 
 type ComplexStainFormValues = ComplexStainRequest;
 
 type ComplexStainFormProps = {
   stainType: string;
+  initialLabware: LabwareFieldsFragment[];
+  onLabwareChange: (labware: LabwareFieldsFragment[]) => void;
 };
 
-export default function ComplexStainForm({ stainType }: ComplexStainFormProps) {
+export default function ComplexStainForm({
+  stainType,
+  initialLabware,
+  onLabwareChange,
+}: ComplexStainFormProps) {
   const [current, send] = useMachine(
     createFormMachine<
       ComplexStainRequest,
@@ -83,22 +91,20 @@ export default function ComplexStainForm({ stainType }: ComplexStainFormProps) {
       .label("Labware"),
   });
 
-  const initialValues: ComplexStainFormValues = {
-    stainType,
-    plex: 1,
-    panel: StainPanel.Marker,
-    labware: [],
-  };
-
   return (
     <Formik<ComplexStainFormValues>
-      initialValues={initialValues}
+      initialValues={{
+        stainType,
+        plex: 1,
+        panel: StainPanel.Marker,
+        labware: initialLabware.map(buildLabware),
+      }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
         send({ type: "SUBMIT_FORM", values });
       }}
     >
-      {({ values }) => (
+      {({ values, resetForm }) => (
         <Form>
           <FormikInput label={""} name={"stainType"} type={"hidden"} />
 
@@ -112,7 +118,7 @@ export default function ComplexStainForm({ stainType }: ComplexStainFormProps) {
               exit={"hidden"}
               className="md:w-2/3 space-y-10"
             >
-              {/*{serverError && <Warning error={serverError} />}*/}
+              {serverError && <Warning error={serverError} />}
 
               <motion.div
                 variants={variants.fadeInWithLift}
@@ -124,12 +130,9 @@ export default function ComplexStainForm({ stainType }: ComplexStainFormProps) {
                 </MutedText>
 
                 <FormikLabwareScanner
-                  buildLabware={(labware) => ({
-                    barcode: labware.barcode,
-                    bondBarcode: "",
-                    bondRun: 0,
-                    workNumber: undefined,
-                  })}
+                  initialLabwares={initialLabware}
+                  onChange={onLabwareChange}
+                  buildLabware={buildLabware}
                   locked={current.matches("submitted")}
                 >
                   <LabwareScanPanel
@@ -241,6 +244,19 @@ export default function ComplexStainForm({ stainType }: ComplexStainFormProps) {
           <OperationCompleteModal
             show={current.matches("submitted")}
             message={"Staining Successful"}
+            additionalButtons={
+              <WhiteButton
+                type="button"
+                style={{ marginRight: "auto" }}
+                className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text-sm"
+                onClick={() => {
+                  resetForm();
+                  send({ type: "RESET" });
+                }}
+              >
+                Stain Again
+              </WhiteButton>
+            }
             onReset={reload}
           >
             <p>
@@ -252,4 +268,13 @@ export default function ComplexStainForm({ stainType }: ComplexStainFormProps) {
       )}
     </Formik>
   );
+}
+
+function buildLabware(labware: LabwareFieldsFragment) {
+  return {
+    barcode: labware.barcode,
+    bondBarcode: "",
+    bondRun: 0,
+    workNumber: undefined,
+  };
 }

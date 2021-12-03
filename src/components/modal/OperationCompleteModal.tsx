@@ -22,6 +22,11 @@ type OperationCompleteModalProps = {
   message?: string;
 
   /**
+   * Additional buttons to display in the button bar
+   */
+  additionalButtons?: React.ReactNode;
+
+  /**
    * Children to be displayed in the modal
    */
   children: React.ReactNode;
@@ -35,6 +40,7 @@ export default function OperationCompleteModal({
   children,
   message,
   show,
+  additionalButtons,
   onReset,
 }: OperationCompleteModalProps) {
   return (
@@ -60,6 +66,7 @@ export default function OperationCompleteModal({
         >
           Reset Form
         </WhiteButton>
+        {additionalButtons}
       </ModalFooter>
     </Modal>
   );

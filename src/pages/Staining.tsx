@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GetStainInfoQuery } from "../types/sdk";
+import { GetStainInfoQuery, LabwareFieldsFragment } from "../types/sdk";
 import AppShell from "../components/AppShell";
 import StainForm from "./staining/StainForm";
 import { Select } from "../components/forms/Select";
@@ -21,6 +21,7 @@ type StainingProps = {
 
 export default function Staining({ stainingInfo }: StainingProps) {
   const [stainType, setStainType] = useState<string>("");
+  const [labwares, setLabwares] = useState<LabwareFieldsFragment[]>([]);
 
   return (
     <AppShell>
@@ -49,11 +50,18 @@ export default function Staining({ stainingInfo }: StainingProps) {
               key={stainType}
               stainType={stainType}
               stainingInfo={stainingInfo}
+              initialLabware={labwares}
+              onLabwareChange={setLabwares}
             />
           )}
 
           {stainType && isComplexStain(stainType) && (
-            <ComplexStainForm key={stainType} stainType={stainType} />
+            <ComplexStainForm
+              key={stainType}
+              stainType={stainType}
+              initialLabware={labwares}
+              onLabwareChange={setLabwares}
+            />
           )}
         </div>
       </AppShell.Main>
