@@ -126,6 +126,7 @@ export default function LabwareResult({
         {
           <RemoveButton
             data-testid={"remove"}
+            type="button"
             onClick={() => onRemoveClick(labware.barcode)}
           />
         }
@@ -141,6 +142,7 @@ export default function LabwareResult({
           <BlueButton
             className="flex-shrink-0"
             data-testid={"passAll"}
+            type="button"
             onClick={() => send({ type: "PASS_ALL" })}
           >
             Pass All
@@ -148,6 +150,7 @@ export default function LabwareResult({
           <PinkButton
             className="flex-shrink-0"
             data-testid={"failAll"}
+            type="button"
             onClick={() => send({ type: "FAIL_ALL" })}
           >
             Fail All

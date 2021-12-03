@@ -111,7 +111,6 @@ export default function LabwareScanner({
   const previousLabwareLength = usePrevious(labwares.length);
   useEffect(() => {
     if (typeof previousLabwareLength === "undefined") return;
-
     if (labwares.length !== previousLabwareLength) {
       onChange?.(labwares);
     }
@@ -137,7 +136,9 @@ export default function LabwareScanner({
     locked: current.matches("locked"),
     labwares: labwares,
     removeLabware: React.useCallback(
-      (barcode) => send({ type: "REMOVE_LABWARE", value: barcode }),
+      (barcode) => {
+        send({ type: "REMOVE_LABWARE", value: barcode });
+      },
       [send]
     ),
   };

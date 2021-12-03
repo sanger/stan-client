@@ -1,0 +1,7 @@
+mutation RecordOpWithSlotMeasurements($request:OpWithSlotMeasurementsRequest!) {
+    recordOpWithSlotMeasurements(request:$request) {
+        operations {
+            id
+        }
+    }
+}
