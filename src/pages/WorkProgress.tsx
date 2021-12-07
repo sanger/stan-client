@@ -27,16 +27,12 @@ import { ClientError } from "graphql-request";
 import { Column } from "react-table";
 import { history } from "../lib/sdk";
 import WorkProgressInput, {
+  WorkProgressFilterType,
   WorkProgressInputData,
-  WorkProgressInputTypeField,
+  WorkProgressSearchType,
 } from "../components/workProgress/WorkProgressInput";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import { SearchResultsType } from "../types/stan";
-import * as Yup from "yup";
-import { Form, Formik } from "formik";
-import FormikSelect from "../components/forms/Select";
-import BlueButton from "../components/buttons/BlueButton";
-import Heading from "../components/Heading";
 
 type WorkProgressProps = {
   urlParamsString: string;
@@ -48,47 +44,11 @@ const defaultInitialValues: WorkProgressQueryInput = {
   status: undefined,
 };
 
-/**
- * Filter inputs to search result
- */
-type WorkProgressFilterInput = {
-  type: string;
-  values: string[];
-};
-
 function WorkProgress({ urlParamsString }: WorkProgressProps) {
   const params: ParsedQuery = parseQueryString(urlParamsString);
   const [workProgressInput, setWorkProgressInput] = useState<
     WorkProgressInputData | undefined
   >(undefined);
-  const [workProgressResultData, setWorkProgressResultData] = useState<
-    WorkProgressResultTableEntry[]
-  >([]);
-  const [workTypes, setWorkTypes] = useState<string[]>([]);
-  const [filterInput, setFilterInput] = useState<
-    WorkProgressFilterInput | undefined
-  >(undefined);
-  /**
-   * Filter validation schema
-   */
-  const filterValidationSchema: Yup.ObjectSchema = Yup.object().shape({
-    type: Yup.string()
-      .oneOf([
-        WorkProgressInputTypeField.WorkType,
-        WorkProgressInputTypeField.Status,
-      ])
-      .optional()
-      .label("Type"),
-    values: Yup.array()
-      .of(Yup.string())
-      .when("type", {
-        is: (value: string) => value === WorkProgressInputTypeField.WorkType,
-        then: Yup.array().of(Yup.string().oneOf(workTypes)).required(),
-        otherwise: Yup.array()
-          .of(Yup.string().oneOf(Object.values(WorkStatus)))
-          .required(),
-      }),
-  });
 
   const workProgressQueryInput: WorkProgressQueryInput = merge(
     {},
@@ -112,45 +72,47 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
     searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
 
-  /**Update the results when state machine fetches data**/
-  React.useEffect(() => {
-    if (!searchResult) {
-      setWorkProgressResultData([]);
-      return;
-    }
-    setWorkProgressResultData(searchResult.entries);
-  }, [searchResult]);
-
-  const handleSubmission = (
-    workProgressInput: WorkProgressInputData,
-    workTypes?: string[]
-  ) => {
-    if (workTypes) setWorkTypes(workTypes);
-    setWorkProgressInput(workProgressInput);
-    send({ type: "FIND", request: formatInputData(workProgressInput) });
-    // Replace instead of push so user doesn't have to go through a load of old searches when going back
-    history.replace(`/?${stringify(workProgressInput)}`);
-  };
-
-  const handleInputChange = React.useCallback(() => {
-    setWorkProgressResultData([]);
-  }, [setWorkProgressResultData]);
+  const handleSubmit = React.useCallback(
+    (workProgressInput: WorkProgressInputData, filterOnly: boolean) => {
+      setWorkProgressInput(workProgressInput);
+      debugger;
+      if (!filterOnly) {
+        send({ type: "FIND", request: formatInputData(workProgressInput) });
+      }
+      // Replace instead of push so user doesn't have to go through a load of old searches when going back
+      history.replace(`/?${stringify(workProgressInput)}`);
+    },
+    [setWorkProgressInput, send]
+  );
 
   /***
    * Filter results
    */
   const filterResults = (
-    filterInput: WorkProgressFilterInput,
-    workProgressResults: WorkProgressResultTableEntry[]
+    workProgressResults: WorkProgressResultTableEntry[],
+    workProgressInput?: WorkProgressInputData
   ): WorkProgressResultTableEntry[] => {
-    return workProgressResults.filter(
-      (workProgressResult) =>
-        filterInput.values.findIndex((filterValue) =>
-          filterInput.type === WorkProgressInputTypeField.WorkType
-            ? filterValue === workProgressResult.workType
-            : filterValue === workProgressResult.status
-        ) !== -1
-    );
+    debugger;
+    if (
+      workProgressInput &&
+      workProgressInput.filterType &&
+      workProgressInput.filterValues.length > 0
+    ) {
+      return workProgressResults.filter((workProgressResult) => {
+        const findIndx = workProgressInput.filterValues.findIndex(
+          (filterValue) => {
+            return workProgressInput.filterType ===
+              WorkProgressFilterType.WorkType
+              ? filterValue === workProgressResult.workType
+              : filterValue === workProgressResult.status;
+          }
+        );
+        debugger;
+        return findIndx !== -1;
+      });
+    } else {
+      return workProgressResults;
+    }
   };
 
   /**
@@ -165,17 +127,17 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
       workType: undefined,
       status: undefined,
     };
-    switch (workProgressInputFields.selectedType) {
-      case WorkProgressInputTypeField.WorkNumber: {
-        queryInput.workNumber = workProgressInputFields.selectedValue;
+    switch (workProgressInputFields.searchType) {
+      case WorkProgressSearchType.WorkNumber: {
+        queryInput.workNumber = workProgressInputFields.searchValue;
         break;
       }
-      case WorkProgressInputTypeField.WorkType: {
-        queryInput.workType = workProgressInputFields.selectedValue;
+      case WorkProgressSearchType.WorkType: {
+        queryInput.workType = workProgressInputFields.searchValue;
         break;
       }
-      case WorkProgressInputTypeField.Status: {
-        queryInput.status = workProgressInputFields.selectedValue as WorkStatus;
+      case WorkProgressSearchType.Status: {
+        queryInput.status = workProgressInputFields.searchValue as WorkStatus;
         break;
       }
     }
@@ -191,8 +153,8 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
         <div className="mx-auto">
           <WorkProgressInput
             initialValue={workProgressQueryInput}
-            onSubmitAction={handleSubmission}
-            onInputChange={handleInputChange}
+            isFilterRequired={true}
+            onSubmitAction={handleSubmit}
           />
           <div className={"my-10 mx-auto max-w-screen-xl"}>
             {serverError && (
@@ -207,105 +169,22 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
             </div>
             {current.matches("searched") ? (
               searchResult && searchResult.entries.length > 0 ? (
-                workProgressInput &&
-                workProgressResultData &&
-                workProgressResultData.length > 0 && (
-                  <div>
-                    <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
-                      <Heading level={4} showBorder={false}>
-                        Filter by
-                      </Heading>
-                      <Formik<WorkProgressFilterInput>
-                        initialValues={{
-                          type:
-                            workProgressInput.selectedType ===
-                            WorkProgressInputTypeField.WorkType
-                              ? WorkProgressInputTypeField.Status
-                              : WorkProgressInputTypeField.WorkType,
-                          values: [],
-                        }}
-                        onSubmit={setFilterInput}
-                        validationSchema={filterValidationSchema}
-                      >
-                        {({ values }) => (
-                          <Form>
-                            <div className={"flex flex-col"}>
-                              <div className="space-y-2 md:grid md:grid-cols-2 md:px-10 md:space-y-0 md:flex md:flex-col md:justify-center md:items-start md:gap-4">
-                                {workProgressInput.selectedType ===
-                                  WorkProgressInputTypeField.WorkNumber && (
-                                  <FormikSelect
-                                    label=""
-                                    name="type"
-                                    emptyOption={false}
-                                  >
-                                    {[
-                                      WorkProgressInputTypeField.WorkType,
-                                      WorkProgressInputTypeField.Status,
-                                    ].map((workType) => (
-                                      <option key={workType} value={workType}>
-                                        {workType}
-                                      </option>
-                                    ))}
-                                  </FormikSelect>
-                                )}
-                                <div className="md:flex-grow">
-                                  <FormikSelect
-                                    label={
-                                      workProgressInput.selectedType !==
-                                      WorkProgressInputTypeField.WorkNumber
-                                        ? values.type
-                                        : ""
-                                    }
-                                    name="values"
-                                    multiple={true}
-                                    className={"ml-6"}
-                                    emptyOption={false}
-                                  >
-                                    {(values.type ===
-                                    WorkProgressInputTypeField.WorkType
-                                      ? workTypes
-                                      : Object.values(WorkStatus)
-                                    ).map((filterValue) => (
-                                      <option
-                                        key={filterValue}
-                                        value={filterValue}
-                                      >
-                                        {filterValue}
-                                      </option>
-                                    ))}
-                                  </FormikSelect>
-                                </div>
-                              </div>
-                              <div className="flex mt-4 justify-end ">
-                                <BlueButton type="submit">Filter</BlueButton>
-                              </div>
-                            </div>
-                          </Form>
-                        )}
-                      </Formik>
-                    </div>
-                    <DataTable
-                      sortable
-                      defaultSort={[
-                        //Sort by Status and within status sort with WorkNumber in descending order
-                        {
-                          id: "status",
-                          desc: false,
-                        },
-                        {
-                          id: "workNumber",
-                          desc: true,
-                        },
-                      ]}
-                      columns={columns}
-                      data={
-                        filterInput
-                          ? filterResults(filterInput, workProgressResultData)
-                          : workProgressResultData
-                      }
-                    />
-                  </div>
-                )
+                <DataTable
+                  sortable
+                  defaultSort={[
+                    //Sort by Status and within status sort with WorkNumber in descending order
+                    {
+                      id: "status",
+                      desc: false,
+                    },
+                    {
+                      id: "workNumber",
+                      desc: true,
+                    },
+                  ]}
+                  columns={columns}
+                  data={filterResults(searchResult.entries, workProgressInput)}
+                />
               ) : (
                 <Warning
                   message={

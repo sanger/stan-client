@@ -6,28 +6,47 @@ import Warning from "../notifications/Warning";
 import React from "react";
 import createWorkProgressInputMachine from "./workProgressInput.machine";
 import BlueButton from "../buttons/BlueButton";
-import FormikSelect from "../forms/Select";
-import FormikInput from "../forms/Input";
-import { FindWorkProgressQueryVariables as WorkProgressQueryInput } from "../../types/sdk";
+import {
+  FindWorkProgressQueryVariables as WorkProgressQueryInput,
+  WorkStatus,
+} from "../../types/sdk";
+import { KeyValueViewer } from "../KeyValueViewer";
 
 /**
- * Enum to fill the Type field
+ * Enum to fill the Search Type field
  */
-export enum WorkProgressInputTypeField {
+export enum WorkProgressSearchType {
   WorkNumber = "SGP/R&D Number",
   WorkType = "Work Type",
   Status = "Status",
 }
 
 /**
+ * Enum to fill the Search Type field
+ */
+export enum WorkProgressFilterType {
+  WorkType = "Work Type",
+  Status = "Status",
+}
+
+/**
+ * Filter inputs to search result
+ */
+export type WorkProgressFilterInput = {
+  filterType: string;
+  filterValues: string[];
+};
+
+/**
  * Data structure to keep the data associated with this component
  */
 export type WorkProgressInputData = {
-  types: WorkProgressInputTypeField[];
-  values: string[] | undefined;
-  selectedType: string;
-  selectedValue: string;
+  searchType: string;
+  searchValue: string;
+  filterType: string;
+  filterValues: string[];
 };
+
 /**
  * This is to reformat the data in query input to form
  * @param workProgressInput
@@ -35,17 +54,17 @@ export type WorkProgressInputData = {
 const mergeFieldTypes = (workProgressInput: WorkProgressQueryInput) => {
   if (workProgressInput.workNumber) {
     return {
-      selectedType: WorkProgressInputTypeField.WorkNumber,
+      selectedType: WorkProgressSearchType.WorkNumber,
       selectedValue: workProgressInput.workNumber,
     };
   } else if (workProgressInput.workType) {
     return {
-      selectedType: WorkProgressInputTypeField.WorkType,
+      selectedType: WorkProgressSearchType.WorkType,
       selectedValue: workProgressInput.workType,
     };
   } else if (workProgressInput.status) {
     return {
-      selectedType: WorkProgressInputTypeField.Status,
+      selectedType: WorkProgressSearchType.Status,
       selectedValue: workProgressInput.status,
     };
   }
@@ -56,29 +75,29 @@ const mergeFieldTypes = (workProgressInput: WorkProgressQueryInput) => {
  */
 const validationSchema: Yup.ObjectSchema = Yup.object().shape({
   selectedType: Yup.string()
-    .oneOf(Object.values(WorkProgressInputTypeField))
+    .oneOf(Object.values(WorkProgressSearchType))
     .required(),
   selectedValue: Yup.string().ensure(),
 });
 
 export default function WorkProgressInput({
   initialValue,
+  isFilterRequired,
   onSubmitAction,
-  onInputChange,
 }: {
   initialValue: WorkProgressQueryInput;
+  isFilterRequired: boolean;
   onSubmitAction: (
     submitData: WorkProgressInputData,
-    workTypes?: string[]
+    isFilterAction: boolean
   ) => void;
-  onInputChange: () => void;
 }) {
   //Initialize form data
   const defaultInitialValues: WorkProgressInputData = {
-    types: Object.values(WorkProgressInputTypeField),
-    values: [],
-    selectedType: WorkProgressInputTypeField.WorkNumber,
-    selectedValue: "",
+    searchType: WorkProgressSearchType.WorkNumber,
+    searchValue: "",
+    filterType: WorkProgressFilterType.Status,
+    filterValues: [],
     ...mergeFieldTypes(initialValue),
   };
   const [current, send] = useMachine(
@@ -88,124 +107,185 @@ export default function WorkProgressInput({
   );
 
   const {
-    workProgressInput: { types, values, selectedType, selectedValue },
+    workProgressInput: { searchType, searchValue },
     workTypes,
     serverError,
   } = current.context;
 
-  const onFormSubmit = () => {
-    onSubmitAction(current.context.workProgressInput, workTypes);
-  };
+  const generateValuesForType = React.useCallback(
+    (type: string): string[] => {
+      debugger;
+      switch (type) {
+        case WorkProgressSearchType.WorkNumber:
+          return [];
+        case WorkProgressSearchType.WorkType:
+          return workTypes ?? [];
+        case WorkProgressSearchType.Status:
+          return Object.values(WorkStatus);
+        default:
+          return [];
+      }
+    },
+    [workTypes]
+  );
+
+  const memoSearchInputKeyValues = React.useMemo(() => {
+    const map = new Map<string, string[]>();
+    Object.values(WorkProgressSearchType).forEach((key) => {
+      map.set(key, generateValuesForType(key));
+    });
+    return map;
+  }, [generateValuesForType]);
+
+  const memoFilterInputKeyValues = React.useMemo(() => {
+    debugger;
+    const map = new Map<string, string[]>();
+    if (searchType === WorkProgressSearchType.WorkNumber) {
+      Object.values(WorkProgressFilterType).forEach((key) => {
+        map.set(key, generateValuesForType(key));
+      });
+    } else if (searchType === WorkProgressSearchType.WorkType) {
+      map.set(
+        WorkProgressSearchType.Status,
+        generateValuesForType(WorkProgressSearchType.Status)
+      );
+    } else {
+      map.set(
+        WorkProgressSearchType.WorkType,
+        generateValuesForType(WorkProgressSearchType.WorkType.toString())
+      );
+    }
+    return map;
+  }, [searchType, generateValuesForType]);
 
   //Send Events to State machine
-  const sendEvents = (eventType: string, value: string) => {
-    if (eventType === "VALUE_SELECTION") {
-      send({ type: "VALUE_SELECTION", value: value });
-      return;
-    }
-    switch (eventType) {
-      case WorkProgressInputTypeField.WorkNumber: {
-        send({ type: "WORK_NUMBER_SELECTION" });
-        break;
-      }
-      case WorkProgressInputTypeField.WorkType: {
-        send({ type: "WORK_TYPE_SELECTION" });
-        break;
-      }
-      case WorkProgressInputTypeField.Status: {
-        send({ type: "STATUS_SELECTION" });
-        break;
-      }
-    }
-  };
+  const onSelectSearchType = React.useCallback(
+    (key: string) => {
+      send({
+        type: "SET_SEARCH_TYPE",
+        value: key,
+      });
+    },
+    [send]
+  );
+  const onSelectSearchValue = React.useCallback(
+    (value: string[]) => {
+      send({ type: "SET_SEARCH_VALUE", value: value[0] });
+    },
+    [send]
+  );
+  const onSelectFilterType = React.useCallback(
+    (key: string) => {
+      send({ type: "SET_FILTER_TYPE", value: key });
+    },
+    [send]
+  );
+  const onSelectFilterValue = React.useCallback(
+    (value: string[]) => {
+      send({ type: "SET_FILTER_VALUE", value: value });
+    },
+    [send]
+  );
+
+  /**
+   * Filter validation schema
+   */
+  const filterValidationSchema: Yup.ObjectSchema = Yup.object().shape({
+    type: Yup.string()
+      .oneOf([WorkProgressSearchType.WorkType, WorkProgressSearchType.Status])
+      .optional()
+      .label("Type"),
+    values: Yup.array()
+      .of(Yup.string())
+      .when("type", {
+        is: (value: string) => value === WorkProgressSearchType.WorkType,
+        then: Yup.array()
+          .of(
+            Array.isArray(workTypes)
+              ? Yup.string().oneOf(workTypes)
+              : Yup.string()
+          )
+          .required(),
+        otherwise: Yup.array()
+          .of(Yup.string().oneOf(Object.values(WorkStatus)))
+          .required(),
+      }),
+  });
 
   return (
-    <div className="mx-auto max-w-screen-xl mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
-      <Heading level={3} showBorder={false}>
-        Search
-      </Heading>
-
-      <Formik
-        initialValues={defaultInitialValues}
-        validationSchema={validationSchema}
-        validateOnChange={false}
-        validateOnBlur={false}
-        validateOnMount={false}
-        onSubmit={onFormSubmit}
-      >
-        {({ errors, isValid }) => (
-          <Form>
-            {!isValid && (
-              <Warning className={"mb-5"} message={"Validation Error"}>
-                {Object.values(errors)}
-              </Warning>
-            )}
-            {serverError && (
-              <Warning message="Search Error" error={serverError} />
-            )}
-            <div className="space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-center md:gap-4">
-              <div className="md:flex-grow">
-                <FormikSelect
-                  label=""
-                  name="selectedType"
-                  data-testid={"type"}
-                  value={selectedType}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    onInputChange();
-                    sendEvents(e.target.value, "");
-                  }}
-                >
-                  {types.map((val) => (
-                    <option key={val} value={val}>
-                      {val}
-                    </option>
-                  ))}
-                </FormikSelect>
-              </div>
-              <div className="md:flex-grow">
-                {selectedType === WorkProgressInputTypeField.WorkNumber ? (
-                  <FormikInput
-                    name="selectedValue"
-                    label=""
-                    data-testid={"valueInput"}
-                    value={selectedValue}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      onInputChange();
-                      sendEvents("VALUE_SELECTION", e.target.value);
-                    }}
-                  />
-                ) : (
-                  <FormikSelect
-                    label=""
-                    name="selectedValue"
-                    data-testid={"valueSelect"}
-                    value={selectedValue ? selectedValue : ""}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      onInputChange();
-                      sendEvents("VALUE_SELECTION", e.target.value);
-                    }}
-                  >
-                    {values ? (
-                      values.map((val) => (
-                        <option key={val} value={val}>
-                          {val}
-                        </option>
-                      ))
-                    ) : (
-                      <></>
-                    )}
-                  </FormikSelect>
-                )}
-              </div>
-              <div className="sm:flex sm:flex-row justify-end">
-                <BlueButton type="submit" disabled={!selectedValue}>
+    <>
+      <div className="mx-auto max-w-screen-xl mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
+        <Heading level={3} showBorder={false}>
+          Search
+        </Heading>
+        <Formik
+          initialValues={defaultInitialValues}
+          validateOnChange={false}
+          validateOnBlur={false}
+          validateOnMount={false}
+          onSubmit={async () => {
+            onSubmitAction(current.context.workProgressInput, false);
+          }}
+        >
+          {({ errors, isValid }) => (
+            <Form>
+              {!isValid && (
+                <Warning className={"mb-5"} message={"Validation Error"}>
+                  {Object.values(errors)}
+                </Warning>
+              )}
+              {serverError && (
+                <Warning message="Search Error" error={serverError} />
+              )}
+              {
+                <KeyValueViewer
+                  keyValueMap={memoSearchInputKeyValues}
+                  onChangeKey={onSelectSearchType}
+                  onChangeValue={onSelectSearchValue}
+                  multiSelectValues={false}
+                />
+              }
+              <div className="sm:flex sm:flex-row  justify-end">
+                <BlueButton type="submit" disabled={!searchValue}>
                   Search
                 </BlueButton>
               </div>
-            </div>
-          </Form>
-        )}
-      </Formik>
-    </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+      {isFilterRequired && memoFilterInputKeyValues.size > 0 && (
+        <div className="mx-auto max-w-screen-xl mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
+          <Heading level={4} showBorder={false}>
+            Filter by
+          </Heading>
+          <Formik<WorkProgressFilterInput>
+            initialValues={{
+              filterType: WorkProgressFilterType.Status,
+              filterValues: Object.values(WorkStatus),
+            }}
+            validateOnChange={false}
+            validateOnBlur={false}
+            validateOnMount={false}
+            onSubmit={async (values) => {
+              debugger;
+              onSubmitAction(current.context.workProgressInput, false);
+            }}
+          >
+            <Form>
+              <KeyValueViewer
+                keyValueMap={memoFilterInputKeyValues}
+                onChangeKey={onSelectFilterType}
+                onChangeValue={onSelectFilterValue}
+                multiSelectValues={true}
+              />
+              <div className="flex mt-4 justify-end ">
+                <BlueButton type="submit">Filter</BlueButton>
+              </div>
+            </Form>
+          </Formik>
+        </div>
+      )}
+    </>
   );
 }

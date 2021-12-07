@@ -1,12 +1,9 @@
 import { assign } from "@xstate/immer";
 import { createMachine } from "xstate";
 import { stanCore } from "../../lib/sdk";
-import { Maybe, WorkStatus } from "../../types/sdk";
+import { Maybe } from "../../types/sdk";
 import { ClientError } from "graphql-request";
-import {
-  WorkProgressInputData,
-  WorkProgressInputTypeField,
-} from "./WorkProgressInput";
+import { WorkProgressInputData } from "./WorkProgressInput";
 import { castDraft } from "immer";
 
 export type WorkProgressInputContext = {
@@ -21,13 +18,6 @@ export type WorkProgressInputContext = {
   workTypes?: string[];
 };
 
-type SelectWorkNumberEvent = {
-  type: "WORK_NUMBER_SELECTION";
-};
-type SelectWorkTypeEvent = {
-  type: "WORK_TYPE_SELECTION";
-};
-
 type InitializeEvent = {
   type: "xstate.init";
 };
@@ -35,13 +25,23 @@ type LoadWorkTypeDoneEvent = {
   type: "done.invoke.loadWorkTypes";
   data: string[];
 };
-type SelectStatusEvent = {
-  type: "STATUS_SELECTION";
-};
-type SelectValueEvent = {
-  type: "VALUE_SELECTION";
+type SetSearchTypeEvent = {
+  type: "SET_SEARCH_TYPE";
   value: string;
 };
+type SetSearchValueEvent = {
+  type: "SET_SEARCH_VALUE";
+  value: string;
+};
+type SetFilterTypeEvent = {
+  type: "SET_FILTER_TYPE";
+  value: string;
+};
+type SetFilterValueEvent = {
+  type: "SET_FILTER_VALUE";
+  value: string[];
+};
+
 type ErrorEvent = {
   type: "error.platform.worktype";
   data: ClientError;
@@ -49,10 +49,10 @@ type ErrorEvent = {
 
 type WorkProgressInputEvent =
   | InitializeEvent
-  | SelectWorkNumberEvent
-  | SelectWorkTypeEvent
-  | SelectStatusEvent
-  | SelectValueEvent
+  | SetSearchTypeEvent
+  | SetSearchValueEvent
+  | SetFilterTypeEvent
+  | SetFilterValueEvent
   | LoadWorkTypeDoneEvent
   | ErrorEvent;
 
@@ -77,15 +77,17 @@ export default function createWorkProgressInputMachine({
 
         ready: {
           on: {
-            WORK_NUMBER_SELECTION: {
-              actions: "assignWorkNumber",
+            SET_SEARCH_TYPE: {
+              actions: "assignSearchType",
             },
-            WORK_TYPE_SELECTION: { actions: "assignWorkType" },
-            STATUS_SELECTION: {
-              actions: "assignStatus",
+            SET_SEARCH_VALUE: {
+              actions: "assignSearchValue",
             },
-            VALUE_SELECTION: {
-              actions: "assignValue",
+            SET_FILTER_TYPE: {
+              actions: "assignFilterType",
+            },
+            SET_FILTER_VALUE: {
+              actions: "assignFilterValue",
             },
           },
         },
@@ -97,46 +99,24 @@ export default function createWorkProgressInputMachine({
           if (e.type !== "done.invoke.loadWorkTypes") return;
           //store all work types
           ctx.workTypes = e.data;
-          //if a type is already selected on initializing (query parameters), load corresponding values for that type
-          if (ctx.workProgressInput) {
-            if (
-              ctx.workProgressInput.selectedType ===
-              WorkProgressInputTypeField.WorkType
-            )
-              ctx.workProgressInput.values = ctx.workTypes;
-            else if (
-              ctx.workProgressInput.selectedType ===
-              WorkProgressInputTypeField.Status
-            )
-              ctx.workProgressInput.values = Object.values(WorkStatus);
-          }
+          debugger;
         }),
-        assignWorkNumber: assign((ctx, e) => {
-          if (e.type !== "WORK_NUMBER_SELECTION") return;
-          ctx.workProgressInput.selectedType =
-            WorkProgressInputTypeField.WorkNumber;
-          ctx.workProgressInput.selectedValue = "";
+        assignSearchType: assign((ctx, e) => {
+          if (e.type !== "SET_SEARCH_TYPE") return;
+          ctx.workProgressInput.searchType = e.value;
         }),
-        assignWorkType: assign((ctx, e) => {
-          if (e.type !== "WORK_TYPE_SELECTION" && !ctx.workTypes) return;
-          ctx.workProgressInput.selectedType =
-            WorkProgressInputTypeField.WorkType;
-          if (ctx.workTypes && ctx.workTypes.length > 0) {
-            ctx.workProgressInput.values = ctx.workTypes;
-            ctx.workProgressInput.selectedValue = ctx.workTypes[0];
-          }
+        assignSearchValue: assign((ctx, e) => {
+          if (e.type !== "SET_SEARCH_VALUE") return;
+          ctx.workProgressInput.searchValue = e.value;
         }),
-        assignStatus: assign((ctx, e) => {
-          if (e.type !== "STATUS_SELECTION") return;
-          ctx.workProgressInput.selectedType =
-            WorkProgressInputTypeField.Status;
-          const statusArr = Object.values(WorkStatus);
-          ctx.workProgressInput.values = statusArr;
-          ctx.workProgressInput.selectedValue = statusArr[0];
+
+        assignFilterType: assign((ctx, e) => {
+          if (e.type !== "SET_FILTER_TYPE") return;
+          ctx.workProgressInput.filterType = e.type;
         }),
-        assignValue: assign((ctx, e) => {
-          if (e.type !== "VALUE_SELECTION") return;
-          ctx.workProgressInput.selectedValue = e.value;
+        assignFilterValue: assign((ctx, e) => {
+          if (e.type !== "SET_FILTER_VALUE") return;
+          ctx.workProgressInput.filterValues = e.value;
         }),
         unassignServerError: assign((ctx, _e) => {
           ctx.serverError = null;
