@@ -101,9 +101,9 @@ const CDNAMeasurementQC = ({
       error = "Required";
     } else {
       if (Number(value) !== 0) {
-        const isFormatted = /^\d{3}(\.\d{2})$/.test(value);
+        const isFormatted = /^\d{0,3}(?:[.]\d{0,2})?$/.test(value);
         if (!isFormatted) {
-          error = "Invalid number format: Required ###.##";
+          error = "Invalid number format: Maximum of 5 digits (###.##)";
         }
       }
     }
