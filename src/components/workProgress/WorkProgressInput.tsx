@@ -168,7 +168,7 @@ export default function WorkProgressInput({
       //Call reset callback
       onReset();
     },
-    [send, getFilterInputKeyValues]
+    [send, getFilterInputKeyValues, onReset]
   );
   /**Call back to update search value- Send Events to State machine**/
   const onSelectSearchValue = React.useCallback(
@@ -177,7 +177,7 @@ export default function WorkProgressInput({
       //Call reset callback
       onReset();
     },
-    [send]
+    [send, onReset]
   );
   /**Call back to update filter type- Send Events to State machine**/
   const onSelectFilterType = React.useCallback(

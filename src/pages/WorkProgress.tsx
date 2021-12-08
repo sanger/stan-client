@@ -93,8 +93,8 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
       type: memoUrlParams.filterType,
       values: memoUrlParams.filterValues,
     });
-    setReset(false);
     send({ type: "FIND", request: formatInputData(memoUrlParams) });
+    setReset(false);
   }, [memoUrlParams, send, setFilter, setReset]);
 
   const {
@@ -117,7 +117,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
 
   const handleReset = React.useCallback(() => {
     setReset(true);
-  }, [setFilter]);
+  }, [setReset]);
 
   /***
    * Filter the results
@@ -135,7 +135,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
           return filter.type === WorkProgressFilterType.WorkType
             ? filterValue === workProgressResult.workType
             : filterValue === workProgressResult.status;
-        }) != -1
+        }) !== -1
     );
   };
 
