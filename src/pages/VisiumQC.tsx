@@ -57,7 +57,7 @@ const validationSchema = Yup.object().shape({
       Yup.object().shape({
         address: Yup.string().required(),
         name: Yup.string().required(),
-        value: Yup.string().required(),
+        value: Yup.string().required("Positive value required"),
       })
     )
     .when("qcType", {
