@@ -64,7 +64,7 @@ export default function createWorkProgressInputMachine({
       context: {
         workProgressInput,
       },
-      initial: "loading",
+      initial: "ready",
       states: {
         ready: {
           on: {

@@ -7,7 +7,7 @@ import React from "react";
 import createWorkProgressInputMachine from "./workProgressInput.machine";
 import BlueButton from "../buttons/BlueButton";
 import { WorkStatus } from "../../types/sdk";
-import { KeyValueViewer } from "../KeyValueViewer";
+import { KeyValueSelector } from "./KeyValueSelector";
 import { WorkProgressUrlParams } from "../../pages/WorkProgress";
 import { history } from "../../lib/sdk";
 import { stringify } from "../../lib/helpers";
@@ -67,6 +67,7 @@ type WorkProgressInputParams = {
   workTypes: string[];
   isFilterRequired: boolean;
   onFilter: (filterType: string, filterValues: string[]) => void;
+  onReset: () => void;
 };
 
 export default function WorkProgressInput({
@@ -74,6 +75,7 @@ export default function WorkProgressInput({
   workTypes,
   isFilterRequired,
   onFilter,
+  onReset,
 }: WorkProgressInputParams) {
   const [current, send] = useMachine(
     createWorkProgressInputMachine({
@@ -82,7 +84,7 @@ export default function WorkProgressInput({
   );
 
   const {
-    workProgressInput: { searchType, searchValue, filterType },
+    workProgressInput: { searchType, searchValue, filterType, filterValues },
     serverError,
   } = current.context;
 
@@ -102,56 +104,89 @@ export default function WorkProgressInput({
     [workTypes]
   );
 
-  const memoSearchInputKeyValues = React.useMemo(() => {
+  /***Get key-value data for search **/
+  const getSearchInputKeyValues = () => {
     const map = new Map<string, string[]>();
     Object.values(WorkProgressSearchType).forEach((key) => {
       map.set(key, generateValuesForType(key));
     });
     return map;
-  }, [generateValuesForType]);
+  };
 
-  const memoFilterInputKeyValues = React.useMemo(() => {
-    const map = new Map<string, string[]>();
-    if (searchType === WorkProgressSearchType.WorkNumber) {
-      Object.values(WorkProgressFilterType).forEach((key) => {
-        map.set(key, generateValuesForType(key));
-      });
-    } else if (searchType === WorkProgressSearchType.WorkType) {
-      map.set(
-        WorkProgressSearchType.Status,
-        generateValuesForType(WorkProgressSearchType.Status)
-      );
-    } else {
-      map.set(
-        WorkProgressSearchType.WorkType,
-        generateValuesForType(WorkProgressSearchType.WorkType.toString())
-      );
-    }
-    return map;
-  }, [searchType, generateValuesForType]);
+  /**Get key-value data for filter based on search type*/
+  const getFilterInputKeyValues = React.useCallback(
+    (searchType: string) => {
+      const map = new Map<string, string[]>();
+      switch (searchType) {
+        case WorkProgressSearchType.WorkNumber: {
+          Object.values(WorkProgressFilterType).forEach((key) => {
+            map.set(key, generateValuesForType(key));
+          });
+          break;
+        }
+        case WorkProgressSearchType.WorkType: {
+          map.set(
+            WorkProgressSearchType.Status,
+            generateValuesForType(WorkProgressSearchType.Status)
+          );
+          break;
+        }
+        case WorkProgressSearchType.Status: {
+          map.set(
+            WorkProgressSearchType.WorkType,
+            generateValuesForType(WorkProgressSearchType.WorkType.toString())
+          );
+          break;
+        }
+      }
+      return map;
+    },
+    [generateValuesForType]
+  );
 
-  //Send Events to State machine
+  /**Call back to update search type- Send Events to State machine**/
   const onSelectSearchType = React.useCallback(
     (key: string) => {
       send({
         type: "SET_SEARCH_TYPE",
         value: key,
       });
+
+      /**There is an update in search key, so initialize the filter key,and values accordingly*/
+      const filterKeyValueMap = getFilterInputKeyValues(key);
+      if (filterKeyValueMap && filterKeyValueMap.size > 0) {
+        const initFilterKey = Array.from(filterKeyValueMap.keys())[0];
+        send({
+          type: "SET_FILTER_TYPE",
+          value: initFilterKey,
+        });
+        send({
+          type: "SET_FILTER_VALUE",
+          value: filterKeyValueMap.get(initFilterKey) ?? [],
+        });
+      }
+      //Call reset callback
+      onReset();
     },
-    [send]
+    [send, getFilterInputKeyValues]
   );
+  /**Call back to update search value- Send Events to State machine**/
   const onSelectSearchValue = React.useCallback(
     (value: string[]) => {
       send({ type: "SET_SEARCH_VALUE", value: value[0] });
+      //Call reset callback
+      onReset();
     },
     [send]
   );
+  /**Call back to update filter type- Send Events to State machine**/
   const onSelectFilterType = React.useCallback(
     (key: string) => {
       send({ type: "SET_FILTER_TYPE", value: key });
     },
     [send]
   );
+  /**Call back to update filter value- Send Events to State machine**/
   const onSelectFilterValue = React.useCallback(
     (value: string[]) => {
       send({ type: "SET_FILTER_VALUE", value: value });
@@ -161,7 +196,7 @@ export default function WorkProgressInput({
 
   return (
     <>
-      <div className="mx-auto max-w-screen-xl mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
+      <div className="mx-auto max-w-screen-xl mt-2 mb-8 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
         <Heading level={3} showBorder={false}>
           Search
         </Heading>
@@ -190,16 +225,16 @@ export default function WorkProgressInput({
               )}
               <div className={" flex flex-row "}>
                 {
-                  <KeyValueViewer
-                    keyValueMap={memoSearchInputKeyValues}
+                  <KeyValueSelector
+                    keyValueMap={getSearchInputKeyValues()}
                     onChangeKey={onSelectSearchType}
                     onChangeValue={onSelectSearchValue}
                     multiSelectValues={false}
                     schemaNameKey={"searchType"}
                     schemaNameValue={"searchValue"}
-                    initialKeyValue={{
-                      key: urlParams.searchType,
-                      value: [urlParams.searchValue],
+                    selected={{
+                      key: searchType,
+                      value: [searchValue],
                     }}
                   />
                 }
@@ -213,33 +248,33 @@ export default function WorkProgressInput({
           )}
         </Formik>
       </div>
-      {isFilterRequired && memoFilterInputKeyValues.size > 0 && (
+      {isFilterRequired && (
         <div className="mx-auto max-w-screen-xl mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
-          <Heading level={4} showBorder={false}>
-            Filter by
+          <Heading level={3} showBorder={false}>
+            Filter search results
           </Heading>
           <Formik<{ filterType: string; filterValues: string[] }>
             initialValues={{
-              filterType: WorkProgressFilterType.Status,
-              filterValues: Object.values(WorkStatus),
+              filterType: urlParams.filterType,
+              filterValues: urlParams.filterValues,
             }}
             validateOnChange={false}
             validateOnBlur={false}
             validateOnMount={false}
-            onSubmit={async (values) => {
-              onFilter(values.filterType, values.filterValues);
+            onSubmit={async () => {
+              onFilter(filterType, filterValues);
             }}
             validationSchema={filterValidationSchema}
           >
             <Form>
               <div className={"flex flex-row"}>
-                <KeyValueViewer
-                  keyValueMap={memoFilterInputKeyValues}
+                <KeyValueSelector
+                  keyValueMap={getFilterInputKeyValues(searchType)}
                   onChangeKey={onSelectFilterType}
                   onChangeValue={onSelectFilterValue}
-                  initialKeyValue={{
-                    key: urlParams.filterType,
-                    value: urlParams.filterValues,
+                  selected={{
+                    key: filterType,
+                    value: filterValues,
                   }}
                   multiSelectValues={true}
                   schemaNameKey={"filterType"}
@@ -252,7 +287,7 @@ export default function WorkProgressInput({
                 />
                 <div className="flex flex-col justify-end">
                   <BlueButton type="submit" disabled={!searchValue}>
-                    Filter
+                    Filter Results
                   </BlueButton>
                 </div>
               </div>

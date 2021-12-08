@@ -42,14 +42,16 @@ export type WorkProgressUrlParams = {
 const defaultInitialValues: WorkProgressUrlParams = {
   searchType: WorkProgressSearchType.WorkNumber,
   searchValue: "",
-  filterType: "",
-  filterValues: [],
+  filterType: WorkProgressFilterType.Status,
+  filterValues: Object.values(WorkStatus),
 };
 
 const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
-  const [urlParams, setUrlParams] = useState<WorkProgressUrlParams>(
-    defaultInitialValues
-  );
+  const [filter, setFilter] = useState<{ type: string; values: string[] }>({
+    type: defaultInitialValues.filterType,
+    values: defaultInitialValues.filterValues,
+  });
+  const [reset, setReset] = React.useState(false);
   const location = useLocation();
 
   const workProgressMachine = searchMachine<
@@ -58,34 +60,42 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   >(new WorkProgressService());
   const [current, send] = useMachine(() =>
     workProgressMachine.withContext({
-      findRequest: formatInputData(urlParams),
+      findRequest: formatInputData(defaultInitialValues),
     })
   );
 
   /**
-   * Form validation schema
-   */
-  const validationSchema: Yup.ObjectSchema = Yup.object().shape({
-    ...workProgressSearchSchema.fields,
-    ...filterValidationSchema(workTypes).fields,
-  });
-
-  /**
    * The deserialized URL search params
    */
-  React.useEffect(() => {
-    const urlParams = safeParseQueryString<WorkProgressUrlParams>(
+  const memoUrlParams = React.useMemo(() => {
+    /**
+     *Schema to validate the deserialized URL search params
+     */
+    const validationSchema: Yup.ObjectSchema = Yup.object().shape({
+      ...workProgressSearchSchema.fields,
+      ...filterValidationSchema(workTypes).fields,
+    });
+
+    return safeParseQueryString<WorkProgressUrlParams>(
       {
         query: location.search,
         schema: validationSchema,
       } ?? defaultInitialValues
     );
-    if (!urlParams) {
-      return;
-    }
-    setUrlParams(urlParams);
-    send({ type: "FIND", request: formatInputData(urlParams) });
-  }, [location.search]);
+  }, [location.search, workTypes]);
+
+  /**
+   * When the URL search params change, send an event to the machine
+   */
+  React.useEffect(() => {
+    if (!memoUrlParams) return;
+    setFilter({
+      type: memoUrlParams.filterType,
+      values: memoUrlParams.filterValues,
+    });
+    setReset(false);
+    send({ type: "FIND", request: formatInputData(memoUrlParams) });
+  }, [memoUrlParams, send, setFilter, setReset]);
 
   const {
     serverError,
@@ -95,70 +105,63 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
 
+  /**
+   * Callback to handle filter action
+   */
   const handleFilter = React.useCallback(
     (filterType: string, filterValues: string[]) => {
-      setUrlParams((prev) => {
-        return {
-          ...prev,
-          filterType: filterType,
-          filterValues: filterValues,
-        };
-      });
+      setFilter({ type: filterType, values: filterValues });
     },
-    []
+    [setFilter]
   );
 
+  const handleReset = React.useCallback(() => {
+    setReset(true);
+  }, [setFilter]);
+
   /***
-   * Filter results
+   * Filter the results
    */
   const filterResults = (
     workProgressResults: WorkProgressResultTableEntry[],
-    workProgressInput?: WorkProgressUrlParams
+    filter?: { type: string; values: string[] }
   ): WorkProgressResultTableEntry[] => {
-    if (
-      workProgressInput &&
-      workProgressInput.filterType &&
-      workProgressInput.filterValues.length > 0
-    ) {
-      return workProgressResults.filter((workProgressResult) => {
-        const findIndx = workProgressInput.filterValues.findIndex(
-          (filterValue) => {
-            return workProgressInput.filterType ===
-              WorkProgressFilterType.WorkType
-              ? filterValue === workProgressResult.workType
-              : filterValue === workProgressResult.status;
-          }
-        );
-        return findIndx !== -1;
-      });
-    } else {
+    if (!filter) {
       return workProgressResults;
     }
+    return workProgressResults.filter(
+      (workProgressResult) =>
+        filter.values.findIndex((filterValue) => {
+          return filter.type === WorkProgressFilterType.WorkType
+            ? filterValue === workProgressResult.workType
+            : filterValue === workProgressResult.status;
+        }) != -1
+    );
   };
 
   /**
    * Convert the data associated with the form to query input data structure.
-   * @param workProgressInputFields
+   * @param workProgressUrl
    */
   function formatInputData(
-    workProgressInputFields: WorkProgressUrlParams
+    workProgressUrl: WorkProgressUrlParams
   ): WorkProgressQueryInput {
     const queryInput: WorkProgressQueryInput = {
       workNumber: undefined,
       workType: undefined,
       status: undefined,
     };
-    switch (workProgressInputFields.searchType) {
+    switch (workProgressUrl.searchType) {
       case WorkProgressSearchType.WorkNumber: {
-        queryInput.workNumber = workProgressInputFields.searchValue;
+        queryInput.workNumber = workProgressUrl.searchValue;
         break;
       }
       case WorkProgressSearchType.WorkType: {
-        queryInput.workType = workProgressInputFields.searchValue;
+        queryInput.workType = workProgressUrl.searchValue;
         break;
       }
       case WorkProgressSearchType.Status: {
-        queryInput.status = workProgressInputFields.searchValue as WorkStatus;
+        queryInput.status = workProgressUrl.searchValue as WorkStatus;
         break;
       }
     }
@@ -173,10 +176,15 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
       <AppShell.Main>
         <div className="mx-auto">
           <WorkProgressInput
-            urlParams={urlParams}
-            isFilterRequired={true}
+            urlParams={memoUrlParams ?? defaultInitialValues}
+            isFilterRequired={
+              searchResult !== undefined &&
+              searchResult.entries.length > 0 &&
+              !reset
+            }
             workTypes={workTypes}
             onFilter={handleFilter}
+            onReset={handleReset}
           />
           <div className={"my-10 mx-auto max-w-screen-xl"}>
             {serverError && (
@@ -189,7 +197,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                 </div>
               )}
             </div>
-            {current.matches("searched") ? (
+            {current.matches("searched") && !reset ? (
               searchResult && searchResult.entries.length > 0 ? (
                 <DataTable
                   sortable
@@ -205,7 +213,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                     },
                   ]}
                   columns={columns}
-                  data={filterResults(searchResult.entries, urlParams)}
+                  data={filterResults(searchResult.entries, filter)}
                 />
               ) : (
                 <Warning
@@ -315,6 +323,42 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     },
   },
   {
+    Header: "Last RNAscope/IHC staining Date",
+    accessor: (originalRow) =>
+      originalRow.lastRNAScopeIHCStainDate &&
+      originalRow.lastRNAScopeIHCStainDate.toLocaleDateString(),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastRNAScopeIHCStainDate,
+        rowB.original.lastRNAScopeIHCStainDate
+      );
+    },
+  },
+  {
+    Header: "Last Visium LP Staining Date",
+    accessor: (originalRow) =>
+      originalRow.lastStainLPDate &&
+      originalRow.lastStainLPDate.toLocaleDateString(),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastStainLPDate,
+        rowB.original.lastStainLPDate
+      );
+    },
+  },
+  {
+    Header: "Last Visium TO Staining Date",
+    accessor: (originalRow) =>
+      originalRow.lastStainTODate &&
+      originalRow.lastStainTODate.toLocaleDateString(),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastStainTODate,
+        rowB.original.lastStainTODate
+      );
+    },
+  },
+  {
     Header: "Last RNA Extraction Date",
     accessor: (originalRow) =>
       originalRow.lastRNAExtractionDate &&
@@ -327,13 +371,37 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     },
   },
   {
-    Header: "Last Date cDNA",
+    Header: "Last RNA Analysis Date",
+    accessor: (originalRow) =>
+      originalRow.lastRNAAnalysisDate &&
+      originalRow.lastRNAAnalysisDate.toLocaleDateString(),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastRNAAnalysisDate,
+        rowB.original.lastRNAAnalysisDate
+      );
+    },
+  },
+  {
+    Header: "Last cDNA Transfer Date",
     accessor: (originalRow) =>
       originalRow.lastCDNADate && originalRow.lastCDNADate.toLocaleDateString(),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastCDNADate,
         rowB.original.lastCDNADate
+      );
+    },
+  },
+  {
+    Header: "Last Imaging Date",
+    accessor: (originalRow) =>
+      originalRow.lastSlideImagedDate &&
+      originalRow.lastSlideImagedDate.toLocaleDateString(),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastSlideImagedDate,
+        rowB.original.lastSlideImagedDate
       );
     },
   },

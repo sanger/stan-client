@@ -1,56 +1,59 @@
 import React from "react";
-import FormikSelect from "./forms/Select";
-import FormikInput from "./forms/Input";
+import FormikSelect from "../forms/Select";
+import FormikInput from "../forms/Input";
 
 type KeyValueViewerProps = {
+  /**
+   * Key-Value data
+   **/
   keyValueMap: Map<string, string[]>;
+  /**
+   * Selected key-value data, if any
+   */
+  selected: { key: string; value: string[] };
+  /**
+   * Callback on changing selected key change
+   * @param selectedKey - newly selected key
+   */
   onChangeKey: (selectedKey: string) => void;
+  /**
+   * Call back on selected value change
+   * @param selectedValue - newly selected value
+   */
   onChangeValue: (selectedValue: string[]) => void;
-  initialKeyValue: { key: string; value: string[] };
+  /**
+   * Enables multiple selection of values
+   */
   multiSelectValues?: boolean;
-  emptyOption?: boolean;
+  /**
+   * Label to display for 'key' field
+   */
   keyLabel?: string;
+  /**
+   * Label to display for value
+   */
   valueLabel?: string;
+  /**
+   * Schema name to be used for key field. This can be used if external validation is required using Yup
+   */
   schemaNameKey?: string;
+  /**
+   * Schema name to be used for value field. This can be used if external validation is required using Yup
+   */
   schemaNameValue?: string;
 };
 
-export const KeyValueViewer: React.FC<KeyValueViewerProps> = ({
+export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
   keyValueMap,
   onChangeKey,
   onChangeValue,
-  initialKeyValue,
+  selected,
   multiSelectValues,
   keyLabel,
   valueLabel,
   schemaNameKey,
   schemaNameValue,
 }) => {
-  const [selectedKey, setSelectedKey] = React.useState<string>(
-    initialKeyValue.key
-  );
-  const [selectedValue, setSelectedValue] = React.useState<string[]>(
-    initialKeyValue.value
-  );
-  debugger;
-  /**Initialize on changes in input data**/
-  /*React.useEffect(() => {
-    if (keyValueMap.size <= 0) {
-      return;
-    }
-    const key = Array.from(keyValueMap.keys())[0];
-    setSelectedKey(key);
-    onChangeKey(key);
-    setSelectedValue([]);
-    onChangeValue([]);
-  }, [
-    keyValueMap,
-    setSelectedKey,
-    setSelectedValue,
-    onChangeKey,
-    onChangeValue,
-  ]);*/
-
   const getValues = React.useCallback(
     (key: string): string[] => {
       return keyValueMap.get(key) ?? [];
@@ -60,22 +63,19 @@ export const KeyValueViewer: React.FC<KeyValueViewerProps> = ({
 
   const handleSelectKey = React.useCallback(
     (key: string) => {
-      setSelectedKey(key);
       onChangeKey(key);
       let val: string[] = [];
       if (!multiSelectValues) {
         const values = getValues(key);
         val = values.length > 0 ? [values[0]] : [];
       }
-      setSelectedValue(val);
       onChangeValue(val);
     },
-    [onChangeKey, onChangeValue, setSelectedValue, multiSelectValues, getValues]
+    [onChangeKey, onChangeValue, multiSelectValues, getValues]
   );
 
   const handleSelectValue = React.useCallback(
     (value: string[]) => {
-      setSelectedValue(value);
       onChangeValue(value);
     },
     [onChangeValue]
@@ -88,7 +88,7 @@ export const KeyValueViewer: React.FC<KeyValueViewerProps> = ({
             label={keyLabel ?? ""}
             name={schemaNameKey ?? ""}
             data-testid={"type"}
-            value={selectedKey}
+            value={selected.key}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               handleSelectKey(e.currentTarget.value);
             }}
@@ -102,12 +102,12 @@ export const KeyValueViewer: React.FC<KeyValueViewerProps> = ({
         </div>
       )}
       <div className="md:flex-grow">
-        {selectedKey && getValues(selectedKey).length <= 0 ? (
+        {selected.key && getValues(selected.key).length <= 0 ? (
           <FormikInput
             name={schemaNameValue ?? ""}
             label={valueLabel ?? ""}
             data-testid={"valueInput"}
-            value={selectedValue}
+            value={selected.value}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               handleSelectValue([e.currentTarget.value]);
             }}
@@ -118,11 +118,11 @@ export const KeyValueViewer: React.FC<KeyValueViewerProps> = ({
             name={schemaNameValue ?? ""}
             data-testid={"valueSelect"}
             value={
-              selectedValue
+              selected.value
                 ? multiSelectValues
-                  ? selectedValue
-                  : selectedValue.length > 0
-                  ? selectedValue[0]
+                  ? selected.value
+                  : selected.value.length > 0
+                  ? selected.value[0]
                   : ""
                 : ""
             }
@@ -133,7 +133,7 @@ export const KeyValueViewer: React.FC<KeyValueViewerProps> = ({
             }}
             multiple={multiSelectValues}
           >
-            {getValues(selectedKey).map((val: string) => (
+            {getValues(selected.key).map((val: string) => (
               <option key={val} value={val}>
                 {val}
               </option>

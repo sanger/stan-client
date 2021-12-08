@@ -644,6 +644,26 @@ export type StainRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
+export enum StainPanel {
+  Positive = 'positive',
+  Negative = 'negative',
+  Marker = 'marker'
+}
+
+export type ComplexStainLabware = {
+  barcode: Scalars['String'];
+  bondBarcode: Scalars['String'];
+  bondRun: Scalars['Int'];
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export type ComplexStainRequest = {
+  stainType: Scalars['String'];
+  plex: Scalars['Int'];
+  panel: StainPanel;
+  labware: Array<ComplexStainLabware>;
+};
+
 export type UnreleaseLabware = {
   barcode: Scalars['String'];
   highestSection?: Maybe<Scalars['Int']>;
@@ -1010,6 +1030,7 @@ export type Mutation = {
   recordRNAAnalysis: OperationResult;
   recordVisiumQC: OperationResult;
   recordOpWithSlotMeasurements: OperationResult;
+  recordComplexStain: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
@@ -1275,6 +1296,11 @@ export type MutationRecordVisiumQcArgs = {
 
 export type MutationRecordOpWithSlotMeasurementsArgs = {
   request: OpWithSlotMeasurementsRequest;
+};
+
+
+export type MutationRecordComplexStainArgs = {
+  request: ComplexStainRequest;
 };
 
 

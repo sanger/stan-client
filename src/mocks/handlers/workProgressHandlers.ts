@@ -13,6 +13,11 @@ function buildWorkProgressTimeStamps(): Array<WorkProgressTimestamp> {
     { type: "Stain", timestamp: new Date().toISOString() },
     { type: "Extract", timestamp: new Date().toISOString() },
     { type: "Visium cDNA", timestamp: new Date().toISOString() },
+    { type: "Stain Visium TO", timestamp: new Date().toISOString() },
+    { type: "Stain Visium LP", timestamp: new Date().toISOString() },
+    { type: "RNAscope/IHC stain", timestamp: new Date().toISOString() },
+    { type: "Image", timestamp: new Date().toISOString() },
+    { type: "Analysis", timestamp: new Date().toISOString() },
   ];
 }
 
