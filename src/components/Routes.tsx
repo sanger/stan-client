@@ -335,9 +335,17 @@ export function Routes() {
 
       <Route
         path="/"
-        render={(routeProps) => (
-          <WorkProgress urlParamsString={routeProps.location.search} />
-        )}
+        render={() => {
+          return (
+            <DataFetcher dataFetcher={stanCore.GetWorkTypes}>
+              {(workTypes) => (
+                <WorkProgress
+                  workTypes={workTypes.workTypes.map((val) => val.name)}
+                />
+              )}
+            </DataFetcher>
+          );
+        }}
       />
     </Switch>
   );
