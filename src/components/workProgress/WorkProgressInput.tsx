@@ -6,11 +6,11 @@ import Warning from "../notifications/Warning";
 import React from "react";
 import createWorkProgressInputMachine from "./workProgressInput.machine";
 import BlueButton from "../buttons/BlueButton";
-import {
-  FindWorkProgressQueryVariables as WorkProgressQueryInput,
-  WorkStatus,
-} from "../../types/sdk";
+import { WorkStatus } from "../../types/sdk";
 import { KeyValueViewer } from "../KeyValueViewer";
+import { WorkProgressUrlParams } from "../../pages/WorkProgress";
+import { history } from "../../lib/sdk";
+import { stringify } from "../../lib/helpers";
 
 /**
  * Enum to fill the Search Type field
@@ -30,91 +30,64 @@ export enum WorkProgressFilterType {
 }
 
 /**
- * Filter inputs to search result
- */
-export type WorkProgressFilterInput = {
-  filterType: string;
-  filterValues: string[];
-};
-
-/**
- * Data structure to keep the data associated with this component
- */
-export type WorkProgressInputData = {
-  searchType: string;
-  searchValue: string;
-  filterType: string;
-  filterValues: string[];
-};
-
-/**
- * This is to reformat the data in query input to form
- * @param workProgressInput
- */
-const mergeFieldTypes = (workProgressInput: WorkProgressQueryInput) => {
-  if (workProgressInput.workNumber) {
-    return {
-      selectedType: WorkProgressSearchType.WorkNumber,
-      selectedValue: workProgressInput.workNumber,
-    };
-  } else if (workProgressInput.workType) {
-    return {
-      selectedType: WorkProgressSearchType.WorkType,
-      selectedValue: workProgressInput.workType,
-    };
-  } else if (workProgressInput.status) {
-    return {
-      selectedType: WorkProgressSearchType.Status,
-      selectedValue: workProgressInput.status,
-    };
-  }
-};
-
-/**
  * Form validation schema
  */
-const validationSchema: Yup.ObjectSchema = Yup.object().shape({
-  selectedType: Yup.string()
+export const workProgressSearchSchema: Yup.ObjectSchema = Yup.object().shape({
+  searchType: Yup.string()
     .oneOf(Object.values(WorkProgressSearchType))
     .required(),
-  selectedValue: Yup.string().ensure(),
+  searchValue: Yup.string().ensure(),
 });
+/**
+ * Filter validation schema
+ */
+export const filterValidationSchema = (
+  workTypes: string[]
+): Yup.ObjectSchema => {
+  return Yup.object().shape({
+    filterType: Yup.string()
+      .oneOf([WorkProgressFilterType.WorkType, WorkProgressFilterType.Status])
+      .optional(),
+    filterValue: Yup.array()
+      .of(Yup.string())
+      .when("filterType", {
+        is: (value: string) => value === WorkProgressFilterType.WorkType,
+        then: Yup.array()
+          .of(workTypes ? Yup.string().oneOf(workTypes) : Yup.string())
+          .optional(),
+        otherwise: Yup.array()
+          .of(Yup.string().oneOf(Object.values(WorkStatus)))
+          .optional(),
+      }),
+  });
+};
+
+type WorkProgressInputParams = {
+  urlParams: WorkProgressUrlParams;
+  workTypes: string[];
+  isFilterRequired: boolean;
+  onFilter: (filterType: string, filterValues: string[]) => void;
+};
 
 export default function WorkProgressInput({
-  initialValue,
+  urlParams,
+  workTypes,
   isFilterRequired,
-  onSubmitAction,
-}: {
-  initialValue: WorkProgressQueryInput;
-  isFilterRequired: boolean;
-  onSubmitAction: (
-    submitData: WorkProgressInputData,
-    isFilterAction: boolean
-  ) => void;
-}) {
-  //Initialize form data
-  const defaultInitialValues: WorkProgressInputData = {
-    searchType: WorkProgressSearchType.WorkNumber,
-    searchValue: "",
-    filterType: WorkProgressFilterType.Status,
-    filterValues: [],
-    ...mergeFieldTypes(initialValue),
-  };
+  onFilter,
+}: WorkProgressInputParams) {
   const [current, send] = useMachine(
     createWorkProgressInputMachine({
-      workProgressInput: defaultInitialValues,
+      workProgressInput: urlParams,
     })
   );
 
   const {
-    workProgressInput: { searchType, searchValue },
-    workTypes,
+    workProgressInput: { searchType, searchValue, filterType },
     serverError,
   } = current.context;
 
   const generateValuesForType = React.useCallback(
     (type: string): string[] => {
-      debugger;
       switch (type) {
         case WorkProgressSearchType.WorkNumber:
           return [];
@@ -138,7 +111,6 @@ export default function WorkProgressInput({
   }, [generateValuesForType]);
 
   const memoFilterInputKeyValues = React.useMemo(() => {
-    debugger;
     const map = new Map<string, string[]>();
     if (searchType === WorkProgressSearchType.WorkNumber) {
       Object.values(WorkProgressFilterType).forEach((key) => {
@@ -187,31 +159,6 @@ export default function WorkProgressInput({
     [send]
   );
 
-  /**
-   * Filter validation schema
-   */
-  const filterValidationSchema: Yup.ObjectSchema = Yup.object().shape({
-    type: Yup.string()
-      .oneOf([WorkProgressSearchType.WorkType, WorkProgressSearchType.Status])
-      .optional()
-      .label("Type"),
-    values: Yup.array()
-      .of(Yup.string())
-      .when("type", {
-        is: (value: string) => value === WorkProgressSearchType.WorkType,
-        then: Yup.array()
-          .of(
-            Array.isArray(workTypes)
-              ? Yup.string().oneOf(workTypes)
-              : Yup.string()
-          )
-          .required(),
-        otherwise: Yup.array()
-          .of(Yup.string().oneOf(Object.values(WorkStatus)))
-          .required(),
-      }),
-  });
-
   return (
     <>
       <div className="mx-auto max-w-screen-xl mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
@@ -219,13 +166,17 @@ export default function WorkProgressInput({
           Search
         </Heading>
         <Formik
-          initialValues={defaultInitialValues}
-          validateOnChange={false}
+          initialValues={urlParams}
+          validateOnChange={true}
           validateOnBlur={false}
           validateOnMount={false}
           onSubmit={async () => {
-            onSubmitAction(current.context.workProgressInput, false);
+            history.push({
+              pathname: "/",
+              search: stringify(current.context.workProgressInput),
+            });
           }}
+          validationSchema={workProgressSearchSchema}
         >
           {({ errors, isValid }) => (
             <Form>
@@ -237,18 +188,26 @@ export default function WorkProgressInput({
               {serverError && (
                 <Warning message="Search Error" error={serverError} />
               )}
-              {
-                <KeyValueViewer
-                  keyValueMap={memoSearchInputKeyValues}
-                  onChangeKey={onSelectSearchType}
-                  onChangeValue={onSelectSearchValue}
-                  multiSelectValues={false}
-                />
-              }
-              <div className="sm:flex sm:flex-row  justify-end">
-                <BlueButton type="submit" disabled={!searchValue}>
-                  Search
-                </BlueButton>
+              <div className={" flex flex-row "}>
+                {
+                  <KeyValueViewer
+                    keyValueMap={memoSearchInputKeyValues}
+                    onChangeKey={onSelectSearchType}
+                    onChangeValue={onSelectSearchValue}
+                    multiSelectValues={false}
+                    schemaNameKey={"searchType"}
+                    schemaNameValue={"searchValue"}
+                    initialKeyValue={{
+                      key: urlParams.searchType,
+                      value: [urlParams.searchValue],
+                    }}
+                  />
+                }
+                <div className="sm:flex sm:flex-row  justify-end">
+                  <BlueButton type="submit" disabled={!searchValue}>
+                    Search
+                  </BlueButton>
+                </div>
               </div>
             </Form>
           )}
@@ -259,7 +218,7 @@ export default function WorkProgressInput({
           <Heading level={4} showBorder={false}>
             Filter by
           </Heading>
-          <Formik<WorkProgressFilterInput>
+          <Formik<{ filterType: string; filterValues: string[] }>
             initialValues={{
               filterType: WorkProgressFilterType.Status,
               filterValues: Object.values(WorkStatus),
@@ -268,19 +227,34 @@ export default function WorkProgressInput({
             validateOnBlur={false}
             validateOnMount={false}
             onSubmit={async (values) => {
-              debugger;
-              onSubmitAction(current.context.workProgressInput, false);
+              onFilter(values.filterType, values.filterValues);
             }}
+            validationSchema={filterValidationSchema}
           >
             <Form>
-              <KeyValueViewer
-                keyValueMap={memoFilterInputKeyValues}
-                onChangeKey={onSelectFilterType}
-                onChangeValue={onSelectFilterValue}
-                multiSelectValues={true}
-              />
-              <div className="flex mt-4 justify-end ">
-                <BlueButton type="submit">Filter</BlueButton>
+              <div className={"flex flex-row"}>
+                <KeyValueViewer
+                  keyValueMap={memoFilterInputKeyValues}
+                  onChangeKey={onSelectFilterType}
+                  onChangeValue={onSelectFilterValue}
+                  initialKeyValue={{
+                    key: urlParams.filterType,
+                    value: urlParams.filterValues,
+                  }}
+                  multiSelectValues={true}
+                  schemaNameKey={"filterType"}
+                  schemaNameValue={"filterValue"}
+                  valueLabel={
+                    searchType !== WorkProgressSearchType.WorkNumber
+                      ? filterType
+                      : ""
+                  }
+                />
+                <div className="flex flex-col justify-end">
+                  <BlueButton type="submit" disabled={!searchValue}>
+                    Filter
+                  </BlueButton>
+                </div>
               </div>
             </Form>
           </Formik>

@@ -1,16 +1,15 @@
 import { assign } from "@xstate/immer";
 import { createMachine } from "xstate";
-import { stanCore } from "../../lib/sdk";
 import { Maybe } from "../../types/sdk";
 import { ClientError } from "graphql-request";
-import { WorkProgressInputData } from "./WorkProgressInput";
 import { castDraft } from "immer";
+import { WorkProgressUrlParams } from "../../pages/WorkProgress";
 
 export type WorkProgressInputContext = {
   /**
    * The initial WorkProgressInput
    */
-  workProgressInput: WorkProgressInputData;
+  workProgressInput: WorkProgressUrlParams;
   /**
    * Error returned by server
    */
@@ -67,14 +66,6 @@ export default function createWorkProgressInputMachine({
       },
       initial: "loading",
       states: {
-        loading: {
-          invoke: {
-            src: "loadWorkTypes",
-            onDone: { actions: "initializeValueArray", target: "ready" },
-            onError: { target: "ready", actions: "assignServerError" },
-          },
-        },
-
         ready: {
           on: {
             SET_SEARCH_TYPE: {
@@ -95,12 +86,6 @@ export default function createWorkProgressInputMachine({
     },
     {
       actions: {
-        initializeValueArray: assign((ctx, e) => {
-          if (e.type !== "done.invoke.loadWorkTypes") return;
-          //store all work types
-          ctx.workTypes = e.data;
-          debugger;
-        }),
         assignSearchType: assign((ctx, e) => {
           if (e.type !== "SET_SEARCH_TYPE") return;
           ctx.workProgressInput.searchType = e.value;
@@ -112,7 +97,7 @@ export default function createWorkProgressInputMachine({
 
         assignFilterType: assign((ctx, e) => {
           if (e.type !== "SET_FILTER_TYPE") return;
-          ctx.workProgressInput.filterType = e.type;
+          ctx.workProgressInput.filterType = e.value;
         }),
         assignFilterValue: assign((ctx, e) => {
           if (e.type !== "SET_FILTER_VALUE") return;
@@ -128,15 +113,6 @@ export default function createWorkProgressInputMachine({
           }
           ctx.serverError = castDraft(e.data);
         }),
-      },
-      services: {
-        loadWorkTypes: async (ctx, e) => {
-          if (e.type !== "xstate.init") {
-            return Promise.reject();
-          }
-          const response = await stanCore.GetWorkTypes();
-          return response.workTypes.map((val) => val.name);
-        },
       },
     }
   );

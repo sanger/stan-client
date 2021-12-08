@@ -6,14 +6,7 @@ import {
 } from "../types/sdk";
 
 import AppShell from "../components/AppShell";
-import { ParsedQuery } from "query-string";
-import {
-  cleanParams,
-  objectKeys,
-  parseQueryString,
-  stringify,
-} from "../lib/helpers";
-import { merge } from "lodash";
+import { safeParseQueryString } from "../lib/helpers";
 import searchMachine from "../lib/machines/search/searchMachine";
 import { useMachine } from "@xstate/react";
 import Warning from "../components/notifications/Warning";
@@ -25,45 +18,75 @@ import {
 import DataTable from "../components/DataTable";
 import { ClientError } from "graphql-request";
 import { Column } from "react-table";
-import { history } from "../lib/sdk";
-import WorkProgressInput, {
-  WorkProgressFilterType,
-  WorkProgressInputData,
-  WorkProgressSearchType,
-} from "../components/workProgress/WorkProgressInput";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import { SearchResultsType } from "../types/stan";
+import * as Yup from "yup";
+import { useLocation } from "react-router-dom";
+import WorkProgressInput, {
+  filterValidationSchema,
+  WorkProgressFilterType,
+  workProgressSearchSchema,
+  WorkProgressSearchType,
+} from "../components/workProgress/WorkProgressInput";
 
-type WorkProgressProps = {
-  urlParamsString: string;
+/**
+ * Data structure to keep the data associated with this component
+ */
+export type WorkProgressUrlParams = {
+  searchType: string;
+  searchValue: string;
+  filterType: string;
+  filterValues: string[];
 };
 
-const defaultInitialValues: WorkProgressQueryInput = {
-  workNumber: "",
-  workType: "",
-  status: undefined,
+const defaultInitialValues: WorkProgressUrlParams = {
+  searchType: WorkProgressSearchType.WorkNumber,
+  searchValue: "",
+  filterType: "",
+  filterValues: [],
 };
 
-function WorkProgress({ urlParamsString }: WorkProgressProps) {
-  const params: ParsedQuery = parseQueryString(urlParamsString);
-  const [workProgressInput, setWorkProgressInput] = useState<
-    WorkProgressInputData | undefined
-  >(undefined);
-
-  const workProgressQueryInput: WorkProgressQueryInput = merge(
-    {},
-    defaultInitialValues,
-    cleanParams(params, objectKeys(defaultInitialValues))
+const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
+  const [urlParams, setUrlParams] = useState<WorkProgressUrlParams>(
+    defaultInitialValues
   );
+  const location = useLocation();
+
   const workProgressMachine = searchMachine<
     FindWorkProgressQueryVariables,
     WorkProgressResultTableEntry
   >(new WorkProgressService());
   const [current, send] = useMachine(() =>
     workProgressMachine.withContext({
-      findRequest: workProgressQueryInput,
+      findRequest: formatInputData(urlParams),
     })
   );
+
+  /**
+   * Form validation schema
+   */
+  const validationSchema: Yup.ObjectSchema = Yup.object().shape({
+    ...workProgressSearchSchema.fields,
+    ...filterValidationSchema(workTypes).fields,
+  });
+
+  /**
+   * The deserialized URL search params
+   */
+  React.useEffect(() => {
+    const urlParams = safeParseQueryString<WorkProgressUrlParams>(
+      {
+        query: location.search,
+        schema: validationSchema,
+      } ?? defaultInitialValues
+    );
+    if (!urlParams) {
+      return;
+    }
+    setUrlParams(urlParams);
+    send({ type: "FIND", request: formatInputData(urlParams) });
+  }, [location.search]);
+
   const {
     serverError,
     searchResult,
@@ -72,17 +95,17 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
     searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
 
-  const handleSubmit = React.useCallback(
-    (workProgressInput: WorkProgressInputData, filterOnly: boolean) => {
-      setWorkProgressInput(workProgressInput);
-      debugger;
-      if (!filterOnly) {
-        send({ type: "FIND", request: formatInputData(workProgressInput) });
-      }
-      // Replace instead of push so user doesn't have to go through a load of old searches when going back
-      history.replace(`/?${stringify(workProgressInput)}`);
+  const handleFilter = React.useCallback(
+    (filterType: string, filterValues: string[]) => {
+      setUrlParams((prev) => {
+        return {
+          ...prev,
+          filterType: filterType,
+          filterValues: filterValues,
+        };
+      });
     },
-    [setWorkProgressInput, send]
+    []
   );
 
   /***
@@ -90,9 +113,8 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
    */
   const filterResults = (
     workProgressResults: WorkProgressResultTableEntry[],
-    workProgressInput?: WorkProgressInputData
+    workProgressInput?: WorkProgressUrlParams
   ): WorkProgressResultTableEntry[] => {
-    debugger;
     if (
       workProgressInput &&
       workProgressInput.filterType &&
@@ -107,7 +129,6 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
               : filterValue === workProgressResult.status;
           }
         );
-        debugger;
         return findIndx !== -1;
       });
     } else {
@@ -120,7 +141,7 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
    * @param workProgressInputFields
    */
   function formatInputData(
-    workProgressInputFields: WorkProgressInputData
+    workProgressInputFields: WorkProgressUrlParams
   ): WorkProgressQueryInput {
     const queryInput: WorkProgressQueryInput = {
       workNumber: undefined,
@@ -152,9 +173,10 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
       <AppShell.Main>
         <div className="mx-auto">
           <WorkProgressInput
-            initialValue={workProgressQueryInput}
+            urlParams={urlParams}
             isFilterRequired={true}
-            onSubmitAction={handleSubmit}
+            workTypes={workTypes}
+            onFilter={handleFilter}
           />
           <div className={"my-10 mx-auto max-w-screen-xl"}>
             {serverError && (
@@ -183,7 +205,7 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
                     },
                   ]}
                   columns={columns}
-                  data={filterResults(searchResult.entries, workProgressInput)}
+                  data={filterResults(searchResult.entries, urlParams)}
                 />
               ) : (
                 <Warning
@@ -200,7 +222,7 @@ function WorkProgress({ urlParamsString }: WorkProgressProps) {
       </AppShell.Main>
     </AppShell>
   );
-}
+};
 
 export default WorkProgress;
 
