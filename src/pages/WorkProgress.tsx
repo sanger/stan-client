@@ -38,7 +38,6 @@ export type WorkProgressUrlParams = {
   filterType: string;
   filterValues: string[];
 };
-
 const defaultInitialValues: WorkProgressUrlParams = {
   searchType: WorkProgressSearchType.WorkNumber,
   searchValue: "",
@@ -64,6 +63,19 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     })
   );
 
+  const getDefaultInitialValues = React.useCallback(
+    (searchType?: string): WorkProgressUrlParams => {
+      return searchType && searchType === WorkProgressSearchType.Status
+        ? {
+            ...defaultInitialValues,
+            filterType: WorkProgressFilterType.WorkType,
+            filterValues: workTypes,
+          }
+        : defaultInitialValues;
+    },
+    [workTypes]
+  );
+
   /**
    * The deserialized URL search params
    */
@@ -76,13 +88,19 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
       ...filterValidationSchema(workTypes).fields,
     });
 
-    return safeParseQueryString<WorkProgressUrlParams>(
+    const params = safeParseQueryString<WorkProgressUrlParams>(
       {
         query: location.search,
         schema: validationSchema,
       } ?? defaultInitialValues
     );
-  }, [location.search, workTypes]);
+    if (params) {
+      return {
+        ...getDefaultInitialValues(params.searchType),
+        ...params,
+      };
+    } else return defaultInitialValues;
+  }, [location.search, workTypes, getDefaultInitialValues]);
 
   /**
    * When the URL search params change, send an event to the machine
@@ -126,7 +144,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     workProgressResults: WorkProgressResultTableEntry[],
     filter?: { type: string; values: string[] }
   ): WorkProgressResultTableEntry[] => {
-    if (!filter) {
+    if (!filter || !filter.type || filter.values.length <= 0) {
       return workProgressResults;
     }
     return workProgressResults.filter(

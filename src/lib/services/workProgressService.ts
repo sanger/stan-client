@@ -62,7 +62,6 @@ export class WorkProgressService
       .value();
 
     const response = await stanCore.FindWorkProgress(request);
-    debugger;
     return {
       numDisplayed: response.workProgress.entries.length,
       entries: this.formatFindResult(response.workProgress),
@@ -81,7 +80,6 @@ export class WorkProgressService
     }
 
     return findResult.map((entry) => {
-      debugger;
       const timeStampMap = new Map<WorkProgressTimeStampType, String>();
       entry.timestamps.forEach((timeStamp) => {
         timeStampMap.set(
