@@ -88,18 +88,16 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
       ...filterValidationSchema(workTypes).fields,
     });
 
-    const params = safeParseQueryString<WorkProgressUrlParams>(
-      {
-        query: location.search,
-        schema: validationSchema,
-      } ?? defaultInitialValues
-    );
+    const params = safeParseQueryString<WorkProgressUrlParams>({
+      query: location.search,
+      schema: validationSchema,
+    });
     if (params) {
       return {
         ...getDefaultInitialValues(params.searchType),
         ...params,
       };
-    } else return defaultInitialValues;
+    } else return params;
   }, [location.search, workTypes, getDefaultInitialValues]);
 
   /**

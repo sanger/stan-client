@@ -1,6 +1,6 @@
 import React from "react";
-import FormikSelect from "../forms/Select";
-import FormikInput from "../forms/Input";
+import FormikSelect from "./forms/Select";
+import FormikInput from "./forms/Input";
 
 type KeyValueViewerProps = {
   /**

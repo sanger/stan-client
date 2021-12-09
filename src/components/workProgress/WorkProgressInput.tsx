@@ -7,7 +7,7 @@ import React from "react";
 import createWorkProgressInputMachine from "./workProgressInput.machine";
 import BlueButton from "../buttons/BlueButton";
 import { WorkStatus } from "../../types/sdk";
-import { KeyValueSelector } from "./KeyValueSelector";
+import { KeyValueSelector } from "../KeyValueSelector";
 import { WorkProgressUrlParams } from "../../pages/WorkProgress";
 import { history } from "../../lib/sdk";
 import { stringify } from "../../lib/helpers";
