@@ -99,13 +99,8 @@ const CDNAMeasurementQC = ({
     let error;
     if (value === "") {
       error = "Required";
-    } else {
-      if (Number(value) !== 0) {
-        const isFormatted = /^\d{3}(\.\d{2})$/.test(value);
-        if (!isFormatted) {
-          error = "Invalid number format: Required ###.##";
-        }
-      }
+    } else if (Number(value) < 0) {
+      error = "Positive value required";
     }
     return error;
   }
@@ -119,8 +114,11 @@ const CDNAMeasurementQC = ({
     if (value === "") {
       error = "Required";
     } else {
+      if (Number(value) < 0) {
+        error = "Positive value required";
+      }
       if (!Number.isInteger(Number(value))) {
-        error = "Invalid number format: Integer value required";
+        error = "Integer value required";
       }
     }
     return error;
