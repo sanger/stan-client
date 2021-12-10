@@ -644,6 +644,26 @@ export type StainRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
+export enum StainPanel {
+  Positive = 'positive',
+  Negative = 'negative',
+  Marker = 'marker'
+}
+
+export type ComplexStainLabware = {
+  barcode: Scalars['String'];
+  bondBarcode: Scalars['String'];
+  bondRun: Scalars['Int'];
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export type ComplexStainRequest = {
+  stainType: Scalars['String'];
+  plex: Scalars['Int'];
+  panel: StainPanel;
+  labware: Array<ComplexStainLabware>;
+};
+
 export type UnreleaseLabware = {
   barcode: Scalars['String'];
   highestSection?: Maybe<Scalars['Int']>;
@@ -1010,6 +1030,7 @@ export type Mutation = {
   recordRNAAnalysis: OperationResult;
   recordVisiumQC: OperationResult;
   recordOpWithSlotMeasurements: OperationResult;
+  recordComplexStain: OperationResult;
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
@@ -1275,6 +1296,11 @@ export type MutationRecordVisiumQcArgs = {
 
 export type MutationRecordOpWithSlotMeasurementsArgs = {
   request: OpWithSlotMeasurementsRequest;
+};
+
+
+export type MutationRecordComplexStainArgs = {
+  request: ComplexStainRequest;
 };
 
 
@@ -1919,6 +1945,22 @@ export type PrintMutationVariables = Exact<{
 export type PrintMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'printLabware'>
+);
+
+export type RecordComplexStainMutationVariables = Exact<{
+  request: ComplexStainRequest;
+}>;
+
+
+export type RecordComplexStainMutation = (
+  { __typename?: 'Mutation' }
+  & { recordComplexStain: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
 );
 
 export type RecordExtractResultMutationVariables = Exact<{
@@ -3488,6 +3530,15 @@ export const PrintDocument = gql`
   printLabware(barcodes: $barcodes, printer: $printer)
 }
     `;
+export const RecordComplexStainDocument = gql`
+    mutation RecordComplexStain($request: ComplexStainRequest!) {
+  recordComplexStain(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const RecordExtractResultDocument = gql`
     mutation RecordExtractResult($request: ExtractResultRequest!) {
   recordExtractResult(request: $request) {
@@ -4231,6 +4282,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     Print(variables: PrintMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PrintMutation> {
       return withWrapper(() => client.request<PrintMutation>(PrintDocument, variables, requestHeaders));
+    },
+    RecordComplexStain(variables: RecordComplexStainMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordComplexStainMutation> {
+      return withWrapper(() => client.request<RecordComplexStainMutation>(RecordComplexStainDocument, variables, requestHeaders));
     },
     RecordExtractResult(variables: RecordExtractResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordExtractResultMutation> {
       return withWrapper(() => client.request<RecordExtractResultMutation>(RecordExtractResultDocument, variables, requestHeaders));
