@@ -75,17 +75,18 @@ export default function WorkNumberSelect({
     [onWorkNumberChange]
   );
 
-  const SelectElement = name ? FormikSelect : Select;
-
-  return (
-    <SelectElement
-      label={label ?? ""}
+  return name ? (
+    <FormikSelect label={label ?? ""} name={name ?? ""} emptyOption={true}>
+      {optionValues(works, "workNumber", "workNumber")}
+    </FormikSelect>
+  ) : (
+    <Select
       value={selectedWorkNumber}
       name={name ?? ""}
       onChange={handleWorkNumberChange}
       emptyOption={true}
     >
       {optionValues(works, "workNumber", "workNumber")}
-    </SelectElement>
+    </Select>
   );
 }

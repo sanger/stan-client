@@ -108,8 +108,6 @@ export default function ComplexStainForm({
         <Form>
           <FormikInput label={""} name={"stainType"} type={"hidden"} />
 
-          {serverError && <Warning error={serverError} />}
-
           <GrayBox>
             <motion.div
               variants={variants.fadeInParent}
@@ -163,7 +161,7 @@ export default function ComplexStainForm({
 
                 <FormikSelect label={"Experimental Panel"} name={"panel"}>
                   {objectKeys(StainPanel).map((stainPanel) => (
-                    <option key={stainPanel} value={stainPanel}>
+                    <option key={stainPanel} value={StainPanel[stainPanel]}>
                       {stainPanel}
                     </option>
                   ))}
@@ -182,7 +180,7 @@ export default function ComplexStainForm({
                       <tr>
                         <TableHeader>Slide Barcode</TableHeader>
                         <TableHeader>Bond Barcode</TableHeader>
-                        <TableHeader>Bond Run Barcode</TableHeader>
+                        <TableHeader>Bond Run Number</TableHeader>
                         <TableHeader>SGP Number</TableHeader>
                       </tr>
                     </TableHead>

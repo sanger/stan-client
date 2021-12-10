@@ -174,12 +174,7 @@ export default function StainForm({
               >
                 <Heading level={3}>SGP Number</Heading>
 
-                <WorkNumberSelect
-                  onWorkNumberChange={(workNumber) =>
-                    setFieldValue("workNumber", workNumber)
-                  }
-                />
-                <FormikErrorMessage name={"workNumber"} />
+                <WorkNumberSelect name={"workNumber"} />
               </motion.div>
 
               <motion.div
