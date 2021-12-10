@@ -43,6 +43,12 @@ type KeyValueViewerProps = {
   schemaNameValue?: string;
 };
 
+/***
+ * This displays a map with Key-Value pairs with following controls
+ * 1) Dropdown to select the key,
+ * 2) Dropdown to select values if there are more than one value or a TextField otherwise
+ * This returns callbacks to parent, whenever a new key and value is selected
+ */
 export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
   keyValueMap,
   onChangeKey,

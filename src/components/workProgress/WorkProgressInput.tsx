@@ -268,6 +268,14 @@ export default function WorkProgressInput({
             validateOnBlur={false}
             validateOnMount={false}
             onSubmit={async () => {
+              /**
+               /* Change the url with reloading page,since filtering is done on client side without calling any call server api
+               */
+              window.history.replaceState(
+                null,
+                "",
+                stringify(current.context.workProgressInput)
+              );
               onFilter(filterType, filterValues);
             }}
             validationSchema={filterValidationSchema}
