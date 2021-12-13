@@ -1,8 +1,3 @@
-import {
-  FindWorkProgressQuery,
-  FindWorkProgressQueryVariables,
-} from "../../../src/types/sdk";
-
 describe("Work Progress", () => {
   before(() => {
     cy.visit("./");
@@ -89,31 +84,6 @@ describe("Work Progress", () => {
         });
       });
     });
-
-    context("when search action return no results", () => {
-      before(() => {
-        cy.msw().then(({ worker, graphql }) => {
-          worker.use(
-            graphql.query<
-              FindWorkProgressQuery,
-              FindWorkProgressQueryVariables
-            >("FindWorkProgress", (req, res, ctx) => {
-              return res.once(
-                ctx.data({
-                  workProgress: [],
-                })
-              );
-            })
-          );
-        });
-        cy.findByRole("button", { name: /Search/i }).click();
-      });
-      it("will show a notification", () => {
-        cy.findByText(
-          "There were no results for the given search. Please try again."
-        ).should("be.visible");
-      });
-    });
   });
 
   //TESTCASES for WorkType based search
@@ -124,7 +94,7 @@ describe("Work Progress", () => {
     context("when a value is given ", () => {
       before(() => {
         search().within(() =>
-          cy.findByTestId("valueSelect").select("Work Type 8")
+          cy.findByTestId("valueSelect").select("Work Type 10")
         );
         cy.findByRole("button", { name: /Search/i }).click();
       });

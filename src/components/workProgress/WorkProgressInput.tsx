@@ -66,7 +66,6 @@ type WorkProgressInputParams = {
   urlParams: WorkProgressUrlParams;
   workTypes: string[];
   isFilterRequired: boolean;
-  onFilter: (filterType: string, filterValues: string[]) => void;
   onReset: () => void;
 };
 
@@ -74,7 +73,6 @@ export default function WorkProgressInput({
   urlParams,
   workTypes,
   isFilterRequired,
-  onFilter,
   onReset,
 }: WorkProgressInputParams) {
   const [current, send] = useMachine(
@@ -271,12 +269,13 @@ export default function WorkProgressInput({
               /**
                /* Change the url with reloading page,since filtering is done on client side without calling any call server api
                */
-              window.history.replaceState(
-                null,
-                "",
-                stringify(current.context.workProgressInput)
-              );
-              onFilter(filterType, filterValues);
+              const searchParam = `${stringify(
+                current.context.workProgressInput
+              )}`;
+              history.push({
+                pathname: "/",
+                search: searchParam,
+              });
             }}
             validationSchema={filterValidationSchema}
           >

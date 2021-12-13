@@ -45,6 +45,9 @@ const defaultInitialValues: WorkProgressUrlParams = {
   filterValues: Object.values(WorkStatus),
 };
 
+/**
+ * Possible URL search params for the page e.g./filterType=Status&filterValues[]=completed&searchType=SGP%2FR%26D%20Number&searchValue=sgp2
+ */
 const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   const [filter, setFilter] = useState<{ type: string; values: string[] }>({
     type: defaultInitialValues.filterType,
@@ -52,6 +55,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   });
   const [reset, setReset] = React.useState(false);
   const location = useLocation();
+  const urlParamRef = React.useRef<WorkProgressUrlParams>();
 
   const workProgressMachine = searchMachine<
     FindWorkProgressQueryVariables,
@@ -105,11 +109,29 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
    */
   React.useEffect(() => {
     if (!memoUrlParams) return;
+
+    //Update filter data
     setFilter({
       type: memoUrlParams.filterType,
       values: memoUrlParams.filterValues,
     });
-    send({ type: "FIND", request: formatInputData(memoUrlParams) });
+
+    /**
+     * Check search type and search value is same as previous search. If so, there is no need to fetch the results
+     */
+    let fetchSearchResults = true;
+    if (
+      urlParamRef.current &&
+      urlParamRef.current?.searchType === memoUrlParams.searchType &&
+      urlParamRef.current?.searchValue === memoUrlParams.searchValue
+    ) {
+      fetchSearchResults = false;
+    }
+
+    if (fetchSearchResults) {
+      send({ type: "FIND", request: formatInputData(memoUrlParams) });
+    }
+    urlParamRef.current = memoUrlParams;
     setReset(false);
   }, [memoUrlParams, send, setFilter, setReset]);
 
@@ -120,16 +142,6 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     serverError?: ClientError | undefined | null;
     searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
-
-  /**
-   * Callback to handle filter action
-   */
-  const handleFilter = React.useCallback(
-    (filterType: string, filterValues: string[]) => {
-      setFilter({ type: filterType, values: filterValues });
-    },
-    [setFilter]
-  );
 
   const handleReset = React.useCallback(() => {
     setReset(true);
@@ -199,7 +211,6 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
               !reset
             }
             workTypes={workTypes}
-            onFilter={handleFilter}
             onReset={handleReset}
           />
           <div className={"my-10 mx-auto max-w-screen-xl"}>
