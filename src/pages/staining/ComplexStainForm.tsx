@@ -32,6 +32,7 @@ import WorkNumberSelect from "../../components/WorkNumberSelect";
 import OperationCompleteModal from "../../components/modal/OperationCompleteModal";
 import Warning from "../../components/notifications/Warning";
 import WhiteButton from "../../components/buttons/WhiteButton";
+import { FormikFieldValue } from "../../components/forms/FormikFieldValue";
 
 type ComplexStainFormValues = ComplexStainRequest;
 
@@ -104,9 +105,9 @@ export default function ComplexStainForm({
         send({ type: "SUBMIT_FORM", values });
       }}
     >
-      {({ values, resetForm }) => (
+      {({ values }) => (
         <Form>
-          <FormikInput label={""} name={"stainType"} type={"hidden"} />
+          <FormikFieldValue field={"stainType"} value={stainType} />
 
           <GrayBox>
             <motion.div
@@ -247,10 +248,7 @@ export default function ComplexStainForm({
                 type="button"
                 style={{ marginRight: "auto" }}
                 className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text-sm"
-                onClick={() => {
-                  resetForm();
-                  send({ type: "RESET" });
-                }}
+                onClick={() => send({ type: "RESET" })}
               >
                 Stain Again
               </WhiteButton>

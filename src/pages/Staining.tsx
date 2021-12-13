@@ -57,7 +57,6 @@ export default function Staining({ stainingInfo }: StainingProps) {
 
           {stainType && isComplexStain(stainType) && (
             <ComplexStainForm
-              key={stainType}
               stainType={stainType}
               initialLabware={labwares}
               onLabwareChange={setLabwares}
