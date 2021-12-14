@@ -4,16 +4,11 @@ import {
   FindPermDataQueryVariables,
   RecordPermMutation,
   RecordPermMutationVariables,
-  Slot,
   VisiumAnalysisMutation,
   VisiumAnalysisMutationVariables,
 } from "../../types/sdk";
 import { createLabware } from "./labwareHandlers";
 import { isSlotFilled } from "../../lib/helpers/slotHelper";
-import {
-  emptySlotFactory,
-  filledSlotFactory,
-} from "../../lib/factories/slotFactory";
 
 const handlers = [
   graphql.mutation<RecordPermMutation, RecordPermMutationVariables>(
@@ -66,18 +61,6 @@ const handlers = [
       }
 
       const labware = createLabware(barcode);
-      // Include some empty, some filled, and a few with multiple samples in
-      const slots = labware.slots.map((slot, i) => {
-        if (i % 2 === 1) {
-          return emptySlotFactory.build({ address: slot.address });
-        } else {
-          return filledSlotFactory.build(
-            { address: slot.address },
-            { transient: { numberOfSamples: 2 } }
-          );
-        }
-      });
-      labware.slots = slots as Slot[];
       return res(
         ctx.data({
           visiumPermData: {
