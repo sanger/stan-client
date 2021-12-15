@@ -961,8 +961,8 @@ export type QueryHistoryForLabwareBarcodeArgs = {
 
 export type QueryWorkProgressArgs = {
   workNumber?: Maybe<Scalars['String']>;
-  workType?: Maybe<Scalars['String']>;
-  status?: Maybe<WorkStatus>;
+  workTypes?: Maybe<Array<Scalars['String']>>;
+  statuses?: Maybe<Array<WorkStatus>>;
 };
 
 
@@ -2694,8 +2694,8 @@ export type FindWorkNumbersQuery = (
 
 export type FindWorkProgressQueryVariables = Exact<{
   workNumber?: Maybe<Scalars['String']>;
-  workType?: Maybe<Scalars['String']>;
-  status?: Maybe<WorkStatus>;
+  workTypes?: Maybe<Array<Scalars['String']> | Scalars['String']>;
+  statuses?: Maybe<Array<WorkStatus> | WorkStatus>;
 }>;
 
 
@@ -3974,8 +3974,12 @@ export const FindWorkNumbersDocument = gql`
 }
     `;
 export const FindWorkProgressDocument = gql`
-    query FindWorkProgress($workNumber: String, $workType: String, $status: WorkStatus) {
-  workProgress(workNumber: $workNumber, workType: $workType, status: $status) {
+    query FindWorkProgress($workNumber: String, $workTypes: [String!], $statuses: [WorkStatus!]) {
+  workProgress(
+    workNumber: $workNumber
+    workTypes: $workTypes
+    statuses: $statuses
+  ) {
     ...WorkProgressFields
   }
 }

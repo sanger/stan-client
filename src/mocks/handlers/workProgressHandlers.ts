@@ -25,7 +25,7 @@ const workProgressHandlers = [
   graphql.query<FindWorkProgressQuery, FindWorkProgressQueryVariables>(
     "FindWorkProgress",
     (req, res, ctx) => {
-      const { workNumber, workType, status } = req.variables;
+      const { workNumber, workTypes, statuses } = req.variables;
       const works = workRepository.findAll().map((work, indx) => {
         const status =
           indx % 2 === 0
@@ -50,35 +50,46 @@ const workProgressHandlers = [
           })
         );
       }
-      if (workType) {
+
+      if (workTypes) {
+        const filteredWorks = Array.isArray(workTypes)
+          ? works.filter(
+              (work) =>
+                workTypes.findIndex(
+                  (workType) => workType === work.workType.name
+                ) !== -1
+            )
+          : works.filter((work) => work.workType.name === workTypes);
         return res(
           ctx.data({
             __typename: "Query",
-            workProgress: works
-              .filter((work) => work.workType.name === workType)
-              .map((work) => {
-                return {
-                  __typename: "WorkProgress",
-                  work: work,
-                  timestamps: buildWorkProgressTimeStamps(),
-                };
-              }),
+            workProgress: filteredWorks.map((work) => {
+              return {
+                __typename: "WorkProgress",
+                work: work,
+                timestamps: buildWorkProgressTimeStamps(),
+              };
+            }),
           })
         );
       }
-      if (status) {
+      if (statuses) {
+        const filteredStatus = Array.isArray(statuses)
+          ? works.filter(
+              (work) =>
+                statuses.findIndex((status) => status === work.status) !== -1
+            )
+          : works.filter((work) => work.status === statuses);
         return res(
           ctx.data({
             __typename: "Query",
-            workProgress: works
-              .filter((work) => work.status === status)
-              .map((work) => {
-                return {
-                  __typename: "WorkProgress",
-                  work: work,
-                  timestamps: buildWorkProgressTimeStamps(),
-                };
-              }),
+            workProgress: filteredStatus.map((work) => {
+              return {
+                __typename: "WorkProgress",
+                work: work,
+                timestamps: buildWorkProgressTimeStamps(),
+              };
+            }),
           })
         );
       }

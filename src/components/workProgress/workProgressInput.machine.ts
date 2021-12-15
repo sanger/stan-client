@@ -2,7 +2,6 @@ import { assign } from "@xstate/immer";
 import { createMachine } from "xstate";
 import { Maybe } from "../../types/sdk";
 import { ClientError } from "graphql-request";
-import { castDraft } from "immer";
 import { WorkProgressUrlParams } from "../../pages/WorkProgress";
 
 export type WorkProgressInputContext = {
@@ -30,14 +29,6 @@ type SetSearchTypeEvent = {
 };
 type SetSearchValueEvent = {
   type: "SET_SEARCH_VALUE";
-  value: string;
-};
-type SetFilterTypeEvent = {
-  type: "SET_FILTER_TYPE";
-  value: string;
-};
-type SetFilterValueEvent = {
-  type: "SET_FILTER_VALUE";
   value: string[];
 };
 
@@ -50,8 +41,6 @@ type WorkProgressInputEvent =
   | InitializeEvent
   | SetSearchTypeEvent
   | SetSearchValueEvent
-  | SetFilterTypeEvent
-  | SetFilterValueEvent
   | LoadWorkTypeDoneEvent
   | ErrorEvent;
 
@@ -74,12 +63,6 @@ export default function createWorkProgressInputMachine({
             SET_SEARCH_VALUE: {
               actions: "assignSearchValue",
             },
-            SET_FILTER_TYPE: {
-              actions: "assignFilterType",
-            },
-            SET_FILTER_VALUE: {
-              actions: "assignFilterValue",
-            },
           },
         },
       },
@@ -92,26 +75,7 @@ export default function createWorkProgressInputMachine({
         }),
         assignSearchValue: assign((ctx, e) => {
           if (e.type !== "SET_SEARCH_VALUE") return;
-          ctx.workProgressInput.searchValue = e.value;
-        }),
-
-        assignFilterType: assign((ctx, e) => {
-          if (e.type !== "SET_FILTER_TYPE") return;
-          ctx.workProgressInput.filterType = e.value;
-        }),
-        assignFilterValue: assign((ctx, e) => {
-          if (e.type !== "SET_FILTER_VALUE") return;
-          ctx.workProgressInput.filterValues = e.value;
-        }),
-        unassignServerError: assign((ctx, _e) => {
-          ctx.serverError = null;
-        }),
-
-        assignServerError: assign((ctx, e) => {
-          if (e.type !== "error.platform.worktype") {
-            return;
-          }
-          ctx.serverError = castDraft(e.data);
+          ctx.workProgressInput.searchValues = e.value;
         }),
       },
     }

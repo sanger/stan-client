@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   FindWorkProgressQueryVariables,
   FindWorkProgressQueryVariables as WorkProgressQueryInput,
@@ -20,11 +20,8 @@ import { ClientError } from "graphql-request";
 import { Column } from "react-table";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import { SearchResultsType } from "../types/stan";
-import * as Yup from "yup";
 import { useLocation } from "react-router-dom";
 import WorkProgressInput, {
-  filterValidationSchema,
-  WorkProgressFilterType,
   workProgressSearchSchema,
   WorkProgressSearchType,
 } from "../components/workProgress/WorkProgressInput";
@@ -34,28 +31,22 @@ import WorkProgressInput, {
  */
 export type WorkProgressUrlParams = {
   searchType: string;
-  searchValue: string;
-  filterType: string;
-  filterValues: string[];
+  searchValues: string[] | undefined;
 };
 const defaultInitialValues: WorkProgressUrlParams = {
   searchType: WorkProgressSearchType.WorkNumber,
-  searchValue: "",
-  filterType: WorkProgressFilterType.Status,
-  filterValues: Object.values(WorkStatus),
+  searchValues: undefined,
 };
 
 /**
- * Possible URL search params for the page e.g./filterType=Status&filterValues[]=completed&searchType=SGP%2FR%26D%20Number&searchValue=sgp2
- */
+ * Possible URL search params for the page e.g.?searchType=SGP%2FR%26D%20Number&searchValues[]=sgp2
+ * or
+ * ?searchType=Status&searchValues[]=completed&searchValues[]=active
+ * or
+ * ?searchType=Work%20Type&searchValues[]=WorkType1&searchValues[]=Worktype2
+ * */
 const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
-  const [filter, setFilter] = useState<{ type: string; values: string[] }>({
-    type: defaultInitialValues.filterType,
-    values: defaultInitialValues.filterValues,
-  });
-  const [reset, setReset] = React.useState(false);
   const location = useLocation();
-  const urlParamRef = React.useRef<WorkProgressUrlParams>();
 
   const workProgressMachine = searchMachine<
     FindWorkProgressQueryVariables,
@@ -67,19 +58,6 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     })
   );
 
-  const getDefaultInitialValues = React.useCallback(
-    (searchType?: string): WorkProgressUrlParams => {
-      return searchType && searchType === WorkProgressSearchType.Status
-        ? {
-            ...defaultInitialValues,
-            filterType: WorkProgressFilterType.WorkType,
-            filterValues: workTypes,
-          }
-        : defaultInitialValues;
-    },
-    [workTypes]
-  );
-
   /**
    * The deserialized URL search params
    */
@@ -87,53 +65,31 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     /**
      *Schema to validate the deserialized URL search params
      */
-    const validationSchema: Yup.ObjectSchema = Yup.object().shape({
-      ...workProgressSearchSchema.fields,
-      ...filterValidationSchema(workTypes).fields,
-    });
 
     const params = safeParseQueryString<WorkProgressUrlParams>({
       query: location.search,
-      schema: validationSchema,
+      schema: workProgressSearchSchema(workTypes),
     });
     if (params) {
       return {
-        ...getDefaultInitialValues(params.searchType),
+        ...defaultInitialValues,
         ...params,
       };
     } else return params;
-  }, [location.search, workTypes, getDefaultInitialValues]);
+  }, [location.search, workTypes]);
 
   /**
    * When the URL search params change, send an event to the machine
    */
   React.useEffect(() => {
-    if (!memoUrlParams) return;
-
-    //Update filter data
-    setFilter({
-      type: memoUrlParams.filterType,
-      values: memoUrlParams.filterValues,
-    });
-
-    /**
-     * Check search type and search value is same as previous search. If so, there is no need to fetch the results
-     */
-    let fetchSearchResults = true;
     if (
-      urlParamRef.current &&
-      urlParamRef.current?.searchType === memoUrlParams.searchType &&
-      urlParamRef.current?.searchValue === memoUrlParams.searchValue
-    ) {
-      fetchSearchResults = false;
-    }
-
-    if (fetchSearchResults) {
-      send({ type: "FIND", request: formatInputData(memoUrlParams) });
-    }
-    urlParamRef.current = memoUrlParams;
-    setReset(false);
-  }, [memoUrlParams, send, setFilter, setReset]);
+      !memoUrlParams ||
+      !memoUrlParams.searchValues ||
+      memoUrlParams.searchValues.length <= 0
+    )
+      return;
+    send({ type: "FIND", request: formatInputData(memoUrlParams) });
+  }, [memoUrlParams, send]);
 
   const {
     serverError,
@@ -142,30 +98,6 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     serverError?: ClientError | undefined | null;
     searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
-
-  const handleReset = React.useCallback(() => {
-    setReset(true);
-  }, [setReset]);
-
-  /***
-   * Filter the results
-   */
-  const filterResults = (
-    workProgressResults: WorkProgressResultTableEntry[],
-    filter?: { type: string; values: string[] }
-  ): WorkProgressResultTableEntry[] => {
-    if (!filter || !filter.type || filter.values.length <= 0) {
-      return workProgressResults;
-    }
-    return workProgressResults.filter(
-      (workProgressResult) =>
-        filter.values.findIndex((filterValue) => {
-          return filter.type === WorkProgressFilterType.WorkType
-            ? filterValue === workProgressResult.workType
-            : filterValue === workProgressResult.status;
-        }) !== -1
-    );
-  };
 
   /**
    * Convert the data associated with the form to query input data structure.
@@ -176,20 +108,24 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   ): WorkProgressQueryInput {
     const queryInput: WorkProgressQueryInput = {
       workNumber: undefined,
-      workType: undefined,
-      status: undefined,
+      workTypes: undefined,
+      statuses: undefined,
     };
     switch (workProgressUrl.searchType) {
       case WorkProgressSearchType.WorkNumber: {
-        queryInput.workNumber = workProgressUrl.searchValue;
+        queryInput.workNumber =
+          workProgressUrl.searchValues &&
+          workProgressUrl.searchValues.length > 0
+            ? workProgressUrl.searchValues[0]
+            : "";
         break;
       }
       case WorkProgressSearchType.WorkType: {
-        queryInput.workType = workProgressUrl.searchValue;
+        queryInput.workTypes = workProgressUrl.searchValues;
         break;
       }
       case WorkProgressSearchType.Status: {
-        queryInput.status = workProgressUrl.searchValue as WorkStatus;
+        queryInput.statuses = workProgressUrl.searchValues as WorkStatus[];
         break;
       }
     }
@@ -205,13 +141,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
         <div className="mx-auto">
           <WorkProgressInput
             urlParams={memoUrlParams ?? defaultInitialValues}
-            isFilterRequired={
-              searchResult !== undefined &&
-              searchResult.entries.length > 0 &&
-              !reset
-            }
             workTypes={workTypes}
-            onReset={handleReset}
           />
           <div className={"my-10 mx-auto max-w-screen-xl"}>
             {serverError && (
@@ -224,7 +154,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                 </div>
               )}
             </div>
-            {current.matches("searched") && !reset ? (
+            {current.matches("searched") ? (
               searchResult && searchResult.entries.length > 0 ? (
                 <DataTable
                   sortable
@@ -240,7 +170,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                     },
                   ]}
                   columns={columns}
-                  data={filterResults(searchResult.entries, filter)}
+                  data={searchResult.entries}
                 />
               ) : (
                 <Warning
