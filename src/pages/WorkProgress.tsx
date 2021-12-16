@@ -86,8 +86,9 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
       !memoUrlParams ||
       !memoUrlParams.searchValues ||
       memoUrlParams.searchValues.length <= 0
-    )
+    ) {
       return;
+    }
     send({ type: "FIND", request: formatInputData(memoUrlParams) });
   }, [memoUrlParams, send]);
 

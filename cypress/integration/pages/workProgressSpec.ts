@@ -23,9 +23,18 @@ describe("Work Progress", () => {
           search().within(() => cy.findByTestId("type").select("Status"));
         });
         it("shows a drop down box with value unstarted ", () => {
-          search().within(() =>
-            cy.get("[data-testid=valueSelect]").should("be.visible")
-          );
+          cy.get("[data-testid = valueSelect]")
+            .children("option")
+            .then(($options) => {
+              const optionValues = $options.toArray().map((elem) => elem.label);
+              expect(optionValues).to.deep.eq([
+                "unstarted",
+                "active",
+                "paused",
+                "completed",
+                "failed",
+              ]);
+            });
         });
       });
       context(" when WorkType is selected in dropdown for type", () => {
@@ -33,9 +42,26 @@ describe("Work Progress", () => {
           search().within(() => cy.findByTestId("type").select("Work Type"));
         });
         it("shows a drop down box with value", () => {
-          search().within(() =>
-            cy.get("[data-testid = valueSelect]").should("be.visible")
-          );
+          cy.get("[data-testid = valueSelect]")
+            .children("option")
+            .then(($options) => {
+              const optionValues = $options.toArray().map((elem) => elem.label);
+              expect(optionValues).to.deep.eq([
+                "Work Type 1",
+                "Work Type 2",
+                "Work Type 3",
+                "TEST_WT_1",
+                "Work Type 5",
+                "Work Type 6",
+                "Work Type 7",
+                "Work Type 8",
+                "Work Type 9",
+                "Work Type 10",
+                "Work Type 11",
+                "Work Type 12",
+                "Work Type 13",
+              ]);
+            });
         });
       });
     });

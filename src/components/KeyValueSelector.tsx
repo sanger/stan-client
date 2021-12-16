@@ -87,26 +87,24 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
     [onChangeValue]
   );
   return (
-    <div className="space-y-2 md:grid md:grid-cols-2 md:px-10 md:space-y-0 md:flex md:flex-row md:flex-grow  md:justify-center md:items-center md:gap-4">
-      {Array.from(keyValueMap.keys()).length > 1 && (
-        <div className="md:flex-grow">
-          <FormikSelect
-            label={keyLabel ?? ""}
-            name={schemaNameKey ?? ""}
-            data-testid={"type"}
-            value={selected.key}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              handleSelectKey(e.currentTarget.value);
-            }}
-          >
-            {Array.from(keyValueMap.keys()).map((key: string) => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-          </FormikSelect>
-        </div>
-      )}
+    <div className="space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:flex-grow  md:justify-center md:items-center md:gap-4">
+      <div className="md:flex-grow">
+        <FormikSelect
+          label={keyLabel ?? ""}
+          name={schemaNameKey ?? ""}
+          data-testid={"type"}
+          value={selected.key}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+            handleSelectKey(e.currentTarget.value);
+          }}
+        >
+          {Array.from(keyValueMap.keys()).map((key: string) => (
+            <option key={key} value={key}>
+              {key}
+            </option>
+          ))}
+        </FormikSelect>
+      </div>
       <div className="md:flex-grow">
         {selected.key && getValues(selected.key).length <= 0 ? (
           <FormikInput

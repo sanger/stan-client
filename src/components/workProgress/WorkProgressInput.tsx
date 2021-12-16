@@ -34,11 +34,7 @@ export const workProgressSearchSchema = (
       .of(Yup.string().required())
       .when("searchType", {
         is: (value: string) => value === WorkProgressSearchType.WorkType,
-        then: Yup.array().of(
-          workTypes
-            ? Yup.string().oneOf(workTypes).required()
-            : Yup.string().required()
-        ),
+        then: Yup.array().of(Yup.string().oneOf(workTypes).required()),
       })
       .when("searchType", {
         is: (value: string) => value === WorkProgressSearchType.Status,
@@ -50,7 +46,13 @@ export const workProgressSearchSchema = (
 };
 
 type WorkProgressInputParams = {
+  /**
+   * Ssearch type and Search values (representation of url structure)
+   */
   urlParams: WorkProgressUrlParams;
+  /**
+   * All Work types available
+   */
   workTypes: string[];
 };
 
@@ -69,7 +71,7 @@ export default function WorkProgressInput({
   } = current.context;
 
   const generateValuesForType = React.useCallback(
-    (type: string): string[] => {
+    (type: WorkProgressSearchType): string[] => {
       switch (type) {
         case WorkProgressSearchType.WorkNumber:
           return [];
@@ -130,7 +132,7 @@ export default function WorkProgressInput({
             search: stringify(current.context.workProgressInput),
           });
         }}
-        validationSchema={workProgressSearchSchema}
+        validationSchema={workProgressSearchSchema(workTypes)}
       >
         <Form>
           <div className={" flex flex-row md:flex-grow"}>
