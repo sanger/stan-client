@@ -71,20 +71,23 @@ export default function History(props: HistoryProps) {
         </div>
       )}
 
-      {current.matches("found") && history.length > 0 && (
-        <>
-          <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
-            <p className="text-sm text-gray-700">
-              History for {historyDisplayValues[props.kind]}{" "}
-              <span className="font-medium">{props.value}</span>
-            </p>
-            <a href={downloadURL} download={true}>
-              <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
-            </a>
-          </div>
-          <DataTable columns={historyColumns} data={history} />
-        </>
-      )}
+      {current.matches("found") &&
+        (history.length > 0 ? (
+          <>
+            <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
+              <p className="text-sm text-gray-700">
+                History for {historyDisplayValues[props.kind]}{" "}
+                <span className="font-medium">{props.value}</span>
+              </p>
+              <a href={downloadURL} download={true}>
+                <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
+              </a>
+            </div>
+            <DataTable columns={historyColumns} data={history} />
+          </>
+        ) : (
+          <Warning message={"No results found!"} />
+        ))}
     </div>
   );
 }
