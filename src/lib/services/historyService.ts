@@ -1,7 +1,11 @@
-import {stanCore} from "../sdk";
-import {HistoryProps, HistoryTableEntry} from "../../types/stan";
-import {HistoryFieldsFragment, LabwareFieldsFragment, SampleFieldsFragment,} from "../../types/sdk";
-import {Column} from "react-table";
+import { stanCore } from "../sdk";
+import { HistoryProps, HistoryTableEntry } from "../../types/stan";
+import {
+  HistoryFieldsFragment,
+  LabwareFieldsFragment,
+  SampleFieldsFragment,
+} from "../../types/sdk";
+import { Column } from "react-table";
 
 /**
  * Retrieves the history for the given History props.
@@ -36,6 +40,12 @@ export async function findHistory(
         barcode: historyProps.value,
       });
       history = result.historyForLabwareBarcode;
+      break;
+    case "workNumber":
+      result = await stanCore.FindHistoryForWorkNumber({
+        workNumber: historyProps.value,
+      });
+      history = result.historyForWorkNumber;
       break;
   }
 
