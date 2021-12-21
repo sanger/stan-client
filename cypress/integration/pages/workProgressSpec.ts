@@ -111,7 +111,7 @@ describe("Work Progress", () => {
   });
 
   //TESTCASES for Status based search
-  describe("Test cases for Status based search", () => {
+  describe("Testing Status based search", () => {
     context("when a value is given", () => {
       before(() => {
         cy.findByTestId("type").select("Status");
@@ -131,6 +131,31 @@ describe("Work Progress", () => {
         cy.findByText(
           "There were no results for the given search. Please try again."
         ).should("be.visible");
+      });
+    });
+  });
+
+  //Testing WorkNumber link
+  describe("Testing WorkNumber link", () => {
+    context("when a search is performed using work number", () => {
+      before(() => {
+        cy.findByTestId("type").select("SGP/R&D Number");
+        cy.findByTestId("valueInput").type("SGP1001");
+        cy.findByRole("button", { name: /Search/i }).click();
+      });
+      it("shows a link for work type in the results table", () => {
+        cy.findByRole("table").within(() => {
+          cy.findByRole("link", { name: "SGP1001" }).should("exist");
+        });
+      });
+    });
+    context("when clicking WorkNumber link", () => {
+      before(() => {
+        cy.findByRole("link", { name: "SGP1001" }).click();
+      });
+      it("displays the history page for SGP1001", () => {
+        cy.url().should("include", "/history/?kind=workNumber&value=SGP1001");
+        cy.findAllByText("History").should("have.length.above", 1);
       });
     });
   });

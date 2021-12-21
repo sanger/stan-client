@@ -24,11 +24,12 @@ import {
 
 import DataTable from "../components/DataTable";
 import { ClientError } from "graphql-request";
-import { Column } from "react-table";
+import { Cell, Column } from "react-table";
 import { history } from "../lib/sdk";
 import WorkProgressInput from "../components/workProgress/WorkProgressInput";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
-import { SearchResultsType } from "../types/stan";
+import { HistoryTableEntry, SearchResultsType } from "../types/stan";
+import StyledLink from "../components/StyledLink";
 
 type WorkProgressProps = {
   urlParamsString: string;
@@ -176,6 +177,14 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: "SGP/R&D Number",
     accessor: "workNumber",
+    Cell: (props: Cell<HistoryTableEntry>) => {
+      const workNumber = props.row.original.workNumber;
+      return (
+        <StyledLink to={`/history/?kind=workNumber&value=${workNumber}`}>
+          {workNumber}
+        </StyledLink>
+      );
+    },
     sortType: (rowA, rowB) => {
       const displayNameA = rowA.original.workNumber;
       const displayNameB = rowB.original.workNumber;
