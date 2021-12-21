@@ -1,17 +1,17 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import createHistoryMachine from "./history.machine";
-import {useMachine} from "@xstate/react";
+import { useMachine } from "@xstate/react";
 import DataTable from "../DataTable";
-import {Cell, Column} from "react-table";
-import {HistoryProps, HistoryTableEntry} from "../../types/stan";
+import { Cell, Column } from "react-table";
+import { HistoryProps, HistoryTableEntry } from "../../types/stan";
 import StyledLink from "../StyledLink";
 import Warning from "../notifications/Warning";
 import WhiteButton from "../buttons/WhiteButton";
 import LoadingSpinner from "../icons/LoadingSpinner";
-import {LabwareStatePill} from "../LabwareStatePill";
-import {createHistoryFileContent} from "../../lib/services/historyService";
+import { LabwareStatePill } from "../LabwareStatePill";
+import { createHistoryFileContent } from "../../lib/services/historyService";
 import DownloadIcon from "../icons/DownloadIcon";
-import {getTimestampStr} from "../../lib/helpers";
+import { getTimestampStr } from "../../lib/helpers";
 
 /**
  * Component for looking up and displaying the history of labware and samples
@@ -71,20 +71,23 @@ export default function History(props: HistoryProps) {
         </div>
       )}
 
-      {current.matches("found") && history.length > 0 && (
-        <>
-          <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
-            <p className="text-sm text-gray-700">
-              History for {historyDisplayValues[props.kind]}{" "}
-              <span className="font-medium">{props.value}</span>
-            </p>
-            <a href={downloadURL} download={true}>
-              <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
-            </a>
-          </div>
-          <DataTable columns={historyColumns} data={history} />
-        </>
-      )}
+      {current.matches("found") &&
+        (history.length > 0 ? (
+          <>
+            <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
+              <p className="text-sm text-gray-700">
+                History for {historyDisplayValues[props.kind]}{" "}
+                <span className="font-medium">{props.value}</span>
+              </p>
+              <a href={downloadURL} download={true}>
+                <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
+              </a>
+            </div>
+            <DataTable columns={historyColumns} data={history} />
+          </>
+        ) : (
+          <Warning message={"No results found."} />
+        ))}
     </div>
   );
 }
@@ -162,4 +165,5 @@ export const historyDisplayValues: { [key in HistoryProps["kind"]]: string } = {
   sampleId: "Sample ID",
   externalName: "External ID",
   donorName: "Donor Name",
+  workNumber: "Work Number",
 };
