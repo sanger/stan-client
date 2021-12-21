@@ -14,8 +14,9 @@ type KeyValueViewerProps = {
   /**
    * Callback on changing selected key change
    * @param selectedKey - newly selected key
+   * @param selectedValues - values for the selected key
    */
-  onChangeKey: (selectedKey: string) => void;
+  onChangeKey: (selectedKey: string, values: string[]) => void;
   /**
    * Call back on selected value change
    * @param selectedValue - newly selected value
@@ -69,15 +70,14 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
 
   const handleSelectKey = React.useCallback(
     (key: string) => {
-      onChangeKey(key);
       let val: string[] = [];
       if (!multiSelectValues) {
         const values = getValues(key);
         val = values.length > 0 ? [values[0]] : [];
       }
-      onChangeValue(val);
+      onChangeKey(key, val);
     },
-    [onChangeKey, onChangeValue, multiSelectValues, getValues]
+    [onChangeKey, multiSelectValues, getValues]
   );
 
   const handleSelectValue = React.useCallback(

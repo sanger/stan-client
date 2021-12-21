@@ -1,9 +1,7 @@
-import { useMachine } from "@xstate/react";
 import * as Yup from "yup";
 import Heading from "../Heading";
 import { Form, Formik } from "formik";
 import React from "react";
-import createWorkProgressInputMachine from "./workProgressInput.machine";
 import BlueButton from "../buttons/BlueButton";
 import { WorkStatus } from "../../types/sdk";
 import { KeyValueSelector } from "../KeyValueSelector";
@@ -60,16 +58,6 @@ export default function WorkProgressInput({
   urlParams,
   workTypes,
 }: WorkProgressInputParams) {
-  const [current, send] = useMachine(
-    createWorkProgressInputMachine({
-      workProgressInput: urlParams,
-    })
-  );
-
-  const {
-    workProgressInput: { searchType, searchValues },
-  } = current.context;
-
   const generateValuesForType = React.useCallback(
     (type: WorkProgressSearchType): string[] => {
       switch (type) {
@@ -95,24 +83,6 @@ export default function WorkProgressInput({
     return map;
   };
 
-  /**Call back to update search type- Send Events to State machine**/
-  const onSelectSearchType = React.useCallback(
-    (key: string) => {
-      send({
-        type: "SET_SEARCH_TYPE",
-        value: key,
-      });
-    },
-    [send]
-  );
-  /**Call back to update search value- Send Events to State machine**/
-  const onSelectSearchValue = React.useCallback(
-    (value: string[]) => {
-      send({ type: "SET_SEARCH_VALUE", value: value });
-    },
-    [send]
-  );
-
   return (
     <div
       className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4"
@@ -126,38 +96,50 @@ export default function WorkProgressInput({
         validateOnChange={true}
         validateOnBlur={false}
         validateOnMount={false}
-        onSubmit={async () => {
+        onSubmit={async (values) => {
           history.push({
             pathname: "/",
-            search: stringify(current.context.workProgressInput),
+            search: stringify({
+              searchType: values.searchType,
+              searchValues: values.searchValues,
+            }),
           });
         }}
         validationSchema={workProgressSearchSchema(workTypes)}
       >
-        <Form>
-          <div className={" flex flex-row md:flex-grow"}>
-            <KeyValueSelector
-              keyValueMap={getSearchInputKeyValues()}
-              onChangeKey={onSelectSearchType}
-              onChangeValue={onSelectSearchValue}
-              multiSelectValues={true}
-              schemaNameKey={"searchType"}
-              schemaNameValue={"searchValues"}
-              selected={{
-                key: searchType,
-                value: searchValues ?? [],
-              }}
-            />
-            <div className="flex flex-row items-center justify-end space-x-4">
-              <BlueButton
-                type="submit"
-                disabled={!searchValues || searchValues.length <= 0}
-              >
-                Search
-              </BlueButton>
+        {({ values, setFieldValue }) => (
+          <Form>
+            <div className={" flex flex-row md:flex-grow"}>
+              <KeyValueSelector
+                keyValueMap={getSearchInputKeyValues()}
+                onChangeKey={(selectedKey, values: string[]) => {
+                  setFieldValue("searchType", selectedKey, false);
+                  setFieldValue("searchValues", values);
+                }}
+                onChangeValue={(selectedValue) => {
+                  setFieldValue("searchValues", selectedValue);
+                }}
+                multiSelectValues={true}
+                schemaNameKey={"searchType"}
+                schemaNameValue={"searchValues"}
+                selected={{
+                  key: values.searchType,
+                  value: values.searchValues ?? [],
+                }}
+              />
+              <div className="flex flex-row items-center justify-end space-x-4">
+                <BlueButton
+                  type="submit"
+                  disabled={
+                    !values.searchValues || values.searchValues.length <= 0
+                  }
+                >
+                  Search
+                </BlueButton>
+              </div>
             </div>
-          </div>
-        </Form>
+          </Form>
+        )}
       </Formik>
     </div>
   );
