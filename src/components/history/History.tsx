@@ -86,7 +86,7 @@ export default function History(props: HistoryProps) {
             <DataTable columns={historyColumns} data={history} />
           </>
         ) : (
-          <Warning message={"No results found!"} />
+          <Warning message={"No results found."} />
         ))}
     </div>
   );
