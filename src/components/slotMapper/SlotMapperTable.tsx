@@ -28,7 +28,6 @@ export default function SlotMapperTable({
           <TableHeader> Tissue Type</TableHeader>
           <TableHeader> Replicate Number</TableHeader>
           <TableHeader> Sections Number(s)</TableHeader>
-
           <TableHeader>Destination Address</TableHeader>
         </tr>
       </TableHead>
