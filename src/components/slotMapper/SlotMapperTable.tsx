@@ -23,6 +23,12 @@ export default function SlotMapperTable({
         <tr>
           <TableHeader>Source Barcode</TableHeader>
           <TableHeader>Source Address</TableHeader>
+          <TableHeader> External Name</TableHeader>
+          <TableHeader> Spatial Location</TableHeader>
+          <TableHeader> Tissue Type</TableHeader>
+          <TableHeader> Replicate Number</TableHeader>
+          <TableHeader> Sections Number(s)</TableHeader>
+
           <TableHeader>Destination Address</TableHeader>
         </tr>
       </TableHead>
@@ -31,6 +37,15 @@ export default function SlotMapperTable({
         <tr>
           <TableCell>{labware.barcode}</TableCell>
           <TableCell>{slot.address}</TableCell>
+          <TableCell>{slot.samples[0].tissue.externalName}</TableCell>
+          <TableCell>{slot.samples[0].tissue.spatialLocation.code}</TableCell>
+          <TableCell>
+            {slot.samples[0].tissue.spatialLocation.tissueType.name}
+          </TableCell>
+          <TableCell>{slot.samples[0].tissue.replicate}</TableCell>
+          <TableCell>
+            {slot.samples.map((sample) => sample.section).join(",")}
+          </TableCell>
           <TableCell>
             {getDestinationAddress(labware, slot, slotCopyContent) ?? "-"}
           </TableCell>
