@@ -2965,6 +2965,11 @@ svg.logo.loading rect:nth-child(3n+1) {
   color: rgba(39, 103, 73, var(--tw-text-opacity));
 }
 
+.text-blue-600 {
+  --tw-text-opacity: 1;
+  color: rgba(49, 130, 206, var(--tw-text-opacity));
+}
+
 .hover\:text-white:hover {
   --tw-text-opacity: 1;
   color: rgba(255, 255, 255, var(--tw-text-opacity));
@@ -4220,4 +4225,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.401db04b.chunk.css.map*/
+/*# sourceMappingURL=main.f0ce935a.chunk.css.map*/
