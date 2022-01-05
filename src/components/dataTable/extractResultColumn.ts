@@ -19,10 +19,11 @@ const barcode: ColumnFactory = () => {
 /**
  * External name of the first sample in the first slot of the labware
  */
-const externalBarcode: ColumnFactory = () => {
+const externalName: ColumnFactory = () => {
   return {
-    Header: "External Barcode",
-    accessor: (result) => result.extractResult.labware.externalBarcode,
+    Header: "External Name",
+    accessor: (result) =>
+      result.extractResult.labware.slots[0].samples[0].tissue.externalName,
   };
 };
 
@@ -72,7 +73,7 @@ const nanodropResult: ColumnFactory = () => {
 
 const columns = {
   barcode,
-  externalBarcode,
+  externalName,
   tissueType,
   medium,
   fixative,

@@ -114,7 +114,7 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
   const columns = useMemo(
     () => [
       extractResultColumn.barcode(),
-      extractResultColumn.externalBarcode(),
+      extractResultColumn.externalName(),
       extractResultColumn.tissueType(),
       extractResultColumn.medium(),
       extractResultColumn.fixative(),
