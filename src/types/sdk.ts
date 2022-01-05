@@ -1358,6 +1358,11 @@ export type ActionFieldsFragment = (
   ) }
 );
 
+export type AddressPermDataFieldsFragment = (
+  { __typename?: 'AddressPermData' }
+  & Pick<AddressPermData, 'address' | 'controlType' | 'seconds' | 'selected'>
+);
+
 export type CommentFieldsFragment = (
   { __typename?: 'Comment' }
   & Pick<Comment, 'id' | 'text' | 'category' | 'enabled'>
@@ -3019,6 +3024,14 @@ export type GetWorkTypesQuery = (
   )> }
 );
 
+export const AddressPermDataFieldsFragmentDoc = gql`
+    fragment AddressPermDataFields on AddressPermData {
+  address
+  controlType
+  seconds
+  selected
+}
+    `;
 export const CommentFieldsFragmentDoc = gql`
     fragment CommentFields on Comment {
   id
