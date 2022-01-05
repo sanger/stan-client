@@ -14,6 +14,7 @@ import FormikSelect from "../forms/Select";
 import { Form, Formik } from "formik";
 import PinkButton from "../buttons/PinkButton";
 import { MAX_NUM_BLOCKANDSLIDES } from "./WorkAllocation";
+import FormikInput from "../forms/Input";
 
 /**
  * The type of values for the edit form
@@ -151,6 +152,19 @@ export default function WorkRow({
           work.numSlides ?? undefined,
           "slide"
         )}
+      </TableCell>
+
+      <TableCell>
+        <FormikInput
+          label={""}
+          name={`${work.workNumber}.value`}
+          data-testid={`${work.workNumber}-priority`}
+          className={"border-0 border-gray-100 "}
+          onChange={(e: React.FormEvent<HTMLInputElement>) => {
+            send({ type: "UPDATE_PRIORITY", priority: e.currentTarget.value });
+          }}
+          defaultValue={work.priority ?? ""}
+        />
       </TableCell>
       {!editModeEnabled && (
         <TableCell>

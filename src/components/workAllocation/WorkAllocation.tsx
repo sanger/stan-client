@@ -240,6 +240,7 @@ export default function WorkAllocation() {
                 <TableHeader>Cost Code</TableHeader>
                 <TableHeader>Number of Blocks</TableHeader>
                 <TableHeader>Number of Slides</TableHeader>
+                <TableHeader>Priority</TableHeader>
                 <TableHeader>Status</TableHeader>
                 <TableHeader />
               </tr>

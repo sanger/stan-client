@@ -12,4 +12,5 @@ fragment WorkFields on Work {
     }
     numBlocks
     numSlides
+    priority
 }
