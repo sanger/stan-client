@@ -1,0 +1,5 @@
+query FindHistoryForWorkNumber($workNumber:String!) {
+    historyForWorkNumber(workNumber: $workNumber) {
+        ...HistoryFields
+    }
+}

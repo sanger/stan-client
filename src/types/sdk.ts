@@ -818,6 +818,7 @@ export type Query = {
   historyForSampleId: History;
   historyForExternalName: History;
   historyForDonorName: History;
+  historyForWorkNumber: History;
   historyForLabwareBarcode: History;
   workProgress: Array<WorkProgress>;
   location: Location;
@@ -951,6 +952,11 @@ export type QueryHistoryForExternalNameArgs = {
 
 export type QueryHistoryForDonorNameArgs = {
   donorName: Scalars['String'];
+};
+
+
+export type QueryHistoryForWorkNumberArgs = {
+  workNumber: Scalars['String'];
 };
 
 
@@ -2591,6 +2597,19 @@ export type FindHistoryForSampleIdQuery = (
   ) }
 );
 
+export type FindHistoryForWorkNumberQueryVariables = Exact<{
+  workNumber: Scalars['String'];
+}>;
+
+
+export type FindHistoryForWorkNumberQuery = (
+  { __typename?: 'Query' }
+  & { historyForWorkNumber: (
+    { __typename?: 'History' }
+    & HistoryFieldsFragment
+  ) }
+);
+
 export type FindLabwareQueryVariables = Exact<{
   barcode: Scalars['String'];
 }>;
@@ -3932,6 +3951,13 @@ export const FindHistoryForSampleIdDocument = gql`
   }
 }
     ${HistoryFieldsFragmentDoc}`;
+export const FindHistoryForWorkNumberDocument = gql`
+    query FindHistoryForWorkNumber($workNumber: String!) {
+  historyForWorkNumber(workNumber: $workNumber) {
+    ...HistoryFields
+  }
+}
+    ${HistoryFieldsFragmentDoc}`;
 export const FindLabwareDocument = gql`
     query FindLabware($barcode: String!) {
   labware(barcode: $barcode) {
@@ -4412,6 +4438,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     FindHistoryForSampleId(variables: FindHistoryForSampleIdQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForSampleIdQuery> {
       return withWrapper(() => client.request<FindHistoryForSampleIdQuery>(FindHistoryForSampleIdDocument, variables, requestHeaders));
+    },
+    FindHistoryForWorkNumber(variables: FindHistoryForWorkNumberQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForWorkNumberQuery> {
+      return withWrapper(() => client.request<FindHistoryForWorkNumberQuery>(FindHistoryForWorkNumberDocument, variables, requestHeaders));
     },
     FindLabware(variables: FindLabwareQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLabwareQuery> {
       return withWrapper(() => client.request<FindLabwareQuery>(FindLabwareDocument, variables, requestHeaders));
