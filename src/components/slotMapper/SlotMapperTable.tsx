@@ -23,11 +23,11 @@ export default function SlotMapperTable({
         <tr>
           <TableHeader>Source Barcode</TableHeader>
           <TableHeader>Source Address</TableHeader>
-          <TableHeader> External Name</TableHeader>
-          <TableHeader> Spatial Location</TableHeader>
-          <TableHeader> Tissue Type</TableHeader>
-          <TableHeader> Replicate Number</TableHeader>
-          <TableHeader> Sections Number(s)</TableHeader>
+          <TableHeader>External Name</TableHeader>
+          <TableHeader>Spatial Location</TableHeader>
+          <TableHeader>Tissue Type</TableHeader>
+          <TableHeader>Replicate Number</TableHeader>
+          <TableHeader>Sections Number(s)</TableHeader>
           <TableHeader>Destination Address</TableHeader>
         </tr>
       </TableHead>
