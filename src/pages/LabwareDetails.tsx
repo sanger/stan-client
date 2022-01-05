@@ -26,64 +26,65 @@ export default function LabwareDetails({ labware }: LabwareDetailsProps) {
         <AppShell.Title>{labware.barcode}</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        <div className="max-w-screen-xl mx-auto space-y-8">
-          <div className="rounded-lg p-8 bg-gray-100 flex flex-row items-top justify-around">
-            <div>
-              <LabwareView
-                labware={labware}
-                name={labware.labwareType.name}
-                selectable={"none"}
-              />
-            </div>
-
-            <div className="space-y-10">
-              <div className="space-y-4">
-                <Heading level={4}>Labware Details</Heading>
-
-                <StripyCard heading={labware.barcode}>
-                  <StripyCardDetail term={"Labware type"}>
-                    {labware.labwareType.name}
-                  </StripyCardDetail>
-
-                  <StripyCardDetail term={"Date of Creation"}>
-                    {labware.created}
-                  </StripyCardDetail>
-
-                  <StripyCardDetail term={"State"}>
-                    <LabwareStatePill labware={labware} />
-                  </StripyCardDetail>
-                </StripyCard>
+        <div className="mx-auto">
+          <div className="max-w-screen-xl mx-auto space-y-8">
+            <div className="rounded-lg p-8 bg-gray-100 flex flex-row items-top justify-around">
+              <div>
+                <LabwareView
+                  labware={labware}
+                  name={labware.labwareType.name}
+                  selectable={"none"}
+                />
               </div>
 
-              {isLabwareUsable(labware) && (
-                <Authenticated>
-                  <div className="space-y-4">
-                    <Heading level={4}>Re-Print Labels</Heading>
-                    <LabelPrinter labwares={[labware]} />
-                  </div>
-                </Authenticated>
-              )}
+              <div className="space-y-10">
+                <div className="space-y-4">
+                  <Heading level={4}>Labware Details</Heading>
+
+                  <StripyCard heading={labware.barcode}>
+                    <StripyCardDetail term={"Labware type"}>
+                      {labware.labwareType.name}
+                    </StripyCardDetail>
+
+                    <StripyCardDetail term={"Date of Creation"}>
+                      {labware.created}
+                    </StripyCardDetail>
+
+                    <StripyCardDetail term={"State"}>
+                      <LabwareStatePill labware={labware} />
+                    </StripyCardDetail>
+                  </StripyCard>
+                </div>
+
+                {isLabwareUsable(labware) && (
+                  <Authenticated>
+                    <div className="space-y-4">
+                      <Heading level={4}>Re-Print Labels</Heading>
+                      <LabelPrinter labwares={[labware]} />
+                    </div>
+                  </Authenticated>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Heading level={2}>Samples</Heading>
+
+              <DataTable
+                columns={[
+                  sampleColumns.slotAddress(),
+                  sampleColumns.tissueType(),
+                  sampleColumns.sectionNumber(),
+                  sampleColumns.bioState(),
+                  sampleColumns.replicateNumber(),
+                  sampleColumns.spatialLocation(),
+                  sampleColumns.lifeStage(),
+                  sampleColumns.donorName(),
+                ]}
+                data={sampleColumns.buildSampleDataTableRows(labware)}
+              />
             </div>
           </div>
-
-          <div className="space-y-4">
-            <Heading level={2}>Samples</Heading>
-
-            <DataTable
-              columns={[
-                sampleColumns.slotAddress(),
-                sampleColumns.tissueType(),
-                sampleColumns.sectionNumber(),
-                sampleColumns.bioState(),
-                sampleColumns.replicateNumber(),
-                sampleColumns.spatialLocation(),
-                sampleColumns.lifeStage(),
-                sampleColumns.donorName(),
-              ]}
-              data={sampleColumns.buildSampleDataTableRows(labware)}
-            />
-          </div>
-
           <div className="space-y-4">
             <Heading level={2}>Labware History</Heading>
             <History kind={"labwareBarcode"} value={labware.barcode} />
