@@ -13,11 +13,18 @@ import { SearchServiceInterface } from "./searchServiceInterface";
  */
 export type WorkProgressResultTableEntry = {
   workNumber: string;
+  workType: string;
+  project: string;
   status: WorkStatus;
   lastSectionDate: Date | undefined;
   lastStainingDate: Date | undefined;
   lastRNAExtractionDate: Date | undefined;
   lastCDNADate: Date | undefined;
+  lastRNAScopeIHCStainDate: Date | undefined;
+  lastSlideImagedDate: Date | undefined;
+  lastRNAAnalysisDate: Date | undefined;
+  lastStainTODate: Date | undefined;
+  lastStainLPDate: Date | undefined;
 };
 /**
  * The keys to store the timestamp data
@@ -26,7 +33,12 @@ export type WorkProgressTimeStampType =
   | "Section"
   | "Stain"
   | "Extract"
-  | "Visium cDNA";
+  | "Visium cDNA"
+  | "Stain Visium TO"
+  | "RNAscope/IHC stain"
+  | "Stain Visium LP"
+  | "Image"
+  | "Analysis";
 
 export class WorkProgressService
   implements
@@ -48,6 +60,7 @@ export class WorkProgressService
         typeof value === "string" ? value.trim() : value
       )
       .value();
+
     const response = await stanCore.FindWorkProgress(request);
     return {
       numDisplayed: response.workProgress.entries.length,
@@ -78,8 +91,15 @@ export class WorkProgressService
       const lastStainingDate = timeStampMap.get("Stain");
       const lastRNAExtractionDate = timeStampMap.get("Extract");
       const lastCDNADate = timeStampMap.get("Visium cDNA");
+      const lastStainVisiumTODate = timeStampMap.get("Stain Visium TO");
+      const lastStainVisiumLPDate = timeStampMap.get("Stain Visium LP");
+      const lastRNAScopeIHCStainDate = timeStampMap.get("RNAscope/IHC stain");
+      const lastSlideImagedDate = timeStampMap.get("Image");
+      const lastRNAAnalysisDate = timeStampMap.get("Analysis");
       return {
         workNumber: entry.work.workNumber,
+        workType: entry.work.workType.name,
+        project: entry.work.project.name,
         status: entry.work.status,
         lastSectionDate:
           lastSectionDate && new Date(lastSectionDate.toString()),
@@ -88,6 +108,17 @@ export class WorkProgressService
         lastRNAExtractionDate:
           lastRNAExtractionDate && new Date(lastRNAExtractionDate.toString()),
         lastCDNADate: lastCDNADate && new Date(lastCDNADate.toString()),
+        lastStainTODate:
+          lastStainVisiumTODate && new Date(lastStainVisiumTODate.toString()),
+        lastStainLPDate:
+          lastStainVisiumLPDate && new Date(lastStainVisiumLPDate.toString()),
+        lastRNAScopeIHCStainDate:
+          lastRNAScopeIHCStainDate &&
+          new Date(lastRNAScopeIHCStainDate.toString()),
+        lastRNAAnalysisDate:
+          lastRNAAnalysisDate && new Date(lastRNAAnalysisDate.toString()),
+        lastSlideImagedDate:
+          lastSlideImagedDate && new Date(lastSlideImagedDate.toString()),
       };
     });
   };
