@@ -15,6 +15,7 @@ import { Form, Formik } from "formik";
 import PinkButton from "../buttons/PinkButton";
 import { MAX_NUM_BLOCKANDSLIDES } from "./WorkAllocation";
 import FormikInput from "../forms/Input";
+import * as Yup from "yup";
 
 /**
  * The type of values for the edit form
@@ -133,6 +134,43 @@ export default function WorkRow({
     );
   };
 
+  const workPriorityValidationSchema: Yup.ObjectSchema = Yup.object().shape({
+    priority: Yup.string()
+      .optional()
+      .matches(
+        /^[A-Z]\d/,
+        "Must be capital letter followed by a one-digit number"
+      )
+      .min(0, "Must be of length 2 - capital letter followed by a number")
+      .max(2, "Must be of length 2 - capital letter followed by a number"),
+  });
+  const renderWorkPriority = (workNumber: string, workPriority: string) => {
+    return (
+      <Formik
+        initialValues={{ priority: workPriority ?? "" }}
+        onSubmit={() => {}}
+        validationSchema={workPriorityValidationSchema}
+      >
+        {({ setFieldValue }) => (
+          <Form>
+            <FormikInput
+              label={""}
+              name={`priority`}
+              data-testid={`${workNumber}-priority`}
+              className={"border-0 border-gray-100 "}
+              onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                setFieldValue("priority", e.currentTarget.value.toUpperCase());
+                send({
+                  type: "UPDATE_PRIORITY",
+                  priority: e.currentTarget.value.toUpperCase(),
+                });
+              }}
+            />
+          </Form>
+        )}
+      </Formik>
+    );
+  };
   return (
     <tr>
       <TableCell>{work.workNumber}</TableCell>
@@ -146,6 +184,7 @@ export default function WorkRow({
           "block"
         )}
       </TableCell>
+
       <TableCell>
         {renderWorkNumValueField(
           work.workNumber,
@@ -155,16 +194,7 @@ export default function WorkRow({
       </TableCell>
 
       <TableCell>
-        <FormikInput
-          label={""}
-          name={`${work.workNumber}.value`}
-          data-testid={`${work.workNumber}-priority`}
-          className={"border-0 border-gray-100 "}
-          onChange={(e: React.FormEvent<HTMLInputElement>) => {
-            send({ type: "UPDATE_PRIORITY", priority: e.currentTarget.value });
-          }}
-          defaultValue={work.priority ?? ""}
-        />
+        {renderWorkPriority(work.workNumber, work.priority ?? "")}
       </TableCell>
       {!editModeEnabled && (
         <TableCell>
