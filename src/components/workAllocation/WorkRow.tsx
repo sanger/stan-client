@@ -15,7 +15,6 @@ import { Form, Formik } from "formik";
 import PinkButton from "../buttons/PinkButton";
 import { MAX_NUM_BLOCKANDSLIDES } from "./WorkAllocation";
 import FormikInput from "../forms/Input";
-import * as Yup from "yup";
 
 /**
  * The type of values for the edit form
@@ -134,22 +133,24 @@ export default function WorkRow({
     );
   };
 
-  const workPriorityValidationSchema: Yup.ObjectSchema = Yup.object().shape({
-    priority: Yup.string()
-      .optional()
-      .matches(
-        /^[A-Z]\d/,
-        "Must be capital letter followed by a one-digit number"
-      )
-      .min(0, "Must be of length 2 - capital letter followed by a number")
-      .max(2, "Must be of length 2 - capital letter followed by a number"),
-  });
+  const validateWorkPriority = (priority: string) => {
+    let errorMessage = "";
+    if (priority.length === 0) return errorMessage;
+    if (priority.length !== 2) {
+      errorMessage =
+        "Must be of length 2 - capital letter followed by a number";
+    }
+    const priorityRegEx = /^[A-Z]\d/;
+    if (!priorityRegEx.test(priority.toUpperCase())) {
+      errorMessage = "Must be capital letter followed by a one-digit number";
+    }
+    return errorMessage;
+  };
   const renderWorkPriority = (workNumber: string, workPriority: string) => {
     return (
       <Formik
         initialValues={{ priority: workPriority ?? "" }}
         onSubmit={() => {}}
-        validationSchema={workPriorityValidationSchema}
       >
         {({ setFieldValue }) => (
           <Form>
@@ -159,12 +160,16 @@ export default function WorkRow({
               data-testid={`${workNumber}-priority`}
               className={"border-0 border-gray-100 "}
               onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                setFieldValue("priority", e.currentTarget.value.toUpperCase());
-                send({
-                  type: "UPDATE_PRIORITY",
-                  priority: e.currentTarget.value.toUpperCase(),
-                });
+                const priority = e.currentTarget.value.toUpperCase();
+                setFieldValue("priority", priority);
+                if (validateWorkPriority(priority).length === 0) {
+                  send({
+                    type: "UPDATE_PRIORITY",
+                    priority: e.currentTarget.value.toUpperCase(),
+                  });
+                }
               }}
+              validate={validateWorkPriority}
             />
           </Form>
         )}
