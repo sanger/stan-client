@@ -520,6 +520,7 @@ video {
 
 
       [type='text'],
+      [type='url'],
       [type='password'],
       [type='number'],
       [type='date'],
@@ -543,7 +544,7 @@ video {
   line-height: 1.5rem;
 }
 
-[type='text']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='search']:focus, [type='time']:focus, [multiple]:focus, textarea:focus, select:focus {
+[type='text']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='search']:focus, [type='time']:focus, [multiple]:focus, textarea:focus, select:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
   --tw-ring-inset: var(--tw-empty,/*!*/ /*!*/);
@@ -4225,4 +4226,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.f0ce935a.chunk.css.map*/
+/*# sourceMappingURL=main.e30e01c1.chunk.css.map*/
