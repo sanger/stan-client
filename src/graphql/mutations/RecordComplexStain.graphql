@@ -1,0 +1,7 @@
+mutation RecordComplexStain($request: ComplexStainRequest!) {
+    recordComplexStain(request: $request) {
+        operations {
+            id
+        }
+    }
+}

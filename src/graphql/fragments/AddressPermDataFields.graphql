@@ -1,0 +1,6 @@
+fragment AddressPermDataFields on AddressPermData {
+    address
+    controlType
+    seconds
+    selected
+}

@@ -1,4 +1,7 @@
-import {FindHistoryForLabwareBarcodeQuery, FindHistoryForLabwareBarcodeQueryVariables,} from "../../../src/types/sdk";
+import {
+  FindHistoryForLabwareBarcodeQuery,
+  FindHistoryForLabwareBarcodeQueryVariables,
+} from "../../../src/types/sdk";
 
 describe("History Page", () => {
   context("when I visit the page with no URL params", () => {
@@ -80,6 +83,22 @@ describe("History Page", () => {
       it("does performs a history search", () => {
         cy.findByTestId("history").should("exist");
         cy.findByTextContent("History for Donor Name DNR123");
+      });
+    });
+  });
+
+  describe("By Work Number", () => {
+    context("when I visit the page with good URL params", () => {
+      before(() => cy.visit("/history?kind=workNumber&value=SGP1"));
+
+      it("uses the params to fill in the form", () => {
+        cy.get("input[name='value']").invoke("val").should("eq", "SGP1");
+        cy.get("select[name='kind']").invoke("val").should("eq", "workNumber");
+      });
+
+      it("does performs a history search", () => {
+        cy.findByTestId("history").should("exist");
+        cy.findByTextContent("History for Work Number SGP1");
       });
     });
   });

@@ -2,6 +2,8 @@ import { graphql } from "msw";
 import {
   GetStainInfoQuery,
   GetStainInfoQueryVariables,
+  RecordComplexStainMutation,
+  RecordComplexStainMutationVariables,
   StainMutation,
   StainMutationVariables,
 } from "../../types/sdk";
@@ -35,6 +37,23 @@ const stainingHandlers = [
       );
     }
   ),
+
+  graphql.mutation<
+    RecordComplexStainMutation,
+    RecordComplexStainMutationVariables
+  >("RecordComplexStain", (req, res, ctx) => {
+    return res(
+      ctx.data({
+        recordComplexStain: {
+          operations: [
+            {
+              id: 1,
+            },
+          ],
+        },
+      })
+    );
+  }),
 ];
 
 export default stainingHandlers;

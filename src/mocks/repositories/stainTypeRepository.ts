@@ -8,6 +8,8 @@ const stainTypeSeeds: Array<StainTypeFieldsFragment> = [
     measurementTypes: ["Haematoxylin", "Blueing", "Eosin"],
   }),
   stainTypeFactory.build({ name: "Masson's Trichrome" }),
+  stainTypeFactory.build({ name: "RNAscope" }),
+  stainTypeFactory.build({ name: "IHC" }),
 ];
 
 const stainTypeRepo = createSessionStorageRepository(

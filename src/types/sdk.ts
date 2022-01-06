@@ -818,6 +818,7 @@ export type Query = {
   historyForSampleId: History;
   historyForExternalName: History;
   historyForDonorName: History;
+  historyForWorkNumber: History;
   historyForLabwareBarcode: History;
   workProgress: Array<WorkProgress>;
   location: Location;
@@ -951,6 +952,11 @@ export type QueryHistoryForExternalNameArgs = {
 
 export type QueryHistoryForDonorNameArgs = {
   donorName: Scalars['String'];
+};
+
+
+export type QueryHistoryForWorkNumberArgs = {
+  workNumber: Scalars['String'];
 };
 
 
@@ -1350,6 +1356,11 @@ export type ActionFieldsFragment = (
     { __typename?: 'Sample' }
     & SampleFieldsFragment
   ) }
+);
+
+export type AddressPermDataFieldsFragment = (
+  { __typename?: 'AddressPermData' }
+  & Pick<AddressPermData, 'address' | 'controlType' | 'seconds' | 'selected'>
 );
 
 export type CommentFieldsFragment = (
@@ -1945,6 +1956,22 @@ export type PrintMutationVariables = Exact<{
 export type PrintMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'printLabware'>
+);
+
+export type RecordComplexStainMutationVariables = Exact<{
+  request: ComplexStainRequest;
+}>;
+
+
+export type RecordComplexStainMutation = (
+  { __typename?: 'Mutation' }
+  & { recordComplexStain: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
 );
 
 export type RecordExtractResultMutationVariables = Exact<{
@@ -2570,6 +2597,19 @@ export type FindHistoryForSampleIdQuery = (
   ) }
 );
 
+export type FindHistoryForWorkNumberQueryVariables = Exact<{
+  workNumber: Scalars['String'];
+}>;
+
+
+export type FindHistoryForWorkNumberQuery = (
+  { __typename?: 'Query' }
+  & { historyForWorkNumber: (
+    { __typename?: 'History' }
+    & HistoryFieldsFragment
+  ) }
+);
+
 export type FindLabwareQueryVariables = Exact<{
   barcode: Scalars['String'];
 }>;
@@ -2984,6 +3024,14 @@ export type GetWorkTypesQuery = (
   )> }
 );
 
+export const AddressPermDataFieldsFragmentDoc = gql`
+    fragment AddressPermDataFields on AddressPermData {
+  address
+  controlType
+  seconds
+  selected
+}
+    `;
 export const CommentFieldsFragmentDoc = gql`
     fragment CommentFields on Comment {
   id
@@ -3514,6 +3562,15 @@ export const PrintDocument = gql`
   printLabware(barcodes: $barcodes, printer: $printer)
 }
     `;
+export const RecordComplexStainDocument = gql`
+    mutation RecordComplexStain($request: ComplexStainRequest!) {
+  recordComplexStain(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
 export const RecordExtractResultDocument = gql`
     mutation RecordExtractResult($request: ExtractResultRequest!) {
   recordExtractResult(request: $request) {
@@ -3894,6 +3951,13 @@ export const FindHistoryForSampleIdDocument = gql`
   }
 }
     ${HistoryFieldsFragmentDoc}`;
+export const FindHistoryForWorkNumberDocument = gql`
+    query FindHistoryForWorkNumber($workNumber: String!) {
+  historyForWorkNumber(workNumber: $workNumber) {
+    ...HistoryFields
+  }
+}
+    ${HistoryFieldsFragmentDoc}`;
 export const FindLabwareDocument = gql`
     query FindLabware($barcode: String!) {
   labware(barcode: $barcode) {
@@ -4262,6 +4326,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     Print(variables: PrintMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PrintMutation> {
       return withWrapper(() => client.request<PrintMutation>(PrintDocument, variables, requestHeaders));
     },
+    RecordComplexStain(variables: RecordComplexStainMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordComplexStainMutation> {
+      return withWrapper(() => client.request<RecordComplexStainMutation>(RecordComplexStainDocument, variables, requestHeaders));
+    },
     RecordExtractResult(variables: RecordExtractResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordExtractResultMutation> {
       return withWrapper(() => client.request<RecordExtractResultMutation>(RecordExtractResultDocument, variables, requestHeaders));
     },
@@ -4375,6 +4442,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     FindHistoryForSampleId(variables: FindHistoryForSampleIdQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForSampleIdQuery> {
       return withWrapper(() => client.request<FindHistoryForSampleIdQuery>(FindHistoryForSampleIdDocument, variables, requestHeaders));
+    },
+    FindHistoryForWorkNumber(variables: FindHistoryForWorkNumberQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForWorkNumberQuery> {
+      return withWrapper(() => client.request<FindHistoryForWorkNumberQuery>(FindHistoryForWorkNumberDocument, variables, requestHeaders));
     },
     FindLabware(variables: FindLabwareQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLabwareQuery> {
       return withWrapper(() => client.request<FindLabwareQuery>(FindLabwareDocument, variables, requestHeaders));

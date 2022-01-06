@@ -242,7 +242,7 @@ export type HistoryTableEntry = {
   details: Array<string>;
 }
 
-const historyStrKeys = ["externalName", "donorName", "labwareBarcode"] as const;
+const historyStrKeys = ["externalName", "donorName", "labwareBarcode","workNumber"] as const;
 type HistoryStrKeys = typeof historyStrKeys[number];
 const historyNumKeys = ["sampleId"] as const;
 type HistoryNumKeys = typeof historyNumKeys[number];

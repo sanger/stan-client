@@ -8,6 +8,8 @@ import {
   FindHistoryForLabwareBarcodeQueryVariables,
   FindHistoryForSampleIdQuery,
   FindHistoryForSampleIdQueryVariables,
+  FindHistoryForWorkNumberQuery,
+  FindHistoryForWorkNumberQueryVariables,
   HistoryEntry,
   HistoryFieldsFragment,
 } from "../../types/sdk";
@@ -88,6 +90,18 @@ const historyHandlers = [
       ctx.data({
         __typename: "Query",
         historyForSampleId: buildHistory(),
+      })
+    );
+  }),
+
+  graphql.query<
+    FindHistoryForWorkNumberQuery,
+    FindHistoryForWorkNumberQueryVariables
+  >("FindHistoryForWorkNumber", (req, res, ctx) => {
+    return res(
+      ctx.data({
+        __typename: "Query",
+        historyForWorkNumber: buildHistory(),
       })
     );
   }),
