@@ -251,6 +251,13 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     },
   },
   {
+    Header: "Status",
+    accessor: "status",
+    sortType: (rowA, rowB) => {
+      return getStatusSortType(rowA.original.status, rowB.original.status);
+    },
+  },
+  {
     Header: "Work Type",
     accessor: "workType",
   },
@@ -258,13 +265,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     Header: "Project",
     accessor: "project",
   },
-  {
-    Header: "Status",
-    accessor: "status",
-    sortType: (rowA, rowB) => {
-      return getStatusSortType(rowA.original.status, rowB.original.status);
-    },
-  },
+
   {
     Header: "Last Sectioning Date",
     accessor: (originalRow) =>
@@ -302,26 +303,14 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     },
   },
   {
-    Header: "Last Visium LP Staining Date",
+    Header: "Last Imaging Date",
     accessor: (originalRow) =>
-      originalRow.lastStainLPDate &&
-      originalRow.lastStainLPDate.toLocaleDateString(),
+      originalRow.lastSlideImagedDate &&
+      originalRow.lastSlideImagedDate.toLocaleDateString(),
     sortType: (rowA, rowB) => {
       return getDateSortType(
-        rowA.original.lastStainLPDate,
-        rowB.original.lastStainLPDate
-      );
-    },
-  },
-  {
-    Header: "Last Visium TO Staining Date",
-    accessor: (originalRow) =>
-      originalRow.lastStainTODate &&
-      originalRow.lastStainTODate.toLocaleDateString(),
-    sortType: (rowA, rowB) => {
-      return getDateSortType(
-        rowA.original.lastStainTODate,
-        rowB.original.lastStainTODate
+        rowA.original.lastSlideImagedDate,
+        rowB.original.lastSlideImagedDate
       );
     },
   },
@@ -350,6 +339,30 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     },
   },
   {
+    Header: "Last Visium TO Staining Date",
+    accessor: (originalRow) =>
+      originalRow.lastStainTODate &&
+      originalRow.lastStainTODate.toLocaleDateString(),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastStainTODate,
+        rowB.original.lastStainTODate
+      );
+    },
+  },
+  {
+    Header: "Last Visium LP Staining Date",
+    accessor: (originalRow) =>
+      originalRow.lastStainLPDate &&
+      originalRow.lastStainLPDate.toLocaleDateString(),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastStainLPDate,
+        rowB.original.lastStainLPDate
+      );
+    },
+  },
+  {
     Header: "Last cDNA Transfer Date",
     accessor: (originalRow) =>
       originalRow.lastCDNADate && originalRow.lastCDNADate.toLocaleDateString(),
@@ -357,18 +370,6 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
       return getDateSortType(
         rowA.original.lastCDNADate,
         rowB.original.lastCDNADate
-      );
-    },
-  },
-  {
-    Header: "Last Imaging Date",
-    accessor: (originalRow) =>
-      originalRow.lastSlideImagedDate &&
-      originalRow.lastSlideImagedDate.toLocaleDateString(),
-    sortType: (rowA, rowB) => {
-      return getDateSortType(
-        rowA.original.lastSlideImagedDate,
-        rowB.original.lastSlideImagedDate
       );
     },
   },
