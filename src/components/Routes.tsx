@@ -301,14 +301,19 @@ export function Routes() {
             <DataFetcher
               key={routeProps.location.key}
               dataFetcher={() => {
-                return stanCore.FindLabware({
+                return stanCore.FindPermData({
                   barcode: routeProps.match.params.barcode,
                 });
               }}
             >
-              {(findLabwareQuery) => (
-                <LabwareDetails labware={findLabwareQuery.labware} />
-              )}
+              {(dataFetcher) => {
+                return (
+                  <LabwareDetails
+                    labware={dataFetcher.visiumPermData.labware}
+                    permData={dataFetcher.visiumPermData.addressPermData}
+                  />
+                );
+              }}
             </DataFetcher>
           );
         }}
@@ -335,9 +340,17 @@ export function Routes() {
 
       <Route
         path="/"
-        render={(routeProps) => (
-          <WorkProgress urlParamsString={routeProps.location.search} />
-        )}
+        render={() => {
+          return (
+            <DataFetcher dataFetcher={stanCore.GetWorkTypes}>
+              {(workTypes) => (
+                <WorkProgress
+                  workTypes={workTypes.workTypes.map((val) => val.name)}
+                />
+              )}
+            </DataFetcher>
+          );
+        }}
       />
     </Switch>
   );

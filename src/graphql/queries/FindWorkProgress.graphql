@@ -1,5 +1,5 @@
-query FindWorkProgress($workNumber:String,$workType:String, $status:WorkStatus) {
-    workProgress(workNumber:$workNumber,workType:$workType,status:$status) {
+query FindWorkProgress($workNumber:String,$workTypes:[String!], $statuses:[WorkStatus!]) {
+    workProgress(workNumber:$workNumber,workTypes:$workTypes,statuses:$statuses) {
         ...WorkProgressFields
     }
 }

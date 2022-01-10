@@ -968,8 +968,8 @@ export type QueryHistoryForWorkNumberArgs = {
 
 export type QueryWorkProgressArgs = {
   workNumber?: Maybe<Scalars['String']>;
-  workType?: Maybe<Scalars['String']>;
-  status?: Maybe<WorkStatus>;
+  workTypes?: Maybe<Array<Scalars['String']>>;
+  statuses?: Maybe<Array<WorkStatus>>;
 };
 
 
@@ -1364,6 +1364,11 @@ export type ActionFieldsFragment = (
     { __typename?: 'Sample' }
     & SampleFieldsFragment
   ) }
+);
+
+export type AddressPermDataFieldsFragment = (
+  { __typename?: 'AddressPermData' }
+  & Pick<AddressPermData, 'address' | 'controlType' | 'seconds' | 'selected'>
 );
 
 export type CommentFieldsFragment = (
@@ -2751,8 +2756,8 @@ export type FindWorkNumbersQuery = (
 
 export type FindWorkProgressQueryVariables = Exact<{
   workNumber?: Maybe<Scalars['String']>;
-  workType?: Maybe<Scalars['String']>;
-  status?: Maybe<WorkStatus>;
+  workTypes?: Maybe<Array<Scalars['String']> | Scalars['String']>;
+  statuses?: Maybe<Array<WorkStatus> | WorkStatus>;
 }>;
 
 
@@ -3041,6 +3046,14 @@ export type GetWorkTypesQuery = (
   )> }
 );
 
+export const AddressPermDataFieldsFragmentDoc = gql`
+    fragment AddressPermDataFields on AddressPermData {
+  address
+  controlType
+  seconds
+  selected
+}
+    `;
 export const CommentFieldsFragmentDoc = gql`
     fragment CommentFields on Comment {
   id
@@ -4055,8 +4068,12 @@ export const FindWorkNumbersDocument = gql`
 }
     `;
 export const FindWorkProgressDocument = gql`
-    query FindWorkProgress($workNumber: String, $workType: String, $status: WorkStatus) {
-  workProgress(workNumber: $workNumber, workType: $workType, status: $status) {
+    query FindWorkProgress($workNumber: String, $workTypes: [String!], $statuses: [WorkStatus!]) {
+  workProgress(
+    workNumber: $workNumber
+    workTypes: $workTypes
+    statuses: $statuses
+  ) {
     ...WorkProgressFields
   }
 }
