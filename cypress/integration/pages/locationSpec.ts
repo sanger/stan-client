@@ -1,18 +1,18 @@
 describe("Location", () => {
   before(() => {
-    cy.visit("/locations/STO-014");
+    cy.visit("/locations/STO-024");
   });
 
   describe("Custom Names", () => {
     it("displays the custom name", () => {
-      cy.findByText("Box 1 in Rack 1 in Freezer 1 in Room 1234").should(
+      cy.findByText("Box 3 in Rack 3 in Freezer 1 in Room 1234").should(
         "be.visible"
       );
     });
 
     context("when I click and edit the custom name", () => {
       before(() => {
-        cy.findByText("Box 1 in Rack 1 in Freezer 1 in Room 1234").click();
+        cy.findByText("Box 3 in Rack 3 in Freezer 1 in Room 1234").click();
         cy.focused().type("Freezer McCool{enter}");
       });
 
@@ -24,19 +24,19 @@ describe("Location", () => {
 
   describe("Displaying Properties", () => {
     it("displays the name", () => {
-      cy.findByText("Location 14").should("exist");
+      cy.findByText("Location 24").should("exist");
     });
 
     it("displays the barcode", () => {
-      cy.findByText("STO-014").should("exist");
+      cy.findByText("STO-024").should("exist");
     });
 
     it("displays the parent", () => {
-      cy.findByText("Rack 1 in Freezer 1 in Room 1234").should("exist");
+      cy.findByText("Rack 3 in Freezer 1 in Room 1234").should("exist");
     });
 
     it("displays the size", () => {
-      cy.findByTextContent("10 row(s) and 5 column(s)").should("exist");
+      cy.findByTextContent("5 row(s) and 5 column(s)").should("exist");
     });
 
     it("displays the number of stored items", () => {
@@ -44,7 +44,7 @@ describe("Location", () => {
     });
 
     it("displays the layout", () => {
-      cy.findByText("RightDown").should("exist");
+      cy.findByText("RightUp").should("exist");
     });
 
     it("displays a section for Stored Items", () => {
