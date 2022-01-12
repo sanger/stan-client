@@ -1,7 +1,6 @@
 describe("Location - List View", () => {
   before(() => {
     cy.visit("/locations/STO-014");
-    cy.findByTestId("listIcon").click();
   });
 
   it("shows stored items", () => {

@@ -125,19 +125,24 @@ freezers.forEach((freezer, index) => {
 });
 
 const boxes: Location[] = [];
+/***
+ * Create non-address-based storage location - size has to be undefined.
+ * This will only have list view.
+ * The storage location are of format STO-011, STO-012...
+ ***/
 racks.forEach((rack, index) => {
   boxes.push(
     locationFactory.build({
       customName: `Box 1 in ${rack.customName}`,
-      size: {
-        numRows: 10,
-        numColumns: 5,
-      },
       direction: GridDirection.RightDown,
       parent: buildLinkedLocation(rack),
     })
   );
-
+  /***
+   * Create address-based storage location.
+   * This will only have grid view.
+   * The storage location are of format STO-021, STO-022..
+   ***/
   boxes.push(
     locationFactory.build({
       customName: `Box 2 in ${rack.customName}`,
