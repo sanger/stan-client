@@ -17,7 +17,6 @@ export default function SlotMapperTable({
   slots,
   slotCopyContent,
 }: SlotMapperTableProps) {
-  debugger;
   return (
     <Table>
       <TableHead>
