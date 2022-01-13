@@ -8,15 +8,16 @@ import {
 
 type SlotMapperTableProps = {
   labware: LabwareFieldsFragment;
-  slot: SlotFieldsFragment;
+  slots: SlotFieldsFragment[];
   slotCopyContent: Array<SlotCopyContent>;
 };
 
 export default function SlotMapperTable({
   labware,
-  slot,
+  slots,
   slotCopyContent,
 }: SlotMapperTableProps) {
+  debugger;
   return (
     <Table>
       <TableHead>
@@ -33,22 +34,24 @@ export default function SlotMapperTable({
       </TableHead>
 
       <TableBody>
-        <tr>
-          <TableCell>{labware.barcode}</TableCell>
-          <TableCell>{slot.address}</TableCell>
-          <TableCell>{slot.samples[0].tissue.externalName}</TableCell>
-          <TableCell>{slot.samples[0].tissue.spatialLocation.code}</TableCell>
-          <TableCell>
-            {slot.samples[0].tissue.spatialLocation.tissueType.name}
-          </TableCell>
-          <TableCell>{slot.samples[0].tissue.replicate}</TableCell>
-          <TableCell>
-            {slot.samples.map((sample) => sample.section).join(",")}
-          </TableCell>
-          <TableCell>
-            {getDestinationAddress(labware, slot, slotCopyContent) ?? "-"}
-          </TableCell>
-        </tr>
+        {slots.map((slot) => (
+          <tr>
+            <TableCell>{labware.barcode}</TableCell>
+            <TableCell>{slot.address}</TableCell>
+            <TableCell>{slot.samples[0].tissue.externalName}</TableCell>
+            <TableCell>{slot.samples[0].tissue.spatialLocation.code}</TableCell>
+            <TableCell>
+              {slot.samples[0].tissue.spatialLocation.tissueType.name}
+            </TableCell>
+            <TableCell>{slot.samples[0].tissue.replicate}</TableCell>
+            <TableCell>
+              {slot.samples.map((sample) => sample.section).join(",")}
+            </TableCell>
+            <TableCell>
+              {getDestinationAddress(labware, slot, slotCopyContent) ?? "-"}
+            </TableCell>
+          </tr>
+        ))}
       </TableBody>
     </Table>
   );
