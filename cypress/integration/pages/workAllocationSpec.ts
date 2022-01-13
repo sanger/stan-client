@@ -10,7 +10,9 @@ describe("Work Allocation", () => {
       "when I submit the form without selecting a work type, project, or cost code",
       () => {
         before(() => {
-          cy.findByRole("button", { name: /Submit/i }).click();
+          cy.findByRole("button", { name: /Submit/i })
+            .scrollIntoView()
+            .click();
         });
 
         it("says the work type is required", () => {
