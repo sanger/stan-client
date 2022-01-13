@@ -180,7 +180,11 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     Cell: (props: Cell<HistoryTableEntry>) => {
       const workNumber = props.row.original.workNumber;
       return (
-        <StyledLink to={`/history/?kind=workNumber&value=${workNumber}`}>
+        <StyledLink
+          to={`/history/?kind=workNumber&value=${
+            workNumber ? encodeURIComponent(workNumber) : workNumber
+          }`}
+        >
           {workNumber}
         </StyledLink>
       );
