@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { TableCell } from "../Table";
 import {
   CommentFieldsFragment,
+  WorkStatus,
   WorkWithCommentFieldsFragment,
 } from "../../types/sdk";
 import { useMachine } from "@xstate/react";
@@ -71,7 +72,10 @@ export default function WorkRow({
    */
   const nextStatuses = current.nextEvents.filter(
     (e) =>
-      e !== "EDIT" && e !== "UPDATE_NUM_SLIDES" && e !== "UPDATE_NUM_BLOCKS"
+      e !== "EDIT" &&
+      e !== "UPDATE_NUM_SLIDES" &&
+      e !== "UPDATE_NUM_BLOCKS" &&
+      e !== "UPDATE_PRIORITY"
   );
 
   /**
@@ -146,7 +150,16 @@ export default function WorkRow({
     }
     return errorMessage;
   };
-  const renderWorkPriority = (workNumber: string, workPriority: string) => {
+
+  const isUpdatePriorityForStatus = (status: WorkStatus) => {
+    return status !== WorkStatus.Failed && status !== WorkStatus.Completed;
+  };
+
+  const renderWorkPriority = (
+    workNumber: string,
+    workPriority: string,
+    enabled: boolean
+  ) => {
     return (
       <Formik
         initialValues={{ priority: workPriority ?? "" }}
@@ -158,7 +171,8 @@ export default function WorkRow({
               label={""}
               name={`priority`}
               data-testid={`${workNumber}-priority`}
-              className={"border-0 border-gray-100 "}
+              className={`border-0 border-gray-100`}
+              disabled={!enabled}
               onChange={(e: React.FormEvent<HTMLInputElement>) => {
                 const priority = e.currentTarget.value.toUpperCase();
                 setFieldValue("priority", priority);
@@ -199,7 +213,11 @@ export default function WorkRow({
       </TableCell>
 
       <TableCell>
-        {renderWorkPriority(work.workNumber, work.priority ?? "")}
+        {renderWorkPriority(
+          work.workNumber,
+          work.priority ?? "",
+          isUpdatePriorityForStatus(work.status)
+        )}
       </TableCell>
       {!editModeEnabled && (
         <TableCell>

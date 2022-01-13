@@ -81,6 +81,7 @@ export default function createWorkRowMachine({
             FAIL: "updating",
             UPDATE_NUM_BLOCKS: "editNumberBlocks",
             UPDATE_NUM_SLIDES: "editNumberSlides",
+            UPDATE_PRIORITY: "editPriority",
           },
         },
         paused: {
@@ -91,6 +92,7 @@ export default function createWorkRowMachine({
             FAIL: "updating",
             UPDATE_NUM_BLOCKS: "editNumberBlocks",
             UPDATE_NUM_SLIDES: "editNumberSlides",
+            UPDATE_PRIORITY: "editPriority",
           },
         },
         completed: {},
@@ -191,7 +193,6 @@ export default function createWorkRowMachine({
             workNumber: ctx.workWithComment.work.workNumber,
           };
           if ("priority" in e && e.priority) params["priority"] = e.priority;
-
           return stanCore.UpdateWorkPriority(params);
         },
       },
