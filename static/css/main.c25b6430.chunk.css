@@ -3700,10 +3700,6 @@ svg.logo.loading rect:nth-child(3n+1) {
     width: 75%;
   }
 
-  .md\:w-1\/6 {
-    width: 16.666667%;
-  }
-
   .md\:gap-4 {
     grid-gap: 1rem;
     gap: 1rem;
@@ -4226,4 +4222,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.e30e01c1.chunk.css.map*/
+/*# sourceMappingURL=main.c25b6430.chunk.css.map*/
