@@ -74,11 +74,12 @@ export const machineOptions: Partial<MachineOptions<
         }
       });
 
-      ctx.selectedAddress = findNextAvailableAddress({
+      const addresses = findNextAvailableAddress({
         locationAddresses: ctx.locationAddresses,
         addressToItemMap: ctx.addressToItemMap,
         minimumAddress: ctx.selectedAddress,
       });
+      ctx.selectedAddress = addresses.length > 0 ? addresses[0] : null;
     }),
 
     [Action.ASSIGN_SELECTED_ADDRESS]: assign((ctx, e) => {

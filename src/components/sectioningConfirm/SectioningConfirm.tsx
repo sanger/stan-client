@@ -27,7 +27,7 @@ type SectioningConfirmProps = {
   /**
    * Callback for when sections have been successfully confirmed
    */
-  onConfirmed: () => void;
+  onConfirmed: (plans?: Array<FindPlanDataQuery>) => void;
 };
 
 /**
@@ -47,11 +47,11 @@ export default function SectioningConfirm({
   useEffect(() => {
     const subscription = service.subscribe((state) => {
       if (state.matches("confirmed")) {
-        onConfirmed();
+        onConfirmed(current.context.plans);
       }
     });
     return subscription.unsubscribe;
-  }, [service, onConfirmed]);
+  }, [service, onConfirmed, current.context.plans]);
 
   const {
     sourceLabware,

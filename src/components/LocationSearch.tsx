@@ -3,8 +3,13 @@ import ScanInput from "./scanInput/ScanInput";
 import LabwareIcon from "./icons/LabwareIcon";
 import LocationIcon from "./icons/LocationIcon";
 import { history } from "../lib/sdk";
+import { LabwareFieldsFragment } from "../types/sdk";
 
-const LocationSearch: React.FC = () => {
+const LocationSearch = ({
+  awaitingLabwares,
+}: {
+  awaitingLabwares?: LabwareFieldsFragment[];
+}) => {
   return (
     <div className="mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md">
       <div className="sm:flex sm:flex-row items-start justify-around">
@@ -20,7 +25,14 @@ const LocationSearch: React.FC = () => {
           </div>
           <ScanInput
             id={"locationScanInput"}
-            onScan={(value) => history.push(`/locations/${value}`)}
+            onScan={(value) =>
+              history.push({
+                pathname: `/locations/${value}`,
+                state: {
+                  awaitingLabwares: awaitingLabwares ?? [],
+                },
+              })
+            }
           />
         </div>
         <div className="mt-6 sm:mt-0 space-y-2">
@@ -37,7 +49,12 @@ const LocationSearch: React.FC = () => {
             id={"labwareLocationScanInput"}
             onScan={(value) => {
               if (value.length > 0) {
-                history.push(`/locations?labwareBarcode=${value}`);
+                history.push({
+                  pathname: `/locations?labwareBarcode=${value}`,
+                  state: {
+                    awaitingLabwares: awaitingLabwares ?? [],
+                  },
+                });
               }
             }}
           />

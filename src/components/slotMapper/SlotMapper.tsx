@@ -20,7 +20,6 @@ import {
   SlotPassFailFieldsFragment,
 } from "../../types/sdk";
 import SlotMapperTable from "./SlotMapperTable";
-import { maybeFindSlotByAddress } from "../../lib/helpers/slotHelper";
 import Heading from "../Heading";
 import MutedText from "../MutedText";
 import { usePager } from "../../lib/hooks/usePager";
@@ -140,17 +139,6 @@ function SlotMapper({
   const [destinationAddress, setDestinationAddress] = useState<
     string | undefined
   >();
-  /**
-   * If there's only one input slot selected, store it here
-   * Will be used for the slop map table
-   */
-  let selectedInputSlot: Maybe<SlotFieldsFragment> = null;
-  if (selectedInputAddresses.length === 1 && currentInputLabware) {
-    selectedInputSlot = maybeFindSlotByAddress(
-      currentInputLabware.slots,
-      selectedInputAddresses[0]
-    );
-  }
 
   /**
    * Hook for tracking state for Pager component
@@ -311,6 +299,15 @@ function SlotMapper({
     [send]
   );
 
+  const selectedSlots = currentInputLabware
+    ? currentInputLabware.slots.filter(
+        (slot) =>
+          selectedInputAddresses.findIndex(
+            (selectedAddress) => selectedAddress === slot.address
+          ) !== -1
+      )
+    : [];
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-2 auto-rows-auto">
@@ -401,12 +398,12 @@ function SlotMapper({
         </div>
       </div>
 
-      {currentInputLabware && selectedInputSlot && (
+      {currentInputLabware && selectedSlots.length > 0 && (
         <div className="space-y-4">
           <Heading level={4}>Slot Mapping</Heading>
           <SlotMapperTable
             labware={currentInputLabware}
-            slot={selectedInputSlot}
+            slots={selectedSlots}
             slotCopyContent={slotCopyContent}
           />
         </div>

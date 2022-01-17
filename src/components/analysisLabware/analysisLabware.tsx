@@ -41,6 +41,8 @@ export default function AnalysisLabware({
     };
   });
 
+  const workNumberCommon = React.useRef("");
+
   const [current, send] = useMachine(() =>
     analysisLabwareMachine.withContext({
       analysisLabwares: defaultLabwareValues,
@@ -179,29 +181,31 @@ export default function AnalysisLabware({
                 ))}
               </FormikSelect>
             </div>
-
-            <WorkNumberSelect
-              onWorkNumberChange={(workNumber) => {
-                send({
-                  type: "UPDATE_ALL_WORKNUMBERS",
-                  workNumber: workNumber ?? "",
-                });
-              }}
-              name={"workNumber"}
-              label={"SGP Number"}
-            />
+            <div className="mt-4">
+              <div>Work Number</div>
+              <WorkNumberSelect
+                onWorkNumberChange={(workNumber) => {
+                  send({
+                    type: "UPDATE_ALL_WORKNUMBERS",
+                    workNumber: workNumber ?? "",
+                  });
+                  workNumberCommon.current = workNumber ?? "";
+                }}
+                workNumber={workNumberCommon.current}
+              />
+            </div>
             <div className="">
               <FormikSelect
                 label={"Comment"}
                 name={"comment"}
                 data-testid={"comment"}
                 emptyOption={true}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   send({
                     type: "UPDATE_ALL_COMMENTS_TYPE",
                     commentId: e.currentTarget.value,
-                  })
-                }
+                  });
+                }}
               >
                 {comments.map((comment) => (
                   <option value={comment.id} key={comment.id}>

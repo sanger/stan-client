@@ -11,9 +11,6 @@ import Modal, {
 } from "../components/Modal";
 import WhiteButton from "../components/buttons/WhiteButton";
 import BinIcon from "../components/icons/BinIcon";
-import IconButton from "../components/buttons/IconButton";
-import GridIcon from "../components/icons/GridIcon";
-import ListIcon from "../components/icons/ListIcon";
 import StyledLink from "../components/StyledLink";
 import ItemsList from "./location/ItemsList";
 import ItemsGrid from "./location/ItemsGrid";
@@ -28,12 +25,18 @@ import {
   findNextAvailableAddress,
 } from "../lib/helpers/locationHelper";
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
-import { RouteComponentProps } from "react-router-dom";
+import { RouteComponentProps, useLocation } from "react-router-dom";
 import { LocationMatchParams, LocationSearchParams } from "../types/stan";
-import { LocationFieldsFragment, Maybe } from "../types/sdk";
+import {
+  LabwareFieldsFragment,
+  LocationFieldsFragment,
+  Maybe,
+} from "../types/sdk";
 import { useMachine } from "@xstate/react";
 import { StoredItemFragment } from "../lib/machines/locations/locationMachineTypes";
 import createLocationMachine from "../lib/machines/locations/locationMachine";
+import { isAwaitingLabwareState } from "./Store";
+import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
 
 /**
  * The different ways of displaying stored items
@@ -68,6 +71,17 @@ const Location: React.FC<LocationProps> = ({
   locationSearchParams,
   match,
 }) => {
+  const locationObject = useLocation();
+  const [awaitingLabwares, setAwaitingLabwares] = useState<
+    LabwareFieldsFragment[]
+  >([]);
+
+  React.useEffect(() => {
+    if (locationObject.state && isAwaitingLabwareState(locationObject.state)) {
+      setAwaitingLabwares(locationObject.state.awaitingLabwares);
+    }
+  }, [locationObject.state]);
+
   const [current, send] = useMachine(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> =
@@ -84,11 +98,13 @@ const Location: React.FC<LocationProps> = ({
     });
 
     // Get the first selected address (which is the first empty address)
-    const selectedAddress = findNextAvailableAddress({
+    const selectedAddresses = findNextAvailableAddress({
       locationAddresses: locationAddresses,
       addressToItemMap: addressToItemMap,
     });
 
+    const selectedAddress =
+      selectedAddresses.length > 0 ? selectedAddresses[0] : undefined;
     return createLocationMachine({
       context: {
         location: storageLocation,
@@ -115,9 +131,7 @@ const Location: React.FC<LocationProps> = ({
   /**
    * Should the page be displaying the grid or list view of the items
    */
-  const [currentViewType, setCurrentViewType] = useState<ViewType>(
-    locationHasGrid ? ViewType.GRID : ViewType.LIST
-  );
+  const currentViewType = locationHasGrid ? ViewType.GRID : ViewType.LIST;
 
   /**
    * Is the "Empty Location" modal open
@@ -211,6 +225,18 @@ const Location: React.FC<LocationProps> = ({
     ]
   );
 
+  const addLabwares = (awaitingLabwares: LabwareFieldsFragment[]) => {
+    // Get the first selected address (which is the first empty address)
+    const nextAvailableAddresses = findNextAvailableAddress({
+      locationAddresses: locationAddresses,
+      addressToItemMap: addressToItemMap,
+      minimumAddress: selectedAddress,
+      numAddresses: awaitingLabwares.length,
+    });
+    if (nextAvailableAddresses.length < awaitingLabwares.length) {
+    }
+  };
+
   const showLocation =
     ["ready", "updating"].some((activeState) => current.matches(activeState)) &&
     !!location;
@@ -261,12 +287,17 @@ const Location: React.FC<LocationProps> = ({
                     {
                       <>
                         <Authenticated>
-                          <EditableText onChange={onCustomNameChange} defaultValue={location.customName || ''}>
+                          <EditableText
+                            onChange={onCustomNameChange}
+                            defaultValue={location.customName || ""}
+                          >
                             {location.customName || location.barcode}
                           </EditableText>
                         </Authenticated>
 
-                        <Unauthenticated>{location.customName || location.barcode}</Unauthenticated>
+                        <Unauthenticated>
+                          {location.customName || location.barcode}
+                        </Unauthenticated>
                       </>
                     }
                   </Heading>
@@ -338,41 +369,19 @@ const Location: React.FC<LocationProps> = ({
                 <>
                   <Heading className="mt-10 mb-5" level={2}>
                     Stored Items
-                    {location?.size!! && (
-                      <div className="float-right">
-                        <div className="flex flex-row items-center">
-                          <IconButton
-                            data-testid="gridIcon"
-                            onClick={() => setCurrentViewType(ViewType.GRID)}
-                          >
-                            <GridIcon
-                              className={`inline-block h-5 w-4 ${
-                                currentViewType === ViewType.GRID &&
-                                "text-gray-700"
-                              }`}
-                            />
-                          </IconButton>
-
-                          <IconButton
-                            data-testid="listIcon"
-                            onClick={() => setCurrentViewType(ViewType.LIST)}
-                          >
-                            <ListIcon
-                              className={`inline-block h-5 w-4 ${
-                                currentViewType === ViewType.LIST &&
-                                "text-gray-700"
-                              }`}
-                            />
-                          </IconButton>
-                        </div>
-                      </div>
-                    )}
                   </Heading>
 
+                  {awaitingLabwares.length > 0 && (
+                    <LabwareAwaitingStorage
+                      labwares={awaitingLabwares}
+                      addEnabled={false}
+                      onAddAllLabware={(labwares) => {}}
+                      onAddLabware={() => {}}
+                    />
+                  )}
+
                   <LocationParentContext.Provider value={locationParentContext}>
-                    {currentViewType === ViewType.LIST && (
-                      <ItemsList freeformAddress={!locationHasGrid} />
-                    )}
+                    {currentViewType === ViewType.LIST && <ItemsList />}
                     {locationHasGrid && currentViewType === ViewType.GRID && (
                       <ItemsGrid />
                     )}

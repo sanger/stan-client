@@ -9,6 +9,8 @@ import {
 import SectioningConfirm from "../../components/sectioningConfirm/SectioningConfirm";
 import { Prompt, useLocation } from "react-router-dom";
 import { useConfirmLeave } from "../../lib/hooks";
+import BlueButton from "../../components/buttons/BlueButton";
+import { history } from "../../lib/sdk";
 
 type SectioningConfirmProps = {
   readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
@@ -18,7 +20,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
   const location = useLocation<{ plans?: Array<FindPlanDataQuery> }>();
   const plans: Array<FindPlanDataQuery> = location?.state?.plans ?? [];
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
-
+  const confirmedPlans = React.useRef<FindPlanDataQuery[]>([]);
   return (
     <AppShell>
       <AppShell.Header>
@@ -29,7 +31,12 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
           <SectioningConfirm
             initialPlans={plans}
             comments={sectioningConfirmInfo.comments}
-            onConfirmed={() => setShouldConfirm(false)}
+            onConfirmed={(plans) => {
+              if (plans) {
+                confirmedPlans.current = plans;
+              }
+              setShouldConfirm(false);
+            }}
           />
         </div>
       </AppShell.Main>
@@ -42,6 +49,25 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
       <OperationCompleteModal
         message={"Sections Confirmed"}
         show={!shouldConfirm}
+        additionalButtons={
+          <BlueButton
+            type="button"
+            style={{ marginLeft: "auto" }}
+            className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+            onClick={() => {
+              history.push({
+                pathname: "/store",
+                state: {
+                  awaitingLabwares: [...confirmedPlans.current].map(
+                    (plan) => plan.planData.destination
+                  ),
+                },
+              });
+            }}
+          >
+            Store
+          </BlueButton>
+        }
         onReset={reload}
       >
         <p>
