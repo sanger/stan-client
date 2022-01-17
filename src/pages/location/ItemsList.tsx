@@ -11,9 +11,7 @@ import { LocationParentContext } from "../Location";
 import UnstoreBarcodeModal from "./UnstoreBarcodeModal";
 import { Maybe } from "../../types/sdk";
 import { StoredItemFragment } from "../../lib/machines/locations/locationMachineTypes";
-import { Select } from "../../components/forms/Select";
 import MutedText from "../../components/MutedText";
-import { Input } from "../../components/forms/Input";
 import { addressToLocationAddress } from "../../lib/helpers/locationHelper";
 import { Authenticated } from "../../components/Authenticated";
 
@@ -24,33 +22,19 @@ interface ItemsListParams {
 /**
  * Component for showing the stored items in a location as a list
  */
-export const ItemsList: React.FC<ItemsListParams> = ({
-  freeformAddress = false,
-}) => {
-  const {
-    location,
-    addressToItemMap,
-    storeBarcode,
-    unstoreBarcode,
-  } = useContext(LocationParentContext)!;
+export const ItemsList: React.FC<ItemsListParams> = () => {
+  const { location, storeBarcode, unstoreBarcode } = useContext(
+    LocationParentContext
+  )!;
 
   const [selectedItem, setSelectedItem] = useState<Maybe<StoredItemFragment>>(
     null
   );
-  const [selectedAddress, setSelectedAddress] = useState<string>("");
 
   const scanInputRef = useRef<HTMLInputElement>(null);
 
-  const addressOptions = Array.from(addressToItemMap.keys())
-    .filter((address) => addressToItemMap.get(address) == null)
-    .map((address, index) => (
-      <option value={address} key={index}>
-        {addressToLocationAddress(address, location.size!, location.direction!)}
-      </option>
-    ));
-
   const handleOnScan = (barcode: string) => {
-    storeBarcode(barcode, selectedAddress);
+    storeBarcode(barcode);
     if (scanInputRef.current) {
       scanInputRef.current.value = "";
     }
@@ -65,23 +49,6 @@ export const ItemsList: React.FC<ItemsListParams> = ({
         </MutedText>
 
         <div className="my-6 space-y-2 md:space-y-0 md:flex md:flex-row items-center justify-start md:gap-4">
-          <div className="md:w-1/6">
-            {freeformAddress ? (
-              <Input
-                type="text"
-                placeholder="Address (opt)"
-                onChange={(e) => setSelectedAddress(e.currentTarget.value)}
-              />
-            ) : (
-              <Select
-                value={selectedAddress}
-                onChange={(e) => setSelectedAddress(e.currentTarget.value)}
-                emptyOption={true}
-              >
-                {addressOptions}
-              </Select>
-            )}
-          </div>
           <div className="md:w-1/2">
             <ScanInput
               ref={scanInputRef}

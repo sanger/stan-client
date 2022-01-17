@@ -11,9 +11,6 @@ import Modal, {
 } from "../components/Modal";
 import WhiteButton from "../components/buttons/WhiteButton";
 import BinIcon from "../components/icons/BinIcon";
-import IconButton from "../components/buttons/IconButton";
-import GridIcon from "../components/icons/GridIcon";
-import ListIcon from "../components/icons/ListIcon";
 import StyledLink from "../components/StyledLink";
 import ItemsList from "./location/ItemsList";
 import ItemsGrid from "./location/ItemsGrid";
@@ -115,9 +112,7 @@ const Location: React.FC<LocationProps> = ({
   /**
    * Should the page be displaying the grid or list view of the items
    */
-  const [currentViewType, setCurrentViewType] = useState<ViewType>(
-    locationHasGrid ? ViewType.GRID : ViewType.LIST
-  );
+  const currentViewType = locationHasGrid ? ViewType.GRID : ViewType.LIST;
 
   /**
    * Is the "Empty Location" modal open
@@ -261,12 +256,17 @@ const Location: React.FC<LocationProps> = ({
                     {
                       <>
                         <Authenticated>
-                          <EditableText onChange={onCustomNameChange} defaultValue={location.customName || ''}>
+                          <EditableText
+                            onChange={onCustomNameChange}
+                            defaultValue={location.customName || ""}
+                          >
                             {location.customName || location.barcode}
                           </EditableText>
                         </Authenticated>
 
-                        <Unauthenticated>{location.customName || location.barcode}</Unauthenticated>
+                        <Unauthenticated>
+                          {location.customName || location.barcode}
+                        </Unauthenticated>
                       </>
                     }
                   </Heading>
@@ -338,41 +338,10 @@ const Location: React.FC<LocationProps> = ({
                 <>
                   <Heading className="mt-10 mb-5" level={2}>
                     Stored Items
-                    {location?.size!! && (
-                      <div className="float-right">
-                        <div className="flex flex-row items-center">
-                          <IconButton
-                            data-testid="gridIcon"
-                            onClick={() => setCurrentViewType(ViewType.GRID)}
-                          >
-                            <GridIcon
-                              className={`inline-block h-5 w-4 ${
-                                currentViewType === ViewType.GRID &&
-                                "text-gray-700"
-                              }`}
-                            />
-                          </IconButton>
-
-                          <IconButton
-                            data-testid="listIcon"
-                            onClick={() => setCurrentViewType(ViewType.LIST)}
-                          >
-                            <ListIcon
-                              className={`inline-block h-5 w-4 ${
-                                currentViewType === ViewType.LIST &&
-                                "text-gray-700"
-                              }`}
-                            />
-                          </IconButton>
-                        </div>
-                      </div>
-                    )}
                   </Heading>
 
                   <LocationParentContext.Provider value={locationParentContext}>
-                    {currentViewType === ViewType.LIST && (
-                      <ItemsList freeformAddress={!locationHasGrid} />
-                    )}
+                    {currentViewType === ViewType.LIST && <ItemsList />}
                     {locationHasGrid && currentViewType === ViewType.GRID && (
                       <ItemsGrid />
                     )}

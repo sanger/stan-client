@@ -1,10 +1,10 @@
 describe("Location Grid View", () => {
   before(() => {
-    cy.visit("/locations/STO-014");
+    cy.visit("/locations/STO-021");
   });
 
   it("selects the first available address", () => {
-    cy.findByText("Selected Address: 2").should("exist");
+    cy.findByText("Selected Address: 1").should("exist");
   });
 
   context("when scanning in a barcode", () => {
@@ -21,7 +21,7 @@ describe("Location Grid View", () => {
     });
 
     it("selects the next available address", () => {
-      cy.findByText("Selected Address: 3").should("exist");
+      cy.findByText("Selected Address: 2").should("exist");
     });
 
     it("empties the value of the ScanInput", () => {
@@ -49,7 +49,7 @@ describe("Location Grid View", () => {
 
       it("shows a confirmation modal", () => {
         cy.findByTextContent(
-          "Are you sure you want to remove STAN-2001 from Box 1 in Rack 1 in Freezer 1 in Room 1234?"
+          "Are you sure you want to remove STAN-2001 from Box 4 in Rack 2 in Freezer 1 in Room 1234?"
         ).should("be.visible");
       });
 
