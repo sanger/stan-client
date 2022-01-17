@@ -155,41 +155,6 @@ export default function WorkRow({
     return status !== WorkStatus.Failed && status !== WorkStatus.Completed;
   };
 
-  const renderWorkPriority = (
-    workNumber: string,
-    workPriority: string,
-    enabled: boolean
-  ) => {
-    return (
-      <Formik
-        initialValues={{ priority: workPriority ?? "" }}
-        onSubmit={() => {}}
-      >
-        {({ setFieldValue }) => (
-          <Form>
-            <FormikInput
-              label={""}
-              name={`priority`}
-              data-testid={`${workNumber}-priority`}
-              className={`border-0 border-gray-100`}
-              disabled={!enabled}
-              onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                const priority = e.currentTarget.value.toUpperCase();
-                setFieldValue("priority", priority);
-                if (validateWorkPriority(priority).length === 0) {
-                  send({
-                    type: "UPDATE_PRIORITY",
-                    priority: e.currentTarget.value.toUpperCase(),
-                  });
-                }
-              }}
-              validate={validateWorkPriority}
-            />
-          </Form>
-        )}
-      </Formik>
-    );
-  };
   return (
     <tr>
       <TableCell>{work.workNumber}</TableCell>
@@ -213,11 +178,41 @@ export default function WorkRow({
       </TableCell>
 
       <TableCell>
-        {renderWorkPriority(
-          work.workNumber,
-          work.priority ?? "",
-          isUpdatePriorityForStatus(work.status)
-        )}
+        {
+          /**Once workrequest is failed or completed then priority need to be cleared**/
+          isUpdatePriorityForStatus(work.status) ? (
+            <Formik
+              initialValues={{ priority: work.priority ?? "" }}
+              onSubmit={() => {}}
+            >
+              {({ setFieldValue }) => {
+                return (
+                  <Form>
+                    <FormikInput
+                      label={""}
+                      name={"priority"}
+                      data-testid={`${work.workNumber}-priority`}
+                      className={`border-0 border-gray-100`}
+                      onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                        const priority = e.currentTarget.value.toUpperCase();
+                        setFieldValue("priority", priority);
+                        if (validateWorkPriority(priority).length === 0) {
+                          send({
+                            type: "UPDATE_PRIORITY",
+                            priority: e.currentTarget.value.toUpperCase(),
+                          });
+                        }
+                      }}
+                      validate={validateWorkPriority}
+                    />
+                  </Form>
+                );
+              }}
+            </Formik>
+          ) : (
+            <div />
+          )
+        }
       </TableCell>
       {!editModeEnabled && (
         <TableCell>
