@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/AppShell";
 import LocationSearch from "../components/LocationSearch";
 import { RouteComponentProps } from "react-router";
@@ -12,19 +12,42 @@ import Heading from "../components/Heading";
 import storeConfig from "../static/store.json";
 import { Link } from "react-router-dom";
 import BarcodeIcon from "../components/icons/BarcodeIcon";
-import { FindLocationByBarcodeQuery, Maybe } from "../types/sdk";
+import {
+  FindLocationByBarcodeQuery,
+  LabwareFieldsFragment,
+  Maybe,
+} from "../types/sdk";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import { isLocationSearch, LocationSearchParams } from "../types/stan";
 import { history, StanCoreContext } from "../lib/sdk";
 import { ClientError } from "graphql-request";
+import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
 
 /**
  * RouteComponentProps from react-router allows the props to be passed in
  */
 interface StoreProps extends RouteComponentProps {}
 
+export type AwaitingStorageStateType = {
+  awaitingLabwares: LabwareFieldsFragment[];
+};
+export function isAwaitingLabwareState(
+  obj: any
+): obj is AwaitingStorageStateType {
+  if (!obj) return false;
+  return (
+    "awaitingLabwares" in obj && typeof obj["awaitingLabwares"] === "object"
+  );
+}
+
 const Store: React.FC<StoreProps> = ({ location }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const awaitingLabwares = useMemo(() => {
+    return isAwaitingLabwareState(location.state)
+      ? location.state.awaitingLabwares
+      : [];
+  }, [location.state]);
 
   /**
    * Runs this hook if there's a `labwareBarcode` URL parameter
@@ -34,7 +57,6 @@ const Store: React.FC<StoreProps> = ({ location }) => {
   useEffect(() => {
     async function invokeFindLabwareLocation(labwareBarcode: string) {
       const locationBarcode = await findLabwareLocation(labwareBarcode);
-
       if (locationBarcode) {
         // Redirect to the location if it's found
         history.push(
@@ -55,7 +77,7 @@ const Store: React.FC<StoreProps> = ({ location }) => {
         invokeFindLabwareLocation(locationSearchParams.labwareBarcode.trim());
       }
     }
-  }, [location.search]);
+  }, [location.search, awaitingLabwares]);
 
   return (
     <AppShell>
@@ -71,7 +93,7 @@ const Store: React.FC<StoreProps> = ({ location }) => {
             To get started, scan either the location you want to find, or scan a
             piece of labware to find its location.
           </MutedText>
-          <LocationSearch />
+          <LocationSearch awaitingLabwares={awaitingLabwares} />
           <div className="my-10 space-y-24">
             {Object.entries(storeConfig.locationType).map(
               ([groupTitle, locations]) => (
@@ -91,6 +113,14 @@ const Store: React.FC<StoreProps> = ({ location }) => {
               )
             )}
           </div>
+          {awaitingLabwares && awaitingLabwares.length > 0 && (
+            <LabwareAwaitingStorage
+              labwares={awaitingLabwares}
+              addEnabled={false}
+              onAddAllLabware={() => {}}
+              onAddLabware={() => {}}
+            />
+          )}
         </div>
       </AppShell.Main>
     </AppShell>
