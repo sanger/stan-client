@@ -31,6 +31,22 @@ describe("Visium cDNA Page", () => {
       saveButton().should("be.disabled");
     });
 
+    context("When user selects some source slots", () => {
+      before(() => {
+        cy.get("#inputLabwares").within(() => {
+          cy.findByText("A1").click();
+          cy.findByText("D1").click({ shiftKey: true });
+        });
+      });
+
+      it("displays the table with A1 slot", () => {
+        cy.findByRole("table").contains("td", "A1");
+      });
+      it("displays the table with D1 slot", () => {
+        cy.findByRole("table").contains("td", "D1");
+      });
+    });
+
     context("When user maps some source slots", () => {
       before(() => {
         cy.get("#inputLabwares").within(() => {
