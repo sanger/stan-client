@@ -19,6 +19,7 @@ export enum LabwareTypeName {
   SLIDE = "Slide",
   PLATE = "96 well plate",
   CASSETTE = "Cassette",
+  VISIUM_ADH = "Visium ADH",
 }
 
 export type Address = string;
