@@ -86,6 +86,44 @@ describe("Work Allocation", () => {
     });
   });
 
+  describe("Editing the priority column for Work ", () => {
+    context("Entering a value in 'Priority' cell in table", () => {
+      before(() => {
+        cy.get("td").eq(6).type("A1");
+        //change the focus
+        cy.findAllByRole("button", { name: /Edit Status/i }).then(
+          (editButtons) => {
+            editButtons[0].focus();
+          }
+        );
+      });
+
+      it("updates priority", () => {
+        cy.findByTestId("SGP1001" + "-" + "priority").should(
+          "have.value",
+          "A1"
+        );
+      });
+    });
+    context("Entering an invalid value in 'Priority' cell in table", () => {
+      before(() => {
+        cy.get("td").eq(6).clear().type("15");
+        //change the focus
+        cy.findAllByRole("button", { name: /Edit Status/i }).then(
+          (editButtons) => {
+            editButtons[0].focus();
+          }
+        );
+      });
+
+      it("displays a validation error message", () => {
+        cy.findByText(
+          "Must be capital letter followed by a one-digit number"
+        ).should("be.visible");
+      });
+    });
+  });
+
   describe("Editing the status of Work", () => {
     context("when I click the Edit Status button", () => {
       before(() => {

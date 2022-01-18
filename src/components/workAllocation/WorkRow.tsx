@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { TableCell } from "../Table";
 import {
   CommentFieldsFragment,
+  WorkStatus,
   WorkWithCommentFieldsFragment,
 } from "../../types/sdk";
 import { useMachine } from "@xstate/react";
@@ -14,6 +15,7 @@ import FormikSelect from "../forms/Select";
 import { Form, Formik } from "formik";
 import PinkButton from "../buttons/PinkButton";
 import { MAX_NUM_BLOCKANDSLIDES } from "./WorkAllocation";
+import FormikInput from "../forms/Input";
 
 /**
  * The type of values for the edit form
@@ -70,7 +72,10 @@ export default function WorkRow({
    */
   const nextStatuses = current.nextEvents.filter(
     (e) =>
-      e !== "EDIT" && e !== "UPDATE_NUM_SLIDES" && e !== "UPDATE_NUM_BLOCKS"
+      e !== "EDIT" &&
+      e !== "UPDATE_NUM_SLIDES" &&
+      e !== "UPDATE_NUM_BLOCKS" &&
+      e !== "UPDATE_PRIORITY"
   );
 
   /**
@@ -132,6 +137,24 @@ export default function WorkRow({
     );
   };
 
+  const validateWorkPriority = (priority: string) => {
+    let errorMessage = "";
+    if (priority.length === 0) return errorMessage;
+    if (priority.length !== 2) {
+      errorMessage =
+        "Must be of length 2 - capital letter followed by a number";
+    }
+    const priorityRegEx = /^[A-Z]\d/;
+    if (!priorityRegEx.test(priority.toUpperCase())) {
+      errorMessage = "Must be capital letter followed by a one-digit number";
+    }
+    return errorMessage;
+  };
+
+  const isUpdatePriorityForStatus = (status: WorkStatus) => {
+    return status !== WorkStatus.Failed && status !== WorkStatus.Completed;
+  };
+
   return (
     <tr>
       <TableCell>{work.workNumber}</TableCell>
@@ -145,12 +168,51 @@ export default function WorkRow({
           "block"
         )}
       </TableCell>
+
       <TableCell>
         {renderWorkNumValueField(
           work.workNumber,
           work.numSlides ?? undefined,
           "slide"
         )}
+      </TableCell>
+
+      <TableCell>
+        {
+          /**Once workrequest is failed or completed then priority need to be cleared**/
+          isUpdatePriorityForStatus(work.status) ? (
+            <Formik
+              initialValues={{ priority: work.priority ?? "" }}
+              onSubmit={() => {}}
+            >
+              {({ setFieldValue }) => {
+                return (
+                  <Form>
+                    <FormikInput
+                      label={""}
+                      name={"priority"}
+                      data-testid={`${work.workNumber}-priority`}
+                      className={`border-0 border-gray-100`}
+                      onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                        const priority = e.currentTarget.value.toUpperCase();
+                        setFieldValue("priority", priority);
+                        if (validateWorkPriority(priority).length === 0) {
+                          send({
+                            type: "UPDATE_PRIORITY",
+                            priority: e.currentTarget.value.toUpperCase(),
+                          });
+                        }
+                      }}
+                      validate={validateWorkPriority}
+                    />
+                  </Form>
+                );
+              }}
+            </Formik>
+          ) : (
+            <div />
+          )
+        }
       </TableCell>
       {!editModeEnabled && (
         <TableCell>
