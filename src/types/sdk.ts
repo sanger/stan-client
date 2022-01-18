@@ -606,6 +606,7 @@ export type Work = {
   status: WorkStatus;
   numBlocks?: Maybe<Scalars['Int']>;
   numSlides?: Maybe<Scalars['Int']>;
+  priority?: Maybe<Scalars['String']>;
 };
 
 export type StainType = {
@@ -818,8 +819,8 @@ export type Query = {
   historyForSampleId: History;
   historyForExternalName: History;
   historyForDonorName: History;
-  historyForWorkNumber: History;
   historyForLabwareBarcode: History;
+  historyForWorkNumber: History;
   workProgress: Array<WorkProgress>;
   location: Location;
   stored: Array<StoredItem>;
@@ -955,13 +956,13 @@ export type QueryHistoryForDonorNameArgs = {
 };
 
 
-export type QueryHistoryForWorkNumberArgs = {
-  workNumber: Scalars['String'];
+export type QueryHistoryForLabwareBarcodeArgs = {
+  barcode: Scalars['String'];
 };
 
 
-export type QueryHistoryForLabwareBarcodeArgs = {
-  barcode: Scalars['String'];
+export type QueryHistoryForWorkNumberArgs = {
+  workNumber: Scalars['String'];
 };
 
 
@@ -1026,6 +1027,7 @@ export type Mutation = {
   updateWorkStatus: WorkWithComment;
   updateWorkNumBlocks: Work;
   updateWorkNumSlides: Work;
+  updateWorkPriority: Work;
   stain: OperationResult;
   recordInPlace: OperationResult;
   unrelease: OperationResult;
@@ -1252,6 +1254,12 @@ export type MutationUpdateWorkNumBlocksArgs = {
 export type MutationUpdateWorkNumSlidesArgs = {
   workNumber: Scalars['String'];
   numSlides?: Maybe<Scalars['Int']>;
+};
+
+
+export type MutationUpdateWorkPriorityArgs = {
+  workNumber: Scalars['String'];
+  priority?: Maybe<Scalars['String']>;
 };
 
 
@@ -1569,7 +1577,7 @@ export type UserFieldsFragment = (
 
 export type WorkFieldsFragment = (
   { __typename?: 'Work' }
-  & Pick<Work, 'workNumber' | 'status' | 'numBlocks' | 'numSlides'>
+  & Pick<Work, 'workNumber' | 'status' | 'numBlocks' | 'numSlides' | 'priority'>
   & { project: (
     { __typename?: 'Project' }
     & ProjectFieldsFragment
@@ -2427,6 +2435,20 @@ export type UpdateWorkNumSlidesMutationVariables = Exact<{
 export type UpdateWorkNumSlidesMutation = (
   { __typename?: 'Mutation' }
   & { updateWorkNumSlides: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
+  ) }
+);
+
+export type UpdateWorkPriorityMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  priority?: Maybe<Scalars['String']>;
+}>;
+
+
+export type UpdateWorkPriorityMutation = (
+  { __typename?: 'Mutation' }
+  & { updateWorkPriority: (
     { __typename?: 'Work' }
     & WorkFieldsFragment
   ) }
@@ -3321,6 +3343,7 @@ export const WorkFieldsFragmentDoc = gql`
   }
   numBlocks
   numSlides
+  priority
 }
     ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
@@ -3826,6 +3849,13 @@ export const UpdateWorkNumBlocksDocument = gql`
 export const UpdateWorkNumSlidesDocument = gql`
     mutation UpdateWorkNumSlides($workNumber: String!, $numSlides: Int) {
   updateWorkNumSlides(workNumber: $workNumber, numSlides: $numSlides) {
+    ...WorkFields
+  }
+}
+    ${WorkFieldsFragmentDoc}`;
+export const UpdateWorkPriorityDocument = gql`
+    mutation UpdateWorkPriority($workNumber: String!, $priority: String) {
+  updateWorkPriority(workNumber: $workNumber, priority: $priority) {
     ...WorkFields
   }
 }
@@ -4415,6 +4445,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     UpdateWorkNumSlides(variables: UpdateWorkNumSlidesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumSlidesMutation> {
       return withWrapper(() => client.request<UpdateWorkNumSlidesMutation>(UpdateWorkNumSlidesDocument, variables, requestHeaders));
+    },
+    UpdateWorkPriority(variables: UpdateWorkPriorityMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkPriorityMutation> {
+      return withWrapper(() => client.request<UpdateWorkPriorityMutation>(UpdateWorkPriorityDocument, variables, requestHeaders));
     },
     UpdateWorkStatus(variables: UpdateWorkStatusMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkStatusMutation> {
       return withWrapper(() => client.request<UpdateWorkStatusMutation>(UpdateWorkStatusDocument, variables, requestHeaders));

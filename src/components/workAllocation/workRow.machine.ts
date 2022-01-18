@@ -3,6 +3,7 @@ import {
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumSlidesMutation,
   UpdateWorkStatusMutation,
+  UpdateWorkPriorityMutation,
   WorkStatus,
   WorkWithCommentFieldsFragment,
 } from "../../types/sdk";
@@ -31,9 +32,11 @@ export type WorkRowEvent =
   | { type: "ACTIVE"; commentId: undefined }
   | { type: "UPDATE_NUM_BLOCKS"; numBlocks: number | undefined }
   | { type: "UPDATE_NUM_SLIDES"; numSlides: number | undefined }
+  | { type: "UPDATE_PRIORITY"; priority: string | undefined }
   | MachineServiceDone<"updateWorkStatus", UpdateWorkStatusMutation>
   | MachineServiceDone<"updateWorkNumBlocks", UpdateWorkNumBlocksMutation>
-  | MachineServiceDone<"updateWorkNumSlides", UpdateWorkNumSlidesMutation>;
+  | MachineServiceDone<"updateWorkNumSlides", UpdateWorkNumSlidesMutation>
+  | MachineServiceDone<"updateWorkPriority", UpdateWorkPriorityMutation>;
 
 type CreateWorkRowMachineParams = Pick<
   WorkRowMachineContext,
@@ -67,6 +70,7 @@ export default function createWorkRowMachine({
             ACTIVE: "updating",
             UPDATE_NUM_BLOCKS: "editNumberBlocks",
             UPDATE_NUM_SLIDES: "editNumberSlides",
+            UPDATE_PRIORITY: "editPriority",
           },
         },
         active: {
@@ -77,6 +81,7 @@ export default function createWorkRowMachine({
             FAIL: "updating",
             UPDATE_NUM_BLOCKS: "editNumberBlocks",
             UPDATE_NUM_SLIDES: "editNumberSlides",
+            UPDATE_PRIORITY: "editPriority",
           },
         },
         paused: {
@@ -87,6 +92,7 @@ export default function createWorkRowMachine({
             FAIL: "updating",
             UPDATE_NUM_BLOCKS: "editNumberBlocks",
             UPDATE_NUM_SLIDES: "editNumberSlides",
+            UPDATE_PRIORITY: "editPriority",
           },
         },
         completed: {},
@@ -121,6 +127,16 @@ export default function createWorkRowMachine({
             onError: { target: "deciding" },
           },
         },
+        editPriority: {
+          invoke: {
+            src: "updatePriority",
+            onDone: {
+              actions: "assignPriority",
+              target: "deciding",
+            },
+            onError: { target: "deciding" },
+          },
+        },
       },
     },
     {
@@ -136,6 +152,10 @@ export default function createWorkRowMachine({
         assignWorkNumSlides: assign((ctx, e) => {
           if (e.type !== "done.invoke.updateWorkNumSlides") return;
           ctx.workWithComment.work = e.data.updateWorkNumSlides;
+        }),
+        assignPriority: assign((ctx, e) => {
+          if (e.type !== "done.invoke.updateWorkPriority") return;
+          ctx.workWithComment.work = e.data.updateWorkPriority;
         }),
         toggleEditMode: assign(
           (ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled)
@@ -167,6 +187,13 @@ export default function createWorkRowMachine({
             params["numSlides"] = e.numSlides;
 
           return stanCore.UpdateWorkNumSlides(params);
+        },
+        updatePriority: (ctx, e) => {
+          let params: { workNumber: string; priority?: string } = {
+            workNumber: ctx.workWithComment.work.workNumber,
+          };
+          if ("priority" in e && e.priority) params["priority"] = e.priority;
+          return stanCore.UpdateWorkPriority(params);
         },
       },
     }

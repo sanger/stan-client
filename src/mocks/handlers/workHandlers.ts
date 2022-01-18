@@ -10,6 +10,8 @@ import {
   UpdateWorkNumBlocksMutationVariables,
   UpdateWorkNumSlidesMutation,
   UpdateWorkNumSlidesMutationVariables,
+  UpdateWorkPriorityMutation,
+  UpdateWorkPriorityMutationVariables,
   UpdateWorkStatusMutation,
   UpdateWorkStatusMutationVariables,
   WorkStatus,
@@ -35,7 +37,6 @@ const workHandlers = [
           comment.category === req.variables.commentCategory &&
           isEnabled(comment)
       );
-
     let works = workRepository.findAll();
 
     if (req.variables.workStatuses) {
@@ -200,6 +201,29 @@ const workHandlers = [
     return res(
       ctx.data({
         updateWorkNumSlides: work,
+      })
+    );
+  }),
+
+  graphql.mutation<
+    UpdateWorkPriorityMutation,
+    UpdateWorkPriorityMutationVariables
+  >("UpdateWorkPriority", (req, res, ctx) => {
+    const work = workRepository.find("workNumber", req.variables.workNumber);
+    if (!work) {
+      return res(
+        ctx.errors([
+          {
+            message: `Work ${req.variables.workNumber} not found`,
+          },
+        ])
+      );
+    }
+    work.priority = req.variables.priority;
+    workRepository.save(work);
+    return res(
+      ctx.data({
+        updateWorkPriority: work,
       })
     );
   }),
