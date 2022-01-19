@@ -234,13 +234,13 @@ export default function WorkAllocation() {
           <Table data-testid="work-allocation-table">
             <TableHead>
               <tr>
+                <TableHeader>Priority</TableHeader>
                 <TableHeader>SGP Number</TableHeader>
                 <TableHeader>Work Type</TableHeader>
                 <TableHeader>Project</TableHeader>
                 <TableHeader>Cost Code</TableHeader>
                 <TableHeader>Number of Blocks</TableHeader>
                 <TableHeader>Number of Slides</TableHeader>
-                <TableHeader>Priority</TableHeader>
                 <TableHeader>Status</TableHeader>
                 <TableHeader />
               </tr>

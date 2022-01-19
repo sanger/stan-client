@@ -157,26 +157,6 @@ export default function WorkRow({
 
   return (
     <tr>
-      <TableCell>{work.workNumber}</TableCell>
-      <TableCell>{work.workType.name}</TableCell>
-      <TableCell>{work.project.name}</TableCell>
-      <TableCell>{work.costCode.code}</TableCell>
-      <TableCell>
-        {renderWorkNumValueField(
-          work.workNumber,
-          work.numBlocks ?? undefined,
-          "block"
-        )}
-      </TableCell>
-
-      <TableCell>
-        {renderWorkNumValueField(
-          work.workNumber,
-          work.numSlides ?? undefined,
-          "slide"
-        )}
-      </TableCell>
-
       <TableCell>
         {
           /**Once workrequest is failed or completed then priority need to be cleared**/
@@ -214,13 +194,30 @@ export default function WorkRow({
           )
         }
       </TableCell>
+      <TableCell>{work.workNumber}</TableCell>
+      <TableCell>{work.workType.name}</TableCell>
+      <TableCell>{work.project.name}</TableCell>
+      <TableCell>{work.costCode.code}</TableCell>
+      <TableCell>
+        {renderWorkNumValueField(
+          work.workNumber,
+          work.numBlocks ?? undefined,
+          "block"
+        )}
+      </TableCell>
+      <TableCell>
+        {renderWorkNumValueField(
+          work.workNumber,
+          work.numSlides ?? undefined,
+          "slide"
+        )}
+      </TableCell>
       {!editModeEnabled && (
         <TableCell>
           <div className="uppercase">{work.status}</div>
           {comment && <div className="font-medium">{comment}</div>}
         </TableCell>
       )}
-
       <TableCell colSpan={showEditButton ? 1 : 2}>
         {showEditButton && (
           <PinkButton
@@ -230,7 +227,6 @@ export default function WorkRow({
             Edit Status
           </PinkButton>
         )}
-
         {editModeEnabled && (
           <Formik<FormValues>
             initialValues={initialValues}
@@ -250,7 +246,6 @@ export default function WorkRow({
                       </option>
                     ))}
                   </FormikSelect>
-
                   {requiresComment(values.type) && (
                     <FormikSelect
                       disabled={current.matches("updating")}
@@ -260,7 +255,6 @@ export default function WorkRow({
                       {optionValues(availableComments, "text", "id")}
                     </FormikSelect>
                   )}
-
                   <div className="flex flex-row items-center justify-end space-x-2">
                     <WhiteButton
                       type="button"
