@@ -117,9 +117,7 @@ describe("Work Allocation", () => {
       });
 
       it("displays a validation error message", () => {
-        cy.findByText("Must be capital letter followed by a one-digit number")
-          .scrollIntoView()
-          .should("be.visible");
+        cy.findByText("Invalid format").scrollIntoView().should("be.visible");
       });
     });
   });
