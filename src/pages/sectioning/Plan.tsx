@@ -1,17 +1,13 @@
-import React, { useCallback, useState } from "react";
-import {
-  FindPlanDataQuery,
-  GetSectioningInfoQuery,
-  Maybe,
-} from "../../types/sdk";
+import React, {useCallback, useState} from "react";
+import {FindPlanDataQuery, GetSectioningInfoQuery, Maybe,} from "../../types/sdk";
 import AppShell from "../../components/AppShell";
-import Planner, { PlanChangedProps } from "../../components/planning/Planner";
-import { LabwareTypeName } from "../../types/stan";
+import Planner, {PlanChangedProps} from "../../components/planning/Planner";
+import {LabwareTypeName} from "../../types/stan";
 import PinkButton from "../../components/buttons/PinkButton";
 import ButtonBar from "../../components/ButtonBar";
-import { Link, Prompt } from "react-router-dom";
+import {Link, Prompt} from "react-router-dom";
 import _ from "lodash";
-import { useConfirmLeave } from "../../lib/hooks";
+import {useConfirmLeave} from "../../lib/hooks";
 
 /**
  * Types of labware the user is allowed to section onto
@@ -21,6 +17,7 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
   LabwareTypeName.SLIDE,
   LabwareTypeName.VISIUM_TO,
   LabwareTypeName.VISIUM_LP,
+  LabwareTypeName.VISIUM_ADH,
 ];
 
 type SectioningParams = {

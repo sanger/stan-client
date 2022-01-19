@@ -1,10 +1,10 @@
-import { Factory } from "fishery";
-import { GridDirection, Labware, LabwareState } from "../../types/sdk";
-import { labwareTypes } from "./labwareTypeFactory";
-import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
-import { uniqueId } from "lodash";
-import { buildAddresses } from "../helpers";
-import { slotFactory } from "./slotFactory";
+import {Factory} from "fishery";
+import {GridDirection, Labware, LabwareState} from "../../types/sdk";
+import {labwareTypes} from "./labwareTypeFactory";
+import {LabwareTypeName, NewLabwareLayout} from "../../types/stan";
+import {uniqueId} from "lodash";
+import {buildAddresses} from "../helpers";
+import {slotFactory} from "./slotFactory";
 
 export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
   ({ params, associations, afterBuild, transientParams }) => {
@@ -111,6 +111,10 @@ export const cassetteFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.CASSETTE].build(),
 });
 
+export const visiumADHFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.VISIUM_ADH].build(),
+});
+
 export const labwareFactories: Record<
   LabwareTypeName,
   Factory<NewLabwareLayout>
@@ -122,4 +126,5 @@ export const labwareFactories: Record<
   [LabwareTypeName.VISIUM_LP]: visiumLPFactory,
   [LabwareTypeName.PLATE]: plateFactory,
   [LabwareTypeName.CASSETTE]: cassetteFactory,
+  [LabwareTypeName.VISIUM_ADH]: visiumADHFactory,
 };

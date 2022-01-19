@@ -1,7 +1,8 @@
-import { Factory } from "fishery";
-import { LabwareType } from "../../types/sdk";
+import {Factory} from "fishery";
+import {LabwareType} from "../../types/sdk";
 import labelTypeFactory from "./labelTypeFactory";
-import { LabwareTypeName } from "../../types/stan";
+import {LabwareTypeName} from "../../types/stan";
+
 const labwareTypeFactory = Factory.define<LabwareType>(({ sequence }) => ({
   __typename: "LabwareType",
   name: `Labware Type ${sequence}`,
@@ -54,6 +55,12 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     name: LabwareTypeName.CASSETTE,
     numRows: 1,
     numColumns: 1,
+  }),
+  [LabwareTypeName.VISIUM_ADH]: labwareTypeFactory.params({
+    __typename: "LabwareType",
+    name: LabwareTypeName.VISIUM_ADH,
+    numRows: 4,
+    numColumns: 2,
   }),
 };
 
