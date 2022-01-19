@@ -75,6 +75,37 @@ const locationHandlers = [
       );
     }
   ),
+  /**
+     graphql.mutation<StoreMutation, StoreMutationVariables>(
+     "Store",
+     (req, res, ctx) => {
+      debugger;
+      let location;
+      try {
+        location = locationRepository.store(
+          req.variables.store,
+          req.variables.locationBarcode,
+        );
+      } catch (e) {
+        return res(
+          ctx.errors([
+            {
+              message: (e as Error).message,
+            },
+          ])
+        );
+      }
+
+      return res(
+        ctx.data({
+          store: {
+            location: locationResponse(location),
+          },
+        })
+      );
+    }
+     ),
+     */
 
   graphql.mutation<UnstoreBarcodeMutation, UnstoreBarcodeMutationVariables>(
     "UnstoreBarcode",

@@ -65,6 +65,41 @@ class LocationRepository implements Repository<Location> {
     return newItem;
   }
 
+  store(
+    store: { barcode: string; address: string }[],
+    locationBarcode: string
+  ): Location {
+    const newLocation = this.locations.get(locationBarcode);
+    if (!newLocation) {
+      throw new Error(`Location with barcode ${locationBarcode} not found`);
+    }
+    store.forEach((storeItem) => {
+      const oldLocation = Array.from(this.locations.values()).find(
+        (location) => {
+          return location.stored.some(
+            (item) => item.barcode === storeItem.barcode
+          );
+        }
+      );
+      if (oldLocation) {
+        oldLocation.stored = oldLocation.stored.filter(
+          (item) => item.barcode !== storeItem.barcode
+        );
+      }
+    });
+    store.forEach((storeItem) => {
+      const newItem: StoredItem = {
+        barcode: storeItem.barcode,
+        address: storeItem.address,
+        location: newLocation,
+      };
+
+      newLocation.stored.push(newItem);
+      newItem.location = cloneDeep(newLocation);
+    });
+    return newLocation;
+  }
+
   unstoreBarcode(barcode: string): Maybe<StoredItem> {
     const location = Array.from(this.locations.values()).find((location) => {
       return location.stored.some((item) => item.barcode === barcode);

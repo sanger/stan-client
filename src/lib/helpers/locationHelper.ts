@@ -121,7 +121,7 @@ interface NextAvailableAddressParams {
  * Finds the next available (i.e. unoccupied) address in a location,
  * taking into account the grid direction
  * If numAddresses is given and there are not enough consecutive free addresses in the location as required by this parameter,
- * an array with available addresses is returned
+ * an array with available consecutive addresses is returned
  */
 export function findNextAvailableAddress({
   locationAddresses,
@@ -129,7 +129,6 @@ export function findNextAvailableAddress({
   minimumAddress = null,
   numAddresses,
 }: NextAvailableAddressParams): string[] {
-  debugger;
   // Build a list of [storelightAddress, stanAddress] tuples, ordered by Stan address
   let addressEntries = Array.from(locationAddresses.entries()).sort(
     (a, b) => a[1] - b[1]
@@ -146,15 +145,17 @@ export function findNextAvailableAddress({
   }
   /**
    Go through the ordered addresses checking if there's an item in each one.
-   If there are not enough consecutive addresses found as required, return the available ones
+   If there are not enough consecutive addresses found as required, return the ones until a non-empty address
    **/
   const retAddressArr: string[] = [];
   if (numAddresses && numAddresses > 0) {
     addressEntries.forEach((entry) => {
+      //got addresses as required
       if (retAddressArr.length >= numAddresses) return retAddressArr;
+      //if the address is empty,add that address
       if (addressToItemMap.get(entry[0]) === undefined) {
         retAddressArr.push(entry[0]);
-      }
+      } else return retAddressArr;
     });
   } else {
     const address =
