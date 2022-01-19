@@ -124,7 +124,7 @@ export default function WorkRow({
     return (
       <input
         data-testid={workNumber + "-" + workNumValueType}
-        className={"border-0 border-gray-100 "}
+        className={"border-0 border-gray-100"}
         type="number"
         min="0"
         max={MAX_NUM_BLOCKANDSLIDES}
@@ -141,12 +141,11 @@ export default function WorkRow({
     let errorMessage = "";
     if (priority.length === 0) return errorMessage;
     if (priority.length !== 2) {
-      errorMessage =
-        "Must be of length 2 - capital letter followed by a number";
+      errorMessage = "Invalid format";
     }
     const priorityRegEx = /^[A-Z]\d/;
     if (!priorityRegEx.test(priority.toUpperCase())) {
-      errorMessage = "Must be capital letter followed by a one-digit number";
+      errorMessage = "Invalid format";
     }
     return errorMessage;
   };
@@ -172,7 +171,7 @@ export default function WorkRow({
                       label={""}
                       name={"priority"}
                       data-testid={`${work.workNumber}-priority`}
-                      className={`border-0 border-gray-100`}
+                      className={`border-0 border-gray-100 w-12`}
                       onChange={(e: React.FormEvent<HTMLInputElement>) => {
                         const priority = e.currentTarget.value.toUpperCase();
                         setFieldValue("priority", priority);
