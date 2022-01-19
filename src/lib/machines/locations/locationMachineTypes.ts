@@ -62,6 +62,7 @@ export interface LocationSchema {
         storingBarcode: {};
         unstoringBarcode: {};
         emptyingLocation: {};
+        storingBarcodes: {};
       };
     };
   };
@@ -151,6 +152,21 @@ type SetErrorMessageEvent = {
   message: string;
 };
 
+type StoreBarcodesEvent = {
+  type: "STORE_BARCODES";
+  data: { barcode: string; address: string }[];
+};
+
+type StoreBarcodesResolveEvent = {
+  type: "done.invoke.storeBarcodes";
+  data: LocationFieldsFragment;
+};
+
+type StoreBarcodesErrorEvent = {
+  type: "error.platform.storeBarcodes";
+  data: ClientError;
+};
+
 export type LocationEvent =
   | FetchLocationEvent
   | FetchLocationResolveEvent
@@ -167,7 +183,10 @@ export type LocationEvent =
   | UpdateLocationEvent
   | SetSelectedAddressEvent
   | SetSuccessMessageEvent
-  | SetErrorMessageEvent;
+  | SetErrorMessageEvent
+  | StoreBarcodesEvent
+  | StoreBarcodesResolveEvent
+  | StoreBarcodesErrorEvent;
 
 /**
  * The type of an interpreted Location Machine

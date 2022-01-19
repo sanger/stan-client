@@ -29,6 +29,7 @@ enum Service {
   STORE_BARCODE = "storeBarcode",
   UNSTORE_BARCODE = "unstoreBarcode",
   EMPTY_LOCATION = "emptyLocation",
+  STORE_BARCODES = "storeBarcodes",
 }
 
 /**
@@ -53,6 +54,7 @@ export const machineOptions: Partial<MachineOptions<
         e.type !== "done.invoke.storeBarcode" &&
         e.type !== "done.invoke.unstoreBarcode" &&
         e.type !== "done.invoke.emptyLocation" &&
+        e.type !== "done.invoke.storeBarcodes" &&
         e.type !== "UPDATE_LOCATION"
       ) {
         return;
@@ -114,7 +116,8 @@ export const machineOptions: Partial<MachineOptions<
         e.type !== "error.platform.fetchLocation" &&
         e.type !== "error.platform.storeBarcode" &&
         e.type !== "error.platform.unstoreBarcode" &&
-        e.type !== "error.platform.emptyLocation"
+        e.type !== "error.platform.emptyLocation" &&
+        e.type !== "error.platform.storeBarcodes"
       ) {
         return;
       }
@@ -134,6 +137,7 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "STORE_BARCODE") {
         return Promise.reject();
       }
+      debugger;
       return locationService.storeBarcode(e.barcode, ctx.location, e.address);
     },
 
@@ -149,6 +153,18 @@ export const machineOptions: Partial<MachineOptions<
 
     [Service.EMPTY_LOCATION]: (ctx, _e) =>
       locationService.emptyLocation(ctx.location.barcode),
+
+    [Service.STORE_BARCODES]: async (ctx, e) => {
+      if (e.type !== "STORE_BARCODES") {
+        return Promise.reject();
+      }
+      debugger;
+      return locationService.storeBarcode(
+        e.data[0].barcode,
+        ctx.location,
+        e.data[0].address
+      );
+    },
   },
 };
 
@@ -177,6 +193,7 @@ export const machineConfig: MachineConfig<
         STORE_BARCODE: "updating.storingBarcode",
         UNSTORE_BARCODE: "updating.unstoringBarcode",
         EMPTY_LOCATION: "updating.emptyingLocation",
+        STORE_BARCODES: "updating.storingBarcodes",
         SET_SELECTED_ADDRESS: { actions: Action.ASSIGN_SELECTED_ADDRESS },
         SET_SUCCESS_MESSAGE: { actions: Action.ASSIGN_SUCCESS_MESSAGE },
         SET_ERROR_MESSAGE: { actions: Action.ASSIGN_ERROR_MESSAGE },
@@ -188,6 +205,25 @@ export const machineConfig: MachineConfig<
         storingBarcode: {
           invoke: {
             src: Service.STORE_BARCODE,
+            onDone: {
+              actions: [
+                Action.ASSIGN_LOCATION,
+                send(setSuccessMessage("Barcode successfully stored")),
+              ],
+              target: [`#locations.ready`],
+            },
+            onError: {
+              actions: [
+                send(setErrorMessage("Barcode could not be stored")),
+                Action.ASSIGN_SERVER_ERRORS,
+              ],
+              target: [`#locations.ready`],
+            },
+          },
+        },
+        storingBarcodes: {
+          invoke: {
+            src: Service.STORE_BARCODES,
             onDone: {
               actions: [
                 Action.ASSIGN_LOCATION,

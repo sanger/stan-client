@@ -129,6 +129,7 @@ export function findNextAvailableAddress({
   minimumAddress = null,
   numAddresses,
 }: NextAvailableAddressParams): string[] {
+  debugger;
   // Build a list of [storelightAddress, stanAddress] tuples, ordered by Stan address
   let addressEntries = Array.from(locationAddresses.entries()).sort(
     (a, b) => a[1] - b[1]
@@ -151,7 +152,7 @@ export function findNextAvailableAddress({
   if (numAddresses && numAddresses > 0) {
     addressEntries.forEach((entry) => {
       if (retAddressArr.length >= numAddresses) return retAddressArr;
-      if (addressToItemMap.get(entry[0]) !== undefined) {
+      if (addressToItemMap.get(entry[0]) === undefined) {
         retAddressArr.push(entry[0]);
       }
     });

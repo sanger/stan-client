@@ -48,6 +48,7 @@ const locationHandlers = [
   graphql.mutation<StoreBarcodeMutation, StoreBarcodeMutationVariables>(
     "StoreBarcode",
     (req, res, ctx) => {
+      debugger;
       let item;
       try {
         item = locationRepository.storeBarcode(

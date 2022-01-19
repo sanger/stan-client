@@ -37,6 +37,7 @@ import { StoredItemFragment } from "../lib/machines/locations/locationMachineTyp
 import createLocationMachine from "../lib/machines/locations/locationMachine";
 import { isAwaitingLabwareState } from "./Store";
 import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
+import warningToast from "../components/notifications/WarningToast";
 
 /**
  * The different ways of displaying stored items
@@ -55,6 +56,7 @@ type LocationParentContextType = {
   selectedAddress: Maybe<string>;
   setSelectedAddress: (address: string) => void;
   labwareBarcodeToAddressMap: Map<string, string>;
+  storeBarcodes: (storeData: { barcode: string; address: string }[]) => void;
 };
 
 export const LocationParentContext = React.createContext<
@@ -75,6 +77,8 @@ const Location: React.FC<LocationProps> = ({
   const [awaitingLabwares, setAwaitingLabwares] = useState<
     LabwareFieldsFragment[]
   >([]);
+
+  const addInProgressForAwaitingLabwares = React.useRef<string[]>([]);
 
   React.useEffect(() => {
     if (locationObject.state && isAwaitingLabwareState(locationObject.state)) {
@@ -143,6 +147,25 @@ const Location: React.FC<LocationProps> = ({
    */
   useEffect(() => {
     if (successMessage) {
+      if (addInProgressForAwaitingLabwares.current.length > 0) {
+        if (
+          addInProgressForAwaitingLabwares.current.length ===
+          awaitingLabwares.length
+        ) {
+          setAwaitingLabwares([]);
+        } else {
+          //Remove added labware from awaiting storage
+          const newLabwareList = [...awaitingLabwares].splice(
+            awaitingLabwares.findIndex(
+              (labware) =>
+                labware.barcode === addInProgressForAwaitingLabwares.current[0]
+            ),
+            1
+          );
+          setAwaitingLabwares(newLabwareList);
+        }
+      }
+      addInProgressForAwaitingLabwares.current = [];
       const SuccessToast = () => {
         return <Success message={successMessage} />;
       };
@@ -159,8 +182,15 @@ const Location: React.FC<LocationProps> = ({
    * Show a toast notification when error message changes (and isn't null)
    */
   useEffect(() => {
+    addInProgressForAwaitingLabwares.current = [];
     if (errorMessage) {
-      const WarningToast = () => (
+      warningToast({
+        message: errorMessage,
+        error: serverError,
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 5000,
+      });
+      /*const WarningToast = () => (
         <Warning message={errorMessage} error={serverError} />
       );
 
@@ -168,7 +198,7 @@ const Location: React.FC<LocationProps> = ({
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 5000,
         hideProgressBar: true,
-      });
+      });*/
     }
   }, [errorMessage, serverError]);
 
@@ -214,6 +244,8 @@ const Location: React.FC<LocationProps> = ({
       unstoreBarcode: (barcode) => send({ type: "UNSTORE_BARCODE", barcode }),
       setSelectedAddress: (address) =>
         send({ type: "SET_SELECTED_ADDRESS", address }),
+      storeBarcodes: (storeData: { barcode: string; address: string }[]) =>
+        send({ type: "STORE_BARCODES", data: storeData }),
     }),
     [
       addressToItemMap,
@@ -225,16 +257,42 @@ const Location: React.FC<LocationProps> = ({
     ]
   );
 
+  const addLabware = (labware: LabwareFieldsFragment) => {
+    if (!selectedAddress) {
+      return;
+    }
+    addInProgressForAwaitingLabwares.current = [labware.barcode];
+    send({ type: "STORE_BARCODE", barcode: labware.barcode });
+  };
+
   const addLabwares = (awaitingLabwares: LabwareFieldsFragment[]) => {
-    // Get the first selected address (which is the first empty address)
-    const nextAvailableAddresses = findNextAvailableAddress({
+    // Get as many consecutive empty addresses equal to number of labwares awaiting storage
+    const nextNumAvailableAddresses = findNextAvailableAddress({
       locationAddresses: locationAddresses,
       addressToItemMap: addressToItemMap,
       minimumAddress: selectedAddress,
       numAddresses: awaitingLabwares.length,
     });
-    if (nextAvailableAddresses.length < awaitingLabwares.length) {
+    debugger;
+    if (nextNumAvailableAddresses.length !== awaitingLabwares.length) {
+      warningToast({
+        message:
+          "Not enough consecutive free addresses available to store all labwares",
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 5000,
+      });
+      return;
     }
+    addInProgressForAwaitingLabwares.current = awaitingLabwares.map(
+      (labware) => labware.barcode
+    );
+    const storeData = awaitingLabwares.map((labware, indx) => {
+      return {
+        barcode: labware.barcode,
+        address: nextNumAvailableAddresses[indx],
+      };
+    });
+    send({ type: "STORE_BARCODES", data: storeData });
   };
 
   const showLocation =
@@ -374,9 +432,9 @@ const Location: React.FC<LocationProps> = ({
                   {awaitingLabwares.length > 0 && (
                     <LabwareAwaitingStorage
                       labwares={awaitingLabwares}
-                      addEnabled={false}
-                      onAddAllLabware={(labwares) => {}}
-                      onAddLabware={() => {}}
+                      addEnabled={selectedAddress !== undefined}
+                      onAddAllLabware={addLabwares}
+                      onAddLabware={addLabware}
                     />
                   )}
 
