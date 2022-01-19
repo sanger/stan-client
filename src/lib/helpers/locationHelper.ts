@@ -149,14 +149,16 @@ export function findNextAvailableAddress({
    **/
   const retAddressArr: string[] = [];
   if (numAddresses && numAddresses > 0) {
-    addressEntries.forEach((entry) => {
+    for (let indx = 0; indx < addressEntries.length; indx++) {
       //got addresses as required
       if (retAddressArr.length >= numAddresses) return retAddressArr;
       //if the address is empty,add that address
-      if (addressToItemMap.get(entry[0]) === undefined) {
-        retAddressArr.push(entry[0]);
-      } else return retAddressArr;
-    });
+      if (addressToItemMap.get(addressEntries[indx][0]) === undefined) {
+        retAddressArr.push(addressEntries[indx][0]);
+      } else {
+        return retAddressArr;
+      }
+    }
   } else {
     const address =
       addressEntries.find((entry) => !addressToItemMap.get(entry[0]))?.[0] ??

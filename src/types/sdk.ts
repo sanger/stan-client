@@ -13,163 +13,36 @@ export type Scalars = {
   Int: number;
   Float: number;
   Address: string;
-  Timestamp: string;
   Date: string;
+  Timestamp: string;
+};
+
+export type Action = {
+  __typename?: 'Action';
+  source: Slot;
+  destination: Slot;
+  operationId: Scalars['Int'];
+  sample: Sample;
 };
 
 
-
-
-export enum UserRole {
-  Disabled = 'disabled',
-  Normal = 'normal',
-  Admin = 'admin'
-}
-
-export enum LabwareState {
-  Empty = 'empty',
-  Active = 'active',
-  Discarded = 'discarded',
-  Released = 'released',
-  Destroyed = 'destroyed'
-}
-
-export enum PassFail {
-  Pass = 'pass',
-  Fail = 'fail'
-}
-
-export enum ControlType {
-  Positive = 'positive',
-  Negative = 'negative'
-}
-
-export type User = {
-  __typename?: 'User';
-  username: Scalars['String'];
-  role: UserRole;
+export type AddressCommentInput = {
+  address: Scalars['Address'];
+  commentId: Scalars['Int'];
 };
 
-export type LoginResult = {
-  __typename?: 'LoginResult';
-  message?: Maybe<Scalars['String']>;
-  user?: Maybe<User>;
-};
-
-export type Medium = {
-  __typename?: 'Medium';
-  name: Scalars['String'];
-};
-
-export type Fixative = {
-  __typename?: 'Fixative';
-  name: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export type MouldSize = {
-  __typename?: 'MouldSize';
-  name: Scalars['String'];
-};
-
-export type TissueType = {
-  __typename?: 'TissueType';
-  name: Scalars['String'];
-  spatialLocations: Array<SpatialLocation>;
-};
-
-export type SpatialLocation = {
-  __typename?: 'SpatialLocation';
-  name: Scalars['String'];
-  code: Scalars['Int'];
-  tissueType: TissueType;
-};
-
-export type Hmdmc = {
-  __typename?: 'Hmdmc';
-  hmdmc: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export type LabelType = {
-  __typename?: 'LabelType';
-  name: Scalars['String'];
-};
-
-export type LabwareType = {
-  __typename?: 'LabwareType';
-  name: Scalars['String'];
-  numRows: Scalars['Int'];
-  numColumns: Scalars['Int'];
-  labelType?: Maybe<LabelType>;
-};
-
-export type Species = {
-  __typename?: 'Species';
-  name: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export type Donor = {
-  __typename?: 'Donor';
-  donorName: Scalars['String'];
-  lifeStage: LifeStage;
-  species: Species;
+export type AddressPermData = {
+  __typename?: 'AddressPermData';
+  address: Scalars['Address'];
+  seconds?: Maybe<Scalars['Int']>;
+  controlType?: Maybe<ControlType>;
+  selected: Scalars['Boolean'];
 };
 
 export type BioState = {
   __typename?: 'BioState';
   name: Scalars['String'];
 };
-
-export type Tissue = {
-  __typename?: 'Tissue';
-  externalName: Scalars['String'];
-  replicate: Scalars['Int'];
-  spatialLocation: SpatialLocation;
-  donor: Donor;
-  hmdmc?: Maybe<Hmdmc>;
-  mouldSize: MouldSize;
-  medium: Medium;
-  fixative: Fixative;
-};
-
-export type Sample = {
-  __typename?: 'Sample';
-  id: Scalars['Int'];
-  section?: Maybe<Scalars['Int']>;
-  tissue: Tissue;
-  bioState: BioState;
-};
-
-export type Slot = {
-  __typename?: 'Slot';
-  address: Scalars['Address'];
-  labwareId: Scalars['Int'];
-  samples: Array<Sample>;
-  block: Scalars['Boolean'];
-  blockHighestSection?: Maybe<Scalars['Int']>;
-};
-
-export type Labware = {
-  __typename?: 'Labware';
-  id: Scalars['Int'];
-  barcode: Scalars['String'];
-  externalBarcode?: Maybe<Scalars['String']>;
-  labwareType: LabwareType;
-  slots: Array<Slot>;
-  released: Scalars['Boolean'];
-  destroyed: Scalars['Boolean'];
-  discarded: Scalars['Boolean'];
-  state: LabwareState;
-  created: Scalars['Timestamp'];
-};
-
-export enum LifeStage {
-  Adult = 'adult',
-  Paediatric = 'paediatric',
-  Fetal = 'fetal'
-}
 
 export type BlockRegisterRequest = {
   donorIdentifier: Scalars['String'];
@@ -188,99 +61,32 @@ export type BlockRegisterRequest = {
   existingTissue?: Maybe<Scalars['Boolean']>;
 };
 
-export type RegisterRequest = {
-  blocks: Array<BlockRegisterRequest>;
-};
-
-export type SectionRegisterContent = {
-  address: Scalars['Address'];
-  species: Scalars['String'];
-  hmdmc?: Maybe<Scalars['String']>;
-  donorIdentifier: Scalars['String'];
-  lifeStage: LifeStage;
-  externalIdentifier: Scalars['String'];
-  tissueType: Scalars['String'];
-  spatialLocation: Scalars['Int'];
-  replicateNumber: Scalars['Int'];
-  fixative: Scalars['String'];
-  medium: Scalars['String'];
-  sectionNumber: Scalars['Int'];
-  sectionThickness?: Maybe<Scalars['Int']>;
-};
-
-export type SectionRegisterLabware = {
-  labwareType: Scalars['String'];
-  externalBarcode: Scalars['String'];
-  contents: Array<SectionRegisterContent>;
-};
-
-export type SectionRegisterRequest = {
-  labware: Array<SectionRegisterLabware>;
-};
-
-export type RegisterClash = {
-  __typename?: 'RegisterClash';
-  tissue: Tissue;
-  labware: Array<Labware>;
-};
-
-export type RegisterResult = {
-  __typename?: 'RegisterResult';
-  labware: Array<Labware>;
-  clashes: Array<RegisterClash>;
-};
-
-export type PlanRequestSource = {
-  barcode: Scalars['String'];
-  address?: Maybe<Scalars['Address']>;
-};
-
-export type OperationType = {
-  __typename?: 'OperationType';
-  name: Scalars['String'];
-};
-
-export type PlanAction = {
-  __typename?: 'PlanAction';
-  source: Slot;
-  destination: Slot;
-  sample: Sample;
-  newSection?: Maybe<Scalars['Int']>;
-};
-
-export type PlanOperation = {
-  __typename?: 'PlanOperation';
-  operationType?: Maybe<OperationType>;
-  planActions: Array<PlanAction>;
-};
-
-export type PlanRequestAction = {
-  address: Scalars['Address'];
-  sampleId: Scalars['Int'];
-  sampleThickness?: Maybe<Scalars['Int']>;
-  source: PlanRequestSource;
-};
-
-export type PlanRequestLabware = {
-  labwareType: Scalars['String'];
-  barcode?: Maybe<Scalars['String']>;
-  actions: Array<PlanRequestAction>;
-};
-
-export type PlanRequest = {
-  operationType: Scalars['String'];
-  labware: Array<PlanRequestLabware>;
-};
-
-export type AddressCommentInput = {
-  address: Scalars['Address'];
-  commentId: Scalars['Int'];
-};
-
 export type CancelPlanAction = {
   destinationAddress: Scalars['Address'];
   sampleId: Scalars['Int'];
   newSection?: Maybe<Scalars['Int']>;
+};
+
+export type Comment = {
+  __typename?: 'Comment';
+  id: Scalars['Int'];
+  text: Scalars['String'];
+  category: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type ComplexStainLabware = {
+  barcode: Scalars['String'];
+  bondBarcode: Scalars['String'];
+  bondRun: Scalars['Int'];
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export type ComplexStainRequest = {
+  stainType: Scalars['String'];
+  plex: Scalars['Int'];
+  panel: StainPanel;
+  labware: Array<ComplexStainLabware>;
 };
 
 export type ConfirmOperationLabware = {
@@ -292,6 +98,12 @@ export type ConfirmOperationLabware = {
 
 export type ConfirmOperationRequest = {
   labware: Array<ConfirmOperationLabware>;
+};
+
+export type ConfirmOperationResult = {
+  __typename?: 'ConfirmOperationResult';
+  labware: Array<Labware>;
+  operations: Array<Operation>;
 };
 
 export type ConfirmSection = {
@@ -312,125 +124,26 @@ export type ConfirmSectionRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
-export type SlotCopyContent = {
-  sourceBarcode: Scalars['String'];
-  sourceAddress: Scalars['Address'];
-  destinationAddress: Scalars['Address'];
+export enum ControlType {
+  Positive = 'positive',
+  Negative = 'negative'
+}
+
+export type CostCode = {
+  __typename?: 'CostCode';
+  code: Scalars['String'];
+  enabled: Scalars['Boolean'];
 };
 
-export type SlotCopyRequest = {
-  labwareType: Scalars['String'];
-  operationType: Scalars['String'];
-  contents: Array<SlotCopyContent>;
-  workNumber?: Maybe<Scalars['String']>;
-};
 
-export type InPlaceOpRequest = {
-  operationType: Scalars['String'];
+export type DestroyRequest = {
   barcodes: Array<Scalars['String']>;
-  equipmentId?: Maybe<Scalars['Int']>;
-  workNumber?: Maybe<Scalars['String']>;
+  reasonId: Scalars['Int'];
 };
 
-export type Action = {
-  __typename?: 'Action';
-  source: Slot;
-  destination: Slot;
-  operationId: Scalars['Int'];
-  sample: Sample;
-};
-
-export type Operation = {
-  __typename?: 'Operation';
-  id: Scalars['Int'];
-  operationType: OperationType;
-  actions: Array<Action>;
-  user: User;
-  performed: Scalars['Timestamp'];
-};
-
-export type ConfirmOperationResult = {
-  __typename?: 'ConfirmOperationResult';
-  labware: Array<Labware>;
-  operations: Array<Operation>;
-};
-
-export type PlanResult = {
-  __typename?: 'PlanResult';
-  labware: Array<Labware>;
-  operations: Array<PlanOperation>;
-};
-
-export type Printer = {
-  __typename?: 'Printer';
-  name: Scalars['String'];
-  labelTypes: Array<LabelType>;
-};
-
-export type Comment = {
-  __typename?: 'Comment';
-  id: Scalars['Int'];
-  text: Scalars['String'];
-  category: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export type Equipment = {
-  __typename?: 'Equipment';
-  id: Scalars['Int'];
-  name: Scalars['String'];
-  category: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export type ReleaseDestination = {
-  __typename?: 'ReleaseDestination';
-  name: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export type ReleaseRecipient = {
-  __typename?: 'ReleaseRecipient';
-  username: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export type Release = {
-  __typename?: 'Release';
-  id: Scalars['Int'];
-  labware: Labware;
-  destination: ReleaseDestination;
-  recipient: ReleaseRecipient;
-};
-
-export type ReleaseResult = {
-  __typename?: 'ReleaseResult';
-  releases: Array<Release>;
-};
-
-export type ReleaseRequest = {
-  barcodes: Array<Scalars['String']>;
-  destination: Scalars['String'];
-  recipient: Scalars['String'];
-};
-
-export type ExtractRequest = {
-  barcodes: Array<Scalars['String']>;
-  labwareType: Scalars['String'];
-  workNumber?: Maybe<Scalars['String']>;
-};
-
-export type OperationResult = {
-  __typename?: 'OperationResult';
-  labware: Array<Labware>;
-  operations: Array<Operation>;
-};
-
-export type DestructionReason = {
-  __typename?: 'DestructionReason';
-  id: Scalars['Int'];
-  text: Scalars['String'];
-  enabled: Scalars['Boolean'];
+export type DestroyResult = {
+  __typename?: 'DestroyResult';
+  destructions: Array<Destruction>;
 };
 
 export type Destruction = {
@@ -441,33 +154,83 @@ export type Destruction = {
   reason?: Maybe<DestructionReason>;
 };
 
-export type DestroyResult = {
-  __typename?: 'DestroyResult';
-  destructions: Array<Destruction>;
+export type DestructionReason = {
+  __typename?: 'DestructionReason';
+  id: Scalars['Int'];
+  text: Scalars['String'];
+  enabled: Scalars['Boolean'];
 };
 
-export type DestroyRequest = {
+export type Donor = {
+  __typename?: 'Donor';
+  donorName: Scalars['String'];
+  lifeStage: LifeStage;
+  species: Species;
+};
+
+export type Equipment = {
+  __typename?: 'Equipment';
+  id: Scalars['Int'];
+  name: Scalars['String'];
+  category: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type ExtractRequest = {
   barcodes: Array<Scalars['String']>;
-  reasonId: Scalars['Int'];
+  labwareType: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
 };
 
-export type StoredItem = {
-  __typename?: 'StoredItem';
+export type ExtractResult = {
+  __typename?: 'ExtractResult';
+  labware: Labware;
+  result?: Maybe<PassFail>;
+  concentration?: Maybe<Scalars['String']>;
+};
+
+export type ExtractResultLabware = {
   barcode: Scalars['String'];
-  location: Location;
-  address?: Maybe<Scalars['Address']>;
+  result: PassFail;
+  concentration?: Maybe<Scalars['String']>;
+  commentId?: Maybe<Scalars['Int']>;
 };
 
-export type UnstoredItem = {
-  __typename?: 'UnstoredItem';
-  barcode: Scalars['String'];
-  address?: Maybe<Scalars['Address']>;
+export type ExtractResultRequest = {
+  labware: Array<ExtractResultLabware>;
+  workNumber?: Maybe<Scalars['String']>;
 };
 
-export type Size = {
-  __typename?: 'Size';
-  numRows: Scalars['Int'];
-  numColumns: Scalars['Int'];
+export type FindEntry = {
+  __typename?: 'FindEntry';
+  sampleId: Scalars['Int'];
+  labwareId: Scalars['Int'];
+};
+
+export type FindRequest = {
+  labwareBarcode?: Maybe<Scalars['String']>;
+  donorName?: Maybe<Scalars['String']>;
+  tissueExternalName?: Maybe<Scalars['String']>;
+  tissueTypeName?: Maybe<Scalars['String']>;
+  maxRecords?: Maybe<Scalars['Int']>;
+  createdMin?: Maybe<Scalars['Date']>;
+  createdMax?: Maybe<Scalars['Date']>;
+};
+
+export type FindResult = {
+  __typename?: 'FindResult';
+  entries: Array<FindEntry>;
+  samples: Array<Sample>;
+  labware: Array<Labware>;
+  locations: Array<Location>;
+  labwareLocations: Array<LabwareLocationEntry>;
+  numRecords: Scalars['Int'];
+};
+
+export type Fixative = {
+  __typename?: 'Fixative';
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
 };
 
 /** A traversal order for a grid. */
@@ -481,6 +244,100 @@ export enum GridDirection {
   /** Up the leftmost column, then right to the next column, etc. */
   UpRight = 'UpRight'
 }
+
+export type History = {
+  __typename?: 'History';
+  entries: Array<HistoryEntry>;
+  labware: Array<Labware>;
+  samples: Array<Sample>;
+};
+
+export type HistoryEntry = {
+  __typename?: 'HistoryEntry';
+  eventId: Scalars['Int'];
+  type: Scalars['String'];
+  time: Scalars['Timestamp'];
+  sourceLabwareId: Scalars['Int'];
+  destinationLabwareId: Scalars['Int'];
+  sampleId?: Maybe<Scalars['Int']>;
+  username: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  details: Array<Scalars['String']>;
+};
+
+export type Hmdmc = {
+  __typename?: 'Hmdmc';
+  hmdmc: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type InPlaceOpRequest = {
+  operationType: Scalars['String'];
+  barcodes: Array<Scalars['String']>;
+  equipmentId?: Maybe<Scalars['Int']>;
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export type LabelType = {
+  __typename?: 'LabelType';
+  name: Scalars['String'];
+};
+
+export type Labware = {
+  __typename?: 'Labware';
+  id: Scalars['Int'];
+  barcode: Scalars['String'];
+  externalBarcode?: Maybe<Scalars['String']>;
+  labwareType: LabwareType;
+  slots: Array<Slot>;
+  released: Scalars['Boolean'];
+  destroyed: Scalars['Boolean'];
+  discarded: Scalars['Boolean'];
+  state: LabwareState;
+  created: Scalars['Timestamp'];
+};
+
+export type LabwareLocationEntry = {
+  __typename?: 'LabwareLocationEntry';
+  labwareId: Scalars['Int'];
+  locationId: Scalars['Int'];
+  address?: Maybe<Scalars['Address']>;
+};
+
+export type LabwareResult = {
+  barcode: Scalars['String'];
+  sampleResults: Array<SampleResult>;
+};
+
+export enum LabwareState {
+  Empty = 'empty',
+  Active = 'active',
+  Discarded = 'discarded',
+  Released = 'released',
+  Destroyed = 'destroyed'
+}
+
+export type LabwareType = {
+  __typename?: 'LabwareType';
+  name: Scalars['String'];
+  numRows: Scalars['Int'];
+  numColumns: Scalars['Int'];
+  labelType?: Maybe<LabelType>;
+};
+
+export enum LifeStage {
+  Adult = 'adult',
+  Paediatric = 'paediatric',
+  Fetal = 'fetal'
+}
+
+export type LinkedLocation = {
+  __typename?: 'LinkedLocation';
+  barcode: Scalars['String'];
+  fixedName?: Maybe<Scalars['String']>;
+  customName?: Maybe<Scalars['String']>;
+  address?: Maybe<Scalars['Address']>;
+};
 
 export type Location = {
   __typename?: 'Location';
@@ -497,494 +354,20 @@ export type Location = {
   qualifiedNameWithFirstBarcode?: Maybe<Scalars['String']>;
 };
 
-export type LinkedLocation = {
-  __typename?: 'LinkedLocation';
-  barcode: Scalars['String'];
-  fixedName?: Maybe<Scalars['String']>;
-  customName?: Maybe<Scalars['String']>;
-  address?: Maybe<Scalars['Address']>;
-};
-
-export type UnstoreResult = {
-  __typename?: 'UnstoreResult';
-  numUnstored: Scalars['Int'];
-  unstored: Array<UnstoredItem>;
-};
-
-export type FindEntry = {
-  __typename?: 'FindEntry';
-  sampleId: Scalars['Int'];
-  labwareId: Scalars['Int'];
-};
-
-export type LabwareLocationEntry = {
-  __typename?: 'LabwareLocationEntry';
-  labwareId: Scalars['Int'];
-  locationId: Scalars['Int'];
-  address?: Maybe<Scalars['Address']>;
-};
-
-export type FindResult = {
-  __typename?: 'FindResult';
-  entries: Array<FindEntry>;
-  samples: Array<Sample>;
-  labware: Array<Labware>;
-  locations: Array<Location>;
-  labwareLocations: Array<LabwareLocationEntry>;
-  numRecords: Scalars['Int'];
-};
-
-export type FindRequest = {
-  labwareBarcode?: Maybe<Scalars['String']>;
-  donorName?: Maybe<Scalars['String']>;
-  tissueExternalName?: Maybe<Scalars['String']>;
-  tissueTypeName?: Maybe<Scalars['String']>;
-  maxRecords?: Maybe<Scalars['Int']>;
-  createdMin?: Maybe<Scalars['Date']>;
-  createdMax?: Maybe<Scalars['Date']>;
-};
-
-export type HistoryEntry = {
-  __typename?: 'HistoryEntry';
-  eventId: Scalars['Int'];
-  type: Scalars['String'];
-  time: Scalars['Timestamp'];
-  sourceLabwareId: Scalars['Int'];
-  destinationLabwareId: Scalars['Int'];
-  sampleId?: Maybe<Scalars['Int']>;
-  username: Scalars['String'];
-  workNumber?: Maybe<Scalars['String']>;
-  details: Array<Scalars['String']>;
-};
-
-export type History = {
-  __typename?: 'History';
-  entries: Array<HistoryEntry>;
-  labware: Array<Labware>;
-  samples: Array<Sample>;
-};
-
-export type PlanData = {
-  __typename?: 'PlanData';
-  sources: Array<Labware>;
-  plan: PlanOperation;
-  destination: Labware;
-};
-
-export type Project = {
-  __typename?: 'Project';
-  name: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export type CostCode = {
-  __typename?: 'CostCode';
-  code: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export type WorkType = {
-  __typename?: 'WorkType';
-  name: Scalars['String'];
-  enabled: Scalars['Boolean'];
-};
-
-export enum WorkStatus {
-  Unstarted = 'unstarted',
-  Active = 'active',
-  Paused = 'paused',
-  Completed = 'completed',
-  Failed = 'failed'
-}
-
-export type Work = {
-  __typename?: 'Work';
-  workType: WorkType;
-  project: Project;
-  costCode: CostCode;
-  workNumber: Scalars['String'];
-  status: WorkStatus;
-  numBlocks?: Maybe<Scalars['Int']>;
-  numSlides?: Maybe<Scalars['Int']>;
-  priority?: Maybe<Scalars['String']>;
-};
-
-export type StainType = {
-  __typename?: 'StainType';
-  name: Scalars['String'];
-  measurementTypes: Array<Scalars['String']>;
-};
-
-export type WorkWithComment = {
-  __typename?: 'WorkWithComment';
-  work: Work;
-  comment?: Maybe<Scalars['String']>;
-};
-
-export type WorkProgressTimestamp = {
-  __typename?: 'WorkProgressTimestamp';
-  type: Scalars['String'];
-  timestamp: Scalars['Timestamp'];
-};
-
-export type WorkProgress = {
-  __typename?: 'WorkProgress';
-  work: Work;
-  timestamps: Array<WorkProgressTimestamp>;
-};
-
-export type TimeMeasurement = {
-  name: Scalars['String'];
-  seconds: Scalars['Int'];
-};
-
-export type StainRequest = {
-  stainType: Scalars['String'];
-  barcodes: Array<Scalars['String']>;
-  timeMeasurements: Array<TimeMeasurement>;
-  workNumber?: Maybe<Scalars['String']>;
-};
-
-export enum StainPanel {
-  Positive = 'positive',
-  Negative = 'negative',
-  Marker = 'marker'
-}
-
-export type ComplexStainLabware = {
-  barcode: Scalars['String'];
-  bondBarcode: Scalars['String'];
-  bondRun: Scalars['Int'];
-  workNumber?: Maybe<Scalars['String']>;
-};
-
-export type ComplexStainRequest = {
-  stainType: Scalars['String'];
-  plex: Scalars['Int'];
-  panel: StainPanel;
-  labware: Array<ComplexStainLabware>;
-};
-
-export type UnreleaseLabware = {
-  barcode: Scalars['String'];
-  highestSection?: Maybe<Scalars['Int']>;
-};
-
-export type UnreleaseRequest = {
-  labware: Array<UnreleaseLabware>;
-};
-
-export type SampleResult = {
-  address: Scalars['Address'];
-  result: PassFail;
-  commentId?: Maybe<Scalars['Int']>;
-};
-
-export type LabwareResult = {
-  barcode: Scalars['String'];
-  sampleResults: Array<SampleResult>;
-};
-
-export type ResultRequest = {
-  operationType?: Maybe<Scalars['String']>;
-  labwareResults: Array<LabwareResult>;
-  workNumber?: Maybe<Scalars['String']>;
-};
-
-export type ExtractResultLabware = {
-  barcode: Scalars['String'];
-  result: PassFail;
-  concentration?: Maybe<Scalars['String']>;
-  commentId?: Maybe<Scalars['Int']>;
-};
-
-export type ExtractResultRequest = {
-  labware: Array<ExtractResultLabware>;
-  workNumber?: Maybe<Scalars['String']>;
-};
-
-export type PermData = {
-  address: Scalars['Address'];
-  seconds?: Maybe<Scalars['Int']>;
-  controlType?: Maybe<ControlType>;
-};
-
-export type RecordPermRequest = {
-  barcode: Scalars['String'];
-  workNumber?: Maybe<Scalars['String']>;
-  permData: Array<PermData>;
-};
-
-export type AddressPermData = {
-  __typename?: 'AddressPermData';
-  address: Scalars['Address'];
-  seconds?: Maybe<Scalars['Int']>;
-  controlType?: Maybe<ControlType>;
-  selected: Scalars['Boolean'];
-};
-
-export type VisiumPermData = {
-  __typename?: 'VisiumPermData';
-  labware: Labware;
-  addressPermData: Array<AddressPermData>;
-};
-
-export type VisiumAnalysisRequest = {
-  barcode: Scalars['String'];
-  workNumber?: Maybe<Scalars['String']>;
-  selectedAddress: Scalars['Address'];
-  selectedTime: Scalars['Int'];
-};
-
-export type SlotPassFail = {
-  __typename?: 'SlotPassFail';
-  address: Scalars['Address'];
-  result: PassFail;
-  comment?: Maybe<Scalars['String']>;
-};
-
-export type OpPassFail = {
-  __typename?: 'OpPassFail';
-  operation: Operation;
-  slotPassFails: Array<SlotPassFail>;
-};
-
-export type ExtractResult = {
-  __typename?: 'ExtractResult';
-  labware: Labware;
-  result?: Maybe<PassFail>;
-  concentration?: Maybe<Scalars['String']>;
-};
-
-export type StringMeasurement = {
-  name: Scalars['String'];
-  value: Scalars['String'];
-};
-
-export type RnaAnalysisLabware = {
-  barcode: Scalars['String'];
-  workNumber?: Maybe<Scalars['String']>;
-  commentId?: Maybe<Scalars['Int']>;
-  measurements: Array<StringMeasurement>;
-};
-
-export type RnaAnalysisRequest = {
-  operationType: Scalars['String'];
-  labware: Array<RnaAnalysisLabware>;
-};
-
-export type SlotMeasurementRequest = {
-  address: Scalars['Address'];
-  name: Scalars['String'];
-  value: Scalars['String'];
-};
-
-export type OpWithSlotMeasurementsRequest = {
-  barcode: Scalars['String'];
-  operationType: Scalars['String'];
-  workNumber?: Maybe<Scalars['String']>;
-  slotMeasurements: Array<SlotMeasurementRequest>;
-};
-
-export type Query = {
-  __typename?: 'Query';
+export type LoginResult = {
+  __typename?: 'LoginResult';
+  message?: Maybe<Scalars['String']>;
   user?: Maybe<User>;
-  tissueTypes: Array<TissueType>;
-  labwareTypes: Array<LabwareType>;
-  hmdmcs: Array<Hmdmc>;
-  mediums: Array<Medium>;
-  fixatives: Array<Fixative>;
-  mouldSizes: Array<MouldSize>;
-  species: Array<Species>;
-  labware: Labware;
-  printers: Array<Printer>;
-  comments: Array<Comment>;
-  equipments: Array<Equipment>;
-  releaseDestinations: Array<ReleaseDestination>;
-  releaseRecipients: Array<ReleaseRecipient>;
-  destructionReasons: Array<DestructionReason>;
-  projects: Array<Project>;
-  costCodes: Array<CostCode>;
-  workTypes: Array<WorkType>;
-  works: Array<Work>;
-  work: Work;
-  worksWithComments: Array<WorkWithComment>;
-  users: Array<User>;
-  find: FindResult;
-  planData: PlanData;
-  stainTypes: Array<StainType>;
-  visiumPermData: VisiumPermData;
-  extractResult: ExtractResult;
-  passFails: Array<OpPassFail>;
-  historyForSampleId: History;
-  historyForExternalName: History;
-  historyForDonorName: History;
-  historyForLabwareBarcode: History;
-  historyForWorkNumber: History;
-  workProgress: Array<WorkProgress>;
-  location: Location;
-  stored: Array<StoredItem>;
-  labwareInLocation: Array<Labware>;
 };
 
-
-export type QueryHmdmcsArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
+export type Medium = {
+  __typename?: 'Medium';
+  name: Scalars['String'];
 };
 
-
-export type QueryFixativesArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QuerySpeciesArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryLabwareArgs = {
-  barcode: Scalars['String'];
-};
-
-
-export type QueryPrintersArgs = {
-  labelType?: Maybe<Scalars['String']>;
-};
-
-
-export type QueryCommentsArgs = {
-  category?: Maybe<Scalars['String']>;
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryEquipmentsArgs = {
-  category?: Maybe<Scalars['String']>;
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryReleaseDestinationsArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryReleaseRecipientsArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryDestructionReasonsArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryProjectsArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryCostCodesArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryWorkTypesArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryWorksArgs = {
-  status?: Maybe<Array<WorkStatus>>;
-};
-
-
-export type QueryWorkArgs = {
-  workNumber: Scalars['String'];
-};
-
-
-export type QueryWorksWithCommentsArgs = {
-  status?: Maybe<Array<WorkStatus>>;
-};
-
-
-export type QueryUsersArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-export type QueryFindArgs = {
-  request: FindRequest;
-};
-
-
-export type QueryPlanDataArgs = {
-  barcode: Scalars['String'];
-};
-
-
-export type QueryVisiumPermDataArgs = {
-  barcode: Scalars['String'];
-};
-
-
-export type QueryExtractResultArgs = {
-  barcode: Scalars['String'];
-};
-
-
-export type QueryPassFailsArgs = {
-  barcode: Scalars['String'];
-  operationType: Scalars['String'];
-};
-
-
-export type QueryHistoryForSampleIdArgs = {
-  sampleId: Scalars['Int'];
-};
-
-
-export type QueryHistoryForExternalNameArgs = {
-  externalName: Scalars['String'];
-};
-
-
-export type QueryHistoryForDonorNameArgs = {
-  donorName: Scalars['String'];
-};
-
-
-export type QueryHistoryForLabwareBarcodeArgs = {
-  barcode: Scalars['String'];
-};
-
-
-export type QueryHistoryForWorkNumberArgs = {
-  workNumber: Scalars['String'];
-};
-
-
-export type QueryWorkProgressArgs = {
-  workNumber?: Maybe<Scalars['String']>;
-  workTypes?: Maybe<Array<Scalars['String']>>;
-  statuses?: Maybe<Array<WorkStatus>>;
-};
-
-
-export type QueryLocationArgs = {
-  locationBarcode: Scalars['String'];
-};
-
-
-export type QueryStoredArgs = {
-  barcodes: Array<Scalars['String']>;
-};
-
-
-export type QueryLabwareInLocationArgs = {
-  locationBarcode: Scalars['String'];
+export type MouldSize = {
+  __typename?: 'MouldSize';
+  name: Scalars['String'];
 };
 
 export type Mutation = {
@@ -1042,6 +425,7 @@ export type Mutation = {
   addUser: User;
   setUserRole: User;
   storeBarcode: StoredItem;
+  store: Location;
   unstoreBarcode?: Maybe<UnstoredItem>;
   empty: UnstoreResult;
   setLocationCustomName: Location;
@@ -1336,6 +720,12 @@ export type MutationStoreBarcodeArgs = {
 };
 
 
+export type MutationStoreArgs = {
+  store: Array<StoreInput>;
+  locationBarcode: Scalars['String'];
+};
+
+
 export type MutationUnstoreBarcodeArgs = {
   barcode: Scalars['String'];
 };
@@ -1349,6 +739,628 @@ export type MutationEmptyArgs = {
 export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
+};
+
+export type OpPassFail = {
+  __typename?: 'OpPassFail';
+  operation: Operation;
+  slotPassFails: Array<SlotPassFail>;
+};
+
+export type OpWithSlotMeasurementsRequest = {
+  barcode: Scalars['String'];
+  operationType: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  slotMeasurements: Array<SlotMeasurementRequest>;
+};
+
+export type Operation = {
+  __typename?: 'Operation';
+  id: Scalars['Int'];
+  operationType: OperationType;
+  actions: Array<Action>;
+  user: User;
+  performed: Scalars['Timestamp'];
+};
+
+export type OperationResult = {
+  __typename?: 'OperationResult';
+  labware: Array<Labware>;
+  operations: Array<Operation>;
+};
+
+export type OperationType = {
+  __typename?: 'OperationType';
+  name: Scalars['String'];
+};
+
+export enum PassFail {
+  Pass = 'pass',
+  Fail = 'fail'
+}
+
+export type PermData = {
+  address: Scalars['Address'];
+  seconds?: Maybe<Scalars['Int']>;
+  controlType?: Maybe<ControlType>;
+};
+
+export type PlanAction = {
+  __typename?: 'PlanAction';
+  source: Slot;
+  destination: Slot;
+  sample: Sample;
+  newSection?: Maybe<Scalars['Int']>;
+};
+
+export type PlanData = {
+  __typename?: 'PlanData';
+  sources: Array<Labware>;
+  plan: PlanOperation;
+  destination: Labware;
+};
+
+export type PlanOperation = {
+  __typename?: 'PlanOperation';
+  operationType?: Maybe<OperationType>;
+  planActions: Array<PlanAction>;
+};
+
+export type PlanRequest = {
+  operationType: Scalars['String'];
+  labware: Array<PlanRequestLabware>;
+};
+
+export type PlanRequestAction = {
+  address: Scalars['Address'];
+  sampleId: Scalars['Int'];
+  sampleThickness?: Maybe<Scalars['Int']>;
+  source: PlanRequestSource;
+};
+
+export type PlanRequestLabware = {
+  labwareType: Scalars['String'];
+  barcode?: Maybe<Scalars['String']>;
+  actions: Array<PlanRequestAction>;
+};
+
+export type PlanRequestSource = {
+  barcode: Scalars['String'];
+  address?: Maybe<Scalars['Address']>;
+};
+
+export type PlanResult = {
+  __typename?: 'PlanResult';
+  labware: Array<Labware>;
+  operations: Array<PlanOperation>;
+};
+
+export type Printer = {
+  __typename?: 'Printer';
+  name: Scalars['String'];
+  labelTypes: Array<LabelType>;
+};
+
+export type Project = {
+  __typename?: 'Project';
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type Query = {
+  __typename?: 'Query';
+  user?: Maybe<User>;
+  tissueTypes: Array<TissueType>;
+  labwareTypes: Array<LabwareType>;
+  hmdmcs: Array<Hmdmc>;
+  mediums: Array<Medium>;
+  fixatives: Array<Fixative>;
+  mouldSizes: Array<MouldSize>;
+  species: Array<Species>;
+  labware: Labware;
+  printers: Array<Printer>;
+  comments: Array<Comment>;
+  equipments: Array<Equipment>;
+  releaseDestinations: Array<ReleaseDestination>;
+  releaseRecipients: Array<ReleaseRecipient>;
+  destructionReasons: Array<DestructionReason>;
+  projects: Array<Project>;
+  costCodes: Array<CostCode>;
+  workTypes: Array<WorkType>;
+  works: Array<Work>;
+  work: Work;
+  worksWithComments: Array<WorkWithComment>;
+  users: Array<User>;
+  find: FindResult;
+  planData: PlanData;
+  stainTypes: Array<StainType>;
+  visiumPermData: VisiumPermData;
+  extractResult: ExtractResult;
+  passFails: Array<OpPassFail>;
+  historyForSampleId: History;
+  historyForExternalName: History;
+  historyForDonorName: History;
+  historyForWorkNumber: History;
+  historyForLabwareBarcode: History;
+  workProgress: Array<WorkProgress>;
+  location: Location;
+  stored: Array<StoredItem>;
+  labwareInLocation: Array<Labware>;
+};
+
+
+export type QueryHmdmcsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryFixativesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QuerySpeciesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryLabwareArgs = {
+  barcode: Scalars['String'];
+};
+
+
+export type QueryPrintersArgs = {
+  labelType?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryCommentsArgs = {
+  category?: Maybe<Scalars['String']>;
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryEquipmentsArgs = {
+  category?: Maybe<Scalars['String']>;
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryReleaseDestinationsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryReleaseRecipientsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryDestructionReasonsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryProjectsArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryCostCodesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryWorkTypesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryWorksArgs = {
+  status?: Maybe<Array<WorkStatus>>;
+};
+
+
+export type QueryWorkArgs = {
+  workNumber: Scalars['String'];
+};
+
+
+export type QueryWorksWithCommentsArgs = {
+  status?: Maybe<Array<WorkStatus>>;
+};
+
+
+export type QueryUsersArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+export type QueryFindArgs = {
+  request: FindRequest;
+};
+
+
+export type QueryPlanDataArgs = {
+  barcode: Scalars['String'];
+};
+
+
+export type QueryVisiumPermDataArgs = {
+  barcode: Scalars['String'];
+};
+
+
+export type QueryExtractResultArgs = {
+  barcode: Scalars['String'];
+};
+
+
+export type QueryPassFailsArgs = {
+  barcode: Scalars['String'];
+  operationType: Scalars['String'];
+};
+
+
+export type QueryHistoryForSampleIdArgs = {
+  sampleId: Scalars['Int'];
+};
+
+
+export type QueryHistoryForExternalNameArgs = {
+  externalName: Scalars['String'];
+};
+
+
+export type QueryHistoryForDonorNameArgs = {
+  donorName: Scalars['String'];
+};
+
+
+export type QueryHistoryForWorkNumberArgs = {
+  workNumber: Scalars['String'];
+};
+
+
+export type QueryHistoryForLabwareBarcodeArgs = {
+  barcode: Scalars['String'];
+};
+
+
+export type QueryWorkProgressArgs = {
+  workNumber?: Maybe<Scalars['String']>;
+  workTypes?: Maybe<Array<Scalars['String']>>;
+  statuses?: Maybe<Array<WorkStatus>>;
+};
+
+
+export type QueryLocationArgs = {
+  locationBarcode: Scalars['String'];
+};
+
+
+export type QueryStoredArgs = {
+  barcodes: Array<Scalars['String']>;
+};
+
+
+export type QueryLabwareInLocationArgs = {
+  locationBarcode: Scalars['String'];
+};
+
+export type RnaAnalysisLabware = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  commentId?: Maybe<Scalars['Int']>;
+  measurements: Array<StringMeasurement>;
+};
+
+export type RnaAnalysisRequest = {
+  operationType: Scalars['String'];
+  labware: Array<RnaAnalysisLabware>;
+};
+
+export type RecordPermRequest = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  permData: Array<PermData>;
+};
+
+export type RegisterClash = {
+  __typename?: 'RegisterClash';
+  tissue: Tissue;
+  labware: Array<Labware>;
+};
+
+export type RegisterRequest = {
+  blocks: Array<BlockRegisterRequest>;
+};
+
+export type RegisterResult = {
+  __typename?: 'RegisterResult';
+  labware: Array<Labware>;
+  clashes: Array<RegisterClash>;
+};
+
+export type Release = {
+  __typename?: 'Release';
+  id: Scalars['Int'];
+  labware: Labware;
+  destination: ReleaseDestination;
+  recipient: ReleaseRecipient;
+};
+
+export type ReleaseDestination = {
+  __typename?: 'ReleaseDestination';
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type ReleaseRecipient = {
+  __typename?: 'ReleaseRecipient';
+  username: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type ReleaseRequest = {
+  barcodes: Array<Scalars['String']>;
+  destination: Scalars['String'];
+  recipient: Scalars['String'];
+};
+
+export type ReleaseResult = {
+  __typename?: 'ReleaseResult';
+  releases: Array<Release>;
+};
+
+export type ResultRequest = {
+  operationType?: Maybe<Scalars['String']>;
+  labwareResults: Array<LabwareResult>;
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export type Sample = {
+  __typename?: 'Sample';
+  id: Scalars['Int'];
+  section?: Maybe<Scalars['Int']>;
+  tissue: Tissue;
+  bioState: BioState;
+};
+
+export type SampleResult = {
+  address: Scalars['Address'];
+  result: PassFail;
+  commentId?: Maybe<Scalars['Int']>;
+};
+
+export type SectionRegisterContent = {
+  address: Scalars['Address'];
+  species: Scalars['String'];
+  hmdmc?: Maybe<Scalars['String']>;
+  donorIdentifier: Scalars['String'];
+  lifeStage: LifeStage;
+  externalIdentifier: Scalars['String'];
+  tissueType: Scalars['String'];
+  spatialLocation: Scalars['Int'];
+  replicateNumber: Scalars['Int'];
+  fixative: Scalars['String'];
+  medium: Scalars['String'];
+  sectionNumber: Scalars['Int'];
+  sectionThickness?: Maybe<Scalars['Int']>;
+};
+
+export type SectionRegisterLabware = {
+  labwareType: Scalars['String'];
+  externalBarcode: Scalars['String'];
+  contents: Array<SectionRegisterContent>;
+};
+
+export type SectionRegisterRequest = {
+  labware: Array<SectionRegisterLabware>;
+};
+
+export type Size = {
+  __typename?: 'Size';
+  numRows: Scalars['Int'];
+  numColumns: Scalars['Int'];
+};
+
+export type Slot = {
+  __typename?: 'Slot';
+  address: Scalars['Address'];
+  labwareId: Scalars['Int'];
+  samples: Array<Sample>;
+  block: Scalars['Boolean'];
+  blockHighestSection?: Maybe<Scalars['Int']>;
+};
+
+export type SlotCopyContent = {
+  sourceBarcode: Scalars['String'];
+  sourceAddress: Scalars['Address'];
+  destinationAddress: Scalars['Address'];
+};
+
+export type SlotCopyRequest = {
+  labwareType: Scalars['String'];
+  operationType: Scalars['String'];
+  contents: Array<SlotCopyContent>;
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export type SlotMeasurementRequest = {
+  address: Scalars['Address'];
+  name: Scalars['String'];
+  value: Scalars['String'];
+};
+
+export type SlotPassFail = {
+  __typename?: 'SlotPassFail';
+  address: Scalars['Address'];
+  result: PassFail;
+  comment?: Maybe<Scalars['String']>;
+};
+
+export type SpatialLocation = {
+  __typename?: 'SpatialLocation';
+  name: Scalars['String'];
+  code: Scalars['Int'];
+  tissueType: TissueType;
+};
+
+export type Species = {
+  __typename?: 'Species';
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export enum StainPanel {
+  Positive = 'positive',
+  Negative = 'negative',
+  Marker = 'marker'
+}
+
+export type StainRequest = {
+  stainType: Scalars['String'];
+  barcodes: Array<Scalars['String']>;
+  timeMeasurements: Array<TimeMeasurement>;
+  workNumber?: Maybe<Scalars['String']>;
+};
+
+export type StainType = {
+  __typename?: 'StainType';
+  name: Scalars['String'];
+  measurementTypes: Array<Scalars['String']>;
+};
+
+export type StoreInput = {
+  barcode: Scalars['String'];
+  address?: Maybe<Scalars['Address']>;
+};
+
+export type StoredItem = {
+  __typename?: 'StoredItem';
+  barcode: Scalars['String'];
+  location: Location;
+  address?: Maybe<Scalars['Address']>;
+};
+
+export type StringMeasurement = {
+  name: Scalars['String'];
+  value: Scalars['String'];
+};
+
+export type TimeMeasurement = {
+  name: Scalars['String'];
+  seconds: Scalars['Int'];
+};
+
+
+export type Tissue = {
+  __typename?: 'Tissue';
+  externalName: Scalars['String'];
+  replicate: Scalars['Int'];
+  spatialLocation: SpatialLocation;
+  donor: Donor;
+  hmdmc?: Maybe<Hmdmc>;
+  mouldSize: MouldSize;
+  medium: Medium;
+  fixative: Fixative;
+};
+
+export type TissueType = {
+  __typename?: 'TissueType';
+  name: Scalars['String'];
+  spatialLocations: Array<SpatialLocation>;
+};
+
+export type UnreleaseLabware = {
+  barcode: Scalars['String'];
+  highestSection?: Maybe<Scalars['Int']>;
+};
+
+export type UnreleaseRequest = {
+  labware: Array<UnreleaseLabware>;
+};
+
+export type UnstoreResult = {
+  __typename?: 'UnstoreResult';
+  numUnstored: Scalars['Int'];
+  unstored: Array<UnstoredItem>;
+};
+
+export type UnstoredItem = {
+  __typename?: 'UnstoredItem';
+  barcode: Scalars['String'];
+  address?: Maybe<Scalars['Address']>;
+};
+
+export type User = {
+  __typename?: 'User';
+  username: Scalars['String'];
+  role: UserRole;
+};
+
+export enum UserRole {
+  Disabled = 'disabled',
+  Normal = 'normal',
+  Admin = 'admin'
+}
+
+export type VisiumAnalysisRequest = {
+  barcode: Scalars['String'];
+  workNumber?: Maybe<Scalars['String']>;
+  selectedAddress: Scalars['Address'];
+  selectedTime: Scalars['Int'];
+};
+
+export type VisiumPermData = {
+  __typename?: 'VisiumPermData';
+  labware: Labware;
+  addressPermData: Array<AddressPermData>;
+};
+
+export type Work = {
+  __typename?: 'Work';
+  workType: WorkType;
+  project: Project;
+  costCode: CostCode;
+  workNumber: Scalars['String'];
+  status: WorkStatus;
+  numBlocks?: Maybe<Scalars['Int']>;
+  numSlides?: Maybe<Scalars['Int']>;
+  priority?: Maybe<Scalars['String']>;
+};
+
+export type WorkProgress = {
+  __typename?: 'WorkProgress';
+  work: Work;
+  timestamps: Array<WorkProgressTimestamp>;
+};
+
+export type WorkProgressTimestamp = {
+  __typename?: 'WorkProgressTimestamp';
+  type: Scalars['String'];
+  timestamp: Scalars['Timestamp'];
+};
+
+export enum WorkStatus {
+  Unstarted = 'unstarted',
+  Active = 'active',
+  Paused = 'paused',
+  Completed = 'completed',
+  Failed = 'failed'
+}
+
+export type WorkType = {
+  __typename?: 'WorkType';
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+export type WorkWithComment = {
+  __typename?: 'WorkWithComment';
+  work: Work;
+  comment?: Maybe<Scalars['String']>;
 };
 
 export type ActionFieldsFragment = (
@@ -2362,6 +2374,20 @@ export type StainMutation = (
       { __typename?: 'Operation' }
       & Pick<Operation, 'id'>
     )> }
+  ) }
+);
+
+export type StoreMutationVariables = Exact<{
+  store: Array<StoreInput> | StoreInput;
+  locationBarcode: Scalars['String'];
+}>;
+
+
+export type StoreMutation = (
+  { __typename?: 'Mutation' }
+  & { store: (
+    { __typename?: 'Location' }
+    & LocationFieldsFragment
   ) }
 );
 
@@ -3809,6 +3835,13 @@ export const StainDocument = gql`
   }
 }
     `;
+export const StoreDocument = gql`
+    mutation Store($store: [StoreInput!]!, $locationBarcode: String!) {
+  store(store: $store, locationBarcode: $locationBarcode) {
+    ...LocationFields
+  }
+}
+    ${LocationFieldsFragmentDoc}`;
 export const StoreBarcodeDocument = gql`
     mutation StoreBarcode($barcode: String!, $locationBarcode: String!, $address: Address) {
   storeBarcode(
@@ -4287,275 +4320,279 @@ export const GetWorkTypesDocument = gql`
 }
     `;
 
-export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
+export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string) => Promise<T>;
 
 
-const defaultWrapper: SdkFunctionWrapper = sdkFunction => sdkFunction();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName) => action();
+
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
     AddComment(variables: AddCommentMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddCommentMutation> {
-      return withWrapper(() => client.request<AddCommentMutation>(AddCommentDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddCommentMutation>(AddCommentDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddComment');
     },
     AddCostCode(variables: AddCostCodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddCostCodeMutation> {
-      return withWrapper(() => client.request<AddCostCodeMutation>(AddCostCodeDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddCostCodeMutation>(AddCostCodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddCostCode');
     },
     AddDestructionReason(variables: AddDestructionReasonMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddDestructionReasonMutation> {
-      return withWrapper(() => client.request<AddDestructionReasonMutation>(AddDestructionReasonDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddDestructionReasonMutation>(AddDestructionReasonDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddDestructionReason');
     },
     AddEquipment(variables: AddEquipmentMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddEquipmentMutation> {
-      return withWrapper(() => client.request<AddEquipmentMutation>(AddEquipmentDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddEquipmentMutation>(AddEquipmentDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddEquipment');
     },
     AddFixative(variables: AddFixativeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddFixativeMutation> {
-      return withWrapper(() => client.request<AddFixativeMutation>(AddFixativeDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddFixativeMutation>(AddFixativeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddFixative');
     },
     AddHmdmc(variables: AddHmdmcMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddHmdmcMutation> {
-      return withWrapper(() => client.request<AddHmdmcMutation>(AddHmdmcDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddHmdmcMutation>(AddHmdmcDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddHmdmc');
     },
     AddProject(variables: AddProjectMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddProjectMutation> {
-      return withWrapper(() => client.request<AddProjectMutation>(AddProjectDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddProjectMutation>(AddProjectDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddProject');
     },
     AddReleaseDestination(variables: AddReleaseDestinationMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddReleaseDestinationMutation> {
-      return withWrapper(() => client.request<AddReleaseDestinationMutation>(AddReleaseDestinationDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddReleaseDestinationMutation>(AddReleaseDestinationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddReleaseDestination');
     },
     AddReleaseRecipient(variables: AddReleaseRecipientMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddReleaseRecipientMutation> {
-      return withWrapper(() => client.request<AddReleaseRecipientMutation>(AddReleaseRecipientDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddReleaseRecipientMutation>(AddReleaseRecipientDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddReleaseRecipient');
     },
     AddSpecies(variables: AddSpeciesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSpeciesMutation> {
-      return withWrapper(() => client.request<AddSpeciesMutation>(AddSpeciesDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddSpeciesMutation>(AddSpeciesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSpecies');
     },
     AddWorkType(variables: AddWorkTypeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddWorkTypeMutation> {
-      return withWrapper(() => client.request<AddWorkTypeMutation>(AddWorkTypeDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<AddWorkTypeMutation>(AddWorkTypeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddWorkType');
     },
     Confirm(variables: ConfirmMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmMutation> {
-      return withWrapper(() => client.request<ConfirmMutation>(ConfirmDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<ConfirmMutation>(ConfirmDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Confirm');
     },
     ConfirmSection(variables: ConfirmSectionMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmSectionMutation> {
-      return withWrapper(() => client.request<ConfirmSectionMutation>(ConfirmSectionDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<ConfirmSectionMutation>(ConfirmSectionDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ConfirmSection');
     },
     CreateWork(variables: CreateWorkMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateWorkMutation> {
-      return withWrapper(() => client.request<CreateWorkMutation>(CreateWorkDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<CreateWorkMutation>(CreateWorkDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CreateWork');
     },
     Destroy(variables: DestroyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DestroyMutation> {
-      return withWrapper(() => client.request<DestroyMutation>(DestroyDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<DestroyMutation>(DestroyDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Destroy');
     },
     EmptyLocation(variables: EmptyLocationMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<EmptyLocationMutation> {
-      return withWrapper(() => client.request<EmptyLocationMutation>(EmptyLocationDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<EmptyLocationMutation>(EmptyLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'EmptyLocation');
     },
     Extract(variables: ExtractMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ExtractMutation> {
-      return withWrapper(() => client.request<ExtractMutation>(ExtractDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<ExtractMutation>(ExtractDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Extract');
     },
     Login(variables: LoginMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LoginMutation> {
-      return withWrapper(() => client.request<LoginMutation>(LoginDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<LoginMutation>(LoginDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Login');
     },
     Logout(variables?: LogoutMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LogoutMutation> {
-      return withWrapper(() => client.request<LogoutMutation>(LogoutDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<LogoutMutation>(LogoutDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Logout');
     },
     Plan(variables: PlanMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PlanMutation> {
-      return withWrapper(() => client.request<PlanMutation>(PlanDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<PlanMutation>(PlanDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Plan');
     },
     Print(variables: PrintMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PrintMutation> {
-      return withWrapper(() => client.request<PrintMutation>(PrintDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<PrintMutation>(PrintDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Print');
     },
     RecordComplexStain(variables: RecordComplexStainMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordComplexStainMutation> {
-      return withWrapper(() => client.request<RecordComplexStainMutation>(RecordComplexStainDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordComplexStainMutation>(RecordComplexStainDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordComplexStain');
     },
     RecordExtractResult(variables: RecordExtractResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordExtractResultMutation> {
-      return withWrapper(() => client.request<RecordExtractResultMutation>(RecordExtractResultDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordExtractResultMutation>(RecordExtractResultDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordExtractResult');
     },
     RecordInPlace(variables: RecordInPlaceMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordInPlaceMutation> {
-      return withWrapper(() => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordInPlace');
     },
     RecordOpWithSlotMeasurements(variables: RecordOpWithSlotMeasurementsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordOpWithSlotMeasurementsMutation> {
-      return withWrapper(() => client.request<RecordOpWithSlotMeasurementsMutation>(RecordOpWithSlotMeasurementsDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordOpWithSlotMeasurementsMutation>(RecordOpWithSlotMeasurementsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordOpWithSlotMeasurements');
     },
     RecordPerm(variables: RecordPermMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordPermMutation> {
-      return withWrapper(() => client.request<RecordPermMutation>(RecordPermDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordPermMutation>(RecordPermDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordPerm');
     },
     RecordRNAAnalysis(variables: RecordRnaAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordRnaAnalysisMutation> {
-      return withWrapper(() => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordRNAAnalysis');
     },
     RecordStainResult(variables: RecordStainResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordStainResultMutation> {
-      return withWrapper(() => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordStainResult');
     },
     RecordVisiumQC(variables: RecordVisiumQcMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordVisiumQcMutation> {
-      return withWrapper(() => client.request<RecordVisiumQcMutation>(RecordVisiumQcDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordVisiumQcMutation>(RecordVisiumQcDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordVisiumQC');
     },
     RegisterSections(variables: RegisterSectionsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterSectionsMutation> {
-      return withWrapper(() => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterSections');
     },
     RegisterTissues(variables: RegisterTissuesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterTissuesMutation> {
-      return withWrapper(() => client.request<RegisterTissuesMutation>(RegisterTissuesDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<RegisterTissuesMutation>(RegisterTissuesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterTissues');
     },
     ReleaseLabware(variables: ReleaseLabwareMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ReleaseLabwareMutation> {
-      return withWrapper(() => client.request<ReleaseLabwareMutation>(ReleaseLabwareDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<ReleaseLabwareMutation>(ReleaseLabwareDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ReleaseLabware');
     },
     SetCommentEnabled(variables: SetCommentEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetCommentEnabledMutation> {
-      return withWrapper(() => client.request<SetCommentEnabledMutation>(SetCommentEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetCommentEnabledMutation>(SetCommentEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetCommentEnabled');
     },
     SetCostCodeEnabled(variables: SetCostCodeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetCostCodeEnabledMutation> {
-      return withWrapper(() => client.request<SetCostCodeEnabledMutation>(SetCostCodeEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetCostCodeEnabledMutation>(SetCostCodeEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetCostCodeEnabled');
     },
     SetDestructionReasonEnabled(variables: SetDestructionReasonEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetDestructionReasonEnabledMutation> {
-      return withWrapper(() => client.request<SetDestructionReasonEnabledMutation>(SetDestructionReasonEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetDestructionReasonEnabledMutation>(SetDestructionReasonEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetDestructionReasonEnabled');
     },
     SetEquipmentEnabled(variables: SetEquipmentEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetEquipmentEnabledMutation> {
-      return withWrapper(() => client.request<SetEquipmentEnabledMutation>(SetEquipmentEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetEquipmentEnabledMutation>(SetEquipmentEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetEquipmentEnabled');
     },
     SetFixativeEnabled(variables: SetFixativeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetFixativeEnabledMutation> {
-      return withWrapper(() => client.request<SetFixativeEnabledMutation>(SetFixativeEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetFixativeEnabledMutation>(SetFixativeEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetFixativeEnabled');
     },
     SetHmdmcEnabled(variables: SetHmdmcEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetHmdmcEnabledMutation> {
-      return withWrapper(() => client.request<SetHmdmcEnabledMutation>(SetHmdmcEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetHmdmcEnabledMutation>(SetHmdmcEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetHmdmcEnabled');
     },
     SetLocationCustomName(variables: SetLocationCustomNameMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetLocationCustomNameMutation> {
-      return withWrapper(() => client.request<SetLocationCustomNameMutation>(SetLocationCustomNameDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetLocationCustomNameMutation>(SetLocationCustomNameDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetLocationCustomName');
     },
     SetProjectEnabled(variables: SetProjectEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetProjectEnabledMutation> {
-      return withWrapper(() => client.request<SetProjectEnabledMutation>(SetProjectEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetProjectEnabledMutation>(SetProjectEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetProjectEnabled');
     },
     SetReleaseDestinationEnabled(variables: SetReleaseDestinationEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetReleaseDestinationEnabledMutation> {
-      return withWrapper(() => client.request<SetReleaseDestinationEnabledMutation>(SetReleaseDestinationEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetReleaseDestinationEnabledMutation>(SetReleaseDestinationEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetReleaseDestinationEnabled');
     },
     SetReleaseRecipientEnabled(variables: SetReleaseRecipientEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetReleaseRecipientEnabledMutation> {
-      return withWrapper(() => client.request<SetReleaseRecipientEnabledMutation>(SetReleaseRecipientEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetReleaseRecipientEnabledMutation>(SetReleaseRecipientEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetReleaseRecipientEnabled');
     },
     SetSpeciesEnabled(variables: SetSpeciesEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSpeciesEnabledMutation> {
-      return withWrapper(() => client.request<SetSpeciesEnabledMutation>(SetSpeciesEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetSpeciesEnabledMutation>(SetSpeciesEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSpeciesEnabled');
     },
     SetWorkTypeEnabled(variables: SetWorkTypeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetWorkTypeEnabledMutation> {
-      return withWrapper(() => client.request<SetWorkTypeEnabledMutation>(SetWorkTypeEnabledDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SetWorkTypeEnabledMutation>(SetWorkTypeEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetWorkTypeEnabled');
     },
     SlotCopy(variables: SlotCopyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SlotCopyMutation> {
-      return withWrapper(() => client.request<SlotCopyMutation>(SlotCopyDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<SlotCopyMutation>(SlotCopyDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SlotCopy');
     },
     Stain(variables: StainMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StainMutation> {
-      return withWrapper(() => client.request<StainMutation>(StainDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<StainMutation>(StainDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Stain');
+    },
+    Store(variables: StoreMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StoreMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StoreMutation>(StoreDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Store');
     },
     StoreBarcode(variables: StoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StoreBarcodeMutation> {
-      return withWrapper(() => client.request<StoreBarcodeMutation>(StoreBarcodeDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<StoreBarcodeMutation>(StoreBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'StoreBarcode');
     },
     Unrelease(variables: UnreleaseMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnreleaseMutation> {
-      return withWrapper(() => client.request<UnreleaseMutation>(UnreleaseDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<UnreleaseMutation>(UnreleaseDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Unrelease');
     },
     UnstoreBarcode(variables: UnstoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnstoreBarcodeMutation> {
-      return withWrapper(() => client.request<UnstoreBarcodeMutation>(UnstoreBarcodeDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<UnstoreBarcodeMutation>(UnstoreBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UnstoreBarcode');
     },
     UpdateWorkNumBlocks(variables: UpdateWorkNumBlocksMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumBlocksMutation> {
-      return withWrapper(() => client.request<UpdateWorkNumBlocksMutation>(UpdateWorkNumBlocksDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumBlocksMutation>(UpdateWorkNumBlocksDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumBlocks');
     },
     UpdateWorkNumSlides(variables: UpdateWorkNumSlidesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumSlidesMutation> {
-      return withWrapper(() => client.request<UpdateWorkNumSlidesMutation>(UpdateWorkNumSlidesDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumSlidesMutation>(UpdateWorkNumSlidesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumSlides');
     },
     UpdateWorkPriority(variables: UpdateWorkPriorityMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkPriorityMutation> {
-      return withWrapper(() => client.request<UpdateWorkPriorityMutation>(UpdateWorkPriorityDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkPriorityMutation>(UpdateWorkPriorityDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkPriority');
     },
     UpdateWorkStatus(variables: UpdateWorkStatusMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkStatusMutation> {
-      return withWrapper(() => client.request<UpdateWorkStatusMutation>(UpdateWorkStatusDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkStatusMutation>(UpdateWorkStatusDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkStatus');
     },
     VisiumAnalysis(variables: VisiumAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<VisiumAnalysisMutation> {
-      return withWrapper(() => client.request<VisiumAnalysisMutation>(VisiumAnalysisDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<VisiumAnalysisMutation>(VisiumAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'VisiumAnalysis');
     },
     CurrentUser(variables?: CurrentUserQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CurrentUserQuery> {
-      return withWrapper(() => client.request<CurrentUserQuery>(CurrentUserDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<CurrentUserQuery>(CurrentUserDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CurrentUser');
     },
     ExtractResult(variables: ExtractResultQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ExtractResultQuery> {
-      return withWrapper(() => client.request<ExtractResultQuery>(ExtractResultDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<ExtractResultQuery>(ExtractResultDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ExtractResult');
     },
     Find(variables: FindQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindQuery> {
-      return withWrapper(() => client.request<FindQuery>(FindDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindQuery>(FindDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Find');
     },
     FindHistoryForDonorName(variables: FindHistoryForDonorNameQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForDonorNameQuery> {
-      return withWrapper(() => client.request<FindHistoryForDonorNameQuery>(FindHistoryForDonorNameDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindHistoryForDonorNameQuery>(FindHistoryForDonorNameDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindHistoryForDonorName');
     },
     FindHistoryForExternalName(variables: FindHistoryForExternalNameQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForExternalNameQuery> {
-      return withWrapper(() => client.request<FindHistoryForExternalNameQuery>(FindHistoryForExternalNameDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindHistoryForExternalNameQuery>(FindHistoryForExternalNameDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindHistoryForExternalName');
     },
     FindHistoryForLabwareBarcode(variables: FindHistoryForLabwareBarcodeQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForLabwareBarcodeQuery> {
-      return withWrapper(() => client.request<FindHistoryForLabwareBarcodeQuery>(FindHistoryForLabwareBarcodeDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindHistoryForLabwareBarcodeQuery>(FindHistoryForLabwareBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindHistoryForLabwareBarcode');
     },
     FindHistoryForSampleId(variables: FindHistoryForSampleIdQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForSampleIdQuery> {
-      return withWrapper(() => client.request<FindHistoryForSampleIdQuery>(FindHistoryForSampleIdDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindHistoryForSampleIdQuery>(FindHistoryForSampleIdDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindHistoryForSampleId');
     },
     FindHistoryForWorkNumber(variables: FindHistoryForWorkNumberQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForWorkNumberQuery> {
-      return withWrapper(() => client.request<FindHistoryForWorkNumberQuery>(FindHistoryForWorkNumberDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindHistoryForWorkNumberQuery>(FindHistoryForWorkNumberDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindHistoryForWorkNumber');
     },
     FindLabware(variables: FindLabwareQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLabwareQuery> {
-      return withWrapper(() => client.request<FindLabwareQuery>(FindLabwareDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindLabwareQuery>(FindLabwareDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindLabware');
     },
     FindLabwareLocation(variables: FindLabwareLocationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLabwareLocationQuery> {
-      return withWrapper(() => client.request<FindLabwareLocationQuery>(FindLabwareLocationDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindLabwareLocationQuery>(FindLabwareLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindLabwareLocation');
     },
     FindLocationByBarcode(variables: FindLocationByBarcodeQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLocationByBarcodeQuery> {
-      return withWrapper(() => client.request<FindLocationByBarcodeQuery>(FindLocationByBarcodeDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindLocationByBarcodeQuery>(FindLocationByBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindLocationByBarcode');
     },
     FindPassFails(variables: FindPassFailsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPassFailsQuery> {
-      return withWrapper(() => client.request<FindPassFailsQuery>(FindPassFailsDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindPassFailsQuery>(FindPassFailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindPassFails');
     },
     FindPermData(variables: FindPermDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPermDataQuery> {
-      return withWrapper(() => client.request<FindPermDataQuery>(FindPermDataDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindPermDataQuery>(FindPermDataDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindPermData');
     },
     FindPlanData(variables: FindPlanDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPlanDataQuery> {
-      return withWrapper(() => client.request<FindPlanDataQuery>(FindPlanDataDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindPlanDataQuery>(FindPlanDataDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindPlanData');
     },
     FindWorkNumbers(variables: FindWorkNumbersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkNumbersQuery> {
-      return withWrapper(() => client.request<FindWorkNumbersQuery>(FindWorkNumbersDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindWorkNumbersQuery>(FindWorkNumbersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindWorkNumbers');
     },
     FindWorkProgress(variables?: FindWorkProgressQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkProgressQuery> {
-      return withWrapper(() => client.request<FindWorkProgressQuery>(FindWorkProgressDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<FindWorkProgressQuery>(FindWorkProgressDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindWorkProgress');
     },
     GetComments(variables?: GetCommentsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetCommentsQuery> {
-      return withWrapper(() => client.request<GetCommentsQuery>(GetCommentsDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetCommentsQuery>(GetCommentsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetComments');
     },
     GetConfiguration(variables?: GetConfigurationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetConfigurationQuery> {
-      return withWrapper(() => client.request<GetConfigurationQuery>(GetConfigurationDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetConfigurationQuery>(GetConfigurationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetConfiguration');
     },
     GetDestroyInfo(variables?: GetDestroyInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestroyInfoQuery> {
-      return withWrapper(() => client.request<GetDestroyInfoQuery>(GetDestroyInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetDestroyInfoQuery>(GetDestroyInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetDestroyInfo');
     },
     GetDestructionReasons(variables?: GetDestructionReasonsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestructionReasonsQuery> {
-      return withWrapper(() => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetDestructionReasons');
     },
     GetLabwareInLocation(variables: GetLabwareInLocationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetLabwareInLocationQuery> {
-      return withWrapper(() => client.request<GetLabwareInLocationQuery>(GetLabwareInLocationDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetLabwareInLocationQuery>(GetLabwareInLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetLabwareInLocation');
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
-      return withWrapper(() => client.request<GetPrintersQuery>(GetPrintersDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetPrintersQuery>(GetPrintersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetPrinters');
     },
     GetRecordExtractResultInfo(variables?: GetRecordExtractResultInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordExtractResultInfoQuery> {
-      return withWrapper(() => client.request<GetRecordExtractResultInfoQuery>(GetRecordExtractResultInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetRecordExtractResultInfoQuery>(GetRecordExtractResultInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetRecordExtractResultInfo');
     },
     GetRecordInPlaceInfo(variables?: GetRecordInPlaceInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordInPlaceInfoQuery> {
-      return withWrapper(() => client.request<GetRecordInPlaceInfoQuery>(GetRecordInPlaceInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetRecordInPlaceInfoQuery>(GetRecordInPlaceInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetRecordInPlaceInfo');
     },
     GetRegistrationInfo(variables?: GetRegistrationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRegistrationInfoQuery> {
-      return withWrapper(() => client.request<GetRegistrationInfoQuery>(GetRegistrationInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetRegistrationInfoQuery>(GetRegistrationInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetRegistrationInfo');
     },
     GetReleaseInfo(variables?: GetReleaseInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetReleaseInfoQuery> {
-      return withWrapper(() => client.request<GetReleaseInfoQuery>(GetReleaseInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetReleaseInfoQuery>(GetReleaseInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetReleaseInfo');
     },
     GetSearchInfo(variables?: GetSearchInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSearchInfoQuery> {
-      return withWrapper(() => client.request<GetSearchInfoQuery>(GetSearchInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSearchInfoQuery>(GetSearchInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSearchInfo');
     },
     GetSectioningConfirmInfo(variables?: GetSectioningConfirmInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSectioningConfirmInfoQuery> {
-      return withWrapper(() => client.request<GetSectioningConfirmInfoQuery>(GetSectioningConfirmInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSectioningConfirmInfoQuery>(GetSectioningConfirmInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSectioningConfirmInfo');
     },
     GetSectioningInfo(variables?: GetSectioningInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSectioningInfoQuery> {
-      return withWrapper(() => client.request<GetSectioningInfoQuery>(GetSectioningInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSectioningInfoQuery>(GetSectioningInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSectioningInfo');
     },
     GetStainInfo(variables?: GetStainInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainInfoQuery> {
-      return withWrapper(() => client.request<GetStainInfoQuery>(GetStainInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetStainInfoQuery>(GetStainInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetStainInfo');
     },
     GetStainingQCInfo(variables?: GetStainingQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainingQcInfoQuery> {
-      return withWrapper(() => client.request<GetStainingQcInfoQuery>(GetStainingQcInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetStainingQcInfoQuery>(GetStainingQcInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetStainingQCInfo');
     },
     GetVisiumQCInfo(variables?: GetVisiumQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetVisiumQcInfoQuery> {
-      return withWrapper(() => client.request<GetVisiumQcInfoQuery>(GetVisiumQcInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetVisiumQcInfoQuery>(GetVisiumQcInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetVisiumQCInfo');
     },
     GetWorkAllocationInfo(variables: GetWorkAllocationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkAllocationInfoQuery> {
-      return withWrapper(() => client.request<GetWorkAllocationInfoQuery>(GetWorkAllocationInfoDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetWorkAllocationInfoQuery>(GetWorkAllocationInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetWorkAllocationInfo');
     },
     GetWorkTypes(variables?: GetWorkTypesQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkTypesQuery> {
-      return withWrapper(() => client.request<GetWorkTypesQuery>(GetWorkTypesDocument, variables, requestHeaders));
+      return withWrapper((wrappedRequestHeaders) => client.request<GetWorkTypesQuery>(GetWorkTypesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetWorkTypes');
     }
   };
 }

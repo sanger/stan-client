@@ -1,4 +1,10 @@
-import { GridDirection, Location, Maybe, StoredItem } from "../../types/sdk";
+import {
+  GridDirection,
+  Location,
+  Maybe,
+  StoredItem,
+  StoreInput,
+} from "../../types/sdk";
 import locationFactory, {
   buildLinkedLocation,
   locationItemFactory,
@@ -65,15 +71,13 @@ class LocationRepository implements Repository<Location> {
     return newItem;
   }
 
-  store(
-    store: { barcode: string; address: string }[],
-    locationBarcode: string
-  ): Location {
+  store(store: StoreInput[] | StoreInput, locationBarcode: string): Location {
     const newLocation = this.locations.get(locationBarcode);
     if (!newLocation) {
       throw new Error(`Location with barcode ${locationBarcode} not found`);
     }
-    store.forEach((storeItem) => {
+    const storedItems = Array.isArray(store) ? store : [store];
+    storedItems.forEach((storeItem) => {
       const oldLocation = Array.from(this.locations.values()).find(
         (location) => {
           return location.stored.some(
@@ -87,7 +91,7 @@ class LocationRepository implements Repository<Location> {
         );
       }
     });
-    store.forEach((storeItem) => {
+    storedItems.forEach((storeItem) => {
       const newItem: StoredItem = {
         barcode: storeItem.barcode,
         address: storeItem.address,

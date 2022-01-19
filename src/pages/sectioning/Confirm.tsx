@@ -9,8 +9,9 @@ import {
 import SectioningConfirm from "../../components/sectioningConfirm/SectioningConfirm";
 import { Prompt, useLocation } from "react-router-dom";
 import { useConfirmLeave } from "../../lib/hooks";
-import BlueButton from "../../components/buttons/BlueButton";
 import { history } from "../../lib/sdk";
+import WhiteButton from "../../components/buttons/WhiteButton";
+import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 
 type SectioningConfirmProps = {
   readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
@@ -20,7 +21,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
   const location = useLocation<{ plans?: Array<FindPlanDataQuery> }>();
   const plans: Array<FindPlanDataQuery> = location?.state?.plans ?? [];
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
-  const confirmedPlans = React.useRef<FindPlanDataQuery[]>([]);
+  const confirmedPlans = React.useRef<LayoutPlan[]>([]);
   return (
     <AppShell>
       <AppShell.Header>
@@ -50,7 +51,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
         message={"Sections Confirmed"}
         show={!shouldConfirm}
         additionalButtons={
-          <BlueButton
+          <WhiteButton
             type="button"
             style={{ marginLeft: "auto" }}
             className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
@@ -59,14 +60,14 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
                 pathname: "/store",
                 state: {
                   awaitingLabwares: [...confirmedPlans.current].map(
-                    (plan) => plan.planData.destination
+                    (plan) => plan.destinationLabware
                   ),
                 },
               });
             }}
           >
             Store
-          </BlueButton>
+          </WhiteButton>
         }
         onReset={reload}
       >
