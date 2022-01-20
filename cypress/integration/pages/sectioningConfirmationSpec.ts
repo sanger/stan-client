@@ -92,11 +92,16 @@ describe("Sectioning Confirmation", () => {
           cy.findByText("Done").click();
         });
       });
+      after(() => {
+        findPlanByBarcode("STAN-0001E");
+      });
     });
 
     context("when I add the section number", () => {
       before(() => {
-        cy.findByTestId("labware-comments").find("input").type("10");
+        cy.findAllByTestId("labware-comments").each((elem) =>
+          cy.wrap(elem).find("input").type("10")
+        );
       });
 
       it("enables the Save button", () => {
@@ -141,6 +146,39 @@ describe("Sectioning Confirmation", () => {
 
       it("shows the success dialog", () => {
         cy.findByText("Sections Confirmed");
+      });
+      it("displays Store option in the success dialog", () => {
+        cy.findByRole("button", { name: /Store/i }).should("be.enabled");
+      });
+    });
+  });
+  describe("when store option selected for confimed labware is", () => {
+    before(() => {
+      cy.findByRole("button", { name: /Store/i }).click();
+    });
+    context("while in store page with confirmed labware", () => {
+      it("navigates to store page", () => {
+        cy.url().should("be.equal", "http://localhost:3000/store");
+      });
+      it("when redirected to the Store page", () => {
+        cy.findByRole("table").contains("td", "STAN-0001F");
+        cy.findByRole("table").contains("td", "STAN-0001E");
+      });
+      it("store all button should be disabled", () => {
+        cy.findByRole("button", { name: /Store All/i }).should("be.disabled");
+      });
+    });
+
+    context("store loaction scanned with confirmed labware", () => {
+      before(() => {
+        cy.findByTestId("locationScanInput").type("STO-024{enter}");
+      });
+      it("display the table with confirmed labware", () => {
+        cy.findByRole("table").contains("td", "STAN-0001F");
+        cy.findByRole("table").contains("td", "STAN-0001E");
+      });
+      it("store all button should be enabled", () => {
+        cy.findByRole("button", { name: /Store All/i }).should("be.enabled");
       });
     });
   });

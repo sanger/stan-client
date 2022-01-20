@@ -59,9 +59,12 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
               history.push({
                 pathname: "/store",
                 state: {
-                  awaitingLabwares: [...confirmedPlans.current].map(
-                    (plan) => plan.destinationLabware
-                  ),
+                  awaitingLabwares: [...confirmedPlans.current].map((plan) => {
+                    return {
+                      barcode: plan.destinationLabware.barcode,
+                      labwareType: plan.destinationLabware.labwareType.name,
+                    };
+                  }),
                 },
               });
             }}

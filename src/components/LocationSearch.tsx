@@ -3,17 +3,17 @@ import ScanInput from "./scanInput/ScanInput";
 import LabwareIcon from "./icons/LabwareIcon";
 import LocationIcon from "./icons/LocationIcon";
 import { history } from "../lib/sdk";
-import { LabwareFieldsFragment } from "../types/sdk";
+import { LabwareAwaitingStorageInfo } from "../pages/Store";
 
 const LocationSearch = ({
   awaitingLabwares,
 }: {
-  awaitingLabwares?: LabwareFieldsFragment[];
+  awaitingLabwares?: LabwareAwaitingStorageInfo[];
 }) => {
   return (
     <div className="mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md">
       <div className="sm:flex sm:flex-row items-start justify-around">
-        <div className="space-y-2">
+        <div data-testid={"locationScanInput"} className="space-y-2">
           <div className="flex flex-row items-center lg:w-96">
             <LocationIcon className="inline-block h-6 w-6 text-sdb-300" />
             <label

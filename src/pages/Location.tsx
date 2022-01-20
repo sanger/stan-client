@@ -27,16 +27,11 @@ import {
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
 import { RouteComponentProps, useLocation } from "react-router-dom";
 import { LocationMatchParams, LocationSearchParams } from "../types/stan";
-import {
-  LabwareFieldsFragment,
-  LocationFieldsFragment,
-  Maybe,
-  StoreInput,
-} from "../types/sdk";
+import { LocationFieldsFragment, Maybe, StoreInput } from "../types/sdk";
 import { useMachine } from "@xstate/react";
 import { StoredItemFragment } from "../lib/machines/locations/locationMachineTypes";
 import createLocationMachine from "../lib/machines/locations/locationMachine";
-import { isAwaitingLabwareState } from "./Store";
+import { isAwaitingLabwareState, LabwareAwaitingStorageInfo } from "./Store";
 import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
 import warningToast from "../components/notifications/WarningToast";
 
@@ -76,10 +71,10 @@ const Location: React.FC<LocationProps> = ({
 }) => {
   const locationObject = useLocation();
   const [awaitingLabwares, setAwaitingLabwares] = useState<
-    LabwareFieldsFragment[]
+    LabwareAwaitingStorageInfo[]
   >([]);
 
-  const labwaresAddInProgress = React.useRef<LabwareFieldsFragment[]>([]);
+  const labwaresAddInProgress = React.useRef<LabwareAwaitingStorageInfo[]>([]);
   React.useEffect(() => {
     if (locationObject.state && isAwaitingLabwareState(locationObject.state)) {
       setAwaitingLabwares(locationObject.state.awaitingLabwares);
@@ -249,7 +244,7 @@ const Location: React.FC<LocationProps> = ({
   );
 
   const addLabware = React.useCallback(
-    (labware: LabwareFieldsFragment) => {
+    (labware: LabwareAwaitingStorageInfo) => {
       if (!selectedAddress && currentViewType === ViewType.GRID) {
         return;
       }
@@ -264,7 +259,7 @@ const Location: React.FC<LocationProps> = ({
   );
 
   const addLabwares = React.useCallback(
-    (awaitingLabwares: LabwareFieldsFragment[]) => {
+    (awaitingLabwares: LabwareAwaitingStorageInfo[]) => {
       let nextNumAvailableAddresses: string[] | undefined = undefined;
       if (currentViewType === ViewType.GRID) {
         // Get consecutive empty addresses equal to number of labwares awaiting storage

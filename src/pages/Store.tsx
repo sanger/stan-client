@@ -12,11 +12,7 @@ import Heading from "../components/Heading";
 import storeConfig from "../static/store.json";
 import { Link } from "react-router-dom";
 import BarcodeIcon from "../components/icons/BarcodeIcon";
-import {
-  FindLocationByBarcodeQuery,
-  LabwareFieldsFragment,
-  Maybe,
-} from "../types/sdk";
+import { FindLocationByBarcodeQuery, Maybe } from "../types/sdk";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import { isLocationSearch, LocationSearchParams } from "../types/stan";
 import { history, StanCoreContext } from "../lib/sdk";
@@ -28,8 +24,12 @@ import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
  */
 interface StoreProps extends RouteComponentProps {}
 
+export type LabwareAwaitingStorageInfo = {
+  barcode: string;
+  labwareType: string;
+};
 export type AwaitingStorageStateType = {
-  awaitingLabwares: LabwareFieldsFragment[];
+  awaitingLabwares: LabwareAwaitingStorageInfo[];
 };
 export function isAwaitingLabwareState(
   obj: any
