@@ -12,17 +12,26 @@ import Panel from "../../components/Panel";
 import { LabwareAwaitingStorageInfo } from "../Store";
 
 interface LabwareAwaitingStorageProps {
+  /***
+   * List of labwares
+   */
   labwares: LabwareAwaitingStorageInfo[];
-  addEnabled: boolean;
-  onAddLabware: (labware: LabwareAwaitingStorageInfo) => void;
-  onAddAllLabware: (labwares: LabwareAwaitingStorageInfo[]) => void;
+  /**
+   *If enabled, the add and Store All button will be enabled
+   */
+  storeEnabled: boolean;
+  /**
+   * Callback to handle both store actions (one at a time or all labwares)
+   * @param labwares - Labware(s) to store
+   *
+   */
+  onStoreLabwares: (labwares: LabwareAwaitingStorageInfo[]) => void;
 }
 
 const LabwareAwaitingStorage: React.FC<LabwareAwaitingStorageProps> = ({
   labwares,
-  addEnabled = true,
-  onAddAllLabware,
-  onAddLabware,
+  storeEnabled = true,
+  onStoreLabwares,
 }) => {
   return (
     <div className="mx-auto max-w-screen-xl">
@@ -44,14 +53,12 @@ const LabwareAwaitingStorage: React.FC<LabwareAwaitingStorageProps> = ({
                 <TableCell>
                   <IconButton
                     data-testid="addIcon"
-                    disabled={!addEnabled}
-                    onClick={
-                      onAddLabware ? () => onAddLabware(labware) : () => {}
-                    }
+                    disabled={!storeEnabled}
+                    onClick={() => onStoreLabwares([labware])}
                   >
                     <AddIcon
                       className={`inline-block h-5 w-4 ${
-                        addEnabled ? "text-red-600" : "text-gray-600"
+                        storeEnabled ? "text-red-600" : "text-gray-600"
                       }`}
                     />
                   </IconButton>
@@ -63,8 +70,8 @@ const LabwareAwaitingStorage: React.FC<LabwareAwaitingStorageProps> = ({
         <div className=" mt-4 flex flex-row items-center justify-end">
           <BlueButton
             type="button"
-            onClick={() => onAddAllLabware(labwares)}
-            disabled={!addEnabled}
+            onClick={() => onStoreLabwares(labwares)}
+            disabled={!storeEnabled}
           >
             Store All
           </BlueButton>

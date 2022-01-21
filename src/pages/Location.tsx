@@ -139,9 +139,11 @@ const Location: React.FC<LocationProps> = ({
 
   /**
    * Show a toast notification when success message changes (and isn't null)
+   * If this is a store operation for awaiting labwares, update that list
    */
   useEffect(() => {
     if (successMessage) {
+      /**This is a store operation for labwares in waiting, so remove the added labware(s) from the awaiting list**/
       if (labwaresAddInProgress.current.length > 0) {
         setAwaitingLabwares((prevAwaitingLabwares) => {
           if (
@@ -172,6 +174,13 @@ const Location: React.FC<LocationProps> = ({
       });
     }
   }, [successMessage, setAwaitingLabwares]);
+
+  /***
+   * When ever awaiting labware list changes, that indicates completion of store action. So, empty the labwaresAddInProgress list
+   */
+  useEffect(() => {
+    labwaresAddInProgress.current = [];
+  }, [awaitingLabwares]);
 
   /**
    * Show a toast notification when error message changes (and isn't null)
@@ -243,33 +252,37 @@ const Location: React.FC<LocationProps> = ({
     ]
   );
 
-  const addLabware = React.useCallback(
-    (labware: LabwareAwaitingStorageInfo) => {
+  /***
+   * Store all awaiting labwares - handles store all labwares  or one labware at a time
+   */
+  const storeLabwares = React.useCallback(
+    (awaitingLabwares: LabwareAwaitingStorageInfo[]) => {
       if (!selectedAddress && currentViewType === ViewType.GRID) {
         return;
       }
-      labwaresAddInProgress.current = [labware];
-      send({
-        type: "STORE_BARCODE",
-        barcode: labware.barcode,
-        address: selectedAddress ?? undefined,
-      });
-    },
-    [selectedAddress, send, currentViewType]
-  );
+      labwaresAddInProgress.current = awaitingLabwares;
+      /**Handle storing of one labware at a time*/
+      if (awaitingLabwares.length === 1) {
+        send({
+          type: "STORE_BARCODE",
+          barcode: awaitingLabwares[0].barcode,
+          address: selectedAddress ?? undefined,
+        });
+        return;
+      }
 
-  const addLabwares = React.useCallback(
-    (awaitingLabwares: LabwareAwaitingStorageInfo[]) => {
-      let nextNumAvailableAddresses: string[] | undefined = undefined;
+      /**Handle storing of all labwares operation**/
+      let nextAvailableAddresses: string[] | undefined = undefined;
       if (currentViewType === ViewType.GRID) {
-        // Get consecutive empty addresses equal to number of labwares awaiting storage
-        nextNumAvailableAddresses = findNextAvailableAddress({
+        /** Get as many consecutive empty addresses equal to number of labwares awaiting storage**/
+        nextAvailableAddresses = findNextAvailableAddress({
           locationAddresses: locationAddresses,
           addressToItemMap: addressToItemMap,
           minimumAddress: selectedAddress,
           numAddresses: awaitingLabwares.length,
         });
-        if (nextNumAvailableAddresses.length !== awaitingLabwares.length) {
+        /**Not enough consecutive empty addresses to store the labwares**/
+        if (nextAvailableAddresses.length !== awaitingLabwares.length) {
           warningToast({
             message:
               "Not enough consecutive free addresses available to store all labwares",
@@ -282,8 +295,8 @@ const Location: React.FC<LocationProps> = ({
       const storeData = awaitingLabwares.map((labware, indx) => {
         return {
           barcode: labware.barcode,
-          address: nextNumAvailableAddresses
-            ? nextNumAvailableAddresses[indx]
+          address: nextAvailableAddresses
+            ? nextAvailableAddresses[indx]
             : undefined,
         };
       });
@@ -436,13 +449,12 @@ const Location: React.FC<LocationProps> = ({
                   {awaitingLabwares.length > 0 && (
                     <LabwareAwaitingStorage
                       labwares={awaitingLabwares}
-                      addEnabled={
+                      storeEnabled={
                         currentViewType === ViewType.LIST ||
                         (currentViewType === ViewType.GRID &&
                           selectedAddress !== undefined)
                       }
-                      onAddAllLabware={addLabwares}
-                      onAddLabware={addLabware}
+                      onStoreLabwares={storeLabwares}
                     />
                   )}
 

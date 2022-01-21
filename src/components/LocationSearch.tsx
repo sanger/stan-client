@@ -4,6 +4,7 @@ import LabwareIcon from "./icons/LabwareIcon";
 import LocationIcon from "./icons/LocationIcon";
 import { history } from "../lib/sdk";
 import { LabwareAwaitingStorageInfo } from "../pages/Store";
+import { stringify } from "../lib/helpers";
 
 const LocationSearch = ({
   awaitingLabwares,
@@ -50,7 +51,10 @@ const LocationSearch = ({
             onScan={(value) => {
               if (value.length > 0) {
                 history.push({
-                  pathname: `/locations?labwareBarcode=${value}`,
+                  pathname: `/locations`,
+                  search: stringify({
+                    labwareBarcode: value,
+                  }),
                   state: {
                     awaitingLabwares: awaitingLabwares ?? [],
                   },

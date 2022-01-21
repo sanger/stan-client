@@ -42,7 +42,6 @@ export function isAwaitingLabwareState(
 
 const Store: React.FC<StoreProps> = ({ location }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
   const awaitingLabwares = useMemo(() => {
     return isAwaitingLabwareState(location.state)
       ? location.state.awaitingLabwares
@@ -77,7 +76,7 @@ const Store: React.FC<StoreProps> = ({ location }) => {
         invokeFindLabwareLocation(locationSearchParams.labwareBarcode.trim());
       }
     }
-  }, [location.search, awaitingLabwares]);
+  }, [location.search]);
 
   return (
     <AppShell>
@@ -116,9 +115,8 @@ const Store: React.FC<StoreProps> = ({ location }) => {
           {awaitingLabwares && awaitingLabwares.length > 0 && (
             <LabwareAwaitingStorage
               labwares={awaitingLabwares}
-              addEnabled={false}
-              onAddAllLabware={() => {}}
-              onAddLabware={() => {}}
+              storeEnabled={false}
+              onStoreLabwares={() => {}}
             />
           )}
         </div>

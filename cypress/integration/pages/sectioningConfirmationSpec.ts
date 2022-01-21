@@ -181,6 +181,16 @@ describe("Sectioning Confirmation", () => {
         cy.findByRole("button", { name: /Store All/i }).should("be.enabled");
       });
     });
+
+    context("storing awaiting labware to location", () => {
+      before(() => {
+        cy.findByRole("button", { name: /Store All/i }).click();
+      });
+      it("should display the labware in boxes", () => {
+        cy.findByText("STAN-0001F").should("exist");
+        cy.findByRole("table").should("not.exist");
+      });
+    });
   });
 });
 
