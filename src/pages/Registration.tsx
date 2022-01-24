@@ -18,7 +18,7 @@ export interface RegistrationFormBlock {
   clientId: number;
   externalIdentifier: string;
   spatialLocation: number;
-  replicateNumber: number;
+  replicateNumber: string;
   lastKnownSectionNumber: number;
   labwareType: string;
   fixative: string;
@@ -45,7 +45,7 @@ export function getRegistrationFormBlock(): RegistrationFormBlock {
     clientId: Date.now(),
     externalIdentifier: "",
     spatialLocation: -1, // Initialise it as invalid so user has to select something
-    replicateNumber: 0,
+    replicateNumber: "1",
     lastKnownSectionNumber: 0,
     labwareType: "",
     fixative: "",

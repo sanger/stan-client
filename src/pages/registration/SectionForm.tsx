@@ -177,7 +177,6 @@ export default function SectionForm({
 
       <FormikInput
         label="Replicate Number"
-        type="number"
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.replicateNumber`}
       />
 

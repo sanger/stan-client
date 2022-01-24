@@ -27,11 +27,11 @@ export const sampleFactory = Factory.define<Sample>(
 );
 
 export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(
-  ({ sequence, params, associations }) => ({
+  ({ params, associations }) => ({
     __typename: "Tissue",
     externalName:
       params.externalName ?? `${faker.name.lastName()}${faker.random.number()}`,
-    replicate: params.replicate ?? _.random(10),
+    replicate: params.replicate ?? String(_.random(10)),
     spatialLocation:
       associations.spatialLocation ?? spatialLocationFactory.build(),
     donor: associations.donor ?? donorFactory.build(),
@@ -72,7 +72,7 @@ export const mouldSizeFactory: Factory<MouldSize> = Factory.define<MouldSize>(
 );
 
 export const hmdmcFactory: Factory<Hmdmc> = Factory.define<Hmdmc>(
-  ({ sequence, params }) => ({
+  ({ params }) => ({
     __typename: "Hmdmc",
     hmdmc: params.hmdmc ?? `${_.random(1, 99)}-${_.random(100, 10000)}`,
     enabled: params.enabled ?? true,
@@ -80,7 +80,7 @@ export const hmdmcFactory: Factory<Hmdmc> = Factory.define<Hmdmc>(
 );
 
 export const donorFactory: Factory<Donor> = Factory.define<Donor>(
-  ({ params, sequence, associations }) => ({
+  ({ params, associations }) => ({
     __typename: "Donor",
     donorName:
       params.donorName ??
@@ -101,7 +101,7 @@ export const speciesFactory: Factory<Species> = Factory.define<Species>(
 );
 
 export const spatialLocationFactory = Factory.define<SpatialLocation>(
-  ({ sequence, params, associations }) => ({
+  ({ params, associations }) => ({
     __typename: "SpatialLocation",
     name: params.name ?? "MONKEY",
     code: params.code ?? _.random(33),

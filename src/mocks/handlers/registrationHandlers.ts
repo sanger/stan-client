@@ -156,7 +156,7 @@ const registrationHandlers = [
                         id: 1,
                         tissue: {
                           externalName: "EXT1",
-                          replicate: 5,
+                          replicate: "5",
                           fixative: {
                             name: "Formalin",
                             enabled: true,

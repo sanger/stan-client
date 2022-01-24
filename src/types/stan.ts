@@ -110,7 +110,7 @@ export type SearchResultTableEntry = {
   tissueType: string;
   location: Maybe<SearchResultTableEntryLocation>;
   sectionNumber?: Maybe<number>;
-  replicate: number;
+  replicate: string;
   labwareCreated: Date;
   embeddingMedium: string;
 };

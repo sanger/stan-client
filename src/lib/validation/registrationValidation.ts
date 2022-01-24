@@ -93,9 +93,11 @@ export default class RegistrationValidation {
   }
 
   get replicateNumber() {
-    return validation.requiredNumber({
+    return validation.requiredString({
       label: "Replicate Number",
-      min: 1,
+      restrictChars: /^[1-9]\d*[a-z]?$/,
+      errorMessage:
+        "Replicate Number contains invalid characters. Only numbers or a number followed by a lower case letter is permitted.",
     });
   }
 
