@@ -89,40 +89,28 @@ export function shouldBehaveLikeARegistrationForm() {
 
     it("requires Replicate Number to have number part as an an integer", () => {
       cy.findByLabelText("Replicate Number").type("1.1").blur();
-      cy.findByText(
-        "Replicate Number contains invalid characters. Only numbers or a number followed by a lower case letter is permitted."
-      ).should("be.visible");
+      checkReplicateWarningIsVisible();
     });
 
     it("requires Replicate Number to have number part greater than 0", () => {
       cy.findByLabelText("Replicate Number").clear().type("-1").blur();
-      cy.findByText(
-        "Replicate Number contains invalid characters. Only numbers or a number followed by a lower case letter is permitted."
-      ).should("be.visible");
+      checkReplicateWarningIsVisible();
     });
 
     it("requires Replicate Number to have number part  greater than or equal to 1", () => {
       cy.findByLabelText("Replicate Number").type("0").blur();
-      cy.findByText(
-        "Replicate Number contains invalid characters. Only numbers or a number followed by a lower case letter is permitted."
-      ).should("be.visible");
+      checkReplicateWarningIsVisible();
     });
     it("requires Replicate Number to be number or number followed by a lowercase letter", () => {
       cy.findByLabelText("Replicate Number").type("0ab").blur();
-      cy.findByText(
-        "Replicate Number contains invalid characters. Only numbers or a number followed by a lower case letter is permitted."
-      ).should("be.visible");
+      checkReplicateWarningIsVisible();
     });
     it("requires Replicate Number to be number or number followed by a lowercase letter", () => {
       cy.findByLabelText("Replicate Number").type("5ab").blur();
-      cy.findByText(
-        "Replicate Number contains invalid characters. Only numbers or a number followed by a lower case letter is permitted."
-      ).should("be.visible");
+      checkReplicateWarningIsVisible();
 
       cy.findByLabelText("Replicate Number").clear().type("5A").blur();
-      cy.findByText(
-        "Replicate Number contains invalid characters. Only numbers or a number followed by a lower case letter is permitted."
-      ).should("be.visible");
+      checkReplicateWarningIsVisible();
     });
 
     it("requires Fixative", () => {
@@ -135,4 +123,9 @@ export function shouldBehaveLikeARegistrationForm() {
       cy.findByText("Medium is a required field").should("be.visible");
     });
   });
+  const checkReplicateWarningIsVisible = () => {
+    cy.findByText(
+      "Replicate Number must be a positive integer, optionally followed by a lower case letter."
+    ).should("be.visible");
+  };
 }
