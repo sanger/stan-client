@@ -113,7 +113,7 @@ function buildSample(): SlideRegistrationFormSection {
     tissueType: "",
     externalIdentifier: "",
     spatialLocation: 0,
-    replicateNumber: "1",
+    replicateNumber: "",
     sectionNumber: 0,
     sectionThickness: 0,
   };

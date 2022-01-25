@@ -45,7 +45,7 @@ export function getRegistrationFormBlock(): RegistrationFormBlock {
     clientId: Date.now(),
     externalIdentifier: "",
     spatialLocation: -1, // Initialise it as invalid so user has to select something
-    replicateNumber: "1",
+    replicateNumber: "",
     lastKnownSectionNumber: 0,
     labwareType: "",
     fixative: "",

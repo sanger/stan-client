@@ -97,7 +97,7 @@ export default class RegistrationValidation {
       label: "Replicate Number",
       restrictChars: /^[1-9]\d*[a-z]?$/,
       errorMessage:
-        "Replicate Number contains invalid characters. Only numbers or a number followed by a lower case letter is permitted.",
+        "Replicate Number must be a positive integer, optionally followed by a lower case letter.",
     });
   }
 
