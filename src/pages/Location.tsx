@@ -73,13 +73,7 @@ const Location: React.FC<LocationProps> = ({
   const [awaitingLabwares, setAwaitingLabwares] = useState<
     LabwareAwaitingStorageInfo[]
   >([]);
-
   const labwaresAddInProgress = React.useRef<LabwareAwaitingStorageInfo[]>([]);
-  React.useEffect(() => {
-    if (locationObject.state && isAwaitingLabwareState(locationObject.state)) {
-      setAwaitingLabwares(locationObject.state.awaitingLabwares);
-    }
-  }, [locationObject.state]);
 
   const [current, send] = useMachine(() => {
     // Create all the possible addresses for this location if it has a size.
@@ -137,9 +131,34 @@ const Location: React.FC<LocationProps> = ({
    */
   const [emptyLocationModalOpen, setEmptyLocationModalOpen] = useState(false);
 
+  /***Runs this hook if there's a url state change
+   Update awaiting labware list from url state**/
+  React.useEffect(() => {
+    if (locationObject.state && isAwaitingLabwareState(locationObject.state)) {
+      setAwaitingLabwares(locationObject.state.awaitingLabwares);
+    }
+  }, [locationObject.state]);
+
+  /**Update the url state, if awaiting labware changes by store operation**/
+  React.useEffect(() => {
+    if (labwaresAddInProgress.current.length > 0) {
+      //Keep url search params if any
+      const urlPath = locationObject.search
+        ? `${locationObject.pathname}${locationObject.search}`
+        : locationObject.pathname;
+      window.history.replaceState(
+        { state: { awaitingLabwares: awaitingLabwares } },
+        "",
+        urlPath
+      );
+      /**Empty the labwaresAddInProgress list*/
+      labwaresAddInProgress.current = [];
+    }
+  }, [awaitingLabwares, locationObject.pathname, locationObject.search]);
+
   /**
    * Show a toast notification when success message changes (and isn't null)
-   * If this is a store operation for awaiting labwares, update that list
+   * If this is a store operation for awaiting labwares, update the awaitingLabwares list
    */
   useEffect(() => {
     if (successMessage) {
@@ -174,13 +193,6 @@ const Location: React.FC<LocationProps> = ({
       });
     }
   }, [successMessage, setAwaitingLabwares]);
-
-  /***
-   * When ever awaiting labware list changes, that indicates completion of store action. So, empty the labwaresAddInProgress list
-   */
-  useEffect(() => {
-    labwaresAddInProgress.current = [];
-  }, [awaitingLabwares]);
 
   /**
    * Show a toast notification when error message changes (and isn't null)
@@ -385,7 +397,14 @@ const Location: React.FC<LocationProps> = ({
 
                 {location.parent && (
                   <StripyCardDetail term={"Parent"}>
-                    <StyledLink to={`/locations/${location.parent.barcode}`}>
+                    <StyledLink
+                      to={{
+                        pathname: `/locations/${location.parent.barcode}`,
+                        state: awaitingLabwares
+                          ? { awaitingLabwares: awaitingLabwares }
+                          : {},
+                      }}
+                    >
                       {location.parent.customName ?? location.parent.barcode}
                     </StyledLink>
                   </StripyCardDetail>
@@ -410,7 +429,14 @@ const Location: React.FC<LocationProps> = ({
                       {location.children.map((child) => {
                         return (
                           <li key={child.barcode}>
-                            <StyledLink to={`/locations/${child.barcode}`}>
+                            <StyledLink
+                              to={{
+                                pathname: `/locations/${child.barcode}`,
+                                state: awaitingLabwares
+                                  ? { awaitingLabwares: awaitingLabwares }
+                                  : {},
+                              }}
+                            >
                               {child.customName ??
                                 child.fixedName ??
                                 child.barcode}

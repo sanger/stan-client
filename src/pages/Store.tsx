@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import AppShell from "../components/AppShell";
 import LocationSearch from "../components/LocationSearch";
 import { RouteComponentProps } from "react-router";
-import { safeParseQueryString } from "../lib/helpers";
+import { safeParseQueryString, stringify } from "../lib/helpers";
 import { findLabwareLocation } from "../lib/services/locationService";
 import Warning from "../components/notifications/Warning";
 import MutedText from "../components/MutedText";
@@ -42,41 +42,56 @@ export function isAwaitingLabwareState(
 
 const Store: React.FC<StoreProps> = ({ location }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const awaitingLabwares = useMemo(() => {
-    return isAwaitingLabwareState(location.state)
-      ? location.state.awaitingLabwares
-      : [];
-  }, [location.state]);
+  const [awaitingLabwares, setAwaitingLabwares] = useState<
+    LabwareAwaitingStorageInfo[]
+  >([]);
 
   /**
    * Runs this hook if there's a `labwareBarcode` URL parameter
-   *
    * Looks up the location for the labware, and redirects to that page
    */
   useEffect(() => {
-    async function invokeFindLabwareLocation(labwareBarcode: string) {
+    async function invokeFindLabwareLocation(
+      labwareBarcode: string,
+      awaitingLabwares: LabwareAwaitingStorageInfo[]
+    ) {
       const locationBarcode = await findLabwareLocation(labwareBarcode);
       if (locationBarcode) {
         // Redirect to the location if it's found
-        history.push(
-          `/locations/${locationBarcode}?labwareBarcode=${labwareBarcode}`
-        );
+        history.push({
+          pathname: `/locations/${locationBarcode}`,
+          state:
+            awaitingLabwares.length > 0
+              ? {
+                  awaitingLabwares: awaitingLabwares,
+                }
+              : {},
+          search: stringify({
+            labwareBarcode: labwareBarcode,
+          }),
+        });
       } else {
         setErrorMessage(`${labwareBarcode} could not be found in storage`);
       }
     }
-
+    let awaitingLabwares: LabwareAwaitingStorageInfo[] = [];
+    if (isAwaitingLabwareState(location.state)) {
+      awaitingLabwares = location.state.awaitingLabwares;
+      setAwaitingLabwares(awaitingLabwares);
+    }
     if (location.search) {
       const locationSearchParams = safeParseQueryString<LocationSearchParams>({
         query: location.search,
         guard: isLocationSearch,
       });
-
       if (locationSearchParams) {
-        invokeFindLabwareLocation(locationSearchParams.labwareBarcode.trim());
+        invokeFindLabwareLocation(
+          locationSearchParams.labwareBarcode.trim(),
+          awaitingLabwares
+        );
       }
     }
-  }, [location.search]);
+  }, [location.search, location.state]);
 
   return (
     <AppShell>
@@ -104,6 +119,7 @@ const Store: React.FC<StoreProps> = ({ location }) => {
                         <LocationLink
                           key={location.barcode}
                           barcode={location.barcode}
+                          awaitingLabwares={awaitingLabwares}
                         />
                       ))}
                     </dl>
@@ -129,9 +145,13 @@ export default Store;
 
 interface LocationLinkProps {
   barcode: string;
+  awaitingLabwares?: LabwareAwaitingStorageInfo[];
 }
 
-const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
+const LocationLink: React.FC<LocationLinkProps> = ({
+  barcode,
+  awaitingLabwares,
+}) => {
   const stanCore = useContext(StanCoreContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Maybe<ClientError>>(null);
@@ -164,7 +184,13 @@ const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
   }
 
   return (
-    <Link key={location?.barcode} to={`/locations/${location?.barcode}`}>
+    <Link
+      key={location?.barcode}
+      to={{
+        pathname: `/locations/${location?.barcode}`,
+        state: awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {},
+      }}
+    >
       <div className="border border-gray-200 p-4 flex bg-gray-50 hover:bg-gray-200 rounded">
         <div className="flex-shrink-0">
           <div className="flex items-center justify-center h-12 w-12 rounded-md bg-sdb-400 text-white">
