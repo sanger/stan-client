@@ -46,28 +46,43 @@ export function isAwaitingLabwareState(
  */
 export function useSessionHistoryStateForLabwares() {
   const history = useHistory();
+  const unListener = React.useRef<H.UnregisterCallback>();
   React.useEffect(() => {
     //Listen to history events
-    history.listen((location) => {
+    /*When you attach a listener using history.listen, it returns a function that can be used to remove the listener,
+     which can then be invoked in cleanup logic:*/
+    unListener.current = history.listen((location) => {
       const awaitingLabwareEntry = sessionStorage.getItem("awaitingLabwares");
       //This is a goBack or goForward action, so update url state
       if (
         history.action === "POP" &&
         location.state &&
         isAwaitingLabwareState(location.state) &&
-        awaitingLabwareEntry
+        awaitingLabwareEntry !== null
       ) {
-        const awaitingLabwareBarcodes = awaitingLabwareEntry.split(",");
-        if (awaitingLabwareBarcodes.length > 0) {
-          const prevURLlabwares = location.state.awaitingLabwares.filter(
-            (item) => awaitingLabwareBarcodes.includes(item.barcode)
-          );
-          const urlPath = history.location.search
-            ? `${history.location.pathname}${history.location.search}`
-            : history.location.pathname;
-          history.replace(urlPath, { awaitingLabwares: prevURLlabwares });
+        let currentAwaitingLabwares: LabwareAwaitingStorageInfo[] = [];
+        //if sessionStorage conains an entry, update labwares otherwise to an empty array
+        if (awaitingLabwareEntry.length > 0) {
+          const awaitingLabwareBarcodes = awaitingLabwareEntry.split(",");
+          if (awaitingLabwareBarcodes.length > 0) {
+            currentAwaitingLabwares = location.state.awaitingLabwares.filter(
+              (item) => awaitingLabwareBarcodes.includes(item.barcode)
+            );
+          }
         }
+        const urlPath = history.location.search
+          ? `${history.location.pathname}${history.location.search}`
+          : history.location.pathname;
+        history.replace(urlPath, {
+          awaitingLabwares: currentAwaitingLabwares,
+        });
       }
+      //cleanup listener
+      return () => {
+        if (unListener.current) {
+          unListener.current();
+        }
+      };
     });
   }, [history]);
   return history;
@@ -78,18 +93,16 @@ export function useSessionHistoryStateForLabwares() {
  * @param location - location to navigate
  * @param action - action performed
  * @param awaitingLabwares
+ * Clear session storage for awaiting labwares if it is navigating to a page other than /location or /store
+ * Session storage will be used for following operations
+ * a) Go back and Go forward operation to a Location/Store page
+ * b) Going to a new location page by invoking a store location link or through a search
  */
 export function awaitingStorageCheckOnExit(
   location: H.Location,
   action: H.Action,
   awaitingLabwares: LabwareAwaitingStorageInfo[]
 ) {
-  /**
-   * Clear session storage for awaiting labwares if it is navigating to a page other than /location or /store
-   * Session storage kept for following operations
-   * a) Go back and Go forward operation to a Location/Store page
-   * b) Going to a new location page by invoking a link
-   ***/
   if (
     (action === "POP" &&
       ["/locations", "/store"].some((path) =>

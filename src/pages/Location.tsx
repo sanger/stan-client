@@ -160,8 +160,11 @@ const Location: React.FC<LocationProps> = ({
     if (labwaresAddInProgress.current.length > 0) {
       sessionStorage.setItem(
         "awaitingLabwares",
-        awaitingLabwares.map((labware) => labware.barcode).join(",")
+        awaitingLabwares.length > 0
+          ? awaitingLabwares.map((labware) => labware.barcode).join(",")
+          : ""
       );
+
       //Store operation is complete, so empty the list
       labwaresAddInProgress.current = [];
     }
