@@ -25,13 +25,18 @@ import {
   findNextAvailableAddress,
 } from "../lib/helpers/locationHelper";
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
-import { RouteComponentProps, useLocation } from "react-router-dom";
+import { Prompt, RouteComponentProps } from "react-router-dom";
 import { LocationMatchParams, LocationSearchParams } from "../types/stan";
 import { LocationFieldsFragment, Maybe, StoreInput } from "../types/sdk";
 import { useMachine } from "@xstate/react";
 import { StoredItemFragment } from "../lib/machines/locations/locationMachineTypes";
 import createLocationMachine from "../lib/machines/locations/locationMachine";
-import { isAwaitingLabwareState, LabwareAwaitingStorageInfo } from "./Store";
+import {
+  awaitingStorageCheckOnExit,
+  isAwaitingLabwareState,
+  LabwareAwaitingStorageInfo,
+  useSessionHistoryStateForLabwares,
+} from "./Store";
 import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
 import warningToast from "../components/notifications/WarningToast";
 
@@ -69,11 +74,8 @@ const Location: React.FC<LocationProps> = ({
   locationSearchParams,
   match,
 }) => {
-  const locationObject = useLocation();
-  const [awaitingLabwares, setAwaitingLabwares] = useState<
-    LabwareAwaitingStorageInfo[]
-  >([]);
-  const labwaresAddInProgress = React.useRef<LabwareAwaitingStorageInfo[]>([]);
+  //Custom hook to retain the updated labware state
+  const history = useSessionHistoryStateForLabwares();
 
   const [current, send] = useMachine(() => {
     // Create all the possible addresses for this location if it has a size.
@@ -127,34 +129,43 @@ const Location: React.FC<LocationProps> = ({
   const currentViewType = locationHasGrid ? ViewType.GRID : ViewType.LIST;
 
   /**
+   *Labware list awaiting to be stored
+   */
+  const [awaitingLabwares, setAwaitingLabwares] = useState<
+    LabwareAwaitingStorageInfo[]
+  >([]);
+
+  /**
+   * Labwares selected for store operation implicitly indicating a store action in progress
+   */
+  const labwaresAddInProgress = React.useRef<LabwareAwaitingStorageInfo[]>([]);
+
+  /**
    * Is the "Empty Location" modal open
    */
   const [emptyLocationModalOpen, setEmptyLocationModalOpen] = useState(false);
 
-  /***Runs this hook if there's a url state change
-   Update awaiting labware list from url state**/
+  /***Runs this hook if there's a url state change and update the awaiting labware list with url state**/
   React.useEffect(() => {
-    if (locationObject.state && isAwaitingLabwareState(locationObject.state)) {
-      setAwaitingLabwares(locationObject.state.awaitingLabwares);
+    if (
+      history.location.state &&
+      isAwaitingLabwareState(history.location.state)
+    ) {
+      setAwaitingLabwares(history.location.state.awaitingLabwares);
     }
-  }, [locationObject.state]);
+  }, [history.location.state]);
 
-  /**Update the url state, if awaiting labware changes by store operation**/
+  /**Runs this hook whenever there is a store operation.Update the session storage with the current labwares awaiting storage**/
   React.useEffect(() => {
     if (labwaresAddInProgress.current.length > 0) {
-      //Keep url search params if any
-      const urlPath = locationObject.search
-        ? `${locationObject.pathname}${locationObject.search}`
-        : locationObject.pathname;
-      window.history.replaceState(
-        { state: { awaitingLabwares: awaitingLabwares } },
-        "",
-        urlPath
+      sessionStorage.setItem(
+        "awaitingLabwares",
+        awaitingLabwares.map((labware) => labware.barcode).join(",")
       );
-      /**Empty the labwaresAddInProgress list*/
+      //Store operation is complete, so empty the list
       labwaresAddInProgress.current = [];
     }
-  }, [awaitingLabwares, locationObject.pathname, locationObject.search]);
+  }, [awaitingLabwares]);
 
   /**
    * Show a toast notification when success message changes (and isn't null)
@@ -357,15 +368,12 @@ const Location: React.FC<LocationProps> = ({
                 </Success>
               )
             )}
-
           {current.matches("notFound") && (
             <Warning
               message={`Location ${match.params.locationBarcode} could not be found`}
             />
           )}
-
-          <LocationSearch />
-
+          <LocationSearch awaitingLabwares={awaitingLabwares} />
           {showLocation && (
             <>
               <StripyCard
@@ -466,7 +474,7 @@ const Location: React.FC<LocationProps> = ({
                 )}
               </StripyCard>
 
-              {location.children.length === 0 && (
+              {location.children.length === 0 ? (
                 <>
                   <Heading className="mt-10 mb-5" level={2}>
                     Stored Items
@@ -483,7 +491,6 @@ const Location: React.FC<LocationProps> = ({
                       onStoreLabwares={storeLabwares}
                     />
                   )}
-
                   <LocationParentContext.Provider value={locationParentContext}>
                     {currentViewType === ViewType.LIST && <ItemsList />}
                     {locationHasGrid && currentViewType === ViewType.GRID && (
@@ -534,11 +541,26 @@ const Location: React.FC<LocationProps> = ({
                     </Modal>
                   </Authenticated>
                 </>
+              ) : (
+                <>
+                  {awaitingLabwares.length > 0 && (
+                    <LabwareAwaitingStorage
+                      labwares={awaitingLabwares}
+                      storeEnabled={false}
+                      onStoreLabwares={() => {}}
+                    />
+                  )}
+                </>
               )}
             </>
           )}
         </div>
       </AppShell.Main>
+      <Prompt
+        message={(location, action) =>
+          awaitingStorageCheckOnExit(location, action, awaitingLabwares)
+        }
+      />
     </AppShell>
   );
 };

@@ -26,14 +26,14 @@ const LocationSearch = ({
           </div>
           <ScanInput
             id={"locationScanInput"}
-            onScan={(value) =>
+            onScan={(value) => {
               history.push({
                 pathname: `/locations/${value}`,
                 state: {
                   awaitingLabwares: awaitingLabwares ?? [],
                 },
-              })
-            }
+              });
+            }}
           />
         </div>
         <div className="mt-6 sm:mt-0 space-y-2">

@@ -10,14 +10,15 @@ import LocationIcon from "../components/icons/LocationIcon";
 import Heading from "../components/Heading";
 
 import storeConfig from "../static/store.json";
-import { Link } from "react-router-dom";
+import { Link, Prompt, useHistory } from "react-router-dom";
 import BarcodeIcon from "../components/icons/BarcodeIcon";
 import { FindLocationByBarcodeQuery, Maybe } from "../types/sdk";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import { isLocationSearch, LocationSearchParams } from "../types/stan";
-import { history, StanCoreContext } from "../lib/sdk";
+import { StanCoreContext } from "../lib/sdk";
 import { ClientError } from "graphql-request";
 import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
+import * as H from "history";
 
 /**
  * RouteComponentProps from react-router allows the props to be passed in
@@ -40,12 +41,79 @@ export function isAwaitingLabwareState(
   );
 }
 
+/**
+ * Custom hook to update the url state with the current list of labwares (awaiting storage) for back and forth action in browser page
+ */
+export function useSessionHistoryStateForLabwares() {
+  const history = useHistory();
+  React.useEffect(() => {
+    //Listen to history events
+    history.listen((location) => {
+      const awaitingLabwareEntry = sessionStorage.getItem("awaitingLabwares");
+      //This is a goBack or goForward action, so update url state
+      if (
+        history.action === "POP" &&
+        location.state &&
+        isAwaitingLabwareState(location.state) &&
+        awaitingLabwareEntry
+      ) {
+        const awaitingLabwareBarcodes = awaitingLabwareEntry.split(",");
+        if (awaitingLabwareBarcodes.length > 0) {
+          const prevURLlabwares = location.state.awaitingLabwares.filter(
+            (item) => awaitingLabwareBarcodes.includes(item.barcode)
+          );
+          const urlPath = history.location.search
+            ? `${history.location.pathname}${history.location.search}`
+            : history.location.pathname;
+          history.replace(urlPath, { awaitingLabwares: prevURLlabwares });
+        }
+      }
+    });
+  }, [history]);
+  return history;
+}
+
+/**
+ *
+ * @param location - location to navigate
+ * @param action - action performed
+ * @param awaitingLabwares
+ */
+export function awaitingStorageCheckOnExit(
+  location: H.Location,
+  action: H.Action,
+  awaitingLabwares: LabwareAwaitingStorageInfo[]
+) {
+  /**
+   * Clear session storage for awaiting labwares if it is navigating to a page other than /location or /store
+   * Session storage kept for following operations
+   * a) Go back and Go forward operation to a Location/Store page
+   * b) Going to a new location page by invoking a link
+   ***/
+  if (
+    (action === "POP" &&
+      ["/locations", "/store"].some((path) =>
+        location.pathname.startsWith(path)
+      )) ||
+    (action === "PUSH" && location.pathname.startsWith("/locations"))
+  ) {
+    return true;
+  } else {
+    sessionStorage.removeItem("awaitingLabwares");
+    if (awaitingLabwares.length > 0) {
+      return "You have unstored labwares. Are you sure you want to leave?";
+    } else {
+      return true;
+    }
+  }
+}
+
 const Store: React.FC<StoreProps> = ({ location }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [awaitingLabwares, setAwaitingLabwares] = useState<
     LabwareAwaitingStorageInfo[]
   >([]);
-
+  const history = useSessionHistoryStateForLabwares();
   /**
    * Runs this hook if there's a `labwareBarcode` URL parameter
    * Looks up the location for the labware, and redirects to that page
@@ -91,7 +159,7 @@ const Store: React.FC<StoreProps> = ({ location }) => {
         );
       }
     }
-  }, [location.search, location.state]);
+  }, [location.search, location.state, history]);
 
   return (
     <AppShell>
@@ -137,6 +205,11 @@ const Store: React.FC<StoreProps> = ({ location }) => {
           )}
         </div>
       </AppShell.Main>
+      <Prompt
+        message={(location, action) =>
+          awaitingStorageCheckOnExit(location, action, awaitingLabwares)
+        }
+      />
     </AppShell>
   );
 };
