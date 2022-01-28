@@ -325,7 +325,6 @@ export function Routes() {
       <Route
         path={"/search"}
         render={(routeProps) => {
-          debugger;
           return (
             <DataFetcher
               dataFetcher={stanCore.GetSearchInfo}
