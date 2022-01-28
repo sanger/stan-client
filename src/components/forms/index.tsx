@@ -47,6 +47,7 @@ export function optionValues<
   V extends string,
   T extends OptionTemplate<L, V>
 >(entities: T[], label: L, value: V) {
+  if (!entities || entities.length === 0) return <option />;
   return entities.map((e, index) => {
     return (
       <option key={index} value={e[value]}>
