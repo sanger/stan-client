@@ -168,29 +168,6 @@ describe("Sectioning Confirmation", () => {
         cy.findByRole("button", { name: /Store All/i }).should("be.disabled");
       });
     });
-
-    context("store loaction scanned with confirmed labware", () => {
-      before(() => {
-        cy.findByTestId("locationScanInput").type("STO-024{enter}");
-      });
-      it("display the table with confirmed labware", () => {
-        cy.findByRole("table").contains("td", "STAN-0001F");
-        cy.findByRole("table").contains("td", "STAN-0001E");
-      });
-      it("store all button should be enabled", () => {
-        cy.findByRole("button", { name: /Store All/i }).should("be.enabled");
-      });
-    });
-
-    context("storing awaiting labware to location", () => {
-      before(() => {
-        cy.findByRole("button", { name: /Store All/i }).click();
-      });
-      it("should display the labware in boxes", () => {
-        cy.findByText("STAN-0001F").should("exist");
-        cy.findByRole("table").should("not.exist");
-      });
-    });
   });
 });
 

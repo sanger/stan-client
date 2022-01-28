@@ -33,9 +33,8 @@ import { StoredItemFragment } from "../lib/machines/locations/locationMachineTyp
 import createLocationMachine from "../lib/machines/locations/locationMachine";
 import {
   awaitingStorageCheckOnExit,
-  isAwaitingLabwareState,
+  getAwaitingLabwaresFromSession,
   LabwareAwaitingStorageInfo,
-  useSessionHistoryStateForLabwares,
 } from "./Store";
 import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
 import warningToast from "../components/notifications/WarningToast";
@@ -75,8 +74,6 @@ const Location: React.FC<LocationProps> = ({
   match,
 }) => {
   //Custom hook to retain the updated labware state
-  const history = useSessionHistoryStateForLabwares();
-
   const [current, send] = useMachine(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> =
@@ -136,39 +133,31 @@ const Location: React.FC<LocationProps> = ({
   >([]);
 
   /**
+   * Is the "Empty Location" modal open
+   */
+  const [emptyLocationModalOpen, setEmptyLocationModalOpen] = useState(false);
+
+  /**
    * Labwares selected for store operation implicitly indicating a store action in progress
    */
   const labwaresAddInProgress = React.useRef<LabwareAwaitingStorageInfo[]>([]);
 
   /**
-   * Is the "Empty Location" modal open
+   * Is navigationg to another page from Prompt dialog
    */
-  const [emptyLocationModalOpen, setEmptyLocationModalOpen] = useState(false);
+  const leavingOnPrompt = React.useRef(false);
 
-  /***Runs this hook if there's a url state change and update the awaiting labware list with url state**/
+  /***When component loads, fill awaitingLabwares from sessionStorage, if any**/
   React.useEffect(() => {
-    if (
-      history.location.state &&
-      isAwaitingLabwareState(history.location.state)
-    ) {
-      setAwaitingLabwares(history.location.state.awaitingLabwares);
-    }
-  }, [history.location.state]);
+    setAwaitingLabwares(getAwaitingLabwaresFromSession());
 
-  /**Runs this hook whenever there is a store operation.Update the session storage with the current labwares awaiting storage**/
-  React.useEffect(() => {
-    if (labwaresAddInProgress.current.length > 0) {
-      sessionStorage.setItem(
-        "awaitingLabwares",
-        awaitingLabwares.length > 0
-          ? awaitingLabwares.map((labware) => labware.barcode).join(",")
-          : ""
-      );
-
-      //Store operation is complete, so empty the list
-      labwaresAddInProgress.current = [];
-    }
-  }, [awaitingLabwares]);
+    //If navigating to another page from a prompt dialog, then clear the sessionStorage before leaving this page
+    return () => {
+      if (leavingOnPrompt.current) {
+        sessionStorage.removeItem("awaitingLabwares");
+      }
+    };
+  }, []);
 
   /**
    * Show a toast notification when success message changes (and isn't null)
@@ -176,26 +165,36 @@ const Location: React.FC<LocationProps> = ({
    */
   useEffect(() => {
     if (successMessage) {
-      /**This is a store operation for labwares in waiting, so remove the added labware(s) from the awaiting list**/
+      /**This is a store operation for labwares in waiting, so remove all the added labwares from the awaiting list**/
+      const prevAwaitingLabwares = getAwaitingLabwaresFromSession();
+      let currAwaitingLabwares: LabwareAwaitingStorageInfo[] = [];
       if (labwaresAddInProgress.current.length > 0) {
-        setAwaitingLabwares((prevAwaitingLabwares) => {
-          if (
-            labwaresAddInProgress.current.length === prevAwaitingLabwares.length
-          ) {
-            /**This is 'Store all' operation for awaiting labwares - so remove all awaiting labwares**/
-            return [];
-          } else {
-            /**This is storing an individual labware operation for awaiting labwares, so remove that labware**/
-            const indx = prevAwaitingLabwares.findIndex(
-              (labware) =>
-                labware.barcode === labwaresAddInProgress.current[0].barcode
-            );
-            const newLabwareList = [...prevAwaitingLabwares];
-            newLabwareList.splice(indx, 1);
-            return newLabwareList;
-          }
-        });
+        if (
+          labwaresAddInProgress.current.length !== prevAwaitingLabwares.length
+        ) {
+          /**This is storing an individual awaiting labware operation, so remove that labware**/
+          const indx = prevAwaitingLabwares.findIndex(
+            (labware) =>
+              labware.barcode === labwaresAddInProgress.current[0].barcode
+          );
+          currAwaitingLabwares = [...prevAwaitingLabwares];
+          currAwaitingLabwares.splice(indx, 1);
+        }
+        setAwaitingLabwares(currAwaitingLabwares);
+        if (currAwaitingLabwares.length > 0) {
+          //Update sessionStorage if any awaitingLabwares
+          sessionStorage.setItem(
+            "awaitingLabwares",
+            currAwaitingLabwares
+              .map((labware) => `${labware.barcode},${labware.labwareType}`)
+              .join(",")
+          );
+          //Otherwise remove it from sessionStorage
+        } else sessionStorage.removeItem("awaitingLabwares");
       }
+      //Store operation is complete, so empty the list
+      labwaresAddInProgress.current = [];
+
       const SuccessToast = () => {
         return <Success message={successMessage} />;
       };
@@ -376,7 +375,7 @@ const Location: React.FC<LocationProps> = ({
               message={`Location ${match.params.locationBarcode} could not be found`}
             />
           )}
-          <LocationSearch awaitingLabwares={awaitingLabwares} />
+          <LocationSearch />
           {showLocation && (
             <>
               <StripyCard
@@ -560,9 +559,14 @@ const Location: React.FC<LocationProps> = ({
         </div>
       </AppShell.Main>
       <Prompt
-        message={(location, action) =>
-          awaitingStorageCheckOnExit(location, action, awaitingLabwares)
-        }
+        when={awaitingLabwares.length > 0}
+        message={(location, action) => {
+          const ret = awaitingStorageCheckOnExit(location, action);
+          if (typeof ret === "string") {
+            leavingOnPrompt.current = true;
+          }
+          return ret;
+        }}
       />
     </AppShell>
   );

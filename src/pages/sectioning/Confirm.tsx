@@ -56,17 +56,18 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
             style={{ marginLeft: "auto" }}
             className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
             onClick={() => {
-              history.push({
-                pathname: "/store",
-                state: {
-                  awaitingLabwares: [...confirmedPlans.current].map((plan) => {
-                    return {
-                      barcode: plan.destinationLabware.barcode,
-                      labwareType: plan.destinationLabware.labwareType.name,
-                    };
-                  }),
-                },
-              });
+              if (confirmedPlans.current.length > 0) {
+                sessionStorage.setItem(
+                  "awaitingLabwares",
+                  [...confirmedPlans.current]
+                    .map(
+                      (plan) =>
+                        `${plan.destinationLabware.barcode}, ${plan.destinationLabware.labwareType.name}`
+                    )
+                    .join(",")
+                );
+              }
+              history.push("/store");
             }}
           >
             Store

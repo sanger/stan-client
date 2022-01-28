@@ -10,7 +10,7 @@ import LocationIcon from "../components/icons/LocationIcon";
 import Heading from "../components/Heading";
 
 import storeConfig from "../static/store.json";
-import { Link, Prompt, useHistory } from "react-router-dom";
+import { Link, Prompt } from "react-router-dom";
 import BarcodeIcon from "../components/icons/BarcodeIcon";
 import { FindLocationByBarcodeQuery, Maybe } from "../types/sdk";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
@@ -19,7 +19,7 @@ import { StanCoreContext } from "../lib/sdk";
 import { ClientError } from "graphql-request";
 import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
 import * as H from "history";
-
+import { history } from "../lib/sdk";
 /**
  * RouteComponentProps from react-router allows the props to be passed in
  */
@@ -29,70 +29,11 @@ export type LabwareAwaitingStorageInfo = {
   barcode: string;
   labwareType: string;
 };
-export type AwaitingStorageStateType = {
-  awaitingLabwares: LabwareAwaitingStorageInfo[];
-};
-export function isAwaitingLabwareState(
-  obj: any
-): obj is AwaitingStorageStateType {
-  if (!obj) return false;
-  return (
-    "awaitingLabwares" in obj && typeof obj["awaitingLabwares"] === "object"
-  );
-}
-
-/**
- * Custom hook to update the url state with the current list of labwares (awaiting storage) for back and forth action in browser page
- */
-export function useSessionHistoryStateForLabwares() {
-  const history = useHistory();
-  const unListener = React.useRef<H.UnregisterCallback>();
-  React.useEffect(() => {
-    //Listen to history events
-    /*When you attach a listener using history.listen, it returns a function that can be used to remove the listener,
-     which can then be invoked in cleanup logic:*/
-    unListener.current = history.listen((location) => {
-      const awaitingLabwareEntry = sessionStorage.getItem("awaitingLabwares");
-      //This is a goBack or goForward action, so update url state
-      if (
-        history.action === "POP" &&
-        location.state &&
-        isAwaitingLabwareState(location.state) &&
-        awaitingLabwareEntry !== null
-      ) {
-        let currentAwaitingLabwares: LabwareAwaitingStorageInfo[] = [];
-        //if sessionStorage conains an entry, update labwares otherwise to an empty array
-        if (awaitingLabwareEntry.length > 0) {
-          const awaitingLabwareBarcodes = awaitingLabwareEntry.split(",");
-          if (awaitingLabwareBarcodes.length > 0) {
-            currentAwaitingLabwares = location.state.awaitingLabwares.filter(
-              (item) => awaitingLabwareBarcodes.includes(item.barcode)
-            );
-          }
-        }
-        const urlPath = history.location.search
-          ? `${history.location.pathname}${history.location.search}`
-          : history.location.pathname;
-        history.replace(urlPath, {
-          awaitingLabwares: currentAwaitingLabwares,
-        });
-      }
-      //cleanup listener
-      return () => {
-        if (unListener.current) {
-          unListener.current();
-        }
-      };
-    });
-  }, [history]);
-  return history;
-}
 
 /**
  *
  * @param location - location to navigate
  * @param action - action performed
- * @param awaitingLabwares
  * Clear session storage for awaiting labwares if it is navigating to a page other than /location or /store
  * Session storage will be used for following operations
  * a) Go back and Go forward operation to a Location/Store page
@@ -100,8 +41,7 @@ export function useSessionHistoryStateForLabwares() {
  */
 export function awaitingStorageCheckOnExit(
   location: H.Location,
-  action: H.Action,
-  awaitingLabwares: LabwareAwaitingStorageInfo[]
+  action: H.Action
 ) {
   if (
     (action === "POP" &&
@@ -112,41 +52,61 @@ export function awaitingStorageCheckOnExit(
   ) {
     return true;
   } else {
-    sessionStorage.removeItem("awaitingLabwares");
-    if (awaitingLabwares.length > 0) {
-      return "You have unstored labwares. Are you sure you want to leave?";
-    } else {
-      return true;
-    }
+    return "You have labwares that are not stored. Are you sure you want to leave?";
   }
+}
+
+/**Get awaiting labware list from session storage**/
+export function getAwaitingLabwaresFromSession() {
+  const awaitingLabwareValue = sessionStorage.getItem("awaitingLabwares");
+  if (!awaitingLabwareValue || awaitingLabwareValue.length < 0) return [];
+  const awaitingLabwareInfo = awaitingLabwareValue.split(",");
+  if (awaitingLabwareInfo.length % 2 !== 0) {
+    return [];
+  }
+  return awaitingLabwareInfo.reduce(
+    (previousValue: LabwareAwaitingStorageInfo[], currentValue, index) => {
+      if (index % 2 === 0) {
+        return [...previousValue, { barcode: currentValue, labwareType: "" }];
+      } else {
+        previousValue[previousValue.length - 1] = {
+          barcode: previousValue[previousValue.length - 1].barcode,
+          labwareType: currentValue,
+        };
+        return [...previousValue];
+      }
+    },
+    []
+  );
 }
 
 const Store: React.FC<StoreProps> = ({ location }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [awaitingLabwares, setAwaitingLabwares] = useState<
-    LabwareAwaitingStorageInfo[]
-  >([]);
-  const history = useSessionHistoryStateForLabwares();
+  /**
+   * Is navigationg to another page from Prompt dialog
+   */
+  const leavingOnPrompt = React.useRef(false);
+
+  React.useEffect(() => {
+    return () => {
+      //If navigating to another page from a prompt dialog, then clear the sessionStorage before leaving this page
+      if (leavingOnPrompt.current) {
+        sessionStorage.removeItem("awaitingLabwares");
+      }
+    };
+  }, []);
+
   /**
    * Runs this hook if there's a `labwareBarcode` URL parameter
    * Looks up the location for the labware, and redirects to that page
    */
   useEffect(() => {
-    async function invokeFindLabwareLocation(
-      labwareBarcode: string,
-      awaitingLabwares: LabwareAwaitingStorageInfo[]
-    ) {
+    async function invokeFindLabwareLocation(labwareBarcode: string) {
       const locationBarcode = await findLabwareLocation(labwareBarcode);
       if (locationBarcode) {
         // Redirect to the location if it's found
         history.push({
           pathname: `/locations/${locationBarcode}`,
-          state:
-            awaitingLabwares.length > 0
-              ? {
-                  awaitingLabwares: awaitingLabwares,
-                }
-              : {},
           search: stringify({
             labwareBarcode: labwareBarcode,
           }),
@@ -155,24 +115,18 @@ const Store: React.FC<StoreProps> = ({ location }) => {
         setErrorMessage(`${labwareBarcode} could not be found in storage`);
       }
     }
-    let awaitingLabwares: LabwareAwaitingStorageInfo[] = [];
-    if (isAwaitingLabwareState(location.state)) {
-      awaitingLabwares = location.state.awaitingLabwares;
-      setAwaitingLabwares(awaitingLabwares);
-    }
     if (location.search) {
       const locationSearchParams = safeParseQueryString<LocationSearchParams>({
         query: location.search,
         guard: isLocationSearch,
       });
       if (locationSearchParams) {
-        invokeFindLabwareLocation(
-          locationSearchParams.labwareBarcode.trim(),
-          awaitingLabwares
-        );
+        invokeFindLabwareLocation(locationSearchParams.labwareBarcode.trim());
       }
     }
-  }, [location.search, location.state, history]);
+  }, [location.search, location.state]);
+
+  const awaitingLabwares = getAwaitingLabwaresFromSession();
 
   return (
     <AppShell>
@@ -188,7 +142,7 @@ const Store: React.FC<StoreProps> = ({ location }) => {
             To get started, scan either the location you want to find, or scan a
             piece of labware to find its location.
           </MutedText>
-          <LocationSearch awaitingLabwares={awaitingLabwares} />
+          <LocationSearch />
           <div className="my-10 space-y-24">
             {Object.entries(storeConfig.locationType).map(
               ([groupTitle, locations]) => (
@@ -200,7 +154,6 @@ const Store: React.FC<StoreProps> = ({ location }) => {
                         <LocationLink
                           key={location.barcode}
                           barcode={location.barcode}
-                          awaitingLabwares={awaitingLabwares}
                         />
                       ))}
                     </dl>
@@ -219,9 +172,14 @@ const Store: React.FC<StoreProps> = ({ location }) => {
         </div>
       </AppShell.Main>
       <Prompt
-        message={(location, action) =>
-          awaitingStorageCheckOnExit(location, action, awaitingLabwares)
-        }
+        when={awaitingLabwares.length > 0}
+        message={(location, action) => {
+          const ret = awaitingStorageCheckOnExit(location, action);
+          if (typeof ret === "string") {
+            leavingOnPrompt.current = true;
+          }
+          return ret;
+        }}
       />
     </AppShell>
   );
@@ -234,10 +192,7 @@ interface LocationLinkProps {
   awaitingLabwares?: LabwareAwaitingStorageInfo[];
 }
 
-const LocationLink: React.FC<LocationLinkProps> = ({
-  barcode,
-  awaitingLabwares,
-}) => {
+const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
   const stanCore = useContext(StanCoreContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Maybe<ClientError>>(null);
@@ -274,7 +229,6 @@ const LocationLink: React.FC<LocationLinkProps> = ({
       key={location?.barcode}
       to={{
         pathname: `/locations/${location?.barcode}`,
-        state: awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {},
       }}
     >
       <div className="border border-gray-200 p-4 flex bg-gray-50 hover:bg-gray-200 rounded">
