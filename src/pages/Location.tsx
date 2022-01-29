@@ -25,7 +25,7 @@ import {
   findNextAvailableAddress,
 } from "../lib/helpers/locationHelper";
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
-import { Prompt, RouteComponentProps } from "react-router-dom";
+import { RouteComponentProps } from "react-router-dom";
 import { LocationMatchParams, LocationSearchParams } from "../types/stan";
 import { LocationFieldsFragment, Maybe, StoreInput } from "../types/sdk";
 import { useMachine } from "@xstate/react";
@@ -38,6 +38,7 @@ import {
 } from "./Store";
 import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
 import warningToast from "../components/notifications/WarningToast";
+import PromptOnLeave from "../components/notifications/PromptOnLeave";
 
 /**
  * The different ways of displaying stored items
@@ -142,21 +143,15 @@ const Location: React.FC<LocationProps> = ({
    */
   const labwaresAddInProgress = React.useRef<LabwareAwaitingStorageInfo[]>([]);
 
-  /**
-   * Is navigationg to another page from Prompt dialog
-   */
-  const leavingOnPrompt = React.useRef(false);
-
   /***When component loads, fill awaitingLabwares from sessionStorage, if any**/
   React.useEffect(() => {
     setAwaitingLabwares(getAwaitingLabwaresFromSession());
+  }, []);
 
-    //If navigating to another page from a prompt dialog, then clear the sessionStorage before leaving this page
-    return () => {
-      if (leavingOnPrompt.current) {
-        sessionStorage.removeItem("awaitingLabwares");
-      }
-    };
+  /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
+  const onLeave = React.useCallback(() => {
+    alert("HERE :)");
+    sessionStorage.removeItem("awaitingLabwares");
   }, []);
 
   /**
@@ -558,15 +553,13 @@ const Location: React.FC<LocationProps> = ({
           )}
         </div>
       </AppShell.Main>
-      <Prompt
+      <PromptOnLeave
         when={awaitingLabwares.length > 0}
-        message={(location, action) => {
-          const ret = awaitingStorageCheckOnExit(location, action);
-          if (typeof ret === "string") {
-            leavingOnPrompt.current = true;
-          }
-          return ret;
-        }}
+        messageHandler={awaitingStorageCheckOnExit}
+        message={
+          "You have labwares that are not stored. Are you sure you want to leave?"
+        }
+        onPromptLeave={onLeave}
       />
     </AppShell>
   );

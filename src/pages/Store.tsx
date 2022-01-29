@@ -10,7 +10,7 @@ import LocationIcon from "../components/icons/LocationIcon";
 import Heading from "../components/Heading";
 
 import storeConfig from "../static/store.json";
-import { Link, Prompt } from "react-router-dom";
+import { Link } from "react-router-dom";
 import BarcodeIcon from "../components/icons/BarcodeIcon";
 import { FindLocationByBarcodeQuery, Maybe } from "../types/sdk";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
@@ -20,6 +20,7 @@ import { ClientError } from "graphql-request";
 import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
 import * as H from "history";
 import { history } from "../lib/sdk";
+import PromptOnLeave from "../components/notifications/PromptOnLeave";
 /**
  * RouteComponentProps from react-router allows the props to be passed in
  */
@@ -34,6 +35,7 @@ export type LabwareAwaitingStorageInfo = {
  *
  * @param location - location to navigate
  * @param action - action performed
+ * @param message - message to display
  * Clear session storage for awaiting labwares if it is navigating to a page other than /location or /store
  * Session storage will be used for following operations
  * a) Go back and Go forward operation to a Location/Store page
@@ -41,7 +43,8 @@ export type LabwareAwaitingStorageInfo = {
  */
 export function awaitingStorageCheckOnExit(
   location: H.Location,
-  action: H.Action
+  action: H.Action,
+  message: string
 ) {
   if (
     (action === "POP" &&
@@ -52,7 +55,7 @@ export function awaitingStorageCheckOnExit(
   ) {
     return true;
   } else {
-    return "You have labwares that are not stored. Are you sure you want to leave?";
+    return message;
   }
 }
 
@@ -82,18 +85,11 @@ export function getAwaitingLabwaresFromSession() {
 
 const Store: React.FC<StoreProps> = ({ location }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  /**
-   * Is navigationg to another page from Prompt dialog
-   */
-  const leavingOnPrompt = React.useRef(false);
 
-  React.useEffect(() => {
-    return () => {
-      //If navigating to another page from a prompt dialog, then clear the sessionStorage before leaving this page
-      if (leavingOnPrompt.current) {
-        sessionStorage.removeItem("awaitingLabwares");
-      }
-    };
+  /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
+  const onLeave = React.useCallback(() => {
+    alert("HERE :)");
+    sessionStorage.removeItem("awaitingLabwares");
   }, []);
 
   /**
@@ -171,15 +167,13 @@ const Store: React.FC<StoreProps> = ({ location }) => {
           )}
         </div>
       </AppShell.Main>
-      <Prompt
+      <PromptOnLeave
         when={awaitingLabwares.length > 0}
-        message={(location, action) => {
-          const ret = awaitingStorageCheckOnExit(location, action);
-          if (typeof ret === "string") {
-            leavingOnPrompt.current = true;
-          }
-          return ret;
-        }}
+        messageHandler={awaitingStorageCheckOnExit}
+        message={
+          "You have labwares that are not stored. Are you sure you want to leave?"
+        }
+        onPromptLeave={onLeave}
       />
     </AppShell>
   );
