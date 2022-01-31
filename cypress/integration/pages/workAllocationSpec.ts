@@ -56,7 +56,7 @@ describe("Work Allocation", () => {
   describe("Editing the number of blocks and slides column for Work ", () => {
     context("Entering a value in 'Number of blocks' cell in table", () => {
       before(() => {
-        cy.get("td").eq(4).type("8");
+        cy.get("td").eq(5).type("8");
         //change the focus
         cy.findAllByRole("button", { name: /Edit Status/i }).then(
           (editButtons) => {
@@ -71,7 +71,7 @@ describe("Work Allocation", () => {
     });
     context("Entering a value in 'Number of slides' cell in table", () => {
       before(() => {
-        cy.get("td").eq(5).type("3");
+        cy.get("td").eq(6).type("3");
         //change the focus
         cy.findAllByRole("button", { name: /Edit Status/i }).then(
           (editButtons) => {
@@ -89,7 +89,7 @@ describe("Work Allocation", () => {
   describe("Editing the priority column for Work ", () => {
     context("Entering a value in 'Priority' cell in table", () => {
       before(() => {
-        cy.get("td").eq(6).type("A1");
+        cy.get("td").eq(0).type("A1");
         //change the focus
         cy.findAllByRole("button", { name: /Edit Status/i }).then(
           (editButtons) => {
@@ -107,7 +107,7 @@ describe("Work Allocation", () => {
     });
     context("Entering an invalid value in 'Priority' cell in table", () => {
       before(() => {
-        cy.get("td").eq(6).clear().type("15");
+        cy.get("td").eq(0).clear().type("15");
         //change the focus
         cy.findAllByRole("button", { name: /Edit Status/i }).then(
           (editButtons) => {
@@ -117,9 +117,7 @@ describe("Work Allocation", () => {
       });
 
       it("displays a validation error message", () => {
-        cy.findByText(
-          "Must be capital letter followed by a one-digit number"
-        ).should("be.visible");
+        cy.findByText("Invalid format").scrollIntoView().should("be.visible");
       });
     });
   });
@@ -136,7 +134,7 @@ describe("Work Allocation", () => {
       });
 
       it("shows a form to edit the status", () => {
-        cy.findByLabelText("New Status").should("be.visible");
+        cy.findByLabelText("New Status").scrollIntoView().should("be.visible");
         cy.findByRole("button", { name: /Cancel/i }).should("be.visible");
         cy.findByRole("button", { name: /Save/i }).should("be.visible");
       });

@@ -124,7 +124,7 @@ export default function WorkRow({
     return (
       <input
         data-testid={workNumber + "-" + workNumValueType}
-        className={"border-0 border-gray-100 "}
+        className={"border-0 border-gray-100"}
         type="number"
         min="0"
         max={MAX_NUM_BLOCKANDSLIDES}
@@ -141,12 +141,11 @@ export default function WorkRow({
     let errorMessage = "";
     if (priority.length === 0) return errorMessage;
     if (priority.length !== 2) {
-      errorMessage =
-        "Must be of length 2 - capital letter followed by a number";
+      errorMessage = "Invalid format";
     }
     const priorityRegEx = /^[A-Z]\d/;
     if (!priorityRegEx.test(priority.toUpperCase())) {
-      errorMessage = "Must be capital letter followed by a one-digit number";
+      errorMessage = "Invalid format";
     }
     return errorMessage;
   };
@@ -157,26 +156,6 @@ export default function WorkRow({
 
   return (
     <tr>
-      <TableCell>{work.workNumber}</TableCell>
-      <TableCell>{work.workType.name}</TableCell>
-      <TableCell>{work.project.name}</TableCell>
-      <TableCell>{work.costCode.code}</TableCell>
-      <TableCell>
-        {renderWorkNumValueField(
-          work.workNumber,
-          work.numBlocks ?? undefined,
-          "block"
-        )}
-      </TableCell>
-
-      <TableCell>
-        {renderWorkNumValueField(
-          work.workNumber,
-          work.numSlides ?? undefined,
-          "slide"
-        )}
-      </TableCell>
-
       <TableCell>
         {
           /**Once workrequest is failed or completed then priority need to be cleared**/
@@ -192,7 +171,7 @@ export default function WorkRow({
                       label={""}
                       name={"priority"}
                       data-testid={`${work.workNumber}-priority`}
-                      className={`border-0 border-gray-100`}
+                      className={`border-0 border-gray-100 w-12`}
                       onChange={(e: React.FormEvent<HTMLInputElement>) => {
                         const priority = e.currentTarget.value.toUpperCase();
                         setFieldValue("priority", priority);
@@ -214,13 +193,30 @@ export default function WorkRow({
           )
         }
       </TableCell>
+      <TableCell>{work.workNumber}</TableCell>
+      <TableCell>{work.workType.name}</TableCell>
+      <TableCell>{work.project.name}</TableCell>
+      <TableCell>{work.costCode.code}</TableCell>
+      <TableCell>
+        {renderWorkNumValueField(
+          work.workNumber,
+          work.numBlocks ?? undefined,
+          "block"
+        )}
+      </TableCell>
+      <TableCell>
+        {renderWorkNumValueField(
+          work.workNumber,
+          work.numSlides ?? undefined,
+          "slide"
+        )}
+      </TableCell>
       {!editModeEnabled && (
         <TableCell>
           <div className="uppercase">{work.status}</div>
           {comment && <div className="font-medium">{comment}</div>}
         </TableCell>
       )}
-
       <TableCell colSpan={showEditButton ? 1 : 2}>
         {showEditButton && (
           <PinkButton
@@ -230,7 +226,6 @@ export default function WorkRow({
             Edit Status
           </PinkButton>
         )}
-
         {editModeEnabled && (
           <Formik<FormValues>
             initialValues={initialValues}
@@ -250,7 +245,6 @@ export default function WorkRow({
                       </option>
                     ))}
                   </FormikSelect>
-
                   {requiresComment(values.type) && (
                     <FormikSelect
                       disabled={current.matches("updating")}
@@ -260,7 +254,6 @@ export default function WorkRow({
                       {optionValues(availableComments, "text", "id")}
                     </FormikSelect>
                   )}
-
                   <div className="flex flex-row items-center justify-end space-x-2">
                     <WhiteButton
                       type="button"

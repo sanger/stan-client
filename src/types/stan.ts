@@ -19,6 +19,7 @@ export enum LabwareTypeName {
   SLIDE = "Slide",
   PLATE = "96 well plate",
   CASSETTE = "Cassette",
+  VISIUM_ADH = "Visium ADH",
 }
 
 export type Address = string;
@@ -109,7 +110,7 @@ export type SearchResultTableEntry = {
   tissueType: string;
   location: Maybe<SearchResultTableEntryLocation>;
   sectionNumber?: Maybe<number>;
-  replicate: number;
+  replicate: string;
   labwareCreated: Date;
   embeddingMedium: string;
 };

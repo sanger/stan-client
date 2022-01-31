@@ -10,7 +10,7 @@ export function shouldBehaveLikeARegistrationForm() {
 
       it("shows a warning", () => {
         cy.findByText(
-            "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, slashes, backslashes, commas, colons, semicolons, full stops and underscores are permitted."
+          "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, slashes, backslashes, commas, colons, semicolons, full stops and underscores are permitted."
         );
       });
     });
@@ -23,7 +23,7 @@ export function shouldBehaveLikeARegistrationForm() {
 
       it("shows a warning", () => {
         cy.findByText(
-            "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, slashes, backslashes, commas, colons, semicolons, full stops and underscores are permitted."
+          "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, slashes, backslashes, commas, colons, semicolons, full stops and underscores are permitted."
         ).should("be.visible");
       });
     });
@@ -87,23 +87,30 @@ export function shouldBehaveLikeARegistrationForm() {
       );
     });
 
-    it("requires Replicate Number to be an integer", () => {
+    it("requires Replicate Number to have number part as an an integer", () => {
       cy.findByLabelText("Replicate Number").type("1.1").blur();
-      cy.findByText("Replicate Number must be an integer").should("be.visible");
+      checkReplicateWarningIsVisible();
     });
 
-    it("requires Replicate Number to be greater than 0", () => {
+    it("requires Replicate Number to have number part greater than 0", () => {
       cy.findByLabelText("Replicate Number").clear().type("-1").blur();
-      cy.findByText(
-        "Replicate Number must be greater than or equal to 1"
-      ).should("be.visible");
+      checkReplicateWarningIsVisible();
     });
 
-    it("requires Replicate Number to be greater than or equal to 1", () => {
+    it("requires Replicate Number to have number part  greater than or equal to 1", () => {
       cy.findByLabelText("Replicate Number").type("0").blur();
-      cy.findByText(
-        "Replicate Number must be greater than or equal to 1"
-      ).should("be.visible");
+      checkReplicateWarningIsVisible();
+    });
+    it("requires Replicate Number to be number or number followed by a lowercase letter", () => {
+      cy.findByLabelText("Replicate Number").type("0ab").blur();
+      checkReplicateWarningIsVisible();
+    });
+    it("requires Replicate Number to be number or number followed by a lowercase letter", () => {
+      cy.findByLabelText("Replicate Number").type("5ab").blur();
+      checkReplicateWarningIsVisible();
+
+      cy.findByLabelText("Replicate Number").clear().type("5A").blur();
+      checkReplicateWarningIsVisible();
     });
 
     it("requires Fixative", () => {
@@ -116,4 +123,9 @@ export function shouldBehaveLikeARegistrationForm() {
       cy.findByText("Medium is a required field").should("be.visible");
     });
   });
+  const checkReplicateWarningIsVisible = () => {
+    cy.findByText(
+      "Replicate Number must be a positive integer, optionally followed by a lower case letter."
+    ).should("be.visible");
+  };
 }
