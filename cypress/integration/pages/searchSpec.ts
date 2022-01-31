@@ -62,6 +62,31 @@ describe("Search", () => {
         });
       }
     );
+    context("when a search has more results than the requested amount", () => {
+      before(() => {
+        cy.visit("/search");
+
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<FindQuery, FindQueryVariables>(
+              "Find",
+              (req, res, ctx) => {
+                return res(ctx.data({ find: buildFindResult(200, 150) }));
+              }
+            )
+          );
+        });
+
+        cy.findByLabelText("Donor ID").type("DNR123");
+        cy.findByRole("button", { name: /Search/i }).click();
+      });
+
+      it("will show a warning", () => {
+        cy.findByText(
+          "Not all results can be displayed. Please refine your search."
+        ).should("be.visible");
+      });
+    });
 
     context("when a search returns no results", () => {
       before(() => {
