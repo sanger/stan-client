@@ -150,7 +150,6 @@ const Location: React.FC<LocationProps> = ({
 
   /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
   const onLeave = React.useCallback(() => {
-    alert("HERE :)");
     sessionStorage.removeItem("awaitingLabwares");
   }, []);
 
