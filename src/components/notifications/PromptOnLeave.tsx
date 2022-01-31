@@ -54,7 +54,6 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({
     <Prompt
       when={when}
       message={(location, action) => {
-        debugger;
         const ret = messageHandler
           ? messageHandler(location, action, message)
           : message;
