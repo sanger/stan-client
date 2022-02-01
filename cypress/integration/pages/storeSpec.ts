@@ -1,10 +1,7 @@
-import { graphql } from "msw";
 import {
   FindLabwareLocationQuery,
   FindLabwareLocationQueryVariables,
-  StoredItem,
 } from "../../../src/types/sdk";
-import { locationRepository } from "../../../src/mocks/repositories/locationRepository";
 
 describe("Store", () => {
   describe("Location search", () => {
@@ -92,6 +89,23 @@ describe("Store", () => {
       it("displays an error on the store page", () => {
         cy.findByText("FAKE-LABWARE could not be found in storage");
       });
+    });
+  });
+
+  describe("when awaiting labwares are in session storage", () => {
+    before(() => {
+      sessionStorage.setItem(
+        "awaitingLabwares",
+        "STAN-2111,tube,STAN-3111,Slide,STAN-4111,Slide,STAN-5111,Slide"
+      );
+      cy.visit("/store");
+    });
+
+    it("store all button should be disabled", () => {
+      cy.findByRole("button", { name: /Store All/i }).should("be.disabled");
+    });
+    after(() => {
+      sessionStorage.removeItem("awaitingLabwares");
     });
   });
 });

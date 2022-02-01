@@ -9,6 +9,9 @@ import {
 import SectioningConfirm from "../../components/sectioningConfirm/SectioningConfirm";
 import { Prompt, useLocation } from "react-router-dom";
 import { useConfirmLeave } from "../../lib/hooks";
+import { history } from "../../lib/sdk";
+import WhiteButton from "../../components/buttons/WhiteButton";
+import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 
 type SectioningConfirmProps = {
   readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
@@ -18,7 +21,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
   const location = useLocation<{ plans?: Array<FindPlanDataQuery> }>();
   const plans: Array<FindPlanDataQuery> = location?.state?.plans ?? [];
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
-
+  const confirmedPlans = React.useRef<LayoutPlan[]>([]);
   return (
     <AppShell>
       <AppShell.Header>
@@ -29,7 +32,12 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
           <SectioningConfirm
             initialPlans={plans}
             comments={sectioningConfirmInfo.comments}
-            onConfirmed={() => setShouldConfirm(false)}
+            onConfirmed={(plans) => {
+              if (plans) {
+                confirmedPlans.current = plans;
+              }
+              setShouldConfirm(false);
+            }}
           />
         </div>
       </AppShell.Main>
@@ -42,6 +50,29 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
       <OperationCompleteModal
         message={"Sections Confirmed"}
         show={!shouldConfirm}
+        additionalButtons={
+          <WhiteButton
+            type="button"
+            style={{ marginLeft: "auto" }}
+            className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+            onClick={() => {
+              if (confirmedPlans.current.length > 0) {
+                sessionStorage.setItem(
+                  "awaitingLabwares",
+                  [...confirmedPlans.current]
+                    .map(
+                      (plan) =>
+                        `${plan.destinationLabware.barcode}, ${plan.destinationLabware.labwareType.name}`
+                    )
+                    .join(",")
+                );
+              }
+              history.push("/store");
+            }}
+          >
+            Store
+          </WhiteButton>
+        }
         onReset={reload}
       >
         <p>

@@ -12,6 +12,8 @@ import { useMachine } from "@xstate/react";
 import { createSectioningConfirmMachine } from "./sectioningConfirm.machine";
 import Warning from "../notifications/Warning";
 import WorkNumberSelect from "../WorkNumberSelect";
+import { Dictionary } from "lodash";
+import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 
 type SectioningConfirmProps = {
   /**
@@ -27,7 +29,7 @@ type SectioningConfirmProps = {
   /**
    * Callback for when sections have been successfully confirmed
    */
-  onConfirmed: () => void;
+  onConfirmed: (plans?: Array<LayoutPlan>) => void;
 };
 
 /**
@@ -41,23 +43,48 @@ export default function SectioningConfirm({
 }: SectioningConfirmProps) {
   const [current, send, service] = useMachine(createSectioningConfirmMachine());
 
-  /**
-   * Call the {@code onConfirmed} callback when machine reaches the {@code confirmed} state
-   */
-  useEffect(() => {
-    const subscription = service.subscribe((state) => {
-      if (state.matches("confirmed")) {
-        onConfirmed();
+  /**Get plans in the same order as displayed*/
+  const getPlansInDisplayedOrder = React.useCallback(
+    (plans: Dictionary<Array<LayoutPlan>>) => {
+      let layoutPlansOrdered: LayoutPlan[] = [];
+      if (plans[LabwareTypeName.TUBE]) {
+        layoutPlansOrdered = [...plans[LabwareTypeName.TUBE]];
       }
-    });
-    return subscription.unsubscribe;
-  }, [service, onConfirmed]);
+      Object.entries(plans)
+        .filter(
+          ([labwareTypeName, _]) => labwareTypeName !== LabwareTypeName.TUBE
+        )
+        .forEach(([_, lps]) => {
+          layoutPlansOrdered = [...layoutPlansOrdered, ...lps];
+        });
+      return layoutPlansOrdered;
+    },
+    []
+  );
 
   const {
     sourceLabware,
     layoutPlansByLabwareType,
     requestError,
   } = current.context;
+
+  /**
+   * Call the {@code onConfirmed} callback when machine reaches the {@code confirmed} state
+   */
+  useEffect(() => {
+    const subscription = service.subscribe((state) => {
+      if (state.matches("confirmed")) {
+        const orderedPlans = getPlansInDisplayedOrder(layoutPlansByLabwareType);
+        onConfirmed(orderedPlans);
+      }
+    });
+    return subscription.unsubscribe;
+  }, [
+    service,
+    onConfirmed,
+    layoutPlansByLabwareType,
+    getPlansInDisplayedOrder,
+  ]);
 
   /**
    * Callback for when the work number select changes

@@ -27,10 +27,18 @@ import {
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
 import { RouteComponentProps } from "react-router-dom";
 import { LocationMatchParams, LocationSearchParams } from "../types/stan";
-import { LocationFieldsFragment, Maybe } from "../types/sdk";
+import { LocationFieldsFragment, Maybe, StoreInput } from "../types/sdk";
 import { useMachine } from "@xstate/react";
 import { StoredItemFragment } from "../lib/machines/locations/locationMachineTypes";
 import createLocationMachine from "../lib/machines/locations/locationMachine";
+import {
+  awaitingStorageCheckOnExit,
+  getAwaitingLabwaresFromSession,
+  LabwareAwaitingStorageInfo,
+} from "./Store";
+import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
+import warningToast from "../components/notifications/WarningToast";
+import PromptOnLeave from "../components/notifications/PromptOnLeave";
 
 /**
  * The different ways of displaying stored items
@@ -49,6 +57,7 @@ type LocationParentContextType = {
   selectedAddress: Maybe<string>;
   setSelectedAddress: (address: string) => void;
   labwareBarcodeToAddressMap: Map<string, string>;
+  storeBarcodes: (storeData: { barcode: string; address: string }[]) => void;
 };
 
 export const LocationParentContext = React.createContext<
@@ -65,6 +74,7 @@ const Location: React.FC<LocationProps> = ({
   locationSearchParams,
   match,
 }) => {
+  //Custom hook to retain the updated labware state
   const [current, send] = useMachine(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> =
@@ -81,11 +91,13 @@ const Location: React.FC<LocationProps> = ({
     });
 
     // Get the first selected address (which is the first empty address)
-    const selectedAddress = findNextAvailableAddress({
+    const selectedAddresses = findNextAvailableAddress({
       locationAddresses: locationAddresses,
       addressToItemMap: addressToItemMap,
     });
 
+    const selectedAddress =
+      selectedAddresses.length > 0 ? selectedAddresses[0] : undefined;
     return createLocationMachine({
       context: {
         location: storageLocation,
@@ -115,15 +127,68 @@ const Location: React.FC<LocationProps> = ({
   const currentViewType = locationHasGrid ? ViewType.GRID : ViewType.LIST;
 
   /**
+   *Labware list awaiting to be stored
+   */
+  const [awaitingLabwares, setAwaitingLabwares] = useState<
+    LabwareAwaitingStorageInfo[]
+  >([]);
+
+  /**
    * Is the "Empty Location" modal open
    */
   const [emptyLocationModalOpen, setEmptyLocationModalOpen] = useState(false);
 
   /**
+   * Labwares selected for store operation implicitly indicating a store action in progress
+   */
+  const labwaresAddInProgress = React.useRef<LabwareAwaitingStorageInfo[]>([]);
+
+  /***When component loads, fill awaitingLabwares from sessionStorage, if any**/
+  React.useEffect(() => {
+    setAwaitingLabwares(getAwaitingLabwaresFromSession());
+  }, []);
+
+  /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
+  const onLeave = React.useCallback(() => {
+    sessionStorage.removeItem("awaitingLabwares");
+  }, []);
+
+  /**
    * Show a toast notification when success message changes (and isn't null)
+   * If this is a store operation for awaiting labwares, update the awaitingLabwares list
    */
   useEffect(() => {
     if (successMessage) {
+      /**This is a store operation for labwares in waiting, so remove all the added labwares from the awaiting list**/
+      const prevAwaitingLabwares = getAwaitingLabwaresFromSession();
+      let currAwaitingLabwares: LabwareAwaitingStorageInfo[] = [];
+      if (labwaresAddInProgress.current.length > 0) {
+        if (
+          labwaresAddInProgress.current.length !== prevAwaitingLabwares.length
+        ) {
+          /**This is storing an individual awaiting labware operation, so remove that labware**/
+          const indx = prevAwaitingLabwares.findIndex(
+            (labware) =>
+              labware.barcode === labwaresAddInProgress.current[0].barcode
+          );
+          currAwaitingLabwares = [...prevAwaitingLabwares];
+          currAwaitingLabwares.splice(indx, 1);
+        }
+        setAwaitingLabwares(currAwaitingLabwares);
+        if (currAwaitingLabwares.length > 0) {
+          //Update sessionStorage if any awaitingLabwares
+          sessionStorage.setItem(
+            "awaitingLabwares",
+            currAwaitingLabwares
+              .map((labware) => `${labware.barcode},${labware.labwareType}`)
+              .join(",")
+          );
+          //Otherwise remove it from sessionStorage
+        } else sessionStorage.removeItem("awaitingLabwares");
+      }
+      //Store operation is complete, so empty the list
+      labwaresAddInProgress.current = [];
+
       const SuccessToast = () => {
         return <Success message={successMessage} />;
       };
@@ -134,22 +199,20 @@ const Location: React.FC<LocationProps> = ({
         hideProgressBar: true,
       });
     }
-  }, [successMessage]);
+  }, [successMessage, setAwaitingLabwares]);
 
   /**
    * Show a toast notification when error message changes (and isn't null)
    */
   useEffect(() => {
     if (errorMessage) {
-      const WarningToast = () => (
-        <Warning message={errorMessage} error={serverError} />
-      );
-
-      toast(<WarningToast />, {
+      warningToast({
+        message: errorMessage,
+        error: serverError,
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 5000,
-        hideProgressBar: true,
       });
+      labwaresAddInProgress.current = [];
     }
   }, [errorMessage, serverError]);
 
@@ -195,6 +258,8 @@ const Location: React.FC<LocationProps> = ({
       unstoreBarcode: (barcode) => send({ type: "UNSTORE_BARCODE", barcode }),
       setSelectedAddress: (address) =>
         send({ type: "SET_SELECTED_ADDRESS", address }),
+      storeBarcodes: (storeData: StoreInput[]) =>
+        send({ type: "STORE", data: storeData }),
     }),
     [
       addressToItemMap,
@@ -203,6 +268,66 @@ const Location: React.FC<LocationProps> = ({
       labwareBarcodeToAddressMap,
       selectedAddress,
       send,
+    ]
+  );
+
+  /***
+   * Store all awaiting labwares - handles store all labwares  or one labware at a time
+   */
+  const storeLabwares = React.useCallback(
+    (awaitingLabwares: LabwareAwaitingStorageInfo[]) => {
+      if (!selectedAddress && currentViewType === ViewType.GRID) {
+        return;
+      }
+      labwaresAddInProgress.current = awaitingLabwares;
+      /**Handle storing of one labware at a time*/
+      if (awaitingLabwares.length === 1) {
+        send({
+          type: "STORE_BARCODE",
+          barcode: awaitingLabwares[0].barcode,
+          address: selectedAddress ?? undefined,
+        });
+        return;
+      }
+
+      /**Handle storing of all labwares operation**/
+      let nextAvailableAddresses: string[] | undefined = undefined;
+      if (currentViewType === ViewType.GRID) {
+        /** Get as many consecutive empty addresses equal to number of labwares awaiting storage**/
+        nextAvailableAddresses = findNextAvailableAddress({
+          locationAddresses: locationAddresses,
+          addressToItemMap: addressToItemMap,
+          minimumAddress: selectedAddress,
+          numAddresses: awaitingLabwares.length,
+        });
+        /**Not enough consecutive empty addresses to store the labwares**/
+        if (nextAvailableAddresses.length !== awaitingLabwares.length) {
+          warningToast({
+            message:
+              "Not enough consecutive free addresses available to store all labwares",
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 5000,
+          });
+          return;
+        }
+      }
+      const storeData = awaitingLabwares.map((labware, indx) => {
+        return {
+          barcode: labware.barcode,
+          address: nextAvailableAddresses
+            ? nextAvailableAddresses[indx]
+            : undefined,
+        };
+      });
+      labwaresAddInProgress.current = awaitingLabwares;
+      send({ type: "STORE", data: storeData });
+    },
+    [
+      addressToItemMap,
+      locationAddresses,
+      selectedAddress,
+      send,
+      currentViewType,
     ]
   );
 
@@ -239,15 +364,12 @@ const Location: React.FC<LocationProps> = ({
                 </Success>
               )
             )}
-
           {current.matches("notFound") && (
             <Warning
               message={`Location ${match.params.locationBarcode} could not be found`}
             />
           )}
-
           <LocationSearch />
-
           {showLocation && (
             <>
               <StripyCard
@@ -279,7 +401,14 @@ const Location: React.FC<LocationProps> = ({
 
                 {location.parent && (
                   <StripyCardDetail term={"Parent"}>
-                    <StyledLink to={`/locations/${location.parent.barcode}`}>
+                    <StyledLink
+                      to={{
+                        pathname: `/locations/${location.parent.barcode}`,
+                        state: awaitingLabwares
+                          ? { awaitingLabwares: awaitingLabwares }
+                          : {},
+                      }}
+                    >
                       {location.parent.customName ?? location.parent.barcode}
                     </StyledLink>
                   </StripyCardDetail>
@@ -304,7 +433,14 @@ const Location: React.FC<LocationProps> = ({
                       {location.children.map((child) => {
                         return (
                           <li key={child.barcode}>
-                            <StyledLink to={`/locations/${child.barcode}`}>
+                            <StyledLink
+                              to={{
+                                pathname: `/locations/${child.barcode}`,
+                                state: awaitingLabwares
+                                  ? { awaitingLabwares: awaitingLabwares }
+                                  : {},
+                              }}
+                            >
                               {child.customName ??
                                 child.fixedName ??
                                 child.barcode}
@@ -334,12 +470,23 @@ const Location: React.FC<LocationProps> = ({
                 )}
               </StripyCard>
 
-              {location.children.length === 0 && (
+              {location.children.length === 0 ? (
                 <>
                   <Heading className="mt-10 mb-5" level={2}>
                     Stored Items
                   </Heading>
 
+                  {awaitingLabwares.length > 0 && (
+                    <LabwareAwaitingStorage
+                      labwares={awaitingLabwares}
+                      storeEnabled={
+                        currentViewType === ViewType.LIST ||
+                        (currentViewType === ViewType.GRID &&
+                          selectedAddress !== undefined)
+                      }
+                      onStoreLabwares={storeLabwares}
+                    />
+                  )}
                   <LocationParentContext.Provider value={locationParentContext}>
                     {currentViewType === ViewType.LIST && <ItemsList />}
                     {locationHasGrid && currentViewType === ViewType.GRID && (
@@ -390,11 +537,29 @@ const Location: React.FC<LocationProps> = ({
                     </Modal>
                   </Authenticated>
                 </>
+              ) : (
+                <>
+                  {awaitingLabwares.length > 0 && (
+                    <LabwareAwaitingStorage
+                      labwares={awaitingLabwares}
+                      storeEnabled={false}
+                      onStoreLabwares={() => {}}
+                    />
+                  )}
+                </>
               )}
             </>
           )}
         </div>
       </AppShell.Main>
+      <PromptOnLeave
+        when={awaitingLabwares.length > 0}
+        messageHandler={awaitingStorageCheckOnExit}
+        message={
+          "You have labwares that are not stored. Are you sure you want to leave?"
+        }
+        onPromptLeave={onLeave}
+      />
     </AppShell>
   );
 };
