@@ -171,6 +171,16 @@ function AppShell({ children }: AppShellParams) {
                         "Record RNA Analysis on tubes from RNA Extraction"
                       }
                     />
+                    <NavLinkMenuItem
+                      caption={"Aliquoting"}
+                      path="/lab/aliquoting"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Aliquot a tube of solution out into multiple new tubes."
+                      }
+                    />
                   </Menu>
                   <Menu
                     caption={"Staining"}
@@ -441,6 +451,9 @@ function AppShell({ children }: AppShellParams) {
                       </StanMobileNavLink>
                       <StanMobileNavLink to="/lab/rna_analysis">
                         Analysis
+                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/aliquoting">
+                        Aliquoting
                       </StanMobileNavLink>
                     </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">

@@ -108,7 +108,10 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
+      <AuthenticatedRoute
+        path="/lab/aliquoting"
+        render={(routerProps) => <Aliquotting key={routerProps.location.key} />}
+      />
       <AuthenticatedRoute
         path="/lab/visium_cdna"
         render={(routeProps) => (
