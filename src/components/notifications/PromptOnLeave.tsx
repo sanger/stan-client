@@ -57,9 +57,7 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({
         const ret = messageHandler
           ? messageHandler(location, action, message)
           : message;
-        if (typeof ret === "string") {
-          promptReturnStatus.current = true;
-        }
+        promptReturnStatus.current = typeof ret === "string";
         return ret;
       }}
     />

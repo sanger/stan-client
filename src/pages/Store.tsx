@@ -46,6 +46,9 @@ export function awaitingStorageCheckOnExit(
   action: H.Action,
   message: string
 ) {
+  /**PUSH is the action for  invoking/visiting a link or for pushing a new entry onto the history stack
+   * POP is the action send while you navigate using the browser's forward/back buttons.
+   * **/
   if (
     (action === "POP" &&
       ["/locations", "/store"].some((path) =>
@@ -62,7 +65,7 @@ export function awaitingStorageCheckOnExit(
 /**Get awaiting labware list from session storage**/
 export function getAwaitingLabwaresFromSession() {
   const awaitingLabwareValue = sessionStorage.getItem("awaitingLabwares");
-  if (!awaitingLabwareValue || awaitingLabwareValue.length < 0) return [];
+  if (!awaitingLabwareValue || awaitingLabwareValue.length <= 0) return [];
   const awaitingLabwareInfo = awaitingLabwareValue.split(",");
   if (awaitingLabwareInfo.length % 2 !== 0) {
     return [];

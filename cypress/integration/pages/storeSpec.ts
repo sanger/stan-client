@@ -101,7 +101,7 @@ describe("Store", () => {
       cy.visit("/store");
     });
 
-    it("store all button should be enabled", () => {
+    it("store all button should be disabled", () => {
       cy.findByRole("button", { name: /Store All/i }).should("be.disabled");
     });
     after(() => {
