@@ -23,28 +23,27 @@ import LabwareScanner from "../components/labwareScanner/LabwareScanner";
 import { useMachine } from "@xstate/react";
 import { buildSampleColors } from "../lib/helpers/labwareHelper";
 import { LabwareFieldsFragment } from "../types/sdk";
-import extractionMachine, {
-  ExtractionContext,
-} from "../lib/machines/extraction/extractionMachine";
 import { Link } from "react-router-dom";
 import ButtonBar from "../components/ButtonBar";
 import { reload } from "../lib/sdk";
 import WorkNumberSelect from "../components/WorkNumberSelect";
+import aliquotMachine, {
+  AliquotContext,
+} from "../lib/machines/aliquot/aliquotMachine";
+import { Input } from "../components/forms/Input";
 
-function buildExtractionTableData(ctx: ExtractionContext) {
-  if (!ctx.extraction) return [];
-  const sourceLabwares = ctx.labwares;
-  const destinationLabwares = ctx.extraction.extract.labware;
+function buildAliquotTableData(ctx: AliquotContext) {
+  if (!ctx.aliquotResult) return [];
+  const sourceLabware = ctx.labware;
+  const destinationLabwares = ctx.aliquotResult.aliquot.labware;
   const sampleColors = buildSampleColors(destinationLabwares);
 
-  return ctx.extraction.extract.operations
+  return ctx.aliquotResult.aliquot.operations
     .map((operation) => {
       return operation.actions.map((action) => {
         return {
           sampleColor: sampleColors.get(action.sample.id),
-          sourceLabware: sourceLabwares.find(
-            (lw) => lw.id === action.source.labwareId
-          ),
+          sourceLabware: sourceLabware,
           destinationLabware: destinationLabwares.find(
             (lw) => lw.id === action.destination.labwareId
           ),
@@ -54,9 +53,12 @@ function buildExtractionTableData(ctx: ExtractionContext) {
     .flat();
 }
 
-function Aliquotting() {
+function Aliquot() {
   const [current, send] = useMachine(() =>
-    extractionMachine.withContext({ labwares: [] })
+    aliquotMachine.withContext({
+      labware: undefined,
+      numLabware: 0,
+    })
   );
 
   const {
@@ -67,11 +69,12 @@ function Aliquotting() {
     currentPrinter,
   } = usePrinters();
 
-  const { labwares, serverErrors, extraction } = current.context;
+  const { labware, serverErrors, aliquotResult, numLabware } = current.context;
 
   const sampleColors: Map<number, string> = useMemo(() => {
+    const labwares = labware ? [labware] : [];
     return buildSampleColors(labwares);
-  }, [labwares]);
+  }, [labware]);
 
   const columns = useMemo(
     () => [
@@ -79,14 +82,12 @@ function Aliquotting() {
       labwareScanTableColumns.barcode(),
       labwareScanTableColumns.donorId(),
       labwareScanTableColumns.tissueType(),
-      labwareScanTableColumns.spatialLocation(),
-      labwareScanTableColumns.replicate(),
     ],
-    [sampleColors]
+    []
   );
 
-  const extractionTableData = useMemo(() => {
-    return buildExtractionTableData(current.context);
+  const aliquoteTableData = useMemo(() => {
+    return buildAliquotTableData(current.context);
   }, [current]);
 
   const handleWorkNumberChange = useCallback(
@@ -96,17 +97,25 @@ function Aliquotting() {
     [send]
   );
 
-  const onLabwareScannerChange = (labwares: Array<LabwareFieldsFragment>) =>
-    send({ type: "UPDATE_LABWARES", labwares });
+  const handleNumLabwareChange = useCallback(
+    (numLabware: number) => {
+      send({ type: "UPDATE_NUM_LABWARE", numLabware });
+    },
+    [send]
+  );
+
+  const onLabwareScannerChange = (labware: LabwareFieldsFragment) =>
+    send({ type: "UPDATE_LABWARE", labware });
 
   const scannerLocked =
-    !current.matches("ready") && !current.matches("extractionFailed");
+    !current.matches("ready") && !current.matches("aliquotFailed");
   const blueButtonDisabled = !(
-    (current.matches("ready") || current.matches("extractionFailed")) &&
-    labwares.length > 0
+    (current.matches("ready") || current.matches("aliquotFailed")) &&
+    labware !== undefined &&
+    numLabware > 0
   );
   const showGrayPanel =
-    current.matches("ready") || current.matches("extractionFailed");
+    current.matches("ready") || current.matches("aliquotFailed");
 
   return (
     <AppShell>
@@ -130,14 +139,25 @@ function Aliquotting() {
             <Heading level={3}>Section Tubes</Heading>
 
             <LabwareScanner
-              onChange={onLabwareScannerChange}
+              onChange={(labwares) => onLabwareScannerChange(labwares[0])}
               locked={scannerLocked}
             >
               <LabwareScanPanel columns={columns} />
             </LabwareScanner>
           </div>
-
-          {current.matches("extracted") && (
+          <div className="mt-8 space-y-4">
+            <Heading level={3}>Destination Tubes</Heading>
+            <Input
+              type="number"
+              id={"numLabware"}
+              value={numLabware}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleNumLabwareChange(Number(e.currentTarget.value))
+              }
+              className={"w-1/2"}
+            />
+          </div>
+          {current.matches("aliquotingDone") && (
             <motion.div
               initial={"hidden"}
               animate={"visible"}
@@ -146,7 +166,7 @@ function Aliquotting() {
             >
               <Heading level={3}>RNA Tubes</Heading>
 
-              <Success message={"Extraction Complete"}>
+              <Success message={"Aliquoting Complete"}>
                 Your source tubes have been marked as discarded.
               </Success>
 
@@ -160,7 +180,7 @@ function Aliquotting() {
                   </tr>
                 </TableHead>
                 <TableBody>
-                  {extractionTableData.map((data) => (
+                  {aliquoteTableData.map((data) => (
                     <tr key={data.destinationLabware?.barcode}>
                       <TableCell>
                         {data.sampleColor && (
@@ -191,13 +211,13 @@ function Aliquotting() {
                   <LabelPrinter
                     labelsPerBarcode={2}
                     showNotifications={false}
-                    labwares={extraction?.extract?.labware ?? []}
+                    labwares={aliquotResult?.aliquot?.labware ?? []}
                     onPrint={handleOnPrint}
                     onPrintError={handleOnPrintError}
                     onPrinterChange={handleOnPrinterChange}
                   />
                   <MutedText className="text-right">
-                    Note: 2 labels for each destination labware will be printed.
+                    Note: 1 labels for each destination labware will be printed.
                   </MutedText>
                 </div>
               </div>
@@ -213,7 +233,7 @@ function Aliquotting() {
           <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">
             <p className="my-3 text-gray-800 text-sm leading-normal">
               Once <span className="font-bold text-gray-900">all tubes</span>{" "}
-              have been scanned, click Extract to create destination labware.
+              have been scanned, click Aliquot to create destination labwares.
             </p>
 
             <p className="my-3 text-gray-800 text-xs leading-relaxed italic text-center">
@@ -226,9 +246,9 @@ function Aliquotting() {
                 disabled={blueButtonDisabled}
                 className="whitespace-nowrap"
                 action={"primary"}
-                onClick={() => send({ type: "EXTRACT" })}
+                onClick={() => send({ type: "ALIQUOT" })}
               >
-                Extract
+                Aliquot
               </BlueButton>
             </div>
           </div>
@@ -247,7 +267,7 @@ function Aliquotting() {
             <Link
               to={{
                 pathname: "/lab/extraction_result",
-                state: { labware: extraction?.extract?.labware },
+                state: { labware: aliquotResult?.aliquot?.labware },
               }}
             >
               <BlueButton action="primary">
@@ -261,4 +281,4 @@ function Aliquotting() {
   );
 }
 
-export default Extraction;
+export default Aliquot;

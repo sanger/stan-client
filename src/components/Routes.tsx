@@ -34,6 +34,7 @@ import ExtractionResult from "../pages/ExtractionResult";
 import VisiumQC from "../pages/VisiumQC";
 import VisiumPerm from "../pages/VisiumPerm";
 import VisiumAnalysis from "../pages/VisiumAnalysis";
+import Aliquot from "../pages/Aliquot";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -110,7 +111,7 @@ export function Routes() {
       />
       <AuthenticatedRoute
         path="/lab/aliquoting"
-        render={(routerProps) => <Aliquotting key={routerProps.location.key} />}
+        render={(routerProps) => <Aliquot key={routerProps.location.key} />}
       />
       <AuthenticatedRoute
         path="/lab/visium_cdna"
