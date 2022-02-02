@@ -109,17 +109,26 @@ interface NextAvailableAddressParams {
    * Next available address must be higher than the minimum address
    */
   minimumAddress?: Maybe<string>;
+
+  /**
+   * Number of addresses to find-  If not given, only the first available address will be returned.
+   *
+   */
+  numAddresses?: number;
 }
 
 /**
  * Finds the next available (i.e. unoccupied) address in a location,
  * taking into account the grid direction
+ * If numAddresses is given and there are not enough consecutive free addresses in the location as required by this parameter,
+ * an array with available consecutive addresses is returned
  */
 export function findNextAvailableAddress({
   locationAddresses,
   addressToItemMap,
   minimumAddress = null,
-}: NextAvailableAddressParams): Maybe<string> {
+  numAddresses,
+}: NextAvailableAddressParams): string[] {
   // Build a list of [storelightAddress, stanAddress] tuples, ordered by Stan address
   let addressEntries = Array.from(locationAddresses.entries()).sort(
     (a, b) => a[1] - b[1]
@@ -134,9 +143,29 @@ export function findNextAvailableAddress({
       (entry, index) => index >= currentIndex
     );
   }
-
-  // Go through the ordered addresses checking if there's an item in each one
-  return (
-    addressEntries.find((entry) => !addressToItemMap.get(entry[0]))?.[0] ?? null
-  );
+  /**
+   Go through the ordered addresses checking if there's an item in each one.
+   If there are not enough consecutive addresses found as required, return the ones until a non-empty address
+   **/
+  const retAddressArr: string[] = [];
+  if (numAddresses && numAddresses > 0) {
+    for (let indx = 0; indx < addressEntries.length; indx++) {
+      //got addresses as required
+      if (retAddressArr.length >= numAddresses) return retAddressArr;
+      //if the address is empty,add that address
+      if (addressToItemMap.get(addressEntries[indx][0]) === undefined) {
+        retAddressArr.push(addressEntries[indx][0]);
+      } else {
+        return retAddressArr;
+      }
+    }
+  } else {
+    const address =
+      addressEntries.find((entry) => !addressToItemMap.get(entry[0]))?.[0] ??
+      null;
+    if (address) {
+      retAddressArr.push(address);
+    }
+  }
+  return retAddressArr;
 }

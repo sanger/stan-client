@@ -330,7 +330,10 @@ export function Routes() {
         path={"/search"}
         render={(routeProps) => {
           return (
-            <DataFetcher dataFetcher={stanCore.GetSearchInfo}>
+            <DataFetcher
+              dataFetcher={stanCore.GetSearchInfo}
+              key={routeProps.location.key}
+            >
               {(searchInfo) => (
                 <Search
                   searchInfo={searchInfo}
@@ -344,9 +347,12 @@ export function Routes() {
 
       <Route
         path="/"
-        render={() => {
+        render={(routeProps) => {
           return (
-            <DataFetcher dataFetcher={stanCore.GetWorkTypes}>
+            <DataFetcher
+              dataFetcher={stanCore.GetWorkTypes}
+              key={routeProps.location.key}
+            >
               {(workTypes) => (
                 <WorkProgress
                   workTypes={workTypes.workTypes.map((val) => val.name)}

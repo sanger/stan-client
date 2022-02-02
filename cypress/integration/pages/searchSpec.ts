@@ -62,7 +62,6 @@ describe("Search", () => {
         });
       }
     );
-
     context("when a search has more results than the requested amount", () => {
       before(() => {
         cy.visit("/search");
@@ -72,7 +71,7 @@ describe("Search", () => {
             graphql.query<FindQuery, FindQueryVariables>(
               "Find",
               (req, res, ctx) => {
-                return res.once(ctx.data({ find: buildFindResult(200, 150) }));
+                return res(ctx.data({ find: buildFindResult(200, 150) }));
               }
             )
           );
@@ -92,13 +91,12 @@ describe("Search", () => {
     context("when a search returns no results", () => {
       before(() => {
         cy.visit("/search");
-
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.query<FindQuery, FindQueryVariables>(
               "Find",
               (req, res, ctx) => {
-                return res.once(ctx.data({ find: buildFindResult(0, 40) }));
+                return res(ctx.data({ find: buildFindResult(0, 40) }));
               }
             )
           );
@@ -124,7 +122,7 @@ describe("Search", () => {
             graphql.query<FindQuery, FindQueryVariables>(
               "Find",
               (req, res, ctx) => {
-                return res.once(
+                return res(
                   ctx.errors([
                     {
                       message:

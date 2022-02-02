@@ -14,6 +14,8 @@ import {
   StoreBarcodeMutation,
   StoreBarcodeMutationVariables,
   StoredItem,
+  StoreMutation,
+  StoreMutationVariables,
   UnstoreBarcodeMutation,
   UnstoreBarcodeMutationVariables,
 } from "../../types/sdk";
@@ -70,6 +72,32 @@ const locationHandlers = [
           storeBarcode: {
             location: locationResponse(item.location),
           },
+        })
+      );
+    }
+  ),
+
+  graphql.mutation<StoreMutation, StoreMutationVariables>(
+    "Store",
+    (req, res, ctx) => {
+      let location;
+      try {
+        location = locationRepository.store(
+          req.variables.store,
+          req.variables.locationBarcode
+        );
+      } catch (e) {
+        return res(
+          ctx.errors([
+            {
+              message: (e as Error).message,
+            },
+          ])
+        );
+      }
+      return res(
+        ctx.data({
+          store: locationResponse(location),
         })
       );
     }

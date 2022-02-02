@@ -1,6 +1,5 @@
-import { LocationFieldsFragment, Maybe } from "../../types/sdk";
+import { LocationFieldsFragment, Maybe, StoreInput } from "../../types/sdk";
 import { stanCore } from "../sdk";
-
 /**
  * Send a query to core to store a barcode in a location (possibly at a particular address)
  * @param barcode the barcode to store
@@ -23,6 +22,27 @@ export async function storeBarcode(
   }
 
   return response.storeBarcode.location;
+}
+
+/**
+ * Send a query to core to store a list of barcodes to given addresses in a location
+ * @param store list of items to store which` is an array of objects containing barcode and address
+ * @param location the location to store the barcode in
+ */
+export async function store(
+  store: StoreInput[],
+  location: LocationFieldsFragment
+): Promise<LocationFieldsFragment> {
+  const response = await stanCore.Store({
+    store,
+    locationBarcode: location.barcode,
+  });
+
+  if (!response) {
+    throw new Error("storeBarcode response data was null");
+  }
+
+  return response.store;
 }
 
 /**
