@@ -37,6 +37,7 @@ import { labwareLocationHandlers } from "./handlers/labwareLocationHandlers";
 import passFailHandlers from "./handlers/passFailsHandlers";
 import visiumQCHandlers from "./handlers/visiumQCHandlers";
 import visiumHandlers from "./handlers/visiumHandlers";
+import aliquotHandlers from "./handlers/aliquotHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -75,4 +76,5 @@ export const handlers = [
   ...passFailHandlers,
   ...visiumQCHandlers,
   ...visiumHandlers,
+  ...aliquotHandlers,
 ];

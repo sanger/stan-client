@@ -124,6 +124,7 @@ export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
     },
     services: {
       aliquot: (ctx, _e) => {
+        debugger;
         if (ctx.labware) {
           return stanCore.Aliquot({
             request: {

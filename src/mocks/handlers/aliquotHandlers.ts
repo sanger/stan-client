@@ -1,9 +1,5 @@
 import { graphql } from "msw";
-import {
-  AliquotMutation,
-  AliquotMutationVariables,
-  ExtractMutation,
-} from "../../types/sdk";
+import { AliquotMutation, AliquotMutationVariables } from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import labwareFactory from "../../lib/factories/labwareFactory";
 
@@ -11,6 +7,7 @@ const aliquotHandlers = [
   graphql.mutation<AliquotMutation, AliquotMutationVariables>(
     "Aliquot",
     (req, res, ctx) => {
+      debugger;
       const barcode = req.variables.request.barcode;
       const labwareJson = sessionStorage.getItem(`labware-${barcode}`);
       if (!labwareJson) {
