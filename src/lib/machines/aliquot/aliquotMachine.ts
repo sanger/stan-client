@@ -21,6 +21,8 @@ export interface AliquotContext {
   /**Error returned from server**/
   serverErrors?: ClientError;
 }
+const aliquotLabwareType: string = "Tube";
+const aliquotOperationType: string = "Aliquot";
 
 type UpdateLabwareEvent = {
   type: "UPDATE_LABWARE";
@@ -80,6 +82,9 @@ export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
       aliquotFailed: {
         on: {
           ALIQUOT: { target: "aliquoting", cond: "validAliquotInput" },
+          UPDATE_WORK_NUMBER: { actions: "assignWorkNumber" },
+          UPDATE_LABWARE: { actions: "assignLabware" },
+          UPDATE_NUM_LABWARE: { actions: "assignNumLabware" },
         },
       },
       aliquotingDone: {},
@@ -92,6 +97,7 @@ export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
           return;
         }
         ctx.labware = e.labware;
+        ctx.serverErrors = undefined;
       }),
       assignNumLabware: assign((ctx, e) => {
         if (e.type !== "UPDATE_NUM_LABWARE") {
@@ -124,15 +130,14 @@ export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
     },
     services: {
       aliquot: (ctx, _e) => {
-        debugger;
         if (ctx.labware) {
           return stanCore.Aliquot({
             request: {
               workNumber: ctx.workNumber,
-              labwareType: "Tube",
+              labwareType: aliquotLabwareType,
               barcode: ctx.labware.barcode,
               numLabware: ctx.numLabware,
-              operationType: "Aliquot",
+              operationType: aliquotOperationType,
             },
           });
         } else {

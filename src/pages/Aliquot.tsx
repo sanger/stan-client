@@ -100,9 +100,9 @@ function Aliquot() {
   );
 
   /**Callback for scanning a new labware**/
-  const onLabwareScannerChange = (labware: LabwareFieldsFragment) =>
+  const onLabwareScannerChange = (labware: LabwareFieldsFragment) => {
     send({ type: "UPDATE_LABWARE", labware });
-
+  };
   const scannerLocked =
     !current.matches("ready") && !current.matches("aliquotFailed");
 

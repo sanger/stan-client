@@ -7,7 +7,6 @@ const aliquotHandlers = [
   graphql.mutation<AliquotMutation, AliquotMutationVariables>(
     "Aliquot",
     (req, res, ctx) => {
-      debugger;
       const barcode = req.variables.request.barcode;
       const labwareJson = sessionStorage.getItem(`labware-${barcode}`);
       if (!labwareJson) {
