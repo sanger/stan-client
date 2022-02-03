@@ -5,6 +5,7 @@ import { GridDirection, Maybe } from "../types/sdk";
 import { HasEnabled, SizeInput } from "../types/stan";
 import _ from "lodash";
 import { Key } from "react";
+import { Column } from "react-table";
 
 /**
  * Utility for retrieving a list of correctly typed object keys.
@@ -245,4 +246,51 @@ export function getEnumKeyByEnumValue<T extends { [index: string]: string }>(
   enumValue: string
 ): keyof T | undefined {
   return Object.keys(enumType).find((x) => enumType[x] === enumValue);
+}
+
+/**
+ * Creates the content for an export file
+ *
+ * @param columns list of columns to build. Note that the columns must have their {@code Header}
+ *        and {@code accessor} (as a string) set
+ * @param entries the data to go into the file
+ * @param delimiter (optional) the column delimiter
+ */
+export type StringKeyedProps = { [key: string]: any };
+export function createDownloadFileContent<T extends StringKeyedProps>(
+  columns: Array<Column<T>>,
+  entries: Array<T>,
+  delimiter?: string
+): string {
+  if (!delimiter) {
+    delimiter = "\t";
+  }
+  const columnNameRow = columns.map((column) => column.Header).join(delimiter);
+  const rows = entries
+    .map((entry) => {
+      return columns
+        .map((column) => {
+          if (typeof column.accessor === "string") {
+            const value = entry[column.accessor];
+            if (
+              typeof value === "object" &&
+              (value as Object) instanceof Date
+            ) {
+              const date = value as Date;
+              return date.toLocaleDateString();
+            } else if (value === "number") {
+              return String(value);
+            } else {
+              return value;
+            }
+          }
+          throw new Error(
+            "createDownloadFileContent requires all column accessors to be strings"
+          );
+        })
+        .join(delimiter);
+    })
+    .join("\n");
+
+  return `${columnNameRow}\n${rows}`;
 }

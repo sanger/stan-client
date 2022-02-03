@@ -9,9 +9,8 @@ import Warning from "../notifications/Warning";
 import WhiteButton from "../buttons/WhiteButton";
 import LoadingSpinner from "../icons/LoadingSpinner";
 import { LabwareStatePill } from "../LabwareStatePill";
-import { createHistoryFileContent } from "../../lib/services/historyService";
 import DownloadIcon from "../icons/DownloadIcon";
-import { getTimestampStr } from "../../lib/helpers";
+import { createDownloadFileContent, getTimestampStr } from "../../lib/helpers";
 
 /**
  * Component for looking up and displaying the history of labware and samples
@@ -34,7 +33,7 @@ export default function History(props: HistoryProps) {
    */
   const historyFile = useMemo(() => {
     return new File(
-      [createHistoryFileContent(historyColumns, history)],
+      [createDownloadFileContent(historyColumns, history)],
       `${getTimestampStr()}_${historyProps.kind}_${historyProps.value}.tsv`,
       {
         type: "text/tsv",

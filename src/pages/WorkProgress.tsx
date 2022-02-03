@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FindWorkProgressQueryVariables,
   FindWorkProgressQueryVariables as WorkProgressQueryInput,
@@ -6,7 +6,11 @@ import {
 } from "../types/sdk";
 
 import AppShell from "../components/AppShell";
-import { safeParseQueryString } from "../lib/helpers";
+import {
+  createDownloadFileContent,
+  getTimestampStr,
+  safeParseQueryString,
+} from "../lib/helpers";
 import searchMachine from "../lib/machines/search/searchMachine";
 import { useMachine } from "@xstate/react";
 import Warning from "../components/notifications/Warning";
@@ -19,13 +23,14 @@ import DataTable from "../components/DataTable";
 import { ClientError } from "graphql-request";
 import { Cell, Column } from "react-table";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
-import { HistoryTableEntry, SearchResultsType } from "../types/stan";
+import { SearchResultsType } from "../types/stan";
 import { useLocation } from "react-router-dom";
 import WorkProgressInput, {
   workProgressSearchSchema,
   WorkProgressSearchType,
 } from "../components/workProgress/WorkProgressInput";
 import StyledLink from "../components/StyledLink";
+import DownloadIcon from "../components/icons/DownloadIcon";
 
 /**
  * Data structure to keep the data associated with this component
@@ -48,6 +53,7 @@ const defaultInitialValues: WorkProgressUrlParams = {
  * */
 const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   const location = useLocation();
+  const [downloadURL, setDownloadURL] = useState<string>();
 
   const workProgressMachine = searchMachine<
     FindWorkProgressQueryVariables,
@@ -58,6 +64,14 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
       findRequest: formatInputData(defaultInitialValues),
     })
   );
+
+  const {
+    serverError,
+    searchResult,
+  }: {
+    serverError?: ClientError | undefined | null;
+    searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
+  } = current.context;
 
   /**
    * The deserialized URL search params
@@ -80,6 +94,39 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   }, [location.search, workTypes]);
 
   /**
+   * Rebuild the file object whenever the history changes
+   */
+  const workProgressFile = useMemo(() => {
+    return new File(
+      [
+        createDownloadFileContent(
+          columns.filter((col) => typeof col.accessor === "string"),
+          searchResult ? searchResult.entries : []
+        ),
+      ],
+      `${getTimestampStr()}_${
+        memoUrlParams?.searchType
+      }_${memoUrlParams?.searchValues?.join("_")}.tsv`,
+      {
+        type: "text/tsv",
+      }
+    );
+  }, [searchResult, memoUrlParams?.searchType, memoUrlParams?.searchValues]);
+
+  /**
+   * Whenever the history file changes we need to rebuild the download URL
+   */
+  useEffect(() => {
+    const workProgressFileURL = URL.createObjectURL(workProgressFile);
+    setDownloadURL(workProgressFileURL);
+
+    /**
+     * Cleanup function that revokes the URL when it's no longer needed
+     */
+    return () => URL.revokeObjectURL(workProgressFileURL);
+  }, [workProgressFile, setDownloadURL]);
+
+  /**
    * When the URL search params change, send an event to the machine
    */
   React.useEffect(() => {
@@ -92,14 +139,6 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     }
     send({ type: "FIND", request: formatInputData(memoUrlParams) });
   }, [memoUrlParams, send]);
-
-  const {
-    serverError,
-    searchResult,
-  }: {
-    serverError?: ClientError | undefined | null;
-    searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
-  } = current.context;
 
   /**
    * Convert the data associated with the form to query input data structure.
@@ -158,22 +197,39 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
             </div>
             {current.matches("searched") ? (
               searchResult && searchResult.entries.length > 0 ? (
-                <DataTable
-                  sortable
-                  defaultSort={[
-                    //Sort by Status and within status sort with WorkNumber in descending order
-                    {
-                      id: "status",
-                      desc: false,
-                    },
-                    {
-                      id: "workNumber",
-                      desc: true,
-                    },
-                  ]}
-                  columns={columns}
-                  data={searchResult.entries}
-                />
+                <>
+                  <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
+                    <p className="text-sm text-gray-700">
+                      Records for {memoUrlParams?.searchType}
+                      {"-"}
+                      <span className="font-medium">
+                        {memoUrlParams?.searchValues?.join(",")}
+                      </span>
+                    </p>
+                    <a href={downloadURL} download={true}>
+                      <DownloadIcon
+                        name="Download"
+                        className="h-4 w-4 text-sdb"
+                      />
+                    </a>
+                  </div>
+                  <DataTable
+                    sortable
+                    defaultSort={[
+                      //Sort by Status and within status sort with WorkNumber in descending order
+                      {
+                        id: "status",
+                        desc: false,
+                      },
+                      {
+                        id: "workNumber",
+                        desc: true,
+                      },
+                    ]}
+                    columns={columns}
+                    data={searchResult.entries}
+                  />
+                </>
               ) : (
                 <Warning
                   message={
@@ -225,11 +281,27 @@ const getStatusSortType = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
   );
 };
 
+const formatDateFieldDisplay = (
+  props: Cell<WorkProgressResultTableEntry>,
+  propName: keyof WorkProgressResultTableEntry
+) => {
+  if (!Object.keys(props.row.original).find((key) => key === propName)) {
+    return <></>;
+  } else {
+    return (
+      <>
+        {props.row.original[propName] &&
+          props.row.original[propName] instanceof Date &&
+          (props.row.original[propName] as Date).toLocaleDateString()}
+      </>
+    );
+  }
+};
 const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: "SGP/R&D Number",
     accessor: "workNumber",
-    Cell: (props: Cell<HistoryTableEntry>) => {
+    Cell: (props: Cell<WorkProgressResultTableEntry>) => {
       const workNumber = props.row.original.workNumber;
       return (
         <StyledLink
@@ -272,9 +344,9 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
 
   {
     Header: "Last Sectioning Date",
-    accessor: (originalRow) =>
-      originalRow.lastSectionDate &&
-      originalRow.lastSectionDate.toLocaleDateString(),
+    accessor: "lastSectionDate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastSectionDate"),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastSectionDate,
@@ -284,9 +356,9 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   },
   {
     Header: "Last Staining Date",
-    accessor: (originalRow) =>
-      originalRow.lastStainingDate &&
-      originalRow.lastStainingDate.toLocaleDateString(),
+    accessor: "lastStainingDate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastStainingDate"),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastStainingDate,
@@ -296,9 +368,9 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   },
   {
     Header: "Last RNAscope/IHC staining Date",
-    accessor: (originalRow) =>
-      originalRow.lastRNAScopeIHCStainDate &&
-      originalRow.lastRNAScopeIHCStainDate.toLocaleDateString(),
+    accessor: "lastRNAScopeIHCStainDate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastRNAScopeIHCStainDate"),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastRNAScopeIHCStainDate,
@@ -308,9 +380,9 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   },
   {
     Header: "Last Imaging Date",
-    accessor: (originalRow) =>
-      originalRow.lastSlideImagedDate &&
-      originalRow.lastSlideImagedDate.toLocaleDateString(),
+    accessor: "lastSlideImagedDate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastSlideImagedDate"),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastSlideImagedDate,
@@ -320,9 +392,9 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   },
   {
     Header: "Last RNA Extraction Date",
-    accessor: (originalRow) =>
-      originalRow.lastRNAExtractionDate &&
-      originalRow.lastRNAExtractionDate.toLocaleDateString(),
+    accessor: "lastRNAExtractionDate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastRNAExtractionDate"),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastRNAExtractionDate,
@@ -332,9 +404,9 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   },
   {
     Header: "Last RNA Analysis Date",
-    accessor: (originalRow) =>
-      originalRow.lastRNAAnalysisDate &&
-      originalRow.lastRNAAnalysisDate.toLocaleDateString(),
+    accessor: "lastRNAAnalysisDate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastRNAAnalysisDate"),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastRNAAnalysisDate,
@@ -344,9 +416,9 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   },
   {
     Header: "Last Visium TO Staining Date",
-    accessor: (originalRow) =>
-      originalRow.lastStainTODate &&
-      originalRow.lastStainTODate.toLocaleDateString(),
+    accessor: "lastStainTODate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastStainTODate"),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastStainTODate,
@@ -356,9 +428,9 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   },
   {
     Header: "Last Visium LP Staining Date",
-    accessor: (originalRow) =>
-      originalRow.lastStainLPDate &&
-      originalRow.lastStainLPDate.toLocaleDateString(),
+    accessor: "lastStainLPDate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastStainLPDate"),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastStainLPDate,
@@ -368,8 +440,9 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   },
   {
     Header: "Last cDNA Transfer Date",
-    accessor: (originalRow) =>
-      originalRow.lastCDNADate && originalRow.lastCDNADate.toLocaleDateString(),
+    accessor: "lastCDNADate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastCDNADate"),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastCDNADate,
