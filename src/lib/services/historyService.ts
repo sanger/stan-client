@@ -5,7 +5,6 @@ import {
   LabwareFieldsFragment,
   SampleFieldsFragment,
 } from "../../types/sdk";
-import { Column } from "react-table";
 
 /**
  * Retrieves the history for the given History props.
@@ -76,40 +75,4 @@ export async function findHistory(
       details: entry.details,
     };
   });
-}
-
-/**
- * Creates the content for a history export file
- *
- * @param columns list of columns to build. Note that the columns must have their {@code Header}
- *        and {@code accessor} (as a string) set
- * @param entries the data to go into the file
- * @param delimiter (optional) the column delimiter
- */
-export function createHistoryFileContent(
-  columns: Array<Column<HistoryTableEntry>>,
-  entries: Array<HistoryTableEntry>,
-  delimiter?: string
-): string {
-  if (!delimiter) {
-    delimiter = "\t";
-  }
-  const columnNameRow = columns.map((column) => column.Header).join(delimiter);
-
-  const rows = entries
-    .map((entry) => {
-      return columns
-        .map((column) => {
-          if (typeof column.accessor === "string") {
-            return entry[column.accessor];
-          }
-          throw new Error(
-            "createHistoryFileContent requires all column accessors to be strings"
-          );
-        })
-        .join(delimiter);
-    })
-    .join("\n");
-
-  return `${columnNameRow}\n${rows}`;
 }
