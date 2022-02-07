@@ -214,7 +214,13 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                       href={downloadURL}
                       download={`${getTimestampStr()}_${
                         memoUrlParams?.searchType
-                      }_${memoUrlParams?.searchValues?.join("&")}.tsv`}
+                      }_${
+                        memoUrlParams?.searchValues &&
+                        memoUrlParams?.searchValues.length < 4
+                          ? memoUrlParams?.searchValues.join("&")
+                          : memoUrlParams?.searchValues?.slice(0, 3).join("&") +
+                            "&etc"
+                      }.tsv`}
                       onClick={handleDownload}
                     >
                       <DownloadIcon
