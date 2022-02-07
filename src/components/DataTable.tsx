@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useImperativeHandle } from "react";
 import {
   Column,
   PluginHook,
@@ -26,14 +26,15 @@ interface DataTableProps<T extends object> {
   defaultSort?: SortingRule<T>[];
 }
 
-function DataTable<T extends object>({
-  columns,
-  data,
-  defaultSort,
-  sortable = false,
-}: React.PropsWithChildren<DataTableProps<T>>): React.ReactElement<
-  DataTableProps<T>
-> {
+const DataTableComponent = <T extends Object>(
+  {
+    columns,
+    data,
+    defaultSort,
+    sortable = false,
+  }: React.PropsWithChildren<DataTableProps<T>>,
+  ref?: React.Ref<T[]>
+): React.ReactElement<DataTableProps<T>> => {
   /**
    * Memoize columns
    */
@@ -61,13 +62,7 @@ function DataTable<T extends object>({
    * The `useTable` hook from {@link https://react-table.tanstack.com/docs/overview React Table}
    * @see {@link https://react-table.tanstack.com/docs/api/useTable}
    */
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = useTable(
+  const instance = useTable(
     {
       columns: memoedColumns,
       data: memoedData,
@@ -75,6 +70,31 @@ function DataTable<T extends object>({
     },
     ...plugins
   );
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+  } = instance;
+
+  // intended to be called outside of table via ref
+  instance.download = () => {
+    // get row data after sorting
+    return rows.map((row) => {
+      prepareRow(row);
+      return row.cells.map((cell) => {
+        return cell.value instanceof Date
+          ? (cell.value as Date).toLocaleDateString()
+          : cell.value;
+      });
+    });
+  };
+
+  // to access table data in sorted order from outside
+  useImperativeHandle(ref, () => {
+    return instance.download();
+  });
 
   return (
     <Table {...getTableProps()}>
@@ -146,6 +166,13 @@ function DataTable<T extends object>({
       </TableBody>
     </Table>
   );
-}
+};
+// Cast the output
+
+const DataTable = React.forwardRef(DataTableComponent) as <T extends Object>(
+  p: React.PropsWithChildren<DataTableProps<T>> & {
+    ref?: React.Ref<T[]>;
+  }
+) => React.ReactElement<DataTableProps<T>>;
 
 export default DataTable;

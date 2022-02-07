@@ -253,13 +253,13 @@ export function getEnumKeyByEnumValue<T extends { [index: string]: string }>(
  *
  * @param columns list of columns to build. Note that the columns must have their {@code Header}
  *        and {@code accessor} (as a string) set
- * @param entries the data to go into the file
+ * @param entries the data to go into the file, or as a string array of values (assumes that it is in same order of columns)
  * @param delimiter (optional) the column delimiter
  */
-export type StringKeyedProps = { [key: string]: any };
+export type StringKeyedProps = { [key: string | number]: any };
 export function createDownloadFileContent<T extends StringKeyedProps>(
   columns: Array<Column<T>>,
-  entries: Array<T>,
+  entries: Array<T> | Array<Array<string>>,
   delimiter?: string
 ): string {
   if (!delimiter) {
@@ -268,27 +268,31 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
   const columnNameRow = columns.map((column) => column.Header).join(delimiter);
   const rows = entries
     .map((entry) => {
-      return columns
-        .map((column) => {
-          if (typeof column.accessor === "string") {
-            const value = entry[column.accessor];
-            if (
-              typeof value === "object" &&
-              (value as Object) instanceof Date
-            ) {
-              const date = value as Date;
-              return date.toLocaleDateString();
-            } else if (value === "number") {
-              return String(value);
-            } else {
-              return value;
+      if (Array.isArray(entry)) {
+        return entry.map((val) => val).join(delimiter);
+      } else {
+        return columns
+          .map((column) => {
+            if (typeof column.accessor === "string") {
+              const value = entry[column.accessor];
+              if (
+                typeof value === "object" &&
+                (value as Object) instanceof Date
+              ) {
+                const date = value as Date;
+                return date.toLocaleDateString();
+              } else if (value === "number") {
+                return String(value);
+              } else {
+                return value;
+              }
             }
-          }
-          throw new Error(
-            "createDownloadFileContent requires all column accessors to be strings"
-          );
-        })
-        .join(delimiter);
+            throw new Error(
+              "createDownloadFileContent requires all column accessors to be strings"
+            );
+          })
+          .join(delimiter);
+      }
     })
     .join("\n");
 

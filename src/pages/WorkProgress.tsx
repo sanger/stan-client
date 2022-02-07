@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FindWorkProgressQueryVariables,
   FindWorkProgressQueryVariables as WorkProgressQueryInput,
@@ -53,7 +53,9 @@ const defaultInitialValues: WorkProgressUrlParams = {
  * */
 const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   const location = useLocation();
-  const [downloadURL, setDownloadURL] = useState<string>();
+  const [downloadURL, setDownloadURL] = useState<string>(
+    URL.createObjectURL(new Blob())
+  );
 
   const workProgressMachine = searchMachine<
     FindWorkProgressQueryVariables,
@@ -73,6 +75,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
 
+  const sortedTableDataRef = React.useRef<WorkProgressResultTableEntry[]>([]);
   /**
    * The deserialized URL search params
    */
@@ -93,38 +96,35 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     } else return params;
   }, [location.search, workTypes]);
 
-  /**
-   * Rebuild the file object whenever the history changes
-   */
-  const workProgressFile = useMemo(() => {
-    return new File(
-      [
-        createDownloadFileContent(
-          columns.filter((col) => typeof col.accessor === "string"),
-          searchResult ? searchResult.entries : []
-        ),
-      ],
-      `${getTimestampStr()}_${
-        memoUrlParams?.searchType
-      }_${memoUrlParams?.searchValues?.join("_")}.tsv`,
-      {
-        type: "text/tsv",
-      }
-    );
-  }, [searchResult, memoUrlParams?.searchType, memoUrlParams?.searchValues]);
-
-  /**
-   * Whenever the history file changes we need to rebuild the download URL
-   */
   useEffect(() => {
-    const workProgressFileURL = URL.createObjectURL(workProgressFile);
-    setDownloadURL(workProgressFileURL);
-
     /**
      * Cleanup function that revokes the URL when it's no longer needed
      */
-    return () => URL.revokeObjectURL(workProgressFileURL);
-  }, [workProgressFile, setDownloadURL]);
+    return () => {
+      if (downloadURL) {
+        URL.revokeObjectURL(downloadURL);
+      }
+    };
+  }, [downloadURL]);
+
+  /**
+   * Rebuild the blob object on download action
+   */
+  const handleDownload = React.useCallback(() => {
+    let data = sortedTableDataRef.current
+      ? sortedTableDataRef.current
+      : searchResult
+      ? searchResult.entries
+      : [];
+    const blob = new Blob([
+      createDownloadFileContent(
+        columns.filter((col) => typeof col.accessor === "string"),
+        data
+      ),
+    ]);
+    const workProgressFileURL = URL.createObjectURL(blob);
+    setDownloadURL(workProgressFileURL);
+  }, [searchResult]);
 
   /**
    * When the URL search params change, send an event to the machine
@@ -201,12 +201,22 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                   <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
                     <p className="text-sm text-gray-700">
                       Records for {memoUrlParams?.searchType}
-                      {"-"}
                       <span className="font-medium">
-                        {memoUrlParams?.searchValues?.join(",")}
+                        {": "}
+                        {memoUrlParams?.searchValues &&
+                        memoUrlParams?.searchValues.length < 4
+                          ? memoUrlParams?.searchValues?.join(",")
+                          : memoUrlParams?.searchValues?.slice(0, 3).join(",") +
+                            ",..."}
                       </span>
                     </p>
-                    <a href={downloadURL} download={true}>
+                    <a
+                      href={downloadURL}
+                      download={`${getTimestampStr()}_${
+                        memoUrlParams?.searchType
+                      }_${memoUrlParams?.searchValues?.join("&")}.tsv`}
+                      onClick={handleDownload}
+                    >
                       <DownloadIcon
                         name="Download"
                         className="h-4 w-4 text-sdb"
@@ -228,6 +238,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                     ]}
                     columns={columns}
                     data={searchResult.entries}
+                    ref={sortedTableDataRef}
                   />
                 </>
               ) : (

@@ -32,14 +32,8 @@ export default function History(props: HistoryProps) {
    * Rebuild the file object whenever the history changes
    */
   const historyFile = useMemo(() => {
-    return new File(
-      [createDownloadFileContent(historyColumns, history)],
-      `${getTimestampStr()}_${historyProps.kind}_${historyProps.value}.tsv`,
-      {
-        type: "text/tsv",
-      }
-    );
-  }, [history, historyProps]);
+    return new Blob([createDownloadFileContent(historyColumns, history)]);
+  }, [history]);
 
   /**
    * Whenever the history file changes we need to rebuild the download URL
@@ -78,7 +72,12 @@ export default function History(props: HistoryProps) {
                 History for {historyDisplayValues[props.kind]}{" "}
                 <span className="font-medium">{props.value}</span>
               </p>
-              <a href={downloadURL} download={true}>
+              <a
+                href={downloadURL}
+                download={`${getTimestampStr()}_${historyProps.kind}_${
+                  historyProps.value
+                }.tsv`}
+              >
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
