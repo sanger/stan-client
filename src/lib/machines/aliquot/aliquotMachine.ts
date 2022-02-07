@@ -6,7 +6,7 @@ import { castDraft } from "immer";
 import { stanCore } from "../../sdk";
 
 export interface AliquotContext {
-  /**The barcode of the source labware.**/
+  /**The work number to associate with this aliquot operation**/
   workNumber?: string;
 
   /**The barcode of the source labware.**/

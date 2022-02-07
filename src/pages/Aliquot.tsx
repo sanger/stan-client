@@ -145,10 +145,7 @@ function Aliquot() {
           </div>
           <div className="space-y-4 mt-8">
             <Heading level={3}>Destination Tubes</Heading>
-            <p className="mt-2">
-              Enter the number of new tubes you want to aliquot a tube of
-              solution.
-            </p>
+            <p className="mt-2">Enter the number of tubes you are creating.</p>
             <Input
               type="number"
               value={numLabware}
@@ -170,7 +167,7 @@ function Aliquot() {
             >
               <Heading level={3}>New Labels</Heading>
               <Success message={"Aliquoting Complete"}>
-                Your source tubes have been marked as discarded.
+                Your source tube has been marked as discarded.
               </Success>
               <Table>
                 <TableHead>
@@ -237,7 +234,7 @@ function Aliquot() {
                 {" "}
                 number of destination tubes{" "}
               </span>{" "}
-              are entered, <p>click Aliquot to create destination labwares.</p>
+              are entered, <p>click Aliquot to create destination tubes.</p>
             </p>
 
             <p className="my-4 text-gray-800 text-xs leading-relaxed italic text-center">
