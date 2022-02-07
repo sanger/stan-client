@@ -238,7 +238,6 @@ export function useConfirmLeave(initialShouldConfirm = false) {
           "You have unsaved data. Are you sure you want to leave?");
       }
     };
-
     if (shouldConfirm) {
       window.addEventListener("beforeunload", beforeunloadListener);
     } else {

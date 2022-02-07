@@ -1,5 +1,5 @@
 import { Interpreter, State, StateNode } from "xstate";
-import { LocationFieldsFragment, Maybe } from "../../../types/sdk";
+import { LocationFieldsFragment, Maybe, StoreInput } from "../../../types/sdk";
 import { ClientError } from "graphql-request";
 import { LocationSearchParams } from "../../../types/stan";
 
@@ -62,6 +62,7 @@ export interface LocationSchema {
         storingBarcode: {};
         unstoringBarcode: {};
         emptyingLocation: {};
+        storing: {};
       };
     };
   };
@@ -151,6 +152,21 @@ type SetErrorMessageEvent = {
   message: string;
 };
 
+type StoreEvent = {
+  type: "STORE";
+  data: StoreInput[];
+};
+
+type StoreResolveEvent = {
+  type: "done.invoke.store";
+  data: LocationFieldsFragment;
+};
+
+type StoreErrorEvent = {
+  type: "error.platform.store";
+  data: ClientError;
+};
+
 export type LocationEvent =
   | FetchLocationEvent
   | FetchLocationResolveEvent
@@ -167,7 +183,10 @@ export type LocationEvent =
   | UpdateLocationEvent
   | SetSelectedAddressEvent
   | SetSuccessMessageEvent
-  | SetErrorMessageEvent;
+  | SetErrorMessageEvent
+  | StoreEvent
+  | StoreResolveEvent
+  | StoreErrorEvent;
 
 /**
  * The type of an interpreted Location Machine

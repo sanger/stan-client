@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import AppShell from "../components/AppShell";
 import LocationSearch from "../components/LocationSearch";
 import { RouteComponentProps } from "react-router";
-import { safeParseQueryString } from "../lib/helpers";
+import { safeParseQueryString, stringify } from "../lib/helpers";
 import { findLabwareLocation } from "../lib/services/locationService";
 import Warning from "../components/notifications/Warning";
 import MutedText from "../components/MutedText";
@@ -15,47 +15,116 @@ import BarcodeIcon from "../components/icons/BarcodeIcon";
 import { FindLocationByBarcodeQuery, Maybe } from "../types/sdk";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import { isLocationSearch, LocationSearchParams } from "../types/stan";
-import { history, StanCoreContext } from "../lib/sdk";
+import { StanCoreContext } from "../lib/sdk";
 import { ClientError } from "graphql-request";
-
+import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
+import * as H from "history";
+import { history } from "../lib/sdk";
+import PromptOnLeave from "../components/notifications/PromptOnLeave";
 /**
  * RouteComponentProps from react-router allows the props to be passed in
  */
 interface StoreProps extends RouteComponentProps {}
 
+export type LabwareAwaitingStorageInfo = {
+  barcode: string;
+  labwareType: string;
+};
+
+/**
+ *
+ * @param location - location to navigate
+ * @param action - action performed
+ * @param message - message to display
+ * Clear session storage for awaiting labwares if it is navigating to a page other than /location or /store
+ * Session storage will be used for following operations
+ * a) Go back and Go forward operation to a Location/Store page
+ * b) Going to a new location page by invoking a store location link or through a search
+ */
+export function awaitingStorageCheckOnExit(
+  location: H.Location,
+  action: H.Action,
+  message: string
+) {
+  /**PUSH is the action for  invoking/visiting a link or for pushing a new entry onto the history stack
+   * POP is the action send while you navigate using the browser's forward/back buttons.
+   * **/
+  if (
+    (action === "POP" &&
+      ["/locations", "/store"].some((path) =>
+        location.pathname.startsWith(path)
+      )) ||
+    (action === "PUSH" && location.pathname.startsWith("/locations"))
+  ) {
+    return true;
+  } else {
+    return message;
+  }
+}
+
+/**Get awaiting labware list from session storage**/
+export function getAwaitingLabwaresFromSession() {
+  const awaitingLabwareValue = sessionStorage.getItem("awaitingLabwares");
+  if (!awaitingLabwareValue || awaitingLabwareValue.length <= 0) return [];
+  const awaitingLabwareInfo = awaitingLabwareValue.split(",");
+  if (awaitingLabwareInfo.length % 2 !== 0) {
+    return [];
+  }
+  return awaitingLabwareInfo.reduce(
+    (previousValue: LabwareAwaitingStorageInfo[], currentValue, index) => {
+      if (index % 2 === 0) {
+        return [...previousValue, { barcode: currentValue, labwareType: "" }];
+      } else {
+        previousValue[previousValue.length - 1] = {
+          barcode: previousValue[previousValue.length - 1].barcode,
+          labwareType: currentValue,
+        };
+        return [...previousValue];
+      }
+    },
+    []
+  );
+}
+
 const Store: React.FC<StoreProps> = ({ location }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
+  const onLeave = React.useCallback(() => {
+    sessionStorage.removeItem("awaitingLabwares");
+  }, []);
+
   /**
    * Runs this hook if there's a `labwareBarcode` URL parameter
-   *
    * Looks up the location for the labware, and redirects to that page
    */
   useEffect(() => {
     async function invokeFindLabwareLocation(labwareBarcode: string) {
       const locationBarcode = await findLabwareLocation(labwareBarcode);
-
       if (locationBarcode) {
         // Redirect to the location if it's found
-        history.push(
-          `/locations/${locationBarcode}?labwareBarcode=${labwareBarcode}`
-        );
+        history.push({
+          pathname: `/locations/${locationBarcode}`,
+          search: stringify({
+            labwareBarcode: labwareBarcode,
+          }),
+        });
       } else {
         setErrorMessage(`${labwareBarcode} could not be found in storage`);
       }
     }
-
     if (location.search) {
       const locationSearchParams = safeParseQueryString<LocationSearchParams>({
         query: location.search,
         guard: isLocationSearch,
       });
-
       if (locationSearchParams) {
         invokeFindLabwareLocation(locationSearchParams.labwareBarcode.trim());
       }
     }
-  }, [location.search]);
+  }, [location.search, location.state]);
+
+  const awaitingLabwares = getAwaitingLabwaresFromSession();
 
   return (
     <AppShell>
@@ -91,8 +160,23 @@ const Store: React.FC<StoreProps> = ({ location }) => {
               )
             )}
           </div>
+          {awaitingLabwares && awaitingLabwares.length > 0 && (
+            <LabwareAwaitingStorage
+              labwares={awaitingLabwares}
+              storeEnabled={false}
+              onStoreLabwares={() => {}}
+            />
+          )}
         </div>
       </AppShell.Main>
+      <PromptOnLeave
+        when={awaitingLabwares.length > 0}
+        messageHandler={awaitingStorageCheckOnExit}
+        message={
+          "You have labwares that are not stored. Are you sure you want to leave?"
+        }
+        onPromptLeave={onLeave}
+      />
     </AppShell>
   );
 };
@@ -101,6 +185,7 @@ export default Store;
 
 interface LocationLinkProps {
   barcode: string;
+  awaitingLabwares?: LabwareAwaitingStorageInfo[];
 }
 
 const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
@@ -136,7 +221,12 @@ const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
   }
 
   return (
-    <Link key={location?.barcode} to={`/locations/${location?.barcode}`}>
+    <Link
+      key={location?.barcode}
+      to={{
+        pathname: `/locations/${location?.barcode}`,
+      }}
+    >
       <div className="border border-gray-200 p-4 flex bg-gray-50 hover:bg-gray-200 rounded">
         <div className="flex-shrink-0">
           <div className="flex items-center justify-center h-12 w-12 rounded-md bg-sdb-400 text-white">

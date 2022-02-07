@@ -79,7 +79,6 @@ type SearchProps = {
 
 function Search({ searchInfo, urlParamsString }: SearchProps) {
   const params: ParsedQuery = parseQueryString(urlParamsString);
-
   const findRequest: FindRequest = merge(
     {},
     emptyFindRequest,

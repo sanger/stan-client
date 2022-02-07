@@ -91,4 +91,99 @@ describe("Location", () => {
       });
     });
   });
+
+  describe("when awaiting labwares are in session storage", () => {
+    before(() => {
+      sessionStorage.setItem(
+        "awaitingLabwares",
+        "STAN-2111,tube,STAN-3111,Slide,STAN-4111,Slide,STAN-5111,Slide"
+      );
+      cy.visit("/locations/STO-024");
+    });
+    context("when location opened with awaiting labware", () => {
+      it("display the table with confirmed labware", () => {
+        cy.findByRole("table").contains("td", "STAN-2111");
+        cy.findByRole("table").contains("td", "STAN-3111");
+      });
+      it("store all button should be enabled", () => {
+        cy.findByRole("button", { name: /Store All/i }).should("be.enabled");
+      });
+    });
+
+    context("when storing all awaiting labware to location in one go", () => {
+      before(() => {
+        cy.findByRole("button", { name: /Store All/i }).click();
+      });
+      it("should display the labware in boxes", () => {
+        cy.findByText("STAN-2111").should("exist");
+        cy.findByText("STAN-3111").should("exist");
+        cy.findByRole("table").should("not.exist");
+      });
+    });
+    context("when storing one awaiting labware to location", () => {
+      before(() => {
+        sessionStorage.setItem(
+          "awaitingLabwares",
+          "STAN-2111,tube,STAN-3111,Slide,STAN-4111,Slide,STAN-5111,Slide"
+        );
+        cy.visit("/locations/STO-024");
+        cy.findByTestId("addIcon-STAN-3111").click();
+      });
+      it("should display the added labware in box", () => {
+        cy.findByText("STAN-3111").should("exist");
+      });
+      it("should only display the remaining labwarein table", () => {
+        cy.findByRole("table").contains("td", "STAN-2111");
+      });
+    });
+  });
+  describe("when performing browser operations", () => {
+    before(() => {
+      sessionStorage.setItem(
+        "awaitingLabwares",
+        "STAN-2111,tube,STAN-3111,Slide,STAN-4111,Slide,STAN-5111,Slide"
+      );
+      cy.visit("/locations/STO-002");
+      cy.findByText("Rack 1 in Freezer 1 in Room 1234").click();
+      cy.findByText("Box 1 in Rack 1 in Freezer 1 in Room 1234").click();
+      cy.findByTestId("addIcon-STAN-3111").click();
+    });
+
+    context("when back button is pressed in browser", () => {
+      before(() => {
+        cy.go("back");
+      });
+      it("should display the updated list of awaiting labwares", () => {
+        cy.findByText("STAN-2111").should("exist");
+        cy.findByText("STAN-4111").should("exist");
+        cy.findByText("STAN-3111").should("not.exist");
+      });
+    });
+
+    context("when refreshing the page", () => {
+      before(() => {
+        cy.reload();
+      });
+      it("should display the updated list of awaiting labwares", () => {
+        cy.findByText("STAN-2111").should("exist");
+        cy.findByText("STAN-4111").should("exist");
+        cy.findByText("STAN-3111").should("not.exist");
+      });
+    });
+    context("when navigationg to another page", () => {
+      before(() => {
+        cy.findByText("Home").click();
+      });
+      it("should display an alert", () => {
+        cy.on("window:alert", (str) => {
+          expect(str).to.equal(
+            "You have labwares that are not stored. Are you sure you want to leave?"
+          );
+        });
+      });
+    });
+    after(() => {
+      sessionStorage.removeItem("awaitingLabwares");
+    });
+  });
 });

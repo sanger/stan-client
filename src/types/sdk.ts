@@ -3327,6 +3327,20 @@ export type StainMutation = (
   ) }
 );
 
+export type StoreMutationVariables = Exact<{
+  store: Array<StoreInput> | StoreInput;
+  locationBarcode: Scalars['String'];
+}>;
+
+
+export type StoreMutation = (
+  { __typename?: 'Mutation' }
+  & { store: (
+    { __typename?: 'Location' }
+    & LocationFieldsFragment
+  ) }
+);
+
 export type StoreBarcodeMutationVariables = Exact<{
   barcode: Scalars['String'];
   locationBarcode: Scalars['String'];
@@ -4801,6 +4815,13 @@ export const StainDocument = gql`
   }
 }
     `;
+export const StoreDocument = gql`
+    mutation Store($store: [StoreInput!]!, $locationBarcode: String!) {
+  store(store: $store, locationBarcode: $locationBarcode) {
+    ...LocationFields
+  }
+}
+    ${LocationFieldsFragmentDoc}`;
 export const StoreBarcodeDocument = gql`
     mutation StoreBarcode($barcode: String!, $locationBarcode: String!, $address: Address) {
   storeBarcode(
@@ -5426,6 +5447,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     Stain(variables: StainMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StainMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<StainMutation>(StainDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Stain');
+    },
+    Store(variables: StoreMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StoreMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StoreMutation>(StoreDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Store');
     },
     StoreBarcode(variables: StoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StoreBarcodeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<StoreBarcodeMutation>(StoreBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'StoreBarcode');
