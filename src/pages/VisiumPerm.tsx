@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import AppShell from "../components/AppShell";
 import Heading from "../components/Heading";
 import WorkNumberSelect from "../components/WorkNumberSelect";
@@ -11,6 +11,7 @@ import { useMachine } from "@xstate/react";
 import createFormMachine from "../lib/machines/form/formMachine";
 import {
   ControlType,
+  LabwareFieldsFragment,
   RecordPermMutation,
   RecordPermRequest,
   SlotFieldsFragment,
@@ -24,7 +25,10 @@ import * as Yup from "yup";
 import { FormikErrorMessage } from "../components/forms";
 import Warning from "../components/notifications/Warning";
 import OperationCompleteModal from "../components/modal/OperationCompleteModal";
-import { isSlotFilled } from "../lib/helpers/slotHelper";
+import { isSlotEmpty, isSlotFilled } from "../lib/helpers/slotHelper";
+import columns from "../components/dataTable/labwareColumns";
+import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
+import PermDPositiveControl from "../components/forms/PermPositiveControl";
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().optional().label("SGP number"),
@@ -43,6 +47,7 @@ const validationSchema = Yup.object().shape({
           .optional()
           .oneOf(Object.values(ControlType))
           .label("Control type"),
+        controlBarcode: Yup.string().optional().label("Control barcode"),
       })
     ),
 });
@@ -113,11 +118,15 @@ export default function VisiumPerm() {
                       <LabwareScanner
                         onAdd={(labware) => {
                           setFieldValue("barcode", labware.barcode);
-                          labware.slots.filter(isSlotFilled).forEach((slot) =>
-                            push({
-                              address: slot.address,
-                              seconds: 1,
-                            })
+                          labware.slots.forEach((slot) =>
+                            push(
+                              isSlotFilled(slot)
+                                ? {
+                                    address: slot.address,
+                                    seconds: 1,
+                                  }
+                                : { address: slot.address }
+                            )
                           );
                         }}
                         onRemove={() => {
@@ -151,7 +160,7 @@ export default function VisiumPerm() {
         </div>
         <OperationCompleteModal
           show={current.matches("submitted")}
-          message={"Visium Permabilisation complete"}
+          message={"Visium Permeabilisation complete"}
           onReset={reload}
         >
           <p>
@@ -167,11 +176,10 @@ export default function VisiumPerm() {
 function VisiumPermForm() {
   const { labwares } = useLabwareContext();
   const { values } = useFormikContext<RecordPermRequest>();
-
+  const controlTubeRef = useRef<LabwareFieldsFragment | undefined>(undefined);
   if (values.permData.length === 0 || labwares.length === 0) {
     return null;
   }
-
   const addressToIndexMap: Map<string, number> = new Map(
     values.permData.map((pd, index) => [pd.address, index] as const)
   );
@@ -184,12 +192,33 @@ function VisiumPermForm() {
         type={"hidden"}
         value={labwares[0].barcode}
       />
+      <div className="flex flex-row" />
+      <Heading level={2}>Control Tube</Heading>
+      <p>Please scan in the tube you wish to assign as a control tube.</p>
+      <div className="flex flex-row" />
+      <LabwareScanner
+        onAdd={(labware) => {
+          controlTubeRef.current = labware;
+        }}
+        onRemove={() => {
+          controlTubeRef.current = undefined;
+        }}
+        limit={1}
+      >
+        <LabwareScanPanel columns={[columns.barcode()]} />
+      </LabwareScanner>
+      <div className="flex flex-row" />
       <div className="mt-10 flex flex-row items-center justify-around">
         <Labware
           labware={labwares[0]}
           slotBuilder={(slot: SlotFieldsFragment) => {
             if (addressToIndexMap.has(slot.address)) {
-              return (
+              return isSlotEmpty(slot) ? (
+                <PermDPositiveControl
+                  name={`permData.${addressToIndexMap.get(slot.address)}`}
+                  controlTube={controlTubeRef.current}
+                />
+              ) : (
                 <PermDataField
                   name={`permData.${addressToIndexMap.get(slot.address)}`}
                 />

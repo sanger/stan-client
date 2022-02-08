@@ -1313,6 +1313,8 @@ export type PermData = {
   seconds?: Maybe<Scalars['Int']>;
   /** The control type, if this is a control. */
   controlType?: Maybe<ControlType>;
+  /** The barcode of the labware being put into this slot as a control, if there is one. */
+  controlBarcode?: Maybe<Scalars['String']>;
 };
 
 /** A planned action in a planned operation; describes a sample moving from one slot to another. */
