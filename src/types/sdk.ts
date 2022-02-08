@@ -55,6 +55,20 @@ export type AddressPermData = {
   selected: Scalars['Boolean'];
 };
 
+/** A request to transfer material from one source labware into multiple new destination labware (first slot). */
+export type AliquotRequest = {
+  /** The name of the operation to record. */
+  operationType: Scalars['String'];
+  /** The barcode of the source labware. */
+  barcode: Scalars['String'];
+  /** The name of the labware type for the destination labware. */
+  labwareType: Scalars['String'];
+  /** The number of destination labware to create. */
+  numLabware: Scalars['Int'];
+  /** An optional work number to associate with this operation. */
+  workNumber?: Maybe<Scalars['String']>;
+};
+
 /** The state of a particular sample. As samples are created in new labware by different operations, it is associated with new bio states. */
 export type BioState = {
   __typename?: 'BioState';
@@ -673,6 +687,8 @@ export type Mutation = {
   recordOpWithSlotMeasurements: OperationResult;
   /** Record a stain operation with plex and bond information. */
   recordComplexStain: OperationResult;
+  /** Transfer samples from one labware into multiple labware. */
+  aliquot: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -1153,6 +1169,15 @@ export type MutationRecordOpWithSlotMeasurementsArgs = {
  */
 export type MutationRecordComplexStainArgs = {
   request: ComplexStainRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationAliquotArgs = {
+  request: AliquotRequest;
 };
 
 
@@ -2661,6 +2686,44 @@ export type AddWorkTypeMutation = (
   & { addWorkType: (
     { __typename?: 'WorkType' }
     & WorkTypeFieldsFragment
+  ) }
+);
+
+export type AliquotMutationVariables = Exact<{
+  request: AliquotRequest;
+}>;
+
+
+export type AliquotMutation = (
+  { __typename?: 'Mutation' }
+  & { aliquot: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), actions: Array<(
+        { __typename?: 'Action' }
+        & { sample: (
+          { __typename?: 'Sample' }
+          & Pick<Sample, 'id'>
+        ), source: (
+          { __typename?: 'Slot' }
+          & Pick<Slot, 'address' | 'labwareId'>
+          & { samples: Array<(
+            { __typename?: 'Sample' }
+            & Pick<Sample, 'id'>
+          )> }
+        ), destination: (
+          { __typename?: 'Slot' }
+          & Pick<Slot, 'address' | 'labwareId'>
+        ) }
+      )> }
+    )> }
   ) }
 );
 
@@ -4363,6 +4426,36 @@ export const AddWorkTypeDocument = gql`
   }
 }
     ${WorkTypeFieldsFragmentDoc}`;
+export const AliquotDocument = gql`
+    mutation Aliquot($request: AliquotRequest!) {
+  aliquot(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      actions {
+        sample {
+          id
+        }
+        source {
+          address
+          labwareId
+          samples {
+            id
+          }
+        }
+        destination {
+          address
+          labwareId
+        }
+      }
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const ConfirmDocument = gql`
     mutation Confirm($request: ConfirmOperationRequest!) {
   confirmOperation(request: $request) {
@@ -5246,6 +5339,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     AddWorkType(variables: AddWorkTypeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddWorkTypeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddWorkTypeMutation>(AddWorkTypeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddWorkType');
+    },
+    Aliquot(variables: AliquotMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AliquotMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AliquotMutation>(AliquotDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Aliquot');
     },
     Confirm(variables: ConfirmMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<ConfirmMutation>(ConfirmDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Confirm');
