@@ -18,6 +18,7 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
   LabwareTypeName.VISIUM_TO,
   LabwareTypeName.VISIUM_LP,
   LabwareTypeName.VISIUM_ADH,
+  LabwareTypeName.FOUR_SLOT_SLIDE,
 ];
 
 type SectioningParams = {

@@ -115,6 +115,10 @@ export const visiumADHFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.VISIUM_ADH].build(),
 });
 
+export const fourSlotSlideFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.FOUR_SLOT_SLIDE].build(),
+});
+
 export const labwareFactories: Record<
   LabwareTypeName,
   Factory<NewLabwareLayout>
@@ -127,4 +131,5 @@ export const labwareFactories: Record<
   [LabwareTypeName.PLATE]: plateFactory,
   [LabwareTypeName.CASSETTE]: cassetteFactory,
   [LabwareTypeName.VISIUM_ADH]: visiumADHFactory,
+  [LabwareTypeName.FOUR_SLOT_SLIDE]: fourSlotSlideFactory,
 };

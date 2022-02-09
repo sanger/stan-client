@@ -25,6 +25,7 @@ const availableSlides: Array<LabwareTypeName> = [
   LabwareTypeName.SLIDE,
   LabwareTypeName.VISIUM_LP,
   LabwareTypeName.VISIUM_TO,
+  LabwareTypeName.FOUR_SLOT_SLIDE,
 ];
 
 type SlideRegistrationFormSection = {
