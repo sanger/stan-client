@@ -281,7 +281,7 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
               ) {
                 const date = value as Date;
                 return date.toLocaleDateString();
-              } else if (value === "number") {
+              } else if (typeof value === "number") {
                 return String(value);
               } else {
                 return value;
