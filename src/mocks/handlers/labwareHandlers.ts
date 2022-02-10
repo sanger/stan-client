@@ -48,9 +48,6 @@ const labwareHandlers = [
       }
 
       const labware = createLabware(barcode);
-      labware.slots[0].samples = [];
-      labware.slots[1].samples = [];
-      labware.slots[5].samples = [];
       const payload: FindLabwareQuery = {
         labware: buildLabwareFragment(labware),
       };

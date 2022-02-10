@@ -88,7 +88,11 @@ export default function PermPositiveControl<T>({
         <Label name={"Control Tube:"} />
         <Field name={formikName(name, "controlBarcode")}>
           {({ field }: any) => (
-            <Label name={""} className="font-bold text-blue-500">
+            <Label
+              data-testid={`${name}.label`}
+              name={""}
+              className="font-bold text-blue-500"
+            >
               {field.value ?? ""}
             </Label>
           )}

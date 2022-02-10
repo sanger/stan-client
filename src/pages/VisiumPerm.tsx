@@ -25,7 +25,11 @@ import * as Yup from "yup";
 import { FormikErrorMessage } from "../components/forms";
 import Warning from "../components/notifications/Warning";
 import OperationCompleteModal from "../components/modal/OperationCompleteModal";
-import { isSlotEmpty, isSlotFilled } from "../lib/helpers/slotHelper";
+import {
+  emptySlots,
+  isSlotEmpty,
+  isSlotFilled,
+} from "../lib/helpers/slotHelper";
 import columns from "../components/dataTable/labwareColumns";
 import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
 import PermPositiveControl from "../components/forms/PermPositiveControl";
@@ -88,7 +92,7 @@ export default function VisiumPerm() {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Visium Permabilisation</AppShell.Title>
+        <AppShell.Title>Visium Permeabilisation</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
@@ -222,30 +226,35 @@ function VisiumPermForm() {
   };
 
   return (
-    <>
+    <div data-testid={"controltubeDiv"} className={"space-y-2"}>
       <FormikInput
         label={""}
         name={"barcode"}
         type={"hidden"}
         value={labwares[0].barcode}
       />
-      <div className="flex flex-row" />
-      <Heading level={2}>Control Tube</Heading>
-      <p>Please scan in the tube you wish to assign as a control tube.</p>
-      <div className="flex flex-row" />
-      <LabwareScanner
-        onAdd={(labware) => {
-          setControlTube(labware);
-        }}
-        onRemove={() => {
-          setControlTube(undefined);
-        }}
-        limit={1}
-      >
-        <LabwareScanPanel columns={[columns.barcode()]} />
-      </LabwareScanner>
-      <div className="flex flex-row" />
-      <div className="mt-10 flex flex-row items-center justify-around">
+      {labwares[0] && emptySlots(labwares[0].slots).length !== 0 && (
+        <>
+          <div className="flex flex-row" />
+          <Heading level={2}>Control Tube</Heading>
+          <p>Please scan in the tube you wish to assign as a control tube.</p>
+          <div className="flex flex-row" />
+          <LabwareScanner
+            onAdd={(labware) => {
+              setControlTube(labware);
+            }}
+            onRemove={() => {
+              setControlTube(undefined);
+            }}
+            limit={1}
+          >
+            <LabwareScanPanel columns={[columns.barcode()]} />
+          </LabwareScanner>
+          <div className="flex flex-row" />
+        </>
+      )}
+
+      <div className="flex flex-row items-center justify-around">
         <Labware
           labware={labwares[0]}
           slotBuilder={(slot: SlotFieldsFragment) => {
@@ -267,6 +276,6 @@ function VisiumPermForm() {
           }}
         />
       </div>
-    </>
+    </div>
   );
 }
