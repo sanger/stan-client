@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import AppShell from "../components/AppShell";
 import Heading from "../components/Heading";
 import WorkNumberSelect from "../components/WorkNumberSelect";
@@ -28,7 +28,7 @@ import OperationCompleteModal from "../components/modal/OperationCompleteModal";
 import { isSlotEmpty, isSlotFilled } from "../lib/helpers/slotHelper";
 import columns from "../components/dataTable/labwareColumns";
 import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
-import PermDPositiveControl from "../components/forms/PermPositiveControl";
+import PermPositiveControl from "../components/forms/PermPositiveControl";
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().optional().label("SGP number"),
@@ -67,15 +67,22 @@ export default function VisiumPerm() {
   const { serverError } = current.context;
 
   const onSubmit = async (values: RecordPermRequest) => {
-    values.permData = values.permData.map((pm) => {
-      if (pm.seconds) {
-        // Form actually displays time as minutes, so we need to convert to seconds.
-        return Object.assign({}, pm, { seconds: pm.seconds * 60 });
-      } else {
-        return pm;
-      }
+    const submitPermData = [...values.permData]
+      .map((pm) => {
+        if (pm.seconds) {
+          // Form actually displays time as minutes, so we need to convert to seconds.
+          return Object.assign({}, pm, { seconds: pm.seconds * 60 });
+        } else {
+          return pm;
+        }
+      })
+      .filter((pm) => pm.seconds || pm.controlType);
+    //Clone data so as to not alter the form data
+    const submitValues = { ...values, permData: submitPermData };
+    send({
+      type: "SUBMIT_FORM",
+      values: submitValues,
     });
-    send({ type: "SUBMIT_FORM", values });
   };
 
   return (
@@ -175,14 +182,44 @@ export default function VisiumPerm() {
 
 function VisiumPermForm() {
   const { labwares } = useLabwareContext();
-  const { values } = useFormikContext<RecordPermRequest>();
-  const controlTubeRef = useRef<LabwareFieldsFragment | undefined>(undefined);
+  const { values, setFieldValue } = useFormikContext<RecordPermRequest>();
+  const [controlTube, setControlTube] = useState<
+    LabwareFieldsFragment | undefined
+  >(undefined);
+
+  /**
+   * Initialize the control tube when there is no labware scanned (Removing a labware)
+   */
+  React.useEffect(() => {
+    if (labwares.length === 0) {
+      setControlTube(undefined);
+    }
+  }, [labwares, setControlTube]);
+
   if (values.permData.length === 0 || labwares.length === 0) {
     return null;
   }
+
   const addressToIndexMap: Map<string, number> = new Map(
     values.permData.map((pd, index) => [pd.address, index] as const)
   );
+
+  const onPositiveControlSelection = (name: string) => {
+    /**Remove permData from  all other empty slots **/
+    values.permData.forEach((permData, indx) => {
+      if (
+        indx !== Number(name) &&
+        permData.controlType === ControlType.Positive &&
+        permData.controlBarcode !== undefined
+      ) {
+        setFieldValue(`permData.${indx}`, {
+          address: permData.address,
+          controlType: undefined,
+          controlBarcode: undefined,
+        });
+      }
+    });
+  };
 
   return (
     <>
@@ -198,10 +235,10 @@ function VisiumPermForm() {
       <div className="flex flex-row" />
       <LabwareScanner
         onAdd={(labware) => {
-          controlTubeRef.current = labware;
+          setControlTube(labware);
         }}
         onRemove={() => {
-          controlTubeRef.current = undefined;
+          setControlTube(undefined);
         }}
         limit={1}
       >
@@ -214,9 +251,10 @@ function VisiumPermForm() {
           slotBuilder={(slot: SlotFieldsFragment) => {
             if (addressToIndexMap.has(slot.address)) {
               return isSlotEmpty(slot) ? (
-                <PermDPositiveControl
+                <PermPositiveControl
                   name={`permData.${addressToIndexMap.get(slot.address)}`}
-                  controlTube={controlTubeRef.current}
+                  controlTube={controlTube}
+                  onPositiveControlSelection={onPositiveControlSelection}
                 />
               ) : (
                 <PermDataField

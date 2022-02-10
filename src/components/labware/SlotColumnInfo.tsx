@@ -19,11 +19,12 @@ const SlotColumnInfo = ({
   return (
     <div className={gridClasses}>
       {slotColumn.map((slot) => (
-        <div
-          key={slot.address}
-          className={`flex flex-col ${alignRight && "items-end"}`}
-        >
-          <div className={"flex font-medium"}>{slot.address}</div>
+        <div key={slot.address}>
+          <div
+            className={`flex flex-col ${alignRight && "items-end"} font-medium`}
+          >
+            {slot.address}
+          </div>
           <div className={"flex"}>{slotBuilder(slot)}</div>
         </div>
       ))}
