@@ -71,7 +71,7 @@ describe("Visium Perm", () => {
           cy.findAllByRole("button").click();
         });
       });
-      it("removes the control tube assigned from all slots", () => {
+      it("removes the control tube assigned", () => {
         cy.findAllByText("STAN-3111").should("not.exist");
       });
     });
