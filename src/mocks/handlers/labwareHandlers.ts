@@ -48,7 +48,6 @@ const labwareHandlers = [
       }
 
       const labware = createLabware(barcode);
-
       const payload: FindLabwareQuery = {
         labware: buildLabwareFragment(labware),
       };

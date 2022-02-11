@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import AppShell from "../components/AppShell";
 import Heading from "../components/Heading";
 import WorkNumberSelect from "../components/WorkNumberSelect";
@@ -11,6 +11,7 @@ import { useMachine } from "@xstate/react";
 import createFormMachine from "../lib/machines/form/formMachine";
 import {
   ControlType,
+  LabwareFieldsFragment,
   RecordPermMutation,
   RecordPermRequest,
   SlotFieldsFragment,
@@ -24,7 +25,14 @@ import * as Yup from "yup";
 import { FormikErrorMessage } from "../components/forms";
 import Warning from "../components/notifications/Warning";
 import OperationCompleteModal from "../components/modal/OperationCompleteModal";
-import { isSlotFilled } from "../lib/helpers/slotHelper";
+import {
+  emptySlots,
+  isSlotEmpty,
+  isSlotFilled,
+} from "../lib/helpers/slotHelper";
+import columns from "../components/dataTable/labwareColumns";
+import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
+import PermPositiveControl from "../components/forms/PermPositiveControl";
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().optional().label("SGP number"),
@@ -43,6 +51,7 @@ const validationSchema = Yup.object().shape({
           .optional()
           .oneOf(Object.values(ControlType))
           .label("Control type"),
+        controlBarcode: Yup.string().optional().label("Control barcode"),
       })
     ),
 });
@@ -62,21 +71,28 @@ export default function VisiumPerm() {
   const { serverError } = current.context;
 
   const onSubmit = async (values: RecordPermRequest) => {
-    values.permData = values.permData.map((pm) => {
-      if (pm.seconds) {
-        // Form actually displays time as minutes, so we need to convert to seconds.
-        return Object.assign({}, pm, { seconds: pm.seconds * 60 });
-      } else {
-        return pm;
-      }
+    const submitPermData = [...values.permData]
+      .map((pm) => {
+        if (pm.seconds) {
+          // Form actually displays time as minutes, so we need to convert to seconds.
+          return Object.assign({}, pm, { seconds: pm.seconds * 60 });
+        } else {
+          return pm;
+        }
+      })
+      .filter((pm) => pm.seconds || pm.controlType);
+    //Clone data so as to not alter the form data
+    const submitValues = { ...values, permData: submitPermData };
+    send({
+      type: "SUBMIT_FORM",
+      values: submitValues,
     });
-    send({ type: "SUBMIT_FORM", values });
   };
 
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Visium Permabilisation</AppShell.Title>
+        <AppShell.Title>Visium Permeabilisation</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
@@ -113,11 +129,15 @@ export default function VisiumPerm() {
                       <LabwareScanner
                         onAdd={(labware) => {
                           setFieldValue("barcode", labware.barcode);
-                          labware.slots.filter(isSlotFilled).forEach((slot) =>
-                            push({
-                              address: slot.address,
-                              seconds: 1,
-                            })
+                          labware.slots.forEach((slot) =>
+                            push(
+                              isSlotFilled(slot)
+                                ? {
+                                    address: slot.address,
+                                    seconds: 1,
+                                  }
+                                : { address: slot.address }
+                            )
                           );
                         }}
                         onRemove={() => {
@@ -151,7 +171,7 @@ export default function VisiumPerm() {
         </div>
         <OperationCompleteModal
           show={current.matches("submitted")}
-          message={"Visium Permabilisation complete"}
+          message={"Visium Permeabilisation complete"}
           onReset={reload}
         >
           <p>
@@ -166,7 +186,19 @@ export default function VisiumPerm() {
 
 function VisiumPermForm() {
   const { labwares } = useLabwareContext();
-  const { values } = useFormikContext<RecordPermRequest>();
+  const { values, setFieldValue } = useFormikContext<RecordPermRequest>();
+  const [controlTube, setControlTube] = useState<
+    LabwareFieldsFragment | undefined
+  >(undefined);
+
+  /**
+   * Initialize the control tube when there is no labware scanned (Removing a labware)
+   */
+  React.useEffect(() => {
+    if (labwares.length === 0) {
+      setControlTube(undefined);
+    }
+  }, [labwares, setControlTube]);
 
   if (values.permData.length === 0 || labwares.length === 0) {
     return null;
@@ -176,20 +208,64 @@ function VisiumPermForm() {
     values.permData.map((pd, index) => [pd.address, index] as const)
   );
 
+  const onPositiveControlSelection = (name: string) => {
+    /**Remove permData from  all other empty slots **/
+    values.permData.forEach((permData, indx) => {
+      if (
+        indx !== Number(name) &&
+        permData.controlType === ControlType.Positive &&
+        permData.controlBarcode !== undefined
+      ) {
+        setFieldValue(`permData.${indx}`, {
+          address: permData.address,
+          controlType: undefined,
+          controlBarcode: undefined,
+        });
+      }
+    });
+  };
+
   return (
-    <>
+    <div data-testid={"controltubeDiv"} className={"space-y-2"}>
       <FormikInput
         label={""}
         name={"barcode"}
         type={"hidden"}
         value={labwares[0].barcode}
       />
-      <div className="mt-10 flex flex-row items-center justify-around">
+      {labwares[0] && emptySlots(labwares[0].slots).length !== 0 && (
+        <>
+          <div className="flex flex-row" />
+          <Heading level={2}>Control Tube</Heading>
+          <p>Please scan in the tube you wish to assign as a control tube.</p>
+          <div className="flex flex-row" />
+          <LabwareScanner
+            onAdd={(labware) => {
+              setControlTube(labware);
+            }}
+            onRemove={() => {
+              setControlTube(undefined);
+            }}
+            limit={1}
+          >
+            <LabwareScanPanel columns={[columns.barcode()]} />
+          </LabwareScanner>
+          <div className="flex flex-row" />
+        </>
+      )}
+
+      <div className="flex flex-row items-center justify-around">
         <Labware
           labware={labwares[0]}
           slotBuilder={(slot: SlotFieldsFragment) => {
             if (addressToIndexMap.has(slot.address)) {
-              return (
+              return isSlotEmpty(slot) ? (
+                <PermPositiveControl
+                  name={`permData.${addressToIndexMap.get(slot.address)}`}
+                  controlTube={controlTube}
+                  onPositiveControlSelection={onPositiveControlSelection}
+                />
+              ) : (
                 <PermDataField
                   name={`permData.${addressToIndexMap.get(slot.address)}`}
                 />
@@ -200,6 +276,6 @@ function VisiumPermForm() {
           }}
         />
       </div>
-    </>
+    </div>
   );
 }
