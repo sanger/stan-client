@@ -9,9 +9,8 @@ import Warning from "../notifications/Warning";
 import WhiteButton from "../buttons/WhiteButton";
 import LoadingSpinner from "../icons/LoadingSpinner";
 import { LabwareStatePill } from "../LabwareStatePill";
-import { createHistoryFileContent } from "../../lib/services/historyService";
 import DownloadIcon from "../icons/DownloadIcon";
-import { getTimestampStr } from "../../lib/helpers";
+import { createDownloadFileContent, getTimestampStr } from "../../lib/helpers";
 
 /**
  * Component for looking up and displaying the history of labware and samples
@@ -33,14 +32,8 @@ export default function History(props: HistoryProps) {
    * Rebuild the file object whenever the history changes
    */
   const historyFile = useMemo(() => {
-    return new File(
-      [createHistoryFileContent(historyColumns, history)],
-      `${getTimestampStr()}_${historyProps.kind}_${historyProps.value}.tsv`,
-      {
-        type: "text/tsv",
-      }
-    );
-  }, [history, historyProps]);
+    return new Blob([createDownloadFileContent(historyColumns, history)]);
+  }, [history]);
 
   /**
    * Whenever the history file changes we need to rebuild the download URL
@@ -79,7 +72,12 @@ export default function History(props: HistoryProps) {
                 History for {historyDisplayValues[props.kind]}{" "}
                 <span className="font-medium">{props.value}</span>
               </p>
-              <a href={downloadURL} download={true}>
+              <a
+                href={downloadURL}
+                download={`${getTimestampStr()}_${historyProps.kind}_${
+                  historyProps.value
+                }.tsv`}
+              >
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
