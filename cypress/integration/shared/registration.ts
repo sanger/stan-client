@@ -46,8 +46,8 @@ export function shouldBehaveLikeARegistrationForm() {
       cy.findByText("Species is a required field").should("be.visible");
     });
 
-    it("has HMDMC initially disabled", () => {
-      cy.findByLabelText("HMDMC").should("be.disabled");
+    it("has HuMFre initially disabled", () => {
+      cy.findByLabelText("HuMFre").should("be.disabled");
     });
 
     context("when selecting a non-Human Species", () => {
@@ -55,8 +55,8 @@ export function shouldBehaveLikeARegistrationForm() {
         cy.findByLabelText("Species").select("Pig");
       });
 
-      it("keeps HMDMC disabled", () => {
-        cy.findByLabelText("HMDMC").should("be.disabled");
+      it("keeps HuMFre disabled", () => {
+        cy.findByLabelText("HuMFre").should("be.disabled");
       });
     });
 
@@ -65,13 +65,13 @@ export function shouldBehaveLikeARegistrationForm() {
         cy.findByLabelText("Species").select("Human");
       });
 
-      it("enables the HMDMC field", () => {
-        cy.findByLabelText("HMDMC").should("not.be.disabled");
+      it("enables the HuMFre field", () => {
+        cy.findByLabelText("HuMFre").should("not.be.disabled");
       });
 
-      it("requires HMDMC to be set", () => {
-        cy.findByLabelText("HMDMC").focus().blur();
-        cy.findByText("HMDMC is a required field").should("be.visible");
+      it("requires HuMFre to be set", () => {
+        cy.findByLabelText("HuMFre").focus().blur();
+        cy.findByText("HuMFre is a required field").should("be.visible");
       });
     });
 

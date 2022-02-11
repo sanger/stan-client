@@ -59,7 +59,7 @@ export default class RegistrationValidation {
       then: Yup.string()
         .oneOf(this.registrationInfo.hmdmcs.map((h) => h.hmdmc))
         .required()
-        .label("HMDMC"),
+        .label("HuMFre"),
       otherwise: Yup.string().length(0),
     });
   }
