@@ -82,7 +82,7 @@ export default function VisiumAnalysis() {
 
                     <p>
                       Please scan in the slide you wish to select the best
-                      permabilisation time for.
+                      permeabilisation time for.
                     </p>
 
                     <div className="mt-4 md:w-1/2">
