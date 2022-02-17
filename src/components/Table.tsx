@@ -1,4 +1,7 @@
 import React from "react";
+import IconButton from "./buttons/IconButton";
+import DownArrowIcon from "./icons/DownArrowIcon";
+import UpArrowIcon from "./icons/UpArrowIcon";
 
 interface TableProps
   extends React.DetailedHTMLProps<
@@ -6,6 +9,17 @@ interface TableProps
     HTMLTableElement
   > {}
 
+export type SortProps = {
+  sortable: boolean;
+  sortField: string;
+  ascending: boolean | undefined;
+  sortHandler: (sortField: string) => void;
+};
+
+interface TableHeaderProps {
+  sortProps?: SortProps;
+  children?: React.ReactNode;
+}
 /**
  * @example
  * <Table>
@@ -46,13 +60,43 @@ export const TableHead: React.FC = ({ children }) => {
   return <thead>{children}</thead>;
 };
 
-export const TableHeader: React.FC = ({ children, ...rest }) => {
+export const TableHeader: React.FC<TableHeaderProps> = ({
+  children,
+  sortProps,
+  ...rest
+}) => {
   return (
-    <th
-      className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider select-none"
-      {...rest}
-    >
-      {children}
+    <th className="px-6 py-3 bg-gray-50 text-left select-none" {...rest}>
+      <>
+        {
+          <IconButton
+            type="button"
+            onClick={() => {
+              sortProps && sortProps.sortHandler(sortProps.sortField);
+            }}
+          >
+            {
+              <span
+                className={
+                  "bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 tracking-wider uppercase"
+                }
+              >
+                {children}
+              </span>
+            }
+            {sortProps &&
+              (sortProps.ascending !== undefined ? (
+                sortProps.ascending ? (
+                  <UpArrowIcon />
+                ) : (
+                  <DownArrowIcon />
+                )
+              ) : (
+                <></>
+              ))}
+          </IconButton>
+        }
+      </>
     </th>
   );
 };

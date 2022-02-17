@@ -10,6 +10,12 @@ import {
 import Table, { TableBody, TableCell, TableHead, TableHeader } from "./Table";
 import { motion } from "framer-motion";
 
+type CellAttributes = {
+  cellAttrs: React.TdHTMLAttributes<HTMLTableDataCellElement>;
+  colIndex: number;
+  rowIndex: number;
+};
+
 interface DataTableProps<T extends object> {
   columns: Column<T>[];
   data: T[];
@@ -24,6 +30,14 @@ interface DataTableProps<T extends object> {
    * @example { id: "donorName" }
    */
   defaultSort?: SortingRule<T>[];
+
+  /**
+   * Allows user to customise the column(td) display properties
+   * Key will be the column index and  value will be the display properties
+   * @example  {[1: {colSpan:2,align:"left"}]}
+   *
+   */
+  cellProps?: CellAttributes[];
 }
 
 const DataTableComponent = <T extends Object>(
@@ -32,6 +46,7 @@ const DataTableComponent = <T extends Object>(
     data,
     defaultSort,
     sortable = false,
+    cellProps,
   }: React.PropsWithChildren<DataTableProps<T>>,
   ref?: React.Ref<T[]>
 ): React.ReactElement<DataTableProps<T>> => {
@@ -96,6 +111,22 @@ const DataTableComponent = <T extends Object>(
     return instance.download();
   });
 
+  const getColumnSpanValue = (
+    rowIndex: number,
+    colIndex: number,
+    cellProps: CellAttributes[] | undefined
+  ): number => {
+    if (!cellProps) return 1;
+    const props = cellProps?.find(
+      (prop) => prop.colIndex === colIndex && prop.rowIndex === rowIndex
+    );
+    if (props && "colSpan" in props.cellAttrs) {
+      return props.cellAttrs["colSpan"] ?? 1;
+    } else {
+      return 1;
+    }
+  };
+
   return (
     <Table {...getTableProps()}>
       <TableHead>
@@ -145,7 +176,7 @@ const DataTableComponent = <T extends Object>(
         ))}
       </TableHead>
       <TableBody {...getTableBodyProps()}>
-        {rows.map((row) => {
+        {rows.map((row, rowindx) => {
           prepareRow(row);
           return (
             <motion.tr
@@ -153,9 +184,12 @@ const DataTableComponent = <T extends Object>(
               animate={{ x: 0, opacity: 1 }}
               {...row.getRowProps()}
             >
-              {row.cells.map((cell) => {
+              {row.cells.map((cell, colindex) => {
                 return (
-                  <TableCell {...cell.getCellProps()}>
+                  <TableCell
+                    colSpan={getColumnSpanValue(rowindx, colindex, cellProps)}
+                    {...cell.getCellProps()}
+                  >
                     {cell.render("Cell")}
                   </TableCell>
                 );
@@ -167,8 +201,8 @@ const DataTableComponent = <T extends Object>(
     </Table>
   );
 };
-// Cast the output
 
+// Cast the output
 const DataTable = React.forwardRef(DataTableComponent) as <T extends Object>(
   p: React.PropsWithChildren<DataTableProps<T>> & {
     ref?: React.Ref<T[]>;

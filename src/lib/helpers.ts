@@ -257,6 +257,7 @@ export function getEnumKeyByEnumValue<T extends { [index: string]: string }>(
  * @param delimiter (optional) the column delimiter
  */
 export type StringKeyedProps = { [key: string | number]: any };
+
 export function createDownloadFileContent<T extends StringKeyedProps>(
   columns: Array<Column<T>>,
   entries: Array<T> | Array<Array<string>>,
@@ -297,4 +298,38 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
     .join("\n");
 
   return `${columnNameRow}\n${rows}`;
+}
+
+export function alphaNumericSort(
+  a: string,
+  b: string,
+  regExp: { alpha: RegExp; numeric: RegExp }
+): number {
+  debugger;
+  const aAlpha = a.replace(regExp.alpha, "");
+  const bAlpha = b.replace(regExp.alpha, "");
+  if (aAlpha === bAlpha) {
+    const aNumeric = parseInt(a.replace(regExp.numeric, ""), 10);
+    const bNumeric = parseInt(b.replace(regExp.numeric, ""), 10);
+    return aNumeric === bNumeric ? 0 : aNumeric > bNumeric ? 1 : -1;
+  } else {
+    return aAlpha > bAlpha ? 1 : -1;
+  }
+}
+
+export function getContainedObjectWithField(
+  field: string,
+  obj: StringKeyedProps
+): Object | undefined {
+  if (Object.keys(obj).includes(field)) return obj;
+  let ret = undefined;
+  for (let property in obj) {
+    if (obj.hasOwnProperty(property) && typeof obj[property] === "object") {
+      ret = getContainedObjectWithField(field, obj[property]);
+      if (ret) {
+        break;
+      }
+    }
+  }
+  return ret;
 }

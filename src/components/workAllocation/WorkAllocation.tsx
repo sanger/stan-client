@@ -10,15 +10,17 @@ import createWorkAllocationMachine, {
 import { useMachine } from "@xstate/react";
 import { optionValues } from "../forms";
 import LoadingSpinner from "../icons/LoadingSpinner";
-import Table, { TableBody, TableHead, TableHeader } from "../Table";
+import Table, { SortProps, TableBody, TableHead, TableHeader } from "../Table";
 import Success from "../notifications/Success";
 import Warning from "../notifications/Warning";
 import * as Yup from "yup";
 import WorkRow from "./WorkRow";
-import { WorkStatus } from "../../types/sdk";
+import { WorkStatus, WorkWithCommentFieldsFragment } from "../../types/sdk";
 import { objectKeys, safeParseQueryString, stringify } from "../../lib/helpers";
 import { useLocation } from "react-router-dom";
 import { history } from "../../lib/sdk";
+import { useTableSort } from "../../lib/hooks/useTableSort";
+import { statusSort } from "../../types/stan";
 
 const initialValues: WorkAllocationFormValues = {
   workType: "",
@@ -48,7 +50,6 @@ const urlParamsSchema = Yup.object().shape({
 
 export default function WorkAllocation() {
   const location = useLocation();
-
   /**
    * The deserialized URL search params
    */
@@ -82,6 +83,17 @@ export default function WorkAllocation() {
     successMessage,
   } = current.context;
 
+  const updatedWorkWithComments = React.useRef<
+    WorkWithCommentFieldsFragment[] | undefined
+  >(undefined);
+
+  const { items, requestSort, sortConfig } = useTableSort<
+    WorkWithCommentFieldsFragment
+  >(updatedWorkWithComments.current ?? workWithComments, {
+    primaryKey: "workNumber",
+    direction: "ascending",
+  });
+
   /**
    * Form validation schema
    */
@@ -110,6 +122,55 @@ export default function WorkAllocation() {
       }),
   });
 
+  const onWorkUpdate = React.useCallback(
+    (rowIndex: number, work: WorkWithCommentFieldsFragment) => {
+      debugger;
+      if (!updatedWorkWithComments.current) {
+        updatedWorkWithComments.current = [...workWithComments];
+      }
+      updatedWorkWithComments.current.splice(rowIndex, 1, work);
+    },
+    [workWithComments]
+  );
+
+  const handleSort = React.useCallback(
+    (sortField: string) => {
+      let customSort = undefined;
+      let sortSubField = undefined;
+      switch (sortField) {
+        case "costCode": {
+          sortSubField = "code";
+          break;
+        }
+        case "status": {
+          customSort = statusSort;
+          break;
+        }
+        case "project": {
+          sortSubField = "name";
+          break;
+        }
+        case "workType": {
+          sortSubField = "name";
+          break;
+        }
+      }
+      requestSort(sortField, sortSubField, customSort);
+    },
+    [requestSort]
+  );
+
+  const getSortProps = (colName: string): SortProps | undefined => {
+    return {
+      sortable: true,
+      sortField: colName,
+      ascending:
+        sortConfig && colName !== sortConfig?.primaryKey
+          ? undefined
+          : sortConfig?.direction === "ascending"!!,
+      sortHandler: handleSort,
+    };
+  };
   return (
     <div>
       <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
@@ -234,23 +295,41 @@ export default function WorkAllocation() {
           <Table data-testid="work-allocation-table">
             <TableHead>
               <tr>
-                <TableHeader>Priority</TableHeader>
-                <TableHeader>SGP Number</TableHeader>
-                <TableHeader>Work Type</TableHeader>
-                <TableHeader>Project</TableHeader>
-                <TableHeader>Cost Code</TableHeader>
-                <TableHeader>Number of Blocks</TableHeader>
-                <TableHeader>Number of Slides</TableHeader>
-                <TableHeader>Status</TableHeader>
+                <TableHeader sortProps={getSortProps("priority")}>
+                  Priority
+                </TableHeader>
+                <TableHeader sortProps={getSortProps("workNumber")}>
+                  SGP Number
+                </TableHeader>
+                <TableHeader sortProps={getSortProps("workType")}>
+                  Work Type
+                </TableHeader>
+                <TableHeader sortProps={getSortProps("project")}>
+                  Project
+                </TableHeader>
+                <TableHeader sortProps={getSortProps("costCode")}>
+                  Cost Code
+                </TableHeader>
+                <TableHeader sortProps={getSortProps("numBlocks")}>
+                  Number of Blocks
+                </TableHeader>
+                <TableHeader sortProps={getSortProps("numSlides")}>
+                  Number of Slides
+                </TableHeader>
+                <TableHeader sortProps={getSortProps("status")}>
+                  Status
+                </TableHeader>
                 <TableHeader />
               </tr>
             </TableHead>
             <TableBody>
-              {workWithComments.map((workWithComment) => (
+              {items.map((workWithComment, index) => (
                 <WorkRow
                   initialWork={workWithComment}
                   availableComments={availableComments}
                   key={workWithComment.work.workNumber}
+                  rowIndex={index}
+                  onWorkFieldUpdate={onWorkUpdate}
                 />
               ))}
             </TableBody>
