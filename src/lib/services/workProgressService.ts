@@ -13,6 +13,7 @@ import { Column } from "react-table";
  * A single row on the results table of the Work Progress page
  */
 export type WorkProgressResultTableEntry = {
+  priority: string | undefined;
   workNumber: string;
   workType: string;
   project: string;
@@ -98,6 +99,7 @@ export class WorkProgressService
       const lastSlideImagedDate = timeStampMap.get("Image");
       const lastRNAAnalysisDate = timeStampMap.get("Analysis");
       return {
+        priority: entry.work.priority ?? undefined,
         workNumber: entry.work.workNumber,
         workType: entry.work.workType.name,
         project: entry.work.project.name,
