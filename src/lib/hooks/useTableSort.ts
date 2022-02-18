@@ -1,59 +1,90 @@
 import React from "react";
-import { getContainedObjectWithField, StringKeyedProps } from "../helpers";
-import { defaultAplhaNumericSort } from "../../types/stan";
+import {
+  getObjectWithField,
+  SortDirection,
+  StringKeyedProps,
+} from "../helpers";
+import { alphaNumericSortDefault } from "../../types/stan";
 
-type Direction = "ascending" | "descending";
 export type SortConfigProps = {
+  /**
+   * Field to sort
+   **/
   primaryKey: string;
-  memberPropertyKey?: string;
-  direction: Direction;
-  customSort?: (a: any, b: any) => number;
+
+  /**
+   * Sort direction - ascending or descending
+   */
+  direction: SortDirection;
+
+  /**
+   * Optional secondary key (
+   * Useful in cases where you have multiple inner objects with same field.
+   * For e.g workType and project objects need to be sorted with 'name' field
+   * primaryKey as 'workType' or 'project' and secondaryKey as 'name'
+   * */
+  secondaryKey?: string;
+
+  /**
+   * custom sort functionality for the field
+   * @param a
+   * @param b
+   */
+  customSort?: (a: any, b: any, sortDirection?: SortDirection) => number;
 };
 
 /**
  * Hook for sorting table data.
- * Works with any Table component data
- *
+ * Works with any <Table> component data
+ * Sorts any array even using fields of contained objects in any depth, supports alphanumeric value sort as well
  */
 export function useTableSort<T extends StringKeyedProps>(
   items: T[],
   config: SortConfigProps | null = null
 ) {
+  /**
+   * Sort configurationb state
+   */
   const [sortConfig, setSortConfig] = React.useState(config);
 
-  const getSortFieldStringKey = React.useCallback(
+  /**Get the value of the sort field**/
+  const getSortFieldValue = React.useCallback(
     (
       object: Object,
       primaryKey: string,
-      memberPropertyKey?: string
-    ): string => {
-      const sortObject:
+      secondaryKey?: string
+    ): string | number => {
+      //Get the object containing the sort field (primaryKey)
+      const objectContainSortField:
         | StringKeyedProps
-        | undefined = getContainedObjectWithField(primaryKey, object);
-      if (!sortObject) return "";
-      const sortField = sortObject[primaryKey];
+        | undefined = getObjectWithField(primaryKey, object);
+      if (!objectContainSortField) return "";
 
-      if (typeof sortField !== "object") {
-        return String(sortField);
+      //Get value for primary sort field
+      const sortValue = objectContainSortField[primaryKey];
+      if (typeof sortValue !== "object") {
+        return sortValue;
       }
-      //The key property given is an object, so check if any memberPropertyKey key given which is a string type
-      const sortFieldObject: StringKeyedProps = sortField;
+      //The value for primary sort field is an object type, so check if any secondaryKey key given of string type
+      const sortValueObject: StringKeyedProps = sortValue;
       if (
-        memberPropertyKey &&
-        sortFieldObject &&
-        typeof sortFieldObject[memberPropertyKey] === "string"
+        secondaryKey &&
+        sortValueObject &&
+        (typeof sortValueObject[secondaryKey] === "string" ||
+          typeof sortValueObject[secondaryKey] === "number")
       ) {
-        return sortFieldObject[memberPropertyKey];
+        return sortValueObject[secondaryKey];
       }
-      //No memberPropertyKey given, so try to find a member property which is not an object type
+      //No secondaryKey given, so try to find a property whose value is of string type
       else {
-        for (let property in sortField) {
+        for (let property in sortValueObject) {
           if (
-            sortFieldObject.hasOwnProperty(property) &&
-            typeof sortFieldObject[property] === "string" &&
+            sortValueObject.hasOwnProperty(property) &&
+            (typeof sortValueObject[property] === "string" ||
+              typeof sortValueObject[property] === "number") &&
             property !== "__typename"
           ) {
-            return sortFieldObject[property];
+            return sortValueObject[property];
           }
         }
       }
@@ -61,52 +92,70 @@ export function useTableSort<T extends StringKeyedProps>(
     },
     []
   );
+
+  /**Memoised sorted Items**/
   const sortedItems = React.useMemo(() => {
-    let sortableItems = [...items];
+    let sortableItems = items;
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        const aVal = getSortFieldStringKey(
+        /**Get value to sort based on primaryKey and secondaryKey**/
+        let aVal = getSortFieldValue(
           a,
           sortConfig.primaryKey,
-          sortConfig.memberPropertyKey
-        ).toLowerCase();
-        const bVal = getSortFieldStringKey(
+          sortConfig.secondaryKey
+        );
+        let bVal = getSortFieldValue(
           b,
           sortConfig.primaryKey,
-          sortConfig.memberPropertyKey
-        ).toLowerCase();
+          sortConfig.secondaryKey
+        );
+
+        /**If custom sort function is given, use that to sort values**/
         if (sortConfig.customSort) {
           return sortConfig.direction === "ascending"
             ? sortConfig.customSort(aVal, bVal)
             : sortConfig.customSort(bVal, aVal);
         } else {
-          return sortConfig.direction === "ascending"
-            ? defaultAplhaNumericSort(aVal, bVal)
-            : defaultAplhaNumericSort(bVal, aVal);
-          /*const regExp = /^[a-z0-9]+$/i;
-          debugger;
-          if (regExp.test(aVal) || regExp.test(bVal)) {
-            return defaultAplhaNumericSort(aVal, bVal);
+          /**Use alphanumeric sort for string values*/
+          if (typeof aVal === "string" && typeof bVal == "string") {
+            return sortConfig.direction === "ascending"
+              ? alphaNumericSortDefault(aVal.toLowerCase(), bVal.toLowerCase())
+              : alphaNumericSortDefault(bVal.toLowerCase(), aVal.toLowerCase());
           } else {
+            //Make sure empty strings will be at the bottom for both sorting
+            aVal =
+              aVal === ""
+                ? sortConfig.direction === "ascending"
+                  ? Number.MAX_VALUE
+                  : Number.MIN_VALUE
+                : aVal;
+            bVal =
+              bVal === ""
+                ? sortConfig.direction === "ascending"
+                  ? Number.MAX_VALUE
+                  : Number.MIN_VALUE
+                : bVal;
             if (aVal < bVal) {
               return sortConfig.direction === "ascending" ? -1 : 1;
             }
             if (aVal > bVal) {
               return sortConfig.direction === "ascending" ? 1 : -1;
             }
-          }*/
+          }
+          return 0;
         }
       });
     }
     return sortableItems;
-  }, [items, sortConfig, getSortFieldStringKey]);
+  }, [items, sortConfig, getSortFieldValue]);
 
-  const requestSort = (
+  /**sort action call*/
+  const sort = (
     key: string,
     subPropertyKey?: string,
     customSort?: (a: any, b: any) => number
   ) => {
-    let direction: Direction = "ascending";
+    let direction: SortDirection = "ascending";
     if (
       sortConfig &&
       sortConfig.primaryKey === key &&
@@ -116,11 +165,11 @@ export function useTableSort<T extends StringKeyedProps>(
     }
     setSortConfig({
       primaryKey: key,
-      memberPropertyKey: subPropertyKey,
+      secondaryKey: subPropertyKey,
       direction,
       customSort,
     });
   };
 
-  return { items: sortedItems, requestSort, sortConfig };
+  return { sortedTableData: sortedItems, sort, sortConfig };
 }

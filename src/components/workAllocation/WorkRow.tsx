@@ -69,10 +69,16 @@ export default function WorkRow({
     workWithComment: { work, comment },
   } = current.context;
 
+  /**Notify the changes in work fields*/
   React.useEffect(() => {
-    debugger;
-    onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
-  }, [work, comment, onWorkFieldUpdate, rowIndex]);
+    if (
+      current.event.type === "done.invoke.updateWorkPriority" ||
+      current.event.type === "done.invoke.updateWorkNumSlides" ||
+      current.event.type === "done.invoke.updateWorkNumBlocks"
+    ) {
+      onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
+    }
+  }, [work, comment, onWorkFieldUpdate, rowIndex, current]);
   /**
    * Should the edit button by displayed to the user right now
    */
@@ -191,13 +197,6 @@ export default function WorkRow({
                           send({
                             type: "UPDATE_PRIORITY",
                             priority: e.currentTarget.value.toUpperCase(),
-                          });
-                          onWorkFieldUpdate(rowIndex, {
-                            work: {
-                              ...work,
-                              priority: e.currentTarget.value.toUpperCase(),
-                            },
-                            comment: comment,
                           });
                         }
                       }}

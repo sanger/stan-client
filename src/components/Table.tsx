@@ -10,7 +10,6 @@ interface TableProps
   > {}
 
 export type SortProps = {
-  sortable: boolean;
   sortField: string;
   ascending: boolean | undefined;
   sortHandler: (sortField: string) => void;
@@ -71,6 +70,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
         {
           <IconButton
             type="button"
+            data-testid={`${sortProps && sortProps.sortField}-SortButton`}
             onClick={() => {
               sortProps && sortProps.sortHandler(sortProps.sortField);
             }}

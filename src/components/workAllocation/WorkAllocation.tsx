@@ -66,13 +66,6 @@ export default function WorkAllocation() {
     createWorkAllocationMachine({ urlParams })
   );
 
-  /**
-   * When the URL search params change, send an event to the machine
-   */
-  useEffect(() => {
-    send({ type: "UPDATE_URL_PARAMS", urlParams });
-  }, [send, urlParams]);
-
   const {
     projects,
     costCodes,
@@ -83,16 +76,67 @@ export default function WorkAllocation() {
     successMessage,
   } = current.context;
 
+  /**This is keep the latest copy of Work updated in WorkRow using editable fields in WorkAllocation table **/
   const updatedWorkWithComments = React.useRef<
     WorkWithCommentFieldsFragment[] | undefined
   >(undefined);
 
-  const { items, requestSort, sortConfig } = useTableSort<
+  /**Hook to sort table*/
+  const { sortedTableData, sort, sortConfig } = useTableSort<
     WorkWithCommentFieldsFragment
-  >(updatedWorkWithComments.current ?? workWithComments, {
+  >(updatedWorkWithComments.current ?? [...workWithComments], {
     primaryKey: "workNumber",
-    direction: "ascending",
+    direction: "descending",
   });
+
+  /**
+   * When the URL search params change, send an event to the machine
+   */
+  useEffect(() => {
+    send({ type: "UPDATE_URL_PARAMS", urlParams });
+  }, [send, urlParams]);
+
+  /**Handler to update works with changes**/
+  const onWorkUpdate = React.useCallback(
+    (rowIndex: number, work: WorkWithCommentFieldsFragment) => {
+      if (!updatedWorkWithComments.current) {
+        updatedWorkWithComments.current = [...sortedTableData];
+      }
+      updatedWorkWithComments?.current.splice(rowIndex, 1, work);
+    },
+    [sortedTableData]
+  );
+
+  /**Handler to do sorting on user action**/
+  const handleSort = React.useCallback(
+    (sortField: string) => {
+      let customSort = undefined;
+      let sortSubField = undefined;
+      switch (sortField) {
+        case "status": {
+          customSort = statusSort;
+          break;
+        }
+        case "project" || "workType": {
+          sortSubField = "name";
+          break;
+        }
+      }
+      sort(sortField, sortSubField, customSort);
+    },
+    [sort]
+  );
+  /**Fill in sort properties for table**/
+  const getSortProps = (colName: string): SortProps | undefined => {
+    return {
+      sortField: colName,
+      ascending:
+        sortConfig && colName !== sortConfig?.primaryKey
+          ? undefined
+          : sortConfig?.direction === "ascending"!!,
+      sortHandler: handleSort,
+    };
+  };
 
   /**
    * Form validation schema
@@ -122,55 +166,6 @@ export default function WorkAllocation() {
       }),
   });
 
-  const onWorkUpdate = React.useCallback(
-    (rowIndex: number, work: WorkWithCommentFieldsFragment) => {
-      debugger;
-      if (!updatedWorkWithComments.current) {
-        updatedWorkWithComments.current = [...workWithComments];
-      }
-      updatedWorkWithComments.current.splice(rowIndex, 1, work);
-    },
-    [workWithComments]
-  );
-
-  const handleSort = React.useCallback(
-    (sortField: string) => {
-      let customSort = undefined;
-      let sortSubField = undefined;
-      switch (sortField) {
-        case "costCode": {
-          sortSubField = "code";
-          break;
-        }
-        case "status": {
-          customSort = statusSort;
-          break;
-        }
-        case "project": {
-          sortSubField = "name";
-          break;
-        }
-        case "workType": {
-          sortSubField = "name";
-          break;
-        }
-      }
-      requestSort(sortField, sortSubField, customSort);
-    },
-    [requestSort]
-  );
-
-  const getSortProps = (colName: string): SortProps | undefined => {
-    return {
-      sortable: true,
-      sortField: colName,
-      ascending:
-        sortConfig && colName !== sortConfig?.primaryKey
-          ? undefined
-          : sortConfig?.direction === "ascending"!!,
-      sortHandler: handleSort,
-    };
-  };
   return (
     <div>
       <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
@@ -307,7 +302,7 @@ export default function WorkAllocation() {
                 <TableHeader sortProps={getSortProps("project")}>
                   Project
                 </TableHeader>
-                <TableHeader sortProps={getSortProps("costCode")}>
+                <TableHeader sortProps={getSortProps("code")}>
                   Cost Code
                 </TableHeader>
                 <TableHeader sortProps={getSortProps("numBlocks")}>
@@ -323,7 +318,7 @@ export default function WorkAllocation() {
               </tr>
             </TableHead>
             <TableBody>
-              {items.map((workWithComment, index) => (
+              {sortedTableData.map((workWithComment, index) => (
                 <WorkRow
                   initialWork={workWithComment}
                   availableComments={availableComments}

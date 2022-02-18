@@ -23,7 +23,11 @@ import DataTable from "../components/DataTable";
 import { ClientError } from "graphql-request";
 import { Cell, Column } from "react-table";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
-import { SearchResultsType, statusSort } from "../types/stan";
+import {
+  alphaNumericSortDefault,
+  SearchResultsType,
+  statusSort,
+} from "../types/stan";
 import { useLocation } from "react-router-dom";
 import WorkProgressInput, {
   workProgressSearchSchema,
@@ -317,16 +321,10 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
       );
     },
     sortType: (rowA, rowB) => {
-      const displayNameA = rowA.original.workNumber;
-      const displayNameB = rowB.original.workNumber;
-      if (displayNameA && displayNameB) {
-        if (displayNameA > displayNameB) return 1;
-        if (displayNameA < displayNameB) return -1;
-        return 0;
-      }
-      if (displayNameA && !displayNameB) return 1;
-      if (!displayNameA && displayNameB) return -1;
-      return 0;
+      return alphaNumericSortDefault(
+        rowA.original.workNumber,
+        rowB.original.workNumber
+      );
     },
   },
   {

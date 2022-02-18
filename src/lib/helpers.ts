@@ -248,6 +248,8 @@ export function getEnumKeyByEnumValue<T extends { [index: string]: string }>(
   return Object.keys(enumType).find((x) => enumType[x] === enumValue);
 }
 
+export type StringKeyedProps = { [key: string | number]: any };
+
 /**
  * Creates the content for an export file
  *
@@ -256,8 +258,6 @@ export function getEnumKeyByEnumValue<T extends { [index: string]: string }>(
  * @param entries the data to go into the file, or as a string array of values (assumes that it is in same order of columns)
  * @param delimiter (optional) the column delimiter
  */
-export type StringKeyedProps = { [key: string | number]: any };
-
 export function createDownloadFileContent<T extends StringKeyedProps>(
   columns: Array<Column<T>>,
   entries: Array<T> | Array<Array<string>>,
@@ -300,24 +300,53 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
   return `${columnNameRow}\n${rows}`;
 }
 
+export type SortDirection = "ascending" | "descending";
+/**
+ * Function to sort alphaNumeric values based on reg expressions given. Thisvsorts
+ * @param a
+ * @param b
+ * @param regExp  Reg expressions for string and numeric parts.
+ * @param alphaFirst Flag to sort first on alpha and then numeric or viceversa.
+ */
 export function alphaNumericSort(
   a: string,
   b: string,
-  regExp: { alpha: RegExp; numeric: RegExp }
+  regExp: { alpha: RegExp; numeric: RegExp },
+  alphaFirst: boolean = true
 ): number {
-  debugger;
-  const aAlpha = a.replace(regExp.alpha, "");
-  const bAlpha = b.replace(regExp.alpha, "");
-  if (aAlpha === bAlpha) {
-    const aNumeric = parseInt(a.replace(regExp.numeric, ""), 10);
-    const bNumeric = parseInt(b.replace(regExp.numeric, ""), 10);
-    return aNumeric === bNumeric ? 0 : aNumeric > bNumeric ? 1 : -1;
+  let aPrim: string | number;
+  let aSec: string | number;
+  let bPrim: string | number;
+  let bSec: string | number;
+
+  let aAlpha = (aPrim = a.replace(regExp.alpha, ""));
+  const bAlpha = (bPrim = b.replace(regExp.alpha, ""));
+  const aNumericVal = a.replace(regExp.numeric, "");
+  const bNumericVal = b.replace(regExp.numeric, "");
+  const aNumeric = (aSec =
+    aNumericVal !== "" ? parseInt(aNumericVal, 10) : Number.MAX_VALUE);
+  const bNumeric = (bSec =
+    bNumericVal !== "" ? parseInt(bNumericVal, 10) : Number.MAX_VALUE);
+  if (!alphaFirst) {
+    aPrim = aNumeric;
+    bPrim = bNumeric;
+    aSec = aAlpha;
+    bSec = bAlpha;
+  }
+
+  if (aPrim === bPrim) {
+    return aSec === bSec ? 0 : aSec > bSec ? 1 : -1;
   } else {
-    return aAlpha > bAlpha ? 1 : -1;
+    return aPrim > bPrim ? 1 : -1;
   }
 }
 
-export function getContainedObjectWithField(
+/**
+ * Function get the (nested) object that have the given field as property
+ * @param field - property name
+ * @param obj - parent object
+ */
+export function getObjectWithField(
   field: string,
   obj: StringKeyedProps
 ): Object | undefined {
@@ -325,9 +354,9 @@ export function getContainedObjectWithField(
   let ret = undefined;
   for (let property in obj) {
     if (obj.hasOwnProperty(property) && typeof obj[property] === "object") {
-      ret = getContainedObjectWithField(field, obj[property]);
+      ret = getObjectWithField(field, obj[property]);
       if (ret) {
-        break;
+        return ret;
       }
     }
   }

@@ -129,9 +129,9 @@ export default function createWorkRowMachine({
         },
         editPriority: {
           invoke: {
-            src: "updatePriority",
+            src: "updateWorkPriority",
             onDone: {
-              actions: "assignPriority",
+              actions: "assignWorkPriority",
               target: "deciding",
             },
             onError: { target: "deciding" },
@@ -153,7 +153,7 @@ export default function createWorkRowMachine({
           if (e.type !== "done.invoke.updateWorkNumSlides") return;
           ctx.workWithComment.work = e.data.updateWorkNumSlides;
         }),
-        assignPriority: assign((ctx, e) => {
+        assignWorkPriority: assign((ctx, e) => {
           if (e.type !== "done.invoke.updateWorkPriority") return;
           ctx.workWithComment.work = e.data.updateWorkPriority;
         }),
@@ -188,7 +188,7 @@ export default function createWorkRowMachine({
 
           return stanCore.UpdateWorkNumSlides(params);
         },
-        updatePriority: (ctx, e) => {
+        updateWorkPriority: (ctx, e) => {
           let params: { workNumber: string; priority?: string } = {
             workNumber: ctx.workWithComment.work.workNumber,
           };
