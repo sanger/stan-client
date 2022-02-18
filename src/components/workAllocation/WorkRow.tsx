@@ -74,7 +74,8 @@ export default function WorkRow({
     if (
       current.event.type === "done.invoke.updateWorkPriority" ||
       current.event.type === "done.invoke.updateWorkNumSlides" ||
-      current.event.type === "done.invoke.updateWorkNumBlocks"
+      current.event.type === "done.invoke.updateWorkNumBlocks" ||
+      current.event.type === "done.invoke.updateWorkStatus"
     ) {
       onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
     }
@@ -161,7 +162,7 @@ export default function WorkRow({
     if (priority.length > 3) {
       errorMessage = "Invalid format";
     }
-    const priorityRegEx = /^[A-Z][0-9]*/;
+    const priorityRegEx = /^[A-Z]\d{1,2}/;
     if (!priorityRegEx.test(priority.toUpperCase())) {
       errorMessage = "Invalid format";
     }

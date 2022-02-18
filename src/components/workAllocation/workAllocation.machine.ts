@@ -59,7 +59,16 @@ type WorkAllocationEvent =
       type: "ALLOCATE_WORK";
       values: WorkAllocationFormValues;
     }
-  | { type: "UPDATE_URL_PARAMS"; urlParams: WorkAllocationUrlParams };
+  | { type: "UPDATE_URL_PARAMS"; urlParams: WorkAllocationUrlParams }
+  | {
+      type: "UPDATE_WORK";
+      workWithComment: WorkWithCommentFieldsFragment;
+      rowIndex: number;
+    }
+  | {
+      type: "UPDATE_WORKS";
+      workWithComments: WorkWithCommentFieldsFragment[];
+    };
 
 type WorkAllocationContext = {
   /**
@@ -110,6 +119,7 @@ type CreateWorkAllocationMachineParams = {
 export default function createWorkAllocationMachine({
   urlParams,
 }: CreateWorkAllocationMachineParams) {
+  /**Hook to sort table*/
   return createMachine<WorkAllocationContext, WorkAllocationEvent>(
     {
       id: "workAllocation",
@@ -137,6 +147,14 @@ export default function createWorkAllocationMachine({
             UPDATE_URL_PARAMS: {
               actions: "assignUrlParams",
               target: "loading",
+            },
+            UPDATE_WORK: {
+              actions: "updateWork",
+              target: "ready",
+            },
+            UPDATE_WORKS: {
+              actions: "updateWorks",
+              target: "ready",
             },
           },
         },
@@ -201,6 +219,18 @@ export default function createWorkAllocationMachine({
               ? blockMessage
               : slideMessage;
           ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideMsg}) to project ${project.name} and cost code ${costCode.code} `;
+        }),
+
+        updateWork: assign((ctx, e) => {
+          if (e.type !== "UPDATE_WORK") return;
+          ctx.workWithComments.splice(e.rowIndex, 1, e.workWithComment);
+        }),
+        updateWorks: assign((ctx, e) => {
+          if (e.type !== "UPDATE_WORKS") return;
+          e.workWithComments.forEach((workWithComment, indx) => {
+            ctx.workWithComments.splice(indx, 1, workWithComment);
+          });
+          //ctx.workWithComments = e.workWithComments;
         }),
 
         clearNotifications: assign((ctx) => {

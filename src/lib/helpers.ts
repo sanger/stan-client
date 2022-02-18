@@ -300,6 +300,50 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
   return `${columnNameRow}\n${rows}`;
 }
 
+/**
+ * Creates the content for an export file
+ *
+ * @param columnNames list of column header names to build. Note that the columns must have their {@code Header}
+ *        and {@code accessor} (as a string) set
+ * @param columnAccessorKeys member field names in an object to access column values
+ * @param entries the data to go into the file, or as a string array of values (assumes that it is in same order of columns)
+ * @param delimiter (optional) the column delimiter
+ */
+export function createDownloadFileContentFromObjectKeys<
+  T extends StringKeyedProps
+>(
+  columnNames: Array<[string]>,
+  columnAccessorKeys: [string, { primKey: string; secKey?: string }],
+  entries: Array<T> | Array<Array<string>>,
+  delimiter?: string
+): string {
+  if (!delimiter) {
+    delimiter = "\t";
+  }
+  const columnNameRow = columnNames.join(delimiter);
+  const rows = entries
+    .map((entry) => {
+      if (Array.isArray(entry)) {
+        return entry.map((val) => val).join(delimiter);
+      } else {
+        return columnAccessorKeys
+          .map((columnKey) => {
+            const primKey =
+              typeof columnKey === "string" ? columnKey : columnKey.primKey;
+            const secKey =
+              typeof columnKey === "object" && "secKey" in columnKey
+                ? columnKey.secKey
+                : undefined;
+            const value = getPropertyValue(entry, primKey, secKey);
+            return String(value);
+          })
+          .join(delimiter);
+      }
+    })
+    .join("\n");
+  return `${columnNameRow}\n${rows}`;
+}
+
 export type SortDirection = "ascending" | "descending";
 /**
  * Function to sort alphaNumeric values based on reg expressions given. Thisvsorts
@@ -342,7 +386,7 @@ export function alphaNumericSort(
 }
 
 /**
- * Function get the (nested) object that have the given field as property
+ * Function  to get the (nested) object that have the given field as property
  * @param field - property name
  * @param obj - parent object
  */
@@ -362,3 +406,46 @@ export function getObjectWithField(
   }
   return ret;
 }
+
+/**Get the value of of the given property from an object or from nested objects**/
+export const getPropertyValue = (
+  object: Object,
+  primaryKey: string,
+  secondaryKey?: string
+): string | number => {
+  //Get the object containing the sort field (primaryKey)
+  const objectContainSortField:
+    | StringKeyedProps
+    | undefined = getObjectWithField(primaryKey, object);
+  if (!objectContainSortField) return "";
+
+  //Get value for primary sort field
+  const sortValue = objectContainSortField[primaryKey];
+  if (typeof sortValue !== "object") {
+    return sortValue;
+  }
+  //The value for primary sort field is an object type, so check if any secondaryKey key given of string type
+  const sortValueObject: StringKeyedProps = sortValue;
+  if (
+    secondaryKey &&
+    sortValueObject &&
+    (typeof sortValueObject[secondaryKey] === "string" ||
+      typeof sortValueObject[secondaryKey] === "number")
+  ) {
+    return sortValueObject[secondaryKey];
+  }
+  //No secondaryKey given, so try to find a property whose value is of string type
+  else {
+    for (let property in sortValueObject) {
+      if (
+        sortValueObject.hasOwnProperty(property) &&
+        (typeof sortValueObject[property] === "string" ||
+          typeof sortValueObject[property] === "number") &&
+        property !== "__typename"
+      ) {
+        return sortValueObject[property];
+      }
+    }
+  }
+  return "";
+};

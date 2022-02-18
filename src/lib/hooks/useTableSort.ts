@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  getObjectWithField,
-  SortDirection,
-  StringKeyedProps,
-} from "../helpers";
+import { getPropertyValue, SortDirection, StringKeyedProps } from "../helpers";
 import { alphaNumericSortDefault } from "../../types/stan";
 
 export type SortConfigProps = {
@@ -47,64 +43,18 @@ export function useTableSort<T extends StringKeyedProps>(
    */
   const [sortConfig, setSortConfig] = React.useState(config);
 
-  /**Get the value of the sort field**/
-  const getSortFieldValue = React.useCallback(
-    (
-      object: Object,
-      primaryKey: string,
-      secondaryKey?: string
-    ): string | number => {
-      //Get the object containing the sort field (primaryKey)
-      const objectContainSortField:
-        | StringKeyedProps
-        | undefined = getObjectWithField(primaryKey, object);
-      if (!objectContainSortField) return "";
-
-      //Get value for primary sort field
-      const sortValue = objectContainSortField[primaryKey];
-      if (typeof sortValue !== "object") {
-        return sortValue;
-      }
-      //The value for primary sort field is an object type, so check if any secondaryKey key given of string type
-      const sortValueObject: StringKeyedProps = sortValue;
-      if (
-        secondaryKey &&
-        sortValueObject &&
-        (typeof sortValueObject[secondaryKey] === "string" ||
-          typeof sortValueObject[secondaryKey] === "number")
-      ) {
-        return sortValueObject[secondaryKey];
-      }
-      //No secondaryKey given, so try to find a property whose value is of string type
-      else {
-        for (let property in sortValueObject) {
-          if (
-            sortValueObject.hasOwnProperty(property) &&
-            (typeof sortValueObject[property] === "string" ||
-              typeof sortValueObject[property] === "number") &&
-            property !== "__typename"
-          ) {
-            return sortValueObject[property];
-          }
-        }
-      }
-      return "";
-    },
-    []
-  );
-
   /**Memoised sorted Items**/
   const sortedItems = React.useMemo(() => {
-    let sortableItems = items;
+    let sortableItems = [...items];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
         /**Get value to sort based on primaryKey and secondaryKey**/
-        let aVal = getSortFieldValue(
+        let aVal = getPropertyValue(
           a,
           sortConfig.primaryKey,
           sortConfig.secondaryKey
         );
-        let bVal = getSortFieldValue(
+        let bVal = getPropertyValue(
           b,
           sortConfig.primaryKey,
           sortConfig.secondaryKey
@@ -147,7 +97,7 @@ export function useTableSort<T extends StringKeyedProps>(
       });
     }
     return sortableItems;
-  }, [items, sortConfig, getSortFieldValue]);
+  }, [items, sortConfig]);
 
   /**sort action call*/
   const sort = (
