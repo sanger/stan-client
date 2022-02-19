@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import Heading from "../Heading";
 import { Form, Formik } from "formik";
 import FormikInput from "../forms/Input";
@@ -27,6 +27,7 @@ import { history } from "../../lib/sdk";
 import { useTableSort } from "../../lib/hooks/useTableSort";
 import { statusSort } from "../../types/stan";
 import DownloadIcon from "../icons/DownloadIcon";
+import { useDownload } from "../../lib/hooks/useDownload";
 const initialValues: WorkAllocationFormValues = {
   workType: "",
   costCode: "",
@@ -70,9 +71,6 @@ export default function WorkAllocation() {
   const [current, send] = useMachine(
     createWorkAllocationMachine({ urlParams })
   );
-  const [downloadURL, setDownloadURL] = useState<string>(
-    URL.createObjectURL(new Blob())
-  );
 
   const {
     projects,
@@ -93,60 +91,51 @@ export default function WorkAllocation() {
   });
 
   /**
+   * Rebuild the download data  whenever the worWithComments changes
+   */
+  const downloadData = React.useMemo(() => {
+    return {
+      columnData: {
+        columnNames: [
+          "Priority",
+          "SGP Number",
+          "Work Type",
+          "Project",
+          "Cost Code",
+          "Number of Blocks",
+          "Number of Slides",
+          "Status",
+        ],
+      },
+      entries: workWithComments.map((data) => [
+        data.work.priority ?? "",
+        data.work.workNumber,
+        data.work.workType.name,
+        data.work.project.name,
+        data.work.costCode.code,
+        data.work.numBlocks ? data.work.numBlocks.toString() : "",
+        data.work.numSlides ? data.work.numSlides.toString() : "",
+        `${data.work.status} ${data.comment ? `:${data.comment}` : ``}`,
+      ]),
+    };
+  }, [workWithComments]);
+
+  /**Custom hook to download data**/
+  const { downloadURL } = useDownload<string[]>(downloadData);
+
+  /**
    * When the URL search params change, send an event to the machine
    */
   useEffect(() => {
     send({ type: "UPDATE_URL_PARAMS", urlParams });
   }, [send, urlParams]);
 
-  /**Update the local copy of data,when data is sorted , */
+  /**Update the workWithComments with sort order, */
   useEffect(() => {
-    send({ type: "UPDATE_WORKS", workWithComments: sortedTableData });
+    send({ type: "SORT_WORKS", workWithComments: sortedTableData });
   }, [sortedTableData, send]);
 
-  /**Create download url data whenever data changes**/
-  React.useEffect(() => {
-    if (!workWithComments) return;
-    const columnNames = [
-      "Priority",
-      "SGP Number",
-      "Work Type",
-      "Project",
-      "Cost Code",
-      "Number of Blocks",
-      "Number of Slides",
-      "Status",
-    ].join("\t");
-
-    const columnValues = workWithComments
-      .map((data) => {
-        return [
-          data.work.priority ?? "",
-          data.work.workNumber,
-          data.work.workType.name,
-          data.work.project.name,
-          data.work.costCode.code,
-          data.work.numBlocks ?? "",
-          data.work.numSlides ?? "",
-          `${data.work.status} ${data.comment ? `:${data.comment}` : ``}`,
-        ].join("\t");
-      })
-      .join("\n");
-    const downloadData = `${columnNames}\n${columnValues}`;
-    const blob = new Blob([downloadData]);
-    const workAllocationFileURL = URL.createObjectURL(blob);
-    setDownloadURL(workAllocationFileURL);
-    /**
-     * Cleanup function that revokes the URL when it's no longer needed
-     */
-    return () => {
-      if (downloadURL) {
-        URL.revokeObjectURL(downloadURL);
-      }
-    };
-  }, [workWithComments]);
-
-  /**Handler to update works with changes**/
+  /**Handler to update works with changes - Update work allocation data whenever any field is edited**/
   const onWorkUpdate = React.useCallback(
     (rowIndex: number, work: WorkWithCommentFieldsFragment) => {
       send({ type: "UPDATE_WORK", workWithComment: work, rowIndex });

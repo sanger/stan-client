@@ -68,7 +68,7 @@ describe("Visium Perm", () => {
     context("when scanned control tube is removed", () => {
       before(() => {
         cy.findByTestId("controltubeDiv").within(() => {
-          cy.findAllByRole("button").click();
+          cy.findByTestId("removeButton").click();
         });
       });
       it("removes the control tube assigned", () => {

@@ -10,6 +10,7 @@ interface RemoveButtonProps
 const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
   return (
     <button
+      data-testid="removeButton"
       {...props}
       className="inline-flex items-center justify-center p-2 rounded-md hover:bg-red-100 focus:outline-none focus:bg-red-100 text-red-400 hover:text-red-600"
     >

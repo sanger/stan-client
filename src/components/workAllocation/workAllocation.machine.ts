@@ -66,7 +66,7 @@ type WorkAllocationEvent =
       rowIndex: number;
     }
   | {
-      type: "UPDATE_WORKS";
+      type: "SORT_WORKS";
       workWithComments: WorkWithCommentFieldsFragment[];
     };
 
@@ -152,8 +152,8 @@ export default function createWorkAllocationMachine({
               actions: "updateWork",
               target: "ready",
             },
-            UPDATE_WORKS: {
-              actions: "updateWorks",
+            SORT_WORKS: {
+              actions: "assignSortedWorks",
               target: "ready",
             },
           },
@@ -225,14 +225,12 @@ export default function createWorkAllocationMachine({
           if (e.type !== "UPDATE_WORK") return;
           ctx.workWithComments.splice(e.rowIndex, 1, e.workWithComment);
         }),
-        updateWorks: assign((ctx, e) => {
-          if (e.type !== "UPDATE_WORKS") return;
+        assignSortedWorks: assign((ctx, e) => {
+          if (e.type !== "SORT_WORKS") return;
           e.workWithComments.forEach((workWithComment, indx) => {
             ctx.workWithComments.splice(indx, 1, workWithComment);
           });
-          //ctx.workWithComments = e.workWithComments;
         }),
-
         clearNotifications: assign((ctx) => {
           ctx.successMessage = undefined;
           ctx.requestError = undefined;
