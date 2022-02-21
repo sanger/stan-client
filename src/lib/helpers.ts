@@ -386,19 +386,19 @@ export function alphaNumericSort(
 }
 
 /**
- * Function  to get the (nested) object that have the given field as property
- * @param field - property name
- * @param obj - parent object
+ * Function  to get the object down in object hierarchy that have given property as a member property
+ * @param property - property to search for
+ * @param obj -  Object to look for the property
  */
-export function getObjectWithField(
-  field: string,
+export function getParentObjectForField(
+  property: string,
   obj: StringKeyedProps
 ): Object | undefined {
-  if (Object.keys(obj).includes(field)) return obj;
+  if (Object.keys(obj).includes(property)) return obj;
   let ret = undefined;
   for (let property in obj) {
     if (obj.hasOwnProperty(property) && typeof obj[property] === "object") {
-      ret = getObjectWithField(field, obj[property]);
+      ret = getParentObjectForField(property, obj[property]);
       if (ret) {
         return ret;
       }
@@ -407,43 +407,50 @@ export function getObjectWithField(
   return ret;
 }
 
-/**Get the value of of the given property from an object or from nested objects**/
+/**
+ * Get the value of the given property from an object or from nested objects
+ * @param object - Object to look for the property
+ * @param propertyName - Property to search for
+ * @param identiferForProp - This is useful when different object types hold property of same name
+ * @example - Work object contains 'workType' and 'project' objects with member property 'name'.
+ * In such cases,to access the name property of workType, the propertyName can be given as "workType" and  identiferForProp as "name"
+ **/
 export const getPropertyValue = (
   object: Object,
-  primaryKey: string,
-  secondaryKey?: string
+  propertyName: string,
+  identiferForProp?: string
 ): string | number => {
-  //Get the object containing the sort field (primaryKey)
-  const objectContainSortField:
+  //Get the object containing the propertyName
+  const parentObjForProperty:
     | StringKeyedProps
-    | undefined = getObjectWithField(primaryKey, object);
-  if (!objectContainSortField) return "";
+    | undefined = getParentObjectForField(propertyName, object);
+  if (!parentObjForProperty) return "";
 
-  //Get value for primary sort field
-  const sortValue = objectContainSortField[primaryKey];
-  if (typeof sortValue !== "object") {
-    return sortValue;
+  //Get value for property name given
+  const propValue = parentObjForProperty[propertyName];
+  if (typeof propValue !== "object") {
+    return propValue;
   }
-  //The value for primary sort field is an object type, so check if any secondaryKey key given of string type
-  const sortValueObject: StringKeyedProps = sortValue;
+  //The value for property given is an object type, so check if any secondary identifier is given in identiferForProp
+  const propValueObject: StringKeyedProps = propValue;
   if (
-    secondaryKey &&
-    sortValueObject &&
-    (typeof sortValueObject[secondaryKey] === "string" ||
-      typeof sortValueObject[secondaryKey] === "number")
+    identiferForProp &&
+    propValueObject &&
+    (typeof propValueObject[identiferForProp] === "string" ||
+      typeof propValueObject[identiferForProp] === "number")
   ) {
-    return sortValueObject[secondaryKey];
+    return propValueObject[identiferForProp];
   }
-  //No secondaryKey given, so try to find a property whose value is of string type
+  //No secondary identifier given, so try to find a property whose value is of string type
   else {
-    for (let property in sortValueObject) {
+    for (let property in propValueObject) {
       if (
-        sortValueObject.hasOwnProperty(property) &&
-        (typeof sortValueObject[property] === "string" ||
-          typeof sortValueObject[property] === "number") &&
+        propValueObject.hasOwnProperty(property) &&
+        (typeof propValueObject[property] === "string" ||
+          typeof propValueObject[property] === "number") &&
         property !== "__typename"
       ) {
-        return sortValueObject[property];
+        return propValueObject[property];
       }
     }
   }
