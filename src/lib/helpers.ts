@@ -387,18 +387,20 @@ export function alphaNumericSort(
 
 /**
  * Function  to get the object down in object hierarchy that have given property as a member property
- * @param property - property to search for
+ * @param findProperty - Property to search
  * @param obj -  Object to look for the property
  */
 export function getParentObjectForField(
-  property: string,
+  findProperty: string,
   obj: StringKeyedProps
 ): Object | undefined {
-  if (Object.keys(obj).includes(property)) return obj;
+  if (Object.keys(obj).includes(findProperty)) {
+    return obj;
+  }
   let ret = undefined;
-  for (let property in obj) {
-    if (obj.hasOwnProperty(property) && typeof obj[property] === "object") {
-      ret = getParentObjectForField(property, obj[property]);
+  for (let prop in obj) {
+    if (obj.hasOwnProperty(prop) && typeof obj[prop] === "object") {
+      ret = getParentObjectForField(findProperty, obj[prop]);
       if (ret) {
         return ret;
       }

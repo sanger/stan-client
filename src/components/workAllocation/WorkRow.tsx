@@ -169,7 +169,7 @@ export default function WorkRow({
     return errorMessage;
   };
 
-  const isUpdatePriorityForStatus = (status: WorkStatus) => {
+  const isEditEnabledForStatus = (status: WorkStatus) => {
     return status !== WorkStatus.Failed && status !== WorkStatus.Completed;
   };
   return (
@@ -177,7 +177,7 @@ export default function WorkRow({
       <TableCell>
         {
           /**Once workrequest is failed or completed then priority need to be cleared**/
-          isUpdatePriorityForStatus(work.status) ? (
+          isEditEnabledForStatus(work.status) ? (
             <Formik
               initialValues={{ priority: work.priority ?? "" }}
               onSubmit={() => {}}
@@ -217,18 +217,20 @@ export default function WorkRow({
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
-        {renderWorkNumValueField(
-          work.workNumber,
-          work.numBlocks ?? undefined,
-          "block"
-        )}
+        {isEditEnabledForStatus(work.status) &&
+          renderWorkNumValueField(
+            work.workNumber,
+            work.numBlocks ?? undefined,
+            "block"
+          )}
       </TableCell>
       <TableCell>
-        {renderWorkNumValueField(
-          work.workNumber,
-          work.numSlides ?? undefined,
-          "slide"
-        )}
+        {isEditEnabledForStatus(work.status) &&
+          renderWorkNumValueField(
+            work.workNumber,
+            work.numSlides ?? undefined,
+            "slide"
+          )}
       </TableCell>
       {!editModeEnabled && (
         <TableCell>
