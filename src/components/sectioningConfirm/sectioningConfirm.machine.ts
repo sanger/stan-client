@@ -17,7 +17,6 @@ import {
 } from "../../types/stan";
 import { buildSampleColors } from "../../lib/helpers/labwareHelper";
 import { ClientError } from "graphql-request";
-
 type SectioningConfirmContext = {
   /**
    * The work number to associate with this confirm operation
@@ -49,6 +48,11 @@ type SectioningConfirmContext = {
    * Useful for the UI to know if user should be allowed to confirm yet
    */
   isConfirmSectionLabwareValid: boolean;
+
+  /**
+   * Created labwares returned from stan core after a confirmSection (if success)
+   */
+  confirmSectionResultLabwares: LabwareFieldsFragment[];
 
   /**
    * Possible errors returned from stan core after a confirmSection request
@@ -83,6 +87,7 @@ export function createSectioningConfirmMachine() {
         layoutPlansByLabwareType: {},
         sourceLabware: [],
         requestError: null,
+        confirmSectionResultLabwares: [],
       },
       initial: "ready",
       entry: ["assignSourceLabware", "assignLayoutPlans"],
@@ -127,7 +132,7 @@ export function createSectioningConfirmMachine() {
             src: "confirmSection",
             onDone: {
               target: "confirmed",
-              actions: "assignConfirmSection",
+              actions: "assignConfirmSectionResults",
             },
             onError: {
               target: "ready.valid",
@@ -194,6 +199,10 @@ export function createSectioningConfirmMachine() {
         assignWorkNumber: assign((ctx, e) => {
           if (e.type !== "UPDATE_WORK_NUMBER") return;
           ctx.workNumber = e.workNumber;
+        }),
+        assignConfirmSectionResults: assign((ctx, e) => {
+          if (e.type !== "done.invoke.confirmSection") return;
+          ctx.confirmSectionResultLabwares = e.data.confirmSection.labware;
         }),
       },
 

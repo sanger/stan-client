@@ -150,8 +150,31 @@ describe("Sectioning Confirmation", () => {
       it("displays Store option in the success dialog", () => {
         cy.findByRole("button", { name: /Store/i }).should("be.enabled");
       });
+      it("displays Print option in the success dialog", () => {
+        cy.findByTestId("print-div").within(() => {
+          cy.findByText("Print labels").should("be.visible");
+          cy.findByRole("table").contains("td", "STAN-0001F");
+          cy.findByRole("table").contains("td", "STAN-0001E");
+        });
+      });
+    });
+
+    context("when print button is clicked for labware", () => {
+      before(() => {
+        cy.findByTestId("print-div").within(() => {
+          cy.findAllByRole("button").eq(0).click();
+        });
+      });
+      it("displays a print success message", () => {
+        cy.findByTestId("print-div").within(() => {
+          cy.findByText("Tube Printer successfully printed STAN-0001F").should(
+            "be.visible"
+          );
+        });
+      });
     });
   });
+
   describe("when store option selected for confimed labware is", () => {
     before(() => {
       cy.findByRole("button", { name: /Store/i }).click();

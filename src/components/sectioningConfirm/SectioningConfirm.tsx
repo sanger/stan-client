@@ -7,13 +7,15 @@ import { LabwareTypeName } from "../../types/stan";
 import ConfirmTubes from "./ConfirmTubes";
 import ConfirmLabware from "./ConfirmLabware";
 import PinkButton from "../buttons/PinkButton";
-import { CommentFieldsFragment, FindPlanDataQuery } from "../../types/sdk";
+import {
+  CommentFieldsFragment,
+  FindPlanDataQuery,
+  LabwareFieldsFragment,
+} from "../../types/sdk";
 import { useMachine } from "@xstate/react";
 import { createSectioningConfirmMachine } from "./sectioningConfirm.machine";
 import Warning from "../notifications/Warning";
 import WorkNumberSelect from "../WorkNumberSelect";
-import { Dictionary } from "lodash";
-import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 
 type SectioningConfirmProps = {
   /**
@@ -27,9 +29,9 @@ type SectioningConfirmProps = {
   initialPlans: Array<FindPlanDataQuery>;
 
   /**
-   * Callback for when sections have been successfully confirmed
+   * Callback when sections have been successfully confirmed,with created labwares as parameter
    */
-  onConfirmed: (plans?: Array<LayoutPlan>) => void;
+  onConfirmed: (labwares?: Array<LabwareFieldsFragment>) => void;
 };
 
 /**
@@ -43,29 +45,11 @@ export default function SectioningConfirm({
 }: SectioningConfirmProps) {
   const [current, send, service] = useMachine(createSectioningConfirmMachine());
 
-  /**Get plans in the same order as displayed*/
-  const getPlansInDisplayedOrder = React.useCallback(
-    (plans: Dictionary<Array<LayoutPlan>>) => {
-      let layoutPlansOrdered: LayoutPlan[] = [];
-      if (plans[LabwareTypeName.TUBE]) {
-        layoutPlansOrdered = [...plans[LabwareTypeName.TUBE]];
-      }
-      Object.entries(plans)
-        .filter(
-          ([labwareTypeName, _]) => labwareTypeName !== LabwareTypeName.TUBE
-        )
-        .forEach(([_, lps]) => {
-          layoutPlansOrdered = [...layoutPlansOrdered, ...lps];
-        });
-      return layoutPlansOrdered;
-    },
-    []
-  );
-
   const {
     sourceLabware,
     layoutPlansByLabwareType,
     requestError,
+    confirmSectionResultLabwares,
   } = current.context;
 
   /**
@@ -74,17 +58,11 @@ export default function SectioningConfirm({
   useEffect(() => {
     const subscription = service.subscribe((state) => {
       if (state.matches("confirmed")) {
-        const orderedPlans = getPlansInDisplayedOrder(layoutPlansByLabwareType);
-        onConfirmed(orderedPlans);
+        onConfirmed(confirmSectionResultLabwares);
       }
     });
     return subscription.unsubscribe;
-  }, [
-    service,
-    onConfirmed,
-    layoutPlansByLabwareType,
-    getPlansInDisplayedOrder,
-  ]);
+  }, [service, onConfirmed, confirmSectionResultLabwares]);
 
   /**
    * Callback for when the work number select changes
