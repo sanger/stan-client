@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Split labware menu ([#80](https://github.com/sanger/stan-client/pull/80))
 - Record extract results page ([#75](https://github.com/sanger/stan-client/pull/75))
 - Support releasing a box of stored labware ([#78] (https://github.com/sanger/stan-client/pull/78))
-- Visium permabilisation page ([#83](https://github.com/sanger/stan-client/pull/83))
+- Visium permeabilisation page ([#83](https://github.com/sanger/stan-client/pull/83))
 - RNA analysis page ([#77](https://github.com/sanger/stan-client/pull/77))
 
 ## [1.9.0] - 2021-10-28

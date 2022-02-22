@@ -120,7 +120,7 @@ export default function VisiumPerm() {
                   <Heading level={2}>Labware</Heading>
 
                   <p>
-                    Please scan in the slide you wish to permabilisation add
+                    Please scan in the slide you wish to add permeabilisation
                     times for.
                   </p>
 
