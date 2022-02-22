@@ -3,11 +3,11 @@ import { createSessionStorageRepository } from "./index";
 import hmdmcFactory from "../../lib/factories/hmdmcFactory";
 
 const seeds: Array<HmdmcFieldsFragment> = [
-  hmdmcFactory.build({ hmdmc: "HMDMC1" }),
-  hmdmcFactory.build({ hmdmc: "HMDMC2" }),
-  hmdmcFactory.build({ hmdmc: "HMDMC3" }),
-  hmdmcFactory.build({ hmdmc: "HMDMC4" }),
-  hmdmcFactory.build({ hmdmc: "HMDMC5", enabled: false }),
+  hmdmcFactory.build({ hmdmc: "HuMFre1" }),
+  hmdmcFactory.build({ hmdmc: "HuMFre2" }),
+  hmdmcFactory.build({ hmdmc: "HuMFre3" }),
+  hmdmcFactory.build({ hmdmc: "HuMFre4" }),
+  hmdmcFactory.build({ hmdmc: "HuMFre5", enabled: false }),
 ];
 
 const hmdmcRepository = createSessionStorageRepository("HMDMC", "hmdmc", seeds);

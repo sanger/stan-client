@@ -150,7 +150,7 @@ export default function SectionForm({
       <Heading level={4}>Tissue Information</Heading>
 
       <FormikSelect
-        label="HMDMC"
+        label="HuMFre"
         disabled={!isHMDMCEnabled}
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.hmdmc`}
         emptyOption

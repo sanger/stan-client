@@ -24,6 +24,13 @@ type EntityManagerProps<E> = {
   displayColumnName: keyof E;
 
   /**
+   * This can be used to display a name (on table column and add button) different from displayColumnName (which is a field name in graphql schema).
+   * One use case is to accommodate changes in field names in future (like HMDMC to HuMFre)
+   * because schema fields cannot be changed as it can bring major impact on db
+   */
+  alternateColumnName?: string;
+
+  /**
    * Callback for when an entity has its <code>enabled</code> property toggled
    * @param entity the toggle entity
    * @param enabled true if the entity is being enabled, false if its being disabled
@@ -40,6 +47,7 @@ type EntityManagerProps<E> = {
 export default function EntityManager<E extends HasEnabled>({
   initialEntities,
   displayColumnName,
+  alternateColumnName,
   onToggle,
   onCreate,
 }: EntityManagerProps<E>) {
@@ -125,7 +133,9 @@ export default function EntityManager<E extends HasEnabled>({
       <Table>
         <TableHead>
           <tr>
-            <TableHeader>{displayColumnName}</TableHeader>
+            <TableHeader>
+              {alternateColumnName ?? displayColumnName}
+            </TableHeader>
             <TableHeader>Enabled</TableHeader>
           </tr>
         </TableHead>
@@ -169,7 +179,12 @@ export default function EntityManager<E extends HasEnabled>({
             disabled={isLoading}
             onClick={() => send({ type: "DRAFT_NEW_ENTITY" })}
           >
-            + Add {capitalize(displayColumnName.toString())}
+            + Add{" "}
+            {capitalize(
+              alternateColumnName
+                ? alternateColumnName.toString()
+                : displayColumnName.toString()
+            )}
           </BlueButton>
         )}
 

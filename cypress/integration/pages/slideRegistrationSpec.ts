@@ -210,7 +210,7 @@ function fillInForm() {
   cy.findByLabelText("Medium").select("Paraffin");
   cy.findByLabelText("Donor ID").clear().type("DONOR_1");
   cy.findByLabelText("Species").select("Human");
-  cy.findByLabelText("HMDMC").select("HMDMC1");
+  cy.findByLabelText("HuMFre").select("HuMFre1");
   cy.findByLabelText("Tissue Type").select("Liver");
   cy.findByLabelText("Spatial Location").select("3");
   cy.findByLabelText("Replicate Number").clear().type("2");

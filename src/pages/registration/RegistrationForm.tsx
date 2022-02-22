@@ -129,7 +129,7 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
               <Heading level={3}>Tissue Information</Heading>
 
               <FormikSelect
-                label="HMDMC"
+                label="HuMFre"
                 name={`tissues.${currentIndex}.hmdmc`}
                 disabled={!isHMDMCEnabled}
                 emptyOption

@@ -28,10 +28,10 @@ describe("Configuration Spec", () => {
       newValue: "Monkey",
     },
     {
-      name: "HMDMC Numbers",
-      field: "HMDMC1",
-      buttonName: "+ Add Hmdmc",
-      newValue: "HMDMC9",
+      name: "HuMFre Numbers",
+      field: "HuMFre1",
+      buttonName: "+ Add Humfre",
+      newValue: "HuMFre9",
     },
     {
       name: "Release Destinations",

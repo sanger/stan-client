@@ -121,9 +121,9 @@ export default function Configuration({ configuration }: ConfigurationParams) {
             </div>
 
             <div data-testid="config">
-              <Heading level={2}>HMDMC Numbers</Heading>
+              <Heading level={2}>HuMFre Numbers</Heading>
               <p className="mt-3 mb-6 text-lg">
-                HMDMC Numbers are available on the{" "}
+                HuMFre Numbers are available on the{" "}
                 <StyledLink to={"/admin/registration"}>
                   Block Registration
                 </StyledLink>{" "}
@@ -136,6 +136,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
               <EntityManager
                 initialEntities={configuration.hmdmcs}
                 displayColumnName={"hmdmc"}
+                alternateColumnName={"HuMFre"}
                 onToggle={(entity, enabled) =>
                   stanCore
                     .SetHmdmcEnabled({ enabled, hmdmc: entity.hmdmc })
