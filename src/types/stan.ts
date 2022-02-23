@@ -2,7 +2,7 @@ import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size,
 import {Location} from "history";
 import {ClientError} from "graphql-request";
 import * as Yup from "yup";
-import {alphaNumericSort} from "../lib/helpers";
+import {regexSort} from "../lib/helpers";
 
 /**
  * Union of STAN's {@link OperationType} names
@@ -297,5 +297,5 @@ export const statusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
 export const alphaNumericSortDefault = (a:string, b:string) :number => {
   const regAlpha = /[^a-zA-Z]*/g;
   const regNumeric = /[^0-9]*/g;
-  return alphaNumericSort(a, b, {alpha: regAlpha, numeric: regNumeric});
+  return regexSort(a, b, {alpha: regAlpha, numeric: regNumeric});
 }

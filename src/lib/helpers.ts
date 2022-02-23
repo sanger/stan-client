@@ -305,15 +305,15 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
  *
  * @param columnNames list of column header names to build. Note that the columns must have their {@code Header}
  *        and {@code accessor} (as a string) set
- * @param columnAccessorKeys member field names in an object to access column values
+ * @param columnAccessPath member field names in an object to access column values
  * @param entries the data to go into the file, or as a string array of values (assumes that it is in same order of columns)
  * @param delimiter (optional) the column delimiter
  */
 export function createDownloadFileContentFromObjectKeys<
   T extends StringKeyedProps
 >(
-  columnNames: Array<[string]>,
-  columnAccessorKeys: [string, { primKey: string; secKey?: string }],
+  columnNames: Array<string>,
+  columnAccessPath: Array<Array<string>>,
   entries: Array<T> | Array<Array<string>>,
   delimiter?: string
 ): string {
@@ -326,15 +326,9 @@ export function createDownloadFileContentFromObjectKeys<
       if (Array.isArray(entry)) {
         return entry.map((val) => val).join(delimiter);
       } else {
-        return columnAccessorKeys
-          .map((columnKey) => {
-            const primKey =
-              typeof columnKey === "string" ? columnKey : columnKey.primKey;
-            const secKey =
-              typeof columnKey === "object" && "secKey" in columnKey
-                ? columnKey.secKey
-                : undefined;
-            const value = getPropertyValue(entry, primKey, secKey);
+        return columnAccessPath
+          .map((columnPath) => {
+            const value = getPropertyValue(entry, columnPath);
             return String(value);
           })
           .join(delimiter);
@@ -352,7 +346,7 @@ export type SortDirection = "ascending" | "descending";
  * @param regExp  Reg expressions for string and numeric parts.
  * @param alphaFirst Flag to sort first on alpha and then numeric or viceversa.
  */
-export function alphaNumericSort(
+export function regexSort(
   a: string,
   b: string,
   regExp: { alpha: RegExp; numeric: RegExp },
@@ -385,76 +379,25 @@ export function alphaNumericSort(
   }
 }
 
-/**
- * Function  to get the object down in object hierarchy that have given property as a member property
- * @param findProperty - Property to search
- * @param obj -  Object to look for the property
- */
-export function getParentObjectForField(
-  findProperty: string,
-  obj: StringKeyedProps
-): Object | undefined {
-  if (Object.keys(obj).includes(findProperty)) {
-    return obj;
-  }
-  let ret = undefined;
-  for (let prop in obj) {
-    if (obj.hasOwnProperty(prop) && typeof obj[prop] === "object") {
-      ret = getParentObjectForField(findProperty, obj[prop]);
-      if (ret) {
-        return ret;
-      }
-    }
-  }
-  return ret;
-}
-
-/**
- * Get the value of the given property from an object or from nested objects
- * @param object - Object to look for the property
- * @param propertyName - Property to search for
- * @param identiferForProp - This is useful when different object types hold property of same name
- * @example - Work object contains 'workType' and 'project' objects with member property 'name'.
- * In such cases,to access the name property of workType, the propertyName can be given as "workType" and  identiferForProp as "name"
- **/
+/**Get value for a property field from an object using the given path
+ * @param obj Object to search for
+ * @param propertyPath Property names to traverse the object to reach the required search property field
+ * @example  To get 'name' field value in a 'work' object - 'work'  holds a property 'workType' which is an object with 'name' field
+ *            the path should be ["workType","name"]
+ ***/
 export const getPropertyValue = (
-  object: Object,
-  propertyName: string,
-  identiferForProp?: string
-): string | number => {
-  //Get the object containing the propertyName
-  const parentObjForProperty:
-    | StringKeyedProps
-    | undefined = getParentObjectForField(propertyName, object);
-  if (!parentObjForProperty) return "";
-
-  //Get value for property name given
-  const propValue = parentObjForProperty[propertyName];
-  if (typeof propValue !== "object") {
-    return propValue;
+  obj: StringKeyedProps,
+  propertyPath: string[]
+): number | string => {
+  let propValue: any = obj;
+  for (let indx = 0; indx < propertyPath.length; indx++) {
+    const val = propValue[propertyPath[indx]];
+    if (!val) break;
+    propValue = val;
   }
-  //The value for property given is an object type, so check if any secondary identifier is given in identiferForProp
-  const propValueObject: StringKeyedProps = propValue;
-  if (
-    identiferForProp &&
-    propValueObject &&
-    (typeof propValueObject[identiferForProp] === "string" ||
-      typeof propValueObject[identiferForProp] === "number")
-  ) {
-    return propValueObject[identiferForProp];
+  if (propValue instanceof Date) {
+    propValue = propValue.getTime();
   }
-  //No secondary identifier given, so try to find a property whose value is of string type
-  else {
-    for (let property in propValueObject) {
-      if (
-        propValueObject.hasOwnProperty(property) &&
-        (typeof propValueObject[property] === "string" ||
-          typeof propValueObject[property] === "number") &&
-        property !== "__typename"
-      ) {
-        return propValueObject[property];
-      }
-    }
-  }
-  return "";
+  if (typeof propValue !== "string" && typeof propValue !== "number") return "";
+  return propValue;
 };

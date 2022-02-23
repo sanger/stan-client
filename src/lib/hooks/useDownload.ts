@@ -10,8 +10,8 @@ type ColumnData<T extends StringKeyedProps> = {
   columns: Array<Column<T>>;
 };
 type ColumnTextData = {
-  columnNames: Array<[string]>;
-  columnAccessorKeys: [string, { primKey: string; secKey?: string }];
+  columnNames: Array<string>;
+  columnAccessPath: Array<Array<string>>;
 };
 type TextData = {
   columnNames: Array<string>;
@@ -21,7 +21,7 @@ type ColumnDataType<T> = ColumnData<T> | ColumnTextData | TextData;
 const isColumnData = (x: any): x is ColumnData<any> =>
   Object.keys(x).includes("columns");
 const isColumnTextData = (x: any): x is ColumnTextData =>
-  Object.keys(x).includes("columnAccessorKeys");
+  Object.keys(x).includes("columnAccessPath");
 const isTextData = (x: any): x is ColumnTextData =>
   Object.keys(x).includes("columnNames");
 
@@ -58,7 +58,7 @@ export function useDownload<T>({
         return new Blob([
           createDownloadFileContentFromObjectKeys(
             downloadProps.columnData.columnNames,
-            downloadProps.columnData.columnAccessorKeys,
+            downloadProps.columnData.columnAccessPath,
             downloadProps.entries,
             delimiterVal
           ),

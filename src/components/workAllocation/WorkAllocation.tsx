@@ -17,6 +17,7 @@ import * as Yup from "yup";
 import WorkRow from "./WorkRow";
 import { WorkStatus, WorkWithCommentFieldsFragment } from "../../types/sdk";
 import {
+  getPropertyValue,
   getTimestampStr,
   objectKeys,
   safeParseQueryString,
@@ -44,6 +45,17 @@ export const MAX_NUM_BLOCKANDSLIDES = 200;
 export type WorkAllocationUrlParams = {
   status: WorkStatus[];
 };
+
+const tableColumnFieldInfo = [
+  { key: "Priority", path: ["work", "priority"] },
+  { key: "SGP Number", path: ["work", "workNumber"] },
+  { key: "Work Type", path: ["work", "workType", "name"] },
+  { key: "Project", path: ["work", "project", "name"] },
+  { key: "Cost Code", path: ["work", "costCode", "code"] },
+  { key: "Number of Blocks", path: ["work", "numBlocks"] },
+  { key: "Number of Slides", path: ["work", "numSlides"] },
+  { key: "Status", path: ["work", "status"] },
+];
 
 /**
  * Schema to validate the deserialized URL search params
@@ -86,8 +98,9 @@ export default function WorkAllocation() {
   const { sortedTableData, sort, sortConfig } = useTableSort<
     WorkWithCommentFieldsFragment
   >(workWithComments, {
-    primaryKey: "workNumber",
+    sortFieldName: "SGP Number",
     direction: "descending",
+    accessPath: ["work", "workNumber"],
   });
 
   /**
@@ -96,27 +109,13 @@ export default function WorkAllocation() {
   const downloadData = React.useMemo(() => {
     return {
       columnData: {
-        columnNames: [
-          "Priority",
-          "SGP Number",
-          "Work Type",
-          "Project",
-          "Cost Code",
-          "Number of Blocks",
-          "Number of Slides",
-          "Status",
-        ],
+        columnNames: tableColumnFieldInfo.map((info) => info.key),
       },
-      entries: workWithComments.map((data) => [
-        data.work.priority ?? "",
-        data.work.workNumber,
-        data.work.workType.name,
-        data.work.project.name,
-        data.work.costCode.code,
-        data.work.numBlocks ? data.work.numBlocks.toString() : "",
-        data.work.numSlides ? data.work.numSlides.toString() : "",
-        `${data.work.status} ${data.comment ? `:${data.comment}` : ``}`,
-      ]),
+      entries: workWithComments.map((data) => {
+        return tableColumnFieldInfo.map((columnInfo) => {
+          return String(getPropertyValue(data, columnInfo.path));
+        });
+      }),
     };
   }, [workWithComments]);
 
@@ -130,7 +129,7 @@ export default function WorkAllocation() {
     send({ type: "UPDATE_URL_PARAMS", urlParams });
   }, [send, urlParams]);
 
-  /**Update the workWithComments with sort order, */
+  /**Update the workWithComments with sort order**/
   useEffect(() => {
     send({ type: "SORT_WORKS", workWithComments: sortedTableData });
   }, [sortedTableData, send]);
@@ -145,29 +144,25 @@ export default function WorkAllocation() {
 
   /**Handler to do sorting on user action**/
   const handleSort = React.useCallback(
-    (sortField: string) => {
-      let customSort = undefined;
-      let sortSubField = undefined;
-      switch (sortField) {
-        case "status": {
-          customSort = statusSort;
-          break;
-        }
-        case "project" || "workType": {
-          sortSubField = "name";
-          break;
-        }
+    (uniqueSortField: string) => {
+      let customSort = uniqueSortField === "status" ? statusSort : undefined;
+      const fieldInfo = tableColumnFieldInfo.find(
+        (fieldInfo) => fieldInfo.key === uniqueSortField
+      );
+      if (!fieldInfo) {
+        return;
       }
-      sort(sortField, sortSubField, customSort);
+      sort(uniqueSortField, fieldInfo.path, customSort);
     },
     [sort]
   );
+
   /**Fill in sort properties for table**/
-  const getSortProps = (colName: string): SortProps | undefined => {
+  const getTableSortProps = (sortFieldName: string): SortProps | undefined => {
     return {
-      sortField: colName,
+      sortFieldName,
       ascending:
-        sortConfig && colName !== sortConfig?.primaryKey
+        sortConfig && sortFieldName !== sortConfig?.sortFieldName
           ? undefined
           : sortConfig?.direction === "ascending"!!,
       sortHandler: handleSort,
@@ -338,28 +333,32 @@ export default function WorkAllocation() {
             <Table data-testid="work-allocation-table">
               <TableHead>
                 <tr>
-                  <TableHeader sortProps={getSortProps("priority")}>
+                  <TableHeader sortProps={getTableSortProps("Priority")}>
                     Priority
                   </TableHeader>
-                  <TableHeader sortProps={getSortProps("workNumber")}>
+                  <TableHeader sortProps={getTableSortProps("SGP Number")}>
                     SGP Number
                   </TableHeader>
-                  <TableHeader sortProps={getSortProps("workType")}>
+                  <TableHeader sortProps={getTableSortProps("Work Type")}>
                     Work Type
                   </TableHeader>
-                  <TableHeader sortProps={getSortProps("project")}>
+                  <TableHeader sortProps={getTableSortProps("Project")}>
                     Project
                   </TableHeader>
-                  <TableHeader sortProps={getSortProps("code")}>
+                  <TableHeader sortProps={getTableSortProps("Cost Code")}>
                     Cost Code
                   </TableHeader>
-                  <TableHeader sortProps={getSortProps("numBlocks")}>
+                  <TableHeader
+                    sortProps={getTableSortProps("Number of Blocks")}
+                  >
                     Number of Blocks
                   </TableHeader>
-                  <TableHeader sortProps={getSortProps("numSlides")}>
+                  <TableHeader
+                    sortProps={getTableSortProps("Number of Slides")}
+                  >
                     Number of Slides
                   </TableHeader>
-                  <TableHeader sortProps={getSortProps("status")}>
+                  <TableHeader sortProps={getTableSortProps("Status")}>
                     Status
                   </TableHeader>
                   <TableHeader />

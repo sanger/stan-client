@@ -4,22 +4,18 @@ import { alphaNumericSortDefault } from "../../types/stan";
 
 export type SortConfigProps = {
   /**
+   *unique identifier for a field
+   */
+  sortFieldName: string;
+  /**
    * Field to sort
    **/
-  primaryKey: string;
+  accessPath: string[];
 
   /**
    * Sort direction - ascending or descending
    */
   direction: SortDirection;
-
-  /**
-   * Optional secondary key (
-   * Useful in cases where you have multiple inner objects with same field.
-   * For e.g workType and project objects need to be sorted with 'name' field
-   * primaryKey as 'workType' or 'project' and secondaryKey as 'name'
-   * */
-  secondaryKey?: string;
 
   /**
    * custom sort functionality for the field
@@ -39,7 +35,7 @@ export function useTableSort<T extends StringKeyedProps>(
   config: SortConfigProps | null = null
 ) {
   /**
-   * Sort configurationb state
+   * Sort configuration state
    */
   const [sortConfig, setSortConfig] = React.useState(config);
 
@@ -48,17 +44,9 @@ export function useTableSort<T extends StringKeyedProps>(
     let sortableItems = [...items];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        /**Get value to sort based on primaryKey and secondaryKey**/
-        let aVal = getPropertyValue(
-          a,
-          sortConfig.primaryKey,
-          sortConfig.secondaryKey
-        );
-        let bVal = getPropertyValue(
-          b,
-          sortConfig.primaryKey,
-          sortConfig.secondaryKey
-        );
+        /**Get value to sort based on keys to traverse in sortFieldPath**/
+        let aVal = getPropertyValue(a, sortConfig.accessPath);
+        let bVal = getPropertyValue(b, sortConfig.accessPath);
 
         /**If custom sort function is given, use that to sort values**/
         if (sortConfig.customSort) {
@@ -100,22 +88,23 @@ export function useTableSort<T extends StringKeyedProps>(
   }, [items, sortConfig]);
 
   /**sort action call*/
+
   const sort = (
-    key: string,
-    subPropertyKey?: string,
+    sortFieldName: string,
+    accessPath: string[],
     customSort?: (a: any, b: any) => number
   ) => {
-    let direction: SortDirection = "ascending";
+    let direction: SortDirection = "descending";
     if (
       sortConfig &&
-      sortConfig.primaryKey === key &&
-      sortConfig.direction === "ascending"
+      sortConfig.sortFieldName === sortFieldName &&
+      sortConfig.direction === "descending"
     ) {
-      direction = "descending";
+      direction = "ascending";
     }
     setSortConfig({
-      primaryKey: key,
-      secondaryKey: subPropertyKey,
+      sortFieldName,
+      accessPath,
       direction,
       customSort,
     });

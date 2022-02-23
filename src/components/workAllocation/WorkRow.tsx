@@ -162,7 +162,7 @@ export default function WorkRow({
     if (priority.length > 3) {
       errorMessage = "Invalid format";
     }
-    const priorityRegEx = /^[A-Z]\d{1,2}/;
+    const priorityRegEx = /^[A-Z]\d+$/;
     if (!priorityRegEx.test(priority.toUpperCase())) {
       errorMessage = "Invalid format";
     }
