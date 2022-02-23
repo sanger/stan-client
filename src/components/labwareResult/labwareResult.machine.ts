@@ -70,7 +70,6 @@ export default function createLabwareResultMachine({
 
           ctx.labwareResult.sampleResults.forEach((sr) => {
             sr.result = PassFail.Pass;
-            sr.commentId = undefined;
           });
         }),
 
@@ -78,7 +77,6 @@ export default function createLabwareResultMachine({
           if (e.type !== "FAIL_ALL") return;
           ctx.labwareResult.sampleResults.forEach((sr) => {
             sr.result = PassFail.Fail;
-            sr.commentId = undefined;
           });
         }),
 
@@ -91,7 +89,6 @@ export default function createLabwareResultMachine({
 
           if (sampleResult) {
             sampleResult.result = PassFail.Pass;
-            sampleResult.commentId = undefined;
           }
         }),
 
@@ -104,7 +101,6 @@ export default function createLabwareResultMachine({
 
           if (sampleResult) {
             sampleResult.result = PassFail.Fail;
-            sampleResult.commentId = undefined;
           }
         }),
 
@@ -115,7 +111,7 @@ export default function createLabwareResultMachine({
             (sr) => sr.address === e.address
           );
 
-          if (sampleResult?.result !== PassFail.Fail) {
+          if (!sampleResult?.result) {
             return;
           }
 
@@ -126,7 +122,7 @@ export default function createLabwareResultMachine({
           if (e.type !== "SET_ALL_COMMENTS") return;
 
           ctx.labwareResult.sampleResults.forEach((sr) => {
-            if (sr.result === PassFail.Fail) {
+            if (sr.result) {
               sr.commentId = e.commentId;
             }
           });

@@ -32,8 +32,8 @@ describe("Staining QC", () => {
         });
       });
 
-      it("has all comment dropdowns disabled", () => {
-        cy.findByTestId("passFailComments").get("select").should("be.disabled");
+      it("has comment dropdowns enabled", () => {
+        cy.findByTestId("passFailComments").get("select").should("be.enabled");
       });
     });
 

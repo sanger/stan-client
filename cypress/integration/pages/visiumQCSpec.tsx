@@ -56,8 +56,8 @@ describe("Visium QC Page", () => {
           });
         });
       });
-      it("has all comment dropdowns disabled", () => {
-        cy.findByTestId("passFailComments").get("select").should("be.disabled");
+      it("has all comment dropdowns enabled", () => {
+        cy.findByTestId("passFailComments").get("select").should("be.enabled");
       });
     });
     context("When user clicks Fail All button", () => {
