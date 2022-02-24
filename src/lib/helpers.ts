@@ -392,7 +392,9 @@ export const getPropertyValue = (
   let propValue: any = obj;
   for (let indx = 0; indx < propertyPath.length; indx++) {
     const val = propValue[propertyPath[indx]];
-    if (!val) break;
+    if (!val) {
+      return "";
+    }
     propValue = val;
   }
   if (propValue instanceof Date) {
