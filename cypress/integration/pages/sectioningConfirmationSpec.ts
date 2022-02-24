@@ -152,7 +152,7 @@ describe("Sectioning Confirmation", () => {
       });
       it("displays Print option in the success dialog", () => {
         cy.findByTestId("print-div").within(() => {
-          cy.findByText("Print labels").should("be.visible");
+          cy.findByText("Tube").should("be.visible");
           cy.findByRole("table").contains("td", "STAN-0001F");
           cy.findByRole("table").contains("td", "STAN-0001E");
         });

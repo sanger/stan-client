@@ -8,19 +8,15 @@ import {
 } from "../../types/sdk";
 import SectioningConfirm from "../../components/sectioningConfirm/SectioningConfirm";
 import { Link, Prompt, useLocation } from "react-router-dom";
-import { useConfirmLeave, usePrinters } from "../../lib/hooks";
+import { useConfirmLeave } from "../../lib/hooks";
 import { history } from "../../lib/sdk";
-import DataTable from "../../components/DataTable";
-import LabelPrinter, { PrintResult } from "../../components/LabelPrinter";
-import { CellProps } from "react-table";
-import LabelPrinterButton from "../../components/LabelPrinterButton";
-import labwareScanTableColumns from "../../components/dataTable/labwareColumns";
 import Heading from "../../components/Heading";
 import BlueButton from "../../components/buttons/BlueButton";
-import OperationCompleteModal from "../../components/modal/OperationCompleteModal";
-import { ModalBody, ModalHeader } from "../../components/Modal";
+import { motion } from "framer-motion";
+import { ModalBody } from "../../components/Modal";
 import Success from "../../components/notifications/Success";
-import Warning from "../../components/notifications/Warning";
+import variants from "../../lib/motionVariants";
+import { ConfirmPrintLabware } from "../../components/sectioningConfirm/ConfirmPrintLabware";
 
 type SectioningConfirmProps = {
   readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
@@ -34,30 +30,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
     LabwareFieldsFragment[]
   >([]);
 
-  const {
-    handleOnPrint,
-    handleOnPrintError,
-    printResult,
-    currentPrinter,
-    handleOnPrinterChange,
-  } = usePrinters();
-
-  // Special case column that renders a label printer button for each row
-  const printColumn = {
-    id: "printer",
-    Header: "",
-    Cell: (props: CellProps<LabwareFieldsFragment>) => (
-      <LabelPrinterButton
-        labwares={[props.row.original]}
-        selectedPrinter={currentPrinter}
-        onPrint={handleOnPrint}
-        onPrintError={handleOnPrintError}
-      />
-    ),
-  };
-
   const labwaresGroupedByType = React.useMemo(() => {
-    debugger;
     const confirmedLabwareTypes = confirmedLabwares.reduce(
       (prev: string[], labware) => {
         if (!prev.includes(labware.labwareType.name)) {
@@ -79,14 +52,13 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
     return labwareGroups;
   }, [confirmedLabwares]);
 
-  const columns = [labwareScanTableColumns.barcode(), printColumn];
   return (
     <AppShell>
       <AppShell.Header>
         <AppShell.Title>Sectioning - Confirmation</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        <div className="my-4 mx-auto max-w-screen-xl space-y-16">
+        <div className="my-4 mx-auto max-w-screen-xl ">
           {confirmedLabwares.length <= 0 ? (
             <SectioningConfirm
               initialPlans={plans}
@@ -96,53 +68,46 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
                   setConfirmedLabwares(labwares ?? []);
                 }
                 setShouldConfirm(false);
+                window.scrollTo(0, 0);
               }}
             />
           ) : (
             <>
-              <div
+              <motion.div
+                variants={variants.fadeInWithLift}
                 data-testid="print-div"
-                className="w-full space-y-4 py-4 px-8 mb-6"
+                className="w-full py-4 px-8 mb-6"
               >
-                <Heading level={2}>{"Operation Complete"}</Heading>
-                <ModalBody>
-                  {<Success message={"Sections Confirmed"} />}
-                </ModalBody>
-                <div className="mb-8" />
-                {labwaresGroupedByType.map((labwaresByType) => (
-                  <div className={"space-y-4 px-4"}>
-                    <Heading
-                      level={3}
-                      showBorder={false}
-                    >{`${labwaresByType[0].labwareType.name} Labels`}</Heading>
-                    <DataTable columns={columns} data={labwaresByType} />
-
-                    <LabelPrinter
+                <div className="space-y-6">
+                  <Heading level={2}>{"Operation Complete"}</Heading>
+                  <ModalBody>
+                    {<Success message={"Sections Confirmed"} />}
+                  </ModalBody>
+                  {labwaresGroupedByType.map((labwaresByType) => (
+                    <ConfirmPrintLabware
+                      key={labwaresByType[0].labwareType.name}
+                      labwareType={`${labwaresByType[0].labwareType.name}`}
                       labwares={labwaresByType}
-                      showNotifications={false}
-                      onPrinterChange={handleOnPrinterChange}
-                      onPrint={handleOnPrint}
-                      onPrintError={handleOnPrintError}
                     />
-                    {printResult && <PrintResult result={printResult} />}
-                  </div>
-                ))}
-
-                <div className="flex-shrink-0 max-w-screen-xl mx-auto">
+                  ))}
+                </div>
+                <div className="flex-shrink-0 max-w-screen-xl mx-auto mt-12">
                   <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">
-                    <p className="my-3 text-gray-800 text-sm leading-normal">
+                    <p className="my-3 text-gray-800 text-center text-sm  leading-normal">
                       If you wish to store all sectioned slides click
-                      <span className="font-bold text-gray-900"> “Store” </span>
-                      button. Otherwise click
+                      <span className="font-bold text-gray-900"> Store </span>
+                      button.
+                    </p>{" "}
+                    <p className="my-3 text-gray-800 text-center text-sm  leading-normal">
+                      Otherwise click{" "}
                       <span className="font-bold text-gray-900">
                         Reset Form
-                      </span>
-                      to start the process again or return to the
-                      <span className="font-bold text-gray-900">Home</span>
+                      </span>{" "}
+                      to start the process again or return to the{" "}
+                      <span className="font-bold text-gray-900">Home</span>{" "}
                       screen.
                     </p>
-
-                    <div className="flex flex-row items-center justify-center gap-4">
+                    <div className="flex flex-row items-center justify-center gap-4 mt-8">
                       <BlueButton
                         type="button"
                         style={{ marginLeft: "auto" }}
@@ -173,7 +138,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </>
           )}
         </div>
