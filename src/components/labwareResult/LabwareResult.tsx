@@ -95,9 +95,6 @@ export default function LabwareResult({
         <div>
           {isSlotFilled(slot) && (
             <Select
-              disabled={
-                sampleResults.get(slot.address)!.result === PassFail.Pass
-              }
               value={sampleResults.get(slot.address)!.commentId ?? ""}
               emptyOption={true}
               data-testid={"comment"}
