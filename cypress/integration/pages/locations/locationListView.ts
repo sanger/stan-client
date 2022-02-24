@@ -29,7 +29,7 @@ describe("Location - List View", () => {
 
   context("when clicking the cross next to an item barcode", () => {
     before(() => {
-      cy.get("table tr button").first().click();
+      cy.findAllByTestId("removeButton").first().click();
     });
 
     it("shows a confirmation modal", () => {

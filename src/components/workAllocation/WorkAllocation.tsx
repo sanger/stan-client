@@ -10,16 +10,25 @@ import createWorkAllocationMachine, {
 import { useMachine } from "@xstate/react";
 import { optionValues } from "../forms";
 import LoadingSpinner from "../icons/LoadingSpinner";
-import Table, { TableBody, TableHead, TableHeader } from "../Table";
+import Table, { SortProps, TableBody, TableHead, TableHeader } from "../Table";
 import Success from "../notifications/Success";
 import Warning from "../notifications/Warning";
 import * as Yup from "yup";
 import WorkRow from "./WorkRow";
-import { WorkStatus } from "../../types/sdk";
-import { objectKeys, safeParseQueryString, stringify } from "../../lib/helpers";
+import { WorkStatus, WorkWithCommentFieldsFragment } from "../../types/sdk";
+import {
+  getPropertyValue,
+  getTimestampStr,
+  objectKeys,
+  safeParseQueryString,
+  stringify,
+} from "../../lib/helpers";
 import { useLocation } from "react-router-dom";
 import { history } from "../../lib/sdk";
-
+import { useTableSort } from "../../lib/hooks/useTableSort";
+import { statusSort } from "../../types/stan";
+import DownloadIcon from "../icons/DownloadIcon";
+import { useDownload } from "../../lib/hooks/useDownload";
 const initialValues: WorkAllocationFormValues = {
   workType: "",
   costCode: "",
@@ -37,6 +46,17 @@ export type WorkAllocationUrlParams = {
   status: WorkStatus[];
 };
 
+const tableColumnFieldInfo = [
+  { key: "Priority", path: ["work", "priority"] },
+  { key: "SGP Number", path: ["work", "workNumber"] },
+  { key: "Work Type", path: ["work", "workType", "name"] },
+  { key: "Project", path: ["work", "project", "name"] },
+  { key: "Cost Code", path: ["work", "costCode", "code"] },
+  { key: "Number of Blocks", path: ["work", "numBlocks"] },
+  { key: "Number of Slides", path: ["work", "numSlides"] },
+  { key: "Status", path: ["work", "status"] },
+];
+
 /**
  * Schema to validate the deserialized URL search params
  */
@@ -48,7 +68,6 @@ const urlParamsSchema = Yup.object().shape({
 
 export default function WorkAllocation() {
   const location = useLocation();
-
   /**
    * The deserialized URL search params
    */
@@ -65,13 +84,6 @@ export default function WorkAllocation() {
     createWorkAllocationMachine({ urlParams })
   );
 
-  /**
-   * When the URL search params change, send an event to the machine
-   */
-  useEffect(() => {
-    send({ type: "UPDATE_URL_PARAMS", urlParams });
-  }, [send, urlParams]);
-
   const {
     projects,
     costCodes,
@@ -81,6 +93,81 @@ export default function WorkAllocation() {
     requestError,
     successMessage,
   } = current.context;
+
+  /**Hook to sort table*/
+  const { sortedTableData, sort, sortConfig } = useTableSort<
+    WorkWithCommentFieldsFragment
+  >(workWithComments, {
+    sortFieldName: "SGP Number",
+    direction: "descending",
+    accessPath: ["work", "workNumber"],
+  });
+
+  /**
+   * Rebuild the download data  whenever the worWithComments changes
+   */
+  const downloadData = React.useMemo(() => {
+    return {
+      columnData: {
+        columnNames: tableColumnFieldInfo.map((info) => info.key),
+      },
+      entries: workWithComments.map((data) => {
+        return tableColumnFieldInfo.map((columnInfo) => {
+          return String(getPropertyValue(data, columnInfo.path));
+        });
+      }),
+    };
+  }, [workWithComments]);
+
+  /**Custom hook to download data**/
+  const { downloadURL } = useDownload<string[]>(downloadData);
+
+  /**
+   * When the URL search params change, send an event to the machine
+   */
+  useEffect(() => {
+    send({ type: "UPDATE_URL_PARAMS", urlParams });
+  }, [send, urlParams]);
+
+  /**Update the workWithComments with sort order**/
+  useEffect(() => {
+    send({ type: "SORT_WORKS", workWithComments: sortedTableData });
+  }, [sortedTableData, send]);
+
+  /**Handler to update works with changes - Update work allocation data whenever any field is edited**/
+  const onWorkUpdate = React.useCallback(
+    (rowIndex: number, work: WorkWithCommentFieldsFragment) => {
+      send({ type: "UPDATE_WORK", workWithComment: work, rowIndex });
+    },
+    [send]
+  );
+
+  /**Handler to do sorting on user action**/
+  const handleSort = React.useCallback(
+    (uniqueSortField: string) => {
+      let customSort = uniqueSortField === "status" ? statusSort : undefined;
+      const fieldInfo = tableColumnFieldInfo.find(
+        (fieldInfo) => fieldInfo.key === uniqueSortField
+      );
+      if (!fieldInfo) {
+        return;
+      }
+      sort(uniqueSortField, fieldInfo.path, customSort);
+    },
+    [sort]
+  );
+
+  /**Fill in sort properties for table**/
+  const getTableSortProps = (sortFieldName: string): SortProps | undefined => {
+    return {
+      sortFieldName,
+      ascending:
+        sortConfig && sortFieldName !== sortConfig?.sortFieldName
+          ? undefined
+          : sortConfig?.direction === "ascending"!!,
+      sortHandler: handleSort,
+    };
+  };
 
   /**
    * Form validation schema
@@ -231,30 +318,65 @@ export default function WorkAllocation() {
             <LoadingSpinner />
           </div>
         ) : (
-          <Table data-testid="work-allocation-table">
-            <TableHead>
-              <tr>
-                <TableHeader>Priority</TableHeader>
-                <TableHeader>SGP Number</TableHeader>
-                <TableHeader>Work Type</TableHeader>
-                <TableHeader>Project</TableHeader>
-                <TableHeader>Cost Code</TableHeader>
-                <TableHeader>Number of Blocks</TableHeader>
-                <TableHeader>Number of Slides</TableHeader>
-                <TableHeader>Status</TableHeader>
-                <TableHeader />
-              </tr>
-            </TableHead>
-            <TableBody>
-              {workWithComments.map((workWithComment) => (
-                <WorkRow
-                  initialWork={workWithComment}
-                  availableComments={availableComments}
-                  key={workWithComment.work.workNumber}
-                />
-              ))}
-            </TableBody>
-          </Table>
+          <>
+            <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
+              <p className="text-sm text-gray-700">
+                Records for SGP management
+              </p>
+              <a
+                href={downloadURL}
+                download={`${getTimestampStr()}_sgp_management.tsv`}
+              >
+                <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
+              </a>
+            </div>
+            <Table data-testid="work-allocation-table">
+              <TableHead>
+                <tr>
+                  <TableHeader sortProps={getTableSortProps("Priority")}>
+                    Priority
+                  </TableHeader>
+                  <TableHeader sortProps={getTableSortProps("SGP Number")}>
+                    SGP Number
+                  </TableHeader>
+                  <TableHeader sortProps={getTableSortProps("Work Type")}>
+                    Work Type
+                  </TableHeader>
+                  <TableHeader sortProps={getTableSortProps("Project")}>
+                    Project
+                  </TableHeader>
+                  <TableHeader sortProps={getTableSortProps("Cost Code")}>
+                    Cost Code
+                  </TableHeader>
+                  <TableHeader
+                    sortProps={getTableSortProps("Number of Blocks")}
+                  >
+                    Number of Blocks
+                  </TableHeader>
+                  <TableHeader
+                    sortProps={getTableSortProps("Number of Slides")}
+                  >
+                    Number of Slides
+                  </TableHeader>
+                  <TableHeader sortProps={getTableSortProps("Status")}>
+                    Status
+                  </TableHeader>
+                  <TableHeader />
+                </tr>
+              </TableHead>
+              <TableBody>
+                {sortedTableData.map((workWithComment, index) => (
+                  <WorkRow
+                    initialWork={workWithComment}
+                    availableComments={availableComments}
+                    key={workWithComment.work.workNumber}
+                    rowIndex={index}
+                    onWorkFieldUpdate={onWorkUpdate}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </>
         )}
       </div>
     </div>

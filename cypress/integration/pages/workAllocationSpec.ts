@@ -56,7 +56,7 @@ describe("Work Allocation", () => {
   describe("Editing the number of blocks and slides column for Work ", () => {
     context("Entering a value in 'Number of blocks' cell in table", () => {
       before(() => {
-        cy.get("td").eq(5).type("8");
+        cy.get("table").find("tr").eq(2).find("td").eq(5).type("8");
         //change the focus
         cy.findAllByRole("button", { name: /Edit Status/i }).then(
           (editButtons) => {
@@ -66,12 +66,12 @@ describe("Work Allocation", () => {
       });
 
       it("updates the number of blocks", () => {
-        cy.findByTestId("SGP1001" + "-" + "block").should("have.value", 8);
+        cy.findByTestId("SGP1008" + "-" + "block").should("have.value", 8);
       });
     });
     context("Entering a value in 'Number of slides' cell in table", () => {
       before(() => {
-        cy.get("td").eq(6).type("3");
+        cy.get("table").find("tr").eq(2).find("td").eq(6).type("3");
         //change the focus
         cy.findAllByRole("button", { name: /Edit Status/i }).then(
           (editButtons) => {
@@ -81,7 +81,7 @@ describe("Work Allocation", () => {
       });
 
       it("updates the number of slides", () => {
-        cy.findByTestId("SGP1001" + "-" + "slide").should("have.value", 3);
+        cy.findByTestId("SGP1008" + "-" + "slide").should("have.value", 3);
       });
     });
   });
@@ -89,7 +89,7 @@ describe("Work Allocation", () => {
   describe("Editing the priority column for Work ", () => {
     context("Entering a value in 'Priority' cell in table", () => {
       before(() => {
-        cy.get("td").eq(0).type("A1");
+        cy.get("td").eq(0).type("A12");
         //change the focus
         cy.findAllByRole("button", { name: /Edit Status/i }).then(
           (editButtons) => {
@@ -99,9 +99,9 @@ describe("Work Allocation", () => {
       });
 
       it("updates priority", () => {
-        cy.findByTestId("SGP1001" + "-" + "priority").should(
+        cy.findByTestId("SGP1009" + "-" + "priority").should(
           "have.value",
-          "A1"
+          "A12"
         );
       });
     });
@@ -152,6 +152,18 @@ describe("Work Allocation", () => {
       });
     });
   });
+  describe("Sorting the SGP management table ", () => {
+    context("while sorting using SGP number", () => {
+      before(() => {
+        cy.findByRole("button", { name: /SGP Number/i }).click();
+      });
+
+      it("displays the table sorted with SGP number in ascending order", () => {
+        cy.get("td").eq(1).should("have.text", "R&D1005");
+      });
+    });
+  });
+
   /*
   describe("Comments are shown or hidden dependent on chosen new status", () => {
     before(() => {

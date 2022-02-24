@@ -79,7 +79,10 @@ describe("Work Progress", () => {
         cy.findByRole("button", { name: /Search/i }).click();
       });
       it("shows a list of results", () => {
-        cy.findByRole("table").contains("SGP/R&D Number");
+        cy.findByRole("table").should("exist");
+      });
+      it("shows priority column in list of results", () => {
+        cy.findByRole("table").contains("Priority");
       });
     });
   });

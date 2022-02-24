@@ -1,7 +1,8 @@
-import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size} from "./sdk";
+import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size, WorkStatus} from "./sdk";
 import {Location} from "history";
 import {ClientError} from "graphql-request";
 import * as Yup from "yup";
+import {regexSort} from "../lib/helpers";
 
 /**
  * Union of STAN's {@link OperationType} names
@@ -270,3 +271,31 @@ export const historySchema = Yup.object({
 }).required();
 
 export type HistoryProps = HistoryStrProps | HistoryNumProps;
+
+/**
+ * Sort functionality for Status. The status need to be sorted in the order "active", "completed", "paused", "failed"
+ * @param rowAStatus
+ * @param rowBStatus
+ */
+export const statusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
+  const statusArray: WorkStatus[] = [
+    WorkStatus.Active,
+    WorkStatus.Completed,
+    WorkStatus.Paused,
+    WorkStatus.Failed,
+    WorkStatus.Unstarted,
+  ];
+  return (
+      statusArray.findIndex((val) => val === rowAStatus) -
+      statusArray.findIndex((val) => val === rowBStatus)
+  );
+};
+
+/**
+ * Sorts alphanumeric strings with alphabetical order  followed by number sort
+ */
+export const alphaNumericSortDefault = (a:string, b:string) :number => {
+  const regAlpha = /[^a-zA-Z]*/g;
+  const regNumeric = /[^0-9]*/g;
+  return regexSort(a, b, {alpha: regAlpha, numeric: regNumeric});
+}

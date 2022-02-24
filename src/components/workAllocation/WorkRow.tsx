@@ -42,6 +42,12 @@ type WorkRowProps = {
    * The comments available for the user to select when updating Work status
    */
   availableComments: Array<CommentFieldsFragment>;
+
+  rowIndex: number;
+  onWorkFieldUpdate: (
+    index: number,
+    work: WorkWithCommentFieldsFragment
+  ) => void;
 };
 
 /**
@@ -51,6 +57,8 @@ type WorkRowProps = {
 export default function WorkRow({
   initialWork,
   availableComments,
+  rowIndex,
+  onWorkFieldUpdate,
 }: WorkRowProps) {
   const [current, send] = useMachine(
     createWorkRowMachine({ workWithComment: initialWork })
@@ -61,6 +69,17 @@ export default function WorkRow({
     workWithComment: { work, comment },
   } = current.context;
 
+  /**Notify the changes in work fields*/
+  React.useEffect(() => {
+    if (
+      current.event.type === "done.invoke.updateWorkPriority" ||
+      current.event.type === "done.invoke.updateWorkNumSlides" ||
+      current.event.type === "done.invoke.updateWorkNumBlocks" ||
+      current.event.type === "done.invoke.updateWorkStatus"
+    ) {
+      onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
+    }
+  }, [work, comment, onWorkFieldUpdate, rowIndex, current]);
   /**
    * Should the edit button by displayed to the user right now
    */
@@ -140,26 +159,25 @@ export default function WorkRow({
   const validateWorkPriority = (priority: string) => {
     let errorMessage = "";
     if (priority.length === 0) return errorMessage;
-    if (priority.length !== 2) {
+    if (priority.length > 3) {
       errorMessage = "Invalid format";
     }
-    const priorityRegEx = /^[A-Z]\d/;
+    const priorityRegEx = /^[A-Z]\d+$/;
     if (!priorityRegEx.test(priority.toUpperCase())) {
       errorMessage = "Invalid format";
     }
     return errorMessage;
   };
 
-  const isUpdatePriorityForStatus = (status: WorkStatus) => {
+  const isEditEnabledForStatus = (status: WorkStatus) => {
     return status !== WorkStatus.Failed && status !== WorkStatus.Completed;
   };
-
   return (
     <tr>
       <TableCell>
         {
           /**Once workrequest is failed or completed then priority need to be cleared**/
-          isUpdatePriorityForStatus(work.status) ? (
+          isEditEnabledForStatus(work.status) ? (
             <Formik
               initialValues={{ priority: work.priority ?? "" }}
               onSubmit={() => {}}
@@ -168,10 +186,11 @@ export default function WorkRow({
                 return (
                   <Form>
                     <FormikInput
+                      style={{ width: "100%" }}
                       label={""}
                       name={"priority"}
                       data-testid={`${work.workNumber}-priority`}
-                      className={`border-0 border-gray-100 w-12`}
+                      className={`border-0 border-gray-100`}
                       onChange={(e: React.FormEvent<HTMLInputElement>) => {
                         const priority = e.currentTarget.value.toUpperCase();
                         setFieldValue("priority", priority);
@@ -198,18 +217,20 @@ export default function WorkRow({
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
-        {renderWorkNumValueField(
-          work.workNumber,
-          work.numBlocks ?? undefined,
-          "block"
-        )}
+        {isEditEnabledForStatus(work.status) &&
+          renderWorkNumValueField(
+            work.workNumber,
+            work.numBlocks ?? undefined,
+            "block"
+          )}
       </TableCell>
       <TableCell>
-        {renderWorkNumValueField(
-          work.workNumber,
-          work.numSlides ?? undefined,
-          "slide"
-        )}
+        {isEditEnabledForStatus(work.status) &&
+          renderWorkNumValueField(
+            work.workNumber,
+            work.numSlides ?? undefined,
+            "slide"
+          )}
       </TableCell>
       {!editModeEnabled && (
         <TableCell>

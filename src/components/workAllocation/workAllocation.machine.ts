@@ -59,7 +59,16 @@ type WorkAllocationEvent =
       type: "ALLOCATE_WORK";
       values: WorkAllocationFormValues;
     }
-  | { type: "UPDATE_URL_PARAMS"; urlParams: WorkAllocationUrlParams };
+  | { type: "UPDATE_URL_PARAMS"; urlParams: WorkAllocationUrlParams }
+  | {
+      type: "UPDATE_WORK";
+      workWithComment: WorkWithCommentFieldsFragment;
+      rowIndex: number;
+    }
+  | {
+      type: "SORT_WORKS";
+      workWithComments: WorkWithCommentFieldsFragment[];
+    };
 
 type WorkAllocationContext = {
   /**
@@ -110,6 +119,7 @@ type CreateWorkAllocationMachineParams = {
 export default function createWorkAllocationMachine({
   urlParams,
 }: CreateWorkAllocationMachineParams) {
+  /**Hook to sort table*/
   return createMachine<WorkAllocationContext, WorkAllocationEvent>(
     {
       id: "workAllocation",
@@ -137,6 +147,14 @@ export default function createWorkAllocationMachine({
             UPDATE_URL_PARAMS: {
               actions: "assignUrlParams",
               target: "loading",
+            },
+            UPDATE_WORK: {
+              actions: "updateWork",
+              target: "ready",
+            },
+            SORT_WORKS: {
+              actions: "assignSortedWorks",
+              target: "ready",
             },
           },
         },
@@ -203,6 +221,16 @@ export default function createWorkAllocationMachine({
           ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideMsg}) to project ${project.name} and cost code ${costCode.code} `;
         }),
 
+        updateWork: assign((ctx, e) => {
+          if (e.type !== "UPDATE_WORK") return;
+          ctx.workWithComments.splice(e.rowIndex, 1, e.workWithComment);
+        }),
+        assignSortedWorks: assign((ctx, e) => {
+          if (e.type !== "SORT_WORKS") return;
+          e.workWithComments.forEach((workWithComment, indx) => {
+            ctx.workWithComments.splice(indx, 1, workWithComment);
+          });
+        }),
         clearNotifications: assign((ctx) => {
           ctx.successMessage = undefined;
           ctx.requestError = undefined;

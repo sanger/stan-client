@@ -167,8 +167,8 @@ const DataTableComponent = <T extends Object>(
     </Table>
   );
 };
-// Cast the output
 
+// Cast the output
 const DataTable = React.forwardRef(DataTableComponent) as <T extends Object>(
   p: React.PropsWithChildren<DataTableProps<T>> & {
     ref?: React.Ref<T[]>;

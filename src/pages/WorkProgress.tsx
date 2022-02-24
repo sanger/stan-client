@@ -23,7 +23,11 @@ import DataTable from "../components/DataTable";
 import { ClientError } from "graphql-request";
 import { Cell, Column } from "react-table";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
-import { SearchResultsType } from "../types/stan";
+import {
+  alphaNumericSortDefault,
+  SearchResultsType,
+  statusSort,
+} from "../types/stan";
 import { useLocation } from "react-router-dom";
 import WorkProgressInput, {
   workProgressSearchSchema,
@@ -279,24 +283,6 @@ const getDateSortType = (
   if (rowADate) return 1;
   return 0;
 };
-/**
- * Sort functionality for Status. The status need to be sorted in the order "active", "completed", "paused", "failed"
- * @param rowAStatus
- * @param rowBStatus
- */
-const getStatusSortType = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
-  const statusArray: WorkStatus[] = [
-    WorkStatus.Active,
-    WorkStatus.Completed,
-    WorkStatus.Paused,
-    WorkStatus.Failed,
-    WorkStatus.Unstarted,
-  ];
-  return (
-    statusArray.findIndex((val) => val === rowAStatus) -
-    statusArray.findIndex((val) => val === rowBStatus)
-  );
-};
 
 const formatDateFieldDisplay = (
   props: Cell<WorkProgressResultTableEntry>,
@@ -316,6 +302,10 @@ const formatDateFieldDisplay = (
 };
 const columns: Column<WorkProgressResultTableEntry>[] = [
   {
+    Header: "Priority",
+    accessor: "priority",
+  },
+  {
     Header: "SGP/R&D Number",
     accessor: "workNumber",
     Cell: (props: Cell<WorkProgressResultTableEntry>) => {
@@ -331,23 +321,17 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
       );
     },
     sortType: (rowA, rowB) => {
-      const displayNameA = rowA.original.workNumber;
-      const displayNameB = rowB.original.workNumber;
-      if (displayNameA && displayNameB) {
-        if (displayNameA > displayNameB) return 1;
-        if (displayNameA < displayNameB) return -1;
-        return 0;
-      }
-      if (displayNameA && !displayNameB) return 1;
-      if (!displayNameA && displayNameB) return -1;
-      return 0;
+      return alphaNumericSortDefault(
+        rowA.original.workNumber,
+        rowB.original.workNumber
+      );
     },
   },
   {
     Header: "Status",
     accessor: "status",
     sortType: (rowA, rowB) => {
-      return getStatusSortType(rowA.original.status, rowB.original.status);
+      return statusSort(rowA.original.status, rowB.original.status);
     },
   },
   {

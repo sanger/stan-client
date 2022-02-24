@@ -248,6 +248,8 @@ export function getEnumKeyByEnumValue<T extends { [index: string]: string }>(
   return Object.keys(enumType).find((x) => enumType[x] === enumValue);
 }
 
+export type StringKeyedProps = { [key: string | number]: any };
+
 /**
  * Creates the content for an export file
  *
@@ -256,7 +258,6 @@ export function getEnumKeyByEnumValue<T extends { [index: string]: string }>(
  * @param entries the data to go into the file, or as a string array of values (assumes that it is in same order of columns)
  * @param delimiter (optional) the column delimiter
  */
-export type StringKeyedProps = { [key: string | number]: any };
 export function createDownloadFileContent<T extends StringKeyedProps>(
   columns: Array<Column<T>>,
   entries: Array<T> | Array<Array<string>>,
@@ -298,3 +299,107 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
 
   return `${columnNameRow}\n${rows}`;
 }
+
+/**
+ * Creates the content for an export file
+ *
+ * @param columnNames list of column header names to build. Note that the columns must have their {@code Header}
+ *        and {@code accessor} (as a string) set
+ * @param columnAccessPath member field names in an object to access column values
+ * @param entries the data to go into the file, or as a string array of values (assumes that it is in same order of columns)
+ * @param delimiter (optional) the column delimiter
+ */
+export function createDownloadFileContentFromObjectKeys<
+  T extends StringKeyedProps
+>(
+  columnNames: Array<string>,
+  columnAccessPath: Array<Array<string>>,
+  entries: Array<T> | Array<Array<string>>,
+  delimiter?: string
+): string {
+  if (!delimiter) {
+    delimiter = "\t";
+  }
+  const columnNameRow = columnNames.join(delimiter);
+  const rows = entries
+    .map((entry) => {
+      if (Array.isArray(entry)) {
+        return entry.map((val) => val).join(delimiter);
+      } else {
+        return columnAccessPath
+          .map((columnPath) => {
+            const value = getPropertyValue(entry, columnPath);
+            return String(value);
+          })
+          .join(delimiter);
+      }
+    })
+    .join("\n");
+  return `${columnNameRow}\n${rows}`;
+}
+
+export type SortDirection = "ascending" | "descending";
+/**
+ * Function to sort alphaNumeric values based on reg expressions given. Thisvsorts
+ * @param a
+ * @param b
+ * @param regExp  Reg expressions for string and numeric parts.
+ * @param alphaFirst Flag to sort first on alpha and then numeric or viceversa.
+ */
+export function regexSort(
+  a: string,
+  b: string,
+  regExp: { alpha: RegExp; numeric: RegExp },
+  alphaFirst: boolean = true
+): number {
+  let aPrim: string | number;
+  let aSec: string | number;
+  let bPrim: string | number;
+  let bSec: string | number;
+
+  let aAlpha = (aPrim = a.replace(regExp.alpha, ""));
+  const bAlpha = (bPrim = b.replace(regExp.alpha, ""));
+  const aNumericVal = a.replace(regExp.numeric, "");
+  const bNumericVal = b.replace(regExp.numeric, "");
+  const aNumeric = (aSec =
+    aNumericVal !== "" ? parseInt(aNumericVal, 10) : Number.MAX_VALUE);
+  const bNumeric = (bSec =
+    bNumericVal !== "" ? parseInt(bNumericVal, 10) : Number.MAX_VALUE);
+  if (!alphaFirst) {
+    aPrim = aNumeric;
+    bPrim = bNumeric;
+    aSec = aAlpha;
+    bSec = bAlpha;
+  }
+
+  if (aPrim === bPrim) {
+    return aSec === bSec ? 0 : aSec > bSec ? 1 : -1;
+  } else {
+    return aPrim > bPrim ? 1 : -1;
+  }
+}
+
+/**Get value for a property field from an object using the given path
+ * @param obj Object to search for
+ * @param propertyPath Property names to traverse the object to reach the required search property field
+ * @example  To get 'name' field value in a 'work' object - 'work'  holds a property 'workType' which is an object with 'name' field
+ *            the path should be ["workType","name"]
+ ***/
+export const getPropertyValue = (
+  obj: StringKeyedProps,
+  propertyPath: string[]
+): number | string => {
+  let propValue: any = obj;
+  for (let indx = 0; indx < propertyPath.length; indx++) {
+    const val = propValue[propertyPath[indx]];
+    if (!val) {
+      return "";
+    }
+    propValue = val;
+  }
+  if (propValue instanceof Date) {
+    propValue = propValue.getTime();
+  }
+  if (typeof propValue !== "string" && typeof propValue !== "number") return "";
+  return propValue;
+};
