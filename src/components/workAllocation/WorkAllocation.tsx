@@ -120,7 +120,7 @@ export default function WorkAllocation() {
   }, [workWithComments]);
 
   /**Custom hook to download data**/
-  const { downloadURL } = useDownload<string[]>(downloadData);
+  const { downloadURL, extension } = useDownload<string[]>(downloadData);
 
   /**
    * When the URL search params change, send an event to the machine
@@ -325,7 +325,7 @@ export default function WorkAllocation() {
               </p>
               <a
                 href={downloadURL}
-                download={`${getTimestampStr()}_sgp_management.tsv`}
+                download={`${getTimestampStr()}_sgp_management${extension}`}
               >
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>

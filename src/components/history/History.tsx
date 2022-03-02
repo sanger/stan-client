@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect } from "react";
 import createHistoryMachine from "./history.machine";
 import { useMachine } from "@xstate/react";
 import DataTable from "../DataTable";
@@ -10,16 +10,30 @@ import WhiteButton from "../buttons/WhiteButton";
 import LoadingSpinner from "../icons/LoadingSpinner";
 import { LabwareStatePill } from "../LabwareStatePill";
 import DownloadIcon from "../icons/DownloadIcon";
-import { createDownloadFileContent, getTimestampStr } from "../../lib/helpers";
+import { getTimestampStr } from "../../lib/helpers";
+import { useDownload } from "../../lib/hooks/useDownload";
 
 /**
  * Component for looking up and displaying the history of labware and samples
  */
 export default function History(props: HistoryProps) {
   const [current, send] = useMachine(createHistoryMachine(props));
-  const [downloadURL, setDownloadURL] = useState<string>();
 
   const { history, historyProps, serverError } = current.context;
+
+  /**
+   * Rebuild the file object whenever the history changes
+   */
+  const downloadData = React.useMemo(() => {
+    return {
+      columnData: {
+        columns: historyColumns,
+      },
+      entries: history,
+    };
+  }, [history]);
+
+  const { downloadURL, extension } = useDownload(downloadData);
 
   /**
    * If the props change, send an update event to the machine
@@ -27,26 +41,6 @@ export default function History(props: HistoryProps) {
   useEffect(() => {
     send({ type: "UPDATE_HISTORY_PROPS", props });
   }, [props, send]);
-
-  /**
-   * Rebuild the file object whenever the history changes
-   */
-  const historyFile = useMemo(() => {
-    return new Blob([createDownloadFileContent(historyColumns, history)]);
-  }, [history]);
-
-  /**
-   * Whenever the history file changes we need to rebuild the download URL
-   */
-  useEffect(() => {
-    const historyFileURL = URL.createObjectURL(historyFile);
-    setDownloadURL(historyFileURL);
-
-    /**
-     * Cleanup function that revokes the URL when it's no longer needed
-     */
-    return () => URL.revokeObjectURL(historyFileURL);
-  }, [historyFile, setDownloadURL]);
 
   return (
     <div data-testid="history">
@@ -76,7 +70,7 @@ export default function History(props: HistoryProps) {
                 href={downloadURL}
                 download={`${getTimestampStr()}_${historyProps.kind}_${
                   historyProps.value
-                }.tsv`}
+                }${extension}`}
               >
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>

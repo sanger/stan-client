@@ -256,48 +256,39 @@ export type StringKeyedProps = { [key: string | number]: any };
  * @param columns list of columns to build. Note that the columns must have their {@code Header}
  *        and {@code accessor} (as a string) set
  * @param entries the data to go into the file, or as a string array of values (assumes that it is in same order of columns)
- * @param delimiter (optional) the column delimiter
  */
 export function createDownloadFileContent<T extends StringKeyedProps>(
   columns: Array<Column<T>>,
-  entries: Array<T> | Array<Array<string>>,
-  delimiter?: string
-): string {
-  if (!delimiter) {
-    delimiter = "\t";
-  }
-  const columnNameRow = columns.map((column) => column.Header).join(delimiter);
-  const rows = entries
-    .map((entry) => {
-      if (Array.isArray(entry)) {
-        return entry.map((val) => val).join(delimiter);
-      } else {
-        return columns
-          .map((column) => {
-            if (typeof column.accessor === "string") {
-              const value = entry[column.accessor];
-              if (
-                typeof value === "object" &&
-                (value as Object) instanceof Date
-              ) {
-                const date = value as Date;
-                return date.toLocaleDateString();
-              } else if (typeof value === "number") {
-                return String(value);
-              } else {
-                return value;
-              }
-            }
-            throw new Error(
-              "createDownloadFileContent requires all column accessors to be strings"
-            );
-          })
-          .join(delimiter);
-      }
-    })
-    .join("\n");
-
-  return `${columnNameRow}\n${rows}`;
+  entries: Array<T> | Array<Array<string>>
+): Array<Array<string>> {
+  const columnNamesRow = columns.map((column) => String(column.Header));
+  const rows = entries.map((entry) => {
+    if (Array.isArray(entry)) {
+      return entry;
+    } else {
+      return columns.map((column) => {
+        if (typeof column.accessor === "string") {
+          const value = entry[column.accessor];
+          if (Array.isArray(value)) {
+            return value.join(",");
+          }
+          if (typeof value === "object" && (value as Object) instanceof Date) {
+            const date = value as Date;
+            return date.toLocaleDateString();
+          }
+          if (typeof value === "number") {
+            return String(value);
+          }
+          return value;
+        }
+        throw new Error(
+          "createDownloadFileContent requires all column accessors to be strings"
+        );
+      });
+    }
+  });
+  rows.splice(0, 0, columnNamesRow);
+  return rows;
 }
 
 /**
@@ -307,35 +298,26 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
  *        and {@code accessor} (as a string) set
  * @param columnAccessPath member field names in an object to access column values
  * @param entries the data to go into the file, or as a string array of values (assumes that it is in same order of columns)
- * @param delimiter (optional) the column delimiter
  */
 export function createDownloadFileContentFromObjectKeys<
   T extends StringKeyedProps
 >(
   columnNames: Array<string>,
   columnAccessPath: Array<Array<string>>,
-  entries: Array<T> | Array<Array<string>>,
-  delimiter?: string
-): string {
-  if (!delimiter) {
-    delimiter = "\t";
-  }
-  const columnNameRow = columnNames.join(delimiter);
-  const rows = entries
-    .map((entry) => {
-      if (Array.isArray(entry)) {
-        return entry.map((val) => val).join(delimiter);
-      } else {
-        return columnAccessPath
-          .map((columnPath) => {
-            const value = getPropertyValue(entry, columnPath);
-            return String(value);
-          })
-          .join(delimiter);
-      }
-    })
-    .join("\n");
-  return `${columnNameRow}\n${rows}`;
+  entries: Array<T> | Array<Array<string>>
+): Array<Array<string>> {
+  const rows = entries.map((entry) => {
+    if (Array.isArray(entry)) {
+      return entry;
+    } else {
+      return columnAccessPath.map((columnPath) => {
+        const value = getPropertyValue(entry, columnPath);
+        return String(value);
+      });
+    }
+  });
+  rows.splice(0, 0, columnNames);
+  return rows;
 }
 
 export type SortDirection = "ascending" | "descending";

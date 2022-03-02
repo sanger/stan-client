@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   FindWorkProgressQueryVariables,
   FindWorkProgressQueryVariables as WorkProgressQueryInput,
@@ -6,11 +6,7 @@ import {
 } from "../types/sdk";
 
 import AppShell from "../components/AppShell";
-import {
-  createDownloadFileContent,
-  getTimestampStr,
-  safeParseQueryString,
-} from "../lib/helpers";
+import { getTimestampStr, safeParseQueryString } from "../lib/helpers";
 import searchMachine from "../lib/machines/search/searchMachine";
 import { useMachine } from "@xstate/react";
 import Warning from "../components/notifications/Warning";
@@ -35,6 +31,7 @@ import WorkProgressInput, {
 } from "../components/workProgress/WorkProgressInput";
 import StyledLink from "../components/StyledLink";
 import DownloadIcon from "../components/icons/DownloadIcon";
+import { useDownload } from "../lib/hooks/useDownload";
 
 /**
  * Data structure to keep the data associated with this component
@@ -57,9 +54,6 @@ const defaultInitialValues: WorkProgressUrlParams = {
  * */
 const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   const location = useLocation();
-  const [downloadURL, setDownloadURL] = useState<string>(
-    URL.createObjectURL(new Blob())
-  );
 
   const workProgressMachine = searchMachine<
     FindWorkProgressQueryVariables,
@@ -80,6 +74,25 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   } = current.context;
 
   const sortedTableDataRef = React.useRef<WorkProgressResultTableEntry[]>([]);
+  const [downloadFileURL, setFileDownloadURL] = React.useState<string>("");
+
+  /**
+   * Rebuild the file object whenever the searchResult changes
+   */
+  const downloadData = React.useMemo(() => {
+    return {
+      columnData: {
+        columns: columns,
+      },
+      entries: searchResult ? searchResult.entries : [],
+    };
+  }, [searchResult]);
+
+  const { downloadURL, requestDownload, extension } = useDownload(downloadData);
+
+  React.useEffect(() => {
+    setFileDownloadURL(downloadURL);
+  }, [downloadURL, setFileDownloadURL]);
   /**
    * The deserialized URL search params
    */
@@ -100,17 +113,6 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     } else return params;
   }, [location.search, workTypes]);
 
-  useEffect(() => {
-    /**
-     * Cleanup function that revokes the URL when it's no longer needed
-     */
-    return () => {
-      if (downloadURL) {
-        URL.revokeObjectURL(downloadURL);
-      }
-    };
-  }, [downloadURL]);
-
   /**
    * Rebuild the blob object on download action
    */
@@ -120,15 +122,14 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
       : searchResult
       ? searchResult.entries
       : [];
-    const blob = new Blob([
-      createDownloadFileContent(
-        columns.filter((col) => typeof col.accessor === "string"),
-        data
-      ),
-    ]);
-    const workProgressFileURL = URL.createObjectURL(blob);
-    setDownloadURL(workProgressFileURL);
-  }, [searchResult]);
+    const fileurl = requestDownload({
+      columnData: {
+        columns: columns,
+      },
+      entries: data,
+    });
+    setFileDownloadURL(fileurl);
+  }, [searchResult, requestDownload]);
 
   /**
    * When the URL search params change, send an event to the machine
@@ -215,7 +216,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                       </span>
                     </p>
                     <a
-                      href={downloadURL}
+                      href={downloadFileURL}
                       download={`${getTimestampStr()}_${
                         memoUrlParams?.searchType
                       }_${
@@ -224,7 +225,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                           ? memoUrlParams?.searchValues.join("&")
                           : memoUrlParams?.searchValues?.slice(0, 3).join("&") +
                             "&etc"
-                      }.tsv`}
+                      }${extension}`}
                       onClick={handleDownload}
                     >
                       <DownloadIcon

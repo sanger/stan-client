@@ -5,6 +5,7 @@ import {
   createDownloadFileContent,
 } from "../helpers";
 import React, { useState } from "react";
+import { write, utils } from "xlsx";
 
 type ColumnData<T extends StringKeyedProps> = {
   columns: Array<Column<T>>;
@@ -28,73 +29,62 @@ const isTextData = (x: any): x is ColumnTextData =>
 type DownloadProps<T extends StringKeyedProps> = {
   columnData: ColumnDataType<T>;
   entries: Array<T> | Array<Array<string>>;
-  delimiter?: string;
 };
 
-export function useDownload<T>({
-  columnData,
-  entries,
-  delimiter,
-}: DownloadProps<T>) {
+export function useDownload<T>(downloadPropsInput: DownloadProps<T>) {
   const [downloadURL, setDownloadURL] = useState<string>(
     URL.createObjectURL(new Blob())
   );
 
+  /**External request for download**/
   const requestDownload = React.useCallback(
-    (downloadProps: DownloadProps<T>) => {
-      let delimiterVal = downloadProps.delimiter;
-      if (!delimiterVal) {
-        delimiterVal = "\t";
-      }
+    (downloadProps: DownloadProps<T>): string => {
+      const fileType =
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      let downloadData: string[][] = [];
       if (isColumnData(downloadProps.columnData)) {
-        return new Blob([
-          createDownloadFileContent(
-            downloadProps.columnData.columns,
-            downloadProps.entries,
-            delimiterVal
-          ),
-        ]);
-      } else if (isColumnTextData(downloadProps.columnData)) {
-        return new Blob([
-          createDownloadFileContentFromObjectKeys(
-            downloadProps.columnData.columnNames,
-            downloadProps.columnData.columnAccessPath,
-            downloadProps.entries,
-            delimiterVal
-          ),
-        ]);
-      } else if (isTextData(downloadProps.columnData)) {
-        const colNames = downloadProps.columnData.columnNames.join(
-          delimiterVal
+        downloadData = createDownloadFileContent(
+          downloadProps.columnData.columns,
+          downloadProps.entries
         );
-        const values = downloadProps.entries
-          .map((entry) => {
-            return Array.isArray(entry) ? entry.join(delimiterVal) : "";
-          })
-          .join("\n");
-        const downloadData = `${colNames}\n${values}`;
-        return new Blob([downloadData]);
       }
-      return new Blob([]);
+      if (isColumnTextData(downloadProps.columnData)) {
+        downloadData = createDownloadFileContentFromObjectKeys(
+          downloadProps.columnData.columnNames,
+          downloadProps.columnData.columnAccessPath,
+          downloadProps.entries
+        );
+      }
+      if (isTextData(downloadProps.columnData)) {
+        const colNames = downloadProps.columnData.columnNames;
+        downloadData = downloadProps.entries.map((entry) => {
+          return Array.isArray(entry) ? entry : [];
+        });
+        downloadData.splice(0, 0, colNames);
+      }
+      const ws = utils.aoa_to_sheet(downloadData);
+      const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+      const excelBuffer = write(wb, { bookType: "xlsx", type: "array" });
+      const downloadBlob = new Blob([excelBuffer], { type: fileType });
+
+      const downloadFileURL = URL.createObjectURL(downloadBlob);
+      setDownloadURL(downloadFileURL);
+      return downloadFileURL;
     },
-    []
+    [setDownloadURL]
   );
 
-  const downloadFile = React.useMemo(() => {
-    return requestDownload({ columnData, entries, delimiter });
-  }, [entries, delimiter, columnData, requestDownload]);
+  /**update download properties whenever input parameters change**/
+  React.useEffect(() => {
+    requestDownload(downloadPropsInput);
+  }, [downloadPropsInput, requestDownload]);
 
   /**
-   * Whenever the workWithCommentsFile file changes we need to rebuild the download URL
+   * Cleanup function that revokes the URL when it's no longer needed
    */
   React.useEffect(() => {
-    const downloadFileURL = URL.createObjectURL(downloadFile);
-    setDownloadURL(downloadFileURL);
-    /**
-     * Cleanup function that revokes the URL when it's no longer needed
-     */
-    return () => URL.revokeObjectURL(downloadFileURL);
-  }, [downloadFile, setDownloadURL]);
+    return () => URL.revokeObjectURL(downloadURL);
+  }, [downloadURL]);
 
-  return { downloadURL, requestDownload };
+  return { downloadURL, requestDownload, extension: ".xlsx" };
 }
