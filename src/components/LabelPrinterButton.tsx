@@ -70,6 +70,7 @@ const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({
 
   return (
     <button
+      id={"printButton"}
       disabled={current.matches("fetching") || current.matches("printing")}
       onClick={() => send({ type: "PRINT", labelsPerBarcode })}
       type="button"
