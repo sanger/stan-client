@@ -35,6 +35,10 @@ describe("Staining QC", () => {
       it("has comment dropdowns enabled", () => {
         cy.findByTestId("passFailComments").get("select").should("be.enabled");
       });
+
+      it("has coverage field displayed", () => {
+        cy.findAllByTestId("coverage").should("have.length.above", 0);
+      });
     });
 
     context("when clicking the Fail All button", () => {

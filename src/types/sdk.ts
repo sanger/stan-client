@@ -486,6 +486,8 @@ export type LabwareResult = {
   barcode: Scalars['String'];
   /** The individual results. */
   sampleResults: Array<SampleResult>;
+  /** Measurements to record in this labware. */
+  slotMeasurements?: Maybe<Array<SlotMeasurementRequest>>;
 };
 
 /** The state of an item of labware. */

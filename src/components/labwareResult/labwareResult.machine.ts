@@ -24,7 +24,8 @@ type LabwareResultEvent =
   | { type: "PASS"; address: string }
   | { type: "FAIL"; address: string }
   | { type: "SET_COMMENT"; address: string; commentId: number | undefined }
-  | { type: "SET_ALL_COMMENTS"; commentId: number | undefined };
+  | { type: "SET_ALL_COMMENTS"; commentId: number | undefined }
+  | { type: "SET_TISSUE_COVERAGE"; address: string; value: string };
 
 export default function createLabwareResultMachine({
   availableComments,
@@ -58,6 +59,9 @@ export default function createLabwareResultMachine({
             },
             SET_ALL_COMMENTS: {
               actions: "assignAllComments",
+            },
+            SET_TISSUE_COVERAGE: {
+              actions: "assignTissueCoverage",
             },
           },
         },
@@ -126,6 +130,17 @@ export default function createLabwareResultMachine({
               sr.commentId = e.commentId;
             }
           });
+        }),
+
+        assignTissueCoverage: assign((ctx, e) => {
+          if (e.type !== "SET_TISSUE_COVERAGE") return;
+          const slotMeasurement = ctx.labwareResult.slotMeasurements?.find(
+            (sr) => sr.address === e.address
+          );
+          if (!slotMeasurement) {
+            return;
+          }
+          slotMeasurement.value = e.value;
         }),
       },
     }
