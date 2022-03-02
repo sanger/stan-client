@@ -9,6 +9,8 @@ import {
 } from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import commentRepository from "../repositories/commentRepository";
+import { buildLabwareFragment } from "../../lib/helpers/labwareHelper";
+import { createLabware } from "./labwareHandlers";
 
 const sectioningHandlers = [
   graphql.query<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>(
@@ -38,10 +40,16 @@ const sectioningHandlers = [
   graphql.mutation<ConfirmSectionMutation, ConfirmSectionMutationVariables>(
     "ConfirmSection",
     (req, res, ctx) => {
+      const confirmedLabwares = req.variables.request.labware.map(
+        (confirmLabware) => {
+          const labware = createLabware(confirmLabware.barcode);
+          return buildLabwareFragment(labware);
+        }
+      );
       return res(
         ctx.data({
           confirmSection: {
-            labware: [],
+            labware: confirmedLabwares,
             operations: [],
           },
         })
