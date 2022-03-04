@@ -32,6 +32,7 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 
 function SlotMapper({
   onChange,
+  notifyLabwaresWithoutPerm,
   initialInputLabware = [],
   initialOutputLabware = [],
   locked = false,
@@ -44,11 +45,13 @@ function SlotMapper({
       colorByBarcode: new Map(),
       failedSlots: new Map(),
       errors: new Map(),
+      labwaresWithoutPerm: [],
     })
   );
 
   const {
     inputLabware,
+    labwaresWithoutPerm,
     slotCopyContent,
     colorByBarcode,
     failedSlots,
@@ -61,6 +64,11 @@ function SlotMapper({
     }
     return slotCopyContent.length > 0;
   }, [inputLabware, slotCopyContent]);
+
+  useEffect(() => {
+    if (!notifyLabwaresWithoutPerm) return;
+    notifyLabwaresWithoutPerm(labwaresWithoutPerm);
+  }, [notifyLabwaresWithoutPerm, labwaresWithoutPerm]);
 
   const getSourceSlotColor = useCallback(
     (
@@ -446,6 +454,7 @@ function SlotMapper({
           <p className={"mt-6 font-bold"}>Do you wish to continue or cancel?</p>
         </ConfirmationModal>
       }
+
       <div className={"flex flex-col w-full"}>
         {errors.size > 0 && (
           <Warning

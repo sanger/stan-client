@@ -1,6 +1,7 @@
 import { NewLabwareLayout } from "../../types/stan";
 import {
   FindPassFailsQuery,
+  FindPermDataQuery,
   LabwareFieldsFragment,
   SlotCopyContent,
   SlotPassFailFieldsFragment,
@@ -17,6 +18,13 @@ export interface SlotMapperProps {
   onChange?: (
     slotCopyContent: Array<SlotCopyContent>,
     allSourcesMapped: boolean
+  ) => void;
+
+  /**
+   * Callback to notify whenever an input labware is scanned which hasn't performed a perm operation
+   */
+  notifyLabwaresWithoutPerm?: (
+    labwaresWithoutPerm: LabwareFieldsFragment[]
   ) => void;
 
   /**
@@ -38,6 +46,7 @@ export interface SlotMapperProps {
 export interface SlotMapperContext {
   inputLabware: Array<LabwareFieldsFragment>;
   outputLabware: Array<NewLabwareLayout>;
+  labwaresWithoutPerm: Array<LabwareFieldsFragment>;
   slotCopyContent: Array<SlotCopyContent>;
   colorByBarcode: Map<string, string>;
   failedSlots: Map<string, SlotPassFailFieldsFragment[]>;
@@ -49,6 +58,7 @@ export interface SlotMapperSchema {
     ready: {};
     locked: {};
     updatingLabware: {};
+    updatingPermData: {};
   };
 }
 
@@ -83,6 +93,10 @@ type SlotPassFailErrorEvent = {
   barcode: string;
   error: ClientError;
 };
+type FindPermDataEvent = {
+  type: "done.invoke.findPermData";
+  data: FindPermDataQuery[];
+};
 type LockEvent = { type: "LOCK" };
 type UnlockEvent = { type: "UNLOCK" };
 
@@ -93,4 +107,5 @@ export type SlotMapperEvent =
   | LockEvent
   | UnlockEvent
   | SlotPassFailEvent
-  | SlotPassFailErrorEvent;
+  | SlotPassFailErrorEvent
+  | FindPermDataEvent;

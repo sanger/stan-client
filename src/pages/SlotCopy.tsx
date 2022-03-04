@@ -9,13 +9,20 @@ import Success from "../components/notifications/Success";
 import { toast } from "react-toastify";
 import { useScrollToRef } from "../lib/hooks";
 import { useMachine } from "@xstate/react";
-import { AddressPermData, SlotCopyContent } from "../types/sdk";
+import { LabwareFieldsFragment, SlotCopyContent } from "../types/sdk";
 import slotCopyMachine from "../lib/machines/slotCopy/slotCopyMachine";
 import { Link } from "react-router-dom";
 import { reload } from "../lib/sdk";
 import WorkNumberSelect from "../components/WorkNumberSelect";
 import Heading from "../components/Heading";
-
+import Table, {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+} from "../components/Table";
+import { ConfirmationModal } from "../components/modal/ConfirmationModal";
+import { history } from "../lib/sdk";
 type PageParams = {
   title: string;
   initialOutputLabware: NewLabwareLayout[];
@@ -33,12 +40,15 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
       outputLabwareType: LabwareTypeName.PLATE,
       outputLabwares: [],
       slotCopyContent: [],
-      permDataInputLabware: new Map<string, AddressPermData[]>(),
     })
   );
 
+  const [labwaresWithoutPerm, setLabwaresWithoutPerm] = React.useState<
+    LabwareFieldsFragment[]
+  >([]);
+  const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
+
   const { serverErrors, outputLabwares } = current.context;
-  debugger;
 
   const handleOnSlotMapperChange = useCallback(
     (slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
@@ -58,7 +68,18 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     [send]
   );
 
-  const handleSave = () => send({ type: "SAVE" });
+  const handleSave = React.useCallback(() => {
+    setWarnBeforeSave(false);
+    send({ type: "SAVE" });
+  }, [setWarnBeforeSave, send]);
+
+  const onSaveAction = React.useCallback(() => {
+    if (labwaresWithoutPerm.length > 0) {
+      setWarnBeforeSave(true);
+    } else {
+      handleSave();
+    }
+  }, [labwaresWithoutPerm, handleSave]);
 
   /**
    * When we get into the "copied" state, show a success message
@@ -111,6 +132,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             locked={current.matches("copied")}
             initialOutputLabware={initialOutputLabware}
             onChange={handleOnSlotMapperChange}
+            notifyLabwaresWithoutPerm={setLabwaresWithoutPerm}
           />
 
           {outputLabwares.length > 0 && (
@@ -128,7 +150,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           {!current.matches("copied") && (
             <BlueButton
               disabled={!current.matches("readyToCopy")}
-              onClick={handleSave}
+              onClick={onSaveAction}
             >
               Save
             </BlueButton>
@@ -146,6 +168,68 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           )}
         </div>
       </div>
+      {
+        <ConfirmationModal
+          show={warnBeforeSave}
+          header={"Save transferred slots"}
+          message={{
+            type: "Warning",
+            text: "Labware(s) without Permeabilisation",
+          }}
+          confirmOptions={[
+            {
+              label: "Cancel",
+              action: () => {
+                setWarnBeforeSave(false);
+              },
+            },
+            { label: "Continue", action: handleSave },
+            {
+              label: "Visium permeabilisation",
+              action: () => {
+                history.push({
+                  pathname: "/lab/visium_perm",
+                });
+                setWarnBeforeSave(false);
+              },
+            },
+          ]}
+        >
+          <p className={"font-bold mt-8"}>
+            {`Following Labware(s) haven't performed permeabilisation operation : `}
+          </p>
+          <Table className={"mt-4 w-full overflow-y-visible"}>
+            <TableHead>
+              <tr>
+                <TableHeader>Barcode</TableHeader>
+                <TableHeader>Type</TableHeader>
+              </tr>
+            </TableHead>
+            <TableBody>
+              {labwaresWithoutPerm.map((lw) => (
+                <tr key={lw.barcode}>
+                  <TableCell>{lw.barcode}</TableCell>
+                  <TableCell>{lw.labwareType.name}</TableCell>
+                </tr>
+              ))}
+            </TableBody>
+          </Table>
+          <p className="mt-8 my-3 text-gray-800 text-center text-sm  leading-normal">
+            If you wish to cancel and perform permeabilisation on these slides,
+            click
+            <span className="font-bold text-gray-900">
+              {" "}
+              Visium Permeabilisation{" "}
+            </span>
+            button.
+          </p>{" "}
+          <p className="my-3 text-gray-800 text-center text-sm  leading-normal">
+            Otherwise click{" "}
+            <span className="font-bold text-gray-900">Continue or Cancel</span>{" "}
+            to continue or cancel the save operation.
+          </p>
+        </ConfirmationModal>
+      }
     </AppShell>
   );
 }

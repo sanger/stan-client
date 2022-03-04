@@ -8,8 +8,6 @@ import {
   OperationTypeName,
 } from "../../../types/stan";
 import {
-  AddressPermData,
-  FindPermDataQuery,
   LabwareFieldsFragment,
   Maybe,
   SlotCopyContent,
@@ -29,7 +27,6 @@ export interface SlotCopyContext {
   operationType: OperationTypeName;
   outputLabwareType: LabwareTypeName;
   slotCopyContent: Array<SlotCopyContent>;
-  permDataInputLabware: Map<string, AddressPermData[]>;
   serverErrors?: Maybe<ClientError>;
   outputLabwares: Array<LabwareFieldsFragment>;
 }
@@ -47,7 +44,6 @@ export type SlotCopyEvent =
   | UpdateSlotCopyContentType
   | SaveEvent
   | MachineServiceDone<"copySlots", SlotCopyMutation>
-  | MachineServiceDone<"getPermTimes", FindPermDataQuery[]>
   | MachineServiceError<"copySlots">;
 
 /**
@@ -82,7 +78,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           },
           UPDATE_SLOT_COPY_CONTENT: [
             {
-              target: "permtimeUpdate",
+              target: "mapping",
               cond: (ctx, e) => !e.anySourceMapped,
               actions: ["assignSCC"],
             },
@@ -92,15 +88,6 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           ],
 
           SAVE: "copying",
-        },
-      },
-      permtimeUpdate: {
-        invoke: {
-          src: "getPermTimes",
-          onDone: {
-            target: "mapping",
-            actions: ["assignPermTimes"],
-          },
         },
       },
       copying: {
@@ -151,45 +138,8 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       emptyServerError: assign((ctx) => {
         ctx.serverErrors = null;
       }),
-      assignPermTimes: assign((ctx, e) => {
-        if (e.type !== "done.invoke.getPermTimes") return;
-        e.data.forEach((data) => {
-          ctx.permDataInputLabware.set(
-            data.visiumPermData.labware.barcode,
-            data.visiumPermData.addressPermData
-          );
-        });
-      }),
     },
     services: {
-      getPermTimes: (ctx) => {
-        const slotCopyContentSourceBarcodes = ctx.slotCopyContent.map(
-          (scc) => scc.sourceBarcode
-        );
-        const validKeys = Array.from(
-          ctx.permDataInputLabware.keys()
-        ).filter((key) =>
-          slotCopyContentSourceBarcodes.some((barcode) => barcode === key)
-        );
-
-        const results: FindPermDataQuery[] = [];
-        ctx.slotCopyContent.forEach(async (scc) => {
-          if (!validKeys.includes(scc.sourceBarcode)) {
-            const result = await stanCore.FindPermData({
-              barcode: scc.sourceBarcode,
-            });
-            results.push(result.visiumPermData);
-          } else {
-            const permData = ctx.permDataInputLabware.get(scc.sourceBarcode);
-            if (permData) {
-              results.push(permData);
-            }
-          }
-        });
-        return new Promise<FindPermDataQuery[]>((resolve, reject) => {
-          return resolve(results);
-        });
-      },
       copySlots: (ctx) => {
         return stanCore.SlotCopy({
           request: {

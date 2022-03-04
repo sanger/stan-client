@@ -5,7 +5,12 @@ import {
   SlotMapperSchema,
 } from "./slotMapper.types";
 import { assign } from "@xstate/immer";
-import { GridDirection, PassFail, SlotCopyContent } from "../../types/sdk";
+import {
+  FindPermDataQuery,
+  GridDirection,
+  PassFail,
+  SlotCopyContent,
+} from "../../types/sdk";
 import { buildAddresses, cycleColors } from "../../lib/helpers";
 import { sortWithDirection } from "../../lib/helpers/addressHelper";
 import { find, indexOf, intersection, map } from "lodash";
@@ -164,6 +169,22 @@ const machineConfig: Partial<MachineOptions<
       if (e.type !== "error.platform.passFailsSlots") return;
       ctx.errors.set(e.barcode, e.error);
     }),
+    assignBarcodesWithoutPerm: assign((ctx, e) => {
+      if (e.type !== "done.invoke.findPermData") return;
+
+      //Sync the permData array with current input labware list
+      const inputLabwareBarcodes = ctx.inputLabware.map((lw) => lw.barcode);
+      ctx.labwaresWithoutPerm = ctx.labwaresWithoutPerm.filter((lw) =>
+        inputLabwareBarcodes.some((barcode) => barcode === lw.barcode)
+      );
+
+      //Add to list if no perm data is available for the barcode
+      e.data.forEach((data) => {
+        if (data.visiumPermData.addressPermData.length === 0) {
+          ctx.labwaresWithoutPerm.push(data.visiumPermData.labware);
+        }
+      });
+    }),
   },
   services: {
     passFailsSlots: async (ctx, e) => {
@@ -181,6 +202,20 @@ const machineConfig: Partial<MachineOptions<
         barcode: e.labware[e.labware.length - 1].barcode,
         result: response,
       };
+    },
+    findPermData: async (ctx) => {
+      const findPermDataQueries: FindPermDataQuery[] = [];
+      for (const inputlw of ctx.inputLabware) {
+        if (
+          !ctx.labwaresWithoutPerm.find((lw) => lw.barcode === inputlw.barcode)
+        ) {
+          const val = await stanCore.FindPermData({ barcode: inputlw.barcode });
+          findPermDataQueries.push(val);
+        }
+      }
+      return new Promise<FindPermDataQuery[]>((resolve) => {
+        return resolve(findPermDataQueries);
+      });
     },
   },
 };
@@ -205,7 +240,7 @@ const slotMapperMachine = Machine<
             actions: ["clearSlots"],
           },
           UPDATE_INPUT_LABWARE: {
-            target: "updatingLabware",
+            target: ["updatingLabware", "updatingPermData"],
             actions: [
               "assignInputLabware",
               "assignLabwareColors",
@@ -219,15 +254,28 @@ const slotMapperMachine = Machine<
         invoke: {
           src: "passFailsSlots",
           onDone: {
-            target: "ready",
+            target: "updatingPermData",
             actions: "assignFailedSlots",
           },
           onError: {
-            target: "ready",
+            target: "updatingPermData",
             actions: "assignPassFailError",
           },
         },
       },
+      updatingPermData: {
+        invoke: {
+          src: "findPermData",
+          onDone: {
+            target: "ready",
+            actions: "assignBarcodesWithoutPerm",
+          },
+          onError: {
+            target: "ready",
+          },
+        },
+      },
+
       locked: {
         on: {
           UNLOCK: "ready",
