@@ -72,7 +72,8 @@ export default function LabwareResult({
 
   /**Ensure Tissue Coverage value is in the range 0 to 100 inclusive**/
   const validateMeasurementField = (value: string) => {
-    const regEx = /^(^$|[0-9]|([1-9][0-9])|100)$/;
+    if (value.length === 0) return true;
+    const regEx = /^[0-9]+$/;
     const val = regEx.test(value);
     if (val) {
       const coverage = Number(value);
