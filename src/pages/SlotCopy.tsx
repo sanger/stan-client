@@ -9,7 +9,7 @@ import Success from "../components/notifications/Success";
 import { toast } from "react-toastify";
 import { useScrollToRef } from "../lib/hooks";
 import { useMachine } from "@xstate/react";
-import { SlotCopyContent } from "../types/sdk";
+import { AddressPermData, SlotCopyContent } from "../types/sdk";
 import slotCopyMachine from "../lib/machines/slotCopy/slotCopyMachine";
 import { Link } from "react-router-dom";
 import { reload } from "../lib/sdk";
@@ -33,10 +33,12 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
       outputLabwareType: LabwareTypeName.PLATE,
       outputLabwares: [],
       slotCopyContent: [],
+      permDataInputLabware: new Map<string, AddressPermData[]>(),
     })
   );
 
   const { serverErrors, outputLabwares } = current.context;
+  debugger;
 
   const handleOnSlotMapperChange = useCallback(
     (slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
