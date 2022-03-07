@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import Labware from "../labware/Labware";
 import { Select } from "../forms/Select";
-import { optionValues } from "../forms";
 import BlueButton from "../buttons/BlueButton";
 import PinkButton from "../buttons/PinkButton";
 import createLabwareResultMachine from "./labwareResult.machine";
@@ -12,12 +11,15 @@ import {
   LabwareResult as CoreLabwareResult,
   PassFail,
   SlotFieldsFragment,
+  SlotMeasurementRequest,
 } from "../../types/sdk";
 import { isSlotFilled } from "../../lib/helpers/slotHelper";
 import RemoveButton from "../buttons/RemoveButton";
 import { mapify } from "../../lib/helpers";
 import PassIcon from "../icons/PassIcon";
 import FailIcon from "../icons/FailIcon";
+import { Input } from "../forms/Input";
+import { optionValues } from "../forms";
 
 type LabwareResultComponentProps = {
   labware: LabwareFieldsFragment;
@@ -56,64 +58,110 @@ export default function LabwareResult({
   );
 
   const { labwareResult } = current.context;
+
   const sampleResults = mapify(labwareResult.sampleResults, "address");
+  const slotMeasurements = labwareResult.slotMeasurements
+    ? mapify(labwareResult.slotMeasurements, "address")
+    : new Map<string, SlotMeasurementRequest>();
 
   useEffect(() => {
     onChange(labwareResult);
   }, [labwareResult, onChange]);
 
+  const isMeasurementExist = "slotMeasurements" in labwareResult;
+
+  /**Ensure Tissue Coverage value is in the range 0 to 100 inclusive**/
+  const validateMeasurementField = (value: string) => {
+    if (value.length === 0) return true;
+    const regEx = /^[0-9]+$/;
+    const val = regEx.test(value);
+    if (val) {
+      const coverage = Number(value);
+      if (coverage >= 0 && coverage <= 100) return true;
+    }
+    return false;
+  };
+
   const slotBuilder = (slot: SlotFieldsFragment): React.ReactNode => {
     return (
-      <div className="flex flex-row items-center justify-between gap-x-2">
-        <div>
-          {isSlotFilled(slot) && (
-            <div className="flex flex-row items-center justify-between">
-              <PassIcon
-                data-testid={"passIcon"}
-                className={`h-6 w-6 cursor-pointer ${
-                  sampleResults.get(slot.address)!.result === PassFail.Pass
-                    ? "text-green-700"
-                    : "text-gray-500"
-                }`}
-                onClick={() => {
-                  send({ type: "PASS", address: slot.address });
+      isSlotFilled(slot) && (
+        <div
+          className={`flex flex-col ${
+            isMeasurementExist &&
+            labware.slots.length > 1 &&
+            "border-b border-gray-300"
+          }`}
+        >
+          <div className="flex flex-row items-center justify-between gap-x-2">
+            <div>
+              <div className="flex flex-row items-center justify-between">
+                <PassIcon
+                  data-testid={"passIcon"}
+                  className={`h-6 w-6 cursor-pointer ${
+                    sampleResults.get(slot.address)!.result === PassFail.Pass
+                      ? "text-green-700"
+                      : "text-gray-500"
+                  }`}
+                  onClick={() => {
+                    send({ type: "PASS", address: slot.address });
+                  }}
+                />
+
+                <FailIcon
+                  data-testid={"failIcon"}
+                  className={`h-6 w-6 cursor-pointer ${
+                    sampleResults.get(slot.address)!.result === PassFail.Fail
+                      ? "text-red-700"
+                      : "text-gray-500"
+                  }`}
+                  onClick={() => send({ type: "FAIL", address: slot.address })}
+                />
+              </div>
+            </div>
+            <div className="w-full">
+              <Select
+                value={sampleResults.get(slot.address)!.commentId ?? ""}
+                emptyOption={true}
+                data-testid={"comment"}
+                onChange={(e) =>
+                  send({
+                    type: "SET_COMMENT",
+                    address: slot.address,
+                    commentId:
+                      e.currentTarget.value !== ""
+                        ? Number(e.currentTarget.value)
+                        : undefined,
+                  })
+                }
+              >
+                {optionValues(availableComments, "text", "id")}
+              </Select>
+            </div>
+          </div>
+          {isMeasurementExist && (
+            <div className="flex flex-row items-center  mt-3 pb-3">
+              <div className="w-full font-normal">Coverage</div>
+              <Input
+                type="number"
+                data-testid="coverage"
+                min={0}
+                max={100}
+                value={slotMeasurements.get(slot.address)!.value}
+                onChange={(e) => {
+                  if (validateMeasurementField(e.currentTarget.value)) {
+                    send({
+                      type: "SET_TISSUE_COVERAGE",
+                      address: slot.address,
+                      value: e.currentTarget.value,
+                    });
+                  }
                 }}
               />
-
-              <FailIcon
-                data-testid={"failIcon"}
-                className={`h-6 w-6 cursor-pointer ${
-                  sampleResults.get(slot.address)!.result === PassFail.Fail
-                    ? "text-red-700"
-                    : "text-gray-500"
-                }`}
-                onClick={() => send({ type: "FAIL", address: slot.address })}
-              />
+              <div className="text-xs font-normal ml-1">%</div>
             </div>
           )}
         </div>
-        <div>
-          {isSlotFilled(slot) && (
-            <Select
-              value={sampleResults.get(slot.address)!.commentId ?? ""}
-              emptyOption={true}
-              data-testid={"comment"}
-              onChange={(e) =>
-                send({
-                  type: "SET_COMMENT",
-                  address: slot.address,
-                  commentId:
-                    e.currentTarget.value !== ""
-                      ? Number(e.currentTarget.value)
-                      : undefined,
-                })
-              }
-            >
-              {optionValues(availableComments, "text", "id")}
-            </Select>
-          )}
-        </div>
-      </div>
+      )
     );
   };
 

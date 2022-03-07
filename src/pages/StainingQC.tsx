@@ -26,6 +26,8 @@ type StainingQCProps = {
   info: GetStainingQcInfoQuery;
 };
 
+export const TISSUE_COVERAGE_MEASUREMENT_NAME = "Tissue coverage";
+
 export default function StainingQC({ info }: StainingQCProps) {
   const [workNumber, setWorkNumber] = useState<string | undefined>();
   const labwareResults = useCollection<CoreLabwareResult>({
@@ -39,8 +41,29 @@ export default function StainingQC({ info }: StainingQCProps) {
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
+
+          /**Omit all measurements for which the tissue coverage is not specified**/
+          const newLabwareResults = e.values.labwareResults.map(
+            (labwareResult) => {
+              const slotMeasurements = labwareResult.slotMeasurements?.filter(
+                (sm) =>
+                  sm.value !== "" &&
+                  sm.name === TISSUE_COVERAGE_MEASUREMENT_NAME
+              );
+              return slotMeasurements && slotMeasurements.length > 0
+                ? { ...labwareResult, slotMeasurements }
+                : {
+                    sampleResults: labwareResult.sampleResults,
+                    barcode: labwareResult.barcode,
+                  };
+            }
+          );
           return stanCore.RecordStainResult({
-            request: e.values,
+            request: {
+              labwareResults: newLabwareResults,
+              workNumber: e.values.workNumber,
+              operationType: e.values.operationType,
+            },
           });
         },
       },
@@ -48,7 +71,6 @@ export default function StainingQC({ info }: StainingQCProps) {
   );
 
   const { serverError } = current.context;
-
   const onAddLabware = useCallback(
     (labware: LabwareFieldsFragment) => {
       labwareResults.append(buildLabwareResult(labware));
@@ -158,6 +180,11 @@ function buildLabwareResult(labware: LabwareFieldsFragment): CoreLabwareResult {
     sampleResults: labware.slots.filter(isSlotFilled).map((slot) => ({
       address: slot.address,
       result: PassFail.Pass,
+    })),
+    slotMeasurements: labware.slots.filter(isSlotFilled).map((slot) => ({
+      address: slot.address,
+      name: TISSUE_COVERAGE_MEASUREMENT_NAME,
+      value: "",
     })),
   };
 }

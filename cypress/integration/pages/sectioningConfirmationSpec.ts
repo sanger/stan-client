@@ -147,10 +147,10 @@ describe("Sectioning Confirmation", () => {
       it("shows the success dialog", () => {
         cy.findByText("Sections Confirmed");
       });
-      it("displays Store option in the success dialog", () => {
+      it("displays Store option in updated page after success", () => {
         cy.findByRole("button", { name: /Store/i }).should("be.enabled");
       });
-      it("displays Print option in the success dialog", () => {
+      it("displays Print option in updated page after success", () => {
         cy.findByTestId("print-div").within(() => {
           cy.findByText("Tube").should("be.visible");
           cy.findByRole("table").contains("td", "STAN-0001F");
