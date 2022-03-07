@@ -48,7 +48,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
   >([]);
   const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
 
-  const { serverErrors, outputLabwares } = current.context;
+  const { serverErrors, outputLabwares, slotCopyContent } = current.context;
 
   const handleOnSlotMapperChange = useCallback(
     (slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
@@ -73,13 +73,24 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     send({ type: "SAVE" });
   }, [setWarnBeforeSave, send]);
 
+  /**
+   * Save action invoked, so check whether a warning to be given to user if any labware with no perm done is copied
+   ***/
   const onSaveAction = React.useCallback(() => {
-    if (labwaresWithoutPerm.length > 0) {
+    /**Get only input lawares that are mapped/copied to 96 well plate from the non-perm list*/
+    const sccLabwaresWithoutPerm = labwaresWithoutPerm.filter(
+      (lwWithoutPerm) => {
+        return slotCopyContent.some(
+          (scc) => scc.sourceBarcode === lwWithoutPerm.barcode
+        );
+      }
+    );
+    if (sccLabwaresWithoutPerm.length > 0) {
       setWarnBeforeSave(true);
     } else {
       handleSave();
     }
-  }, [labwaresWithoutPerm, handleSave]);
+  }, [labwaresWithoutPerm, handleSave, slotCopyContent]);
 
   /**
    * When we get into the "copied" state, show a success message
@@ -196,7 +207,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           ]}
         >
           <p className={"font-bold mt-8"}>
-            {`Following Labware(s) haven't performed permeabilisation operation : `}
+            {`Permeabilisation operation is not performed on following labware(s)`}
           </p>
           <Table className={"mt-4 w-full overflow-y-visible"}>
             <TableHead>
@@ -206,12 +217,18 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
               </tr>
             </TableHead>
             <TableBody>
-              {labwaresWithoutPerm.map((lw) => (
-                <tr key={lw.barcode}>
-                  <TableCell>{lw.barcode}</TableCell>
-                  <TableCell>{lw.labwareType.name}</TableCell>
-                </tr>
-              ))}
+              {labwaresWithoutPerm
+                .filter((lwWithoutPerm) => {
+                  return slotCopyContent.some(
+                    (scc) => scc.sourceBarcode === lwWithoutPerm.barcode
+                  );
+                })
+                .map((lw) => (
+                  <tr key={lw.barcode}>
+                    <TableCell>{lw.barcode}</TableCell>
+                    <TableCell>{lw.labwareType.name}</TableCell>
+                  </tr>
+                ))}
             </TableBody>
           </Table>
           <p className="mt-8 my-3 text-gray-800 text-center text-sm  leading-normal">
@@ -226,7 +243,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           <p className="my-3 text-gray-800 text-center text-sm  leading-normal">
             Otherwise click{" "}
             <span className="font-bold text-gray-900">Continue or Cancel</span>{" "}
-            to continue or cancel the save operation.
+            to proceed or cancel the save operation.
           </p>
         </ConfirmationModal>
       }

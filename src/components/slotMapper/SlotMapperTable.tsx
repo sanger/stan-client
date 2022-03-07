@@ -34,7 +34,7 @@ export default function SlotMapperTable({
 
       <TableBody>
         {slots.map((slot) => (
-          <tr>
+          <tr key={`${slot.address}-${slot.labwareId}`}>
             <TableCell>{labware.barcode}</TableCell>
             <TableCell>{slot.address}</TableCell>
             <TableCell>
