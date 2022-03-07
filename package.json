@@ -100,7 +100,7 @@
     "@types/faker": "^5.1.6",
     "@xstate/inspect": "^0.4.1",
     "babel-plugin-polyfill-corejs2": "^0.3.0",
-    "cypress": "^8.7.0",
+    "cypress": "^9.5.1",
     "cypress-intellij-reporter": "^0.0.4",
     "faker": "^5.4.0",
     "fishery": "^1.0.1",
