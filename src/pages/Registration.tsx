@@ -23,7 +23,6 @@ export interface RegistrationFormBlock {
   labwareType: string;
   fixative: string;
   medium: string;
-  mouldSize: string;
 }
 
 export interface RegistrationFormTissue {
@@ -50,7 +49,6 @@ export function getRegistrationFormBlock(): RegistrationFormBlock {
     labwareType: "",
     fixative: "",
     medium: "",
-    mouldSize: "",
   };
 }
 
@@ -95,7 +93,6 @@ function buildRegistrationSchema(
                 labwareType: validation.labwareType,
                 fixative: validation.fixative,
                 medium: validation.medium,
-                mouldSize: validation.mouldSize,
               })
             ),
         })

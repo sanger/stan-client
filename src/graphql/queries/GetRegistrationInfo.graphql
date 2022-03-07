@@ -21,7 +21,4 @@ query GetRegistrationInfo {
     mediums {
         name
     }
-    mouldSizes {
-        name
-    }
 }

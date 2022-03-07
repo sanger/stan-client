@@ -125,11 +125,4 @@ export default class RegistrationValidation {
       oneOf: this.registrationInfo.labwareTypes.map((lt) => lt.name),
     });
   }
-
-  get mouldSize() {
-    return validation.requiredString({
-      label: "Mould Size",
-      oneOf: this.registrationInfo.mouldSizes.map((ms) => ms.name),
-    });
-  }
 }

@@ -247,21 +247,6 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
                           )}
                         </FormikSelect>
 
-                        <RadioGroup
-                          label="Mould Size"
-                          name={`tissues.${currentIndex}.blocks.${blockIndex}.mouldSize`}
-                        >
-                          {registrationInfo.mouldSizes.map((ms) => {
-                            return (
-                              <RadioButton
-                                key={ms.name}
-                                name={ms.name}
-                                value={ms.name}
-                              />
-                            );
-                          })}
-                        </RadioGroup>
-
                         {/* Only show the delete button if we've got more than 1 block */}
                         {values.tissues[currentIndex].blocks.length > 1 && (
                           <div className="flex justify-end">
