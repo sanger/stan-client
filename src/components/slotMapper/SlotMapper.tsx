@@ -32,7 +32,7 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 
 function SlotMapper({
   onChange,
-  notifyLabwaresWithoutPerm,
+  onInputLabwareChange,
   initialInputLabware = [],
   initialOutputLabware = [],
   locked = false,
@@ -45,13 +45,11 @@ function SlotMapper({
       colorByBarcode: new Map(),
       failedSlots: new Map(),
       errors: new Map(),
-      labwaresWithoutPerm: [],
     })
   );
 
   const {
     inputLabware,
-    labwaresWithoutPerm,
     slotCopyContent,
     colorByBarcode,
     failedSlots,
@@ -66,9 +64,9 @@ function SlotMapper({
   }, [inputLabware, slotCopyContent]);
 
   useEffect(() => {
-    if (!notifyLabwaresWithoutPerm) return;
-    notifyLabwaresWithoutPerm(labwaresWithoutPerm);
-  }, [notifyLabwaresWithoutPerm, labwaresWithoutPerm]);
+    if (!onInputLabwareChange) return;
+    onInputLabwareChange(inputLabware);
+  }, [onInputLabwareChange, inputLabware]);
 
   const getSourceSlotColor = useCallback(
     (
@@ -298,7 +296,7 @@ function SlotMapper({
   }, [onChange, slotCopyContent, anySourceMapped]);
 
   /**
-   * Handler for whenever labware is added or removed by the labware scanner
+   * Callback whenever labware is added or removed by the labware scanner
    */
   const onLabwareScannerChange = React.useCallback(
     (labware: LabwareFieldsFragment[]) => {

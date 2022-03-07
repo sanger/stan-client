@@ -40,6 +40,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
       outputLabwareType: LabwareTypeName.PLATE,
       outputLabwares: [],
       slotCopyContent: [],
+      inputLabwarePermData: [],
     })
   );
 
@@ -48,7 +49,12 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
   >([]);
   const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
 
-  const { serverErrors, outputLabwares, slotCopyContent } = current.context;
+  const {
+    serverErrors,
+    outputLabwares,
+    slotCopyContent,
+    inputLabwarePermData,
+  } = current.context;
 
   const handleOnSlotMapperChange = useCallback(
     (slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
@@ -73,24 +79,38 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     send({ type: "SAVE" });
   }, [setWarnBeforeSave, send]);
 
+  const handleInputLabwareChange = React.useCallback(
+    (inputLabwares: LabwareFieldsFragment[]) => {
+      debugger;
+      send({ type: "UPDATE_INPUT_LABWARE_PERMTIME", labwares: inputLabwares });
+    },
+    [send]
+  );
+
   /**
    * Save action invoked, so check whether a warning to be given to user if any labware with no perm done is copied
    ***/
   const onSaveAction = React.useCallback(() => {
-    /**Get only input lawares that are mapped/copied to 96 well plate from the non-perm list*/
-    const sccLabwaresWithoutPerm = labwaresWithoutPerm.filter(
-      (lwWithoutPerm) => {
-        return slotCopyContent.some(
-          (scc) => scc.sourceBarcode === lwWithoutPerm.barcode
-        );
-      }
+    /**Get all input lawares that didn't perform perm operation and are mapped/copied to 96 well plate*/
+    const labwareWithoutPermData = inputLabwarePermData.filter(
+      (permData) =>
+        permData.visiumPermData.addressPermData.length === 0 &&
+        slotCopyContent.some(
+          (scc) => scc.sourceBarcode === permData.visiumPermData.labware.barcode
+        )
     );
-    if (sccLabwaresWithoutPerm.length > 0) {
+
+    if (labwareWithoutPermData.length > 0) {
+      setLabwaresWithoutPerm(
+        labwareWithoutPermData.map(
+          (permData) => permData.visiumPermData.labware
+        )
+      );
       setWarnBeforeSave(true);
     } else {
       handleSave();
     }
-  }, [labwaresWithoutPerm, handleSave, slotCopyContent]);
+  }, [handleSave, inputLabwarePermData, slotCopyContent]);
 
   /**
    * When we get into the "copied" state, show a success message
@@ -143,7 +163,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             locked={current.matches("copied")}
             initialOutputLabware={initialOutputLabware}
             onChange={handleOnSlotMapperChange}
-            notifyLabwaresWithoutPerm={setLabwaresWithoutPerm}
+            onInputLabwareChange={handleInputLabwareChange}
           />
 
           {outputLabwares.length > 0 && (
@@ -217,18 +237,12 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
               </tr>
             </TableHead>
             <TableBody>
-              {labwaresWithoutPerm
-                .filter((lwWithoutPerm) => {
-                  return slotCopyContent.some(
-                    (scc) => scc.sourceBarcode === lwWithoutPerm.barcode
-                  );
-                })
-                .map((lw) => (
-                  <tr key={lw.barcode}>
-                    <TableCell>{lw.barcode}</TableCell>
-                    <TableCell>{lw.labwareType.name}</TableCell>
-                  </tr>
-                ))}
+              {labwaresWithoutPerm.map((lw) => (
+                <tr key={lw.barcode}>
+                  <TableCell>{lw.barcode}</TableCell>
+                  <TableCell>{lw.labwareType.name}</TableCell>
+                </tr>
+              ))}
             </TableBody>
           </Table>
           <p className="mt-8 my-3 text-gray-800 text-center text-sm  leading-normal">
