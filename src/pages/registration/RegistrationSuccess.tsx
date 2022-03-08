@@ -11,6 +11,7 @@ import PinkButton from "../../components/buttons/PinkButton";
 import ButtonBar from "../../components/ButtonBar";
 import AppShell from "../../components/AppShell";
 import { Column } from "react-table";
+import { history } from "../../lib/sdk";
 
 interface RegistrationSuccessProps {
   labware: LabwareFieldsFragment[];
@@ -57,7 +58,25 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
 
       <ButtonBar>
         <Link to={"/store"}>
-          <BlueButton action="secondary">Store</BlueButton>
+          <BlueButton
+            action="secondary"
+            onClick={() => {
+              if (labware.length > 0) {
+                sessionStorage.setItem(
+                  "awaitingLabwares",
+                  labware
+                    .map(
+                      (labware) =>
+                        `${labware.barcode}, ${labware.labwareType.name}`
+                    )
+                    .join(",")
+                );
+              }
+              history.push("/store");
+            }}
+          >
+            Store
+          </BlueButton>
         </Link>
         <Link to={"/"}>
           <PinkButton action="primary">Return Home</PinkButton>
