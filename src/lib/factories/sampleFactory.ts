@@ -7,7 +7,6 @@ import {
   Hmdmc,
   LifeStage,
   Medium,
-  MouldSize,
   Sample,
   SpatialLocation,
   Species,
@@ -36,7 +35,6 @@ export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(
       associations.spatialLocation ?? spatialLocationFactory.build(),
     donor: associations.donor ?? donorFactory.build(),
     hmdmc: associations.hmdmc ?? hmdmcFactory.build(),
-    mouldSize: associations.mouldSize ?? mouldSizeFactory.build(),
     medium: associations.medium ?? mediumFactory.build(),
     fixative: associations.fixative ?? fixativeFactory.build(),
   })
@@ -61,13 +59,6 @@ export const mediumFactory: Factory<Medium> = Factory.define<Medium>(
   ({ params, sequence }) => ({
     __typename: "Medium",
     name: params.name ?? `Medium ${sequence}`,
-  })
-);
-
-export const mouldSizeFactory: Factory<MouldSize> = Factory.define<MouldSize>(
-  ({ params, sequence }) => ({
-    __typename: "MouldSize",
-    name: params.name ?? `Mould Size ${sequence}`,
   })
 );
 

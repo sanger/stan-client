@@ -99,8 +99,6 @@ export type BlockRegisterRequest = {
   medium: Scalars['String'];
   /** The fixative used for the tissue. */
   fixative: Scalars['String'];
-  /** The mould size used for the tissue. */
-  mouldSize: Scalars['String'];
   /** The species of the donor. */
   species: Scalars['String'];
   /** Is this a new block of tissue already in the application's database? */
@@ -575,12 +573,6 @@ export type LoginResult = {
 /** A chemical a sample is put in. */
 export type Medium = {
   __typename?: 'Medium';
-  name: Scalars['String'];
-};
-
-/** A size of mould used for tissue. */
-export type MouldSize = {
-  __typename?: 'MouldSize';
   name: Scalars['String'];
 };
 
@@ -1432,8 +1424,6 @@ export type Query = {
   mediums: Array<Medium>;
   /** Get all the fixatives that are enabled, or get all including those that are disabled. */
   fixatives: Array<Fixative>;
-  /** Get all the mould sizes available. */
-  mouldSizes: Array<MouldSize>;
   /** Get all the species that are enabled, or get all including those that are disabled. */
   species: Array<Species>;
   /** Get the labware with the given barcode. */
@@ -2113,8 +2103,6 @@ export type Tissue = {
   /** The individual from whom this tissue was taken. */
   donor: Donor;
   hmdmc?: Maybe<Hmdmc>;
-  /** The size of mould used on this tissue. */
-  mouldSize: MouldSize;
   /** The medium used on this tissue. */
   medium: Medium;
   /** The fixative used on this tissue. */
@@ -3903,9 +3891,6 @@ export type GetRegistrationInfoQuery = (
   )>, mediums: Array<(
     { __typename?: 'Medium' }
     & Pick<Medium, 'name'>
-  )>, mouldSizes: Array<(
-    { __typename?: 'MouldSize' }
-    & Pick<MouldSize, 'name'>
   )> }
 );
 
@@ -5213,9 +5198,6 @@ export const GetRegistrationInfoDocument = gql`
     name
   }
   mediums {
-    name
-  }
-  mouldSizes {
     name
   }
 }

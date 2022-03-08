@@ -210,6 +210,4 @@ function fillInForm() {
   cy.findByLabelText("Labware Type").select("Proviasette");
   cy.findByLabelText("Fixative").select("None");
   cy.findByLabelText("Medium").select("Paraffin");
-  // Can't figure out why, but for some reason, without { force: true }, this is really temperamental
-  cy.get('[type="radio"]').check("10x10", { force: true });
 }

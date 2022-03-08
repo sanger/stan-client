@@ -106,17 +106,6 @@ const registrationHandlers = [
           ],
           fixatives: [{ name: "None" }, { name: "Formalin" }],
           mediums: [{ name: "OCT" }, { name: "Paraffin" }, { name: "None" }],
-          mouldSizes: [
-            {
-              name: "10x10",
-            },
-            {
-              name: "15x15",
-            },
-            {
-              name: "30x24",
-            },
-          ],
         })
       );
     }
