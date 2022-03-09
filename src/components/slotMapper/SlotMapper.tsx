@@ -32,6 +32,7 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 
 function SlotMapper({
   onChange,
+  onInputLabwareChange,
   initialInputLabware = [],
   initialOutputLabware = [],
   locked = false,
@@ -61,6 +62,11 @@ function SlotMapper({
     }
     return slotCopyContent.length > 0;
   }, [inputLabware, slotCopyContent]);
+
+  useEffect(() => {
+    if (!onInputLabwareChange) return;
+    onInputLabwareChange(inputLabware);
+  }, [onInputLabwareChange, inputLabware]);
 
   const getSourceSlotColor = useCallback(
     (
@@ -290,7 +296,7 @@ function SlotMapper({
   }, [onChange, slotCopyContent, anySourceMapped]);
 
   /**
-   * Handler for whenever labware is added or removed by the labware scanner
+   * Callback whenever labware is added or removed by the labware scanner
    */
   const onLabwareScannerChange = React.useCallback(
     (labware: LabwareFieldsFragment[]) => {
@@ -446,6 +452,7 @@ function SlotMapper({
           <p className={"mt-6 font-bold"}>Do you wish to continue or cancel?</p>
         </ConfirmationModal>
       }
+
       <div className={"flex flex-col w-full"}>
         {errors.size > 0 && (
           <Warning

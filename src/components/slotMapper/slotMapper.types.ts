@@ -20,6 +20,11 @@ export interface SlotMapperProps {
   ) => void;
 
   /**
+   * Callback to notify whenever an input labware is scanned
+   */
+  onInputLabwareChange?: (labwaresWithoutPerm: LabwareFieldsFragment[]) => void;
+
+  /**
    * Lock the SlotMapper.
    */
   locked?: boolean;
@@ -83,6 +88,7 @@ type SlotPassFailErrorEvent = {
   barcode: string;
   error: ClientError;
 };
+
 type LockEvent = { type: "LOCK" };
 type UnlockEvent = { type: "UNLOCK" };
 

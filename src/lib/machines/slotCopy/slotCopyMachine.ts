@@ -8,6 +8,7 @@ import {
   OperationTypeName,
 } from "../../../types/stan";
 import {
+  FindPermDataQuery,
   LabwareFieldsFragment,
   Maybe,
   SlotCopyContent,
@@ -29,6 +30,7 @@ export interface SlotCopyContext {
   slotCopyContent: Array<SlotCopyContent>;
   serverErrors?: Maybe<ClientError>;
   outputLabwares: Array<LabwareFieldsFragment>;
+  inputLabwarePermData: FindPermDataQuery[];
 }
 
 type UpdateSlotCopyContentType = {
@@ -37,12 +39,27 @@ type UpdateSlotCopyContentType = {
   anySourceMapped: boolean;
 };
 
+type UPDATE_INPUT_LABWARE_PERMTIME = {
+  type: "UPDATE_INPUT_LABWARE_PERMTIME";
+  labwares: Array<LabwareFieldsFragment>;
+};
+
+type FindPermDataEvent = {
+  type: "done.invoke.findPermTime";
+  data: {
+    findPermTimes: FindPermDataQuery[];
+    inputLabwares: LabwareFieldsFragment[];
+  };
+};
+
 type SaveEvent = { type: "SAVE" };
 
 export type SlotCopyEvent =
   | { type: "UPDATE_WORK_NUMBER"; workNumber?: string }
   | UpdateSlotCopyContentType
+  | UPDATE_INPUT_LABWARE_PERMTIME
   | SaveEvent
+  | FindPermDataEvent
   | MachineServiceDone<"copySlots", SlotCopyMutation>
   | MachineServiceError<"copySlots">;
 
@@ -69,6 +86,9 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
               actions: ["assignSCC"],
             },
           ],
+          UPDATE_INPUT_LABWARE_PERMTIME: {
+            target: "updateLabwarePermTime",
+          },
         },
       },
       readyToCopy: {
@@ -86,6 +106,9 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
               actions: ["assignSCC"],
             },
           ],
+          UPDATE_INPUT_LABWARE_PERMTIME: {
+            target: "updateLabwarePermTime",
+          },
 
           SAVE: "copying",
         },
@@ -102,6 +125,24 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
             target: "readyToCopy",
             actions: ["assignServerError"],
           },
+        },
+      },
+      updateLabwarePermTime: {
+        invoke: {
+          src: "findPermTime",
+          onDone: [
+            {
+              target: "readyToCopy",
+              cond: (context, e) =>
+                e.data.inputLabwares.length > 0 &&
+                context.slotCopyContent.length > 0,
+              actions: "assignLabwarePermTimes",
+            },
+            {
+              target: "mapping",
+              actions: "assignLabwarePermTimes",
+            },
+          ],
         },
       },
       copied: {
@@ -134,6 +175,23 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         if (e.type !== "UPDATE_WORK_NUMBER") return;
         ctx.workNumber = e.workNumber;
       }),
+      assignLabwarePermTimes: assign((ctx, e) => {
+        if (e.type !== "done.invoke.findPermTime") return;
+        //Sync the permData array with current input labware list
+        ctx.inputLabwarePermData = ctx.inputLabwarePermData.filter((permData) =>
+          e.data.inputLabwares.some(
+            (lw) => lw.barcode === permData.visiumPermData.labware.barcode
+          )
+        );
+        //Add newly fetched perm times if any
+        e.data.findPermTimes.forEach((permData) => {
+          ctx.inputLabwarePermData.push(permData);
+        });
+        //update slot copy content with updated labware
+        ctx.slotCopyContent = ctx.slotCopyContent.filter((scc) =>
+          e.data.inputLabwares.some((lw) => lw.barcode === scc.sourceBarcode)
+        );
+      }),
 
       emptyServerError: assign((ctx) => {
         ctx.serverErrors = null;
@@ -148,6 +206,32 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
             labwareType: ctx.outputLabwareType,
             contents: ctx.slotCopyContent,
           },
+        });
+      },
+      findPermTime: async (ctx, e) => {
+        const findPermDataQueries: FindPermDataQuery[] = [];
+        if (e.type !== "UPDATE_INPUT_LABWARE_PERMTIME") return Promise.reject();
+        for (const inputlw of e.labwares) {
+          if (
+            !ctx.inputLabwarePermData.some(
+              (permData) =>
+                permData.visiumPermData.labware.barcode === inputlw.barcode
+            )
+          ) {
+            const val = await stanCore.FindPermData({
+              barcode: inputlw.barcode,
+            });
+            findPermDataQueries.push(val);
+          }
+        }
+        return new Promise<{
+          findPermTimes: FindPermDataQuery[];
+          inputLabwares: LabwareFieldsFragment[];
+        }>((resolve) => {
+          return resolve({
+            findPermTimes: findPermDataQueries,
+            inputLabwares: e.labwares,
+          });
         });
       },
     },

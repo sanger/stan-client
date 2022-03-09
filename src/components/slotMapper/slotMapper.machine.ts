@@ -35,6 +35,11 @@ const machineConfig: Partial<MachineOptions<
           -1
       );
       keys.forEach((key) => ctx.errors.delete(key));
+
+      //Update slotCopyContent if it  has entries for any removed labware
+      ctx.slotCopyContent = ctx.slotCopyContent.filter((scc) =>
+        ctx.inputLabware.some((lw) => lw.barcode === scc.sourceBarcode)
+      );
     }),
 
     assignLabwareColors: assign((ctx) => {
@@ -205,7 +210,7 @@ const slotMapperMachine = Machine<
             actions: ["clearSlots"],
           },
           UPDATE_INPUT_LABWARE: {
-            target: "updatingLabware",
+            target: ["updatingLabware"],
             actions: [
               "assignInputLabware",
               "assignLabwareColors",

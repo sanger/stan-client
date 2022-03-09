@@ -9,13 +9,20 @@ import Success from "../components/notifications/Success";
 import { toast } from "react-toastify";
 import { useScrollToRef } from "../lib/hooks";
 import { useMachine } from "@xstate/react";
-import { SlotCopyContent } from "../types/sdk";
+import { LabwareFieldsFragment, SlotCopyContent } from "../types/sdk";
 import slotCopyMachine from "../lib/machines/slotCopy/slotCopyMachine";
 import { Link } from "react-router-dom";
 import { reload } from "../lib/sdk";
 import WorkNumberSelect from "../components/WorkNumberSelect";
 import Heading from "../components/Heading";
-
+import Table, {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+} from "../components/Table";
+import { ConfirmationModal } from "../components/modal/ConfirmationModal";
+import { history } from "../lib/sdk";
 type PageParams = {
   title: string;
   initialOutputLabware: NewLabwareLayout[];
@@ -33,10 +40,21 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
       outputLabwareType: LabwareTypeName.PLATE,
       outputLabwares: [],
       slotCopyContent: [],
+      inputLabwarePermData: [],
     })
   );
 
-  const { serverErrors, outputLabwares } = current.context;
+  const [labwaresWithoutPerm, setLabwaresWithoutPerm] = React.useState<
+    LabwareFieldsFragment[]
+  >([]);
+  const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
+
+  const {
+    serverErrors,
+    outputLabwares,
+    slotCopyContent,
+    inputLabwarePermData,
+  } = current.context;
 
   const handleOnSlotMapperChange = useCallback(
     (slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
@@ -56,7 +74,42 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     [send]
   );
 
-  const handleSave = () => send({ type: "SAVE" });
+  const handleSave = React.useCallback(() => {
+    setWarnBeforeSave(false);
+    send({ type: "SAVE" });
+  }, [setWarnBeforeSave, send]);
+
+  const handleInputLabwareChange = React.useCallback(
+    (inputLabwares: LabwareFieldsFragment[]) => {
+      send({ type: "UPDATE_INPUT_LABWARE_PERMTIME", labwares: inputLabwares });
+    },
+    [send]
+  );
+
+  /**
+   * Save action invoked, so check whether a warning to be given to user if any labware with no perm done is copied
+   ***/
+  const onSaveAction = React.useCallback(() => {
+    /**Get all input lawares that didn't perform perm operation and are mapped/copied to 96 well plate*/
+    const labwareWithoutPermData = inputLabwarePermData.filter(
+      (permData) =>
+        permData.visiumPermData.addressPermData.length === 0 &&
+        slotCopyContent.some(
+          (scc) => scc.sourceBarcode === permData.visiumPermData.labware.barcode
+        )
+    );
+
+    if (labwareWithoutPermData.length > 0) {
+      setLabwaresWithoutPerm(
+        labwareWithoutPermData.map(
+          (permData) => permData.visiumPermData.labware
+        )
+      );
+      setWarnBeforeSave(true);
+    } else {
+      handleSave();
+    }
+  }, [handleSave, inputLabwarePermData, slotCopyContent]);
 
   /**
    * When we get into the "copied" state, show a success message
@@ -109,6 +162,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             locked={current.matches("copied")}
             initialOutputLabware={initialOutputLabware}
             onChange={handleOnSlotMapperChange}
+            onInputLabwareChange={handleInputLabwareChange}
           />
 
           {outputLabwares.length > 0 && (
@@ -126,7 +180,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           {!current.matches("copied") && (
             <BlueButton
               disabled={!current.matches("readyToCopy")}
-              onClick={handleSave}
+              onClick={onSaveAction}
             >
               Save
             </BlueButton>
@@ -144,6 +198,67 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           )}
         </div>
       </div>
+      {
+        <ConfirmationModal
+          show={warnBeforeSave}
+          header={"Save transferred slots"}
+          message={{
+            type: "Warning",
+            text: "Labware without Permeabilisation",
+          }}
+          confirmOptions={[
+            {
+              label: "Cancel",
+              action: () => {
+                setWarnBeforeSave(false);
+              },
+            },
+            { label: "Continue", action: handleSave },
+            {
+              label: "Visium permeabilisation",
+              action: () => {
+                history.push({
+                  pathname: "/lab/visium_perm",
+                });
+                setWarnBeforeSave(false);
+              },
+            },
+          ]}
+        >
+          <p className={"font-bold mt-8"}>
+            {"Permeabilisation has not been recorded on the following labware"}
+          </p>
+          <Table className={"mt-6 w-full overflow-y-visible"}>
+            <TableHead>
+              <tr>
+                <TableHeader>Barcode</TableHeader>
+                <TableHeader>Type</TableHeader>
+              </tr>
+            </TableHead>
+            <TableBody>
+              {labwaresWithoutPerm.map((lw) => (
+                <tr key={lw.barcode}>
+                  <TableCell>{lw.barcode}</TableCell>
+                  <TableCell>{lw.labwareType.name}</TableCell>
+                </tr>
+              ))}
+            </TableBody>
+          </Table>
+          <p className="mt-8 my-3 text-gray-800 text-center text-sm  leading-normal">
+            If you wish to cancel this operation and record permeabilisation on these slides, click the
+            <span className="font-bold text-gray-900">
+              {" "}
+              Visium Permeabilisation{" "}
+            </span>
+            button.
+          </p>{" "}
+          <p className="my-3 text-gray-800 text-center text-sm  leading-normal">
+            Otherwise click{" "}
+            <span className="font-bold text-gray-900">Continue or Cancel</span>{" "}
+            to record or cancel this operation.
+          </p>
+        </ConfirmationModal>
+      }
     </AppShell>
   );
 }

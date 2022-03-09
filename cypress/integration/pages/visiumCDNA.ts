@@ -1,7 +1,10 @@
 import {
+  FindPermDataQuery,
+  FindPermDataQueryVariables,
   SlotCopyMutation,
   SlotCopyMutationVariables,
 } from "../../../src/types/sdk";
+import { createLabware } from "../../../src/mocks/handlers/labwareHandlers";
 
 describe("Visium cDNA Page", () => {
   before(() => {
@@ -110,7 +113,6 @@ describe("Visium cDNA Page", () => {
 
           saveButton().click();
         });
-
         it("shows an error", () => {
           cy.findByText("Labware is discarded: [STAN-4100]").should(
             "be.visible"
@@ -139,8 +141,77 @@ describe("Visium cDNA Page", () => {
       });
     });
   });
+
+  context("when scans a labwares with no perm done", () => {
+    before(() => {
+      saveSlotForLabwareWithNoPerm();
+    });
+    it("shows a warning message", () => {
+      cy.findByText("Labware without Permeabilisation").should("be.visible");
+    });
+
+    context("when Continue button is clicked", () => {
+      before(() => {
+        cy.findByRole("button", { name: /Continue/i }).click();
+      });
+      it("shows a success message", () => {
+        cy.findByText("Slots copied").should("be.visible");
+      });
+    });
+    context("when Cancel button is clicked", () => {
+      before(() => {
+        saveSlotForLabwareWithNoPerm();
+        cy.findByRole("button", { name: /Cancel/i }).click();
+      });
+      it("cancels the operation", () => {
+        cy.findByRole("button", { name: /Save/i }).should("be.enabled");
+      });
+    });
+
+    context("When Visium permeabilisation button is clicked", () => {
+      before(() => {
+        saveButton().click();
+        cy.findByRole("button", { name: /Visium permeabilisation/i }).click();
+      });
+      it("should navigate to Visium perm page", () => {
+        cy.url().should("include", "/lab/visium_perm");
+      });
+    });
+  });
 });
 
 function saveButton() {
   return cy.findByRole("button", { name: /Save/i });
+}
+
+function saveSlotForLabwareWithNoPerm() {
+  cy.visit("/lab/visium_cdna");
+  cy.msw().then(({ worker, graphql }) => {
+    const labware = createLabware("STAN-3200");
+    worker.use(
+      graphql.query<FindPermDataQuery, FindPermDataQueryVariables>(
+        "FindPermData",
+        (req, res, ctx) => {
+          return res.once(
+            ctx.data({
+              visiumPermData: {
+                labware: { ...labware, barcode: "STAN-3200" },
+                addressPermData: [],
+              },
+            })
+          );
+        }
+      )
+    );
+  });
+  cy.get("#labwareScanInput").type("STAN-3200{enter}");
+  cy.get("#inputLabwares").within(() => {
+    cy.findByText("A1").click();
+    cy.findByText("D1").click({ shiftKey: true });
+  });
+  cy.get("#outputLabwares").within(() => {
+    cy.findByText("A1").click();
+  });
+
+  saveButton().click();
 }
