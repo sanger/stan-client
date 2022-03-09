@@ -2539,6 +2539,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   overflow-y: auto;
 }
 
+.overflow-y-visible {
+  overflow-y: visible;
+}
+
 .p-1 {
   padding: 0.25rem;
 }
@@ -4227,4 +4231,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.a249ee9f.chunk.css.map*/
+/*# sourceMappingURL=main.70713915.chunk.css.map*/
