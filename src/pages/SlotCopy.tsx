@@ -245,7 +245,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             </TableBody>
           </Table>
           <p className="mt-8 my-3 text-gray-800 text-center text-sm  leading-normal">
-            If you wish to perform permeabilisation on these slides, click the
+            If you wish to cancel this operation and record permeabilisation on these slides, click the
             <span className="font-bold text-gray-900">
               {" "}
               Visium Permeabilisation{" "}
