@@ -187,6 +187,10 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         e.data.findPermTimes.forEach((permData) => {
           ctx.inputLabwarePermData.push(permData);
         });
+        //update slot copy content with updated labware
+        ctx.slotCopyContent = ctx.slotCopyContent.filter((scc) =>
+          e.data.inputLabwares.some((lw) => lw.barcode === scc.sourceBarcode)
+        );
       }),
 
       emptyServerError: assign((ctx) => {

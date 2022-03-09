@@ -81,7 +81,6 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   const handleInputLabwareChange = React.useCallback(
     (inputLabwares: LabwareFieldsFragment[]) => {
-      debugger;
       send({ type: "UPDATE_INPUT_LABWARE_PERMTIME", labwares: inputLabwares });
     },
     [send]
@@ -205,7 +204,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           header={"Save transferred slots"}
           message={{
             type: "Warning",
-            text: "Labware(s) without Permeabilisation",
+            text: "Labware without Permeabilisation",
           }}
           confirmOptions={[
             {
@@ -227,9 +226,9 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           ]}
         >
           <p className={"font-bold mt-8"}>
-            {`Permeabilisation operation is not performed on following labware(s)`}
+            {"Permeabilisation has not been recorded on the following labware"}
           </p>
-          <Table className={"mt-4 w-full overflow-y-visible"}>
+          <Table className={"mt-6 w-full overflow-y-visible"}>
             <TableHead>
               <tr>
                 <TableHeader>Barcode</TableHeader>
@@ -246,8 +245,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             </TableBody>
           </Table>
           <p className="mt-8 my-3 text-gray-800 text-center text-sm  leading-normal">
-            If you wish to cancel and perform permeabilisation on these slides,
-            click
+            If you wish to perform permeabilisation on these slides, click the
             <span className="font-bold text-gray-900">
               {" "}
               Visium Permeabilisation{" "}
@@ -257,7 +255,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           <p className="my-3 text-gray-800 text-center text-sm  leading-normal">
             Otherwise click{" "}
             <span className="font-bold text-gray-900">Continue or Cancel</span>{" "}
-            to proceed or cancel the save operation.
+            to record or cancel this operation.
           </p>
         </ConfirmationModal>
       }
