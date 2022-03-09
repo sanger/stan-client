@@ -25,12 +25,15 @@ interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
+  disableSectionNumbers?: boolean;
 }
 
 const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
   layoutPlans,
   comments,
   onChange,
+
+  disableSectionNumbers = false,
 }) => {
   return (
     <div className="p-4 lg:w-2/3 lg:mx-auto rounded-lg bg-gray-100 space-y-4">
@@ -59,6 +62,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
                 initialLayoutPlan={layoutPlan}
                 comments={comments}
                 onChange={onChange}
+                disableSectionNumbers={disableSectionNumbers}
               />
             ))}
           </TableBody>
@@ -74,12 +78,14 @@ interface TubeRowProps {
   initialLayoutPlan: LayoutPlan;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
+  disableSectionNumbers?: boolean;
 }
 
 const TubeRow: React.FC<TubeRowProps> = ({
   initialLayoutPlan,
   comments,
   onChange,
+  disableSectionNumbers = false,
 }) => {
   const [current, send, service] = useMachine(
     createConfirmLabwareMachine(
@@ -99,6 +105,10 @@ const TubeRow: React.FC<TubeRowProps> = ({
       onChange(confirmOperationLabware);
     }
   }, [onChange, confirmOperationLabware]);
+
+  useEffect(() => {
+    send("UPDATE_ALL_SECTION_NUMBERS", initialLayoutPlan);
+  }, [initialLayoutPlan, send]);
 
   const { cancelled, layoutPlan, labware } = current.context;
   const { layoutMachine } = current.children;
@@ -197,11 +207,9 @@ const TubeRow: React.FC<TubeRowProps> = ({
           <Input
             key={source.address + String(index)}
             type="number"
-            defaultValue={
-              source.newSection === 0 ? "" : String(source.newSection)
-            }
+            value={source.newSection === 0 ? "" : String(source.newSection)}
             min={1}
-            disabled={cancelled}
+            disabled={cancelled || disableSectionNumbers}
             // So the row click handler doesn't get triggered
             onClick={(e) => e.stopPropagation()}
             onChange={(e) =>

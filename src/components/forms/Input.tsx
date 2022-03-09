@@ -47,7 +47,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (props, ref) => {
     const inputClassNames = classNames(
       {
-        "w-full disabled:bg-gray-200": props.type !== "checkbox",
+        "w-full disabled:bg-gray-200":
+          props.type !== "checkbox" || props.type !== "radio",
       },
       defaultInputClassNames
     );

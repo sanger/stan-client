@@ -16,6 +16,8 @@ import { useMachine } from "@xstate/react";
 import { createSectioningConfirmMachine } from "./sectioningConfirm.machine";
 import Warning from "../notifications/Warning";
 import WorkNumberSelect from "../WorkNumberSelect";
+import RadioGroup, { RadioButtonInput } from "../forms/RadioGroup";
+import { objectKeys } from "../../lib/helpers";
 
 type SectioningConfirmProps = {
   /**
@@ -34,6 +36,11 @@ type SectioningConfirmProps = {
   onConfirmed: (labwares?: Array<LabwareFieldsFragment>) => void;
 };
 
+export enum SectionNumberMode {
+  Auto = "Auto",
+  Manual = "Manual",
+}
+
 /**
  * Component for managing the confirmation of a list of Sectioning Plans.
  * Responsible for calling core with the {@code confirmSection} request.
@@ -50,6 +57,7 @@ export default function SectioningConfirm({
     layoutPlansByLabwareType,
     requestError,
     confirmSectionResultLabwares,
+    sectionNumberMode,
   } = current.context;
 
   /**
@@ -95,6 +103,13 @@ export default function SectioningConfirm({
     [send]
   );
 
+  const handleSectionNumberingModeChange = useCallback(
+    (mode: SectionNumberMode) => {
+      send({ type: "UPDATE_SECTION_NUMBERING_MODE", mode });
+    },
+    [send]
+  );
+
   return (
     <div className="my-4 mx-auto max-w-screen-xl space-y-12">
       <div>
@@ -121,18 +136,51 @@ export default function SectioningConfirm({
             {({ removePlanByBarcode }) => (
               <div className="mt-8 space-y-12">
                 {Object.keys(layoutPlansByLabwareType).length > 0 && (
-                  <div className="space-y-4">
-                    <Heading level={3}>Source Labware</Heading>
-                    <DataTable
-                      data={sourceLabware}
-                      columns={[
-                        columns.barcode(),
-                        columns.highestSectionForSlot("A1"),
-                      ]}
-                    />
-                  </div>
-                )}
+                  <>
+                    <div className="space-y-4">
+                      <Heading level={3}>Source Labware</Heading>
+                      <DataTable
+                        data={sourceLabware}
+                        columns={[
+                          columns.barcode(),
+                          columns.highestSectionForSlot("A1"),
+                        ]}
+                      />
+                    </div>
 
+                    <Heading level={3}>Section Numbering</Heading>
+                    <div
+                      className={
+                        "md:w-1/2 flex flex-row sm:justify-between px-3"
+                      }
+                    >
+                      <RadioGroup
+                        label="Select mode"
+                        name={"sectionNumber"}
+                        withFormik={false}
+                      >
+                        {objectKeys(SectionNumberMode).map((key, index) => {
+                          return (
+                            <RadioButtonInput
+                              key={index}
+                              name={"sectionNumber"}
+                              value={SectionNumberMode[key]}
+                              checked={
+                                sectionNumberMode === SectionNumberMode[key]
+                              }
+                              onChange={() =>
+                                handleSectionNumberingModeChange(
+                                  SectionNumberMode[key]
+                                )
+                              }
+                              label={SectionNumberMode[key]}
+                            />
+                          );
+                        })}
+                      </RadioGroup>
+                    </div>
+                  </>
+                )}
                 <div className="space-y-4">
                   {/* Always show tubes first (if there are any) */}
                   {layoutPlansByLabwareType?.[LabwareTypeName.TUBE] && (
@@ -142,6 +190,9 @@ export default function SectioningConfirm({
                         layoutPlansByLabwareType[LabwareTypeName.TUBE]
                       }
                       comments={comments}
+                      disableSectionNumbers={
+                        sectionNumberMode === SectionNumberMode.Auto
+                      }
                     />
                   )}
 
@@ -151,21 +202,26 @@ export default function SectioningConfirm({
                       ([labwareTypeName, _]) =>
                         labwareTypeName !== LabwareTypeName.TUBE
                     )
-                    .map(([labwareTypeName, lps]) => (
-                      <div key={labwareTypeName} className="space-y-4">
-                        <Heading level={3}>{labwareTypeName}</Heading>
+                    .map(([labwareTypeName, lps]) => {
+                      return (
+                        <div key={labwareTypeName} className="space-y-4">
+                          <Heading level={3}>{labwareTypeName}</Heading>
 
-                        {lps.map((layoutPlan) => (
-                          <ConfirmLabware
-                            onChange={handleConfirmChange}
-                            onRemoveClick={removePlanByBarcode}
-                            key={layoutPlan.destinationLabware.barcode}
-                            originalLayoutPlan={layoutPlan}
-                            comments={comments}
-                          />
-                        ))}
-                      </div>
-                    ))}
+                          {lps.map((layoutPlan) => (
+                            <ConfirmLabware
+                              onChange={handleConfirmChange}
+                              onRemoveClick={removePlanByBarcode}
+                              key={layoutPlan.destinationLabware.barcode}
+                              originalLayoutPlan={layoutPlan}
+                              comments={comments}
+                              disableSectionNumbers={
+                                sectionNumberMode === SectionNumberMode.Auto
+                              }
+                            />
+                          ))}
+                        </div>
+                      );
+                    })}
                   {requestError && (
                     <div>
                       <Warning

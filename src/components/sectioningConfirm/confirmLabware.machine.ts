@@ -75,6 +75,11 @@ type UpdateSectionNumberEvent = {
   sectionNumber: number;
 };
 
+type UpdateAllSectionNumbersEvent = {
+  type: "UPDATE_ALL_SECTION_NUMBERS";
+  plannedActions: Map<Address, Array<Source>>;
+};
+
 export type CommitConfirmationEvent = {
   type: "COMMIT_CONFIRMATION";
   confirmOperationLabware: ConfirmOperationLabware;
@@ -93,6 +98,7 @@ export type ConfirmLabwareEvent =
   | LayoutMachineDone
   | ToggleCancelEvent
   | UpdateSectionNumberEvent
+  | UpdateAllSectionNumbersEvent
   | CommitConfirmationEvent
   | SectioningConfirmationCompleteEvent;
 
@@ -158,6 +164,9 @@ export const createConfirmLabwareMachine = (
             },
             UPDATE_SECTION_NUMBER: {
               actions: ["updateSectionNumber", "commitConfirmation"],
+            },
+            UPDATE_ALL_SECTION_NUMBERS: {
+              actions: ["updateAllSectionNumbers", "commitConfirmation"],
             },
           },
         },
@@ -252,6 +261,22 @@ export const createConfirmLabwareMachine = (
           }
         }),
 
+        updateAllSectionNumbers: assign((ctx, e) => {
+          if (e.type !== "UPDATE_ALL_SECTION_NUMBERS") {
+            return;
+          }
+          for (let [key, sources] of e.plannedActions.entries()) {
+            const currentSources = ctx.layoutPlan.plannedActions.get(key);
+            sources.forEach((source) => {
+              const currSource = currentSources
+                ? currentSources.find((sc) => source.address === sc.address)
+                : undefined;
+              if (currSource) {
+                currSource.newSection = source.newSection;
+              }
+            });
+          }
+        }),
         commitConfirmation: assign((ctx) => {
           const confirmSections: Array<ConfirmSection> = [];
 

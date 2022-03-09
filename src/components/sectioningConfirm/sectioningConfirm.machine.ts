@@ -12,11 +12,18 @@ import { LayoutPlan, Source } from "../../lib/machines/layout/layoutContext";
 import _, { Dictionary, groupBy } from "lodash";
 import {
   Address,
+  LabwareTypeName,
   MachineServiceDone,
   MachineServiceError,
 } from "../../types/stan";
-import { buildSampleColors } from "../../lib/helpers/labwareHelper";
+import {
+  buildSampleColors,
+  sortDownRight,
+} from "../../lib/helpers/labwareHelper";
 import { ClientError } from "graphql-request";
+import { SectionNumberMode } from "./SectioningConfirm";
+import { maybeFindSlotByAddress } from "../../lib/helpers/slotHelper";
+
 type SectioningConfirmContext = {
   /**
    * The work number to associate with this confirm operation
@@ -55,6 +62,16 @@ type SectioningConfirmContext = {
   confirmSectionResultLabwares: LabwareFieldsFragment[];
 
   /**
+   * Numbering mode for section numbers - either auto or manual
+   */
+  sectionNumberMode: SectionNumberMode;
+
+  /**
+   * Section number start value
+   */
+  sectionNumberStart: number;
+
+  /**
    * Possible errors returned from stan core after a confirmSection request
    */
   requestError: Maybe<ClientError>;
@@ -62,6 +79,14 @@ type SectioningConfirmContext = {
 
 type SectioningConfirmEvent =
   | { type: "UPDATE_WORK_NUMBER"; workNumber?: string }
+  | {
+      type: "UPDATE_SECTION_NUMBERING_MODE";
+      mode: SectionNumberMode;
+    }
+  | {
+      type: "UPDATE_SECTION_START_NUMBER";
+      start: number;
+    }
   | {
       type: "UPDATE_PLANS";
       plans: Array<FindPlanDataQuery>;
@@ -88,6 +113,8 @@ export function createSectioningConfirmMachine() {
         sourceLabware: [],
         requestError: null,
         confirmSectionResultLabwares: [],
+        sectionNumberMode: SectionNumberMode.Auto,
+        sectionNumberStart: 0,
       },
       initial: "ready",
       entry: ["assignSourceLabware", "assignLayoutPlans"],
@@ -107,6 +134,9 @@ export function createSectioningConfirmMachine() {
             UPDATE_CONFIRM_SECTION_LABWARE: {
               target: "validating",
               actions: ["assignConfirmSectionLabware"],
+            },
+            UPDATE_SECTION_NUMBERING_MODE: {
+              actions: ["assignSectionNumberMode"],
             },
           },
           states: {
@@ -166,6 +196,11 @@ export function createSectioningConfirmMachine() {
             ctx.plans,
             ctx.sourceLabware
           );
+          fillInSectionNumbersInLayoutPlan(
+            ctx.sectionNumberMode,
+            ctx.layoutPlansByLabwareType,
+            ctx.sectionNumberStart
+          );
         }),
 
         assignPlans: assign((ctx, e) => {
@@ -184,11 +219,28 @@ export function createSectioningConfirmMachine() {
           );
         }),
 
+        assignSectionNumberMode: assign((ctx, e) => {
+          if (e.type !== "UPDATE_SECTION_NUMBERING_MODE") return;
+          ctx.sectionNumberMode = e.mode;
+          fillInSectionNumbersInLayoutPlan(
+            ctx.sectionNumberMode,
+            ctx.layoutPlansByLabwareType,
+            ctx.sectionNumberStart
+          );
+        }),
+
         assignSourceLabware: assign((ctx) => {
           ctx.sourceLabware = _(ctx.plans)
             .flatMap((plan) => plan.planData.sources)
             .uniqBy((source) => source.barcode)
             .value();
+
+          const highestSectionNumber = ctx.sourceLabware.map(
+            (sourceLabware) =>
+              maybeFindSlotByAddress(sourceLabware.slots, "A1")
+                ?.blockHighestSection ?? 0
+          );
+          ctx.sectionNumberStart = Math.max(...highestSectionNumber);
         }),
 
         assignRequestError: assign((ctx, e) => {
@@ -233,6 +285,59 @@ export function createSectioningConfirmMachine() {
       },
     }
   );
+}
+
+function fillInSectionNumbersInLayoutPlan(
+  fillMode: SectionNumberMode,
+  layoutPlanMap: Dictionary<Array<LayoutPlan>>,
+  startNum: number
+) {
+  if (fillMode === SectionNumberMode.Auto) {
+    let lastSectionNum = startNum;
+    const tubes = layoutPlanMap?.[LabwareTypeName.TUBE];
+    tubes &&
+      tubes.forEach((layoutPlan) => {
+        lastSectionNum = autoFillSectionNumbers(
+          layoutPlan,
+          lastSectionNum,
+          true
+        );
+      });
+    Object.entries(layoutPlanMap)
+      .filter(
+        ([labwareTypeName, _]) => labwareTypeName !== LabwareTypeName.TUBE
+      )
+      .forEach(([_, lps]) => {
+        return lps.forEach((layoutPlan) => {
+          lastSectionNum = autoFillSectionNumbers(
+            layoutPlan,
+            lastSectionNum,
+            true
+          );
+        });
+      });
+  } else {
+    Object.entries(layoutPlanMap).forEach(([_, lps]) => {
+      return lps.forEach((layoutPlan) => {
+        autoFillSectionNumbers(layoutPlan, 0, false);
+      });
+    });
+  }
+}
+function autoFillSectionNumbers(
+  layoutPlan: LayoutPlan,
+  sectionNum: number,
+  incrementFill: boolean
+) {
+  let newSectionNum = sectionNum;
+  sortDownRight(layoutPlan.destinationLabware.slots).map((slot) => {
+    const action = layoutPlan.plannedActions.get(slot.address);
+    if (action && action.length > 0) {
+      action[0].newSection = incrementFill ? ++newSectionNum : sectionNum;
+    }
+    return action;
+  });
+  return newSectionNum;
 }
 
 /**

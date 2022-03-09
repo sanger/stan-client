@@ -11,7 +11,8 @@ interface LabwareCommentsProps {
   layoutPlan: LayoutPlan;
   comments: Array<Comment>;
   value: string | number | undefined;
-  disabled?: boolean;
+  disabledComment?: boolean;
+  disabledSectionNumber?: boolean;
   onCommentChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   onSectionNumberChange: (
     slotAddress: string,
@@ -26,7 +27,8 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
   comments,
   value,
   onCommentChange,
-  disabled = false,
+  disabledComment = false,
+  disabledSectionNumber = false,
   onSectionNumberChange,
 }) => {
   return (
@@ -39,10 +41,9 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
           <Input
             key={source.address + String(index)}
             type="number"
-            defaultValue={
-              source.newSection === 0 ? "" : String(source.newSection)
-            }
+            value={source.newSection === 0 ? "" : String(source.newSection)}
             min={1}
+            disabled={disabledSectionNumber}
             onChange={(e) =>
               onSectionNumberChange(slot.address, index, Number(e.target.value))
             }
@@ -56,7 +57,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
         {layoutPlan.plannedActions.has(slot.address) && (
           <Select
             value={value}
-            disabled={disabled}
+            disabled={disabledComment}
             style={{ width: "100%" }}
             onChange={(e) => onCommentChange(e)}
           >

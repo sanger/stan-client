@@ -31,6 +31,7 @@ interface ConfirmLabwareProps {
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
   onRemoveClick: (labwareBarcode: string) => void;
+  disableSectionNumbers?: boolean;
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
@@ -38,6 +39,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   comments,
   onChange,
   onRemoveClick,
+  disableSectionNumbers = false,
 }) => {
   const [current, send, service] = useMachine(
     createConfirmLabwareMachine(
@@ -57,6 +59,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     }
   }, [onChange, confirmOperationLabware]);
 
+  useEffect(() => {
+    send("UPDATE_ALL_SECTION_NUMBERS", originalLayoutPlan);
+  }, [originalLayoutPlan, send]);
+
   const { addressToCommentMap, labware, layoutPlan } = current.context;
 
   const { layoutMachine } = current.children;
@@ -68,7 +74,6 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     },
     "grid grid-cols-1 gap-x-8 gap-y-2"
   );
-
   return (
     <motion.div
       variants={variants.fadeInWithLift}
@@ -108,7 +113,8 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                   key={slot.address}
                   slot={slot}
                   value={addressToCommentMap.get(slot.address) ?? ""}
-                  disabled={current.matches("done")}
+                  disabledComment={current.matches("done")}
+                  disabledSectionNumber={disableSectionNumbers}
                   comments={comments}
                   layoutPlan={layoutPlan}
                   onCommentChange={(e) => {
