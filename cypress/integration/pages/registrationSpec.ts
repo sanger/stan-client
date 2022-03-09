@@ -118,9 +118,24 @@ describe("Registration", () => {
       });
     });
 
+    context(
+      "when store button is clicked after successful registration",
+      () => {
+        before(() => {
+          cy.findByRole("button", { name: /Store/i }).click();
+        });
+        it("should go to store page", () => {
+          cy.url().should("include", "/store");
+        });
+        it("should list the registered labware in store page", () => {
+          cy.findByText("LW_BC_1").should("be.visible");
+        });
+      }
+    );
+
     context("when the submission fails server side", () => {
       before(() => {
-        cy.reload();
+        cy.visit("/admin/registration");
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
