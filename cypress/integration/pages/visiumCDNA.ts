@@ -147,7 +147,7 @@ describe("Visium cDNA Page", () => {
       saveSlotForLabwareWithNoPerm();
     });
     it("shows a warning message", () => {
-      cy.findByText("Labware(s) without Permeabilisation").should("be.visible");
+      cy.findByText("Labware without Permeabilisation").should("be.visible");
     });
 
     context("when Continue button is clicked", () => {
