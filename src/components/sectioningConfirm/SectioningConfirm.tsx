@@ -18,6 +18,8 @@ import Warning from "../notifications/Warning";
 import WorkNumberSelect from "../WorkNumberSelect";
 import RadioGroup, { RadioButtonInput } from "../forms/RadioGroup";
 import { objectKeys } from "../../lib/helpers";
+import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
+import { ConfirmationModal } from "../modal/ConfirmationModal";
 
 type SectioningConfirmProps = {
   /**
@@ -60,6 +62,10 @@ export default function SectioningConfirm({
     sectionNumberMode,
   } = current.context;
 
+  const [labwarePlanToDelete, setLabwarePlanToDelete] = React.useState<
+    string | undefined
+  >(undefined);
+
   /**
    * Call the {@code onConfirmed} callback when machine reaches the {@code confirmed} state
    */
@@ -93,6 +99,16 @@ export default function SectioningConfirm({
   );
 
   /**
+   * Callback for when the {@link LayoutPlan} updates its section layout
+   */
+  const handlePlanLayoutChange = useCallback(
+    (layoutPlan: LayoutPlan) => {
+      send({ type: "UPDATE_SECTIONLAYOUT_IN_PLAN", layoutPlan });
+    },
+    [send]
+  );
+
+  /**
    * Callback for when a {@link ConfirmLabware} or {@link ConfirmTubes} updates
    * e.g. sections are added, comments are made against sections
    */
@@ -108,6 +124,27 @@ export default function SectioningConfirm({
       send({ type: "UPDATE_SECTION_NUMBERING_MODE", mode });
     },
     [send]
+  );
+
+  const handlePlanCancelled = useCallback(
+    (layoutPlan: LayoutPlan, cancelled: boolean) => {
+      debugger;
+      send({ type: "UPDATE_CANCELLED_LAYOUTPLAN", layoutPlan, cancelled });
+    },
+    [send]
+  );
+
+  const handleDeleteLabwarePlan = useCallback(
+    (labwareBarcode: string, deleteLabwarePlan: (barcode: string) => void) => {
+      //&&
+      //         Object.values(layoutPlansByLabwareType).length > 1
+      if (sectionNumberMode === SectionNumberMode.Auto) {
+        setLabwarePlanToDelete(labwareBarcode);
+      } else {
+        deleteLabwarePlan(labwareBarcode);
+      }
+    },
+    [setLabwarePlanToDelete, sectionNumberMode, layoutPlansByLabwareType]
   );
 
   return (
@@ -193,6 +230,8 @@ export default function SectioningConfirm({
                       disableSectionNumbers={
                         sectionNumberMode === SectionNumberMode.Auto
                       }
+                      onPlanLayoutChange={handlePlanLayoutChange}
+                      onPlanCancelled={handlePlanCancelled}
                     />
                   )}
 
@@ -210,7 +249,13 @@ export default function SectioningConfirm({
                           {lps.map((layoutPlan) => (
                             <ConfirmLabware
                               onChange={handleConfirmChange}
-                              onRemoveClick={removePlanByBarcode}
+                              onPlanLayoutChange={handlePlanLayoutChange}
+                              onRemoveClick={(labwareBarcode) => {
+                                handleDeleteLabwarePlan(
+                                  labwareBarcode,
+                                  removePlanByBarcode
+                                );
+                              }}
                               key={layoutPlan.destinationLabware.barcode}
                               originalLayoutPlan={layoutPlan}
                               comments={comments}
@@ -245,6 +290,32 @@ export default function SectioningConfirm({
                     </div>
                   )}
                 </div>
+                <ConfirmationModal
+                  show={labwarePlanToDelete !== undefined}
+                  header={"Removing labware"}
+                  message={{ type: "Warning", text: "Section number update" }}
+                  confirmOptions={[
+                    {
+                      label: "Cancel",
+                      action: () => {
+                        setLabwarePlanToDelete(undefined);
+                      },
+                    },
+                    {
+                      label: "Continue",
+                      action: () => {
+                        labwarePlanToDelete &&
+                          removePlanByBarcode(labwarePlanToDelete);
+                        setLabwarePlanToDelete(undefined);
+                      },
+                    },
+                  ]}
+                >
+                  <p className={"font-bold mt-8"}>
+                    Section numbers in all remaining labware will be auto
+                    numbered with deletion.
+                  </p>
+                </ConfirmationModal>
               </div>
             )}
           </PlanFinder>

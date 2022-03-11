@@ -30,6 +30,7 @@ interface ConfirmLabwareProps {
   originalLayoutPlan: LayoutPlan;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
+  onPlanLayoutChange: (layoutPlan: LayoutPlan) => void;
   onRemoveClick: (labwareBarcode: string) => void;
   disableSectionNumbers?: boolean;
 }
@@ -38,6 +39,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   originalLayoutPlan,
   comments,
   onChange,
+  onPlanLayoutChange,
   onRemoveClick,
   disableSectionNumbers = false,
 }) => {
@@ -52,19 +54,9 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     service,
     selectConfirmOperationLabware
   );
-
-  useEffect(() => {
-    if (confirmOperationLabware) {
-      onChange(confirmOperationLabware);
-    }
-  }, [onChange, confirmOperationLabware]);
-
-  useEffect(() => {
-    send("UPDATE_ALL_SECTION_NUMBERS", originalLayoutPlan);
-  }, [originalLayoutPlan, send]);
+  const sectionsInSlotChanged = React.useRef<boolean>(false);
 
   const { addressToCommentMap, labware, layoutPlan } = current.context;
-
   const { layoutMachine } = current.children;
 
   const gridClassNames = classNames(
@@ -74,6 +66,26 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     },
     "grid grid-cols-1 gap-x-8 gap-y-2"
   );
+
+  useEffect(() => {
+    if (confirmOperationLabware) {
+      onChange(confirmOperationLabware);
+    }
+  }, [onChange, confirmOperationLabware]);
+
+  /**Update for section numbers changes in parent**/
+  useEffect(() => {
+    send("UPDATE_ALL_SECTION_NUMBERS", originalLayoutPlan);
+  }, [originalLayoutPlan, send]);
+
+  useEffect(() => {
+    /**Sections in a slot is changed, so notify parent**/
+    if (sectionsInSlotChanged.current) {
+      onPlanLayoutChange(layoutPlan);
+      sectionsInSlotChanged.current = false;
+    }
+  }, [layoutPlan, onPlanLayoutChange]);
+
   return (
     <motion.div
       variants={variants.fadeInWithLift}
@@ -175,7 +187,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
         </ModalBody>
         <ModalFooter>
           <BlueButton
-            onClick={() => layoutMachine.send({ type: "DONE" })}
+            onClick={() => {
+              sectionsInSlotChanged.current = true;
+              layoutMachine.send({ type: "DONE" });
+            }}
             className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
           >
             Done

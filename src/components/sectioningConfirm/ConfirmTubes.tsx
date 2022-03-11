@@ -25,6 +25,8 @@ interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
+  onPlanLayoutChange: (layoutPlan: LayoutPlan) => void;
+  onPlanCancelled: (layoutPlan: LayoutPlan, cancelled: boolean) => void;
   disableSectionNumbers?: boolean;
 }
 
@@ -32,7 +34,8 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
   layoutPlans,
   comments,
   onChange,
-
+  onPlanLayoutChange,
+  onPlanCancelled,
   disableSectionNumbers = false,
 }) => {
   return (
@@ -62,6 +65,8 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
                 initialLayoutPlan={layoutPlan}
                 comments={comments}
                 onChange={onChange}
+                onPlanLayoutChange={onPlanLayoutChange}
+                onPlanCancelled={onPlanCancelled}
                 disableSectionNumbers={disableSectionNumbers}
               />
             ))}
@@ -78,6 +83,8 @@ interface TubeRowProps {
   initialLayoutPlan: LayoutPlan;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
+  onPlanLayoutChange: (layoutPlan: LayoutPlan) => void;
+  onPlanCancelled: (layoutPlan: LayoutPlan, cancelled: boolean) => void;
   disableSectionNumbers?: boolean;
 }
 
@@ -85,6 +92,8 @@ const TubeRow: React.FC<TubeRowProps> = ({
   initialLayoutPlan,
   comments,
   onChange,
+  onPlanLayoutChange,
+  onPlanCancelled,
   disableSectionNumbers = false,
 }) => {
   const [current, send, service] = useMachine(
@@ -94,6 +103,9 @@ const TubeRow: React.FC<TubeRowProps> = ({
       initialLayoutPlan
     )
   );
+  const { cancelled, layoutPlan, labware } = current.context;
+  const { layoutMachine } = current.children;
+  const sectionChangeClicked = React.useRef<boolean>(false);
 
   const confirmOperationLabware = useSelector(
     service,
@@ -106,12 +118,18 @@ const TubeRow: React.FC<TubeRowProps> = ({
     }
   }, [onChange, confirmOperationLabware]);
 
+  /**Update for section numbers changes in parent**/
   useEffect(() => {
     send("UPDATE_ALL_SECTION_NUMBERS", initialLayoutPlan);
   }, [initialLayoutPlan, send]);
 
-  const { cancelled, layoutPlan, labware } = current.context;
-  const { layoutMachine } = current.children;
+  useEffect(() => {
+    /**Sections in a slot is changed, so notify parent**/
+    if (sectionChangeClicked.current) {
+      onPlanLayoutChange(layoutPlan);
+      sectionChangeClicked.current = false;
+    }
+  }, [layoutPlan, onPlanLayoutChange]);
 
   const rowClassnames = classNames(
     {
@@ -121,8 +139,9 @@ const TubeRow: React.FC<TubeRowProps> = ({
   );
 
   const handleOnClick = useCallback(() => {
+    onPlanCancelled(layoutPlan, !cancelled);
     send({ type: "TOGGLE_CANCEL" });
-  }, [send]);
+  }, [send, onPlanCancelled, cancelled, layoutPlan]);
 
   const handleOnChange = useCallback(
     (slotAddress: string, sectionNumber: number, sectionIndex: number) => {
@@ -187,7 +206,10 @@ const TubeRow: React.FC<TubeRowProps> = ({
             </ModalBody>
             <ModalFooter>
               <BlueButton
-                onClick={() => layoutMachine.send({ type: "DONE" })}
+                onClick={() => {
+                  sectionChangeClicked.current = true;
+                  layoutMachine.send({ type: "DONE" });
+                }}
                 className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
               >
                 Done

@@ -11,6 +11,7 @@ import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../lib/machines/layout/layoutMachine";
 import { cloneDeep } from "lodash";
 import { Address, NewLabwareLayout } from "../../types/stan";
+import { SectionNumberMode } from "./SectioningConfirm";
 
 export interface ConfirmLabwareContext {
   /**
@@ -80,6 +81,15 @@ type UpdateAllSectionNumbersEvent = {
   plannedActions: Map<Address, Array<Source>>;
 };
 
+type UpdateSectionNumberModeEvent = {
+  type: "UPDATE_SECTION_NUMBER_MODE";
+  mode: SectionNumberMode;
+};
+type SetMinimumSectionNumberEvent = {
+  type: "SET_MIN_SECTION_NUMBER";
+  minSectionNumber: number;
+};
+
 export type CommitConfirmationEvent = {
   type: "COMMIT_CONFIRMATION";
   confirmOperationLabware: ConfirmOperationLabware;
@@ -99,6 +109,8 @@ export type ConfirmLabwareEvent =
   | ToggleCancelEvent
   | UpdateSectionNumberEvent
   | UpdateAllSectionNumbersEvent
+  | UpdateSectionNumberModeEvent
+  | SetMinimumSectionNumberEvent
   | CommitConfirmationEvent
   | SectioningConfirmationCompleteEvent;
 
@@ -167,6 +179,9 @@ export const createConfirmLabwareMachine = (
             },
             UPDATE_ALL_SECTION_NUMBERS: {
               actions: ["updateAllSectionNumbers", "commitConfirmation"],
+            },
+            SET_MIN_SECTION_NUMBER: {
+              actions: ["setMinimumSectionNumber", "commmitConfirmation"],
             },
           },
         },
@@ -267,14 +282,21 @@ export const createConfirmLabwareMachine = (
           }
           for (let [key, sources] of e.plannedActions.entries()) {
             const currentSources = ctx.layoutPlan.plannedActions.get(key);
-            sources.forEach((source) => {
-              const currSource = currentSources
-                ? currentSources.find((sc) => source.address === sc.address)
-                : undefined;
-              if (currSource) {
-                currSource.newSection = source.newSection;
-              }
-            });
+            debugger;
+
+            sources &&
+              sources.forEach((source, indx) => {
+                debugger;
+                const currSourcesForAddress = currentSources
+                  ? currentSources.filter((sc) => source.address === sc.address)
+                  : undefined;
+                if (
+                  currSourcesForAddress &&
+                  currSourcesForAddress.length > indx
+                ) {
+                  currSourcesForAddress[indx].newSection = source.newSection;
+                }
+              });
           }
         }),
         commitConfirmation: assign((ctx) => {
