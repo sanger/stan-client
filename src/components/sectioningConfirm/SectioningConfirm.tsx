@@ -18,7 +18,6 @@ import Warning from "../notifications/Warning";
 import WorkNumberSelect from "../WorkNumberSelect";
 import RadioGroup, { RadioButtonInput } from "../forms/RadioGroup";
 import { objectKeys } from "../../lib/helpers";
-import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 import { ConfirmationModal } from "../modal/ConfirmationModal";
 
 type SectioningConfirmProps = {
@@ -99,22 +98,18 @@ export default function SectioningConfirm({
   );
 
   /**
-   * Callback for when the {@link LayoutPlan} updates its section layout
-   */
-  const handlePlanLayoutChange = useCallback(
-    (layoutPlan: LayoutPlan) => {
-      send({ type: "UPDATE_SECTIONLAYOUT_IN_PLAN", layoutPlan });
-    },
-    [send]
-  );
-
-  /**
    * Callback for when a {@link ConfirmLabware} or {@link ConfirmTubes} updates
    * e.g. sections are added, comments are made against sections
    */
   const handleConfirmChange = useCallback(
     (confirmSectionLabware) => {
-      send({ type: "UPDATE_CONFIRM_SECTION_LABWARE", confirmSectionLabware });
+      send({
+        type: "UPDATE_CONFIRM_SECTION_LABWARE",
+        confirmSectionLabware,
+        labware: sourceLabware.find(
+          (lw) => lw.barcode === confirmSectionLabware.barcode
+        ),
+      });
     },
     [send]
   );
@@ -126,25 +121,15 @@ export default function SectioningConfirm({
     [send]
   );
 
-  const handlePlanCancelled = useCallback(
-    (layoutPlan: LayoutPlan, cancelled: boolean) => {
-      debugger;
-      send({ type: "UPDATE_CANCELLED_LAYOUTPLAN", layoutPlan, cancelled });
-    },
-    [send]
-  );
-
   const handleDeleteLabwarePlan = useCallback(
     (labwareBarcode: string, deleteLabwarePlan: (barcode: string) => void) => {
-      //&&
-      //         Object.values(layoutPlansByLabwareType).length > 1
       if (sectionNumberMode === SectionNumberMode.Auto) {
         setLabwarePlanToDelete(labwareBarcode);
       } else {
         deleteLabwarePlan(labwareBarcode);
       }
     },
-    [setLabwarePlanToDelete, sectionNumberMode, layoutPlansByLabwareType]
+    [setLabwarePlanToDelete, sectionNumberMode]
   );
 
   return (
@@ -230,8 +215,6 @@ export default function SectioningConfirm({
                       disableSectionNumbers={
                         sectionNumberMode === SectionNumberMode.Auto
                       }
-                      onPlanLayoutChange={handlePlanLayoutChange}
-                      onPlanCancelled={handlePlanCancelled}
                     />
                   )}
 
@@ -249,7 +232,6 @@ export default function SectioningConfirm({
                           {lps.map((layoutPlan) => (
                             <ConfirmLabware
                               onChange={handleConfirmChange}
-                              onPlanLayoutChange={handlePlanLayoutChange}
                               onRemoveClick={(labwareBarcode) => {
                                 handleDeleteLabwarePlan(
                                   labwareBarcode,

@@ -25,8 +25,6 @@ interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
-  onPlanLayoutChange: (layoutPlan: LayoutPlan) => void;
-  onPlanCancelled: (layoutPlan: LayoutPlan, cancelled: boolean) => void;
   disableSectionNumbers?: boolean;
 }
 
@@ -34,8 +32,6 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
   layoutPlans,
   comments,
   onChange,
-  onPlanLayoutChange,
-  onPlanCancelled,
   disableSectionNumbers = false,
 }) => {
   return (
@@ -65,8 +61,6 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
                 initialLayoutPlan={layoutPlan}
                 comments={comments}
                 onChange={onChange}
-                onPlanLayoutChange={onPlanLayoutChange}
-                onPlanCancelled={onPlanCancelled}
                 disableSectionNumbers={disableSectionNumbers}
               />
             ))}
@@ -83,8 +77,6 @@ interface TubeRowProps {
   initialLayoutPlan: LayoutPlan;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
-  onPlanLayoutChange: (layoutPlan: LayoutPlan) => void;
-  onPlanCancelled: (layoutPlan: LayoutPlan, cancelled: boolean) => void;
   disableSectionNumbers?: boolean;
 }
 
@@ -92,8 +84,6 @@ const TubeRow: React.FC<TubeRowProps> = ({
   initialLayoutPlan,
   comments,
   onChange,
-  onPlanLayoutChange,
-  onPlanCancelled,
   disableSectionNumbers = false,
 }) => {
   const [current, send, service] = useMachine(
@@ -123,14 +113,6 @@ const TubeRow: React.FC<TubeRowProps> = ({
     send("UPDATE_ALL_SECTION_NUMBERS", initialLayoutPlan);
   }, [initialLayoutPlan, send]);
 
-  useEffect(() => {
-    /**Sections in a slot is changed, so notify parent**/
-    if (sectionChangeClicked.current) {
-      onPlanLayoutChange(layoutPlan);
-      sectionChangeClicked.current = false;
-    }
-  }, [layoutPlan, onPlanLayoutChange]);
-
   const rowClassnames = classNames(
     {
       "opacity-50": cancelled,
@@ -139,9 +121,8 @@ const TubeRow: React.FC<TubeRowProps> = ({
   );
 
   const handleOnClick = useCallback(() => {
-    onPlanCancelled(layoutPlan, !cancelled);
     send({ type: "TOGGLE_CANCEL" });
-  }, [send, onPlanCancelled, cancelled, layoutPlan]);
+  }, [send]);
 
   const handleOnChange = useCallback(
     (slotAddress: string, sectionNumber: number, sectionIndex: number) => {

@@ -1,4 +1,5 @@
 import {
+  ConfirmSection,
   ConfirmSectionLabware,
   ConfirmSectionMutation,
   FindPlanDataQuery,
@@ -9,7 +10,7 @@ import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
 import { stanCore } from "../../lib/sdk";
 import { LayoutPlan, Source } from "../../lib/machines/layout/layoutContext";
-import _, { cloneDeep, Dictionary, groupBy } from "lodash";
+import _, { Dictionary, groupBy } from "lodash";
 import {
   Address,
   LabwareTypeName,
@@ -75,11 +76,6 @@ type SectioningConfirmContext = {
    * Possible errors returned from stan core after a confirmSection request
    */
   requestError: Maybe<ClientError>;
-
-  /**
-   * Layout plans that are cancelled (Cancelling is only supported by TUBES, currently)
-   */
-  cancelledLayoutPlans: Array<LayoutPlan>;
 };
 
 type SectioningConfirmEvent =
@@ -99,15 +95,7 @@ type SectioningConfirmEvent =
   | {
       type: "UPDATE_CONFIRM_SECTION_LABWARE";
       confirmSectionLabware: ConfirmSectionLabware;
-    }
-  | {
-      type: "UPDATE_SECTIONLAYOUT_IN_PLAN";
-      layoutPlan: LayoutPlan;
-    }
-  | {
-      type: "UPDATE_CANCELLED_LAYOUTPLAN";
-      layoutPlan: LayoutPlan;
-      cancelled: boolean;
+      labware?: LabwareFieldsFragment;
     }
   | { type: "IS_VALID" }
   | { type: "IS_INVALID" }
@@ -129,7 +117,6 @@ export function createSectioningConfirmMachine() {
         confirmSectionResultLabwares: [],
         sectionNumberMode: SectionNumberMode.Auto,
         sectionNumberStart: 0,
-        cancelledLayoutPlans: [],
       },
       initial: "ready",
       entry: ["assignSourceLabware"],
@@ -149,16 +136,14 @@ export function createSectioningConfirmMachine() {
             },
             UPDATE_CONFIRM_SECTION_LABWARE: {
               target: "validating",
-              actions: ["assignConfirmSectionLabware"],
+              actions: [
+                "assignConfirmSectionLabware",
+                "updateSectionLayout",
+                "fillSectionNumbers",
+              ],
             },
             UPDATE_SECTION_NUMBERING_MODE: {
               actions: ["assignSectionNumberMode", "fillSectionNumbers"],
-            },
-            UPDATE_SECTIONLAYOUT_IN_PLAN: {
-              actions: ["updateSectionLayout", "fillSectionNumbers"],
-            },
-            UPDATE_CANCELLED_LAYOUTPLAN: {
-              actions: ["updateCancelledLayoutPlan", "fillSectionNumbers"],
             },
           },
           states: {
@@ -201,7 +186,6 @@ export function createSectioningConfirmMachine() {
       actions: {
         assignConfirmSectionLabware: assign((ctx, e) => {
           if (e.type !== "UPDATE_CONFIRM_SECTION_LABWARE") return;
-
           const cslIndex = ctx.confirmSectionLabware.findIndex(
             (csl) => csl.barcode === e.confirmSectionLabware.barcode
           );
@@ -254,40 +238,68 @@ export function createSectioningConfirmMachine() {
             (lp) => lp.destinationLabware.labwareType.name
           );
         }),
-
         updateSectionLayout: assign((ctx, e) => {
-          if (e.type !== "UPDATE_SECTIONLAYOUT_IN_PLAN") {
+          if (e.type !== "UPDATE_CONFIRM_SECTION_LABWARE") {
             return;
           }
+
           let planInOriginalLayout: LayoutPlan | undefined = undefined;
-          /**Find the layoutPlan in the list whose section layout is changed*/
+
+          /**Find the layoutPlan in the list whose section info is changed*/
           for (let plans of Object.values(ctx.layoutPlansByLabwareType)) {
             const findPlan = plans.find(
               (plan) =>
                 plan.destinationLabware.barcode ===
-                e.layoutPlan.destinationLabware.barcode
+                e.confirmSectionLabware.barcode
             );
             if (findPlan) {
               planInOriginalLayout = findPlan;
               break;
             }
           }
-          /**Update sections in changed layoutPlan**/
-          if (planInOriginalLayout) {
-            const plannedActionsFromEvent = Array.from(
-              e.layoutPlan.plannedActions.entries()
+          if (planInOriginalLayout && e.confirmSectionLabware.confirmSections) {
+            /**Get total sections from existing plan**/
+            const totalSources = Array.from(
+              planInOriginalLayout?.plannedActions.values()
+            ).reduce((prev, plannedAction) => {
+              return prev + Array.from(plannedAction.values()).length;
+            }, 0);
+
+            const confirmSectionMap = e.confirmSectionLabware.confirmSections.reduce(
+              (map, section) => {
+                map.has(section.destinationAddress)
+                  ? map.get(section.destinationAddress)?.push(section)
+                  : map.set(section.destinationAddress, [section]);
+                return map;
+              },
+              new Map<string, ConfirmSection[]>()
             );
-            if (plannedActionsFromEvent.length <= 0) {
-              planInOriginalLayout!.plannedActions.clear();
-            } else {
-              plannedActionsFromEvent.forEach(([key, action]) => {
-                const newAction = cloneDeep(action);
-                newAction.forEach((action) => (action.newSection = 0));
-                planInOriginalLayout!.plannedActions.set(key, newAction);
-              });
-            }
+
+            /**Check any change in sections**/
+            if (totalSources === e.confirmSectionLabware.confirmSections.length)
+              return;
+
+            /**There is change in section, so update the layoutPlan with new sections**/
+            planInOriginalLayout!.plannedActions = new Map<string, Source[]>();
+            Array.from(confirmSectionMap.keys()).forEach((key) => {
+              const sections = confirmSectionMap.get(key);
+              if (!sections || sections.length === 0) {
+                planInOriginalLayout?.plannedActions.set(key, []);
+              } else {
+                const sources = sections!.map((section) => {
+                  return {
+                    sampleId: section.sampleId,
+                    labware: planInOriginalLayout?.destinationLabware as LabwareFieldsFragment,
+                    newSection: 0,
+                    address: section.destinationAddress,
+                  };
+                });
+                planInOriginalLayout?.plannedActions.set(key, sources);
+              }
+            });
           }
         }),
+
         assignPlans: assign((ctx, e) => {
           if (e.type !== "UPDATE_PLANS") return;
           ctx.plans = e.plans;
@@ -300,17 +312,6 @@ export function createSectioningConfirmMachine() {
 
           ctx.confirmSectionLabware = ctx.confirmSectionLabware.filter((csl) =>
             destinationBarcodes.has(csl.barcode)
-          );
-          /**
-           * Remove all deleted plans from cancelled list
-           */
-          ctx.cancelledLayoutPlans = ctx.cancelledLayoutPlans.filter(
-            (clp) =>
-              !e.plans.some(
-                (plan) =>
-                  plan.planData.destination.barcode ===
-                  clp.destinationLabware.barcode
-              )
           );
         }),
 
@@ -345,32 +346,12 @@ export function createSectioningConfirmMachine() {
         assignConfirmSectionResults: assign((ctx, e) => {
           if (e.type !== "done.invoke.confirmSection") return;
           ctx.confirmSectionResultLabwares = e.data.confirmSection.labware;
-          debugger;
         }),
 
-        updateCancelledLayoutPlan: assign((ctx, e) => {
-          if (e.type !== "UPDATE_CANCELLED_LAYOUTPLAN") return;
-          /**Add to list if a layout plan is cancelled*/
-          if (e.cancelled) {
-            !ctx.cancelledLayoutPlans.some(
-              (plan) =>
-                plan.destinationLabware.barcode ===
-                e.layoutPlan.destinationLabware.barcode
-            ) && ctx.cancelledLayoutPlans.push(e.layoutPlan);
-          } else {
-            /**The cancellation has been removed for the layoutplan, so remove from cancelled list**/
-            ctx.cancelledLayoutPlans = ctx.cancelledLayoutPlans.filter(
-              (plan) =>
-                plan.destinationLabware.barcode !==
-                e.layoutPlan.destinationLabware.barcode
-            );
-          }
-        }),
         fillSectionNumbers: assign((ctx, e) => {
           const updateSectionNumber: boolean =
-            ((e.type === "UPDATE_CANCELLED_LAYOUTPLAN" ||
-              e.type === "UPDATE_SECTIONLAYOUT_IN_PLAN" ||
-              e.type === "UPDATE_PLANS") &&
+            ((e.type === "UPDATE_PLANS" ||
+              e.type === "UPDATE_CONFIRM_SECTION_LABWARE") &&
               ctx.sectionNumberMode === SectionNumberMode.Auto) ||
             e.type === "UPDATE_SECTION_NUMBERING_MODE";
           updateSectionNumber &&
@@ -378,7 +359,9 @@ export function createSectioningConfirmMachine() {
               ctx.sectionNumberMode,
               ctx.layoutPlansByLabwareType,
               ctx.sectionNumberStart,
-              ctx.cancelledLayoutPlans
+              ctx.confirmSectionLabware
+                .filter((csl) => csl.cancelled)
+                .map((item) => item.barcode)
             );
         }),
       },
@@ -425,13 +408,13 @@ export function createSectioningConfirmMachine() {
  * @param fillMode 'Auto' or 'Manual'
  * @param layoutPlanMap List of layoutPlans
  * @param startNum For 'Auto' the numbering starts from this value
- * @param cancelledLayoutPlans  Cancelled layout plans
+ * @param cancelledBarcodes
  */
 function fillInSectionNumbersInLayoutPlan(
   fillMode: SectionNumberMode,
   layoutPlanMap: Dictionary<Array<LayoutPlan>>,
   startNum: number,
-  cancelledLayoutPlans: Array<LayoutPlan>
+  cancelledBarcodes: Array<string>
 ) {
   /**Auto filling of section numbers**/
   if (fillMode === SectionNumberMode.Auto) {
@@ -445,10 +428,8 @@ function fillInSectionNumbersInLayoutPlan(
           layoutPlan,
           lastSectionNum,
           /** Tubes, if cancelled will be filled with 0, if cancelled, even in 'Auto' mode**/
-          !cancelledLayoutPlans.some(
-            (cp) =>
-              cp.destinationLabware.barcode ===
-              layoutPlan.destinationLabware.barcode
+          !cancelledBarcodes.some(
+            (barcode) => barcode === layoutPlan.destinationLabware.barcode
           )
         );
       });

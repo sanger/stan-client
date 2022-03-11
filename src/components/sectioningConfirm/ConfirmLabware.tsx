@@ -30,7 +30,6 @@ interface ConfirmLabwareProps {
   originalLayoutPlan: LayoutPlan;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
-  onPlanLayoutChange: (layoutPlan: LayoutPlan) => void;
   onRemoveClick: (labwareBarcode: string) => void;
   disableSectionNumbers?: boolean;
 }
@@ -39,7 +38,6 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   originalLayoutPlan,
   comments,
   onChange,
-  onPlanLayoutChange,
   onRemoveClick,
   disableSectionNumbers = false,
 }) => {
@@ -54,7 +52,6 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     service,
     selectConfirmOperationLabware
   );
-  const sectionsInSlotChanged = React.useRef<boolean>(false);
 
   const { addressToCommentMap, labware, layoutPlan } = current.context;
   const { layoutMachine } = current.children;
@@ -77,14 +74,6 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   useEffect(() => {
     send("UPDATE_ALL_SECTION_NUMBERS", originalLayoutPlan);
   }, [originalLayoutPlan, send]);
-
-  useEffect(() => {
-    /**Sections in a slot is changed, so notify parent**/
-    if (sectionsInSlotChanged.current) {
-      onPlanLayoutChange(layoutPlan);
-      sectionsInSlotChanged.current = false;
-    }
-  }, [layoutPlan, onPlanLayoutChange]);
 
   return (
     <motion.div
@@ -188,7 +177,6 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
         <ModalFooter>
           <BlueButton
             onClick={() => {
-              sectionsInSlotChanged.current = true;
               layoutMachine.send({ type: "DONE" });
             }}
             className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
