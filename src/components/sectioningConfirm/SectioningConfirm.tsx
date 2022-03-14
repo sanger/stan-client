@@ -102,10 +102,11 @@ export default function SectioningConfirm({
    * e.g. sections are added, comments are made against sections
    */
   const handleConfirmChange = useCallback(
-    (confirmSectionLabware) => {
+    (confirmSectionLabware, sourceLabwares: LabwareFieldsFragment[]) => {
       send({
         type: "UPDATE_CONFIRM_SECTION_LABWARE",
         confirmSectionLabware,
+        sourceLabwares,
       });
     },
     [send]

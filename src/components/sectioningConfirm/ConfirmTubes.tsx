@@ -18,13 +18,20 @@ import BlueButton from "../buttons/BlueButton";
 import WhiteButton from "../buttons/WhiteButton";
 import PinkButton from "../buttons/PinkButton";
 import Labware from "../labware/Labware";
-import { CommentFieldsFragment, ConfirmSectionLabware } from "../../types/sdk";
+import {
+  CommentFieldsFragment,
+  ConfirmSectionLabware,
+  LabwareFieldsFragment,
+} from "../../types/sdk";
 import { selectConfirmOperationLabware } from "./index";
 
 interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
   comments: Array<CommentFieldsFragment>;
-  onChange: (labware: ConfirmSectionLabware) => void;
+  onChange: (
+    labware: ConfirmSectionLabware,
+    sourceLabwares: LabwareFieldsFragment[]
+  ) => void;
   disableSectionNumbers?: boolean;
 }
 
@@ -76,7 +83,10 @@ export default ConfirmTubes;
 interface TubeRowProps {
   initialLayoutPlan: LayoutPlan;
   comments: Array<CommentFieldsFragment>;
-  onChange: (labware: ConfirmSectionLabware) => void;
+  onChange: (
+    labware: ConfirmSectionLabware,
+    sourceLabwares: LabwareFieldsFragment[]
+  ) => void;
   disableSectionNumbers?: boolean;
 }
 
@@ -103,9 +113,14 @@ const TubeRow: React.FC<TubeRowProps> = ({
 
   useEffect(() => {
     if (confirmOperationLabware) {
-      onChange(confirmOperationLabware);
+      onChange(
+        confirmOperationLabware,
+        Array.from(layoutPlan.plannedActions.values()).flatMap((sources) =>
+          Array.from(sources.values()).map((source) => source.labware)
+        )
+      );
     }
-  }, [onChange, confirmOperationLabware]);
+  }, [onChange, confirmOperationLabware, layoutPlan.plannedActions]);
 
   /**Update for section numbers changes in parent**/
   useEffect(() => {

@@ -68,9 +68,9 @@ type SectioningConfirmContext = {
   sectionNumberMode: SectionNumberMode;
 
   /**
-   * Section number start value
+   * Map to store the highest section numbers for each source labware. Key is the source labware barcode
    */
-  sectionNumberStart: number;
+  highestSectionNumbers: Map<string, number>;
 
   /**
    * Possible errors returned from stan core after a confirmSection request
@@ -87,6 +87,7 @@ type SectioningConfirmEvent =
   | {
       type: "UPDATE_SECTION_START_NUMBER";
       start: number;
+      sourceBarcode: string;
     }
   | {
       type: "UPDATE_PLANS";
@@ -95,6 +96,7 @@ type SectioningConfirmEvent =
   | {
       type: "UPDATE_CONFIRM_SECTION_LABWARE";
       confirmSectionLabware: ConfirmSectionLabware;
+      sourceLabwares: LabwareFieldsFragment[];
     }
   | { type: "IS_VALID" }
   | { type: "IS_INVALID" }
@@ -115,7 +117,7 @@ export function createSectioningConfirmMachine() {
         requestError: null,
         confirmSectionResultLabwares: [],
         sectionNumberMode: SectionNumberMode.Auto,
-        sectionNumberStart: 0,
+        highestSectionNumbers: new Map(),
       },
       initial: "ready",
       entry: ["assignSourceLabware"],
@@ -276,7 +278,6 @@ export function createSectioningConfirmMachine() {
             ) {
               return;
             }
-
             /**There is change in section, so update the layoutPlan with new sections**/
             planInOriginalLayout!.plannedActions = new Map<string, Source[]>();
             Array.from(confirmSectionMap.keys()).forEach((key) => {
@@ -287,7 +288,7 @@ export function createSectioningConfirmMachine() {
                 const newSources = sections!.map((section, indx) => {
                   return {
                     sampleId: section.sampleId,
-                    labware: planInOriginalLayout?.destinationLabware as LabwareFieldsFragment,
+                    labware: e.sourceLabwares[indx],
                     newSection: indx < sources.length ? section.newSection : 0,
                     address: section.destinationAddress,
                   };
@@ -324,12 +325,14 @@ export function createSectioningConfirmMachine() {
             .uniqBy((source) => source.barcode)
             .value();
 
-          const highestSectionNumber = ctx.sourceLabware.map(
-            (sourceLabware) =>
+          //Set all highest section numbers for all source labware
+          ctx.sourceLabware.forEach((sourceLabware) => {
+            ctx.highestSectionNumbers.set(
+              sourceLabware.barcode,
               maybeFindSlotByAddress(sourceLabware.slots, "A1")
                 ?.blockHighestSection ?? 0
-          );
-          ctx.sectionNumberStart = Math.max(...highestSectionNumber);
+            );
+          });
         }),
 
         assignRequestError: assign((ctx, e) => {
@@ -356,7 +359,7 @@ export function createSectioningConfirmMachine() {
             fillInSectionNumbersInLayoutPlan(
               ctx.sectionNumberMode,
               ctx.layoutPlansByLabwareType,
-              ctx.sectionNumberStart,
+              ctx.highestSectionNumbers,
               ctx.confirmSectionLabware
                 .filter((csl) => csl.cancelled)
                 .map((item) => item.barcode)
@@ -396,38 +399,44 @@ export function createSectioningConfirmMachine() {
 /***
  * This function fills in section numbers for all given layout Plans.
  * The filling rules are
- * 1) If the fill mode is 'AUTO' all section numbers will be filled with numbers incrementally starting from 'startNum'
- * 2) Otherwise, if manual all will be filled with zeros
+ * 1) If fill mode is 'Manual' all sections will be filled with zeros
+ * 2) If the fill mode is 'AUTO',all section numbers will be filled with numbers incrementally starting from
+ *    the highest section number (stored in highestSectionMap mapped to it's source labware barcode in highestSectionMap)
  * 3) First the Tubes will be numbered, followed by other labware in the order they are kept in the list.
- * 4) For slides, the numbering will be columnwise for example: proceed down first column, then down second etc
+ * 4) For slides, the numbering will be column-wise for example: proceed down first column, then down second etc
  * 5) Tubes, if cancelled will be filled with 0, if cancelled, even in 'Auto' mode.
  *
  * @param fillMode 'Auto' or 'Manual'
  * @param layoutPlanMap List of layoutPlans
- * @param startNum For 'Auto' the numbering starts from this value
+ * @param highestSectionNumberMap  Highest section number for each source labware.
+ *                                 Key is the source labware barcode and value is highest section number
+ *                                 For 'Auto' the numbering starts from this value
  * @param cancelledBarcodes Barcodes corresponding to cancelled layout
  */
 function fillInSectionNumbersInLayoutPlan(
   fillMode: SectionNumberMode,
   layoutPlanMap: Dictionary<Array<LayoutPlan>>,
-  startNum: number,
+  highestSectionNumberMap: Map<string, number>,
   cancelledBarcodes: Array<string>
 ) {
   /**Auto filling of section numbers**/
   if (fillMode === SectionNumberMode.Auto) {
-    let lastSectionNum = startNum;
-
+    let lastSectionNumbers: Map<string, number> = new Map();
+    //copy all highest section numbers, so as to avoid changing context values
+    Array.from(highestSectionNumberMap.entries()).map(([key, val]) =>
+      lastSectionNumbers.set(key, val)
+    );
     /**First fill in section numbers for TUBES**/
     const tubes = layoutPlanMap?.[LabwareTypeName.TUBE];
     tubes &&
       tubes.forEach((layoutPlan) => {
-        lastSectionNum = autoFillSectionNumbers(
+        autoFillSectionNumbers(
           layoutPlan,
-          lastSectionNum,
           /** Tubes, if cancelled will be filled with 0, if cancelled, even in 'Auto' mode**/
           !cancelledBarcodes.some(
             (barcode) => barcode === layoutPlan.destinationLabware.barcode
-          )
+          ),
+          lastSectionNumbers
         );
       });
     /**Fill in section numbers for all labware which are not TUBES**/
@@ -437,39 +446,44 @@ function fillInSectionNumbersInLayoutPlan(
       )
       .forEach(([_, lps]) => {
         lps.forEach((layoutPlan) => {
-          lastSectionNum = autoFillSectionNumbers(
-            layoutPlan,
-            lastSectionNum,
-            true
-          );
+          autoFillSectionNumbers(layoutPlan, true, lastSectionNumbers);
         });
       });
   } else {
     /**Manual filling, so fill all section numbers with default value 0 **/
     Object.entries(layoutPlanMap).forEach(([_, lps]) => {
       return lps.forEach((layoutPlan) => {
-        autoFillSectionNumbers(layoutPlan, 0, false);
+        autoFillSectionNumbers(layoutPlan, false);
       });
     });
   }
 }
 function autoFillSectionNumbers(
   layoutPlan: LayoutPlan,
-  sectionNum: number,
-  incrementFill: boolean
+  incrementFill: boolean,
+  startNumbers?: Map<string, number>
 ) {
-  let newSectionNum = sectionNum;
   /**Get slots column wise to fill the section numbers**/
-  sortDownRight(layoutPlan.destinationLabware.slots).map((slot) => {
+  sortDownRight(layoutPlan.destinationLabware.slots).forEach((slot) => {
     const action = layoutPlan.plannedActions.get(slot.address);
     action &&
       action.length > 0 &&
-      action.forEach(
-        (item) => (item.newSection = incrementFill ? ++newSectionNum : 0)
-      );
-    return action;
+      action.forEach((item) => {
+        let newSectionNum = 0;
+        if (
+          startNumbers &&
+          item.labware &&
+          startNumbers.has(item.labware.barcode) &&
+          incrementFill
+        ) {
+          //Get the highest section number of the source labware for this section
+          newSectionNum = startNumbers.get(item.labware.barcode)! + 1;
+          //Store the current highest section number so that it will be incremental for next section
+          startNumbers.set(item.labware.barcode, newSectionNum);
+        }
+        item.newSection = newSectionNum;
+      });
   });
-  return newSectionNum;
 }
 
 /**

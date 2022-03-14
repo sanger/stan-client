@@ -137,6 +137,7 @@ describe("Sectioning Confirmation", () => {
             .then((col) => {
               highestSectionNumber = Number(col.text());
             });
+
           cy.findAllByTestId("labware-comments").each((elem) => {
             highestSectionNumber++;
             cy.wrap(elem)
@@ -149,6 +150,7 @@ describe("Sectioning Confirmation", () => {
         });
       }
     );
+
     context("when 'manual' mode is selected for section numbering", () => {
       before(() => {
         cy.get('[type = "radio"]').eq(1).click();

@@ -22,14 +22,21 @@ import {
 } from "../../pages/sectioning";
 import { createConfirmLabwareMachine } from "./confirmLabware.machine";
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
-import { CommentFieldsFragment, ConfirmSectionLabware } from "../../types/sdk";
+import {
+  CommentFieldsFragment,
+  ConfirmSectionLabware,
+  LabwareFieldsFragment,
+} from "../../types/sdk";
 import { selectConfirmOperationLabware } from "./index";
 import RemoveButton from "../buttons/RemoveButton";
 
 interface ConfirmLabwareProps {
   originalLayoutPlan: LayoutPlan;
   comments: Array<CommentFieldsFragment>;
-  onChange: (labware: ConfirmSectionLabware) => void;
+  onChange: (
+    labware: ConfirmSectionLabware,
+    sourceLabwares: LabwareFieldsFragment[]
+  ) => void;
   onRemoveClick: (labwareBarcode: string) => void;
   disableSectionNumbers?: boolean;
 }
@@ -66,9 +73,14 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
 
   useEffect(() => {
     if (confirmOperationLabware) {
-      onChange(confirmOperationLabware);
+      onChange(
+        confirmOperationLabware,
+        Array.from(layoutPlan.plannedActions.values()).flatMap((sources) =>
+          Array.from(sources.values()).map((source) => source.labware)
+        )
+      );
     }
-  }, [onChange, confirmOperationLabware]);
+  }, [onChange, confirmOperationLabware, layoutPlan.plannedActions]);
 
   /***Update section numbers whenever there is an update in section numbers in parent**/
   useEffect(() => {
@@ -83,7 +95,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       className="relative p-3 shadow"
     >
       <RemoveButton onClick={() => onRemoveClick(labware.barcode!)} />
-      <div className="md:grid md:grid-cols-2">
+      <div
+        data-testid={`div-slide-${labware.barcode}`}
+        className="md:grid md:grid-cols-2"
+      >
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
             labware={labware}
