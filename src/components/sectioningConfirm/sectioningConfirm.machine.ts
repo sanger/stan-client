@@ -95,7 +95,6 @@ type SectioningConfirmEvent =
   | {
       type: "UPDATE_CONFIRM_SECTION_LABWARE";
       confirmSectionLabware: ConfirmSectionLabware;
-      labware?: LabwareFieldsFragment;
     }
   | { type: "IS_VALID" }
   | { type: "IS_INVALID" }
@@ -242,7 +241,6 @@ export function createSectioningConfirmMachine() {
           if (e.type !== "UPDATE_CONFIRM_SECTION_LABWARE") {
             return;
           }
-
           let planInOriginalLayout: LayoutPlan | undefined = undefined;
 
           /**Find the layoutPlan in the list whose section info is changed*/
@@ -259,12 +257,9 @@ export function createSectioningConfirmMachine() {
           }
           if (planInOriginalLayout && e.confirmSectionLabware.confirmSections) {
             /**Get total sections from existing plan**/
-            const totalSources = Array.from(
+            const sources = Array.from(
               planInOriginalLayout?.plannedActions.values()
-            ).reduce((prev, plannedAction) => {
-              return prev + Array.from(plannedAction.values()).length;
-            }, 0);
-
+            ).flatMap((val) => val);
             const confirmSectionMap = e.confirmSectionLabware.confirmSections.reduce(
               (map, section) => {
                 map.has(section.destinationAddress)
@@ -276,8 +271,11 @@ export function createSectioningConfirmMachine() {
             );
 
             /**Check any change in sections**/
-            if (totalSources === e.confirmSectionLabware.confirmSections.length)
+            if (
+              sources.length === e.confirmSectionLabware.confirmSections.length
+            ) {
               return;
+            }
 
             /**There is change in section, so update the layoutPlan with new sections**/
             planInOriginalLayout!.plannedActions = new Map<string, Source[]>();
@@ -286,15 +284,15 @@ export function createSectioningConfirmMachine() {
               if (!sections || sections.length === 0) {
                 planInOriginalLayout?.plannedActions.set(key, []);
               } else {
-                const sources = sections!.map((section) => {
+                const newSources = sections!.map((section, indx) => {
                   return {
                     sampleId: section.sampleId,
                     labware: planInOriginalLayout?.destinationLabware as LabwareFieldsFragment,
-                    newSection: 0,
+                    newSection: indx < sources.length ? section.newSection : 0,
                     address: section.destinationAddress,
                   };
                 });
-                planInOriginalLayout?.plannedActions.set(key, sources);
+                planInOriginalLayout?.plannedActions.set(key, newSources);
               }
             });
           }
@@ -368,7 +366,6 @@ export function createSectioningConfirmMachine() {
 
       services: {
         confirmSection: (context) => {
-          debugger;
           return stanCore.ConfirmSection({
             request: {
               labware: context.confirmSectionLabware,
@@ -408,7 +405,7 @@ export function createSectioningConfirmMachine() {
  * @param fillMode 'Auto' or 'Manual'
  * @param layoutPlanMap List of layoutPlans
  * @param startNum For 'Auto' the numbering starts from this value
- * @param cancelledBarcodes
+ * @param cancelledBarcodes Barcodes corresponding to cancelled layout
  */
 function fillInSectionNumbersInLayoutPlan(
   fillMode: SectionNumberMode,

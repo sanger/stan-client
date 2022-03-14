@@ -95,7 +95,6 @@ const TubeRow: React.FC<TubeRowProps> = ({
   );
   const { cancelled, layoutPlan, labware } = current.context;
   const { layoutMachine } = current.children;
-  const sectionChangeClicked = React.useRef<boolean>(false);
 
   const confirmOperationLabware = useSelector(
     service,
@@ -124,6 +123,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
     send({ type: "TOGGLE_CANCEL" });
   }, [send]);
 
+  /***Update section numbers whenever there is an update in section numbers in parent**/
   const handleOnChange = useCallback(
     (slotAddress: string, sectionNumber: number, sectionIndex: number) => {
       send({
@@ -188,7 +188,6 @@ const TubeRow: React.FC<TubeRowProps> = ({
             <ModalFooter>
               <BlueButton
                 onClick={() => {
-                  sectionChangeClicked.current = true;
                   layoutMachine.send({ type: "DONE" });
                 }}
                 className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"

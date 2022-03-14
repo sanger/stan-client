@@ -37,14 +37,9 @@ export default RadioGroup;
 interface RadioButtonParameters {
   name: string;
   value: string;
-  checked?: boolean;
 }
 
-export const RadioButton = ({
-  name,
-  value,
-  checked = false,
-}: RadioButtonParameters) => {
+export const RadioButton = ({ name, value }: RadioButtonParameters) => {
   const ctx = useContext(RadioGroupContext);
   return (
     <label className="inline-flex items-center">
@@ -53,7 +48,6 @@ export const RadioButton = ({
         className="form-radio text-sp"
         name={ctx.name}
         value={value}
-        checked={checked}
       />
       <span className="ml-2">{name}</span>
     </label>

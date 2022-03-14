@@ -50,9 +50,33 @@ describe("Sectioning Confirmation", () => {
       cy.findAllByText("STAN-0001F").its("length").should("be.gte", 1);
     });
 
-    // Section numbers not yet filled in
-    it("doesn't enable the Save button", () => {
-      saveButton().should("be.disabled");
+    it("should select the section numbering mode as 'auto'", () => {
+      cy.get('[type="radio"]').first().should("be.checked");
+    });
+    it("should auto fill section numbers starting from highest section number", () => {
+      let sectionNumber = 0;
+      cy.findByRole("table")
+        .find("td")
+        .eq(1)
+        .then((col) => {
+          sectionNumber = Number(col.text());
+        });
+      cy.findAllByTestId("labware-comments").each((elem) =>
+        cy
+          .wrap(elem)
+          .find("input")
+          .should("have.value", sectionNumber + 1 + "")
+      );
+    });
+
+    it("disables all section number fields", () => {
+      cy.findAllByTestId("labware-comments").each((elem) =>
+        cy.wrap(elem).find("input").should("be.disabled")
+      );
+    });
+    // Section numbers already filled in
+    it("enables the Save button", () => {
+      saveButton().should("be.enabled");
     });
 
     context("when I scan the same barcode again", () => {
@@ -92,20 +116,71 @@ describe("Sectioning Confirmation", () => {
           cy.findByText("Done").click();
         });
       });
-      after(() => {
-        findPlanByBarcode("STAN-0001E");
+    });
+
+    context(
+      "when a new section is added in 'auto' mode for section numbering ",
+      () => {
+        before(() => {
+          cy.findByText("Edit Layout").click();
+          cy.findByRole("dialog").within(() => {
+            cy.findByText("STAN-2021").click();
+            cy.findByText("Done").click();
+          });
+        });
+
+        it("should renumber all section numbers", () => {
+          let highestSectionNumber = 0;
+          cy.findByRole("table")
+            .find("td")
+            .eq(1)
+            .then((col) => {
+              highestSectionNumber = Number(col.text());
+            });
+          cy.findAllByTestId("labware-comments").each((elem) => {
+            highestSectionNumber++;
+            cy.wrap(elem)
+              .find("input")
+              .should("have.value", highestSectionNumber + "");
+          });
+        });
+        after(() => {
+          findPlanByBarcode("STAN-0001E");
+        });
+      }
+    );
+    context("when 'manual' mode is selected for section numbering", () => {
+      before(() => {
+        cy.get('[type = "radio"]').eq(1).click();
+      });
+      it("enables all section number fields ", () => {
+        cy.findAllByTestId("labware-comments").each((elem) =>
+          cy.wrap(elem).find("input").should("be.enabled")
+        );
+      });
+      it("should empty all section number fields", () => {
+        cy.findAllByTestId("labware-comments").each((elem) =>
+          cy.wrap(elem).find("input").should("have.value", "")
+        );
+      });
+      // Section numbers not filled in
+      it("disables the Save button", () => {
+        saveButton().should("be.disabled");
       });
     });
 
-    context("when I add the section number", () => {
+    context("when I add the section number in manual mode", () => {
       before(() => {
-        cy.findAllByTestId("labware-comments").each((elem) =>
-          cy.wrap(elem).find("input").type("10")
-        );
+        cy.findAllByTestId("labware-comments").each((elem) => {
+          cy.wrap(elem)
+            .find("input")
+            .each((input) => {
+              cy.wrap(input).type("10");
+            });
+        });
       });
-
       it("enables the Save button", () => {
-        saveButton().should("not.be.disabled");
+        saveButton().should("be.enabled");
       });
     });
 

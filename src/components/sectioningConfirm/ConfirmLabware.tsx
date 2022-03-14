@@ -70,7 +70,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     }
   }, [onChange, confirmOperationLabware]);
 
-  /**Update for section numbers changes in parent**/
+  /***Update section numbers whenever there is an update in section numbers in parent**/
   useEffect(() => {
     send("UPDATE_ALL_SECTION_NUMBERS", originalLayoutPlan);
   }, [originalLayoutPlan, send]);

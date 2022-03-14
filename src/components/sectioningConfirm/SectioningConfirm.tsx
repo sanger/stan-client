@@ -106,14 +106,14 @@ export default function SectioningConfirm({
       send({
         type: "UPDATE_CONFIRM_SECTION_LABWARE",
         confirmSectionLabware,
-        labware: sourceLabware.find(
-          (lw) => lw.barcode === confirmSectionLabware.barcode
-        ),
       });
     },
     [send]
   );
 
+  /**
+   * Callback to handle change in section numbering mode
+   */
   const handleSectionNumberingModeChange = useCallback(
     (mode: SectionNumberMode) => {
       send({ type: "UPDATE_SECTION_NUMBERING_MODE", mode });
@@ -121,6 +121,9 @@ export default function SectioningConfirm({
     [send]
   );
 
+  /**
+   * Callback to handle deleting labware plan
+   */
   const handleDeleteLabwarePlan = useCallback(
     (labwareBarcode: string, deleteLabwarePlan: (barcode: string) => void) => {
       if (sectionNumberMode === SectionNumberMode.Auto) {
@@ -181,10 +184,10 @@ export default function SectioningConfirm({
                         name={"sectionNumber"}
                         withFormik={false}
                       >
-                        {objectKeys(SectionNumberMode).map((key, index) => {
+                        {objectKeys(SectionNumberMode).map((key) => {
                           return (
                             <RadioButtonInput
-                              key={index}
+                              key={key}
                               name={"sectionNumber"}
                               value={SectionNumberMode[key]}
                               checked={
@@ -294,8 +297,8 @@ export default function SectioningConfirm({
                   ]}
                 >
                   <p className={"font-bold mt-8"}>
-                    Section numbers in all remaining labware will be auto
-                    numbered with deletion.
+                    Section numbers in all remaining labware will be updated
+                    with deletion.
                   </p>
                 </ConfirmationModal>
               </div>

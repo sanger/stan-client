@@ -266,7 +266,6 @@ export const createConfirmLabwareMachine = (
           if (e.type !== "UPDATE_SECTION_NUMBER") {
             return;
           }
-
           const plannedAction = ctx.layoutPlan.plannedActions.get(
             e.slotAddress
           );
@@ -282,11 +281,8 @@ export const createConfirmLabwareMachine = (
           }
           for (let [key, sources] of e.plannedActions.entries()) {
             const currentSources = ctx.layoutPlan.plannedActions.get(key);
-            debugger;
-
             sources &&
               sources.forEach((source, indx) => {
-                debugger;
                 const currSourcesForAddress = currentSources
                   ? currentSources.filter((sc) => source.address === sc.address)
                   : undefined;
@@ -301,7 +297,6 @@ export const createConfirmLabwareMachine = (
         }),
         commitConfirmation: assign((ctx) => {
           const confirmSections: Array<ConfirmSection> = [];
-
           for (let [
             destinationAddress,
             originalPlannedActions,
