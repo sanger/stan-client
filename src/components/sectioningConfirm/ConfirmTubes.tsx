@@ -223,6 +223,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
         {layoutPlan.plannedActions.get("A1")?.map((source, index) => (
           <Input
             key={source.address + String(index)}
+            data-testid={`sectionnumber-tube-${layoutPlan.destinationLabware.barcode}`}
             type="number"
             value={source.newSection === 0 ? "" : String(source.newSection)}
             min={1}
@@ -236,7 +237,10 @@ const TubeRow: React.FC<TubeRowProps> = ({
         ))}
       </TableCell>
       <TableCell onClick={handleOnClick}>
-        <RemoveIcon className="h-4 w-4 text-red-500" />
+        <RemoveIcon
+          data-testid={`remove-tube-${layoutPlan.destinationLabware.barcode}`}
+          className="h-4 w-4 text-red-500"
+        />
       </TableCell>
     </tr>
   );

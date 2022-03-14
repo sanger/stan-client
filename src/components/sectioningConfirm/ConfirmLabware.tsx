@@ -37,7 +37,7 @@ interface ConfirmLabwareProps {
     labware: ConfirmSectionLabware,
     sourceLabwares: LabwareFieldsFragment[]
   ) => void;
-  onRemoveClick: (labwareBarcode: string) => void;
+  onRemoveClick: (layoutPlan: LayoutPlan) => void;
   disableSectionNumbers?: boolean;
 }
 
@@ -94,7 +94,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       animate={"visible"}
       className="relative p-3 shadow"
     >
-      <RemoveButton onClick={() => onRemoveClick(labware.barcode!)} />
+      <RemoveButton
+        data-testid={`remove-slide-${labware.barcode}`}
+        onClick={() => onRemoveClick(layoutPlan)}
+      />
       <div
         data-testid={`div-slide-${labware.barcode}`}
         className="md:grid md:grid-cols-2"

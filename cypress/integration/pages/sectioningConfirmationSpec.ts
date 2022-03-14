@@ -4,6 +4,10 @@ import {
   FindPlanDataQuery,
   FindPlanDataQueryVariables,
 } from "../../../src/types/sdk";
+import labwareFactory from "../../../src/lib/factories/labwareFactory";
+import { labwareTypes } from "../../../src/lib/factories/labwareTypeFactory";
+import { LabwareTypeName } from "../../../src/types/stan";
+import { findPlanData } from "../../../src/mocks/handlers/planHandlers";
 
 describe("Sectioning Confirmation", () => {
   before(() => {
@@ -151,6 +155,91 @@ describe("Sectioning Confirmation", () => {
       }
     );
 
+    context("when a tube is cancelled in 'auto' mode", () => {
+      before(() => {
+        const sourceLabware = labwareFactory.build(
+          { barcode: "STAN-2222" },
+          {
+            associations: {
+              labwareType: labwareTypes[LabwareTypeName.CASSETTE].build(),
+            },
+          }
+        );
+
+        const destinationLabware = labwareFactory.build(
+          { barcode: "STAN-0001D" },
+          {
+            associations: {
+              labwareType: labwareTypes[LabwareTypeName.TUBE].build(),
+            },
+          }
+        );
+        cy.msw().then(({ graphql, worker }) => {
+          worker.use(
+            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>(
+              "FindPlanData",
+              (req, res, ctx) => {
+                return res.once(
+                  findPlanData(sourceLabware, destinationLabware, ctx)
+                );
+              }
+            )
+          );
+        });
+
+        findPlanByBarcode("STAN-0001D");
+        cy.findByTestId("remove-tube-STAN-0001D").click();
+      });
+
+      it("should empty the section field for cancelled tube", () => {
+        cy.findByTestId("sectionnumber-tube-STAN-0001D").should(
+          "have.text",
+          ""
+        );
+      });
+    });
+    context("when a slide is removed in auto mode", () => {
+      before(() => {
+        const sourceLabware = labwareFactory.build(
+          { barcode: "STAN-2222" },
+          {
+            associations: {
+              labwareType: labwareTypes[LabwareTypeName.CASSETTE].build(),
+            },
+          }
+        );
+
+        const destinationLabware = labwareFactory.build(
+          { barcode: "STAN-0001C" },
+          {
+            associations: {
+              labwareType: labwareTypes[LabwareTypeName.SLIDE].build(),
+            },
+          }
+        );
+        cy.msw().then(({ graphql, worker }) => {
+          worker.use(
+            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>(
+              "FindPlanData",
+              (req, res, ctx) => {
+                return res.once(
+                  findPlanData(sourceLabware, destinationLabware, ctx)
+                );
+              }
+            )
+          );
+        });
+        findPlanByBarcode("STAN-0001C");
+        cy.findByTestId("remove-slide-STAN-0001C").click();
+      });
+      it("should display a warning message", () => {
+        cy.findByText("Removing labware").should("be.visible");
+      });
+      it("should remove the labware on pressing Continue button", () => {
+        cy.findByRole("button", { name: /Continue/i }).click();
+        cy.findByText("STAN-0001C").should("not.exist");
+      });
+    });
     context("when 'manual' mode is selected for section numbering", () => {
       before(() => {
         cy.get('[type = "radio"]').eq(1).click();

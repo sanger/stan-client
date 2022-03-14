@@ -19,6 +19,7 @@ import WorkNumberSelect from "../WorkNumberSelect";
 import RadioGroup, { RadioButtonInput } from "../forms/RadioGroup";
 import { objectKeys } from "../../lib/helpers";
 import { ConfirmationModal } from "../modal/ConfirmationModal";
+import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 
 type SectioningConfirmProps = {
   /**
@@ -62,7 +63,7 @@ export default function SectioningConfirm({
   } = current.context;
 
   const [labwarePlanToDelete, setLabwarePlanToDelete] = React.useState<
-    string | undefined
+    LayoutPlan | undefined
   >(undefined);
 
   /**
@@ -126,11 +127,11 @@ export default function SectioningConfirm({
    * Callback to handle deleting labware plan
    */
   const handleDeleteLabwarePlan = useCallback(
-    (labwareBarcode: string, deleteLabwarePlan: (barcode: string) => void) => {
+    (layoutPlan: LayoutPlan, deleteLabwarePlan: (barcode: string) => void) => {
       if (sectionNumberMode === SectionNumberMode.Auto) {
-        setLabwarePlanToDelete(labwareBarcode);
+        setLabwarePlanToDelete(layoutPlan);
       } else {
-        deleteLabwarePlan(labwareBarcode);
+        deleteLabwarePlan(layoutPlan.destinationLabware.barcode!);
       }
     },
     [setLabwarePlanToDelete, sectionNumberMode]
@@ -174,12 +175,8 @@ export default function SectioningConfirm({
                       />
                     </div>
 
-                    <Heading level={3}>Section Numbering</Heading>
-                    <div
-                      className={
-                        "md:w-1/2 flex flex-row sm:justify-between px-3"
-                      }
-                    >
+                    <div className={"sm:justify-between px-3"}>
+                      <Heading level={3}>Section Numbering</Heading>
                       <RadioGroup
                         label="Select mode"
                         name={"sectionNumber"}
@@ -291,15 +288,18 @@ export default function SectioningConfirm({
                       label: "Continue",
                       action: () => {
                         labwarePlanToDelete &&
-                          removePlanByBarcode(labwarePlanToDelete);
+                          labwarePlanToDelete.destinationLabware.barcode &&
+                          removePlanByBarcode(
+                            labwarePlanToDelete.destinationLabware.barcode
+                          );
                         setLabwarePlanToDelete(undefined);
                       },
                     },
                   ]}
                 >
                   <p className={"font-bold mt-8"}>
-                    Section numbers in all remaining labware will be updated
-                    with deletion.
+                    Section numbers of remaining plans with same source labware
+                    will be renumbered with deletion.
                   </p>
                 </ConfirmationModal>
               </div>
