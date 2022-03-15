@@ -77,12 +77,13 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_DESTINATION") {
         return;
       }
-
       if (!ctx.possibleActions?.has(e.address)) {
         return;
       }
-
       const slotActions = ctx.possibleActions?.get(e.address)!;
+      //initialize section numbers in new actions added
+      slotActions.forEach((action) => (action.newSection = 0));
+
       const plannedActionsForSlot = ctx.layoutPlan.plannedActions.get(
         e.address
       );

@@ -76,18 +76,14 @@ type UpdateSectionNumberEvent = {
   sectionNumber: number;
 };
 
-type UpdateAllSectionNumbersEvent = {
-  type: "UPDATE_ALL_SECTION_NUMBERS";
+type UpdateAllSourcesEvent = {
+  type: "UPDATE_ALL_SOURCES";
   plannedActions: Map<Address, Array<Source>>;
 };
 
 type UpdateSectionNumberModeEvent = {
   type: "UPDATE_SECTION_NUMBER_MODE";
   mode: SectionNumberMode;
-};
-type SetMinimumSectionNumberEvent = {
-  type: "SET_MIN_SECTION_NUMBER";
-  minSectionNumber: number;
 };
 
 export type CommitConfirmationEvent = {
@@ -108,9 +104,8 @@ export type ConfirmLabwareEvent =
   | LayoutMachineDone
   | ToggleCancelEvent
   | UpdateSectionNumberEvent
-  | UpdateAllSectionNumbersEvent
+  | UpdateAllSourcesEvent
   | UpdateSectionNumberModeEvent
-  | SetMinimumSectionNumberEvent
   | CommitConfirmationEvent
   | SectioningConfirmationCompleteEvent;
 
@@ -177,11 +172,8 @@ export const createConfirmLabwareMachine = (
             UPDATE_SECTION_NUMBER: {
               actions: ["updateSectionNumber", "commitConfirmation"],
             },
-            UPDATE_ALL_SECTION_NUMBERS: {
-              actions: ["updateAllSectionNumbers", "commitConfirmation"],
-            },
-            SET_MIN_SECTION_NUMBER: {
-              actions: ["setMinimumSectionNumber", "commmitConfirmation"],
+            UPDATE_ALL_SOURCES: {
+              actions: ["updateAllSources", "commitConfirmation"],
             },
           },
         },
@@ -275,22 +267,16 @@ export const createConfirmLabwareMachine = (
           }
         }),
 
-        updateAllSectionNumbers: assign((ctx, e) => {
-          if (e.type !== "UPDATE_ALL_SECTION_NUMBERS") {
+        updateAllSources: assign((ctx, e) => {
+          if (e.type !== "UPDATE_ALL_SOURCES") {
             return;
           }
-          for (let [key, sources] of e.plannedActions.entries()) {
+          for (let [key, updateSources] of e.plannedActions.entries()) {
             const currentSources = ctx.layoutPlan.plannedActions.get(key);
-            sources &&
-              sources.forEach((source, indx) => {
-                const currSourcesForAddress = currentSources
-                  ? currentSources.filter((sc) => source.address === sc.address)
-                  : undefined;
-                if (
-                  currSourcesForAddress &&
-                  currSourcesForAddress.length > indx
-                ) {
-                  currSourcesForAddress[indx].newSection = source.newSection;
+            updateSources &&
+              updateSources.forEach((source, indx) => {
+                if (currentSources && currentSources.length > indx) {
+                  currentSources[indx] = { ...source };
                 }
               });
           }
@@ -308,7 +294,6 @@ export const createConfirmLabwareMachine = (
               )
             );
           }
-
           ctx.confirmSectionLabware = {
             barcode: ctx.labware.barcode!,
             cancelled: ctx.cancelled,

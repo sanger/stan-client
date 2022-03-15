@@ -35,3 +35,16 @@ export interface LayoutContext {
   possibleActions?: LayoutPlan["plannedActions"];
   selected: Maybe<Source>;
 }
+
+export function addressToSourceLabwareMap(layoutPlan: LayoutPlan) {
+  const addressToLabwareMap: Map<string, LabwareFieldsFragment> = new Map();
+  Array.from(layoutPlan.plannedActions.entries()).forEach(
+    ([address, sources]) => {
+      const sourcesArr = Array.from(sources.values());
+      if (sourcesArr.length > 0) {
+        addressToLabwareMap.set(address, sourcesArr[0].labware);
+      }
+    }
+  );
+  return addressToLabwareMap;
+}

@@ -191,7 +191,12 @@ describe("Sectioning Confirmation", () => {
         cy.findByTestId("remove-tube-STAN-0001D").click();
       });
 
+      it("should display a warning message", () => {
+        cy.findByText("Cancelling tube").should("be.visible");
+      });
+
       it("should empty the section field for cancelled tube", () => {
+        cy.findByRole("button", { name: /Continue/i }).click();
         cy.findByTestId("sectionnumber-tube-STAN-0001D").should(
           "have.text",
           ""

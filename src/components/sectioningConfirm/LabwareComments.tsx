@@ -36,7 +36,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
       <span className="font-medium text-gray-800 tracking-wide">
         {slot.address}
       </span>
-      <span className="w-20">
+      <span className="w-30">
         {layoutPlan.plannedActions.get(slot.address)?.map((source, index) => (
           <Input
             key={source.address + String(index)}

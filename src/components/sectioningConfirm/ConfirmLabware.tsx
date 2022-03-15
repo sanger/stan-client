@@ -22,31 +22,27 @@ import {
 } from "../../pages/sectioning";
 import { createConfirmLabwareMachine } from "./confirmLabware.machine";
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
-import {
-  CommentFieldsFragment,
-  ConfirmSectionLabware,
-  LabwareFieldsFragment,
-} from "../../types/sdk";
+import { CommentFieldsFragment, ConfirmSectionLabware } from "../../types/sdk";
 import { selectConfirmOperationLabware } from "./index";
 import RemoveButton from "../buttons/RemoveButton";
+import { ConfirmationModal } from "../modal/ConfirmationModal";
 
 interface ConfirmLabwareProps {
   originalLayoutPlan: LayoutPlan;
   comments: Array<CommentFieldsFragment>;
-  onChange: (
-    labware: ConfirmSectionLabware,
-    sourceLabwares: LabwareFieldsFragment[]
-  ) => void;
-  onRemoveClick: (layoutPlan: LayoutPlan) => void;
-  disableSectionNumbers?: boolean;
+  onChange: (labware: ConfirmSectionLabware) => void;
+  onSectionUpdate: (layoutPlan: LayoutPlan) => void;
+  removePlan: (barcode: string) => void;
+  autoMode: boolean;
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   originalLayoutPlan,
   comments,
   onChange,
-  onRemoveClick,
-  disableSectionNumbers = false,
+  onSectionUpdate,
+  removePlan,
+  autoMode,
 }) => {
   const [current, send, service] = useMachine(
     createConfirmLabwareMachine(
@@ -62,6 +58,8 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
 
   const { addressToCommentMap, labware, layoutPlan } = current.context;
   const { layoutMachine } = current.children;
+  const [notifyDelete, setNotifyDelete] = React.useState(false);
+  const notifySectionChange = React.useRef(false);
 
   const gridClassNames = classNames(
     {
@@ -73,19 +71,39 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
 
   useEffect(() => {
     if (confirmOperationLabware) {
-      onChange(
-        confirmOperationLabware,
-        Array.from(layoutPlan.plannedActions.values()).flatMap((sources) =>
-          Array.from(sources.values()).map((source) => source.labware)
-        )
-      );
+      onChange(confirmOperationLabware);
     }
-  }, [onChange, confirmOperationLabware, layoutPlan.plannedActions]);
+  }, [onChange, confirmOperationLabware]);
 
-  /***Update section numbers whenever there is an update in section numbers in parent**/
   useEffect(() => {
-    send("UPDATE_ALL_SECTION_NUMBERS", originalLayoutPlan);
+    //Notify parent only for layout changes
+    if (
+      layoutPlan &&
+      current.event.type === "done.invoke.layoutMachine" &&
+      notifySectionChange.current
+    ) {
+      notifySectionChange.current = false;
+      onSectionUpdate(layoutPlan);
+    }
+  }, [layoutPlan, current.event, onSectionUpdate]);
+
+  /***Update sources whenever there is an update in a source in parent**/
+  useEffect(() => {
+    send("UPDATE_ALL_SOURCES", originalLayoutPlan);
   }, [originalLayoutPlan, send]);
+
+  const handleRemovePlan = React.useCallback(() => {
+    if (autoMode) {
+      setNotifyDelete(true);
+    } else {
+      removePlan(layoutPlan.destinationLabware.barcode!);
+    }
+  }, [
+    autoMode,
+    setNotifyDelete,
+    removePlan,
+    layoutPlan.destinationLabware.barcode,
+  ]);
 
   return (
     <motion.div
@@ -96,7 +114,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     >
       <RemoveButton
         data-testid={`remove-slide-${labware.barcode}`}
-        onClick={() => onRemoveClick(layoutPlan)}
+        onClick={handleRemovePlan}
       />
       <div
         data-testid={`div-slide-${labware.barcode}`}
@@ -133,7 +151,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                   slot={slot}
                   value={addressToCommentMap.get(slot.address) ?? ""}
                   disabledComment={current.matches("done")}
-                  disabledSectionNumber={disableSectionNumbers}
+                  disabledSectionNumber={autoMode}
                   comments={comments}
                   layoutPlan={layoutPlan}
                   onCommentChange={(e) => {
@@ -195,6 +213,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
         <ModalFooter>
           <BlueButton
             onClick={() => {
+              notifySectionChange.current = true;
               layoutMachine.send({ type: "DONE" });
             }}
             className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
@@ -209,6 +228,34 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
           </WhiteButton>
         </ModalFooter>
       </Modal>
+      {
+        <ConfirmationModal
+          show={notifyDelete}
+          header={"Removing labware"}
+          message={{ type: "Warning", text: "Section number update" }}
+          confirmOptions={[
+            {
+              label: "Cancel",
+              action: () => {
+                setNotifyDelete(false);
+              },
+            },
+            {
+              label: "Continue",
+              action: () => {
+                layoutPlan &&
+                  layoutPlan.destinationLabware.barcode &&
+                  removePlan(layoutPlan.destinationLabware.barcode);
+                setNotifyDelete(false);
+              },
+            },
+          ]}
+        >
+          <p className={"font-bold mt-8"}>
+            Planned section numbers of other labware will be updated.
+          </p>
+        </ConfirmationModal>
+      }
     </motion.div>
   );
 };

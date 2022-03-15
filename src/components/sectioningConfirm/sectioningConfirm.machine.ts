@@ -1,5 +1,4 @@
 import {
-  ConfirmSection,
   ConfirmSectionLabware,
   ConfirmSectionMutation,
   FindPlanDataQuery,
@@ -96,7 +95,10 @@ type SectioningConfirmEvent =
   | {
       type: "UPDATE_CONFIRM_SECTION_LABWARE";
       confirmSectionLabware: ConfirmSectionLabware;
-      sourceLabwares: LabwareFieldsFragment[];
+    }
+  | {
+      type: "UPDATE_SECTION_LAYOUT";
+      layoutPlan: LayoutPlan;
     }
   | { type: "IS_VALID" }
   | { type: "IS_INVALID" }
@@ -137,11 +139,11 @@ export function createSectioningConfirmMachine() {
             },
             UPDATE_CONFIRM_SECTION_LABWARE: {
               target: "validating",
-              actions: [
-                "assignConfirmSectionLabware",
-                "updateSectionLayout",
-                "fillSectionNumbers",
-              ],
+              actions: ["assignConfirmSectionLabware"],
+            },
+            UPDATE_SECTION_LAYOUT: {
+              target: "validating",
+              actions: ["updateSectionLayout", "fillSectionNumbers"],
             },
             UPDATE_SECTION_NUMBERING_MODE: {
               actions: ["assignSectionNumberMode", "fillSectionNumbers"],
@@ -240,62 +242,25 @@ export function createSectioningConfirmMachine() {
           );
         }),
         updateSectionLayout: assign((ctx, e) => {
-          if (e.type !== "UPDATE_CONFIRM_SECTION_LABWARE") {
+          if (e.type !== "UPDATE_SECTION_LAYOUT") {
             return;
           }
-          let planInOriginalLayout: LayoutPlan | undefined = undefined;
+          let planInContext: LayoutPlan | undefined = undefined;
 
           /**Find the layoutPlan in the list whose section info is changed*/
           for (let plans of Object.values(ctx.layoutPlansByLabwareType)) {
             const findPlan = plans.find(
               (plan) =>
                 plan.destinationLabware.barcode ===
-                e.confirmSectionLabware.barcode
+                e.layoutPlan.destinationLabware.barcode
             );
             if (findPlan) {
-              planInOriginalLayout = findPlan;
+              planInContext = findPlan;
               break;
             }
           }
-          if (planInOriginalLayout && e.confirmSectionLabware.confirmSections) {
-            /**Get total sections from existing plan**/
-            const sources = Array.from(
-              planInOriginalLayout?.plannedActions.values()
-            ).flatMap((val) => val);
-            const confirmSectionMap = e.confirmSectionLabware.confirmSections.reduce(
-              (map, section) => {
-                map.has(section.destinationAddress)
-                  ? map.get(section.destinationAddress)?.push(section)
-                  : map.set(section.destinationAddress, [section]);
-                return map;
-              },
-              new Map<string, ConfirmSection[]>()
-            );
-
-            /**Check any change in sections**/
-            if (
-              sources.length === e.confirmSectionLabware.confirmSections.length
-            ) {
-              return;
-            }
-            /**There is change in section, so update the layoutPlan with new sections**/
-            planInOriginalLayout!.plannedActions = new Map<string, Source[]>();
-            Array.from(confirmSectionMap.keys()).forEach((key) => {
-              const sections = confirmSectionMap.get(key);
-              if (!sections || sections.length === 0) {
-                planInOriginalLayout?.plannedActions.set(key, []);
-              } else {
-                const newSources = sections!.map((section, indx) => {
-                  return {
-                    sampleId: section.sampleId,
-                    labware: e.sourceLabwares[indx],
-                    newSection: indx < sources.length ? section.newSection : 0,
-                    address: section.destinationAddress,
-                  };
-                });
-                planInOriginalLayout?.plannedActions.set(key, newSources);
-              }
-            });
+          if (planInContext && e.layoutPlan) {
+            planInContext.plannedActions = e.layoutPlan.plannedActions;
           }
         }),
 
@@ -352,7 +317,7 @@ export function createSectioningConfirmMachine() {
         fillSectionNumbers: assign((ctx, e) => {
           const updateSectionNumber: boolean =
             ((e.type === "UPDATE_PLANS" ||
-              e.type === "UPDATE_CONFIRM_SECTION_LABWARE") &&
+              e.type === "UPDATE_SECTION_LAYOUT") &&
               ctx.sectionNumberMode === SectionNumberMode.Auto) ||
             e.type === "UPDATE_SECTION_NUMBERING_MODE";
           updateSectionNumber &&
@@ -388,7 +353,6 @@ export function createSectioningConfirmMachine() {
               csl.confirmSections?.every((cs) => cs.newSection > 0) ?? false
             );
           });
-
           send(isValid ? "IS_VALID" : "IS_INVALID");
         },
       },
@@ -466,23 +430,26 @@ function autoFillSectionNumbers(
   /**Get slots column wise to fill the section numbers**/
   sortDownRight(layoutPlan.destinationLabware.slots).forEach((slot) => {
     const action = layoutPlan.plannedActions.get(slot.address);
-    action &&
+    if (action) {
       action.length > 0 &&
-      action.forEach((item) => {
-        let newSectionNum = 0;
-        if (
-          startNumbers &&
-          item.labware &&
-          startNumbers.has(item.labware.barcode) &&
-          incrementFill
-        ) {
-          //Get the highest section number of the source labware for this section
-          newSectionNum = startNumbers.get(item.labware.barcode)! + 1;
-          //Store the current highest section number so that it will be incremental for next section
-          startNumbers.set(item.labware.barcode, newSectionNum);
-        }
-        item.newSection = newSectionNum;
-      });
+        action.forEach((item) => {
+          let newSectionNum = 0;
+          if (
+            startNumbers &&
+            item.labware &&
+            startNumbers.has(item.labware.barcode) &&
+            incrementFill
+          ) {
+            //Get the highest section number of the source labware for this section
+            newSectionNum = startNumbers.get(item.labware.barcode)! + 1;
+            //Store the current highest section number so that it will be incremental for next section
+            startNumbers.set(item.labware.barcode, newSectionNum);
+          }
+          item.newSection = newSectionNum;
+        });
+      //Mutate the layoutPlan so that the child will be notified of this change and the changes will be rendered
+      layoutPlan.plannedActions.set(slot.address, [...action]);
+    }
   });
 }
 

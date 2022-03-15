@@ -232,7 +232,7 @@ export default function createWorkAllocationMachine({
           });
         }),
         clearNotifications: assign((ctx) => {
-          ctx.successMessage = undefined;
+          // ctx.successMessage = undefined;
           ctx.requestError = undefined;
         }),
       },
