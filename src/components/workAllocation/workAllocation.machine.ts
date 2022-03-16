@@ -154,7 +154,6 @@ export default function createWorkAllocationMachine({
             },
             SORT_WORKS: {
               actions: "assignSortedWorks",
-              target: "ready",
             },
           },
         },
