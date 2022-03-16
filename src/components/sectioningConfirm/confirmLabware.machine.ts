@@ -11,7 +11,6 @@ import { assign } from "@xstate/immer";
 import { createLayoutMachine } from "../../lib/machines/layout/layoutMachine";
 import { cloneDeep } from "lodash";
 import { Address, NewLabwareLayout } from "../../types/stan";
-import { SectionNumberMode } from "./SectioningConfirm";
 
 export interface ConfirmLabwareContext {
   /**
@@ -81,11 +80,6 @@ type UpdateAllSourcesEvent = {
   plannedActions: Map<Address, Array<Source>>;
 };
 
-type UpdateSectionNumberModeEvent = {
-  type: "UPDATE_SECTION_NUMBER_MODE";
-  mode: SectionNumberMode;
-};
-
 export type CommitConfirmationEvent = {
   type: "COMMIT_CONFIRMATION";
   confirmOperationLabware: ConfirmOperationLabware;
@@ -105,7 +99,6 @@ export type ConfirmLabwareEvent =
   | ToggleCancelEvent
   | UpdateSectionNumberEvent
   | UpdateAllSourcesEvent
-  | UpdateSectionNumberModeEvent
   | CommitConfirmationEvent
   | SectioningConfirmationCompleteEvent;
 
@@ -271,6 +264,10 @@ export const createConfirmLabwareMachine = (
           if (e.type !== "UPDATE_ALL_SOURCES") {
             return;
           }
+          /**There is a change in sections (precisely section numbers) from parent , so update the plans in this machine context**/
+          //update the original plan
+          ctx.originalLayoutPlan.plannedActions = e.plannedActions;
+          //copy the changes to current layout plan as well
           for (let [key, updateSources] of e.plannedActions.entries()) {
             const currentSources = ctx.layoutPlan.plannedActions.get(key);
             updateSources &&

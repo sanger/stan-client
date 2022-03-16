@@ -32,6 +32,12 @@ interface ConfirmLabwareProps {
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
   onSectionUpdate: (layoutPlan: LayoutPlan) => void;
+  onSectionNumberChange: (
+    layoutPlan: LayoutPlan,
+    slotAddress: string,
+    sectionIndex: number,
+    sectionNumber: number
+  ) => void;
   removePlan: (barcode: string) => void;
   autoMode: boolean;
 }
@@ -41,6 +47,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   comments,
   onChange,
   onSectionUpdate,
+  onSectionNumberChange,
   removePlan,
   autoMode,
 }) => {
@@ -89,7 +96,9 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
 
   /***Update sources whenever there is an update in a source in parent**/
   useEffect(() => {
-    send("UPDATE_ALL_SOURCES", originalLayoutPlan);
+    if (originalLayoutPlan) {
+      send("UPDATE_ALL_SOURCES", originalLayoutPlan);
+    }
   }, [originalLayoutPlan, send]);
 
   const handleRemovePlan = React.useCallback(() => {
@@ -166,6 +175,13 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                     sectionIndex,
                     sectionNumber
                   ) => {
+                    /**Notify parent, so as to modify section number in original layout*/
+                    onSectionNumberChange(
+                      layoutPlan,
+                      slotAddress,
+                      sectionIndex,
+                      sectionNumber
+                    );
                     send({
                       type: "UPDATE_SECTION_NUMBER",
                       slotAddress,

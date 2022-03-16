@@ -27,6 +27,12 @@ interface ConfirmTubesProps {
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
   onSectionUpdate: (layoutPlan: LayoutPlan) => void;
+  onSectionNumberChange: (
+    layoutPlan: LayoutPlan,
+    slotAddress: string,
+    sectionIndex: number,
+    sectionNumber: number
+  ) => void;
   autoMode: boolean;
 }
 
@@ -34,6 +40,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
   layoutPlans,
   comments,
   onChange,
+  onSectionNumberChange,
   onSectionUpdate,
   autoMode,
 }) => {
@@ -65,6 +72,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
                 comments={comments}
                 onChange={onChange}
                 onSectionUpdate={onSectionUpdate}
+                onSectionNumberChange={onSectionNumberChange}
                 autoMode={autoMode}
               />
             ))}
@@ -82,6 +90,12 @@ interface TubeRowProps {
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
   onSectionUpdate: (layoutPlan: LayoutPlan) => void;
+  onSectionNumberChange: (
+    layoutPlan: LayoutPlan,
+    slotAddress: string,
+    sectionIndex: number,
+    sectionNumber: number
+  ) => void;
   autoMode: boolean;
 }
 
@@ -89,6 +103,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
   initialLayoutPlan,
   comments,
   onChange,
+  onSectionNumberChange,
   onSectionUpdate,
   autoMode,
 }) => {
@@ -148,9 +163,16 @@ const TubeRow: React.FC<TubeRowProps> = ({
     }
   }, [send, autoMode, setNotifyCancel]);
 
-  /***Update section numbers whenever there is an update in section numbers in parent**/
+  /***Update section numbers **/
   const handleOnChange = useCallback(
     (slotAddress: string, sectionNumber: number, sectionIndex: number) => {
+      /**Notify parent, so as to modify section number in original layout**/
+      onSectionNumberChange(
+        layoutPlan,
+        slotAddress,
+        sectionIndex,
+        sectionNumber
+      );
       send({
         type: "UPDATE_SECTION_NUMBER",
         slotAddress,
@@ -158,11 +180,37 @@ const TubeRow: React.FC<TubeRowProps> = ({
         sectionIndex,
       });
     },
-    [send]
+    [send, layoutPlan, onSectionNumberChange]
   );
 
   return (
     <>
+      {
+        <ConfirmationModal
+          show={notifyCancel}
+          header={`${cancelled ? "Enabling" : "Cancelling"} tube`}
+          message={{ type: "Warning", text: "Section number update" }}
+          confirmOptions={[
+            {
+              label: "Cancel",
+              action: () => {
+                setNotifyCancel(false);
+              },
+            },
+            {
+              label: "Continue",
+              action: () => {
+                send({ type: "TOGGLE_CANCEL" });
+                setNotifyCancel(false);
+              },
+            },
+          ]}
+        >
+          <p className={"font-bold mt-8"}>
+            Planned section numbers of other labware will be updated.
+          </p>
+        </ConfirmationModal>
+      }
       <tr className={rowClassnames}>
         <TableCell>
           <div className="py-4 flex flex-col items-center justify-between space-y-8">
@@ -255,32 +303,6 @@ const TubeRow: React.FC<TubeRowProps> = ({
           />
         </TableCell>
       </tr>
-      {
-        <ConfirmationModal
-          show={notifyCancel}
-          header={"Cancelling tube"}
-          message={{ type: "Warning", text: "Section number update" }}
-          confirmOptions={[
-            {
-              label: "Cancel",
-              action: () => {
-                setNotifyCancel(false);
-              },
-            },
-            {
-              label: "Continue",
-              action: () => {
-                send({ type: "TOGGLE_CANCEL" });
-                setNotifyCancel(false);
-              },
-            },
-          ]}
-        >
-          <p className={"font-bold mt-8"}>
-            Planned section numbers of other labware will be updated.
-          </p>
-        </ConfirmationModal>
-      }
     </>
   );
 };

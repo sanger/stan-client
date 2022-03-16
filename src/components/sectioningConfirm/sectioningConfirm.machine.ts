@@ -89,16 +89,23 @@ type SectioningConfirmEvent =
       sourceBarcode: string;
     }
   | {
+      type: "UPDATE_SECTION_LAYOUT";
+      layoutPlan: LayoutPlan;
+    }
+  | {
+      type: "UPDATE_SECTION_NUMBER";
+      layoutPlan: LayoutPlan;
+      slotAddress: string;
+      sectionIndex: number;
+      sectionNumber: number;
+    }
+  | {
       type: "UPDATE_PLANS";
       plans: Array<FindPlanDataQuery>;
     }
   | {
       type: "UPDATE_CONFIRM_SECTION_LABWARE";
       confirmSectionLabware: ConfirmSectionLabware;
-    }
-  | {
-      type: "UPDATE_SECTION_LAYOUT";
-      layoutPlan: LayoutPlan;
     }
   | { type: "IS_VALID" }
   | { type: "IS_INVALID" }
@@ -147,6 +154,9 @@ export function createSectioningConfirmMachine() {
             },
             UPDATE_SECTION_NUMBERING_MODE: {
               actions: ["assignSectionNumberMode", "fillSectionNumbers"],
+            },
+            UPDATE_SECTION_NUMBER: {
+              actions: "assignSectionNumber",
             },
           },
           states: {
@@ -245,25 +255,36 @@ export function createSectioningConfirmMachine() {
           if (e.type !== "UPDATE_SECTION_LAYOUT") {
             return;
           }
-          let planInContext: LayoutPlan | undefined = undefined;
-
           /**Find the layoutPlan in the list whose section info is changed*/
-          for (let plans of Object.values(ctx.layoutPlansByLabwareType)) {
-            const findPlan = plans.find(
-              (plan) =>
-                plan.destinationLabware.barcode ===
-                e.layoutPlan.destinationLabware.barcode
-            );
-            if (findPlan) {
-              planInContext = findPlan;
-              break;
-            }
-          }
-          if (planInContext && e.layoutPlan) {
+          const planInContext = findPlan(
+            ctx.layoutPlansByLabwareType,
+            e.layoutPlan.destinationLabware.barcode!
+          );
+          if (planInContext) {
             planInContext.plannedActions = e.layoutPlan.plannedActions;
           }
         }),
-
+        assignSectionNumber: assign((ctx, e) => {
+          if (e.type !== "UPDATE_SECTION_NUMBER") {
+            return;
+          }
+          /**Section number is changed externally in this plan, so update that in the layoutPlan in context**/
+          const planInContext = findPlan(
+            ctx.layoutPlansByLabwareType,
+            e.layoutPlan.destinationLabware.barcode!
+          );
+          if (planInContext) {
+            const source = Array.from(planInContext.plannedActions.values())
+              .flatMap((sources) => sources)
+              .find(
+                (source, indx) =>
+                  source.address === e.slotAddress && indx === e.sectionIndex
+              );
+            if (source) {
+              source.newSection = e.sectionNumber;
+            }
+          }
+        }),
         assignPlans: assign((ctx, e) => {
           if (e.type !== "UPDATE_PLANS") return;
           ctx.plans = e.plans;
@@ -484,7 +505,6 @@ function buildLayoutPlans(
           },
         ];
         const plannedActionsForSlot = memo.get(planAction.destination.address);
-
         if (!plannedActionsForSlot) {
           memo.set(planAction.destination.address, slotActions);
         } else {
@@ -505,4 +525,25 @@ function buildLayoutPlans(
     };
   });
   return layoutPlans;
+}
+
+/**
+ * Find LayoutPlan from the dictionary using barcode
+ * @param layoutPlans
+ * @param barcode
+ */
+function findPlan(layoutPlans: Dictionary<LayoutPlan[]>, barcode: string) {
+  let planInContext: LayoutPlan | undefined = undefined;
+
+  /**Find the layoutPlan in the list whose section info is changed*/
+  for (let plans of Object.values(layoutPlans)) {
+    const findPlan = plans.find(
+      (plan) => plan.destinationLabware.barcode === barcode
+    );
+    if (findPlan) {
+      planInContext = findPlan;
+      break;
+    }
+  }
+  return planInContext;
 }

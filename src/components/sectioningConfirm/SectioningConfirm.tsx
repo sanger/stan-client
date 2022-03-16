@@ -126,6 +126,24 @@ export default function SectioningConfirm({
     },
     [send]
   );
+
+  const handleSectionNumberChange = useCallback(
+    (
+      layoutPlan: LayoutPlan,
+      slotAddress: string,
+      sectionIndex: number,
+      sectionNumber: number
+    ) => {
+      send({
+        type: "UPDATE_SECTION_NUMBER",
+        layoutPlan,
+        slotAddress,
+        sectionIndex,
+        sectionNumber,
+      });
+    },
+    [send]
+  );
   return (
     <div className="my-4 mx-auto max-w-screen-xl space-y-12">
       <div>
@@ -199,6 +217,7 @@ export default function SectioningConfirm({
                     <ConfirmTubes
                       onChange={handleConfirmChange}
                       onSectionUpdate={handleSectionUpdate}
+                      onSectionNumberChange={handleSectionNumberChange}
                       layoutPlans={
                         layoutPlansByLabwareType[LabwareTypeName.TUBE]
                       }
@@ -229,6 +248,7 @@ export default function SectioningConfirm({
                               autoMode={
                                 sectionNumberMode === SectionNumberMode.Auto
                               }
+                              onSectionNumberChange={handleSectionNumberChange}
                             />
                           ))}
                         </div>

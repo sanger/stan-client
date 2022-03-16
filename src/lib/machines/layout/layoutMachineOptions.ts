@@ -41,7 +41,6 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_DESTINATION") {
         return;
       }
-
       const plannedActions = ctx.layoutPlan.plannedActions;
 
       if (
@@ -59,7 +58,6 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_DESTINATION") {
         return;
       }
-
       ctx.layoutPlan.plannedActions.delete(e.address);
     }),
 
@@ -80,20 +78,23 @@ export const machineOptions: Partial<MachineOptions<
       if (!ctx.possibleActions?.has(e.address)) {
         return;
       }
-      const slotActions = ctx.possibleActions?.get(e.address)!;
-      //initialize section numbers in new actions added
-      slotActions.forEach((action) => (action.newSection = 0));
 
+      //These are old entries already existing
+      const slotActions = ctx.possibleActions?.get(e.address)!;
+      //These are new additions
       const plannedActionsForSlot = ctx.layoutPlan.plannedActions.get(
         e.address
       );
-
       if (!plannedActionsForSlot) {
         ctx.layoutPlan.plannedActions.set(e.address, slotActions);
       } else {
+        //Initialise section numbers to 0 for new additions
+        Array.from(plannedActionsForSlot.values()).forEach(
+          (val) => (val.newSection = 0)
+        );
         ctx.layoutPlan.plannedActions.set(e.address, [
-          ...plannedActionsForSlot,
           ...slotActions,
+          ...plannedActionsForSlot,
         ]);
       }
     }),
@@ -102,7 +103,6 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "REMOVE_SECTION") {
         return;
       }
-
       if (!ctx.possibleActions?.has(e.address)) {
         return;
       }
@@ -111,6 +111,7 @@ export const machineOptions: Partial<MachineOptions<
 
       if (slotActions.length > 1) {
         slotActions.pop();
+        ctx.layoutPlan.plannedActions.set(e.address, slotActions);
       } else if (slotActions.length === 1) {
         ctx.layoutPlan.plannedActions.delete(e.address);
       }
@@ -120,7 +121,6 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_DESTINATION") {
         return;
       }
-
       // If there was never anything in this slot, do nothing
       if (ctx.possibleActions && !ctx.possibleActions.has(e.address)) {
         return;
