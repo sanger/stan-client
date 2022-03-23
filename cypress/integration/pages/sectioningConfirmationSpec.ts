@@ -89,7 +89,7 @@ describe("Sectioning Confirmation", () => {
       });
 
       it("shows an error", () => {
-        cy.findByText("Plan has already been found for STAN-0001F").should(
+        cy.findByText('"STAN-0001F" has already been scanned').should(
           "be.visible"
         );
       });
@@ -174,6 +174,7 @@ describe("Sectioning Confirmation", () => {
             },
           }
         );
+        destinationLabware.id = -2;
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
             graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>(
@@ -197,10 +198,7 @@ describe("Sectioning Confirmation", () => {
 
       it("should empty the section field for cancelled tube", () => {
         cy.findByRole("button", { name: /Continue/i }).click();
-        cy.findByTestId("sectionnumber-tube-STAN-0001D").should(
-          "have.text",
-          ""
-        );
+        cy.findByTestId("sectionnumber-tube-STAN-0001D").should("not.exist");
       });
     });
     context("when a slide is removed in auto mode", () => {

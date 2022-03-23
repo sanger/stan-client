@@ -78,23 +78,18 @@ export const machineOptions: Partial<MachineOptions<
       if (!ctx.possibleActions?.has(e.address)) {
         return;
       }
-
-      //These are old entries already existing
       const slotActions = ctx.possibleActions?.get(e.address)!;
-      //These are new additions
+      //Initialise section numbers to 0 for new additions
+      Array.from(slotActions.values()).forEach((val) => (val.newSection = 0));
       const plannedActionsForSlot = ctx.layoutPlan.plannedActions.get(
         e.address
       );
       if (!plannedActionsForSlot) {
         ctx.layoutPlan.plannedActions.set(e.address, slotActions);
       } else {
-        //Initialise section numbers to 0 for new additions
-        Array.from(plannedActionsForSlot.values()).forEach(
-          (val) => (val.newSection = 0)
-        );
         ctx.layoutPlan.plannedActions.set(e.address, [
-          ...slotActions,
           ...plannedActionsForSlot,
+          ...slotActions,
         ]);
       }
     }),
@@ -111,7 +106,6 @@ export const machineOptions: Partial<MachineOptions<
 
       if (slotActions.length > 1) {
         slotActions.pop();
-        ctx.layoutPlan.plannedActions.set(e.address, slotActions);
       } else if (slotActions.length === 1) {
         ctx.layoutPlan.plannedActions.delete(e.address);
       }

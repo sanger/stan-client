@@ -137,7 +137,7 @@ export const createConfirmLabwareMachine = (
       context: {
         comments,
         labware,
-        originalLayoutPlan: layoutPlan,
+        originalLayoutPlan: cloneDeep(layoutPlan),
         layoutPlan: cloneDeep(layoutPlan),
         addressToCommentMap: new Map(),
         cancelled: false,
@@ -265,8 +265,6 @@ export const createConfirmLabwareMachine = (
             return;
           }
           /**There is a change in sections (precisely section numbers) from parent , so update the plans in this machine context**/
-          //update the original plan
-          ctx.originalLayoutPlan.plannedActions = e.plannedActions;
           //copy the changes to current layout plan as well
           for (let [key, updateSources] of e.plannedActions.entries()) {
             const currentSources = ctx.layoutPlan.plannedActions.get(key);

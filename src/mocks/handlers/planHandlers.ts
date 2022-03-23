@@ -16,6 +16,7 @@ import labwareFactory from "../../lib/factories/labwareFactory";
 import { uniqueId } from "lodash";
 import { buildLabwareFragment } from "../../lib/helpers/labwareHelper";
 import { LabwareTypeName } from "../../types/stan";
+import { generateLabwareIdFromBarcode } from "./labwareHandlers";
 
 const planHandlers = [
   graphql.mutation<PlanMutation, PlanMutationVariables>(
@@ -109,9 +110,11 @@ const planHandlers = [
           },
         }
       );
-
       const destinationLabware = labwareFactory.build(
-        { barcode: req.variables.barcode },
+        {
+          barcode: req.variables.barcode,
+          id: generateLabwareIdFromBarcode(req.variables.barcode),
+        },
         {
           associations: {
             labwareType: labwareTypes[LabwareTypeName.SLIDE].build(),

@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect } from "react";
 import { FindPlanDataQuery } from "../../types/sdk";
 import { useMachine } from "@xstate/react";
-import ScanInput from "../scanInput/ScanInput";
 import { planFinderMachine } from "./planFinder.machine";
 import Warning from "../notifications/Warning";
+import LabwareScanner from "../labwareScanner/LabwareScanner";
 
 type PlanFinderParams = {
   /**
@@ -63,7 +63,7 @@ export function PlanFinder({
       plans: planMap,
     })
   );
-  const { barcode, plans, requestError, validationError } = current.context;
+  const { plans, requestError, validationError } = current.context;
   const showError = requestError || validationError;
 
   /**
@@ -74,20 +74,14 @@ export function PlanFinder({
   }, [plans, onChange]);
 
   /**
-   * Callback for when the scan input value changes (i.e. the user types)
-   */
-  const handleOnChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      send({ type: "UPDATE_BARCODE", barcode: e.target.value }),
-    [send]
-  );
-
-  /**
    * Callback for when the user submits the barcode in the <ScanInput />
    */
-  const handleOnScan = useCallback(() => send({ type: "SUBMIT_BARCODE" }), [
-    send,
-  ]);
+  const handleOnScan = useCallback(
+    (labware) => {
+      send({ type: "SUBMIT_LABWARE", labware });
+    },
+    [send]
+  );
 
   /**
    * Callback for removing a plan by barcode
@@ -98,19 +92,15 @@ export function PlanFinder({
   );
 
   return (
-    <div>
+    <div className={"max-w-screen-xl mx-auto"}>
       {showError && (
         <Warning
           message={validationError ?? "Plan Search Error"}
           error={requestError}
         />
       )}
-      <div data-testid="plan-finder" className="mt-2 sm:w-2/3 md:w-1/2">
-        <ScanInput
-          value={barcode}
-          onChange={handleOnChange}
-          onScan={handleOnScan}
-        />
+      <div data-testid="plan-finder">
+        <LabwareScanner onAdd={handleOnScan}>{}</LabwareScanner>
       </div>
       {children({ plans: Array.from(plans.values()), removePlanByBarcode })}
     </div>
