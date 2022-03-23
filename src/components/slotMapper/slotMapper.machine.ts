@@ -41,6 +41,9 @@ const machineConfig: Partial<MachineOptions<
         ctx.inputLabware.some((lw) => lw.barcode === scc.sourceBarcode)
       );
     }),
+    assignOutputLabware: assign((ctx, e) => {
+      e.type === "UPDATE_OUTPUT_LABWARE" && (ctx.outputLabware = e.labware);
+    }),
 
     assignLabwareColors: assign((ctx) => {
       ctx.inputLabware.forEach((lw) => {
@@ -70,7 +73,6 @@ const machineConfig: Partial<MachineOptions<
       if (e.type !== "COPY_SLOTS") {
         return;
       }
-
       const inputLabware = find(ctx.inputLabware, { id: e.inputLabwareId });
       const outputLabware = find(ctx.outputLabware, {
         id: e.outputLabwareId,
@@ -216,6 +218,9 @@ const slotMapperMachine = Machine<
               "assignLabwareColors",
               "checkSlots",
             ],
+          },
+          UPDATE_OUTPUT_LABWARE: {
+            actions: "assignOutputLabware",
           },
           LOCK: "locked",
         },

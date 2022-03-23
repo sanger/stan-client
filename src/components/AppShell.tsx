@@ -254,6 +254,16 @@ function AppShell({ children }: AppShellParams) {
                         "Select the best permeabilisation time for a slide."
                       }
                     />
+                    <NavLinkMenuItem
+                      caption={"Dual Index Plate"}
+                      path={"/lab/dual_index_plate"}
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Record the transfer of dual-index reagent to 96 well plate."
+                      }
+                    />
                   </Menu>
                   <NavLinkMenuItem
                     caption={"Imaging"}
@@ -480,6 +490,9 @@ function AppShell({ children }: AppShellParams) {
                       </StanMobileNavLink>
                       <StanMobileNavLink to="/lab/visium_analysis">
                         Visium Analysis
+                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/dual_index_plate">
+                        Dual Index Plate
                       </StanMobileNavLink>
                     </div>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
