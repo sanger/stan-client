@@ -84,6 +84,8 @@ export default function WorkAllocation() {
     createWorkAllocationMachine({ urlParams })
   );
 
+  /**This prevents duplicate submissions on double click**/
+  const [submitted, setSubmitted] = React.useState(false);
   const {
     projects,
     costCodes,
@@ -212,6 +214,10 @@ export default function WorkAllocation() {
         <Formik<WorkAllocationFormValues>
           initialValues={initialValues}
           onSubmit={async (values) => {
+            setSubmitted(true);
+            setTimeout(() => {
+              setSubmitted(false);
+            }, 500);
             send({ type: "ALLOCATE_WORK", values });
           }}
           validationSchema={validationSchema}
@@ -267,7 +273,7 @@ export default function WorkAllocation() {
             <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
               <FormikInput label={"R&D?"} name={"isRnD"} type={"checkbox"} />
               <BlueButton
-                disabled={current.matches("allocating")}
+                disabled={current.matches("allocating") || submitted}
                 type="submit"
               >
                 Submit
