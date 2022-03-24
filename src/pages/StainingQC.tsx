@@ -154,7 +154,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                 })
               }
             >
-              inputLabwares
+              Save
             </BlueButton>
           </div>
         </div>
