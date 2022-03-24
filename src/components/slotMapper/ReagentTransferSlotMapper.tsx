@@ -13,9 +13,11 @@ import {
   SlotCopyContent,
   SlotFieldsFragment,
 } from "../../types/sdk";
-import { NewLabwareLayout } from "../../types/stan";
 import { useMachine } from "@xstate/react";
 import { find } from "lodash";
+import { findSlotByAddress, isSlotEmpty } from "../../lib/helpers/slotHelper";
+import { toast } from "react-toastify";
+import warningToast from "../notifications/WarningToast";
 
 export interface ReagentTransferMappingProps {
   /**
@@ -61,7 +63,7 @@ function ReagentTransferSlotMapper({
     })
   );
 
-  const { slotCopyContent, colorByBarcode } = current.context;
+  const { slotCopyContent } = current.context;
   /**
    * Update machine state when inut/source labware is changed in parent
    */
@@ -97,27 +99,33 @@ function ReagentTransferSlotMapper({
           sourceAddress: address,
         })
       ) {
-        return `bg-red-200`;
+        return `bg-blue-200`;
       }
 
       if (slot?.samples?.length) {
-        return `bg-red-500`;
+        return `bg-blue-500`;
       }
     },
-    [slotCopyContent, colorByBarcode]
+    [slotCopyContent]
   );
 
   const getDestinationSlotColor = useCallback(
-    (labware: NewLabwareLayout, address: string) => {
+    (
+      labware: LabwareFieldsFragment,
+      address: string,
+      slot: SlotFieldsFragment
+    ) => {
       const scc = find(slotCopyContent, {
         destinationAddress: address,
       });
-
       if (scc) {
+        return `bg-blue-500`;
+      }
+      if (slot?.samples?.length) {
         return `bg-green-500`;
       }
     },
-    [slotCopyContent, colorByBarcode]
+    [slotCopyContent]
   );
 
   /**
@@ -182,10 +190,21 @@ function ReagentTransferSlotMapper({
    */
   const handleOnOutputLabwareSlotClick = React.useCallback(
     (outputAddress: string) => {
+      /**if the selected destination address slot is empty, give warning and return**/
+      if (
+        isSlotEmpty(findSlotByAddress(initialDestLabware!.slots, outputAddress))
+      ) {
+        warningToast({
+          message: "Cannot transfer reagent to an empty slot.",
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 5000,
+        });
+        return;
+      }
       setDestinationAddress(outputAddress);
       handleCopySlots(outputAddress);
     },
-    [handleCopySlots]
+    [handleCopySlots, initialDestLabware]
   );
 
   /**
@@ -246,8 +265,8 @@ function ReagentTransferSlotMapper({
               name={initialDestLabware.labwareType.name}
               onSlotClick={handleOnOutputLabwareSlotClick}
               onSelect={setSelectedOutputAddresses}
-              slotColor={(address) =>
-                getDestinationSlotColor(initialDestLabware, address)
+              slotColor={(address, slot) =>
+                getDestinationSlotColor(initialDestLabware, address, slot)
               }
             />
           )}

@@ -35,7 +35,6 @@ import VisiumQC from "../pages/VisiumQC";
 import VisiumPerm from "../pages/VisiumPerm";
 import VisiumAnalysis from "../pages/VisiumAnalysis";
 import Aliquot from "../pages/Aliquot";
-import ReagentTransfer from "../pages/DualIndexPlate";
 import DualIndexPlate from "../pages/DualIndexPlate";
 
 export function Routes() {

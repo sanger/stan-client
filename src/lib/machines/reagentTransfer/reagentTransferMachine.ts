@@ -4,6 +4,7 @@ import { castDraft } from "immer";
 
 import { ClientError } from "graphql-request";
 import {
+  FindReagentPlateQuery,
   LabwareFieldsFragment,
   Maybe,
   ReagentPlate,
@@ -26,7 +27,7 @@ export interface ReagentTransferContext {
    */
   workNumber: string;
   /**
-   * The operattion type associated with this reagent transfer
+   * The operation type associated with reagent transfer
    */
   operationType: OperationTypeName;
 
@@ -35,7 +36,7 @@ export interface ReagentTransferContext {
 
   /**
    * Dual Index plate, which is the source labware, from which the reagent is copied.
-   * This is fetched and if diesn't exist, will be ceated
+   * This is fetched and if doesn't exist it will be created
    */
   sourceReagentPlate: ReagentPlate | undefined;
 
@@ -43,17 +44,21 @@ export interface ReagentTransferContext {
    * 96 well plate, which is the destination labware, to which the reagent is copied
    */
   destLabware: LabwareFieldsFragment | undefined;
+
   /**
    * All the transfers to record between slots in source and destination
    */
   reagentTransfers: Array<ReagentTransfer>;
 
-  /**The result returned by aliquot api*/
+  /**The result returned by reagentTransfer api*/
   reagentTransferResult?: RecordReagentTransferMutation;
+
   /**
    * Errors from server, if any
    */
   serverErrors?: Maybe<ClientError>;
+
+  validationError?: string;
 }
 
 type UpdateTransferContent = {
@@ -86,7 +91,7 @@ export type ReagentTransferEvent =
   | SaveEvent
   | MachineServiceDone<"reagentTransfer", RecordReagentTransferMutation>
   | MachineServiceError<"reagentTransfer">
-  | MachineServiceDone<"findReagentPlate", ReagentPlate>
+  | MachineServiceDone<"findReagentPlate", FindReagentPlateQuery>
   | MachineServiceError<"findReagentPlate">;
 
 /**
@@ -105,10 +110,16 @@ export const reagentTransferMachine = createMachine<
           UPDATE_WORK_NUMBER: {
             actions: "assignWorkNumber",
           },
-          SET_SOURCE_LABWARE: {
-            target: "finding",
-            actions: "assignSourceBarcode",
-          },
+          SET_SOURCE_LABWARE: [
+            {
+              target: "finding",
+              cond: (ctx, e) => /^[0-9]{24}$/.test(e.barcode),
+              actions: ["emptyValidationError", "assignSourceBarcode"],
+            },
+            {
+              actions: "assignValidationError",
+            },
+          ],
           SET_DESTINATION_LABWARE: {
             actions: "assignDestination",
           },
@@ -190,13 +201,12 @@ export const reagentTransferMachine = createMachine<
           ctx.sourceBarcode === undefined
         )
           return;
-
-        let reagentPlate: ReagentPlate = {
-          barcode: ctx.sourceBarcode,
-          slots: [],
-        };
-        ctx.sourceReagentPlate = e.data ?? reagentPlate;
-        ctx.sourceReagentPlate.barcode = ctx.sourceBarcode;
+        ctx.sourceReagentPlate = e.data.reagentPlate
+          ? {
+              barcode: e.data.reagentPlate.barcode,
+              slots: e.data.reagentPlate.slots ?? [],
+            }
+          : { barcode: ctx.sourceBarcode, slots: [] };
       }),
       assignTransfers: assign((ctx, e) => {
         e.type === "UPDATE_TRANSFER_CONTENT" &&
@@ -211,7 +221,10 @@ export const reagentTransferMachine = createMachine<
       }),
 
       assignServerError: assign((ctx, e) => {
-        if (e.type !== "error.platform.reagentTransfer") {
+        if (
+          e.type !== "error.platform.reagentTransfer" &&
+          e.type !== "error.platform.findReagentPlate"
+        ) {
           return;
         }
         ctx.serverErrors = castDraft(e.data);
@@ -219,6 +232,12 @@ export const reagentTransferMachine = createMachine<
 
       emptyServerError: assign((ctx) => {
         ctx.serverErrors = null;
+      }),
+      assignValidationError: assign((ctx) => {
+        ctx.validationError = "24 digit number required";
+      }),
+      emptyValidationError: assign((ctx) => {
+        ctx.validationError = undefined;
       }),
     },
     services: {
@@ -230,7 +249,7 @@ export const reagentTransferMachine = createMachine<
           request: {
             workNumber: ctx.workNumber,
             operationType: ctx.operationType,
-            destinationBarcode: ctx.sourceReagentPlate.barcode,
+            destinationBarcode: ctx.destLabware!.barcode,
             transfers: ctx.reagentTransfers,
           },
         });

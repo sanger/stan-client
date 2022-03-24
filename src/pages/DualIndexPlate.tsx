@@ -27,11 +27,12 @@ import Table, {
   TableHead,
   TableHeader,
 } from "../components/Table";
+import { ErrorMessage } from "../components/forms";
 
 /**
  * Success notification when slots have been copied
  */
-const ToastSuccess = () => <Success message={"Slots copied"} />;
+const ToastSuccess = () => <Success message={"Reagents transferred"} />;
 
 function DualIndexPlate() {
   const [current, send] = useMachine(() =>
@@ -45,6 +46,15 @@ function DualIndexPlate() {
     })
   );
 
+  const {
+    serverErrors,
+    sourceReagentPlate,
+    destLabware,
+    reagentTransfers,
+    workNumber,
+    validationError,
+  } = current.context;
+
   const handleWorkNumberChange = useCallback(
     (workNumber?: string) => {
       if (workNumber) {
@@ -53,14 +63,6 @@ function DualIndexPlate() {
     },
     [send]
   );
-
-  const {
-    serverErrors,
-    sourceReagentPlate,
-    destLabware,
-    reagentTransfers,
-    workNumber,
-  } = current.context;
   /**
    * When we get into the "copied" state, show a success message
    */
@@ -144,13 +146,18 @@ function DualIndexPlate() {
           <div className="grid grid-cols-2 auto-rows-max">
             <div className="space-y-4">
               <Heading level={4}>Dual Index Plate</Heading>
-              <div className="w-1/2">
+              <div className="w-1/2" id="sourceScanInput">
                 <ScanInput
-                  onScan={(value) =>
-                    send({ type: "SET_SOURCE_LABWARE", barcode: value })
-                  }
+                  onScan={(value) => {
+                    send({ type: "SET_SOURCE_LABWARE", barcode: value });
+                  }}
                   disabled={sourceReagentPlate !== undefined}
                 />
+                {validationError && (
+                  <div className={"mt-2"}>
+                    <ErrorMessage>{validationError}</ErrorMessage>
+                  </div>
+                )}
                 <MutedText>
                   Add source labware using the scan input above
                 </MutedText>
@@ -176,6 +183,7 @@ function DualIndexPlate() {
               </div>
             </div>
           </div>
+
           <ReagentTransferSlotMapper
             initialDestLabware={destLabware}
             initialSourceLabware={memoInputLabware}
@@ -209,22 +217,17 @@ function DualIndexPlate() {
           </Table>
         </>
       )}
-      <div className={"flex flex-col w-full"}>
-        {serverErrors && <Warning error={serverErrors} />}
-      </div>
 
       <div className="border border-t-2 border-gray-200 w-full py-4 px-4 sm:px-6 lg:px-8 bg-gray-100 flex-shrink-0">
         <div className="flex flex-row items-center justify-end space-x-2">
-          {!current.matches("transferred") && (
+          {!current.matches("transferred") ? (
             <BlueButton
               disabled={reagentTransfers.length <= 0 || workNumber === ""}
               onClick={() => send({ type: "SAVE" })}
             >
               Save
             </BlueButton>
-          )}
-
-          {current.matches("copied") && (
+          ) : (
             <>
               <BlueButton onClick={reload} action="tertiary">
                 Reset Form
