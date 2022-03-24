@@ -34,6 +34,11 @@ export function createLabware(barcode: string) {
   return labware;
 }
 
+/**This function generates an id which is equivalent to the number part in barcode
+ * The intention is not to generate a unique id , but useful in scenarios which requires
+ * comparison against a predictable id rather than having completely random one
+ * @param barcode
+ */
 export function generateLabwareIdFromBarcode(barcode: string) {
   const numPartInBarcode = barcode.replace(/\D/g, "");
   return Number.parseInt(numPartInBarcode);
