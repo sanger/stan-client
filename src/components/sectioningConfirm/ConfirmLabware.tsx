@@ -26,6 +26,7 @@ import { CommentFieldsFragment, ConfirmSectionLabware } from "../../types/sdk";
 import { selectConfirmOperationLabware } from "./index";
 import RemoveButton from "../buttons/RemoveButton";
 import { ConfirmationModal } from "../modal/ConfirmationModal";
+import { SectionNumberMode } from "./SectioningConfirm";
 
 interface ConfirmLabwareProps {
   originalLayoutPlan: LayoutPlan;
@@ -39,7 +40,7 @@ interface ConfirmLabwareProps {
     sectionNumber: number
   ) => void;
   removePlan: (barcode: string) => void;
-  autoMode: boolean;
+  mode: SectionNumberMode;
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
@@ -49,7 +50,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   onSectionUpdate,
   onSectionNumberChange,
   removePlan,
-  autoMode,
+  mode,
 }) => {
   const [current, send, service] = useMachine(
     createConfirmLabwareMachine(
@@ -102,13 +103,13 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   }, [originalLayoutPlan, send]);
 
   const handleRemovePlan = React.useCallback(() => {
-    if (autoMode) {
+    if (mode === SectionNumberMode.Auto) {
       setNotifyDelete(true);
     } else {
       removePlan(layoutPlan.destinationLabware.barcode!);
     }
   }, [
-    autoMode,
+    mode,
     setNotifyDelete,
     removePlan,
     layoutPlan.destinationLabware.barcode,
@@ -160,7 +161,9 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                   slot={slot}
                   value={addressToCommentMap.get(slot.address) ?? ""}
                   disabledComment={current.matches("done")}
-                  disabledSectionNumber={autoMode}
+                  disabledSectionNumber={
+                    mode === SectionNumberMode.Auto || current.matches("done")
+                  }
                   comments={comments}
                   layoutPlan={layoutPlan}
                   onCommentChange={(e) => {

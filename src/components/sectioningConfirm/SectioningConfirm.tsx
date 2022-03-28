@@ -222,7 +222,7 @@ export default function SectioningConfirm({
                         layoutPlansByLabwareType[LabwareTypeName.TUBE]
                       }
                       comments={comments}
-                      autoMode={sectionNumberMode === SectionNumberMode.Auto}
+                      mode={sectionNumberMode}
                     />
                   )}
 
@@ -245,9 +245,7 @@ export default function SectioningConfirm({
                               key={layoutPlan.destinationLabware.barcode}
                               originalLayoutPlan={layoutPlan}
                               comments={comments}
-                              autoMode={
-                                sectionNumberMode === SectionNumberMode.Auto
-                              }
+                              mode={sectionNumberMode}
                               onSectionNumberChange={handleSectionNumberChange}
                             />
                           ))}

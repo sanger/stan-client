@@ -21,6 +21,7 @@ import Labware from "../labware/Labware";
 import { CommentFieldsFragment, ConfirmSectionLabware } from "../../types/sdk";
 import { selectConfirmOperationLabware } from "./index";
 import { ConfirmationModal } from "../modal/ConfirmationModal";
+import { SectionNumberMode } from "./SectioningConfirm";
 
 interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
@@ -33,7 +34,7 @@ interface ConfirmTubesProps {
     sectionIndex: number,
     sectionNumber: number
   ) => void;
-  autoMode: boolean;
+  mode: SectionNumberMode;
 }
 
 const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
@@ -42,7 +43,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
   onChange,
   onSectionNumberChange,
   onSectionUpdate,
-  autoMode,
+  mode,
 }) => {
   return (
     <div className="p-4 lg:w-2/3 lg:mx-auto rounded-lg bg-gray-100 space-y-4">
@@ -73,7 +74,7 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
                 onChange={onChange}
                 onSectionUpdate={onSectionUpdate}
                 onSectionNumberChange={onSectionNumberChange}
-                autoMode={autoMode}
+                mode={mode}
               />
             ))}
           </TableBody>
@@ -96,7 +97,7 @@ interface TubeRowProps {
     sectionIndex: number,
     sectionNumber: number
   ) => void;
-  autoMode: boolean;
+  mode: SectionNumberMode;
 }
 
 const TubeRow: React.FC<TubeRowProps> = ({
@@ -105,7 +106,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
   onChange,
   onSectionNumberChange,
   onSectionUpdate,
-  autoMode,
+  mode,
 }) => {
   const [current, send, service] = useMachine(
     createConfirmLabwareMachine(
@@ -156,12 +157,12 @@ const TubeRow: React.FC<TubeRowProps> = ({
   );
 
   const handleOnClick = useCallback(() => {
-    if (autoMode) {
+    if (mode === SectionNumberMode.Auto) {
       setNotifyCancel(true);
     } else {
       send({ type: "TOGGLE_CANCEL" });
     }
-  }, [send, autoMode, setNotifyCancel]);
+  }, [send, mode, setNotifyCancel]);
 
   /***Update section numbers **/
   const handleOnChange = useCallback(
@@ -287,7 +288,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
               type="number"
               value={source.newSection === 0 ? "" : String(source.newSection)}
               min={1}
-              disabled={cancelled || autoMode}
+              disabled={cancelled || mode === SectionNumberMode.Auto}
               // So the row click handler doesn't get triggered
               onClick={(e) => e.stopPropagation()}
               onChange={(e) =>
