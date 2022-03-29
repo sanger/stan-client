@@ -21,12 +21,6 @@ import { labwareTypeInstances } from "../lib/factories/labwareTypeFactory";
 import MutedText from "../components/MutedText";
 import { buildLabwareFragment } from "../lib/helpers/labwareHelper";
 
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-} from "../components/Table";
 import { ErrorMessage } from "../components/forms";
 
 /**
@@ -191,32 +185,6 @@ function DualIndexPlate() {
           />
         </div>
       </AppShell.Main>
-
-      {reagentTransfers.length > 0 && (
-        <>
-          <Heading level={4}>Mapping</Heading>
-          <Table>
-            <TableHead>
-              <tr>
-                <TableHeader>Source - Dual index plate</TableHeader>
-                <TableHeader>Destination - 96 well plate</TableHeader>
-              </tr>
-            </TableHead>
-            <TableBody>
-              {reagentTransfers.map((transfer) => (
-                <tr
-                  key={
-                    transfer.reagentPlateBarcode + transfer.reagentSlotAddress
-                  }
-                >
-                  <TableCell>{transfer.reagentSlotAddress}</TableCell>
-                  <TableCell>{transfer.destinationAddress}</TableCell>
-                </tr>
-              ))}
-            </TableBody>
-          </Table>
-        </>
-      )}
 
       <div className="border border-t-2 border-gray-200 w-full py-4 px-4 sm:px-6 lg:px-8 bg-gray-100 flex-shrink-0">
         <div className="flex flex-row items-center justify-end space-x-2">

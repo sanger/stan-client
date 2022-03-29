@@ -64,6 +64,7 @@ const machineConfig: Partial<MachineOptions<
       if (e.type !== "CLEAR_SLOTS") {
         return;
       }
+      debugger;
       ctx.slotCopyContent = ctx.slotCopyContent.filter(
         (scc) => !e.outputAddresses.includes(scc.destinationAddress)
       );

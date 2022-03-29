@@ -18,6 +18,9 @@ import { find } from "lodash";
 import { findSlotByAddress, isSlotEmpty } from "../../lib/helpers/slotHelper";
 import { toast } from "react-toastify";
 import warningToast from "../notifications/WarningToast";
+import Heading from "../Heading";
+import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
+import RemoveButton from "../buttons/RemoveButton";
 
 export interface ReagentTransferMappingProps {
   /**
@@ -215,11 +218,25 @@ function ReagentTransferSlotMapper({
       send({
         type: "CLEAR_SLOTS",
         outputLabwareId: initialDestLabware.id,
-        outputAddresses: selectedOutputAddresses,
+        outputAddresses: slotCopyContent.map((scc) => scc.destinationAddress),
       });
       outputLabwareRef.current?.deselectAll();
     }
-  }, [send, initialDestLabware, selectedOutputAddresses, outputLabwareRef]);
+  }, [send, initialDestLabware, outputLabwareRef, slotCopyContent]);
+
+  const handleOnRemoveMapping = React.useCallback(
+    (destAddress: string) => {
+      send({
+        type: "CLEAR_SLOTS",
+        outputLabwareId: initialDestLabware!.id,
+        outputAddresses: [destAddress],
+      });
+      if (selectedOutputAddresses.includes(destAddress)) {
+        outputLabwareRef.current?.deselectAll();
+      }
+    },
+    [initialDestLabware, outputLabwareRef, selectedOutputAddresses, send]
+  );
 
   /**
    * Whenever the SlotCopyContent map changes, or the current input labware changes,
@@ -237,7 +254,7 @@ function ReagentTransferSlotMapper({
   }, [onChange, slotCopyContent, anySourceMapped]);
 
   return (
-    <div className="space-y-8 mt-3 ">
+    <div className="mt-3 space-y-8">
       <div className="grid grid-cols-2 auto-rows-auto">
         <div id="sourceLabwares" className="bg-gray-100">
           {initialSourceLabware && (
@@ -272,6 +289,35 @@ function ReagentTransferSlotMapper({
           )}
         </div>
       </div>
+      {slotCopyContent.length > 0 && (
+        <div className="flex flex-col p-4 bg-gray-100 space-y-8">
+          <Heading level={4}>Mapping</Heading>
+          <Table>
+            <TableHead>
+              <tr>
+                <TableHeader>Source - Dual index plate</TableHeader>
+                <TableHeader>Destination - 96 well plate</TableHeader>
+              </tr>
+            </TableHead>
+            <TableBody>
+              {slotCopyContent.map((scc) => (
+                <tr key={scc.sourceBarcode + scc.sourceAddress}>
+                  <TableCell>{scc.sourceAddress}</TableCell>
+                  <TableCell>{scc.destinationAddress}</TableCell>
+                  <TableCell>
+                    <RemoveButton
+                      type="button"
+                      onClick={() =>
+                        handleOnRemoveMapping(scc.destinationAddress)
+                      }
+                    />
+                  </TableCell>
+                </tr>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
       {initialSourceLabware && initialDestLabware && (
         <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-end bg-gray-200">
           <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>

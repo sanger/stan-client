@@ -91,14 +91,42 @@ describe("Dual Index Plate", () => {
         );
       });
     });
-    context("when user clears the mapped slot", () => {
+  });
+  describe("On removing mapping", () => {
+    before(() => {
+      cy.get("#sourceLabwares").within(() => {
+        cy.findByText("A3").click();
+      });
+      cy.get("#destLabwares").within(() => {
+        cy.findByText("A3").click();
+      });
+    });
+    it("should display two mappings in table", () => {
+      //find("tr) return rows including header
+      cy.findByRole("table").find("tr").should("have.length", 3);
+    });
+    context("when user clicks remove button in the mapping table", () => {
       before(() => {
+        cy.findAllByTestId("removeButton").eq(0).click();
+      });
+      it("should remove the mapping", () => {
+        cy.findByRole("table")
+          .find("tr")
+          .contains("td", "A1")
+          .should("not.exist");
+      });
+    });
+    context("when user clears all mapped slots", () => {
+      before(() => {
+        cy.get("#sourceLabwares").within(() => {
+          cy.findByText("A3").click();
+        });
         cy.get("#destLabwares").within(() => {
-          cy.findByText("A1").click();
+          cy.findByText("A3").click();
         });
         cy.findByRole("button", { name: /Clear/i }).click();
       });
-      it("should remove the mapping", () => {
+      it("should remove all mappings", () => {
         cy.findByRole("table").should("not.exist");
       });
       it("should not enable Save button", () => {
@@ -114,16 +142,16 @@ describe("Dual Index Plate", () => {
       });
     });
   });
-  context("When user selects a work number and have a mapping", () => {
-    before(() => {
-      cy.get("select").select("SGP1008");
-    });
-    it("should enable save", () => {
-      saveButton().should("be.enabled");
-    });
-  });
 
   describe("On Save", () => {
+    context("When user selects a work number and have a mapping", () => {
+      before(() => {
+        cy.get("select").select("SGP1008");
+      });
+      it("should enable save", () => {
+        saveButton().should("be.enabled");
+      });
+    });
     context("when there is a server error", () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
