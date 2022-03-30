@@ -57,9 +57,11 @@ const workHandlers = [
         worksWithComments: works.map((work) => {
           return {
             work,
-            comment: [WorkStatus.Failed, WorkStatus.Paused].includes(
-              work.status
-            )
+            comment: [
+              WorkStatus.Failed,
+              WorkStatus.Paused,
+              WorkStatus.Withdrawn,
+            ].includes(work.status)
               ? sample(comments)?.text
               : undefined,
           };

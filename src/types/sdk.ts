@@ -2248,7 +2248,9 @@ export enum WorkStatus {
   /** The work has been completed successfully. This is a final status. */
   Completed = 'completed',
   /** The work has failed (for some particular reason). This is a final status. */
-  Failed = 'failed'
+  Failed = 'failed',
+  /** The work has been withdrawn (for some particular reason). This is a final status. */
+  Withdrawn = 'withdrawn'
 }
 
 /** A type of work, describing what kind of work it is (its purpose or activity). */

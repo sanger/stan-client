@@ -29,6 +29,7 @@ describe("Work Progress", () => {
                 "paused",
                 "completed",
                 "failed",
+                "withdrawn",
               ]);
             });
         });

@@ -284,6 +284,7 @@ export const statusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
     WorkStatus.Paused,
     WorkStatus.Failed,
     WorkStatus.Unstarted,
+    WorkStatus.Withdrawn
   ];
   return (
       statusArray.findIndex((val) => val === rowAStatus) -

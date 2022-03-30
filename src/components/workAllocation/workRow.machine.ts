@@ -2,8 +2,8 @@ import { createMachine } from "xstate";
 import {
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumSlidesMutation,
-  UpdateWorkStatusMutation,
   UpdateWorkPriorityMutation,
+  UpdateWorkStatusMutation,
   WorkStatus,
   WorkWithCommentFieldsFragment,
 } from "../../types/sdk";
@@ -28,6 +28,7 @@ export type WorkRowEvent =
   | { type: "PAUSE"; commentId: number }
   | { type: "COMPLETE"; commentId: undefined }
   | { type: "FAIL"; commentId: number }
+  | { type: "WITHDRAW"; commentId: number }
   | { type: "REACTIVATE"; commentId: undefined }
   | { type: "ACTIVE"; commentId: undefined }
   | { type: "UPDATE_NUM_BLOCKS"; numBlocks: number | undefined }
@@ -62,6 +63,7 @@ export default function createWorkRowMachine({
             maybeGoToStatus("paused"),
             maybeGoToStatus("completed"),
             maybeGoToStatus("failed"),
+            maybeGoToStatus("withdrawn"),
           ],
         },
         unstarted: {
@@ -79,6 +81,7 @@ export default function createWorkRowMachine({
             PAUSE: "updating",
             COMPLETE: "updating",
             FAIL: "updating",
+            WITHDRAW: "updating",
             UPDATE_NUM_BLOCKS: "editNumberBlocks",
             UPDATE_NUM_SLIDES: "editNumberSlides",
             UPDATE_PRIORITY: "editPriority",
@@ -90,6 +93,7 @@ export default function createWorkRowMachine({
             REACTIVATE: "updating",
             COMPLETE: "updating",
             FAIL: "updating",
+            WITHDRAW: "updating",
             UPDATE_NUM_BLOCKS: "editNumberBlocks",
             UPDATE_NUM_SLIDES: "editNumberSlides",
             UPDATE_PRIORITY: "editPriority",
@@ -97,6 +101,7 @@ export default function createWorkRowMachine({
         },
         completed: {},
         failed: {},
+        withdrawn: {},
         updating: {
           invoke: {
             src: "updateWorkStatus",
@@ -210,6 +215,8 @@ function getWorkStatusFromEventType(e: WorkRowEvent): WorkStatus {
       return WorkStatus.Completed;
     case "FAIL":
       return WorkStatus.Failed;
+    case "WITHDRAW":
+      return WorkStatus.Withdrawn;
     case "PAUSE":
       return WorkStatus.Paused;
     case "REACTIVATE":
