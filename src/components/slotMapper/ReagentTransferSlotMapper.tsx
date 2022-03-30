@@ -37,7 +37,7 @@ export interface ReagentTransferMappingProps {
   /**
    * Lock the SlotMapper.
    */
-  locked?: boolean;
+  disabled?: boolean;
 
   /**
    * Initial input labware
@@ -54,6 +54,7 @@ function ReagentTransferSlotMapper({
   onChange,
   initialSourceLabware,
   initialDestLabware,
+  disabled,
 }: ReagentTransferMappingProps) {
   const [current, send] = useMachine(() =>
     slotMapperMachine.withContext({
@@ -67,70 +68,6 @@ function ReagentTransferSlotMapper({
   );
 
   const { slotCopyContent } = current.context;
-  /**
-   * Update machine state when inut/source labware is changed in parent
-   */
-  React.useEffect(() => {
-    if (!initialSourceLabware) return;
-    send({ type: "UPDATE_INPUT_LABWARE", labware: [initialSourceLabware] });
-  }, [send, initialSourceLabware]);
-
-  /**
-   * Update machine state when output/destination labware is changed in parent
-   */
-  React.useEffect(() => {
-    if (!initialDestLabware) return;
-    send({ type: "UPDATE_OUTPUT_LABWARE", labware: [initialDestLabware] });
-  }, [send, initialDestLabware]);
-
-  const anySourceMapped = useMemo(() => {
-    if (!initialSourceLabware || !initialDestLabware) {
-      return false;
-    }
-    return slotCopyContent.length > 0;
-  }, [slotCopyContent, initialSourceLabware, initialDestLabware]);
-
-  const getSourceSlotColor = useCallback(
-    (
-      labware: LabwareFieldsFragment,
-      address: string,
-      slot: SlotFieldsFragment
-    ) => {
-      if (
-        find(slotCopyContent, {
-          sourceBarcode: labware.barcode,
-          sourceAddress: address,
-        })
-      ) {
-        return `bg-blue-200`;
-      }
-
-      if (slot?.samples?.length) {
-        return `bg-blue-500`;
-      }
-    },
-    [slotCopyContent]
-  );
-
-  const getDestinationSlotColor = useCallback(
-    (
-      labware: LabwareFieldsFragment,
-      address: string,
-      slot: SlotFieldsFragment
-    ) => {
-      const scc = find(slotCopyContent, {
-        destinationAddress: address,
-      });
-      if (scc) {
-        return `bg-blue-500`;
-      }
-      if (slot?.samples?.length) {
-        return `bg-green-500`;
-      }
-    },
-    [slotCopyContent]
-  );
-
   /**
    * State to track the currently selected input and output addresses
    */
@@ -154,6 +91,87 @@ function ReagentTransferSlotMapper({
    */
   const inputLabwareRef = useRef<LabwareImperativeRef>(null);
   const outputLabwareRef = useRef<LabwareImperativeRef>(null);
+
+  /**
+   * Update machine state when inut/source labware is changed in parent
+   */
+  React.useEffect(() => {
+    if (!initialSourceLabware) return;
+    send({ type: "UPDATE_INPUT_LABWARE", labware: [initialSourceLabware] });
+  }, [send, initialSourceLabware]);
+
+  /**
+   * Update machine state when output/destination labware is changed in parent
+   */
+  React.useEffect(() => {
+    if (!initialDestLabware) return;
+    send({ type: "UPDATE_OUTPUT_LABWARE", labware: [initialDestLabware] });
+  }, [send, initialDestLabware]);
+
+  React.useEffect(() => {
+    if (!disabled) return;
+
+    setSelectedInputAddresses([]);
+    setSelectedOutputAddresses([]);
+    inputLabwareRef.current?.deselectAll();
+    outputLabwareRef.current?.deselectAll();
+  }, [disabled, setSelectedOutputAddresses, setSelectedInputAddresses]);
+
+  const anySourceMapped = useMemo(() => {
+    if (!initialSourceLabware || !initialDestLabware) {
+      return false;
+    }
+    return slotCopyContent.length > 0;
+  }, [slotCopyContent, initialSourceLabware, initialDestLabware]);
+
+  const getSourceSlotColor = useCallback(
+    (
+      labware: LabwareFieldsFragment,
+      address: string,
+      slot: SlotFieldsFragment
+    ) => {
+      if (disabled) {
+        return `bg-gray-400 `;
+      } else {
+        if (
+          find(slotCopyContent, {
+            sourceBarcode: labware.barcode,
+            sourceAddress: address,
+          })
+        ) {
+          return `bg-blue-200`;
+        }
+
+        if (slot?.samples?.length) {
+          return `bg-blue-500`;
+        }
+      }
+    },
+    [slotCopyContent, disabled]
+  );
+
+  const getDestinationSlotColor = useCallback(
+    (
+      labware: LabwareFieldsFragment,
+      address: string,
+      slot: SlotFieldsFragment
+    ) => {
+      if (disabled) {
+        return `bg-gray-400`;
+      } else {
+        const scc = find(slotCopyContent, {
+          destinationAddress: address,
+        });
+        if (scc) {
+          return `bg-blue-500`;
+        }
+        if (slot?.samples?.length) {
+          return `bg-green-500`;
+        }
+      }
+    },
+    [slotCopyContent, disabled]
+  );
 
   /**
    * Callback for sending the actual copy slots event
@@ -194,6 +212,9 @@ function ReagentTransferSlotMapper({
   const handleOnOutputLabwareSlotClick = React.useCallback(
     (outputAddress: string) => {
       /**if the selected destination address slot is empty, give warning and return**/
+      if (disabled) {
+        return;
+      }
       if (
         isSlotEmpty(findSlotByAddress(initialDestLabware!.slots, outputAddress))
       ) {
@@ -207,7 +228,7 @@ function ReagentTransferSlotMapper({
       setDestinationAddress(outputAddress);
       handleCopySlots(outputAddress);
     },
-    [handleCopySlots, initialDestLabware]
+    [handleCopySlots, initialDestLabware, disabled]
   );
 
   /**
@@ -310,6 +331,7 @@ function ReagentTransferSlotMapper({
                       onClick={() =>
                         handleOnRemoveMapping(scc.destinationAddress)
                       }
+                      disabled={disabled}
                     />
                   </TableCell>
                 </tr>
@@ -320,7 +342,9 @@ function ReagentTransferSlotMapper({
       )}
       {initialSourceLabware && initialDestLabware && (
         <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-end bg-gray-200">
-          <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>
+          <WhiteButton onClick={handleOnClickClear} disabled={disabled}>
+            Clear
+          </WhiteButton>
         </div>
       )}
     </div>

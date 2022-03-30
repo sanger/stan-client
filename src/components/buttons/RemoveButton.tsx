@@ -12,7 +12,7 @@ const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
     <button
       data-testid="removeButton"
       {...props}
-      className="inline-flex items-center justify-center p-2 rounded-md hover:bg-red-100 focus:outline-none focus:bg-red-100 text-red-400 hover:text-red-600"
+      className="inline-flex items-center justify-center p-2 rounded-md hover:bg-red-100 focus:outline-none focus:bg-red-100 text-red-400 hover:text-red-600 disabled:text-gray-200"
     >
       <RemoveIcon className="block h-5 w-5" />
     </button>

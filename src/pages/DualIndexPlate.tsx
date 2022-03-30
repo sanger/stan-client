@@ -182,6 +182,7 @@ function DualIndexPlate() {
             initialDestLabware={destLabware}
             initialSourceLabware={memoInputLabware}
             onChange={handleOnSlotMapperChange}
+            disabled={current.matches("transferred")}
           />
         </div>
       </AppShell.Main>
