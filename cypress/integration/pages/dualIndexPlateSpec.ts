@@ -187,7 +187,15 @@ describe("Dual Index Plate", () => {
       });
       it("should display a success message", () => {
         cy.findByText("Reagents transferred").should("be.visible");
+      });
+      it("should display Reset button", () => {
         cy.findByRole("button", { name: /Reset Form/i }).should("be.visible");
+      });
+      it("should disable Clear button", () => {
+        cy.findByRole("button", { name: /Clear/i }).should("be.disabled");
+      });
+      it("should disable Remove button", () => {
+        cy.findAllByTestId("removeButton").eq(0).should("be.disabled");
       });
     });
   });
