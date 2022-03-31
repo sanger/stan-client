@@ -3498,6 +3498,10 @@ svg.logo.loading rect:nth-child(3n+1) {
     justify-content: flex-end;
   }
 
+  .sm\:justify-between {
+    justify-content: space-between;
+  }
+
   .sm\:h-screen {
     height: 100vh;
   }
@@ -4231,4 +4235,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.70713915.chunk.css.map*/
+/*# sourceMappingURL=main.7e305d21.chunk.css.map*/
