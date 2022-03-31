@@ -1,9 +1,10 @@
-import { graphql } from "msw";
+import { graphql, GraphQLContext } from "msw";
 import {
   ConfirmMutation,
   ConfirmMutationVariables,
   FindPlanDataQuery,
   FindPlanDataQueryVariables,
+  Labware,
   PlanMutation,
   PlanMutationVariables,
 } from "../../types/sdk";
@@ -15,6 +16,7 @@ import labwareFactory from "../../lib/factories/labwareFactory";
 import { uniqueId } from "lodash";
 import { buildLabwareFragment } from "../../lib/helpers/labwareHelper";
 import { LabwareTypeName } from "../../types/stan";
+import { generateLabwareIdFromBarcode } from "./labwareHandlers";
 
 const planHandlers = [
   graphql.mutation<PlanMutation, PlanMutationVariables>(
@@ -108,9 +110,11 @@ const planHandlers = [
           },
         }
       );
-
       const destinationLabware = labwareFactory.build(
-        { barcode: req.variables.barcode },
+        {
+          barcode: req.variables.barcode,
+          id: generateLabwareIdFromBarcode(req.variables.barcode),
+        },
         {
           associations: {
             labwareType: labwareTypes[LabwareTypeName.SLIDE].build(),
@@ -118,45 +122,7 @@ const planHandlers = [
         }
       );
 
-      return res(
-        ctx.data({
-          planData: {
-            sources: [buildLabwareFragment(sourceLabware)],
-            destination: buildLabwareFragment(destinationLabware),
-            plan: {
-              operationType: {
-                __typename: "OperationType",
-                name: "Section",
-              },
-              planActions: [
-                {
-                  __typename: "PlanAction",
-                  source: {
-                    __typename: "Slot",
-                    address: "A1",
-                    samples: [
-                      {
-                        __typename: "Sample",
-                        id: sourceLabware.slots[0].samples[0].id,
-                      },
-                    ],
-                    labwareId: sourceLabware.id,
-                  },
-                  destination: {
-                    __typename: "Slot",
-                    labwareId: destinationLabware.id,
-                    address: "A1",
-                  },
-                  sample: {
-                    __typename: "Sample",
-                    id: sourceLabware.slots[0].samples[0].id,
-                  },
-                },
-              ],
-            },
-          },
-        })
-      );
+      return res(findPlanData(sourceLabware, destinationLabware, ctx));
     }
   ),
 
@@ -174,5 +140,49 @@ const planHandlers = [
     }
   ),
 ];
+
+export function findPlanData(
+  sourceLabware: Labware,
+  destinationLabware: Labware,
+  ctx: GraphQLContext<FindPlanDataQuery>
+) {
+  return ctx.data({
+    planData: {
+      sources: [buildLabwareFragment(sourceLabware)],
+      destination: buildLabwareFragment(destinationLabware),
+      plan: {
+        operationType: {
+          __typename: "OperationType",
+          name: "Section",
+        },
+        planActions: [
+          {
+            __typename: "PlanAction",
+            source: {
+              __typename: "Slot",
+              address: "A1",
+              samples: [
+                {
+                  __typename: "Sample",
+                  id: sourceLabware.slots[0].samples[0].id,
+                },
+              ],
+              labwareId: sourceLabware.id,
+            },
+            destination: {
+              __typename: "Slot",
+              labwareId: destinationLabware.id,
+              address: "A1",
+            },
+            sample: {
+              __typename: "Sample",
+              id: sourceLabware.slots[0].samples[0].id,
+            },
+          },
+        ],
+      },
+    },
+  });
+}
 
 export default planHandlers;

@@ -6,11 +6,17 @@ interface RadioGroupProps {
   label: string;
   name: string;
   children: React.ReactNode;
+  withFormik?: boolean;
 }
 
 const RadioGroupContext = React.createContext({ name: "" });
 
-const RadioGroup = ({ label, name, children }: RadioGroupProps) => {
+const RadioGroup = ({
+  label,
+  name,
+  children,
+  withFormik = true,
+}: RadioGroupProps) => {
   return (
     <>
       <div className="mt-2">
@@ -21,7 +27,7 @@ const RadioGroup = ({ label, name, children }: RadioGroupProps) => {
           </RadioGroupContext.Provider>
         </div>
       </div>
-      <FormikErrorMessage name={name} />
+      {withFormik && <FormikErrorMessage name={name} />}
     </>
   );
 };
@@ -47,3 +53,28 @@ export const RadioButton = ({ name, value }: RadioButtonParameters) => {
     </label>
   );
 };
+
+interface RadioButtonProps
+  extends React.DetailedHTMLProps<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    HTMLInputElement
+  > {
+  label: string;
+}
+export const RadioButtonInput = React.forwardRef<
+  HTMLInputElement,
+  RadioButtonProps
+>((props, ref) => {
+  const ctx = useContext(RadioGroupContext);
+  return (
+    <label className="inline-flex items-center">
+      <input
+        ref={ref}
+        {...props}
+        type={"radio"}
+        name={ctx.name ?? props.name}
+      />
+      <span className="ml-2">{props.label}</span>
+    </label>
+  );
+});

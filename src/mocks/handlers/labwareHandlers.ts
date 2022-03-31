@@ -12,23 +12,36 @@ export function createLabware(barcode: string) {
   // The number after that determines how many samples to put in each slot
   const samplesPerSlot = parseInt(barcode.substr(6, 1));
 
-  const labware = labwareFactory.build(
-    {
-      barcode: barcode,
+  const id = generateLabwareIdFromBarcode(barcode);
+  const params =
+    id < 0
+      ? { barcode: barcode }
+      : {
+          barcode: barcode,
+          id: id,
+        };
+  const labware = labwareFactory.build(params, {
+    transient: {
+      samplesPerSlot,
     },
-    {
-      transient: {
-        samplesPerSlot,
-      },
-      associations: {
-        labwareType,
-      },
-    }
-  );
+    associations: {
+      labwareType,
+    },
+  });
 
   sessionStorage.setItem(`labware-${labware.barcode}`, JSON.stringify(labware));
 
   return labware;
+}
+
+/**This function generates an id which is equivalent to the number part in barcode
+ * The intention is not to generate a unique id , but useful in scenarios which requires
+ * comparison against a predictable id rather than having completely random one
+ * @param barcode
+ */
+export function generateLabwareIdFromBarcode(barcode: string) {
+  const numPartInBarcode = barcode.replace(/\D/g, "");
+  return Number.parseInt(numPartInBarcode);
 }
 
 const labwareHandlers = [

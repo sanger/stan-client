@@ -75,6 +75,11 @@ type UpdateSectionNumberEvent = {
   sectionNumber: number;
 };
 
+type UpdateAllSourcesEvent = {
+  type: "UPDATE_ALL_SOURCES";
+  plannedActions: Map<Address, Array<Source>>;
+};
+
 export type CommitConfirmationEvent = {
   type: "COMMIT_CONFIRMATION";
   confirmOperationLabware: ConfirmOperationLabware;
@@ -93,6 +98,7 @@ export type ConfirmLabwareEvent =
   | LayoutMachineDone
   | ToggleCancelEvent
   | UpdateSectionNumberEvent
+  | UpdateAllSourcesEvent
   | CommitConfirmationEvent
   | SectioningConfirmationCompleteEvent;
 
@@ -131,7 +137,7 @@ export const createConfirmLabwareMachine = (
       context: {
         comments,
         labware,
-        originalLayoutPlan: layoutPlan,
+        originalLayoutPlan: cloneDeep(layoutPlan),
         layoutPlan: cloneDeep(layoutPlan),
         addressToCommentMap: new Map(),
         cancelled: false,
@@ -158,6 +164,9 @@ export const createConfirmLabwareMachine = (
             },
             UPDATE_SECTION_NUMBER: {
               actions: ["updateSectionNumber", "commitConfirmation"],
+            },
+            UPDATE_ALL_SOURCES: {
+              actions: ["updateAllSources", "commitConfirmation"],
             },
           },
         },
@@ -242,7 +251,6 @@ export const createConfirmLabwareMachine = (
           if (e.type !== "UPDATE_SECTION_NUMBER") {
             return;
           }
-
           const plannedAction = ctx.layoutPlan.plannedActions.get(
             e.slotAddress
           );
@@ -252,9 +260,24 @@ export const createConfirmLabwareMachine = (
           }
         }),
 
+        updateAllSources: assign((ctx, e) => {
+          if (e.type !== "UPDATE_ALL_SOURCES") {
+            return;
+          }
+          /**There is a change in sections (precisely section numbers) from parent , so update the plans in this machine context**/
+          //copy the changes to current layout plan as well
+          for (let [key, updateSources] of e.plannedActions.entries()) {
+            const currentSources = ctx.layoutPlan.plannedActions.get(key);
+            updateSources &&
+              updateSources.forEach((source, indx) => {
+                if (currentSources && currentSources.length > indx) {
+                  currentSources[indx] = { ...source };
+                }
+              });
+          }
+        }),
         commitConfirmation: assign((ctx) => {
           const confirmSections: Array<ConfirmSection> = [];
-
           for (let [
             destinationAddress,
             originalPlannedActions,
@@ -266,7 +289,6 @@ export const createConfirmLabwareMachine = (
               )
             );
           }
-
           ctx.confirmSectionLabware = {
             barcode: ctx.labware.barcode!,
             cancelled: ctx.cancelled,

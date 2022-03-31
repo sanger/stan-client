@@ -41,7 +41,6 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_DESTINATION") {
         return;
       }
-
       const plannedActions = ctx.layoutPlan.plannedActions;
 
       if (
@@ -59,7 +58,6 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_DESTINATION") {
         return;
       }
-
       ctx.layoutPlan.plannedActions.delete(e.address);
     }),
 
@@ -77,16 +75,15 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_DESTINATION") {
         return;
       }
-
       if (!ctx.possibleActions?.has(e.address)) {
         return;
       }
-
       const slotActions = ctx.possibleActions?.get(e.address)!;
+      //Initialise section numbers to 0 for new additions
+      Array.from(slotActions.values()).forEach((val) => (val.newSection = 0));
       const plannedActionsForSlot = ctx.layoutPlan.plannedActions.get(
         e.address
       );
-
       if (!plannedActionsForSlot) {
         ctx.layoutPlan.plannedActions.set(e.address, slotActions);
       } else {
@@ -101,7 +98,6 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "REMOVE_SECTION") {
         return;
       }
-
       if (!ctx.possibleActions?.has(e.address)) {
         return;
       }
@@ -119,7 +115,6 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "SELECT_DESTINATION") {
         return;
       }
-
       // If there was never anything in this slot, do nothing
       if (ctx.possibleActions && !ctx.possibleActions.has(e.address)) {
         return;

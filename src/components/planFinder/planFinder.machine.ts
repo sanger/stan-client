@@ -1,4 +1,8 @@
-import { FindPlanDataQuery, Maybe } from "../../types/sdk";
+import {
+  FindPlanDataQuery,
+  LabwareFieldsFragment,
+  Maybe,
+} from "../../types/sdk";
 import { ClientError } from "graphql-request";
 import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
@@ -8,7 +12,7 @@ type PlanFinderContext = {
   /**
    * The current value of the scan input
    */
-  barcode: string;
+  labware: LabwareFieldsFragment | undefined;
 
   /**
    * Map of labware barcode to plan retrieved for that barcode
@@ -27,8 +31,7 @@ type PlanFinderContext = {
 };
 
 type PlanFinderEvent =
-  | { type: "UPDATE_BARCODE"; barcode: string }
-  | { type: "SUBMIT_BARCODE" }
+  | { type: "SUBMIT_LABWARE"; labware: LabwareFieldsFragment }
   | { type: "REMOVE_PLAN_BY_BARCODE"; barcode: string }
   | { type: "done.invoke.findPlan"; data: FindPlanDataQuery }
   | { type: "error.platform.findPlan"; data: ClientError };
@@ -41,7 +44,7 @@ export const planFinderMachine = createMachine<
     id: "planFinderMachine",
     initial: "idle",
     context: {
-      barcode: "",
+      labware: undefined,
       plans: new Map(),
       validationError: null,
       requestError: null,
@@ -49,11 +52,10 @@ export const planFinderMachine = createMachine<
     states: {
       idle: {
         on: {
-          UPDATE_BARCODE: { actions: "assignBarcode" },
           REMOVE_PLAN_BY_BARCODE: { actions: "removePlanByBarcode" },
-          SUBMIT_BARCODE: {
+          SUBMIT_LABWARE: {
             target: "validatingBarcode",
-            actions: "clearErrors",
+            actions: ["assignLabware", "clearErrors"],
           },
         },
       },
@@ -61,9 +63,9 @@ export const planFinderMachine = createMachine<
         always: [
           {
             // Check plan hasn't already been found for this labware
-            cond: (ctx) => ctx.plans.has(ctx.barcode),
+            cond: (ctx) => ctx.plans.has(ctx.labware!.barcode),
             target: "idle",
-            actions: "assignDuplicationError",
+            actions: ["assignDuplicationError", "resetLabware"],
           },
           { target: "searching" },
         ],
@@ -73,7 +75,7 @@ export const planFinderMachine = createMachine<
           src: "findPlan",
           onDone: {
             target: "idle",
-            actions: ["assignPlan", "resetBarcode"],
+            actions: ["assignPlan", "resetLabware"],
           },
           onError: {
             target: "idle",
@@ -85,18 +87,23 @@ export const planFinderMachine = createMachine<
   },
   {
     actions: {
-      assignBarcode: assign((ctx, e) => {
-        if (e.type !== "UPDATE_BARCODE") return;
-        ctx.barcode = e.barcode;
+      assignLabware: assign((ctx, e) => {
+        if (e.type !== "SUBMIT_LABWARE") return;
+        ctx.labware = e.labware;
       }),
 
-      assignDuplicationError: assign((ctx) => {
-        ctx.validationError = `Plan has already been found for ${ctx.barcode}`;
+      assignDuplicationError: assign((ctx, e) => {
+        if (e.type !== "SUBMIT_LABWARE") return;
+        ctx.validationError = `Plan has already been found for ${e.labware.barcode}`;
       }),
 
       assignPlan: assign((ctx, e) => {
         if (e.type !== "done.invoke.findPlan") return;
-        ctx.plans.set(ctx.barcode, e.data);
+        //Remove all actions, if any that doesn't belong to the labware in context
+        e.data.planData.plan.planActions = e.data.planData.plan.planActions.filter(
+          (action) => action.destination.labwareId === ctx.labware!.id
+        );
+        ctx.plans.set(ctx.labware!.barcode, e.data);
       }),
 
       assignRequestError: assign((ctx, e) => {
@@ -114,11 +121,14 @@ export const planFinderMachine = createMachine<
         ctx.plans.delete(e.barcode);
       }),
 
-      resetBarcode: assign((ctx) => (ctx.barcode = "")),
+      resetLabware: assign((ctx) => (ctx.labware = undefined)),
     },
 
     services: {
-      findPlan: (ctx) => stanCore.FindPlanData({ barcode: ctx.barcode }),
+      findPlan: (ctx) =>
+        stanCore.FindPlanData({
+          barcode: ctx.labware!.barcode,
+        }),
     },
   }
 );
