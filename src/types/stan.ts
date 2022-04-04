@@ -284,6 +284,7 @@ export const statusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
     WorkStatus.Completed,
     WorkStatus.Paused,
     WorkStatus.Failed,
+    WorkStatus.Withdrawn,
     WorkStatus.Unstarted,
   ];
   return (

@@ -170,7 +170,11 @@ export default function WorkRow({
   };
 
   const isEditEnabledForStatus = (status: WorkStatus) => {
-    return status !== WorkStatus.Failed && status !== WorkStatus.Completed;
+    return (
+      status !== WorkStatus.Failed &&
+      status !== WorkStatus.Completed &&
+      status !== WorkStatus.Withdrawn
+    );
   };
   return (
     <tr>
@@ -305,5 +309,5 @@ export default function WorkRow({
  * @param type an {@link WorkRowEvent} type
  */
 function requiresComment(type: WorkRowEvent["type"]): boolean {
-  return ["PAUSE", "FAIL"].includes(type);
+  return ["PAUSE", "FAIL", "WITHDRAW"].includes(type);
 }
