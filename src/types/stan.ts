@@ -7,7 +7,7 @@ import {regexSort} from "../lib/helpers";
 /**
  * Union of STAN's {@link OperationType} names
  */
-export type OperationTypeName = "Section" | "Visium cDNA";
+export type OperationTypeName = "Section" | "Visium cDNA" | "Dual index plate";
 
 /**
  * Enum for all of STAN's {@link LabwareType} names
@@ -22,6 +22,7 @@ export enum LabwareTypeName {
   CASSETTE = "Cassette",
   VISIUM_ADH = "Visium ADH",
   FOUR_SLOT_SLIDE = "4 slot slide",
+  DUAL_INDEX_PLATE= "Dual index plate"
 }
 
 export type Address = string;

@@ -61,6 +61,10 @@ type UpdateInputLabwareEvent = {
   type: "UPDATE_INPUT_LABWARE";
   labware: Array<LabwareFieldsFragment>;
 };
+type UpdateOutputLabwareEvent = {
+  type: "UPDATE_OUTPUT_LABWARE";
+  labware: Array<LabwareFieldsFragment>;
+};
 
 type CopySlotsEvent = {
   type: "COPY_SLOTS";
@@ -94,6 +98,7 @@ type UnlockEvent = { type: "UNLOCK" };
 
 export type SlotMapperEvent =
   | UpdateInputLabwareEvent
+  | UpdateOutputLabwareEvent
   | CopySlotsEvent
   | ClearSlotsEvent
   | LockEvent
