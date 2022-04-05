@@ -144,6 +144,15 @@ export default function SectioningConfirm({
     },
     [send]
   );
+
+  const sectionNumberEnabled = () => {
+    return (
+      Object.entries(layoutPlansByLabwareType).filter(
+        ([labwareTypeName, _]) =>
+          labwareTypeName !== LabwareTypeName.FETAL_WASTE
+      ).length !== 0
+    );
+  };
   return (
     <div className="my-4 mx-auto max-w-screen-xl space-y-12">
       <div>
@@ -182,7 +191,7 @@ export default function SectioningConfirm({
                       />
                     </div>
 
-                    <div className={"sm:justify-between px-3"}>
+                    <div className={"sm:justify-between"}>
                       <Heading level={3}>Section Numbering</Heading>
                       <RadioGroup
                         label="Select mode"
@@ -196,6 +205,7 @@ export default function SectioningConfirm({
                               name={"sectionNumber"}
                               value={SectionNumberMode[key]}
                               checked={
+                                sectionNumberEnabled() &&
                                 sectionNumberMode === SectionNumberMode[key]
                               }
                               onChange={() =>
@@ -204,6 +214,7 @@ export default function SectioningConfirm({
                                 )
                               }
                               label={SectionNumberMode[key]}
+                              disabled={!sectionNumberEnabled()}
                             />
                           );
                         })}
@@ -212,25 +223,52 @@ export default function SectioningConfirm({
                   </>
                 )}
                 <div className="space-y-4">
+                  {/* Always show fetal waste first (if there are any) */}
+                  {layoutPlansByLabwareType?.[LabwareTypeName.FETAL_WASTE] && (
+                    <div
+                      key={LabwareTypeName.FETAL_WASTE}
+                      className="space-y-4"
+                    >
+                      <Heading level={3}>{LabwareTypeName.FETAL_WASTE}</Heading>
+                      {layoutPlansByLabwareType?.[
+                        LabwareTypeName.FETAL_WASTE
+                      ].map((layoutPlan) => (
+                        <ConfirmLabware
+                          onChange={handleConfirmChange}
+                          removePlan={removePlanByBarcode}
+                          key={layoutPlan.destinationLabware.barcode}
+                          originalLayoutPlan={layoutPlan}
+                          comments={comments}
+                          mode={sectionNumberMode}
+                          sectionNumberEnabled={false}
+                        />
+                      ))}
+                    </div>
+                  )}
+
                   {/* Always show tubes first (if there are any) */}
                   {layoutPlansByLabwareType?.[LabwareTypeName.TUBE] && (
-                    <ConfirmTubes
-                      onChange={handleConfirmChange}
-                      onSectionUpdate={handleSectionUpdate}
-                      onSectionNumberChange={handleSectionNumberChange}
-                      layoutPlans={
-                        layoutPlansByLabwareType[LabwareTypeName.TUBE]
-                      }
-                      comments={comments}
-                      mode={sectionNumberMode}
-                    />
+                    <div key={LabwareTypeName.TUBE} className="space-y-4">
+                      <Heading level={3}>{LabwareTypeName.TUBE}</Heading>
+                      <ConfirmTubes
+                        onChange={handleConfirmChange}
+                        onSectionUpdate={handleSectionUpdate}
+                        onSectionNumberChange={handleSectionNumberChange}
+                        layoutPlans={
+                          layoutPlansByLabwareType[LabwareTypeName.TUBE]
+                        }
+                        comments={comments}
+                        mode={sectionNumberMode}
+                      />
+                    </div>
                   )}
 
                   {/* Filter out tubes as they've been shown above */}
                   {Object.entries(layoutPlansByLabwareType)
                     .filter(
                       ([labwareTypeName, _]) =>
-                        labwareTypeName !== LabwareTypeName.TUBE
+                        labwareTypeName !== LabwareTypeName.TUBE &&
+                        labwareTypeName !== LabwareTypeName.FETAL_WASTE
                     )
                     .map(([labwareTypeName, lps]) => {
                       return (

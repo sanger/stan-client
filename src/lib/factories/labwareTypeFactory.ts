@@ -1,7 +1,7 @@
-import {Factory} from "fishery";
-import {LabwareType} from "../../types/sdk";
+import { Factory } from "fishery";
+import { LabwareType } from "../../types/sdk";
 import labelTypeFactory from "./labelTypeFactory";
-import {LabwareTypeName} from "../../types/stan";
+import { LabwareTypeName } from "../../types/stan";
 
 const labwareTypeFactory = Factory.define<LabwareType>(({ sequence }) => ({
   __typename: "LabwareType",
@@ -67,6 +67,10 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     name: LabwareTypeName.FOUR_SLOT_SLIDE,
     numRows: 4,
     numColumns: 1,
+  }),
+  [LabwareTypeName.FETAL_WASTE]: labwareTypeFactory.params({
+    __typename: "LabwareType",
+    name: LabwareTypeName.FETAL_WASTE,
   }),
 };
 

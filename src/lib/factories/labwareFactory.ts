@@ -1,10 +1,10 @@
-import {Factory} from "fishery";
-import {GridDirection, Labware, LabwareState} from "../../types/sdk";
-import {labwareTypes} from "./labwareTypeFactory";
-import {LabwareTypeName, NewLabwareLayout} from "../../types/stan";
-import {uniqueId} from "lodash";
-import {buildAddresses} from "../helpers";
-import {slotFactory} from "./slotFactory";
+import { Factory } from "fishery";
+import { GridDirection, Labware, LabwareState } from "../../types/sdk";
+import { labwareTypes } from "./labwareTypeFactory";
+import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
+import { uniqueId } from "lodash";
+import { buildAddresses } from "../helpers";
+import { slotFactory } from "./slotFactory";
 
 export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
   ({ params, associations, afterBuild, transientParams }) => {
@@ -119,6 +119,10 @@ export const fourSlotSlideFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.FOUR_SLOT_SLIDE].build(),
 });
 
+export const fetalWasteFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.FETAL_WASTE].build(),
+});
+
 export const labwareFactories: Record<
   LabwareTypeName,
   Factory<NewLabwareLayout>
@@ -132,4 +136,5 @@ export const labwareFactories: Record<
   [LabwareTypeName.CASSETTE]: cassetteFactory,
   [LabwareTypeName.VISIUM_ADH]: visiumADHFactory,
   [LabwareTypeName.FOUR_SLOT_SLIDE]: fourSlotSlideFactory,
+  [LabwareTypeName.FETAL_WASTE]: fetalWasteFactory,
 };

@@ -202,11 +202,25 @@ export function createSectioningConfirmMachine() {
           const cslIndex = ctx.confirmSectionLabware.findIndex(
             (csl) => csl.barcode === e.confirmSectionLabware.barcode
           );
+          let confirmLabware = e.confirmSectionLabware;
+          if (
+            ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE] &&
+            ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE].some(
+              (plan) =>
+                plan.destinationLabware.barcode ===
+                e.confirmSectionLabware.barcode
+            )
+          ) {
+            confirmLabware = {
+              ...e.confirmSectionLabware,
+              confirmSections: undefined,
+            };
+          }
 
           if (cslIndex > -1) {
-            ctx.confirmSectionLabware[cslIndex] = e.confirmSectionLabware;
+            ctx.confirmSectionLabware[cslIndex] = confirmLabware;
           } else {
-            ctx.confirmSectionLabware.push(e.confirmSectionLabware);
+            ctx.confirmSectionLabware.push(confirmLabware);
           }
         }),
         assignLayoutPlans: assign((ctx) => {
@@ -367,11 +381,19 @@ export function createSectioningConfirmMachine() {
           send
         ) => {
           const isValid = ctx.confirmSectionLabware.every((csl) => {
-            if (csl.cancelled) {
+            if (
+              csl.cancelled ||
+              (ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE] &&
+                ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE].some(
+                  (plan) => plan.destinationLabware.barcode === csl.barcode
+                ))
+            ) {
               return true;
             }
             return (
-              csl.confirmSections?.every((cs) => cs.newSection > 0) ?? false
+              csl.confirmSections?.every((cs) =>
+                cs.newSection ? cs.newSection > 0 : false
+              ) ?? false
             );
           });
           send(isValid ? "IS_VALID" : "IS_INVALID");
@@ -424,10 +446,13 @@ function fillInSectionNumbersInLayoutPlan(
           lastSectionNumbers
         );
       });
+
     /**Fill in section numbers for all labware which are not TUBES**/
     Object.entries(layoutPlanMap)
       .filter(
-        ([labwareTypeName, _]) => labwareTypeName !== LabwareTypeName.TUBE
+        ([labwareTypeName, _]) =>
+          labwareTypeName !== LabwareTypeName.TUBE &&
+          labwareTypeName !== LabwareTypeName.FETAL_WASTE
       )
       .forEach(([_, lps]) => {
         lps.forEach((layoutPlan) => {

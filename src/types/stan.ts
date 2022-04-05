@@ -22,6 +22,7 @@ export enum LabwareTypeName {
   CASSETTE = "Cassette",
   VISIUM_ADH = "Visium ADH",
   FOUR_SLOT_SLIDE = "4 slot slide",
+  FETAL_WASTE = "Fetal waste"
 }
 
 export type Address = string;
