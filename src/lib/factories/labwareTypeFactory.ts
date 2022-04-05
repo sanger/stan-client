@@ -70,7 +70,12 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
   }),
   [LabwareTypeName.FETAL_WASTE]: labwareTypeFactory.params({
     __typename: "LabwareType",
-    name: LabwareTypeName.FETAL_WASTE,
+    name: LabwareTypeName.FETAL_WASTE}),
+  [LabwareTypeName.DUAL_INDEX_PLATE]: labwareTypeFactory.params({
+    __typename: "LabwareType",
+    name: LabwareTypeName.DUAL_INDEX_PLATE,
+    numRows: 8,
+    numColumns: 12,
   }),
 };
 

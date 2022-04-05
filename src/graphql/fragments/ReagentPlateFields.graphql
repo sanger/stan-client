@@ -1,0 +1,6 @@
+fragment ReagentPlateFields on ReagentPlate {
+    barcode
+    slots {
+        ...ReagentSlotFields
+    }
+}

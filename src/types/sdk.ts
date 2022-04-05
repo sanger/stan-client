@@ -646,6 +646,7 @@ export type Mutation = {
   addFixative: Fixative;
   /** Enable or disable a fixative. */
   setFixativeEnabled: Fixative;
+  /** Create a new work type. */
   addWorkType: WorkType;
   /** Enable or disable a work type. */
   setWorkTypeEnabled: WorkType;
@@ -683,6 +684,8 @@ export type Mutation = {
   recordComplexStain: OperationResult;
   /** Transfer samples from one labware into multiple labware. */
   aliquot: OperationResult;
+  /** Record an operation transferring reagents from a reagent plate to an item of Stan labware. */
+  reagentTransfer: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -1179,6 +1182,15 @@ export type MutationAliquotArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
+export type MutationReagentTransferArgs = {
+  request: ReagentTransferRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1481,6 +1493,8 @@ export type Query = {
    * work types, statuses.
    */
   workProgress: Array<WorkProgress>;
+  /** Gets a reagent plate, if it exists. May return null. */
+  reagentPlate?: Maybe<ReagentPlate>;
   /** Get the specified storage location. */
   location: Location;
   /** Get the information about stored items with the given barcodes. */
@@ -1751,6 +1765,15 @@ export type QueryWorkProgressArgs = {
  * Get information from the application.
  * These typically require no user privilege.
  */
+export type QueryReagentPlateArgs = {
+  barcode: Scalars['String'];
+};
+
+
+/**
+ * Get information from the application.
+ * These typically require no user privilege.
+ */
 export type QueryLocationArgs = {
   locationBarcode: Scalars['String'];
 };
@@ -1791,6 +1814,42 @@ export type RnaAnalysisRequest = {
   operationType: Scalars['String'];
   /** The details of what to record on one or more labware. */
   labware: Array<RnaAnalysisLabware>;
+};
+
+/** A plate of reagents. */
+export type ReagentPlate = {
+  __typename?: 'ReagentPlate';
+  barcode: Scalars['String'];
+  slots: Array<ReagentSlot>;
+};
+
+/** A slot in a reagent plate. */
+export type ReagentSlot = {
+  __typename?: 'ReagentSlot';
+  address: Scalars['Address'];
+  used: Scalars['Boolean'];
+};
+
+/** A specification that a particular reagent slot should be transferred to an address. */
+export type ReagentTransfer = {
+  /** The barcode of a reagent plate. */
+  reagentPlateBarcode: Scalars['String'];
+  /** The address of a slot in the reagent plate. */
+  reagentSlotAddress: Scalars['Address'];
+  /** The address if a slot in the destination labware. */
+  destinationAddress: Scalars['Address'];
+};
+
+/** A request to transfer reagents from reagent plates to a STAN labware. */
+export type ReagentTransferRequest = {
+  /** The name of the operation being performed. */
+  operationType: Scalars['String'];
+  /** The work number to associate with the operation. */
+  workNumber?: Maybe<Scalars['String']>;
+  /** The barcode of the destination labware. */
+  destinationBarcode: Scalars['String'];
+  /** The transfers from aliquot slots to destination slots. */
+  transfers: Array<ReagentTransfer>;
 };
 
 /** A request to record permeabilisation data. */
@@ -2248,7 +2307,9 @@ export enum WorkStatus {
   /** The work has been completed successfully. This is a final status. */
   Completed = 'completed',
   /** The work has failed (for some particular reason). This is a final status. */
-  Failed = 'failed'
+  Failed = 'failed',
+  /** The work has been withdrawn (for some particular reason). This is a final status. */
+  Withdrawn = 'withdrawn'
 }
 
 /** A type of work, describing what kind of work it is (its purpose or activity). */
@@ -2421,6 +2482,20 @@ export type PrinterFieldsFragment = (
 export type ProjectFieldsFragment = (
   { __typename?: 'Project' }
   & Pick<Project, 'name' | 'enabled'>
+);
+
+export type ReagentPlateFieldsFragment = (
+  { __typename?: 'ReagentPlate' }
+  & Pick<ReagentPlate, 'barcode'>
+  & { slots: Array<(
+    { __typename?: 'ReagentSlot' }
+    & ReagentSlotFieldsFragment
+  )> }
+);
+
+export type ReagentSlotFieldsFragment = (
+  { __typename?: 'ReagentSlot' }
+  & Pick<ReagentSlot, 'address' | 'used'>
 );
 
 export type ReleaseDestinationFieldsFragment = (
@@ -2992,6 +3067,22 @@ export type RecordPermMutationVariables = Exact<{
 export type RecordPermMutation = (
   { __typename?: 'Mutation' }
   & { recordPerm: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'id'>
+    )> }
+  ) }
+);
+
+export type RecordReagentTransferMutationVariables = Exact<{
+  request: ReagentTransferRequest;
+}>;
+
+
+export type RecordReagentTransferMutation = (
+  { __typename?: 'Mutation' }
+  & { reagentTransfer: (
     { __typename?: 'OperationResult' }
     & { operations: Array<(
       { __typename?: 'Operation' }
@@ -3709,6 +3800,23 @@ export type FindPlanDataQuery = (
   ) }
 );
 
+export type FindReagentPlateQueryVariables = Exact<{
+  barcode: Scalars['String'];
+}>;
+
+
+export type FindReagentPlateQuery = (
+  { __typename?: 'Query' }
+  & { reagentPlate?: Maybe<(
+    { __typename?: 'ReagentPlate' }
+    & Pick<ReagentPlate, 'barcode'>
+    & { slots: Array<(
+      { __typename?: 'ReagentSlot' }
+      & ReagentSlotFieldsFragment
+    )> }
+  )> }
+);
+
 export type FindWorkNumbersQueryVariables = Exact<{
   status: WorkStatus;
 }>;
@@ -4244,6 +4352,20 @@ export const PrinterFieldsFragmentDoc = gql`
   }
 }
     `;
+export const ReagentSlotFieldsFragmentDoc = gql`
+    fragment ReagentSlotFields on ReagentSlot {
+  address
+  used
+}
+    `;
+export const ReagentPlateFieldsFragmentDoc = gql`
+    fragment ReagentPlateFields on ReagentPlate {
+  barcode
+  slots {
+    ...ReagentSlotFields
+  }
+}
+    ${ReagentSlotFieldsFragmentDoc}`;
 export const ReleaseDestinationFieldsFragmentDoc = gql`
     fragment ReleaseDestinationFields on ReleaseDestination {
   name
@@ -4619,6 +4741,15 @@ export const RecordOpWithSlotMeasurementsDocument = gql`
 export const RecordPermDocument = gql`
     mutation RecordPerm($request: RecordPermRequest!) {
   recordPerm(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
+export const RecordReagentTransferDocument = gql`
+    mutation RecordReagentTransfer($request: ReagentTransferRequest!) {
+  reagentTransfer(request: $request) {
     operations {
       id
     }
@@ -5062,6 +5193,16 @@ export const FindPlanDataDocument = gql`
 }
     ${LabwareFieldsFragmentDoc}
 ${PlanActionFieldsFragmentDoc}`;
+export const FindReagentPlateDocument = gql`
+    query FindReagentPlate($barcode: String!) {
+  reagentPlate(barcode: $barcode) {
+    barcode
+    slots {
+      ...ReagentSlotFields
+    }
+  }
+}
+    ${ReagentSlotFieldsFragmentDoc}`;
 export const FindWorkNumbersDocument = gql`
     query FindWorkNumbers($status: WorkStatus!) {
   works(status: [$status]) {
@@ -5374,6 +5515,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     RecordPerm(variables: RecordPermMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordPermMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordPermMutation>(RecordPermDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordPerm');
     },
+    RecordReagentTransfer(variables: RecordReagentTransferMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordReagentTransferMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordReagentTransferMutation>(RecordReagentTransferDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordReagentTransfer');
+    },
     RecordRNAAnalysis(variables: RecordRnaAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordRnaAnalysisMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordRNAAnalysis');
     },
@@ -5502,6 +5646,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     FindPlanData(variables: FindPlanDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPlanDataQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindPlanDataQuery>(FindPlanDataDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindPlanData');
+    },
+    FindReagentPlate(variables: FindReagentPlateQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindReagentPlateQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FindReagentPlateQuery>(FindReagentPlateDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindReagentPlate');
     },
     FindWorkNumbers(variables: FindWorkNumbersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkNumbersQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindWorkNumbersQuery>(FindWorkNumbersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindWorkNumbers');

@@ -38,6 +38,7 @@ import passFailHandlers from "./handlers/passFailsHandlers";
 import visiumQCHandlers from "./handlers/visiumQCHandlers";
 import visiumHandlers from "./handlers/visiumHandlers";
 import aliquotHandlers from "./handlers/aliquotHandlers";
+import reagentTransferHandlers from "./handlers/reagentTransferHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -77,4 +78,5 @@ export const handlers = [
   ...visiumQCHandlers,
   ...visiumHandlers,
   ...aliquotHandlers,
+  ...reagentTransferHandlers,
 ];

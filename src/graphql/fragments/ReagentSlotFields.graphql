@@ -1,0 +1,4 @@
+fragment ReagentSlotFields on ReagentSlot {
+    address
+    used
+}

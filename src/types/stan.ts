@@ -7,7 +7,7 @@ import {regexSort} from "../lib/helpers";
 /**
  * Union of STAN's {@link OperationType} names
  */
-export type OperationTypeName = "Section" | "Visium cDNA";
+export type OperationTypeName = "Section" | "Visium cDNA" | "Dual index plate";
 
 /**
  * Enum for all of STAN's {@link LabwareType} names
@@ -23,6 +23,7 @@ export enum LabwareTypeName {
   VISIUM_ADH = "Visium ADH",
   FOUR_SLOT_SLIDE = "4 slot slide",
   FETAL_WASTE = "Fetal waste"
+  DUAL_INDEX_PLATE= "Dual index plate"
 }
 
 export type Address = string;
@@ -284,6 +285,7 @@ export const statusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
     WorkStatus.Completed,
     WorkStatus.Paused,
     WorkStatus.Failed,
+    WorkStatus.Withdrawn,
     WorkStatus.Unstarted,
   ];
   return (
