@@ -62,8 +62,6 @@ function Plan({ sectioningInfo }: SectioningParams) {
   const allowedLabwareTypes = sectioningInfo.labwareTypes.filter((lw) =>
     allowedLabwareTypeNames.includes(lw.name as LabwareTypeName)
   );
-
-  debugger;
   return (
     <AppShell>
       <AppShell.Header>
