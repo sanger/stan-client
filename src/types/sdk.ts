@@ -137,16 +137,18 @@ export type ComplexStainLabware = {
   bondRun: Scalars['Int'];
   /** An optional work number to associate with this operation. */
   workNumber?: Maybe<Scalars['String']>;
+  /** The plex for RNAscope if that is being recorded. */
+  plexRNAscope?: Maybe<Scalars['Int']>;
+  /** The plex for IHC if that is being recorded. */
+  plexIHC?: Maybe<Scalars['Int']>;
+  /** The experiment panel. */
+  panel: StainPanel;
 };
 
 /** A request for a stain including bond barcodes and such. */
 export type ComplexStainRequest = {
-  /** The name of the type of stain being recorded. */
-  stainType: Scalars['String'];
-  /** The plex number. */
-  plex: Scalars['Int'];
-  /** The stain panel. */
-  panel: StainPanel;
+  /** The names of the types of stain being recorded. */
+  stainTypes: Array<Scalars['String']>;
   /** The details of the labware being stained. */
   labware: Array<ComplexStainLabware>;
 };

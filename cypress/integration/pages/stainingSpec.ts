@@ -63,4 +63,56 @@ describe("Staining Page", () => {
       });
     });
   });
+
+  describe("On RNSAcope and IHC Stain type selection", () => {
+    context("when RNAscope Stain Type is selected", () => {
+      before(() => {
+        cy.findByLabelText("Stain Type").select("RNAscope");
+        cy.get("#labwareScanInput").type("STAN-3111{enter}");
+      });
+      it("displays a table to enter stain information", () => {
+        cy.findByTestId("stain-info-table").contains("STAN-3111");
+      });
+      it("shows a table with RNAScope Plex Number column enabled", () => {
+        cy.findByTestId("STAN-3111-plexRNAscope").should("be.enabled");
+      });
+      it("shows a table with IHC Plex Number column disabled", () => {
+        cy.findByTestId("STAN-3111-plexIHC").should("be.disabled");
+      });
+    });
+    context("when IHC Stain Type is selected", () => {
+      before(() => {
+        cy.findByLabelText("Stain Type").select("IHC");
+      });
+      it("shows a table with IHC Plex Number column enabled", () => {
+        cy.findByTestId("STAN-3111-plexIHC").should("be.enabled");
+      });
+      it("shows a table with RNAScope Plex Number column disabled", () => {
+        cy.findByTestId("STAN-3111-plexRNAscope").should("be.disabled");
+      });
+    });
+    context("when RNAscope & IHC Stain Type is selected", () => {
+      before(() => {
+        cy.findByLabelText("Stain Type").select("RNAscope & IHC");
+      });
+      it("shows a table with RNAScope Plex Number column enabled", () => {
+        cy.findByTestId("STAN-3111-plexRNAscope").should("be.enabled");
+      });
+      it("shows a table with IHC Plex Number column enabled", () => {
+        cy.findByTestId("STAN-3111-plexIHC").should("be.enabled");
+      });
+    });
+    context(
+      "when 'Positive' is selected for experimental panel column in 'Apply all' row",
+      () => {
+        before(() => {
+          cy.get("#labwareScanInput").type("STAN-4111{enter}");
+          cy.findByTestId("all-panel").select("Positive");
+        });
+        it("selects 'Positive' value for all experimental panel columns", () => {
+          cy.findAllByText("Positive").should("have.length", 3);
+        });
+      }
+    );
+  });
 });

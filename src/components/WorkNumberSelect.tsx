@@ -76,7 +76,12 @@ export default function WorkNumberSelect({
   );
 
   return name ? (
-    <FormikSelect label={label ?? ""} name={name} emptyOption={true}>
+    <FormikSelect
+      label={label ?? ""}
+      name={name}
+      emptyOption={true}
+      onChange={handleWorkNumberChange}
+    >
       {optionValues(works, "workNumber", "workNumber")}
     </FormikSelect>
   ) : (
