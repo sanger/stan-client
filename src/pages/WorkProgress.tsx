@@ -73,6 +73,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
 
+  debugger;
   const sortedTableDataRef = React.useRef<WorkProgressResultTableEntry[]>([]);
   const [downloadFileURL, setFileDownloadURL] = React.useState<string>("");
 
@@ -413,6 +414,18 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
       return getDateSortType(
         rowA.original.lastRNAAnalysisDate,
         rowB.original.lastRNAAnalysisDate
+      );
+    },
+  },
+  {
+    Header: "Last Visium ADH stain date",
+    accessor: "lastVisiumADHStainDate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastVisiumADHStainDate"),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastVisiumADHStainDate,
+        rowB.original.lastVisiumADHStainDate
       );
     },
   },

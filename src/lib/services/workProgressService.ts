@@ -25,6 +25,7 @@ export type WorkProgressResultTableEntry = {
   lastRNAScopeIHCStainDate: Date | undefined;
   lastSlideImagedDate: Date | undefined;
   lastRNAAnalysisDate: Date | undefined;
+  lastVisiumADHStainDate: Date | undefined;
   lastStainTODate: Date | undefined;
   lastStainLPDate: Date | undefined;
 };
@@ -38,6 +39,7 @@ export type WorkProgressTimeStampType =
   | "Visium cDNA"
   | "Stain Visium TO"
   | "RNAscope/IHC stain"
+  | "Visium ADH H&E stain"
   | "Stain Visium LP"
   | "Image"
   | "Analysis";
@@ -96,6 +98,7 @@ export class WorkProgressService
       const lastStainVisiumTODate = timeStampMap.get("Stain Visium TO");
       const lastStainVisiumLPDate = timeStampMap.get("Stain Visium LP");
       const lastRNAScopeIHCStainDate = timeStampMap.get("RNAscope/IHC stain");
+      const lastVisiumADHStainDate = timeStampMap.get("Visium ADH H&E stain");
       const lastSlideImagedDate = timeStampMap.get("Image");
       const lastRNAAnalysisDate = timeStampMap.get("Analysis");
       return {
@@ -120,6 +123,8 @@ export class WorkProgressService
           new Date(lastRNAScopeIHCStainDate.toString()),
         lastRNAAnalysisDate:
           lastRNAAnalysisDate && new Date(lastRNAAnalysisDate.toString()),
+        lastVisiumADHStainDate:
+          lastVisiumADHStainDate && new Date(lastVisiumADHStainDate.toString()),
         lastSlideImagedDate:
           lastSlideImagedDate && new Date(lastSlideImagedDate.toString()),
       };
