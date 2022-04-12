@@ -72,8 +72,6 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     serverError?: ClientError | undefined | null;
     searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
-
-  debugger;
   const sortedTableDataRef = React.useRef<WorkProgressResultTableEntry[]>([]);
   const [downloadFileURL, setFileDownloadURL] = React.useState<string>("");
 
@@ -462,6 +460,18 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
       return getDateSortType(
         rowA.original.lastCDNADate,
         rowB.original.lastCDNADate
+      );
+    },
+  },
+  {
+    Header: "Last date 96 well plate Released",
+    accessor: "lastRelease96WellPlateData",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastCDNADate"),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastRelease96WellPlateData,
+        rowB.original.lastRelease96WellPlateData
       );
     },
   },
