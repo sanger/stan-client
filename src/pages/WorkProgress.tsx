@@ -467,7 +467,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     Header: "Last date 96 well plate Released",
     accessor: "lastRelease96WellPlateData",
     Cell: (props: Cell<WorkProgressResultTableEntry>) =>
-      formatDateFieldDisplay(props, "lastCDNADate"),
+      formatDateFieldDisplay(props, "lastRelease96WellPlateData"),
     sortType: (rowA, rowB) => {
       return getDateSortType(
         rowA.original.lastRelease96WellPlateData,
