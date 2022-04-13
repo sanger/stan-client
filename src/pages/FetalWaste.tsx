@@ -35,7 +35,16 @@ function FetalWaste() {
     LabwareFieldsFragment[]
   >([]);
 
-  const columns = useMemo(() => [labwareColumns.barcode()], []);
+  const columns = useMemo(
+    () => [
+      labwareColumns.barcode(),
+      labwareColumns.labwareType(),
+      labwareColumns.tissueType(),
+      labwareColumns.spatialLocation(),
+      labwareColumns.replicate(),
+    ],
+    []
+  );
   return (
     <AppShell>
       <AppShell.Header>
@@ -49,7 +58,7 @@ function FetalWaste() {
               {fetalWasteLabware.length === 0 && (
                 <MutedText>Scan a piece of labware to get started</MutedText>
               )}
-              <div className="sm:w-2/3 md:w-1/2 mb-4">
+              <div className="sm:w-2/3 mb-4">
                 <LabwareScanner
                   onChange={(labwares) =>
                     setFetalWasteLabware((prev) => [...prev, ...labwares])
