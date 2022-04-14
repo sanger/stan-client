@@ -32,6 +32,7 @@ export interface RegistrationFormTissue {
   species: string;
   hmdmc: string;
   tissueType: string;
+  sampleCollectionDate?: Date;
   blocks: RegistrationFormBlock[];
 }
 
@@ -93,6 +94,7 @@ function buildRegistrationSchema(
                 labwareType: validation.labwareType,
                 fixative: validation.fixative,
                 medium: validation.medium,
+                sampleCollectionDate: validation.sampleCollectionDate,
               })
             ),
         })

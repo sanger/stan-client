@@ -20,6 +20,7 @@ import {
   RegistrationFormValues,
 } from "../Registration";
 import { LabwareTypeName } from "../../types/stan";
+import DatePickerField from "../../components/forms/DatePickerField";
 
 interface RegistrationFormParams {
   registrationInfo: GetRegistrationInfoQuery;
@@ -56,7 +57,7 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
   const isHMDMCEnabled = values.tissues[currentIndex].species === "Human";
   useEffect(() => {
     if (!isHMDMCEnabled) {
-      setFieldValue(`tissues.${currentIndex}.hmdmc`, "", true);
+      setFieldValue(`tissues.${currentIndex}.hmdmc`, "", false);
     }
   }, [isHMDMCEnabled, setFieldValue, currentIndex]);
 
@@ -111,6 +112,13 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
                   );
                 })}
               </RadioGroup>
+
+              {values.tissues[currentIndex].lifeStage === LifeStage.Fetal && (
+                <DatePickerField
+                  name={`tissues.${currentIndex}.sampleCollectionDate`}
+                  label={"Sample collection date"}
+                />
+              )}
 
               <FormikSelect
                 label={"Species"}
