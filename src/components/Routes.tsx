@@ -36,6 +36,7 @@ import VisiumPerm from "../pages/VisiumPerm";
 import VisiumAnalysis from "../pages/VisiumAnalysis";
 import Aliquot from "../pages/Aliquot";
 import DualIndexPlate from "../pages/DualIndexPlate";
+import FetalWaste from "../pages/FetalWaste";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -243,6 +244,10 @@ export function Routes() {
       <AuthenticatedRoute
         path="/admin/unrelease"
         render={(routeProps) => <Unrelease key={routeProps.location.key} />}
+      />
+      <AuthenticatedRoute
+        path={"/lab/fetal_waste"}
+        render={(routerProps) => <FetalWaste key={routerProps.location.key} />}
       />
 
       <Route
