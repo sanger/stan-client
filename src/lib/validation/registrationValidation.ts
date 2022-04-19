@@ -127,15 +127,14 @@ export default class RegistrationValidation {
   }
 
   get sampleCollectionDate() {
-    const date = new Date();
     return Yup.date().when("lifeStage", {
       is: LifeStage.Fetal,
       then: Yup.date()
         .max(
           new Date(),
-          `Sample collection date should be equal or earlier than ${date.toString()}`
+          `Sample collection date should be equal or earlier than ${new Date().toString()}`
         )
-        .required()
+        .required("Sample collection date required for fetal samples")
         .label("Sample collection date"),
       otherwise: Yup.date().notRequired(),
     });

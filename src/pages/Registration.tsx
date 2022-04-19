@@ -62,6 +62,7 @@ export function getRegistrationFormTissue(): RegistrationFormTissue {
     hmdmc: "",
     tissueType: "",
     blocks: [getRegistrationFormBlock()],
+    sampleCollectionDate: undefined,
   };
 }
 

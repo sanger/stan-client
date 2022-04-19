@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { GetRegistrationInfoQuery, LifeStage } from "../../types/sdk";
-import { FieldArray, Form, useFormikContext } from "formik";
+import { FieldArray, Form, getIn, useFormikContext } from "formik";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "../../components/Heading";
 import FormikInput from "../../components/forms/Input";
 import RadioGroup, { RadioButton } from "../../components/forms/RadioGroup";
 import { objectKeys } from "../../lib/helpers";
 import FormikSelect from "../../components/forms/Select";
-import { optionValues } from "../../components/forms";
+import { ErrorMessage, optionValues } from "../../components/forms";
 import PinkButton from "../../components/buttons/PinkButton";
 import BlueButton from "../../components/buttons/BlueButton";
 import SummaryBox from "./SummaryBox";
@@ -116,9 +116,20 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
               {values.tissues[currentIndex].lifeStage === LifeStage.Fetal && (
                 <DatePickerField
                   name={`tissues.${currentIndex}.sampleCollectionDate`}
-                  label={"Sample collection date"}
+                  label={"Sample Collection Date"}
                 />
               )}
+
+              {values.tissues[currentIndex].lifeStage === LifeStage.Fetal &&
+                !values.tissues[currentIndex].sampleCollectionDate &&
+                getIn(
+                  touched,
+                  `tissues[${currentIndex}].sampleCollectionDate`
+                ) && (
+                  <ErrorMessage>
+                    {"Sample Collection Date is a required field"}
+                  </ErrorMessage>
+                )}
 
               <FormikSelect
                 label={"Species"}

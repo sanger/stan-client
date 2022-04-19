@@ -14,6 +14,7 @@ interface FormikFieldProps {
 export const DatePickerField = ({ label, name, ...rest }: FormikFieldProps) => {
   const { setFieldValue } = useFormikContext();
   const [field] = useField(name);
+
   return (
     <>
       {/**There is a known issue with DatePicker when wrpaped inside Label that the popup not getting closed on selection.
@@ -24,7 +25,7 @@ export const DatePickerField = ({ label, name, ...rest }: FormikFieldProps) => {
           {...rest}
           selected={field.value}
           onChange={(val) => {
-            setFieldValue(field.name, val);
+            setFieldValue(name, val);
           }}
           dateFormat="dd-MM-yyyy"
           closeOnScroll={(e) => e.target === document}

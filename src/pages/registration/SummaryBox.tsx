@@ -12,6 +12,7 @@ import {
   RegistrationFormTissue,
   RegistrationFormValues,
 } from "../Registration";
+import { LifeStage } from "../../types/sdk";
 
 function getNumberOfBlocks(values: FormikValues) {
   return values.tissues.reduce(
@@ -39,12 +40,18 @@ function getNumErrorsPerTissue(
           }
         });
       });
-
       Object.keys(tissue)
         .filter((k) => k !== "blocks")
         .forEach((tissueKey) => {
           const fieldName = `tissues[${tissueIndex}].${tissueKey}`;
           if (getIn(touched, fieldName) && getIn(errors, fieldName)) {
+            count++;
+          }
+          if (
+            tissue.lifeStage === LifeStage.Fetal &&
+            tissueKey === "sampleCollectionDate" &&
+            !tissue.sampleCollectionDate
+          ) {
             count++;
           }
         });
@@ -76,7 +83,6 @@ const SummaryBox = ({
 }: SummaryBoxParams) => {
   const errorCount = getNumErrorsPerTissue(values.tissues, errors, touched);
   const [whiteButtonDisabled, setWhiteButtonDisabled] = useState(false);
-
   return (
     <div className="sticky top-0 space-y-2">
       <Heading level={3} showBorder={false}>
@@ -162,6 +168,7 @@ const SummaryBox = ({
           + Add Another Tissue
         </WhiteButton>
 
+        {}
         <PinkButton loading={submitting} type="submit" className="mt-4 w-full">
           Register
         </PinkButton>
