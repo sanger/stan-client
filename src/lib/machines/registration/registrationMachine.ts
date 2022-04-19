@@ -40,6 +40,7 @@ export function buildRegisterTissuesMutationVariables(
               replicateNumber: block.replicateNumber,
               fixative: block.fixative.trim(),
               medium: block.medium.trim(),
+              sampleCollectionDate: tissue.sampleCollectionDate ?? undefined,
             };
 
             if (
