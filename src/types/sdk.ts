@@ -184,7 +184,7 @@ export type ConfirmSection = {
   /** The original sample id of the source. */
   sampleId: Scalars['Int'];
   /** The section number of the new section. */
-  newSection: Scalars['Int'];
+  newSection?: Maybe<Scalars['Int']>;
 };
 
 /** A specification of a particular piece of labware to confirm or cancel planned sectioning into. */

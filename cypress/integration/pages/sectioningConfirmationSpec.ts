@@ -83,6 +83,60 @@ describe("Sectioning Confirmation", () => {
       saveButton().should("be.enabled");
     });
 
+    context("when a fetal waste is scanned", () => {
+      before(() => {
+        const sourceLabware = labwareFactory.build(
+          { barcode: "STAN-3333" },
+          {
+            associations: {
+              labwareType: labwareTypes[LabwareTypeName.CASSETTE].build(),
+            },
+          }
+        );
+
+        const destinationLabware = labwareFactory.build(
+          { barcode: "STAN-0002D" },
+          {
+            associations: {
+              labwareType: labwareTypes[LabwareTypeName.FETAL_WASTE].build(),
+            },
+          }
+        );
+        cy.msw().then(({ graphql, worker }) => {
+          worker.use(
+            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>(
+              "FindPlanData",
+              (req, res, ctx) => {
+                return res.once(
+                  findPlanData(sourceLabware, destinationLabware, ctx)
+                );
+              }
+            )
+          );
+        });
+        findPlanByBarcode("STAN-0002D");
+      });
+
+      it("should display fetal waste labware", () => {
+        cy.findByText("Fetal waste").should("be.visible");
+      });
+
+      it("shouldn't display edit layout option", () => {
+        cy.findByTestId("div-slide-STAN-0002D").within(() => {
+          cy.findByText("Edit Layout").should("not.exist");
+        });
+      });
+      context("when remove labware button is clicked", () => {
+        before(() => {
+          cy.findByTestId("remove-slide-STAN-0002D").click();
+        });
+        it("should remove the fetal waste labware without warning", () => {
+          cy.findByText("Removing labware").should("not.exist");
+          cy.findByTestId("div-slide-STAN-0002D").should("not.exist");
+        });
+      });
+    });
+
     context("when I scan the same barcode again", () => {
       before(() => {
         findPlanByBarcode("STAN-0001F");
