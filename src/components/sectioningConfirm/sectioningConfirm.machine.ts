@@ -203,13 +203,11 @@ export function createSectioningConfirmMachine() {
             (csl) => csl.barcode === e.confirmSectionLabware.barcode
           );
           let confirmLabware = e.confirmSectionLabware;
-          {
-            /**
+          /**
            When the request is submitted for fetal waste labware, It needs to be sent with
            a ConfirmSection that has a destination address and a sample id,
            but no "newSection", since it has no section number.
            **/
-          }
           if (
             ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE] &&
             ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE].some(
