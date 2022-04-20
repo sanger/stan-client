@@ -3,6 +3,7 @@ import React from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Label from "./Label";
+import { FormikErrorMessage } from "./index";
 
 interface FormikFieldProps {
   label: string;
@@ -35,6 +36,7 @@ export const DatePickerField = ({ label, name, ...rest }: FormikFieldProps) => {
           maxDate={new Date()}
         />
       </Label>
+      <FormikErrorMessage name={name} />
     </>
   );
 };

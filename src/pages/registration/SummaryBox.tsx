@@ -12,7 +12,6 @@ import {
   RegistrationFormTissue,
   RegistrationFormValues,
 } from "../Registration";
-import { LifeStage } from "../../types/sdk";
 
 function getNumberOfBlocks(values: FormikValues) {
   return values.tissues.reduce(
@@ -45,13 +44,6 @@ function getNumErrorsPerTissue(
         .forEach((tissueKey) => {
           const fieldName = `tissues[${tissueIndex}].${tissueKey}`;
           if (getIn(touched, fieldName) && getIn(errors, fieldName)) {
-            count++;
-          }
-          if (
-            tissue.lifeStage === LifeStage.Fetal &&
-            tissueKey === "sampleCollectionDate" &&
-            !tissue.sampleCollectionDate
-          ) {
             count++;
           }
         });

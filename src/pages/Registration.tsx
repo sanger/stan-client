@@ -84,6 +84,7 @@ function buildRegistrationSchema(
           species: validation.species,
           hmdmc: validation.hmdmc,
           tissueType: validation.tissueType,
+          sampleCollectionDate: validation.sampleCollectionDate,
           blocks: Yup.array()
             .min(1)
             .of(
@@ -95,7 +96,6 @@ function buildRegistrationSchema(
                 labwareType: validation.labwareType,
                 fixative: validation.fixative,
                 medium: validation.medium,
-                sampleCollectionDate: validation.sampleCollectionDate,
               })
             ),
         })
