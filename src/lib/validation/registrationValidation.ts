@@ -134,9 +134,12 @@ export default class RegistrationValidation {
           new Date(),
           `Sample CollectionDate should be equal or earlier than ${new Date().toString()}`
         )
+        .nullable()
+        .transform((curr, orig) => (orig === "" ? null : curr))
         .required(
           "Sample Collection Date is a required field for fetal samples"
         )
+
         .label("Sample Collection Date"),
       otherwise: Yup.date().notRequired(),
     });

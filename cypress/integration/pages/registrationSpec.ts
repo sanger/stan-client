@@ -100,6 +100,19 @@ describe("Registration", () => {
         cy.findByText("1 Error").should("be.visible");
       });
     });
+    context("when there is no sample collection date for fetal sample", () => {
+      before(() => {
+        cy.reload();
+        fillInForm();
+        cy.findByLabelText("Sample Collection Date").clear();
+        cy.findByText("Register").click();
+      });
+      it("shows the validation error for sample collection date", () => {
+        cy.findByText(
+          "Sample Collection Date is a required field for fetal samples"
+        ).should("be.visible");
+      });
+    });
 
     context("when the submission is successful", () => {
       before(() => {
@@ -215,6 +228,10 @@ describe("Registration", () => {
 
 function fillInForm() {
   cy.findByLabelText("Donor ID").type("DONOR_1");
+  cy.findByLabelText("Fetal").click();
+  cy.findByLabelText("Sample Collection Date").type("01-01-2022", {
+    force: true,
+  });
   cy.findByLabelText("Species").select("Human");
   cy.findByLabelText("External Identifier").type("EXT_ID_1");
   cy.findByLabelText("HuMFre").select("HuMFre1");

@@ -41,6 +41,25 @@ export function shouldBehaveLikeARegistrationForm() {
       });
     });
 
+    context("Life stage selection", () => {
+      context("when Fetal is selected", () => {
+        before(() => {
+          cy.findByLabelText("Fetal").click();
+        });
+        it("shows sample collection date", () => {
+          cy.findByLabelText("Sample Collection Date").should("be.visible");
+        });
+      });
+      context("when Adult is selected", () => {
+        before(() => {
+          cy.findByLabelText("Adult").click();
+        });
+        it("shows sample collection date", () => {
+          cy.findByLabelText("Sample Collection Date").should("not.exist");
+        });
+      });
+    });
+
     it("requires Species", () => {
       cy.findByLabelText("Species").focus().blur();
       cy.findByText("Species is a required field").should("be.visible");
