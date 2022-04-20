@@ -36,7 +36,7 @@ import VisiumPerm from "../pages/VisiumPerm";
 import VisiumAnalysis from "../pages/VisiumAnalysis";
 import Aliquot from "../pages/Aliquot";
 import DualIndexPlate from "../pages/DualIndexPlate";
-import FetalWaste from "../pages/FetalWaste";
+import columns from "./dataTable/labwareColumns";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -192,6 +192,13 @@ export function Routes() {
                 title={"Imaging"}
                 operationType={"image"}
                 equipment={recordInPlaceInfo.equipments}
+                columns={[
+                  columns.barcode(),
+                  columns.donorId(),
+                  columns.labwareType(),
+                  columns.externalName(),
+                  columns.bioState(),
+                ]}
               />
             )}
           </DataFetcher>
@@ -247,7 +254,24 @@ export function Routes() {
       />
       <AuthenticatedRoute
         path={"/lab/fetal_waste"}
-        render={(routerProps) => <FetalWaste key={routerProps.location.key} />}
+        render={(routeProps) => (
+          <RecordInPlace
+            title={"Fetal Waste"}
+            operationType={"Convert to fetal waste"}
+            key={routeProps.location.key}
+            columns={[
+              columns.barcode(),
+              columns.labwareType(),
+              columns.tissueType(),
+              columns.spatialLocation(),
+              columns.replicate(),
+            ]}
+            description={
+              " to change bio state of all scanned labware to 'Fetal Waste" +
+              "                        Waste'"
+            }
+          />
+        )}
       />
 
       <Route
