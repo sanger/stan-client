@@ -3,6 +3,7 @@ import AppShell from "../components/AppShell";
 import {
   EquipmentFieldsFragment,
   InPlaceOpRequest,
+  LabwareFieldsFragment,
   RecordInPlaceMutation,
 } from "../types/sdk";
 import { Form, Formik } from "formik";
@@ -15,7 +16,6 @@ import WorkNumberSelect from "../components/WorkNumberSelect";
 import { FormikErrorMessage, optionValues } from "../components/forms";
 import LabwareScanner from "../components/labwareScanner/LabwareScanner";
 import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
-import columns from "../components/dataTable/labwareColumns";
 import FormikSelect from "../components/forms/Select";
 import PinkButton from "../components/buttons/PinkButton";
 import * as Yup from "yup";
@@ -23,6 +23,7 @@ import { useMachine } from "@xstate/react";
 import createFormMachine from "../lib/machines/form/formMachine";
 import { reload, stanCore } from "../lib/sdk";
 import OperationCompleteModal from "../components/modal/OperationCompleteModal";
+import { Column } from "react-table";
 
 type RecordInPlaceProps = {
   /**
@@ -38,7 +39,17 @@ type RecordInPlaceProps = {
   /**
    * The equipment available for this operation
    */
-  equipment: Array<EquipmentFieldsFragment>;
+  equipment?: Array<EquipmentFieldsFragment>;
+
+  /**
+   * The columns to display on labware scan for this operation
+   */
+  columns: Column<LabwareFieldsFragment>[];
+
+  /**
+   * The description for operation
+   */
+  description?: string;
 };
 
 type RecordInPlaceForm = InPlaceOpRequest;
@@ -47,6 +58,8 @@ export default function RecordInPlace({
   title,
   operationType,
   equipment,
+  columns,
+  description,
 }: RecordInPlaceProps) {
   const [current, send] = useMachine(
     createFormMachine<InPlaceOpRequest, RecordInPlaceMutation>().withConfig({
@@ -71,7 +84,7 @@ export default function RecordInPlace({
       .required()
       .label("Labware"),
     equipmentId: Yup.number()
-      .oneOf(equipment.map((e) => e.id))
+      .oneOf(equipment ? equipment.map((e) => e.id) : [])
       .optional()
       .label("Equipment"),
     operationType: Yup.string().required().label("Operation Type"),
@@ -143,20 +156,12 @@ export default function RecordInPlace({
                         }
                         locked={current.matches("submitted")}
                       >
-                        <LabwareScanPanel
-                          columns={[
-                            columns.barcode(),
-                            columns.donorId(),
-                            columns.labwareType(),
-                            columns.externalName(),
-                            columns.bioState(),
-                          ]}
-                        />
+                        <LabwareScanPanel columns={columns} />
                       </LabwareScanner>
                       <FormikErrorMessage name={"barcodes"} />
                     </motion.div>
 
-                    {equipment.length > 0 && (
+                    {equipment && equipment.length > 0 && (
                       <motion.div
                         variants={variants.fadeInWithLift}
                         className="space-y-4"
@@ -202,6 +207,22 @@ export default function RecordInPlace({
                       <p className="text-sm italic">No SGP number selected.</p>
                     )}
 
+                    {description && (
+                      <div className="my-4 mx-4 sm:mx-auto p-1 rounded-md bg-sdb-400 italic">
+                        <p className="my-3 text-white-800 text-xs leading-normal">
+                          Once{" "}
+                          <span className="font-bold text-white-800">
+                            all labware
+                          </span>{" "}
+                          have been scanned, click
+                          <span className="font-bold text-white-800">
+                            {" "}
+                            Submit
+                          </span>{" "}
+                          {description}
+                        </p>
+                      </div>
+                    )}
                     <PinkButton
                       disabled={current.matches("submitted")}
                       loading={current.matches("submitting")}
