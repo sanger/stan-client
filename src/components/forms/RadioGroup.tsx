@@ -74,7 +74,9 @@ export const RadioButtonInput = React.forwardRef<
         type={"radio"}
         name={ctx.name ?? props.name}
       />
-      <span className="ml-2">{props.label}</span>
+      <span className={`ml-2 ${props.disabled && "text-gray-400"}`}>
+        {props.label}
+      </span>
     </label>
   );
 });

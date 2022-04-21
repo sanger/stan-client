@@ -6,13 +6,18 @@ import { Comment, LabwareFieldsFragment } from "../../types/sdk";
 import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
 import { Input } from "../forms/Input";
 
+export enum SectionNumberSetting {
+  NORMAL,
+  DISABLE,
+  HIDE,
+}
 interface LabwareCommentsProps {
   slot: LabwareFieldsFragment["slots"][number];
   layoutPlan: LayoutPlan;
   comments: Array<Comment>;
   value: string | number | undefined;
   disabledComment?: boolean;
-  disabledSectionNumber?: boolean;
+  sectionNumberDisplay?: SectionNumberSetting;
   onCommentChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   onSectionNumberChange: (
     slotAddress: string,
@@ -28,7 +33,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
   value,
   onCommentChange,
   disabledComment = false,
-  disabledSectionNumber = false,
+  sectionNumberDisplay = SectionNumberSetting.NORMAL,
   onSectionNumberChange,
 }) => {
   return (
@@ -37,18 +42,25 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
         {slot.address}
       </span>
       <span className="w-30">
-        {layoutPlan.plannedActions.get(slot.address)?.map((source, index) => (
-          <Input
-            key={source.address + String(index)}
-            type="number"
-            value={source.newSection === 0 ? "" : String(source.newSection)}
-            min={1}
-            disabled={disabledSectionNumber}
-            onChange={(e) =>
-              onSectionNumberChange(slot.address, index, Number(e.target.value))
-            }
-          />
-        ))}
+        {sectionNumberDisplay !== SectionNumberSetting.HIDE &&
+          layoutPlan.plannedActions
+            .get(slot.address)
+            ?.map((source, index) => (
+              <Input
+                key={source.address + String(index)}
+                type="number"
+                value={source.newSection === 0 ? "" : String(source.newSection)}
+                min={1}
+                disabled={sectionNumberDisplay === SectionNumberSetting.DISABLE}
+                onChange={(e) =>
+                  onSectionNumberChange(
+                    slot.address,
+                    index,
+                    Number(e.target.value)
+                  )
+                }
+              />
+            ))}
       </span>
       <span className="flex-grow text-center">
         {!layoutPlan.plannedActions.has(slot.address) && (

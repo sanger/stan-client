@@ -72,7 +72,6 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     serverError?: ClientError | undefined | null;
     searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
-
   const sortedTableDataRef = React.useRef<WorkProgressResultTableEntry[]>([]);
   const [downloadFileURL, setFileDownloadURL] = React.useState<string>("");
 
@@ -417,6 +416,18 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     },
   },
   {
+    Header: "Last Visium ADH stain date",
+    accessor: "lastVisiumADHStainDate",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastVisiumADHStainDate"),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastVisiumADHStainDate,
+        rowB.original.lastVisiumADHStainDate
+      );
+    },
+  },
+  {
     Header: "Last Visium TO Staining Date",
     accessor: "lastStainTODate",
     Cell: (props: Cell<WorkProgressResultTableEntry>) =>
@@ -449,6 +460,18 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
       return getDateSortType(
         rowA.original.lastCDNADate,
         rowB.original.lastCDNADate
+      );
+    },
+  },
+  {
+    Header: "Last date 96 well plate Released",
+    accessor: "lastRelease96WellPlateData",
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, "lastRelease96WellPlateData"),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastRelease96WellPlateData,
+        rowB.original.lastRelease96WellPlateData
       );
     },
   },

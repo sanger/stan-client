@@ -12,7 +12,7 @@ import ComplexStainForm from "./staining/ComplexStainForm";
  * By default, any new stain types will use the "simple" form. Any that need to use the
  * complex form will need to be added to the set below.
  */
-const complexStains = new Set(["RNAscope", "IHC"]);
+const complexStains = new Set(["RNAscope", "IHC", "RNAscope & IHC"]);
 const isComplexStain = (stainName: string) => complexStains.has(stainName);
 
 type StainingProps = {
@@ -36,7 +36,18 @@ export default function Staining({ stainingInfo }: StainingProps) {
                 emptyOption
                 onChange={(e) => setStainType(e.currentTarget.value)}
               >
-                {optionValues(stainingInfo.stainTypes, "name", "name")}
+                {optionValues(
+                  [
+                    ...stainingInfo.stainTypes,
+                    {
+                      __typename: "StainType",
+                      measurementTypes: [],
+                      name: "RNAscope & IHC",
+                    },
+                  ],
+                  "name",
+                  "name"
+                )}
               </Select>
             </Label>
           </div>
