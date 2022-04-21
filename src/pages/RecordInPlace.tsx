@@ -219,8 +219,7 @@ export default function RecordInPlace({
                             {" "}
                             Submit
                           </span>{" "}
-                          to change bio state of all scanned labware to 'Fetal
-                          Waste'.
+                          {description}
                         </p>
                       </div>
                     )}
