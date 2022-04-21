@@ -266,8 +266,7 @@ export function Routes() {
               columns.replicate(),
             ]}
             description={
-              " to change bio state of all scanned labware to 'Fetal Waste" +
-              "                        Waste'"
+              " to change bio state of all scanned labware to 'Fetal Waste"
             }
           />
         )}
