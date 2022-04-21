@@ -5,8 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.6] - 2022-04-21
 ### Added
+-Sectioning feature to allow for automatic section numbering on the confirmation page as well as manual
+-Dual Index Plate in Visium menu ,record the transfer of dual-index reagent to our 96 well plates containing samples
 ### Modified
+-Double-clicking the submit button should not create duplicate work numbers.
+-Fix for UI bug: When you create a new SGP number, the confirmation message disappears almost immediately
 
 ## [1.10.2] - 2021-11-18
 ### Added
