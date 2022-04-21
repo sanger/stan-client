@@ -37,7 +37,6 @@ import VisiumAnalysis from "../pages/VisiumAnalysis";
 import Aliquot from "../pages/Aliquot";
 import DualIndexPlate from "../pages/DualIndexPlate";
 import columns from "./dataTable/labwareColumns";
-import FetalWaste from "../pages/FetalWaste";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -79,11 +78,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-      <AuthenticatedRoute
-        path={"/lab/fetal_waste"}
-        render={(routerProps) => <FetalWaste key={routerProps.location.key} />}
-      />
-
       <AuthenticatedRoute
         path="/lab/extraction"
         render={(routerProps) => <Extraction key={routerProps.location.key} />}
