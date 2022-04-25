@@ -1,4 +1,6 @@
-export function shouldBehaveLikeARegistrationForm() {
+export function shouldBehaveLikeARegistrationForm(
+  isSlideRegistration: boolean
+) {
   describe("Validation", () => {
     it("requires Donor ID", () => {
       cy.findByLabelText("Donor ID").focus().blur();
@@ -46,9 +48,16 @@ export function shouldBehaveLikeARegistrationForm() {
         before(() => {
           cy.findByLabelText("Fetal").click();
         });
-        it("shows sample collection date", () => {
-          cy.findByLabelText("Sample Collection Date").should("be.visible");
-        });
+        it(
+          isSlideRegistration
+            ? "does not show sample collection date"
+            : "shows sample collection date",
+          () => {
+            cy.findByLabelText("Sample Collection Date").should(
+              isSlideRegistration ? "not.exist" : "be.visible"
+            );
+          }
+        );
       });
       context("when Adult is selected", () => {
         before(() => {

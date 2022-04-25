@@ -12,7 +12,7 @@ describe("Registration", () => {
   });
 
   describe("Validation", () => {
-    shouldBehaveLikeARegistrationForm();
+    shouldBehaveLikeARegistrationForm(false);
 
     it("requires External Identifier", () => {
       cy.findByLabelText("External Identifier").focus().blur();
