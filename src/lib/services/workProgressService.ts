@@ -25,8 +25,10 @@ export type WorkProgressResultTableEntry = {
   lastRNAScopeIHCStainDate: Date | undefined;
   lastSlideImagedDate: Date | undefined;
   lastRNAAnalysisDate: Date | undefined;
+  lastVisiumADHStainDate: Date | undefined;
   lastStainTODate: Date | undefined;
   lastStainLPDate: Date | undefined;
+  lastRelease96WellPlateData: Date | undefined;
 };
 /**
  * The keys to store the timestamp data
@@ -38,8 +40,10 @@ export type WorkProgressTimeStampType =
   | "Visium cDNA"
   | "Stain Visium TO"
   | "RNAscope/IHC stain"
+  | "Visium ADH H&E stain"
   | "Stain Visium LP"
   | "Image"
+  | "Release 96 well plate"
   | "Analysis";
 
 export class WorkProgressService
@@ -96,8 +100,12 @@ export class WorkProgressService
       const lastStainVisiumTODate = timeStampMap.get("Stain Visium TO");
       const lastStainVisiumLPDate = timeStampMap.get("Stain Visium LP");
       const lastRNAScopeIHCStainDate = timeStampMap.get("RNAscope/IHC stain");
+      const lastVisiumADHStainDate = timeStampMap.get("Visium ADH H&E stain");
       const lastSlideImagedDate = timeStampMap.get("Image");
       const lastRNAAnalysisDate = timeStampMap.get("Analysis");
+      const lastRelease96WellPlateData = timeStampMap.get(
+        "Release 96 well plate"
+      );
       return {
         priority: entry.work.priority ?? undefined,
         workNumber: entry.work.workNumber,
@@ -120,8 +128,13 @@ export class WorkProgressService
           new Date(lastRNAScopeIHCStainDate.toString()),
         lastRNAAnalysisDate:
           lastRNAAnalysisDate && new Date(lastRNAAnalysisDate.toString()),
+        lastVisiumADHStainDate:
+          lastVisiumADHStainDate && new Date(lastVisiumADHStainDate.toString()),
         lastSlideImagedDate:
           lastSlideImagedDate && new Date(lastSlideImagedDate.toString()),
+        lastRelease96WellPlateData:
+          lastRelease96WellPlateData &&
+          new Date(lastRelease96WellPlateData.toString()),
       };
     });
   };

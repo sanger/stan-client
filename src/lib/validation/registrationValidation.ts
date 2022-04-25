@@ -54,6 +54,7 @@ export default class RegistrationValidation {
   }
 
   get hmdmc() {
+    ("");
     return Yup.string().when("species", {
       is: "Human",
       then: Yup.string()

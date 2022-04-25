@@ -1,7 +1,6 @@
 module.exports = {
   purge: {
     content: ["./src/**/*.html", "./src/**/*.tsx"],
-
     // Used in the Labware component for slots, but colour is built dynamically so we need to make sure it's not purged
     options: {
       safelist: [

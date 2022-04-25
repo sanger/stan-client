@@ -13,7 +13,7 @@ import Label from "../forms/Label";
 import WhiteButton from "../buttons/WhiteButton";
 import { sortRightDown } from "../../lib/helpers/labwareHelper";
 import { Select } from "../forms/Select";
-import LabwareComments from "./LabwareComments";
+import LabwareComments, { SectionNumberSetting } from "./LabwareComments";
 import classNames from "classnames";
 import {
   buildSlotColor,
@@ -27,13 +27,15 @@ import { selectConfirmOperationLabware } from "./index";
 import RemoveButton from "../buttons/RemoveButton";
 import { ConfirmationModal } from "../modal/ConfirmationModal";
 import { SectionNumberMode } from "./SectioningConfirm";
+import { LabwareTypeName } from "../../types/stan";
 
 interface ConfirmLabwareProps {
   originalLayoutPlan: LayoutPlan;
   comments: Array<CommentFieldsFragment>;
   onChange: (labware: ConfirmSectionLabware) => void;
-  onSectionUpdate: (layoutPlan: LayoutPlan) => void;
-  onSectionNumberChange: (
+  sectionNumberEnabled?: boolean;
+  onSectionUpdate?: (layoutPlan: LayoutPlan) => void;
+  onSectionNumberChange?: (
     layoutPlan: LayoutPlan,
     slotAddress: string,
     sectionIndex: number,
@@ -47,6 +49,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   originalLayoutPlan,
   comments,
   onChange,
+  sectionNumberEnabled = true,
   onSectionUpdate,
   onSectionNumberChange,
   removePlan,
@@ -91,7 +94,8 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       notifySectionChange.current
     ) {
       notifySectionChange.current = false;
-      onSectionUpdate(layoutPlan);
+
+      onSectionUpdate && onSectionUpdate(layoutPlan);
     }
   }, [layoutPlan, current.event, onSectionUpdate]);
 
@@ -103,7 +107,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   }, [originalLayoutPlan, send]);
 
   const handleRemovePlan = React.useCallback(() => {
-    if (mode === SectionNumberMode.Auto) {
+    if (mode === SectionNumberMode.Auto && sectionNumberEnabled) {
       setNotifyDelete(true);
     } else {
       removePlan(layoutPlan.destinationLabware.barcode!);
@@ -113,6 +117,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     setNotifyDelete,
     removePlan,
     layoutPlan.destinationLabware.barcode,
+    sectionNumberEnabled,
   ]);
 
   return (
@@ -120,7 +125,9 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       variants={variants.fadeInWithLift}
       initial={"hidden"}
       animate={"visible"}
-      className="relative p-3 shadow"
+      className={`relative p-3 shadow ${
+        !sectionNumberEnabled && "lg:w-2/3 lg:mx-auto rounded-lg"
+      }`}
     >
       <RemoveButton
         data-testid={`remove-slide-${labware.barcode}`}
@@ -128,89 +135,100 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       />
       <div
         data-testid={`div-slide-${labware.barcode}`}
-        className="md:grid md:grid-cols-2"
+        className={`${sectionNumberEnabled && "md:grid md:grid-cols-2"}`}
       >
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
             labware={labware}
-            onClick={() => send({ type: "EDIT_LAYOUT" })}
+            onClick={() =>
+              sectionNumberEnabled && send({ type: "EDIT_LAYOUT" })
+            }
             slotText={(address) => buildSlotText(layoutPlan, address)}
             slotSecondaryText={(address) =>
               buildSlotSecondaryText(layoutPlan, address)
             }
             slotColor={(address) => buildSlotColor(layoutPlan, address)}
           />
-
-          <PinkButton
-            disabled={current.matches("done")}
-            onClick={() => send({ type: "EDIT_LAYOUT" })}
-          >
-            Edit Layout
-          </PinkButton>
+          {sectionNumberEnabled && (
+            <PinkButton
+              disabled={current.matches("done")}
+              onClick={() => send({ type: "EDIT_LAYOUT" })}
+            >
+              Edit Layout
+            </PinkButton>
+          )}
         </div>
-        <div className="p-4 space-y-8 space-x-2 bg-gray-100">
-          <Heading level={3} showBorder={false}>
-            Comments
-          </Heading>
+        {sectionNumberEnabled && (
+          <div className="p-4 space-y-8 space-x-2 bg-gray-100">
+            <Heading level={3} showBorder={false}>
+              Comments
+            </Heading>
 
-          <div className="w-full space-y-4">
-            <div data-testid="labware-comments" className={gridClassNames}>
-              {sortRightDown(labware.slots).map((slot) => (
-                <LabwareComments
-                  key={slot.address}
-                  slot={slot}
-                  value={addressToCommentMap.get(slot.address) ?? ""}
-                  disabledComment={current.matches("done")}
-                  disabledSectionNumber={
-                    mode === SectionNumberMode.Auto || current.matches("done")
-                  }
-                  comments={comments}
-                  layoutPlan={layoutPlan}
-                  onCommentChange={(e) => {
-                    send({
-                      type: "SET_COMMENT_FOR_ADDRESS",
-                      address: slot.address,
-                      commentId: e.currentTarget.value,
-                    });
-                  }}
-                  onSectionNumberChange={(
-                    slotAddress,
-                    sectionIndex,
-                    sectionNumber
-                  ) => {
-                    /**Notify parent, so as to modify section number in original layout*/
-                    onSectionNumberChange(
-                      layoutPlan,
+            <div className="w-full space-y-4">
+              <div data-testid="labware-comments" className={gridClassNames}>
+                {sortRightDown(labware.slots).map((slot) => (
+                  <LabwareComments
+                    key={slot.address}
+                    slot={slot}
+                    value={addressToCommentMap.get(slot.address) ?? ""}
+                    disabledComment={current.matches("done")}
+                    sectionNumberDisplay={
+                      labware.labwareType.name === LabwareTypeName.FETAL_WASTE
+                        ? SectionNumberSetting.HIDE
+                        : mode === SectionNumberMode.Auto ||
+                          current.matches("done")
+                        ? SectionNumberSetting.DISABLE
+                        : SectionNumberSetting.NORMAL
+                    }
+                    comments={comments}
+                    layoutPlan={layoutPlan}
+                    onCommentChange={(e) => {
+                      send({
+                        type: "SET_COMMENT_FOR_ADDRESS",
+                        address: slot.address,
+                        commentId: e.currentTarget.value,
+                      });
+                    }}
+                    onSectionNumberChange={(
                       slotAddress,
                       sectionIndex,
                       sectionNumber
-                    );
-                    send({
-                      type: "UPDATE_SECTION_NUMBER",
-                      slotAddress,
-                      sectionIndex,
-                      sectionNumber,
-                    });
-                  }}
-                />
-              ))}
+                    ) => {
+                      /**Notify parent, so as to modify section number in original layout*/
+                      onSectionNumberChange &&
+                        onSectionNumberChange(
+                          layoutPlan,
+                          slotAddress,
+                          sectionIndex,
+                          sectionNumber
+                        );
+                      send({
+                        type: "UPDATE_SECTION_NUMBER",
+                        slotAddress,
+                        sectionIndex,
+                        sectionNumber,
+                      });
+                    }}
+                  />
+                ))}
+              </div>
             </div>
+            <Label name={"All slots:"}>
+              <Select
+                disabled={current.matches("done")}
+                onChange={(e) =>
+                  send({
+                    type: "SET_COMMENT_FOR_ALL",
+                    commentId: e.currentTarget.value,
+                  })
+                }
+              >
+                <option />
+                {optionValues(comments, "text", "id")}
+              </Select>
+            </Label>
           </div>
-          <Label name={"All slots:"}>
-            <Select
-              disabled={current.matches("done")}
-              onChange={(e) =>
-                send({
-                  type: "SET_COMMENT_FOR_ALL",
-                  commentId: e.currentTarget.value,
-                })
-              }
-            >
-              <option />
-              {optionValues(comments, "text", "id")}
-            </Select>
-          </Label>
-        </div>
+        )}
       </div>
 
       <Modal show={current.matches("editingLayout")}>

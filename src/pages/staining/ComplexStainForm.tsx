@@ -1,12 +1,12 @@
 import React from "react";
 import {
+  ComplexStainLabware,
   ComplexStainRequest,
   LabwareFieldsFragment,
   RecordComplexStainMutation,
   StainPanel,
 } from "../../types/sdk";
 import { Form, Formik } from "formik";
-import FormikInput from "../../components/forms/Input";
 import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
 import { motion } from "framer-motion";
 import variants from "../../lib/motionVariants";
@@ -19,20 +19,17 @@ import * as Yup from "yup";
 import { useMachine } from "@xstate/react";
 import createFormMachine from "../../lib/machines/form/formMachine";
 import { reload, stanCore } from "../../lib/sdk";
-import FormikSelect from "../../components/forms/Select";
-import { objectKeys } from "../../lib/helpers";
 import { FormikLabwareScanner } from "../../components/labwareScanner/FormikLabwareScanner";
 import Table, {
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
 } from "../../components/Table";
-import WorkNumberSelect from "../../components/WorkNumberSelect";
 import OperationCompleteModal from "../../components/modal/OperationCompleteModal";
 import Warning from "../../components/notifications/Warning";
 import WhiteButton from "../../components/buttons/WhiteButton";
-import { FormikFieldValue } from "../../components/forms/FormikFieldValue";
+import { FormikFieldValueArray } from "../../components/forms/FormikFieldValueArray";
+import ComplexStainRow from "./ComplexStainRow";
 
 type ComplexStainFormValues = ComplexStainRequest;
 
@@ -65,28 +62,49 @@ export default function ComplexStainForm({
 
   const plexMin = 1;
   const plexMax = 100;
+  const stainTypes =
+    stainType === "RNAscope & IHC"
+      ? stainType.split("&").map((val) => val.trim())
+      : [stainType];
 
-  const validationSchema = Yup.object().shape({
-    stainType: Yup.string().required().label("Stain Type"),
-    plex: Yup.number()
-      .integer()
-      .min(plexMin)
-      .max(plexMax)
-      .required()
-      .label("Plex Number"),
+  const labwareValidationSchema = Yup.object().shape({
+    barcode: Yup.string().required().label("Barcode"),
+    bondBarcode: Yup.string().required().label("Bond Barcode").min(4).max(8),
+    bondRun: Yup.number().integer().positive().label("Bond Run"),
+    workNumber: Yup.string().optional().label("SGP Number"),
     panel: Yup.string()
       .oneOf(Object.values(StainPanel))
       .required()
       .label("Experimental Panel"),
+    plexRNAscope: Yup.number().when("stainTypes", {
+      is: () => {
+        return stainType !== "IHC";
+      },
+      then: Yup.number()
+        .integer()
+        .min(plexMin)
+        .max(plexMax)
+        .required()
+        .label("RNAScope Plex Number"),
+      otherwise: Yup.number().notRequired(),
+    }),
+    plexIHC: Yup.number().when("stainTypes", {
+      is: () => {
+        return stainType !== "RNAscope";
+      },
+      then: Yup.number()
+        .required()
+        .integer()
+        .min(plexMin)
+        .max(plexMax)
+        .label("IHC Plex Number"),
+      otherwise: Yup.number().notRequired(),
+    }),
+  });
+  const validationSchema = Yup.object().shape({
+    stainTypes: Yup.array().required().label("Stain Type"),
     labware: Yup.array()
-      .of(
-        Yup.object().shape({
-          barcode: Yup.string().required().label("Barcode"),
-          bondBarcode: Yup.string().required().label("Bond Barcode"),
-          bondRun: Yup.number().integer().positive().label("Bond Run"),
-          workNumber: Yup.string().optional().label("SGP Number"),
-        })
-      )
+      .of(labwareValidationSchema)
       .min(1)
       .required()
       .label("Labware"),
@@ -95,20 +113,27 @@ export default function ComplexStainForm({
   return (
     <Formik<ComplexStainFormValues>
       initialValues={{
-        stainType,
-        plex: 1,
-        panel: StainPanel.Marker,
+        stainTypes: [stainType],
         labware: initialLabware.map(buildLabware),
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
+        //Make sure the submitting values do not contain fields that are not required for the selected stain type
+        if (!values.stainTypes.includes("RNAscope")) {
+          values.labware.forEach((val) => delete val.plexRNAscope);
+        }
+        if (!values.stainTypes.includes("IHC")) {
+          values.labware.forEach((val) => delete val.plexIHC);
+        }
         send({ type: "SUBMIT_FORM", values });
       }}
     >
-      {({ values }) => (
+      {({
+        values: stainFormValues,
+        setFieldValue: setStainTableFieldValue,
+      }) => (
         <Form>
-          <FormikFieldValue field={"stainType"} value={stainType} />
-
+          <FormikFieldValueArray field={"stainTypes"} values={stainTypes} />
           <GrayBox>
             <motion.div
               variants={variants.fadeInParent}
@@ -145,71 +170,66 @@ export default function ComplexStainForm({
                 </FormikLabwareScanner>
               </motion.div>
 
-              <motion.div
-                variants={variants.fadeInWithLift}
-                className="space-y-4"
-              >
-                <Heading level={3}>Stain Information</Heading>
-
-                <FormikInput
-                  label={"Plex Number"}
-                  name={"plex"}
-                  type={"number"}
-                  min={plexMin}
-                  max={plexMax}
-                  step={1}
-                />
-
-                <FormikSelect label={"Experimental Panel"} name={"panel"}>
-                  {objectKeys(StainPanel).map((stainPanel) => (
-                    <option key={stainPanel} value={StainPanel[stainPanel]}>
-                      {stainPanel}
-                    </option>
-                  ))}
-                </FormikSelect>
-              </motion.div>
-
-              {values.labware.length > 0 && (
+              {stainFormValues.labware.length > 0 && (
                 <motion.div
                   variants={variants.fadeInWithLift}
                   className="space-y-4"
                 >
-                  <Heading level={3}>Bond Run Information</Heading>
+                  <Heading level={3}>Stain Information</Heading>
 
-                  <Table>
+                  <Table data-testid={"stain-info-table"}>
                     <TableHead>
                       <tr>
                         <TableHeader>Slide Barcode</TableHeader>
                         <TableHeader>Bond Barcode</TableHeader>
                         <TableHeader>Bond Run Number</TableHeader>
                         <TableHeader>SGP Number</TableHeader>
+                        <TableHeader>Experimental panel</TableHeader>
+                        <TableHeader>RNAScope Plex Number</TableHeader>
+                        <TableHeader>IHC Plex Number</TableHeader>
                       </tr>
                     </TableHead>
-
+                    <TableHead>
+                      <Formik<ComplexStainLabware>
+                        initialValues={{
+                          panel: StainPanel.Marker,
+                          bondRun: 0,
+                          bondBarcode: "",
+                          plexIHC: undefined,
+                          plexRNAscope: undefined,
+                          workNumber: "",
+                          barcode: "",
+                        }}
+                        onSubmit={() => {}}
+                      >
+                        {({ values: stainLabwareValues, setFieldValue }) => (
+                          <ComplexStainRow
+                            barcode={"Apply to all"}
+                            stainType={stainType}
+                            plexMin={plexMin}
+                            plexMax={plexMax}
+                            stainFormValues={stainFormValues}
+                            setFieldValue={setFieldValue}
+                            stainRowApplyAllSettings={{
+                              stainValuesToAll: stainLabwareValues,
+                              setValueToAllStainRows: setStainTableFieldValue,
+                            }}
+                          />
+                        )}
+                      </Formik>
+                    </TableHead>
                     <TableBody>
-                      {values.labware.map((lw, i) => (
-                        <tr key={lw.barcode}>
-                          <TableCell>{lw.barcode}</TableCell>
-                          <TableCell>
-                            <FormikInput
-                              label={""}
-                              name={`labware.${i}.bondBarcode`}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <FormikInput
-                              label={""}
-                              name={`labware.${i}.bondRun`}
-                              type={"number"}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <WorkNumberSelect
-                              label={""}
-                              name={`labware.${i}.workNumber`}
-                            />
-                          </TableCell>
-                        </tr>
+                      {stainFormValues.labware.map((lw, i) => (
+                        <ComplexStainRow
+                          key={lw.barcode}
+                          barcode={lw.barcode}
+                          stainType={stainType}
+                          plexMin={plexMin}
+                          plexMax={plexMax}
+                          rowID={i}
+                          stainFormValues={stainFormValues}
+                          setFieldValue={setStainTableFieldValue}
+                        />
                       ))}
                     </TableBody>
                   </Table>
@@ -222,11 +242,16 @@ export default function ComplexStainForm({
                 Summary
               </Heading>
 
-              {values.labware.length > 0 && (
+              {stainFormValues.labware.length > 0 && (
                 <p>
-                  <span className="font-semibold">{values.labware.length}</span>{" "}
+                  <span className="font-semibold">
+                    {stainFormValues.labware.length}
+                  </span>{" "}
                   piece(s) of labware will be stained using{" "}
-                  <span className="font-semibold">{values.stainType}</span>.
+                  <span className="font-semibold">
+                    {stainFormValues.stainTypes.join(" and ")}
+                  </span>
+                  .
                 </p>
               )}
 
@@ -272,5 +297,8 @@ function buildLabware(labware: LabwareFieldsFragment) {
     bondBarcode: "",
     bondRun: 0,
     workNumber: undefined,
+    panel: StainPanel.Marker,
+    plexRNAscope: 0,
+    plexIHC: 0,
   };
 }
