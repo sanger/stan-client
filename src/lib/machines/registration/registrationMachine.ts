@@ -40,7 +40,11 @@ export function buildRegisterTissuesMutationVariables(
               replicateNumber: block.replicateNumber,
               fixative: block.fixative.trim(),
               medium: block.medium.trim(),
-              sampleCollectionDate: tissue.sampleCollectionDate ?? undefined,
+              sampleCollectionDate: tissue.sampleCollectionDate
+                ? tissue.sampleCollectionDate instanceof Date
+                  ? tissue.sampleCollectionDate.toLocaleDateString()
+                  : tissue.sampleCollectionDate
+                : undefined,
             };
 
             if (

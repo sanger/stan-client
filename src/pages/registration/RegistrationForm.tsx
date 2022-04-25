@@ -20,7 +20,6 @@ import {
   RegistrationFormValues,
 } from "../Registration";
 import { LabwareTypeName } from "../../types/stan";
-import DatePickerField from "../../components/forms/DatePickerField";
 
 interface RegistrationFormParams {
   registrationInfo: GetRegistrationInfoQuery;
@@ -114,9 +113,11 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
               </RadioGroup>
 
               {values.tissues[currentIndex].lifeStage === LifeStage.Fetal && (
-                <DatePickerField
+                <FormikInput
+                  type="date"
                   name={`tissues.${currentIndex}.sampleCollectionDate`}
                   label={"Sample Collection Date"}
+                  max={new Date()}
                 />
               )}
 

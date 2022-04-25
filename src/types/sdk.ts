@@ -103,6 +103,8 @@ export type BlockRegisterRequest = {
   species: Scalars['String'];
   /** Is this a new block of tissue already in the application's database? */
   existingTissue?: Maybe<Scalars['Boolean']>;
+  /** The date the original sample was collected, if known. */
+  sampleCollectionDate?: Maybe<Scalars['Date']>;
 };
 
 /** A request to cancel a particular planned action in a planned operation. */
@@ -2168,6 +2170,8 @@ export type Tissue = {
   medium: Medium;
   /** The fixative used on this tissue. */
   fixative: Fixative;
+  /** The date the original sample was collected, if known. */
+  collectionDate?: Maybe<Scalars['Date']>;
 };
 
 /** The type of tissue, typically an organ. */

@@ -114,6 +114,23 @@ describe("Registration", () => {
       });
     });
 
+    context("when a future date is entered for sample collection", () => {
+      before(() => {
+        cy.reload();
+        fillInForm();
+        cy.findByLabelText("Sample Collection Date")
+          .type("2050-04-01", {
+            force: true,
+          })
+          .blur();
+      });
+      it("shows an error message to enter a past date", () => {
+        cy.findByText(
+          `Please select a date on or before ${new Date().toLocaleDateString()}`
+        );
+      });
+    });
+
     context("when the submission is successful", () => {
       before(() => {
         cy.reload();
@@ -229,7 +246,7 @@ describe("Registration", () => {
 function fillInForm() {
   cy.findByLabelText("Donor ID").type("DONOR_1");
   cy.findByLabelText("Fetal").click();
-  cy.findByLabelText("Sample Collection Date").type("01-01-2022", {
+  cy.findByLabelText("Sample Collection Date").type("2022-01-01", {
     force: true,
   });
   cy.findByLabelText("Species").select("Human");

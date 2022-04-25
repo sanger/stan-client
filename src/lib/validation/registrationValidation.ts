@@ -133,14 +133,13 @@ export default class RegistrationValidation {
       then: Yup.date()
         .max(
           new Date(),
-          `Sample CollectionDate should be equal or earlier than ${new Date().toString()}`
+          `Please select a date on or before ${new Date().toLocaleDateString()}`
         )
         .nullable()
         .transform((curr, orig) => (orig === "" ? null : curr))
         .required(
           "Sample Collection Date is a required field for fetal samples"
         )
-
         .label("Sample Collection Date"),
       otherwise: Yup.date().notRequired(),
     });

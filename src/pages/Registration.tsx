@@ -32,7 +32,7 @@ export interface RegistrationFormTissue {
   species: string;
   hmdmc: string;
   tissueType: string;
-  sampleCollectionDate?: Date;
+  sampleCollectionDate?: Date | string;
   blocks: RegistrationFormBlock[];
 }
 
@@ -62,7 +62,7 @@ export function getRegistrationFormTissue(): RegistrationFormTissue {
     hmdmc: "",
     tissueType: "",
     blocks: [getRegistrationFormBlock()],
-    sampleCollectionDate: undefined,
+    sampleCollectionDate: "",
   };
 }
 
