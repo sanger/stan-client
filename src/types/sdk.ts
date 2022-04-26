@@ -2519,7 +2519,7 @@ export type SampleFieldsFragment = (
   & Pick<Sample, 'id' | 'section'>
   & { tissue: (
     { __typename?: 'Tissue' }
-    & Pick<Tissue, 'externalName' | 'replicate'>
+    & Pick<Tissue, 'externalName' | 'replicate' | 'collectionDate'>
     & { donor: (
       { __typename?: 'Donor' }
       & Pick<Donor, 'donorName' | 'lifeStage'>
@@ -4196,6 +4196,7 @@ export const SampleFieldsFragmentDoc = gql`
       name
       enabled
     }
+    collectionDate
   }
   bioState {
     name

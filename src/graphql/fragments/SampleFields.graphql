@@ -21,6 +21,7 @@ fragment SampleFields on Sample {
             name
             enabled
         }
+        collectionDate
     }
     bioState {
         name

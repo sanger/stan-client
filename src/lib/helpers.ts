@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import { ParsedQuery } from "query-string";
 import { GridDirection, Maybe } from "../types/sdk";
 import { HasEnabled, SizeInput } from "../types/stan";
-import _ from "lodash";
+import _, { isNaN } from "lodash";
 import { Key } from "react";
 import { Column } from "react-table";
 
@@ -385,3 +385,20 @@ export const getPropertyValue = (
   if (typeof propValue !== "string" && typeof propValue !== "number") return "";
   return propValue;
 };
+
+/***Get number of days between two dates given (in string format)
+ *
+ * @param firstDate
+ * @param secondDate
+ */
+export function getNumberOfDaysBetween(firstDate: string, secondDate: string) {
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const date1 = Date.parse(firstDate);
+  const date2 = Date.parse(secondDate);
+  debugger;
+  if (isNaN(date1) || isNaN(date2)) {
+    return 0;
+  } else {
+    return Math.round(Math.abs((date1 - date2) / oneDay));
+  }
+}
