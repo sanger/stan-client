@@ -118,7 +118,7 @@ describe("Sectioning Confirmation", () => {
       });
 
       it("should display fetal waste labware", () => {
-        cy.findByText("Fetal waste").should("be.visible");
+        cy.findByText("Fetal waste container").should("be.visible");
       });
 
       it("shouldn't display edit layout option", () => {
