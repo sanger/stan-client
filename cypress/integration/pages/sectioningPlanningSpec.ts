@@ -70,9 +70,6 @@ describe("Sectioning Planning", () => {
         it("should display a warning message", () => {
           cy.findByText("STAN-3333").should("be.visible");
         });
-        after(() => {
-          cy.findByText("Delete Layout").click();
-        });
       }
     );
   });
