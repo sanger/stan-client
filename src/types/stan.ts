@@ -22,7 +22,7 @@ export enum LabwareTypeName {
   CASSETTE = "Cassette",
   VISIUM_ADH = "Visium ADH",
   FOUR_SLOT_SLIDE = "4 slot slide",
-  FETAL_WASTE = "Fetal waste",
+  FETAL_WASTE = "Fetal waste container",
   DUAL_INDEX_PLATE= "Dual index plate"
 }
 
