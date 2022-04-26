@@ -56,7 +56,7 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
   const isHMDMCEnabled = values.tissues[currentIndex].species === "Human";
   useEffect(() => {
     if (!isHMDMCEnabled) {
-      setFieldValue(`tissues.${currentIndex}.hmdmc`, "", false);
+      setFieldValue(`tissues.${currentIndex}.hmdmc`, "", true);
     }
   }, [isHMDMCEnabled, setFieldValue, currentIndex]);
 
