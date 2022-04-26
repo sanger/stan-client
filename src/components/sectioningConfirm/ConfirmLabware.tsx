@@ -173,7 +173,8 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                     value={addressToCommentMap.get(slot.address) ?? ""}
                     disabledComment={current.matches("done")}
                     sectionNumberDisplay={
-                      labware.labwareType.name === LabwareTypeName.FETAL_WASTE
+                      labware.labwareType.name ===
+                      LabwareTypeName.FETAL_WASTE_CONTAINER
                         ? SectionNumberSetting.HIDE
                         : mode === SectionNumberMode.Auto ||
                           current.matches("done")

@@ -31,7 +31,7 @@ import {
   buildSlotColor,
   buildSlotSecondaryText,
   buildSlotText,
-} from "../../pages/sectioning/index";
+} from "../../pages/sectioning";
 import { PlannerContext } from "./Planner";
 
 type LabwarePlanProps = {
@@ -197,16 +197,19 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                       />
                     )}
 
-                    <FormikInput
-                      disabled={
-                        current.matches("printing") || current.matches("done")
-                      }
-                      label={"Section Thickness"}
-                      name={"sectionThickness"}
-                      type={"number"}
-                      min={1}
-                      step={1}
-                    />
+                    {outputLabware.labwareType.name !==
+                      LabwareTypeName.FETAL_WASTE_CONTAINER && (
+                      <FormikInput
+                        disabled={
+                          current.matches("printing") || current.matches("done")
+                        }
+                        label={"Section Thickness"}
+                        name={"sectionThickness"}
+                        type={"number"}
+                        min={1}
+                        step={1}
+                      />
+                    )}
                   </div>
 
                   {plannedLabware.length > 0 && (
@@ -325,11 +328,13 @@ function buildInitialValues(
   let formValues: FormValues = {
     operationType,
     quantity: 1,
-    sectionThickness: 0,
   };
 
   if (labwareType.name === LabwareTypeName.VISIUM_LP) {
     formValues.barcode = "";
+  }
+  if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
+    formValues.sectionThickness = 0;
   }
 
   return formValues;
@@ -342,17 +347,19 @@ function buildInitialValues(
 function buildValidationSchema(labwareType: LabwareType): Yup.ObjectSchema {
   type FormShape = {
     quantity: Yup.NumberSchema;
-    sectionThickness: Yup.NumberSchema;
+    sectionThickness?: Yup.NumberSchema;
     barcode?: Yup.StringSchema;
   };
 
   let formShape: FormShape = {
     quantity: Yup.number().required().integer().min(1).max(99),
-    sectionThickness: Yup.number().required().integer().min(1),
   };
 
   if (labwareType.name === LabwareTypeName.VISIUM_LP) {
     formShape.barcode = Yup.string().required().min(14);
+  }
+  if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
+    formShape.sectionThickness = Yup.number().required().integer().min(1);
   }
 
   return Yup.object().shape(formShape).defined();

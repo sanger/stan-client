@@ -149,7 +149,7 @@ export default function SectioningConfirm({
     return (
       Object.entries(layoutPlansByLabwareType).filter(
         ([labwareTypeName, _]) =>
-          labwareTypeName !== LabwareTypeName.FETAL_WASTE
+          labwareTypeName !== LabwareTypeName.FETAL_WASTE_CONTAINER
       ).length !== 0
     );
   };
@@ -224,14 +224,18 @@ export default function SectioningConfirm({
                 )}
                 <div className="space-y-4">
                   {/* Always show fetal waste first (if there are any) */}
-                  {layoutPlansByLabwareType?.[LabwareTypeName.FETAL_WASTE] && (
+                  {layoutPlansByLabwareType?.[
+                    LabwareTypeName.FETAL_WASTE_CONTAINER
+                  ] && (
                     <div
-                      key={LabwareTypeName.FETAL_WASTE}
+                      key={LabwareTypeName.FETAL_WASTE_CONTAINER}
                       className="space-y-4"
                     >
-                      <Heading level={3}>{LabwareTypeName.FETAL_WASTE}</Heading>
+                      <Heading level={3}>
+                        {LabwareTypeName.FETAL_WASTE_CONTAINER}
+                      </Heading>
                       {layoutPlansByLabwareType?.[
-                        LabwareTypeName.FETAL_WASTE
+                        LabwareTypeName.FETAL_WASTE_CONTAINER
                       ].map((layoutPlan) => (
                         <ConfirmLabware
                           onChange={handleConfirmChange}
@@ -268,7 +272,8 @@ export default function SectioningConfirm({
                     .filter(
                       ([labwareTypeName, _]) =>
                         labwareTypeName !== LabwareTypeName.TUBE &&
-                        labwareTypeName !== LabwareTypeName.FETAL_WASTE
+                        labwareTypeName !==
+                          LabwareTypeName.FETAL_WASTE_CONTAINER
                     )
                     .map(([labwareTypeName, lps]) => {
                       return (
