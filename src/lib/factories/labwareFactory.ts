@@ -119,9 +119,8 @@ export const fourSlotSlideFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.FOUR_SLOT_SLIDE].build(),
 });
 
-
 export const fetalWasteFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.FETAL_WASTE].build(),
+  labwareType: labwareTypes[LabwareTypeName.FETAL_WASTE_CONTAINER].build(),
 });
 export const dualIndexPlateFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.DUAL_INDEX_PLATE].build(),
@@ -140,6 +139,6 @@ export const labwareFactories: Record<
   [LabwareTypeName.CASSETTE]: cassetteFactory,
   [LabwareTypeName.VISIUM_ADH]: visiumADHFactory,
   [LabwareTypeName.FOUR_SLOT_SLIDE]: fourSlotSlideFactory,
-  [LabwareTypeName.FETAL_WASTE]: fetalWasteFactory,
+  [LabwareTypeName.FETAL_WASTE_CONTAINER]: fetalWasteFactory,
   [LabwareTypeName.DUAL_INDEX_PLATE]: dualIndexPlateFactory,
 };

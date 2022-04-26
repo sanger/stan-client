@@ -126,6 +126,23 @@ describe("Sectioning Planning", () => {
       });
     });
 
+    context("when adding a Fetal waste container", () => {
+      before(() => {
+        cy.findByRole("combobox").select("Fetal waste container");
+        cy.findByText("+ Add Labware").click();
+      });
+
+      it("shows only Number of Labware", () => {
+        cy.findByLabelText("Number of Labware").should("be.visible");
+        cy.findByLabelText("Barcode").should("not.exist");
+        cy.findByLabelText("Section Thickness").should("not.exist");
+        cy.findByText("Create Labware").should("be.disabled");
+      });
+      after(() => {
+        cy.findByText("Delete Layout").click();
+      });
+    });
+
     context("when adding a Visium TO layout", () => {
       before(() => {
         cy.findByRole("combobox").select("Visium LP");

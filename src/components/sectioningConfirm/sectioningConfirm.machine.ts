@@ -209,8 +209,12 @@ export function createSectioningConfirmMachine() {
            but no "newSection", since it has no section number.
            **/
           if (
-            ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE] &&
-            ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE].some(
+            ctx.layoutPlansByLabwareType[
+              LabwareTypeName.FETAL_WASTE_CONTAINER
+            ] &&
+            ctx.layoutPlansByLabwareType[
+              LabwareTypeName.FETAL_WASTE_CONTAINER
+            ].some(
               (plan) =>
                 plan.destinationLabware.barcode ===
                 e.confirmSectionLabware.barcode
@@ -395,8 +399,12 @@ export function createSectioningConfirmMachine() {
           const isValid = ctx.confirmSectionLabware.every((csl) => {
             if (
               csl.cancelled ||
-              (ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE] &&
-                ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE].some(
+              (ctx.layoutPlansByLabwareType[
+                LabwareTypeName.FETAL_WASTE_CONTAINER
+              ] &&
+                ctx.layoutPlansByLabwareType[
+                  LabwareTypeName.FETAL_WASTE_CONTAINER
+                ].some(
                   (plan) => plan.destinationLabware.barcode === csl.barcode
                 ))
             ) {
@@ -464,7 +472,7 @@ function fillInSectionNumbersInLayoutPlan(
       .filter(
         ([labwareTypeName, _]) =>
           labwareTypeName !== LabwareTypeName.TUBE &&
-          labwareTypeName !== LabwareTypeName.FETAL_WASTE
+          labwareTypeName !== LabwareTypeName.FETAL_WASTE_CONTAINER
       )
       .forEach(([_, lps]) => {
         lps.forEach((layoutPlan) => {
