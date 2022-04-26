@@ -258,20 +258,19 @@ export default function Planner({
       );
     }
   );
+  //Find all labwares having fetal waste samples with collection date less than 12 weeks
   const fetalSampleWarningLabware = state.sourceLabware.filter(
     (lw) =>
       lw.slots.find(
         (slot) =>
           slot.samples.find((sample) => {
-            debugger;
-            return (
+            const numDays =
               sample.tissue.collectionDate &&
               getNumberOfDaysBetween(
                 sample.tissue.collectionDate,
                 new Date().toDateString()
-              ) <
-                FETAL_STORAGE_WEEKS * 7
-            );
+              );
+            return numDays && numDays < FETAL_STORAGE_WEEKS * 7;
           }) !== undefined
       ) !== undefined
   );
@@ -300,7 +299,7 @@ export default function Planner({
             .map((lw) => lw.barcode)
             .join(",")} ${
             fetalSampleWarningLabware.length > 1 ? " have" : " has"
-          } fetal waste samples less than ${FETAL_STORAGE_WEEKS} weeks old. Please collect the fetal waste to "Fetal waste container" labware type.`}
+          } fetal waste samples collected less than ${FETAL_STORAGE_WEEKS} weeks. Please keep the fetal waste for ${FETAL_STORAGE_WEEKS} weeks.`}
         />
       )}
 
