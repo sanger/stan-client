@@ -259,20 +259,24 @@ export default function Planner({
     }
   );
   //Find all labwares having fetal waste samples with collection date less than 12 weeks
-  const fetalSampleWarningLabware = state.sourceLabware.filter(
-    (lw) =>
-      lw.slots.find(
-        (slot) =>
-          slot.samples.find((sample) => {
-            const numDays =
-              sample.tissue.collectionDate &&
-              getNumberOfDaysBetween(
-                sample.tissue.collectionDate,
-                new Date().toDateString()
-              );
-            return numDays && numDays < FETAL_STORAGE_WEEKS * 7;
-          }) !== undefined
-      ) !== undefined
+  const fetalSampleWarningLabware = React.useMemo(
+    () =>
+      state.sourceLabware.filter(
+        (lw) =>
+          lw.slots.find(
+            (slot) =>
+              slot.samples.find((sample) => {
+                const numDays =
+                  sample.tissue.collectionDate &&
+                  getNumberOfDaysBetween(
+                    sample.tissue.collectionDate,
+                    new Date().toDateString()
+                  );
+                return numDays && numDays < FETAL_STORAGE_WEEKS * 7;
+              }) !== undefined
+          ) !== undefined
+      ),
+    [state.sourceLabware]
   );
 
   return (
