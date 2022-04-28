@@ -1,24 +1,22 @@
 import { assign, createMachine } from "xstate";
-import {
-  HasEnabled,
-  MachineServiceDone,
-  MachineServiceError,
-} from "../../types/stan";
+import { MachineServiceDone, MachineServiceError } from "../../types/stan";
 import { Maybe } from "../../types/sdk";
 import { ClientError } from "graphql-request";
+import { EntityValueType } from "./EntityManager";
 
-interface EntityManagerContext<E extends HasEnabled> {
+interface EntityManagerContext<E> {
   entities: Array<E>;
-  field: keyof E;
+  keyField: keyof E;
+  valueField: keyof E;
   successMessage: Maybe<string>;
   error: Maybe<ClientError>;
 }
 
-type EntityManagerEvent<E extends HasEnabled> =
+type EntityManagerEvent<E> =
   | {
-      type: "TOGGLE_ENABLED";
+      type: "VALUE_CHANGE";
       entity: E;
-      enabled: boolean;
+      value: EntityValueType;
     }
   | {
       type: "DRAFT_NEW_ENTITY";
@@ -28,20 +26,22 @@ type EntityManagerEvent<E extends HasEnabled> =
       value: string;
     }
   | { type: "DISCARD_DRAFT" }
-  | MachineServiceDone<"toggleEnabled", E>
-  | MachineServiceError<"toggleEnabled", ClientError>
+  | MachineServiceDone<"valueChanged", E>
+  | MachineServiceError<"valueChanged", ClientError>
   | MachineServiceDone<"createEntity", E>
   | MachineServiceError<"createEntity", ClientError>;
 
-export function createEntityManagerMachine<E extends HasEnabled>(
+export function createEntityManagerMachine<E>(
   entities: Array<E>,
-  field: keyof E
+  keyField: keyof E,
+  valueField: keyof E
 ) {
   return createMachine<EntityManagerContext<E>, EntityManagerEvent<E>>(
     {
       context: {
         entities,
-        field,
+        keyField,
+        valueField,
         successMessage: null,
         error: null,
       },
@@ -50,7 +50,7 @@ export function createEntityManagerMachine<E extends HasEnabled>(
       states: {
         ready: {
           on: {
-            TOGGLE_ENABLED: "loading.toggleEnabled",
+            VALUE_CHANGE: "loading.valueChanged",
             DRAFT_NEW_ENTITY: "draftCreation",
           },
         },
@@ -63,9 +63,9 @@ export function createEntityManagerMachine<E extends HasEnabled>(
         loading: {
           entry: ["clearMessages"],
           states: {
-            toggleEnabled: {
+            valueChanged: {
               invoke: {
-                src: "toggleEnabled",
+                src: "valueChanged",
                 onDone: {
                   target: "#entityManager.ready",
                   actions: "updateEntity",
@@ -108,7 +108,7 @@ export function createEntityManagerMachine<E extends HasEnabled>(
         assignErrorMessage: assign((ctx, e) => {
           if (
             e.type !== "error.platform.createEntity" &&
-            e.type !== "error.platform.toggleEnabled"
+            e.type !== "error.platform.valueChanged"
           ) {
             return {};
           }
@@ -125,18 +125,18 @@ export function createEntityManagerMachine<E extends HasEnabled>(
         }),
 
         updateEntity: assign((ctx, e) => {
-          if (e.type !== "done.invoke.toggleEnabled") {
+          if (e.type !== "done.invoke.valueChanged") {
             return {};
           }
 
-          const successMessage = `"${e.data[ctx.field]}" ${
-            e.data.enabled ? "enabled" : "disabled"
+          const successMessage = `"${e.data[ctx.keyField]}" set to ${
+            e.data[ctx.valueField]
           }`;
 
           return {
             successMessage,
             entities: ctx.entities.map((entity) => {
-              if (entity[ctx.field] === e.data[ctx.field]) {
+              if (entity[ctx.keyField] === e.data[ctx.keyField]) {
                 return e.data;
               } else {
                 return entity;

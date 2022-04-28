@@ -1,13 +1,19 @@
 import { graphql } from "msw";
 import {
+  AddUserMutation,
+  AddUserMutationVariables,
   CurrentUserQuery,
   CurrentUserQueryVariables,
   LoginMutation,
   LoginMutationVariables,
   LogoutMutation,
   LogoutMutationVariables,
+  SetUserRoleMutation,
+  SetUserRoleMutationVariables,
   UserRole,
 } from "../../types/sdk";
+import userFactory from "../../lib/factories/userFactory";
+import userRepository from "../repositories/userRepository";
 
 const CURRENT_USER_KEY = "currentUser";
 
@@ -57,7 +63,7 @@ const userHandlers = [
             user: {
               __typename: "User",
               username: "jb1",
-              role: UserRole.Normal,
+              role: UserRole.Admin,
             },
           })
         );
@@ -67,9 +73,40 @@ const userHandlers = [
             user: {
               __typename: "User",
               username: currentUser,
-              role: UserRole.Normal,
+              role: UserRole.Admin,
             },
           })
+        );
+      }
+    }
+  ),
+
+  graphql.mutation<AddUserMutation, AddUserMutationVariables>(
+    "AddUser",
+    (req, res, ctx) => {
+      const addUser = userFactory.build({
+        username: req.variables.username,
+      });
+      userRepository.save(addUser);
+      return res(ctx.data({ addUser }));
+    }
+  ),
+
+  graphql.mutation<SetUserRoleMutation, SetUserRoleMutationVariables>(
+    "SetUserRole",
+    (req, res, ctx) => {
+      const user = userRepository.find("username", req.variables.username);
+      if (user) {
+        user.role = req.variables.role;
+        userRepository.save(user);
+        return res(ctx.data({ setUserRole: user }));
+      } else {
+        return res(
+          ctx.errors([
+            {
+              message: `Could not find equipment: "${req.variables.username}"`,
+            },
+          ])
         );
       }
     }

@@ -2,16 +2,22 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
 import { Input } from "../forms/Input";
 import BlueButton from "../buttons/BlueButton";
-import { HasEnabled } from "../../types/stan";
 import { useMachine } from "@xstate/react";
-import { createEntityManagerMachine } from "./entityManager.machine";
 import Success from "../notifications/Success";
 import Warning from "../notifications/Warning";
 import { capitalize } from "lodash";
 import WhiteButton from "../buttons/WhiteButton";
 import PinkButton from "../buttons/PinkButton";
 import LoadingSpinner from "../icons/LoadingSpinner";
+import { SelectEntityRow } from "./SelectEntityRow";
+import { BooleanEntityRow } from "./BooleanEntityRow";
+import { createEntityManagerMachine } from "./entityManager.machine";
 
+export type EntityValueType = boolean | string | number;
+type ValueFieldComponentInfo = {
+  type: "CHECKBOX" | "SELECT";
+  valueOptions?: string[];
+};
 type EntityManagerProps<E> = {
   /**
    * The initial entities to display in the table
@@ -19,52 +25,64 @@ type EntityManagerProps<E> = {
   initialEntities: Array<E>;
 
   /**
-   * Which property of the entity should be used to display its value
+   * Which property of the entity should be used to display its value as key
    */
-  displayColumnName: keyof E;
+  displayKeyColumnName: keyof E;
 
   /**
    * This can be used to display a name (on table column and add button) different from displayColumnName (which is a field name in graphql schema).
    * One use case is to accommodate changes in field names in future (like HMDMC to HuMFre)
    * because schema fields cannot be changed as it can bring major impact on db
    */
-  alternateColumnName?: string;
+  alternateKeyColumnName?: string;
 
   /**
-   * Callback for when an entity has its <code>enabled</code> property toggled
-   * @param entity the toggle entity
-   * @param enabled true if the entity is being enabled, false if its being disabled
+   * Which property of the entity should be used to display as value
    */
-  onToggle(entity: E, enabled: boolean): Promise<E>;
+  valueColumnName: keyof E;
+
+  /***
+   * Component type details to display in Value field
+   */
+  valueFieldComponentInfo: ValueFieldComponentInfo;
 
   /**
    * Callback when a new entity is to be created
    * @param value the value of the new entity
    */
   onCreate(value: string): Promise<E>;
+
+  /**
+   * Callback when the value of key changes
+   */
+  onChangeValue(entity: E, value: EntityValueType): Promise<E>;
 };
 
-export default function EntityManager<E extends HasEnabled>({
+export default function EntityManager<
+  E extends Record<string, EntityValueType>
+>({
   initialEntities,
-  displayColumnName,
-  alternateColumnName,
-  onToggle,
+  displayKeyColumnName,
+  alternateKeyColumnName,
+  valueColumnName,
+  valueFieldComponentInfo,
   onCreate,
+  onChangeValue,
 }: EntityManagerProps<E>) {
   const [current, send] = useMachine(
     createEntityManagerMachine<E>(
       initialEntities,
-      displayColumnName
+      displayKeyColumnName,
+      valueColumnName
     ).withConfig({
       services: {
-        toggleEnabled: (context, e) => {
-          if (e.type !== "TOGGLE_ENABLED") return Promise.reject();
-          return onToggle(e.entity, e.enabled);
-        },
-
         createEntity: (ctx, e) => {
           if (e.type !== "CREATE_NEW_ENTITY") return Promise.reject();
           return onCreate(e.value);
+        },
+        valueChanged: (context, e) => {
+          if (e.type !== "VALUE_CHANGE") return Promise.reject();
+          return onChangeValue(e.entity, e.value);
         },
       },
     })
@@ -102,8 +120,8 @@ export default function EntityManager<E extends HasEnabled>({
    * Callback handler for when an EntityRow changes (i.e. enabled property is toggled)
    */
   const handleOnRowChange = useCallback(
-    (entity: E, enabled: boolean) => {
-      send({ type: "TOGGLE_ENABLED", entity, enabled });
+    (entity: E, value: EntityValueType) => {
+      send({ type: "VALUE_CHANGE", entity, value });
     },
     [send]
   );
@@ -126,6 +144,37 @@ export default function EntityManager<E extends HasEnabled>({
   const isCreatingEntity = current.matches({ loading: "creatingEntity" });
   const showDraft = isDrafting || isCreatingEntity;
 
+  const getValueFieldComponent = (
+    valueFieldComponentInfo: ValueFieldComponentInfo,
+    entity: E,
+    keyColumn: string,
+    valueColumn: string
+  ) => {
+    switch (valueFieldComponentInfo.type) {
+      case "SELECT": {
+        return (
+          <SelectEntityRow
+            key={keyColumn}
+            value={String(entity[valueColumn])}
+            valueFieldOptions={valueFieldComponentInfo.valueOptions ?? []}
+            onChange={(val) => handleOnRowChange(entity, val)}
+          />
+        );
+      }
+      case "CHECKBOX": {
+        return (
+          <BooleanEntityRow
+            disable={isLoading || isDrafting}
+            value={Boolean(entity[valueColumn])}
+            onChange={(enabled) => handleOnRowChange(entity, enabled)}
+          />
+        );
+      }
+      default:
+        return <></>;
+    }
+  };
+
   return (
     <div className="space-y-4">
       {successMessage && <Success message={successMessage} />}
@@ -133,23 +182,22 @@ export default function EntityManager<E extends HasEnabled>({
       <Table>
         <TableHead>
           <tr>
-            <TableHeader>
-              {alternateColumnName ?? displayColumnName}
-            </TableHeader>
+            <TableHeader>User</TableHeader>
             <TableHeader>Enabled</TableHeader>
           </tr>
         </TableHead>
         <TableBody>
           {entities.map((entity) => (
-            <EntityRow<E>
-              key={String(entity[displayColumnName])}
-              entity={entity}
-              displayColumnName={displayColumnName}
-              disable={isLoading || isDrafting}
-              onChange={handleOnRowChange}
-            />
+            <tr>
+              <TableCell>{entity[displayKeyColumnName]}</TableCell>
+              {getValueFieldComponent(
+                valueFieldComponentInfo,
+                entity,
+                String(displayKeyColumnName),
+                String(valueColumnName)
+              )}
+            </tr>
           ))}
-
           {showDraft && (
             <tr>
               <TableCell colSpan={2}>
@@ -181,9 +229,9 @@ export default function EntityManager<E extends HasEnabled>({
           >
             + Add{" "}
             {capitalize(
-              alternateColumnName
-                ? alternateColumnName.toString()
-                : displayColumnName.toString()
+              alternateKeyColumnName
+                ? alternateKeyColumnName.toString()
+                : displayKeyColumnName.toString()
             )}
           </BlueButton>
         )}
@@ -200,54 +248,5 @@ export default function EntityManager<E extends HasEnabled>({
         )}
       </div>
     </div>
-  );
-}
-
-type EntityRowParams<E extends HasEnabled> = {
-  /**
-   * The entity to display in this row
-   */
-  entity: E;
-
-  /**
-   * The parameter of the entity to display the value of
-   */
-  displayColumnName: keyof E;
-
-  /**
-   * Should this row be disabled right now
-   */
-  disable: boolean;
-
-  /**
-   * Callback handler for when the checkbox changes value
-   * @param entity the row entity
-   * @param enabled true if the checkbox is checked, false otherwise
-   */
-  onChange: (entity: E, enabled: boolean) => void;
-};
-
-function EntityRow<E extends HasEnabled>({
-  entity,
-  displayColumnName,
-  disable,
-  onChange,
-}: EntityRowParams<E>) {
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(entity, e.target.checked);
-  };
-
-  return (
-    <tr className={`${disable && "opacity-50"}`}>
-      <TableCell>{entity[displayColumnName]}</TableCell>
-      <TableCell>
-        <Input
-          type="checkbox"
-          disabled={disable}
-          defaultChecked={entity.enabled}
-          onChange={handleOnChange}
-        />
-      </TableCell>
-    </tr>
   );
 }
