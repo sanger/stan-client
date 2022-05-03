@@ -32,6 +32,7 @@ export interface RegistrationFormTissue {
   species: string;
   hmdmc: string;
   tissueType: string;
+  sampleCollectionDate?: Date | string;
   blocks: RegistrationFormBlock[];
 }
 
@@ -61,6 +62,7 @@ export function getRegistrationFormTissue(): RegistrationFormTissue {
     hmdmc: "",
     tissueType: "",
     blocks: [getRegistrationFormBlock()],
+    sampleCollectionDate: "",
   };
 }
 
@@ -82,6 +84,7 @@ function buildRegistrationSchema(
           species: validation.species,
           hmdmc: validation.hmdmc,
           tissueType: validation.tissueType,
+          sampleCollectionDate: validation.sampleCollectionDate,
           blocks: Yup.array()
             .min(1)
             .of(

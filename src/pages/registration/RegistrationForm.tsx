@@ -112,6 +112,15 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
                 })}
               </RadioGroup>
 
+              {values.tissues[currentIndex].lifeStage === LifeStage.Fetal && (
+                <FormikInput
+                  type="date"
+                  name={`tissues.${currentIndex}.sampleCollectionDate`}
+                  label={"Sample Collection Date"}
+                  max={new Date()}
+                />
+              )}
+
               <FormikSelect
                 label={"Species"}
                 name={`tissues.${currentIndex}.species`}

@@ -39,7 +39,6 @@ function getNumErrorsPerTissue(
           }
         });
       });
-
       Object.keys(tissue)
         .filter((k) => k !== "blocks")
         .forEach((tissueKey) => {
@@ -76,7 +75,6 @@ const SummaryBox = ({
 }: SummaryBoxParams) => {
   const errorCount = getNumErrorsPerTissue(values.tissues, errors, touched);
   const [whiteButtonDisabled, setWhiteButtonDisabled] = useState(false);
-
   return (
     <div className="sticky top-0 space-y-2">
       <Heading level={3} showBorder={false}>
@@ -162,6 +160,7 @@ const SummaryBox = ({
           + Add Another Tissue
         </WhiteButton>
 
+        {}
         <PinkButton loading={submitting} type="submit" className="mt-4 w-full">
           Register
         </PinkButton>

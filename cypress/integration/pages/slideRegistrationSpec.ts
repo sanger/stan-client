@@ -35,7 +35,7 @@ describe("Slide Registration Page", () => {
   });
 
   describe("Validation", () => {
-    shouldBehaveLikeARegistrationForm();
+    shouldBehaveLikeARegistrationForm(true);
 
     it("requires External Slide Barcode", () => {
       cy.findByLabelText("External Slide Barcode").focus().blur();

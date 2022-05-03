@@ -126,4 +126,22 @@ export default class RegistrationValidation {
       oneOf: this.registrationInfo.labwareTypes.map((lt) => lt.name),
     });
   }
+
+  get sampleCollectionDate() {
+    return Yup.date().when("lifeStage", {
+      is: LifeStage.Fetal,
+      then: Yup.date()
+        .max(
+          new Date(),
+          `Please select a date on or before ${new Date().toLocaleDateString()}`
+        )
+        .nullable()
+        .transform((curr, orig) => (orig === "" ? null : curr))
+        .required(
+          "Sample Collection Date is a required field for fetal samples"
+        )
+        .label("Sample Collection Date"),
+      otherwise: Yup.date().notRequired(),
+    });
+  }
 }

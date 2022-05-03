@@ -1,4 +1,6 @@
-export function shouldBehaveLikeARegistrationForm() {
+export function shouldBehaveLikeARegistrationForm(
+  isSlideRegistration: boolean
+) {
   describe("Validation", () => {
     it("requires Donor ID", () => {
       cy.findByLabelText("Donor ID").focus().blur();
@@ -38,6 +40,32 @@ export function shouldBehaveLikeARegistrationForm() {
         cy.findByText(
           "Donor ID contains invalid characters. Only letters, numbers, spaces, hyphens, and underscores are permitted"
         ).should("not.exist");
+      });
+    });
+
+    context("Life stage selection", () => {
+      context("when Fetal is selected", () => {
+        before(() => {
+          cy.findByLabelText("Fetal").click();
+        });
+        it(
+          isSlideRegistration
+            ? "does not show sample collection date"
+            : "shows sample collection date",
+          () => {
+            cy.findByLabelText("Sample Collection Date").should(
+              isSlideRegistration ? "not.exist" : "be.visible"
+            );
+          }
+        );
+      });
+      context("when Adult is selected", () => {
+        before(() => {
+          cy.findByLabelText("Adult").click();
+        });
+        it("does not show sample collection date", () => {
+          cy.findByLabelText("Sample Collection Date").should("not.exist");
+        });
       });
     });
 
