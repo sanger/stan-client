@@ -1,4 +1,12 @@
-import { PlanMutation, PlanMutationVariables } from "../../../src/types/sdk";
+import {
+  FindLabwareQuery,
+  FindLabwareQueryVariables,
+  PlanMutation,
+  PlanMutationVariables,
+} from "../../../src/types/sdk";
+import labwareFactory from "../../../src/lib/factories/labwareFactory";
+import { labwareTypes } from "../../../src/lib/factories/labwareTypeFactory";
+import { LabwareTypeName } from "../../../src/types/stan";
 
 describe("Sectioning Planning", () => {
   before(() => {
@@ -21,6 +29,49 @@ describe("Sectioning Planning", () => {
         cy.findByText("+ Add Labware").should("not.be.disabled");
       });
     });
+
+    context(
+      "when a source labware loaded with fetal samples less than 12 weeks old",
+      () => {
+        before(() => {
+          const sourceLabware = labwareFactory.build(
+            { barcode: "STAN-3333" },
+            {
+              associations: {
+                labwareType: labwareTypes[LabwareTypeName.CASSETTE].build(),
+              },
+            }
+          );
+          sourceLabware.slots.forEach((slot) =>
+            slot.samples.forEach(
+              (sample) =>
+                (sample.tissue.collectionDate = new Date(
+                  Date.now() - 1000 * 60 * 60 * 24 * 7
+                ).toDateString())
+            )
+          );
+          cy.msw().then(({ graphql, worker }) => {
+            worker.use(
+              graphql.query<FindLabwareQuery, FindLabwareQueryVariables>(
+                "FindLabware",
+                (req, res, ctx) => {
+                  return res.once(
+                    ctx.data({
+                      labware: sourceLabware,
+                    })
+                  );
+                }
+              )
+            );
+          });
+          cy.get("#labwareScanInput").type("STAN-3333{enter}");
+        });
+
+        it("should display a warning message", () => {
+          cy.findByText("STAN-3333").should("be.visible");
+        });
+      }
+    );
   });
 
   describe("Source labware table", () => {

@@ -24,6 +24,8 @@ import LabwareScanner from "../labwareScanner/LabwareScanner";
 import { buildSampleColors } from "../../lib/helpers/labwareHelper";
 import Heading from "../Heading";
 import { useScrollToRef } from "../../lib/hooks";
+import { getNumberOfDaysBetween } from "../../lib/helpers";
+import Warning from "../notifications/Warning";
 
 type PlannerProps = {
   /**
@@ -108,6 +110,8 @@ type Action =
   | { type: "ADD_LABWARE_PLAN"; labwareType: LabwareTypeFieldsFragment }
   | { type: "REMOVE_LABWARE_PLAN"; cid: string }
   | { type: "PLAN_COMPLETE"; cid: string; plan: PlanMutation };
+
+const FETAL_STORAGE_WEEKS = 12;
 
 function reducer(state: PlannerState, action: Action): PlannerState {
   return produce(state, (draft) => {
@@ -254,6 +258,26 @@ export default function Planner({
       );
     }
   );
+  //Find all labwares having fetal waste samples with collection date less than 12 weeks
+  const fetalSampleWarningLabware = React.useMemo(
+    () =>
+      state.sourceLabware.filter(
+        (lw) =>
+          lw.slots.find(
+            (slot) =>
+              slot.samples.find((sample) => {
+                const numDays =
+                  sample.tissue.collectionDate &&
+                  getNumberOfDaysBetween(
+                    sample.tissue.collectionDate,
+                    new Date().toDateString()
+                  );
+                return numDays && numDays < FETAL_STORAGE_WEEKS * 7;
+              }) !== undefined
+          ) !== undefined
+      ),
+    [state.sourceLabware]
+  );
 
   return (
     <div className="space-y-4">
@@ -273,6 +297,15 @@ export default function Planner({
           ]}
         />
       </LabwareScanner>
+      {fetalSampleWarningLabware.length > 0 && (
+        <Warning
+          message={`The labware ${fetalSampleWarningLabware
+            .map((lw) => lw.barcode)
+            .join(",")} ${
+            fetalSampleWarningLabware.length > 1 ? " have" : " has"
+          } fetal waste samples collected less than ${FETAL_STORAGE_WEEKS} weeks ago. Please keep the fetal waste for ${FETAL_STORAGE_WEEKS} weeks.`}
+        />
+      )}
 
       <PlannerContext.Provider
         value={{
