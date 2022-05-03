@@ -463,6 +463,8 @@ export type Labware = {
   destroyed: Scalars['Boolean'];
   /** Has this labware been discarded? */
   discarded: Scalars['Boolean'];
+  /** Has this labware been marked as used? */
+  used: Scalars['Boolean'];
   /** The state, derived from the contents and other fields on the labware. */
   state: LabwareState;
   /** The time when this labware was created in the application. */
@@ -501,7 +503,9 @@ export enum LabwareState {
   /** The labware has been given out to another team or organisation. */
   Released = 'released',
   /** The labware has been destroyed for a specific reason. */
-  Destroyed = 'destroyed'
+  Destroyed = 'destroyed',
+  /** The labware has been used but may still be stored. */
+  Used = 'used'
 }
 
 /** A type of labware, such as slides and tubes. */
