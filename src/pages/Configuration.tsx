@@ -343,7 +343,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                 valueColumnName={"role"}
                 valueFieldComponentInfo={{
                   type: "SELECT",
-                  valueOptions: Object.keys(UserRole),
+                  valueOptions: Object.values(UserRole),
                 }}
                 onCreate={(username) =>
                   stanCore.AddUser({ username }).then((res) => res.addUser)

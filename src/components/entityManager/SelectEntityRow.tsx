@@ -22,6 +22,7 @@ type SelectEntityRowParams = {
 };
 
 export function SelectEntityRow({
+  value,
   valueFieldOptions,
   onChange,
 }: SelectEntityRowParams) {
@@ -31,7 +32,7 @@ export function SelectEntityRow({
 
   return (
     <TableCell colSpan={2}>
-      <Select onChange={handleOnChange}>
+      <Select onChange={handleOnChange} value={value}>
         {valueFieldOptions.map((option, indx) => (
           <option key={indx} value={option}>
             {option}

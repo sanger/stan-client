@@ -129,9 +129,14 @@ export function createEntityManagerMachine<E>(
             return {};
           }
 
-          const successMessage = `"${e.data[ctx.keyField]}" set to ${
-            e.data[ctx.valueField]
-          }`;
+          const successMessage =
+            typeof e.data[ctx.valueField] === "boolean"
+              ? `"${e.data[ctx.keyField]}" ${
+                  e.data[ctx.valueField] ? "enabled" : "disabled"
+                }`
+              : `"${e.data[ctx.keyField]}" - ${ctx.valueField} changed to ${
+                  e.data[ctx.valueField]
+                }`;
 
           return {
             successMessage,

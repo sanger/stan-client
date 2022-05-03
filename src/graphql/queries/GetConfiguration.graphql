@@ -32,7 +32,7 @@ query GetConfiguration {
     equipments(includeDisabled: true) {
         ...EquipmentFields
     }
-    users {
+    users(includeDisabled: true) {
         ...UserFields
     }
 }

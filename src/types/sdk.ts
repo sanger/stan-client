@@ -5309,7 +5309,7 @@ export const GetConfigurationDocument = gql`
   equipments(includeDisabled: true) {
     ...EquipmentFields
   }
-  users {
+  users(includeDisabled: true) {
     ...UserFields
   }
 }

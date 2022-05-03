@@ -14,10 +14,13 @@ import { BooleanEntityRow } from "./BooleanEntityRow";
 import { createEntityManagerMachine } from "./entityManager.machine";
 
 export type EntityValueType = boolean | string | number;
+
+/**Component type to display in value field**/
 type ValueFieldComponentInfo = {
   type: "CHECKBOX" | "SELECT";
   valueOptions?: string[];
 };
+
 type EntityManagerProps<E> = {
   /**
    * The initial entities to display in the table
@@ -42,7 +45,7 @@ type EntityManagerProps<E> = {
   valueColumnName: keyof E;
 
   /***
-   * Component type details to display in Value field
+   * How to display in Value field
    */
   valueFieldComponentInfo: ValueFieldComponentInfo;
 
@@ -53,7 +56,7 @@ type EntityManagerProps<E> = {
   onCreate(value: string): Promise<E>;
 
   /**
-   * Callback when the value of key changes
+   * Callback when value changes
    */
   onChangeValue(entity: E, value: EntityValueType): Promise<E>;
 };
@@ -182,8 +185,8 @@ export default function EntityManager<
       <Table>
         <TableHead>
           <tr>
-            <TableHeader>User</TableHeader>
-            <TableHeader>Enabled</TableHeader>
+            <TableHeader>{displayKeyColumnName}</TableHeader>
+            <TableHeader>{valueColumnName}</TableHeader>
           </tr>
         </TableHead>
         <TableBody>
