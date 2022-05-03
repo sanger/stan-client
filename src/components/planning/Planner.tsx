@@ -303,7 +303,7 @@ export default function Planner({
             .map((lw) => lw.barcode)
             .join(",")} ${
             fetalSampleWarningLabware.length > 1 ? " have" : " has"
-          } fetal waste samples collected less than ${FETAL_STORAGE_WEEKS} weeks. Please keep the fetal waste for ${FETAL_STORAGE_WEEKS} weeks.`}
+          } fetal waste samples collected less than ${FETAL_STORAGE_WEEKS} weeks ago. Please keep the fetal waste for ${FETAL_STORAGE_WEEKS} weeks.`}
         />
       )}
 
