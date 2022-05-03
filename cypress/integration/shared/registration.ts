@@ -63,7 +63,7 @@ export function shouldBehaveLikeARegistrationForm(
         before(() => {
           cy.findByLabelText("Adult").click();
         });
-        it("shows sample collection date", () => {
+        it("does not show sample collection date", () => {
           cy.findByLabelText("Sample Collection Date").should("not.exist");
         });
       });
