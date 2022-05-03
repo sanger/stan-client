@@ -104,7 +104,7 @@ const userHandlers = [
         return res(
           ctx.errors([
             {
-              message: `Could not find equipment: "${req.variables.username}"`,
+              message: `Could not find user: "${req.variables.username}"`,
             },
           ])
         );
