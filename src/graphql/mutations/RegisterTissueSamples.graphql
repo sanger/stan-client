@@ -1,0 +1,18 @@
+mutation RegisterTissueSamples($request:TissueSampleRegisterRequest!) {
+registerTissueSamples(request:$request) {
+    labware {
+        ...LabwareFields
+    }
+    clashes {
+        tissue {
+            externalName
+        }
+        labware {
+            barcode
+            labwareType {
+                name
+            }
+        }
+    }
+}
+}

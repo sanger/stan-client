@@ -23,7 +23,8 @@ export enum LabwareTypeName {
   VISIUM_ADH = "Visium ADH",
   FOUR_SLOT_SLIDE = "4 slot slide",
   FETAL_WASTE_CONTAINER = "Fetal waste container",
-  DUAL_INDEX_PLATE= "Dual index plate"
+  DUAL_INDEX_PLATE= "Dual index plate",
+  POT="Pot"
 }
 
 export type Address = string;

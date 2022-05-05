@@ -598,6 +598,8 @@ export type Mutation = {
   register: RegisterResult;
   /** Register sections of tissue. */
   registerSections: RegisterResult;
+  /** Register samples of tissue. */
+  registerTissueSamples: RegisterResult;
   /** Record planned operations. */
   plan: PlanResult;
   /** Print the specified labware barcodes on the specified printer. */
@@ -658,6 +660,10 @@ export type Mutation = {
   addWorkType: WorkType;
   /** Enable or disable a work type. */
   setWorkTypeEnabled: WorkType;
+  /** Create a new chemical for sample to put in. */
+  addSolutionSample: SolutionSample;
+  /** Enable or disable a solution sample. */
+  setSolutionSampleEnabled: SolutionSample;
   /** Create a new work, which will be allocated a new work number with the given prefix. */
   createWork: Work;
   /** Update the status of an existing work. */
@@ -736,6 +742,15 @@ export type MutationRegisterArgs = {
  */
 export type MutationRegisterSectionsArgs = {
   request?: Maybe<SectionRegisterRequest>;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationRegisterTissueSamplesArgs = {
+  request: TissueSampleRegisterRequest;
 };
 
 
@@ -1019,6 +1034,25 @@ export type MutationAddWorkTypeArgs = {
  */
 export type MutationSetWorkTypeEnabledArgs = {
   name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationAddSolutionSampleArgs = {
+  name: Scalars['String'];
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationSetSolutionSampleEnabledArgs = {
+  solutionSample: Scalars['String'];
   enabled: Scalars['Boolean'];
 };
 
@@ -1444,6 +1478,8 @@ export type Query = {
   mediums: Array<Medium>;
   /** Get all the fixatives that are enabled, or get all including those that are disabled. */
   fixatives: Array<Fixative>;
+  /** Get all the solution samples available. */
+  solutionSamples: Array<SolutionSample>;
   /** Get all the species that are enabled, or get all including those that are disabled. */
   species: Array<Species>;
   /** Get the labware with the given barcode. */
@@ -1526,6 +1562,15 @@ export type QueryHmdmcsArgs = {
  * These typically require no user privilege.
  */
 export type QueryFixativesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+/**
+ * Get information from the application.
+ * These typically require no user privilege.
+ */
+export type QuerySolutionSamplesArgs = {
   includeDisabled?: Maybe<Scalars['Boolean']>;
 };
 
@@ -1959,6 +2004,34 @@ export type Sample = {
   bioState: BioState;
 };
 
+/** A request to register one or more samples of tissue sample. */
+export type SampleRegisterRequest = {
+  /** The string to use as the donor name. */
+  donorIdentifier: Scalars['String'];
+  /** The life stage of the donor. */
+  lifeStage: LifeStage;
+  /** The HMDMC to use for the tissue. */
+  hmdmc?: Maybe<Scalars['String']>;
+  /** The name of the tissue type (the organ from which the tissue is taken). */
+  tissueType: Scalars['String'];
+  /** The code for the spatial location from which the tissue is taken. */
+  spatialLocation: Scalars['Int'];
+  /** The string to use for the replicate number of the tissue. */
+  replicateNumber?: Maybe<Scalars['String']>;
+  /** The external identifier used to identify the tissue. */
+  externalIdentifier?: Maybe<Scalars['String']>;
+  /** The name of the type of labware containing the sample. */
+  labwareType: Scalars['String'];
+  /** The solution sample used for the tissue. */
+  solutionSample: Scalars['String'];
+  /** The fixative used for the tissue. */
+  fixative: Scalars['String'];
+  /** The species of the donor. */
+  species: Scalars['String'];
+  /** The date the original sample was collected, if known. */
+  sampleCollectionDate?: Maybe<Scalars['Date']>;
+};
+
 /** Specification of a result being recording. */
 export type SampleResult = {
   /** The slot address that the result refers to. */
@@ -2081,6 +2154,13 @@ export type SlotPassFail = {
   comment?: Maybe<Scalars['String']>;
 };
 
+/** A chemical a sample is put in. For example Ethanol */
+export type SolutionSample = {
+  __typename?: 'SolutionSample';
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
 /** A location in an organ that tissue was taken from. */
 export type SpatialLocation = {
   __typename?: 'SpatialLocation';
@@ -2176,6 +2256,11 @@ export type Tissue = {
   fixative: Fixative;
   /** The date the original sample was collected, if known. */
   collectionDate?: Maybe<Scalars['Date']>;
+};
+
+/** A request to register one or more samples of tissue sample. */
+export type TissueSampleRegisterRequest = {
+  samples: Array<SampleRegisterRequest>;
 };
 
 /** The type of tissue, typically an organ. */
@@ -2561,6 +2646,11 @@ export type SlotPassFailFieldsFragment = (
   & Pick<SlotPassFail, 'address' | 'result' | 'comment'>
 );
 
+export type SolutionSampleFieldsFragment = (
+  { __typename?: 'SolutionSample' }
+  & Pick<SolutionSample, 'name' | 'enabled'>
+);
+
 export type SpeciesFieldsFragment = (
   { __typename?: 'Species' }
   & Pick<Species, 'name' | 'enabled'>
@@ -2737,6 +2827,19 @@ export type AddReleaseRecipientMutation = (
   & { addReleaseRecipient: (
     { __typename?: 'ReleaseRecipient' }
     & ReleaseRecipientFieldsFragment
+  ) }
+);
+
+export type AddSolutionSampleMutationVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type AddSolutionSampleMutation = (
+  { __typename?: 'Mutation' }
+  & { addSolutionSample: (
+    { __typename?: 'SolutionSample' }
+    & SolutionSampleFieldsFragment
   ) }
 );
 
@@ -3165,6 +3268,35 @@ export type RegisterSectionsMutation = (
   ) }
 );
 
+export type RegisterTissueSamplesMutationVariables = Exact<{
+  request: TissueSampleRegisterRequest;
+}>;
+
+
+export type RegisterTissueSamplesMutation = (
+  { __typename?: 'Mutation' }
+  & { registerTissueSamples: (
+    { __typename?: 'RegisterResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, clashes: Array<(
+      { __typename?: 'RegisterClash' }
+      & { tissue: (
+        { __typename?: 'Tissue' }
+        & Pick<Tissue, 'externalName'>
+      ), labware: Array<(
+        { __typename?: 'Labware' }
+        & Pick<Labware, 'barcode'>
+        & { labwareType: (
+          { __typename?: 'LabwareType' }
+          & Pick<LabwareType, 'name'>
+        ) }
+      )> }
+    )> }
+  ) }
+);
+
 export type RegisterTissuesMutationVariables = Exact<{
   request: RegisterRequest;
 }>;
@@ -3357,6 +3489,20 @@ export type SetReleaseRecipientEnabledMutation = (
   & { setReleaseRecipientEnabled: (
     { __typename?: 'ReleaseRecipient' }
     & ReleaseRecipientFieldsFragment
+  ) }
+);
+
+export type SetSolutionSampleEnabledMutationVariables = Exact<{
+  solutionSample: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetSolutionSampleEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setSolutionSampleEnabled: (
+    { __typename?: 'SolutionSample' }
+    & SolutionSampleFieldsFragment
   ) }
 );
 
@@ -4009,6 +4155,9 @@ export type GetRegistrationInfoQuery = (
   )>, mediums: Array<(
     { __typename?: 'Medium' }
     & Pick<Medium, 'name'>
+  )>, solutionSamples: Array<(
+    { __typename?: 'SolutionSample' }
+    & Pick<SolutionSample, 'name'>
   )> }
 );
 
@@ -4396,6 +4545,12 @@ export const SlotPassFailFieldsFragmentDoc = gql`
   comment
 }
     `;
+export const SolutionSampleFieldsFragmentDoc = gql`
+    fragment SolutionSampleFields on SolutionSample {
+  name
+  enabled
+}
+    `;
 export const SpeciesFieldsFragmentDoc = gql`
     fragment SpeciesFields on Species {
   name
@@ -4534,6 +4689,13 @@ export const AddReleaseRecipientDocument = gql`
   }
 }
     ${ReleaseRecipientFieldsFragmentDoc}`;
+export const AddSolutionSampleDocument = gql`
+    mutation AddSolutionSample($name: String!) {
+  addSolutionSample(name: $name) {
+    ...SolutionSampleFields
+  }
+}
+    ${SolutionSampleFieldsFragmentDoc}`;
 export const AddSpeciesDocument = gql`
     mutation AddSpecies($name: String!) {
   addSpecies(name: $name) {
@@ -4803,6 +4965,26 @@ export const RegisterSectionsDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const RegisterTissueSamplesDocument = gql`
+    mutation RegisterTissueSamples($request: TissueSampleRegisterRequest!) {
+  registerTissueSamples(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    clashes {
+      tissue {
+        externalName
+      }
+      labware {
+        barcode
+        labwareType {
+          name
+        }
+      }
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {
@@ -4914,6 +5096,13 @@ export const SetReleaseRecipientEnabledDocument = gql`
   }
 }
     ${ReleaseRecipientFieldsFragmentDoc}`;
+export const SetSolutionSampleEnabledDocument = gql`
+    mutation SetSolutionSampleEnabled($solutionSample: String!, $enabled: Boolean!) {
+  setSolutionSampleEnabled(solutionSample: $solutionSample, enabled: $enabled) {
+    ...SolutionSampleFields
+  }
+}
+    ${SolutionSampleFieldsFragmentDoc}`;
 export const SetSpeciesEnabledDocument = gql`
     mutation SetSpeciesEnabled($name: String!, $enabled: Boolean!) {
   setSpeciesEnabled(name: $name, enabled: $enabled) {
@@ -5352,6 +5541,9 @@ export const GetRegistrationInfoDocument = gql`
   mediums {
     name
   }
+  solutionSamples {
+    name
+  }
 }
     ${LabwareTypeFieldsFragmentDoc}`;
 export const GetReleaseInfoDocument = gql`
@@ -5472,6 +5664,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AddReleaseRecipient(variables: AddReleaseRecipientMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddReleaseRecipientMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddReleaseRecipientMutation>(AddReleaseRecipientDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddReleaseRecipient');
     },
+    AddSolutionSample(variables: AddSolutionSampleMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSolutionSampleMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddSolutionSampleMutation>(AddSolutionSampleDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSolutionSample');
+    },
     AddSpecies(variables: AddSpeciesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSpeciesMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddSpeciesMutation>(AddSpeciesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSpecies');
     },
@@ -5541,6 +5736,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     RegisterSections(variables: RegisterSectionsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterSectionsMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterSections');
     },
+    RegisterTissueSamples(variables: RegisterTissueSamplesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterTissueSamplesMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RegisterTissueSamplesMutation>(RegisterTissueSamplesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterTissueSamples');
+    },
     RegisterTissues(variables: RegisterTissuesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterTissuesMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RegisterTissuesMutation>(RegisterTissuesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterTissues');
     },
@@ -5576,6 +5774,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     SetReleaseRecipientEnabled(variables: SetReleaseRecipientEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetReleaseRecipientEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetReleaseRecipientEnabledMutation>(SetReleaseRecipientEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetReleaseRecipientEnabled');
+    },
+    SetSolutionSampleEnabled(variables: SetSolutionSampleEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSolutionSampleEnabledMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetSolutionSampleEnabledMutation>(SetSolutionSampleEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSolutionSampleEnabled');
     },
     SetSpeciesEnabled(variables: SetSpeciesEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSpeciesEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetSpeciesEnabledMutation>(SetSpeciesEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSpeciesEnabled');

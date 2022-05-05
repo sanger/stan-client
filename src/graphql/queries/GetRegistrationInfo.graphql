@@ -21,4 +21,7 @@ query GetRegistrationInfo {
     mediums {
         name
     }
+    solutionSamples {
+        name
+    }
 }
