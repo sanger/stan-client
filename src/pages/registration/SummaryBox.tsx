@@ -11,7 +11,7 @@ import Pill from "../../components/Pill";
 import {
   RegistrationFormTissue,
   RegistrationFormValues,
-} from "../Registration";
+} from "../BlockRegistration";
 
 function getNumberOfBlocks(values: FormikValues) {
   return values.tissues.reduce(

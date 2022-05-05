@@ -1,39 +1,29 @@
-import React, { useEffect, useMemo, useRef } from "react";
-import AppShell from "../components/AppShell";
-import Warning from "../components/notifications/Warning";
-import RegistrationForm from "./registration/RegistrationForm";
-import { Formik } from "formik";
-import ClashModal from "./registration/ClashModal";
-import { GetRegistrationInfoQuery, LifeStage } from "../types/sdk";
+import React, { useMemo } from "react";
+import {
+  GetRegistrationInfoQuery,
+  LifeStage,
+  RegisterTissueSamplesMutationVariables,
+  SampleRegisterRequest,
+} from "../types/sdk";
 import * as Yup from "yup";
 import RegistrationValidation from "../lib/validation/registrationValidation";
-import { useMachine } from "@xstate/react";
-import registrationMachine from "../lib/machines/registration/registrationMachine";
-import RegistrationSuccess from "./registration/RegistrationSuccess";
-import columns from "../components/dataTable/labwareColumns";
-import { useConfirmLeave } from "../lib/hooks";
-import { Prompt } from "react-router-dom";
 import { LabwareTypeName } from "../types/stan";
+import { registerTissueSamples } from "../lib/services/registrationService";
+import { PartialBy } from "../lib/helpers";
+import {
+  RegistrationFormBlock,
+  RegistrationFormTissue,
+} from "./BlockRegistration";
+import Registration from "./registration/Registration";
 
-const availableLabware: Array<LabwareTypeName> = [LabwareTypeName.POT];
-export interface RegistrationFormSample {
-  clientId: number;
-  externalIdentifier?: string;
-  spatialLocation: number;
-  replicateNumber?: string;
-  labwareType: LabwareTypeName;
-  fixative: string;
+type RegistrationFormSample = PartialBy<
+  Omit<RegistrationFormBlock, "medium" | "lastKnownSectionNumber">,
+  "externalIdentifier" | "replicateNumber"
+> & {
   solutionSample: string;
-}
-type RegistrationFormTissueSample = {
-  clientId: number;
-  donorId: string;
-  lifeStage: LifeStage;
-  species: string;
-  hmdmc: string;
-  tissueType: string;
-  sampleCollectionDate?: Date | string;
-  samples: RegistrationFormSample[];
+};
+type RegistrationFormTissueSample = Omit<RegistrationFormTissue, "blocks"> & {
+  blocks: RegistrationFormSample[];
 };
 
 export interface RegistrationFormTissueSampleValues {
@@ -58,7 +48,7 @@ export function getRegistrationFormTissueSample(): RegistrationFormTissueSample 
     lifeStage: LifeStage.Fetal,
     hmdmc: "",
     tissueType: "",
-    samples: [getRegistrationFormSample()],
+    blocks: [getRegistrationFormSample()],
     sampleCollectionDate: "",
   };
 }
@@ -103,102 +93,80 @@ interface RegistrationParams {
   registrationInfo: GetRegistrationInfoQuery;
 }
 
+/**
+ * Builds the registerTissueSample mutation variables from the RegistrationFormTissueSampleValues
+ * @param formValues
+ * @return Promise<RegisterTissueSamplesMutationVariables> mutation variables wrapped in a promise
+ */
+export function buildRegisterTissueSampleMutationVariables(
+  formValues: RegistrationFormTissueSampleValues
+): Promise<RegisterTissueSamplesMutationVariables> {
+  return new Promise((resolve) => {
+    const samples = formValues.tissues.reduce<SampleRegisterRequest[]>(
+      (memo, tissue) => {
+        return [
+          ...memo,
+          ...tissue.blocks.map<SampleRegisterRequest>((block) => {
+            const sampleRegisterRequest: SampleRegisterRequest = {
+              species: tissue.species.trim(),
+              donorIdentifier: tissue.donorId.trim(),
+              externalIdentifier: block.externalIdentifier
+                ? block.externalIdentifier.trim()
+                : undefined,
+              hmdmc: tissue.hmdmc.trim(),
+              labwareType: block.labwareType.trim(),
+              lifeStage: tissue.lifeStage,
+              tissueType: tissue.tissueType.trim(),
+              spatialLocation: block.spatialLocation,
+              replicateNumber: block.replicateNumber ?? undefined,
+              fixative: block.fixative.trim(),
+              solutionSample: block.solutionSample.trim(),
+              sampleCollectionDate: tissue.sampleCollectionDate
+                ? tissue.sampleCollectionDate instanceof Date
+                  ? tissue.sampleCollectionDate.toLocaleDateString()
+                  : tissue.sampleCollectionDate
+                : undefined,
+            };
+
+            return sampleRegisterRequest;
+          }),
+        ];
+      },
+      []
+    );
+
+    resolve({ request: { samples } });
+  });
+}
+
 function TissueSampleRegistration({ registrationInfo }: RegistrationParams) {
-  const [current, send, service] = useMachine(registrationMachine);
-
-  const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
-  useEffect(() => {
-    const subscription = service.subscribe((state) => {
-      if (state.matches("complete")) {
-        setShouldConfirm(false);
-      }
-    });
-    return subscription.unsubscribe;
-  }, [service, setShouldConfirm]);
-
   const validationSchema = useMemo(() => {
     return buildRegistrationSchema(registrationInfo);
   }, [registrationInfo]);
-
-  const warningRef = useRef<HTMLDivElement>(null);
-  // Scroll the error notification into view if it appears
-  useEffect(() => {
-    warningRef.current?.scrollIntoView({ behavior: "smooth" });
-  });
-
-  const { registrationResult, registrationErrors } = current.context;
-  const formIsReady = [
-    "ready",
-    "submitting",
-    "clashed",
-    "submissionError",
-  ].some((val) => current.matches(val));
-
-  if (current.matches("complete") && registrationResult) {
-    return (
-      <RegistrationSuccess
-        labware={registrationResult.register.labware}
-        columns={[
-          columns.barcode(),
-          columns.labwareType(),
-          columns.externalName(),
-        ]}
-      />
+  const availableLabwareTypes = useMemo(() => {
+    return registrationInfo.labwareTypes.filter((lt) =>
+      [LabwareTypeName.POT].includes(lt.name as LabwareTypeName)
     );
-  }
+  }, [registrationInfo]);
 
   return (
-    <AppShell>
-      <AppShell.Header>
-        <AppShell.Title>Block Registration</AppShell.Title>
-      </AppShell.Header>
-      <AppShell.Main>
-        <div className="max-w-screen-xl mx-auto">
-          <Prompt
-            when={shouldConfirm}
-            message={
-              "You have unsaved changes. Are you sure you want to leave?"
-            }
-          />
-
-          {registrationErrors && (
-            <div ref={warningRef}>
-              <Warning message={"There was a problem registering your tissues"}>
-                <ul className="list-disc list-inside">
-                  {registrationErrors.problems.map((problem, index) => {
-                    return <li key={index}>{problem}</li>;
-                  })}
-                </ul>
-              </Warning>
-            </div>
-          )}
-
-          {formIsReady && (
-            <Formik<RegistrationFormTissueSampleValues>
-              initialValues={initialValues}
-              validationSchema={validationSchema}
-              validateOnChange={false}
-              validateOnBlur={true}
-              onSubmit={async (values) => send({ type: "SUBMIT_FORM", values })}
-            >
-              {({ values }) => (
-                <>
-                  <RegistrationForm registrationInfo={registrationInfo} />
-
-                  {current.matches("clashed") && registrationResult && (
-                    <ClashModal
-                      registrationResult={registrationResult}
-                      onConfirm={() => send({ type: "SUBMIT_FORM", values })}
-                      onCancel={() => send({ type: "EDIT_SUBMISSION" })}
-                    />
-                  )}
-                </>
-              )}
-            </Formik>
-          )}
-        </div>
-      </AppShell.Main>
-    </AppShell>
+    <Registration<
+      RegistrationFormTissueSampleValues,
+      RegisterTissueSamplesMutationVariables,
+      RegistrationFormTissueSample,
+      RegistrationFormSample
+    >
+      title={"Tissue Sample Registration"}
+      availableLabwareTypes={availableLabwareTypes}
+      registrationInfo={registrationInfo}
+      initialValues={initialValues}
+      buildRegistrationInput={buildRegisterTissueSampleMutationVariables}
+      registrationService={registerTissueSamples}
+      registrationValidationSchema={validationSchema}
+      successDisplayTableColumns={[]}
+      defaultFormTissueValues={getRegistrationFormTissueSample()}
+      defaultFormBlockValues={getRegistrationFormSample()}
+    />
   );
 }
 

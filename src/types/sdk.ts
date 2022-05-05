@@ -2593,6 +2593,27 @@ export type ReagentSlotFieldsFragment = (
   & Pick<ReagentSlot, 'address' | 'used'>
 );
 
+export type RegisterResultFieldsFragment = (
+  { __typename?: 'RegisterResult' }
+  & { labware: Array<(
+    { __typename?: 'Labware' }
+    & LabwareFieldsFragment
+  )>, clashes: Array<(
+    { __typename?: 'RegisterClash' }
+    & { tissue: (
+      { __typename?: 'Tissue' }
+      & Pick<Tissue, 'externalName'>
+    ), labware: Array<(
+      { __typename?: 'Labware' }
+      & Pick<Labware, 'barcode'>
+      & { labwareType: (
+        { __typename?: 'LabwareType' }
+        & Pick<LabwareType, 'name'>
+      ) }
+    )> }
+  )> }
+);
+
 export type ReleaseDestinationFieldsFragment = (
   { __typename?: 'ReleaseDestination' }
   & Pick<ReleaseDestination, 'name' | 'enabled'>
@@ -3277,23 +3298,7 @@ export type RegisterTissueSamplesMutation = (
   { __typename?: 'Mutation' }
   & { registerTissueSamples: (
     { __typename?: 'RegisterResult' }
-    & { labware: Array<(
-      { __typename?: 'Labware' }
-      & LabwareFieldsFragment
-    )>, clashes: Array<(
-      { __typename?: 'RegisterClash' }
-      & { tissue: (
-        { __typename?: 'Tissue' }
-        & Pick<Tissue, 'externalName'>
-      ), labware: Array<(
-        { __typename?: 'Labware' }
-        & Pick<Labware, 'barcode'>
-        & { labwareType: (
-          { __typename?: 'LabwareType' }
-          & Pick<LabwareType, 'name'>
-        ) }
-      )> }
-    )> }
+    & RegisterResultFieldsFragment
   ) }
 );
 
@@ -3306,23 +3311,7 @@ export type RegisterTissuesMutation = (
   { __typename?: 'Mutation' }
   & { register: (
     { __typename?: 'RegisterResult' }
-    & { labware: Array<(
-      { __typename?: 'Labware' }
-      & LabwareFieldsFragment
-    )>, clashes: Array<(
-      { __typename?: 'RegisterClash' }
-      & { tissue: (
-        { __typename?: 'Tissue' }
-        & Pick<Tissue, 'externalName'>
-      ), labware: Array<(
-        { __typename?: 'Labware' }
-        & Pick<Labware, 'barcode'>
-        & { labwareType: (
-          { __typename?: 'LabwareType' }
-          & Pick<LabwareType, 'name'>
-        ) }
-      )> }
-    )> }
+    & RegisterResultFieldsFragment
   ) }
 );
 
@@ -4526,6 +4515,24 @@ export const ReagentPlateFieldsFragmentDoc = gql`
   }
 }
     ${ReagentSlotFieldsFragmentDoc}`;
+export const RegisterResultFieldsFragmentDoc = gql`
+    fragment RegisterResultFields on RegisterResult {
+  labware {
+    ...LabwareFields
+  }
+  clashes {
+    tissue {
+      externalName
+    }
+    labware {
+      barcode
+      labwareType {
+        name
+      }
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const ReleaseDestinationFieldsFragmentDoc = gql`
     fragment ReleaseDestinationFields on ReleaseDestination {
   name
@@ -4968,43 +4975,17 @@ export const RegisterSectionsDocument = gql`
 export const RegisterTissueSamplesDocument = gql`
     mutation RegisterTissueSamples($request: TissueSampleRegisterRequest!) {
   registerTissueSamples(request: $request) {
-    labware {
-      ...LabwareFields
-    }
-    clashes {
-      tissue {
-        externalName
-      }
-      labware {
-        barcode
-        labwareType {
-          name
-        }
-      }
-    }
+    ...RegisterResultFields
   }
 }
-    ${LabwareFieldsFragmentDoc}`;
+    ${RegisterResultFieldsFragmentDoc}`;
 export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {
-    labware {
-      ...LabwareFields
-    }
-    clashes {
-      tissue {
-        externalName
-      }
-      labware {
-        barcode
-        labwareType {
-          name
-        }
-      }
-    }
+    ...RegisterResultFields
   }
 }
-    ${LabwareFieldsFragmentDoc}`;
+    ${RegisterResultFieldsFragmentDoc}`;
 export const ReleaseLabwareDocument = gql`
     mutation ReleaseLabware($releaseRequest: ReleaseRequest!) {
   release(request: $releaseRequest) {

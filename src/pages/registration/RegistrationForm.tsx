@@ -1,5 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { GetRegistrationInfoQuery, LifeStage } from "../../types/sdk";
+import {
+  GetRegistrationInfoQuery,
+  LabwareType,
+  LifeStage,
+} from "../../types/sdk";
 import { FieldArray, Form, useFormikContext } from "formik";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "../../components/Heading";
@@ -14,18 +18,21 @@ import SummaryBox from "./SummaryBox";
 import variants from "../../lib/motionVariants";
 import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
 import { useScrollToRef } from "../../lib/hooks";
-import {
-  getRegistrationFormBlock,
-  getRegistrationFormTissue,
-  RegistrationFormValues,
-} from "../Registration";
-import { LabwareTypeName } from "../../types/stan";
+import { RegistrationFormValues } from "../BlockRegistration";
 
-interface RegistrationFormParams {
+interface RegistrationFormParams<T, K> {
   registrationInfo: GetRegistrationInfoQuery;
+  availableLabwareTypes: LabwareType[];
+  defaultFormTissueValues: T;
+  defaultFormBlockValues: K;
 }
 
-const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
+const RegistrationForm = <T, K>({
+  registrationInfo,
+  availableLabwareTypes,
+  defaultFormTissueValues,
+  defaultFormBlockValues,
+}: RegistrationFormParams<T, K>) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const {
     setFieldValue,
@@ -34,14 +41,6 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
     touched,
     isSubmitting,
   } = useFormikContext<RegistrationFormValues>();
-
-  const availableLabwareTypes = useMemo(() => {
-    return registrationInfo.labwareTypes.filter((lt) =>
-      [LabwareTypeName.PROVIASETTE, LabwareTypeName.CASSETTE].includes(
-        lt.name as LabwareTypeName
-      )
-    );
-  }, [registrationInfo]);
 
   // Available spatial locations are determined by the current tissue type
   const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] = useMemo(() => {
@@ -211,12 +210,14 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
                           label="Replicate Number"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.replicateNumber`}
                         />
-
-                        <FormikInput
-                          label="Last Known Section Number"
-                          type="number"
-                          name={`tissues.${currentIndex}.blocks.${blockIndex}.lastKnownSectionNumber`}
-                        />
+                        {"medium" in
+                          values.tissues[currentIndex].blocks[blockIndex] && (
+                          <FormikInput
+                            label="Last Known Section Number"
+                            type="number"
+                            name={`tissues.${currentIndex}.blocks.${blockIndex}.lastKnownSectionNumber`}
+                          />
+                        )}
 
                         <FormikSelect
                           emptyOption
@@ -242,19 +243,36 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
                             "name"
                           )}
                         </FormikSelect>
-
-                        <FormikSelect
-                          emptyOption
-                          label="Medium"
-                          className="block mt-2"
-                          name={`tissues.${currentIndex}.blocks.${blockIndex}.medium`}
-                        >
-                          {optionValues(
-                            registrationInfo.mediums,
-                            "name",
-                            "name"
-                          )}
-                        </FormikSelect>
+                        {"medium" in
+                          values.tissues[currentIndex].blocks[blockIndex] && (
+                          <FormikSelect
+                            emptyOption
+                            label="Medium"
+                            className="block mt-2"
+                            name={`tissues.${currentIndex}.blocks.${blockIndex}.medium`}
+                          >
+                            {optionValues(
+                              registrationInfo.mediums,
+                              "name",
+                              "name"
+                            )}
+                          </FormikSelect>
+                        )}
+                        {"solutionSample" in
+                          values.tissues[currentIndex].blocks[blockIndex] && (
+                          <FormikSelect
+                            emptyOption
+                            label="Solution Sample"
+                            className="block mt-2"
+                            name={`tissues.${currentIndex}.blocks.${blockIndex}.solutionSample`}
+                          >
+                            {optionValues(
+                              registrationInfo.solutionSamples,
+                              "name",
+                              "name"
+                            )}
+                          </FormikSelect>
+                        )}
 
                         {/* Only show the delete button if we've got more than 1 block */}
                         {values.tissues[currentIndex].blocks.length > 1 && (
@@ -290,7 +308,7 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
                     action="secondary"
                     className="mt-4 inline-flex"
                     onClick={() => {
-                      blockHelpers.push(getRegistrationFormBlock());
+                      blockHelpers.push(defaultFormBlockValues);
                       scrollToLatestBlock();
                     }}
                   >
@@ -334,7 +352,7 @@ const RegistrationForm = ({ registrationInfo }: RegistrationFormParams) => {
                 currentFormIndex={currentIndex}
                 setCurrentFormIndex={setCurrentIndex}
                 onNewTissueButton={() => {
-                  tissueHelpers.push(getRegistrationFormTissue());
+                  tissueHelpers.push(defaultFormTissueValues);
                   setCurrentIndex(currentIndex + 1);
                   tissueRef.current?.scrollIntoView({
                     behavior: "smooth",

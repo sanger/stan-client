@@ -1,0 +1,16 @@
+fragment RegisterResultFields on RegisterResult {
+    labware {
+        ...LabwareFields
+    }
+    clashes {
+        tissue {
+            externalName
+        }
+        labware {
+            barcode
+            labwareType {
+                name
+            }
+        }
+    }
+}
