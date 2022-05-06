@@ -2753,6 +2753,19 @@ export type AddSpeciesMutation = (
   ) }
 );
 
+export type AddUserMutationVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type AddUserMutation = (
+  { __typename?: 'Mutation' }
+  & { addUser: (
+    { __typename?: 'User' }
+    & UserFieldsFragment
+  ) }
+);
+
 export type AddWorkTypeMutationVariables = Exact<{
   name: Scalars['String'];
 }>;
@@ -3374,6 +3387,20 @@ export type SetSpeciesEnabledMutation = (
   ) }
 );
 
+export type SetUserRoleMutationVariables = Exact<{
+  username: Scalars['String'];
+  role: UserRole;
+}>;
+
+
+export type SetUserRoleMutation = (
+  { __typename?: 'Mutation' }
+  & { setUserRole: (
+    { __typename?: 'User' }
+    & UserFieldsFragment
+  ) }
+);
+
 export type SetWorkTypeEnabledMutationVariables = Exact<{
   name: Scalars['String'];
   enabled: Scalars['Boolean'];
@@ -3907,6 +3934,9 @@ export type GetConfigurationQuery = (
   )>, equipments: Array<(
     { __typename?: 'Equipment' }
     & EquipmentFieldsFragment
+  )>, users: Array<(
+    { __typename?: 'User' }
+    & UserFieldsFragment
   )> }
 );
 
@@ -4541,6 +4571,13 @@ export const AddSpeciesDocument = gql`
   }
 }
     ${SpeciesFieldsFragmentDoc}`;
+export const AddUserDocument = gql`
+    mutation AddUser($username: String!) {
+  addUser(username: $username) {
+    ...UserFields
+  }
+}
+    ${UserFieldsFragmentDoc}`;
 export const AddWorkTypeDocument = gql`
     mutation AddWorkType($name: String!) {
   addWorkType(name: $name) {
@@ -4921,6 +4958,13 @@ export const SetSpeciesEnabledDocument = gql`
   }
 }
     ${SpeciesFieldsFragmentDoc}`;
+export const SetUserRoleDocument = gql`
+    mutation SetUserRole($username: String!, $role: UserRole!) {
+  setUserRole(username: $username, role: $role) {
+    ...UserFields
+  }
+}
+    ${UserFieldsFragmentDoc}`;
 export const SetWorkTypeEnabledDocument = gql`
     mutation SetWorkTypeEnabled($name: String!, $enabled: Boolean!) {
   setWorkTypeEnabled(name: $name, enabled: $enabled) {
@@ -5274,6 +5318,9 @@ export const GetConfigurationDocument = gql`
   equipments(includeDisabled: true) {
     ...EquipmentFields
   }
+  users(includeDisabled: true) {
+    ...UserFields
+  }
 }
     ${DestructionReasonFieldsFragmentDoc}
 ${CommentFieldsFragmentDoc}
@@ -5285,7 +5332,8 @@ ${ReleaseRecipientFieldsFragmentDoc}
 ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}
-${EquipmentFieldsFragmentDoc}`;
+${EquipmentFieldsFragmentDoc}
+${UserFieldsFragmentDoc}`;
 export const GetDestroyInfoDocument = gql`
     query GetDestroyInfo {
   destructionReasons {
@@ -5475,6 +5523,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AddSpecies(variables: AddSpeciesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSpeciesMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddSpeciesMutation>(AddSpeciesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSpecies');
     },
+    AddUser(variables: AddUserMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddUserMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddUserMutation>(AddUserDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddUser');
+    },
     AddWorkType(variables: AddWorkTypeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddWorkTypeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddWorkTypeMutation>(AddWorkTypeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddWorkType');
     },
@@ -5579,6 +5630,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     SetSpeciesEnabled(variables: SetSpeciesEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSpeciesEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetSpeciesEnabledMutation>(SetSpeciesEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSpeciesEnabled');
+    },
+    SetUserRole(variables: SetUserRoleMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetUserRoleMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetUserRoleMutation>(SetUserRoleDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetUserRole');
     },
     SetWorkTypeEnabled(variables: SetWorkTypeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetWorkTypeEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetWorkTypeEnabledMutation>(SetWorkTypeEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetWorkTypeEnabled');

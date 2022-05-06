@@ -14,6 +14,7 @@ import projectRepository from "../repositories/projectRepository";
 import costCodeRepository from "../repositories/costCodeRepository";
 import workTypeRepository from "../repositories/workTypeRepository";
 import equipmentRepository from "../repositories/equipmentRepository";
+import userRepository from "../repositories/userRepository";
 
 const configurationHandlers = [
   graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>(
@@ -32,6 +33,7 @@ const configurationHandlers = [
           costCodes: costCodeRepository.findAll(),
           workTypes: workTypeRepository.findAll(),
           equipments: equipmentRepository.findAll(),
+          users: userRepository.findAll(),
         })
       );
     }
