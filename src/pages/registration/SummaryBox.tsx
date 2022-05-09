@@ -12,6 +12,7 @@ import {
   RegistrationFormTissue,
   RegistrationFormValues,
 } from "../BlockRegistration";
+import { TextType } from "./RegistrationForm";
 
 function getNumberOfBlocks(values: FormikValues) {
   return values.tissues.reduce(
@@ -62,6 +63,7 @@ interface SummaryBoxParams {
   onNewTissueButton: () => void;
   currentFormIndex: number;
   setCurrentFormIndex: (n: number) => void;
+  keywordsMap?: Map<TextType, string>;
 }
 
 const SummaryBox = ({
@@ -72,9 +74,11 @@ const SummaryBox = ({
   onNewTissueButton,
   currentFormIndex,
   setCurrentFormIndex,
+  keywordsMap,
 }: SummaryBoxParams) => {
   const errorCount = getNumErrorsPerTissue(values.tissues, errors, touched);
   const [whiteButtonDisabled, setWhiteButtonDisabled] = useState(false);
+  const keyword = (keywordsMap && keywordsMap.get("Block")) ?? "Block";
   return (
     <div className="sticky top-0 space-y-2">
       <Heading level={3} showBorder={false}>
@@ -85,7 +89,8 @@ const SummaryBox = ({
         There {values.tissues.length === 1 ? "is" : "are"} currently{" "}
         <span className="font-bold">{values.tissues.length}</span> tissue(s) and
         a total of{" "}
-        <span className="font-bold">{getNumberOfBlocks(values)}</span> block(s).
+        <span className="font-bold">{getNumberOfBlocks(values)}</span>{" "}
+        {`${keyword.toLowerCase()}(s)`}
       </p>
 
       <div id="tissue-summaries" className="space-y-2">

@@ -15,7 +15,6 @@ export default function Configuration({ configuration }: ConfigurationParams) {
   const stanCore = useContext(StanCoreContext);
   const groupedComments = groupBy(configuration.comments, "category");
   const groupedEquipments = groupBy(configuration.equipments, "category");
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -73,9 +72,13 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                 <StyledLink to={"/admin/registration"}>
                   Block Registration
                 </StyledLink>{" "}
-                and{" "}
+                ,{" "}
                 <StyledLink to={"/admin/slide_registration"}>
                   Slide Registration
+                </StyledLink>{" "}
+                and{" "}
+                <StyledLink to={"/admin/tissue_registration"}>
+                  Tissue Sample Registration
                 </StyledLink>{" "}
                 pages.
               </p>
@@ -100,9 +103,13 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                 <StyledLink to={"/admin/registration"}>
                   Block Registration
                 </StyledLink>{" "}
-                and{" "}
+                ,{" "}
                 <StyledLink to={"/admin/slide_registration"}>
                   Slide Registration
+                </StyledLink>{" "}
+                and{" "}
+                <StyledLink to={"/admin/tissue_registration"}>
+                  Tissue Sample Registration
                 </StyledLink>{" "}
                 pages.
               </p>
@@ -127,9 +134,13 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                 <StyledLink to={"/admin/registration"}>
                   Block Registration
                 </StyledLink>{" "}
-                and{" "}
+                ,{" "}
                 <StyledLink to={"/admin/slide_registration"}>
                   Slide Registration
+                </StyledLink>{" "}
+                and{" "}
+                <StyledLink to={"/admin/tissue_registration"}>
+                  Tissue Sample Registration
                 </StyledLink>{" "}
                 pages.
               </p>
@@ -277,6 +288,33 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                 />
               </div>
             ))}
+            <div data-testid="config">
+              <Heading level={2}>Solution Sample</Heading>
+              <p className="mt-3 mb-6 text-lg">
+                Solution Samples are available on the{" "}
+                <StyledLink to={"/admin/tissue_registration"}>
+                  Tissue Sample Registration
+                </StyledLink>{" "}
+                page.
+              </p>
+              <EntityManager
+                initialEntities={configuration.solutionSamples}
+                displayColumnName={"name"}
+                onToggle={(entity, enabled) =>
+                  stanCore
+                    .SetSolutionSampleEnabled({
+                      enabled,
+                      solutionSample: entity.name,
+                    })
+                    .then((res) => res.setSolutionSampleEnabled)
+                }
+                onCreate={(name) =>
+                  stanCore
+                    .AddSolutionSample({ name })
+                    .then((res) => res.addSolutionSample)
+                }
+              />
+            </div>
           </div>
         </div>
       </AppShell.Main>

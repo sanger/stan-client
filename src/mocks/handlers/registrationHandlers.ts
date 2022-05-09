@@ -15,6 +15,7 @@ import {
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import speciesRepository from "../repositories/speciesRepository";
 import hmdmcRepository from "../repositories/hmdmcRepository";
+import solutionSampleRepository from "../repositories/solutionSampleRepository";
 
 const registrationHandlers = [
   graphql.query<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>(
@@ -108,13 +109,9 @@ const registrationHandlers = [
           ],
           fixatives: [{ name: "None" }, { name: "Formalin" }],
           mediums: [{ name: "OCT" }, { name: "Paraffin" }, { name: "None" }],
-          solutionSamples: [
-            { name: "HypoThermosol" },
-            { name: "Ethanol" },
-            { name: "PFA" },
-            { name: "PBS" },
-            { name: "Formalin" },
-          ],
+          solutionSamples: solutionSampleRepository
+            .findAll()
+            .filter((sample) => sample.enabled),
         })
       );
     }

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import AppShell from "../../components/AppShell";
 import Warning from "../../components/notifications/Warning";
-import RegistrationForm from "./RegistrationForm";
+import RegistrationForm, { TextType } from "./RegistrationForm";
 import { Formik } from "formik";
 import ClashModal from "./ClashModal";
 import {
@@ -18,39 +18,87 @@ import { Prompt } from "react-router-dom";
 import { Column } from "react-table";
 import { createRegistrationMachine } from "../../lib/machines/registration/registrationMachine";
 
-interface RegistrationParams<F, M, T, K> {
+/**
+ * Expect form input interface
+ */
+interface FormInput<T> {
+  tissues: T[];
+}
+
+/**
+ * Expected Tissue value interfcae
+ */
+export interface TissueValues<B> {
+  blocks: B[];
+}
+
+interface RegistrationParams<M, T, B> {
+  /**
+   * Title to be displayed in the page
+   * **/
   title: string;
+  /**
+   * Labware types available for registration
+   */
   availableLabwareTypes: LabwareType[];
+  /**
+   * Registration information like available species,fixatives etc
+   */
   registrationInfo: GetRegistrationInfoQuery;
-  initialValues: F;
+
+  /**
+   * Default values for Tissue
+   */
+  defaultFormTissueValues: T;
+
+  /**
+   * Handler to convert form input data to the format that mutation api expects
+   * @param formInput
+   * @param existingTissues
+   */
   buildRegistrationInput: (
-    formInput: F,
+    formInput: FormInput<T>,
     existingTissues?: Array<string>
   ) => Promise<M>;
+  /**
+   * Service to call for registration
+   * @param mutationInput
+   */
   registrationService: (
     mutationInput: M
   ) => Promise<RegisterResultFieldsFragment>;
+  /**
+   * Validation schema for form input
+   */
   registrationValidationSchema: Yup.ObjectSchema;
+  /**
+   * Columns to display on succesful registration
+   */
   successDisplayTableColumns: Column<LabwareFieldsFragment>[];
-  defaultFormTissueValues: T;
-  defaultFormBlockValues: K;
+
+  /**
+   * Change in default keywords to display
+   */
+  keywordsMap?: Map<TextType, string>;
 }
 
-function Registration<F, M, T, K>({
-  initialValues,
+function Registration<M, T extends TissueValues<B>, B>({
+  title,
   availableLabwareTypes,
   registrationInfo,
   buildRegistrationInput,
   registrationService,
   registrationValidationSchema,
   successDisplayTableColumns,
-  defaultFormBlockValues,
   defaultFormTissueValues,
-}: RegistrationParams<F, M, T, K>) {
+  keywordsMap,
+}: RegistrationParams<M, T, B>) {
   const [current, send, service] = useMachine(
-    createRegistrationMachine<F, M>(buildRegistrationInput, registrationService)
+    createRegistrationMachine<FormInput<T>, M>(
+      buildRegistrationInput,
+      registrationService
+    )
   );
-
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
   useEffect(() => {
     const subscription = service.subscribe((state) => {
@@ -67,6 +115,9 @@ function Registration<F, M, T, K>({
     warningRef.current?.scrollIntoView({ behavior: "smooth" });
   });
 
+  const initialValues = {
+    tissues: [defaultFormTissueValues],
+  };
   const { registrationResult, registrationErrors } = current.context;
   const formIsReady = [
     "ready",
@@ -87,7 +138,7 @@ function Registration<F, M, T, K>({
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Tissue Sample Registration</AppShell.Title>
+        <AppShell.Title>{title}</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
@@ -111,7 +162,7 @@ function Registration<F, M, T, K>({
           )}
 
           {formIsReady && (
-            <Formik<F>
+            <Formik<FormInput<T>>
               initialValues={initialValues}
               validationSchema={registrationValidationSchema}
               validateOnChange={false}
@@ -123,8 +174,8 @@ function Registration<F, M, T, K>({
                   <RegistrationForm
                     registrationInfo={registrationInfo}
                     availableLabwareTypes={availableLabwareTypes}
-                    defaultFormBlockValues={defaultFormBlockValues}
                     defaultFormTissueValues={defaultFormTissueValues}
+                    keywordsMap={keywordsMap}
                   />
 
                   {current.matches("clashed") && registrationResult && (

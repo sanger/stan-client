@@ -3,6 +3,7 @@ import {
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,
 } from "../../../src/types/sdk";
+import { RegistrationType } from "../../../src/pages/registration/Registration";
 
 describe("Slide Registration Page", () => {
   before(() => {
@@ -35,7 +36,7 @@ describe("Slide Registration Page", () => {
   });
 
   describe("Validation", () => {
-    shouldBehaveLikeARegistrationForm(true);
+    shouldBehaveLikeARegistrationForm(RegistrationType.SLIDE);
 
     it("requires External Slide Barcode", () => {
       cy.findByLabelText("External Slide Barcode").focus().blur();

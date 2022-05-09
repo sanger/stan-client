@@ -15,6 +15,7 @@ import {
   RegistrationFormTissue,
 } from "./BlockRegistration";
 import Registration from "./registration/Registration";
+import columns from "../components/dataTable/labwareColumns";
 
 type RegistrationFormSample = PartialBy<
   Omit<RegistrationFormBlock, "medium" | "lastKnownSectionNumber">,
@@ -34,7 +35,7 @@ export function getRegistrationFormSample(): RegistrationFormSample {
   return {
     clientId: Date.now(),
     spatialLocation: -1, // Initialise it as invalid so user has to select something
-    labwareType: LabwareTypeName.POT,
+    labwareType: "",
     fixative: "",
     solutionSample: "",
   };
@@ -53,10 +54,6 @@ export function getRegistrationFormTissueSample(): RegistrationFormTissueSample 
   };
 }
 
-const initialValues: RegistrationFormTissueSampleValues = {
-  tissues: [getRegistrationFormTissueSample()],
-};
-
 function buildRegistrationSchema(
   registrationInfo: GetRegistrationInfoQuery
 ): Yup.ObjectSchema {
@@ -72,7 +69,7 @@ function buildRegistrationSchema(
           hmdmc: validation.hmdmc,
           tissueType: validation.tissueType,
           sampleCollectionDate: validation.sampleCollectionDate,
-          samples: Yup.array()
+          blocks: Yup.array()
             .min(1)
             .of(
               Yup.object().shape({
@@ -81,7 +78,7 @@ function buildRegistrationSchema(
                 replicateNumber: validation.replicateNumber,
                 labwareType: validation.labwareType,
                 fixative: validation.fixative,
-                medium: validation.medium,
+                solutionSample: validation.solutionSample,
               })
             ),
         })
@@ -149,9 +146,17 @@ function TissueSampleRegistration({ registrationInfo }: RegistrationParams) {
     );
   }, [registrationInfo]);
 
+  const resultColumns = [
+    columns.barcode(),
+    columns.labwareType(),
+    columns.externalName(),
+  ];
+
+  const keywords = new Map()
+    .set("Block", "Sample")
+    .set("Embedding", "Solution");
   return (
     <Registration<
-      RegistrationFormTissueSampleValues,
       RegisterTissueSamplesMutationVariables,
       RegistrationFormTissueSample,
       RegistrationFormSample
@@ -159,13 +164,12 @@ function TissueSampleRegistration({ registrationInfo }: RegistrationParams) {
       title={"Tissue Sample Registration"}
       availableLabwareTypes={availableLabwareTypes}
       registrationInfo={registrationInfo}
-      initialValues={initialValues}
+      defaultFormTissueValues={getRegistrationFormTissueSample()}
       buildRegistrationInput={buildRegisterTissueSampleMutationVariables}
       registrationService={registerTissueSamples}
       registrationValidationSchema={validationSchema}
-      successDisplayTableColumns={[]}
-      defaultFormTissueValues={getRegistrationFormTissueSample()}
-      defaultFormBlockValues={getRegistrationFormSample()}
+      successDisplayTableColumns={resultColumns}
+      keywordsMap={keywords}
     />
   );
 }

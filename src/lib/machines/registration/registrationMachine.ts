@@ -150,7 +150,6 @@ export function createRegistrationMachine<F, M>(
           if (event.type !== "SUBMIT_FORM") {
             return Promise.reject();
           }
-          debugger;
           return buildRegistrationInput(
             event.values,
             context.confirmedTissues

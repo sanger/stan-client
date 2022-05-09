@@ -2154,7 +2154,7 @@ export type SlotPassFail = {
   comment?: Maybe<Scalars['String']>;
 };
 
-/** A chemical a sample is put in. For example Ethanol */
+/** A chemical a sample is put in, e.g Ethanol */
 export type SolutionSample = {
   __typename?: 'SolutionSample';
   name: Scalars['String'];
@@ -4042,6 +4042,9 @@ export type GetConfigurationQuery = (
   )>, equipments: Array<(
     { __typename?: 'Equipment' }
     & EquipmentFieldsFragment
+  )>, solutionSamples: Array<(
+    { __typename?: 'SolutionSample' }
+    & SolutionSampleFieldsFragment
   )> }
 );
 
@@ -5444,6 +5447,9 @@ export const GetConfigurationDocument = gql`
   equipments(includeDisabled: true) {
     ...EquipmentFields
   }
+  solutionSamples(includeDisabled: true) {
+    ...SolutionSampleFields
+  }
 }
     ${DestructionReasonFieldsFragmentDoc}
 ${CommentFieldsFragmentDoc}
@@ -5455,7 +5461,8 @@ ${ReleaseRecipientFieldsFragmentDoc}
 ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}
-${EquipmentFieldsFragmentDoc}`;
+${EquipmentFieldsFragmentDoc}
+${SolutionSampleFieldsFragmentDoc}`;
 export const GetDestroyInfoDocument = gql`
     query GetDestroyInfo {
   destructionReasons {

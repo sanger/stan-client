@@ -19,20 +19,35 @@ import variants from "../../lib/motionVariants";
 import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
 import { useScrollToRef } from "../../lib/hooks";
 import { RegistrationFormValues } from "../BlockRegistration";
+import { TissueValues } from "./Registration";
 
-interface RegistrationFormParams<T, K> {
+export type TextType = "Block" | "Embedding";
+
+interface RegistrationFormParams<T, B> {
+  /**
+   * Registration information like available species,fixatives etc
+   */
   registrationInfo: GetRegistrationInfoQuery;
+  /**
+   * Labware types available for registration
+   */
   availableLabwareTypes: LabwareType[];
+  /**
+   * Default values for Tissue
+   */
   defaultFormTissueValues: T;
-  defaultFormBlockValues: K;
+  /**
+   * Change in default keywords to display
+   */
+  keywordsMap?: Map<TextType, string>;
 }
 
-const RegistrationForm = <T, K>({
+const RegistrationForm = <T extends TissueValues<B>, B>({
   registrationInfo,
   availableLabwareTypes,
   defaultFormTissueValues,
-  defaultFormBlockValues,
-}: RegistrationFormParams<T, K>) => {
+  keywordsMap,
+}: RegistrationFormParams<T, B>) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const {
     setFieldValue,
@@ -41,6 +56,8 @@ const RegistrationForm = <T, K>({
     touched,
     isSubmitting,
   } = useFormikContext<RegistrationFormValues>();
+
+  const keywords = keywordsMap ?? new Map();
 
   // Available spatial locations are determined by the current tissue type
   const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] = useMemo(() => {
@@ -160,7 +177,9 @@ const RegistrationForm = <T, K>({
               variants={variants.fadeInWithLift}
               className="space-y-4"
             >
-              <Heading level={3}>Block Information</Heading>
+              <Heading level={3}>
+                {`${keywords.get("Block") ?? "Block"} Information`}
+              </Heading>
               <AnimatePresence
                 onExitComplete={() => {
                   setFieldValue(
@@ -210,7 +229,7 @@ const RegistrationForm = <T, K>({
                           label="Replicate Number"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.replicateNumber`}
                         />
-                        {"medium" in
+                        {"lastKnownSectionNumber" in
                           values.tissues[currentIndex].blocks[blockIndex] && (
                           <FormikInput
                             label="Last Known Section Number"
@@ -228,7 +247,9 @@ const RegistrationForm = <T, K>({
                         </FormikSelect>
 
                         <Heading level={4} showBorder={false} className="mt-4">
-                          Embedding Information
+                          {`${
+                            keywords.get("Embedding") ?? "Embedding"
+                          } Information`}
                         </Heading>
 
                         <FormikSelect
@@ -287,7 +308,7 @@ const RegistrationForm = <T, K>({
                                 );
                               }}
                             >
-                              Delete Block
+                              {`Delete ${keywords.get("Block") ?? "Block"}`}
                             </PinkButton>
                           </div>
                         )}
@@ -308,11 +329,11 @@ const RegistrationForm = <T, K>({
                     action="secondary"
                     className="mt-4 inline-flex"
                     onClick={() => {
-                      blockHelpers.push(defaultFormBlockValues);
+                      blockHelpers.push(defaultFormTissueValues.blocks);
                       scrollToLatestBlock();
                     }}
                   >
-                    + Add Another Tissue Block
+                    {`+ Add Another Tissue ${keywords.get("Block") ?? "Block"}`}
                   </BlueButton>
                 )}
               </FieldArray>
@@ -358,6 +379,7 @@ const RegistrationForm = <T, K>({
                     behavior: "smooth",
                   });
                 }}
+                keywordsMap={keywordsMap}
               />
             )}
           </FieldArray>

@@ -233,12 +233,14 @@ export function Routes() {
             key={routeProps.location.key}
             dataFetcher={stanCore.GetRegistrationInfo}
           >
-            {(registrationInfo) => (
-              <TissueSampleRegistration
-                registrationInfo={registrationInfo}
-                {...routeProps}
-              />
-            )}
+            {(registrationInfo) => {
+              return (
+                <TissueSampleRegistration
+                  registrationInfo={registrationInfo}
+                  {...routeProps}
+                />
+              );
+            }}
           </DataFetcher>
         )}
       />

@@ -63,10 +63,6 @@ function getRegistrationFormTissue(): RegistrationFormTissue {
   };
 }
 
-const initialValues: RegistrationFormValues = {
-  tissues: [getRegistrationFormTissue()],
-};
-
 function buildRegistrationSchema(
   registrationInfo: GetRegistrationInfoQuery
 ): Yup.ObjectSchema {
@@ -177,21 +173,18 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
 
   return (
     <Registration<
-      RegistrationFormValues,
       RegisterTissuesMutationVariables,
       RegistrationFormTissue,
       RegistrationFormBlock
     >
-      title={"Tissue Sample Registration"}
+      title={"Block Registration"}
       availableLabwareTypes={availableLabwareTypes}
       registrationInfo={registrationInfo}
-      initialValues={initialValues}
+      defaultFormTissueValues={getRegistrationFormTissue()}
       buildRegistrationInput={buildRegisterTissuesMutationVariables}
       registrationService={registrationService.registerTissues}
       registrationValidationSchema={validationSchema}
       successDisplayTableColumns={resultColumns}
-      defaultFormTissueValues={getRegistrationFormTissue()}
-      defaultFormBlockValues={getRegistrationFormBlock()}
     />
   );
 }
