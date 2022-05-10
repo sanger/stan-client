@@ -32,7 +32,7 @@ export interface TissueValues<B> {
   blocks: B[];
 }
 
-interface RegistrationParams<M, T, B> {
+interface RegistrationParams<M, T> {
   /**
    * Title to be displayed in the page
    * **/
@@ -92,7 +92,7 @@ function Registration<M, T extends TissueValues<B>, B>({
   successDisplayTableColumns,
   defaultFormTissueValues,
   keywordsMap,
-}: RegistrationParams<M, T, B>) {
+}: RegistrationParams<M, T>) {
   const [current, send, service] = useMachine(
     createRegistrationMachine<FormInput<T>, M>(
       buildRegistrationInput,

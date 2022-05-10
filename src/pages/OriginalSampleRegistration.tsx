@@ -136,7 +136,7 @@ export function buildRegisterTissueSampleMutationVariables(
   });
 }
 
-function TissueSampleRegistration({ registrationInfo }: RegistrationParams) {
+function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
   const validationSchema = useMemo(() => {
     return buildRegistrationSchema(registrationInfo);
   }, [registrationInfo]);
@@ -161,7 +161,7 @@ function TissueSampleRegistration({ registrationInfo }: RegistrationParams) {
       RegistrationFormTissueSample,
       RegistrationFormSample
     >
-      title={"Tissue Sample Registration"}
+      title={"Original Sample Registration"}
       availableLabwareTypes={availableLabwareTypes}
       registrationInfo={registrationInfo}
       defaultFormTissueValues={getRegistrationFormTissueSample()}
@@ -174,4 +174,4 @@ function TissueSampleRegistration({ registrationInfo }: RegistrationParams) {
   );
 }
 
-export default TissueSampleRegistration;
+export default OriginalSampleRegistration;

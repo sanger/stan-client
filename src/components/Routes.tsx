@@ -36,7 +36,7 @@ import VisiumAnalysis from "../pages/VisiumAnalysis";
 import Aliquot from "../pages/Aliquot";
 import DualIndexPlate from "../pages/DualIndexPlate";
 import columns from "./dataTable/labwareColumns";
-import TissueSampleRegistration from "../pages/TissueSampleRegistration";
+import OriginalSampleRegistration from "../pages/OriginalSampleRegistration";
 import BlockRegistration from "../pages/BlockRegistration";
 
 export function Routes() {
@@ -235,7 +235,7 @@ export function Routes() {
           >
             {(registrationInfo) => {
               return (
-                <TissueSampleRegistration
+                <OriginalSampleRegistration
                   registrationInfo={registrationInfo}
                   {...routeProps}
                 />

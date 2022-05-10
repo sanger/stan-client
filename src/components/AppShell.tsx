@@ -308,7 +308,7 @@ function AppShell({ children }: AppShellParams) {
                     }
                   />
                   <NavLinkMenuItem
-                    caption={"Tissue Sample Registration"}
+                    caption={"Original Sample Registration"}
                     path={"/admin/tissue_registration"}
                     icon={
                       <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />

@@ -23,7 +23,7 @@ import { TissueValues } from "./Registration";
 
 export type TextType = "Block" | "Embedding";
 
-interface RegistrationFormParams<T, B> {
+interface RegistrationFormParams<T> {
   /**
    * Registration information like available species,fixatives etc
    */
@@ -47,7 +47,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
   availableLabwareTypes,
   defaultFormTissueValues,
   keywordsMap,
-}: RegistrationFormParams<T, B>) => {
+}: RegistrationFormParams<T>) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const {
     setFieldValue,
