@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8] - 2022-05-12
+### Added
+- x672 Track "sample collection date" for fetal samples being registered. ([#139](https://github.com/sanger/stan-client/pull/139))
+- x855 Support user management by super-users. ([#143](https://github.com/sanger/stan-client/pull/143))
+
+### Modified
+- x677 Indicate on sectioning page when fetal waste must be collected, based on sample collection date. ([#142](https://github.com/sanger/stan-client/pull/142))
+- x869 Source labware for cDNA now becomes "used" instead of "discarded", so that the labware can be stored. ([#141](https://github.com/sanger/stan-client/pull/141))
+- x863 New storage locations, including "dessicator". ([#144](https://github.com/sanger/stan-client/pull/144))
+
 ## [2.7] - 2022-05-05
 ### Added
 - New feature to convert the bio state of a labware to "Fetal Waste" ([#138](https://github.com/sanger/stan-client/pull/138))
