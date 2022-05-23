@@ -127,7 +127,7 @@ export function createRegistrationMachine<F, M>(
 
           // Store the clashed tissues to be used for possible user confirmation
           ctx.confirmedTissues = ctx.registrationResult.clashes.map(
-            (clash) => clash.tissue.externalName
+            (clash) => clash.tissue.externalName ?? ""
           );
         }),
 

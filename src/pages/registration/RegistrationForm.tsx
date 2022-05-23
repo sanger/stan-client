@@ -192,7 +192,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
               >
                 {values.tissues[currentIndex].blocks
                   .filter((block) => block.clientId !== null)
-                  .map((block, blockIndex) => {
+                  .flatMap((block, blockIndex) => {
                     return (
                       <motion.div
                         ref={
@@ -264,8 +264,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                             "name"
                           )}
                         </FormikSelect>
-                        {"medium" in
-                          values.tissues[currentIndex].blocks[blockIndex] && (
+                        {"medium" in block && (
                           <FormikSelect
                             emptyOption
                             label="Medium"
@@ -279,8 +278,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                             )}
                           </FormikSelect>
                         )}
-                        {"solutionSample" in
-                          values.tissues[currentIndex].blocks[blockIndex] && (
+                        {"solutionSample" in block && (
                           <FormikSelect
                             emptyOption
                             label="Solution Sample"
@@ -329,7 +327,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                     action="secondary"
                     className="mt-4 inline-flex"
                     onClick={() => {
-                      blockHelpers.push(defaultFormTissueValues.blocks);
+                      blockHelpers.push(defaultFormTissueValues.blocks[0]);
                       scrollToLatestBlock();
                     }}
                   >

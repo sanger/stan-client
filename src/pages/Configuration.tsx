@@ -304,7 +304,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                   stanCore
                     .SetSolutionSampleEnabled({
                       enabled,
-                      solutionSample: entity.name,
+                      name: entity.name,
                     })
                     .then((res) => res.setSolutionSampleEnabled)
                 }

@@ -1,7 +1,6 @@
 import {
-  RegisterTissueSamplesMutation,
-  RegisterTissueSamplesMutationVariables,
-  RegisterTissuesMutationVariables,
+  RegisterOriginalSamplesMutation,
+  RegisterOriginalSamplesMutationVariables,
 } from "../../../src/types/sdk";
 import {
   RegistrationType,
@@ -153,9 +152,9 @@ describe("Registration", () => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<
-              RegisterTissueSamplesMutation,
-              RegisterTissuesMutationVariables
-            >("RegisterTissueSamples", (req, res, ctx) => {
+              RegisterOriginalSamplesMutation,
+              RegisterOriginalSamplesMutationVariables
+            >("RegisterOriginalSamples", (req, res, ctx) => {
               return res.once(
                 ctx.errors([
                   {
@@ -193,12 +192,12 @@ describe("Registration", () => {
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
           graphql.mutation<
-            RegisterTissueSamplesMutation,
-            RegisterTissueSamplesMutationVariables
-          >("RegisterTissueSamples", (req, res, ctx) => {
+            RegisterOriginalSamplesMutation,
+            RegisterOriginalSamplesMutationVariables
+          >("RegisterOriginalSamples", (req, res, ctx) => {
             return res.once(
               ctx.data({
-                registerTissueSamples: {
+                registerOriginalSamples: {
                   labware: [],
                   clashes: [
                     {

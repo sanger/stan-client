@@ -1,5 +1,0 @@
-mutation RegisterTissueSamples($request:TissueSampleRegisterRequest!) {
-    registerTissueSamples(request:$request) {
-        ...RegisterResultFields
-    }
-}

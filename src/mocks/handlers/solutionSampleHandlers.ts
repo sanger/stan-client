@@ -26,7 +26,7 @@ const solutionSampleHandlers = [
   >("SetSolutionSampleEnabled", (req, res, ctx) => {
     const solutionSample = solutionSampleRepository.find(
       "name",
-      req.variables.solutionSample
+      req.variables.name
     );
     if (solutionSample) {
       solutionSample.enabled = req.variables.enabled;
@@ -36,7 +36,7 @@ const solutionSampleHandlers = [
       return res(
         ctx.errors([
           {
-            message: `Could not find equipment: "${req.variables.solutionSample}"`,
+            message: `Could not find equipment: "${req.variables.name}"`,
           },
         ])
       );

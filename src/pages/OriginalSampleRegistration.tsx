@@ -2,13 +2,12 @@ import React, { useMemo } from "react";
 import {
   GetRegistrationInfoQuery,
   LifeStage,
-  RegisterTissueSamplesMutationVariables,
-  SampleRegisterRequest,
+  RegisterOriginalSamplesMutationVariables,
+  OriginalSampleData,
 } from "../types/sdk";
 import * as Yup from "yup";
 import RegistrationValidation from "../lib/validation/registrationValidation";
 import { LabwareTypeName } from "../types/stan";
-import { registerTissueSamples } from "../lib/services/registrationService";
 import { PartialBy } from "../lib/helpers";
 import {
   RegistrationFormBlock,
@@ -16,22 +15,33 @@ import {
 } from "./BlockRegistration";
 import Registration from "./registration/Registration";
 import columns from "../components/dataTable/labwareColumns";
+import { registerOriginalSamples } from "../lib/services/registrationService";
 
-type RegistrationFormSample = PartialBy<
+/**Following modifications required for RegistrationFormBlock Type so that it can be reused
+ - "medium" and "lastknownSectionNumber" fields are omitted
+ - changed "externalIdentifier" and "replicateNumber" fields to optional
+ **/
+type RegistrationFormBlockSample = PartialBy<
   Omit<RegistrationFormBlock, "medium" | "lastKnownSectionNumber">,
   "externalIdentifier" | "replicateNumber"
 > & {
   solutionSample: string;
 };
-type RegistrationFormTissueSample = Omit<RegistrationFormTissue, "blocks"> & {
-  blocks: RegistrationFormSample[];
+
+/**Redefine 'blocks' field in RegistrationFormTissue Type
+ * Keeping 'blocks' field name as such so that components like "Registration' & 'RegistrationForm'
+ * can be reused for Original sample registration as well
+ */
+type RegistrationFormOriginalSample = Omit<RegistrationFormTissue, "blocks"> & {
+  blocks: RegistrationFormBlockSample[];
 };
 
-export interface RegistrationFormTissueSampleValues {
-  tissues: Array<RegistrationFormTissueSample>;
+export interface RegistrationFormOriginalSampleValues {
+  tissues: Array<RegistrationFormOriginalSample>;
 }
 
-export function getRegistrationFormSample(): RegistrationFormSample {
+/**Define default values**/
+export function getRegistrationFormSample(): RegistrationFormBlockSample {
   return {
     clientId: Date.now(),
     spatialLocation: -1, // Initialise it as invalid so user has to select something
@@ -41,7 +51,7 @@ export function getRegistrationFormSample(): RegistrationFormSample {
   };
 }
 
-export function getRegistrationFormTissueSample(): RegistrationFormTissueSample {
+export function getRegistrationFormTissueSample(): RegistrationFormOriginalSample {
   return {
     clientId: Date.now(),
     donorId: "",
@@ -95,16 +105,16 @@ interface RegistrationParams {
  * @param formValues
  * @return Promise<RegisterTissueSamplesMutationVariables> mutation variables wrapped in a promise
  */
-export function buildRegisterTissueSampleMutationVariables(
-  formValues: RegistrationFormTissueSampleValues
-): Promise<RegisterTissueSamplesMutationVariables> {
+export function buildOriginalSampleMutationVariables(
+  formValues: RegistrationFormOriginalSampleValues
+): Promise<RegisterOriginalSamplesMutationVariables> {
   return new Promise((resolve) => {
-    const samples = formValues.tissues.reduce<SampleRegisterRequest[]>(
+    const samples = formValues.tissues.reduce<OriginalSampleData[]>(
       (memo, tissue) => {
         return [
           ...memo,
-          ...tissue.blocks.map<SampleRegisterRequest>((block) => {
-            const sampleRegisterRequest: SampleRegisterRequest = {
+          ...tissue.blocks.map<OriginalSampleData>((block) => {
+            const sampleRegisterData: OriginalSampleData = {
               species: tissue.species.trim(),
               donorIdentifier: tissue.donorId.trim(),
               externalIdentifier: block.externalIdentifier
@@ -125,7 +135,7 @@ export function buildRegisterTissueSampleMutationVariables(
                 : undefined,
             };
 
-            return sampleRegisterRequest;
+            return sampleRegisterData;
           }),
         ];
       },
@@ -152,21 +162,23 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
     columns.externalName(),
   ];
 
+  /**These are changes required for labels in Registration page for Original sample registration
+   * The changes are mapped here so that Registration and RegistrationForm components  can be reused **/
   const keywords = new Map()
     .set("Block", "Sample")
     .set("Embedding", "Solution");
   return (
     <Registration<
-      RegisterTissueSamplesMutationVariables,
-      RegistrationFormTissueSample,
-      RegistrationFormSample
+      RegisterOriginalSamplesMutationVariables,
+      RegistrationFormOriginalSample,
+      RegistrationFormBlockSample
     >
       title={"Original Sample Registration"}
       availableLabwareTypes={availableLabwareTypes}
       registrationInfo={registrationInfo}
       defaultFormTissueValues={getRegistrationFormTissueSample()}
-      buildRegistrationInput={buildRegisterTissueSampleMutationVariables}
-      registrationService={registerTissueSamples}
+      buildRegistrationInput={buildOriginalSampleMutationVariables}
+      registrationService={registerOriginalSamples}
       registrationValidationSchema={validationSchema}
       successDisplayTableColumns={resultColumns}
       keywordsMap={keywords}

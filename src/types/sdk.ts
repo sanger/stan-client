@@ -598,8 +598,6 @@ export type Mutation = {
   register: RegisterResult;
   /** Register sections of tissue. */
   registerSections: RegisterResult;
-  /** Register samples of tissue. */
-  registerTissueSamples: RegisterResult;
   /** Record planned operations. */
   plan: PlanResult;
   /** Print the specified labware barcodes on the specified printer. */
@@ -660,7 +658,7 @@ export type Mutation = {
   addWorkType: WorkType;
   /** Enable or disable a work type. */
   setWorkTypeEnabled: WorkType;
-  /** Create a new chemical for sample to put in. */
+  /** Add a new solution sample. */
   addSolutionSample: SolutionSample;
   /** Enable or disable a solution sample. */
   setSolutionSampleEnabled: SolutionSample;
@@ -700,6 +698,8 @@ export type Mutation = {
   aliquot: OperationResult;
   /** Record an operation transferring reagents from a reagent plate to an item of Stan labware. */
   reagentTransfer: OperationResult;
+  /** Register original samples. */
+  registerOriginalSamples: RegisterResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -742,15 +742,6 @@ export type MutationRegisterArgs = {
  */
 export type MutationRegisterSectionsArgs = {
   request?: Maybe<SectionRegisterRequest>;
-};
-
-
-/**
- * Send information to the application.
- * These typically require a user with the suitable permission for the particular request.
- */
-export type MutationRegisterTissueSamplesArgs = {
-  request: TissueSampleRegisterRequest;
 };
 
 
@@ -1052,7 +1043,7 @@ export type MutationAddSolutionSampleArgs = {
  * These typically require a user with the suitable permission for the particular request.
  */
 export type MutationSetSolutionSampleEnabledArgs = {
-  solutionSample: Scalars['String'];
+  name: Scalars['String'];
   enabled: Scalars['Boolean'];
 };
 
@@ -1233,6 +1224,15 @@ export type MutationReagentTransferArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
+export type MutationRegisterOriginalSamplesArgs = {
+  request: OriginalSampleRegisterRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1345,6 +1345,39 @@ export type OperationResult = {
 export type OperationType = {
   __typename?: 'OperationType';
   name: Scalars['String'];
+};
+
+/** Data about registering a new original sample. */
+export type OriginalSampleData = {
+  /** The string to use as the donor name. */
+  donorIdentifier: Scalars['String'];
+  /** The life stage of the donor. */
+  lifeStage: LifeStage;
+  /** The HMDMC to use for the tissue. */
+  hmdmc?: Maybe<Scalars['String']>;
+  /** The name of the tissue type (the organ from which the tissue is taken). */
+  tissueType: Scalars['String'];
+  /** The code for the spatial location from which the tissue is taken. */
+  spatialLocation: Scalars['Int'];
+  /** The string to use for the replicate number of the tissue (optional). */
+  replicateNumber?: Maybe<Scalars['String']>;
+  /** The external identifier used to identify the tissue. */
+  externalIdentifier?: Maybe<Scalars['String']>;
+  /** The name of the type of labware containing the sample. */
+  labwareType: Scalars['String'];
+  /** The solution sample used for the tissue. */
+  solutionSample: Scalars['String'];
+  /** The fixative used for the tissue. */
+  fixative: Scalars['String'];
+  /** The species of the donor. */
+  species: Scalars['String'];
+  /** The date the original sample was collected, if known. */
+  sampleCollectionDate?: Maybe<Scalars['Date']>;
+};
+
+/** A request to register one or more original samples of tissue. */
+export type OriginalSampleRegisterRequest = {
+  samples: Array<OriginalSampleData>;
 };
 
 /** A pass or fail result. */
@@ -1478,8 +1511,6 @@ export type Query = {
   mediums: Array<Medium>;
   /** Get all the fixatives that are enabled, or get all including those that are disabled. */
   fixatives: Array<Fixative>;
-  /** Get all the solution samples available. */
-  solutionSamples: Array<SolutionSample>;
   /** Get all the species that are enabled, or get all including those that are disabled. */
   species: Array<Species>;
   /** Get the labware with the given barcode. */
@@ -1500,6 +1531,8 @@ export type Query = {
   projects: Array<Project>;
   /** Get all the cost codes that are enabled, or get all including those that are disabled. */
   costCodes: Array<CostCode>;
+  /** Get all the solution samples that are enabled, or get all including those that are disabled. */
+  solutionSamples: Array<SolutionSample>;
   /** Get all the work types that are enabled, or get all including those that are disabled. */
   workTypes: Array<WorkType>;
   /** Get all the works, or get all the works in the given specified statuses. */
@@ -1562,15 +1595,6 @@ export type QueryHmdmcsArgs = {
  * These typically require no user privilege.
  */
 export type QueryFixativesArgs = {
-  includeDisabled?: Maybe<Scalars['Boolean']>;
-};
-
-
-/**
- * Get information from the application.
- * These typically require no user privilege.
- */
-export type QuerySolutionSamplesArgs = {
   includeDisabled?: Maybe<Scalars['Boolean']>;
 };
 
@@ -1663,6 +1687,15 @@ export type QueryProjectsArgs = {
  * These typically require no user privilege.
  */
 export type QueryCostCodesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+/**
+ * Get information from the application.
+ * These typically require no user privilege.
+ */
+export type QuerySolutionSamplesArgs = {
   includeDisabled?: Maybe<Scalars['Boolean']>;
 };
 
@@ -2004,34 +2037,6 @@ export type Sample = {
   bioState: BioState;
 };
 
-/** A request to register one or more samples of tissue sample. */
-export type SampleRegisterRequest = {
-  /** The string to use as the donor name. */
-  donorIdentifier: Scalars['String'];
-  /** The life stage of the donor. */
-  lifeStage: LifeStage;
-  /** The HMDMC to use for the tissue. */
-  hmdmc?: Maybe<Scalars['String']>;
-  /** The name of the tissue type (the organ from which the tissue is taken). */
-  tissueType: Scalars['String'];
-  /** The code for the spatial location from which the tissue is taken. */
-  spatialLocation: Scalars['Int'];
-  /** The string to use for the replicate number of the tissue. */
-  replicateNumber?: Maybe<Scalars['String']>;
-  /** The external identifier used to identify the tissue. */
-  externalIdentifier?: Maybe<Scalars['String']>;
-  /** The name of the type of labware containing the sample. */
-  labwareType: Scalars['String'];
-  /** The solution sample used for the tissue. */
-  solutionSample: Scalars['String'];
-  /** The fixative used for the tissue. */
-  fixative: Scalars['String'];
-  /** The species of the donor. */
-  species: Scalars['String'];
-  /** The date the original sample was collected, if known. */
-  sampleCollectionDate?: Maybe<Scalars['Date']>;
-};
-
 /** Specification of a result being recording. */
 export type SampleResult = {
   /** The slot address that the result refers to. */
@@ -2154,10 +2159,12 @@ export type SlotPassFail = {
   comment?: Maybe<Scalars['String']>;
 };
 
-/** A chemical a sample is put in, e.g Ethanol */
+/** A solution linked to a sample being registered. */
 export type SolutionSample = {
   __typename?: 'SolutionSample';
+  /** The unique name of the solution sample. */
   name: Scalars['String'];
+  /** Whether the solution sample is available for use. */
   enabled: Scalars['Boolean'];
 };
 
@@ -2242,9 +2249,9 @@ export type TimeMeasurement = {
 /** A piece of tissue from which multiple samples may originate. */
 export type Tissue = {
   __typename?: 'Tissue';
-  externalName: Scalars['String'];
+  externalName?: Maybe<Scalars['String']>;
   /** A number (optionall followed by a letter) that helps to distinguish this tissue from other similar tissues. */
-  replicate: Scalars['String'];
+  replicate?: Maybe<Scalars['String']>;
   /** The location in a particular organ from which this tissue was taken. */
   spatialLocation: SpatialLocation;
   /** The individual from whom this tissue was taken. */
@@ -2256,11 +2263,8 @@ export type Tissue = {
   fixative: Fixative;
   /** The date the original sample was collected, if known. */
   collectionDate?: Maybe<Scalars['Date']>;
-};
-
-/** A request to register one or more samples of tissue sample. */
-export type TissueSampleRegisterRequest = {
-  samples: Array<SampleRegisterRequest>;
+  /** The solution sample used when registering original samples. */
+  solutionSample?: Maybe<SolutionSample>;
 };
 
 /** The type of tissue, typically an organ. */
@@ -3273,6 +3277,19 @@ export type RecordVisiumQcMutation = (
   ) }
 );
 
+export type RegisterOriginalSamplesMutationVariables = Exact<{
+  request: OriginalSampleRegisterRequest;
+}>;
+
+
+export type RegisterOriginalSamplesMutation = (
+  { __typename?: 'Mutation' }
+  & { registerOriginalSamples: (
+    { __typename?: 'RegisterResult' }
+    & RegisterResultFieldsFragment
+  ) }
+);
+
 export type RegisterSectionsMutationVariables = Exact<{
   request: SectionRegisterRequest;
 }>;
@@ -3286,19 +3303,6 @@ export type RegisterSectionsMutation = (
       { __typename?: 'Labware' }
       & LabwareFieldsFragment
     )> }
-  ) }
-);
-
-export type RegisterTissueSamplesMutationVariables = Exact<{
-  request: TissueSampleRegisterRequest;
-}>;
-
-
-export type RegisterTissueSamplesMutation = (
-  { __typename?: 'Mutation' }
-  & { registerTissueSamples: (
-    { __typename?: 'RegisterResult' }
-    & RegisterResultFieldsFragment
   ) }
 );
 
@@ -3482,7 +3486,7 @@ export type SetReleaseRecipientEnabledMutation = (
 );
 
 export type SetSolutionSampleEnabledMutationVariables = Exact<{
-  solutionSample: Scalars['String'];
+  name: Scalars['String'];
   enabled: Scalars['Boolean'];
 }>;
 
@@ -4966,6 +4970,13 @@ export const RecordVisiumQcDocument = gql`
   }
 }
     `;
+export const RegisterOriginalSamplesDocument = gql`
+    mutation RegisterOriginalSamples($request: OriginalSampleRegisterRequest!) {
+  registerOriginalSamples(request: $request) {
+    ...RegisterResultFields
+  }
+}
+    ${RegisterResultFieldsFragmentDoc}`;
 export const RegisterSectionsDocument = gql`
     mutation RegisterSections($request: SectionRegisterRequest!) {
   registerSections(request: $request) {
@@ -4975,13 +4986,6 @@ export const RegisterSectionsDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
-export const RegisterTissueSamplesDocument = gql`
-    mutation RegisterTissueSamples($request: TissueSampleRegisterRequest!) {
-  registerTissueSamples(request: $request) {
-    ...RegisterResultFields
-  }
-}
-    ${RegisterResultFieldsFragmentDoc}`;
 export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {
@@ -5081,8 +5085,8 @@ export const SetReleaseRecipientEnabledDocument = gql`
 }
     ${ReleaseRecipientFieldsFragmentDoc}`;
 export const SetSolutionSampleEnabledDocument = gql`
-    mutation SetSolutionSampleEnabled($solutionSample: String!, $enabled: Boolean!) {
-  setSolutionSampleEnabled(solutionSample: $solutionSample, enabled: $enabled) {
+    mutation SetSolutionSampleEnabled($name: String!, $enabled: Boolean!) {
+  setSolutionSampleEnabled(name: $name, enabled: $enabled) {
     ...SolutionSampleFields
   }
 }
@@ -5721,11 +5725,11 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     RecordVisiumQC(variables: RecordVisiumQcMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordVisiumQcMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordVisiumQcMutation>(RecordVisiumQcDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordVisiumQC');
     },
+    RegisterOriginalSamples(variables: RegisterOriginalSamplesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterOriginalSamplesMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RegisterOriginalSamplesMutation>(RegisterOriginalSamplesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterOriginalSamples');
+    },
     RegisterSections(variables: RegisterSectionsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterSectionsMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterSections');
-    },
-    RegisterTissueSamples(variables: RegisterTissueSamplesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterTissueSamplesMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RegisterTissueSamplesMutation>(RegisterTissueSamplesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterTissueSamples');
     },
     RegisterTissues(variables: RegisterTissuesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterTissuesMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RegisterTissuesMutation>(RegisterTissuesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterTissues');

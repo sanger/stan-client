@@ -100,7 +100,7 @@ const externalName: ColumnFactory = () => {
   return {
     Header: "External ID",
     accessor: (labware) =>
-      valueFromSamples(labware, (sample) => sample.tissue.externalName),
+      valueFromSamples(labware, (sample) => sample.tissue.externalName ?? ""),
   };
 };
 

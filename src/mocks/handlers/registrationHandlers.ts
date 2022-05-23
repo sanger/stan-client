@@ -7,8 +7,8 @@ import {
   LifeStage,
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,
-  RegisterTissueSamplesMutation,
-  RegisterTissueSamplesMutationVariables,
+  RegisterOriginalSamplesMutation,
+  RegisterOriginalSamplesMutationVariables,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
 } from "../../types/sdk";
@@ -245,12 +245,12 @@ const registrationHandlers = [
     }
   ),
   graphql.mutation<
-    RegisterTissueSamplesMutation,
-    RegisterTissueSamplesMutationVariables
-  >("RegisterTissueSamples", (req, res, ctx) => {
+    RegisterOriginalSamplesMutation,
+    RegisterOriginalSamplesMutationVariables
+  >("RegisterOriginalSamples", (req, res, ctx) => {
     return res(
       ctx.data({
-        registerTissueSamples: {
+        registerOriginalSamples: {
           clashes: [],
           labware: [
             {
