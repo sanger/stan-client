@@ -1,9 +1,11 @@
-import { shouldBehaveLikeARegistrationForm } from "../shared/registration";
+import {
+  RegistrationType,
+  shouldBehaveLikeARegistrationForm,
+} from "../shared/registration";
 import {
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,
 } from "../../../src/types/sdk";
-import { RegistrationType } from "../../../src/pages/registration/Registration";
 
 describe("Slide Registration Page", () => {
   before(() => {
