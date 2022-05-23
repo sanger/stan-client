@@ -6,13 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7] - 2022-05-05
+### Added
+- New feature to convert the bio state of a labware to "Fetal Waste" ([#138](https://github.com/sanger/stan-client/pull/138))
+- New labware type "Fetal waste container"  ([#136](https://github.com/sanger/stan-client/pull/134))
+### Modified
+- New columns on the dash board "Last Visium ADH stain date" and "Last date 96 well plate Released"([#136](https://github.com/sanger/stan-client/pull/136))
+- Changes in "RNAscope & IHC' staing feature to have experimental panel  and plex number (RNAscope, IHC)for each slide([#135](https://github.com/sanger/stan-client/pull/135))
+
 ## [2.6] - 2022-04-21
 ### Added
--Sectioning feature to allow for automatic section numbering on the confirmation page as well as manual
--Dual Index Plate in Visium menu ,record the transfer of dual-index reagent to our 96 well plates containing samples
+- Sectioning feature to allow for automatic section numbering on the confirmation page as well as manual
+- Dual Index Plate in Visium menu ,record the transfer of dual-index reagent to our 96 well plates containing samples
 ### Modified
--Double-clicking the submit button should not create duplicate work numbers.
--Fix for UI bug: When you create a new SGP number, the confirmation message disappears almost immediately
+- Double-clicking the submit button should not create duplicate work numbers.
+- Fix for UI bug: When you create a new SGP number, the confirmation message disappears almost immediately
 
 ## [1.10.2] - 2021-11-18
 ### Added

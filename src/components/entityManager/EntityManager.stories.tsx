@@ -16,17 +16,22 @@ export const DestructionReasonsManager = () => {
   return (
     <EntityManager
       initialEntities={destructionReasonRepository.findAll()}
-      displayColumnName={"text"}
-      onToggle={(entity, enabled) =>
-        stanCore
+      displayKeyColumnName={"text"}
+      valueColumnName={"enabled"}
+      onChangeValue={(entity, value) => {
+        const enabled = typeof value === "boolean" ? value : false;
+        return stanCore
           .SetDestructionReasonEnabled({ text: entity.text, enabled })
-          .then((res) => res.setDestructionReasonEnabled)
-      }
+          .then((res) => res.setDestructionReasonEnabled);
+      }}
       onCreate={(text) =>
         stanCore
           .AddDestructionReason({ text })
           .then((res) => res.addDestructionReason)
       }
+      valueFieldComponentInfo={{
+        type: "CHECKBOX",
+      }}
     />
   );
 };

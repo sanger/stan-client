@@ -32,6 +32,9 @@ query GetConfiguration {
     equipments(includeDisabled: true) {
         ...EquipmentFields
     }
+    users(includeDisabled: true) {
+        ...UserFields
+    }
     solutionSamples(includeDisabled: true){
         ...SolutionSampleFields
     }

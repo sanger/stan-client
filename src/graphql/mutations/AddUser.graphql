@@ -1,0 +1,5 @@
+mutation AddUser($username: String!) {
+    addUser(username:$username) {
+            ...UserFields
+    }
+}
