@@ -357,20 +357,50 @@ export default function Configuration({ configuration }: ConfigurationParams) {
               </p>
               <EntityManager
                 initialEntities={configuration.solutionSamples}
-                displayColumnName={"name"}
-                onToggle={(entity, enabled) =>
-                  stanCore
+                displayKeyColumnName={"name"}
+                valueColumnName={"enabled"}
+                onChangeValue={(entity, value) => {
+                  const enabled = typeof value === "boolean" ? value : false;
+                  return stanCore
                     .SetSolutionSampleEnabled({
-                      enabled,
                       name: entity.name,
+                      enabled,
                     })
-                    .then((res) => res.setSolutionSampleEnabled)
-                }
+                    .then((res) => res.setSolutionSampleEnabled);
+                }}
                 onCreate={(name) =>
                   stanCore
                     .AddSolutionSample({ name })
                     .then((res) => res.addSolutionSample)
                 }
+                valueFieldComponentInfo={{
+                  type: "CHECKBOX",
+                }}
+              />
+            </div>
+
+            <div data-testid="config">
+              <Heading level={2}>Users</Heading>
+              <EntityManager
+                initialEntities={configuration.users}
+                displayKeyColumnName={"username"}
+                valueColumnName={"role"}
+                valueFieldComponentInfo={{
+                  type: "SELECT",
+                  valueOptions: Object.values(UserRole),
+                }}
+                onCreate={(username) =>
+                  stanCore.AddUser({ username }).then((res) => res.addUser)
+                }
+                onChangeValue={(entity, value) => {
+                  const role: UserRole =
+                    typeof value === "string"
+                      ? (value as UserRole)
+                      : UserRole.Normal;
+                  return stanCore
+                    .SetUserRole({ username: entity.username, role })
+                    .then((res) => res.setUserRole);
+                }}
               />
             </div>
           </div>
