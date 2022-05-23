@@ -76,6 +76,14 @@ const seeds: Array<CommentFieldsFragment> = [
     category: "Visium QC",
     text: "Slide damaged",
   }),
+  commentFactory.build({
+    category: "Tissue Block processing",
+    text: "Issue while moving",
+  }),
+  commentFactory.build({
+    category: "Tissue Block processing",
+    text: "Labware damaged",
+  }),
 ];
 
 const commentRepository = createSessionStorageRepository(

@@ -135,6 +135,17 @@ function AppShell({ children }: AppShellParams) {
                     />
                   </Menu>
                   <NavLinkMenuItem
+                    caption={"Block Processing"}
+                    path="/lab/block_processing"
+                    icon={
+                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
+                    description={
+                      "Divide original tissue samples into new labware to become tissue blocks"
+                    }
+                  />
+
+                  <NavLinkMenuItem
                     caption={"Fetal Waste"}
                     path="/lab/fetal_waste"
                     icon={

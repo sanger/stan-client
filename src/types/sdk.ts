@@ -606,6 +606,7 @@ export type Mutation = {
   confirmOperation: ConfirmOperationResult;
   /** Confirm sections previously planned. */
   confirmSection: OperationResult;
+  performTissueBlock: OperationResult;
   /** Release some labware. */
   release: ReleaseResult;
   /** Record extract operations. */
@@ -773,6 +774,15 @@ export type MutationConfirmOperationArgs = {
  */
 export type MutationConfirmSectionArgs = {
   request: ConfirmSectionRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationPerformTissueBlockArgs = {
+  request: TissueBlockRequest;
 };
 
 
@@ -2178,6 +2188,21 @@ export type Tissue = {
   collectionDate?: Maybe<Scalars['Date']>;
 };
 
+export type TissueBlockLabware = {
+  sourceBarcode: Scalars['String'];
+  labwareType: Scalars['String'];
+  preBarcode?: Maybe<Scalars['String']>;
+  commentId?: Maybe<Scalars['Int']>;
+  replicate: Scalars['String'];
+  medium: Scalars['String'];
+};
+
+export type TissueBlockRequest = {
+  workNumber?: Maybe<Scalars['String']>;
+  labware: Array<TissueBlockLabware>;
+  discardSourceBarcodes?: Maybe<Array<Scalars['String']>>;
+};
+
 /** The type of tissue, typically an organ. */
 export type TissueType = {
   __typename?: 'TissueType';
@@ -2980,6 +3005,32 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'logout'>
+);
+
+export type PerformTissueBlockMutationVariables = Exact<{
+  request: TissueBlockRequest;
+}>;
+
+
+export type PerformTissueBlockMutation = (
+  { __typename?: 'Mutation' }
+  & { performTissueBlock: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
 );
 
 export type PlanMutationVariables = Exact<{
@@ -4111,6 +4162,23 @@ export type GetStainingQcInfoQuery = (
   )> }
 );
 
+export type GetTissueBlockProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetTissueBlockProcessingInfoQuery = (
+  { __typename?: 'Query' }
+  & { mediums: Array<(
+    { __typename?: 'Medium' }
+    & Pick<Medium, 'name'>
+  )>, comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )>, labwareTypes: Array<(
+    { __typename?: 'LabwareType' }
+    & LabwareTypeFieldsFragment
+  )> }
+);
+
 export type GetVisiumQcInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -4727,6 +4795,24 @@ export const LogoutDocument = gql`
   logout
 }
     `;
+export const PerformTissueBlockDocument = gql`
+    mutation PerformTissueBlock($request: TissueBlockRequest!) {
+  performTissueBlock(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const PlanDocument = gql`
     mutation Plan($request: PlanRequest!) {
   plan(request: $request) {
@@ -5448,6 +5534,20 @@ export const GetStainingQcInfoDocument = gql`
   }
 }
     ${CommentFieldsFragmentDoc}`;
+export const GetTissueBlockProcessingInfoDocument = gql`
+    query GetTissueBlockProcessingInfo {
+  mediums {
+    name
+  }
+  comments(includeDisabled: false, category: "Tissue Block processing") {
+    ...CommentFields
+  }
+  labwareTypes {
+    ...LabwareTypeFields
+  }
+}
+    ${CommentFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}`;
 export const GetVisiumQcInfoDocument = gql`
     query GetVisiumQCInfo {
   comments(includeDisabled: false, category: "Visium QC") {
@@ -5555,6 +5655,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     Logout(variables?: LogoutMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LogoutMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<LogoutMutation>(LogoutDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Logout');
+    },
+    PerformTissueBlock(variables: PerformTissueBlockMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformTissueBlockMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformTissueBlockMutation>(PerformTissueBlockDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformTissueBlock');
     },
     Plan(variables: PlanMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PlanMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PlanMutation>(PlanDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Plan');
@@ -5765,6 +5868,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetStainingQCInfo(variables?: GetStainingQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainingQcInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetStainingQcInfoQuery>(GetStainingQcInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetStainingQCInfo');
+    },
+    GetTissueBlockProcessingInfo(variables?: GetTissueBlockProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetTissueBlockProcessingInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetTissueBlockProcessingInfoQuery>(GetTissueBlockProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetTissueBlockProcessingInfo');
     },
     GetVisiumQCInfo(variables?: GetVisiumQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetVisiumQcInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetVisiumQcInfoQuery>(GetVisiumQcInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetVisiumQCInfo');

@@ -1,0 +1,11 @@
+query GetTissueBlockProcessingInfo {
+    mediums {
+        name
+    }
+    comments(includeDisabled: false, category: "Tissue Block processing") {
+        ...CommentFields
+    }
+    labwareTypes {
+        ...LabwareTypeFields
+    }
+}
