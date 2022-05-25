@@ -78,6 +78,12 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numRows: 8,
     numColumns: 12,
   }),
+  [LabwareTypeName.PRE_BARCODED_TUBE]: labwareTypeFactory.params({
+    __typename: "LabwareType",
+    name: LabwareTypeName.PRE_BARCODED_TUBE,
+    numRows: 1,
+    numColumns: 1,
+  }),
 };
 
 export const labwareTypeInstances = Object.keys(labwareTypes).map((lt) =>

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import labwareScanTableColumns from "../dataTable/labwareColumns";
 import PinkButton from "../buttons/PinkButton";
 import { useMachine } from "@xstate/react";
@@ -32,7 +32,6 @@ import {
   buildSlotSecondaryText,
   buildSlotText,
 } from "../../pages/sectioning";
-import { PlannerContext } from "./Planner";
 
 type LabwarePlanProps = {
   /**
@@ -45,6 +44,11 @@ type LabwarePlanProps = {
    */
   outputLabware: NewLabwareLayout;
 
+  sourceLabware: LabwareFieldsFragment[];
+
+  operationType: string;
+
+  sampleColors: Map<number, string>;
   /**
    * Callback triggered when the delete button is clicked
    * @param cid the client ID of the {@link LabwarePlan}
@@ -60,10 +64,18 @@ type LabwarePlanProps = {
 };
 
 const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
-  ({ cid, outputLabware, onDeleteButtonClick, onComplete }, ref) => {
-    const { sampleColors, operationType, sourceLabware } = useContext(
-      PlannerContext
-    )!;
+  (
+    {
+      cid,
+      outputLabware,
+      onDeleteButtonClick,
+      onComplete,
+      sampleColors,
+      operationType,
+      sourceLabware,
+    },
+    ref
+  ) => {
     const [current, send, service] = useMachine(
       createLabwarePlanMachine(
         buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware)

@@ -2,16 +2,20 @@ import React, { useCallback, useState } from "react";
 import {
   FindPlanDataQuery,
   GetSectioningInfoQuery,
+  LabwareFieldsFragment,
   Maybe,
+  PlanMutation,
 } from "../../types/sdk";
 import AppShell from "../../components/AppShell";
-import Planner, { PlanChangedProps } from "../../components/planning/Planner";
-import { LabwareTypeName } from "../../types/stan";
+import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
 import PinkButton from "../../components/buttons/PinkButton";
 import ButtonBar from "../../components/ButtonBar";
 import { Link, Prompt } from "react-router-dom";
 import _ from "lodash";
 import { useConfirmLeave } from "../../lib/hooks";
+import LabwarePlan from "../../components/planning/LabwarePlan";
+import labwareScanTableColumns from "../../components/dataTable/labwareColumns";
+import Planner, { PlanChangedProps } from "../../components/planning/Planner";
 
 /**
  * Types of labware the user is allowed to section onto
@@ -34,7 +38,9 @@ function Plan({ sectioningInfo }: SectioningParams) {
   /**
    * The list of currently completed plans from the planner
    */
-  const [planProps, setPlanProps] = useState<Maybe<PlanChangedProps>>(null);
+  const [planProps, setPlanProps] = useState<
+    Maybe<PlanChangedProps<PlanMutation>>
+  >(null);
 
   /**
    * For tracking whether the user gets a prompt if they tried to navigate to another page
@@ -45,7 +51,7 @@ function Plan({ sectioningInfo }: SectioningParams) {
    * Callback for when a user adds or removes a plan.
    */
   const handlePlanChange = useCallback(
-    (props: PlanChangedProps) => {
+    (props: PlanChangedProps<PlanMutation>) => {
       const allPlansComplete =
         props.completedPlans.length > 0 &&
         props.numberOfPlans === props.completedPlans.length;
@@ -54,6 +60,34 @@ function Plan({ sectioningInfo }: SectioningParams) {
       setPlanProps(props);
     },
     [setShouldConfirm, setPlanProps]
+  );
+
+  const buildPlanLayouts = React.useCallback(
+    (
+      plans: Map<string, NewLabwareLayout>,
+      sourceLabware: LabwareFieldsFragment[],
+      sampleColors: Map<number, string>,
+      deleteAction: (cid: string) => void,
+      confirmAction?: (cid: string, plan: PlanMutation) => void
+    ) => {
+      return (
+        <>
+          {Array.from(plans.entries()).map(([cid, newLabwareLayout]) => (
+            <LabwarePlan
+              key={cid}
+              cid={cid}
+              outputLabware={newLabwareLayout}
+              sampleColors={sampleColors}
+              operationType={"Section"}
+              sourceLabware={sourceLabware}
+              onDeleteButtonClick={deleteAction}
+              onComplete={confirmAction!}
+            />
+          ))}
+        </>
+      );
+    },
+    []
   );
 
   /**
@@ -69,10 +103,18 @@ function Plan({ sectioningInfo }: SectioningParams) {
       </AppShell.Header>
       <AppShell.Main>
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
-          <Planner
+          <Planner<PlanMutation>
             operationType={"Section"}
             allowedLabwareTypes={allowedLabwareTypes}
             onPlanChanged={handlePlanChange}
+            buildPlanLayouts={buildPlanLayouts}
+            columns={[
+              labwareScanTableColumns.barcode(),
+              labwareScanTableColumns.donorId(),
+              labwareScanTableColumns.tissueType(),
+              labwareScanTableColumns.spatialLocation(),
+              labwareScanTableColumns.replicate(),
+            ]}
           />
         </div>
       </AppShell.Main>
@@ -104,7 +146,7 @@ export default Plan;
  * Useful for passing as initial state to Sectioning Confirm.
  */
 function planPropsToPlanData(
-  planProps: Maybe<PlanChangedProps>
+  planProps: Maybe<PlanChangedProps<PlanMutation>>
 ): Array<FindPlanDataQuery> {
   if (planProps == null) {
     return [];

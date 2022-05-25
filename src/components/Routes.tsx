@@ -36,8 +36,8 @@ import VisiumPerm from "../pages/VisiumPerm";
 import VisiumAnalysis from "../pages/VisiumAnalysis";
 import Aliquot from "../pages/Aliquot";
 import DualIndexPlate from "../pages/DualIndexPlate";
-import TissueBlockProcessing from "../pages/TissueBlockProcessing";
 import columns from "./dataTable/labwareColumns";
+import BlockProcessing from "../pages/BlockProcessing";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -86,9 +86,7 @@ export function Routes() {
             key={routeProps.location.key}
             dataFetcher={stanCore.GetTissueBlockProcessingInfo}
           >
-            {(blockInfo) => (
-              <TissueBlockProcessing blockProcessingInfo={blockInfo} />
-            )}
+            {(blockInfo) => <BlockProcessing blockProcessingInfo={blockInfo} />}
           </DataFetcher>
         )}
       />
