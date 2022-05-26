@@ -31,13 +31,15 @@ const blockProcessingHandlers = [
   graphql.mutation<
     PerformTissueBlockMutation,
     PerformTissueBlockMutationVariables
-  >("PeformTissueBlock", (req, res, ctx) => {
+  >("PerformTissueBlock", (req, res, ctx) => {
+    debugger;
     const confirmedLabwares = req.variables.request.labware.map(
       (confirmLabware) => {
         const labware = createLabware(confirmLabware.sourceBarcode);
         return buildLabwareFragment(labware);
       }
     );
+    debugger;
     return res(
       ctx.data({
         performTissueBlock: {

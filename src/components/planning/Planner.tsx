@@ -376,6 +376,7 @@ export default function Planner<M>({
                 onChange={(e) =>
                   setSelectedLabwareTypeName(e.currentTarget.value)
                 }
+                data-testid={"labwareType"}
                 value={selectedLabwareTypeName}
               >
                 {optionValues(allowedLabwareTypes, "name", "name")}
@@ -385,6 +386,7 @@ export default function Planner<M>({
                 className="mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
                 onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
                 value={numlabware}
+                data-testid={"numLabware"}
                 min={1}
               />
             </div>
@@ -397,6 +399,7 @@ export default function Planner<M>({
                 className="whitespace-nowrap"
                 disabled={state.isAddLabwareButtonDisabled}
                 action={"primary"}
+                type={"button"}
               >
                 + Add Labware
               </BlueButton>
@@ -418,6 +421,7 @@ export default function Planner<M>({
               className="whitespace-nowrap"
               disabled={state.isAddLabwareButtonDisabled}
               action={"primary"}
+              type={"button"}
             >
               + Add Labware
             </BlueButton>

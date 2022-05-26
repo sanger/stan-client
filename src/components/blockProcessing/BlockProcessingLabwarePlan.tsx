@@ -25,6 +25,8 @@ import { useFormikContext } from "formik";
 import Warning from "../notifications/Warning";
 import FormikInput from "../forms/Input";
 import { createLabwarePlanMachine } from "../planning/labwarePlan.machine";
+import { BlockFormData } from "../../pages/BlockProcessing";
+import { Source } from "../../lib/machines/layout/layoutContext";
 
 type BlockProcessingLabwarePlanProps = {
   /**
@@ -89,11 +91,28 @@ const BlockProcessingLabwarePlan = React.forwardRef<
     );
     const { requestError, layoutPlan } = current.context;
     const { layoutMachine } = current.children;
-    const { setFieldValue } = useFormikContext();
+    const { setFieldValue, values } = useFormikContext<BlockFormData>();
 
     React.useEffect(() => {
-      setFieldValue(`values.${rowIndex}.replicateNumber`, rowIndex + "");
-    }, [setFieldValue, rowIndex]);
+      setFieldValue(`plans.${rowIndex}.replicateNumber`, rowIndex + 1 + "");
+      setFieldValue(
+        `plans.${rowIndex}.labwareType`,
+        outputLabware.labwareType.name
+      );
+    }, [setFieldValue, rowIndex, outputLabware]);
+
+    React.useEffect(() => {
+      if (layoutPlan.sources.length <= 0) return;
+      const plannedActions:
+        | Source[]
+        | undefined = layoutPlan.plannedActions.get("A1");
+      if (plannedActions && plannedActions.length > 0) {
+        setFieldValue(
+          `plans.${rowIndex}.sourceBarcode`,
+          plannedActions[0].labware.barcode
+        );
+      }
+    }, [setFieldValue, rowIndex, layoutPlan.plannedActions]);
     return (
       <motion.div
         variants={variants.fadeInWithLift}
@@ -117,7 +136,10 @@ const BlockProcessingLabwarePlan = React.forwardRef<
               />
 
               {current.matches("prep") && (
-                <PinkButton onClick={() => send({ type: "EDIT_LAYOUT" })}>
+                <PinkButton
+                  type={"button"}
+                  onClick={() => send({ type: "EDIT_LAYOUT" })}
+                >
                   Edit Layout
                 </PinkButton>
               )}
@@ -133,22 +155,17 @@ const BlockProcessingLabwarePlan = React.forwardRef<
                     error={requestError}
                   />
                 )}
-                <FormikInput
-                  name={`values.${rowIndex}.labwareType`}
-                  value={outputLabware.labwareType.name}
-                  label={""}
-                  type={"hidden"}
-                />
+
                 {outputLabware.labwareType.name ===
                   LabwareTypeName.PRE_BARCODED_TUBE && (
                   <FormikInput
-                    name={`values.${rowIndex}.preBarcode`}
+                    name={`plans.${rowIndex}.preBarcode`}
                     label={"Barcode"}
                     type={"text"}
                   />
                 )}
                 <FormikInput
-                  name={`values.${rowIndex}.replicateNumber`}
+                  name={`plans.${rowIndex}.replicateNumber`}
                   label={"Replicate Number"}
                   type={"text"}
                   disabled={true}
@@ -156,30 +173,36 @@ const BlockProcessingLabwarePlan = React.forwardRef<
 
                 <FormikSelect
                   label={"Medium"}
-                  name={`values.${rowIndex}.medium`}
+                  name={`plans.${rowIndex}.medium`}
                   emptyOption={true}
                 >
                   {optionValues(blockProcessInfo.mediums, "name", "name")}
                 </FormikSelect>
                 <FormikSelect
                   label={"Processing comments"}
-                  name={`values.${rowIndex}.comments`}
+                  name={`plans.${rowIndex}.comments`}
                   emptyOption={true}
                 >
                   {optionValues(blockProcessInfo.comments, "text", "id")}
                 </FormikSelect>
                 <FormikInput
                   label={"Discard source?"}
-                  name={`values.${rowIndex}.discardSource`}
+                  name={`plans.${rowIndex}.discardSource`}
                   type={"checkbox"}
                 />
               </div>
 
               {current.matches("prep") && (
                 <div className="w-full border-t-2 border-gray-200 py-3 px-4 sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
-                  <WhiteButton onClick={() => onDelete(cid)}>
+                  <BlueButton
+                    type="button"
+                    onClick={() => {
+                      values.plans.splice(rowIndex, 1);
+                      onDelete(cid);
+                    }}
+                  >
                     Delete Layout
-                  </WhiteButton>
+                  </BlueButton>
                 </div>
               )}
             </div>
@@ -203,12 +226,14 @@ const BlockProcessingLabwarePlan = React.forwardRef<
           </ModalBody>
           <ModalFooter>
             <BlueButton
+              type={"button"}
               onClick={() => layoutMachine.send({ type: "DONE" })}
               className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
             >
               Done
             </BlueButton>
             <WhiteButton
+              type={"button"}
               onClick={() => layoutMachine.send({ type: "CANCEL" })}
               className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
             >

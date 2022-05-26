@@ -20,6 +20,11 @@ import Planner from "../components/planning/Planner";
 import createFormMachine from "../lib/machines/form/formMachine";
 import { stanCore } from "../lib/sdk";
 import WorkNumberSelect from "../components/WorkNumberSelect";
+import columns from "../components/dataTable/labwareColumns";
+import BlockProcessingSuccess from "../components/blockProcessing/BlockProcessingSuccess";
+import Warning from "../components/notifications/Warning";
+import { Prompt } from "react-router-dom";
+import { useConfirmLeave } from "../lib/hooks";
 
 type BlockProcessingParams = {
   readonly blockProcessingInfo: GetTissueBlockProcessingInfoQuery;
@@ -37,9 +42,9 @@ export type BlockFormValue = {
   discardSource?: boolean;
   preBarcode?: string;
 };
-type BlockFormData = {
+export type BlockFormData = {
   workNumber: string;
-  values: BlockFormValue[];
+  plans: BlockFormValue[];
 };
 
 const allowedLabwareTypeNames: Array<LabwareTypeName> = [
@@ -52,7 +57,12 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
 export default function BlockProcessing({
   blockProcessingInfo,
 }: BlockProcessingParams) {
-  const [, send] = useMachine(
+  /**
+   * For tracking whether the user gets a prompt if they tried to navigate to another page
+   */
+  const [shouldConfirm] = useConfirmLeave(true);
+
+  const [current, send] = useMachine(
     createFormMachine<
       TissueBlockRequest,
       PerformTissueBlockMutation
@@ -67,6 +77,9 @@ export default function BlockProcessing({
       },
     })
   );
+
+  const { submissionResult, serverError } = current.context;
+
   /**
    * Limit the labware types the user can Section on to.
    */
@@ -98,34 +111,37 @@ export default function BlockProcessing({
 
       let rowIndx: number = 0;
       return (
-        <Form>
-          <div className={"flex flex-col py-10 gap-y-20"}>
-            {Object.entries(layoutPlanGroupedByType).map(
-              ([key, labwarePlans]) => {
-                return (
-                  <div className={"flex flex-col"}>
-                    <Heading className={"mb-8"} level={2}>{`${key}s`}</Heading>
-                    {labwarePlans.map((lwPlan) => {
-                      rowIndx++;
-                      return (
-                        <BlockProcessingLabwarePlan
-                          key={lwPlan.cid}
-                          cid={lwPlan.cid}
-                          blockProcessInfo={blockProcessingInfo}
-                          outputLabware={lwPlan.plan!}
-                          sourceLabware={sourceLabware}
-                          sampleColors={sampleColors}
-                          onDelete={deleteAction}
-                          rowIndex={rowIndx}
-                        />
-                      );
-                    })}
-                  </div>
-                );
-              }
-            )}
-          </div>
-        </Form>
+        <div className={"flex flex-col py-10 gap-y-20"}>
+          {Object.entries(layoutPlanGroupedByType).map(
+            ([key, labwarePlans]) => {
+              return (
+                <div
+                  className={"flex flex-col"}
+                  data-testid={`divSection-${key}`}
+                  key={"key"}
+                >
+                  <Heading className={"mb-8"} level={2}>{`${key}s`}</Heading>
+                  {labwarePlans.map((lwPlan) => {
+                    rowIndx++;
+                    return (
+                      <BlockProcessingLabwarePlan
+                        data-testid={"plan"}
+                        key={lwPlan.cid}
+                        cid={lwPlan.cid}
+                        blockProcessInfo={blockProcessingInfo}
+                        outputLabware={lwPlan.plan!}
+                        sourceLabware={sourceLabware}
+                        sampleColors={sampleColors}
+                        onDelete={deleteAction}
+                        rowIndex={rowIndx - 1}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            }
+          )}
+        </div>
       );
     },
     [blockProcessingInfo]
@@ -137,19 +153,31 @@ export default function BlockProcessing({
   function buildValidationSchema(): Yup.ObjectSchema {
     return Yup.object().shape({
       workNumber: Yup.string().required(),
-      values: Yup.array().of(
-        Yup.object().shape({
-          sourceBarcode: Yup.string().required(),
-          medium: Yup.string().optional(),
-          replicateNumber: Yup.string().required(),
-          commentId: Yup.number().optional(),
-          discardSource: Yup.boolean().optional(),
-          preBarcode: Yup.string().optional(),
-          labwareType: Yup.string()
-            .required()
-            .oneOf(allowedLabwareTypes.map((type) => type.name)),
-        })
-      ),
+      plans: Yup.array()
+        .of(
+          Yup.object().shape({
+            sourceBarcode: Yup.string().required().min(1),
+            medium: Yup.string().optional(),
+            replicateNumber: Yup.string().required(),
+            commentId: Yup.number().optional(),
+            discardSource: Yup.boolean().optional(),
+            labwareType: Yup.string()
+              .required()
+              .oneOf(allowedLabwareTypes.map((type) => type.name)),
+            preBarcode: Yup.string().when("labwareType", {
+              is: (value: string) =>
+                value === LabwareTypeName.PRE_BARCODED_TUBE,
+              then: Yup.string()
+                .required("Barcode is a required field.")
+                .matches(
+                  /[a-zA-Z]{2}\d{8}/,
+                  "Barcode should be in the format with two letters followed by 8 numbers"
+                ),
+            }),
+          })
+        )
+        .required()
+        .min(1),
     });
   }
 
@@ -158,7 +186,7 @@ export default function BlockProcessing({
   ): TissueBlockRequest => {
     return {
       workNumber: formData.workNumber,
-      labware: formData.values.map((plan) => ({
+      labware: formData.plans.map((plan) => ({
         sourceBarcode: plan.sourceBarcode,
         preBarcode: plan.preBarcode,
         commentId: plan.commentId,
@@ -166,11 +194,25 @@ export default function BlockProcessing({
         medium: plan.medium ?? "",
         labwareType: plan.labwareType,
       })),
-      discardSourceBarcodes: formData.values
+      discardSourceBarcodes: formData.plans
         .filter((plan) => plan.discardSource === true)
         .map((plan) => plan.sourceBarcode),
     };
   };
+
+  if (current.matches("submitted") && submissionResult) {
+    return (
+      <BlockProcessingSuccess
+        labware={submissionResult.performTissueBlock.labware}
+        columns={[
+          columns.barcode(),
+          columns.donorId(),
+          columns.tissueType(),
+          columns.spatialLocation(),
+        ]}
+      />
+    );
+  }
 
   return (
     <AppShell>
@@ -182,7 +224,7 @@ export default function BlockProcessing({
           <Formik<BlockFormData>
             initialValues={{
               workNumber: "",
-              values: [
+              plans: [
                 {
                   replicateNumber: "0",
                   sourceBarcode: "",
@@ -198,44 +240,60 @@ export default function BlockProcessing({
               });
             }}
           >
-            {({ setFieldValue }) => (
+            {({ setFieldValue, isValid }) => (
               <Form>
-                <div className={"mb-10"}>
-                  <Heading level={3}>SGP Number</Heading>
-                  <p className="mt-2">
-                    Please select an SGP number to associate with block
-                    processing.
-                  </p>
-                  <div className="mt-4 md:w-1/2">
-                    <WorkNumberSelect
-                      onWorkNumberChange={(workNumber) => {
-                        setFieldValue("workNumber", workNumber);
-                      }}
-                    />
+                <div className={"space-y-10"}>
+                  <div>
+                    <Heading level={3}>SGP Number</Heading>
+                    <p className="mt-2">
+                      Please select an SGP number to associate with block
+                      processing.
+                    </p>
+                    <div className="mt-4 md:w-1/2">
+                      <WorkNumberSelect
+                        onWorkNumberChange={(workNumber) => {
+                          setFieldValue("workNumber", workNumber);
+                        }}
+                      />
+                    </div>
                   </div>
+                  <Planner<undefined>
+                    operationType={"Section"}
+                    allowedLabwareTypes={allowedLabwareTypes}
+                    onPlanChanged={() => {}}
+                    buildPlanLayouts={buildPlanLayouts}
+                    columns={[
+                      labwareScanTableColumns.barcode(),
+                      labwareScanTableColumns.donorId(),
+                      labwareScanTableColumns.tissueType(),
+                      labwareScanTableColumns.spatialLocation(),
+                      labwareScanTableColumns.replicate(),
+                    ]}
+                    multiplePlanCreationRequired={true}
+                  />
+                  {serverError && current.matches("complete") && (
+                    <Warning
+                      message={"Failed to perform Block Processing"}
+                      error={serverError}
+                    />
+                  )}
+
+                  <ButtonBar>
+                    <BlueButton disabled={!isValid} type={"submit"}>
+                      Save
+                    </BlueButton>
+                  </ButtonBar>
                 </div>
-                <Planner<undefined>
-                  operationType={"Section"}
-                  allowedLabwareTypes={allowedLabwareTypes}
-                  onPlanChanged={() => {}}
-                  buildPlanLayouts={buildPlanLayouts}
-                  columns={[
-                    labwareScanTableColumns.barcode(),
-                    labwareScanTableColumns.donorId(),
-                    labwareScanTableColumns.tissueType(),
-                    labwareScanTableColumns.spatialLocation(),
-                    labwareScanTableColumns.replicate(),
-                  ]}
-                  multiplePlanCreationRequired={true}
-                />
-                <ButtonBar>
-                  <BlueButton type="submit">Save</BlueButton>
-                </ButtonBar>
               </Form>
             )}
           </Formik>
         </div>
       </AppShell.Main>
+
+      <Prompt
+        when={shouldConfirm}
+        message={"You have unsaved changes. Are you sure you want to leave?"}
+      />
     </AppShell>
   );
 }
