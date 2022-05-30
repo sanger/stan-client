@@ -102,7 +102,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<
     }, [setFieldValue, rowIndex, outputLabware]);
 
     React.useEffect(() => {
-      if (layoutPlan.sources.length <= 0) return;
+      if (layoutPlan.plannedActions.size <= 0) return;
       const plannedActions:
         | Source[]
         | undefined = layoutPlan.plannedActions.get("A1");
@@ -120,6 +120,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<
         initial={"hidden"}
         animate={"visible"}
         className="relative p-3 shadow"
+        data-testid={"plan"}
       >
         <>
           <div className="md:grid md:grid-cols-2">

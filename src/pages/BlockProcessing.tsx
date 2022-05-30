@@ -125,7 +125,6 @@ export default function BlockProcessing({
                     rowIndx++;
                     return (
                       <BlockProcessingLabwarePlan
-                        data-testid={"plan"}
                         key={lwPlan.cid}
                         cid={lwPlan.cid}
                         blockProcessInfo={blockProcessingInfo}
@@ -271,7 +270,7 @@ export default function BlockProcessing({
                     ]}
                     multiplePlanCreationRequired={true}
                   />
-                  {serverError && current.matches("complete") && (
+                  {serverError && (
                     <Warning
                       message={"Failed to perform Block Processing"}
                       error={serverError}
