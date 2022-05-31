@@ -19,7 +19,7 @@ import { ClientError } from "graphql-request";
  */
 export function buildRegisterTissuesMutationVariables(
   formValues: RegistrationFormValues,
-  existingTissues: Array<string> = []
+  existingTissues: Array<TissueIdentifier> = []
 ): Promise<RegisterTissuesMutationVariables> {
   return new Promise((resolve) => {
     const blocks = formValues.tissues.reduce<BlockRegisterRequest[]>(
@@ -46,9 +46,16 @@ export function buildRegisterTissuesMutationVariables(
                   : tissue.sampleCollectionDate
                 : undefined,
             };
-
             if (
-              existingTissues.includes(blockRegisterRequest.externalIdentifier)
+              existingTissues.some(
+                (tissue) =>
+                  tissue.externalName ===
+                    blockRegisterRequest.externalIdentifier &&
+                  tissue.tissueType === blockRegisterRequest.tissueType &&
+                  tissue.donorName === blockRegisterRequest.donorIdentifier &&
+                  tissue.spatialLocation ===
+                    blockRegisterRequest.spatialLocation
+              )
             ) {
               blockRegisterRequest.existingTissue = true;
             }
@@ -64,11 +71,18 @@ export function buildRegisterTissuesMutationVariables(
   });
 }
 
+export type TissueIdentifier = {
+  externalName: string;
+  donorName: string;
+  spatialLocation: number;
+  tissueType: String;
+};
+
 export interface RegistrationContext {
   registrationInfo: GetRegistrationInfoQuery;
   registrationResult: RegisterTissuesMutation;
   registrationErrors: ServerErrors;
-  confirmedTissues: Array<string>;
+  confirmedTissues: Array<TissueIdentifier>;
 }
 
 type SubmitFormEvent = {
@@ -166,7 +180,14 @@ const registrationMachine = createMachine<
 
         // Store the clashed tissues to be used for possible user confirmation
         ctx.confirmedTissues = ctx.registrationResult.register.clashes.map(
-          (clash) => clash.tissue.externalName
+          (clash) => {
+            return {
+              externalName: clash.tissue.externalName ?? "",
+              donorName: clash.tissue.donor.donorName,
+              spatialLocation: clash.tissue.spatialLocation.code,
+              tissueType: clash.tissue.spatialLocation.tissueType.name,
+            };
+          }
         );
       }),
 

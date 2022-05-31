@@ -20,7 +20,7 @@ describe("Block Processing", () => {
 
     context("when there is source labware loaded", () => {
       before(() => {
-        cy.get("#labwareScanInput").type("STAN-113{enter}");
+        scanInput();
       });
 
       it("is enabled", () => {
@@ -103,7 +103,11 @@ describe("Block Processing", () => {
           cy.findByText("Done").click();
         });
       });
-      it("should display STAN-113", () => {});
+      it("should display STAN-113", () => {
+        cy.findByTestId(`divSection-Tube`).within(() => {
+          cy.findByText("STAN-113").should("exist");
+        });
+      });
     });
 
     context("when removing a layout", () => {
@@ -125,9 +129,9 @@ describe("Block Processing", () => {
       });
     });
 
-    context("when adding a Pre-barcoded tube", () => {
+    context("when adding a Prebarcoded tube", () => {
       before(() => {
-        cy.findAllByRole("combobox").last().select("Pre-barcoded tube");
+        cy.findAllByRole("combobox").last().select("Prebarcoded tube");
         cy.findByTestId("numLabware").type("{selectall}").type("1");
         cy.findByText("+ Add Labware").click();
       });
@@ -142,10 +146,9 @@ describe("Block Processing", () => {
         cy.findByText("Delete Layout").click();
       });
     });
-    context("when adding labware other than Pre-barcoded tube", () => {
+    context("when adding labware other than Prebarcoded tube", () => {
       before(() => {
-        cy.findAllByRole("combobox").last().select("Tube");
-        cy.findByText("+ Add Labware").click();
+        addTubeLabware();
       });
 
       it("should not show Barcode field", () => {
@@ -157,20 +160,56 @@ describe("Block Processing", () => {
     });
 
     describe("Save button", () => {
-      context("when SGP Number is missing", () => {
+      context("When all other fields filled in but not source selected", () => {
         before(() => {
           cy.visit("/lab/block_processing");
-          addLabwareAndSelectSource();
+          scanInput();
+          addTubeLabware();
+          fillSGPNumber();
+          fillMedium();
         });
         it("Save button is disabled", () => {
           cy.findByRole("button", { name: /Save/i }).should("be.disabled");
         });
       });
-      context("when there is SGP Number", () => {
+      context(
+        "when source selected along with all other fields filled in but SGP Number is missing",
+        () => {
+          before(() => {
+            cy.visit("/lab/block_processing");
+            scanInput();
+            addTubeLabware();
+            selectSource();
+            fillMedium();
+          });
+          it("Save button is disabled", () => {
+            cy.findByRole("button", { name: /Save/i }).should("be.disabled");
+          });
+        }
+      );
+      context(
+        "when source selected along with all other fields filled in but Medium is missing",
+        () => {
+          before(() => {
+            cy.visit("/lab/block_processing");
+            scanInput();
+            addTubeLabware();
+            selectSource();
+            fillSGPNumber();
+          });
+          it("Save button is disabled", () => {
+            cy.findByRole("button", { name: /Save/i }).should("be.disabled");
+          });
+        }
+      );
+      context("when all fields are filled along with source selected", () => {
         before(() => {
           cy.visit("/lab/block_processing");
-          addLabwareAndSelectSource();
-          cy.findAllByRole("combobox").first().select("SGP1008");
+          scanInput();
+          addTubeLabware();
+          selectSource();
+          fillSGPNumber();
+          fillMedium();
         });
         it("Save button is enabled", () => {
           cy.findByRole("button", { name: /Save/i }).should("be.enabled");
@@ -234,8 +273,11 @@ describe("Block Processing", () => {
     context("when request is unsuccessful", () => {
       before(() => {
         cy.visit("/lab/block_processing");
-        cy.findAllByRole("combobox").first().select("SGP1008");
-        addLabwareAndSelectSource();
+        scanInput();
+        addTubeLabware();
+        selectSource();
+        fillSGPNumber();
+        fillMedium();
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<
@@ -274,11 +316,21 @@ function checkBlockProcessingFields() {
   cy.findByLabelText("Medium").should("be.visible");
   cy.findByLabelText("Processing comments").should("be.visible");
 }
-function addLabwareAndSelectSource() {
-  cy.get("#labwareScanInput").type("STAN-113{enter}");
 
+function scanInput() {
+  cy.get("#labwareScanInput").type("STAN-113{enter}");
+}
+function addTubeLabware() {
   cy.findAllByRole("combobox").last().select("Tube");
   cy.findByText("+ Add Labware").click();
+}
+function fillSGPNumber() {
+  cy.findAllByRole("combobox").first().select("SGP1008");
+}
+function fillMedium() {
+  cy.findByLabelText("Medium").select("None");
+}
+function selectSource() {
   cy.findByText("Edit Layout").click();
   cy.findByRole("dialog").within(() => {
     cy.findByText("STAN-113").click();

@@ -49,9 +49,9 @@ export type BlockFormData = {
 
 const allowedLabwareTypeNames: Array<LabwareTypeName> = [
   LabwareTypeName.TUBE,
+  LabwareTypeName.PRE_BARCODED_TUBE,
   LabwareTypeName.PROVIASETTE,
   LabwareTypeName.CASSETTE,
-  LabwareTypeName.PRE_BARCODED_TUBE,
 ];
 
 export default function BlockProcessing({
@@ -80,6 +80,7 @@ export default function BlockProcessing({
 
   const { submissionResult, serverError } = current.context;
 
+  debugger;
   /**
    * Limit the labware types the user can Section on to.
    */
@@ -92,12 +93,16 @@ export default function BlockProcessing({
       plans: Map<string, NewLabwareLayout>,
       sourceLabware: LabwareFieldsFragment[],
       sampleColors: Map<number, string>,
-      deleteAction: (cid: string) => void
+      deleteAction: (cid: string) => void,
+      confirmAction?: (cid: string, plan: undefined) => void,
+      labwareAddType?: string,
+      scrollRef?: React.MutableRefObject<HTMLDivElement | null>
     ) => {
       type PlanWithId = {
         cid: string;
         plan: NewLabwareLayout | undefined;
       };
+      //Group by labware type
       const planWithKeys: PlanWithId[] = Array.from(plans.keys()).map((k) => {
         return {
           cid: k,
@@ -110,18 +115,22 @@ export default function BlockProcessing({
       );
 
       let rowIndx: number = 0;
-      return (
+      return Object.keys(layoutPlanGroupedByType).length > 0 ? (
         <div className={"flex flex-col py-10 gap-y-20"}>
-          {Object.entries(layoutPlanGroupedByType).map(
-            ([key, labwarePlans]) => {
-              return (
+          {allowedLabwareTypeNames.map((labwareType) => {
+            const labwarePlans = layoutPlanGroupedByType[labwareType];
+            return (
+              labwarePlans && (
                 <div
                   className={"flex flex-col"}
-                  data-testid={`divSection-${key}`}
-                  key={"key"}
+                  data-testid={`divSection-${labwareType}`}
+                  key={labwareType}
                 >
-                  <Heading className={"mb-8"} level={2}>{`${key}s`}</Heading>
-                  {labwarePlans.map((lwPlan) => {
+                  <Heading
+                    className={"mb-8"}
+                    level={2}
+                  >{`${labwareType.toString()}s`}</Heading>
+                  {labwarePlans.map((lwPlan, indx) => {
                     rowIndx++;
                     return (
                       <BlockProcessingLabwarePlan
@@ -133,14 +142,22 @@ export default function BlockProcessing({
                         sampleColors={sampleColors}
                         onDelete={deleteAction}
                         rowIndex={rowIndx - 1}
+                        ref={
+                          labwareType === labwareAddType &&
+                          indx === labwarePlans.length - 1
+                            ? scrollRef
+                            : undefined
+                        }
                       />
                     );
                   })}
                 </div>
-              );
-            }
-          )}
+              )
+            );
+          })}
         </div>
+      ) : (
+        <></>
       );
     },
     [blockProcessingInfo]
@@ -156,7 +173,9 @@ export default function BlockProcessing({
         .of(
           Yup.object().shape({
             sourceBarcode: Yup.string().required().min(1),
-            medium: Yup.string().optional(),
+            medium: Yup.string()
+              .required()
+              .oneOf(blockProcessingInfo.mediums.map((medium) => medium.name)),
             replicateNumber: Yup.string().required(),
             commentId: Yup.number().optional(),
             discardSource: Yup.boolean().optional(),
@@ -223,13 +242,7 @@ export default function BlockProcessing({
           <Formik<BlockFormData>
             initialValues={{
               workNumber: "",
-              plans: [
-                {
-                  replicateNumber: "0",
-                  sourceBarcode: "",
-                  labwareType: LabwareTypeName.TUBE,
-                },
-              ],
+              plans: [],
             }}
             validationSchema={buildValidationSchema()}
             onSubmit={async (values) => {
@@ -239,7 +252,7 @@ export default function BlockProcessing({
               });
             }}
           >
-            {({ setFieldValue, isValid }) => (
+            {({ setFieldValue, isValid, values }) => (
               <Form>
                 <div className={"space-y-10"}>
                   <div>
@@ -276,12 +289,15 @@ export default function BlockProcessing({
                       error={serverError}
                     />
                   )}
-
-                  <ButtonBar>
-                    <BlueButton disabled={!isValid} type={"submit"}>
-                      Save
-                    </BlueButton>
-                  </ButtonBar>
+                  {values.plans.length > 0 && (
+                    <div className={"sm:flex mt-4 sm:flex-row justify-end"}>
+                      <ButtonBar>
+                        <BlueButton disabled={!isValid} type={"submit"}>
+                          Save
+                        </BlueButton>
+                      </ButtonBar>
+                    </div>
+                  )}
                 </div>
               </Form>
             )}

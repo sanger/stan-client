@@ -44,7 +44,9 @@ type PlannerProps<M> = {
     sourceLabware: LabwareFieldsFragment[],
     sampleColors: Map<number, string>,
     deleteAction: (cid: string) => void,
-    confirmAction?: (cid: string, plan: M) => void
+    confirmAction?: (cid: string, plan: M) => void,
+    labwareAddType?: string,
+    scrollRef?: React.MutableRefObject<HTMLDivElement | null>
   ) => JSX.Element;
   columns: Column<LabwareFieldsFragment>[];
 
@@ -354,7 +356,9 @@ export default function Planner<M>({
         state.sourceLabware,
         sampleColors,
         onLabwarePlanDelete,
-        onLabwarePlanComplete
+        onLabwarePlanComplete,
+        selectedLabwareTypeName,
+        scrollRef
       )}
       <div
         ref={scrollRef}

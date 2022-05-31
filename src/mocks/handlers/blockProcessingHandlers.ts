@@ -17,7 +17,7 @@ const blockProcessingHandlers = [
   >("GetTissueBlockProcessingInfo", (req, res, ctx) => {
     return res(
       ctx.data({
-        mediums: [{ name: "OCT" }, { name: "Paraffin" }, { name: "None" }],
+        mediums: [{ name: "None" }, { name: "OCT" }, { name: "Paraffin" }],
         comments: commentRepository
           .findAll()
           .filter(

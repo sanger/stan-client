@@ -606,7 +606,6 @@ export type Mutation = {
   confirmOperation: ConfirmOperationResult;
   /** Confirm sections previously planned. */
   confirmSection: OperationResult;
-  performTissueBlock: OperationResult;
   /** Release some labware. */
   release: ReleaseResult;
   /** Record extract operations. */
@@ -659,6 +658,10 @@ export type Mutation = {
   addWorkType: WorkType;
   /** Enable or disable a work type. */
   setWorkTypeEnabled: WorkType;
+  /** Add a new solution sample. */
+  addSolutionSample: SolutionSample;
+  /** Enable or disable a solution sample. */
+  setSolutionSampleEnabled: SolutionSample;
   /** Create a new work, which will be allocated a new work number with the given prefix. */
   createWork: Work;
   /** Update the status of an existing work. */
@@ -695,6 +698,10 @@ export type Mutation = {
   aliquot: OperationResult;
   /** Record an operation transferring reagents from a reagent plate to an item of Stan labware. */
   reagentTransfer: OperationResult;
+  /** Register original samples. */
+  registerOriginalSamples: RegisterResult;
+  /** Process tissue into blocks. */
+  performTissueBlock: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -774,15 +781,6 @@ export type MutationConfirmOperationArgs = {
  */
 export type MutationConfirmSectionArgs = {
   request: ConfirmSectionRequest;
-};
-
-
-/**
- * Send information to the application.
- * These typically require a user with the suitable permission for the particular request.
- */
-export type MutationPerformTissueBlockArgs = {
-  request: TissueBlockRequest;
 };
 
 
@@ -1037,6 +1035,25 @@ export type MutationSetWorkTypeEnabledArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
+export type MutationAddSolutionSampleArgs = {
+  name: Scalars['String'];
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationSetSolutionSampleEnabledArgs = {
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
 export type MutationCreateWorkArgs = {
   prefix: Scalars['String'];
   workType: Scalars['String'];
@@ -1209,6 +1226,24 @@ export type MutationReagentTransferArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
+export type MutationRegisterOriginalSamplesArgs = {
+  request: OriginalSampleRegisterRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationPerformTissueBlockArgs = {
+  request: TissueBlockRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1321,6 +1356,39 @@ export type OperationResult = {
 export type OperationType = {
   __typename?: 'OperationType';
   name: Scalars['String'];
+};
+
+/** Data about registering a new original sample. */
+export type OriginalSampleData = {
+  /** The string to use as the donor name. */
+  donorIdentifier: Scalars['String'];
+  /** The life stage of the donor. */
+  lifeStage: LifeStage;
+  /** The HMDMC to use for the tissue. */
+  hmdmc?: Maybe<Scalars['String']>;
+  /** The name of the tissue type (the organ from which the tissue is taken). */
+  tissueType: Scalars['String'];
+  /** The code for the spatial location from which the tissue is taken. */
+  spatialLocation: Scalars['Int'];
+  /** The string to use for the replicate number of the tissue (optional). */
+  replicateNumber?: Maybe<Scalars['String']>;
+  /** The external identifier used to identify the tissue. */
+  externalIdentifier?: Maybe<Scalars['String']>;
+  /** The name of the type of labware containing the sample. */
+  labwareType: Scalars['String'];
+  /** The solution sample used for the tissue. */
+  solutionSample: Scalars['String'];
+  /** The fixative used for the tissue. */
+  fixative: Scalars['String'];
+  /** The species of the donor. */
+  species: Scalars['String'];
+  /** The date the original sample was collected, if known. */
+  sampleCollectionDate?: Maybe<Scalars['Date']>;
+};
+
+/** A request to register one or more original samples of tissue. */
+export type OriginalSampleRegisterRequest = {
+  samples: Array<OriginalSampleData>;
 };
 
 /** A pass or fail result. */
@@ -1474,6 +1542,8 @@ export type Query = {
   projects: Array<Project>;
   /** Get all the cost codes that are enabled, or get all including those that are disabled. */
   costCodes: Array<CostCode>;
+  /** Get all the solution samples that are enabled, or get all including those that are disabled. */
+  solutionSamples: Array<SolutionSample>;
   /** Get all the work types that are enabled, or get all including those that are disabled. */
   workTypes: Array<WorkType>;
   /** Get all the works, or get all the works in the given specified statuses. */
@@ -1628,6 +1698,15 @@ export type QueryProjectsArgs = {
  * These typically require no user privilege.
  */
 export type QueryCostCodesArgs = {
+  includeDisabled?: Maybe<Scalars['Boolean']>;
+};
+
+
+/**
+ * Get information from the application.
+ * These typically require no user privilege.
+ */
+export type QuerySolutionSamplesArgs = {
   includeDisabled?: Maybe<Scalars['Boolean']>;
 };
 
@@ -2091,6 +2170,15 @@ export type SlotPassFail = {
   comment?: Maybe<Scalars['String']>;
 };
 
+/** A solution linked to a sample being registered. */
+export type SolutionSample = {
+  __typename?: 'SolutionSample';
+  /** The unique name of the solution sample. */
+  name: Scalars['String'];
+  /** Whether the solution sample is available for use. */
+  enabled: Scalars['Boolean'];
+};
+
 /** A location in an organ that tissue was taken from. */
 export type SpatialLocation = {
   __typename?: 'SpatialLocation';
@@ -2172,9 +2260,9 @@ export type TimeMeasurement = {
 /** A piece of tissue from which multiple samples may originate. */
 export type Tissue = {
   __typename?: 'Tissue';
-  externalName: Scalars['String'];
+  externalName?: Maybe<Scalars['String']>;
   /** A number (optionall followed by a letter) that helps to distinguish this tissue from other similar tissues. */
-  replicate: Scalars['String'];
+  replicate?: Maybe<Scalars['String']>;
   /** The location in a particular organ from which this tissue was taken. */
   spatialLocation: SpatialLocation;
   /** The individual from whom this tissue was taken. */
@@ -2186,20 +2274,33 @@ export type Tissue = {
   fixative: Fixative;
   /** The date the original sample was collected, if known. */
   collectionDate?: Maybe<Scalars['Date']>;
+  /** The solution sample used when registering original samples. */
+  solutionSample?: Maybe<SolutionSample>;
 };
 
+/** The input about a new block being created. */
 export type TissueBlockLabware = {
+  /** The original tissue barcode. */
   sourceBarcode: Scalars['String'];
+  /** The labware type for the new labware. */
   labwareType: Scalars['String'];
+  /** The barcode of the new labware, if it is prebarcoded. */
   preBarcode?: Maybe<Scalars['String']>;
+  /** The comment (if any) associated with this operation. */
   commentId?: Maybe<Scalars['Int']>;
+  /** The replicate number for the new block. */
   replicate: Scalars['String'];
+  /** The medium for the new block. */
   medium: Scalars['String'];
 };
 
+/** A request to process original tissue into blocks. */
 export type TissueBlockRequest = {
+  /** The work number associated with this request. */
   workNumber?: Maybe<Scalars['String']>;
+  /** The labware (blocks) being created by this request. */
   labware: Array<TissueBlockLabware>;
+  /** Which source barcodes (if any) to discard as part of this request. */
   discardSourceBarcodes?: Maybe<Array<Scalars['String']>>;
 };
 
@@ -3246,6 +3347,17 @@ export type RegisterTissuesMutation = (
       & { tissue: (
         { __typename?: 'Tissue' }
         & Pick<Tissue, 'externalName'>
+        & { donor: (
+          { __typename?: 'Donor' }
+          & Pick<Donor, 'donorName'>
+        ), spatialLocation: (
+          { __typename?: 'SpatialLocation' }
+          & Pick<SpatialLocation, 'code' | 'name'>
+          & { tissueType: (
+            { __typename?: 'TissueType' }
+            & Pick<TissueType, 'name'>
+          ) }
+        ) }
       ), labware: Array<(
         { __typename?: 'Labware' }
         & Pick<Labware, 'barcode'>
@@ -4935,6 +5047,16 @@ export const RegisterTissuesDocument = gql`
     clashes {
       tissue {
         externalName
+        donor {
+          donorName
+        }
+        spatialLocation {
+          code
+          name
+          tissueType {
+            name
+          }
+        }
       }
       labware {
         barcode

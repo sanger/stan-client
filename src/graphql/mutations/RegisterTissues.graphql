@@ -6,6 +6,17 @@ mutation RegisterTissues($request: RegisterRequest!) {
         clashes {
             tissue {
                 externalName
+                donor {
+                    donorName
+                }
+                spatialLocation {
+                    code
+                    name
+                    tissueType {
+                        name
+                    }
+                }
+
             }
             labware {
                 barcode
