@@ -54,6 +54,11 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
   LabwareTypeName.CASSETTE,
 ];
 
+const enum SampleProcessing {
+  BLOCK = "Block Processing",
+  POT = "Pot Processing",
+}
+
 export default function BlockProcessing({
   blockProcessingInfo,
 }: BlockProcessingParams) {
@@ -80,7 +85,6 @@ export default function BlockProcessing({
 
   const { submissionResult, serverError } = current.context;
 
-  debugger;
   /**
    * Limit the labware types the user can Section on to.
    */
