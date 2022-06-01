@@ -174,7 +174,7 @@ export default function BlockProcessing({
           Yup.object().shape({
             sourceBarcode: Yup.string().required().min(1),
             medium: Yup.string()
-              .required()
+              .required("Medium is a required field.")
               .oneOf(blockProcessingInfo.mediums.map((medium) => medium.name)),
             replicateNumber: Yup.string().required(),
             commentId: Yup.number().optional(),
