@@ -79,8 +79,6 @@ export default function BlockProcessing({
   );
 
   const { submissionResult, serverError } = current.context;
-
-  debugger;
   /**
    * Limit the labware types the user can Section on to.
    */
