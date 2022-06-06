@@ -3,7 +3,6 @@ import React, {
   useCallback,
   useEffect,
   useReducer,
-  useState,
 } from "react";
 import {
   LabwareFieldsFragment,
@@ -11,9 +10,8 @@ import {
   Maybe,
 } from "../../types/sdk";
 import { uniqueId } from "lodash";
-import { optionValues } from "../forms";
 import BlueButton from "../buttons/BlueButton";
-import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
+import { NewLabwareLayout } from "../../types/stan";
 import produce, { castDraft } from "immer";
 import { unregisteredLabwareFactory } from "../../lib/factories/labwareFactory";
 import LabwareScanTable from "../labwareScanPanel/LabwareScanPanel";
@@ -32,10 +30,19 @@ import { useScrollToRef } from "../../lib/hooks";
 
 type PlannerProps<M> = {
   /**
-   * List of labware types that can be planned for.
+   * The labware type to be created when "Add Labware" is clicked
    */
-  allowedLabwareTypes: Array<LabwareTypeFieldsFragment>;
+  selectedLabwareType: LabwareTypeFieldsFragment | undefined;
 
+  /**
+   * The number of labwares to be created when "Add Labware" is clicked
+   */
+  numPlansToCreate?: number;
+
+  /***
+   * Is only a single source labware allowed?
+   */
+  singleSourceAllowed?: boolean;
   /**
    *Callback to render the plan layouts created. This allows to customise the plan layout depending on the context it is called
    */
@@ -45,15 +52,15 @@ type PlannerProps<M> = {
     sampleColors: Map<number, string>,
     deleteAction: (cid: string) => void,
     confirmAction?: (cid: string, plan: M) => void,
-    labwareAddType?: string,
     scrollRef?: React.MutableRefObject<HTMLDivElement | null>
   ) => JSX.Element;
   columns: Column<LabwareFieldsFragment>[];
 
   /**
-   * Should allow creation of multiple plans in one go?
+   * Create the settings component for plan creation
    */
-  multiplePlanCreationRequired?: boolean;
+  buildPlanCreationSettings: () => JSX.Element;
+
   /**
    * The operation the user is planning for , if any. Will be sent to core in the plan request.
    */
@@ -201,11 +208,13 @@ function reducer<M>(
  *Component to display the planning operation
  */
 export default function Planner<M>({
-  allowedLabwareTypes,
+  selectedLabwareType,
+  numPlansToCreate,
   onPlanChanged,
-  multiplePlanCreationRequired = false,
   columns,
+  singleSourceAllowed,
   buildPlanLayouts,
+  buildPlanCreationSettings,
 }: PlannerProps<M>) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -232,21 +241,6 @@ export default function Planner<M>({
     state.sourceLabware,
     onPlanChanged,
   ]);
-
-  /**
-   * The labware type to be created when "Add Labware" is clicked
-   */
-  const [selectedLabwareTypeName, setSelectedLabwareTypeName] = useState<
-    string
-  >(LabwareTypeName.TUBE);
-  /**
-   * The number of labwares to be created when "Add Labware" is clicked
-   */
-  const [numlabware, setNumLabware] = useState<number>(1);
-  /**
-
-
-
   /**
    * Handler for LabwareScanner's onChange event
    */
@@ -261,25 +255,16 @@ export default function Planner<M>({
    * Handler for when the "Add Labware" button is clicked
    */
   const onAddLabwareClick = useCallback(() => {
-    const selectedLabwareType = allowedLabwareTypes.find(
-      (lt) => lt.name === selectedLabwareTypeName
-    );
     if (!selectedLabwareType) {
       return;
     }
     dispatch({
       type: "ADD_LABWARE_PLAN",
       labwareType: selectedLabwareType,
-      numLabwareAdd: numlabware,
+      numLabwareAdd: numPlansToCreate ?? 1,
     });
     scrollToRef();
-  }, [
-    selectedLabwareTypeName,
-    numlabware,
-    allowedLabwareTypes,
-    dispatch,
-    scrollToRef,
-  ]);
+  }, [selectedLabwareType, numPlansToCreate, dispatch, scrollToRef]);
 
   /**
    * Handler for the onDeleteButtonClick event of a LabwarePlan
@@ -331,10 +316,13 @@ export default function Planner<M>({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-10">
       <Heading level={3}>Source Labware</Heading>
       <LabwareScanner
-        locked={state.isLabwareScannerLocked}
+        locked={
+          state.isLabwareScannerLocked ||
+          (singleSourceAllowed && state.sourceLabware.length === 1)
+        }
         onChange={onLabwareScannerChange}
       >
         <LabwareScanTable
@@ -357,7 +345,6 @@ export default function Planner<M>({
         sampleColors,
         onLabwarePlanDelete,
         onLabwarePlanComplete,
-        selectedLabwareTypeName,
         scrollRef
       )}
       <div
@@ -369,56 +356,9 @@ export default function Planner<M>({
           <span className="font-bold text-gray-900">all source labware</span>{" "}
           has been scanned, select a type of labware to plan layouts:
         </p>
-
-        {multiplePlanCreationRequired ? (
-          <div className="flex flex-row items-end gap-x-4 justify-center">
-            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-center text-sm">
-              <div className="text-gray-500">Labware type</div>
-              <div className="text-gray-500">Number of labware</div>
-              <select
-                className="mt-1 block  py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
-                onChange={(e) =>
-                  setSelectedLabwareTypeName(e.currentTarget.value)
-                }
-                data-testid={"labwareType"}
-                value={selectedLabwareTypeName}
-              >
-                {optionValues(allowedLabwareTypes, "name", "name")}
-              </select>
-              <input
-                type="number"
-                className="mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
-                onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
-                value={numlabware}
-                data-testid={"numLabware"}
-                min={1}
-              />
-            </div>
-            <div
-              className={"flex-shrink-0 align-bottom justify-end content-end"}
-            >
-              <BlueButton
-                id="#addLabware"
-                onClick={onAddLabwareClick}
-                className="whitespace-nowrap"
-                disabled={state.isAddLabwareButtonDisabled}
-                action={"primary"}
-                type={"button"}
-              >
-                + Add Labware
-              </BlueButton>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-row items-center justify-center gap-4">
-            <select
-              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
-              onChange={(e) =>
-                setSelectedLabwareTypeName(e.currentTarget.value)
-              }
-            >
-              {optionValues(allowedLabwareTypes, "name", "name")}
-            </select>
+        <div className="flex flex-row items-end gap-x-4 justify-center">
+          {buildPlanCreationSettings()}
+          <div className={"flex-shrink-0 align-bottom justify-end content-end"}>
             <BlueButton
               id="#addLabware"
               onClick={onAddLabwareClick}
@@ -430,7 +370,7 @@ export default function Planner<M>({
               + Add Labware
             </BlueButton>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

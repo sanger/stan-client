@@ -1,34 +1,32 @@
 import {
-  GetTissueBlockProcessingInfoQuery,
+  GetBlockProcessingInfoQuery,
   LabwareFieldsFragment,
   PerformTissueBlockMutation,
   TissueBlockRequest,
-} from "../types/sdk";
+} from "../../../types/sdk";
 import { useMachine } from "@xstate/react";
-import ButtonBar from "../components/ButtonBar";
-import AppShell from "../components/AppShell";
-import BlueButton from "../components/buttons/BlueButton";
+import ButtonBar from "../../ButtonBar";
+import BlueButton from "../../buttons/BlueButton";
 import React from "react";
-import { LabwareTypeName, NewLabwareLayout } from "../types/stan";
-import labwareScanTableColumns from "../components/dataTable/labwareColumns";
+import { LabwareTypeName, NewLabwareLayout } from "../../../types/stan";
+import labwareScanTableColumns from "../../dataTable/labwareColumns";
 import * as Yup from "yup";
 import { Form, Formik } from "formik";
-import BlockProcessingLabwarePlan from "../components/blockProcessing/BlockProcessingLabwarePlan";
+import BlockProcessingLabwarePlan from "./BlockProcessingLabwarePlan";
 import { Dictionary, groupBy } from "lodash";
-import Heading from "../components/Heading";
-import Planner from "../components/planning/Planner";
-import createFormMachine from "../lib/machines/form/formMachine";
-import { stanCore } from "../lib/sdk";
-import WorkNumberSelect from "../components/WorkNumberSelect";
-import columns from "../components/dataTable/labwareColumns";
-import BlockProcessingSuccess from "../components/blockProcessing/BlockProcessingSuccess";
-import Warning from "../components/notifications/Warning";
+import Heading from "../../Heading";
+import Planner from "../../planning/Planner";
+import createFormMachine from "../../../lib/machines/form/formMachine";
+import { stanCore } from "../../../lib/sdk";
+import WorkNumberSelect from "../../WorkNumberSelect";
+import columns from "../../dataTable/labwareColumns";
+import Warning from "../../notifications/Warning";
+import variants from "../../../lib/motionVariants";
+import { motion } from "framer-motion";
+import { optionValues } from "../../forms";
+import ProcessingSuccess from "../ProcessingSuccess";
+import { useConfirmLeave } from "../../../lib/hooks";
 import { Prompt } from "react-router-dom";
-import { useConfirmLeave } from "../lib/hooks";
-
-type BlockProcessingParams = {
-  readonly blockProcessingInfo: GetTissueBlockProcessingInfoQuery;
-};
 
 /**
  * Used as Formik's values
@@ -54,14 +52,13 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
   LabwareTypeName.CASSETTE,
 ];
 
-export default function BlockProcessing({
-  blockProcessingInfo,
-}: BlockProcessingParams) {
-  /**
-   * For tracking whether the user gets a prompt if they tried to navigate to another page
-   */
-  const [shouldConfirm] = useConfirmLeave(true);
+type BlockProcessingParams = {
+  readonly processingInfo: GetBlockProcessingInfoQuery;
+};
 
+export default function BlockProcessing({
+  processingInfo,
+}: BlockProcessingParams) {
   const [current, send] = useMachine(
     createFormMachine<
       TissueBlockRequest,
@@ -78,16 +75,28 @@ export default function BlockProcessing({
     })
   );
 
-  const { submissionResult, serverError } = current.context;
+  /**
+   * For tracking whether the user gets a prompt if they tried to navigate to another page
+   */
+  const [shouldConfirm] = useConfirmLeave(true);
 
-  debugger;
+  const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(
+    LabwareTypeName.TUBE
+  );
+  const [numLabware, setNumLabware] = React.useState<number>(1);
+  const { submissionResult, serverError } = current.context;
   /**
    * Limit the labware types the user can Section on to.
    */
-  const allowedLabwareTypes = blockProcessingInfo.labwareTypes.filter((lw) =>
-    allowedLabwareTypeNames.includes(lw.name as LabwareTypeName)
+  const allowedLabwareTypes = React.useMemo(
+    () =>
+      processingInfo
+        ? processingInfo.labwareTypes.filter((lw) =>
+            allowedLabwareTypeNames.includes(lw.name as LabwareTypeName)
+          )
+        : [],
+    [processingInfo]
   );
-
   const buildPlanLayouts = React.useCallback(
     (
       plans: Map<string, NewLabwareLayout>,
@@ -95,7 +104,6 @@ export default function BlockProcessing({
       sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
       confirmAction?: (cid: string, plan: undefined) => void,
-      labwareAddType?: string,
       scrollRef?: React.MutableRefObject<HTMLDivElement | null>
     ) => {
       type PlanWithId = {
@@ -136,15 +144,15 @@ export default function BlockProcessing({
                       <BlockProcessingLabwarePlan
                         key={lwPlan.cid}
                         cid={lwPlan.cid}
-                        blockProcessInfo={blockProcessingInfo}
+                        blockProcessInfo={processingInfo!}
                         outputLabware={lwPlan.plan!}
                         sourceLabware={sourceLabware}
                         sampleColors={sampleColors}
                         onDelete={deleteAction}
                         rowIndex={rowIndx - 1}
                         ref={
-                          labwareType === labwareAddType &&
-                          indx === labwarePlans.length - 1
+                          labwareType === selectedLabwareType &&
+                          indx === labwarePlans.length - numLabware
                             ? scrollRef
                             : undefined
                         }
@@ -160,8 +168,39 @@ export default function BlockProcessing({
         <></>
       );
     },
-    [blockProcessingInfo]
+    [processingInfo, selectedLabwareType, numLabware]
   );
+
+  const buildPlanCreationSettings = React.useCallback(() => {
+    return (
+      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-center text-sm">
+        <div className="text-gray-500">Labware type</div>
+        <div className="text-gray-500">Number of labware</div>
+        <select
+          className="mt-1 block  py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
+          onChange={(e) => setSelectedLabwareType(e.currentTarget.value)}
+          data-testid={"labwareType"}
+          value={selectedLabwareType}
+        >
+          {optionValues(allowedLabwareTypes, "name", "name")}
+        </select>
+        <input
+          type="number"
+          className="mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
+          onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
+          value={numLabware}
+          data-testid={"numLabware"}
+          min={1}
+        />
+      </div>
+    );
+  }, [
+    selectedLabwareType,
+    setSelectedLabwareType,
+    numLabware,
+    setNumLabware,
+    allowedLabwareTypes,
+  ]);
 
   /**
    * Builds a yup validator for the labware plan form
@@ -175,7 +214,7 @@ export default function BlockProcessing({
             sourceBarcode: Yup.string().required().min(1),
             medium: Yup.string()
               .required()
-              .oneOf(blockProcessingInfo.mediums.map((medium) => medium.name)),
+              .oneOf(processingInfo!.mediums.map((medium) => medium.name)),
             replicateNumber: Yup.string().required(),
             commentId: Yup.number().optional(),
             discardSource: Yup.boolean().optional(),
@@ -220,7 +259,7 @@ export default function BlockProcessing({
 
   if (current.matches("submitted") && submissionResult) {
     return (
-      <BlockProcessingSuccess
+      <ProcessingSuccess
         labware={submissionResult.performTissueBlock.labware}
         columns={[
           columns.barcode(),
@@ -228,17 +267,21 @@ export default function BlockProcessing({
           columns.tissueType(),
           columns.spatialLocation(),
         ]}
+        successMessage={"Block processing completed"}
       />
     );
   }
 
   return (
-    <AppShell>
-      <AppShell.Header>
-        <AppShell.Title>Block Processing</AppShell.Title>
-      </AppShell.Header>
-      <AppShell.Main>
-        <div className="my-4 mx-auto max-w-screen-xl space-y-16">
+    <>
+      <motion.div
+        variants={variants.fadeInParent}
+        initial={"hidden"}
+        animate={"visible"}
+        exit={"hidden"}
+        className="my-4 mx-auto max-w-screen-xl space-y-16"
+      >
+        {processingInfo && (
           <Formik<BlockFormData>
             initialValues={{
               workNumber: "",
@@ -254,24 +297,32 @@ export default function BlockProcessing({
           >
             {({ setFieldValue, isValid, values }) => (
               <Form>
-                <div className={"space-y-10"}>
-                  <div>
+                <motion.div
+                  variants={variants.fadeInWithLift}
+                  className="space-y-10"
+                >
+                  <motion.div variants={variants.fadeInWithLift}>
                     <Heading level={3}>SGP Number</Heading>
                     <p className="mt-2">
                       Please select an SGP number to associate with block
                       processing.
                     </p>
-                    <div className="mt-4 md:w-1/2">
+                    <motion.div
+                      variants={variants.fadeInWithLift}
+                      className="mt-4 md:w-1/2"
+                    >
                       <WorkNumberSelect
                         onWorkNumberChange={(workNumber) => {
                           setFieldValue("workNumber", workNumber);
                         }}
                       />
-                    </div>
-                  </div>
+                    </motion.div>
+                  </motion.div>
                   <Planner<undefined>
-                    operationType={"Section"}
-                    allowedLabwareTypes={allowedLabwareTypes}
+                    selectedLabwareType={allowedLabwareTypes.find(
+                      (lt) => lt.name === selectedLabwareType
+                    )}
+                    numPlansToCreate={numLabware}
                     onPlanChanged={() => {}}
                     buildPlanLayouts={buildPlanLayouts}
                     columns={[
@@ -281,7 +332,7 @@ export default function BlockProcessing({
                       labwareScanTableColumns.spatialLocation(),
                       labwareScanTableColumns.replicate(),
                     ]}
-                    multiplePlanCreationRequired={true}
+                    buildPlanCreationSettings={buildPlanCreationSettings}
                   />
                   {serverError && (
                     <Warning
@@ -290,25 +341,27 @@ export default function BlockProcessing({
                     />
                   )}
                   {values.plans.length > 0 && (
-                    <div className={"sm:flex mt-4 sm:flex-row justify-end"}>
+                    <motion.div
+                      variants={variants.fadeInWithLift}
+                      className={"sm:flex mt-4 sm:flex-row justify-end"}
+                    >
                       <ButtonBar>
                         <BlueButton disabled={!isValid} type={"submit"}>
                           Save
                         </BlueButton>
                       </ButtonBar>
-                    </div>
+                    </motion.div>
                   )}
-                </div>
+                </motion.div>
               </Form>
             )}
           </Formik>
-        </div>
-      </AppShell.Main>
-
+        )}
+      </motion.div>
       <Prompt
         when={shouldConfirm}
         message={"You have unsaved changes. Are you sure you want to leave?"}
       />
-    </AppShell>
+    </>
   );
 }

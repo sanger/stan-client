@@ -1,32 +1,32 @@
 import {
-  GetTissueBlockProcessingInfoQuery,
+  GetBlockProcessingInfoQuery,
   LabwareFieldsFragment,
-} from "../../types/sdk";
+} from "../../../types/sdk";
 import React from "react";
 import { useMachine } from "@xstate/react";
 import { motion } from "framer-motion";
-import variants from "../../lib/motionVariants";
-import Labware from "../labware/Labware";
+import variants from "../../../lib/motionVariants";
+import Labware from "../../labware/Labware";
 import {
   buildSlotColor,
   buildSlotSecondaryText,
   buildSlotText,
-} from "../../pages/sectioning";
-import PinkButton from "../buttons/PinkButton";
-import Heading from "../Heading";
-import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
-import FormikSelect from "../forms/Select";
-import { optionValues } from "../forms";
-import Modal, { ModalBody, ModalFooter } from "../Modal";
-import LayoutPlanner from "../LayoutPlanner";
-import BlueButton from "../buttons/BlueButton";
-import WhiteButton from "../buttons/WhiteButton";
+} from "../../../pages/sectioning";
+import PinkButton from "../../buttons/PinkButton";
+import Heading from "../../Heading";
+import { LabwareTypeName, NewLabwareLayout } from "../../../types/stan";
+import FormikSelect from "../../forms/Select";
+import { optionValues } from "../../forms";
+import Modal, { ModalBody, ModalFooter } from "../../Modal";
+import LayoutPlanner from "../../LayoutPlanner";
+import BlueButton from "../../buttons/BlueButton";
+import WhiteButton from "../../buttons/WhiteButton";
 import { useFormikContext } from "formik";
-import Warning from "../notifications/Warning";
-import FormikInput from "../forms/Input";
-import { createLabwarePlanMachine } from "../planning/labwarePlan.machine";
-import { BlockFormData } from "../../pages/BlockProcessing";
-import { Source } from "../../lib/machines/layout/layoutContext";
+import Warning from "../../notifications/Warning";
+import FormikInput from "../../forms/Input";
+import { createLabwarePlanMachine } from "../../planning/labwarePlan.machine";
+import { BlockFormData } from "./BlockProcessing";
+import { Source } from "../../../lib/machines/layout/layoutContext";
 
 type BlockProcessingLabwarePlanProps = {
   /**
@@ -35,7 +35,7 @@ type BlockProcessingLabwarePlanProps = {
   cid: string;
   sourceLabware: LabwareFieldsFragment[];
   outputLabware: NewLabwareLayout;
-  blockProcessInfo: GetTissueBlockProcessingInfoQuery;
+  blockProcessInfo: GetBlockProcessingInfoQuery;
   sampleColors: Map<number, string>;
   onDelete: (cid: string) => void;
   rowIndex: number;

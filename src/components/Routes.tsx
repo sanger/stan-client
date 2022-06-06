@@ -37,7 +37,9 @@ import VisiumAnalysis from "../pages/VisiumAnalysis";
 import Aliquot from "../pages/Aliquot";
 import DualIndexPlate from "../pages/DualIndexPlate";
 import columns from "./dataTable/labwareColumns";
-import BlockProcessing from "../pages/BlockProcessing";
+import { OriginalSampleProcessing } from "../pages/OriginalSampleProcessing";
+import BlockProcessing from "./originalSampleProcessing/blockProcessing/BlockProcessing";
+import PotProcessing from "./originalSampleProcessing/potProcessing/PotProcessing";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -80,13 +82,43 @@ export function Routes() {
         )}
       />
       <AuthenticatedRoute
-        path="/lab/block_processing"
+        path="/lab/original_sample_processing"
+        render={(routeProps) => (
+          <OriginalSampleProcessing
+            key={routeProps.location.key}
+            {...routeProps}
+          />
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/original_sample_processing/block"
         render={(routeProps) => (
           <DataFetcher
             key={routeProps.location.key}
-            dataFetcher={stanCore.GetTissueBlockProcessingInfo}
+            dataFetcher={() => stanCore.GetBlockProcessingInfo()}
           >
-            {(blockInfo) => <BlockProcessing blockProcessingInfo={blockInfo} />}
+            {(blockInfo) => (
+              <BlockProcessing
+                key={routeProps.location.key}
+                processingInfo={blockInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/original_sample_processing/pot"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetPotProcessingInfo()}
+          >
+            {(blockInfo) => (
+              <PotProcessing
+                key={routeProps.location.key}
+                processingInfo={blockInfo}
+              />
+            )}
           </DataFetcher>
         )}
       />
