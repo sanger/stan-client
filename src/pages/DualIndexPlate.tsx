@@ -50,7 +50,7 @@ function DualIndexPlate() {
   } = current.context;
 
   const handleWorkNumberChange = useCallback(
-    (workNumber?: string) => {
+    (workNumber: string) => {
       if (workNumber) {
         send({ type: "UPDATE_WORK_NUMBER", workNumber });
       }

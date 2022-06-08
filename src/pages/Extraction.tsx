@@ -56,7 +56,7 @@ function buildExtractionTableData(ctx: ExtractionContext) {
 
 function Extraction() {
   const [current, send] = useMachine(() =>
-    extractionMachine.withContext({ labwares: [] })
+    extractionMachine.withContext({ labwares: [], workNumber: "" })
   );
 
   const {
@@ -90,7 +90,7 @@ function Extraction() {
   }, [current]);
 
   const handleWorkNumberChange = useCallback(
-    (workNumber?: string) => {
+    (workNumber: string) => {
       send({ type: "UPDATE_WORK_NUMBER", workNumber });
     },
     [send]
@@ -101,10 +101,7 @@ function Extraction() {
 
   const scannerLocked =
     !current.matches("ready") && !current.matches("extractionFailed");
-  const blueButtonDisabled = !(
-    (current.matches("ready") || current.matches("extractionFailed")) &&
-    labwares.length > 0
-  );
+
   const showGrayPanel =
     current.matches("ready") || current.matches("extractionFailed");
 
@@ -118,8 +115,7 @@ function Extraction() {
           <div>
             <Heading level={3}>SGP Number</Heading>
             <p className="mt-2">
-              You may optionally select an SGP number to associate with this
-              extraction.
+              Select an SGP number to associate with this extraction.
             </p>
             <div className="mt-4 md:w-1/2">
               <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
@@ -223,7 +219,7 @@ function Extraction() {
             <div className="flex flex-row items-center justify-center gap-4">
               <BlueButton
                 id="#extract"
-                disabled={blueButtonDisabled}
+                disabled={!current.matches({ ready: "valid" })}
                 className="whitespace-nowrap"
                 action={"primary"}
                 onClick={() => send({ type: "EXTRACT" })}

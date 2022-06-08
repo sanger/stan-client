@@ -6,7 +6,7 @@ import { ClientError } from "graphql-request";
 import { stanCore } from "../../sdk";
 
 export interface ExtractionContext {
-  workNumber?: string;
+  workNumber: string;
   labwares: LabwareFieldsFragment[];
   extraction?: ExtractMutation;
   serverErrors?: ClientError;
@@ -27,7 +27,9 @@ type ExtractErrorEvent = {
 };
 
 export type ExtractionEvent =
-  | { type: "UPDATE_WORK_NUMBER"; workNumber?: string }
+  | { type: "UPDATE_WORK_NUMBER"; workNumber: string }
+  | { type: "IS_VALID" }
+  | { type: "IS_INVALID" }
   | UpdateLabwaresEvent
   | ExtractEvent
   | ExtractDoneEvent
@@ -42,10 +44,24 @@ export const extractionMachine = createMachine<
     initial: "ready",
     states: {
       ready: {
+        initial: "invalid",
         on: {
-          UPDATE_WORK_NUMBER: { actions: "assignWorkNumber" },
-          UPDATE_LABWARES: { actions: "assignLabwares" },
-          EXTRACT: { target: "extracting", cond: "labwaresNotEmpty" },
+          UPDATE_WORK_NUMBER: { 
+            target: "validating",
+            actions: "assignWorkNumber"
+          },
+          UPDATE_LABWARES: { 
+            actions: "assignLabwares",
+            target: "validating"
+          },
+        },
+        states: {
+          valid: {
+            on: {
+              EXTRACT: "#extraction.extracting",
+            },
+          },
+          invalid: {},
         },
       },
       extracting: {
@@ -56,14 +72,18 @@ export const extractionMachine = createMachine<
             actions: "assignExtraction",
           },
           onError: {
-            target: "extractionFailed",
+            target: "ready.valid",
             actions: "assignServerErrors",
           },
         },
       },
-      extractionFailed: {
+      validating: {
+        invoke: {
+          src: "validateExtraction",
+        },
         on: {
-          EXTRACT: { target: "extracting", cond: "labwaresNotEmpty" },
+          IS_VALID: "ready.valid",
+          IS_INVALID: "ready.invalid",
         },
       },
       extracted: {},
@@ -98,10 +118,6 @@ export const extractionMachine = createMachine<
       }),
     },
 
-    guards: {
-      labwaresNotEmpty: (ctx, _e) => ctx.labwares.length > 0,
-    },
-
     services: {
       extract: (ctx, _e) => {
         return stanCore.Extract({
@@ -111,6 +127,12 @@ export const extractionMachine = createMachine<
             barcodes: ctx.labwares.map((lw) => lw.barcode),
           },
         });
+      },
+      validateExtraction: (ctx: ExtractionContext) => (
+        send
+      ) => {
+        const isValid = (ctx.labwares.length > 0) && (ctx.workNumber !== "")
+        send(isValid ? "IS_VALID" : "IS_INVALID");
       },
     },
   }

@@ -36,6 +36,7 @@ const ToastSuccess = () => <Success message={"Slots copied"} />;
 function SlotCopy({ title, initialOutputLabware }: PageParams) {
   const [current, send] = useMachine(() =>
     slotCopyMachine.withContext({
+      workNumber: "",
       operationType: "Visium cDNA",
       outputLabwareType: LabwareTypeName.PLATE,
       outputLabwares: [],
@@ -68,7 +69,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
   );
 
   const handleWorkNumberChange = useCallback(
-    (workNumber?: string) => {
+    (workNumber: string) => {
       send({ type: "UPDATE_WORK_NUMBER", workNumber });
     },
     [send]
@@ -150,7 +151,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           <div className="mb-8">
             <Heading level={3}>SGP Number</Heading>
             <p className="mt-2">
-              You may optionally select an SGP number to associate with this
+              Select an SGP number to associate with this
               operation.
             </p>
             <div className="my-4 md:w-1/2">
@@ -179,7 +180,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
         <div className="flex flex-row items-center justify-end space-x-2">
           {!current.matches("copied") && (
             <BlueButton
-              disabled={!current.matches("readyToCopy")}
+              disabled={!current.matches("readyToCopy") || current.context.workNumber === ""}
               onClick={onSaveAction}
             >
               Save

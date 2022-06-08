@@ -65,8 +65,8 @@ export type AliquotRequest = {
   labwareType: Scalars['String'];
   /** The number of destination labware to create. */
   numLabware: Scalars['Int'];
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
 };
 
 /** The state of a particular sample. As samples are created in new labware by different operations, it is associated with new bio states. */
@@ -137,8 +137,8 @@ export type ComplexStainLabware = {
   bondBarcode: Scalars['String'];
   /** The bond run number. */
   bondRun: Scalars['Int'];
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
   /** The plex for RNAscope if that is being recorded. */
   plexRNAscope?: Maybe<Scalars['Int']>;
   /** The plex for IHC if that is being recorded. */
@@ -207,8 +207,8 @@ export type ConfirmSectionLabware = {
 export type ConfirmSectionRequest = {
   /** The specification of what to confirm or cancel in each labware. */
   labware: Array<ConfirmSectionLabware>;
-  /** An optional work number to associate with the operations. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with the operations. */
+  workNumber: Scalars['String'];
 };
 
 /** A type of control. */
@@ -289,8 +289,8 @@ export type ExtractRequest = {
   barcodes: Array<Scalars['String']>;
   /** The name of the labware type for the new destination labware. */
   labwareType: Scalars['String'];
-  /** An optional work number to associate with these operations. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with these operations. */
+  workNumber: Scalars['String'];
 };
 
 /** A piece of labware and an extract result, if any exists. */
@@ -320,8 +320,8 @@ export type ExtractResultLabware = {
 export type ExtractResultRequest = {
   /** The details of the results in each item of labware. */
   labware: Array<ExtractResultLabware>;
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
 };
 
 /** Information that a particular sample was found in a particular labware. */
@@ -437,8 +437,8 @@ export type InPlaceOpRequest = {
   barcodes: Array<Scalars['String']>;
   /** The id of the equipment (if any) being used in this operation. */
   equipmentId?: Maybe<Scalars['Int']>;
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
 };
 
 /** A type of label that can be printed, typically including a barcode and some other information. */
@@ -1277,8 +1277,8 @@ export type OpWithSlotMeasurementsRequest = {
   barcode: Scalars['String'];
   /** The name of the type of operation to record. */
   operationType: Scalars['String'];
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
   /** The measurements to record in individual slots. */
   slotMeasurements: Array<SlotMeasurementRequest>;
 };
@@ -1808,8 +1808,8 @@ export type QueryLabwareInLocationArgs = {
 export type RnaAnalysisLabware = {
   /** The barcode of the labware. */
   barcode: Scalars['String'];
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
   /** The id of a preset comment, if any, to associate with the analysis. */
   commentId?: Maybe<Scalars['Int']>;
   /** The measurements to record for this operation. */
@@ -1853,7 +1853,7 @@ export type ReagentTransferRequest = {
   /** The name of the operation being performed. */
   operationType: Scalars['String'];
   /** The work number to associate with the operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  workNumber: Scalars['String'];
   /** The barcode of the destination labware. */
   destinationBarcode: Scalars['String'];
   /** The transfers from aliquot slots to destination slots. */
@@ -1864,8 +1864,8 @@ export type ReagentTransferRequest = {
 export type RecordPermRequest = {
   /** The barcode of the labware. */
   barcode: Scalars['String'];
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
   /** The data for each slot in the labware. */
   permData: Array<PermData>;
 };
@@ -1943,8 +1943,8 @@ export type ResultRequest = {
   operationType?: Maybe<Scalars['String']>;
   /** The results for each item of labware. */
   labwareResults: Array<LabwareResult>;
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
 };
 
 /** A particular sample of tissue, in a particular state. */
@@ -2056,8 +2056,8 @@ export type SlotCopyRequest = {
   operationType: Scalars['String'];
   /** The specifications of which source slots are being copied into what addresses in the destination labware. */
   contents: Array<SlotCopyContent>;
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
 };
 
 /** A measurement to be recorded in a particular slot of some item of labware. */
@@ -2113,8 +2113,8 @@ export type StainRequest = {
   barcodes: Array<Scalars['String']>;
   /** The times of particular measurements for the stains. */
   timeMeasurements: Array<TimeMeasurement>;
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
 };
 
 /** A type of stain that may be performed. */
@@ -2238,8 +2238,8 @@ export enum UserRole {
 export type VisiumAnalysisRequest = {
   /** The barcode of the labware. */
   barcode: Scalars['String'];
-  /** An optional work number to associate with this operation. */
-  workNumber?: Maybe<Scalars['String']>;
+  /** A work number to associate with this operation. */
+  workNumber: Scalars['String'];
   /** The address where the selected permeabilisation was recorded. */
   selectedAddress: Scalars['Address'];
   /** The permeabilisation time that we want to select. */

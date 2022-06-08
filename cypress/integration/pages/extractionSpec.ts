@@ -9,6 +9,10 @@ function scanInLabware() {
   cy.get("#labwareScanInput").type("STAN-013{enter}");
 }
 
+function selectWorkNumber() {
+  cy.get("select").select("SGP1008");
+}
+
 describe("RNA Extraction", () => {
   context("when extraction fails", () => {
     before(() => {
@@ -33,6 +37,7 @@ describe("RNA Extraction", () => {
       });
 
       scanInLabware();
+      selectWorkNumber();
       cy.findByText("Extract").click();
     });
 
@@ -53,6 +58,7 @@ describe("RNA Extraction", () => {
     before(() => {
       cy.visit("/lab/extraction");
       scanInLabware();
+      selectWorkNumber();
       cy.findByRole("button", { name: "Extract" }).click();
     });
 

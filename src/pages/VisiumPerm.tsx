@@ -35,7 +35,7 @@ import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
 import PermPositiveControl from "../components/forms/PermPositiveControl";
 
 const validationSchema = Yup.object().shape({
-  workNumber: Yup.string().optional().label("SGP number"),
+  workNumber: Yup.string().required().label("SGP number"),
   barcode: Yup.string().required().label("Barcode"),
   permData: Yup.array()
     .min(1)
@@ -97,7 +97,7 @@ export default function VisiumPerm() {
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           <Formik<RecordPermRequest>
-            initialValues={{ barcode: "", workNumber: undefined, permData: [] }}
+            initialValues={{ barcode: "", workNumber: "", permData: [] }}
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
@@ -107,12 +107,13 @@ export default function VisiumPerm() {
                   <Heading level={2}>SGP Number</Heading>
 
                   <p>
-                    You may optionally select an SGP number to associate with
-                    this operation.
+                    Select an SGP number to associate with this operation.
                   </p>
 
                   <div className="mt-4 md:w-1/2">
-                    <WorkNumberSelect name={"workNumber"} />
+                    <WorkNumberSelect name={"workNumber"} onWorkNumberChange={(workNumber) =>
+                      setFieldValue("workNumber", workNumber)
+                    }/>
                   </div>
                 </div>
 

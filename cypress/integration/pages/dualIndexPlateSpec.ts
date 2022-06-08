@@ -21,6 +21,7 @@ describe("Dual Index Plate", () => {
   context("when source and destination labware are not scanned", () => {
     before(() => {
       cy.visit("/lab/dual_index_plate");
+      cy.get("select").select("SGP1008");
     });
     it("disables the Save button", () => {
       saveButton().should("be.disabled");
