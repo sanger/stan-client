@@ -35,7 +35,7 @@ import { useConfirmLeave } from "../../../lib/hooks";
 export type PotFormValue = {
   labwareType: string;
   commentId?: number;
-  fixative?: string;
+  fixative: string;
 };
 export type PotFormData = {
   workNumber: string;
@@ -280,6 +280,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
   const buildTissuePotRequest = (
     formData: PotFormData
   ): PotProcessingRequest => {
+    debugger;
     return {
       sourceBarcode: formData.sourceBarcode,
       workNumber: formData.workNumber,

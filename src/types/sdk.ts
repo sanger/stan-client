@@ -1502,24 +1502,24 @@ export type PlanResult = {
 
 /** A destination for pot processing. */
 export type PotProcessingDestination = {
-  /** Comment to record, if any. */
-  commentId?: Maybe<Scalars['Int']>;
-  /** The fixative (if any). */
-  fixative?: Maybe<Scalars['String']>;
   /** The name of the type of labware. */
   labwareType: Scalars['String'];
+  /** The fixative. */
+  fixative: Scalars['String'];
+  /** Comment to record, if any. */
+  commentId?: Maybe<Scalars['Int']>;
 };
 
 /** A request to transfer original sample into pots. */
 export type PotProcessingRequest = {
-  /** The destinations that will be created. */
-  destinations: Array<PotProcessingDestination>;
   /** The source barcode. */
   sourceBarcode: Scalars['String'];
-  /** Should the source labware be discarded? */
-  sourceDiscarded?: Maybe<Scalars['Boolean']>;
   /** The work number. */
   workNumber: Scalars['String'];
+  /** The destinations that will be created. */
+  destinations: Array<PotProcessingDestination>;
+  /** Is the source labware discarded? */
+  sourceDiscarded?: Maybe<Scalars['Boolean']>;
 };
 
 /** A printer, typically used to print labels for labware. */

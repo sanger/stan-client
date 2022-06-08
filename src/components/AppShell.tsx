@@ -141,7 +141,7 @@ function AppShell({ children }: AppShellParams) {
                       <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                     }
                     description={
-                      "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative or fetal waste labware"
+                      "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
                     }
                   />
 

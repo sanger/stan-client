@@ -132,9 +132,12 @@ const PotProcessingLabwarePlan = React.forwardRef<
           outputLabware.labwareType.name
         );
       }
-      if (fixative) {
-        setFieldValue(`plans.${rowIndex}.fixative`, fixative);
-      }
+      setFieldValue(
+        `plans.${rowIndex}.fixative`,
+        outputLabware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER
+          ? "None"
+          : fixative
+      );
     }, [setFieldValue, rowIndex, fixative, outputLabware, sourceLabware]);
 
     return (
