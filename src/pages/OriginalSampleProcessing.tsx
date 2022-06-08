@@ -24,6 +24,7 @@ export const OriginalSampleProcessing: React.FC<RouteComponentProps> = ({
     GetBlockProcessingInfoQuery | GetPotProcessingInfoQuery | undefined
   >(undefined);
 
+  /**Set processing Type with selected value**/
   useEffect(() => {
     const queryString = parseQueryString(location.search);
 
@@ -40,6 +41,7 @@ export const OriginalSampleProcessing: React.FC<RouteComponentProps> = ({
     }
   }, [location, setProcessingType]);
 
+  /**Set processing Info based on processing type**/
   useEffect(() => {
     async function fetchAndSetProcessingInfo(
       type: string,
@@ -61,7 +63,7 @@ export const OriginalSampleProcessing: React.FC<RouteComponentProps> = ({
       }
       return;
     }
-    if (processingType.length > 0) {
+    if (processingType !== "" && processingType.length > 0) {
       fetchAndSetProcessingInfo(processingType, setProcessingInfo);
     }
   }, [processingType, setProcessingInfo]);

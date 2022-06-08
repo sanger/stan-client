@@ -44,7 +44,7 @@ type PlannerProps<M> = {
    */
   singleSourceAllowed?: boolean;
   /**
-   *Callback to render the plan layouts created. This allows to customise the plan layout depending on the context it is called
+   *Callback to render the plan layouts created. This allows to customise the plan layout depending on the context it is called.
    */
   buildPlanLayouts: (
     layout: Map<string, NewLabwareLayout>, //All layouts created
@@ -57,7 +57,7 @@ type PlannerProps<M> = {
   columns: Column<LabwareFieldsFragment>[];
 
   /**
-   * Create the settings component for plan creation
+   * Callback to render the component to display configuration setting to add a labware plan.
    */
   buildPlanCreationSettings: () => JSX.Element;
 
@@ -181,7 +181,6 @@ function reducer<M>(
             )
           );
         }
-
         // As soon as there are any plans present, stop the user from adding
         // any more source labware
         draft.isLabwareScannerLocked = true;

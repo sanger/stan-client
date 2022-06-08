@@ -76,7 +76,6 @@ const originalSampleProcessingHandlers = [
   graphql.mutation<PerformTissuePotMutation, PerformTissuePotMutationVariables>(
     "PerformTissuePot",
     (req, res, ctx) => {
-      debugger;
       const confirmedLabwares = req.variables.request.destinations.map(() => {
         const labware = labwareFactory.build({ id: Math.random() });
         return buildLabwareFragment(labware);

@@ -8,7 +8,7 @@ import { LabwareTypeName } from "../../../src/types/stan";
 
 describe("Block Processing", () => {
   before(() => {
-    cy.visit("/lab/block_processing");
+    cy.visit("/lab/original_sample_processing?type=block");
   });
 
   describe("Add Labware button", () => {
@@ -18,7 +18,7 @@ describe("Block Processing", () => {
       });
     });
 
-    context("when there is source labware loaded", () => {
+    context("when source labware is loaded", () => {
       before(() => {
         scanInput();
       });
@@ -77,20 +77,6 @@ describe("Block Processing", () => {
         cy.findAllByLabelText("Replicate Number")
           .last()
           .should("have.value", 2);
-      });
-
-      context("when I try and leave the page", () => {
-        it("shows a confirm box", () => {
-          cy.on("window:confirm", (str) => {
-            expect(str).to.equal(
-              "You have unsaved changes. Are you sure you want to leave?"
-            );
-            // Returning false cancels the event
-            return false;
-          });
-
-          cy.findByText("Search").click();
-        });
       });
     });
 
@@ -159,10 +145,26 @@ describe("Block Processing", () => {
       });
     });
 
+    describe("Leaving page", () => {
+      context("when I try and leave the page", () => {
+        it("shows a confirm box", () => {
+          cy.on("window:confirm", (str) => {
+            expect(str).to.equal(
+              "You have unsaved changes. Are you sure you want to leave?"
+            );
+            // Returning false cancels the event
+            return false;
+          });
+
+          cy.findByText("Search").click();
+        });
+      });
+    });
+
     describe("Save button", () => {
       context("When all other fields filled in but not source selected", () => {
         before(() => {
-          cy.visit("/lab/block_processing");
+          cy.visit("/lab/original_sample_processing?type=block");
           scanInput();
           addTubeLabware();
           fillSGPNumber();
@@ -173,10 +175,10 @@ describe("Block Processing", () => {
         });
       });
       context(
-        "when source selected along with all other fields filled in but SGP Number is missing",
+        "when source selected and all other fields filled in except SGP Number",
         () => {
           before(() => {
-            cy.visit("/lab/block_processing");
+            cy.visit("/lab/original_sample_processing?type=block");
             scanInput();
             addTubeLabware();
             selectSource();
@@ -188,10 +190,10 @@ describe("Block Processing", () => {
         }
       );
       context(
-        "when source selected along with all other fields filled in but Medium is missing",
+        "when source selected and all other fields filled in except Medium",
         () => {
           before(() => {
-            cy.visit("/lab/block_processing");
+            cy.visit("/lab/original_sample_processing?type=block");
             scanInput();
             addTubeLabware();
             selectSource();
@@ -202,9 +204,9 @@ describe("Block Processing", () => {
           });
         }
       );
-      context("when all fields are filled along with source selected", () => {
+      context("when all required fields are filled in", () => {
         before(() => {
-          cy.visit("/lab/block_processing");
+          cy.visit("/lab/original_sample_processing?type=block");
           scanInput();
           addTubeLabware();
           selectSource();
@@ -272,7 +274,7 @@ describe("Block Processing", () => {
 
     context("when request is unsuccessful", () => {
       before(() => {
-        cy.visit("/lab/block_processing");
+        cy.visit("/lab/original_sample_processing?type=block");
         scanInput();
         addTubeLabware();
         selectSource();

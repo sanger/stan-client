@@ -26,12 +26,34 @@ type PotProcessingLabwarePlanProps = {
    * Since PlanRequests have no identity, a client ID must be provided
    */
   cid: string;
+  /**
+   * Source labware scanned
+   */
   sourceLabware: LabwareFieldsFragment[];
+  /**
+   * Destination labware plans created
+   */
   outputLabware: NewLabwareLayout;
+  /**
+   * Additional information required for block processing
+   */
   potProcessInfo: GetPotProcessingInfoQuery;
+  /**
+   * Colours to represent source labware
+   */
   sampleColors: Map<number, string>;
+  /**
+   * Call back handler for  delete layout operation
+   * @param cid - unique id for a labware plan created
+   */
   onDelete: (cid: string) => void;
+  /**
+   * rowIndex representing form data array index
+   */
   rowIndex: number;
+  /**
+   * Initial fixative value selected
+   */
   fixative?: string;
 };
 
@@ -97,20 +119,21 @@ const PotProcessingLabwarePlan = React.forwardRef<
     const { values, setFieldValue } = useFormikContext<PotFormData>();
 
     /**
-     * Set form values which are not displayed
+     * Set form values that need to be auto filled
      */
     React.useEffect(() => {
-      if (fixative) {
-        setFieldValue(`plans.${rowIndex}.fixative`, fixative);
-      }
       if (sourceLabware.length > 0) {
         setFieldValue("sourceBarcode", sourceLabware[0].barcode);
       }
+
       if (outputLabware) {
         setFieldValue(
           `plans.${rowIndex}.labwareType`,
           outputLabware.labwareType.name
         );
+      }
+      if (fixative) {
+        setFieldValue(`plans.${rowIndex}.fixative`, fixative);
       }
     }, [setFieldValue, rowIndex, fixative, outputLabware, sourceLabware]);
 

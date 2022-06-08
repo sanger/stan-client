@@ -33,11 +33,30 @@ type BlockProcessingLabwarePlanProps = {
    * Since PlanRequests have no identity, a client ID must be provided
    */
   cid: string;
+  /**
+   * All source labware
+   */
   sourceLabware: LabwareFieldsFragment[];
+  /**
+   * Destination labware plans created
+   */
   outputLabware: NewLabwareLayout;
+  /**
+   * Additional information required for block processing
+   */
   blockProcessInfo: GetBlockProcessingInfoQuery;
+  /**
+   * Colours to represent source labware
+   */
   sampleColors: Map<number, string>;
+  /**
+   * Call back handler for  delete layout operation
+   * @param cid - unique id for a labware plan created
+   */
   onDelete: (cid: string) => void;
+  /**
+   * rowIndex representing form data array index
+   */
   rowIndex: number;
 };
 
@@ -93,6 +112,9 @@ const BlockProcessingLabwarePlan = React.forwardRef<
     const { layoutMachine } = current.children;
     const { setFieldValue, values } = useFormikContext<BlockFormData>();
 
+    /**
+     * Fill all form fields that need to be auto-filled
+     */
     React.useEffect(() => {
       setFieldValue(`plans.${rowIndex}.replicateNumber`, rowIndex + 1 + "");
       setFieldValue(
@@ -101,6 +123,9 @@ const BlockProcessingLabwarePlan = React.forwardRef<
       );
     }, [setFieldValue, rowIndex, outputLabware]);
 
+    /**
+     * Fill source barcode in form data
+     */
     React.useEffect(() => {
       if (layoutPlan.plannedActions.size <= 0) return;
       const plannedActions:

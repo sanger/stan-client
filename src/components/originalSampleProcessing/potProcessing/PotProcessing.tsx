@@ -94,6 +94,9 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
     [processingInfo]
   );
 
+  /**
+   * Display all plans created
+   */
   const buildPlanLayouts = React.useCallback(
     (
       plans: Map<string, NewLabwareLayout>,
@@ -141,7 +144,10 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
                   labwarePlans && (
                     <div
                       className={"flex flex-col"}
-                      data-testid={`divSection-${labwareType}`}
+                      data-testid={`divSection-${labwareType.replace(
+                        /\s+/g,
+                        ""
+                      )}`}
                       key={labwareType}
                     >
                       <Heading
@@ -184,6 +190,9 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
     [processingInfo, selectedLabwareType, numLabware, selectedFixative]
   );
 
+  /**
+   * Display settings panel to add labware
+   */
   const buildPlanCreationSettings = React.useCallback(() => {
     return (
       <div
@@ -267,6 +276,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
     });
   }
 
+  /**Reformat the form data as mutation input**/
   const buildTissuePotRequest = (
     formData: PotFormData
   ): PotProcessingRequest => {
@@ -282,6 +292,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
     };
   };
 
+  /**Save operation performed, so display the success page**/
   if (current.matches("submitted") && submissionResult) {
     return (
       <ProcessingSuccess
@@ -292,10 +303,23 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
           columns.tissueType(),
           columns.spatialLocation(),
         ]}
-        successMessage={"Pot processing completed"}
+        successMessage={"Pot processing complete"}
       />
     );
   }
+
+  const isEnableSubmit = (value: PotFormData) => {
+    if (!value.sourceBarcode || value.sourceBarcode.length <= 0) return false;
+    if (!value.workNumber || value.workNumber.length <= 0) return false;
+    if (value.plans.length <= 0) return false;
+    return (
+      value.plans.filter(
+        (val) =>
+          val.labwareType === LabwareTypeName.POT &&
+          (!val.fixative || val.fixative.length === 0)
+      ).length === 0
+    );
+  };
 
   return (
     <>
@@ -314,15 +338,15 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
               discardSource: false,
               plans: [],
             }}
-            validationSchema={buildValidationSchema()}
             onSubmit={async (values) => {
               send({
                 type: "SUBMIT_FORM",
                 values: buildTissuePotRequest(values),
               });
             }}
+            validationSchema={buildValidationSchema()}
           >
-            {({ setFieldValue, isValid, values }) => (
+            {({ setFieldValue, values }) => (
               <Form>
                 <motion.div
                   variants={variants.fadeInWithLift}
@@ -375,7 +399,10 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
                       className={"sm:flex mt-4 sm:flex-row justify-end"}
                     >
                       <ButtonBar>
-                        <BlueButton disabled={!isValid} type={"submit"}>
+                        <BlueButton
+                          disabled={!isEnableSubmit(values)}
+                          type={"submit"}
+                        >
                           Save
                         </BlueButton>
                       </ButtonBar>

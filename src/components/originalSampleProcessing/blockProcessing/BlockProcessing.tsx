@@ -97,6 +97,8 @@ export default function BlockProcessing({
         : [],
     [processingInfo]
   );
+
+  /** Display created Labware plans**/
   const buildPlanLayouts = React.useCallback(
     (
       plans: Map<string, NewLabwareLayout>,
@@ -110,7 +112,7 @@ export default function BlockProcessing({
         cid: string;
         plan: NewLabwareLayout | undefined;
       };
-      //Group by labware type
+      //Group plans labware type
       const planWithKeys: PlanWithId[] = Array.from(plans.keys()).map((k) => {
         return {
           cid: k,
@@ -171,6 +173,9 @@ export default function BlockProcessing({
     [processingInfo, selectedLabwareType, numLabware]
   );
 
+  /**
+   * Display settings panel to add labware
+   */
   const buildPlanCreationSettings = React.useCallback(() => {
     return (
       <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-center text-sm">
@@ -238,6 +243,7 @@ export default function BlockProcessing({
     });
   }
 
+  /**Reformat form data as mutation input**/
   const buildTissueBlockRequest = (
     formData: BlockFormData
   ): TissueBlockRequest => {
@@ -257,6 +263,7 @@ export default function BlockProcessing({
     };
   };
 
+  /**Save operation performed, so display the success page**/
   if (current.matches("submitted") && submissionResult) {
     return (
       <ProcessingSuccess
@@ -267,7 +274,7 @@ export default function BlockProcessing({
           columns.tissueType(),
           columns.spatialLocation(),
         ]}
-        successMessage={"Block processing completed"}
+        successMessage={"Block processing complete"}
       />
     );
   }
