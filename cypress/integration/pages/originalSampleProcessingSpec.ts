@@ -29,8 +29,5 @@ describe("Original Sample Processing", () => {
     it("should display Pot Processing page ", () => {
       cy.url().should("include", "/lab/original_sample_processing?type=pot");
     });
-    after(() => {
-      cy.visit("/lab/original_sample_processing");
-    });
   });
 });
