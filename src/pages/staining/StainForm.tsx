@@ -313,10 +313,14 @@ export default function StainForm({
                 Summary
               </Heading>
 
-              <p>
-                The selected SGP number is{" "}
-                <span className="font-semibold">{values.workNumber}</span>.
-              </p>
+              {values.workNumber ? (
+                <p>
+                  The selected SGP number is{" "}
+                  <span className="font-semibold">{values.workNumber}</span>.
+                </p>
+              ) : (
+                <p className="text-sm italic">No SGP number selected.</p>
+              )}
 
               {values.barcodes.length > 0 && (
                 <p>

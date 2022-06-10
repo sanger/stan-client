@@ -123,8 +123,7 @@ export const analysisLabwareMachine = createMachine<
         const updateAnalysisLabware = { ...ctx.analysisLabwares[indx] };
         switch (e.labware.field) {
           case "workNumber": {
-            updateAnalysisLabware.workNumber =
-              e.labware.value !== "" ? e.labware.value : "";
+            updateAnalysisLabware.workNumber = e.labware.value;
             break;
           }
           case "measurements": {
@@ -180,7 +179,7 @@ export const analysisLabwareMachine = createMachine<
         ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
           return {
             ...labware,
-            workNumber: e.workNumber !== "" ? e.workNumber : "",
+            workNumber: e.workNumber,
           };
         });
       },
