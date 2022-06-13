@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 import AppShell from "../components/AppShell";
-import { GetConfigurationQuery, UserRole } from "../types/sdk";
+import { GetConfigurationQuery } from "../types/sdk";
 import EntityManager from "../components/entityManager/EntityManager";
 import Heading from "../components/Heading";
 import { groupBy } from "lodash";
-import StyledLink from "../components/StyledLink";
 import { StanCoreContext } from "../lib/sdk";
-
+import { TabList } from "../components/TabbedPane";
+import { Item } from "@react-stately/collections";
 type ConfigurationParams = {
   configuration: GetConfigurationQuery;
 };
@@ -24,32 +24,40 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           <div className="space-y-8">
-            {Object.keys(groupedComments).map((category) => (
-              <div key={category} data-testid="config" className="space-y-3">
-                <Heading level={2}>Comments - {category}</Heading>
-                <EntityManager
-                  initialEntities={groupedComments[category]}
-                  displayKeyColumnName={"text"}
-                  valueColumnName={"enabled"}
-                  onChangeValue={(entity, value) => {
-                    const enabled = typeof value === "boolean" ? value : false;
-                    return stanCore
-                      .SetCommentEnabled({ commentId: entity.id, enabled })
-                      .then((res) => res.setCommentEnabled);
-                  }}
-                  onCreate={(text) =>
-                    stanCore
-                      .AddComment({ category, text })
-                      .then((res) => res.addComment)
-                  }
-                  valueFieldComponentInfo={{
-                    type: "CHECKBOX",
-                  }}
-                />
-              </div>
-            ))}
+            <TabList>
+              {Object.keys(groupedComments).map((category) => (
+                <Item key={category} title={`Comments - ${category}`}>
+                  <>
+                    <Heading level={2}>Comments - {category}</Heading>
+                    <EntityManager
+                      initialEntities={groupedComments[category]}
+                      displayKeyColumnName={"text"}
+                      valueColumnName={"enabled"}
+                      onChangeValue={(entity, value) => {
+                        const enabled =
+                          typeof value === "boolean" ? value : false;
+                        return stanCore
+                          .SetCommentEnabled({
+                            commentId: entity.id,
+                            enabled,
+                          })
+                          .then((res) => res.setCommentEnabled);
+                      }}
+                      onCreate={(text) =>
+                        stanCore
+                          .AddComment({ category, text })
+                          .then((res) => res.addComment)
+                      }
+                      valueFieldComponentInfo={{
+                        type: "CHECKBOX",
+                      }}
+                    />
+                  </>
+                </Item>
+              ))}
+            </TabList>
 
-            <div data-testid="config">
+            {/*   f<div data-testid="config">
               <Heading level={2}>Destruction Reasons</Heading>
               <p className="mt-3 mb-6 text-lg">
                 Destruction Reasons are used on the{" "}
@@ -358,7 +366,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                     .then((res) => res.setUserRole);
                 }}
               />
-            </div>
+            </div> */}
           </div>
         </div>
       </AppShell.Main>

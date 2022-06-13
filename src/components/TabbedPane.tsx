@@ -15,7 +15,13 @@ const TabList = (props: AriaTabListProps<object>) => {
   const { tabListProps } = useTabList(props, state, ref);
   return (
     <div className={"h-20"}>
-      <div {...tabListProps} ref={ref}>
+      <div
+        {...tabListProps}
+        ref={ref}
+        className={
+          "max-w-min min-w-min rounded-tl overflow-hidden rounded-tr grid grid-flow-col justify-start items-center gap-x-1 bg-primary-200 border border-t-0 border-primary-200 border-px bg-primary-50"
+        }
+      >
         {Array.from(state.collection).map((item) => (
           <TabItem key={item.key} item={item} state={state} />
         ))}
@@ -33,7 +39,14 @@ function TabItem<T extends object>({ state, item }: TabItemProps<T>) {
   let isDisabled = state.disabledKeys.has(key);
 
   return (
-    <div {...tabProps} ref={ref}>
+    <div
+      key={key}
+      {...tabProps}
+      ref={ref}
+      className={`rounded-tl-lg rounded-tr-lg whitespace-nowrap transition focus:outline-none py-2 cursor-pointer px-8 h-full ${
+        isSelected ? "bg-sdb-400 text-white" : "bg-gray-200"
+      } ${isDisabled && "text-gray-300 cursor-not-allowed"}`}
+    >
       {rendered}
     </div>
   );
@@ -47,7 +60,11 @@ const TabContentPanel = ({
 }) => {
   const ref = React.useRef(null);
   const { tabPanelProps } = useTabPanel(props, state, ref);
-  return <div>{state.selectedItem?.props.children}</div>;
+  return (
+    <div {...tabPanelProps} ref={ref}>
+      {state.selectedItem?.props.children}
+    </div>
+  );
 };
 
 export { TabList, TabItem };
