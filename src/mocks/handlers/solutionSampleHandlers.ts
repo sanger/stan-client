@@ -36,7 +36,7 @@ const solutionSampleHandlers = [
       return res(
         ctx.errors([
           {
-            message: `Could not find equipment: "${req.variables.name}"`,
+            message: `Could not find Solution sample: "${req.variables.name}"`,
           },
         ])
       );
