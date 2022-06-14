@@ -14,12 +14,12 @@ const TabList = (props: AriaTabListProps<object>) => {
   const ref = React.useRef(null);
   const { tabListProps } = useTabList(props, state, ref);
   return (
-    <div className={"h-20"}>
+    <div className={"h-full"}>
       <div
         {...tabListProps}
         ref={ref}
         className={
-          "max-w-min min-w-min rounded-tl overflow-hidden rounded-tr grid grid-flow-col justify-start items-center gap-x-1 bg-primary-200 border border-t-0 border-primary-200 border-px bg-primary-50"
+          "rounded-tl overflow-hidden rounded-tr grid grid-flow-col justify-start items-center gap-x-1 bg-primary-200 border border-t-0 border-primary-200 bg-primary-50"
         }
       >
         {Array.from(state.collection).map((item) => (
@@ -61,7 +61,13 @@ const TabContentPanel = ({
   const ref = React.useRef(null);
   const { tabPanelProps } = useTabPanel(props, state, ref);
   return (
-    <div {...tabPanelProps} ref={ref}>
+    <div
+      className={
+        "p-4 border h-full border-primary-200 -mt-px rounded rounded-tl-none overflow-y-auto overflow-x-hidden"
+      }
+      {...tabPanelProps}
+      ref={ref}
+    >
       {state.selectedItem?.props.children}
     </div>
   );
