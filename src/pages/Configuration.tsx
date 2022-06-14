@@ -1,12 +1,14 @@
 import React, { useContext } from "react";
 import AppShell from "../components/AppShell";
-import { GetConfigurationQuery } from "../types/sdk";
+import { GetConfigurationQuery, UserRole } from "../types/sdk";
 import EntityManager from "../components/entityManager/EntityManager";
 import Heading from "../components/Heading";
 import { groupBy } from "lodash";
+import StyledLink from "../components/StyledLink";
 import { StanCoreContext } from "../lib/sdk";
 import { TabList } from "../components/TabbedPane";
 import { Item } from "@react-stately/collections";
+
 type ConfigurationParams = {
   configuration: GetConfigurationQuery;
 };
@@ -15,7 +17,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
   const stanCore = useContext(StanCoreContext);
   const groupedComments = groupBy(configuration.comments, "category");
   const groupedEquipments = groupBy(configuration.equipments, "category");
-
+  const configElements = ["Comments", "Destruction Reasons", "Fixatives"];
   return (
     <AppShell>
       <AppShell.Header>
@@ -23,98 +25,65 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          <div className="space-y-8">
-            <TabList>
+          <TabList className="space-y-8">
+            <Item key={"comments"} title={`Comments`}>
               {Object.keys(groupedComments).map((category) => (
-                <Item key={category} title={`Comments - ${category}`}>
-                  <>
-                    <Heading level={2}>Comments - {category}</Heading>
-                    <EntityManager
-                      initialEntities={groupedComments[category]}
-                      displayKeyColumnName={"text"}
-                      valueColumnName={"enabled"}
-                      onChangeValue={(entity, value) => {
-                        const enabled =
-                          typeof value === "boolean" ? value : false;
-                        return stanCore
-                          .SetCommentEnabled({
-                            commentId: entity.id,
-                            enabled,
-                          })
-                          .then((res) => res.setCommentEnabled);
-                      }}
-                      onCreate={(text) =>
-                        stanCore
-                          .AddComment({ category, text })
-                          .then((res) => res.addComment)
-                      }
-                      valueFieldComponentInfo={{
-                        type: "CHECKBOX",
-                      }}
-                    />
-                  </>
-                </Item>
+                <div key={category} data-testid="config" className="space-y-3">
+                  <Heading level={2}>Comments - {category}</Heading>
+                  <EntityManager
+                    initialEntities={groupedComments[category]}
+                    displayKeyColumnName={"text"}
+                    valueColumnName={"enabled"}
+                    onChangeValue={(entity, value) => {
+                      const enabled =
+                        typeof value === "boolean" ? value : false;
+                      return stanCore
+                        .SetCommentEnabled({ commentId: entity.id, enabled })
+                        .then((res) => res.setCommentEnabled);
+                    }}
+                    onCreate={(text) =>
+                      stanCore
+                        .AddComment({ category, text })
+                        .then((res) => res.addComment)
+                    }
+                    valueFieldComponentInfo={{
+                      type: "CHECKBOX",
+                    }}
+                  />
+                </div>
               ))}
-            </TabList>
-
-            {/*   f<div data-testid="config">
-              <Heading level={2}>Destruction Reasons</Heading>
-              <p className="mt-3 mb-6 text-lg">
-                Destruction Reasons are used on the{" "}
-                <StyledLink to={"/admin/destroy"}>Destroy</StyledLink> page.
-              </p>
-              <EntityManager
-                initialEntities={configuration.destructionReasons}
-                displayKeyColumnName={"text"}
-                valueColumnName={"enabled"}
-                onChangeValue={(entity, value) => {
-                  const enabled = typeof value === "boolean" ? value : false;
-                  return stanCore
-                    .SetDestructionReasonEnabled({ text: entity.text, enabled })
-                    .then((res) => res.setDestructionReasonEnabled);
-                }}
-                onCreate={(text) =>
-                  stanCore
-                    .AddDestructionReason({ text })
-                    .then((res) => res.addDestructionReason)
-                }
-                valueFieldComponentInfo={{
-                  type: "CHECKBOX",
-                }}
-              />
-            </div>
-
-            <div data-testid="config">
-              <Heading level={2}>Species</Heading>
-              <p className="mt-3 mb-6 text-lg">
-                Species are available on the{" "}
-                <StyledLink to={"/admin/registration"}>
-                  Block Registration
-                </StyledLink>{" "}
-                and{" "}
-                <StyledLink to={"/admin/slide_registration"}>
-                  Slide Registration
-                </StyledLink>{" "}
-                pages.
-              </p>
-              <EntityManager
-                initialEntities={configuration.species}
-                displayKeyColumnName={"name"}
-                valueColumnName={"enabled"}
-                onChangeValue={(entity, value) => {
-                  const enabled = typeof value === "boolean" ? value : false;
-                  return stanCore
-                    .SetSpeciesEnabled({ enabled, name: entity.name })
-                    .then((res) => res.setSpeciesEnabled);
-                }}
-                onCreate={(name) =>
-                  stanCore.AddSpecies({ name }).then((res) => res.addSpecies)
-                }
-                valueFieldComponentInfo={{
-                  type: "CHECKBOX",
-                }}
-              />
-            </div>
+            </Item>
+            <Item key={"Destruction Reasons"} title={`Destruction Reasons`}>
+              <div data-testid="config">
+                <Heading level={2}>Destruction Reasons</Heading>
+                <p className="mt-3 mb-6 text-lg">
+                  Destruction Reasons are used on the{" "}
+                  <StyledLink to={"/admin/destroy"}>Destroy</StyledLink> page.
+                </p>
+                <EntityManager
+                  initialEntities={configuration.destructionReasons}
+                  displayKeyColumnName={"text"}
+                  valueColumnName={"enabled"}
+                  onChangeValue={(entity, value) => {
+                    const enabled = typeof value === "boolean" ? value : false;
+                    return stanCore
+                      .SetDestructionReasonEnabled({
+                        text: entity.text,
+                        enabled,
+                      })
+                      .then((res) => res.setDestructionReasonEnabled);
+                  }}
+                  onCreate={(text) =>
+                    stanCore
+                      .AddDestructionReason({ text })
+                      .then((res) => res.addDestructionReason)
+                  }
+                  valueFieldComponentInfo={{
+                    type: "CHECKBOX",
+                  }}
+                />
+              </div>
+            </Item>
 
             <div data-testid="config">
               <Heading level={2}>Fixatives</Heading>
@@ -147,6 +116,40 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                 }}
               />
             </div>
+
+            <Item key={"Species"} title={`Species`}>
+              <div data-testid="config">
+                <Heading level={2}>Species</Heading>
+                <p className="mt-3 mb-6 text-lg">
+                  Species are available on the{" "}
+                  <StyledLink to={"/admin/registration"}>
+                    Block Registration
+                  </StyledLink>{" "}
+                  and{" "}
+                  <StyledLink to={"/admin/slide_registration"}>
+                    Slide Registration
+                  </StyledLink>{" "}
+                  pages.
+                </p>
+                <EntityManager
+                  initialEntities={configuration.species}
+                  displayKeyColumnName={"name"}
+                  valueColumnName={"enabled"}
+                  onChangeValue={(entity, value) => {
+                    const enabled = typeof value === "boolean" ? value : false;
+                    return stanCore
+                      .SetSpeciesEnabled({ enabled, name: entity.name })
+                      .then((res) => res.setSpeciesEnabled);
+                  }}
+                  onCreate={(name) =>
+                    stanCore.AddSpecies({ name }).then((res) => res.addSpecies)
+                  }
+                  valueFieldComponentInfo={{
+                    type: "CHECKBOX",
+                  }}
+                />
+              </div>
+            </Item>
 
             <div data-testid="config">
               <Heading level={2}>HuMFre Numbers</Heading>
@@ -366,8 +369,8 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                     .then((res) => res.setUserRole);
                 }}
               />
-            </div> */}
-          </div>
+            </div>
+          </TabList>
         </div>
       </AppShell.Main>
     </AppShell>
