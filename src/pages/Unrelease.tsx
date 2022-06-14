@@ -29,7 +29,7 @@ const validationSchema = Yup.object().shape({
       Yup.object().shape({
         barcode: Yup.string().required(),
         highestSection: Yup.number()
-          .min(0, "Section number must be equal or  greater than 0")
+          .min(1, "Section number must be greater than 0")
           .notRequired(),
       })
     ),
