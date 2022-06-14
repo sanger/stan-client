@@ -9,6 +9,7 @@ type TabItemProps<T extends object> = {
   item: Node<T>;
 };
 
+/**Component to display Tabbed pane*/
 const TabList = (props: AriaTabListProps<object>) => {
   const state = useTabListState(props);
   const ref = React.useRef(null);
@@ -31,13 +32,20 @@ const TabList = (props: AriaTabListProps<object>) => {
   );
 };
 
+/**This component represent single tab**/
 function TabItem<T extends object>({ state, item }: TabItemProps<T>) {
   const { key, rendered } = item;
-  const ref = React.useRef(null);
+  const ref = React.useRef<HTMLDivElement>(null);
   const { tabProps } = useTab({ key }, state, ref);
   let isSelected = state.selectedKey === key;
   let isDisabled = state.disabledKeys.has(key);
 
+  /**Set the focus for selected tab. This is useful for navigation using arrows as soon as a tab is displayed**/
+  React.useEffect(() => {
+    if (isSelected && ref.current) {
+      ref.current.focus();
+    }
+  });
   return (
     <div
       key={key}
@@ -52,6 +60,7 @@ function TabItem<T extends object>({ state, item }: TabItemProps<T>) {
   );
 }
 
+/**Panel to display when a tab is selected**/
 const TabContentPanel = ({
   state,
   ...props
@@ -60,6 +69,7 @@ const TabContentPanel = ({
 }) => {
   const ref = React.useRef(null);
   const { tabPanelProps } = useTabPanel(props, state, ref);
+
   return (
     <div
       className={

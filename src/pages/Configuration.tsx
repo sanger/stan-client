@@ -396,8 +396,8 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           <MutedText className="mt-5">
-            To navigate to tabs that are not displayed, please select start/end
-            tab and press left/right arrow in keyboard.
+            Press left/right arrows in keyboard to navigate to tabs that are not
+            in display.
           </MutedText>
           {configPanels.length === configElements.length && (
             <TabList>
