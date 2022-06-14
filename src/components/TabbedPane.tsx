@@ -20,7 +20,7 @@ const TabList = (props: AriaTabListProps<object>) => {
         {...tabListProps}
         ref={ref}
         className={
-          "rounded-tl overflow-hidden rounded-tr grid grid-flow-col justify-start items-center gap-x-1 bg-primary-200 border border-t-0 border-primary-200 bg-primary-50"
+          "rounded-tl overflow-hidden rounded-tr grid grid-flow-col justify-start items-center gap-x-1 bg-primary-200 border border-t-0 "
         }
       >
         {Array.from(state.collection).map((item) => (
@@ -73,7 +73,7 @@ const TabContentPanel = ({
   return (
     <div
       className={
-        "p-4 border h-full border-primary-200 -mt-px rounded rounded-tl-none overflow-y-auto overflow-x-hidden"
+        "p-4  h-full border-primary-200 -mt-px rounded rounded-tl-none overflow-y-auto overflow-x-hidden"
       }
       {...tabPanelProps}
       ref={ref}
