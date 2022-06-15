@@ -1,0 +1,4 @@
+fragment SolutionSampleFields on SolutionSample {
+    name
+    enabled
+}
