@@ -111,12 +111,12 @@ export type SearchResultsType<T> = {
 export type SearchResultTableEntry = {
   barcode: string;
   labwareType: string;
-  externalId?:string;
+  externalId?: Maybe<string>;
   donorId: string;
   tissueType: string;
   location: Maybe<SearchResultTableEntryLocation>;
   sectionNumber?: Maybe<number>;
-  replicate?: string;
+  replicate?:  Maybe<string>;
   labwareCreated: Date;
   embeddingMedium: string;
 };

@@ -1,4 +1,7 @@
-import { shouldBehaveLikeARegistrationForm } from "../shared/registration";
+import {
+  RegistrationType,
+  shouldBehaveLikeARegistrationForm,
+} from "../shared/registration";
 import {
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,
@@ -35,7 +38,7 @@ describe("Slide Registration Page", () => {
   });
 
   describe("Validation", () => {
-    shouldBehaveLikeARegistrationForm(true);
+    shouldBehaveLikeARegistrationForm(RegistrationType.SLIDE);
 
     it("requires External Slide Barcode", () => {
       cy.findByLabelText("External Slide Barcode").focus().blur();

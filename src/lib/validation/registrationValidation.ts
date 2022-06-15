@@ -4,11 +4,15 @@ import { GetRegistrationInfoQuery, LifeStage } from "../../types/sdk";
 
 export default class RegistrationValidation {
   private registrationInfo: GetRegistrationInfoQuery;
+  private tissueSampleRegistration: boolean;
 
-  constructor(registrationInfo: GetRegistrationInfoQuery) {
+  constructor(
+    registrationInfo: GetRegistrationInfoQuery,
+    tissueSampleRegistration?: boolean
+  ) {
     this.registrationInfo = registrationInfo;
+    this.tissueSampleRegistration = tissueSampleRegistration ?? false;
   }
-
   get externalSlideBarcode() {
     return validation.requiredString({
       label: "External Slide Barcode",
@@ -26,6 +30,13 @@ export default class RegistrationValidation {
     return validation.requiredString({
       label: "Medium",
       oneOf: this.registrationInfo.mediums.map((m) => m.name),
+    });
+  }
+
+  get solutionSample() {
+    return validation.requiredString({
+      label: "Solution Sample",
+      oneOf: this.registrationInfo.solutionSamples.map((m) => m.name),
     });
   }
 
@@ -54,7 +65,6 @@ export default class RegistrationValidation {
   }
 
   get hmdmc() {
-    ("");
     return Yup.string().when("species", {
       is: "Human",
       then: Yup.string()
@@ -73,10 +83,17 @@ export default class RegistrationValidation {
   }
 
   get externalIdentifier() {
-    return validation.requiredString({
-      label: "External Identifier",
-      restrictChars: validation.DEFAULT_PERMITTED_CHARS,
-    });
+    if (this.tissueSampleRegistration) {
+      return validation.optionalString({
+        label: "External Identifier",
+        restrictChars: validation.DEFAULT_PERMITTED_CHARS,
+      });
+    } else {
+      return validation.requiredString({
+        label: "External Identifier",
+        restrictChars: validation.DEFAULT_PERMITTED_CHARS,
+      });
+    }
   }
 
   get sectionExternalIdentifier() {
@@ -94,12 +111,21 @@ export default class RegistrationValidation {
   }
 
   get replicateNumber() {
-    return validation.requiredString({
-      label: "Replicate Number",
-      restrictChars: /^[1-9]\d*[a-z]?$/,
-      errorMessage:
-        "Replicate Number must be a positive integer, optionally followed by a lower case letter.",
-    });
+    if (this.tissueSampleRegistration) {
+      return validation.optionalString({
+        label: "Replicate Number",
+        restrictChars: /^[1-9]\d*[a-z]?$/,
+        errorMessage:
+          "Replicate Number must be a positive integer, optionally followed by a lower case letter.",
+      });
+    } else {
+      return validation.requiredString({
+        label: "Replicate Number",
+        restrictChars: /^[1-9]\d*[a-z]?$/,
+        errorMessage:
+          "Replicate Number must be a positive integer, optionally followed by a lower case letter.",
+      });
+    }
   }
 
   get lastKnownSectionNumber() {

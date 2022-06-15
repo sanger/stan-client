@@ -1,5 +1,10 @@
+export enum RegistrationType {
+  BLOCK,
+  SLIDE,
+  TISSUE_SAMPLE,
+}
 export function shouldBehaveLikeARegistrationForm(
-  isSlideRegistration: boolean
+  registrationType: RegistrationType
 ) {
   describe("Validation", () => {
     it("requires Donor ID", () => {
@@ -49,12 +54,14 @@ export function shouldBehaveLikeARegistrationForm(
           cy.findByLabelText("Fetal").click();
         });
         it(
-          isSlideRegistration
+          registrationType === RegistrationType.SLIDE
             ? "does not show sample collection date"
             : "shows sample collection date",
           () => {
             cy.findByLabelText("Sample Collection Date").should(
-              isSlideRegistration ? "not.exist" : "be.visible"
+              registrationType === RegistrationType.SLIDE
+                ? "not.exist"
+                : "be.visible"
             );
           }
         );
@@ -108,12 +115,19 @@ export function shouldBehaveLikeARegistrationForm(
       cy.findByText("Tissue Type is a required field").should("be.visible");
     });
 
-    it("requires Replicate Number", () => {
-      cy.findByLabelText("Replicate Number").clear().blur();
-      cy.findByText("Replicate Number is a required field").should(
-        "be.visible"
-      );
-    });
+    it(
+      registrationType === RegistrationType.TISSUE_SAMPLE
+        ? "doesn't require Replicate Number"
+        : "requires Replicate Number",
+      () => {
+        cy.findByLabelText("Replicate Number").clear().blur();
+        cy.findByText("Replicate Number is a required field").should(
+          registrationType === RegistrationType.TISSUE_SAMPLE
+            ? "not.exist"
+            : "be.visible"
+        );
+      }
+    );
 
     it("requires Replicate Number to have number part as an an integer", () => {
       cy.findByLabelText("Replicate Number").type("1.1").blur();
@@ -146,10 +160,19 @@ export function shouldBehaveLikeARegistrationForm(
       cy.findByText("Fixative is a required field").should("be.visible");
     });
 
-    it("requires Medium", () => {
-      cy.findByLabelText("Medium").focus().blur();
-      cy.findByText("Medium is a required field").should("be.visible");
-    });
+    if (registrationType !== RegistrationType.TISSUE_SAMPLE) {
+      it("requires Medium", () => {
+        cy.findByLabelText("Medium").focus().blur();
+        cy.findByText("Medium is a required field").should("be.visible");
+      });
+    } else {
+      it("requires Soultion Sample", () => {
+        cy.findByLabelText("Solution Sample").focus().blur();
+        cy.findByText("Solution Sample is a required field").should(
+          "be.visible"
+        );
+      });
+    }
   });
   const checkReplicateWarningIsVisible = () => {
     cy.findByText(
