@@ -40,7 +40,7 @@ function TabItem<T extends object>({ state, item }: TabItemProps<T>) {
   let isSelected = state.selectedKey === key;
   let isDisabled = state.disabledKeys.has(key);
 
-  /**Set the focus for selected tab. This is useful for navigation using arrows as soon as a tab is displayed**/
+  /**Set the focus for selected tab**/
   React.useEffect(() => {
     if (isSelected && ref.current) {
       ref.current.focus();
