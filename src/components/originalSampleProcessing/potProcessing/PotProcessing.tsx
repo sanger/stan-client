@@ -280,7 +280,6 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
   const buildTissuePotRequest = (
     formData: PotFormData
   ): PotProcessingRequest => {
-    debugger;
     return {
       sourceBarcode: formData.sourceBarcode,
       workNumber: formData.workNumber,
