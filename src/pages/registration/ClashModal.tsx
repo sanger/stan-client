@@ -14,10 +14,10 @@ import StyledLink from "../../components/StyledLink";
 import ExternalIcon from "../../components/icons/ExternalIcon";
 import PinkButton from "../../components/buttons/PinkButton";
 import WhiteButton from "../../components/buttons/WhiteButton";
-import { RegisterTissuesMutation } from "../../types/sdk";
+import { RegisterResultFieldsFragment } from "../../types/sdk";
 
 type ClashModalProps = {
-  registrationResult: RegisterTissuesMutation;
+  registrationResult: RegisterResultFieldsFragment;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -46,7 +46,7 @@ export default function ClashModal({
               </tr>
             </TableHead>
             <TableBody>
-              {registrationResult.register.clashes.map((clash) => {
+              {registrationResult.clashes.map((clash) => {
                 return clash.labware.map((lw, index) => (
                   <tr key={lw.barcode}>
                     {index === 0 && (

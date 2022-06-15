@@ -17,9 +17,9 @@ describe("Unrelease Page", () => {
       });
 
       it("shows an error", () => {
-        cy.findByText("Section number must be greater than 0").should(
-          "be.visible"
-        );
+        cy.findByText(
+          "Section number must be greater than or equal to 0"
+        ).should("be.visible");
       });
     });
   });

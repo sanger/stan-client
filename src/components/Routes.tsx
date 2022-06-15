@@ -7,7 +7,6 @@ import Location from "../pages/Location";
 import Plan from "../pages/sectioning/Plan";
 import Confirm from "../pages/sectioning/Confirm";
 import Extraction from "../pages/Extraction";
-import Registration from "../pages/Registration";
 import Release from "../pages/Release";
 import Store from "../pages/Store";
 import Search from "../pages/Search";
@@ -37,6 +36,8 @@ import VisiumAnalysis from "../pages/VisiumAnalysis";
 import Aliquot from "../pages/Aliquot";
 import DualIndexPlate from "../pages/DualIndexPlate";
 import columns from "./dataTable/labwareColumns";
+import OriginalSampleRegistration from "../pages/OriginalSampleRegistration";
+import BlockRegistration from "../pages/BlockRegistration";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -52,7 +53,6 @@ export function Routes() {
       <Route path="/logout">
         <Logout />
       </Route>
-
       <AuthenticatedRoute
         path="/lab/sectioning/confirm"
         render={(routeProps) => (
@@ -66,7 +66,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/sectioning"
         render={(routeProps) => (
@@ -98,7 +97,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/extraction_result"
         render={(routerProps) => (
@@ -139,7 +137,6 @@ export function Routes() {
         path="/lab/visium_perm"
         render={(routeProps) => <VisiumPerm key={routeProps.location.key} />}
       />
-
       <AuthenticatedRoute
         path="/lab/visium_analysis"
         render={(routeProps) => (
@@ -152,7 +149,6 @@ export function Routes() {
           <DualIndexPlate key={routeProps.location.key} />
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/staining"
         render={(routeProps) => (
@@ -164,7 +160,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/staining_qc"
         render={(routeProps) => (
@@ -176,7 +171,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/imaging"
         render={(routeProps) => (
@@ -203,7 +197,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/admin/registration"
         render={(routeProps) => (
@@ -212,12 +205,11 @@ export function Routes() {
             dataFetcher={stanCore.GetRegistrationInfo}
           >
             {(registrationInfo) => (
-              <Registration registrationInfo={registrationInfo} />
+              <BlockRegistration registrationInfo={registrationInfo} />
             )}
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/admin/slide_registration"
         render={(routeProps) => (
@@ -234,7 +226,25 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
+      <AuthenticatedRoute
+        path="/admin/tissue_registration"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetRegistrationInfo}
+          >
+            {(registrationInfo) => {
+              return (
+                <OriginalSampleRegistration
+                  registrationInfo={registrationInfo}
+                  {...routeProps}
+                />
+              );
+            }}
+          </DataFetcher>
+        )}
+      />
+      /admin/tissue_registration
       <AuthenticatedRoute
         path="/admin/release"
         render={(routeProps) => (
@@ -246,7 +256,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/admin/unrelease"
         render={(routeProps) => <Unrelease key={routeProps.location.key} />}
@@ -271,7 +280,6 @@ export function Routes() {
           />
         )}
       />
-
       <Route
         path="/locations/:locationBarcode"
         render={(routeProps) => {
@@ -306,7 +314,6 @@ export function Routes() {
           );
         }}
       />
-
       <Route path="/locations" component={Store} />
       <Route path="/store" component={Store} />
       <Route path="/login" component={Login} />
@@ -321,7 +328,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/config"
         role={UserRole.Admin}
@@ -331,7 +337,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <Route
         path="/labware/:barcode"
         render={(routeProps) => {
@@ -356,10 +361,8 @@ export function Routes() {
           );
         }}
       />
-
       <Route path={"/history"} component={History} />
       <AuthenticatedRoute path={"/sgp"} component={SGP} />
-
       <Route
         path={"/search"}
         render={(routeProps) => {
@@ -378,7 +381,6 @@ export function Routes() {
           );
         }}
       />
-
       <Route
         path="/"
         render={(routeProps) => {

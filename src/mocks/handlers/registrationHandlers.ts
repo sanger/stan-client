@@ -7,12 +7,15 @@ import {
   LifeStage,
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,
+  RegisterOriginalSamplesMutation,
+  RegisterOriginalSamplesMutationVariables,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
 } from "../../types/sdk";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";
 import speciesRepository from "../repositories/speciesRepository";
 import hmdmcRepository from "../repositories/hmdmcRepository";
+import solutionSampleRepository from "../repositories/solutionSampleRepository";
 
 const registrationHandlers = [
   graphql.query<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>(
@@ -106,6 +109,9 @@ const registrationHandlers = [
           ],
           fixatives: [{ name: "None" }, { name: "Formalin" }],
           mediums: [{ name: "OCT" }, { name: "Paraffin" }, { name: "None" }],
+          solutionSamples: solutionSampleRepository
+            .findAll()
+            .filter((sample) => sample.enabled),
         })
       );
     }
@@ -238,6 +244,71 @@ const registrationHandlers = [
       );
     }
   ),
+  graphql.mutation<
+    RegisterOriginalSamplesMutation,
+    RegisterOriginalSamplesMutationVariables
+  >("RegisterOriginalSamples", (req, res, ctx) => {
+    return res(
+      ctx.data({
+        registerOriginalSamples: {
+          clashes: [],
+          labware: [
+            {
+              id: 1,
+              barcode: "LW_BC_1",
+              released: false,
+              discarded: false,
+              destroyed: false,
+              state: LabwareState.Active,
+              created: new Date().toISOString(),
+              labwareType: {
+                name: "Proviasette",
+                numRows: 1,
+                numColumns: 1,
+                labelType: {
+                  name: "Label Type 1",
+                },
+              },
+              slots: [
+                {
+                  address: "A1",
+                  labwareId: 1,
+                  block: true,
+                  samples: [
+                    {
+                      id: 1,
+                      tissue: {
+                        externalName: "EXT1",
+                        replicate: "5",
+                        fixative: {
+                          name: "Formalin",
+                          enabled: true,
+                        },
+                        medium: {
+                          name: "Paraffin",
+                        },
+                        donor: {
+                          donorName: "Donor 3",
+                          lifeStage: LifeStage.Adult,
+                        },
+                        spatialLocation: {
+                          code: 3,
+                          tissueType: {
+                            name: "Lung",
+                          },
+                        },
+                      },
+                      bioState: { name: "Tissue" },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      })
+    );
+  }),
 ];
 
 export default registrationHandlers;

@@ -401,3 +401,5 @@ export function getNumberOfDaysBetween(firstDate: string, secondDate: string) {
     return Math.round(Math.abs((date1 - date2) / oneDay));
   }
 }
+/**This type allows to create a new type from given type with specified fields as optional **/
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

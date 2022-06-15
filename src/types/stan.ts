@@ -23,7 +23,8 @@ export enum LabwareTypeName {
   VISIUM_ADH = "Visium ADH",
   FOUR_SLOT_SLIDE = "4 slot slide",
   FETAL_WASTE_CONTAINER = "Fetal waste container",
-  DUAL_INDEX_PLATE= "Dual index plate"
+  DUAL_INDEX_PLATE= "Dual index plate",
+  POT="Pot"
 }
 
 export type Address = string;
@@ -109,12 +110,12 @@ export type SearchResultsType<T> = {
 export type SearchResultTableEntry = {
   barcode: string;
   labwareType: string;
-  externalId: string;
+  externalId?: Maybe<string>;
   donorId: string;
   tissueType: string;
   location: Maybe<SearchResultTableEntryLocation>;
   sectionNumber?: Maybe<number>;
-  replicate: string;
+  replicate?:  Maybe<string>;
   labwareCreated: Date;
   embeddingMedium: string;
 };
