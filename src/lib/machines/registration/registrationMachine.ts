@@ -49,12 +49,9 @@ export function buildRegisterTissuesMutationVariables(
             if (
               existingTissues.some(
                 (tissue) =>
+                  tissue.externalName.length > 0 &&
                   tissue.externalName ===
-                    blockRegisterRequest.externalIdentifier &&
-                  tissue.tissueType === blockRegisterRequest.tissueType &&
-                  tissue.donorName === blockRegisterRequest.donorIdentifier &&
-                  tissue.spatialLocation ===
-                    blockRegisterRequest.spatialLocation
+                    blockRegisterRequest.externalIdentifier
               )
             ) {
               blockRegisterRequest.existingTissue = true;
