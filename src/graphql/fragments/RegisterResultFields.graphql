@@ -5,6 +5,17 @@ fragment RegisterResultFields on RegisterResult {
     clashes {
         tissue {
             externalName
+            donor {
+                donorName
+            }
+            spatialLocation {
+                code
+                name
+                tissueType {
+                    name
+                }
+            }
+
         }
         labware {
             barcode
