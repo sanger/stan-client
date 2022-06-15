@@ -13,7 +13,7 @@ describe("Configuration Spec", () => {
       cy.findByRole("tabpanel").should("exist");
     });
     after(() => {
-      cy.findByText("Species").click();
+      cy.findByText("Destruction Reasons").click();
     });
   });
   describe("Entities with boolean property", () => {
@@ -63,19 +63,14 @@ describe("Configuration Spec", () => {
     ].forEach((config) => {
       describe(config.name, () => {
         before(() => {
-          cy.scrollTo(0, 0);
           cy.findByText(config.tabName).click();
         });
         it("toggles the enabled field", () => {
           cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(
             () => {
-              getElement(`tr:contains('${config.field}') input`).click({
-                force: true,
-              });
+              selectElement(`tr:contains('${config.field}') input`);
               cy.findByText(`"${config.field}" disabled`).should("be.visible");
-              getElement(`tr:contains('${config.field}') input`).click({
-                force: true,
-              });
+              selectElement(`tr:contains('${config.field}') input`);
               cy.findByText(`"${config.field}" enabled`).should("be.visible");
             }
           );
@@ -84,10 +79,8 @@ describe("Configuration Spec", () => {
         it("saves new entites", () => {
           cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(
             () => {
-              cy.findByRole("button", { name: config.buttonName })
-                .scrollIntoView()
-                .click({ force: true });
-              cy.focused().type(`${config.newValue}{enter}`);
+              clickButton(config.buttonName);
+              enterNewValue(config.newValue);
               cy.findByText("Saved").scrollIntoView().should("be.visible");
             }
           );
@@ -114,9 +107,7 @@ describe("Configuration Spec", () => {
         it("sets the value field", () => {
           cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(
             () => {
-              getElement(`tr:contains('${config.field}') select`).select(
-                "normal"
-              );
+              cy.get(`tr:contains('${config.field}') select`).select("normal");
               cy.findByText(
                 `"${config.field}" - role changed to normal`
               ).should("be.visible");
@@ -127,10 +118,8 @@ describe("Configuration Spec", () => {
         it("saves new entites", () => {
           cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(
             () => {
-              cy.findByRole("button", { name: config.buttonName })
-                .scrollIntoView()
-                .click({ force: true });
-              cy.focused().type(`${config.newValue}{enter}`);
+              clickButton(config.buttonName);
+              enterNewValue(config.newValue);
               cy.findByText("Saved").should("be.visible");
             }
           );
@@ -165,17 +154,28 @@ describe("Configuration Spec", () => {
     it("shows an error message", () => {
       cy.get(`div[data-testid="config"]:contains('Release Recipients')`).within(
         () => {
-          cy.findByRole("button", { name: "+ Add Username" })
-            .scrollIntoView()
-            .click({ force: true });
-          cy.focused().type(`I should fail{enter}`);
+          clickButton("+ Add Username");
+          enterNewValue(`I should fail{enter}`);
           cy.findByText("Save Failed").should("be.visible");
           cy.findByText("Something went wrong").should("be.visible");
         }
       );
     });
   });
-  function getElement(findTag: string) {
-    return cy.get(findTag).scrollIntoView().focus();
+  function selectElement(findTag: string) {
+    return cy.get(findTag).scrollIntoView().click({
+      force: true,
+    });
+  }
+  function clickButton(buttonName: string) {
+    cy.findByRole("button", { name: buttonName })
+      .scrollIntoView()
+      .click({ force: true });
+  }
+  function enterNewValue(value: string) {
+    cy.findByTestId("input-field")
+      .scrollIntoView()
+      .focus()
+      .type(`${value}{enter}`, { force: true });
   }
 });
