@@ -26,8 +26,8 @@ import { useScrollToRef } from "../../lib/hooks";
 
 /**
  * The props passed to the Planner component
+ * M represents the mutation object passed to the planner if 'Create Labware' is supported within each plan, otherwise null
  */
-
 type PlannerProps<M> = {
   /**
    * The labware type to be created when "Add Labware" is clicked
@@ -338,6 +338,7 @@ export default function Planner<M>({
         />
       )}
 
+      {/**Render plans using the callback method (passed as props) so that it will be done by the parent component**/}
       {buildPlanLayouts(
         state.labwarePlans,
         state.sourceLabware,
@@ -356,7 +357,10 @@ export default function Planner<M>({
           has been scanned, select a type of labware to plan layouts:
         </p>
         <div className="flex flex-row items-end gap-x-4 justify-center">
-          {buildPlanCreationSettings()}
+          {
+            /**Render plan creation settings panel using the callback method (passed as props) so that it will be done by the parent component **/
+            buildPlanCreationSettings()
+          }
           <div className={"flex-shrink-0 align-bottom justify-end content-end"}>
             <BlueButton
               id="#addLabware"
