@@ -86,7 +86,6 @@ describe("Configuration Spec", () => {
             () => {
               cy.findByRole("button", { name: config.buttonName })
                 .scrollIntoView()
-                .focus()
                 .click({ force: true });
               cy.focused().type(`${config.newValue}{enter}`);
               cy.findByText("Saved").scrollIntoView().should("be.visible");
