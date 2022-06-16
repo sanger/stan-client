@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.1] - 2022-06-16
+### Bug fix
+- x897 [RT#752998](https://rt.sanger.ac.uk/Ticket/Display.html?id=752998) — Can now unrelease labware and set highest section to zero.
+
 ## [2.8] - 2022-05-12
 ### Added
 - x672 Track "sample collection date" for fetal samples being registered. ([#139](https://github.com/sanger/stan-client/pull/139))
