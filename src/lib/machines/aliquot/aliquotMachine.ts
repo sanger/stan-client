@@ -7,7 +7,7 @@ import { stanCore } from "../../sdk";
 
 export interface AliquotContext {
   /**The work number to associate with this aliquot operation**/
-  workNumber?: string;
+  workNumber: string;
 
   /**The barcode of the source labware.**/
   labware: LabwareFieldsFragment | undefined;
@@ -46,7 +46,7 @@ type AliquotErrorEvent = {
 };
 
 export type AliquottingEvent =
-  | { type: "UPDATE_WORK_NUMBER"; workNumber?: string }
+  | { type: "UPDATE_WORK_NUMBER"; workNumber: string }
   | AliquotEvent
   | AliquotDoneEvent
   | AliquotErrorEvent

@@ -28,7 +28,7 @@ type SectioningConfirmContext = {
   /**
    * The work number to associate with this confirm operation
    */
-  workNumber?: string;
+  workNumber: string;
 
   /**
    * The list of plans found after scanning in labware
@@ -78,7 +78,7 @@ type SectioningConfirmContext = {
 };
 
 type SectioningConfirmEvent =
-  | { type: "UPDATE_WORK_NUMBER"; workNumber?: string }
+  | { type: "UPDATE_WORK_NUMBER"; workNumber: string }
   | {
       type: "UPDATE_SECTION_NUMBERING_MODE";
       mode: SectionNumberMode;
@@ -118,6 +118,7 @@ export function createSectioningConfirmMachine() {
     {
       id: "sectioningConfirm",
       context: {
+        workNumber: "",
         plans: [],
         confirmSectionLabware: [],
         isConfirmSectionLabwareValid: false,
@@ -134,7 +135,10 @@ export function createSectioningConfirmMachine() {
         ready: {
           initial: "invalid",
           on: {
-            UPDATE_WORK_NUMBER: { actions: "assignWorkNumber" },
+            UPDATE_WORK_NUMBER: {
+              target: "validating",
+              actions: "assignWorkNumber"
+            },
             UPDATE_PLANS: {
               target: "validating",
               actions: [
@@ -396,7 +400,7 @@ export function createSectioningConfirmMachine() {
         validateConfirmSectionLabware: (ctx: SectioningConfirmContext) => (
           send
         ) => {
-          const isValid = ctx.confirmSectionLabware.every((csl) => {
+          var isValid = ctx.confirmSectionLabware.every((csl) => {
             if (
               csl.cancelled ||
               (ctx.layoutPlansByLabwareType[
@@ -415,7 +419,7 @@ export function createSectioningConfirmMachine() {
                 cs.newSection ? cs.newSection > 0 : false
               ) ?? false
             );
-          });
+          }) && ctx.workNumber !== "";
           send(isValid ? "IS_VALID" : "IS_INVALID");
         },
       },

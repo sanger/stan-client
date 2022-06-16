@@ -43,6 +43,7 @@ describe("Sectioning Confirmation", () => {
 
   context("when I scan in a labware with a plan", () => {
     before(() => {
+      cy.get("select").select("SGP1008");
       findPlanByBarcode("STAN-0001F");
     });
 

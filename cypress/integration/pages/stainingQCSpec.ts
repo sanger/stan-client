@@ -2,16 +2,18 @@ describe("Staining QC", () => {
   before(() => {
     cy.visit("/lab/staining_qc");
   });
-
+  
   describe("Save button", () => {
     context("when no labwares have been scanned", () => {
       it("is disabled", () => {
+        cy.get("select").select("SGP1008");
         cy.findByRole("button", { name: "Save" }).should("be.disabled");
       });
     });
 
     context("when there is at least 1 labware", () => {
       before(() => {
+        cy.get("select").select("SGP1008");
         cy.get("#labwareScanInput").type("STAN-411{enter}");
       });
 

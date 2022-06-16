@@ -9,6 +9,7 @@ import { createLabware } from "../../../src/mocks/handlers/labwareHandlers";
 describe("Visium cDNA Page", () => {
   before(() => {
     cy.visit("/lab/visium_cdna");
+    cy.get("select").select("SGP1008");
   });
 
   describe("On load", () => {
@@ -186,6 +187,7 @@ function saveButton() {
 
 function saveSlotForLabwareWithNoPerm() {
   cy.visit("/lab/visium_cdna");
+  cy.get("select").select("SGP1008");
   cy.msw().then(({ worker, graphql }) => {
     const labware = createLabware("STAN-3200");
     worker.use(

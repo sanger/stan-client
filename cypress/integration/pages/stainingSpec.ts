@@ -47,6 +47,12 @@ describe("Staining Page", () => {
           "be.visible"
         );
       });
+
+      it("shows a validation error for work number", () => {
+        cy.findByText("SGP Number is a required field").should(
+          "be.visible"
+        );
+      });
     });
 
     context("when a Stain Type with measurements is selected", () => {

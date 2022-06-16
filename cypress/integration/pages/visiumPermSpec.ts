@@ -11,9 +11,14 @@ describe("Visium Perm", () => {
     });
 
     context("when clicking Submit", () => {
-      before(() => cy.findByRole("button", { name: "Submit" }).click());
-
-      it("submits the form", () => {
+      it("shows an error message for SGP number", () => {
+        cy.findByRole("button", { name: "Submit" }).click()
+        cy.findByText("SGP number is a required field").should("be.visible");
+      });
+    
+      it("submits the form when SGP number is selected", () => {
+        cy.get("select").select("SGP1008");
+        cy.findByRole("button", { name: "Submit" }).click()
         cy.findByText("Visium Permeabilisation complete").should("be.visible");
       });
     });
@@ -22,6 +27,7 @@ describe("Visium Perm", () => {
   describe("scanning labware with empty slots", () => {
     before(() => {
       cy.visit("/lab/visium_perm");
+      cy.get("select").select("SGP1008");
       cy.get("#labwareScanInput").type("STAN-4011{enter}");
     });
 

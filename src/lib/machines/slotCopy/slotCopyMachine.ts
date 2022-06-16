@@ -24,7 +24,7 @@ export interface SlotCopyContext {
   /**
    * The work number associated with this operation
    */
-  workNumber?: string;
+  workNumber: string;
   operationType: OperationTypeName;
   outputLabwareType: LabwareTypeName;
   slotCopyContent: Array<SlotCopyContent>;
@@ -55,7 +55,7 @@ type FindPermDataEvent = {
 type SaveEvent = { type: "SAVE" };
 
 export type SlotCopyEvent =
-  | { type: "UPDATE_WORK_NUMBER"; workNumber?: string }
+  | { type: "UPDATE_WORK_NUMBER"; workNumber: string }
   | UpdateSlotCopyContentType
   | UPDATE_INPUT_LABWARE_PERMTIME
   | SaveEvent

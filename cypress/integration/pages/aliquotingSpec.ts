@@ -11,11 +11,16 @@ function enterNumberOfDestinationTubes(numTubes: string) {
   cy.findByTestId("numLabware").focus().invoke("val", "").type(numTubes);
 }
 
+function selectWorkNumber() {
+  cy.get("select").select("SGP1008");
+}
+
 describe("Aliquoting", () => {
   context("when source labware is not scanned", () => {
     before(() => {
       cy.visit("/lab/aliquoting");
       enterNumberOfDestinationTubes("1");
+      selectWorkNumber();
     });
     it("disables the Aliquot button", () => {
       cy.findByRole("button", { name: "Aliquot" }).should("be.disabled");
@@ -25,6 +30,17 @@ describe("Aliquoting", () => {
     before(() => {
       cy.visit("/lab/aliquoting");
       enterNumberOfDestinationTubes("0");
+      scanInLabware();
+      selectWorkNumber();
+    });
+    it("disables the Aliquot button", () => {
+      cy.findByRole("button", { name: "Aliquot" }).should("be.disabled");
+    });
+  });
+  context("when the work number is not selected", () => {
+    before(() => {
+      cy.visit("/lab/aliquoting");
+      enterNumberOfDestinationTubes("1");
       scanInLabware();
     });
     it("disables the Aliquot button", () => {
@@ -55,6 +71,7 @@ describe("Aliquoting", () => {
       });
 
       scanInLabware();
+      selectWorkNumber();
       enterNumberOfDestinationTubes("4");
       cy.findByText("Aliquot").click();
     });
@@ -72,6 +89,7 @@ describe("Aliquoting", () => {
     before(() => {
       cy.visit("/lab/aliquoting");
       scanInLabware();
+      selectWorkNumber();
       enterNumberOfDestinationTubes("4");
       cy.findByRole("button", { name: "Aliquot" }).click();
     });
@@ -99,11 +117,11 @@ describe("Aliquoting", () => {
   context("while printing the label from table", () => {
     before(() => {
       cy.findByTestId("newLabelDiv").within(() => {
-        cy.contains("STAN-1004").parents("tr").find("button").click();
+        cy.contains("STAN-1005").parents("tr").find("button").click();
       });
     });
     it("should display a print success message", () => {
-      cy.findByText("Tube Printer successfully printed STAN-1004").should(
+      cy.findByText("Tube Printer successfully printed STAN-1005").should(
         "be.visible"
       );
     });
@@ -115,11 +133,11 @@ describe("Aliquoting", () => {
     });
     it("should display a print success message", () => {
       cy.findByText(
-        "Tube Printer successfully printed STAN-1004, STAN-1005, STAN-1006, STAN-1007"
+        "Tube Printer successfully printed STAN-1005, STAN-1006, STAN-1007, STAN-1008"
       ).should("be.visible");
     });
   });
-  context("when store button is clicken", () => {
+  context("when store button is clicked", () => {
     before(() => {
       cy.findByRole("button", { name: /Store/i }).click();
     });

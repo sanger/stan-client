@@ -115,7 +115,7 @@ export default function StainForm({
         seconds: Yup.number().integer().min(1).required().label("Duration"),
       })
     ),
-    workNumber: Yup.string().optional().label("SGP Number"),
+    workNumber: Yup.string().required().label("SGP Number"),
   });
 
   /**
@@ -134,7 +134,7 @@ export default function StainForm({
           _seconds: 0,
           seconds: 0,
         })),
-        workNumber: undefined,
+        workNumber: "",
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
@@ -174,7 +174,9 @@ export default function StainForm({
               >
                 <Heading level={3}>SGP Number</Heading>
 
-                <WorkNumberSelect name={"workNumber"} />
+                <WorkNumberSelect name={"workNumber"} onWorkNumberChange={(workNumber) =>
+                  setFieldValue("workNumber", workNumber)
+                }/>
               </motion.div>
 
               <motion.div
