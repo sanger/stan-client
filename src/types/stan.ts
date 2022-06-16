@@ -24,7 +24,8 @@ export enum LabwareTypeName {
   FOUR_SLOT_SLIDE = "4 slot slide",
   FETAL_WASTE_CONTAINER = "Fetal waste container",
   DUAL_INDEX_PLATE= "Dual index plate",
-  POT="Pot"
+  POT="Pot",
+  PRE_BARCODED_TUBE="Prebarcoded tube",
 }
 
 export type Address = string;

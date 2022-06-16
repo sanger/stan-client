@@ -2677,6 +2677,17 @@ export type RegisterResultFieldsFragment = (
     & { tissue: (
       { __typename?: 'Tissue' }
       & Pick<Tissue, 'externalName'>
+      & { donor: (
+        { __typename?: 'Donor' }
+        & Pick<Donor, 'donorName'>
+      ), spatialLocation: (
+        { __typename?: 'SpatialLocation' }
+        & Pick<SpatialLocation, 'code' | 'name'>
+        & { tissueType: (
+          { __typename?: 'TissueType' }
+          & Pick<TissueType, 'name'>
+        ) }
+      ) }
     ), labware: Array<(
       { __typename?: 'Labware' }
       & Pick<Labware, 'barcode'>
@@ -3178,6 +3189,58 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'logout'>
+);
+
+export type PerformTissueBlockMutationVariables = Exact<{
+  request: TissueBlockRequest;
+}>;
+
+
+export type PerformTissueBlockMutation = (
+  { __typename?: 'Mutation' }
+  & { performTissueBlock: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
+);
+
+export type PerformTissuePotMutationVariables = Exact<{
+  request: PotProcessingRequest;
+}>;
+
+
+export type PerformTissuePotMutation = (
+  { __typename?: 'Mutation' }
+  & { performPotProcessing: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
 );
 
 export type PlanMutationVariables = Exact<{
@@ -4091,6 +4154,23 @@ export type FindWorkProgressQuery = (
   )> }
 );
 
+export type GetBlockProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetBlockProcessingInfoQuery = (
+  { __typename?: 'Query' }
+  & { mediums: Array<(
+    { __typename?: 'Medium' }
+    & Pick<Medium, 'name'>
+  )>, comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )>, labwareTypes: Array<(
+    { __typename?: 'LabwareType' }
+    & LabwareTypeFieldsFragment
+  )> }
+);
+
 export type GetCommentsQueryVariables = Exact<{
   commentCategory?: Maybe<Scalars['String']>;
   includeDisabled?: Maybe<Scalars['Boolean']>;
@@ -4186,6 +4266,23 @@ export type GetLabwareInLocationQuery = (
   & { labwareInLocation: Array<(
     { __typename?: 'Labware' }
     & LabwareFieldsFragment
+  )> }
+);
+
+export type GetPotProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetPotProcessingInfoQuery = (
+  { __typename?: 'Query' }
+  & { fixatives: Array<(
+    { __typename?: 'Fixative' }
+    & Pick<Fixative, 'name'>
+  )>, comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )>, labwareTypes: Array<(
+    { __typename?: 'LabwareType' }
+    & LabwareTypeFieldsFragment
   )> }
 );
 
@@ -4630,6 +4727,16 @@ export const RegisterResultFieldsFragmentDoc = gql`
   clashes {
     tissue {
       externalName
+      donor {
+        donorName
+      }
+      spatialLocation {
+        code
+        name
+        tissueType {
+          name
+        }
+      }
     }
     labware {
       barcode
@@ -4973,6 +5080,42 @@ export const LogoutDocument = gql`
   logout
 }
     `;
+export const PerformTissueBlockDocument = gql`
+    mutation PerformTissueBlock($request: TissueBlockRequest!) {
+  performTissueBlock(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
+export const PerformTissuePotDocument = gql`
+    mutation PerformTissuePot($request: PotProcessingRequest!) {
+  performPotProcessing(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const PlanDocument = gql`
     mutation Plan($request: PlanRequest!) {
   plan(request: $request) {
@@ -5523,6 +5666,20 @@ export const FindWorkProgressDocument = gql`
   }
 }
     ${WorkProgressFieldsFragmentDoc}`;
+export const GetBlockProcessingInfoDocument = gql`
+    query GetBlockProcessingInfo {
+  mediums {
+    name
+  }
+  comments(includeDisabled: false, category: "Tissue Block processing") {
+    ...CommentFields
+  }
+  labwareTypes {
+    ...LabwareTypeFields
+  }
+}
+    ${CommentFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}`;
 export const GetCommentsDocument = gql`
     query GetComments($commentCategory: String, $includeDisabled: Boolean) {
   comments(category: $commentCategory, includeDisabled: $includeDisabled) {
@@ -5606,6 +5763,20 @@ export const GetLabwareInLocationDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const GetPotProcessingInfoDocument = gql`
+    query GetPotProcessingInfo {
+  fixatives {
+    name
+  }
+  comments(includeDisabled: false, category: "Tissue Pot processing") {
+    ...CommentFields
+  }
+  labwareTypes {
+    ...LabwareTypeFields
+  }
+}
+    ${CommentFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}`;
 export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
@@ -5813,6 +5984,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     Logout(variables?: LogoutMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LogoutMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<LogoutMutation>(LogoutDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Logout');
     },
+    PerformTissueBlock(variables: PerformTissueBlockMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformTissueBlockMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformTissueBlockMutation>(PerformTissueBlockDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformTissueBlock');
+    },
+    PerformTissuePot(variables: PerformTissuePotMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformTissuePotMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformTissuePotMutation>(PerformTissuePotDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformTissuePot');
+    },
     Plan(variables: PlanMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PlanMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PlanMutation>(PlanDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Plan');
     },
@@ -5984,6 +6161,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     FindWorkProgress(variables?: FindWorkProgressQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkProgressQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindWorkProgressQuery>(FindWorkProgressDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindWorkProgress');
     },
+    GetBlockProcessingInfo(variables?: GetBlockProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetBlockProcessingInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetBlockProcessingInfoQuery>(GetBlockProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetBlockProcessingInfo');
+    },
     GetComments(variables?: GetCommentsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetCommentsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCommentsQuery>(GetCommentsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetComments');
     },
@@ -5998,6 +6178,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetLabwareInLocation(variables: GetLabwareInLocationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetLabwareInLocationQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetLabwareInLocationQuery>(GetLabwareInLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetLabwareInLocation');
+    },
+    GetPotProcessingInfo(variables?: GetPotProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPotProcessingInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetPotProcessingInfoQuery>(GetPotProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetPotProcessingInfo');
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetPrintersQuery>(GetPrintersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetPrinters');

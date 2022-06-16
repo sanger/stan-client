@@ -38,6 +38,9 @@ import DualIndexPlate from "../pages/DualIndexPlate";
 import columns from "./dataTable/labwareColumns";
 import OriginalSampleRegistration from "../pages/OriginalSampleRegistration";
 import BlockRegistration from "../pages/BlockRegistration";
+import { OriginalSampleProcessing } from "../pages/OriginalSampleProcessing";
+import BlockProcessing from "./originalSampleProcessing/blockProcessing/BlockProcessing";
+import PotProcessing from "./originalSampleProcessing/potProcessing/PotProcessing";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -53,6 +56,7 @@ export function Routes() {
       <Route path="/logout">
         <Logout />
       </Route>
+
       <AuthenticatedRoute
         path="/lab/sectioning/confirm"
         render={(routeProps) => (
@@ -66,6 +70,7 @@ export function Routes() {
           </DataFetcher>
         )}
       />
+
       <AuthenticatedRoute
         path="/lab/sectioning"
         render={(routeProps) => (
@@ -74,6 +79,47 @@ export function Routes() {
             dataFetcher={stanCore.GetSectioningInfo}
           >
             {(sectioningInfo) => <Plan sectioningInfo={sectioningInfo} />}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/original_sample_processing"
+        render={(routeProps) => (
+          <OriginalSampleProcessing
+            key={routeProps.location.key}
+            {...routeProps}
+          />
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/original_sample_processing/block"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetBlockProcessingInfo()}
+          >
+            {(blockInfo) => (
+              <BlockProcessing
+                key={routeProps.location.key}
+                processingInfo={blockInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/original_sample_processing/pot"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetPotProcessingInfo()}
+          >
+            {(blockInfo) => (
+              <PotProcessing
+                key={routeProps.location.key}
+                processingInfo={blockInfo}
+              />
+            )}
           </DataFetcher>
         )}
       />
@@ -197,6 +243,7 @@ export function Routes() {
           </DataFetcher>
         )}
       />
+
       <AuthenticatedRoute
         path="/admin/registration"
         render={(routeProps) => (
@@ -210,6 +257,7 @@ export function Routes() {
           </DataFetcher>
         )}
       />
+
       <AuthenticatedRoute
         path="/admin/slide_registration"
         render={(routeProps) => (
@@ -256,6 +304,7 @@ export function Routes() {
           </DataFetcher>
         )}
       />
+
       <AuthenticatedRoute
         path="/admin/unrelease"
         render={(routeProps) => <Unrelease key={routeProps.location.key} />}
@@ -280,6 +329,7 @@ export function Routes() {
           />
         )}
       />
+
       <Route
         path="/locations/:locationBarcode"
         render={(routeProps) => {
@@ -314,6 +364,7 @@ export function Routes() {
           );
         }}
       />
+
       <Route path="/locations" component={Store} />
       <Route path="/store" component={Store} />
       <Route path="/login" component={Login} />
@@ -328,6 +379,7 @@ export function Routes() {
           </DataFetcher>
         )}
       />
+
       <AuthenticatedRoute
         path="/config"
         role={UserRole.Admin}
@@ -337,6 +389,7 @@ export function Routes() {
           </DataFetcher>
         )}
       />
+
       <Route
         path="/labware/:barcode"
         render={(routeProps) => {
@@ -361,8 +414,10 @@ export function Routes() {
           );
         }}
       />
+
       <Route path={"/history"} component={History} />
       <AuthenticatedRoute path={"/sgp"} component={SGP} />
+
       <Route
         path={"/search"}
         render={(routeProps) => {
@@ -381,6 +436,7 @@ export function Routes() {
           );
         }}
       />
+
       <Route
         path="/"
         render={(routeProps) => {
