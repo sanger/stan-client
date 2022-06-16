@@ -16,6 +16,7 @@ import { useConfirmLeave } from "../../lib/hooks";
 import LabwarePlan from "../../components/planning/LabwarePlan";
 import labwareScanTableColumns from "../../components/dataTable/labwareColumns";
 import Planner, { PlanChangedProps } from "../../components/planning/Planner";
+import { optionValues } from "../../components/forms";
 
 /**
  * Types of labware the user is allowed to section onto
@@ -46,6 +47,21 @@ function Plan({ sectioningInfo }: SectioningParams) {
    * For tracking whether the user gets a prompt if they tried to navigate to another page
    */
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
+
+  const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(
+    LabwareTypeName.TUBE
+  );
+
+  /**
+   * Limit the labware types the user can Section on to.
+   */
+  const allowedLabwareTypes = React.useMemo(
+    () =>
+      sectioningInfo.labwareTypes.filter((lw) =>
+        allowedLabwareTypeNames.includes(lw.name as LabwareTypeName)
+      ),
+    [sectioningInfo.labwareTypes]
+  );
 
   /**
    * Callback for when a user adds or removes a plan.
@@ -89,13 +105,17 @@ function Plan({ sectioningInfo }: SectioningParams) {
     },
     []
   );
+  const buildPlanCreationSettings = React.useCallback(() => {
+    return (
+      <select
+        className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
+        onChange={(e) => setSelectedLabwareType(e.currentTarget.value)}
+      >
+        {optionValues(allowedLabwareTypes, "name", "name")}
+      </select>
+    );
+  }, [allowedLabwareTypes]);
 
-  /**
-   * Limit the labware types the user can Section on to.
-   */
-  const allowedLabwareTypes = sectioningInfo.labwareTypes.filter((lw) =>
-    allowedLabwareTypeNames.includes(lw.name as LabwareTypeName)
-  );
   return (
     <AppShell>
       <AppShell.Header>
@@ -105,8 +125,11 @@ function Plan({ sectioningInfo }: SectioningParams) {
         <div className="my-4 mx-auto max-w-screen-xl space-y-16">
           <Planner<PlanMutation>
             operationType={"Section"}
-            allowedLabwareTypes={allowedLabwareTypes}
+            selectedLabwareType={allowedLabwareTypes.find(
+              (lt) => lt.name === selectedLabwareType
+            )}
             onPlanChanged={handlePlanChange}
+            buildPlanCreationSettings={buildPlanCreationSettings}
             buildPlanLayouts={buildPlanLayouts}
             columns={[
               labwareScanTableColumns.barcode(),

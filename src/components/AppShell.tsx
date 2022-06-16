@@ -135,13 +135,13 @@ function AppShell({ children }: AppShellParams) {
                     />
                   </Menu>
                   <NavLinkMenuItem
-                    caption={"Block Processing"}
-                    path="/lab/block_processing"
+                    caption={"Original Sample Processing"}
+                    path="/lab/original_sample_processing"
                     icon={
                       <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                     }
                     description={
-                      "Divide original tissue samples into new labware to become tissue blocks"
+                      "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
                     }
                   />
 
@@ -319,6 +319,16 @@ function AppShell({ children }: AppShellParams) {
                     }
                   />
                   <NavLinkMenuItem
+                    caption={"Original Sample Registration"}
+                    path={"/admin/tissue_registration"}
+                    icon={
+                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
+                    description={
+                      "Register tissue samples which can be either fixed or fresh into STAN."
+                    }
+                  />
+                  <NavLinkMenuItem
                     caption={"Destroy"}
                     path={"/admin/destroy"}
                     icon={
@@ -470,6 +480,9 @@ function AppShell({ children }: AppShellParams) {
                     <StanMobileNavLink to="/lab/fetal_waste">
                       Fetal Waste
                     </StanMobileNavLink>
+                    <StanMobileNavLink to="/lab/original_sample_processing">
+                      Original Sample Processing
+                    </StanMobileNavLink>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">
                       RNA
                     </h4>
@@ -540,6 +553,9 @@ function AppShell({ children }: AppShellParams) {
 
                       <StanMobileNavLink to="/admin/slide_registration">
                         Slide Registration
+                      </StanMobileNavLink>
+                      <StanMobileNavLink to={"/admin/tissue_registration"}>
+                        Tissue Registration
                       </StanMobileNavLink>
 
                       <StanMobileNavLink to="/admin/destroy">

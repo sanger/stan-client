@@ -78,6 +78,12 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numRows: 8,
     numColumns: 12,
   }),
+  [LabwareTypeName.POT]: labwareTypeFactory.params({
+    __typename: "LabwareType",
+    name: LabwareTypeName.POT,
+    numRows: 1,
+    numColumns: 1,
+  }),
   [LabwareTypeName.PRE_BARCODED_TUBE]: labwareTypeFactory.params({
     __typename: "LabwareType",
     name: LabwareTypeName.PRE_BARCODED_TUBE,

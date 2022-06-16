@@ -702,6 +702,8 @@ export type Mutation = {
   registerOriginalSamples: RegisterResult;
   /** Process tissue into blocks. */
   performTissueBlock: OperationResult;
+  /** Process an original sample into pots. */
+  performPotProcessing: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -1244,6 +1246,15 @@ export type MutationPerformTissueBlockArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
+export type MutationPerformPotProcessingArgs = {
+  request: PotProcessingRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1487,6 +1498,28 @@ export type PlanResult = {
   labware: Array<Labware>;
   /** The planned operations created. */
   operations: Array<PlanOperation>;
+};
+
+/** A destination for pot processing. */
+export type PotProcessingDestination = {
+  /** The name of the type of labware. */
+  labwareType: Scalars['String'];
+  /** The fixative. */
+  fixative: Scalars['String'];
+  /** Comment to record, if any. */
+  commentId?: Maybe<Scalars['Int']>;
+};
+
+/** A request to transfer original sample into pots. */
+export type PotProcessingRequest = {
+  /** The source barcode. */
+  sourceBarcode: Scalars['String'];
+  /** The work number. */
+  workNumber: Scalars['String'];
+  /** The destinations that will be created. */
+  destinations: Array<PotProcessingDestination>;
+  /** Is the source labware discarded? */
+  sourceDiscarded?: Maybe<Scalars['Boolean']>;
 };
 
 /** A printer, typically used to print labels for labware. */
@@ -2634,6 +2667,38 @@ export type ReagentSlotFieldsFragment = (
   & Pick<ReagentSlot, 'address' | 'used'>
 );
 
+export type RegisterResultFieldsFragment = (
+  { __typename?: 'RegisterResult' }
+  & { labware: Array<(
+    { __typename?: 'Labware' }
+    & LabwareFieldsFragment
+  )>, clashes: Array<(
+    { __typename?: 'RegisterClash' }
+    & { tissue: (
+      { __typename?: 'Tissue' }
+      & Pick<Tissue, 'externalName'>
+      & { donor: (
+        { __typename?: 'Donor' }
+        & Pick<Donor, 'donorName'>
+      ), spatialLocation: (
+        { __typename?: 'SpatialLocation' }
+        & Pick<SpatialLocation, 'code' | 'name'>
+        & { tissueType: (
+          { __typename?: 'TissueType' }
+          & Pick<TissueType, 'name'>
+        ) }
+      ) }
+    ), labware: Array<(
+      { __typename?: 'Labware' }
+      & Pick<Labware, 'barcode'>
+      & { labwareType: (
+        { __typename?: 'LabwareType' }
+        & Pick<LabwareType, 'name'>
+      ) }
+    )> }
+  )> }
+);
+
 export type ReleaseDestinationFieldsFragment = (
   { __typename?: 'ReleaseDestination' }
   & Pick<ReleaseDestination, 'name' | 'enabled'>
@@ -2685,6 +2750,11 @@ export type SlotFieldsFragment = (
 export type SlotPassFailFieldsFragment = (
   { __typename?: 'SlotPassFail' }
   & Pick<SlotPassFail, 'address' | 'result' | 'comment'>
+);
+
+export type SolutionSampleFieldsFragment = (
+  { __typename?: 'SolutionSample' }
+  & Pick<SolutionSample, 'name' | 'enabled'>
 );
 
 export type SpeciesFieldsFragment = (
@@ -2863,6 +2933,19 @@ export type AddReleaseRecipientMutation = (
   & { addReleaseRecipient: (
     { __typename?: 'ReleaseRecipient' }
     & ReleaseRecipientFieldsFragment
+  ) }
+);
+
+export type AddSolutionSampleMutationVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type AddSolutionSampleMutation = (
+  { __typename?: 'Mutation' }
+  & { addSolutionSample: (
+    { __typename?: 'SolutionSample' }
+    & SolutionSampleFieldsFragment
   ) }
 );
 
@@ -3134,6 +3217,32 @@ export type PerformTissueBlockMutation = (
   ) }
 );
 
+export type PerformTissuePotMutationVariables = Exact<{
+  request: PotProcessingRequest;
+}>;
+
+
+export type PerformTissuePotMutation = (
+  { __typename?: 'Mutation' }
+  & { performPotProcessing: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
+);
+
 export type PlanMutationVariables = Exact<{
   request: PlanRequest;
 }>;
@@ -3314,6 +3423,19 @@ export type RecordVisiumQcMutation = (
   ) }
 );
 
+export type RegisterOriginalSamplesMutationVariables = Exact<{
+  request: OriginalSampleRegisterRequest;
+}>;
+
+
+export type RegisterOriginalSamplesMutation = (
+  { __typename?: 'Mutation' }
+  & { registerOriginalSamples: (
+    { __typename?: 'RegisterResult' }
+    & RegisterResultFieldsFragment
+  ) }
+);
+
 export type RegisterSectionsMutationVariables = Exact<{
   request: SectionRegisterRequest;
 }>;
@@ -3339,34 +3461,7 @@ export type RegisterTissuesMutation = (
   { __typename?: 'Mutation' }
   & { register: (
     { __typename?: 'RegisterResult' }
-    & { labware: Array<(
-      { __typename?: 'Labware' }
-      & LabwareFieldsFragment
-    )>, clashes: Array<(
-      { __typename?: 'RegisterClash' }
-      & { tissue: (
-        { __typename?: 'Tissue' }
-        & Pick<Tissue, 'externalName'>
-        & { donor: (
-          { __typename?: 'Donor' }
-          & Pick<Donor, 'donorName'>
-        ), spatialLocation: (
-          { __typename?: 'SpatialLocation' }
-          & Pick<SpatialLocation, 'code' | 'name'>
-          & { tissueType: (
-            { __typename?: 'TissueType' }
-            & Pick<TissueType, 'name'>
-          ) }
-        ) }
-      ), labware: Array<(
-        { __typename?: 'Labware' }
-        & Pick<Labware, 'barcode'>
-        & { labwareType: (
-          { __typename?: 'LabwareType' }
-          & Pick<LabwareType, 'name'>
-        ) }
-      )> }
-    )> }
+    & RegisterResultFieldsFragment
   ) }
 );
 
@@ -3533,6 +3628,20 @@ export type SetReleaseRecipientEnabledMutation = (
   & { setReleaseRecipientEnabled: (
     { __typename?: 'ReleaseRecipient' }
     & ReleaseRecipientFieldsFragment
+  ) }
+);
+
+export type SetSolutionSampleEnabledMutationVariables = Exact<{
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetSolutionSampleEnabledMutation = (
+  { __typename?: 'Mutation' }
+  & { setSolutionSampleEnabled: (
+    { __typename?: 'SolutionSample' }
+    & SolutionSampleFieldsFragment
   ) }
 );
 
@@ -4045,6 +4154,23 @@ export type FindWorkProgressQuery = (
   )> }
 );
 
+export type GetBlockProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetBlockProcessingInfoQuery = (
+  { __typename?: 'Query' }
+  & { mediums: Array<(
+    { __typename?: 'Medium' }
+    & Pick<Medium, 'name'>
+  )>, comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )>, labwareTypes: Array<(
+    { __typename?: 'LabwareType' }
+    & LabwareTypeFieldsFragment
+  )> }
+);
+
 export type GetCommentsQueryVariables = Exact<{
   commentCategory?: Maybe<Scalars['String']>;
   includeDisabled?: Maybe<Scalars['Boolean']>;
@@ -4100,6 +4226,9 @@ export type GetConfigurationQuery = (
   )>, users: Array<(
     { __typename?: 'User' }
     & UserFieldsFragment
+  )>, solutionSamples: Array<(
+    { __typename?: 'SolutionSample' }
+    & SolutionSampleFieldsFragment
   )> }
 );
 
@@ -4137,6 +4266,23 @@ export type GetLabwareInLocationQuery = (
   & { labwareInLocation: Array<(
     { __typename?: 'Labware' }
     & LabwareFieldsFragment
+  )> }
+);
+
+export type GetPotProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetPotProcessingInfoQuery = (
+  { __typename?: 'Query' }
+  & { fixatives: Array<(
+    { __typename?: 'Fixative' }
+    & Pick<Fixative, 'name'>
+  )>, comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )>, labwareTypes: Array<(
+    { __typename?: 'LabwareType' }
+    & LabwareTypeFieldsFragment
   )> }
 );
 
@@ -4202,6 +4348,9 @@ export type GetRegistrationInfoQuery = (
   )>, mediums: Array<(
     { __typename?: 'Medium' }
     & Pick<Medium, 'name'>
+  )>, solutionSamples: Array<(
+    { __typename?: 'SolutionSample' }
+    & Pick<SolutionSample, 'name'>
   )> }
 );
 
@@ -4271,23 +4420,6 @@ export type GetStainingQcInfoQuery = (
   & { comments: Array<(
     { __typename?: 'Comment' }
     & CommentFieldsFragment
-  )> }
-);
-
-export type GetTissueBlockProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetTissueBlockProcessingInfoQuery = (
-  { __typename?: 'Query' }
-  & { mediums: Array<(
-    { __typename?: 'Medium' }
-    & Pick<Medium, 'name'>
-  )>, comments: Array<(
-    { __typename?: 'Comment' }
-    & CommentFieldsFragment
-  )>, labwareTypes: Array<(
-    { __typename?: 'LabwareType' }
-    & LabwareTypeFieldsFragment
   )> }
 );
 
@@ -4587,6 +4719,34 @@ export const ReagentPlateFieldsFragmentDoc = gql`
   }
 }
     ${ReagentSlotFieldsFragmentDoc}`;
+export const RegisterResultFieldsFragmentDoc = gql`
+    fragment RegisterResultFields on RegisterResult {
+  labware {
+    ...LabwareFields
+  }
+  clashes {
+    tissue {
+      externalName
+      donor {
+        donorName
+      }
+      spatialLocation {
+        code
+        name
+        tissueType {
+          name
+        }
+      }
+    }
+    labware {
+      barcode
+      labwareType {
+        name
+      }
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const ReleaseDestinationFieldsFragmentDoc = gql`
     fragment ReleaseDestinationFields on ReleaseDestination {
   name
@@ -4604,6 +4764,12 @@ export const SlotPassFailFieldsFragmentDoc = gql`
   address
   result
   comment
+}
+    `;
+export const SolutionSampleFieldsFragmentDoc = gql`
+    fragment SolutionSampleFields on SolutionSample {
+  name
+  enabled
 }
     `;
 export const SpeciesFieldsFragmentDoc = gql`
@@ -4744,6 +4910,13 @@ export const AddReleaseRecipientDocument = gql`
   }
 }
     ${ReleaseRecipientFieldsFragmentDoc}`;
+export const AddSolutionSampleDocument = gql`
+    mutation AddSolutionSample($name: String!) {
+  addSolutionSample(name: $name) {
+    ...SolutionSampleFields
+  }
+}
+    ${SolutionSampleFieldsFragmentDoc}`;
 export const AddSpeciesDocument = gql`
     mutation AddSpecies($name: String!) {
   addSpecies(name: $name) {
@@ -4925,6 +5098,24 @@ export const PerformTissueBlockDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const PerformTissuePotDocument = gql`
+    mutation PerformTissuePot($request: PotProcessingRequest!) {
+  performPotProcessing(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const PlanDocument = gql`
     mutation Plan($request: PlanRequest!) {
   plan(request: $request) {
@@ -5029,6 +5220,13 @@ export const RecordVisiumQcDocument = gql`
   }
 }
     `;
+export const RegisterOriginalSamplesDocument = gql`
+    mutation RegisterOriginalSamples($request: OriginalSampleRegisterRequest!) {
+  registerOriginalSamples(request: $request) {
+    ...RegisterResultFields
+  }
+}
+    ${RegisterResultFieldsFragmentDoc}`;
 export const RegisterSectionsDocument = gql`
     mutation RegisterSections($request: SectionRegisterRequest!) {
   registerSections(request: $request) {
@@ -5041,33 +5239,10 @@ export const RegisterSectionsDocument = gql`
 export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {
-    labware {
-      ...LabwareFields
-    }
-    clashes {
-      tissue {
-        externalName
-        donor {
-          donorName
-        }
-        spatialLocation {
-          code
-          name
-          tissueType {
-            name
-          }
-        }
-      }
-      labware {
-        barcode
-        labwareType {
-          name
-        }
-      }
-    }
+    ...RegisterResultFields
   }
 }
-    ${LabwareFieldsFragmentDoc}`;
+    ${RegisterResultFieldsFragmentDoc}`;
 export const ReleaseLabwareDocument = gql`
     mutation ReleaseLabware($releaseRequest: ReleaseRequest!) {
   release(request: $releaseRequest) {
@@ -5159,6 +5334,13 @@ export const SetReleaseRecipientEnabledDocument = gql`
   }
 }
     ${ReleaseRecipientFieldsFragmentDoc}`;
+export const SetSolutionSampleEnabledDocument = gql`
+    mutation SetSolutionSampleEnabled($name: String!, $enabled: Boolean!) {
+  setSolutionSampleEnabled(name: $name, enabled: $enabled) {
+    ...SolutionSampleFields
+  }
+}
+    ${SolutionSampleFieldsFragmentDoc}`;
 export const SetSpeciesEnabledDocument = gql`
     mutation SetSpeciesEnabled($name: String!, $enabled: Boolean!) {
   setSpeciesEnabled(name: $name, enabled: $enabled) {
@@ -5484,6 +5666,20 @@ export const FindWorkProgressDocument = gql`
   }
 }
     ${WorkProgressFieldsFragmentDoc}`;
+export const GetBlockProcessingInfoDocument = gql`
+    query GetBlockProcessingInfo {
+  mediums {
+    name
+  }
+  comments(includeDisabled: false, category: "Tissue Block processing") {
+    ...CommentFields
+  }
+  labwareTypes {
+    ...LabwareTypeFields
+  }
+}
+    ${CommentFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}`;
 export const GetCommentsDocument = gql`
     query GetComments($commentCategory: String, $includeDisabled: Boolean) {
   comments(category: $commentCategory, includeDisabled: $includeDisabled) {
@@ -5529,6 +5725,9 @@ export const GetConfigurationDocument = gql`
   users(includeDisabled: true) {
     ...UserFields
   }
+  solutionSamples(includeDisabled: true) {
+    ...SolutionSampleFields
+  }
 }
     ${DestructionReasonFieldsFragmentDoc}
 ${CommentFieldsFragmentDoc}
@@ -5541,7 +5740,8 @@ ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}
 ${EquipmentFieldsFragmentDoc}
-${UserFieldsFragmentDoc}`;
+${UserFieldsFragmentDoc}
+${SolutionSampleFieldsFragmentDoc}`;
 export const GetDestroyInfoDocument = gql`
     query GetDestroyInfo {
   destructionReasons {
@@ -5563,6 +5763,20 @@ export const GetLabwareInLocationDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const GetPotProcessingInfoDocument = gql`
+    query GetPotProcessingInfo {
+  fixatives {
+    name
+  }
+  comments(includeDisabled: false, category: "Tissue Pot processing") {
+    ...CommentFields
+  }
+  labwareTypes {
+    ...LabwareTypeFields
+  }
+}
+    ${CommentFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}`;
 export const GetPrintersDocument = gql`
     query GetPrinters {
   printers {
@@ -5606,6 +5820,9 @@ export const GetRegistrationInfoDocument = gql`
     name
   }
   mediums {
+    name
+  }
+  solutionSamples {
     name
   }
 }
@@ -5656,20 +5873,6 @@ export const GetStainingQcInfoDocument = gql`
   }
 }
     ${CommentFieldsFragmentDoc}`;
-export const GetTissueBlockProcessingInfoDocument = gql`
-    query GetTissueBlockProcessingInfo {
-  mediums {
-    name
-  }
-  comments(includeDisabled: false, category: "Tissue Block processing") {
-    ...CommentFields
-  }
-  labwareTypes {
-    ...LabwareTypeFields
-  }
-}
-    ${CommentFieldsFragmentDoc}
-${LabwareTypeFieldsFragmentDoc}`;
 export const GetVisiumQcInfoDocument = gql`
     query GetVisiumQCInfo {
   comments(includeDisabled: false, category: "Visium QC") {
@@ -5742,6 +5945,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AddReleaseRecipient(variables: AddReleaseRecipientMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddReleaseRecipientMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddReleaseRecipientMutation>(AddReleaseRecipientDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddReleaseRecipient');
     },
+    AddSolutionSample(variables: AddSolutionSampleMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSolutionSampleMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddSolutionSampleMutation>(AddSolutionSampleDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSolutionSample');
+    },
     AddSpecies(variables: AddSpeciesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSpeciesMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddSpeciesMutation>(AddSpeciesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSpecies');
     },
@@ -5781,6 +5987,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     PerformTissueBlock(variables: PerformTissueBlockMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformTissueBlockMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PerformTissueBlockMutation>(PerformTissueBlockDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformTissueBlock');
     },
+    PerformTissuePot(variables: PerformTissuePotMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformTissuePotMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformTissuePotMutation>(PerformTissuePotDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformTissuePot');
+    },
     Plan(variables: PlanMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PlanMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PlanMutation>(PlanDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Plan');
     },
@@ -5813,6 +6022,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     RecordVisiumQC(variables: RecordVisiumQcMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordVisiumQcMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordVisiumQcMutation>(RecordVisiumQcDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordVisiumQC');
+    },
+    RegisterOriginalSamples(variables: RegisterOriginalSamplesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterOriginalSamplesMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RegisterOriginalSamplesMutation>(RegisterOriginalSamplesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterOriginalSamples');
     },
     RegisterSections(variables: RegisterSectionsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterSectionsMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterSections');
@@ -5852,6 +6064,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     SetReleaseRecipientEnabled(variables: SetReleaseRecipientEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetReleaseRecipientEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetReleaseRecipientEnabledMutation>(SetReleaseRecipientEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetReleaseRecipientEnabled');
+    },
+    SetSolutionSampleEnabled(variables: SetSolutionSampleEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSolutionSampleEnabledMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetSolutionSampleEnabledMutation>(SetSolutionSampleEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSolutionSampleEnabled');
     },
     SetSpeciesEnabled(variables: SetSpeciesEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSpeciesEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetSpeciesEnabledMutation>(SetSpeciesEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSpeciesEnabled');
@@ -5946,6 +6161,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     FindWorkProgress(variables?: FindWorkProgressQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkProgressQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindWorkProgressQuery>(FindWorkProgressDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindWorkProgress');
     },
+    GetBlockProcessingInfo(variables?: GetBlockProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetBlockProcessingInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetBlockProcessingInfoQuery>(GetBlockProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetBlockProcessingInfo');
+    },
     GetComments(variables?: GetCommentsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetCommentsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCommentsQuery>(GetCommentsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetComments');
     },
@@ -5960,6 +6178,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetLabwareInLocation(variables: GetLabwareInLocationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetLabwareInLocationQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetLabwareInLocationQuery>(GetLabwareInLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetLabwareInLocation');
+    },
+    GetPotProcessingInfo(variables?: GetPotProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPotProcessingInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetPotProcessingInfoQuery>(GetPotProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetPotProcessingInfo');
     },
     GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetPrintersQuery>(GetPrintersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetPrinters');
@@ -5990,9 +6211,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetStainingQCInfo(variables?: GetStainingQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainingQcInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetStainingQcInfoQuery>(GetStainingQcInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetStainingQCInfo');
-    },
-    GetTissueBlockProcessingInfo(variables?: GetTissueBlockProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetTissueBlockProcessingInfoQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetTissueBlockProcessingInfoQuery>(GetTissueBlockProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetTissueBlockProcessingInfo');
     },
     GetVisiumQCInfo(variables?: GetVisiumQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetVisiumQcInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetVisiumQcInfoQuery>(GetVisiumQcInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetVisiumQCInfo');

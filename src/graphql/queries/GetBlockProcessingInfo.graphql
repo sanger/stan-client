@@ -1,4 +1,4 @@
-query GetTissueBlockProcessingInfo {
+query GetBlockProcessingInfo {
     mediums {
         name
     }

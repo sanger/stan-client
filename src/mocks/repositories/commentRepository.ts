@@ -84,6 +84,18 @@ const seeds: Array<CommentFieldsFragment> = [
     category: "Tissue Block processing",
     text: "Labware damaged",
   }),
+  commentFactory.build({
+    category: "Tissue Pot processing",
+    text: "Issue while fixing",
+  }),
+  commentFactory.build({
+    category: "Tissue Pot processing",
+    text: "Labware damaged",
+  }),
+  commentFactory.build({
+    category: "Tissue Pot processing",
+    text: "Fixatives damaged",
+  }),
 ];
 
 const commentRepository = createSessionStorageRepository(

@@ -1,0 +1,27 @@
+fragment RegisterResultFields on RegisterResult {
+    labware {
+        ...LabwareFields
+    }
+    clashes {
+        tissue {
+            externalName
+            donor {
+                donorName
+            }
+            spatialLocation {
+                code
+                name
+                tissueType {
+                    name
+                }
+            }
+
+        }
+        labware {
+            barcode
+            labwareType {
+                name
+            }
+        }
+    }
+}

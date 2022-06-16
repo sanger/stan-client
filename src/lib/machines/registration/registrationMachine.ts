@@ -1,93 +1,26 @@
 import { createMachine } from "xstate";
 import { assign } from "@xstate/immer";
 import { extractServerErrors, ServerErrors } from "../../../types/stan";
-import * as registrationService from "../../services/registrationService";
-import {
-  BlockRegisterRequest,
-  GetRegistrationInfoQuery,
-  RegisterTissuesMutation,
-  RegisterTissuesMutationVariables,
-} from "../../../types/sdk";
-import { RegistrationFormValues } from "../../../pages/Registration";
 import { ClientError } from "graphql-request";
+import { Maybe, RegisterResultFieldsFragment } from "../../../types/sdk";
 
-/**
- * Builds the registerTissue mutation variables from the RegistrationFormValues
- * @param formValues
- * @param existingTissues list of tissue external names that the user has confirmed as pre-existing
- * @return Promise<RegisterTissuesMutationVariables> mutation variables wrapped in a promise
- */
-export function buildRegisterTissuesMutationVariables(
-  formValues: RegistrationFormValues,
-  existingTissues: Array<TissueIdentifier> = []
-): Promise<RegisterTissuesMutationVariables> {
-  return new Promise((resolve) => {
-    const blocks = formValues.tissues.reduce<BlockRegisterRequest[]>(
-      (memo, tissue) => {
-        return [
-          ...memo,
-          ...tissue.blocks.map<BlockRegisterRequest>((block) => {
-            const blockRegisterRequest: BlockRegisterRequest = {
-              species: tissue.species.trim(),
-              donorIdentifier: tissue.donorId.trim(),
-              externalIdentifier: block.externalIdentifier.trim(),
-              highestSection: block.lastKnownSectionNumber,
-              hmdmc: tissue.hmdmc.trim(),
-              labwareType: block.labwareType.trim(),
-              lifeStage: tissue.lifeStage,
-              tissueType: tissue.tissueType.trim(),
-              spatialLocation: block.spatialLocation,
-              replicateNumber: block.replicateNumber,
-              fixative: block.fixative.trim(),
-              medium: block.medium.trim(),
-              sampleCollectionDate: tissue.sampleCollectionDate
-                ? tissue.sampleCollectionDate instanceof Date
-                  ? tissue.sampleCollectionDate.toLocaleDateString()
-                  : tissue.sampleCollectionDate
-                : undefined,
-            };
-            if (
-              existingTissues.some(
-                (tissue) =>
-                  tissue.externalName ===
-                    blockRegisterRequest.externalIdentifier &&
-                  tissue.tissueType === blockRegisterRequest.tissueType &&
-                  tissue.donorName === blockRegisterRequest.donorIdentifier &&
-                  tissue.spatialLocation ===
-                    blockRegisterRequest.spatialLocation
-              )
-            ) {
-              blockRegisterRequest.existingTissue = true;
-            }
-
-            return blockRegisterRequest;
-          }),
-        ];
-      },
-      []
-    );
-
-    resolve({ request: { blocks } });
-  });
+export interface RegistrationContext<F, M> {
+  registrationFormInput: Maybe<F>;
+  buildRegistrationInput: (
+    formInput: F,
+    existingTissues?: Array<string>
+  ) => Promise<M>;
+  registrationService: (
+    mutationInput: M
+  ) => Promise<RegisterResultFieldsFragment>;
+  registrationResult: Maybe<RegisterResultFieldsFragment>;
+  registrationErrors: Maybe<ServerErrors>;
+  confirmedTissues: Array<string>;
 }
 
-export type TissueIdentifier = {
-  externalName: string;
-  donorName: string;
-  spatialLocation: number;
-  tissueType: String;
-};
-
-export interface RegistrationContext {
-  registrationInfo: GetRegistrationInfoQuery;
-  registrationResult: RegisterTissuesMutation;
-  registrationErrors: ServerErrors;
-  confirmedTissues: Array<TissueIdentifier>;
-}
-
-type SubmitFormEvent = {
+type SubmitFormEvent<F> = {
   type: "SUBMIT_FORM";
-  values: RegistrationFormValues;
+  values: F;
 };
 
 type EditSubmissionEvent = {
@@ -96,7 +29,7 @@ type EditSubmissionEvent = {
 
 type SubmittingDoneEvent = {
   type: "done.invoke.submitting";
-  data: RegisterTissuesMutation;
+  data: RegisterResultFieldsFragment;
 };
 
 type SubmittingErrorEvent = {
@@ -104,8 +37,8 @@ type SubmittingErrorEvent = {
   data: ClientError;
 };
 
-export type RegistrationEvent =
-  | SubmitFormEvent
+export type RegistrationEvent<F> =
+  | SubmitFormEvent<F>
   | EditSubmissionEvent
   | SubmittingDoneEvent
   | SubmittingErrorEvent;
@@ -113,108 +46,116 @@ export type RegistrationEvent =
 /**
  * XState state machine for Registration
  */
-const registrationMachine = createMachine<
-  RegistrationContext,
-  RegistrationEvent
->(
-  {
-    id: "registration",
-    initial: "ready",
-    states: {
-      ready: {
-        entry: ["emptyConfirmedTissues"],
-        on: {
-          SUBMIT_FORM: "submitting",
-        },
+export function createRegistrationMachine<F, M>(
+  buildRegistrationInput: (
+    formInput: F,
+    existingTissues?: Array<string>
+  ) => Promise<M>,
+  registrationService: (
+    mutationInput: M
+  ) => Promise<RegisterResultFieldsFragment>
+) {
+  return createMachine<RegistrationContext<F, M>, RegistrationEvent<F>>(
+    {
+      context: {
+        registrationFormInput: null,
+        buildRegistrationInput,
+        registrationService,
+        registrationResult: null,
+        registrationErrors: null,
+        confirmedTissues: [],
       },
-      submitting: {
-        invoke: {
-          id: "submitting",
-          src: "submit",
-          onDone: {
-            target: "checkSubmissionClashes",
-            actions: ["assignRegistrationResult"],
+      id: "registration",
+      initial: "ready",
+      states: {
+        ready: {
+          entry: ["emptyConfirmedTissues"],
+          on: {
+            SUBMIT_FORM: "submitting",
           },
-          onError: {
-            target: "submissionError",
-            actions: "assignRegistrationError",
+        },
+        submitting: {
+          invoke: {
+            id: "submitting",
+            src: "submit",
+            onDone: {
+              target: "checkSubmissionClashes",
+              actions: ["assignRegistrationResult"],
+            },
+            onError: {
+              target: "submissionError",
+              actions: "assignRegistrationError",
+            },
           },
         },
-      },
-      checkSubmissionClashes: {
-        always: [
-          {
-            cond: "isClash",
-            target: "clashed",
-          },
-          {
-            target: "complete",
-          },
-        ],
-      },
-      clashed: {
-        on: {
-          EDIT_SUBMISSION: "ready",
-          SUBMIT_FORM: "submitting",
+        checkSubmissionClashes: {
+          always: [
+            {
+              cond: "isClash",
+              target: "clashed",
+            },
+            {
+              target: "complete",
+            },
+          ],
         },
-      },
-      submissionError: {
-        on: {
-          SUBMIT_FORM: "submitting",
+        clashed: {
+          on: {
+            EDIT_SUBMISSION: "ready",
+            SUBMIT_FORM: "submitting",
+          },
         },
-      },
-      complete: {
-        type: "final",
+        submissionError: {
+          on: {
+            SUBMIT_FORM: "submitting",
+          },
+        },
+        complete: {
+          type: "final",
+        },
       },
     },
-  },
-  {
-    actions: {
-      emptyConfirmedTissues: assign((ctx) => (ctx.confirmedTissues = [])),
+    {
+      actions: {
+        emptyConfirmedTissues: assign((ctx) => (ctx.confirmedTissues = [])),
 
-      assignRegistrationResult: assign((ctx, e) => {
-        if (e.type !== "done.invoke.submitting" || !e.data) {
-          return;
-        }
-        ctx.registrationResult = e.data;
-
-        // Store the clashed tissues to be used for possible user confirmation
-        ctx.confirmedTissues = ctx.registrationResult.register.clashes.map(
-          (clash) => {
-            return {
-              externalName: clash.tissue.externalName ?? "",
-              donorName: clash.tissue.donor.donorName,
-              spatialLocation: clash.tissue.spatialLocation.code,
-              tissueType: clash.tissue.spatialLocation.tissueType.name,
-            };
+        assignRegistrationResult: assign((ctx, e) => {
+          if (e.type !== "done.invoke.submitting" || !e.data) {
+            return;
           }
-        );
-      }),
+          ctx.registrationResult = e.data;
 
-      assignRegistrationError: assign((ctx, e) => {
-        if (e.type !== "error.platform.submitting") {
-          return;
-        }
-        ctx.registrationErrors = extractServerErrors(e.data);
-      }),
-    },
+          // Store the clashed tissues to be used for possible user confirmation
+          ctx.confirmedTissues = ctx.registrationResult.clashes.map(
+            (clash) => clash.tissue.externalName ?? ""
+          );
+        }),
 
-    guards: {
-      isClash: (ctx) => ctx.registrationResult.register.clashes.length > 0,
-    },
-
-    services: {
-      submit: (context, event) => {
-        if (event.type !== "SUBMIT_FORM") {
-          return Promise.reject();
-        }
-        return buildRegisterTissuesMutationVariables(
-          event.values,
-          context.confirmedTissues
-        ).then(registrationService.registerTissues);
+        assignRegistrationError: assign((ctx, e) => {
+          if (e.type !== "error.platform.submitting") {
+            return;
+          }
+          ctx.registrationErrors = extractServerErrors(e.data);
+        }),
       },
-    },
-  }
-);
 
-export default registrationMachine;
+      guards: {
+        isClash: (ctx) =>
+          ctx.registrationResult !== null &&
+          ctx.registrationResult.clashes.length > 0,
+      },
+
+      services: {
+        submit: (context, event) => {
+          if (event.type !== "SUBMIT_FORM") {
+            return Promise.reject();
+          }
+          return buildRegistrationInput(
+            event.values,
+            context.confirmedTissues
+          ).then(context.registrationService);
+        },
+      },
+    }
+  );
+}
