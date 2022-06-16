@@ -278,15 +278,15 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                             )}
                           </FormikSelect>
                         )}
-                        {"solutionSample" in block && (
+                        {"solution" in block && (
                           <FormikSelect
                             emptyOption
                             label="Solution Sample"
                             className="block mt-2"
-                            name={`tissues.${currentIndex}.blocks.${blockIndex}.solutionSample`}
+                            name={`tissues.${currentIndex}.blocks.${blockIndex}.solution`}
                           >
                             {optionValues(
-                              registrationInfo.solutionSamples,
+                              registrationInfo.solutions,
                               "name",
                               "name"
                             )}

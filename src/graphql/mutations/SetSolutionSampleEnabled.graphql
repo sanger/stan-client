@@ -1,5 +1,0 @@
-mutation SetSolutionSampleEnabled($name:String!,$enabled:Boolean!){
-    setSolutionSampleEnabled(name:$name,enabled:$enabled) {
-        ...SolutionSampleFields
-    }
-}

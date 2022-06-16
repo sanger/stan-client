@@ -1,9 +1,9 @@
 import { Factory } from "fishery";
-import { SolutionSampleFieldsFragment } from "../../types/sdk";
+import { SolutionFieldsFragment } from "../../types/sdk";
 
-export default Factory.define<SolutionSampleFieldsFragment>(
+export default Factory.define<SolutionFieldsFragment>(
   ({ params, sequence }) => ({
-    __typename: "SolutionSample",
+    __typename: "Solution",
     name: params.name ?? `Sample ${sequence}`,
     enabled: params.enabled ?? true,
   })

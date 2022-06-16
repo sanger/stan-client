@@ -1,5 +1,0 @@
-mutation AddSolutionSample($name:String!) {
- addSolutionSample(name: $name) {
-     ...SolutionSampleFields
- }
-}
