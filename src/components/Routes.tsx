@@ -7,7 +7,6 @@ import Location from "../pages/Location";
 import Plan from "../pages/sectioning/Plan";
 import Confirm from "../pages/sectioning/Confirm";
 import Extraction from "../pages/Extraction";
-import Registration from "../pages/Registration";
 import Release from "../pages/Release";
 import Store from "../pages/Store";
 import Search from "../pages/Search";
@@ -37,6 +36,11 @@ import VisiumAnalysis from "../pages/VisiumAnalysis";
 import Aliquot from "../pages/Aliquot";
 import DualIndexPlate from "../pages/DualIndexPlate";
 import columns from "./dataTable/labwareColumns";
+import OriginalSampleRegistration from "../pages/OriginalSampleRegistration";
+import BlockRegistration from "../pages/BlockRegistration";
+import { OriginalSampleProcessing } from "../pages/OriginalSampleProcessing";
+import BlockProcessing from "./originalSampleProcessing/blockProcessing/BlockProcessing";
+import PotProcessing from "./originalSampleProcessing/potProcessing/PotProcessing";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -79,6 +83,47 @@ export function Routes() {
         )}
       />
       <AuthenticatedRoute
+        path="/lab/original_sample_processing"
+        render={(routeProps) => (
+          <OriginalSampleProcessing
+            key={routeProps.location.key}
+            {...routeProps}
+          />
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/original_sample_processing/block"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetBlockProcessingInfo()}
+          >
+            {(blockInfo) => (
+              <BlockProcessing
+                key={routeProps.location.key}
+                processingInfo={blockInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/original_sample_processing/pot"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetPotProcessingInfo()}
+          >
+            {(blockInfo) => (
+              <PotProcessing
+                key={routeProps.location.key}
+                processingInfo={blockInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
         path="/lab/extraction"
         render={(routerProps) => <Extraction key={routerProps.location.key} />}
       />
@@ -98,7 +143,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/extraction_result"
         render={(routerProps) => (
@@ -139,7 +183,6 @@ export function Routes() {
         path="/lab/visium_perm"
         render={(routeProps) => <VisiumPerm key={routeProps.location.key} />}
       />
-
       <AuthenticatedRoute
         path="/lab/visium_analysis"
         render={(routeProps) => (
@@ -152,7 +195,6 @@ export function Routes() {
           <DualIndexPlate key={routeProps.location.key} />
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/staining"
         render={(routeProps) => (
@@ -164,7 +206,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/staining_qc"
         render={(routeProps) => (
@@ -176,7 +217,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/imaging"
         render={(routeProps) => (
@@ -212,7 +252,7 @@ export function Routes() {
             dataFetcher={stanCore.GetRegistrationInfo}
           >
             {(registrationInfo) => (
-              <Registration registrationInfo={registrationInfo} />
+              <BlockRegistration registrationInfo={registrationInfo} />
             )}
           </DataFetcher>
         )}
@@ -234,7 +274,25 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
+      <AuthenticatedRoute
+        path="/admin/tissue_registration"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={stanCore.GetRegistrationInfo}
+          >
+            {(registrationInfo) => {
+              return (
+                <OriginalSampleRegistration
+                  registrationInfo={registrationInfo}
+                  {...routeProps}
+                />
+              );
+            }}
+          </DataFetcher>
+        )}
+      />
+      /admin/tissue_registration
       <AuthenticatedRoute
         path="/admin/release"
         render={(routeProps) => (

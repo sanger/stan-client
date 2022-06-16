@@ -31,6 +31,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
     "Release Destinations",
     "Release Recipients",
     "Species",
+      "Solution Samples",
     "Users",
     "Work Types",
   ];
@@ -159,11 +160,18 @@ export default function Configuration({ configuration }: ConfigurationParams) {
         <Heading level={2}>Fixatives</Heading>
         <p className="mt-3 mb-6 text-lg">
           Fixatives are available on the{" "}
-          <StyledLink to={"/admin/registration"}>Block Registration</StyledLink>{" "}
-          and{" "}
+
+                <StyledLink to={"/admin/registration"}>
+                  Block Registration
+                </StyledLink>{" "}
+                ,{" "}
           <StyledLink to={"/admin/slide_registration"}>
             Slide Registration
           </StyledLink>{" "}
+                and{" "}
+                <StyledLink to={"/admin/tissue_registration"}>
+                  Tissue Sample Registration
+                </StyledLink>{" "}
           pages.
         </p>
         <EntityManager
@@ -190,11 +198,18 @@ export default function Configuration({ configuration }: ConfigurationParams) {
         <Heading level={2}>HuMFre Numbers</Heading>
         <p className="mt-3 mb-6 text-lg">
           HuMFre Numbers are available on the{" "}
-          <StyledLink to={"/admin/registration"}>Block Registration</StyledLink>{" "}
-          and{" "}
+
+                <StyledLink to={"/admin/registration"}>
+                  Block Registration
+                </StyledLink>{" "}
+                ,{" "}
           <StyledLink to={"/admin/slide_registration"}>
             Slide Registration
           </StyledLink>{" "}
+                and{" "}
+                <StyledLink to={"/admin/tissue_registration"}>
+                  Tissue Sample Registration
+                </StyledLink>{" "}
           pages.
         </p>
         <EntityManager
@@ -310,10 +325,16 @@ export default function Configuration({ configuration }: ConfigurationParams) {
         <Heading level={2}>Species</Heading>
         <p className="mt-3 mb-6 text-lg">
           Species are available on the{" "}
-          <StyledLink to={"/admin/registration"}>Block Registration</StyledLink>{" "}
-          and{" "}
+          <StyledLink to={"/admin/registration"}>
+            Block Registration
+          </StyledLink>{" "}
+          ,{" "}
           <StyledLink to={"/admin/slide_registration"}>
             Slide Registration
+          </StyledLink>{" "}
+          and{" "}
+          <StyledLink to={"/admin/tissue_registration"}>
+            Tissue Sample Registration
           </StyledLink>{" "}
           pages.
         </p>
@@ -335,7 +356,38 @@ export default function Configuration({ configuration }: ConfigurationParams) {
           }}
         />
       </div>,
-
+      <div data-testid="config">
+        <Heading level={2}>Solution Sample</Heading>
+        <p className="mt-3 mb-6 text-lg">
+          Solution Samples are available on the{" "}
+          <StyledLink to={"/admin/tissue_registration"}>
+            Tissue Sample Registration
+          </StyledLink>{" "}
+          page.
+        </p>
+        <EntityManager
+            initialEntities={configuration.solutionSamples}
+            displayKeyColumnName={"name"}
+            valueColumnName={"enabled"}
+            onChangeValue={(entity, value) => {
+              const enabled = typeof value === "boolean" ? value : false;
+              return stanCore
+                  .SetSolutionSampleEnabled({
+                    name: entity.name,
+                    enabled,
+                  })
+                  .then((res) => res.setSolutionSampleEnabled);
+            }}
+            onCreate={(name) =>
+                stanCore
+                    .AddSolutionSample({ name })
+                    .then((res) => res.addSolutionSample)
+            }
+            valueFieldComponentInfo={{
+              type: "CHECKBOX",
+            }}
+        />
+      </div>
       /**Users**/
       <div data-testid="config">
         <Heading level={2}>Users</Heading>

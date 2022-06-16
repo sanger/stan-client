@@ -39,6 +39,8 @@ import visiumQCHandlers from "./handlers/visiumQCHandlers";
 import visiumHandlers from "./handlers/visiumHandlers";
 import aliquotHandlers from "./handlers/aliquotHandlers";
 import reagentTransferHandlers from "./handlers/reagentTransferHandlers";
+import originalSampleProcessingHandlers from "./handlers/originalSampleProcessingHandlers";
+import solutionSampleHandlers from "./handlers/solutionSampleHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -79,4 +81,6 @@ export const handlers = [
   ...visiumHandlers,
   ...aliquotHandlers,
   ...reagentTransferHandlers,
+  ...originalSampleProcessingHandlers,
+  ...solutionSampleHandlers,
 ];

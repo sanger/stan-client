@@ -17,7 +17,7 @@ import PermTimeSelectField from "../components/forms/PermTimeSelectField";
 import RemoveButton from "../components/buttons/RemoveButton";
 
 const validationSchema = Yup.object().shape({
-  workNumber: Yup.string().optional().label("SGP number"),
+  workNumber: Yup.string().required().label("SGP number"),
   barcode: Yup.string().required().label("Barcode"),
   selectedAddress: Yup.string().required().label("Address"),
   selectedTime: Yup.number()
@@ -54,7 +54,7 @@ export default function VisiumAnalysis() {
           <Formik<VisiumAnalysisRequest>
             initialValues={{
               barcode: "",
-              workNumber: undefined,
+              workNumber: "",
               selectedAddress: "",
               selectedTime: 0,
             }}
@@ -67,12 +67,13 @@ export default function VisiumAnalysis() {
                   <Heading level={2}>SGP Number</Heading>
 
                   <p>
-                    You may optionally select an SGP number to associate with
-                    this operation.
+                    Select an SGP number to associate with this operation.
                   </p>
 
                   <div className="mt-4 md:w-1/2">
-                    <WorkNumberSelect name={"workNumber"} />
+                    <WorkNumberSelect name={"workNumber"} onWorkNumberChange={(workNumber) =>
+                      setFieldValue("workNumber", workNumber)
+                    }/>
                   </div>
                 </div>
 

@@ -71,7 +71,7 @@ export default function ComplexStainForm({
     barcode: Yup.string().required().label("Barcode"),
     bondBarcode: Yup.string().required().label("Bond Barcode").min(4).max(8),
     bondRun: Yup.number().integer().positive().label("Bond Run"),
-    workNumber: Yup.string().optional().label("SGP Number"),
+    workNumber: Yup.string().required().label("SGP Number"),
     panel: Yup.string()
       .oneOf(Object.values(StainPanel))
       .required()
@@ -296,7 +296,7 @@ function buildLabware(labware: LabwareFieldsFragment) {
     barcode: labware.barcode,
     bondBarcode: "",
     bondRun: 0,
-    workNumber: undefined,
+    workNumber: "",
     panel: StainPanel.Marker,
     plexRNAscope: 0,
     plexIHC: 0,

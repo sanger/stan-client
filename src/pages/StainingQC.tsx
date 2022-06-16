@@ -29,7 +29,7 @@ type StainingQCProps = {
 export const TISSUE_COVERAGE_MEASUREMENT_NAME = "Tissue coverage";
 
 export default function StainingQC({ info }: StainingQCProps) {
-  const [workNumber, setWorkNumber] = useState<string | undefined>();
+  const [workNumber, setWorkNumber] = useState<string>("");
   const labwareResults = useCollection<CoreLabwareResult>({
     getKey: (item) => item.barcode,
   });
@@ -85,6 +85,11 @@ export default function StainingQC({ info }: StainingQCProps) {
     [labwareResults]
   );
 
+  const blueButtonDisabled = (
+    (labwareResults.items.length <= 0) ||
+    (workNumber === "")
+  );
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -96,8 +101,7 @@ export default function StainingQC({ info }: StainingQCProps) {
             <Heading level={2}>SGP Number</Heading>
 
             <p>
-              You may optionally select an SGP number to associate with this
-              operation.
+              Select an SGP number to associate with this operation.
             </p>
 
             <div className="mt-4 md:w-1/2">
@@ -143,7 +147,7 @@ export default function StainingQC({ info }: StainingQCProps) {
 
           <div className={"mt-4 flex flex-row items-center justify-end"}>
             <BlueButton
-              disabled={labwareResults.items.length <= 0}
+              disabled={blueButtonDisabled}
               onClick={() =>
                 send({
                   type: "SUBMIT_FORM",

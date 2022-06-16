@@ -34,7 +34,7 @@ type UpdateAllCommentTypeEvent = {
   type: "UPDATE_ALL_COMMENTS_TYPE";
   commentId: string;
 };
-type UpdateAllWorkNUmbersEvent = {
+type UpdateAllWorkNumbersEvent = {
   type: "UPDATE_ALL_WORKNUMBERS";
   workNumber: string;
 };
@@ -44,7 +44,7 @@ type AnalysisLabwareEvent =
   | UpdateLabwareDataEvent
   | UpdateMeasurementTypeEvent
   | UpdateAllCommentTypeEvent
-  | UpdateAllWorkNUmbersEvent;
+  | UpdateAllWorkNumbersEvent;
 
 export const analysisLabwareMachine = createMachine<
   AnalysisLabwareContext,
@@ -123,8 +123,7 @@ export const analysisLabwareMachine = createMachine<
         const updateAnalysisLabware = { ...ctx.analysisLabwares[indx] };
         switch (e.labware.field) {
           case "workNumber": {
-            updateAnalysisLabware.workNumber =
-              e.labware.value !== "" ? e.labware.value : undefined;
+            updateAnalysisLabware.workNumber = e.labware.value;
             break;
           }
           case "measurements": {
@@ -180,7 +179,7 @@ export const analysisLabwareMachine = createMachine<
         ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
           return {
             ...labware,
-            workNumber: e.workNumber !== "" ? e.workNumber : undefined,
+            workNumber: e.workNumber,
           };
         });
       },

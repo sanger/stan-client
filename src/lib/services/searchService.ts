@@ -76,7 +76,7 @@ export class SearchService
       return {
         barcode: labware.barcode,
         labwareType: labware.labwareType.name,
-        externalId: sample.tissue.externalName,
+        externalId: sample.tissue.externalName ?? "",
         donorId: sample.tissue.donor.donorName,
         tissueType: sample.tissue.spatialLocation.tissueType.name,
         location:
@@ -98,7 +98,7 @@ export class SearchService
                     : null,
               },
         sectionNumber: sample.section,
-        replicate: sample.tissue.replicate,
+        replicate: sample.tissue.replicate ?? "",
         labwareCreated: new Date(labware.created),
         embeddingMedium: sample.tissue.medium.name,
       };

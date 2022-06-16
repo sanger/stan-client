@@ -88,7 +88,7 @@ export default function RecordInPlace({
       .optional()
       .label("Equipment"),
     operationType: Yup.string().required().label("Operation Type"),
-    workNumber: Yup.string().optional().label("SGP Number"),
+    workNumber: Yup.string().required().label("SGP Number"),
   });
 
   /**
@@ -98,7 +98,7 @@ export default function RecordInPlace({
     operationType,
     barcodes: [],
     equipmentId: undefined,
-    workNumber: undefined,
+    workNumber: "",
   };
 
   return (
@@ -137,6 +137,7 @@ export default function RecordInPlace({
                         onWorkNumberChange={(workNumber) =>
                           setFieldValue("workNumber", workNumber)
                         }
+                        name="WorkNumber"
                       />
                       <FormikErrorMessage name={"workNumber"} />
                     </motion.div>

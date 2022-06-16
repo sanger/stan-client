@@ -36,7 +36,7 @@ type VisiumQCProps = {
 };
 
 export interface VisiumQCFormData {
-  workNumber?: string;
+  workNumber: string;
   qcType: QCType;
   barcode: string;
   slotMeasurements?: Array<SlotMeasurementRequest>;
@@ -44,7 +44,7 @@ export interface VisiumQCFormData {
 }
 
 const validationSchema = Yup.object().shape({
-  workNumber: Yup.string().optional().label("SGP number"),
+  workNumber: Yup.string().required().label("SGP number"),
   barcode: Yup.string().optional(),
   qcType: Yup.string().required().label("QC Type"),
   labwareResult: Yup.object().when("qcType", {
@@ -131,6 +131,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
   };
 
   const isEnableSubmit = (value: VisiumQCFormData) => {
+    if (value.workNumber === "") { return false }
     if (
       value.qcType === QCType.CDNA_AMPLIFICATION ||
       value.qcType === QCType.CDNA_ANALYSIS
@@ -170,7 +171,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
           <Formik<VisiumQCFormData>
             initialValues={{
               barcode: "",
-              workNumber: undefined,
+              workNumber: "",
               qcType: QCType.SLIDE_PROCESSING,
               slotMeasurements: [],
               labwareResult: undefined,
@@ -183,8 +184,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                 <div className="space-y-2 mb-8 ">
                   <Heading level={2}>SGP Number</Heading>
                   <p>
-                    You may optionally select an SGP number to associate with
-                    this operation.
+                    Select an SGP number to associate with this operation.
                   </p>
 
                   <div className="mt-4 md:w-1/2">

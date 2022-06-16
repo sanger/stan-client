@@ -126,6 +126,13 @@ export const dualIndexPlateFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.DUAL_INDEX_PLATE].build(),
 });
 
+export const potFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.POT].build(),
+});
+export const preBarcodedFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.PRE_BARCODED_TUBE].build(),
+});
+
 export const labwareFactories: Record<
   LabwareTypeName,
   Factory<NewLabwareLayout>
@@ -141,4 +148,6 @@ export const labwareFactories: Record<
   [LabwareTypeName.FOUR_SLOT_SLIDE]: fourSlotSlideFactory,
   [LabwareTypeName.FETAL_WASTE_CONTAINER]: fetalWasteFactory,
   [LabwareTypeName.DUAL_INDEX_PLATE]: dualIndexPlateFactory,
+  [LabwareTypeName.PRE_BARCODED_TUBE]: preBarcodedFactory,
+  [LabwareTypeName.POT]: potFactory,
 };

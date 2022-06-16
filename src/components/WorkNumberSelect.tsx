@@ -24,7 +24,7 @@ type WorkSelectProps = {
    * Optional. Callback for when the work number changes in the select
    * @param workNumber the new work number (or undefined if none are selected)
    */
-  onWorkNumberChange?: (workNumber: string | undefined) => void;
+  onWorkNumberChange?: (workNumber: string) => void;
 };
 
 /**
@@ -43,6 +43,10 @@ export default function WorkNumberSelect({
   const [selectedWorkNumber, setSelectedWorkNumber] = useState<
     string | undefined
   >(undefined);
+  /**
+   * State for validating select field
+   */
+  const [error, setError] = useState<string>("");
   /**
    * Fetch active work and set them to state
    */
@@ -70,10 +74,18 @@ export default function WorkNumberSelect({
   const handleWorkNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedWorkNumber(e.currentTarget.value);
-      onWorkNumberChange?.(e.target.value === "" ? undefined : e.target.value);
+      onWorkNumberChange?.(e.target.value);
     },
     [onWorkNumberChange]
   );
+
+  const validateWorkNumber = () => {
+    if (selectedWorkNumber === "") {
+      setError("SGP number is required");
+    } else {
+      setError("")
+    }
+  }
 
   return name ? (
     <FormikSelect
@@ -85,12 +97,16 @@ export default function WorkNumberSelect({
       {optionValues(works, "workNumber", "workNumber")}
     </FormikSelect>
   ) : (
+    <>
     <Select
       value={selectedWorkNumber}
       onChange={handleWorkNumberChange}
       emptyOption={true}
+      onBlur={validateWorkNumber}
     >
       {optionValues(works, "workNumber", "workNumber")}
     </Select>
+    { error.length ? <p className="text-red-500 text-xs italic">{ error }</p> : "" }
+    </>
   );
 }

@@ -2,7 +2,10 @@ import {
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
 } from "../../../src/types/sdk";
-import { shouldBehaveLikeARegistrationForm } from "../shared/registration";
+import {
+  RegistrationType,
+  shouldBehaveLikeARegistrationForm,
+} from "../shared/registration";
 import { tissueFactory } from "../../../src/lib/factories/sampleFactory";
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
 
@@ -12,7 +15,7 @@ describe("Registration", () => {
   });
 
   describe("Validation", () => {
-    shouldBehaveLikeARegistrationForm(false);
+    shouldBehaveLikeARegistrationForm(RegistrationType.BLOCK);
 
     it("requires External Identifier", () => {
       cy.findByLabelText("External Identifier").focus().blur();

@@ -3,54 +3,89 @@ import React, {
   useCallback,
   useEffect,
   useReducer,
-  useRef,
 } from "react";
 import {
   LabwareFieldsFragment,
   LabwareTypeFieldsFragment,
   Maybe,
-  PlanMutation,
 } from "../../types/sdk";
 import { uniqueId } from "lodash";
-import { optionValues } from "../forms";
 import BlueButton from "../buttons/BlueButton";
 import { NewLabwareLayout } from "../../types/stan";
-import produce from "immer";
+import produce, { castDraft } from "immer";
 import { unregisteredLabwareFactory } from "../../lib/factories/labwareFactory";
-import LabwarePlan from "./LabwarePlan";
 import LabwareScanTable from "../labwareScanPanel/LabwareScanPanel";
-import labwareScanTableColumns from "../dataTable/labwareColumns";
 import LabwareScanner from "../labwareScanner/LabwareScanner";
 import { buildSampleColors } from "../../lib/helpers/labwareHelper";
 import Heading from "../Heading";
-import { useScrollToRef } from "../../lib/hooks";
 import { getNumberOfDaysBetween } from "../../lib/helpers";
 import Warning from "../notifications/Warning";
+import { Column } from "react-table";
+import labwareScanTableColumns from "../dataTable/labwareColumns";
+import { useScrollToRef } from "../../lib/hooks";
 
-type PlannerProps = {
+/**
+ * The props passed to the Planner component
+ * M represents the mutation object passed to the planner if 'Create Labware' is supported within each plan, otherwise null
+ */
+type PlannerProps<M> = {
   /**
-   * The operation the user is planning for. Will be sent to core in the plan request.
+   * The labware type to be created when "Add Labware" is clicked
    */
-  operationType: "Section";
+  selectedLabwareType: LabwareTypeFieldsFragment | undefined;
 
   /**
-   * List of labware types that can be planned for.
+   * The number of labwares to be created when "Add Labware" is clicked
    */
-  allowedLabwareTypes: Array<LabwareTypeFieldsFragment>;
+  numPlansToCreate?: number;
+
+  /***
+   * Is only a single source labware allowed?
+   */
+  singleSourceAllowed?: boolean;
+  /**
+   *Callback to render the plan layouts created. This allows to customise the plan layout depending on the context it is called.
+   */
+  buildPlanLayouts: (
+    layout: Map<string, NewLabwareLayout>, //All layouts created
+    sourceLabware: LabwareFieldsFragment[],
+    sampleColors: Map<number, string>,
+    deleteAction: (cid: string) => void,
+    confirmAction?: (cid: string, plan: M) => void,
+    scrollRef?: React.MutableRefObject<HTMLDivElement | null>
+  ) => JSX.Element;
+  columns: Column<LabwareFieldsFragment>[];
 
   /**
-   * Called when an plan is added or removed from the {@link Planner}. Note that once complete, plans can not be
+   * Callback to render the component to display configuration setting to add a labware plan.
+   */
+  buildPlanCreationSettings: () => JSX.Element;
+
+  /**
+   * The operation the user is planning for , if any. Will be sent to core in the plan request.
+   */
+  operationType?: "Section";
+
+  /**
+   * Called when a plan is added or removed from the {@link Planner}. Note that once complete, plans can not be
    * removed.
    */
-  onPlanChanged: (props: PlanChangedProps) => void;
+  onPlanChanged?: (props: PlanChangedProps<M>) => void;
 };
 
-export type PlanChangedProps = {
+/**
+ * The information send in the callback when we notify the parent about any change in plan layouts created
+ */
+export type PlanChangedProps<M> = {
   numberOfPlans: number;
-  completedPlans: Array<PlanMutation>;
+  completedPlans: Array<M>;
   sourceLabware: Array<LabwareFieldsFragment>;
+  layoutPlans: Map<string, NewLabwareLayout>;
 };
 
+/**
+ * Context for planning operation
+ */
 type PlannerContextType = {
   /**
    * The name of the planning operation
@@ -70,7 +105,11 @@ type PlannerContextType = {
 
 export const PlannerContext = createContext<Maybe<PlannerContextType>>(null);
 
-type PlannerState = {
+/**
+ * State which represents the current status of planning operation
+ */
+
+type PlannerState<M> = {
   /**
    * Labware scanned in by the user
    */
@@ -84,7 +123,7 @@ type PlannerState = {
   /**
    * Map of client ID to completed plans
    */
-  completedPlans: Map<string, PlanMutation>;
+  completedPlans: Map<string, M>;
 
   /**
    * Tracks whether the Labware Scanner should allow more labware to be scanned in
@@ -97,7 +136,7 @@ type PlannerState = {
   isAddLabwareButtonDisabled: boolean;
 };
 
-const initialState: PlannerState = {
+const initialState = {
   sourceLabware: [],
   labwarePlans: new Map(),
   completedPlans: new Map(),
@@ -105,15 +144,22 @@ const initialState: PlannerState = {
   isAddLabwareButtonDisabled: true,
 };
 
-type Action =
+type Action<M> =
   | { type: "SET_SOURCE_LABWARE"; labware: Array<LabwareFieldsFragment> }
-  | { type: "ADD_LABWARE_PLAN"; labwareType: LabwareTypeFieldsFragment }
+  | {
+      type: "ADD_LABWARE_PLAN";
+      labwareType: LabwareTypeFieldsFragment;
+      numLabwareAdd: number;
+    }
   | { type: "REMOVE_LABWARE_PLAN"; cid: string }
-  | { type: "PLAN_COMPLETE"; cid: string; plan: PlanMutation };
+  | { type: "PLAN_COMPLETE"; cid: string; plan: M };
 
 const FETAL_STORAGE_WEEKS = 12;
 
-function reducer(state: PlannerState, action: Action): PlannerState {
+function reducer<M>(
+  state: PlannerState<M>,
+  action: Action<M>
+): PlannerState<M> {
   return produce(state, (draft) => {
     switch (action.type) {
       case "SET_SOURCE_LABWARE":
@@ -121,22 +167,25 @@ function reducer(state: PlannerState, action: Action): PlannerState {
         draft.isAddLabwareButtonDisabled = action.labware.length === 0;
         break;
 
-      case "ADD_LABWARE_PLAN":
-        draft.labwarePlans.set(
-          uniqueId("labware_plan_"),
-          unregisteredLabwareFactory.build(
-            {},
-            {
-              associations: {
-                labwareType: action.labwareType,
-              },
-            }
-          )
-        );
+      case "ADD_LABWARE_PLAN": {
+        for (let indx = 0; indx < action.numLabwareAdd; indx++) {
+          draft.labwarePlans.set(
+            uniqueId("labware_plan_"),
+            unregisteredLabwareFactory.build(
+              {},
+              {
+                associations: {
+                  labwareType: action.labwareType,
+                },
+              }
+            )
+          );
+        }
         // As soon as there are any plans present, stop the user from adding
         // any more source labware
         draft.isLabwareScannerLocked = true;
         break;
+      }
 
       case "REMOVE_LABWARE_PLAN":
         draft.labwarePlans.delete(action.cid);
@@ -145,7 +194,7 @@ function reducer(state: PlannerState, action: Action): PlannerState {
         break;
 
       case "PLAN_COMPLETE":
-        draft.completedPlans.set(action.cid, action.plan);
+        draft.completedPlans.set(action.cid, castDraft(action.plan));
         break;
 
       default:
@@ -155,22 +204,35 @@ function reducer(state: PlannerState, action: Action): PlannerState {
 }
 
 /**
- *
+ *Component to display the planning operation
  */
-export default function Planner({
-  allowedLabwareTypes,
+export default function Planner<M>({
+  selectedLabwareType,
+  numPlansToCreate,
   onPlanChanged,
-  operationType,
-}: PlannerProps) {
+  columns,
+  singleSourceAllowed,
+  buildPlanLayouts,
+  buildPlanCreationSettings,
+}: PlannerProps<M>) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Whenever any of the labware plans are added, removed, or completed,
-  // call the passed in onPlanChanged callback
+  /**
+   * Ref for the latest labware plan so it can be scrolled to when added to the page
+   */
+  const [scrollRef, scrollToRef] = useScrollToRef();
+
+  /** Whenever any of the labware plans are added, removed, or completed,
+   call the passed in onPlanChanged callback**/
   useEffect(() => {
+    if (!onPlanChanged) {
+      return;
+    }
     onPlanChanged({
-      completedPlans: Array.from(state.completedPlans.values()),
+      completedPlans: Array.from(state.completedPlans.values()) as M[],
       sourceLabware: state.sourceLabware,
       numberOfPlans: state.labwarePlans.size,
+      layoutPlans: state.labwarePlans,
     });
   }, [
     state.labwarePlans,
@@ -178,17 +240,6 @@ export default function Planner({
     state.sourceLabware,
     onPlanChanged,
   ]);
-
-  /**
-   * Used so we can get the current value of the select element when "Add Labware" is clicked
-   */
-  const labwareTypeSelectRef = useRef<HTMLSelectElement>(null);
-
-  /**
-   * Ref for the latest labware plan so it can be scrolled to when added to the page
-   */
-  const [latestLabwarePlanRef, scrollToRef] = useScrollToRef();
-
   /**
    * Handler for LabwareScanner's onChange event
    */
@@ -203,19 +254,16 @@ export default function Planner({
    * Handler for when the "Add Labware" button is clicked
    */
   const onAddLabwareClick = useCallback(() => {
-    const selectedLabwareTypeName = labwareTypeSelectRef.current?.value;
-    const selectedLabwareType = allowedLabwareTypes.find(
-      (lt) => lt.name === selectedLabwareTypeName
-    );
     if (!selectedLabwareType) {
       return;
     }
     dispatch({
       type: "ADD_LABWARE_PLAN",
       labwareType: selectedLabwareType,
+      numLabwareAdd: numPlansToCreate ?? 1,
     });
     scrollToRef();
-  }, [labwareTypeSelectRef, allowedLabwareTypes, dispatch, scrollToRef]);
+  }, [selectedLabwareType, numPlansToCreate, dispatch, scrollToRef]);
 
   /**
    * Handler for the onDeleteButtonClick event of a LabwarePlan
@@ -231,8 +279,7 @@ export default function Planner({
    * Handler for when a labware plan is completed
    */
   const onLabwarePlanComplete = useCallback(
-    (cid: string, plan: PlanMutation) =>
-      dispatch({ type: "PLAN_COMPLETE", cid, plan }),
+    (cid: string, plan: M) => dispatch({ type: "PLAN_COMPLETE", cid, plan }),
     [dispatch]
   );
 
@@ -244,21 +291,9 @@ export default function Planner({
     state.sourceLabware
   );
 
-  const labwarePlans = Array.from(state.labwarePlans.entries()).map(
-    ([cid, newLabwareLayout], i) => {
-      return (
-        <LabwarePlan
-          ref={i === state.labwarePlans.size - 1 ? latestLabwarePlanRef : null}
-          key={cid}
-          cid={cid}
-          outputLabware={newLabwareLayout}
-          onDeleteButtonClick={onLabwarePlanDelete}
-          onComplete={onLabwarePlanComplete}
-        />
-      );
-    }
-  );
-  //Find all labwares having fetal waste samples with collection date less than 12 weeks
+  /**
+   *  Find all labwares having fetal waste samples with collection date less than 12 weeks after scanning
+   */
   const fetalSampleWarningLabware = React.useMemo(
     () =>
       state.sourceLabware.filter(
@@ -280,21 +315,17 @@ export default function Planner({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-10">
       <Heading level={3}>Source Labware</Heading>
       <LabwareScanner
-        locked={state.isLabwareScannerLocked}
+        locked={
+          state.isLabwareScannerLocked ||
+          (singleSourceAllowed && state.sourceLabware.length === 1)
+        }
         onChange={onLabwareScannerChange}
       >
         <LabwareScanTable
-          columns={[
-            labwareScanTableColumns.color(sampleColors),
-            labwareScanTableColumns.barcode(),
-            labwareScanTableColumns.donorId(),
-            labwareScanTableColumns.tissueType(),
-            labwareScanTableColumns.spatialLocation(),
-            labwareScanTableColumns.replicate(),
-          ]}
+          columns={[labwareScanTableColumns.color(sampleColors), ...columns]}
         />
       </LabwareScanner>
       {fetalSampleWarningLabware.length > 0 && (
@@ -307,39 +338,41 @@ export default function Planner({
         />
       )}
 
-      <PlannerContext.Provider
-        value={{
-          operationType,
-          sampleColors,
-          sourceLabware: state.sourceLabware,
-        }}
+      {/**Render plans using the callback method (passed as props) so that it will be done by the parent component**/}
+      {buildPlanLayouts(
+        state.labwarePlans,
+        state.sourceLabware,
+        sampleColors,
+        onLabwarePlanDelete,
+        onLabwarePlanComplete,
+        scrollRef
+      )}
+      <div
+        ref={scrollRef}
+        className="my-4 max-w-2xl mx-auto p-4 rounded-md bg-gray-100"
       >
-        {labwarePlans}
-      </PlannerContext.Provider>
-      <div className="my-4 max-w-2xl mx-auto p-4 rounded-md bg-gray-100">
         <p className="my-3 text-gray-800 text-sm text-center leading-normal">
           Once{" "}
           <span className="font-bold text-gray-900">all source labware</span>{" "}
-          has been scanned, select a type of labware to plan {operationType}{" "}
-          layouts:
+          has been scanned, select a type of labware to plan layouts:
         </p>
-
-        <div className="flex flex-row items-center justify-center gap-4">
-          <select
-            ref={labwareTypeSelectRef}
-            className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
-          >
-            {optionValues(allowedLabwareTypes, "name", "name")}
-          </select>
-          <BlueButton
-            id="#addLabware"
-            onClick={onAddLabwareClick}
-            className="whitespace-nowrap"
-            disabled={state.isAddLabwareButtonDisabled}
-            action={"primary"}
-          >
-            + Add Labware
-          </BlueButton>
+        <div className="flex flex-row items-end gap-x-4 justify-center">
+          {
+            /**Render plan creation settings panel using the callback method (passed as props) so that it will be done by the parent component **/
+            buildPlanCreationSettings()
+          }
+          <div className={"flex-shrink-0 align-bottom justify-end content-end"}>
+            <BlueButton
+              id="#addLabware"
+              onClick={onAddLabwareClick}
+              className="whitespace-nowrap"
+              disabled={state.isAddLabwareButtonDisabled}
+              action={"primary"}
+              type={"button"}
+            >
+              + Add Labware
+            </BlueButton>
+          </div>
         </div>
       </div>
     </div>

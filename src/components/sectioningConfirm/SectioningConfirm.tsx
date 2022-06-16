@@ -77,7 +77,7 @@ export default function SectioningConfirm({
    * Callback for when the work number select changes
    */
   const handleWorkNumberChange = useCallback(
-    (workNumber?: string) => {
+    (workNumber: string) => {
       send({ type: "UPDATE_WORK_NUMBER", workNumber });
     },
     [send]
@@ -158,8 +158,7 @@ export default function SectioningConfirm({
       <div>
         <Heading level={3}>SGP Number</Heading>
         <p className="mt-2">
-          You may optionally select an SGP number to associate with this
-          confirmation.
+          Select an SGP number to associate with this confirmation.
         </p>
         <div className="mt-4 md:w-1/2">
           <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />

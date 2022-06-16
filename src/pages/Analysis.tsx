@@ -21,6 +21,8 @@ import OperationCompleteModal from "../components/modal/OperationCompleteModal";
 import Warning from "../components/notifications/Warning";
 import { Link } from "react-router-dom";
 
+// TODO Add front-end validation to this page
+
 type AnalysisProps = {
   /***
    * Comments for 'analysis' category

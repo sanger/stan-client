@@ -1,18 +1,5 @@
 mutation RegisterTissues($request: RegisterRequest!) {
     register(request: $request) {
-        labware {
-            ...LabwareFields
-        }
-        clashes {
-            tissue {
-                externalName
-            }
-            labware {
-                barcode
-                labwareType {
-                    name
-                }
-            }
-        }
+       ...RegisterResultFields
     }
 }

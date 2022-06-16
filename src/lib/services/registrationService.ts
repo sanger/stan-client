@@ -1,4 +1,7 @@
 import {
+  RegisterOriginalSamplesDocument,
+  RegisterOriginalSamplesMutation,
+  RegisterOriginalSamplesMutationVariables,
   RegisterTissuesDocument,
   RegisterTissuesMutation,
   RegisterTissuesMutationVariables,
@@ -16,6 +19,14 @@ export async function registerTissues(
     RegisterTissuesDocument,
     mutationVariables
   );
+  return response.data.register;
+}
 
-  return response.data;
+export async function registerOriginalSamples(
+  mutationVariables: RegisterOriginalSamplesMutationVariables
+) {
+  const response = await graphQLClient.rawRequest<
+    RegisterOriginalSamplesMutation
+  >(RegisterOriginalSamplesDocument, mutationVariables);
+  return response.data.registerOriginalSamples;
 }

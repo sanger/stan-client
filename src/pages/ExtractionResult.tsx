@@ -33,7 +33,7 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
     location?.state?.labware ?? [];
 
   const initialValues: ExtractResultRequest = {
-    workNumber: undefined,
+    workNumber: "",
     labware: initialLabware.map(buildExtractResultLabware),
   };
 
@@ -54,7 +54,7 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
   const { serverError } = current.context;
 
   const validationSchema = Yup.object().shape({
-    workNumber: Yup.number().optional(),
+    workNumber: Yup.string().required().label("SGP Number"),
     labware: Yup.array()
       .min(1)
       .label("Labware")
@@ -93,16 +93,17 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
             validateOnMount={true}
             onSubmit={async (values) => send({ type: "SUBMIT_FORM", values })}
           >
-            {({ isValid }) => (
+            {({ isValid, setFieldValue }) => (
               <Form className="space-y-8">
                 <div>
                   <Heading level={3}>SGP Number</Heading>
                   <p className="mt-2">
-                    You may optionally select an SGP number to associate with
-                    this extraction result.
+                    Select an SGP number to associate with this extraction result.
                   </p>
                   <div className="mt-4 md:w-1/2">
-                    <WorkNumberSelect />
+                    <WorkNumberSelect name="workNumber" onWorkNumberChange={(workNumber) =>
+                      setFieldValue("workNumber", workNumber)
+                    }/>
                   </div>
                 </div>
 

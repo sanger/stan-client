@@ -38,6 +38,7 @@ export default function AnalysisLabware({
     return {
       barcode: barcode,
       measurements: [{ name: AnalysisMeasurementType.RIN, value: "" }],
+      workNumber: ""
     };
   });
 
@@ -182,7 +183,7 @@ export default function AnalysisLabware({
               </FormikSelect>
             </div>
             <div className="mt-4">
-              <div>Work Number</div>
+              <div>SGP Number</div>
               <WorkNumberSelect
                 onWorkNumberChange={(workNumber) => {
                   send({

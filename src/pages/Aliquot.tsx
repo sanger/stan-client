@@ -56,6 +56,7 @@ function Aliquot() {
     aliquotMachine.withContext({
       labware: undefined,
       numLabware: 0,
+      workNumber: ""
     })
   );
 
@@ -67,7 +68,7 @@ function Aliquot() {
     currentPrinter,
   } = usePrinters();
 
-  const { labware, serverErrors, aliquotResult, numLabware } = current.context;
+  const { labware, serverErrors, aliquotResult, numLabware, workNumber } = current.context;
 
   /**Table column for scanned source tube*/
   const columns = useMemo(
@@ -85,7 +86,7 @@ function Aliquot() {
 
   /**Callback for Work number change**/
   const handleWorkNumberChange = useCallback(
-    (workNumber?: string) => {
+    (workNumber: string) => {
       send({ type: "UPDATE_WORK_NUMBER", workNumber });
     },
     [send]
@@ -106,9 +107,10 @@ function Aliquot() {
   const scannerLocked =
     !current.matches("ready") && !current.matches("aliquotFailed");
 
+  // TODO Move this type of valdation into state machine and add validation to 'ready' state
   const blueButtonDisabled = !(
     (current.matches("ready") || current.matches("aliquotFailed")) &&
-    labware !== undefined &&
+    labware !== undefined && workNumber !== "" &&
     numLabware > 0
   );
   const showGrayPanel =
@@ -124,8 +126,7 @@ function Aliquot() {
           <div>
             <Heading level={3}>SGP Number</Heading>
             <p className="mt-2">
-              You may optionally select an SGP number to associate with this
-              aliquoting.
+              Select an SGP number to associate with this aliquoting.
             </p>
             <div className="mt-4 md:w-1/2">
               <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
