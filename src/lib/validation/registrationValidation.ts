@@ -35,7 +35,7 @@ export default class RegistrationValidation {
 
   get solution() {
     return validation.requiredString({
-      label: "Solution Sample",
+      label: "Solution",
       oneOf: this.registrationInfo.solutions.map((m) => m.name),
     });
   }

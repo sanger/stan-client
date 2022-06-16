@@ -281,7 +281,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                         {"solution" in block && (
                           <FormikSelect
                             emptyOption
-                            label="Solution Sample"
+                            label="Solution"
                             className="block mt-2"
                             name={`tissues.${currentIndex}.blocks.${blockIndex}.solution`}
                           >
