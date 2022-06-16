@@ -219,7 +219,7 @@ export default function BlockProcessing({
             sourceBarcode: Yup.string().required().min(1),
             medium: Yup.string()
               .required("Medium is a required field.")
-              .oneOf(blockProcessingInfo.mediums.map((medium) => medium.name)),
+              .oneOf(processingInfo.mediums.map((medium) => medium.name)),
             replicateNumber: Yup.string().required(),
             commentId: Yup.number().optional(),
             discardSource: Yup.boolean().optional(),
