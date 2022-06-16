@@ -135,6 +135,17 @@ function AppShell({ children }: AppShellParams) {
                     />
                   </Menu>
                   <NavLinkMenuItem
+                    caption={"Original Sample Processing"}
+                    path="/lab/original_sample_processing"
+                    icon={
+                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                    }
+                    description={
+                      "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
+                    }
+                  />
+
+                  <NavLinkMenuItem
                     caption={"Fetal Waste"}
                     path="/lab/fetal_waste"
                     icon={
@@ -468,6 +479,9 @@ function AppShell({ children }: AppShellParams) {
                     </div>
                     <StanMobileNavLink to="/lab/fetal_waste">
                       Fetal Waste
+                    </StanMobileNavLink>
+                    <StanMobileNavLink to="/lab/original_sample_processing">
+                      Original Sample Processing
                     </StanMobileNavLink>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">
                       RNA
