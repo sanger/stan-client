@@ -658,10 +658,10 @@ export type Mutation = {
   addWorkType: WorkType;
   /** Enable or disable a work type. */
   setWorkTypeEnabled: WorkType;
-  /** Add a new solution sample. */
-  addSolutionSample: SolutionSample;
-  /** Enable or disable a solution sample. */
-  setSolutionSampleEnabled: SolutionSample;
+  /** Add a new solution. */
+  addSolution: Solution;
+  /** Enable or disable a solution. */
+  setSolutionEnabled: Solution;
   /** Create a new work, which will be allocated a new work number with the given prefix. */
   createWork: Work;
   /** Update the status of an existing work. */
@@ -1037,7 +1037,7 @@ export type MutationSetWorkTypeEnabledArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
-export type MutationAddSolutionSampleArgs = {
+export type MutationAddSolutionArgs = {
   name: Scalars['String'];
 };
 
@@ -1046,7 +1046,7 @@ export type MutationAddSolutionSampleArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
-export type MutationSetSolutionSampleEnabledArgs = {
+export type MutationSetSolutionEnabledArgs = {
   name: Scalars['String'];
   enabled: Scalars['Boolean'];
 };
@@ -1387,8 +1387,8 @@ export type OriginalSampleData = {
   externalIdentifier?: Maybe<Scalars['String']>;
   /** The name of the type of labware containing the sample. */
   labwareType: Scalars['String'];
-  /** The solution sample used for the tissue. */
-  solutionSample: Scalars['String'];
+  /** The solution used for the tissue. */
+  solution: Scalars['String'];
   /** The fixative used for the tissue. */
   fixative: Scalars['String'];
   /** The species of the donor. */
@@ -1575,8 +1575,8 @@ export type Query = {
   projects: Array<Project>;
   /** Get all the cost codes that are enabled, or get all including those that are disabled. */
   costCodes: Array<CostCode>;
-  /** Get all the solution samples that are enabled, or get all including those that are disabled. */
-  solutionSamples: Array<SolutionSample>;
+  /** Get all the solutions that are enabled, or get all including those that are disabled. */
+  solutions: Array<Solution>;
   /** Get all the work types that are enabled, or get all including those that are disabled. */
   workTypes: Array<WorkType>;
   /** Get all the works, or get all the works in the given specified statuses. */
@@ -1739,7 +1739,7 @@ export type QueryCostCodesArgs = {
  * Get information from the application.
  * These typically require no user privilege.
  */
-export type QuerySolutionSamplesArgs = {
+export type QuerySolutionsArgs = {
   includeDisabled?: Maybe<Scalars['Boolean']>;
 };
 
@@ -2203,12 +2203,12 @@ export type SlotPassFail = {
   comment?: Maybe<Scalars['String']>;
 };
 
-/** A solution linked to a sample being registered. */
-export type SolutionSample = {
-  __typename?: 'SolutionSample';
-  /** The unique name of the solution sample. */
+/** A solution used in an operation. */
+export type Solution = {
+  __typename?: 'Solution';
+  /** The unique name of the solution. */
   name: Scalars['String'];
-  /** Whether the solution sample is available for use. */
+  /** Whether the solution is available for use. */
   enabled: Scalars['Boolean'];
 };
 
@@ -2307,8 +2307,6 @@ export type Tissue = {
   fixative: Fixative;
   /** The date the original sample was collected, if known. */
   collectionDate?: Maybe<Scalars['Date']>;
-  /** The solution sample used when registering original samples. */
-  solutionSample?: Maybe<SolutionSample>;
 };
 
 /** The input about a new block being created. */
@@ -2752,9 +2750,9 @@ export type SlotPassFailFieldsFragment = (
   & Pick<SlotPassFail, 'address' | 'result' | 'comment'>
 );
 
-export type SolutionSampleFieldsFragment = (
-  { __typename?: 'SolutionSample' }
-  & Pick<SolutionSample, 'name' | 'enabled'>
+export type SolutionFieldsFragment = (
+  { __typename?: 'Solution' }
+  & Pick<Solution, 'name' | 'enabled'>
 );
 
 export type SpeciesFieldsFragment = (
@@ -2936,16 +2934,16 @@ export type AddReleaseRecipientMutation = (
   ) }
 );
 
-export type AddSolutionSampleMutationVariables = Exact<{
+export type AddSolutionMutationVariables = Exact<{
   name: Scalars['String'];
 }>;
 
 
-export type AddSolutionSampleMutation = (
+export type AddSolutionMutation = (
   { __typename?: 'Mutation' }
-  & { addSolutionSample: (
-    { __typename?: 'SolutionSample' }
-    & SolutionSampleFieldsFragment
+  & { addSolution: (
+    { __typename?: 'Solution' }
+    & SolutionFieldsFragment
   ) }
 );
 
@@ -3631,17 +3629,17 @@ export type SetReleaseRecipientEnabledMutation = (
   ) }
 );
 
-export type SetSolutionSampleEnabledMutationVariables = Exact<{
+export type SetSolutionEnabledMutationVariables = Exact<{
   name: Scalars['String'];
   enabled: Scalars['Boolean'];
 }>;
 
 
-export type SetSolutionSampleEnabledMutation = (
+export type SetSolutionEnabledMutation = (
   { __typename?: 'Mutation' }
-  & { setSolutionSampleEnabled: (
-    { __typename?: 'SolutionSample' }
-    & SolutionSampleFieldsFragment
+  & { setSolutionEnabled: (
+    { __typename?: 'Solution' }
+    & SolutionFieldsFragment
   ) }
 );
 
@@ -4226,9 +4224,9 @@ export type GetConfigurationQuery = (
   )>, users: Array<(
     { __typename?: 'User' }
     & UserFieldsFragment
-  )>, solutionSamples: Array<(
-    { __typename?: 'SolutionSample' }
-    & SolutionSampleFieldsFragment
+  )>, solutions: Array<(
+    { __typename?: 'Solution' }
+    & SolutionFieldsFragment
   )> }
 );
 
@@ -4348,9 +4346,9 @@ export type GetRegistrationInfoQuery = (
   )>, mediums: Array<(
     { __typename?: 'Medium' }
     & Pick<Medium, 'name'>
-  )>, solutionSamples: Array<(
-    { __typename?: 'SolutionSample' }
-    & Pick<SolutionSample, 'name'>
+  )>, solutions: Array<(
+    { __typename?: 'Solution' }
+    & Pick<Solution, 'name'>
   )> }
 );
 
@@ -4766,8 +4764,8 @@ export const SlotPassFailFieldsFragmentDoc = gql`
   comment
 }
     `;
-export const SolutionSampleFieldsFragmentDoc = gql`
-    fragment SolutionSampleFields on SolutionSample {
+export const SolutionFieldsFragmentDoc = gql`
+    fragment SolutionFields on Solution {
   name
   enabled
 }
@@ -4910,13 +4908,13 @@ export const AddReleaseRecipientDocument = gql`
   }
 }
     ${ReleaseRecipientFieldsFragmentDoc}`;
-export const AddSolutionSampleDocument = gql`
-    mutation AddSolutionSample($name: String!) {
-  addSolutionSample(name: $name) {
-    ...SolutionSampleFields
+export const AddSolutionDocument = gql`
+    mutation AddSolution($name: String!) {
+  addSolution(name: $name) {
+    ...SolutionFields
   }
 }
-    ${SolutionSampleFieldsFragmentDoc}`;
+    ${SolutionFieldsFragmentDoc}`;
 export const AddSpeciesDocument = gql`
     mutation AddSpecies($name: String!) {
   addSpecies(name: $name) {
@@ -5334,13 +5332,13 @@ export const SetReleaseRecipientEnabledDocument = gql`
   }
 }
     ${ReleaseRecipientFieldsFragmentDoc}`;
-export const SetSolutionSampleEnabledDocument = gql`
-    mutation SetSolutionSampleEnabled($name: String!, $enabled: Boolean!) {
-  setSolutionSampleEnabled(name: $name, enabled: $enabled) {
-    ...SolutionSampleFields
+export const SetSolutionEnabledDocument = gql`
+    mutation SetSolutionEnabled($name: String!, $enabled: Boolean!) {
+  setSolutionEnabled(name: $name, enabled: $enabled) {
+    ...SolutionFields
   }
 }
-    ${SolutionSampleFieldsFragmentDoc}`;
+    ${SolutionFieldsFragmentDoc}`;
 export const SetSpeciesEnabledDocument = gql`
     mutation SetSpeciesEnabled($name: String!, $enabled: Boolean!) {
   setSpeciesEnabled(name: $name, enabled: $enabled) {
@@ -5725,8 +5723,8 @@ export const GetConfigurationDocument = gql`
   users(includeDisabled: true) {
     ...UserFields
   }
-  solutionSamples(includeDisabled: true) {
-    ...SolutionSampleFields
+  solutions(includeDisabled: true) {
+    ...SolutionFields
   }
 }
     ${DestructionReasonFieldsFragmentDoc}
@@ -5741,7 +5739,7 @@ ${CostCodeFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}
 ${EquipmentFieldsFragmentDoc}
 ${UserFieldsFragmentDoc}
-${SolutionSampleFieldsFragmentDoc}`;
+${SolutionFieldsFragmentDoc}`;
 export const GetDestroyInfoDocument = gql`
     query GetDestroyInfo {
   destructionReasons {
@@ -5822,7 +5820,7 @@ export const GetRegistrationInfoDocument = gql`
   mediums {
     name
   }
-  solutionSamples {
+  solutions {
     name
   }
 }
@@ -5945,8 +5943,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AddReleaseRecipient(variables: AddReleaseRecipientMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddReleaseRecipientMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddReleaseRecipientMutation>(AddReleaseRecipientDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddReleaseRecipient');
     },
-    AddSolutionSample(variables: AddSolutionSampleMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSolutionSampleMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<AddSolutionSampleMutation>(AddSolutionSampleDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSolutionSample');
+    AddSolution(variables: AddSolutionMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSolutionMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddSolutionMutation>(AddSolutionDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSolution');
     },
     AddSpecies(variables: AddSpeciesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSpeciesMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddSpeciesMutation>(AddSpeciesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSpecies');
@@ -6065,8 +6063,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     SetReleaseRecipientEnabled(variables: SetReleaseRecipientEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetReleaseRecipientEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetReleaseRecipientEnabledMutation>(SetReleaseRecipientEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetReleaseRecipientEnabled');
     },
-    SetSolutionSampleEnabled(variables: SetSolutionSampleEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSolutionSampleEnabledMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SetSolutionSampleEnabledMutation>(SetSolutionSampleEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSolutionSampleEnabled');
+    SetSolutionEnabled(variables: SetSolutionEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSolutionEnabledMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetSolutionEnabledMutation>(SetSolutionEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSolutionEnabled');
     },
     SetSpeciesEnabled(variables: SetSpeciesEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSpeciesEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetSpeciesEnabledMutation>(SetSpeciesEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSpeciesEnabled');

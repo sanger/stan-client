@@ -1,0 +1,5 @@
+mutation AddSolution($name:String!) {
+ addSolution(name: $name) {
+     ...SolutionFields
+ }
+}

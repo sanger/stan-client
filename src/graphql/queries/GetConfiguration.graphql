@@ -35,7 +35,7 @@ query GetConfiguration {
     users(includeDisabled: true) {
         ...UserFields
     }
-    solutionSamples(includeDisabled: true){
-        ...SolutionSampleFields
+    solutions(includeDisabled: true){
+        ...SolutionFields
     }
 }

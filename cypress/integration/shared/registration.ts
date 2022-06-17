@@ -167,10 +167,8 @@ export function shouldBehaveLikeARegistrationForm(
       });
     } else {
       it("requires Soultion Sample", () => {
-        cy.findByLabelText("Solution Sample").focus().blur();
-        cy.findByText("Solution Sample is a required field").should(
-          "be.visible"
-        );
+        cy.findByLabelText("Solution").focus().blur();
+        cy.findByText("Solution is a required field").should("be.visible");
       });
     }
   });

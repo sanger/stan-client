@@ -14,7 +14,7 @@ import projectRepository from "../repositories/projectRepository";
 import costCodeRepository from "../repositories/costCodeRepository";
 import workTypeRepository from "../repositories/workTypeRepository";
 import equipmentRepository from "../repositories/equipmentRepository";
-import solutionSampleRepository from "../repositories/solutionSampleRepository";
+import solutionRepository from "../repositories/solutionRepository";
 import userRepository from "../repositories/userRepository";
 
 const configurationHandlers = [
@@ -34,7 +34,7 @@ const configurationHandlers = [
           costCodes: costCodeRepository.findAll(),
           workTypes: workTypeRepository.findAll(),
           equipments: equipmentRepository.findAll(),
-          solutionSamples: solutionSampleRepository.findAll(),
+          solutions: solutionRepository.findAll(),
           users: userRepository.findAll(),
         })
       );

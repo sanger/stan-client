@@ -25,7 +25,7 @@ type RegistrationFormBlockSample = PartialBy<
   Omit<RegistrationFormBlock, "medium" | "lastKnownSectionNumber">,
   "externalIdentifier" | "replicateNumber"
 > & {
-  solutionSample: string;
+  solution: string;
 };
 
 /**Redefine 'blocks' field in RegistrationFormTissue Type
@@ -47,7 +47,7 @@ export function getRegistrationFormSample(): RegistrationFormBlockSample {
     spatialLocation: -1, // Initialise it as invalid so user has to select something
     labwareType: "",
     fixative: "",
-    solutionSample: "",
+    solution: "",
   };
 }
 
@@ -88,7 +88,7 @@ function buildRegistrationSchema(
                 replicateNumber: validation.replicateNumber,
                 labwareType: validation.labwareType,
                 fixative: validation.fixative,
-                solutionSample: validation.solutionSample,
+                solution: validation.solution,
               })
             ),
         })
@@ -127,7 +127,7 @@ export function buildOriginalSampleMutationVariables(
               spatialLocation: block.spatialLocation,
               replicateNumber: block.replicateNumber ?? undefined,
               fixative: block.fixative.trim(),
-              solutionSample: block.solutionSample.trim(),
+              solution: block.solution.trim(),
               sampleCollectionDate: tissue.sampleCollectionDate
                 ? tissue.sampleCollectionDate instanceof Date
                   ? tissue.sampleCollectionDate.toLocaleDateString()
