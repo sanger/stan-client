@@ -1,0 +1,5 @@
+mutation SetSolutionEnabled($name:String!,$enabled:Boolean!){
+    setSolutionEnabled(name:$name,enabled:$enabled) {
+        ...SolutionFields
+    }
+}

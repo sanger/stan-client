@@ -239,5 +239,5 @@ function fillInForm() {
   cy.findByLabelText("Replicate Number").type("2");
   cy.findByLabelText("Labware Type").select("Pot");
   cy.findByLabelText("Fixative").select("None");
-  cy.findByLabelText("Solution Sample").select("Formalin");
+  cy.findByLabelText("Solution").select("Formalin");
 }

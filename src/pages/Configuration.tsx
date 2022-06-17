@@ -347,31 +347,29 @@ export default function Configuration({ configuration }: ConfigurationParams) {
               </div>
             ))}
             <div data-testid="config">
-              <Heading level={2}>Solution Sample</Heading>
+              <Heading level={2}>Solutions</Heading>
               <p className="mt-3 mb-6 text-lg">
-                Solution Samples are available on the{" "}
+                Solutions are available on the{" "}
                 <StyledLink to={"/admin/tissue_registration"}>
-                  Tissue Sample Registration
+                  Original Sample Registration
                 </StyledLink>{" "}
                 page.
               </p>
               <EntityManager
-                initialEntities={configuration.solutionSamples}
+                initialEntities={configuration.solutions}
                 displayKeyColumnName={"name"}
                 valueColumnName={"enabled"}
                 onChangeValue={(entity, value) => {
                   const enabled = typeof value === "boolean" ? value : false;
                   return stanCore
-                    .SetSolutionSampleEnabled({
+                    .SetSolutionEnabled({
                       name: entity.name,
                       enabled,
                     })
-                    .then((res) => res.setSolutionSampleEnabled);
+                    .then((res) => res.setSolutionEnabled);
                 }}
                 onCreate={(name) =>
-                  stanCore
-                    .AddSolutionSample({ name })
-                    .then((res) => res.addSolutionSample)
+                  stanCore.AddSolution({ name }).then((res) => res.addSolution)
                 }
                 valueFieldComponentInfo={{
                   type: "CHECKBOX",

@@ -33,10 +33,10 @@ export default class RegistrationValidation {
     });
   }
 
-  get solutionSample() {
+  get solution() {
     return validation.requiredString({
-      label: "Solution Sample",
-      oneOf: this.registrationInfo.solutionSamples.map((m) => m.name),
+      label: "Solution",
+      oneOf: this.registrationInfo.solutions.map((m) => m.name),
     });
   }
 
