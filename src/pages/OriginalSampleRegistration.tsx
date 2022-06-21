@@ -48,6 +48,8 @@ export function getRegistrationFormSample(): RegistrationFormBlockSample {
     labwareType: "",
     fixative: "",
     solution: "",
+    externalIdentifier: "",
+    replicateNumber: "",
   };
 }
 
