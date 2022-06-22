@@ -704,6 +704,7 @@ export type Mutation = {
   performTissueBlock: OperationResult;
   /** Process an original sample into pots. */
   performPotProcessing: OperationResult;
+  /** Add solutions to labware. */
   performSolutionTransfer: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
