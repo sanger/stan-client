@@ -109,7 +109,7 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({
                       >
                         <Heading level={3}>SGP Number</Heading>
                         <p className="mt-2">
-                          Please select an SGP number to associate with block
+                          Please select an SGP number to associate with FFPE
                           processing.
                         </p>
                         <motion.div
