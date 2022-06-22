@@ -222,7 +222,7 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({
 
                     <OperationCompleteModal
                       show={submissionResult !== undefined}
-                      message={"FFPE processing type recored on all labware"}
+                      message={"FFPE processing type recorded on all labware"}
                       onReset={reload}
                     >
                       <p>

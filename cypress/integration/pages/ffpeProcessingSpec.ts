@@ -12,7 +12,7 @@ describe("FFPE Processing", () => {
   });
 
   describe("Validation", () => {
-    context("when the form with nothing filled in", () => {
+    context("when all form fields are empty", () => {
       before(() => {
         cy.findByRole("button", { name: "Submit" }).click();
       });
@@ -45,8 +45,7 @@ describe("FFPE Processing", () => {
               const labwareType = labwareTypeInstances.find(
                 (lt) => lt.name === LabwareTypeName.POT
               );
-              const barcode = "STAN-111";
-              const labware = req.variables.request.barcodes.map(() =>
+              const labware = req.variables.request.barcodes.map((barcode) =>
                 labwareFactory.build({ labwareType, barcode })
               );
               return res(
