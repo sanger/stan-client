@@ -134,16 +134,34 @@ function AppShell({ children }: AppShellParams) {
                       }
                     />
                   </Menu>
-                  <NavLinkMenuItem
-                    caption={"Original Sample Processing"}
-                    path="/lab/original_sample_processing"
+                  <Menu
+                    caption={"Original Sample"}
                     icon={
                       <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                     }
-                    description={
-                      "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
-                    }
-                  />
+                    description={"Sample processing steps."}
+                  >
+                    <NavLinkMenuItem
+                      caption={"Original Sample Processing"}
+                      path="/lab/original_sample_processing"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"Solution Transfer"}
+                      path="/lab/solution_transfer"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Records solution transfer operation of samples."
+                      }
+                    />
+                  </Menu>
 
                   <NavLinkMenuItem
                     caption={"Fetal Waste"}

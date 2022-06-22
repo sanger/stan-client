@@ -41,6 +41,7 @@ import BlockRegistration from "../pages/BlockRegistration";
 import { OriginalSampleProcessing } from "../pages/OriginalSampleProcessing";
 import BlockProcessing from "./originalSampleProcessing/blockProcessing/BlockProcessing";
 import PotProcessing from "./originalSampleProcessing/potProcessing/PotProcessing";
+import SolutionTransfer from "../pages/SolutionTransfer";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -56,7 +57,6 @@ export function Routes() {
       <Route path="/logout">
         <Logout />
       </Route>
-
       <AuthenticatedRoute
         path="/lab/sectioning/confirm"
         render={(routeProps) => (
@@ -70,7 +70,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/sectioning"
         render={(routeProps) => (
@@ -118,6 +117,22 @@ export function Routes() {
               <PotProcessing
                 key={routeProps.location.key}
                 processingInfo={blockInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/solution_transfer"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetSolutionTransferInfo()}
+          >
+            {(solnTransferInfo) => (
+              <SolutionTransfer
+                key={routeProps.location.key}
+                solutionTransferInfo={solnTransferInfo}
               />
             )}
           </DataFetcher>
@@ -243,7 +258,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/admin/registration"
         render={(routeProps) => (
@@ -257,7 +271,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/admin/slide_registration"
         render={(routeProps) => (
@@ -304,7 +317,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/admin/unrelease"
         render={(routeProps) => <Unrelease key={routeProps.location.key} />}
@@ -329,7 +341,6 @@ export function Routes() {
           />
         )}
       />
-
       <Route
         path="/locations/:locationBarcode"
         render={(routeProps) => {
@@ -364,7 +375,6 @@ export function Routes() {
           );
         }}
       />
-
       <Route path="/locations" component={Store} />
       <Route path="/store" component={Store} />
       <Route path="/login" component={Login} />
@@ -379,7 +389,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/config"
         role={UserRole.Admin}
@@ -389,7 +398,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <Route
         path="/labware/:barcode"
         render={(routeProps) => {
@@ -414,10 +422,8 @@ export function Routes() {
           );
         }}
       />
-
       <Route path={"/history"} component={History} />
       <AuthenticatedRoute path={"/sgp"} component={SGP} />
-
       <Route
         path={"/search"}
         render={(routeProps) => {
@@ -436,7 +442,6 @@ export function Routes() {
           );
         }}
       />
-
       <Route
         path="/"
         render={(routeProps) => {

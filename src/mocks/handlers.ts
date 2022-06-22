@@ -41,6 +41,7 @@ import aliquotHandlers from "./handlers/aliquotHandlers";
 import reagentTransferHandlers from "./handlers/reagentTransferHandlers";
 import originalSampleProcessingHandlers from "./handlers/originalSampleProcessingHandlers";
 import solutionHandlers from "./handlers/solutionHandlers";
+import solutionTransferHandlers from "./handlers/solutionTransferHandlers";
 
 export const handlers = [
   ...labwareHandlers,
@@ -83,4 +84,5 @@ export const handlers = [
   ...reagentTransferHandlers,
   ...originalSampleProcessingHandlers,
   ...solutionHandlers,
+  ...solutionTransferHandlers,
 ];

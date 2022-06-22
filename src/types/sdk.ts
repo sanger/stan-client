@@ -704,6 +704,7 @@ export type Mutation = {
   performTissueBlock: OperationResult;
   /** Process an original sample into pots. */
   performPotProcessing: OperationResult;
+  performSolutionTransfer: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -1248,6 +1249,15 @@ export type MutationPerformTissueBlockArgs = {
  */
 export type MutationPerformPotProcessingArgs = {
   request: PotProcessingRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationPerformSolutionTransferArgs = {
+  request: SolutionTransferRequest;
 };
 
 
@@ -2210,6 +2220,22 @@ export type Solution = {
   name: Scalars['String'];
   /** Whether the solution is available for use. */
   enabled: Scalars['Boolean'];
+};
+
+/** A labware in a solution transfer request. */
+export type SolutionTransferLabware = {
+  /** The barcode of the labware. */
+  barcode: Scalars['String'];
+  /** The name solution. */
+  solution: Scalars['String'];
+};
+
+/** A request to perform solution transfer. */
+export type SolutionTransferRequest = {
+  /** The work number for the operations. */
+  workNumber: Scalars['String'];
+  /** The details of the labware in the request. */
+  labware: Array<SolutionTransferLabware>;
 };
 
 /** A location in an organ that tissue was taken from. */
@@ -3187,6 +3213,32 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'logout'>
+);
+
+export type PerformSolutionTransferMutationVariables = Exact<{
+  request: SolutionTransferRequest;
+}>;
+
+
+export type PerformSolutionTransferMutation = (
+  { __typename?: 'Mutation' }
+  & { performSolutionTransfer: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
 );
 
 export type PerformTissueBlockMutationVariables = Exact<{
@@ -4399,6 +4451,17 @@ export type GetSectioningInfoQuery = (
   )> }
 );
 
+export type GetSolutionTransferInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSolutionTransferInfoQuery = (
+  { __typename?: 'Query' }
+  & { solutions: Array<(
+    { __typename?: 'Solution' }
+    & Pick<Solution, 'name'>
+  )> }
+);
+
 export type GetStainInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -5078,6 +5141,24 @@ export const LogoutDocument = gql`
   logout
 }
     `;
+export const PerformSolutionTransferDocument = gql`
+    mutation PerformSolutionTransfer($request: SolutionTransferRequest!) {
+  performSolutionTransfer(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const PerformTissueBlockDocument = gql`
     mutation PerformTissueBlock($request: TissueBlockRequest!) {
   performTissueBlock(request: $request) {
@@ -5857,6 +5938,13 @@ export const GetSectioningInfoDocument = gql`
   }
 }
     ${LabwareTypeFieldsFragmentDoc}`;
+export const GetSolutionTransferInfoDocument = gql`
+    query GetSolutionTransferInfo {
+  solutions {
+    name
+  }
+}
+    `;
 export const GetStainInfoDocument = gql`
     query GetStainInfo {
   stainTypes {
@@ -5981,6 +6069,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     Logout(variables?: LogoutMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LogoutMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<LogoutMutation>(LogoutDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Logout');
+    },
+    PerformSolutionTransfer(variables: PerformSolutionTransferMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformSolutionTransferMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformSolutionTransferMutation>(PerformSolutionTransferDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformSolutionTransfer');
     },
     PerformTissueBlock(variables: PerformTissueBlockMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformTissueBlockMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PerformTissueBlockMutation>(PerformTissueBlockDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformTissueBlock');
@@ -6203,6 +6294,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetSectioningInfo(variables?: GetSectioningInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSectioningInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetSectioningInfoQuery>(GetSectioningInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSectioningInfo');
+    },
+    GetSolutionTransferInfo(variables?: GetSolutionTransferInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSolutionTransferInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSolutionTransferInfoQuery>(GetSolutionTransferInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSolutionTransferInfo');
     },
     GetStainInfo(variables?: GetStainInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetStainInfoQuery>(GetStainInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetStainInfo');
