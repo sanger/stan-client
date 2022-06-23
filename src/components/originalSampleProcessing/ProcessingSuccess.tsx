@@ -36,7 +36,7 @@ const ProcessingSuccess: React.FC<ProcessingSuccessProps> = ({
           className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow"
         >
           <LabelPrinter
-            labwares={labware.map(
+            labwares={labware.filter(
               (lw) => lw.labwareType.name !== LabwareTypeName.PRE_BARCODED_TUBE
             )}
           />
