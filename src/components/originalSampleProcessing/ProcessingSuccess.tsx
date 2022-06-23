@@ -11,7 +11,6 @@ import { Column } from "react-table";
 import Heading from "../Heading";
 import { ModalBody } from "../Modal";
 import BlueButton from "../buttons/BlueButton";
-import { LabwareTypeName } from "../../types/stan";
 interface ProcessingSuccessProps {
   labware: LabwareFieldsFragment[];
   columns: Column<LabwareFieldsFragment>[];
@@ -37,7 +36,9 @@ const ProcessingSuccess: React.FC<ProcessingSuccessProps> = ({
         >
           <LabelPrinter
             labwares={labware.filter(
-              (lw) => lw.labwareType.name !== LabwareTypeName.PRE_BARCODED_TUBE
+              (lw) =>
+                lw.labwareType.labelType !== null &&
+                lw.labwareType.labelType !== undefined
             )}
           />
         </motion.div>
