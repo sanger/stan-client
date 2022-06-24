@@ -5,12 +5,14 @@ import LocationIcon from "./icons/LocationIcon";
 import { history } from "../lib/sdk";
 import { LabwareAwaitingStorageInfo } from "../pages/Store";
 import { stringify } from "../lib/helpers";
+import { useNavigate } from "react-router-dom";
 
 const LocationSearch = ({
   awaitingLabwares,
 }: {
   awaitingLabwares?: LabwareAwaitingStorageInfo[];
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md">
       <div className="sm:flex sm:flex-row items-start justify-around">
@@ -27,11 +29,8 @@ const LocationSearch = ({
           <ScanInput
             id={"locationScanInput"}
             onScan={(value) => {
-              history.push({
-                pathname: `/locations/${value}`,
-                state: {
-                  awaitingLabwares: awaitingLabwares ?? [],
-                },
+              history.push(`/locations/${value}`, {
+                awaitingLabwares: awaitingLabwares ?? [],
               });
             }}
           />
@@ -50,15 +49,17 @@ const LocationSearch = ({
             id={"labwareLocationScanInput"}
             onScan={(value) => {
               if (value.length > 0) {
-                history.push({
-                  pathname: `/locations`,
-                  search: stringify({
-                    labwareBarcode: value,
-                  }),
-                  state: {
-                    awaitingLabwares: awaitingLabwares ?? [],
+                history.push(
+                  {
+                    pathname: `/locations`,
+                    search: stringify({
+                      labwareBarcode: value,
+                    }),
                   },
-                });
+                  {
+                    awaitingLabwares: awaitingLabwares ?? [],
+                  }
+                );
               }
             }}
           />

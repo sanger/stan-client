@@ -8,9 +8,8 @@ import AppShell from "./AppShell";
 
 export interface DataFetcherProps<E> {
   dataFetcher: () => Promise<E>;
-  children: (data: E) => React.ReactNode;
+  children: (data: E) => React.ReactNode | JSX.Element;
 }
-
 /**
  * Component that will show a loading page for you while fetching some data
  *
@@ -18,9 +17,10 @@ export interface DataFetcherProps<E> {
  * @param children render function that accepts the fetched data
  * @constructor
  */
-const DataFetcher: <E>(
-  props: React.PropsWithChildren<DataFetcherProps<E>>
-) => React.ReactElement<DataFetcherProps<E>> = ({ dataFetcher, children }) => {
+const DataFetcher = <E extends unknown>({
+  dataFetcher,
+  children,
+}: DataFetcherProps<E>) => {
   const [state, send] = useMachine(
     createDataFetcherMachine({
       context: {
@@ -28,7 +28,6 @@ const DataFetcher: <E>(
       },
     })
   );
-
   const { data } = state.context;
 
   if (state.matches("done")) {

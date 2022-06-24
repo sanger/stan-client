@@ -97,13 +97,12 @@ export default function WorkAllocation() {
   } = current.context;
 
   /**Hook to sort table*/
-  const { sortedTableData, sort, sortConfig } = useTableSort<
-    WorkWithCommentFieldsFragment
-  >(workWithComments, {
-    sortFieldName: "SGP Number",
-    direction: "descending",
-    accessPath: ["work", "workNumber"],
-  });
+  const { sortedTableData, sort, sortConfig } =
+    useTableSort<WorkWithCommentFieldsFragment>(workWithComments, {
+      sortFieldName: "SGP Number",
+      direction: "descending",
+      accessPath: ["work", "workNumber"],
+    });
 
   /**
    * Rebuild the download data  whenever the worWithComments changes
@@ -174,7 +173,7 @@ export default function WorkAllocation() {
   /**
    * Form validation schema
    */
-  const validationSchema: Yup.ObjectSchema = Yup.object().shape({
+  const validationSchema = Yup.object().shape({
     workType: Yup.string()
       .oneOf(workTypes.map((wt) => wt.name))
       .required()

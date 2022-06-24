@@ -134,9 +134,9 @@ export function createEntityManagerMachine<E>(
               ? `"${e.data[ctx.keyField]}" ${
                   e.data[ctx.valueField] ? "enabled" : "disabled"
                 }`
-              : `"${e.data[ctx.keyField]}" - ${ctx.valueField} changed to ${
+              : `"${e.data[ctx.keyField]}" - ${
                   e.data[ctx.valueField]
-                }`;
+                } changed to ${e.data[ctx.valueField]}`;
 
           return {
             successMessage,

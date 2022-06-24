@@ -14,9 +14,10 @@ import * as Yup from "yup";
 import { useMachine } from "@xstate/react";
 import RegistrationSuccess from "./RegistrationSuccess";
 import { useConfirmLeave } from "../../lib/hooks";
-import { Prompt } from "react-router-dom";
 import { Column } from "react-table";
 import { createRegistrationMachine } from "../../lib/machines/registration/registrationMachine";
+import NavigationPrompt, { ChildData } from "react-router-navigation-prompt";
+import { ConfirmationNavigationModal } from "../../components/modal/ConfirmationNavigationModal";
 
 /**
  * Expect form input interface
@@ -70,7 +71,7 @@ interface RegistrationParams<M, T> {
   /**
    * Validation schema for form input
    */
-  registrationValidationSchema: Yup.ObjectSchema;
+  registrationValidationSchema: Yup.ObjectSchema<any>;
   /**
    * Columns to display on succesful registration
    */
@@ -142,12 +143,15 @@ function Registration<M, T extends TissueValues<B>, B>({
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          <Prompt
-            when={shouldConfirm}
-            message={
-              "You have unsaved changes. Are you sure you want to leave?"
-            }
-          />
+          {/**This is the replacement of Prompt which is removed in react-router version 6**/}
+          <NavigationPrompt when={shouldConfirm}>
+            {({ onConfirm, onCancel }: ChildData) => (
+              <ConfirmationNavigationModal
+                onConfirm={onConfirm}
+                onCancel={onCancel}
+              />
+            )}
+          </NavigationPrompt>
 
           {registrationErrors && (
             <div ref={warningRef}>

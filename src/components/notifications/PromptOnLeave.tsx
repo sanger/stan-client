@@ -1,7 +1,8 @@
 import React from "react";
 import * as H from "history";
-import { Prompt } from "react-router-dom";
 import { useConfirmLeave } from "../../lib/hooks";
+import NavigationPrompt, { ChildData } from "react-router-navigation-prompt";
+import { ConfirmationNavigationModal } from "../modal/ConfirmationNavigationModal";
 
 interface PromptOnLeaveProps {
   /**Should a prompt dialog be displayed?**/
@@ -51,16 +52,14 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({
   }, [onPromptLeave, onPromptCancel]);
 
   return (
-    <Prompt
-      when={when}
-      message={(location, action) => {
-        const ret = messageHandler
-          ? messageHandler(location, action, message)
-          : message;
-        promptReturnStatus.current = typeof ret === "string";
-        return ret;
-      }}
-    />
+    <NavigationPrompt when={when}>
+      {({ onConfirm, onCancel }: ChildData) => (
+        <ConfirmationNavigationModal
+          onConfirm={onPromptLeave}
+          onCancel={onPromptCancel}
+        />
+      )}
+    </NavigationPrompt>
   );
 };
 export default PromptOnLeave;

@@ -25,7 +25,6 @@ import {
   findNextAvailableAddress,
 } from "../lib/helpers/locationHelper";
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
-import { RouteComponentProps } from "react-router-dom";
 import { LocationMatchParams, LocationSearchParams } from "../types/stan";
 import { LocationFieldsFragment, Maybe, StoreInput } from "../types/sdk";
 import { useMachine } from "@xstate/react";
@@ -60,11 +59,10 @@ type LocationParentContextType = {
   storeBarcodes: (storeData: { barcode: string; address: string }[]) => void;
 };
 
-export const LocationParentContext = React.createContext<
-  Maybe<LocationParentContextType>
->(null);
+export const LocationParentContext =
+  React.createContext<Maybe<LocationParentContextType>>(null);
 
-interface LocationProps extends RouteComponentProps<LocationMatchParams> {
+interface LocationProps {
   storageLocation: LocationFieldsFragment;
   locationSearchParams: Maybe<LocationSearchParams>;
 }

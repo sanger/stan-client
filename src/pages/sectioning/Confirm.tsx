@@ -7,7 +7,7 @@ import {
   LabwareFieldsFragment,
 } from "../../types/sdk";
 import SectioningConfirm from "../../components/sectioningConfirm/SectioningConfirm";
-import { Link, Prompt, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useConfirmLeave } from "../../lib/hooks";
 import { history } from "../../lib/sdk";
 import Heading from "../../components/Heading";
@@ -17,14 +17,17 @@ import { ModalBody } from "../../components/Modal";
 import Success from "../../components/notifications/Success";
 import variants from "../../lib/motionVariants";
 import { ConfirmPrintLabware } from "../../components/sectioningConfirm/ConfirmPrintLabware";
+import NavigationPrompt, { ChildData } from "react-router-navigation-prompt";
+import { ConfirmationNavigationModal } from "../../components/modal/ConfirmationNavigationModal";
 
 type SectioningConfirmProps = {
   readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
 };
 
 function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
-  const location = useLocation<{ plans?: Array<FindPlanDataQuery> }>();
-  const plans: Array<FindPlanDataQuery> = location?.state?.plans ?? [];
+  const location = useLocation();
+  const state = location.state as { plans?: Array<FindPlanDataQuery> };
+  const plans: Array<FindPlanDataQuery> = state?.plans ?? [];
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
   const [confirmedLabwares, setConfirmedLabwares] = React.useState<
     LabwareFieldsFragment[]
@@ -144,10 +147,15 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
         </div>
       </AppShell.Main>
 
-      <Prompt
-        when={shouldConfirm}
-        message={"You have unsaved changes. Are you sure you want to leave?"}
-      />
+      {/**This is the replacement of Prompt which is removed in react-router version 6**/}
+      <NavigationPrompt when={shouldConfirm}>
+        {({ onConfirm, onCancel }: ChildData) => (
+          <ConfirmationNavigationModal
+            onConfirm={onConfirm}
+            onCancel={onCancel}
+          />
+        )}
+      </NavigationPrompt>
     </AppShell>
   );
 }

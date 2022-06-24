@@ -5,7 +5,6 @@ import { StanMobileNavLink, StanNavLink } from "./nav";
 import { useOnClickOutside } from "../lib/hooks";
 import Logo from "./Logo";
 import GuestIcon from "./icons/GuestIcon";
-import { authContext } from "../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "./Heading";
 import variants from "../lib/motionVariants";
@@ -20,6 +19,7 @@ import { UserRole } from "../types/sdk";
 import { configContext } from "../context/ConfigContext";
 import NavLinkMenuItem from "./menu/NavlinkMenuItem";
 import Menu from "./menu/Menu";
+import { useAuth } from "../context/AuthContext";
 
 interface AppShellParams {
   children?: React.ReactNode | React.ReactNode[];
@@ -27,8 +27,8 @@ interface AppShellParams {
 
 function AppShell({ children }: AppShellParams) {
   const config = useContext(configContext);
-  const auth = useContext(authContext);
-  const location = useLocation<LocationState>();
+  const location = useLocation();
+  const state = location.state as LocationState;
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -47,6 +47,7 @@ function AppShell({ children }: AppShellParams) {
   // Should the mobile menu be open
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const auth = useAuth();
   return (
     <div className="flex flex-col min-h-screen">
       <div className={`relative ${config?.headerColor}`}>
@@ -91,12 +92,8 @@ function AppShell({ children }: AppShellParams) {
               </button>
             </div>
             <nav className="hidden md:flex space-x-10">
-              <StanNavLink exact to="/">
-                Home
-              </StanNavLink>
-              <StanNavLink exact to="/search">
-                Search
-              </StanNavLink>
+              <StanNavLink to="/">Home</StanNavLink>
+              <StanNavLink to="/search">Search</StanNavLink>
               <StanNavLink to="/store">Store</StanNavLink>
               <StanNavLink to="/history">History</StanNavLink>
               <Authenticated>
@@ -630,8 +627,8 @@ function AppShell({ children }: AppShellParams) {
           )}
         </AnimatePresence>
       </div>
-      {location.state?.warning && <Warning message={location.state.warning} />}
-      {location.state?.success && <Success message={location.state.success} />}
+      {state?.warning && <Warning message={state.warning} />}
+      {state?.success && <Success message={state.success} />}
       {children}
       <footer
         className={`border border-t-2 pt-5 pb-3 flex-shrink-0 ${config?.footerColor}`}
@@ -724,8 +721,10 @@ AppShell.Title = function ({ children }: { children: string }) {
     </Heading>
   );
 };
-
-const Main: React.FC = ({ children }) => (
+type Props = {
+  children?: React.ReactNode;
+};
+const Main = ({ children }: Props) => (
   <motion.main
     className="flex-auto"
     initial={{ opacity: 0.1 }}

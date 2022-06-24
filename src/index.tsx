@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { enableAllPlugins } from "immer";
 import "./styles/index.css";
 import App from "./App";
+import { BrowserRouter } from "react-router-dom";
 
 // To use the XState Inspector, uncomment the following lines
 // import { inspect } from "@xstate/inspect";
@@ -31,7 +32,9 @@ async function prepare() {
 prepare().then(() => {
   ReactDOM.render(
     <React.StrictMode>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </React.StrictMode>,
     document.getElementById("root"),
     () => window.dispatchEvent(new CustomEvent("reactRenderComplete"))

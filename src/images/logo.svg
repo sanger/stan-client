@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlnsDc="http://purl.org/dc/elements/1.1/"
+   xmlnsCc="http://creativecommons.org/ns#"
+   xmlnsRdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlnsSvg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   inkscape:version="1.0beta2 (2b71d25, 2019-12-03)"
-   sodipodi:docname="logo.svg"
+   xmlnsXlink="http://www.w3.org/1999/xlink"
+   xmlnsSodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlnsInkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscapeVersion="1.0beta2 (2b71d25, 2019-12-03)"
+   sodipodiDocname="logo.svg"
    id="svg30"
    viewBox="0 0 210 297"
    version="1.1"
    height="297mm"
    width="210mm">
-  <sodipodi:namedview
-     inkscape:current-layer="g28"
-     inkscape:window-maximized="1"
-     inkscape:window-y="23"
-     inkscape:window-x="0"
-     inkscape:cy="561.25984"
-     inkscape:cx="75.295276"
-     inkscape:zoom="0.5986532"
+  <sodipodiNamedview
+     inkscapeCurrent-layer="g28"
+     inkscapeWindow-maximized="1"
+     inkscapeWindow-y="23"
+     inkscapeWindow-x="0"
+     inkscapeCy="561.25984"
+     inkscapeCx="75.295276"
+     inkscapeZoom="0.5986532"
      showgrid="false"
      id="namedview32"
-     inkscape:window-height="955"
-     inkscape:window-width="1920"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0"
+     inkscapeWindow-height="955"
+     inkscapeWindow-width="1920"
+     inkscapePageshadow="2"
+     inkscapePageopacity="0"
      guidetolerance="10"
      gridtolerance="10"
      objecttolerance="10"
      borderopacity="1"
-     inkscape:document-rotation="0"
+     inkscapeDocument-rotation="0"
      bordercolor="#666666"
      pagecolor="#ffffff" />
   <defs
@@ -422,20 +422,20 @@
        gradientTransform="matrix(1.3261 -1.2049e-7 0 1.7334 -51.191 -211.93)"
        gradientUnits="userSpaceOnUse"
        id="linearGradient1007"
-       xlink:href="#linearGradient901-4-9"
-       inkscape:collect="always" />
+       xlinkHref="#linearGradient901-4-9"
+       inkscapeCollect="always" />
   </defs>
   <metadata
      id="metadata22">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
-      </cc:Work>
-    </rdf:RDF>
+    <rdfRDF>
+      <ccWork
+         rdfAbout="">
+        <dcFormat>image/svg+xml</dcFormat>
+        <dcType
+           rdfResource="http://purl.org/dc/dcmitype/StillImage" />
+        <dcTitle></dcTitle>
+      </ccWork>
+    </rdfRDF>
   </metadata>
   <g
      id="g28"

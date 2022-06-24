@@ -267,9 +267,9 @@ export const historySchema = Yup.object({
     .required(),
   value: Yup.mixed()
     .when("kind", {
-      is: (val) => val === "sampleId",
+      is: (val:string) => val === "sampleId",
       then: Yup.number().integer().positive().required(),
-      else: Yup.string().required(),
+      otherwise: Yup.string().required(),
     })
     .required(),
 }).required();

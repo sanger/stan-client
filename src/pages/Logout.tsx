@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Redirect } from "react-router-dom";
-import { authContext } from "../context/AuthContext";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import Splash from "./Splash";
 
 /**
  * Logs out the current user and redirects them to the login page.
  */
 const Logout = () => {
-  const auth = useContext(authContext);
+  const auth = useAuth();
   const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
@@ -24,9 +24,7 @@ const Logout = () => {
   }, [auth]);
 
   return shouldRedirect ? (
-    <Redirect
-      to={{ pathname: "/login", state: { success: "Logout successful" } }}
-    />
+    <Navigate to={"/login"} state={{ success: "Logout successful" }} />
   ) : (
     <Splash />
   );
