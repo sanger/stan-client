@@ -72,13 +72,13 @@ type SchemaParams = {
   /**
    * A Yup schema. Used to cast and validate the parsed URL query string.
    */
-  schema: Yup.SchemaOf<any>;
+  schema: Yup.ObjectSchema;
 };
 type SafeParseQueryStringParams<T> = GuardAndTransformParams<T> | SchemaParams;
 
 /**
  * Will attempt to deserialize a URL query string into a given type <T>
- * @return T if query can be parsed and conforms to the type guard or schema; null otherwise
+ * @return object if query can be parsed and conforms to the type guard or schema; null otherwise
  */
 export function safeParseQueryString<T>(
   params: SafeParseQueryStringParams<T>
@@ -92,7 +92,9 @@ export function safeParseQueryString<T>(
   if ("schema" in params) {
     try {
       const castValue = params.schema.cast(parsed);
-      return params.schema.isValidSync(castValue) ? castValue : null;
+      return params.schema.isValidSync(castValue)
+        ? (castValue as unknown as T) ?? null
+        : null;
     } catch {
       return null;
     }

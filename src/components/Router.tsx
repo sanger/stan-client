@@ -1,5 +1,11 @@
 import React, { useContext, useEffect } from "react";
-import { Route, Routes, useLocation, useParams } from "react-router-dom";
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 import AuthenticatedRoute from "./AuthenticatedRoute";
 import Login from "../pages/Login";
 import Logout from "../pages/Logout";
@@ -49,6 +55,7 @@ export function Router() {
   // Hook to remove any location state after it has been consumed for a component.
   // Turns state into "flashes"
   useEffect(() => {
+    debugger;
     window.history.replaceState(null, "");
   }, []);
 

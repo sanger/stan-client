@@ -5,17 +5,19 @@ import WhiteButton from "../buttons/WhiteButton";
 interface ConfirmationNavigationProps {
   onConfirm?: () => void;
   onCancel?: () => void;
+  message?: string;
 }
 
 export const ConfirmationNavigationModal = ({
   onConfirm,
   onCancel,
+  message,
 }: ConfirmationNavigationProps): JSX.Element => {
   return (
     <Modal show={true}>
       <ModalHeader>{}</ModalHeader>
       <ModalBody>
-        You have unsaved changes. Are you sure you want to leave?
+        {message ?? "You have unsaved changes. Are you sure you want to leave?"}
       </ModalBody>
       <ModalFooter>
         <WhiteButton

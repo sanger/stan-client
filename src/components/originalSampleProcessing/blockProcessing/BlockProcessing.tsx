@@ -26,8 +26,8 @@ import { motion } from "framer-motion";
 import { optionValues } from "../../forms";
 import ProcessingSuccess from "../ProcessingSuccess";
 import { useConfirmLeave } from "../../../lib/hooks";
-import NavigationPrompt, { ChildData } from "react-router-navigation-prompt";
 import { ConfirmationNavigationModal } from "../../modal/ConfirmationNavigationModal";
+import PromptOnLeave from "../../notifications/PromptOnLeave";
 
 /**
  * Used as Formik's values
@@ -367,14 +367,7 @@ export default function BlockProcessing({
       </motion.div>
 
       {/**This is the replacement of Prompt which is removed in react-router version 6**/}
-      <NavigationPrompt when={shouldConfirm}>
-        {({ onConfirm, onCancel }: ChildData) => (
-          <ConfirmationNavigationModal
-            onConfirm={onConfirm}
-            onCancel={onCancel}
-          />
-        )}
-      </NavigationPrompt>
+      <PromptOnLeave when={shouldConfirm} />
     </>
   );
 }
