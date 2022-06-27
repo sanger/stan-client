@@ -1,7 +1,7 @@
 import {
   RegistrationType,
   shouldBehaveLikeARegistrationForm,
-} from "../shared/registration";
+} from "../shared/registration.cy";
 import {
   RegisterSectionsMutation,
   RegisterSectionsMutationVariables,

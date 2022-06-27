@@ -25,7 +25,8 @@ import {
   findNextAvailableAddress,
 } from "../lib/helpers/locationHelper";
 import { Authenticated, Unauthenticated } from "../components/Authenticated";
-import { LocationSearchParams } from "../types/stan";
+import { RouteComponentProps } from "react-router-dom";
+import { LocationMatchParams, LocationSearchParams } from "../types/stan";
 import { LocationFieldsFragment, Maybe, StoreInput } from "../types/sdk";
 import { useMachine } from "@xstate/react";
 import { StoredItemFragment } from "../lib/machines/locations/locationMachineTypes";
@@ -38,7 +39,6 @@ import {
 import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
 import warningToast from "../components/notifications/WarningToast";
 import PromptOnLeave from "../components/notifications/PromptOnLeave";
-import { useParams } from "react-router-dom";
 
 /**
  * The different ways of displaying stored items
@@ -63,7 +63,7 @@ type LocationParentContextType = {
 export const LocationParentContext =
   React.createContext<Maybe<LocationParentContextType>>(null);
 
-interface LocationProps {
+interface LocationProps extends RouteComponentProps<LocationMatchParams> {
   storageLocation: LocationFieldsFragment;
   locationSearchParams: Maybe<LocationSearchParams>;
 }
@@ -71,8 +71,8 @@ interface LocationProps {
 const Location: React.FC<LocationProps> = ({
   storageLocation,
   locationSearchParams,
+  match,
 }) => {
-  const { locationBarcode } = useParams();
   //Custom hook to retain the updated labware state
   const [current, send] = useMachine(() => {
     // Create all the possible addresses for this location if it has a size.
@@ -365,7 +365,7 @@ const Location: React.FC<LocationProps> = ({
             )}
           {current.matches("notFound") && (
             <Warning
-              message={`Location ${locationBarcode} could not be found`}
+              message={`Location ${match.params.locationBarcode} could not be found`}
             />
           )}
           <LocationSearch />
@@ -401,12 +401,12 @@ const Location: React.FC<LocationProps> = ({
                 {location.parent && (
                   <StripyCardDetail term={"Parent"}>
                     <StyledLink
-                      to={`/locations/${locationBarcode}`}
-                      state={
-                        awaitingLabwares
+                      to={{
+                        pathname: `/locations/${location.parent.barcode}`,
+                        state: awaitingLabwares
                           ? { awaitingLabwares: awaitingLabwares }
-                          : {}
-                      }
+                          : {},
+                      }}
                     >
                       {location.parent.customName ?? location.parent.barcode}
                     </StyledLink>
@@ -433,12 +433,12 @@ const Location: React.FC<LocationProps> = ({
                         return (
                           <li key={child.barcode}>
                             <StyledLink
-                              to={`/locations/${child.barcode}`}
-                              state={
-                                awaitingLabwares
+                              to={{
+                                pathname: `/locations/${child.barcode}`,
+                                state: awaitingLabwares
                                   ? { awaitingLabwares: awaitingLabwares }
-                                  : {}
-                              }
+                                  : {},
+                              }}
                             >
                               {child.customName ??
                                 child.fixedName ??

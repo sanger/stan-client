@@ -1,14 +1,7 @@
 import React from "react";
 import * as H from "history";
-import { useConfirmLeave } from "../../lib/hooks";
-import { ConfirmationNavigationModal } from "../modal/ConfirmationNavigationModal";
-import {useBlocker, usePrompt} from "react-router-dom";
-
-import React from "react";
-import * as H from "history";
 import { Prompt } from "react-router-dom";
 import { useConfirmLeave } from "../../lib/hooks";
-import {useLocation} from "react-router";
 
 interface PromptOnLeaveProps {
   /**Should a prompt dialog be displayed?**/
@@ -19,9 +12,9 @@ interface PromptOnLeaveProps {
    * - Action(e.g Go back,go forward etc) performed and
    * - Future Location going to navigate to */
   messageHandler?: (
-      location: H.Location,
-      action: H.Action,
-      message: string
+    location: H.Location,
+    action: H.Action,
+    message: string
   ) => string | boolean;
   /**Callback when user presses Ok in Prompt, i.e leaving from current page to another page**/
   onPromptLeave?: () => void;
@@ -30,37 +23,14 @@ interface PromptOnLeaveProps {
 }
 
 const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({
-                                                       when,
-                                                       message,
-                                                       messageHandler,
-                                                       onPromptLeave,
-                                                       onPromptCancel,
-                                                     }) => {
+  when,
+  message,
+  messageHandler,
+  onPromptLeave,
+  onPromptCancel,
+}) => {
   //User hook to prompt Refresh and Exit events as these are not handled by Prompt
   const [, setShouldConfirm] = useConfirmLeave(true);
-
-    const handleBlockNavigation = () => {
-        const shouldDisplayPrompt =
-            typeof shouldPrompt === "boolean" ? shouldPrompt : shouldPrompt()
-        if (shouldDisplayPrompt) {
-            openModal({
-                name: "EXIT_ROUTE_CONFIRMATION",
-                data: {
-                    ...messageObj,
-                    cb: (leaveRoute: Boolean) => {
-                        if (leaveRoute) {
-                            setConfirmedNavigation(true)
-                            retryFn.current = retry
-                        }
-                    }
-                }
-            })
-        } else {
-            retry()
-        }
-    }
-
-    useBlocker(handleBlockNavigation, !confirmedNavigation)
 
   React.useEffect(() => {
     setShouldConfirm(when);
@@ -81,18 +51,16 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({
   }, [onPromptLeave, onPromptCancel]);
 
   return (
-      <ConfirmationNavigationModal onConfirm={onPromptLeave} onCancel={onPromptCancel}/>
-
-      <Prompt
-          when={when}
-          message={(location, action) => {
-            const ret = messageHandler
-                ? messageHandler(location, action, message)
-                : message;
-            promptReturnStatus.current = typeof ret === "string";
-            return ret;
-          }}
-      />
+    <Prompt
+      when={when}
+      message={(location, action) => {
+        const ret = messageHandler
+          ? messageHandler(location, action, message)
+          : message;
+        promptReturnStatus.current = typeof ret === "string";
+        return ret;
+      }}
+    />
   );
 };
 export default PromptOnLeave;

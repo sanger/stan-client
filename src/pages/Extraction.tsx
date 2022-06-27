@@ -241,8 +241,10 @@ function Extraction() {
           </Link>
           <div className={""}>
             <Link
-              to="/lab/extraction_result"
-              state={{ labware: extraction?.extract?.labware }}
+              to={{
+                pathname: "/lab/extraction_result",
+                state: { labware: extraction?.extract?.labware },
+              }}
             >
               <BlueButton action="primary">
                 Go to Extraction Result &gt;

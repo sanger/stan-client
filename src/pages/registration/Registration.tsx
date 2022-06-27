@@ -16,8 +16,7 @@ import RegistrationSuccess from "./RegistrationSuccess";
 import { useConfirmLeave } from "../../lib/hooks";
 import { Column } from "react-table";
 import { createRegistrationMachine } from "../../lib/machines/registration/registrationMachine";
-import NavigationPrompt, { ChildData } from "react-router-navigation-prompt";
-import { ConfirmationNavigationModal } from "../../components/modal/ConfirmationNavigationModal";
+import { Prompt } from "react-router-dom";
 
 /**
  * Expect form input interface
@@ -143,16 +142,12 @@ function Registration<M, T extends TissueValues<B>, B>({
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          {/**This is the replacement of Prompt which is removed in react-router version 6**/}
-          <NavigationPrompt when={shouldConfirm}>
-            {({ onConfirm, onCancel }: ChildData) => (
-              <ConfirmationNavigationModal
-                onConfirm={onConfirm}
-                onCancel={onCancel}
-              />
-            )}
-          </NavigationPrompt>
-
+          <Prompt
+            when={shouldConfirm}
+            message={
+              "You have unsaved changes. Are you sure you want to leave?"
+            }
+          />
           {registrationErrors && (
             <div ref={warningRef}>
               <Warning message={"There was a problem registering your tissues"}>

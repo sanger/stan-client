@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Link, Redirect, RouteComponentProps } from "react-router-dom";
+import { StaticContext } from "react-router";
 import {
   ErrorMessage,
   Field,
@@ -27,17 +28,17 @@ const LoginSchema = Yup.object().shape({
   password: Yup.string().required("Password is required"),
 });
 
-const Login = (): JSX.Element => {
+const Login = (
+  props: RouteComponentProps<{}, StaticContext, LocationState>
+): JSX.Element => {
   const auth = useAuth();
 
-  const location = useLocation();
-  const state = location.state as LocationState;
   // If the user was redirected here because they were logged in, and then their session expired, clear the AuthState
   useEffect(() => {
-    if (state?.loggedOut) {
+    if (props.location?.state?.loggedOut) {
       auth.clearAuthState();
     }
-  }, [auth, state]);
+  }, [auth, props.location]);
 
   const stanCore = useContext(StanCoreContext);
   const [showLoginSuccess, setShowLoginSuccess] = useState(false);
@@ -84,7 +85,9 @@ const Login = (): JSX.Element => {
 
   return (
     <>
-      {auth.isAuthenticated() && <Navigate to={state?.referrer ?? "/"} />}
+      {auth.isAuthenticated() && (
+        <Redirect to={props.location.state?.referrer ?? "/"} />
+      )}
 
       <div className="bg-gradient-to-bl from-sdb to-sdb-400">
         <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -109,13 +112,23 @@ const Login = (): JSX.Element => {
               <Success message={"Login Successful!"} className="mt-8" />
             )}
 
-            {state?.success && !showLoginSuccess && errorMessage == null && (
-              <Success message={state.success} className="mt-8" />
-            )}
+            {props.location.state?.success &&
+              !showLoginSuccess &&
+              errorMessage == null && (
+                <Success
+                  message={props.location.state.success}
+                  className="mt-8"
+                />
+              )}
 
-            {state?.warning && !showLoginSuccess && errorMessage == null && (
-              <Warning className="mt-8" message={state.warning} />
-            )}
+            {props.location.state?.warning &&
+              !showLoginSuccess &&
+              errorMessage == null && (
+                <Warning
+                  className="mt-8"
+                  message={props.location.state.warning}
+                />
+              )}
 
             {errorMessage && (
               <Warning className="mt-8" message={errorMessage} />

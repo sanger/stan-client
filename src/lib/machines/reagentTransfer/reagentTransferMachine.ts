@@ -140,6 +140,7 @@ export const reagentTransferMachine = createMachine<
       finding: {
         invoke: {
           src: "findReagentPlate",
+          id: "findReagentPlate",
           onDone: {
             target: "ready",
             actions: "assignReagentPlate",
@@ -165,6 +166,7 @@ export const reagentTransferMachine = createMachine<
         entry: ["emptyServerError"],
         invoke: {
           src: "reagentTransfer",
+          id: "reagentTransfer",
           onDone: {
             target: "transferred",
             actions: "assignResult",

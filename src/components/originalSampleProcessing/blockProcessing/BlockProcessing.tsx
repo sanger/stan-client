@@ -26,8 +26,7 @@ import { motion } from "framer-motion";
 import { optionValues } from "../../forms";
 import ProcessingSuccess from "../ProcessingSuccess";
 import { useConfirmLeave } from "../../../lib/hooks";
-import { ConfirmationNavigationModal } from "../../modal/ConfirmationNavigationModal";
-import PromptOnLeave from "../../notifications/PromptOnLeave";
+import { Prompt } from "react-router-dom";
 
 /**
  * Used as Formik's values
@@ -80,6 +79,7 @@ export default function BlockProcessing({
    * For tracking whether the user gets a prompt if they tried to navigate to another page
    */
   const [shouldConfirm] = useConfirmLeave(true);
+
   const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(
     LabwareTypeName.TUBE
   );
@@ -210,7 +210,7 @@ export default function BlockProcessing({
   /**
    * Builds a yup validator for the labware plan form
    */
-  function buildValidationSchema() {
+  function buildValidationSchema(): Yup.ObjectSchema {
     return Yup.object().shape({
       workNumber: Yup.string().required(),
       plans: Yup.array()
@@ -365,9 +365,10 @@ export default function BlockProcessing({
           </Formik>
         )}
       </motion.div>
-
-      {/**This is the replacement of Prompt which is removed in react-router version 6**/}
-      <PromptOnLeave when={shouldConfirm} />
+      <Prompt
+        when={shouldConfirm}
+        message={"You have unsaved changes. Are you sure you want to leave?"}
+      />
     </>
   );
 }

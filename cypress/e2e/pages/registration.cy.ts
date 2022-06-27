@@ -1,26 +1,27 @@
 import {
-  RegisterOriginalSamplesMutation,
-  RegisterOriginalSamplesMutationVariables,
+  RegisterTissuesMutation,
+  RegisterTissuesMutationVariables,
 } from "../../../src/types/sdk";
+
+import { tissueFactory } from "../../../src/lib/factories/sampleFactory";
+import labwareFactory from "../../../src/lib/factories/labwareFactory";
 import {
   RegistrationType,
   shouldBehaveLikeARegistrationForm,
-} from "../shared/registration";
-import { tissueFactory } from "../../../src/lib/factories/sampleFactory";
-import labwareFactory from "../../../src/lib/factories/labwareFactory";
+} from "../shared/registration.cy";
 
 describe("Registration", () => {
   before(() => {
-    cy.visit("/admin/tissue_registration");
+    cy.visit("/admin/registration");
   });
 
   describe("Validation", () => {
-    shouldBehaveLikeARegistrationForm(RegistrationType.TISSUE_SAMPLE);
+    shouldBehaveLikeARegistrationForm(RegistrationType.BLOCK);
 
-    it("does not require External Identifier", () => {
+    it("requires External Identifier", () => {
       cy.findByLabelText("External Identifier").focus().blur();
       cy.findByText("External Identifier is a required field").should(
-        "not.exist"
+        "be.visible"
       );
     });
 
@@ -31,25 +32,46 @@ describe("Registration", () => {
       ).should("be.visible");
     });
 
+    it("requires Last Known Section Number", () => {
+      cy.findByLabelText("Last Known Section Number").clear().blur();
+      cy.findByText("Last Known Section Number is a required field").should(
+        "be.visible"
+      );
+    });
+
+    it("requires Last Known Section Number to be an integer", () => {
+      cy.findByLabelText("Last Known Section Number").type("1.1").blur();
+      cy.findByText("Last Known Section Number must be an integer").should(
+        "be.visible"
+      );
+    });
+
+    it("requires Last Known Section Number to be greater than or equal to 0", () => {
+      cy.findByLabelText("Last Known Section Number").clear().type("-1").blur();
+      cy.findByText(
+        "Last Known Section Number must be greater than or equal to 0"
+      ).should("be.visible");
+    });
+
     it("requires Labware Type", () => {
       cy.findByLabelText("Labware Type").focus().blur();
       cy.findByText("Labware Type is a required field").should("be.visible");
     });
   });
 
-  context("when clicking the Add Another Tissue Sample button", () => {
+  context("when clicking the Add Another Tissue Block button", () => {
     before(() => {
-      cy.findByText("Delete Sample").should("not.exist");
-      cy.findByText("Sample Information").siblings().should("have.length", 1);
-      cy.findByText("+ Add Another Tissue Sample").click();
+      cy.findByText("Delete Block").should("not.exist");
+      cy.findByText("Block Information").siblings().should("have.length", 1);
+      cy.findByText("+ Add Another Tissue Block").click();
     });
 
-    it("adds another tissue sample", () => {
-      cy.findByText("Sample Information").siblings().should("have.length", 2);
+    it("adds another tissue block", () => {
+      cy.findByText("Block Information").siblings().should("have.length", 2);
     });
 
-    it("shows the Delete Sample button for each sample", () => {
-      cy.findAllByText("Delete Sample").should("be.visible");
+    it("shows the Delete Block button for each block", () => {
+      cy.findAllByText("Delete Block").should("be.visible");
     });
   });
 
@@ -147,14 +169,14 @@ describe("Registration", () => {
 
     context("when the submission fails server side", () => {
       before(() => {
-        cy.visit("/admin/tissue_registration");
+        cy.visit("/admin/registration");
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<
-              RegisterOriginalSamplesMutation,
-              RegisterOriginalSamplesMutationVariables
-            >("RegisterOriginalSamples", (req, res, ctx) => {
+              RegisterTissuesMutation,
+              RegisterTissuesMutationVariables
+            >("RegisterTissues", (req, res, ctx) => {
               return res.once(
                 ctx.errors([
                   {
@@ -192,12 +214,12 @@ describe("Registration", () => {
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
           graphql.mutation<
-            RegisterOriginalSamplesMutation,
-            RegisterOriginalSamplesMutationVariables
-          >("RegisterOriginalSamples", (req, res, ctx) => {
+            RegisterTissuesMutation,
+            RegisterTissuesMutationVariables
+          >("RegisterTissues", (req, res, ctx) => {
             return res.once(
               ctx.data({
-                registerOriginalSamples: {
+                register: {
                   labware: [],
                   clashes: [
                     {
@@ -237,7 +259,8 @@ function fillInForm() {
   cy.findByLabelText("Tissue Type").select("Liver");
   cy.findByLabelText("Spatial Location").select("3");
   cy.findByLabelText("Replicate Number").type("2");
-  cy.findByLabelText("Labware Type").select("Pot");
+  cy.findByLabelText("Last Known Section Number").type("5");
+  cy.findByLabelText("Labware Type").select("Proviasette");
   cy.findByLabelText("Fixative").select("None");
-  cy.findByLabelText("Solution").select("Formalin");
+  cy.findByLabelText("Medium").select("Paraffin");
 }

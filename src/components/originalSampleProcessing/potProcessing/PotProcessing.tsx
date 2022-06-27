@@ -26,9 +26,8 @@ import FormikInput from "../../forms/Input";
 import PotProcessingLabwarePlan from "./PotProcessingLabwarePlan";
 import ProcessingSuccess from "../ProcessingSuccess";
 import columns from "../../dataTable/labwareColumns";
+import { Prompt } from "react-router-dom";
 import { useConfirmLeave } from "../../../lib/hooks";
-import NavigationPrompt, { ChildData } from "react-router-navigation-prompt";
-import { ConfirmationNavigationModal } from "../../modal/ConfirmationNavigationModal";
 
 /**
  * Used as Formik's values
@@ -250,7 +249,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
   /**
    * Builds a yup validator for the labware plan form
    */
-  function buildValidationSchema() {
+  function buildValidationSchema(): Yup.ObjectSchema {
     return Yup.object().shape({
       workNumber: Yup.string().required(),
       sourceBarcode: Yup.string().required(),
@@ -415,16 +414,10 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
           </Formik>
         )}
       </motion.div>
-
-      {/**This is the replacement of Prompt which is removed in react-router version 6**/}
-      <NavigationPrompt when={shouldConfirm}>
-        {({ onConfirm, onCancel }: ChildData) => (
-          <ConfirmationNavigationModal
-            onConfirm={onConfirm}
-            onCancel={onCancel}
-          />
-        )}
-      </NavigationPrompt>
+      <Prompt
+        when={shouldConfirm}
+        message={"You have unsaved changes. Are you sure you want to leave?"}
+      />
     </>
   );
 }

@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Redirect } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Splash from "./Splash";
 
@@ -24,7 +24,9 @@ const Logout = () => {
   }, [auth]);
 
   return shouldRedirect ? (
-    <Navigate to={"/login"} state={{ success: "Logout successful" }} />
+    <Redirect
+      to={{ pathname: "/login", state: { success: "Logout successful" } }}
+    />
   ) : (
     <Splash />
   );

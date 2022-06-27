@@ -7,7 +7,7 @@ import {
   LabwareFieldsFragment,
 } from "../../types/sdk";
 import SectioningConfirm from "../../components/sectioningConfirm/SectioningConfirm";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Prompt, useLocation } from "react-router-dom";
 import { useConfirmLeave } from "../../lib/hooks";
 import { history } from "../../lib/sdk";
 import Heading from "../../components/Heading";
@@ -17,8 +17,6 @@ import { ModalBody } from "../../components/Modal";
 import Success from "../../components/notifications/Success";
 import variants from "../../lib/motionVariants";
 import { ConfirmPrintLabware } from "../../components/sectioningConfirm/ConfirmPrintLabware";
-import NavigationPrompt, { ChildData } from "react-router-navigation-prompt";
-import { ConfirmationNavigationModal } from "../../components/modal/ConfirmationNavigationModal";
 
 type SectioningConfirmProps = {
   readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
@@ -147,15 +145,10 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
         </div>
       </AppShell.Main>
 
-      {/**This is the replacement of Prompt which is removed in react-router version 6**/}
-      <NavigationPrompt when={shouldConfirm}>
-        {({ onConfirm, onCancel }: ChildData) => (
-          <ConfirmationNavigationModal
-            onConfirm={onConfirm}
-            onCancel={onCancel}
-          />
-        )}
-      </NavigationPrompt>
+      <Prompt
+        when={shouldConfirm}
+        message={"You have unsaved changes. Are you sure you want to leave?"}
+      />
     </AppShell>
   );
 }

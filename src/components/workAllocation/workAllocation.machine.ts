@@ -136,6 +136,7 @@ export default function createWorkAllocationMachine({
         loading: {
           invoke: {
             src: "loadWorkAllocationInfo",
+            id: "loadWorkAllocationInfo",
             onDone: { actions: "assignWorkAllocationInfo", target: "ready" },
             onError: { actions: "assignServerError", target: "ready" },
           },
@@ -160,6 +161,7 @@ export default function createWorkAllocationMachine({
         allocating: {
           invoke: {
             src: "allocateWork",
+            id: "allocateWork",
             onDone: { actions: "assignSuccessMessage", target: "loading" },
             onError: { actions: "assignServerError", target: "loading" },
           },
@@ -239,14 +241,8 @@ export default function createWorkAllocationMachine({
       services: {
         allocateWork: (ctx, e) => {
           if (e.type !== "ALLOCATE_WORK") return Promise.reject();
-          const {
-            workType,
-            project,
-            costCode,
-            isRnD,
-            numBlocks,
-            numSlides,
-          } = e.values;
+          const { workType, project, costCode, isRnD, numBlocks, numSlides } =
+            e.values;
 
           return stanCore.CreateWork({
             workType,

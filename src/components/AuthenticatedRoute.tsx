@@ -1,15 +1,13 @@
 import React from "react";
-import { Navigate, Route } from "react-router-dom";
+import { Redirect, Route, RouteProps } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { UserRole } from "../types/sdk";
 
-interface AuthenticatedRouteProps {
+interface AuthenticatedRouteProps extends RouteProps {
   /**
    * If defined, this is the minimum role a user must be to access the route
    */
   role?: UserRole;
-  element: React.ReactNode;
-  path: string;
 }
 
 /**
@@ -17,34 +15,46 @@ interface AuthenticatedRouteProps {
  * If the user is authenticated, acts like a route.
  * If the user is not authenticated, redirects them to the login page.
  */
-function AuthenticatedRoute({ role, element, path }: AuthenticatedRouteProps) {
+function AuthenticatedRoute({
+  render,
+  role,
+  ...rest
+}: AuthenticatedRouteProps) {
   const auth = useAuth();
+
   if (role) {
     if (auth.userRoleIncludes(role)) {
-      return <Route path={path} element={element} />;
+      return <Route render={render} {...rest} />;
     } else {
       return (
-        <Navigate
-          to={"/"}
-          state={{
-            referrer: path,
-            warning: `You are not authorised to access ${path}`,
-          }}
-          replace
-        />
+        <Route {...rest}>
+          <Redirect
+            to={{
+              pathname: "/",
+              state: {
+                referrer: rest.location,
+                warning: `You are not authorised to access ${rest.path}`,
+              },
+            }}
+          />
+        </Route>
       );
     }
   } else if (auth.isAuthenticated()) {
-    return <Route path={path} element={element} />;
+    return <Route render={render} {...rest} />;
   } else {
     return (
-      <Navigate
-        to={"/login"}
-        state={{
-          referrer: path,
-          warning: `Please sign in to access ${path}`,
-        }}
-      />
+      <Route {...rest}>
+        <Redirect
+          to={{
+            pathname: "/login",
+            state: {
+              referrer: rest.location,
+              warning: `Please sign in to access ${rest.path}`,
+            },
+          }}
+        />
+      </Route>
     );
   }
 }

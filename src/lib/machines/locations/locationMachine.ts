@@ -35,10 +35,9 @@ enum Service {
 /**
  * Location Machine Options
  */
-export const machineOptions: Partial<MachineOptions<
-  LocationContext,
-  LocationEvent
->> = {
+export const machineOptions: Partial<
+  MachineOptions<LocationContext, LocationEvent>
+> = {
   actions: {
     [Action.ASSIGN_LOCATION_SEARCH_PARAMS]: assign((ctx, e) => {
       if (e.type !== "FETCH_LOCATION") {
@@ -137,6 +136,7 @@ export const machineOptions: Partial<MachineOptions<
       if (e.type !== "STORE_BARCODE") {
         return Promise.reject();
       }
+      debugger;
       return locationService.storeBarcode(e.barcode, ctx.location, e.address);
     },
 
@@ -173,6 +173,7 @@ export const machineConfig: MachineConfig<
     fetching: {
       invoke: {
         src: Service.FETCH_LOCATION,
+        id: Service.FETCH_LOCATION,
         onDone: {
           actions: [Action.ASSIGN_LOCATION],
           target: "ready",
@@ -199,6 +200,7 @@ export const machineConfig: MachineConfig<
         storingBarcode: {
           invoke: {
             src: Service.STORE_BARCODE,
+            id: Service.STORE_BARCODE,
             onDone: {
               actions: [
                 Action.ASSIGN_LOCATION,
@@ -218,6 +220,7 @@ export const machineConfig: MachineConfig<
         storing: {
           invoke: {
             src: Service.STORE,
+            id: Service.STORE,
             onDone: {
               actions: [
                 Action.ASSIGN_LOCATION,
@@ -237,6 +240,7 @@ export const machineConfig: MachineConfig<
         unstoringBarcode: {
           invoke: {
             src: Service.UNSTORE_BARCODE,
+            id: Service.UNSTORE_BARCODE,
             onDone: {
               actions: [
                 Action.ASSIGN_LOCATION,
@@ -256,6 +260,7 @@ export const machineConfig: MachineConfig<
         emptyingLocation: {
           invoke: {
             src: Service.EMPTY_LOCATION,
+            id: Service.EMPTY_LOCATION,
             onDone: {
               actions: [
                 Action.ASSIGN_LOCATION,

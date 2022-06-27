@@ -10,15 +10,13 @@ import AppShell from "../../components/AppShell";
 import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
 import PinkButton from "../../components/buttons/PinkButton";
 import ButtonBar from "../../components/ButtonBar";
-import { NavLink } from "react-router-dom";
+import { Link, Prompt } from "react-router-dom";
 import _ from "lodash";
 import { useConfirmLeave } from "../../lib/hooks";
 import LabwarePlan from "../../components/planning/LabwarePlan";
 import labwareScanTableColumns from "../../components/dataTable/labwareColumns";
 import Planner, { PlanChangedProps } from "../../components/planning/Planner";
 import { optionValues } from "../../components/forms";
-import NavigationPrompt, { ChildData } from "react-router-navigation-prompt";
-import { ConfirmationNavigationModal } from "../../components/modal/ConfirmationNavigationModal";
 
 /**
  * Types of labware the user is allowed to section onto
@@ -41,9 +39,8 @@ function Plan({ sectioningInfo }: SectioningParams) {
   /**
    * The list of currently completed plans from the planner
    */
-  const [planProps, setPlanProps] = useState<
-    Maybe<PlanChangedProps<PlanMutation>>
-  >(null);
+  const [planProps, setPlanProps] =
+    useState<Maybe<PlanChangedProps<PlanMutation>>>(null);
 
   /**
    * For tracking whether the user gets a prompt if they tried to navigate to another page
@@ -145,25 +142,22 @@ function Plan({ sectioningInfo }: SectioningParams) {
       </AppShell.Main>
 
       <ButtonBar>
-        <NavLink
-          to={"/lab/sectioning/confirm"}
-          state={{ plans: planPropsToPlanData(planProps) }}
+        <Link
+          to={{
+            pathname: "/lab/sectioning/confirm",
+            state: { plans: planPropsToPlanData(planProps) },
+          }}
         >
           <PinkButton disabled={shouldConfirm} action="primary">
             Next {">"}
           </PinkButton>
-        </NavLink>
+        </Link>
       </ButtonBar>
 
-      {/**This is the replacement of Prompt which is removed in react-router version 6**/}
-      <NavigationPrompt when={shouldConfirm}>
-        {({ onConfirm, onCancel }: ChildData) => (
-          <ConfirmationNavigationModal
-            onConfirm={onConfirm}
-            onCancel={onCancel}
-          />
-        )}
-      </NavigationPrompt>
+      <Prompt
+        when={shouldConfirm}
+        message={"You have unsaved changes. Are you sure you want to leave?"}
+      />
     </AppShell>
   );
 }
