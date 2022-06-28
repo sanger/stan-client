@@ -165,7 +165,7 @@ export function shouldBehaveLikeARegistrationForm(
         cy.findByText("Medium is a required field").should("be.visible");
       });
     } else {
-      it("requires Soultion", () => {
+      it("requires Solution", () => {
         cy.findByLabelText("Solution").focus().blur();
         cy.findByText("Solution is a required field").should("be.visible");
       });
