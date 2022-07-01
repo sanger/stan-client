@@ -5,14 +5,14 @@ import MutedText from "../components/MutedText";
 
 interface PasteRestrictedBoxProps {
   /**
-   * Callback for when a value is added into the {@link PasteRestrictedBox}
-   * @param value the current value of the input
+   * Callback for when a value is pasted into the {@link PasteRestrictedBox}
+   * @param value the current value of the pasted item
    */
   onChange?: (value: string) => void;
 }
 
 /**
- * Box that will call onChange callback on both paste button press
+ * Box that will call onChange callback on paste button press
  */
 export default function PasteRestrictedBox({
   onChange
@@ -26,7 +26,6 @@ export default function PasteRestrictedBox({
         onChange?.(text)
       }
     )
-    return
   }
 
   const handleClear = () => {

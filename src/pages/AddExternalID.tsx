@@ -108,10 +108,12 @@ export default function AddExternalID() {
                   <Heading level={2}>External ID</Heading>
                   <motion.div>
                     <PasteRestrictedBox
-                      onChange={(externalName) => {setFieldValue(
-                        "externalName",
-                        externalName
-                      );}}
+                      onChange={(externalName) => { 
+                        setFieldValue(
+                          "externalName",
+                          externalName
+                        );
+                      }}
                     />
                     <FormikErrorMessage name={"externalName"} />
                   </motion.div>
