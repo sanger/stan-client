@@ -41,6 +41,7 @@ import BlockRegistration from "../pages/BlockRegistration";
 import { OriginalSampleProcessing } from "../pages/OriginalSampleProcessing";
 import BlockProcessing from "./originalSampleProcessing/blockProcessing/BlockProcessing";
 import PotProcessing from "./originalSampleProcessing/potProcessing/PotProcessing";
+import AddExternalID from "../pages/AddExternalID"
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -121,6 +122,12 @@ export function Routes() {
               />
             )}
           </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/add_external_id"
+        render={(routeProps) => (
+          <AddExternalID key={routeProps.location.key} />
         )}
       />
       <AuthenticatedRoute

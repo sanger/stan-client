@@ -33,6 +33,13 @@ export type Action = {
   sample: Sample;
 };
 
+export type AddExternalIdRequest = {
+  /** The external identifier used to identify the tissue. */
+  externalName: Scalars['String'];
+  /** The existing labware containing the tissue */
+  labwareBarcode: Scalars['String'];
+};
+
 
 /** A combination of an address and a comment id, used to record comments in particular slots of labware. */
 export type AddressCommentInput = {
@@ -131,7 +138,7 @@ export type Comment = {
 
 /** The details for a particular labware in a complex stain request. */
 export type ComplexStainLabware = {
-  /** The barcode of the lawbare. */
+  /** The barcode of the labware. */
   barcode: Scalars['String'];
   /** The bond barcode for the stain. */
   bondBarcode: Scalars['String'];
@@ -704,6 +711,8 @@ export type Mutation = {
   performTissueBlock: OperationResult;
   /** Process an original sample into pots. */
   performPotProcessing: OperationResult;
+  /** Record an operation adding a external ID to a sample. */
+  addExternalID: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -1248,6 +1257,15 @@ export type MutationPerformTissueBlockArgs = {
  */
 export type MutationPerformPotProcessingArgs = {
   request: PotProcessingRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationAddExternalIdArgs = {
+  request: AddExternalIdRequest;
 };
 
 
@@ -2866,6 +2884,29 @@ export type AddEquipmentMutation = (
   & { addEquipment: (
     { __typename?: 'Equipment' }
     & EquipmentFieldsFragment
+  ) }
+);
+
+export type AddExternalIdMutationVariables = Exact<{
+  request: AddExternalIdRequest;
+}>;
+
+
+export type AddExternalIdMutation = (
+  { __typename?: 'Mutation' }
+  & { addExternalID: (
+    { __typename?: 'OperationResult' }
+    & { operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
   ) }
 );
 
@@ -4873,6 +4914,21 @@ export const AddEquipmentDocument = gql`
   }
 }
     ${EquipmentFieldsFragmentDoc}`;
+export const AddExternalIdDocument = gql`
+    mutation AddExternalID($request: AddExternalIDRequest!) {
+  addExternalID(request: $request) {
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    `;
 export const AddFixativeDocument = gql`
     mutation AddFixative($name: String!) {
   addFixative(name: $name) {
@@ -5927,6 +5983,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     AddEquipment(variables: AddEquipmentMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddEquipmentMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddEquipmentMutation>(AddEquipmentDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddEquipment');
+    },
+    AddExternalID(variables: AddExternalIdMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddExternalIdMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddExternalIdMutation>(AddExternalIdDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddExternalID');
     },
     AddFixative(variables: AddFixativeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddFixativeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddFixativeMutation>(AddFixativeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddFixative');
