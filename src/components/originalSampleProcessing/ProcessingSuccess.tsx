@@ -25,7 +25,9 @@ const ProcessingSuccess: React.FC<ProcessingSuccessProps> = ({
   return (
     <div className="space-y-6">
       <Heading level={2}>{"Operation Complete"}</Heading>
-      <ModalBody>{<Success message={successMessage} />}</ModalBody>
+      <ModalBody>
+        <Success message={successMessage} />
+      </ModalBody>
       <motion.div variants={variants.fadeInWithLift} className="flex flex-col">
         <DataTable columns={columns} data={labware} />
       </motion.div>
@@ -34,7 +36,13 @@ const ProcessingSuccess: React.FC<ProcessingSuccessProps> = ({
           variants={variants.fadeInWithLift}
           className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow"
         >
-          <LabelPrinter labwares={labware} />
+          <LabelPrinter
+            labwares={labware.filter(
+              (lw) =>
+                lw.labwareType.labelType !== null &&
+                lw.labwareType.labelType !== undefined
+            )}
+          />
         </motion.div>
       </div>
 

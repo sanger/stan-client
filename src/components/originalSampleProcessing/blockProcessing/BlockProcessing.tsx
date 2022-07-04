@@ -59,8 +59,6 @@ type BlockProcessingParams = {
   readonly processingInfo: GetBlockProcessingInfoQuery;
 };
 
-
-
 export default function BlockProcessing({
   processingInfo,
 }: BlockProcessingParams) {
@@ -80,7 +78,7 @@ export default function BlockProcessing({
     })
   );
 
-    const { submissionResult, serverError } = current.context;
+  const { submissionResult, serverError } = current.context;
   /**
    * For tracking whether the user gets a prompt if they tried to navigate to another page
    */
@@ -101,7 +99,6 @@ export default function BlockProcessing({
     new Map<string, string>()
   );
 
-
   /**
    * Limit the labware types the user can Section on to.
    */
@@ -115,26 +112,26 @@ export default function BlockProcessing({
     [processingInfo]
   );
 
-    /**A source is selected for a plan, so update the mapping state between source and plan**/
-    const notifySourceSelection = React.useCallback(
-        (cid: string, sourceBarcode: string) => {
-            if (
-                planToSourceMap.has(cid) &&
-                planToSourceMap.get(cid) === sourceBarcode
-            ) {
-                return;
-            }
-            setPlanToSourceMap((prev) => {
-                const map = new Map<string, string>();
-                Array.from(prev.entries()).forEach(([key, value]) => {
-                    map.set(key, value);
-                });
-                map.set(cid, sourceBarcode);
-                return map;
-            });
-        },
-        [planToSourceMap]
-    );
+  /**A source is selected for a plan, so update the mapping state between source and plan**/
+  const notifySourceSelection = React.useCallback(
+    (cid: string, sourceBarcode: string) => {
+      if (
+        planToSourceMap.has(cid) &&
+        planToSourceMap.get(cid) === sourceBarcode
+      ) {
+        return;
+      }
+      setPlanToSourceMap((prev) => {
+        const map = new Map<string, string>();
+        Array.from(prev.entries()).forEach(([key, value]) => {
+          map.set(key, value);
+        });
+        map.set(cid, sourceBarcode);
+        return map;
+      });
+    },
+    [planToSourceMap]
+  );
 
   /** Display created Labware plans**/
   const buildPlanLayouts = React.useCallback(
@@ -234,7 +231,14 @@ export default function BlockProcessing({
         <></>
       );
     },
-    [processingInfo, selectedLabwareType, numLabware,nextReplicateData,notifySourceSelection,planToSourceMap]
+    [
+      processingInfo,
+      selectedLabwareType,
+      numLabware,
+      nextReplicateData,
+      notifySourceSelection,
+      planToSourceMap,
+    ]
   );
 
   /**
@@ -276,18 +280,20 @@ export default function BlockProcessing({
    */
   function buildValidationSchema(): Yup.ObjectSchema {
     return Yup.object().shape({
-      workNumber: Yup.string().required("SGP Number is a required field."),
+      workNumber: Yup.string().required("SGP Number is required"),
       plans: Yup.array()
         .of(
           Yup.object().shape({
             sourceBarcode: Yup.string().required().min(1),
             medium: Yup.string()
-              .required("Medium is a required field.")
+              .required("Medium is required")
               .oneOf(
                 processingInfo.mediums.map((medium) => medium.name),
-                "Medium is a required field."
+                "Medium is required"
               ),
-            replicateNumber: Yup.string().required(),
+            replicateNumber: Yup.string().required(
+              "Replicate number is required"
+            ),
             commentId: Yup.number().optional(),
             labwareType: Yup.string()
               .required()
@@ -296,7 +302,7 @@ export default function BlockProcessing({
               is: (value: string) =>
                 value === LabwareTypeName.PRE_BARCODED_TUBE,
               then: Yup.string()
-                .required("Barcode is a required field.")
+                .required("Barcode is required")
                 .matches(
                   /[a-zA-Z]{2}\d{8}/,
                   "Barcode should be in the format with two letters followed by 8 numbers"
@@ -352,6 +358,7 @@ export default function BlockProcessing({
             />
             <FormikInput
               label={""}
+              className={"content-center align-middle justify-center"}
               name={`discardSources.${row.index}.discard`}
               type={"checkbox"}
             />
@@ -361,14 +368,15 @@ export default function BlockProcessing({
     };
   }, []);
 
-
-
   /**Notifies about a plan change - so  make sure that we have fetched nextReplicateData for all source labware scanned
    * This is the only place we can check it, as we don't have a specific action to denote all source labware scanning is finished
    * Inorder to avoid unnecessary fetching of same data multiple times on each plan change, we are checking it against the stored nextReplicateData
    * **/
   const onPlanChanged = React.useCallback(
     (planChangedProps: PlanChangedProps<undefined>) => {
+      if (planChangedProps.numberOfPlans === 0) {
+        return;
+      }
       async function fetchNextReplicateData() {
         const barcodes = planChangedProps.sourceLabware.map((lw) => lw.barcode);
         return await stanCore.GetNextReplicateNumber({ barcodes });
@@ -392,23 +400,23 @@ export default function BlockProcessing({
     },
     [nextReplicateData]
   );
-    /**Save operation performed, so display the success page**/
-    if (current.matches("submitted") && submissionResult) {
-        return (
-            <ProcessingSuccess
-                labware={submissionResult.performTissueBlock.labware}
-                columns={[
-                    columns.barcode(),
-                    columns.donorId(),
-                    columns.tissueType(),
-                    columns.spatialLocation(),
-                ]}
-                successMessage={"Block processing complete"}
-            />
-        );
-    }
-
+  /**Save operation performed, so display the success page**/
+  if (current.matches("submitted") && submissionResult) {
     return (
+      <ProcessingSuccess
+        labware={submissionResult.performTissueBlock.labware}
+        columns={[
+          columns.barcode(),
+          columns.donorId(),
+          columns.tissueType(),
+          columns.spatialLocation(),
+        ]}
+        successMessage={"Block processing complete"}
+      />
+    );
+  }
+
+  return (
     <>
       <motion.div
         variants={variants.fadeInParent}
@@ -431,7 +439,7 @@ export default function BlockProcessing({
               });
             }}
           >
-            {({ setFieldValue, isValid, values }) => (
+            {({ setFieldValue, values }) => (
               <Form>
                 <motion.div
                   variants={variants.fadeInWithLift}
@@ -467,7 +475,6 @@ export default function BlockProcessing({
                       labwareScanTableColumns.donorId(),
                       labwareScanTableColumns.tissueType(),
                       labwareScanTableColumns.spatialLocation(),
-                      labwareScanTableColumns.replicate(),
                     ]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                   />
@@ -483,9 +490,7 @@ export default function BlockProcessing({
                       className={"sm:flex mt-4 sm:flex-row justify-end"}
                     >
                       <ButtonBar>
-                        <BlueButton disabled={!isValid} type={"submit"}>
-                          Save
-                        </BlueButton>
+                        <BlueButton type={"submit"}>Save</BlueButton>
                       </ButtonBar>
                     </motion.div>
                   )}

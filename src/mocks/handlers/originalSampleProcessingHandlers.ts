@@ -84,6 +84,7 @@ const originalSampleProcessingHandlers = [
     const confirmedLabwares = req.variables.request.labware.map(
       (confirmLabware) => {
         const labware = createLabware(confirmLabware.sourceBarcode);
+        labware.barcode = "DEST_" + labware.barcode;
         return buildLabwareFragment(labware);
       }
     );

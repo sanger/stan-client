@@ -136,7 +136,6 @@ export const machineOptions: Partial<
       if (e.type !== "STORE_BARCODE") {
         return Promise.reject();
       }
-      debugger;
       return locationService.storeBarcode(e.barcode, ctx.location, e.address);
     },
 
