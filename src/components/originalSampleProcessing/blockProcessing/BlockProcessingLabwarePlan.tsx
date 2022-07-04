@@ -58,6 +58,9 @@ type BlockProcessingLabwarePlanProps = {
    * rowIndex representing form data array index
    */
   rowIndex: number;
+
+  replicateNumber: number;
+  notifySourceSelection: (cid: string, sourceBarcode: string) => void;
 };
 
 /**
@@ -100,6 +103,8 @@ const BlockProcessingLabwarePlan = React.forwardRef<
       sampleColors,
       onDelete,
       rowIndex,
+      replicateNumber,
+      notifySourceSelection
     },
     ref
   ) => {
@@ -116,28 +121,56 @@ const BlockProcessingLabwarePlan = React.forwardRef<
      * Fill all form fields that need to be auto-filled
      */
     React.useEffect(() => {
-      setFieldValue(`plans.${rowIndex}.replicateNumber`, rowIndex + 1 + "");
+      sourceLabware.forEach((source, indx) => {
+        setFieldValue(`discardSources.${indx}.sourceBarcode`, source.barcode);
+      });
+    }, [setFieldValue, rowIndex, sourceLabware]);
+
+    React.useEffect(() => {
       setFieldValue(
         `plans.${rowIndex}.labwareType`,
         outputLabware.labwareType.name
       );
-    }, [setFieldValue, rowIndex, outputLabware]);
+    }, [outputLabware, rowIndex,setFieldValue]);
 
+    React.useEffect(() => {
+      setFieldValue(`plans.${rowIndex}.replicateNumber`, replicateNumber===-1?"":replicateNumber + "");
+    }, [replicateNumber, rowIndex,setFieldValue]);
+
+    React.useEffect(() => {
+      const defaultMediumForlabwareTyps = [
+        { lwType: LabwareTypeName.PRE_BARCODED_TUBE, medium: "None" },
+        { lwType: LabwareTypeName.TUBE, medium: "None" },
+        { lwType: LabwareTypeName.PROVIASETTE, medium: "OCT" },
+        { lwType: LabwareTypeName.CASSETTE, medium: "Paraffin" },
+      ];
+      const mediumLwType = defaultMediumForlabwareTyps.find(
+        (item) =>
+          item.lwType === outputLabware.labwareType.name &&
+          blockProcessInfo.mediums.find(
+            (medium) => medium.name === item.medium
+          ) !== undefined
+      );
+      mediumLwType &&
+        setFieldValue(`plans.${rowIndex}.medium`, mediumLwType.medium);
+    }, [blockProcessInfo, setFieldValue,outputLabware,rowIndex]);
     /**
      * Fill source barcode in form data
+     * and
+     * Notify parent about change in source (This is for auto numbering of replicate numbers)
      */
     React.useEffect(() => {
       if (layoutPlan.plannedActions.size <= 0) return;
-      const plannedActions:
-        | Source[]
-        | undefined = layoutPlan.plannedActions.get("A1");
+      const plannedActions: Source[] | undefined =
+        layoutPlan.plannedActions.get("A1");
       if (plannedActions && plannedActions.length > 0) {
         setFieldValue(
           `plans.${rowIndex}.sourceBarcode`,
           plannedActions[0].labware.barcode
         );
+        notifySourceSelection(cid,  plannedActions[0].labware.barcode )
       }
-    }, [setFieldValue, rowIndex, layoutPlan.plannedActions]);
+    }, [setFieldValue, rowIndex, layoutPlan.plannedActions,cid,notifySourceSelection]);
     return (
       <motion.div
         variants={variants.fadeInWithLift}
@@ -211,11 +244,6 @@ const BlockProcessingLabwarePlan = React.forwardRef<
                 >
                   {optionValues(blockProcessInfo.comments, "text", "id")}
                 </FormikSelect>
-                <FormikInput
-                  label={"Discard source?"}
-                  name={`plans.${rowIndex}.discardSource`}
-                  type={"checkbox"}
-                />
               </div>
 
               {current.matches("prep") && (

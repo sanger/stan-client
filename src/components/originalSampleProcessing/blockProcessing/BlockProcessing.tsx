@@ -1,6 +1,7 @@
 import {
   GetBlockProcessingInfoQuery,
   LabwareFieldsFragment,
+  NextReplicateDataFieldsFragment,
   PerformTissueBlockMutation,
   TissueBlockRequest,
 } from "../../../types/sdk";
@@ -13,9 +14,9 @@ import labwareScanTableColumns from "../../dataTable/labwareColumns";
 import * as Yup from "yup";
 import { Form, Formik } from "formik";
 import BlockProcessingLabwarePlan from "./BlockProcessingLabwarePlan";
-import { Dictionary, groupBy } from "lodash";
+import { cloneDeep, Dictionary, groupBy } from "lodash";
 import Heading from "../../Heading";
-import Planner from "../../planning/Planner";
+import Planner, { PlanChangedProps } from "../../planning/Planner";
 import createFormMachine from "../../../lib/machines/form/formMachine";
 import { stanCore } from "../../../lib/sdk";
 import WorkNumberSelect from "../../WorkNumberSelect";
@@ -27,6 +28,8 @@ import { optionValues } from "../../forms";
 import ProcessingSuccess from "../ProcessingSuccess";
 import { useConfirmLeave } from "../../../lib/hooks";
 import { Prompt } from "react-router-dom";
+import { Row } from "react-table";
+import FormikInput from "../../forms/Input";
 
 /**
  * Used as Formik's values
@@ -37,12 +40,12 @@ export type BlockFormValue = {
   replicateNumber: string;
   medium?: string;
   commentId?: number;
-  discardSource?: boolean;
   preBarcode?: string;
 };
 export type BlockFormData = {
   workNumber: string;
   plans: BlockFormValue[];
+  discardSources?: { sourceBarcode: string; discard: boolean }[];
 };
 
 const allowedLabwareTypeNames: Array<LabwareTypeName> = [
@@ -55,6 +58,8 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
 type BlockProcessingParams = {
   readonly processingInfo: GetBlockProcessingInfoQuery;
 };
+
+
 
 export default function BlockProcessing({
   processingInfo,
@@ -75,6 +80,7 @@ export default function BlockProcessing({
     })
   );
 
+    const { submissionResult, serverError } = current.context;
   /**
    * For tracking whether the user gets a prompt if they tried to navigate to another page
    */
@@ -84,7 +90,18 @@ export default function BlockProcessing({
     LabwareTypeName.TUBE
   );
   const [numLabware, setNumLabware] = React.useState<number>(1);
-  const { submissionResult, serverError } = current.context;
+
+  /**Next replicate data  for all source labware scanned**/
+  const [nextReplicateData, setNextReplicateData] = React.useState<
+    NextReplicateDataFieldsFragment[]
+  >([]);
+
+  /**To keep the mapping between source selected and the plan. Key is source labware barcode and value is unique id for a plan created**/
+  const [planToSourceMap, setPlanToSourceMap] = React.useState(
+    new Map<string, string>()
+  );
+
+
   /**
    * Limit the labware types the user can Section on to.
    */
@@ -97,6 +114,27 @@ export default function BlockProcessing({
         : [],
     [processingInfo]
   );
+
+    /**A source is selected for a plan, so update the mapping state between source and plan**/
+    const notifySourceSelection = React.useCallback(
+        (cid: string, sourceBarcode: string) => {
+            if (
+                planToSourceMap.has(cid) &&
+                planToSourceMap.get(cid) === sourceBarcode
+            ) {
+                return;
+            }
+            setPlanToSourceMap((prev) => {
+                const map = new Map<string, string>();
+                Array.from(prev.entries()).forEach(([key, value]) => {
+                    map.set(key, value);
+                });
+                map.set(cid, sourceBarcode);
+                return map;
+            });
+        },
+        [planToSourceMap]
+    );
 
   /** Display created Labware plans**/
   const buildPlanLayouts = React.useCallback(
@@ -123,6 +161,7 @@ export default function BlockProcessing({
         planWithKeys,
         (planWithKey) => planWithKey.plan!.labwareType.name
       );
+      const nextReplicateDataCopy = cloneDeep(nextReplicateData);
 
       let rowIndx: number = 0;
       return Object.keys(layoutPlanGroupedByType).length > 0 ? (
@@ -141,6 +180,25 @@ export default function BlockProcessing({
                     level={2}
                   >{`${labwareType.toString()}s`}</Heading>
                   {labwarePlans.map((lwPlan, indx) => {
+                    //Auto numbering for replicateNumbers
+                    const sourcebarcode = planToSourceMap.get(lwPlan.cid);
+                    /** Make sure
+                     * 1) All labware with sources having same original samples(donor id + spatial location) are numbered consecutively
+                     * 2) All labware with same source are numbered consecutively
+                     ***/
+                    let replicateData:
+                      | NextReplicateDataFieldsFragment
+                      | undefined = undefined;
+                    if (sourcebarcode) {
+                      replicateData = nextReplicateDataCopy.find((repData) =>
+                        repData.barcodes.some(
+                          (barcode) => barcode === sourcebarcode
+                        )
+                      );
+                      if (replicateData) {
+                        replicateData.nextReplicateNumber++;
+                      }
+                    }
                     rowIndx++;
                     return (
                       <BlockProcessingLabwarePlan
@@ -152,12 +210,18 @@ export default function BlockProcessing({
                         sampleColors={sampleColors}
                         onDelete={deleteAction}
                         rowIndex={rowIndx - 1}
+                        replicateNumber={
+                          replicateData
+                            ? replicateData.nextReplicateNumber - 1
+                            : -1
+                        }
                         ref={
                           labwareType === selectedLabwareType &&
                           indx === labwarePlans.length - numLabware
                             ? scrollRef
                             : undefined
                         }
+                        notifySourceSelection={notifySourceSelection}
                       />
                     );
                   })}
@@ -170,7 +234,7 @@ export default function BlockProcessing({
         <></>
       );
     },
-    [processingInfo, selectedLabwareType, numLabware]
+    [processingInfo, selectedLabwareType, numLabware,nextReplicateData,notifySourceSelection,planToSourceMap]
   );
 
   /**
@@ -212,17 +276,19 @@ export default function BlockProcessing({
    */
   function buildValidationSchema(): Yup.ObjectSchema {
     return Yup.object().shape({
-      workNumber: Yup.string().required(),
+      workNumber: Yup.string().required("SGP Number is a required field."),
       plans: Yup.array()
         .of(
           Yup.object().shape({
             sourceBarcode: Yup.string().required().min(1),
             medium: Yup.string()
               .required("Medium is a required field.")
-              .oneOf(processingInfo.mediums.map((medium) => medium.name)),
+              .oneOf(
+                processingInfo.mediums.map((medium) => medium.name),
+                "Medium is a required field."
+              ),
             replicateNumber: Yup.string().required(),
             commentId: Yup.number().optional(),
-            discardSource: Yup.boolean().optional(),
             labwareType: Yup.string()
               .required()
               .oneOf(allowedLabwareTypes.map((type) => type.name)),
@@ -240,6 +306,14 @@ export default function BlockProcessing({
         )
         .required()
         .min(1),
+      discardSources: Yup.array()
+        .of(
+          Yup.object().shape({
+            sourceBarcode: Yup.string().optional(),
+            discard: Yup.boolean().optional(),
+          })
+        )
+        .optional(),
     });
   }
 
@@ -257,29 +331,84 @@ export default function BlockProcessing({
         medium: plan.medium ?? "",
         labwareType: plan.labwareType,
       })),
-      discardSourceBarcodes: formData.plans
-        .filter((plan) => plan.discardSource === true)
-        .map((plan) => plan.sourceBarcode),
+      discardSourceBarcodes: formData.discardSources
+        ?.filter((ds) => ds.discard)
+        .map((ds) => ds.sourceBarcode),
     };
   };
 
-  /**Save operation performed, so display the success page**/
-  if (current.matches("submitted") && submissionResult) {
-    return (
-      <ProcessingSuccess
-        labware={submissionResult.performTissueBlock.labware}
-        columns={[
-          columns.barcode(),
-          columns.donorId(),
-          columns.tissueType(),
-          columns.spatialLocation(),
-        ]}
-        successMessage={"Block processing complete"}
-      />
-    );
-  }
+  const discardSourceColumn = React.useMemo(() => {
+    return {
+      Header: "Discard Source",
+      id: "discard_source",
+      Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
+        return (
+          <>
+            <FormikInput
+              name={`discardSources.${row.index}.sourceBarcode`}
+              label={""}
+              type={"hidden"}
+              value={row.original.barcode}
+            />
+            <FormikInput
+              label={""}
+              name={`discardSources.${row.index}.discard`}
+              type={"checkbox"}
+            />
+          </>
+        );
+      },
+    };
+  }, []);
 
-  return (
+
+
+  /**Notifies about a plan change - so  make sure that we have fetched nextReplicateData for all source labware scanned
+   * This is the only place we can check it, as we don't have a specific action to denote all source labware scanning is finished
+   * Inorder to avoid unnecessary fetching of same data multiple times on each plan change, we are checking it against the stored nextReplicateData
+   * **/
+  const onPlanChanged = React.useCallback(
+    (planChangedProps: PlanChangedProps<undefined>) => {
+      async function fetchNextReplicateData() {
+        const barcodes = planChangedProps.sourceLabware.map((lw) => lw.barcode);
+        return await stanCore.GetNextReplicateNumber({ barcodes });
+      }
+      if (nextReplicateData.length > 0) {
+        /**Any update is source labwared scanned**/
+        const barcodes = nextReplicateData.flatMap((rd) => rd.barcodes);
+        if (
+          planChangedProps.sourceLabware.length === barcodes.length &&
+          planChangedProps.sourceLabware.every((sourceLw) =>
+            barcodes.includes(sourceLw.barcode)
+          )
+        ) {
+          return;
+        }
+      }
+      /**There is update, so fetch next Replicate data for all**/
+      fetchNextReplicateData().then((res) =>
+        setNextReplicateData(res.nextReplicateNumbers)
+      );
+    },
+    [nextReplicateData]
+  );
+    /**Save operation performed, so display the success page**/
+    if (current.matches("submitted") && submissionResult) {
+        return (
+            <ProcessingSuccess
+                labware={submissionResult.performTissueBlock.labware}
+                columns={[
+                    columns.barcode(),
+                    columns.donorId(),
+                    columns.tissueType(),
+                    columns.spatialLocation(),
+                ]}
+                successMessage={"Block processing complete"}
+            />
+        );
+    }
+
+    return (
     <>
       <motion.div
         variants={variants.fadeInParent}
@@ -330,10 +459,11 @@ export default function BlockProcessing({
                       (lt) => lt.name === selectedLabwareType
                     )}
                     numPlansToCreate={numLabware}
-                    onPlanChanged={() => {}}
+                    onPlanChanged={onPlanChanged}
                     buildPlanLayouts={buildPlanLayouts}
                     columns={[
                       labwareScanTableColumns.barcode(),
+                      discardSourceColumn,
                       labwareScanTableColumns.donorId(),
                       labwareScanTableColumns.tissueType(),
                       labwareScanTableColumns.spatialLocation(),

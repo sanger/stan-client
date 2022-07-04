@@ -1,0 +1,6 @@
+fragment NextReplicateDataFields on NextReplicateData {
+    barcodes
+    donorId
+    nextReplicateNumber
+    spatialLocationId
+}

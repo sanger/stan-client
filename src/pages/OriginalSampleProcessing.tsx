@@ -42,28 +42,20 @@ export const OriginalSampleProcessing: React.FC = () => {
 
   /**Set processing Info based on processing type**/
   useEffect(() => {
-    async function fetchAndSetProcessingInfo(
-      type: string,
-      setFunction: (
-        data:
-          | GetBlockProcessingInfoQuery
-          | GetPotProcessingInfoQuery
-          | undefined
-      ) => void
-    ) {
+    async function fetchAndSetProcessingInfo(type: string) {
       let ret;
       if (type === OriginalSampleProcessingType.BLOCK) {
         ret = await stanCore.GetBlockProcessingInfo();
       } else {
         ret = await stanCore.GetPotProcessingInfo();
       }
-      if (ret) {
-        setFunction(ret);
-      }
-      return;
+
+      return ret;
     }
     if (processingType !== "" && processingType.length > 0) {
-      fetchAndSetProcessingInfo(processingType, setProcessingInfo);
+      fetchAndSetProcessingInfo(processingType).then((info) =>
+        setProcessingInfo(info)
+      );
     }
   }, [processingType, setProcessingInfo]);
 

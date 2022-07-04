@@ -8,6 +8,9 @@ import {
   PerformTissueBlockMutationVariables,
   PerformTissuePotMutation,
   PerformTissuePotMutationVariables,
+  GetNextReplicateNumberQuery,
+  GetNextReplicateNumberQueryVariables,
+  NextReplicateData,
 } from "../../types/sdk";
 import { createLabware } from "./labwareHandlers";
 import { buildLabwareFragment } from "../../lib/helpers/labwareHelper";
@@ -53,6 +56,27 @@ const originalSampleProcessingHandlers = [
       );
     }
   ),
+  graphql.query<
+    GetNextReplicateNumberQuery,
+    GetNextReplicateNumberQueryVariables
+  >("GetNextReplicateNumber", (req, res, ctx) => {
+    const sourceBarcodes = [...req.variables.barcodes];
+    const nextReplicateData: NextReplicateData[] = [];
+    /***Keeps labware in pairs as a group. This is to enable testing for all cases**/
+    for (let indx = 0; indx < sourceBarcodes.length; indx += 2) {
+      nextReplicateData.push({
+        barcodes: sourceBarcodes.slice(indx, indx + 2),
+        nextReplicateNumber: 5,
+        donorId: 1,
+        spatialLocationId: 1,
+      });
+    }
+    return res(
+      ctx.data({
+        nextReplicateNumbers: nextReplicateData,
+      })
+    );
+  }),
   graphql.mutation<
     PerformTissueBlockMutation,
     PerformTissueBlockMutationVariables

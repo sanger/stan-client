@@ -71,6 +71,10 @@ type PlannerProps<M> = {
    * removed.
    */
   onPlanChanged?: (props: PlanChangedProps<M>) => void;
+
+  /**
+   *
+   */
 };
 
 /**
