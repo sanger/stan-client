@@ -12,12 +12,14 @@ interface FormikInputProps {
   name: string;
   type?: string;
   [key: string]: any;
+  displayTag?: string;
 }
 
 const FormikInput = ({
   label,
   name,
   type = "text",
+  displayTag,
   ...rest
 }: FormikInputProps) => {
   const inputClassNames = classNames(
@@ -28,7 +30,7 @@ const FormikInput = ({
   );
   return (
     <>
-      <Label name={label}>
+      <Label name={label} displayTag={displayTag}>
         <Field type={type} className={inputClassNames} name={name} {...rest} />
       </Label>
       <FormikErrorMessage name={name} />
