@@ -31,7 +31,13 @@ const FormikInput = ({
   return (
     <>
       <Label name={label} displayTag={displayTag}>
-        <Field type={type} className={inputClassNames} name={name} {...rest} />
+        <Field
+          type={type}
+          data-testid={label}
+          className={inputClassNames}
+          name={name}
+          {...rest}
+        />
       </Label>
       <FormikErrorMessage name={name} />
     </>
