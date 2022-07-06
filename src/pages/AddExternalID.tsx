@@ -28,7 +28,6 @@ export default function AddExternalID() {
     createFormMachine<AddExternalIdRequest, AddExternalIdMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          console.log("getting called " + e.type);
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
           return stanCore.AddExternalID({request: e.values});
         },
@@ -73,7 +72,7 @@ export default function AddExternalID() {
                   className="space-y-4"
                 >
                   {serverError && <Warning error={serverError} />}
-                  <Heading level={2}>Labware</Heading>
+                  <Heading level={3}>Labware</Heading>
                   <LabwareScanner
                     limit={1}
                     onAdd={(labware) => {
@@ -86,9 +85,6 @@ export default function AddExternalID() {
                       setFieldValue("labwareBarcode", "");
                     }}
                   >
-                    {values.labwareBarcode.length === 0 && (
-                      <FormikErrorMessage name={"labware"} />
-                    )}
                     <motion.div variants={variants.fadeInWithLift}>
                       <LabwareScanTable
                         columns={[
@@ -105,7 +101,7 @@ export default function AddExternalID() {
                     </motion.div>
                     <FormikErrorMessage name={"labwareBarcode"} />
                   </LabwareScanner>
-                  <Heading level={2}>External ID</Heading>
+                  <Heading level={3}>External ID</Heading>
                   <motion.div>
                     <PasteRestrictedBox
                       onChange={(externalName) => { 
@@ -118,31 +114,33 @@ export default function AddExternalID() {
                     <FormikErrorMessage name={"externalName"} />
                   </motion.div>
                 </motion.div>
-                <OperationCompleteModal
-                  show={current.matches("submitted")}
-                  message={"Operation Complete"}
-                  onReset={reload}
-                >
-                  <p>
-                    If you wish to start the process again, click the "Reset
-                    Form" button. Otherwise you can return to the Home screen.
-                  </p>
-                </OperationCompleteModal>
-                <div className="my-4 mx-4 p-4 rounded-md bg-gray-100">
-                  <p className="my-3 text-gray-800 text-sm text-center">
-                    Once a labware has been scanned in and a valid external id is given, click save 
-                    to record the external id on the sample
-                  </p>
-                  <div className="flex flex-row items-center justify-center gap-4">
-                    <BlueButton
-                      id="save"
-                      disabled={formLocked}
-                      className="whitespace-nowrap"
-                      action={"primary"}
-                      type="submit"
-                    >
-                      Save
-                    </BlueButton>
+                <div className="flex flex-row mx-auto m:w-2/3 md:w-1/2">
+                  <OperationCompleteModal
+                    show={current.matches("submitted")}
+                    message={"Operation Complete"}
+                    onReset={reload}
+                  >
+                    <p>
+                      If you wish to start the process again, click the "Reset
+                      Form" button. Otherwise you can return to the Home screen.
+                    </p>
+                  </OperationCompleteModal>
+                  <div className="my-4 mx-4 p-4 rounded-md bg-gray-100">
+                    <p className="my-3 text-gray-800 text-sm text-center">
+                      Once a labware has been scanned in and a valid external id is given, click save 
+                      to record the external id on the sample
+                    </p>
+                    <div className="flex flex-row items-center justify-center gap-4">
+                      <BlueButton
+                        id="save"
+                        disabled={formLocked}
+                        className="whitespace-nowrap"
+                        action={"primary"}
+                        type="submit"
+                      >
+                        Save
+                      </BlueButton>
+                    </div>
                   </div>
                 </div>
               </Form>

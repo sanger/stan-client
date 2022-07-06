@@ -60,7 +60,7 @@ export default function PasteRestrictedBox({
         </button>
       </div>
       { value === "" &&
-        <MutedText>Paste an External ID from your clipboard above</MutedText>
+        <MutedText>Click the paste button above to paste in an External ID from your clipboard</MutedText>
       }
     </>
   );
