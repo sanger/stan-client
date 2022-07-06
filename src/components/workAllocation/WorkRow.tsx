@@ -128,8 +128,10 @@ export default function WorkRow({
         value = MAX_NUM_BLOCKANDSLIDES;
       if (workNumValueType === "block") {
         send({ type: "UPDATE_NUM_BLOCKS", numBlocks: value });
-      } else {
+      } else if (workNumValueType === "slide") {
         send({ type: "UPDATE_NUM_SLIDES", numSlides: value });
+      } else if (workNumValueType === "originalSamples") {
+        send({ type: "UPDATE_NUM_ORIGINAL_SAMPLES", numOriginalSamples: value });
       }
     },
     [send]
@@ -218,6 +220,7 @@ export default function WorkRow({
       </TableCell>
       <TableCell>{work.workNumber}</TableCell>
       <TableCell>{work.workType.name}</TableCell>
+      <TableCell>{work.workRequester?.username}</TableCell>
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
@@ -234,6 +237,14 @@ export default function WorkRow({
             work.workNumber,
             work.numSlides ?? undefined,
             "slide"
+          )}
+      </TableCell>
+      <TableCell>
+        {isEditEnabledForStatus(work.status) &&
+          renderWorkNumValueField(
+            work.workNumber,
+            work.numOriginalSamples ?? undefined,
+            "originalSamples"
           )}
       </TableCell>
       {!editModeEnabled && (

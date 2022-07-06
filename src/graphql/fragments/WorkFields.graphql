@@ -1,6 +1,9 @@
 fragment WorkFields on Work {
     workNumber
     status
+    workRequester {
+        ...ReleaseRecipientFields
+    }
     project {
         ...ProjectFields
     }
@@ -12,5 +15,6 @@ fragment WorkFields on Work {
     }
     numBlocks
     numSlides
+    numOriginalSamples
     priority
 }

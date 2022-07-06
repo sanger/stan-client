@@ -24,6 +24,7 @@ import workFactory from "../../lib/factories/workFactory";
 import { isEnabled } from "../../lib/helpers";
 import workTypeRepository from "../repositories/workTypeRepository";
 import { sample } from "lodash";
+import releaseRecipientRepository from "../repositories/releaseRecipientRepository";
 
 const workHandlers = [
   graphql.query<
@@ -67,6 +68,7 @@ const workHandlers = [
           };
         }),
         workTypes: workTypeRepository.findAll().filter(isEnabled),
+        releaseRecipients: releaseRecipientRepository.findAll().filter(isEnabled)
       })
     );
   }),
@@ -77,11 +79,12 @@ const workHandlers = [
       const workType = workTypeRepository.find("name", req.variables.workType);
       const costCode = costCodeRepository.find("code", req.variables.costCode);
       const project = projectRepository.find("name", req.variables.project);
+      const workRequester = releaseRecipientRepository.find("username", req.variables.workRequester);
 
       if (!workType) {
         return res(
           ctx.errors([
-            { message: `Cost code ${req.variables.workType} not found` },
+            { message: `Work type ${req.variables.workType} not found` },
           ])
         );
       }
@@ -106,10 +109,19 @@ const workHandlers = [
         );
       }
 
+      if (!workRequester) {
+        return res(
+          ctx.errors([
+            { message: `Work requester ${req.variables.workRequester} not found` },
+          ])
+        );
+      }
+
       const createWork = workFactory.build(
         {
           numSlides: req.variables.numSlides,
           numBlocks: req.variables.numBlocks,
+          numOriginalSamples: req.variables.numOriginalSamples
         },
         {
           associations: { workType, costCode, project },

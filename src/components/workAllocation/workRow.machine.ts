@@ -1,6 +1,7 @@
 import { createMachine } from "xstate";
 import {
   UpdateWorkNumBlocksMutation,
+  UpdateWorkNumOriginalSamplesMutation,
   UpdateWorkNumSlidesMutation,
   UpdateWorkPriorityMutation,
   UpdateWorkStatusMutation,
@@ -33,11 +34,13 @@ export type WorkRowEvent =
   | { type: "ACTIVE"; commentId: undefined }
   | { type: "UPDATE_NUM_BLOCKS"; numBlocks: number | undefined }
   | { type: "UPDATE_NUM_SLIDES"; numSlides: number | undefined }
+  | { type: "UPDATE_NUM_ORIGINAL_SAMPLES"; numOriginalSamples: number | undefined }
   | { type: "UPDATE_PRIORITY"; priority: string | undefined }
   | MachineServiceDone<"updateWorkStatus", UpdateWorkStatusMutation>
   | MachineServiceDone<"updateWorkNumBlocks", UpdateWorkNumBlocksMutation>
   | MachineServiceDone<"updateWorkNumSlides", UpdateWorkNumSlidesMutation>
-  | MachineServiceDone<"updateWorkPriority", UpdateWorkPriorityMutation>;
+  | MachineServiceDone<"updateWorkPriority", UpdateWorkPriorityMutation>
+  | MachineServiceDone<"updateWorkNumOriginalSamples", UpdateWorkNumOriginalSamplesMutation>;
 
 type CreateWorkRowMachineParams = Pick<
   WorkRowMachineContext,
@@ -72,6 +75,7 @@ export default function createWorkRowMachine({
             ACTIVE: "updating",
             UPDATE_NUM_BLOCKS: "editNumberBlocks",
             UPDATE_NUM_SLIDES: "editNumberSlides",
+            UPDATE_NUM_ORIGINAL_SAMPLES: "editNumberOriginalSamples",
             UPDATE_PRIORITY: "editPriority",
           },
         },
@@ -84,6 +88,7 @@ export default function createWorkRowMachine({
             WITHDRAW: "updating",
             UPDATE_NUM_BLOCKS: "editNumberBlocks",
             UPDATE_NUM_SLIDES: "editNumberSlides",
+            UPDATE_NUM_ORIGINAL_SAMPLES: "editNumberOriginalSamples",
             UPDATE_PRIORITY: "editPriority",
           },
         },
@@ -96,6 +101,7 @@ export default function createWorkRowMachine({
             WITHDRAW: "updating",
             UPDATE_NUM_BLOCKS: "editNumberBlocks",
             UPDATE_NUM_SLIDES: "editNumberSlides",
+            UPDATE_NUM_ORIGINAL_SAMPLES: "editNumberOriginalSamples",
             UPDATE_PRIORITY: "editPriority",
           },
         },
@@ -132,6 +138,16 @@ export default function createWorkRowMachine({
             onError: { target: "deciding" },
           },
         },
+        editNumberOriginalSamples: {
+          invoke: {
+            src: "updateWorkNumOriginalSamples",
+            onDone: {
+              actions: "assignWorkNumOriginalSamples",
+              target: "deciding",
+            },
+            onError: { target: "deciding" },
+          },
+        },
         editPriority: {
           invoke: {
             src: "updateWorkPriority",
@@ -157,6 +173,10 @@ export default function createWorkRowMachine({
         assignWorkNumSlides: assign((ctx, e) => {
           if (e.type !== "done.invoke.updateWorkNumSlides") return;
           ctx.workWithComment.work = e.data.updateWorkNumSlides;
+        }),
+        assignWorkNumOriginalSamples: assign((ctx, e) => {
+          if (e.type !== "done.invoke.updateWorkNumOriginalSamples") return;
+          ctx.workWithComment.work = e.data.updateWorkNumOriginalSamples;
         }),
         assignWorkPriority: assign((ctx, e) => {
           if (e.type !== "done.invoke.updateWorkPriority") return;
@@ -192,6 +212,15 @@ export default function createWorkRowMachine({
             params["numSlides"] = e.numSlides;
 
           return stanCore.UpdateWorkNumSlides(params);
+        },
+        updateWorkNumOriginalSamples: (ctx, e) => {
+          let params: { workNumber: string; numOriginalSamples?: number } = {
+            workNumber: ctx.workWithComment.work.workNumber,
+          };
+          if ("numOriginalSamples" in e && e.numOriginalSamples)
+            params["numOriginalSamples"] = e.numOriginalSamples;
+
+          return stanCore.UpdateWorkNumOriginalSamples(params);
         },
         updateWorkPriority: (ctx, e) => {
           let params: { workNumber: string; priority?: string } = {

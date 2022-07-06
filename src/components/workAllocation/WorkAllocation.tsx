@@ -31,11 +31,13 @@ import DownloadIcon from "../icons/DownloadIcon";
 import { useDownload } from "../../lib/hooks/useDownload";
 const initialValues: WorkAllocationFormValues = {
   workType: "",
+  workRequester: "",
   costCode: "",
   project: "",
   isRnD: false,
   numSlides: undefined,
   numBlocks: undefined,
+  numOriginalSamples: undefined
 };
 export const MAX_NUM_BLOCKANDSLIDES = 200;
 
@@ -50,10 +52,12 @@ const tableColumnFieldInfo = [
   { key: "Priority", path: ["work", "priority"] },
   { key: "SGP Number", path: ["work", "workNumber"] },
   { key: "Work Type", path: ["work", "workType", "name"] },
+  { key: "Work Requester", path: ["work", "workRequester", "username"] },
   { key: "Project", path: ["work", "project", "name"] },
   { key: "Cost Code", path: ["work", "costCode", "code"] },
   { key: "Number of Blocks", path: ["work", "numBlocks"] },
   { key: "Number of Slides", path: ["work", "numSlides"] },
+  { key: "Number of Original samples", path: ["work", "numOriginalSamples"] },
   { key: "Status", path: ["work", "status"] },
 ];
 
@@ -91,6 +95,7 @@ export default function WorkAllocation() {
     costCodes,
     workWithComments,
     workTypes,
+    workRequesters,
     availableComments,
     requestError,
     successMessage,
@@ -179,6 +184,10 @@ export default function WorkAllocation() {
       .oneOf(workTypes.map((wt) => wt.name))
       .required()
       .label("Work Type"),
+    workRequester: Yup.string()
+      .oneOf(workRequesters.map((wr) => wr.username))
+      .required()
+      .label("Work Requester"),
     project: Yup.string()
       .oneOf(projects.map((p) => p.name))
       .required()
@@ -197,6 +206,7 @@ export default function WorkAllocation() {
         }
         return schema;
       }),
+    numOriginalSamples: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
   });
 
   return (
@@ -235,6 +245,16 @@ export default function WorkAllocation() {
               </div>
 
               <div className="md:flex-grow">
+                <FormikSelect
+                  label="Work Requester"
+                  name="workRequester"
+                  emptyOption={true}
+                >
+                  {optionValues(workRequesters, "username", "username")}
+                </FormikSelect>
+              </div>
+
+              <div className="md:flex-grow">
                 <FormikSelect label="Project" name="project" emptyOption={true}>
                   {optionValues(projects, "name", "name")}
                 </FormikSelect>
@@ -263,6 +283,15 @@ export default function WorkAllocation() {
                 <FormikInput
                   label={"Number of slides"}
                   name={"numSlides"}
+                  type={"number"}
+                  maxLength={MAX_NUM_BLOCKANDSLIDES}
+                  min={0}
+                />
+              </div>
+              <div className="md:flex-grow">
+                <FormikInput
+                  label={"Number of original samples"}
+                  name={"numOriginalSamples"}
                   type={"number"}
                   maxLength={MAX_NUM_BLOCKANDSLIDES}
                   min={0}
@@ -348,6 +377,9 @@ export default function WorkAllocation() {
                   <TableHeader sortProps={getTableSortProps("Work Type")}>
                     Work Type
                   </TableHeader>
+                  <TableHeader sortProps={getTableSortProps("Work Requester")}>
+                    Work Requester
+                  </TableHeader>
                   <TableHeader sortProps={getTableSortProps("Project")}>
                     Project
                   </TableHeader>
@@ -363,6 +395,11 @@ export default function WorkAllocation() {
                     sortProps={getTableSortProps("Number of Slides")}
                   >
                     Number of Slides
+                  </TableHeader>
+                  <TableHeader
+                    sortProps={getTableSortProps("Number of Original Samples")}
+                  >
+                    Number of Original Samples
                   </TableHeader>
                   <TableHeader sortProps={getTableSortProps("Status")}>
                     Status

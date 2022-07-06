@@ -6,6 +6,7 @@ import {
   CreateWorkMutation,
   GetWorkAllocationInfoQuery,
   ProjectFieldsFragment,
+  ReleaseRecipientFieldsFragment,
   WorkTypeFieldsFragment,
   WorkWithCommentFieldsFragment,
 } from "../../types/sdk";
@@ -26,6 +27,11 @@ export type WorkAllocationFormValues = {
   workType: string;
 
   /**
+   * The Work Requester for this Work
+   */
+  workRequester: string;
+
+  /**
    * The name of the project
    */
   project: string;
@@ -39,10 +45,16 @@ export type WorkAllocationFormValues = {
    * Number of blocks
    */
   numBlocks: number | undefined;
+
   /**
    * Number of Samples
    */
   numSlides: number | undefined;
+
+  /**
+   * Number of Samples
+   */
+  numOriginalSamples: number | undefined;
 
   /**
    * Whether or not an R&D number is being created. Will use a different prefix on call to core.
@@ -80,6 +92,11 @@ type WorkAllocationContext = {
    * List of enabled Work Types
    */
   workTypes: Array<WorkTypeFieldsFragment>;
+
+  /**
+   * List of enabled Work Requesters (Release recipients)
+   */
+  workRequesters: Array<ReleaseRecipientFieldsFragment>;
 
   /**
    * List of possible projects to allocate a Work to
@@ -126,6 +143,7 @@ export default function createWorkAllocationMachine({
       context: {
         workWithComments: [],
         workTypes: [],
+        workRequesters: [],
         projects: [],
         costCodes: [],
         availableComments: [],
@@ -181,12 +199,15 @@ export default function createWorkAllocationMachine({
             worksWithComments,
             workTypes,
             costCodes,
+            releaseRecipients
           } = e.data;
+          console.log(releaseRecipients);
           ctx.availableComments = comments;
           ctx.projects = projects;
           ctx.workWithComments = worksWithComments;
           ctx.workTypes = workTypes;
           ctx.costCodes = costCodes;
+          ctx.workRequesters = releaseRecipients;
         }),
 
         assignServerError: assign((ctx, e) => {
@@ -203,21 +224,21 @@ export default function createWorkAllocationMachine({
           if (e.type !== "done.invoke.allocateWork") return;
           const {
             workNumber,
+            workRequester,
             workType,
             project,
             costCode,
             numBlocks,
             numSlides,
+            numOriginalSamples
           } = e.data.createWork;
-          const blockMessage = numBlocks ? `${numBlocks} blocks` : undefined;
-          const slideMessage = numSlides ? `${numSlides} slides` : undefined;
-          const blockSlideMsg =
-            blockMessage && slideMessage
-              ? `${blockMessage} and ${slideMessage}`
-              : blockMessage
-              ? blockMessage
-              : slideMessage;
-          ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideMsg}) to project ${project.name} and cost code ${costCode.code} `;
+          const blockSlideSampleMsg = [
+            numBlocks ? `${numBlocks} blocks` : undefined,
+            numSlides ? `${numSlides} slides` : undefined,
+            numOriginalSamples ? `${numOriginalSamples} original samples` : undefined
+          ].filter(msg => msg).join(' and ');
+          ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideSampleMsg}) to project ${project.name} 
+                                and cost code ${costCode.code} with the work requester ${workRequester?.username}`;
         }),
 
         updateWork: assign((ctx, e) => {
@@ -241,29 +262,33 @@ export default function createWorkAllocationMachine({
           if (e.type !== "ALLOCATE_WORK") return Promise.reject();
           const {
             workType,
+            workRequester,
             project,
             costCode,
             isRnD,
             numBlocks,
             numSlides,
+            numOriginalSamples
           } = e.values;
 
           return stanCore.CreateWork({
             workType,
+            workRequester,
             project,
             costCode,
             prefix: isRnD ? "R&D" : "SGP",
             numBlocks,
             numSlides,
+            numOriginalSamples
           });
         },
 
-        loadWorkAllocationInfo: (ctx) =>
+        loadWorkAllocationInfo: (ctx) => 
           stanCore.GetWorkAllocationInfo({
             commentCategory: "Work status",
             workStatuses: ctx.urlParams.status,
-          }),
-      },
+          })
+      }
     }
   );
 }

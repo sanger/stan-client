@@ -12,7 +12,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** A row/column combination, either in the form "B5" (row 2, column 5), or "32.15" (row 32, column 15) */
+  /** A row/column combination, either in the form "B5" (row 2, column 5), or "32,15" (row 32, column 15) */
   Address: string;
   /** A date, typically in the format yyyy-mm-dd. */
   Date: string;
@@ -670,6 +670,8 @@ export type Mutation = {
   updateWorkNumBlocks: Work;
   /** Update the number of slides field in a work. */
   updateWorkNumSlides: Work;
+  /** Update the number of original samples field in a work. */
+  updateWorkNumOriginalSamples: Work;
   /** Update the priority of a work. */
   updateWorkPriority: Work;
   /** Record a new stain with time measurements. */
@@ -1059,10 +1061,12 @@ export type MutationSetSolutionEnabledArgs = {
 export type MutationCreateWorkArgs = {
   prefix: Scalars['String'];
   workType: Scalars['String'];
+  workRequester: Scalars['String'];
   project: Scalars['String'];
   costCode: Scalars['String'];
   numBlocks?: Maybe<Scalars['Int']>;
   numSlides?: Maybe<Scalars['Int']>;
+  numOriginalSamples?: Maybe<Scalars['Int']>;
 };
 
 
@@ -1094,6 +1098,16 @@ export type MutationUpdateWorkNumBlocksArgs = {
 export type MutationUpdateWorkNumSlidesArgs = {
   workNumber: Scalars['String'];
   numSlides?: Maybe<Scalars['Int']>;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationUpdateWorkNumOriginalSamplesArgs = {
+  workNumber: Scalars['String'];
+  numOriginalSamples?: Maybe<Scalars['Int']>;
 };
 
 
@@ -1316,6 +1330,19 @@ export type MutationEmptyArgs = {
 export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
+};
+
+/** The data about original tissues and their next replicate numbers. */
+export type NextReplicateData = {
+  __typename?: 'NextReplicateData';
+  /** The source barcodes for the new replicates. */
+  barcodes: Array<Scalars['String']>;
+  /** The id of the donor. */
+  donorId: Scalars['Int'];
+  /** The id of the spatial location. */
+  spatialLocationId: Scalars['Int'];
+  /** The next replicate number for this group. */
+  nextReplicateNumber: Scalars['Int'];
 };
 
 /** An operation and the pass/fails in the slots of its labware. */
@@ -1616,6 +1643,8 @@ export type Query = {
   workProgress: Array<WorkProgress>;
   /** Gets a reagent plate, if it exists. May return null. */
   reagentPlate?: Maybe<ReagentPlate>;
+  /** Gets the next replicate data for the given source labware barcodes. */
+  nextReplicateNumbers: Array<NextReplicateData>;
   /** Get the specified storage location. */
   location: Location;
   /** Get the information about stored items with the given barcodes. */
@@ -1897,6 +1926,15 @@ export type QueryWorkProgressArgs = {
  */
 export type QueryReagentPlateArgs = {
   barcode: Scalars['String'];
+};
+
+
+/**
+ * Get information from the application.
+ * These typically require no user privilege.
+ */
+export type QueryNextReplicateNumbersArgs = {
+  barcodes: Array<Scalars['String']>;
 };
 
 
@@ -2423,6 +2461,8 @@ export type Work = {
   costCode: CostCode;
   /** The unique (generated) string identifying this work. */
   workNumber: Scalars['String'];
+  /** The name of the person requesting the work.(Note sure how to deal with this as the existing work will all be null but future work we want it mandatory?) */
+  workRequester?: Maybe<ReleaseRecipient>;
   /** The current status of the work. */
   status: WorkStatus;
   /**
@@ -2435,6 +2475,11 @@ export type Work = {
    * This is set and updated by users during the course of the work.
    */
   numSlides?: Maybe<Scalars['Int']>;
+  /**
+   * The number of original samples that this work still needs to be done on.
+   * This is set and updated by users during the course of the work.
+   */
+  numOriginalSamples?: Maybe<Scalars['Int']>;
   /**
    * A string describing the priority of this work.
    * This is set and updated by users during the course of the work.
@@ -2772,8 +2817,11 @@ export type UserFieldsFragment = (
 
 export type WorkFieldsFragment = (
   { __typename?: 'Work' }
-  & Pick<Work, 'workNumber' | 'status' | 'numBlocks' | 'numSlides' | 'priority'>
-  & { project: (
+  & Pick<Work, 'workNumber' | 'status' | 'numBlocks' | 'numSlides' | 'numOriginalSamples' | 'priority'>
+  & { workRequester?: Maybe<(
+    { __typename?: 'ReleaseRecipient' }
+    & ReleaseRecipientFieldsFragment
+  )>, project: (
     { __typename?: 'Project' }
     & ProjectFieldsFragment
   ), costCode: (
@@ -3079,10 +3127,12 @@ export type ConfirmSectionMutation = (
 export type CreateWorkMutationVariables = Exact<{
   prefix: Scalars['String'];
   workType: Scalars['String'];
+  workRequester: Scalars['String'];
   project: Scalars['String'];
   costCode: Scalars['String'];
   numBlocks?: Maybe<Scalars['Int']>;
   numSlides?: Maybe<Scalars['Int']>;
+  numOriginalSamples?: Maybe<Scalars['Int']>;
 }>;
 
 
@@ -3792,6 +3842,20 @@ export type UpdateWorkNumBlocksMutation = (
   ) }
 );
 
+export type UpdateWorkNumOriginalSamplesMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  numOriginalSamples?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type UpdateWorkNumOriginalSamplesMutation = (
+  { __typename?: 'Mutation' }
+  & { updateWorkNumOriginalSamples: (
+    { __typename?: 'Work' }
+    & WorkFieldsFragment
+  ) }
+);
+
 export type UpdateWorkNumSlidesMutationVariables = Exact<{
   workNumber: Scalars['String'];
   numSlides?: Maybe<Scalars['Int']>;
@@ -4455,6 +4519,9 @@ export type GetWorkAllocationInfoQuery = (
   )>, comments: Array<(
     { __typename?: 'Comment' }
     & CommentFieldsFragment
+  )>, releaseRecipients: Array<(
+    { __typename?: 'ReleaseRecipient' }
+    & ReleaseRecipientFieldsFragment
   )> }
 );
 
@@ -4751,12 +4818,6 @@ export const ReleaseDestinationFieldsFragmentDoc = gql`
   enabled
 }
     `;
-export const ReleaseRecipientFieldsFragmentDoc = gql`
-    fragment ReleaseRecipientFields on ReleaseRecipient {
-  username
-  enabled
-}
-    `;
 export const SlotPassFailFieldsFragmentDoc = gql`
     fragment SlotPassFailFields on SlotPassFail {
   address
@@ -4782,6 +4843,12 @@ export const StainTypeFieldsFragmentDoc = gql`
   measurementTypes
 }
     `;
+export const ReleaseRecipientFieldsFragmentDoc = gql`
+    fragment ReleaseRecipientFields on ReleaseRecipient {
+  username
+  enabled
+}
+    `;
 export const ProjectFieldsFragmentDoc = gql`
     fragment ProjectFields on Project {
   name
@@ -4804,6 +4871,9 @@ export const WorkFieldsFragmentDoc = gql`
     fragment WorkFields on Work {
   workNumber
   status
+  workRequester {
+    ...ReleaseRecipientFields
+  }
   project {
     ...ProjectFields
   }
@@ -4815,9 +4885,11 @@ export const WorkFieldsFragmentDoc = gql`
   }
   numBlocks
   numSlides
+  numOriginalSamples
   priority
 }
-    ${ProjectFieldsFragmentDoc}
+    ${ReleaseRecipientFieldsFragmentDoc}
+${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}`;
 export const WorkProgressTimeStampFieldFragmentDoc = gql`
@@ -5003,14 +5075,16 @@ export const ConfirmSectionDocument = gql`
 }
     ${LabwareFieldsFragmentDoc}`;
 export const CreateWorkDocument = gql`
-    mutation CreateWork($prefix: String!, $workType: String!, $project: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int) {
+    mutation CreateWork($prefix: String!, $workType: String!, $workRequester: String!, $project: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int) {
   createWork(
     prefix: $prefix
     workType: $workType
+    workRequester: $workRequester
     project: $project
     costCode: $costCode
     numBlocks: $numBlocks
     numSlides: $numSlides
+    numOriginalSamples: $numOriginalSamples
   ) {
     ...WorkFields
   }
@@ -5418,6 +5492,16 @@ export const UnstoreBarcodeDocument = gql`
 export const UpdateWorkNumBlocksDocument = gql`
     mutation UpdateWorkNumBlocks($workNumber: String!, $numBlocks: Int) {
   updateWorkNumBlocks(workNumber: $workNumber, numBlocks: $numBlocks) {
+    ...WorkFields
+  }
+}
+    ${WorkFieldsFragmentDoc}`;
+export const UpdateWorkNumOriginalSamplesDocument = gql`
+    mutation UpdateWorkNumOriginalSamples($workNumber: String!, $numOriginalSamples: Int) {
+  updateWorkNumOriginalSamples(
+    workNumber: $workNumber
+    numOriginalSamples: $numOriginalSamples
+  ) {
     ...WorkFields
   }
 }
@@ -5895,12 +5979,16 @@ export const GetWorkAllocationInfoDocument = gql`
   comments(category: $commentCategory, includeDisabled: false) {
     ...CommentFields
   }
+  releaseRecipients(includeDisabled: false) {
+    ...ReleaseRecipientFields
+  }
 }
     ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
 ${WorkWithCommentFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}
-${CommentFieldsFragmentDoc}`;
+${CommentFieldsFragmentDoc}
+${ReleaseRecipientFieldsFragmentDoc}`;
 export const GetWorkTypesDocument = gql`
     query GetWorkTypes {
   workTypes(includeDisabled: true) {
@@ -6095,6 +6183,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     UpdateWorkNumBlocks(variables: UpdateWorkNumBlocksMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumBlocksMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumBlocksMutation>(UpdateWorkNumBlocksDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumBlocks');
+    },
+    UpdateWorkNumOriginalSamples(variables: UpdateWorkNumOriginalSamplesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumOriginalSamplesMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumOriginalSamplesMutation>(UpdateWorkNumOriginalSamplesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumOriginalSamples');
     },
     UpdateWorkNumSlides(variables: UpdateWorkNumSlidesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumSlidesMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumSlidesMutation>(UpdateWorkNumSlidesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumSlides');
