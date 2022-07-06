@@ -18,14 +18,14 @@ describe("Registration", () => {
     shouldBehaveLikeARegistrationForm(RegistrationType.TISSUE_SAMPLE);
 
     it("does not require External Identifier", () => {
-      cy.findByLabelText("External Identifier").focus().blur();
+      cy.findByTestId("External Identifier").focus().blur();
       cy.findByText("External Identifier is a required field").should(
         "not.exist"
       );
     });
 
     it("requires External Identifier to only permit certain characters", () => {
-      cy.findByLabelText("External Identifier").type("EXT&99").blur();
+      cy.findByTestId("External Identifier").type("EXT&99").blur();
       cy.findByText(
         "External Identifier contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted"
       ).should("be.visible");
@@ -232,11 +232,11 @@ function fillInForm() {
     force: true,
   });
   cy.findByLabelText("Species").select("Human");
-  cy.findByLabelText("External Identifier").type("EXT_ID_1");
+  cy.findByTestId("External Identifier").type("EXT_ID_1");
   cy.findByLabelText("HuMFre").select("HuMFre1");
   cy.findByLabelText("Tissue Type").select("Liver");
   cy.findByLabelText("Spatial Location").select("3");
-  cy.findByLabelText("Replicate Number").type("2");
+  cy.findByTestId("Replicate Number").type("2");
   cy.findByLabelText("Labware Type").select("Pot");
   cy.findByLabelText("Fixative").select("None");
   cy.findByLabelText("Solution").select("Formalin");

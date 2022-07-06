@@ -12,30 +12,29 @@ describe("Block Processing", () => {
   });
 
   describe("Add Labware button", () => {
-    context("when there is no source labware loaded", () => {
-      it("is disabled", () => {
+    context("when no source labware is scanned", () => {
+      it("Add labware button is disabled", () => {
         cy.findByText("+ Add Labware").should("be.disabled");
       });
     });
 
     context("when source labware is loaded", () => {
       before(() => {
-        scanInput();
+        scanInput("STAN-113");
       });
 
-      it("is enabled", () => {
+      it("Add labware button is enabled", () => {
         cy.findByText("+ Add Labware").should("not.be.disabled");
       });
     });
   });
-
   describe("Source labware table", () => {
     context("when destination labware is added", () => {
       before(() => {
         cy.findByText("+ Add Labware").click();
       });
 
-      it("scan labware input becomes disabled", () => {
+      it(" disables scan labware input", () => {
         cy.get("#labwareScanInput").should("be.disabled");
       });
 
@@ -44,13 +43,12 @@ describe("Block Processing", () => {
           cy.findByText("Delete Layout").click();
         });
 
-        it("scan labware input is re-enabled", () => {
+        it("re-enables scan labware input", () => {
           cy.get("#labwareScanInput").should("not.be.disabled");
         });
       });
     });
   });
-
   describe("Adding multiple labware", () => {
     before(() => {
       cy.findByTestId("labwareType").select("Tube");
@@ -66,55 +64,44 @@ describe("Block Processing", () => {
 
   describe("Labware Layout", () => {
     context("when labware layout is added", () => {
-      it("doesn't enable the Save button", () => {
-        cy.findByRole("button", { name: /Save/i }).should("be.disabled");
-      });
-
-      it("should autofill all replicate numbers", () => {
-        cy.findAllByLabelText("Replicate Number")
-          .first()
-          .should("have.value", 1);
-        cy.findAllByLabelText("Replicate Number")
-          .last()
-          .should("have.value", 2);
-      });
-    });
-
-    context("when editing a layout", () => {
-      before(() => {
-        cy.findAllByText("Edit Layout").first().click();
-        cy.findByRole("dialog").within(() => {
-          cy.findByText("STAN-113").click();
-          cy.findByText("A1").click();
-          cy.findByText("Done").click();
-        });
-      });
-      it("should display STAN-113", () => {
-        cy.findByTestId(`divSection-Tube`).within(() => {
-          cy.findByText("STAN-113").should("exist");
-        });
-      });
-    });
-
-    context("when removing a layout", () => {
-      before(() => {
-        cy.findAllByTestId("plan")
-          .first()
-          .within(() => {
-            cy.findByRole("button", { name: /Delete Layout/i }).click();
+      context("when editing a layout", () => {
+        before(() => {
+          cy.findAllByText("Edit Layout").first().click();
+          cy.findByRole("dialog").within(() => {
+            cy.findByText("STAN-113").click();
+            cy.findByText("A1").click();
+            cy.findByText("Done").click();
           });
-      });
-
-      it("removes the panel", () => {
-        cy.findByTestId(`divSection-Tube`).within(() => {
-          cy.findAllByTestId("plan").should("have.length", 1);
+        });
+        it("should display STAN-113", () => {
+          cy.findByTestId(`divSection-Tube`).within(() => {
+            cy.findByText("STAN-113").should("exist");
+          });
         });
       });
-      after(() => {
-        cy.findByText("Delete Layout").click();
+
+      context("when removing a layout", () => {
+        before(() => {
+          cy.findAllByTestId("plan")
+            .first()
+            .within(() => {
+              cy.findByRole("button", { name: /Delete Layout/i }).click();
+            });
+        });
+
+        it("removes the panel", () => {
+          cy.findByTestId(`divSection-Tube`).within(() => {
+            cy.findAllByTestId("plan").should("have.length", 1);
+          });
+        });
+        after(() => {
+          cy.findByText("Delete Layout").click();
+        });
       });
     });
+  });
 
+  describe("Prebarcoded tube", () => {
     context("when adding a Prebarcoded tube", () => {
       before(() => {
         cy.findAllByRole("combobox").last().select("Prebarcoded tube");
@@ -128,13 +115,23 @@ describe("Block Processing", () => {
       it("shows other fields", () => {
         checkBlockProcessingFields();
       });
+    });
+    context("when entering an invalid value in Barcode field", () => {
+      before(() => {
+        cy.findAllByLabelText("Barcode").last().type("Barcode1{enter}");
+      });
+      it("should display an error message", () => {
+        cy.findByText(
+          "Barcode should be in the format with two letters followed by 8 numbers"
+        ).should("be.visible");
+      });
       after(() => {
         cy.findByText("Delete Layout").click();
       });
     });
     context("when adding labware other than Prebarcoded tube", () => {
       before(() => {
-        addTubeLabware();
+        addLabware("Tube");
       });
 
       it("should not show Barcode field", () => {
@@ -144,130 +141,163 @@ describe("Block Processing", () => {
         checkBlockProcessingFields();
       });
     });
+  });
 
-    describe("Leaving page", () => {
-      context("when I try and leave the page", () => {
-        it("shows a confirm box", () => {
-          cy.on("window:confirm", (str) => {
-            expect(str).to.equal(
-              "You have unsaved changes. Are you sure you want to leave?"
-            );
-            // Returning false cancels the event
-            return false;
-          });
-
-          cy.findByText("Search").click();
-        });
-      });
+  describe("Auto numbering of replicate numbers", () => {
+    before(() => {
+      cy.visit("/lab/original_sample_processing?type=block");
     });
-
-    describe("Save button", () => {
-      context("When all other fields filled in but not source selected", () => {
+    context(
+      "when adding grouped labware for replicate number baed on original samples",
+      () => {
+        const sources = ["STAN-1111", "STAN-2111", "STAN-3111", "STAN-4111"];
         before(() => {
-          cy.visit("/lab/original_sample_processing?type=block");
-          scanInput();
-          addTubeLabware();
-          fillSGPNumber();
-          fillMedium();
-        });
-        it("Save button is disabled", () => {
-          cy.findByRole("button", { name: /Save/i }).should("be.disabled");
-        });
-      });
-      context(
-        "when source selected and all other fields filled in except SGP Number",
-        () => {
-          before(() => {
-            cy.visit("/lab/original_sample_processing?type=block");
-            scanInput();
-            addTubeLabware();
-            selectSource();
-            fillMedium();
+          //Mock handler will ensure that they are grouped in two's
+          sources.forEach((barcode) => {
+            scanInput(barcode);
           });
-          it("Save button is disabled", () => {
-            cy.findByRole("button", { name: /Save/i }).should("be.disabled");
-          });
-        }
-      );
-      context(
-        "when source selected and all other fields filled in except Medium",
-        () => {
-          before(() => {
-            cy.visit("/lab/original_sample_processing?type=block");
-            scanInput();
-            addTubeLabware();
-            selectSource();
-            fillSGPNumber();
-          });
-          it("Save button is disabled", () => {
-            cy.findByRole("button", { name: /Save/i }).should("be.disabled");
-          });
-        }
-      );
-      context("when all required fields are filled in", () => {
-        before(() => {
-          cy.visit("/lab/original_sample_processing?type=block");
-          scanInput();
-          addTubeLabware();
-          selectSource();
-          fillSGPNumber();
-          fillMedium();
-        });
-        it("Save button is enabled", () => {
-          cy.findByRole("button", { name: /Save/i }).should("be.enabled");
-        });
-      });
-    });
-
-    describe("API Requests", () => {
-      context("when request is successful", () => {
-        context("when I click Save", () => {
-          before(() => {
-            // Store the barcode of the created labware
-            cy.msw().then(({ worker, graphql }) => {
-              const labwareType = labwareTypeInstances.find(
-                (lt) => lt.name === LabwareTypeName.TUBE
-              );
-              const barcode = "STAN-111";
-              const newLabware = labwareFactory.build({ labwareType, barcode });
-
-              worker.use(
-                graphql.mutation<
-                  PerformTissueBlockMutation,
-                  PerformTissueBlockMutationVariables
-                >("PerformTissueBlock", (req, res, ctx) => {
-                  return res(
-                    ctx.data({
-                      performTissueBlock: {
-                        labware: [newLabware],
-                        operations: [],
-                      },
-                    })
-                  );
-                })
-              );
+          sources.forEach((barcode, indx) => {
+            cy.findByText("+ Add Labware").click();
+            cy.findAllByText("Edit Layout").eq(indx).click();
+            cy.findByRole("dialog").within(() => {
+              cy.findAllByText(barcode).first().click();
+              cy.findByText("A1").click();
+              cy.findByText("Done").click();
             });
-            cy.findByRole("button", { name: /Save/i }).click();
-          });
-
-          it("displays Block processing complete page", () => {
-            cy.findByText("Block processing complete").should("be.visible");
-            cy.findByRole("table").should("exist");
-          });
-
-          it("displays the destination labware", function () {
-            cy.findAllByText("STAN-111").its("length").should("be.gte", 1);
           });
         });
 
-        context("Printing labels", () => {
-          before(() => {
-            printLabels();
-          });
+        it("should autofill all replicate numbers consecutively based on original samples of source labware", () => {
+          cy.findAllByLabelText("Replicate Number")
+            .eq(0)
+            .should("have.value", 5);
+          cy.findAllByLabelText("Replicate Number")
+            .eq(1)
+            .should("have.value", 6);
+          cy.findAllByLabelText("Replicate Number")
+            .eq(2)
+            .should("have.value", 5);
+          cy.findAllByLabelText("Replicate Number")
+            .eq(3)
+            .should("have.value", 6);
+        });
+      }
+    );
+    context("when adding multiple labware with same source labware", () => {
+      before(() => {
+        cy.findByText("+ Add Labware").click();
+        cy.findAllByText("Edit Layout").eq(4).click();
+        cy.findByRole("dialog").within(() => {
+          cy.findByText("STAN-1111").click();
+          cy.findByText("A1").click();
+          cy.findByText("Done").click();
+        });
+      });
+      it("should autofill all replicate numbers so that it continues the sequence of source labware", () => {
+        cy.findAllByLabelText("Replicate Number").eq(4).should("have.value", 7);
+      });
+    });
+  });
+  describe("Leaving page", () => {
+    context("when I try and leave the page", () => {
+      it("shows a confirm box", () => {
+        cy.on("window:confirm", (str) => {
+          expect(str).to.equal(
+            "You have unsaved changes. Are you sure you want to leave?"
+          );
+          // Returning false cancels the event
+          return false;
+        });
 
-          it("shows a success message for print", () => {
-            cy.findByText(/Tube Printer successfully printed/).should("exist");
+        cy.findByText("Search").click();
+      });
+    });
+  });
+  describe("Save button", () => {
+    context("When all other fields filled in but not source selected", () => {
+      before(() => {
+        cy.visit("/lab/original_sample_processing?type=block");
+        scanInput("STAN-113");
+        addLabware("Tube");
+        cy.findByLabelText("Medium").select("");
+        cy.findAllByRole("combobox").first().select("");
+        cy.findByRole("button", { name: /Save/i }).click();
+      });
+      it("Shows error for replicate number", () => {
+        cy.findByText("Replicate number is required").should("be.visible");
+      });
+      it("Shows error for medium", () => {
+        cy.findByText("Medium is required").should("be.visible");
+      });
+      it("Shows error for SGP Number", () => {
+        cy.findByText("SGP number is required").should("be.visible");
+      });
+    });
+  });
+  describe("API Requests", () => {
+    context("when request is successful", () => {
+      context("when I click Save", () => {
+        before(() => {
+          cy.visit("/lab/original_sample_processing?type=block");
+          // Store the barcode of the created labware
+          cy.msw().then(({ worker, graphql }) => {
+            const newLabware = [
+              LabwareTypeName.TUBE,
+              LabwareTypeName.PRE_BARCODED_TUBE,
+            ].map((type) => {
+              const labwareType = labwareTypeInstances.find(
+                (lt) => lt.name === type
+              );
+              const barcode = "Dest-STAN-111";
+              return labwareFactory.build({ labwareType, barcode });
+            });
+            worker.use(
+              graphql.mutation<
+                PerformTissueBlockMutation,
+                PerformTissueBlockMutationVariables
+              >("PerformTissueBlock", (req, res, ctx) => {
+                return res(
+                  ctx.data({
+                    performTissueBlock: {
+                      labware: newLabware,
+                      operations: [],
+                    },
+                  })
+                );
+              })
+            );
           });
+          scanInput("STAN-113");
+          addLabware("Tube");
+          selectSource();
+          addLabware("Prebarcoded tube");
+          cy.findAllByText("Barcode").last().type("FF10153223");
+          cy.findAllByText("Edit Layout").last().click();
+          cy.findByRole("dialog").within(() => {
+            cy.findByText("STAN-113").click();
+            cy.findByText("A1").click();
+            cy.findByText("Done").click();
+          });
+          fillSGPNumber();
+          cy.findByRole("button", { name: /Save/i }).click();
+        });
+        it("displays Block processing complete page", () => {
+          cy.findByText("Block processing complete").should("be.visible");
+          cy.findByRole("table").should("exist");
+        });
+
+        it("should not display all destination labware except Pre-barcoded Tube", function () {
+          cy.findAllByText("Dest-STAN-111").its("length").should("be.gte", 1);
+        });
+      });
+
+      context("Printing labels", () => {
+        before(() => {
+          printLabels();
+        });
+
+        it("shows a success message for print", () => {
+          cy.findByText(/Tube Printer successfully printed/).should("exist");
         });
       });
     });
@@ -275,8 +305,8 @@ describe("Block Processing", () => {
     context("when request is unsuccessful", () => {
       before(() => {
         cy.visit("/lab/original_sample_processing?type=block");
-        scanInput();
-        addTubeLabware();
+        scanInput("STAN-113");
+        addLabware("Tube");
         selectSource();
         fillSGPNumber();
         fillMedium();
@@ -311,19 +341,17 @@ describe("Block Processing", () => {
     });
   });
 });
-
 function checkBlockProcessingFields() {
   cy.findByLabelText("Replicate Number").should("be.visible");
-  cy.findByLabelText("Discard source?").should("be.visible");
   cy.findByLabelText("Medium").should("be.visible");
   cy.findByLabelText("Processing comments").should("be.visible");
 }
 
-function scanInput() {
-  cy.get("#labwareScanInput").type("STAN-113{enter}");
+function scanInput(barcode: string) {
+  cy.get("#labwareScanInput").type(`${barcode}{enter}`);
 }
-function addTubeLabware() {
-  cy.findAllByRole("combobox").last().select("Tube");
+function addLabware(labwareType: string) {
+  cy.findAllByRole("combobox").last().select(labwareType);
   cy.findByText("+ Add Labware").click();
 }
 function fillSGPNumber() {

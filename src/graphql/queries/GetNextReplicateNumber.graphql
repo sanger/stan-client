@@ -1,0 +1,5 @@
+query GetNextReplicateNumber($barcodes:[String!]!) {
+    nextReplicateNumbers(barcodes: $barcodes) {
+        ...NextReplicateDataFields
+    }
+}
