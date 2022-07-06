@@ -12,7 +12,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** A row/column combination, either in the form "B5" (row 2, column 5), or "32.15" (row 32, column 15) */
+  /** A row/column combination, either in the form "B5" (row 2, column 5), or "32,15" (row 32, column 15) */
   Address: string;
   /** A date, typically in the format yyyy-mm-dd. */
   Date: string;
@@ -718,6 +718,7 @@ export type Mutation = {
   empty: UnstoreResult;
   /** Set the custom name of a specified location. */
   setLocationCustomName: Location;
+  recordSampleProcessingComments: OperationResult;
 };
 
 
@@ -1316,6 +1317,15 @@ export type MutationEmptyArgs = {
 export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationRecordSampleProcessingCommentsArgs = {
+  request: SampleProcessingCommentRequest;
 };
 
 /** The data about original tissues and their next replicate numbers. */
@@ -2103,6 +2113,15 @@ export type Sample = {
   tissue: Tissue;
   /** The state of this particular sample. */
   bioState: BioState;
+};
+
+export type SampleProcessingComment = {
+  barcode: Scalars['String'];
+  commentId: Scalars['Int'];
+};
+
+export type SampleProcessingCommentRequest = {
+  labware: Array<SampleProcessingComment>;
 };
 
 /** Specification of a result being recording. */
@@ -3418,6 +3437,32 @@ export type RecordRnaAnalysisMutation = (
   ) }
 );
 
+export type RecordSampleProcessingCommentsMutationVariables = Exact<{
+  request: SampleProcessingCommentRequest;
+}>;
+
+
+export type RecordSampleProcessingCommentsMutation = (
+  { __typename?: 'Mutation' }
+  & { recordSampleProcessingComments: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
+);
+
 export type RecordStainResultMutationVariables = Exact<{
   request: ResultRequest;
 }>;
@@ -4408,6 +4453,20 @@ export type GetReleaseInfoQuery = (
   )> }
 );
 
+export type GetSampleProcessingCommentsInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSampleProcessingCommentsInfoQuery = (
+  { __typename?: 'Query' }
+  & { blockProcessing: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )>, potProcessing: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
 export type GetSearchInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -5250,6 +5309,24 @@ export const RecordRnaAnalysisDocument = gql`
   }
 }
     `;
+export const RecordSampleProcessingCommentsDocument = gql`
+    mutation RecordSampleProcessingComments($request: SampleProcessingCommentRequest!) {
+  recordSampleProcessingComments(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const RecordStainResultDocument = gql`
     mutation RecordStainResult($request: ResultRequest!) {
   recordStainResult(request: $request) {
@@ -5893,6 +5970,22 @@ export const GetReleaseInfoDocument = gql`
 }
     ${ReleaseDestinationFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}`;
+export const GetSampleProcessingCommentsInfoDocument = gql`
+    query GetSampleProcessingCommentsInfo {
+  blockProcessing: comments(
+    includeDisabled: false
+    category: "Tissue Block processing"
+  ) {
+    ...CommentFields
+  }
+  potProcessing: comments(
+    includeDisabled: false
+    category: "Tissue Pot processing"
+  ) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetSearchInfoDocument = gql`
     query GetSearchInfo {
   tissueTypes {
@@ -6071,6 +6164,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     RecordRNAAnalysis(variables: RecordRnaAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordRnaAnalysisMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordRNAAnalysis');
+    },
+    RecordSampleProcessingComments(variables: RecordSampleProcessingCommentsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordSampleProcessingCommentsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordSampleProcessingCommentsMutation>(RecordSampleProcessingCommentsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordSampleProcessingComments');
     },
     RecordStainResult(variables: RecordStainResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordStainResultMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordStainResult');
@@ -6254,6 +6350,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetReleaseInfo(variables?: GetReleaseInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetReleaseInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetReleaseInfoQuery>(GetReleaseInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetReleaseInfo');
+    },
+    GetSampleProcessingCommentsInfo(variables?: GetSampleProcessingCommentsInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSampleProcessingCommentsInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSampleProcessingCommentsInfoQuery>(GetSampleProcessingCommentsInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSampleProcessingCommentsInfo');
     },
     GetSearchInfo(variables?: GetSearchInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSearchInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetSearchInfoQuery>(GetSearchInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSearchInfo');
