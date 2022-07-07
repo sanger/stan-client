@@ -18,14 +18,24 @@ export default function PasteRestrictedBox({
   onChange
 }: PasteRestrictedBoxProps) {
   const [value, setValue] = useState<string>("");
+  const [disableInput, setDisableInput] = useState<boolean>(true)
 
   const handlePaste = async () => {
-    await navigator.clipboard.readText().then(
-      (text) => {
-        setValue(text)
-        onChange?.(text)
-      }
-    )
+    try {
+      await navigator.clipboard.readText().then(
+        (text) => {
+          setValue(text)
+          onChange?.(text)
+        }
+      )
+    } catch (error) {
+      setDisableInput(false)
+    }
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value)
+    onChange?.(e.target.value)
   }
 
   const handleClear = () => {
@@ -37,14 +47,19 @@ export default function PasteRestrictedBox({
     <>
       <div className="flex flex-row">
         <span className="m:w-2/3 md:w-1/2 flex flex-row items-center w-full rounded-l-md border border-r-0">
-          <div className="block px-3 py-3 text-md">
-            { value  }
-          </div>
+          <input
+            id="pasteInput"
+            className="block px-3 py-3 text-md w-full bg-white"
+            value={value}
+            disabled={disableInput}
+            onChange={(text) => handleChange(text)}
+          >
+          </input>
         </span>
         { value !== "" &&
           <span className="flex items-center border border-l-0">
             <RemoveButton
-              className="px-3 flex"
+              className="px-3 flex bg-zinc-200"
               type={"button"}
               onClick={() => { handleClear() }}
             />
@@ -59,8 +74,11 @@ export default function PasteRestrictedBox({
           <PasteIcon className="block h-5 w-5"/>
         </button>
       </div>
-      { value === "" &&
+      { value === "" && disableInput &&
         <MutedText>Click the paste button above to paste in an External ID from your clipboard</MutedText>
+      }
+      { value === "" && !disableInput &&
+        <MutedText className="text-red-500">We can't read your clipboard! Please type in the External ID in the field above</MutedText>
       }
     </>
   );
