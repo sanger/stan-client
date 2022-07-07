@@ -88,26 +88,28 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
       id: "comments",
       Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
         return (
-          <FormikSelect
-            name={`labware.${row.index}.solution`}
-            label={""}
-            emptyOption
-          >
-            {comments.map((comment) => (
-              <option value={comment.id} key={comment.id}>
-                {comment.text}
-              </option>
-            ))}
-          </FormikSelect>
+          <div className={"min-w-25"}>
+            <FormikSelect
+              name={`labware.${row.index}.comment`}
+              label={""}
+              emptyOption
+            >
+              {comments.map((comment) => (
+                <option value={comment.id} key={comment.id}>
+                  {comment.text}
+                </option>
+              ))}
+            </FormikSelect>
+          </div>
         );
       },
     };
-  }, [sampleCommentsInfo]);
+  }, [comments]);
 
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Solution Transfer</AppShell.Title>
+        <AppShell.Title>Sample Processing Comments</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className={"max-w-screen-xl mx-auto"}>
@@ -144,8 +146,8 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
                         <Heading level={3}>Labware</Heading>
                         <LabwareScanner
                           /***
-                                                   Handlers to update the form data whenever labware list changes
-                                                  ***/
+                          Handlers to update the form data whenever labware list changes
+                          ***/
                           onChange={(labware) => {
                             labware.forEach((lw, indx) =>
                               setFieldValue(
@@ -174,7 +176,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
                             {values.labware.length > 0 && (
                               <motion.div
                                 variants={variants.fadeInWithLift}
-                                className={"pt-10"}
+                                className={"pt-10 pb-5"}
                               >
                                 <FormikSelect
                                   name={"applyAllComment"}
@@ -251,7 +253,9 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
 
                     <OperationCompleteModal
                       show={submissionResult !== undefined}
-                      message={"Solution transfer recorded on all labware"}
+                      message={
+                        "Sample processing comments recorded on all labware"
+                      }
                       onReset={reload}
                     >
                       <p>
