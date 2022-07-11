@@ -59,7 +59,7 @@ export default function PasteRestrictedBox({
         { value !== "" &&
           <span className="flex items-center border border-l-0">
             <RemoveButton
-              className="px-3 flex bg-zinc-200"
+              className="px-3 flex"
               type={"button"}
               onClick={() => { handleClear() }}
             />

@@ -4,11 +4,12 @@ import Heading from "../components/Heading";
 import LabwareScanner from "../components/labwareScanner/LabwareScanner";
 import LabwareScanTable from "../components/labwareScanPanel/LabwareScanPanel";
 import labwareScanTableColumns from "../components/dataTable/labwareColumns";
-import BlueButton from "../components/buttons/BlueButton";
 import PasteRestrictedBox from "../components/PasteRestrictedBox"
 import OperationCompleteModal from "../components/modal/OperationCompleteModal";
 import { FormikErrorMessage } from "../components/forms";
+import PinkButton from "../components/buttons/PinkButton";
 import Warning from "../components/notifications/Warning";
+import GrayBox, { Sidebar } from "../components/layouts/GrayBox";
 import { motion } from "framer-motion";
 import variants from "../lib/motionVariants";
 import { Form, Formik } from "formik";
@@ -42,7 +43,6 @@ export default function AddExternalID() {
     });
   }
 
-  const formLocked = !current.matches("fillingOutForm");
   const serverError = current.context.serverError;
 
   return (
@@ -67,54 +67,87 @@ export default function AddExternalID() {
           >
             {({ values, setFieldValue }) => (
               <Form>
-                <motion.div
-                  variants={variants.fadeInWithLift}
-                  className="space-y-4"
-                >
-                  {serverError && <Warning error={serverError} />}
-                  <Heading level={3}>Labware</Heading>
-                  <LabwareScanner
-                    limit={1}
-                    onAdd={(labware) => {
-                      setFieldValue(
-                        "labwareBarcode",
-                        labware.barcode
-                      );
-                    }}
-                    onRemove={() => {
-                      setFieldValue("labwareBarcode", "");
-                    }}
+                <GrayBox>
+                  <motion.div
+                    variants={variants.fadeInParent}
+                    initial={"hidden"}
+                    animate={"visible"}
+                    exit={"hidden"}
+                    className="md:w-2/3 space-y-5"
                   >
-                    <motion.div variants={variants.fadeInWithLift}>
-                      <LabwareScanTable
-                        columns={[
-                          labwareScanTableColumns.barcode(),
-                          labwareScanTableColumns.donorId(),
-                          labwareScanTableColumns.tissueType(),
-                          labwareScanTableColumns.spatialLocation(),
-                          labwareScanTableColumns.replicate(),
-                          labwareScanTableColumns.labwareType(),
-                          labwareScanTableColumns.fixative(),
-                          labwareScanTableColumns.medium()
-                        ]}
-                      />
-                    </motion.div>
-                    <FormikErrorMessage name={"labwareBarcode"} />
-                  </LabwareScanner>
-                  <Heading level={3}>External ID</Heading>
-                  <motion.div>
-                    <PasteRestrictedBox
-                      onChange={(externalName) => { 
+                    {serverError && <Warning error={serverError} />}
+                    <Heading level={3}>Labware</Heading>
+                    <LabwareScanner
+                      limit={1}
+                      onAdd={(labware) => {
                         setFieldValue(
-                          "externalName",
-                          externalName
+                          "labwareBarcode",
+                          labware.barcode
                         );
                       }}
-                    />
-                    <FormikErrorMessage name={"externalName"} />
+                      onRemove={() => {
+                        setFieldValue("labwareBarcode", "");
+                      }}
+                    >
+                      <motion.div variants={variants.fadeInWithLift}>
+                        <LabwareScanTable
+                          columns={[
+                            labwareScanTableColumns.barcode(),
+                            labwareScanTableColumns.donorId(),
+                            labwareScanTableColumns.tissueType(),
+                            labwareScanTableColumns.spatialLocation(),
+                            labwareScanTableColumns.replicate(),
+                            labwareScanTableColumns.labwareType(),
+                            labwareScanTableColumns.fixative(),
+                            labwareScanTableColumns.medium()
+                          ]}
+                        />
+                      </motion.div>
+                      <FormikErrorMessage name={"labwareBarcode"} />
+                    </LabwareScanner>
+                    <Heading level={3}>External ID</Heading>
+                    <motion.div>
+                      <PasteRestrictedBox
+                        onChange={(externalName) => { 
+                          setFieldValue(
+                            "externalName",
+                            externalName
+                          );
+                        }}
+                      />
+                      <FormikErrorMessage name={"externalName"} />
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-                <div className="flex flex-row mx-auto m:w-2/3 md:w-1/2">
+
+                  <Sidebar>
+                    <Heading level={3} showBorder={false}>
+                      Summary
+                    </Heading>
+                    <div className="my-4 mx-4 sm:mx-auto p-1 rounded-md bg-sdb-400 italic">
+                      <p className="my-3 text-white-800 text-xs leading-normal">
+                        Once 
+                        {" "}
+                        <span className="font-bold text-white-800">
+                          a labware
+                        </span>{" "}
+                        has been scanned in and
+                        {" "}
+                        <span className="font-bold text-white-800">
+                          a valid external id
+                        </span>{" "}
+                        is given, click
+                        <span className="font-bold text-white-800">
+                          {" "}
+                          Submit
+                        </span>{" "} 
+                        to record the external id on the sample.
+                      </p>
+                    </div>
+                    <PinkButton type="submit" className="sm:w-full">
+                      Submit
+                    </PinkButton>
+                  </Sidebar>
+
                   <OperationCompleteModal
                     show={current.matches("submitted")}
                     message={"Operation Complete"}
@@ -125,24 +158,7 @@ export default function AddExternalID() {
                       Form" button. Otherwise you can return to the Home screen.
                     </p>
                   </OperationCompleteModal>
-                  <div className="my-4 mx-4 p-4 rounded-md bg-gray-100">
-                    <p className="my-3 text-gray-800 text-sm text-center">
-                      Once a labware has been scanned in and a valid external id is given, click save 
-                      to record the external id on the sample
-                    </p>
-                    <div className="flex flex-row items-center justify-center gap-4">
-                      <BlueButton
-                        id="save"
-                        disabled={formLocked}
-                        className="whitespace-nowrap"
-                        action={"primary"}
-                        type="submit"
-                      >
-                        Save
-                      </BlueButton>
-                    </div>
-                  </div>
-                </div>
+                </GrayBox>
               </Form>
             )}
           </Formik>

@@ -11,12 +11,12 @@ describe("Add External ID page", () => {
 
     context("when form is submitted without filling in any fields", () => {
         before(() => {
-            cy.findByText("Save").click();
+            cy.findByRole("button", { name: "Submit" }).click();
         });
 
-        it("has the correct properties for the save button", () => {
-            cy.findByText("Save").should("be.visible");
-            cy.findByText("Save").should("not.be.disabled");
+        it("has the correct properties for the Submit button", () => {
+            cy.findByRole("button", { name: "Submit" }).should("be.visible");
+            cy.findByRole("button", { name: "Submit" }).should("not.be.disabled");
         });
 
         it("shows an error about labwares", () => {
