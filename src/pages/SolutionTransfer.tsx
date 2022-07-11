@@ -194,7 +194,7 @@ const SolutionTransfer: React.FC<SolutionTransferParams> = ({
                             {values.labware.length > 0 && (
                               <motion.div
                                 variants={variants.fadeInWithLift}
-                                className={"pt-10"}
+                                className={"pt-10 pb-5"}
                               >
                                 <FormikSelect
                                   name={"applyAllSolution"}
