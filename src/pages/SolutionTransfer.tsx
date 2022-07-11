@@ -70,8 +70,8 @@ const SolutionTransfer: React.FC<SolutionTransferParams> = ({
             solution: Yup.string().required("Solution is a required field"),
           })
         )
-        .required("Atleast one labware must be scanned")
-        .min(1, "Atleast one labware must be scanned"),
+        .required("At least one labware must be scanned")
+        .min(1, "At least one labware must be scanned"),
       applyAllSolution: Yup.string().optional(),
     });
   }

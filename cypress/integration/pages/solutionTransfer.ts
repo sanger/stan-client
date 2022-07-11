@@ -18,7 +18,7 @@ describe("Solution Transfer", () => {
       });
 
       it("shows a validation error for labware", () => {
-        cy.findByText("Atleast one labware must be scanned").should(
+        cy.findByText("At least one labware must be scanned").should(
           "be.visible"
         );
       });
