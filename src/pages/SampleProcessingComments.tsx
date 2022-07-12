@@ -72,7 +72,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
         .of(
           Yup.object().shape({
             barcode: Yup.string().required("Barcode is a required field"),
-            comment: Yup.number().required("Comment is a required field"),
+            commentId: Yup.number().required("Comment is a required field"),
           })
         )
         .required("Atleast one labware must be scanned")
@@ -90,7 +90,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
         return (
           <div className={"min-w-25"}>
             <FormikSelect
-              name={`labware.${row.index}.comment`}
+              name={`labware.${row.index}.commentId`}
               label={""}
               emptyOption
             >
@@ -158,7 +158,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
                           }}
                           onAdd={() => {
                             setFieldValue(
-                              `labware.${values.labware.length}.comment`,
+                              `labware.${values.labware.length}.commentId`,
                               values.applyAllComment ?? -1
                             );
                           }}
@@ -192,7 +192,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
                                     );
                                     values.labware.forEach((lw, indx) =>
                                       setFieldValue(
-                                        `labware.${indx}.comment`,
+                                        `labware.${indx}.commentId`,
                                         evt.currentTarget.value
                                       )
                                     );

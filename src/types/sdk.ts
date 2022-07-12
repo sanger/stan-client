@@ -704,6 +704,8 @@ export type Mutation = {
   performTissueBlock: OperationResult;
   /** Process an original sample into pots. */
   performPotProcessing: OperationResult;
+  /** Record ops to add sample processing comments. */
+  recordSampleProcessingComments: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -718,7 +720,6 @@ export type Mutation = {
   empty: UnstoreResult;
   /** Set the custom name of a specified location. */
   setLocationCustomName: Location;
-  recordSampleProcessingComments: OperationResult;
 };
 
 
@@ -1256,6 +1257,15 @@ export type MutationPerformPotProcessingArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
+export type MutationRecordSampleProcessingCommentsArgs = {
+  request: SampleProcessingCommentRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
 export type MutationAddUserArgs = {
   username: Scalars['String'];
 };
@@ -1317,15 +1327,6 @@ export type MutationEmptyArgs = {
 export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
-};
-
-
-/**
- * Send information to the application.
- * These typically require a user with the suitable permission for the particular request.
- */
-export type MutationRecordSampleProcessingCommentsArgs = {
-  request: SampleProcessingCommentRequest;
 };
 
 /** The data about original tissues and their next replicate numbers. */
@@ -2115,12 +2116,17 @@ export type Sample = {
   bioState: BioState;
 };
 
+/** A labware barcode and a comment id to add. */
 export type SampleProcessingComment = {
+  /** The barcode of the labware. */
   barcode: Scalars['String'];
+  /** The id of the comment. */
   commentId: Scalars['Int'];
 };
 
+/** Request to record operations and add comments to labware. */
 export type SampleProcessingCommentRequest = {
+  /** The comments to add for each labware. */
   labware: Array<SampleProcessingComment>;
 };
 
