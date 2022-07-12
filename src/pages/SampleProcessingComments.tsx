@@ -58,7 +58,6 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
   );
 
   const { serverError, submissionResult } = current.context;
-
   const comments = React.useMemo(() => {
     return [
       ...sampleCommentsInfo.blockProcessing,
