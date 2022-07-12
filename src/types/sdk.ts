@@ -704,8 +704,6 @@ export type Mutation = {
   performTissueBlock: OperationResult;
   /** Process an original sample into pots. */
   performPotProcessing: OperationResult;
-  /** Record ops to add sample processing comments. */
-  recordSampleProcessingComments: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -1250,15 +1248,6 @@ export type MutationPerformTissueBlockArgs = {
  */
 export type MutationPerformPotProcessingArgs = {
   request: PotProcessingRequest;
-};
-
-
-/**
- * Send information to the application.
- * These typically require a user with the suitable permission for the particular request.
- */
-export type MutationRecordSampleProcessingCommentsArgs = {
-  request: SampleProcessingCommentRequest;
 };
 
 
@@ -2114,20 +2103,6 @@ export type Sample = {
   tissue: Tissue;
   /** The state of this particular sample. */
   bioState: BioState;
-};
-
-/** A labware barcode and a comment id to add. */
-export type SampleProcessingComment = {
-  /** The barcode of the labware. */
-  barcode: Scalars['String'];
-  /** The id of the comment. */
-  commentId: Scalars['Int'];
-};
-
-/** Request to record operations and add comments to labware. */
-export type SampleProcessingCommentRequest = {
-  /** The comments to add for each labware. */
-  labware: Array<SampleProcessingComment>;
 };
 
 /** Specification of a result being recording. */
