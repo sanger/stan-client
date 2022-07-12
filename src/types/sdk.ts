@@ -12,7 +12,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** A row/column combination, either in the form "B5" (row 2, column 5), or "32.15" (row 32, column 15) */
+  /** A row/column combination, either in the form "B5" (row 2, column 5), or "32,15" (row 32, column 15) */
   Address: string;
   /** A date, typically in the format yyyy-mm-dd. */
   Date: string;
@@ -5719,7 +5719,7 @@ export const GetBlockProcessingInfoDocument = gql`
   mediums {
     name
   }
-  comments(includeDisabled: false, category: "Tissue Block processing") {
+  comments(includeDisabled: false, category: "Sample Processing") {
     ...CommentFields
   }
   labwareTypes {
@@ -5823,7 +5823,7 @@ export const GetPotProcessingInfoDocument = gql`
   fixatives {
     name
   }
-  comments(includeDisabled: false, category: "Tissue Pot processing") {
+  comments(includeDisabled: false, category: "Sample Processing") {
     ...CommentFields
   }
   labwareTypes {

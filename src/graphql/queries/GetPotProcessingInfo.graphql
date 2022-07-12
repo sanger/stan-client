@@ -3,7 +3,7 @@ query GetPotProcessingInfo {
     fixatives {
         name
     }
-    comments(includeDisabled: false, category: "Tissue Pot processing") {
+    comments(includeDisabled: false, category: "Sample Processing") {
         ...CommentFields
     }
     labwareTypes {
