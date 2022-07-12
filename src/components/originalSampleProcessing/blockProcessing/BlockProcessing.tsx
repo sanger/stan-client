@@ -410,6 +410,7 @@ export default function BlockProcessing({
           columns.donorId(),
           columns.tissueType(),
           columns.spatialLocation(),
+          columns.replicate(),
         ]}
         successMessage={"Block processing complete"}
       />
