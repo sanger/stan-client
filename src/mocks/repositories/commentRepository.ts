@@ -77,23 +77,20 @@ const seeds: Array<CommentFieldsFragment> = [
     text: "Slide damaged",
   }),
   commentFactory.build({
-    category: "Tissue Block processing",
+    category: "Sample Processing",
     text: "Issue while moving",
   }),
   commentFactory.build({
-    category: "Tissue Block processing",
+    category: "Sample Processing",
     text: "Labware damaged",
   }),
   commentFactory.build({
-    category: "Tissue Pot processing",
+    category: "Sample Processing",
     text: "Issue while fixing",
   }),
+
   commentFactory.build({
-    category: "Tissue Pot processing",
-    text: "Labware damaged",
-  }),
-  commentFactory.build({
-    category: "Tissue Pot processing",
+    category: "Sample Processing",
     text: "Fixatives damaged",
   }),
 ];

@@ -58,12 +58,6 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
   );
 
   const { serverError, submissionResult } = current.context;
-  const comments = React.useMemo(() => {
-    return [
-      ...sampleCommentsInfo.blockProcessing,
-      ...sampleCommentsInfo.potProcessing,
-    ];
-  }, [sampleCommentsInfo]);
 
   function buildValidationSchema(): Yup.ObjectSchema {
     return Yup.object().shape({
@@ -93,7 +87,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
               label={""}
               emptyOption
             >
-              {comments.map((comment) => (
+              {sampleCommentsInfo.comments.map((comment) => (
                 <option value={comment.id} key={comment.id}>
                   {comment.text}
                 </option>
@@ -103,7 +97,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
         );
       },
     };
-  }, [comments]);
+  }, [sampleCommentsInfo]);
 
   return (
     <AppShell>
@@ -112,7 +106,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
       </AppShell.Header>
       <AppShell.Main>
         <div className={"max-w-screen-xl mx-auto"}>
-          {comments && (
+          {sampleCommentsInfo.comments && (
             <Formik<SampleCommentsFormData>
               initialValues={{
                 labware: [],
@@ -197,11 +191,16 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
                                     );
                                   }}
                                 >
-                                  {comments.map((comment) => (
-                                    <option value={comment.id} key={comment.id}>
-                                      {comment.text}
-                                    </option>
-                                  ))}
+                                  {sampleCommentsInfo.comments.map(
+                                    (comment) => (
+                                      <option
+                                        value={comment.id}
+                                        key={comment.id}
+                                      >
+                                        {comment.text}
+                                      </option>
+                                    )
+                                  )}
                                 </FormikSelect>
                                 <MutedText>
                                   Comment selected will be applied to all

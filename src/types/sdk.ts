@@ -4464,10 +4464,7 @@ export type GetSampleProcessingCommentsInfoQueryVariables = Exact<{ [key: string
 
 export type GetSampleProcessingCommentsInfoQuery = (
   { __typename?: 'Query' }
-  & { blockProcessing: Array<(
-    { __typename?: 'Comment' }
-    & CommentFieldsFragment
-  )>, potProcessing: Array<(
+  & { comments: Array<(
     { __typename?: 'Comment' }
     & CommentFieldsFragment
   )> }
@@ -5978,16 +5975,7 @@ export const GetReleaseInfoDocument = gql`
 ${ReleaseRecipientFieldsFragmentDoc}`;
 export const GetSampleProcessingCommentsInfoDocument = gql`
     query GetSampleProcessingCommentsInfo {
-  blockProcessing: comments(
-    includeDisabled: false
-    category: "Tissue Block processing"
-  ) {
-    ...CommentFields
-  }
-  potProcessing: comments(
-    includeDisabled: false
-    category: "Tissue Pot processing"
-  ) {
+  comments: comments(includeDisabled: false, category: "Sample Processing") {
     ...CommentFields
   }
 }

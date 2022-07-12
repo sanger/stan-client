@@ -87,17 +87,11 @@ const originalSampleProcessingHandlers = [
   >("GetSampleProcessingCommentsInfo", (req, res, ctx) => {
     return res(
       ctx.data({
-        blockProcessing: commentRepository
+        comments: commentRepository
           .findAll()
           .filter(
             (comment) =>
-              comment.category === "Tissue Block processing" && comment.enabled
-          ),
-        potProcessing: commentRepository
-          .findAll()
-          .filter(
-            (comment) =>
-              comment.category === "Tissue Pot processing" && comment.enabled
+              comment.category === "Sample Processing" && comment.enabled
           ),
       })
     );

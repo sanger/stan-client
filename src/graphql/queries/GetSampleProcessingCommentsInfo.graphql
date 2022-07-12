@@ -1,8 +1,5 @@
 query GetSampleProcessingCommentsInfo {
-    blockProcessing:  comments(includeDisabled: false, category: "Tissue Block processing") {
+    comments:  comments(includeDisabled: false, category: "Sample Processing") {
             ...CommentFields
         }
-    potProcessing:comments(includeDisabled: false, category: "Tissue Pot processing") {
-        ...CommentFields
-    }
 }
