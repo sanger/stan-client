@@ -2,7 +2,7 @@ query GetBlockProcessingInfo {
     mediums {
         name
     }
-    comments(includeDisabled: false, category: "Tissue Block processing") {
+    comments(includeDisabled: false, category: "Sample Processing") {
         ...CommentFields
     }
     labwareTypes {
