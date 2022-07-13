@@ -120,7 +120,7 @@ export function shouldBehaveLikeARegistrationForm(
         ? "doesn't require Replicate Number"
         : "requires Replicate Number",
       () => {
-        cy.findByLabelText("Replicate Number").clear().blur();
+        cy.findByTestId("Replicate Number").clear().blur();
         cy.findByText("Replicate Number is a required field").should(
           registrationType === RegistrationType.TISSUE_SAMPLE
             ? "not.exist"
@@ -130,28 +130,28 @@ export function shouldBehaveLikeARegistrationForm(
     );
 
     it("requires Replicate Number to have number part as an an integer", () => {
-      cy.findByLabelText("Replicate Number").type("1.1").blur();
+      cy.findByTestId("Replicate Number").type("1.1").blur();
       checkReplicateWarningIsVisible();
     });
 
     it("requires Replicate Number to have number part greater than 0", () => {
-      cy.findByLabelText("Replicate Number").clear().type("-1").blur();
+      cy.findByTestId("Replicate Number").clear().type("-1").blur();
       checkReplicateWarningIsVisible();
     });
 
     it("requires Replicate Number to have number part  greater than or equal to 1", () => {
-      cy.findByLabelText("Replicate Number").type("0").blur();
+      cy.findByTestId("Replicate Number").type("0").blur();
       checkReplicateWarningIsVisible();
     });
     it("requires Replicate Number to be number or number followed by a lowercase letter", () => {
-      cy.findByLabelText("Replicate Number").type("0ab").blur();
+      cy.findByTestId("Replicate Number").type("0ab").blur();
       checkReplicateWarningIsVisible();
     });
     it("requires Replicate Number to be number or number followed by a lowercase letter", () => {
-      cy.findByLabelText("Replicate Number").type("5ab").blur();
+      cy.findByTestId("Replicate Number").type("5ab").blur();
       checkReplicateWarningIsVisible();
 
-      cy.findByLabelText("Replicate Number").clear().type("5A").blur();
+      cy.findByTestId("Replicate Number").clear().type("5A").blur();
       checkReplicateWarningIsVisible();
     });
 

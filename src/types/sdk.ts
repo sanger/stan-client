@@ -1318,6 +1318,19 @@ export type MutationSetLocationCustomNameArgs = {
   customName?: Maybe<Scalars['String']>;
 };
 
+/** The data about original tissues and their next replicate numbers. */
+export type NextReplicateData = {
+  __typename?: 'NextReplicateData';
+  /** The source barcodes for the new replicates. */
+  barcodes: Array<Scalars['String']>;
+  /** The id of the donor. */
+  donorId: Scalars['Int'];
+  /** The id of the spatial location. */
+  spatialLocationId: Scalars['Int'];
+  /** The next replicate number for this group. */
+  nextReplicateNumber: Scalars['Int'];
+};
+
 /** An operation and the pass/fails in the slots of its labware. */
 export type OpPassFail = {
   __typename?: 'OpPassFail';
@@ -1616,6 +1629,8 @@ export type Query = {
   workProgress: Array<WorkProgress>;
   /** Gets a reagent plate, if it exists. May return null. */
   reagentPlate?: Maybe<ReagentPlate>;
+  /** Gets the next replicate data for the given source labware barcodes. */
+  nextReplicateNumbers: Array<NextReplicateData>;
   /** Get the specified storage location. */
   location: Location;
   /** Get the information about stored items with the given barcodes. */
@@ -1897,6 +1912,15 @@ export type QueryWorkProgressArgs = {
  */
 export type QueryReagentPlateArgs = {
   barcode: Scalars['String'];
+};
+
+
+/**
+ * Get information from the application.
+ * These typically require no user privilege.
+ */
+export type QueryNextReplicateNumbersArgs = {
+  barcodes: Array<Scalars['String']>;
 };
 
 
@@ -2601,6 +2625,11 @@ export type LocationFieldsFragment = (
     { __typename?: 'LinkedLocation' }
     & Pick<LinkedLocation, 'barcode' | 'fixedName' | 'customName' | 'address'>
   )> }
+);
+
+export type NextReplicateDataFieldsFragment = (
+  { __typename?: 'NextReplicateData' }
+  & Pick<NextReplicateData, 'barcodes' | 'donorId' | 'nextReplicateNumber' | 'spatialLocationId'>
 );
 
 export type OperationFieldsFragment = (
@@ -4267,6 +4296,19 @@ export type GetLabwareInLocationQuery = (
   )> }
 );
 
+export type GetNextReplicateNumberQueryVariables = Exact<{
+  barcodes: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+
+export type GetNextReplicateNumberQuery = (
+  { __typename?: 'Query' }
+  & { nextReplicateNumbers: Array<(
+    { __typename?: 'NextReplicateData' }
+    & NextReplicateDataFieldsFragment
+  )> }
+);
+
 export type GetPotProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -4637,6 +4679,14 @@ export const LocationFieldsFragmentDoc = gql`
     customName
     address
   }
+}
+    `;
+export const NextReplicateDataFieldsFragmentDoc = gql`
+    fragment NextReplicateDataFields on NextReplicateData {
+  barcodes
+  donorId
+  nextReplicateNumber
+  spatialLocationId
 }
     `;
 export const ActionFieldsFragmentDoc = gql`
@@ -5761,6 +5811,13 @@ export const GetLabwareInLocationDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const GetNextReplicateNumberDocument = gql`
+    query GetNextReplicateNumber($barcodes: [String!]!) {
+  nextReplicateNumbers(barcodes: $barcodes) {
+    ...NextReplicateDataFields
+  }
+}
+    ${NextReplicateDataFieldsFragmentDoc}`;
 export const GetPotProcessingInfoDocument = gql`
     query GetPotProcessingInfo {
   fixatives {
@@ -6176,6 +6233,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetLabwareInLocation(variables: GetLabwareInLocationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetLabwareInLocationQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetLabwareInLocationQuery>(GetLabwareInLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetLabwareInLocation');
+    },
+    GetNextReplicateNumber(variables: GetNextReplicateNumberQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetNextReplicateNumberQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetNextReplicateNumberQuery>(GetNextReplicateNumberDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetNextReplicateNumber');
     },
     GetPotProcessingInfo(variables?: GetPotProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPotProcessingInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetPotProcessingInfoQuery>(GetPotProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetPotProcessingInfo');

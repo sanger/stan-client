@@ -34,7 +34,13 @@ const ProcessingSuccess: React.FC<ProcessingSuccessProps> = ({
           variants={variants.fadeInWithLift}
           className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow"
         >
-          <LabelPrinter labwares={labware} />
+          <LabelPrinter
+            labwares={labware.filter(
+              (lw) =>
+                lw.labwareType.labelType !== null &&
+                lw.labwareType.labelType !== undefined
+            )}
+          />
         </motion.div>
       </div>
 
