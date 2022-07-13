@@ -5799,7 +5799,7 @@ export const GetBlockProcessingInfoDocument = gql`
   mediums {
     name
   }
-  comments(includeDisabled: false, category: "Tissue Block processing") {
+  comments(includeDisabled: false, category: "Sample Processing") {
     ...CommentFields
   }
   labwareTypes {
@@ -5903,7 +5903,7 @@ export const GetPotProcessingInfoDocument = gql`
   fixatives {
     name
   }
-  comments(includeDisabled: false, category: "Tissue Pot processing") {
+  comments(includeDisabled: false, category: "Sample Processing") {
     ...CommentFields
   }
   labwareTypes {

@@ -35,7 +35,7 @@ const originalSampleProcessingHandlers = [
           .findAll()
           .filter(
             (comment) =>
-              comment.category === "Tissue Block processing" && comment.enabled
+              comment.category === "Sample Processing" && comment.enabled
           ),
         labwareTypes: labwareTypeInstances,
       })
@@ -50,7 +50,7 @@ const originalSampleProcessingHandlers = [
             .findAll()
             .filter(
               (comment) =>
-                comment.category === "Tissue Pot processing" && comment.enabled
+                comment.category === "Sample Processing" && comment.enabled
             ),
           labwareTypes: labwareTypeInstances,
           fixatives: fixativeRepository

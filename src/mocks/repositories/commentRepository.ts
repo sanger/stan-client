@@ -88,7 +88,6 @@ const seeds: Array<CommentFieldsFragment> = [
     category: "Sample Processing",
     text: "Issue while fixing",
   }),
-
   commentFactory.build({
     category: "Sample Processing",
     text: "Fixatives damaged",
