@@ -1,3 +1,8 @@
+import { 
+  CreateWorkMutation, 
+  CreateWorkMutationVariables 
+} from "../../../src/types/sdk";
+
 describe("Work Allocation", () => {
   before(() => {
     cy.visit(
@@ -40,6 +45,9 @@ describe("Work Allocation", () => {
       "when I select a work type, project, cost code, number of blocks/slides/originalsamples and then submit the form",
       () => {
         before(() => {
+          cy.visit(
+            "/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused"
+          );
           cy.findByLabelText("Work Type").select("TEST_WT_1");
           cy.findByLabelText("Work Requester").select("et2");
           cy.findByLabelText("Project").select("TEST999");
@@ -47,13 +55,34 @@ describe("Work Allocation", () => {
           cy.findByLabelText("Number of blocks").type("5");
           cy.findByLabelText("Number of slides").type("15");
           cy.findByLabelText("Number of original samples").type("1");
-          cy.findByRole("button", { name: /Submit/i }).click();
         });
 
         it("allocates new Work", () => {
+          cy.findByRole("button", { name: /Submit/i }).click();
           cy.findByText(
             /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999 and cost code S999 with the work requester et2/
           ).should("exist");
+        });
+
+        it("shows an error when the request errors", () => {
+          cy.msw().then(({ graphql, worker }) => {
+            worker.use(
+              graphql.mutation<
+                CreateWorkMutation,
+                CreateWorkMutationVariables
+              >("CreateWork", (req, res, ctx) => {
+                return res.once(
+                  ctx.errors([
+                    {
+                      message: "There was an error with the request",
+                    },
+                  ])
+                );
+              })
+            );
+          });
+          cy.findByRole("button", { name: /Submit/i }).click();
+          cy.findByText("There was an error with the request").should("exist");
         });
       }
     );
