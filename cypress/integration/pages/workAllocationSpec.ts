@@ -115,7 +115,6 @@ describe("Work Allocation", () => {
   describe("Editing the number of blocks, slides and original samples column for Work ", () => {
     context("Entering a value in 'Number of blocks', 'Number of slides' and 'Number of original samples' cells in table", () => {
       before(() => {
-        //cy.get("table").find("tr").eq(2).find("td").eq(5).type("8");
         cy.findByTestId("SGP1008-block").type("1");
         cy.findByTestId("SGP1008-slide").type("2");
         cy.findByTestId("SGP1008-originalSamples").type("3");
@@ -218,8 +217,7 @@ describe("Work Allocation", () => {
       it("should show the correct work when a filter is applied", () => {
         cy.get("select[name='status']").select('Unstarted');
         cy.findByRole("button", { name: /Search/i }).should("be.visible").click();
-        cy.get("table[data-testid='work-allocation-table']")
-          .find("tr").should("have.length", 10);
+        cy.get("table[data-testid='work-allocation-table']").find("tr").should("have.length", 10);
       });
     });
 
