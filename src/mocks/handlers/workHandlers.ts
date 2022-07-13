@@ -124,7 +124,7 @@ const workHandlers = [
           numOriginalSamples: req.variables.numOriginalSamples
         },
         {
-          associations: { workType, costCode, project },
+          associations: { workType, costCode, project, workRequester },
           transient: { isRnD: req.variables.prefix === "R&D" },
         }
       );

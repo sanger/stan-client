@@ -198,15 +198,14 @@ export default function WorkAllocation() {
       .label("Cost Code"),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
-    numSlides: Yup.number()
-      .max(MAX_NUM_BLOCKANDSLIDES)
-      .when("numBlocks", (numBlocks: any, schema: any) => {
-        if (!numBlocks) {
-          return schema.required("Number of blocks or slides required");
+    numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
+    numOriginalSamples: Yup.number().max(MAX_NUM_BLOCKANDSLIDES)
+      .when(["numBlocks", "numSlides"], (numBlocks: any, numSlides: any, schema: any) => {
+        if (!numBlocks && !numSlides) {
+          return schema.required("Number of blocks, slides or original samples required");
         }
         return schema;
       }),
-    numOriginalSamples: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
   });
 
   return (

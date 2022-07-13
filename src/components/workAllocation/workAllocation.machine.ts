@@ -201,7 +201,6 @@ export default function createWorkAllocationMachine({
             costCodes,
             releaseRecipients
           } = e.data;
-          console.log(releaseRecipients);
           ctx.availableComments = comments;
           ctx.projects = projects;
           ctx.workWithComments = worksWithComments;
