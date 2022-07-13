@@ -68,8 +68,8 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
             commentId: Yup.number().required("Comment is a required field"),
           })
         )
-        .required("Atleast one labware must be scanned")
-        .min(1, "Atleast one labware must be scanned"),
+        .required("At least one labware must be scanned")
+        .min(1, "At least one labware must be scanned"),
       applyAllComment: Yup.string().optional(),
     });
   }
