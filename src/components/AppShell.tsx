@@ -51,7 +51,7 @@ function AppShell({ children }: AppShellParams) {
     <div className="flex flex-col min-h-screen">
       <div className={`relative ${config?.headerColor}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex justify-between items-center py-4 md:justify-start md:space-x-10">
+          <div className="flex justify-between items-center py-4 md:justify-start md:space-x-10 ">
             <div className="flex justify-start">
               <Link to="/">
                 <Logo />
@@ -151,6 +151,17 @@ function AppShell({ children }: AppShellParams) {
                         "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
                       }
                     />
+                    <NavLinkMenuItem
+                      caption={"FFPE Processing"}
+                      path="/lab/ffpe_processing"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Records the type of processing cycle run on the sample."
+                      }
+                    />
+                  </Menu>
                     <NavLinkMenuItem
                       caption={"Sample processing comments"}
                       path="/lab/sample_processing_comments"
@@ -488,7 +499,6 @@ function AppShell({ children }: AppShellParams) {
                       <StanMobileNavLink to="/lab/sectioning">
                         Planning
                       </StanMobileNavLink>
-
                       <StanMobileNavLink to="/lab/sectioning/confirm">
                         Confirmation
                       </StanMobileNavLink>
@@ -496,9 +506,17 @@ function AppShell({ children }: AppShellParams) {
                     <StanMobileNavLink to="/lab/fetal_waste">
                       Fetal Waste
                     </StanMobileNavLink>
-                    <StanMobileNavLink to="/lab/original_sample_processing">
-                      Original Sample Processing
-                    </StanMobileNavLink>
+                    <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">
+                      Original Sample
+                    </h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/original_sample_processing">
+                        Original Sample Processing
+                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/original_sample_processing">
+                        FFPE Processing
+                      </StanMobileNavLink>
+                    </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">
                       RNA
                     </h4>
@@ -506,7 +524,6 @@ function AppShell({ children }: AppShellParams) {
                       <StanMobileNavLink to="/lab/extraction">
                         Extraction
                       </StanMobileNavLink>
-
                       <StanMobileNavLink to="/lab/extraction_result">
                         Extraction Result
                       </StanMobileNavLink>

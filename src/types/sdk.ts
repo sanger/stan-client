@@ -324,6 +324,16 @@ export type ExtractResultRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
+/** A request to record FFPE processing. */
+export type FfpeProcessingRequest = {
+  /** The work number. */
+  workNumber: Scalars['String'];
+  /** The labware barcodes. */
+  barcodes: Array<Scalars['String']>;
+  /** The comment ID. */
+  commentId: Scalars['Int'];
+};
+
 /** Information that a particular sample was found in a particular labware. */
 export type FindEntry = {
   __typename?: 'FindEntry';
@@ -706,6 +716,8 @@ export type Mutation = {
   performPotProcessing: OperationResult;
   /** Record ops to add sample processing comments. */
   recordSampleProcessingComments: OperationResult;
+  /** Perform FFPE processing. */
+  performFFPEProcessing: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -1259,6 +1271,15 @@ export type MutationPerformPotProcessingArgs = {
  */
 export type MutationRecordSampleProcessingCommentsArgs = {
   request: SampleProcessingCommentRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationPerformFfpeProcessingArgs = {
+  request: FfpeProcessingRequest;
 };
 
 
@@ -2114,20 +2135,6 @@ export type Sample = {
   tissue: Tissue;
   /** The state of this particular sample. */
   bioState: BioState;
-};
-
-/** A labware barcode and a comment id to add. */
-export type SampleProcessingComment = {
-  /** The barcode of the labware. */
-  barcode: Scalars['String'];
-  /** The id of the comment. */
-  commentId: Scalars['Int'];
-};
-
-/** Request to record operations and add comments to labware. */
-export type SampleProcessingCommentRequest = {
-  /** The comments to add for each labware. */
-  labware: Array<SampleProcessingComment>;
 };
 
 /** Specification of a result being recording. */
@@ -3243,6 +3250,32 @@ export type LogoutMutation = (
   & Pick<Mutation, 'logout'>
 );
 
+export type PerformFfpeProcessingMutationVariables = Exact<{
+  request: FfpeProcessingRequest;
+}>;
+
+
+export type PerformFfpeProcessingMutation = (
+  { __typename?: 'Mutation' }
+  & { performFFPEProcessing: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
+);
+
 export type PerformTissueBlockMutationVariables = Exact<{
   request: TissueBlockRequest;
 }>;
@@ -3439,32 +3472,6 @@ export type RecordRnaAnalysisMutation = (
     & { operations: Array<(
       { __typename?: 'Operation' }
       & Pick<Operation, 'id'>
-    )> }
-  ) }
-);
-
-export type RecordSampleProcessingCommentsMutationVariables = Exact<{
-  request: SampleProcessingCommentRequest;
-}>;
-
-
-export type RecordSampleProcessingCommentsMutation = (
-  { __typename?: 'Mutation' }
-  & { recordSampleProcessingComments: (
-    { __typename?: 'OperationResult' }
-    & { labware: Array<(
-      { __typename?: 'Labware' }
-      & LabwareFieldsFragment
-    )>, operations: Array<(
-      { __typename?: 'Operation' }
-      & Pick<Operation, 'performed'>
-      & { operationType: (
-        { __typename?: 'OperationType' }
-        & Pick<OperationType, 'name'>
-      ), user: (
-        { __typename?: 'User' }
-        & Pick<User, 'username'>
-      ) }
     )> }
   ) }
 );
@@ -4334,6 +4341,17 @@ export type GetDestructionReasonsQuery = (
   )> }
 );
 
+export type GetFfpeProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetFfpeProcessingInfoQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
 export type GetLabwareInLocationQueryVariables = Exact<{
   locationBarcode: Scalars['String'];
 }>;
@@ -4456,17 +4474,6 @@ export type GetReleaseInfoQuery = (
   )>, releaseRecipients: Array<(
     { __typename?: 'ReleaseRecipient' }
     & ReleaseRecipientFieldsFragment
-  )> }
-);
-
-export type GetSampleProcessingCommentsInfoQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetSampleProcessingCommentsInfoQuery = (
-  { __typename?: 'Query' }
-  & { comments: Array<(
-    { __typename?: 'Comment' }
-    & CommentFieldsFragment
   )> }
 );
 
@@ -5190,6 +5197,24 @@ export const LogoutDocument = gql`
   logout
 }
     `;
+export const PerformFfpeProcessingDocument = gql`
+    mutation PerformFFPEProcessing($request: FFPEProcessingRequest!) {
+  performFFPEProcessing(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const PerformTissueBlockDocument = gql`
     mutation PerformTissueBlock($request: TissueBlockRequest!) {
   performTissueBlock(request: $request) {
@@ -5312,24 +5337,6 @@ export const RecordRnaAnalysisDocument = gql`
   }
 }
     `;
-export const RecordSampleProcessingCommentsDocument = gql`
-    mutation RecordSampleProcessingComments($request: SampleProcessingCommentRequest!) {
-  recordSampleProcessingComments(request: $request) {
-    labware {
-      ...LabwareFields
-    }
-    operations {
-      operationType {
-        name
-      }
-      user {
-        username
-      }
-      performed
-    }
-  }
-}
-    ${LabwareFieldsFragmentDoc}`;
 export const RecordStainResultDocument = gql`
     mutation RecordStainResult($request: ResultRequest!) {
   recordStainResult(request: $request) {
@@ -5884,6 +5891,13 @@ export const GetDestructionReasonsDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
+export const GetFfpeProcessingInfoDocument = gql`
+    query GetFFPEProcessingInfo {
+  comments(includeDisabled: false, category: "FFPE processing program") {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetLabwareInLocationDocument = gql`
     query GetLabwareInLocation($locationBarcode: String!) {
   labwareInLocation(locationBarcode: $locationBarcode) {
@@ -5973,13 +5987,6 @@ export const GetReleaseInfoDocument = gql`
 }
     ${ReleaseDestinationFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}`;
-export const GetSampleProcessingCommentsInfoDocument = gql`
-    query GetSampleProcessingCommentsInfo {
-  comments: comments(includeDisabled: false, category: "Sample Processing") {
-    ...CommentFields
-  }
-}
-    ${CommentFieldsFragmentDoc}`;
 export const GetSearchInfoDocument = gql`
     query GetSearchInfo {
   tissueTypes {
@@ -6126,6 +6133,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     Logout(variables?: LogoutMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LogoutMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<LogoutMutation>(LogoutDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Logout');
     },
+    PerformFFPEProcessing(variables: PerformFfpeProcessingMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformFfpeProcessingMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformFfpeProcessingMutation>(PerformFfpeProcessingDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformFFPEProcessing');
+    },
     PerformTissueBlock(variables: PerformTissueBlockMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformTissueBlockMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PerformTissueBlockMutation>(PerformTissueBlockDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformTissueBlock');
     },
@@ -6158,9 +6168,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     RecordRNAAnalysis(variables: RecordRnaAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordRnaAnalysisMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordRNAAnalysis');
-    },
-    RecordSampleProcessingComments(variables: RecordSampleProcessingCommentsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordSampleProcessingCommentsMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RecordSampleProcessingCommentsMutation>(RecordSampleProcessingCommentsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordSampleProcessingComments');
     },
     RecordStainResult(variables: RecordStainResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordStainResultMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordStainResult');
@@ -6321,6 +6328,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     GetDestructionReasons(variables?: GetDestructionReasonsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestructionReasonsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetDestructionReasons');
     },
+    GetFFPEProcessingInfo(variables?: GetFfpeProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetFfpeProcessingInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFfpeProcessingInfoQuery>(GetFfpeProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetFFPEProcessingInfo');
+    },
     GetLabwareInLocation(variables: GetLabwareInLocationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetLabwareInLocationQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetLabwareInLocationQuery>(GetLabwareInLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetLabwareInLocation');
     },
@@ -6344,9 +6354,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetReleaseInfo(variables?: GetReleaseInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetReleaseInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetReleaseInfoQuery>(GetReleaseInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetReleaseInfo');
-    },
-    GetSampleProcessingCommentsInfo(variables?: GetSampleProcessingCommentsInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSampleProcessingCommentsInfoQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetSampleProcessingCommentsInfoQuery>(GetSampleProcessingCommentsInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSampleProcessingCommentsInfo');
     },
     GetSearchInfo(variables?: GetSearchInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSearchInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetSearchInfoQuery>(GetSearchInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSearchInfo');
