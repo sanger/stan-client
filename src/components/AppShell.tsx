@@ -161,7 +161,6 @@ function AppShell({ children }: AppShellParams) {
                         "Records solution transfer operation of samples."
                       }
                     />
-                  </Menu>
                     <NavLinkMenuItem
                       caption={"FFPE Processing"}
                       path="/lab/ffpe_processing"
