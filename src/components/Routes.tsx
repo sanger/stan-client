@@ -41,6 +41,7 @@ import BlockRegistration from "../pages/BlockRegistration";
 import { OriginalSampleProcessing } from "../pages/OriginalSampleProcessing";
 import BlockProcessing from "./originalSampleProcessing/blockProcessing/BlockProcessing";
 import PotProcessing from "./originalSampleProcessing/potProcessing/PotProcessing";
+import FFPEProcessing from "../pages/FFPEProcessing";
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -116,6 +117,22 @@ export function Routes() {
               <PotProcessing
                 key={routeProps.location.key}
                 processingInfo={blockInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/ffpe_processing"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetFFPEProcessingInfo()}
+          >
+            {(ffpeInfo) => (
+              <FFPEProcessing
+                key={routeProps.location.key}
+                ffPeInfo={ffpeInfo}
               />
             )}
           </DataFetcher>
