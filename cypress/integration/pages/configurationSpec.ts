@@ -8,6 +8,14 @@ describe("Configuration Spec", () => {
     cy.visitAsAdmin("/config");
   });
 
+  context("Tab panel", () => {
+    it("should display a tab panel", () => {
+      cy.findByRole("tabpanel").should("exist");
+    });
+    after(() => {
+      cy.findByText("Destruction Reasons").click();
+    });
+  });
   describe("Entities with boolean property", () => {
     [
       {
@@ -15,45 +23,54 @@ describe("Configuration Spec", () => {
         field: "Section Folded",
         buttonName: "+ Add Text",
         newValue: "My new comment",
+        tabName: "Comments",
       },
       {
         name: "Destruction Reasons",
+        tabName: "Destruction Reasons",
         field: "Experiment complete.",
         buttonName: "+ Add Text",
         newValue: "My new comment",
       },
       {
         name: "Species",
+        tabName: "Species",
         field: "Mouse",
         buttonName: "+ Add Name",
         newValue: "Monkey",
       },
       {
         name: "HuMFre Numbers",
+        tabName: "HuMFre Numbers",
         field: "HuMFre1",
         buttonName: "+ Add Humfre",
         newValue: "HuMFre9",
       },
       {
         name: "Release Destinations",
+        tabName: "Release Destinations",
         field: "Vento lab",
         buttonName: "+ Add Name",
         newValue: "Fab lab",
       },
       {
         name: "Release Recipients",
+        tabName: "Release Recipients",
         field: "cs41",
         buttonName: "+ Add Username",
         newValue: "az99",
       },
     ].forEach((config) => {
       describe(config.name, () => {
+        before(() => {
+          cy.findByText(config.tabName).click();
+        });
         it("toggles the enabled field", () => {
           cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(
             () => {
-              cy.get(`tr:contains('${config.field}') input`).click();
+              selectElement(`tr:contains('${config.field}') input`);
               cy.findByText(`"${config.field}" disabled`).should("be.visible");
-              cy.get(`tr:contains('${config.field}') input`).click();
+              selectElement(`tr:contains('${config.field}') input`);
               cy.findByText(`"${config.field}" enabled`).should("be.visible");
             }
           );
@@ -62,9 +79,9 @@ describe("Configuration Spec", () => {
         it("saves new entites", () => {
           cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(
             () => {
-              cy.findByRole("button", { name: config.buttonName }).click();
-              cy.focused().type(`${config.newValue}{enter}`);
-              cy.findByText("Saved").should("be.visible");
+              clickButton(config.buttonName);
+              enterNewValue(config.newValue);
+              cy.findByText("Saved").scrollIntoView().should("be.visible");
             }
           );
         });
@@ -76,12 +93,17 @@ describe("Configuration Spec", () => {
     [
       {
         name: "Users",
+        tabName: "Users",
         field: "Test user",
         buttonName: "+ Add Username",
         newValue: "az99",
       },
     ].forEach((config) => {
       describe(config.name, () => {
+        before(() => {
+          cy.scrollTo(0, 0);
+          cy.findByText(config.tabName).click();
+        });
         it("sets the value field", () => {
           cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(
             () => {
@@ -96,8 +118,8 @@ describe("Configuration Spec", () => {
         it("saves new entites", () => {
           cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(
             () => {
-              cy.findByRole("button", { name: config.buttonName }).click();
-              cy.focused().type(`${config.newValue}{enter}`);
+              clickButton(config.buttonName);
+              enterNewValue(config.newValue);
               cy.findByText("Saved").should("be.visible");
             }
           );
@@ -125,17 +147,35 @@ describe("Configuration Spec", () => {
           })
         );
       });
+      cy.scrollTo(0, 0);
+      cy.findByText("Release Recipients").click();
     });
 
     it("shows an error message", () => {
       cy.get(`div[data-testid="config"]:contains('Release Recipients')`).within(
         () => {
-          cy.findByRole("button", { name: "+ Add Username" }).click();
-          cy.focused().type(`I should fail{enter}`);
+          clickButton("+ Add Username");
+          enterNewValue(`I should fail{enter}`);
           cy.findByText("Save Failed").should("be.visible");
           cy.findByText("Something went wrong").should("be.visible");
         }
       );
     });
   });
+  function selectElement(findTag: string) {
+    return cy.get(findTag).scrollIntoView().click({
+      force: true,
+    });
+  }
+  function clickButton(buttonName: string) {
+    cy.findByRole("button", { name: buttonName })
+      .scrollIntoView()
+      .click({ force: true });
+  }
+  function enterNewValue(value: string) {
+    cy.findByTestId("input-field")
+      .scrollIntoView()
+      .focus()
+      .type(`${value}{enter}`, { force: true });
+  }
 });

@@ -41,6 +41,7 @@ import BlockRegistration from "../pages/BlockRegistration";
 import { OriginalSampleProcessing } from "../pages/OriginalSampleProcessing";
 import BlockProcessing from "./originalSampleProcessing/blockProcessing/BlockProcessing";
 import PotProcessing from "./originalSampleProcessing/potProcessing/PotProcessing";
+import FFPEProcessing from "../pages/FFPEProcessing";
 import AddExternalID from "../pages/AddExternalID"
 
 export function Routes() {
@@ -57,7 +58,6 @@ export function Routes() {
       <Route path="/logout">
         <Logout />
       </Route>
-
       <AuthenticatedRoute
         path="/lab/sectioning/confirm"
         render={(routeProps) => (
@@ -71,7 +71,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/lab/sectioning"
         render={(routeProps) => (
@@ -119,6 +118,22 @@ export function Routes() {
               <PotProcessing
                 key={routeProps.location.key}
                 processingInfo={blockInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/ffpe_processing"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetFFPEProcessingInfo()}
+          >
+            {(ffpeInfo) => (
+              <FFPEProcessing
+                key={routeProps.location.key}
+                ffPeInfo={ffpeInfo}
               />
             )}
           </DataFetcher>

@@ -48,6 +48,8 @@ export function getRegistrationFormSample(): RegistrationFormBlockSample {
     labwareType: "",
     fixative: "",
     solution: "",
+    externalIdentifier: "",
+    replicateNumber: "",
   };
 }
 
@@ -166,7 +168,8 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
    * The changes are mapped here so that Registration and RegistrationForm components  can be reused **/
   const keywords = new Map()
     .set("Block", "Sample")
-    .set("Embedding", "Solution");
+    .set("Embedding", "Solution")
+    .set("Optional", ["Replicate Number", "External Identifier"]);
   return (
     <Registration<
       RegisterOriginalSamplesMutationVariables,
