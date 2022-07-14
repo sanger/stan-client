@@ -83,9 +83,9 @@ export default function WorkNumberSelect({
     if (selectedWorkNumber === "") {
       setError("SGP number is required");
     } else {
-      setError("")
+      setError("");
     }
-  }
+  };
 
   return name ? (
     <FormikSelect
@@ -98,15 +98,19 @@ export default function WorkNumberSelect({
     </FormikSelect>
   ) : (
     <>
-    <Select
-      value={selectedWorkNumber}
-      onChange={handleWorkNumberChange}
-      emptyOption={true}
-      onBlur={validateWorkNumber}
-    >
-      {optionValues(works, "workNumber", "workNumber")}
-    </Select>
-    { error.length ? <p className="text-red-500 text-xs italic">{ error }</p> : "" }
+      <Select
+        value={selectedWorkNumber}
+        onChange={handleWorkNumberChange}
+        emptyOption={true}
+        onBlur={validateWorkNumber}
+      >
+        {optionValues(works, "workNumber", "workNumber")}
+      </Select>
+      {error.length ? (
+        <p className="text-red-500 text-xs italic">{error}</p>
+      ) : (
+        ""
+      )}
     </>
   );
 }

@@ -92,6 +92,18 @@ const seeds: Array<CommentFieldsFragment> = [
     category: "Sample Processing",
     text: "Fixatives damaged",
   }),
+  commentFactory.build({
+    category: "FFPE processing program",
+    text: "Rapid biopsy",
+  }),
+  commentFactory.build({
+    category: "FFPE processing program",
+    text: "Soft tissue",
+  }),
+  commentFactory.build({
+    category: "FFPE processing program",
+    text: "Hard tissue",
+  }),
 ];
 
 const commentRepository = createSessionStorageRepository(
