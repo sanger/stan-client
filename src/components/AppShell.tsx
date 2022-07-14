@@ -161,7 +161,26 @@ function AppShell({ children }: AppShellParams) {
                         "Records the type of processing cycle run on the sample."
                       }
                     />
-                  </Menu>
+                    <NavLinkMenuItem
+                      caption={"Sample Processing"}
+                      path="/lab/original_sample_processing"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"FFPE Processing"}
+                      path="/lab/ffpe_processing"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Records the type of processing cycle run on the sample."
+                      }
+                    />
                     <NavLinkMenuItem
                       caption={"Sample processing comments"}
                       path="/lab/sample_processing_comments"
