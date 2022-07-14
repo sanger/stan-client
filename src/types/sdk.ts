@@ -12,7 +12,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** A row/column combination, either in the form "B5" (row 2, column 5), or "32,15" (row 32, column 15) */
+  /** A row/column combination, either in the form "B5" (row 2, column 5), or "32.15" (row 32, column 15) */
   Address: string;
   /** A date, typically in the format yyyy-mm-dd. */
   Date: string;
@@ -731,6 +731,8 @@ export type Mutation = {
   performFFPEProcessing: OperationResult;
   /** Record an operation adding a external ID to a sample. */
   addExternalID: OperationResult;
+  /** Add solutions to labware. */
+  performSolutionTransfer: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -1323,6 +1325,15 @@ export type MutationPerformFfpeProcessingArgs = {
  */
 export type MutationAddExternalIdArgs = {
   request: AddExternalIdRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationPerformSolutionTransferArgs = {
+  request: SolutionTransferRequest;
 };
 
 
@@ -3355,6 +3366,32 @@ export type LogoutMutation = (
   & Pick<Mutation, 'logout'>
 );
 
+export type PerformSolutionTransferMutationVariables = Exact<{
+  request: SolutionTransferRequest;
+}>;
+
+
+export type PerformSolutionTransferMutation = (
+  { __typename?: 'Mutation' }
+  & { performSolutionTransfer: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
+);
+
 export type PerformFfpeProcessingMutationVariables = Exact<{
   request: FfpeProcessingRequest;
 }>;
@@ -4652,6 +4689,17 @@ export type GetSectioningInfoQuery = (
   )> }
 );
 
+export type GetSolutionTransferInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSolutionTransferInfoQuery = (
+  { __typename?: 'Query' }
+  & { solutions: Array<(
+    { __typename?: 'Solution' }
+    & Pick<Solution, 'name'>
+  )> }
+);
+
 export type GetStainInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -5356,6 +5404,24 @@ export const LogoutDocument = gql`
   logout
 }
     `;
+export const PerformSolutionTransferDocument = gql`
+    mutation PerformSolutionTransfer($request: SolutionTransferRequest!) {
+  performSolutionTransfer(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const PerformFfpeProcessingDocument = gql`
     mutation PerformFFPEProcessing($request: FFPEProcessingRequest!) {
   performFFPEProcessing(request: $request) {
@@ -6192,6 +6258,13 @@ export const GetSectioningInfoDocument = gql`
   }
 }
     ${LabwareTypeFieldsFragmentDoc}`;
+export const GetSolutionTransferInfoDocument = gql`
+    query GetSolutionTransferInfo {
+  solutions {
+    name
+  }
+}
+    `;
 export const GetStainInfoDocument = gql`
     query GetStainInfo {
   stainTypes {
@@ -6322,6 +6395,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     PerformFFPEProcessing(variables: PerformFfpeProcessingMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformFfpeProcessingMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PerformFfpeProcessingMutation>(PerformFfpeProcessingDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformFFPEProcessing');
+    },
+    PerformSolutionTransfer(variables: PerformSolutionTransferMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformSolutionTransferMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformSolutionTransferMutation>(PerformSolutionTransferDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformSolutionTransfer');
     },
     PerformTissueBlock(variables: PerformTissueBlockMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformTissueBlockMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PerformTissueBlockMutation>(PerformTissueBlockDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformTissueBlock');
@@ -6556,6 +6632,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetSectioningInfo(variables?: GetSectioningInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSectioningInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetSectioningInfoQuery>(GetSectioningInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSectioningInfo');
+    },
+    GetSolutionTransferInfo(variables?: GetSolutionTransferInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSolutionTransferInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSolutionTransferInfoQuery>(GetSolutionTransferInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSolutionTransferInfo');
     },
     GetStainInfo(variables?: GetStainInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetStainInfoQuery>(GetStainInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetStainInfo');

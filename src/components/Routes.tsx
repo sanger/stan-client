@@ -41,6 +41,7 @@ import BlockRegistration from "../pages/BlockRegistration";
 import { OriginalSampleProcessing } from "../pages/OriginalSampleProcessing";
 import BlockProcessing from "./originalSampleProcessing/blockProcessing/BlockProcessing";
 import PotProcessing from "./originalSampleProcessing/potProcessing/PotProcessing";
+import SolutionTransfer from "../pages/SolutionTransfer";
 import FFPEProcessing from "../pages/FFPEProcessing";
 import SampleProcessingComments from "../pages/SampleProcessingComments";
 import AddExternalID from "../pages/AddExternalID"
@@ -135,6 +136,22 @@ export function Routes() {
               <SampleProcessingComments
                 key={routeProps.location.key}
                 sampleCommentsInfo={samnpleCommentsInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/solution_transfer"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetSolutionTransferInfo()}
+          >
+            {(solnTransferInfo) => (
+              <SolutionTransfer
+                key={routeProps.location.key}
+                solutionTransferInfo={solnTransferInfo}
               />
             )}
           </DataFetcher>

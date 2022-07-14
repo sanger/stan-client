@@ -172,6 +172,16 @@ function AppShell({ children }: AppShellParams) {
                       }
                     />
                     <NavLinkMenuItem
+                      caption={"Solution Transfer"}
+                      path="/lab/solution_transfer"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Records solution transfer operation of samples."
+                      }
+                    />
+                    <NavLinkMenuItem
                       caption={"Add External ID"}
                       path="/lab/add_external_id"
                       icon={
