@@ -324,6 +324,16 @@ export type ExtractResultRequest = {
   workNumber?: Maybe<Scalars['String']>;
 };
 
+/** A request to record FFPE processing. */
+export type FfpeProcessingRequest = {
+  /** The work number. */
+  workNumber: Scalars['String'];
+  /** The labware barcodes. */
+  barcodes: Array<Scalars['String']>;
+  /** The comment ID. */
+  commentId: Scalars['Int'];
+};
+
 /** Information that a particular sample was found in a particular labware. */
 export type FindEntry = {
   __typename?: 'FindEntry';
@@ -704,6 +714,8 @@ export type Mutation = {
   performTissueBlock: OperationResult;
   /** Process an original sample into pots. */
   performPotProcessing: OperationResult;
+  /** Perform FFPE processing. */
+  performFFPEProcessing: OperationResult;
   /** Add solutions to labware. */
   performSolutionTransfer: OperationResult;
   /** Create a new user for the application. */
@@ -1257,6 +1269,15 @@ export type MutationPerformPotProcessingArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
+export type MutationPerformFfpeProcessingArgs = {
+  request: FfpeProcessingRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
 export type MutationPerformSolutionTransferArgs = {
   request: SolutionTransferRequest;
 };
@@ -1327,6 +1348,19 @@ export type MutationEmptyArgs = {
 export type MutationSetLocationCustomNameArgs = {
   locationBarcode: Scalars['String'];
   customName?: Maybe<Scalars['String']>;
+};
+
+/** The data about original tissues and their next replicate numbers. */
+export type NextReplicateData = {
+  __typename?: 'NextReplicateData';
+  /** The source barcodes for the new replicates. */
+  barcodes: Array<Scalars['String']>;
+  /** The id of the donor. */
+  donorId: Scalars['Int'];
+  /** The id of the spatial location. */
+  spatialLocationId: Scalars['Int'];
+  /** The next replicate number for this group. */
+  nextReplicateNumber: Scalars['Int'];
 };
 
 /** An operation and the pass/fails in the slots of its labware. */
@@ -1627,6 +1661,8 @@ export type Query = {
   workProgress: Array<WorkProgress>;
   /** Gets a reagent plate, if it exists. May return null. */
   reagentPlate?: Maybe<ReagentPlate>;
+  /** Gets the next replicate data for the given source labware barcodes. */
+  nextReplicateNumbers: Array<NextReplicateData>;
   /** Get the specified storage location. */
   location: Location;
   /** Get the information about stored items with the given barcodes. */
@@ -1908,6 +1944,15 @@ export type QueryWorkProgressArgs = {
  */
 export type QueryReagentPlateArgs = {
   barcode: Scalars['String'];
+};
+
+
+/**
+ * Get information from the application.
+ * These typically require no user privilege.
+ */
+export type QueryNextReplicateNumbersArgs = {
+  barcodes: Array<Scalars['String']>;
 };
 
 
@@ -2630,6 +2675,11 @@ export type LocationFieldsFragment = (
   )> }
 );
 
+export type NextReplicateDataFieldsFragment = (
+  { __typename?: 'NextReplicateData' }
+  & Pick<NextReplicateData, 'barcodes' | 'donorId' | 'nextReplicateNumber' | 'spatialLocationId'>
+);
+
 export type OperationFieldsFragment = (
   { __typename?: 'Operation' }
   & Pick<Operation, 'id' | 'performed'>
@@ -3224,6 +3274,32 @@ export type PerformSolutionTransferMutationVariables = Exact<{
 export type PerformSolutionTransferMutation = (
   { __typename?: 'Mutation' }
   & { performSolutionTransfer: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
+    )> }
+  ) }
+);
+
+export type PerformFfpeProcessingMutationVariables = Exact<{
+  request: FfpeProcessingRequest;
+}>;
+
+
+export type PerformFfpeProcessingMutation = (
+  { __typename?: 'Mutation' }
+  & { performFFPEProcessing: (
     { __typename?: 'OperationResult' }
     & { labware: Array<(
       { __typename?: 'Labware' }
@@ -4307,6 +4383,17 @@ export type GetDestructionReasonsQuery = (
   )> }
 );
 
+export type GetFfpeProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetFfpeProcessingInfoQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
 export type GetLabwareInLocationQueryVariables = Exact<{
   locationBarcode: Scalars['String'];
 }>;
@@ -4317,6 +4404,19 @@ export type GetLabwareInLocationQuery = (
   & { labwareInLocation: Array<(
     { __typename?: 'Labware' }
     & LabwareFieldsFragment
+  )> }
+);
+
+export type GetNextReplicateNumberQueryVariables = Exact<{
+  barcodes: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+
+export type GetNextReplicateNumberQuery = (
+  { __typename?: 'Query' }
+  & { nextReplicateNumbers: Array<(
+    { __typename?: 'NextReplicateData' }
+    & NextReplicateDataFieldsFragment
   )> }
 );
 
@@ -4701,6 +4801,14 @@ export const LocationFieldsFragmentDoc = gql`
     customName
     address
   }
+}
+    `;
+export const NextReplicateDataFieldsFragmentDoc = gql`
+    fragment NextReplicateDataFields on NextReplicateData {
+  barcodes
+  donorId
+  nextReplicateNumber
+  spatialLocationId
 }
     `;
 export const ActionFieldsFragmentDoc = gql`
@@ -5145,6 +5253,24 @@ export const LogoutDocument = gql`
 export const PerformSolutionTransferDocument = gql`
     mutation PerformSolutionTransfer($request: SolutionTransferRequest!) {
   performSolutionTransfer(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
+export const PerformFfpeProcessingDocument = gql`
+    mutation PerformFFPEProcessing($request: FFPEProcessingRequest!) {
+  performFFPEProcessing(request: $request) {
     labware {
       ...LabwareFields
     }
@@ -5751,7 +5877,7 @@ export const GetBlockProcessingInfoDocument = gql`
   mediums {
     name
   }
-  comments(includeDisabled: false, category: "Tissue Block processing") {
+  comments(includeDisabled: false, category: "Sample Processing") {
     ...CommentFields
   }
   labwareTypes {
@@ -5836,6 +5962,13 @@ export const GetDestructionReasonsDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
+export const GetFfpeProcessingInfoDocument = gql`
+    query GetFFPEProcessingInfo {
+  comments(includeDisabled: false, category: "FFPE processing program") {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetLabwareInLocationDocument = gql`
     query GetLabwareInLocation($locationBarcode: String!) {
   labwareInLocation(locationBarcode: $locationBarcode) {
@@ -5843,12 +5976,19 @@ export const GetLabwareInLocationDocument = gql`
   }
 }
     ${LabwareFieldsFragmentDoc}`;
+export const GetNextReplicateNumberDocument = gql`
+    query GetNextReplicateNumber($barcodes: [String!]!) {
+  nextReplicateNumbers(barcodes: $barcodes) {
+    ...NextReplicateDataFields
+  }
+}
+    ${NextReplicateDataFieldsFragmentDoc}`;
 export const GetPotProcessingInfoDocument = gql`
     query GetPotProcessingInfo {
   fixatives {
     name
   }
-  comments(includeDisabled: false, category: "Tissue Pot processing") {
+  comments(includeDisabled: false, category: "Sample Processing") {
     ...CommentFields
   }
   labwareTypes {
@@ -6071,6 +6211,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     Logout(variables?: LogoutMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LogoutMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<LogoutMutation>(LogoutDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Logout');
     },
+    PerformFFPEProcessing(variables: PerformFfpeProcessingMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformFfpeProcessingMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformFfpeProcessingMutation>(PerformFfpeProcessingDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformFFPEProcessing');
+    },
     PerformSolutionTransfer(variables: PerformSolutionTransferMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformSolutionTransferMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PerformSolutionTransferMutation>(PerformSolutionTransferDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformSolutionTransfer');
     },
@@ -6266,8 +6409,14 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     GetDestructionReasons(variables?: GetDestructionReasonsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestructionReasonsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetDestructionReasons');
     },
+    GetFFPEProcessingInfo(variables?: GetFfpeProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetFfpeProcessingInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFfpeProcessingInfoQuery>(GetFfpeProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetFFPEProcessingInfo');
+    },
     GetLabwareInLocation(variables: GetLabwareInLocationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetLabwareInLocationQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetLabwareInLocationQuery>(GetLabwareInLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetLabwareInLocation');
+    },
+    GetNextReplicateNumber(variables: GetNextReplicateNumberQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetNextReplicateNumberQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetNextReplicateNumberQuery>(GetNextReplicateNumberDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetNextReplicateNumber');
     },
     GetPotProcessingInfo(variables?: GetPotProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPotProcessingInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetPotProcessingInfoQuery>(GetPotProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetPotProcessingInfo');

@@ -20,7 +20,6 @@ import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
 import { useScrollToRef } from "../../lib/hooks";
 import { RegistrationFormValues } from "../BlockRegistration";
 import { TissueValues } from "./Registration";
-
 export type TextType = "Block" | "Embedding";
 
 interface RegistrationFormParams<T> {
@@ -49,24 +48,21 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
   keywordsMap,
 }: RegistrationFormParams<T>) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const {
-    setFieldValue,
-    values,
-    errors,
-    touched,
-    isSubmitting,
-  } = useFormikContext<RegistrationFormValues>();
+  const { setFieldValue, values, errors, touched, isSubmitting } =
+    useFormikContext<RegistrationFormValues>();
 
   const keywords = keywordsMap ?? new Map();
+  const optionalFields = keywords.has("Optional") && keywords.get("Optional");
 
   // Available spatial locations are determined by the current tissue type
-  const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] = useMemo(() => {
-    return (
-      registrationInfo.tissueTypes.find(
-        (tt) => tt.name === values.tissues[currentIndex].tissueType
-      )?.spatialLocations ?? []
-    );
-  }, [registrationInfo.tissueTypes, values.tissues, currentIndex]);
+  const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] =
+    useMemo(() => {
+      return (
+        registrationInfo.tissueTypes.find(
+          (tt) => tt.name === values.tissues[currentIndex].tissueType
+        )?.spatialLocations ?? []
+      );
+    }, [registrationInfo.tissueTypes, values.tissues, currentIndex]);
 
   // Only enable HMDMC when the species is Human
   const isHMDMCEnabled = values.tissues[currentIndex].species === "Human";
@@ -80,6 +76,11 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
   const tissueRef = useRef<HTMLDivElement>(null);
 
   const [lastBlockRef, scrollToLatestBlock] = useScrollToRef();
+
+  const getOptionalTag = (fieldName: string) =>
+    optionalFields && optionalFields.includes(fieldName)
+      ? "Optional"
+      : undefined;
 
   return (
     <Form>
@@ -210,6 +211,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                         <FormikInput
                           label="External Identifier"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.externalIdentifier`}
+                          displayTag={getOptionalTag("External Identifier")}
                         />
 
                         <FormikSelect
@@ -228,6 +230,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                         <FormikInput
                           label="Replicate Number"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.replicateNumber`}
+                          displayTag={getOptionalTag("Replicate Number")}
                         />
                         {"lastKnownSectionNumber" in
                           values.tissues[currentIndex].blocks[blockIndex] && (

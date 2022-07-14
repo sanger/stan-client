@@ -206,6 +206,7 @@ export default function EntityManager<
               <TableCell colSpan={2}>
                 <Input
                   ref={inputRef}
+                  data-testid={"input-field"}
                   type="text"
                   disabled={isCreatingEntity}
                   onChange={handleOnInputChange}
