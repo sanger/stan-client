@@ -6,11 +6,15 @@ import {
   GetNextReplicateNumberQueryVariables,
   GetPotProcessingInfoQuery,
   GetPotProcessingInfoQueryVariables,
+  GetSampleProcessingCommentsInfoQuery,
+  GetSampleProcessingCommentsInfoQueryVariables,
   NextReplicateData,
   PerformTissueBlockMutation,
   PerformTissueBlockMutationVariables,
   PerformTissuePotMutation,
   PerformTissuePotMutationVariables,
+  RecordSampleProcessingCommentsMutation,
+  RecordSampleProcessingCommentsMutationVariables,
 } from "../../types/sdk";
 import { createLabware } from "./labwareHandlers";
 import { buildLabwareFragment } from "../../lib/helpers/labwareHelper";
@@ -77,6 +81,21 @@ const originalSampleProcessingHandlers = [
       })
     );
   }),
+  graphql.query<
+    GetSampleProcessingCommentsInfoQuery,
+    GetSampleProcessingCommentsInfoQueryVariables
+  >("GetSampleProcessingCommentsInfo", (req, res, ctx) => {
+    return res(
+      ctx.data({
+        comments: commentRepository
+          .findAll()
+          .filter(
+            (comment) =>
+              comment.category === "Sample Processing" && comment.enabled
+          ),
+      })
+    );
+  }),
   graphql.mutation<
     PerformTissueBlockMutation,
     PerformTissueBlockMutationVariables
@@ -115,6 +134,25 @@ const originalSampleProcessingHandlers = [
       );
     }
   ),
+  graphql.mutation<
+    RecordSampleProcessingCommentsMutation,
+    RecordSampleProcessingCommentsMutationVariables
+  >("RecordSampleProcessingComments", (req, res, ctx) => {
+    const confirmedLabwares = req.variables.request.labware.map(
+      (confirmLabware) => {
+        const labware = createLabware(confirmLabware.barcode);
+        return buildLabwareFragment(labware);
+      }
+    );
+    return res(
+      ctx.data({
+        recordSampleProcessingComments: {
+          labware: confirmedLabwares,
+          operations: [],
+        },
+      })
+    );
+  }),
 ];
 
 export default originalSampleProcessingHandlers;

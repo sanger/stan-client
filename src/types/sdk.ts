@@ -687,6 +687,8 @@ export type Mutation = {
   updateWorkNumBlocks: Work;
   /** Update the number of slides field in a work. */
   updateWorkNumSlides: Work;
+  /** Update the number of original samples field in a work. */
+  updateWorkNumOriginalSamples: Work;
   /** Update the priority of a work. */
   updateWorkPriority: Work;
   /** Record a new stain with time measurements. */
@@ -721,10 +723,14 @@ export type Mutation = {
   performTissueBlock: OperationResult;
   /** Process an original sample into pots. */
   performPotProcessing: OperationResult;
-  /** Record an operation adding a external ID to a sample. */
-  addExternalID: OperationResult;
+  /** Record ops to add sample processing comments. */
+  recordSampleProcessingComments: OperationResult;
+  /** Add solutions to labware. */
+  performSolutionTransfer: OperationResult;
   /** Perform FFPE processing. */
   performFFPEProcessing: OperationResult;
+  /** Record an operation adding a external ID to a sample. */
+  addExternalID: OperationResult;
   /** Create a new user for the application. */
   addUser: User;
   /** Set the user role (privileges) for a user. */
@@ -1080,10 +1086,12 @@ export type MutationSetSolutionEnabledArgs = {
 export type MutationCreateWorkArgs = {
   prefix: Scalars['String'];
   workType: Scalars['String'];
+  workRequester: Scalars['String'];
   project: Scalars['String'];
   costCode: Scalars['String'];
   numBlocks?: Maybe<Scalars['Int']>;
   numSlides?: Maybe<Scalars['Int']>;
+  numOriginalSamples?: Maybe<Scalars['Int']>;
 };
 
 
@@ -1115,6 +1123,16 @@ export type MutationUpdateWorkNumBlocksArgs = {
 export type MutationUpdateWorkNumSlidesArgs = {
   workNumber: Scalars['String'];
   numSlides?: Maybe<Scalars['Int']>;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationUpdateWorkNumOriginalSamplesArgs = {
+  workNumber: Scalars['String'];
+  numOriginalSamples?: Maybe<Scalars['Int']>;
 };
 
 
@@ -1276,8 +1294,17 @@ export type MutationPerformPotProcessingArgs = {
  * Send information to the application.
  * These typically require a user with the suitable permission for the particular request.
  */
-export type MutationAddExternalIdArgs = {
-  request: AddExternalIdRequest;
+export type MutationRecordSampleProcessingCommentsArgs = {
+  request: SampleProcessingCommentRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationPerformSolutionTransferArgs = {
+  request: SolutionTransferRequest;
 };
 
 
@@ -1287,6 +1314,15 @@ export type MutationAddExternalIdArgs = {
  */
 export type MutationPerformFfpeProcessingArgs = {
   request: FfpeProcessingRequest;
+};
+
+
+/**
+ * Send information to the application.
+ * These typically require a user with the suitable permission for the particular request.
+ */
+export type MutationAddExternalIdArgs = {
+  request: AddExternalIdRequest;
 };
 
 
@@ -2144,6 +2180,20 @@ export type Sample = {
   bioState: BioState;
 };
 
+/** A labware barcode and a comment id to add. */
+export type SampleProcessingComment = {
+  /** The barcode of the labware. */
+  barcode: Scalars['String'];
+  /** The id of the comment. */
+  commentId: Scalars['Int'];
+};
+
+/** Request to record operations and add comments to labware. */
+export type SampleProcessingCommentRequest = {
+  /** The comments to add for each labware. */
+  labware: Array<SampleProcessingComment>;
+};
+
 /** Specification of a result being recording. */
 export type SampleResult = {
   /** The slot address that the result refers to. */
@@ -2273,6 +2323,22 @@ export type Solution = {
   name: Scalars['String'];
   /** Whether the solution is available for use. */
   enabled: Scalars['Boolean'];
+};
+
+/** A labware in a solution transfer request. */
+export type SolutionTransferLabware = {
+  /** The barcode of the labware. */
+  barcode: Scalars['String'];
+  /** The name solution. */
+  solution: Scalars['String'];
+};
+
+/** A request to perform solution transfer. */
+export type SolutionTransferRequest = {
+  /** The work number for the operations. */
+  workNumber: Scalars['String'];
+  /** The details of the labware in the request. */
+  labware: Array<SolutionTransferLabware>;
 };
 
 /** A location in an organ that tissue was taken from. */
@@ -2486,6 +2552,8 @@ export type Work = {
   costCode: CostCode;
   /** The unique (generated) string identifying this work. */
   workNumber: Scalars['String'];
+  /** The name of the person requesting the work.(Note sure how to deal with this as the existing work will all be null but future work we want it mandatory?) */
+  workRequester?: Maybe<ReleaseRecipient>;
   /** The current status of the work. */
   status: WorkStatus;
   /**
@@ -2498,6 +2566,11 @@ export type Work = {
    * This is set and updated by users during the course of the work.
    */
   numSlides?: Maybe<Scalars['Int']>;
+  /**
+   * The number of original samples that this work still needs to be done on.
+   * This is set and updated by users during the course of the work.
+   */
+  numOriginalSamples?: Maybe<Scalars['Int']>;
   /**
    * A string describing the priority of this work.
    * This is set and updated by users during the course of the work.
@@ -3170,10 +3243,12 @@ export type ConfirmSectionMutation = (
 export type CreateWorkMutationVariables = Exact<{
   prefix: Scalars['String'];
   workType: Scalars['String'];
+  workRequester: Scalars['String'];
   project: Scalars['String'];
   costCode: Scalars['String'];
   numBlocks?: Maybe<Scalars['Int']>;
   numSlides?: Maybe<Scalars['Int']>;
+  numOriginalSamples?: Maybe<Scalars['Int']>;
 }>;
 
 
@@ -3502,6 +3577,32 @@ export type RecordRnaAnalysisMutation = (
     & { operations: Array<(
       { __typename?: 'Operation' }
       & Pick<Operation, 'id'>
+    )> }
+  ) }
+);
+
+export type RecordSampleProcessingCommentsMutationVariables = Exact<{
+  request: SampleProcessingCommentRequest;
+}>;
+
+
+export type RecordSampleProcessingCommentsMutation = (
+  { __typename?: 'Mutation' }
+  & { recordSampleProcessingComments: (
+    { __typename?: 'OperationResult' }
+    & { labware: Array<(
+      { __typename?: 'Labware' }
+      & LabwareFieldsFragment
+    )>, operations: Array<(
+      { __typename?: 'Operation' }
+      & Pick<Operation, 'performed'>
+      & { operationType: (
+        { __typename?: 'OperationType' }
+        & Pick<OperationType, 'name'>
+      ), user: (
+        { __typename?: 'User' }
+        & Pick<User, 'username'>
+      ) }
     )> }
   ) }
 );
@@ -4507,6 +4608,17 @@ export type GetReleaseInfoQuery = (
   )> }
 );
 
+export type GetSampleProcessingCommentsInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSampleProcessingCommentsInfoQuery = (
+  { __typename?: 'Query' }
+  & { comments: Array<(
+    { __typename?: 'Comment' }
+    & CommentFieldsFragment
+  )> }
+);
+
 export type GetSearchInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -5167,14 +5279,16 @@ export const ConfirmSectionDocument = gql`
 }
     ${LabwareFieldsFragmentDoc}`;
 export const CreateWorkDocument = gql`
-    mutation CreateWork($prefix: String!, $workType: String!, $project: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int) {
+    mutation CreateWork($prefix: String!, $workType: String!, $workRequester: String!, $project: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int) {
   createWork(
     prefix: $prefix
     workType: $workType
+    workRequester: $workRequester
     project: $project
     costCode: $costCode
     numBlocks: $numBlocks
     numSlides: $numSlides
+    numOriginalSamples: $numOriginalSamples
   ) {
     ...WorkFields
   }
@@ -5382,6 +5496,24 @@ export const RecordRnaAnalysisDocument = gql`
   }
 }
     `;
+export const RecordSampleProcessingCommentsDocument = gql`
+    mutation RecordSampleProcessingComments($request: SampleProcessingCommentRequest!) {
+  recordSampleProcessingComments(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}`;
 export const RecordStainResultDocument = gql`
     mutation RecordStainResult($request: ResultRequest!) {
   recordStainResult(request: $request) {
@@ -6032,6 +6164,13 @@ export const GetReleaseInfoDocument = gql`
 }
     ${ReleaseDestinationFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}`;
+export const GetSampleProcessingCommentsInfoDocument = gql`
+    query GetSampleProcessingCommentsInfo {
+  comments: comments(includeDisabled: false, category: "Sample Processing") {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetSearchInfoDocument = gql`
     query GetSearchInfo {
   tissueTypes {
@@ -6216,6 +6355,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     RecordRNAAnalysis(variables: RecordRnaAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordRnaAnalysisMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordRNAAnalysis');
+    },
+    RecordSampleProcessingComments(variables: RecordSampleProcessingCommentsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordSampleProcessingCommentsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordSampleProcessingCommentsMutation>(RecordSampleProcessingCommentsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordSampleProcessingComments');
     },
     RecordStainResult(variables: RecordStainResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordStainResultMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordStainResult');
@@ -6402,6 +6544,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetReleaseInfo(variables?: GetReleaseInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetReleaseInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetReleaseInfoQuery>(GetReleaseInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetReleaseInfo');
+    },
+    GetSampleProcessingCommentsInfo(variables?: GetSampleProcessingCommentsInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSampleProcessingCommentsInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSampleProcessingCommentsInfoQuery>(GetSampleProcessingCommentsInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSampleProcessingCommentsInfo');
     },
     GetSearchInfo(variables?: GetSearchInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSearchInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetSearchInfoQuery>(GetSearchInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSearchInfo');

@@ -42,6 +42,7 @@ import { OriginalSampleProcessing } from "../pages/OriginalSampleProcessing";
 import BlockProcessing from "./originalSampleProcessing/blockProcessing/BlockProcessing";
 import PotProcessing from "./originalSampleProcessing/potProcessing/PotProcessing";
 import FFPEProcessing from "../pages/FFPEProcessing";
+import SampleProcessingComments from "../pages/SampleProcessingComments";
 import AddExternalID from "../pages/AddExternalID"
 
 export function Routes() {
@@ -118,6 +119,22 @@ export function Routes() {
               <PotProcessing
                 key={routeProps.location.key}
                 processingInfo={blockInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/sample_processing_comments"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetSampleProcessingCommentsInfo()}
+          >
+            {(samnpleCommentsInfo) => (
+              <SampleProcessingComments
+                key={routeProps.location.key}
+                sampleCommentsInfo={samnpleCommentsInfo}
               />
             )}
           </DataFetcher>
@@ -351,7 +368,6 @@ export function Routes() {
           />
         )}
       />
-
       <Route
         path="/locations/:locationBarcode"
         render={(routeProps) => {
@@ -386,7 +402,6 @@ export function Routes() {
           );
         }}
       />
-
       <Route path="/locations" component={Store} />
       <Route path="/store" component={Store} />
       <Route path="/login" component={Login} />
@@ -401,7 +416,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <AuthenticatedRoute
         path="/config"
         role={UserRole.Admin}
@@ -411,7 +425,6 @@ export function Routes() {
           </DataFetcher>
         )}
       />
-
       <Route
         path="/labware/:barcode"
         render={(routeProps) => {
@@ -436,10 +449,8 @@ export function Routes() {
           );
         }}
       />
-
       <Route path={"/history"} component={History} />
       <AuthenticatedRoute path={"/sgp"} component={SGP} />
-
       <Route
         path={"/search"}
         render={(routeProps) => {
@@ -458,7 +469,6 @@ export function Routes() {
           );
         }}
       />
-
       <Route
         path="/"
         render={(routeProps) => {

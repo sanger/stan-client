@@ -139,12 +139,30 @@ function AppShell({ children }: AppShellParams) {
                     icon={
                       <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                     }
-                    description={
-                      "Sample processing steps."
-                    }
+                    description={"Original sample operations"}
                   >
                     <NavLinkMenuItem
                       caption={"Original Sample Processing"}
+                      path="/lab/original_sample_processing"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                      "Sample processing steps."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"FFPE Processing"}
+                      path="/lab/ffpe_processing"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Records the type of processing cycle run on the sample."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"Sample Processing"}
                       path="/lab/original_sample_processing"
                       icon={
                         <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
@@ -172,6 +190,14 @@ function AppShell({ children }: AppShellParams) {
                       description={
                         "Records the type of processing cycle run on the sample."
                       }
+                    />
+                    <NavLinkMenuItem
+                      caption={"Sample processing comments"}
+                      path="/lab/sample_processing_comments"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={"Records extra sample processing commentas."}
                     />
                   </Menu>
 
