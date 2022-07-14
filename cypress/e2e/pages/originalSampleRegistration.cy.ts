@@ -2,12 +2,13 @@ import {
   RegisterOriginalSamplesMutation,
   RegisterOriginalSamplesMutationVariables,
 } from "../../../src/types/sdk";
+
+import { tissueFactory } from "../../../src/lib/factories/sampleFactory";
+import labwareFactory from "../../../src/lib/factories/labwareFactory";
 import {
   RegistrationType,
   shouldBehaveLikeARegistrationForm,
-} from "../shared/registration";
-import { tissueFactory } from "../../../src/lib/factories/sampleFactory";
-import labwareFactory from "../../../src/lib/factories/labwareFactory";
+} from "../shared/registration.cy";
 
 describe("Registration", () => {
   before(() => {

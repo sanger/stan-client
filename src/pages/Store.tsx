@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import AppShell from "../components/AppShell";
 import LocationSearch from "../components/LocationSearch";
-import { RouteComponentProps } from "react-router";
 import { safeParseQueryString, stringify } from "../lib/helpers";
 import { findLabwareLocation } from "../lib/services/locationService";
 import Warning from "../components/notifications/Warning";
@@ -10,7 +9,7 @@ import LocationIcon from "../components/icons/LocationIcon";
 import Heading from "../components/Heading";
 
 import storeConfig from "../static/store.json";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import BarcodeIcon from "../components/icons/BarcodeIcon";
 import { FindLocationByBarcodeQuery, Maybe } from "../types/sdk";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
@@ -21,10 +20,6 @@ import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
 import * as H from "history";
 import { history } from "../lib/sdk";
 import PromptOnLeave from "../components/notifications/PromptOnLeave";
-/**
- * RouteComponentProps from react-router allows the props to be passed in
- */
-interface StoreProps extends RouteComponentProps {}
 
 export type LabwareAwaitingStorageInfo = {
   barcode: string;
@@ -86,8 +81,9 @@ export function getAwaitingLabwaresFromSession() {
   );
 }
 
-const Store: React.FC<StoreProps> = ({ location }) => {
+const Store = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const location = useLocation();
 
   /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
   const onLeave = React.useCallback(() => {

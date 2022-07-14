@@ -122,6 +122,7 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
         editingLayout: {
           invoke: {
             src: "layoutMachine",
+            id: "layoutMachine",
             onDone: {
               target: "validatingLayout",
               actions: "assignLayoutPlan",

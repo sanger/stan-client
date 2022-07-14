@@ -7,14 +7,15 @@ interface MenuProps {
   description?: string;
   topMostMenu?: boolean;
   icon?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const Menu: React.FC<MenuProps> = ({
-  children,
   caption,
   description,
   topMostMenu = false,
   icon,
+  children,
 }) => {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuDropdownRef = useRef<HTMLDivElement>(null);

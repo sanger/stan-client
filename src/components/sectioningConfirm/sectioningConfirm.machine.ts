@@ -137,7 +137,7 @@ export function createSectioningConfirmMachine() {
           on: {
             UPDATE_WORK_NUMBER: {
               target: "validating",
-              actions: "assignWorkNumber"
+              actions: "assignWorkNumber",
             },
             UPDATE_PLANS: {
               target: "validating",
@@ -175,6 +175,7 @@ export function createSectioningConfirmMachine() {
         validating: {
           invoke: {
             src: "validateConfirmSectionLabware",
+            id: "validateConfirmSectionLabware",
           },
           on: {
             IS_VALID: "ready.valid",
@@ -184,6 +185,7 @@ export function createSectioningConfirmMachine() {
         confirming: {
           invoke: {
             src: "confirmSection",
+            id: "confirmSection",
             onDone: {
               target: "confirmed",
               actions: "assignConfirmSectionResults",
@@ -397,31 +399,31 @@ export function createSectioningConfirmMachine() {
           });
         },
 
-        validateConfirmSectionLabware: (ctx: SectioningConfirmContext) => (
-          send
-        ) => {
-          var isValid = ctx.confirmSectionLabware.every((csl) => {
-            if (
-              csl.cancelled ||
-              (ctx.layoutPlansByLabwareType[
-                LabwareTypeName.FETAL_WASTE_CONTAINER
-              ] &&
-                ctx.layoutPlansByLabwareType[
-                  LabwareTypeName.FETAL_WASTE_CONTAINER
-                ].some(
-                  (plan) => plan.destinationLabware.barcode === csl.barcode
-                ))
-            ) {
-              return true;
-            }
-            return (
-              csl.confirmSections?.every((cs) =>
-                cs.newSection ? cs.newSection > 0 : false
-              ) ?? false
-            );
-          }) && ctx.workNumber !== "";
-          send(isValid ? "IS_VALID" : "IS_INVALID");
-        },
+        validateConfirmSectionLabware:
+          (ctx: SectioningConfirmContext) => (send) => {
+            var isValid =
+              ctx.confirmSectionLabware.every((csl) => {
+                if (
+                  csl.cancelled ||
+                  (ctx.layoutPlansByLabwareType[
+                    LabwareTypeName.FETAL_WASTE_CONTAINER
+                  ] &&
+                    ctx.layoutPlansByLabwareType[
+                      LabwareTypeName.FETAL_WASTE_CONTAINER
+                    ].some(
+                      (plan) => plan.destinationLabware.barcode === csl.barcode
+                    ))
+                ) {
+                  return true;
+                }
+                return (
+                  csl.confirmSections?.every((cs) =>
+                    cs.newSection ? cs.newSection > 0 : false
+                  ) ?? false
+                );
+              }) && ctx.workNumber !== "";
+            send(isValid ? "IS_VALID" : "IS_INVALID");
+          },
       },
     }
   );

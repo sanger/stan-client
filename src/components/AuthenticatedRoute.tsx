@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Redirect, Route, RouteProps } from "react-router-dom";
-import { authContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { UserRole } from "../types/sdk";
 
 interface AuthenticatedRouteProps extends RouteProps {
@@ -20,7 +20,7 @@ function AuthenticatedRoute({
   role,
   ...rest
 }: AuthenticatedRouteProps) {
-  const auth = useContext(authContext);
+  const auth = useAuth();
 
   if (role) {
     if (auth.userRoleIncludes(role)) {

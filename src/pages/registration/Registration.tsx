@@ -14,9 +14,9 @@ import * as Yup from "yup";
 import { useMachine } from "@xstate/react";
 import RegistrationSuccess from "./RegistrationSuccess";
 import { useConfirmLeave } from "../../lib/hooks";
-import { Prompt } from "react-router-dom";
 import { Column } from "react-table";
 import { createRegistrationMachine } from "../../lib/machines/registration/registrationMachine";
+import { Prompt } from "react-router-dom";
 
 /**
  * Expect form input interface
@@ -70,7 +70,7 @@ interface RegistrationParams<M, T> {
   /**
    * Validation schema for form input
    */
-  registrationValidationSchema: Yup.ObjectSchema;
+  registrationValidationSchema: Yup.ObjectSchema<any>;
   /**
    * Columns to display on succesful registration
    */
@@ -148,7 +148,6 @@ function Registration<M, T extends TissueValues<B>, B>({
               "You have unsaved changes. Are you sure you want to leave?"
             }
           />
-
           {registrationErrors && (
             <div ref={warningRef}>
               <Warning message={"There was a problem registering your tissues"}>

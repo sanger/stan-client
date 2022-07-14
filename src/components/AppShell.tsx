@@ -5,7 +5,7 @@ import { StanMobileNavLink, StanNavLink } from "./nav";
 import { useOnClickOutside } from "../lib/hooks";
 import Logo from "./Logo";
 import GuestIcon from "./icons/GuestIcon";
-import { authContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "./Heading";
 import variants from "../lib/motionVariants";
@@ -27,7 +27,7 @@ interface AppShellParams {
 
 function AppShell({ children }: AppShellParams) {
   const config = useContext(configContext);
-  const auth = useContext(authContext);
+  const auth = useAuth();
   const location = useLocation<LocationState>();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);

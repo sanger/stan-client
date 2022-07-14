@@ -11,7 +11,6 @@ import {
   RegisterSectionsMutation,
   SectionRegisterRequest,
 } from "../types/sdk";
-import { RouteComponentProps } from "react-router";
 import { LabwareTypeName } from "../types/stan";
 import _, { uniqueId } from "lodash";
 import RegistrationValidation from "../lib/validation/registrationValidation";
@@ -20,6 +19,7 @@ import { useMachine } from "@xstate/react";
 import createFormMachine from "../lib/machines/form/formMachine";
 import { parseQueryString } from "../lib/helpers";
 import { history, StanCoreContext } from "../lib/sdk";
+import { useLocation } from "react-router-dom";
 
 const availableSlides: Array<LabwareTypeName> = [
   LabwareTypeName.SLIDE,
@@ -120,9 +120,7 @@ function buildSample(): SlideRegistrationFormSection {
   };
 }
 
-function buildValidationSchema(
-  registrationInfo: GetRegistrationInfoQuery
-): Yup.ObjectSchema {
+function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
   const validation = new RegistrationValidation(registrationInfo);
   return Yup.object().shape({
     labwares: Yup.array()
@@ -168,24 +166,14 @@ export const SlideRegistrationContext = React.createContext(
   defaultSlideRegistrationContext
 );
 
-interface PageParams extends RouteComponentProps {
+interface PageParams {
   registrationInfo: GetRegistrationInfoQuery;
 }
 
 export const SlideRegistration: React.FC<PageParams> = ({
-  location,
   registrationInfo,
 }) => {
-  const initialSlide = useMemo(() => {
-    const queryString = parseQueryString(location.search);
-    if (
-      typeof queryString["initialSlide"] === "string" &&
-      availableSlides.includes(queryString["initialSlide"] as LabwareTypeName)
-    ) {
-      return queryString["initialSlide"] as LabwareTypeName;
-    }
-  }, [location]);
-
+  const location = useLocation();
   const stanCore = useContext(StanCoreContext);
 
   const [current, send] = useMachine(() =>
@@ -201,6 +189,16 @@ export const SlideRegistration: React.FC<PageParams> = ({
       },
     })
   );
+
+  const initialSlide = useMemo(() => {
+    const queryString = parseQueryString(location.search);
+    if (
+      typeof queryString["initialSlide"] === "string" &&
+      availableSlides.includes(queryString["initialSlide"] as LabwareTypeName)
+    ) {
+      return queryString["initialSlide"] as LabwareTypeName;
+    }
+  }, [location]);
 
   const initialValues = useMemo(() => {
     if (initialSlide) {

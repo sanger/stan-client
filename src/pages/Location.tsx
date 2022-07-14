@@ -60,9 +60,8 @@ type LocationParentContextType = {
   storeBarcodes: (storeData: { barcode: string; address: string }[]) => void;
 };
 
-export const LocationParentContext = React.createContext<
-  Maybe<LocationParentContextType>
->(null);
+export const LocationParentContext =
+  React.createContext<Maybe<LocationParentContextType>>(null);
 
 interface LocationProps extends RouteComponentProps<LocationMatchParams> {
   storageLocation: LocationFieldsFragment;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import IconButton from "./buttons/IconButton";
 import DownArrowIcon from "./icons/DownArrowIcon";
 import UpArrowIcon from "./icons/UpArrowIcon";
@@ -17,7 +17,7 @@ export type SortProps = {
 
 interface TableHeaderProps {
   sortProps?: SortProps;
-  children?: React.ReactNode;
+  children?: ReactNode | ReactNode[];
 }
 /**
  * @example
@@ -55,15 +55,18 @@ const Table: React.FC<TableProps> = ({ children, ...rest }) => {
 
 export default Table;
 
-export const TableHead: React.FC = ({ children }) => {
+type TableHeadProps = {
+  children: ReactNode | ReactNode[];
+};
+export const TableHead = ({ children }: TableHeadProps) => {
   return <thead>{children}</thead>;
 };
 
-export const TableHeader: React.FC<TableHeaderProps> = ({
+export const TableHeader = ({
   children,
   sortProps,
   ...rest
-}) => {
+}: TableHeaderProps) => {
   return (
     <th className="px-6 py-3 bg-gray-50 text-left select-none" {...rest}>
       <>
@@ -101,7 +104,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   );
 };
 
-export const TableBody: React.FC = ({ children, ...rest }) => {
+export const TableBody = ({ children, ...rest }: TableHeadProps) => {
   return (
     <tbody className="bg-white divide-y divide-gray-200" {...rest}>
       {children}
