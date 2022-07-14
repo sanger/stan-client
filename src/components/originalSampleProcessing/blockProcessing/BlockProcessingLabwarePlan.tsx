@@ -206,7 +206,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<
                 </FormikSelect>
                 <FormikSelect
                   label={"Processing comments"}
-                  name={`plans.${rowIndex}.comments`}
+                  name={`plans.${rowIndex}.commentId`}
                   emptyOption={true}
                 >
                   {optionValues(blockProcessInfo.comments, "text", "id")}
