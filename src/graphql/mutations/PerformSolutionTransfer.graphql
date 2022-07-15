@@ -1,0 +1,16 @@
+mutation PerformSolutionTransfer($request:SolutionTransferRequest!) {
+    performSolutionTransfer(request: $request) {
+        labware {
+            ...LabwareFields
+        }
+        operations {
+            operationType {
+                name
+            }
+            user {
+                username
+            }
+            performed
+        }
+    }
+}

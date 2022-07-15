@@ -29,7 +29,7 @@ import { configContext } from "../context/ConfigContext";
 import searchMachine from "../lib/machines/search/searchMachine";
 import SearchService from "../lib/services/searchService";
 
-const validationSchema: Yup.ObjectSchema = Yup.object()
+const validationSchema = Yup.object()
   .shape({
     // ensure transforms undefined and null to empty strings which is easier for extra validation later
     labwareBarcode: Yup.string().ensure(),
@@ -51,8 +51,7 @@ const validationSchema: Yup.ObjectSchema = Yup.object()
 
       if (isValid) return true;
       return this.createError({
-        path:
-          "labwareBarcode | tissueExternalName | donorName | tissueTypeName",
+        path: "labwareBarcode | tissueExternalName | donorName | tissueTypeName",
         message:
           "At least one of STAN Barcode, External Identifier, Donor ID, or Tissue Type must not be empty.",
       });
@@ -68,9 +67,8 @@ const emptyFindRequest: FindRequest = {
   tissueTypeName: "",
 };
 
-const emptyFindRequestKeys: Array<keyof FindRequest> = objectKeys(
-  emptyFindRequest
-);
+const emptyFindRequestKeys: Array<keyof FindRequest> =
+  objectKeys(emptyFindRequest);
 
 type SearchProps = {
   searchInfo: GetSearchInfoQuery;

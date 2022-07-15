@@ -21,9 +21,7 @@ export enum WorkProgressSearchType {
 /**
  * Form validation schema
  */
-export const workProgressSearchSchema = (
-  workTypes: string[]
-): Yup.ObjectSchema => {
+export const workProgressSearchSchema = (workTypes: string[]) => {
   return Yup.object().shape({
     searchType: Yup.string()
       .oneOf(Object.values(WorkProgressSearchType))

@@ -13,10 +13,9 @@ import { stanCore } from "../../sdk";
 /**
  * LabelPrinter Machine Options
  */
-export const machineOptions: Partial<MachineOptions<
-  LabelPrinterContext,
-  LabelPrinterEvent
->> = {
+export const machineOptions: Partial<
+  MachineOptions<LabelPrinterContext, LabelPrinterEvent>
+> = {
   actions: {
     assignPrinters: assign((ctx, e) => {
       if (e.type !== "done.invoke.fetchPrinters") {
@@ -97,6 +96,7 @@ export const machineConfig: MachineConfig<
     fetching: {
       invoke: {
         src: "fetchPrinters",
+        id: "fetchPrinters",
         onDone: {
           target: "ready",
           actions: "assignPrinters",
@@ -128,6 +128,7 @@ export const machineConfig: MachineConfig<
     printing: {
       invoke: {
         src: "printLabels",
+        id: "printLabels",
         onDone: {
           target: "ready.printSuccess",
         },

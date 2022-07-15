@@ -39,9 +39,8 @@ function Plan({ sectioningInfo }: SectioningParams) {
   /**
    * The list of currently completed plans from the planner
    */
-  const [planProps, setPlanProps] = useState<
-    Maybe<PlanChangedProps<PlanMutation>>
-  >(null);
+  const [planProps, setPlanProps] =
+    useState<Maybe<PlanChangedProps<PlanMutation>>>(null);
 
   /**
    * For tracking whether the user gets a prompt if they tried to navigate to another page

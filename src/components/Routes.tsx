@@ -41,7 +41,10 @@ import BlockRegistration from "../pages/BlockRegistration";
 import { OriginalSampleProcessing } from "../pages/OriginalSampleProcessing";
 import BlockProcessing from "./originalSampleProcessing/blockProcessing/BlockProcessing";
 import PotProcessing from "./originalSampleProcessing/potProcessing/PotProcessing";
+import SolutionTransfer from "../pages/SolutionTransfer";
 import FFPEProcessing from "../pages/FFPEProcessing";
+import SampleProcessingComments from "../pages/SampleProcessingComments";
+import AddExternalID from "../pages/AddExternalID"
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -123,6 +126,38 @@ export function Routes() {
         )}
       />
       <AuthenticatedRoute
+        path="/lab/sample_processing_comments"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetSampleProcessingCommentsInfo()}
+          >
+            {(samnpleCommentsInfo) => (
+              <SampleProcessingComments
+                key={routeProps.location.key}
+                sampleCommentsInfo={samnpleCommentsInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/solution_transfer"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetSolutionTransferInfo()}
+          >
+            {(solnTransferInfo) => (
+              <SolutionTransfer
+                key={routeProps.location.key}
+                solutionTransferInfo={solnTransferInfo}
+              />
+            )}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
         path="/lab/ffpe_processing"
         render={(routeProps) => (
           <DataFetcher
@@ -136,6 +171,12 @@ export function Routes() {
               />
             )}
           </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/add_external_id"
+        render={(routeProps) => (
+          <AddExternalID key={routeProps.location.key} />
         )}
       />
       <AuthenticatedRoute
@@ -258,6 +299,7 @@ export function Routes() {
           </DataFetcher>
         )}
       />
+
       <AuthenticatedRoute
         path="/admin/registration"
         render={(routeProps) => (
@@ -271,6 +313,7 @@ export function Routes() {
           </DataFetcher>
         )}
       />
+
       <AuthenticatedRoute
         path="/admin/slide_registration"
         render={(routeProps) => (
@@ -317,6 +360,7 @@ export function Routes() {
           </DataFetcher>
         )}
       />
+
       <AuthenticatedRoute
         path="/admin/unrelease"
         render={(routeProps) => <Unrelease key={routeProps.location.key} />}

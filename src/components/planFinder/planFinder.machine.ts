@@ -33,8 +33,14 @@ type PlanFinderContext = {
 type PlanFinderEvent =
   | { type: "SUBMIT_LABWARE"; labware: LabwareFieldsFragment }
   | { type: "REMOVE_PLAN_BY_BARCODE"; barcode: string }
-  | { type: "done.invoke.findPlan"; data: FindPlanDataQuery }
-  | { type: "error.platform.findPlan"; data: ClientError };
+  | {
+      type: "done.invoke.findPlan";
+      data: FindPlanDataQuery;
+    }
+  | {
+      type: "error.platform.findPlan";
+      data: ClientError;
+    };
 
 export const planFinderMachine = createMachine<
   PlanFinderContext,
@@ -73,6 +79,7 @@ export const planFinderMachine = createMachine<
       searching: {
         invoke: {
           src: "findPlan",
+          id: "findPlan",
           onDone: {
             target: "idle",
             actions: ["assignPlan", "resetLabware"],
@@ -100,9 +107,10 @@ export const planFinderMachine = createMachine<
       assignPlan: assign((ctx, e) => {
         if (e.type !== "done.invoke.findPlan") return;
         //Remove all actions, if any that doesn't belong to the labware in context
-        e.data.planData.plan.planActions = e.data.planData.plan.planActions.filter(
-          (action) => action.destination.labwareId === ctx.labware!.id
-        );
+        e.data.planData.plan.planActions =
+          e.data.planData.plan.planActions.filter(
+            (action) => action.destination.labwareId === ctx.labware!.id
+          );
         ctx.plans.set(ctx.labware!.barcode, e.data);
       }),
 

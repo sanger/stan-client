@@ -63,9 +63,7 @@ function getRegistrationFormTissue(): RegistrationFormTissue {
   };
 }
 
-function buildRegistrationSchema(
-  registrationInfo: GetRegistrationInfoQuery
-): Yup.ObjectSchema {
+function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
   const validation = new RegistrationValidation(registrationInfo);
   return Yup.object().shape({
     tissues: Yup.array()

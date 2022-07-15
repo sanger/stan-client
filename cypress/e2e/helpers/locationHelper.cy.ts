@@ -1,6 +1,6 @@
 import { buildOrderedAddresses } from "../../../src/lib/helpers/locationHelper";
 import { SizeInput } from "../../../src/types/stan";
-import { GridDirection, Size } from "../../../src/types/sdk";
+import { GridDirection } from "../../../src/types/sdk";
 import { buildAddresses } from "../../../src/lib/helpers";
 
 const evenLocationSize: SizeInput = {

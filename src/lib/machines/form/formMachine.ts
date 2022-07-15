@@ -20,8 +20,6 @@ export type FormEvent<V, R> =
 
 /**
  * Create a form machine
- * @param <V> The type of values submitted by the form
- * @param <R> The type of the result after successful submission
  */
 export default function createFormMachine<V, R>() {
   return createMachine<FormContext<R>, FormEvent<V, R>>(
@@ -38,6 +36,7 @@ export default function createFormMachine<V, R>() {
           entry: "unsetServerError",
           invoke: {
             src: "submitForm",
+            id: "submitForm",
             onDone: {
               target: "submitted",
               actions: "assignSubmissionResult",

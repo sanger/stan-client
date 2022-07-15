@@ -12,7 +12,7 @@ describe("initData.machine", () => {
       const machine = createDataFetcherMachine({
         options: {
           actions: {
-            log: (ctx, e) => console.log("Logged:", ctx),
+            log: (ctx) => console.log("Logged:", ctx),
           },
         },
       });

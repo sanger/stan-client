@@ -29,9 +29,7 @@ const initialValues: DestroyRequest = {
   reasonId: -1,
 };
 
-function buildValidationSchema(
-  destroyInfo: GetDestroyInfoQuery
-): Yup.ObjectSchema {
+function buildValidationSchema(destroyInfo: GetDestroyInfoQuery) {
   const destructionReasonIds = destroyInfo.destructionReasons.map(
     (dr) => dr.id
   );
@@ -64,9 +62,10 @@ const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
     })
   );
 
-  const validationSchema = useMemo(() => buildValidationSchema(destroyInfo), [
-    destroyInfo,
-  ]);
+  const validationSchema = useMemo(
+    () => buildValidationSchema(destroyInfo),
+    [destroyInfo]
+  );
 
   const submitForm = async (values: DestroyRequest) =>
     send({ type: "SUBMIT_FORM", values });

@@ -34,7 +34,7 @@ const initialValues: ReleaseRequest = {
   recipient: "",
 };
 
-const validationSchema: Yup.ObjectSchema = Yup.object().shape({
+const validationSchema = Yup.object().shape({
   barcodes: Yup.array()
     .label("Labware")
     .min(1, "Please scan in at least 1 labware")

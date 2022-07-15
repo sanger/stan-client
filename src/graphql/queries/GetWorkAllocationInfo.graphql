@@ -14,4 +14,7 @@ query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatu
     comments(category: $commentCategory, includeDisabled: false) {
         ...CommentFields
     }
+    releaseRecipients(includeDisabled: false) {
+        ...ReleaseRecipientFields
+    }
 }

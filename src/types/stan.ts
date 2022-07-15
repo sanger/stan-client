@@ -1,8 +1,15 @@
-import {LabwareFieldsFragment, LabwareState, Maybe, PrinterFieldsFragment, Size, WorkStatus} from "./sdk";
-import {Location} from "history";
-import {ClientError} from "graphql-request";
+import {
+  LabwareFieldsFragment,
+  LabwareState,
+  Maybe,
+  PrinterFieldsFragment,
+  Size,
+  WorkStatus,
+} from "./sdk";
+import { Location } from "history";
+import { ClientError } from "graphql-request";
 import * as Yup from "yup";
-import {regexSort} from "../lib/helpers";
+import { regexSort } from "../lib/helpers";
 
 /**
  * Union of STAN's {@link OperationType} names
@@ -23,9 +30,9 @@ export enum LabwareTypeName {
   VISIUM_ADH = "Visium ADH",
   FOUR_SLOT_SLIDE = "4 slot slide",
   FETAL_WASTE_CONTAINER = "Fetal waste container",
-  DUAL_INDEX_PLATE= "Dual index plate",
-  POT="Pot",
-  PRE_BARCODED_TUBE="Prebarcoded tube",
+  DUAL_INDEX_PLATE = "Dual index plate",
+  POT = "Pot",
+  PRE_BARCODED_TUBE = "Prebarcoded tube",
 }
 
 export type Address = string;
@@ -60,7 +67,7 @@ type GraphQLErrorWithExtensions = {
     column: number;
   }[];
   path: string[];
-}
+};
 
 /**
  * Builds a {@link ServerErrors} object from a ClientError
@@ -68,18 +75,21 @@ type GraphQLErrorWithExtensions = {
  */
 export function extractServerErrors(e: ClientError): ServerErrors {
   return {
-    message: e.response.errors
-      ?.map(error => error?.message?.match(/^.*\s:\s(.*)$/)?.[1])
-      .filter(error => !!error).join("\n") ?? null,
-    problems: (e.response.errors as GraphQLErrorWithExtensions[]).reduce<string[]>(
-      (memo, graphQLError, _index, _original) => {
-        if (!graphQLError.extensions?.hasOwnProperty("problems")) {
-          return memo;
-        }
-        return [...memo, ...graphQLError.extensions["problems"]];
-      },
-      []
-    ) ?? [],
+    message:
+      e.response.errors
+        ?.map((error) => error?.message?.match(/^.*\s:\s(.*)$/)?.[1])
+        .filter((error) => !!error)
+        .join("\n") ?? null,
+    problems:
+      (e.response.errors as GraphQLErrorWithExtensions[]).reduce<string[]>(
+        (memo, graphQLError, _index, _original) => {
+          if (!graphQLError.extensions?.hasOwnProperty("problems")) {
+            return memo;
+          }
+          return [...memo, ...graphQLError.extensions["problems"]];
+        },
+        []
+      ) ?? [],
   };
 }
 
@@ -89,8 +99,9 @@ export function extractServerErrors(e: ClientError): ServerErrors {
  * @param T the type
  * @param K the union of keys to make nullable
  */
-export type Nullable<T, K extends keyof T> = Omit<T, K> &
-  { [P in K]: T[P] | null };
+export type Nullable<T, K extends keyof T> = Omit<T, K> & {
+  [P in K]: T[P] | null;
+};
 
 export type PrintResultType = {
   successful: boolean;
@@ -103,7 +114,7 @@ export type SearchResultsType<T> = {
   numDisplayed?: number;
   numRecords?: number;
   entries: T[];
-}
+};
 
 /**
  * A single row on the results table of the Search page
@@ -116,7 +127,7 @@ export type SearchResultTableEntry = {
   tissueType: string;
   location: Maybe<SearchResultTableEntryLocation>;
   sectionNumber?: Maybe<number>;
-  replicate?:  Maybe<string>;
+  replicate?: Maybe<string>;
   labwareCreated: Date;
   embeddingMedium: string;
 };
@@ -126,9 +137,6 @@ export type SearchResultTableEntryLocation = {
   displayName: string;
   address?: Maybe<number>;
 };
-
-
-
 
 /**
  * Type for possible location URL params
@@ -160,7 +168,7 @@ export interface LocationMatchParams {
 export type MachineServiceDone<T extends string, E> = {
   type: `done.invoke.${T}`;
   data: E;
-}
+};
 
 /**
  * Type for when an XState service errors
@@ -227,7 +235,7 @@ export type StanConfig = {
   /**
    * The maximum number of rows to display on the Search page
    */
-  maxSearchRecords: number
+  maxSearchRecords: number;
 };
 
 /**
@@ -247,9 +255,14 @@ export type HistoryTableEntry = {
   username: string;
   workNumber?: Maybe<string>;
   details: Array<string>;
-}
+};
 
-const historyStrKeys = ["externalName", "donorName", "labwareBarcode","workNumber"] as const;
+const historyStrKeys = [
+  "externalName",
+  "donorName",
+  "labwareBarcode",
+  "workNumber",
+] as const;
 type HistoryStrKeys = typeof historyStrKeys[number];
 const historyNumKeys = ["sampleId"] as const;
 type HistoryNumKeys = typeof historyNumKeys[number];
@@ -267,9 +280,9 @@ export const historySchema = Yup.object({
     .required(),
   value: Yup.mixed()
     .when("kind", {
-      is: (val) => val === "sampleId",
+      is: (val: string) => val === "sampleId",
       then: Yup.number().integer().positive().required(),
-      else: Yup.string().required(),
+      otherwise: Yup.string().required(),
     })
     .required(),
 }).required();
@@ -291,16 +304,16 @@ export const statusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
     WorkStatus.Unstarted,
   ];
   return (
-      statusArray.findIndex((val) => val === rowAStatus) -
-      statusArray.findIndex((val) => val === rowBStatus)
+    statusArray.findIndex((val) => val === rowAStatus) -
+    statusArray.findIndex((val) => val === rowBStatus)
   );
 };
 
 /**
  * Sorts alphanumeric strings with alphabetical order  followed by number sort
  */
-export const alphaNumericSortDefault = (a:string, b:string) :number => {
+export const alphaNumericSortDefault = (a: string, b: string): number => {
   const regAlpha = /[^a-zA-Z]*/g;
   const regNumeric = /[^0-9]*/g;
-  return regexSort(a, b, {alpha: regAlpha, numeric: regNumeric});
-}
+  return regexSort(a, b, { alpha: regAlpha, numeric: regNumeric });
+};

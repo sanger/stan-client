@@ -289,6 +289,8 @@ export default function Configuration({ configuration }: ConfigurationParams) {
         <p className="mt-3 mb-6 text-lg">
           Release Recipients are available on the{" "}
           <StyledLink to={"/admin/release"}>Release</StyledLink> page.
+          They are also available on the{" "}
+          <StyledLink to={"/sgp"}>SGP Management</StyledLink> page as "Work Requester"
         </p>
         <EntityManager
           initialEntities={configuration.releaseRecipients}

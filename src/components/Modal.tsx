@@ -1,7 +1,8 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
 interface ModalProps {
   show?: boolean;
+  children: ReactNode;
 }
 
 const Modal: React.FC<ModalProps> = ({ children, show }) => {
@@ -37,7 +38,7 @@ const Modal: React.FC<ModalProps> = ({ children, show }) => {
 
 export default Modal;
 
-export const ModalHeader: React.FC = ({ children }) => {
+export const ModalHeader = ({ children }: ModalProps) => {
   return (
     <h3
       className="border-b-2 border-gray-200 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 bg-gray-100 text-lg leading-6 font-medium text-gray-900"
@@ -48,13 +49,13 @@ export const ModalHeader: React.FC = ({ children }) => {
   );
 };
 
-export const ModalBody: React.FC = ({ children }) => {
+export const ModalBody = ({ children }: ModalProps) => {
   return (
     <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">{children}</div>
   );
 };
 
-export const ModalFooter: React.FC = ({ children }) => {
+export const ModalFooter = ({ children }: ModalProps) => {
   return (
     <div className="bg-gray-100 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
       {children}
