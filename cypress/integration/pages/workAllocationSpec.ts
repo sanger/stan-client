@@ -74,7 +74,7 @@ describe("Work Allocation", () => {
                 return res.once(
                   ctx.errors([
                     {
-                      message: "There was an error with the request",
+                      message: "SGP Request Error",
                     },
                   ])
                 );
@@ -82,7 +82,7 @@ describe("Work Allocation", () => {
             );
           });
           cy.findByRole("button", { name: /Submit/i }).click();
-          cy.findByText("There was an error with the request").should("exist");
+          cy.findByText("SGP Request Error").should("exist");
         });
       }
     );
@@ -104,7 +104,7 @@ describe("Work Allocation", () => {
           cy.findByText("Number of blocks, slides or original samples required").should("not.exist");;
       })
 
-      it("should not show an error message if Number of Blocks has a value", () => {
+      it("should not show an error message if Number of original samples has a value", () => {
           cy.get("input[name='numOriginalSamples']").type("1");
           cy.findByRole("button", { name: /Submit/i }).should("be.visible").click();
           cy.findByText("Number of blocks, slides or original samples required").should("not.exist");;

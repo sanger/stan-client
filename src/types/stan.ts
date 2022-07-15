@@ -69,7 +69,7 @@ type GraphQLErrorWithExtensions = {
 export function extractServerErrors(e: ClientError): ServerErrors {
   return {
     message: e.response.errors
-      ?.map(error => error?.message)
+      ?.map(error => error?.message?.match(/^.*\s:\s(.*)$/)?.[1])
       .filter(error => !!error).join("\n") ?? null,
     problems: (e.response.errors as GraphQLErrorWithExtensions[]).reduce<string[]>(
       (memo, graphQLError, _index, _original) => {
