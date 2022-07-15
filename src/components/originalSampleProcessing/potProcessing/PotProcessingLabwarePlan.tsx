@@ -185,7 +185,7 @@ const PotProcessingLabwarePlan = React.forwardRef<
 
                 <FormikSelect
                   label={"Processing comments"}
-                  name={`plans.${rowIndex}.comments`}
+                  name={`plans.${rowIndex}.commentId`}
                   emptyOption={true}
                 >
                   {optionValues(potProcessInfo.comments, "text", "id")}
