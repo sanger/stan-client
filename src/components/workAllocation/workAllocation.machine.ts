@@ -45,7 +45,6 @@ export type WorkAllocationFormValues = {
    * Number of blocks
    */
   numBlocks: number | undefined;
-
   /**
    * Number of Samples
    */
@@ -154,6 +153,7 @@ export default function createWorkAllocationMachine({
         loading: {
           invoke: {
             src: "loadWorkAllocationInfo",
+            id: "loadWorkAllocationInfo",
             onDone: { actions: "assignWorkAllocationInfo", target: "ready" },
             onError: { actions: "assignServerError", target: "ready" },
           },
@@ -178,6 +178,7 @@ export default function createWorkAllocationMachine({
         allocating: {
           invoke: {
             src: "allocateWork",
+            id: "allocateWork",
             onDone: { actions: "assignSuccessMessage", target: "loading" },
             onError: { actions: "assignServerError", target: "loading" },
           },
@@ -282,7 +283,7 @@ export default function createWorkAllocationMachine({
           });
         },
 
-        loadWorkAllocationInfo: (ctx) => 
+        loadWorkAllocationInfo: (ctx) =>
           stanCore.GetWorkAllocationInfo({
             commentCategory: "Work status",
             workStatuses: ctx.urlParams.status,

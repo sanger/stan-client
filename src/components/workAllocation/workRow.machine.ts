@@ -111,6 +111,7 @@ export default function createWorkRowMachine({
         updating: {
           invoke: {
             src: "updateWorkStatus",
+            id: "updateWorkStatus",
             onDone: {
               actions: ["assignSgpNumber", "toggleEditMode"],
               target: "deciding",
@@ -121,6 +122,7 @@ export default function createWorkRowMachine({
         editNumberBlocks: {
           invoke: {
             src: "updateWorkNumBlocks",
+            id: "updateWorkNumBlocks",
             onDone: {
               actions: "assignWorkNumBlocks",
               target: "deciding",
@@ -131,6 +133,7 @@ export default function createWorkRowMachine({
         editNumberSlides: {
           invoke: {
             src: "updateWorkNumSlides",
+            id: "updateWorkNumSlides",
             onDone: {
               actions: "assignWorkNumSlides",
               target: "deciding",
@@ -151,6 +154,7 @@ export default function createWorkRowMachine({
         editPriority: {
           invoke: {
             src: "updateWorkPriority",
+            id: "updateWorkPriority",
             onDone: {
               actions: "assignWorkPriority",
               target: "deciding",

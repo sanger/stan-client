@@ -1,6 +1,6 @@
 import React from "react";
-import logo from "../images/logo.svg";
 import classNames from "classnames";
+import LogoSVG from "../images/LogoSVG";
 
 interface LogoProps
   extends React.DetailedHTMLProps<
@@ -11,11 +11,11 @@ interface LogoProps
 /**
  * Stan logo. Defaults to h-8 w-8.
  * @param className
+ * @param rest
  * @constructor
  */
-const Logo = ({ className, ...rest }: LogoProps) => {
+const Logo = ({ className }: LogoProps) => {
   const imgClassName = classNames("h-8 w-8", className);
-  return <img {...rest} className={imgClassName} src={logo} alt="STAN logo" />;
+  return <LogoSVG className={imgClassName} />;
 };
-
 export default Logo;

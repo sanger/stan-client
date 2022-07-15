@@ -74,6 +74,7 @@ export const extractResultMachine = createMachine<
         onEntry: ["unassignServerError", "unassignErrorMessage"],
         invoke: {
           src: "extractResult",
+          id: "extractResult",
           onDone: {
             target: "extractResultSuccess",
             actions: "assignExtractResult",

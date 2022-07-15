@@ -69,6 +69,7 @@ export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
       aliquoting: {
         invoke: {
           src: "aliquot",
+          id: "aliquot",
           onDone: {
             target: "aliquotingDone",
             actions: "assignAliquotResult",

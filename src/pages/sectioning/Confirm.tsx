@@ -23,8 +23,9 @@ type SectioningConfirmProps = {
 };
 
 function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
-  const location = useLocation<{ plans?: Array<FindPlanDataQuery> }>();
-  const plans: Array<FindPlanDataQuery> = location?.state?.plans ?? [];
+  const location = useLocation();
+  const state = location.state as { plans?: Array<FindPlanDataQuery> };
+  const plans: Array<FindPlanDataQuery> = state?.plans ?? [];
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
   const [confirmedLabwares, setConfirmedLabwares] = React.useState<
     LabwareFieldsFragment[]

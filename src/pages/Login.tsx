@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { authContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { Link, Redirect, RouteComponentProps } from "react-router-dom";
 import { StaticContext } from "react-router";
 import {
@@ -31,7 +31,7 @@ const LoginSchema = Yup.object().shape({
 const Login = (
   props: RouteComponentProps<{}, StaticContext, LocationState>
 ): JSX.Element => {
-  const auth = useContext(authContext);
+  const auth = useAuth();
 
   // If the user was redirected here because they were logged in, and then their session expired, clear the AuthState
   useEffect(() => {

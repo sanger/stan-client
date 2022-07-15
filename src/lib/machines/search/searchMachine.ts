@@ -34,7 +34,7 @@ function searchMachine<E, T>(searchService: SearchServiceInterface<E, T>) {
     SearchEvent | FindEvent<E> | SearchDoneEvent<T>
   >(
     {
-      id: "search",
+      id: "searchMachine",
       initial: "unknown",
       states: {
         unknown: {
@@ -60,6 +60,7 @@ function searchMachine<E, T>(searchService: SearchServiceInterface<E, T>) {
           entry: "unassignServerError",
           invoke: {
             src: "search",
+            id: "search",
             onDone: {
               target: "searched",
               actions: "assignSearchResult",

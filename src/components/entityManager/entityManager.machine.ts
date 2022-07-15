@@ -66,6 +66,7 @@ export function createEntityManagerMachine<E>(
             valueChanged: {
               invoke: {
                 src: "valueChanged",
+                id: "valueChanged",
                 onDone: {
                   target: "#entityManager.ready",
                   actions: "updateEntity",
@@ -78,6 +79,7 @@ export function createEntityManagerMachine<E>(
             },
             creatingEntity: {
               invoke: {
+                id: "createEntity",
                 src: "createEntity",
                 onDone: {
                   target: "#entityManager.ready",
@@ -134,9 +136,9 @@ export function createEntityManagerMachine<E>(
               ? `"${e.data[ctx.keyField]}" ${
                   e.data[ctx.valueField] ? "enabled" : "disabled"
                 }`
-              : `"${e.data[ctx.keyField]}" - ${ctx.valueField} changed to ${
-                  e.data[ctx.valueField]
-                }`;
+              : `"${e.data[ctx.keyField]}" - ${
+                  ctx.valueField as string
+                } changed to ${e.data[ctx.valueField]}`;
 
           return {
             successMessage,

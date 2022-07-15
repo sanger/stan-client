@@ -140,4 +140,7 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   );
 };
 
-export { authContext, AuthProvider };
+const useAuth = () => {
+  return useContext(authContext);
+};
+export { useAuth, AuthProvider };

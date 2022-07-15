@@ -46,13 +46,13 @@ export const extractionMachine = createMachine<
       ready: {
         initial: "invalid",
         on: {
-          UPDATE_WORK_NUMBER: { 
+          UPDATE_WORK_NUMBER: {
             target: "validating",
-            actions: "assignWorkNumber"
+            actions: "assignWorkNumber",
           },
-          UPDATE_LABWARES: { 
+          UPDATE_LABWARES: {
             actions: "assignLabwares",
-            target: "validating"
+            target: "validating",
           },
         },
         states: {
@@ -67,6 +67,7 @@ export const extractionMachine = createMachine<
       extracting: {
         invoke: {
           src: "extract",
+          id: "extract",
           onDone: {
             target: "extracted",
             actions: "assignExtraction",
@@ -80,6 +81,7 @@ export const extractionMachine = createMachine<
       validating: {
         invoke: {
           src: "validateExtraction",
+          id: "validateExtraction",
         },
         on: {
           IS_VALID: "ready.valid",
@@ -128,10 +130,8 @@ export const extractionMachine = createMachine<
           },
         });
       },
-      validateExtraction: (ctx: ExtractionContext) => (
-        send
-      ) => {
-        const isValid = (ctx.labwares.length > 0) && (ctx.workNumber !== "")
+      validateExtraction: (ctx: ExtractionContext) => (send) => {
+        const isValid = ctx.labwares.length > 0 && ctx.workNumber !== "";
         send(isValid ? "IS_VALID" : "IS_INVALID");
       },
     },

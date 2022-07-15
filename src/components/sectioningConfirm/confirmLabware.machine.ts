@@ -173,6 +173,7 @@ export const createConfirmLabwareMachine = (
         editingLayout: {
           invoke: {
             src: "layoutMachine",
+            id: "layoutMachine",
             onDone: {
               target: "editableMode",
               actions: ["assignLayoutPlan", "commitConfirmation"],
@@ -293,9 +294,9 @@ export const createConfirmLabwareMachine = (
             barcode: ctx.labware.barcode!,
             cancelled: ctx.cancelled,
             confirmSections: ctx.cancelled ? undefined : confirmSections,
-            addressComments: Array.from(
-              ctx.addressToCommentMap.entries()
-            ).map(([address, commentId]) => ({ address, commentId })),
+            addressComments: Array.from(ctx.addressToCommentMap.entries()).map(
+              ([address, commentId]) => ({ address, commentId })
+            ),
           };
         }),
       },

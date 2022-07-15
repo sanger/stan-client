@@ -5,7 +5,7 @@ import { StanMobileNavLink, StanNavLink } from "./nav";
 import { useOnClickOutside } from "../lib/hooks";
 import Logo from "./Logo";
 import GuestIcon from "./icons/GuestIcon";
-import { authContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import Heading from "./Heading";
 import variants from "../lib/motionVariants";
@@ -27,7 +27,7 @@ interface AppShellParams {
 
 function AppShell({ children }: AppShellParams) {
   const config = useContext(configContext);
-  const auth = useContext(authContext);
+  const auth = useAuth();
   const location = useLocation<LocationState>();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
@@ -139,9 +139,7 @@ function AppShell({ children }: AppShellParams) {
                     icon={
                       <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                     }
-                    description={
-                      "Recording sectioning planning and confirmation."
-                    }
+                    description={"Original sample operations"}
                   >
                     <NavLinkMenuItem
                       caption={"Original Sample Processing"}
@@ -150,7 +148,7 @@ function AppShell({ children }: AppShellParams) {
                         <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                       }
                       description={
-                        "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
+                      "Sample processing steps."
                       }
                     />
                     <NavLinkMenuItem
@@ -162,6 +160,54 @@ function AppShell({ children }: AppShellParams) {
                       description={
                         "Records the type of processing cycle run on the sample."
                       }
+                    />
+                    <NavLinkMenuItem
+                      caption={"Sample Processing"}
+                      path="/lab/original_sample_processing"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"Solution Transfer"}
+                      path="/lab/solution_transfer"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Records solution transfer operation of samples."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"Add External ID"}
+                      path="/lab/add_external_id"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Add an External ID to an original sample."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"FFPE Processing"}
+                      path="/lab/ffpe_processing"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={
+                        "Records the type of processing cycle run on the sample."
+                      }
+                    />
+                    <NavLinkMenuItem
+                      caption={"Sample processing comments"}
+                      path="/lab/sample_processing_comments"
+                      icon={
+                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
+                      }
+                      description={"Records extra sample processing commentas."}
                     />
                   </Menu>
 
