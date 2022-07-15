@@ -142,13 +142,13 @@ function AppShell({ children }: AppShellParams) {
                     description={"Original sample operations"}
                   >
                     <NavLinkMenuItem
-                      caption={"Original Sample Processing"}
+                      caption={"Sample Processing"}
                       path="/lab/original_sample_processing"
                       icon={
                         <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                       }
                       description={
-                      "Sample processing steps."
+                        "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
                       }
                     />
                     <NavLinkMenuItem
@@ -161,16 +161,7 @@ function AppShell({ children }: AppShellParams) {
                         "Records the type of processing cycle run on the sample."
                       }
                     />
-                    <NavLinkMenuItem
-                      caption={"Sample Processing"}
-                      path="/lab/original_sample_processing"
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
-                      }
-                    />
+
                     <NavLinkMenuItem
                       caption={"Solution Transfer"}
                       path="/lab/solution_transfer"
@@ -187,20 +178,9 @@ function AppShell({ children }: AppShellParams) {
                       icon={
                         <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
                       }
-                      description={
-                        "Add an External ID to an original sample."
-                      }
+                      description={"Add an External ID to an original sample."}
                     />
-                    <NavLinkMenuItem
-                      caption={"FFPE Processing"}
-                      path="/lab/ffpe_processing"
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Records the type of processing cycle run on the sample."
-                      }
-                    />
+
                     <NavLinkMenuItem
                       caption={"Sample processing comments"}
                       path="/lab/sample_processing_comments"
