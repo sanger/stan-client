@@ -5,11 +5,10 @@ import {
 import { labwareTypeInstances } from "../../../src/lib/factories/labwareTypeFactory";
 import { LabwareTypeName } from "../../../src/types/stan";
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
+import { shouldDisplyProjectAndUserNameForWorkNumber } from "../shared/workNumberExtraInfo.cy";
 
 describe("FFPE Processing", () => {
-  before(() => {
-    cy.visit("/lab/ffpe_processing");
-  });
+  shouldDisplyProjectAndUserNameForWorkNumber("/lab/ffpe_processing");
 
   describe("Validation", () => {
     context("when all form fields are empty", () => {

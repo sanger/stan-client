@@ -328,7 +328,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     },
   },
   {
-    Header: "Work Requestor",
+    Header: "Work Requester",
     accessor: "workRequester",
     sortType: (rowA, rowB) => {
       return statusSort(rowA.original.status, rowB.original.status);

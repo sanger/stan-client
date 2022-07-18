@@ -5,11 +5,10 @@ import {
 import { labwareTypeInstances } from "../../../src/lib/factories/labwareTypeFactory";
 import { LabwareTypeName } from "../../../src/types/stan";
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
+import { shouldDisplyProjectAndUserNameForWorkNumber } from "../shared/workNumberExtraInfo.cy";
 
 describe("Solution Transfer", () => {
-  before(() => {
-    cy.visit("/lab/solution_transfer");
-  });
+  shouldDisplyProjectAndUserNameForWorkNumber("/lab/solution_transfer");
 
   describe("Validation", () => {
     context("when the form with nothing filled in", () => {
