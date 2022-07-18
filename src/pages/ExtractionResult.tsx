@@ -30,8 +30,8 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
   // There will be initial labware if user has come from the Extraction page
   const location = useLocation();
   const state = location.state as { labware?: Array<LabwareFieldsFragment> };
-  const initialLabware: Array<LabwareFieldsFragment> = state.labware ?? [];
-
+  const initialLabware: Array<LabwareFieldsFragment> =
+    state === null ? [] : state.labware ?? [];
   const initialValues: ExtractResultRequest = {
     workNumber: "",
     labware: initialLabware.map(buildExtractResultLabware),
