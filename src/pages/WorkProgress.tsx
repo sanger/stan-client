@@ -328,6 +328,13 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     },
   },
   {
+    Header: "Work Requestor",
+    accessor: "workRequester",
+    sortType: (rowA, rowB) => {
+      return statusSort(rowA.original.status, rowB.original.status);
+    },
+  },
+  {
     Header: "Status",
     accessor: "status",
     sortType: (rowA, rowB) => {

@@ -29,6 +29,7 @@ export type WorkProgressResultTableEntry = {
   lastStainTODate: Date | undefined;
   lastStainLPDate: Date | undefined;
   lastRelease96WellPlateData: Date | undefined;
+  workRequester: String | undefined;
 };
 /**
  * The keys to store the timestamp data
@@ -135,6 +136,9 @@ export class WorkProgressService
         lastRelease96WellPlateData:
           lastRelease96WellPlateData &&
           new Date(lastRelease96WellPlateData.toString()),
+        workRequester: entry.work.workRequester
+          ? entry.work.workRequester.username
+          : "",
       };
     });
   };
