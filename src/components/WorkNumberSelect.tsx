@@ -112,6 +112,7 @@ export default function WorkNumberSelect({
         label={label ?? ""}
         name={name}
         emptyOption={true}
+        onBlur={validateWorkNumber}
         onChange={handleWorkNumberChange}
         className={"flex-grow w-full"}
         data-testid={"workNumber"}

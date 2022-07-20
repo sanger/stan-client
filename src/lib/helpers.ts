@@ -93,7 +93,7 @@ export function safeParseQueryString<T>(
     try {
       const castValue = params.schema.cast(parsed);
       return params.schema.isValidSync(castValue)
-        ? ((castValue as unknown) as T) ?? null
+        ? (castValue as unknown as T) ?? null
         : null;
     } catch {
       return null;
