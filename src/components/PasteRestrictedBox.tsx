@@ -24,6 +24,8 @@ export default function PasteRestrictedBox({
     try {
       await navigator.clipboard.readText().then(
         (text) => {
+          // Strip out hidden chars \r \n
+          text = text.replace(/[\r\n]/g, "");
           setValue(text)
           onChange?.(text)
         }
