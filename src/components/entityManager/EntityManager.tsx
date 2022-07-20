@@ -191,7 +191,7 @@ export default function EntityManager<
         </TableHead>
         <TableBody>
           {entities.map((entity) => (
-            <tr>
+            <tr key={String(displayKeyColumnName)}>
               <TableCell>{entity[displayKeyColumnName]}</TableCell>
               {getValueFieldComponent(
                 valueFieldComponentInfo,
