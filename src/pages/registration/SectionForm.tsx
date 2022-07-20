@@ -172,8 +172,8 @@ export default function SectionForm({
         label="Spatial Location"
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.spatialLocation`}
       >
-        {availableSpatialLocations.map((spatialLocation, index) => (
-          <option value={spatialLocation.code} key={index}>
+        {availableSpatialLocations.map((spatialLocation) => (
+          <option value={spatialLocation.code} key={spatialLocation.code}>
             {spatialLocation.code + " - " + spatialLocation.name}
           </option>
         ))}

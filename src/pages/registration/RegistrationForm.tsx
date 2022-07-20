@@ -220,8 +220,8 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                           label="Spatial Location"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.spatialLocation`}
                         >
-                          {availableSpatialLocations.map((spatialLocation, index) => (
-                            <option value={spatialLocation.code} key={index}>
+                          {availableSpatialLocations.map((spatialLocation) => (
+                            <option value={spatialLocation.code} key={spatialLocation.code}>
                               {spatialLocation.code + " - " + spatialLocation.name}
                             </option>
                           ))}
