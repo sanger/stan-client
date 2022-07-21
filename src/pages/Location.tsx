@@ -73,8 +73,7 @@ const Location: React.FC<LocationProps> = ({
   locationSearchParams,
   match,
 }) => {
-  //Custom hook to retain the updated labware state
-  const [current, send] = useMachine(() => {
+  const locationMachine = React.useMemo(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> =
       storageLocation.size && storageLocation.direction
@@ -106,7 +105,9 @@ const Location: React.FC<LocationProps> = ({
         selectedAddress,
       },
     });
-  });
+  }, [storageLocation, locationSearchParams]);
+  //Custom hook to retain the updated labware state
+  const [current, send] = useMachine(locationMachine);
 
   const {
     location,

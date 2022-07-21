@@ -76,11 +76,12 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
     },
     ref
   ) => {
-    const [current, send, service] = useMachine(
-      createLabwarePlanMachine(
+    const labwarePlanMachine = React.useMemo(() => {
+      return createLabwarePlanMachine(
         buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware)
-      )
-    );
+      );
+    }, [sourceLabware, sampleColors, outputLabware]);
+    const [current, send, service] = useMachine(labwarePlanMachine);
 
     useEffect(() => {
       const subscription = service.subscribe((state) => {

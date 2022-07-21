@@ -110,11 +110,12 @@ const PotProcessingLabwarePlan = React.forwardRef<
     },
     ref
   ) => {
-    const [current] = useMachine(
-      createLabwarePlanMachine(
+    const labwarePlanMachine = React.useMemo(() => {
+      return createLabwarePlanMachine(
         buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware)
-      )
-    );
+      );
+    }, [sourceLabware, sampleColors, outputLabware]);
+    const [current] = useMachine(labwarePlanMachine);
     const { requestError, layoutPlan } = current.context;
     const { values, setFieldValue } = useFormikContext<PotFormData>();
 

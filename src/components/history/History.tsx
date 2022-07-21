@@ -17,7 +17,10 @@ import { useDownload } from "../../lib/hooks/useDownload";
  * Component for looking up and displaying the history of labware and samples
  */
 export default function History(props: HistoryProps) {
-  const [current, send] = useMachine(createHistoryMachine(props));
+  const historyMachine = React.useMemo(() => {
+    return createHistoryMachine(props);
+  }, [props]);
+  const [current, send] = useMachine(historyMachine);
 
   const { history, historyProps, serverError } = current.context;
 

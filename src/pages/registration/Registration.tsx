@@ -93,12 +93,13 @@ function Registration<M, T extends TissueValues<B>, B>({
   defaultFormTissueValues,
   keywordsMap,
 }: RegistrationParams<M, T>) {
-  const [current, send, service] = useMachine(
-    createRegistrationMachine<FormInput<T>, M>(
+  const registrationMachine = React.useMemo(() => {
+    return createRegistrationMachine<FormInput<T>, M>(
       buildRegistrationInput,
       registrationService
-    )
-  );
+    );
+  }, [buildRegistrationInput, registrationService]);
+  const [current, send, service] = useMachine(registrationMachine);
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
   useEffect(() => {
     const subscription = service.subscribe((state) => {

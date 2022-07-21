@@ -72,8 +72,8 @@ export default function EntityManager<
   onCreate,
   onChangeValue,
 }: EntityManagerProps<E>) {
-  const [current, send] = useMachine(
-    createEntityManagerMachine<E>(
+  const entityManagerMachine = React.useMemo(() => {
+    return createEntityManagerMachine<E>(
       initialEntities,
       displayKeyColumnName,
       valueColumnName
@@ -88,8 +88,16 @@ export default function EntityManager<
           return onChangeValue(e.entity, e.value);
         },
       },
-    })
-  );
+    });
+  }, [
+    initialEntities,
+    displayKeyColumnName,
+    valueColumnName,
+    onChangeValue,
+    onCreate,
+  ]);
+
+  const [current, send] = useMachine(entityManagerMachine);
 
   /**
    * The value of the input used for creating new entities
@@ -190,8 +198,8 @@ export default function EntityManager<
           </tr>
         </TableHead>
         <TableBody>
-          {entities.map((entity) => (
-            <tr key={String(displayKeyColumnName)}>
+          {entities.map((entity, indx) => (
+            <tr key={indx}>
               <TableCell>{entity[displayKeyColumnName]}</TableCell>
               {getValueFieldComponent(
                 valueFieldComponentInfo,

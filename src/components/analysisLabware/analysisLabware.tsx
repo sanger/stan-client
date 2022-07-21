@@ -38,18 +38,20 @@ export default function AnalysisLabware({
     return {
       barcode: barcode,
       measurements: [{ name: AnalysisMeasurementType.RIN, value: "" }],
-      workNumber: ""
+      workNumber: "",
     };
   });
 
   const workNumberCommon = React.useRef("");
 
-  const [current, send] = useMachine(() =>
-    analysisLabwareMachine.withContext({
+  const memoAnalysisLabwareMachine = React.useMemo(() => {
+    return analysisLabwareMachine.withContext({
       analysisLabwares: defaultLabwareValues,
       operationType: OperationType.RIN,
-    })
-  );
+    });
+  }, [defaultLabwareValues]);
+
+  const [current, send] = useMachine(() => memoAnalysisLabwareMachine);
   const { operationType, analysisLabwares } = current.context;
 
   React.useEffect(() => {

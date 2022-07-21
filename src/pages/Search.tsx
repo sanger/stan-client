@@ -87,12 +87,14 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   const search = searchMachine<FindRequest, SearchResultTableEntry>(
     new SearchService()
   );
-  const [current, send] = useMachine(() =>
-    search.withContext({
+
+  const memoSearchMachine = React.useMemo(() => {
+    return search.withContext({
       findRequest,
       maxRecords: config.maxSearchRecords,
-    })
-  );
+    });
+  }, [urlParamsString, config]);
+  const [current, send] = useMachine(() => memoSearchMachine);
 
   const { serverError, searchResult } = current.context;
 

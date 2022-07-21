@@ -73,13 +73,20 @@ export default function LabwareScanner({
   children,
   enableLocationScanner,
 }: LabwareScannerProps) {
-  if (limit && initialLabwares.length > limit) {
-    initialLabwares = initialLabwares.slice(0, limit);
-  }
+  const slicedInitialLabwareMemo = React.useMemo(() => {
+    if (limit && initialLabwares.length > limit) {
+      return initialLabwares.slice(0, limit);
+    } else return initialLabwares;
+  }, [initialLabwares, limit]);
+  const labwareMachine = React.useMemo(() => {
+    return createLabwareMachine(
+      slicedInitialLabwareMemo,
+      labwareCheckFunction,
+      limit
+    );
+  }, [slicedInitialLabwareMemo, labwareCheckFunction, limit]);
 
-  const [current, send, service] = useMachine(
-    createLabwareMachine(initialLabwares, labwareCheckFunction, limit)
-  );
+  const [current, send, service] = useMachine(labwareMachine);
 
   const {
     labwares,
@@ -154,9 +161,10 @@ export default function LabwareScanner({
     [send]
   );
 
-  const handleOnScan = useCallback(() => send({ type: "SUBMIT_BARCODE" }), [
-    send,
-  ]);
+  const handleOnScan = useCallback(
+    () => send({ type: "SUBMIT_BARCODE" }),
+    [send]
+  );
 
   return (
     <div className="space-y-4">

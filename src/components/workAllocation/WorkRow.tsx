@@ -60,9 +60,10 @@ export default function WorkRow({
   rowIndex,
   onWorkFieldUpdate,
 }: WorkRowProps) {
-  const [current, send] = useMachine(
-    createWorkRowMachine({ workWithComment: initialWork })
-  );
+  const workRowMachine = React.useMemo(() => {
+    return createWorkRowMachine({ workWithComment: initialWork });
+  }, [initialWork]);
+  const [current, send] = useMachine(workRowMachine);
 
   const {
     editModeEnabled,
@@ -131,7 +132,10 @@ export default function WorkRow({
       } else if (workNumValueType === "slide") {
         send({ type: "UPDATE_NUM_SLIDES", numSlides: value });
       } else if (workNumValueType === "originalSamples") {
-        send({ type: "UPDATE_NUM_ORIGINAL_SAMPLES", numOriginalSamples: value });
+        send({
+          type: "UPDATE_NUM_ORIGINAL_SAMPLES",
+          numOriginalSamples: value,
+        });
       }
     },
     [send]

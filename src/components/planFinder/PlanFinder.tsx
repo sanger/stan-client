@@ -57,12 +57,14 @@ export function PlanFinder({
     new Map()
   );
 
-  const [current, send] = useMachine(
-    planFinderMachine.withContext({
+  const memoPlanFinderMachine = React.useMemo(() => {
+    return planFinderMachine.withContext({
       ...planFinderMachine.context,
       plans: planMap,
-    })
-  );
+    });
+  }, [planMap]);
+
+  const [current, send] = useMachine(memoPlanFinderMachine);
   const { plans, requestError, validationError } = current.context;
   const showError = requestError || validationError;
 

@@ -55,13 +55,14 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   removePlan,
   mode,
 }) => {
-  const [current, send, service] = useMachine(
-    createConfirmLabwareMachine(
+  const confirmLabwareMachine = React.useMemo(() => {
+    return createConfirmLabwareMachine(
       comments,
       originalLayoutPlan.destinationLabware,
       originalLayoutPlan
-    )
-  );
+    );
+  }, [comments, originalLayoutPlan]);
+  const [current, send, service] = useMachine(confirmLabwareMachine);
   const confirmOperationLabware = useSelector(
     service,
     selectConfirmOperationLabware
