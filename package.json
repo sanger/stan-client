@@ -5,6 +5,7 @@
   "proxy": "http://localhost:8080",
   "dependencies": {
     "@react-aria/tabs": "^3.2.0",
+    "@sanger/ui-styling": "^4.0.0",
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@tailwindcss/typography": "^0.5.4",
     "@testing-library/jest-dom": "^5.16.4",
@@ -57,8 +58,8 @@
     "build": "npm-run-all build:css build:js",
     "start:js": "react-scripts start",
     "build:js": "react-scripts build",
-    "start:css": "postcss src/styles/tailwind.css -o src/styles/index.css -w",
-    "build:css": "postcss src/styles/tailwind.css -o src/styles/index.css --env production",
+    "start:css": "postcss node_modules/@sanger/ui-styling/tailwind.css -o src/styles/index.css -w",
+    "build:css": "postcss node_modules/@sanger/ui-styling/tailwind.css -o src/styles/index.css --env production",
     "cypress:open": "cypress open --config-file=cypress.config.ts",
     "cypress:run": "cypress run",
     "test": "start-server-and-test start 3000 cypress:run",
