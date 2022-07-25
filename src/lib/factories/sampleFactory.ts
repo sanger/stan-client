@@ -13,7 +13,7 @@ import {
   Tissue,
   TissueType,
 } from "../../types/sdk";
-import { faker } from "@faker-js/faker/locale/en";
+import { faker } from "@faker-js/faker";
 
 export const sampleFactory = Factory.define<Sample>(
   ({ sequence, params, associations }) => ({

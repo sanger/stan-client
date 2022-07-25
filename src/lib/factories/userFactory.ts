@@ -1,6 +1,6 @@
 import { Factory } from "fishery";
 import { UserFieldsFragment, UserRole } from "../../types/sdk";
-import { faker } from "@faker-js/faker/locale/en";
+import { faker } from "@faker-js/faker";
 import _ from "lodash";
 
 export default Factory.define<UserFieldsFragment>(({ params }) => ({

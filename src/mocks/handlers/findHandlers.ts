@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { faker } from "@faker-js/faker/locale/en";
+import { faker } from "@faker-js/faker";
 import { graphql } from "msw";
 import {
   FindEntry,

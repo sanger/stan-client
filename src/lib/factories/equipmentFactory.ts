@@ -1,6 +1,6 @@
 import { Factory } from "fishery";
 import { EquipmentFieldsFragment } from "../../types/sdk";
-import { faker } from "@faker-js/faker/locale/en";
+import { faker } from "@faker-js/faker";
 
 export default Factory.define<EquipmentFieldsFragment>(
   ({ params, sequence }) => ({

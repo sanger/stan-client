@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker/locale/en";
+import { faker } from "@faker-js/faker";
 import { Factory } from "fishery";
 import { ReleaseRecipientFieldsFragment } from "../../types/sdk";
 
