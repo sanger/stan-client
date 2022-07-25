@@ -93,7 +93,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
       findRequest,
       maxRecords: config.maxSearchRecords,
     });
-  }, [urlParamsString, config]);
+  }, [findRequest, search, config]);
   const [current, send] = useMachine(() => memoSearchMachine);
 
   const { serverError, searchResult } = current.context;

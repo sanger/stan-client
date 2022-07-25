@@ -61,16 +61,20 @@ export default function RecordInPlace({
   columns,
   description,
 }: RecordInPlaceProps) {
-  const [current, send] = useMachine(
-    createFormMachine<InPlaceOpRequest, RecordInPlaceMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
+      InPlaceOpRequest,
+      RecordInPlaceMutation
+    >().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
           return stanCore.RecordInPlace({ request: e.values });
         },
       },
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
 

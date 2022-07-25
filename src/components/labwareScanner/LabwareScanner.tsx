@@ -63,7 +63,7 @@ export type LabwareScannerProps = {
 };
 
 export default function LabwareScanner({
-  initialLabwares = [],
+  initialLabwares,
   locked = false,
   limit,
   labwareCheckFunction,
@@ -73,18 +73,20 @@ export default function LabwareScanner({
   children,
   enableLocationScanner,
 }: LabwareScannerProps) {
-  const slicedInitialLabwareMemo = React.useMemo(() => {
+  const slicedInitialLabware = React.useMemo(() => {
+    if (!initialLabwares) return [];
     if (limit && initialLabwares.length > limit) {
       return initialLabwares.slice(0, limit);
     } else return initialLabwares;
   }, [initialLabwares, limit]);
+
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine(
-      slicedInitialLabwareMemo,
+      slicedInitialLabware,
       labwareCheckFunction,
       limit
     );
-  }, [slicedInitialLabwareMemo, labwareCheckFunction, limit]);
+  }, [limit, labwareCheckFunction, slicedInitialLabware]);
 
   const [current, send, service] = useMachine(labwareMachine);
 

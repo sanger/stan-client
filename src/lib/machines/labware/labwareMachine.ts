@@ -43,7 +43,7 @@ export interface LabwareContext {
    * @param foundLabware the new labware to be entered
    * @return a list of any problems identified
    */
-  foundLabwareCheck: (
+  foundLabwareCheck?: (
     labwares: LabwareFieldsFragment[],
     foundLabware: LabwareFieldsFragment
   ) => string[];
@@ -175,9 +175,9 @@ export const createLabwareMachine = (
       context: {
         currentBarcode: "",
         foundLabware: null,
-        labwares,
+        labwares: labwares ?? [],
         removedLabware: null,
-        foundLabwareCheck: foundLabwareCheck ?? (() => []),
+        foundLabwareCheck: foundLabwareCheck ?? undefined,
         validator: Yup.string().trim().required("Barcode is required"),
         successMessage: null,
         errorMessage: null,
@@ -390,10 +390,9 @@ export const createLabwareMachine = (
               /*Validate all the labwares in the location using the validation function passed.
                If validation is success, add that labware to the list of labwares, otherwise add the error message
                for failure*/
-              problem = ctx.foundLabwareCheck(
-                e.data.labwareInLocation,
-                labware
-              );
+              problem = ctx.foundLabwareCheck
+                ? ctx.foundLabwareCheck(e.data.labwareInLocation, labware)
+                : [];
             }
             if (problem.length !== 0) {
               problems.push(problem.join("\n"));
@@ -451,7 +450,9 @@ export const createLabwareMachine = (
         validateFoundLabware: (ctx: LabwareContext) => {
           return new Promise((resolve, reject) => {
             const problems = ctx.foundLabware
-              ? ctx.foundLabwareCheck(ctx.labwares, ctx.foundLabware)
+              ? ctx.foundLabwareCheck
+                ? ctx.foundLabwareCheck(ctx.labwares, ctx.foundLabware)
+                : []
               : ["Labware not loaded."];
             if (problems.length === 0) {
               resolve(ctx.foundLabware);
