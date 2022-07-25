@@ -6,5 +6,10 @@ module.exports = {
     ...defaultOptions.purge,
     content: ["./src/**/*.{html,tsx}"],
   },
+  plugins: [
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/aspect-ratio"),
+  ],
   important: true,
 };

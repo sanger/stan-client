@@ -5,7 +5,7 @@ import { FormikErrorMessage } from "./index";
 import classNames from "classnames";
 
 const defaultInputClassNames =
-  "focus:ring-sdb-100 focus:border-sdb-100 block px-3 py-2 border border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed";
+  "focus:ring-sdb-100 focus:border-sdb-100 block border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed";
 
 interface FormikInputProps {
   label: string;
@@ -24,7 +24,7 @@ const FormikInput = ({
 }: FormikInputProps) => {
   const inputClassNames = classNames(
     {
-      "w-full h-10 disabled:bg-gray-200": type !== "checkbox",
+      "w-full disabled:bg-gray-200": type !== "checkbox",
     },
     defaultInputClassNames
   );
@@ -55,7 +55,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (props, ref) => {
     const inputClassNames = classNames(
       {
-        "w-full disabled:bg-gray-200 h-10":
+        "w-full disabled:bg-gray-200":
           props.type !== "checkbox" || props.type !== "radio",
       },
       defaultInputClassNames
