@@ -1,6 +1,6 @@
 import { UserFieldsFragment, UserRole } from "../../types/sdk";
 import userFactory from "../../lib/factories/userFactory";
-import faker from "faker";
+import { faker } from "@faker-js/faker/locale/en";
 import { createSessionStorageRepository } from "./index";
 
 const seeds: Array<UserFieldsFragment> = [

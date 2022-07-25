@@ -37,7 +37,7 @@ const initialValues: WorkAllocationFormValues = {
   isRnD: false,
   numSlides: undefined,
   numBlocks: undefined,
-  numOriginalSamples: undefined
+  numOriginalSamples: undefined,
 };
 export const MAX_NUM_BLOCKANDSLIDES = 200;
 
@@ -198,13 +198,12 @@ export default function WorkAllocation() {
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
     numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
-    numOriginalSamples: Yup.number().max(MAX_NUM_BLOCKANDSLIDES)
-      .when(["numBlocks", "numSlides"], (numBlocks: any, numSlides: any, schema: any) => {
-        if (!numBlocks && !numSlides) {
-          return schema.required("Number of blocks, slides or original samples required");
-        }
-        return schema;
-      }),
+    numOriginalSamples: Yup.number().when(["numBlocks", "numSlides"], {
+      is: (numBlocks: any, numSlides: any) => !numBlocks && !numSlides,
+      then: Yup.number().required(
+        "Number of blocks, slides or original samples required"
+      ),
+    }),
   });
 
   return (
