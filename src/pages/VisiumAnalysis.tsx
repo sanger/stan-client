@@ -28,8 +28,8 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function VisiumAnalysis() {
-  const [current, send] = useMachine(
-    createFormMachine<
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
       VisiumAnalysisRequest,
       VisiumAnalysisMutation
     >().withConfig({
@@ -39,8 +39,9 @@ export default function VisiumAnalysis() {
           return stanCore.VisiumAnalysis({ request: e.values });
         },
       },
-    })
-  );
+    });
+  }, [stanCore]);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
 
@@ -66,14 +67,15 @@ export default function VisiumAnalysis() {
                 <div className="space-y-2">
                   <Heading level={2}>SGP Number</Heading>
 
-                  <p>
-                    Select an SGP number to associate with this operation.
-                  </p>
+                  <p>Select an SGP number to associate with this operation.</p>
 
                   <div className="mt-4 md:w-1/2">
-                    <WorkNumberSelect name={"workNumber"} onWorkNumberChange={(workNumber) =>
-                      setFieldValue("workNumber", workNumber)
-                    }/>
+                    <WorkNumberSelect
+                      name={"workNumber"}
+                      onWorkNumberChange={(workNumber) =>
+                        setFieldValue("workNumber", workNumber)
+                      }
+                    />
                   </div>
                 </div>
 

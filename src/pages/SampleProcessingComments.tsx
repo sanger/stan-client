@@ -39,8 +39,8 @@ type SampleCommentsFormData = Required<SampleProcessingCommentRequest> & {
 const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
   sampleCommentsInfo,
 }: SampleProcessingCommentsParams) => {
-  const [current, send] = useMachine(
-    createFormMachine<
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
       SampleProcessingCommentRequest,
       RecordSampleProcessingCommentsMutation
     >().withConfig({
@@ -54,8 +54,9 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
           });
         },
       },
-    })
-  );
+    });
+  }, [stanCore]);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError, submissionResult } = current.context;
 

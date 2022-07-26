@@ -40,8 +40,8 @@ function Analysis({ comments }: AnalysisProps) {
   const [operationType, setOperationType] = React.useState("");
   const [analysisMode, setAnalysisMode] = React.useState(false);
 
-  const [current, send] = useMachine(
-    createFormMachine<
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
       RnaAnalysisRequest,
       RecordRnaAnalysisMutation
     >().withConfig({
@@ -53,8 +53,9 @@ function Analysis({ comments }: AnalysisProps) {
           });
         },
       },
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
   const { serverError } = current.context;
 
   const onChangeExtractResults = useCallback((result: ExtractResultQuery[]) => {

@@ -40,24 +40,26 @@ export default function History() {
               }}
             >
               <Form>
-                <div className="space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-center md:gap-4">
-                  <div className="md:flex-grow">
-                    <FormikInput name="value" label="" />
+                <div className="space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-center">
+                  <div className="space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:flex-grow  md:justify-center md:items-center md:gap-4">
+                    <div className="md:flex-grow">
+                      <FormikInput name="value" label="" />
+                    </div>
+
+                    <div className="md:flex-grow">
+                      <FormikSelect label="" name="kind">
+                        {objectKeys(historyDisplayValues)
+                          .filter((selectValue) => selectValue !== "sampleId")
+                          .map((selectValue) => (
+                            <option value={selectValue} key={selectValue}>
+                              {historyDisplayValues[selectValue]}
+                            </option>
+                          ))}
+                      </FormikSelect>
+                    </div>
                   </div>
 
-                  <div className="md:flex-grow">
-                    <FormikSelect label="" name="kind">
-                      {objectKeys(historyDisplayValues)
-                        .filter((selectValue) => selectValue !== "sampleId")
-                        .map((selectValue) => (
-                          <option value={selectValue} key={selectValue}>
-                            {historyDisplayValues[selectValue]}
-                          </option>
-                        ))}
-                    </FormikSelect>
-                  </div>
-
-                  <div className="sm:flex sm:flex-row justify-end">
+                  <div className="sm:flex sm:flex-row items-center justify-end space-x-4">
                     <BlueButton type="submit">Search</BlueButton>
                   </div>
                 </div>

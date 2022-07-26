@@ -107,7 +107,11 @@ export default function WorkProgressInput({
       >
         {({ values, setFieldValue }) => (
           <Form>
-            <div className={" flex flex-row md:flex-grow"}>
+            <div
+              className={
+                " space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-center md:gap-4"
+              }
+            >
               <KeyValueSelector
                 keyValueMap={getSearchInputKeyValues()}
                 onChangeKey={(selectedKey, values: string[]) => {

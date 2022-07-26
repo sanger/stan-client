@@ -54,8 +54,8 @@ type PotProcessingParams = {
 };
 
 export default function PotProcessing({ processingInfo }: PotProcessingParams) {
-  const [current, send] = useMachine(
-    createFormMachine<
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
       PotProcessingRequest,
       PerformTissuePotMutation
     >().withConfig({
@@ -67,8 +67,9 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
           });
         },
       },
-    })
-  );
+    });
+  }, [stanCore]);
+  const [current, send] = useMachine(formMachine);
 
   const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(
     LabwareTypeName.POT

@@ -39,8 +39,8 @@ type SolutionTransferFormData = Required<SolutionTransferRequest> & {
 const SolutionTransfer: React.FC<SolutionTransferParams> = ({
   solutionTransferInfo,
 }: SolutionTransferParams) => {
-  const [current, send] = useMachine(
-    createFormMachine<
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
       SolutionTransferRequest,
       PerformSolutionTransferMutation
     >().withConfig({
@@ -55,8 +55,9 @@ const SolutionTransfer: React.FC<SolutionTransferParams> = ({
           });
         },
       },
-    })
-  );
+    });
+  }, [stanCore]);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError, submissionResult } = current.context;
 

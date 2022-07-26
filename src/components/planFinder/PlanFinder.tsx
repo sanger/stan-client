@@ -47,22 +47,21 @@ export function PlanFinder({
   onChange,
   children,
 }: PlanFinderParams) {
-  // Plans are kept as a map of destination barcode to plan
-  // by the planFinderMachine so we need to convert the initial plans list first
-  const planMap = initialPlans.reduce<Map<string, FindPlanDataQuery>>(
-    (memo, plan) => {
-      memo.set(plan.planData.destination.barcode, plan);
-      return memo;
-    },
-    new Map()
-  );
-
   const memoPlanFinderMachine = React.useMemo(() => {
+    // Plans are kept as a map of destination barcode to plan
+    // by the planFinderMachine so we need to convert the initial plans list first
+    const planMap = initialPlans.reduce<Map<string, FindPlanDataQuery>>(
+      (memo, plan) => {
+        memo.set(plan.planData.destination.barcode, plan);
+        return memo;
+      },
+      new Map()
+    );
     return planFinderMachine.withContext({
       ...planFinderMachine.context,
       plans: planMap,
     });
-  }, [planMap]);
+  }, [initialPlans]);
 
   const [current, send] = useMachine(memoPlanFinderMachine);
   const { plans, requestError, validationError } = current.context;

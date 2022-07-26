@@ -31,8 +31,8 @@ interface FFPEProcessingParams {
 const FFPEProcessing: React.FC<FFPEProcessingParams> = ({
   ffPeInfo,
 }: FFPEProcessingParams) => {
-  const [current, send] = useMachine(
-    createFormMachine<
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
       FfpeProcessingRequest,
       PerformFfpeProcessingMutation
     >().withConfig({
@@ -44,8 +44,10 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({
           });
         },
       },
-    })
-  );
+    });
+  }, [stanCore]);
+
+  const [current, send] = useMachine(formMachine);
 
   const { serverError, submissionResult } = current.context;
 

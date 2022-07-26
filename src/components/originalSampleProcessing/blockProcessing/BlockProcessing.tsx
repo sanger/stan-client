@@ -62,8 +62,8 @@ type BlockProcessingParams = {
 export default function BlockProcessing({
   processingInfo,
 }: BlockProcessingParams) {
-  const [current, send] = useMachine(
-    createFormMachine<
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
       TissueBlockRequest,
       PerformTissueBlockMutation
     >().withConfig({
@@ -75,8 +75,9 @@ export default function BlockProcessing({
           });
         },
       },
-    })
-  );
+    });
+  }, [stanCore]);
+  const [current, send] = useMachine(formMachine);
 
   const { submissionResult, serverError } = current.context;
   /**

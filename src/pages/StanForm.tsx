@@ -57,16 +57,17 @@ export default function StanForm<V, R>({
   summary,
   children,
 }: StanFormParams<V, R>) {
-  const [current, send] = useMachine(() =>
-    createFormMachine<V, R>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<V, R>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
           return onSubmit(e.values);
         },
       },
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(() => formMachine);
 
   const submitForm = async (values: V) => send({ type: "SUBMIT_FORM", values });
   const serverError = current.context.serverError;

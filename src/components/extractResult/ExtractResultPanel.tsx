@@ -32,16 +32,16 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
   onChangeExtractResults,
   locked,
 }) => {
-  const [current, send] = useMachine(() =>
-    extractResultMachine.withContext({ extractResults: [], currentBarcode: "" })
-  );
+  const machine = React.useMemo(() => {
+    return extractResultMachine.withContext({
+      extractResults: [],
+      currentBarcode: "",
+    });
+  }, []);
+  const [current, send] = useMachine(() => machine);
 
-  const {
-    serverError,
-    extractResults,
-    scanErrorMessage,
-    currentBarcode,
-  } = current.context;
+  const { serverError, extractResults, scanErrorMessage, currentBarcode } =
+    current.context;
 
   const formatErrorMessage = (message: string) => {
     const firstcolonIndx = message.indexOf(":");

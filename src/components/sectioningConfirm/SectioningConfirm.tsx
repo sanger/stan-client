@@ -51,7 +51,10 @@ export default function SectioningConfirm({
   initialPlans,
   onConfirmed,
 }: SectioningConfirmProps) {
-  const [current, send, service] = useMachine(createSectioningConfirmMachine());
+  const sectioningMachine = React.useMemo(() => {
+    return createSectioningConfirmMachine();
+  }, []);
+  const [current, send, service] = useMachine(sectioningMachine);
 
   const {
     sourceLabware,

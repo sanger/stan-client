@@ -176,8 +176,8 @@ export const SlideRegistration: React.FC<PageParams> = ({
   const location = useLocation();
   const stanCore = useContext(StanCoreContext);
 
-  const [current, send] = useMachine(() =>
-    createFormMachine<
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
       SectionRegisterRequest,
       RegisterSectionsMutation
     >().withConfig({
@@ -187,8 +187,9 @@ export const SlideRegistration: React.FC<PageParams> = ({
           return stanCore.RegisterSections({ request: e.values });
         },
       },
-    })
-  );
+    });
+  }, [stanCore]);
+  const [current, send] = useMachine(() => formMachine);
 
   const initialSlide = useMemo(() => {
     const queryString = parseQueryString(location.search);

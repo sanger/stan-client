@@ -5,7 +5,7 @@ import { FormikErrorMessage } from "./index";
 import classNames from "classnames";
 
 const defaultInputClassNames =
-  "focus:ring-sdb-100 focus:border-sdb-100 block border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed";
+  "focus:ring-sdb-100 focus:border-sdb-100 border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed";
 
 interface FormikInputProps {
   label: string;

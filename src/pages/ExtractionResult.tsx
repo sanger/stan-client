@@ -37,8 +37,8 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
     labware: initialLabware.map(buildExtractResultLabware),
   };
 
-  const [current, send] = useMachine(
-    createFormMachine<
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
       ExtractResultRequest,
       RecordExtractResultMutation
     >().withConfig({
@@ -48,8 +48,10 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
           return stanCore.RecordExtractResult({ request: e.values });
         },
       },
-    })
-  );
+    });
+  }, [stanCore]);
+
+  const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
 

@@ -44,8 +44,8 @@ export default function ComplexStainForm({
   initialLabware,
   onLabwareChange,
 }: ComplexStainFormProps) {
-  const [current, send] = useMachine(
-    createFormMachine<
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<
       ComplexStainRequest,
       RecordComplexStainMutation
     >().withConfig({
@@ -55,8 +55,9 @@ export default function ComplexStainForm({
           return stanCore.RecordComplexStain({ request: e.values });
         },
       },
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
 

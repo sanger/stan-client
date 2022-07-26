@@ -69,16 +69,17 @@ export default function StainForm({
   initialLabware,
   onLabwareChange,
 }: StainFormProps) {
-  const [current, send] = useMachine(
-    createFormMachine<StainRequest, StainMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<StainRequest, StainMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== "SUBMIT_FORM") return Promise.reject();
           return stanCore.Stain({ request: e.values });
         },
       },
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
 
@@ -174,9 +175,12 @@ export default function StainForm({
               >
                 <Heading level={3}>SGP Number</Heading>
 
-                <WorkNumberSelect name={"workNumber"} onWorkNumberChange={(workNumber) =>
-                  setFieldValue("workNumber", workNumber)
-                }/>
+                <WorkNumberSelect
+                  name={"workNumber"}
+                  onWorkNumberChange={(workNumber) =>
+                    setFieldValue("workNumber", workNumber)
+                  }
+                />
               </motion.div>
 
               <motion.div
