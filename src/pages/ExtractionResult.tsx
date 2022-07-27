@@ -28,10 +28,10 @@ type ExtractionResultProps = {
 
 export default function ExtractionResult({ info }: ExtractionResultProps) {
   // There will be initial labware if user has come from the Extraction page
-  const location = useLocation<{ labware?: Array<LabwareFieldsFragment> }>();
+  const location = useLocation();
+  const state = location.state as { labware?: Array<LabwareFieldsFragment> };
   const initialLabware: Array<LabwareFieldsFragment> =
-    location?.state?.labware ?? [];
-
+    state === null ? [] : state.labware ?? [];
   const initialValues: ExtractResultRequest = {
     workNumber: "",
     labware: initialLabware.map(buildExtractResultLabware),
@@ -98,12 +98,16 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
                 <div>
                   <Heading level={3}>SGP Number</Heading>
                   <p className="mt-2">
-                    Select an SGP number to associate with this extraction result.
+                    Select an SGP number to associate with this extraction
+                    result.
                   </p>
                   <div className="mt-4 md:w-1/2">
-                    <WorkNumberSelect name="workNumber" onWorkNumberChange={(workNumber) =>
-                      setFieldValue("workNumber", workNumber)
-                    }/>
+                    <WorkNumberSelect
+                      name="workNumber"
+                      onWorkNumberChange={(workNumber) =>
+                        setFieldValue("workNumber", workNumber)
+                      }
+                    />
                   </div>
                 </div>
 

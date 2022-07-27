@@ -75,7 +75,6 @@ export function shouldBehaveLikeARegistrationForm(
         });
       });
     });
-
     it("requires Species", () => {
       cy.findByLabelText("Species").focus().blur();
       cy.findByText("Species is a required field").should("be.visible");
@@ -166,7 +165,7 @@ export function shouldBehaveLikeARegistrationForm(
         cy.findByText("Medium is a required field").should("be.visible");
       });
     } else {
-      it("requires Soultion Sample", () => {
+      it("requires Solution", () => {
         cy.findByLabelText("Solution").focus().blur();
         cy.findByText("Solution is a required field").should("be.visible");
       });

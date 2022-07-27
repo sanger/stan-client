@@ -38,6 +38,7 @@ export default function createHistoryMachine(
         searching: {
           invoke: {
             src: "findHistory",
+            id: "findHistory",
             onDone: {
               target: "found",
               actions: "assignHistory",

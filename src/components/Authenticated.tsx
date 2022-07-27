@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
-import { authContext } from "../context/AuthContext";
+import React from "react";
 import { UserRole } from "../types/sdk";
+import { useAuth } from "../context/AuthContext";
 
 interface AuthProps {
   role?: UserRole;
@@ -12,7 +12,7 @@ interface AuthProps {
  * @param children
  */
 function Authenticated({ children, role }: AuthProps) {
-  const auth = useContext(authContext);
+  const auth = useAuth();
   if (role) {
     return <>{auth.userRoleIncludes(role) && children}</>;
   }
@@ -24,7 +24,7 @@ function Authenticated({ children, role }: AuthProps) {
  * @param children
  */
 function Unauthenticated({ children }: AuthProps) {
-  const auth = useContext(authContext);
+  const auth = useAuth();
   return <>{!auth.isAuthenticated() && children}</>;
 }
 

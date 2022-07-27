@@ -13,10 +13,9 @@ import { stanCore } from "../../lib/sdk";
 
 const colors = cycleColors();
 
-const machineConfig: Partial<MachineOptions<
-  SlotMapperContext,
-  SlotMapperEvent
->> = {
+const machineConfig: Partial<
+  MachineOptions<SlotMapperContext, SlotMapperEvent>
+> = {
   actions: {
     assignInputLabware: assign((ctx, e) => {
       e.type === "UPDATE_INPUT_LABWARE" && (ctx.inputLabware = e.labware);
@@ -228,6 +227,7 @@ const slotMapperMachine = Machine<
       updatingLabware: {
         invoke: {
           src: "passFailsSlots",
+          id: "passFailsSlots",
           onDone: {
             target: "ready",
             actions: "assignFailedSlots",

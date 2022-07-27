@@ -127,7 +127,10 @@ const highestSectionForSlot: ColumnFactory = (slotAddress) => {
 const medium: ColumnFactory = () => {
   return {
     Header: "Medium",
-    accessor: (labware) => labware.slots[0].samples[0].tissue.medium.name,
+    accessor: (labware) =>
+      labware.slots[0].samples.length > 0
+        ? labware.slots[0].samples[0].tissue.medium.name
+        : "",
   };
 };
 
@@ -137,7 +140,10 @@ const medium: ColumnFactory = () => {
 const fixative: ColumnFactory = () => {
   return {
     Header: "Fixative",
-    accessor: (labware) => labware.slots[0].samples[0].tissue.fixative.name,
+    accessor: (labware) =>
+      labware.slots[0].samples.length > 0
+        ? labware.slots[0].samples[0].tissue.fixative.name
+        : "",
   };
 };
 

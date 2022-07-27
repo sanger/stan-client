@@ -356,7 +356,7 @@ function buildInitialValues(
  * Builds a yup validator for the labware plan form
  * @param labwareType the labware type of the labware plan
  */
-function buildValidationSchema(labwareType: LabwareType): Yup.ObjectSchema {
+function buildValidationSchema(labwareType: LabwareType) {
   type FormShape = {
     quantity: Yup.NumberSchema;
     sectionThickness?: Yup.NumberSchema;

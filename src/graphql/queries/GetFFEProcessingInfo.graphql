@@ -1,0 +1,5 @@
+query GetFFPEProcessingInfo {
+    comments(includeDisabled: false, category: "FFPE processing program") {
+        ...CommentFields
+    }
+}

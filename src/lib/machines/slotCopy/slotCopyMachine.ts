@@ -117,6 +117,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         entry: ["emptyServerError"],
         invoke: {
           src: "copySlots",
+          id: "copySlots",
           onDone: {
             target: "copied",
             actions: ["assignResult"],
@@ -130,6 +131,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       updateLabwarePermTime: {
         invoke: {
           src: "findPermTime",
+          id: "findPermTime",
           onDone: [
             {
               target: "readyToCopy",

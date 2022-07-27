@@ -10,20 +10,19 @@ import {
   GetBlockProcessingInfoQuery,
   GetPotProcessingInfoQuery,
 } from "../types/sdk";
-import { RouteComponentProps } from "react-router";
+import { useLocation } from "react-router-dom";
 enum OriginalSampleProcessingType {
   BLOCK = "Block Processing",
   POT = "Pot Processing",
 }
 
-export const OriginalSampleProcessing: React.FC<RouteComponentProps> = ({
-  location,
-}) => {
+export const OriginalSampleProcessing: React.FC = () => {
   const [processingType, setProcessingType] = React.useState<string>("");
   const [processingInfo, setProcessingInfo] = React.useState<
     GetBlockProcessingInfoQuery | GetPotProcessingInfoQuery | undefined
   >(undefined);
 
+  const location = useLocation();
   /**Set processing Type with selected value**/
   useEffect(() => {
     const queryString = parseQueryString(location.search);

@@ -191,7 +191,7 @@ export default function EntityManager<
         </TableHead>
         <TableBody>
           {entities.map((entity) => (
-            <tr>
+            <tr key={String(displayKeyColumnName)}>
               <TableCell>{entity[displayKeyColumnName]}</TableCell>
               {getValueFieldComponent(
                 valueFieldComponentInfo,
@@ -206,6 +206,7 @@ export default function EntityManager<
               <TableCell colSpan={2}>
                 <Input
                   ref={inputRef}
+                  data-testid={"input-field"}
                   type="text"
                   disabled={isCreatingEntity}
                   onChange={handleOnInputChange}

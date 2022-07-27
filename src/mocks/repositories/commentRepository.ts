@@ -82,15 +82,27 @@ const seeds: Array<CommentFieldsFragment> = [
   }),
   commentFactory.build({
     category: "Sample Processing",
-    text: "Issue while fixing",
-  }),
-  commentFactory.build({
-    category: "Sample Processing",
     text: "Labware damaged",
   }),
   commentFactory.build({
     category: "Sample Processing",
+    text: "Issue while fixing",
+  }),
+  commentFactory.build({
+    category: "Sample Processing",
     text: "Fixatives damaged",
+  }),
+  commentFactory.build({
+    category: "FFPE processing program",
+    text: "Rapid biopsy",
+  }),
+  commentFactory.build({
+    category: "FFPE processing program",
+    text: "Soft tissue",
+  }),
+  commentFactory.build({
+    category: "FFPE processing program",
+    text: "Hard tissue",
   }),
 ];
 

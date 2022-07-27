@@ -1,0 +1,16 @@
+mutation RecordSampleProcessingComments($request:SampleProcessingCommentRequest!) {
+    recordSampleProcessingComments(request: $request) {
+            labware {
+                ...LabwareFields
+            }
+            operations {
+                operationType {
+                    name
+                }
+                user {
+                    username
+                }
+                performed
+            }
+    }
+}
