@@ -12,7 +12,7 @@ import { SearchResultTableEntry } from "../types/stan";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import Warning from "../components/notifications/Warning";
 import Heading from "../components/Heading";
-import { FindRequest, GetSearchInfoQuery, Work, WorkStatus } from "../types/sdk";
+import { FindRequest, GetSearchInfoQuery, Work } from "../types/sdk";
 import { stanCore } from "../lib/sdk";
 import { useMachine } from "@xstate/react";
 import * as Yup from "yup";
@@ -116,9 +116,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   const [works, setWorks] = useState<Array<Pick<Work, "workNumber">>>([]);
   useEffect(() => {
     async function fetchActiveWorkNumbers() {
-      const response = await stanCore.FindWorkNumbers({
-        status: WorkStatus.Active,
-      });
+      const response = await stanCore.GetWorkNumbers();
       setWorks(response.works);
     }
     fetchActiveWorkNumbers();
