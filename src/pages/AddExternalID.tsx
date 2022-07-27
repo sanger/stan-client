@@ -34,7 +34,7 @@ export default function AddExternalID() {
         },
       },
     });
-  }, [stanCore]);
+  }, []);
   const [current, send] = useMachine(formMachine);
 
   function buildValidationSchema(): Yup.AnyObjectSchema {

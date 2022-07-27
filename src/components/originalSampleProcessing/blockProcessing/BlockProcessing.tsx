@@ -76,7 +76,7 @@ export default function BlockProcessing({
         },
       },
     });
-  }, [stanCore]);
+  }, []);
   const [current, send] = useMachine(formMachine);
 
   const { submissionResult, serverError } = current.context;

@@ -49,7 +49,7 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
         },
       },
     });
-  }, [stanCore]);
+  }, []);
 
   const [current, send] = useMachine(formMachine);
 

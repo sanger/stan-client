@@ -56,7 +56,7 @@ const SolutionTransfer: React.FC<SolutionTransferParams> = ({
         },
       },
     });
-  }, [stanCore]);
+  }, []);
   const [current, send] = useMachine(formMachine);
 
   const { serverError, submissionResult } = current.context;

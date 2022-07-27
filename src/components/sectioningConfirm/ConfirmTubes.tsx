@@ -114,7 +114,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
       initialLayoutPlan.destinationLabware,
       initialLayoutPlan
     );
-  }, []);
+  }, [comments, initialLayoutPlan]);
   const [current, send, service] = useMachine(confirmLabwareMachine);
   const { cancelled, layoutPlan, labware } = current.context;
   const { layoutMachine } = current.children;

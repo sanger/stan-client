@@ -45,7 +45,7 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({
         },
       },
     });
-  }, [stanCore]);
+  }, []);
 
   const [current, send] = useMachine(formMachine);
 

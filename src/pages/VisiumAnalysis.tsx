@@ -40,7 +40,7 @@ export default function VisiumAnalysis() {
         },
       },
     });
-  }, [stanCore]);
+  }, []);
   const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;

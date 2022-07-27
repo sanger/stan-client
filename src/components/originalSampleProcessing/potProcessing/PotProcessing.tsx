@@ -68,7 +68,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
         },
       },
     });
-  }, [stanCore]);
+  }, []);
   const [current, send] = useMachine(formMachine);
 
   const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(

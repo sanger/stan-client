@@ -55,7 +55,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
         },
       },
     });
-  }, [stanCore]);
+  }, []);
   const [current, send] = useMachine(formMachine);
 
   const { serverError, submissionResult } = current.context;

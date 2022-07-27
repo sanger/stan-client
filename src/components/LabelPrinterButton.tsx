@@ -38,7 +38,7 @@ const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({
         labwares,
       },
     });
-  }, []);
+  }, [labwares, selectedPrinter]);
   const [current, send, service] = useMachine(labelPrinterMachine);
 
   useEffect(() => {

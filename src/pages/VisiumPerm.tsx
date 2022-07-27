@@ -69,7 +69,7 @@ export default function VisiumPerm() {
         },
       },
     });
-  }, [stanCore]);
+  }, []);
   const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;

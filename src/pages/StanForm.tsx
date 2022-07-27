@@ -66,7 +66,7 @@ export default function StanForm<V, R>({
         },
       },
     });
-  }, []);
+  }, [onSubmit]);
   const [current, send] = useMachine(() => formMachine);
 
   const submitForm = async (values: V) => send({ type: "SUBMIT_FORM", values });
