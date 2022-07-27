@@ -4,6 +4,7 @@ query Find($request: FindRequest!) {
         entries {
             labwareId
             sampleId
+            workNumbers
         }
         samples {
             id

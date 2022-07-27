@@ -815,6 +815,8 @@ export type FindEntry = {
   sampleId: Scalars['Int'];
   /** The id of the labware where the sample was found. */
   labwareId: Scalars['Int'];
+  /** The list of work numbers assoicated with the entry. */
+  workNumbers: Array<Maybe<Scalars['String']>>;
 };
 
 /** Information that a particular labware was found in a particular location. */
@@ -857,6 +859,8 @@ export type FindRequest = {
   tissueTypeName?: InputMaybe<Scalars['String']>;
   /** The maximum number of records to return. Use a negative value to indicate no limit. */
   maxRecords?: InputMaybe<Scalars['Int']>;
+   /** The work number associated with the labware. */
+  workNumber?: InputMaybe<Scalars['String']>;
   /** The minimum creation date for the labware. */
   createdMin?: InputMaybe<Scalars['Date']>;
   /** The maximum creation date for the labware. */
@@ -3224,7 +3228,7 @@ export type FindQueryVariables = Exact<{
 }>;
 
 
-export type FindQuery = { __typename?: 'Query', find: { __typename?: 'FindResult', numRecords: number, entries: Array<{ __typename?: 'FindEntry', labwareId: number, sampleId: number }>, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', replicate?: string | null, externalName?: string | null, spatialLocation: { __typename?: 'SpatialLocation', tissueType: { __typename?: 'TissueType', name: string } }, donor: { __typename?: 'Donor', donorName: string }, medium: { __typename?: 'Medium', name: string } } }>, labware: Array<{ __typename?: 'Labware', id: number, barcode: string, created: string, labwareType: { __typename?: 'LabwareType', name: string } }>, locations: Array<{ __typename?: 'Location', id: number, barcode: string, customName?: string | null, fixedName?: string | null, direction?: GridDirection | null, qualifiedNameWithFirstBarcode?: string | null, size?: { __typename?: 'Size', numRows: number, numColumns: number } | null }>, labwareLocations: Array<{ __typename?: 'LabwareLocationEntry', labwareId: number, locationId: number, address?: string | null }> } };
+export type FindQuery = { __typename?: 'Query', find: { __typename?: 'FindResult', numRecords: number, entries: Array<{ __typename?: 'FindEntry', labwareId: number, sampleId: number, workNumbers: Array<string | null> }>, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', replicate?: string | null, externalName?: string | null, spatialLocation: { __typename?: 'SpatialLocation', tissueType: { __typename?: 'TissueType', name: string } }, donor: { __typename?: 'Donor', donorName: string }, medium: { __typename?: 'Medium', name: string } } }>, labware: Array<{ __typename?: 'Labware', id: number, barcode: string, created: string, labwareType: { __typename?: 'LabwareType', name: string } }>, locations: Array<{ __typename?: 'Location', id: number, barcode: string, customName?: string | null, fixedName?: string | null, direction?: GridDirection | null, qualifiedNameWithFirstBarcode?: string | null, size?: { __typename?: 'Size', numRows: number, numColumns: number } | null }>, labwareLocations: Array<{ __typename?: 'LabwareLocationEntry', labwareId: number, locationId: number, address?: string | null }> } };
 
 export type FindLabwareQueryVariables = Exact<{
   barcode: Scalars['String'];
@@ -4563,6 +4567,7 @@ export const FindDocument = gql`
     entries {
       labwareId
       sampleId
+      workNumbers
     }
     samples {
       id

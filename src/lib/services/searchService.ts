@@ -76,6 +76,7 @@ export class SearchService
       return {
         barcode: labware.barcode,
         labwareType: labware.labwareType.name,
+        workNumbers: entry.workNumbers ?? [],
         externalId: sample.tissue.externalName ?? "",
         donorId: sample.tissue.donor.donorName,
         tissueType: sample.tissue.spatialLocation.tissueType.name,
