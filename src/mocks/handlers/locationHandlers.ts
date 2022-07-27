@@ -159,11 +159,12 @@ const locationHandlers = [
   graphql.query<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>(
     "FindLabwareLocation",
     (req, res, ctx) => {
-      const storedItems: Array<StoredItem> = locationRepository.findByLabwareBarcode(
-        Array.isArray(req.variables.barcodes)
-          ? req.variables.barcodes
-          : [req.variables.barcodes]
-      );
+      const storedItems: Array<StoredItem> =
+        locationRepository.findByLabwareBarcode(
+          Array.isArray(req.variables.barcodes)
+            ? req.variables.barcodes
+            : [req.variables.barcodes]
+        );
 
       return res(
         ctx.data({

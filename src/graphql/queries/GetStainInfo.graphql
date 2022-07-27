@@ -1,5 +1,5 @@
 query GetStainInfo {
-    stainTypes {
-        ...StainTypeFields
-    }
+  stainTypes {
+    ...StainTypeFields
+  }
 }

@@ -1,7 +1,7 @@
 query FindLabwareLocation($barcodes: [String!]!) {
-    stored(barcodes: $barcodes) {
-        location {
-            barcode
-        }
+  stored(barcodes: $barcodes) {
+    location {
+      barcode
     }
+  }
 }

@@ -1,8 +1,7 @@
-mutation RecordVisiumQC ($request:ResultRequest!) {
-    recordVisiumQC(request: $request) {
-        operations {
-            id
-        }
+mutation RecordVisiumQC($request: ResultRequest!) {
+  recordVisiumQC(request: $request) {
+    operations {
+      id
     }
-
+  }
 }

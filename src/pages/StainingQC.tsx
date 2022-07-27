@@ -85,10 +85,8 @@ export default function StainingQC({ info }: StainingQCProps) {
     [labwareResults]
   );
 
-  const blueButtonDisabled = (
-    (labwareResults.items.length <= 0) ||
-    (workNumber === "")
-  );
+  const blueButtonDisabled =
+    labwareResults.items.length <= 0 || workNumber === "";
 
   return (
     <AppShell>
@@ -100,9 +98,7 @@ export default function StainingQC({ info }: StainingQCProps) {
           <div className="space-y-2">
             <Heading level={2}>SGP Number</Heading>
 
-            <p>
-              Select an SGP number to associate with this operation.
-            </p>
+            <p>Select an SGP number to associate with this operation.</p>
 
             <div className="mt-4 md:w-1/2">
               <WorkNumberSelect onWorkNumberChange={setWorkNumber} />

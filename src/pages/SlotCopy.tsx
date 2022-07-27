@@ -151,8 +151,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           <div className="mb-8">
             <Heading level={3}>SGP Number</Heading>
             <p className="mt-2">
-              Select an SGP number to associate with this
-              operation.
+              Select an SGP number to associate with this operation.
             </p>
             <div className="my-4 md:w-1/2">
               <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
@@ -180,7 +179,10 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
         <div className="flex flex-row items-center justify-end space-x-2">
           {!current.matches("copied") && (
             <BlueButton
-              disabled={!current.matches("readyToCopy") || current.context.workNumber === ""}
+              disabled={
+                !current.matches("readyToCopy") ||
+                current.context.workNumber === ""
+              }
               onClick={onSaveAction}
             >
               Save
@@ -246,7 +248,8 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             </TableBody>
           </Table>
           <p className="mt-8 my-3 text-gray-800 text-center text-sm  leading-normal">
-            If you wish to cancel this operation and record permeabilisation on these slides, click the
+            If you wish to cancel this operation and record permeabilisation on
+            these slides, click the
             <span className="font-bold text-gray-900">
               {" "}
               Visium Permeabilisation{" "}

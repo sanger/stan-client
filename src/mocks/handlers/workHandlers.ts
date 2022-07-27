@@ -68,7 +68,9 @@ const workHandlers = [
           };
         }),
         workTypes: workTypeRepository.findAll().filter(isEnabled),
-        releaseRecipients: releaseRecipientRepository.findAll().filter(isEnabled)
+        releaseRecipients: releaseRecipientRepository
+          .findAll()
+          .filter(isEnabled),
       })
     );
   }),
@@ -79,7 +81,10 @@ const workHandlers = [
       const workType = workTypeRepository.find("name", req.variables.workType);
       const costCode = costCodeRepository.find("code", req.variables.costCode);
       const project = projectRepository.find("name", req.variables.project);
-      const workRequester = releaseRecipientRepository.find("username", req.variables.workRequester);
+      const workRequester = releaseRecipientRepository.find(
+        "username",
+        req.variables.workRequester
+      );
 
       if (!workType) {
         return res(
@@ -112,7 +117,9 @@ const workHandlers = [
       if (!workRequester) {
         return res(
           ctx.errors([
-            { message: `Work requester ${req.variables.workRequester} not found` },
+            {
+              message: `Work requester ${req.variables.workRequester} not found`,
+            },
           ])
         );
       }
@@ -121,7 +128,7 @@ const workHandlers = [
         {
           numSlides: req.variables.numSlides,
           numBlocks: req.variables.numBlocks,
-          numOriginalSamples: req.variables.numOriginalSamples
+          numOriginalSamples: req.variables.numOriginalSamples,
         },
         {
           associations: { workType, costCode, project, workRequester },

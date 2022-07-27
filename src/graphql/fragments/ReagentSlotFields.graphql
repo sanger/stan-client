@@ -1,4 +1,4 @@
 fragment ReagentSlotFields on ReagentSlot {
-    address
-    used
+  address
+  used
 }

@@ -14,9 +14,7 @@ describe("Staining Page", () => {
       });
 
       it("shows a validation error for the work number", () => {
-        cy.findByText("SGP Number is a required field").should(
-          "be.visible"
-        );
+        cy.findByText("SGP Number is a required field").should("be.visible");
       });
     });
   });

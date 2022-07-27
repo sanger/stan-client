@@ -1,5 +1,5 @@
-mutation RegisterOriginalSamples($request:OriginalSampleRegisterRequest!) {
-    registerOriginalSamples(request:$request) {
-        ...RegisterResultFields
-    }
+mutation RegisterOriginalSamples($request: OriginalSampleRegisterRequest!) {
+  registerOriginalSamples(request: $request) {
+    ...RegisterResultFields
+  }
 }

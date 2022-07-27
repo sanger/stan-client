@@ -1,6 +1,6 @@
 fragment EquipmentFields on Equipment {
-    id
-    name
-    category
-    enabled
+  id
+  name
+  category
+  enabled
 }

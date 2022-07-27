@@ -174,9 +174,12 @@ export default function StainForm({
               >
                 <Heading level={3}>SGP Number</Heading>
 
-                <WorkNumberSelect name={"workNumber"} onWorkNumberChange={(workNumber) =>
-                  setFieldValue("workNumber", workNumber)
-                }/>
+                <WorkNumberSelect
+                  name={"workNumber"}
+                  onWorkNumberChange={(workNumber) =>
+                    setFieldValue("workNumber", workNumber)
+                  }
+                />
               </motion.div>
 
               <motion.div

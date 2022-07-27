@@ -17,10 +17,9 @@ export enum Actions {
   REMOVE_SECTION = "layoutMachine.removeSection",
 }
 
-export const machineOptions: Partial<MachineOptions<
-  LayoutContext,
-  LayoutEvents
->> = {
+export const machineOptions: Partial<
+  MachineOptions<LayoutContext, LayoutEvents>
+> = {
   actions: {
     [Actions.ASSIGN_SELECTED]: assign((ctx, e) => {
       if (e.type !== "SELECT_SOURCE") {

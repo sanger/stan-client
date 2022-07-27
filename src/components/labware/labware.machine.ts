@@ -173,10 +173,9 @@ function createLabwareMachine({
   );
 }
 
-const machineOptions: Partial<MachineOptions<
-  LabwareMachineContext,
-  LabwareMachineEvent
->> = {
+const machineOptions: Partial<
+  MachineOptions<LabwareMachineContext, LabwareMachineEvent>
+> = {
   actions: {
     clearSelectedSlots: assign((ctx) => ctx.selectedAddresses.clear()),
 

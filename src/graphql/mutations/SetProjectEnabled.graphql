@@ -1,5 +1,5 @@
 mutation SetProjectEnabled($name: String!, $enabled: Boolean!) {
-    setProjectEnabled(name: $name, enabled: $enabled) {
-        ...ProjectFields
-    }
+  setProjectEnabled(name: $name, enabled: $enabled) {
+    ...ProjectFields
+  }
 }

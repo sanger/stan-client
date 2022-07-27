@@ -12,13 +12,13 @@ describe("Visium Perm", () => {
 
     context("when clicking Submit", () => {
       it("shows an error message for SGP number", () => {
-        cy.findByRole("button", { name: "Submit" }).click()
+        cy.findByRole("button", { name: "Submit" }).click();
         cy.findByText("SGP number is a required field").should("be.visible");
       });
-    
+
       it("submits the form when SGP number is selected", () => {
         cy.get("select").select("SGP1008");
-        cy.findByRole("button", { name: "Submit" }).click()
+        cy.findByRole("button", { name: "Submit" }).click();
         cy.findByText("Visium Permeabilisation complete").should("be.visible");
       });
     });

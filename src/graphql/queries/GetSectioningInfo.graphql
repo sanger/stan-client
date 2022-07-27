@@ -1,5 +1,5 @@
 query GetSectioningInfo {
-    labwareTypes {
-        ...LabwareTypeFields
-    }
+  labwareTypes {
+    ...LabwareTypeFields
+  }
 }

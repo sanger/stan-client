@@ -1,5 +1,5 @@
 mutation SetCommentEnabled($commentId: Int!, $enabled: Boolean!) {
-    setCommentEnabled(commentId: $commentId, enabled: $enabled) {
-        ...CommentFields
-    }
+  setCommentEnabled(commentId: $commentId, enabled: $enabled) {
+    ...CommentFields
+  }
 }

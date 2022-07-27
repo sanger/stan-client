@@ -2,7 +2,7 @@ describe("Staining QC", () => {
   before(() => {
     cy.visit("/lab/staining_qc");
   });
-  
+
   describe("Save button", () => {
     context("when no labwares have been scanned", () => {
       it("is disabled", () => {

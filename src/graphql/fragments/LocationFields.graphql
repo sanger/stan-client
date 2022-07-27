@@ -1,26 +1,26 @@
 fragment LocationFields on Location {
+  barcode
+  fixedName
+  customName
+  address
+  direction
+  parent {
+    barcode
+    fixedName
+    customName
+  }
+  size {
+    numRows
+    numColumns
+  }
+  stored {
+    barcode
+    address
+  }
+  children {
     barcode
     fixedName
     customName
     address
-    direction
-    parent {
-        barcode
-        fixedName
-        customName
-    }
-    size {
-        numRows
-        numColumns
-    }
-    stored {
-        barcode
-        address
-    }
-    children {
-        barcode
-        fixedName
-        customName
-        address
-    }
+  }
 }

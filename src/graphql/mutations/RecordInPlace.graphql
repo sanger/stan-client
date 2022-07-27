@@ -1,7 +1,7 @@
 mutation RecordInPlace($request: InPlaceOpRequest!) {
-    recordInPlace(request: $request) {
-        labware {
-            ...LabwareFields
-        }
+  recordInPlace(request: $request) {
+    labware {
+      ...LabwareFields
     }
+  }
 }
