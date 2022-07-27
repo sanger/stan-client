@@ -56,7 +56,7 @@ const validationSchema = Yup.object()
       return this.createError({
         path: "labwareBarcode | tissueExternalName | donorName | tissueTypeName | workNumber",
         message:
-          "At least one of STAN Barcode, External Identifier, Donor ID, Tissue Type or Work Number must not be empty.",
+          "At least one of STAN Barcode, External Identifier, Donor ID, Tissue Type or SGP Number must not be empty.",
       });
     },
   });
