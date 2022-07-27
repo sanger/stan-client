@@ -1,5 +1,5 @@
 mutation AddSpecies($name: String!) {
-    addSpecies(name: $name) {
-        ...SpeciesFields
-    }
+  addSpecies(name: $name) {
+    ...SpeciesFields
+  }
 }

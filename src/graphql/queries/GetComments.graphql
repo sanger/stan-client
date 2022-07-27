@@ -1,5 +1,5 @@
-query GetComments ($commentCategory:String,$includeDisabled:Boolean) {
-    comments(category: $commentCategory, includeDisabled: $includeDisabled) {
-        ...CommentFields
-    }
+query GetComments($commentCategory: String, $includeDisabled: Boolean) {
+  comments(category: $commentCategory, includeDisabled: $includeDisabled) {
+    ...CommentFields
+  }
 }

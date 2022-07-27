@@ -9,7 +9,11 @@ interface EditableTextProps {
   defaultValue: string;
 }
 
-const EditableText: React.FC<EditableTextProps> = ({ onChange, children, defaultValue}) => {
+const EditableText: React.FC<EditableTextProps> = ({
+  onChange,
+  children,
+  defaultValue,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editableText, setEditableText] = useState<string | null>(null);

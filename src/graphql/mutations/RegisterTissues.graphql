@@ -1,5 +1,5 @@
 mutation RegisterTissues($request: RegisterRequest!) {
-    register(request: $request) {
-       ...RegisterResultFields
-    }
+  register(request: $request) {
+    ...RegisterResultFields
+  }
 }

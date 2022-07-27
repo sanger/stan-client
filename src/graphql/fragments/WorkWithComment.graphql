@@ -1,6 +1,6 @@
 fragment WorkWithCommentFields on WorkWithComment {
-    work {
-        ...WorkFields
-    }
-    comment
+  work {
+    ...WorkFields
+  }
+  comment
 }

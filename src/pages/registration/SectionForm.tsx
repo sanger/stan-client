@@ -61,9 +61,8 @@ export default function SectionForm({
   scrollIntoView = false,
 }: SectionFormParams) {
   const { buildSample } = useContext(SlideRegistrationContext);
-  const { setFieldValue, values } = useFormikContext<
-    SlideRegistrationFormValues
-  >();
+  const { setFieldValue, values } =
+    useFormikContext<SlideRegistrationFormValues>();
   const slotRef = useRef<HTMLDivElement>(null);
   const isOnScreen = useOnScreen(slotRef, { threshold: 0.4 });
 
@@ -88,12 +87,14 @@ export default function SectionForm({
   const selectedTissueType =
     values.labwares[currentIndex].slots[slotAddress][sectionIndex].tissueType;
 
-  const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] = useMemo(() => {
-    return (
-      registrationInfo.tissueTypes.find((tt) => tt.name === selectedTissueType)
-        ?.spatialLocations ?? []
-    );
-  }, [registrationInfo.tissueTypes, selectedTissueType]);
+  const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] =
+    useMemo(() => {
+      return (
+        registrationInfo.tissueTypes.find(
+          (tt) => tt.name === selectedTissueType
+        )?.spatialLocations ?? []
+      );
+    }, [registrationInfo.tissueTypes, selectedTissueType]);
 
   /**
    * Only when the species is "Human", should the HMDMC field be enabled

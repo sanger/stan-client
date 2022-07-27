@@ -6,7 +6,7 @@ describe("Fetal Waste Page", () => {
   describe("Validation", () => {
     context("when submitting the form with nothing filled in", () => {
       before(() => {
-        cy.findByRole("button", { name: "Submit" }).click()
+        cy.findByRole("button", { name: "Submit" }).click();
       });
 
       it("shows a validation error for labware", () => {
@@ -16,11 +16,8 @@ describe("Fetal Waste Page", () => {
       });
 
       it("shows a validation error for the work number", () => {
-        cy.findByText("SGP Number is a required field").should(
-          "be.visible"
-        );
+        cy.findByText("SGP Number is a required field").should("be.visible");
       });
     });
-
   });
 });

@@ -1,8 +1,8 @@
 query GetReleaseInfo {
-    releaseDestinations {
-        ...ReleaseDestinationFields
-    }
-    releaseRecipients {
-        ...ReleaseRecipientFields
-    }
+  releaseDestinations {
+    ...ReleaseDestinationFields
+  }
+  releaseRecipients {
+    ...ReleaseRecipientFields
+  }
 }

@@ -1,5 +1,5 @@
 query GetSolutionTransferInfo {
-    solutions {
-        name
-    }
+  solutions {
+    name
+  }
 }

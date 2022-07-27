@@ -70,13 +70,8 @@ const DataTableComponent = <T extends Object>(
     },
     ...plugins
   );
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = instance;
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+    instance;
 
   // intended to be called outside of table via ref
   instance.download = () => {

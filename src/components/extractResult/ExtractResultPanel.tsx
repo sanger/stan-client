@@ -36,12 +36,8 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
     extractResultMachine.withContext({ extractResults: [], currentBarcode: "" })
   );
 
-  const {
-    serverError,
-    extractResults,
-    scanErrorMessage,
-    currentBarcode,
-  } = current.context;
+  const { serverError, extractResults, scanErrorMessage, currentBarcode } =
+    current.context;
 
   const formatErrorMessage = (message: string) => {
     const firstcolonIndx = message.indexOf(":");

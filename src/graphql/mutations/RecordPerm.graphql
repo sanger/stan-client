@@ -1,7 +1,7 @@
 mutation RecordPerm($request: RecordPermRequest!) {
-    recordPerm(request: $request) {
-        operations {
-            id
-        }
+  recordPerm(request: $request) {
+    operations {
+      id
     }
+  }
 }

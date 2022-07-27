@@ -32,9 +32,7 @@ describe("Visium Analysis", () => {
   context("when there is no work number selected", () => {
     it("shows a warning", () => {
       cy.findByRole("button", { name: /Submit/i }).click();
-      cy.findByText(
-        "SGP number is a required field"
-      ).should("be.visible");
+      cy.findByText("SGP number is a required field").should("be.visible");
     });
   });
 });

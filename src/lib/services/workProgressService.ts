@@ -51,7 +51,8 @@ export class WorkProgressService
     SearchServiceInterface<
       FindWorkProgressQueryVariables,
       WorkProgressResultTableEntry
-    > {
+    >
+{
   /**
    * Do a findWorkProgress query on core. Format the response into a list of table rows
    * @param workProgressRequest the variables that go into a FindWorkProgress query

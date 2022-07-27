@@ -1,41 +1,41 @@
 query GetConfiguration {
-    destructionReasons(includeDisabled: true) {
-        ...DestructionReasonFields
-    }
-    comments(includeDisabled: true) {
-        ...CommentFields
-    }
-    hmdmcs(includeDisabled: true) {
-        ...HmdmcFields
-    }
-    species(includeDisabled: true) {
-        ...SpeciesFields
-    }
-    fixatives(includeDisabled: true) {
-        ...FixativeFields
-    }
-    releaseDestinations(includeDisabled: true) {
-        ...ReleaseDestinationFields
-    }
-    releaseRecipients(includeDisabled: true) {
-        ...ReleaseRecipientFields
-    }
-    projects(includeDisabled: true) {
-        ...ProjectFields
-    }
-    costCodes(includeDisabled: true) {
-        ...CostCodeFields
-    }
-    workTypes(includeDisabled: true) {
-        ...WorkTypeFields
-    }
-    equipments(includeDisabled: true) {
-        ...EquipmentFields
-    }
-    users(includeDisabled: true) {
-        ...UserFields
-    }
-    solutions(includeDisabled: true){
-        ...SolutionFields
-    }
+  destructionReasons(includeDisabled: true) {
+    ...DestructionReasonFields
+  }
+  comments(includeDisabled: true) {
+    ...CommentFields
+  }
+  hmdmcs(includeDisabled: true) {
+    ...HmdmcFields
+  }
+  species(includeDisabled: true) {
+    ...SpeciesFields
+  }
+  fixatives(includeDisabled: true) {
+    ...FixativeFields
+  }
+  releaseDestinations(includeDisabled: true) {
+    ...ReleaseDestinationFields
+  }
+  releaseRecipients(includeDisabled: true) {
+    ...ReleaseRecipientFields
+  }
+  projects(includeDisabled: true) {
+    ...ProjectFields
+  }
+  costCodes(includeDisabled: true) {
+    ...CostCodeFields
+  }
+  workTypes(includeDisabled: true) {
+    ...WorkTypeFields
+  }
+  equipments(includeDisabled: true) {
+    ...EquipmentFields
+  }
+  users(includeDisabled: true) {
+    ...UserFields
+  }
+  solutions(includeDisabled: true) {
+    ...SolutionFields
+  }
 }

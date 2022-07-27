@@ -1,5 +1,5 @@
-query GetNextReplicateNumber($barcodes:[String!]!) {
-    nextReplicateNumbers(barcodes: $barcodes) {
-        ...NextReplicateDataFields
-    }
+query GetNextReplicateNumber($barcodes: [String!]!) {
+  nextReplicateNumbers(barcodes: $barcodes) {
+    ...NextReplicateDataFields
+  }
 }

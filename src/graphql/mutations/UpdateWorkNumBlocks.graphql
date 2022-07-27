@@ -1,5 +1,5 @@
-mutation UpdateWorkNumBlocks($workNumber:String!, $numBlocks:Int) {
-    updateWorkNumBlocks(workNumber: $workNumber,numBlocks: $numBlocks) {
-        ...WorkFields
-    }
+mutation UpdateWorkNumBlocks($workNumber: String!, $numBlocks: Int) {
+  updateWorkNumBlocks(workNumber: $workNumber, numBlocks: $numBlocks) {
+    ...WorkFields
+  }
 }

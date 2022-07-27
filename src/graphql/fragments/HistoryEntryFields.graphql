@@ -1,11 +1,11 @@
 fragment HistoryEntryFields on HistoryEntry {
-    destinationLabwareId
-    details
-    eventId
-    sampleId
-    sourceLabwareId
-    time
-    username
-    type
-    workNumber
+  destinationLabwareId
+  details
+  eventId
+  sampleId
+  sourceLabwareId
+  time
+  username
+  type
+  workNumber
 }

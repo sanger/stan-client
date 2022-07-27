@@ -200,7 +200,7 @@ export default function createWorkAllocationMachine({
             worksWithComments,
             workTypes,
             costCodes,
-            releaseRecipients
+            releaseRecipients,
           } = e.data;
           ctx.availableComments = comments;
           ctx.projects = projects;
@@ -230,13 +230,17 @@ export default function createWorkAllocationMachine({
             costCode,
             numBlocks,
             numSlides,
-            numOriginalSamples
+            numOriginalSamples,
           } = e.data.createWork;
           const blockSlideSampleMsg = [
             numBlocks ? `${numBlocks} blocks` : undefined,
             numSlides ? `${numSlides} slides` : undefined,
-            numOriginalSamples ? `${numOriginalSamples} original samples` : undefined
-          ].filter(msg => msg).join(' and ');
+            numOriginalSamples
+              ? `${numOriginalSamples} original samples`
+              : undefined,
+          ]
+            .filter((msg) => msg)
+            .join(" and ");
           ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideSampleMsg}) to project ${project.name} 
                                 and cost code ${costCode.code} with the work requester ${workRequester?.username}`;
         }),
@@ -268,7 +272,7 @@ export default function createWorkAllocationMachine({
             isRnD,
             numBlocks,
             numSlides,
-            numOriginalSamples
+            numOriginalSamples,
           } = e.values;
 
           return stanCore.CreateWork({
@@ -279,7 +283,7 @@ export default function createWorkAllocationMachine({
             prefix: isRnD ? "R&D" : "SGP",
             numBlocks,
             numSlides,
-            numOriginalSamples
+            numOriginalSamples,
           });
         },
 
@@ -287,8 +291,8 @@ export default function createWorkAllocationMachine({
           stanCore.GetWorkAllocationInfo({
             commentCategory: "Work status",
             workStatuses: ctx.urlParams.status,
-          })
-      }
+          }),
+      },
     }
   );
 }

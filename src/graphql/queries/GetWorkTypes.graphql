@@ -1,1 +1,5 @@
-query GetWorkTypes { workTypes(includeDisabled: true) { name }}
+query GetWorkTypes {
+  workTypes(includeDisabled: true) {
+    name
+  }
+}

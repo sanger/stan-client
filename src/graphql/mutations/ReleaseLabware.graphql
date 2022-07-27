@@ -1,16 +1,16 @@
 mutation ReleaseLabware($releaseRequest: ReleaseRequest!) {
-    release(request: $releaseRequest) {
-        releases {
-            id
-            labware {
-                barcode
-            }
-            destination {
-                name
-            }
-            recipient {
-                username
-            }
-        }
+  release(request: $releaseRequest) {
+    releases {
+      id
+      labware {
+        barcode
+      }
+      destination {
+        name
+      }
+      recipient {
+        username
+      }
     }
+  }
 }

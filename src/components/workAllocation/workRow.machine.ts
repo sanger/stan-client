@@ -34,13 +34,19 @@ export type WorkRowEvent =
   | { type: "ACTIVE"; commentId: undefined }
   | { type: "UPDATE_NUM_BLOCKS"; numBlocks: number | undefined }
   | { type: "UPDATE_NUM_SLIDES"; numSlides: number | undefined }
-  | { type: "UPDATE_NUM_ORIGINAL_SAMPLES"; numOriginalSamples: number | undefined }
+  | {
+      type: "UPDATE_NUM_ORIGINAL_SAMPLES";
+      numOriginalSamples: number | undefined;
+    }
   | { type: "UPDATE_PRIORITY"; priority: string | undefined }
   | MachineServiceDone<"updateWorkStatus", UpdateWorkStatusMutation>
   | MachineServiceDone<"updateWorkNumBlocks", UpdateWorkNumBlocksMutation>
   | MachineServiceDone<"updateWorkNumSlides", UpdateWorkNumSlidesMutation>
   | MachineServiceDone<"updateWorkPriority", UpdateWorkPriorityMutation>
-  | MachineServiceDone<"updateWorkNumOriginalSamples", UpdateWorkNumOriginalSamplesMutation>;
+  | MachineServiceDone<
+      "updateWorkNumOriginalSamples",
+      UpdateWorkNumOriginalSamplesMutation
+    >;
 
 type CreateWorkRowMachineParams = Pick<
   WorkRowMachineContext,

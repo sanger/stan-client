@@ -1,5 +1,5 @@
 mutation AddHmdmc($hmdmc: String!) {
-    addHmdmc(hmdmc: $hmdmc) {
-        ...HmdmcFields
-    }
+  addHmdmc(hmdmc: $hmdmc) {
+    ...HmdmcFields
+  }
 }

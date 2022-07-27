@@ -10,7 +10,7 @@ import {
 export function buildConfirmSectionRequest(): ConfirmSectionRequest {
   return {
     labware: [],
-    workNumber: ""
+    workNumber: "",
   };
 }
 

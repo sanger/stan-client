@@ -31,10 +31,9 @@ type OptionTemplate<
   VV = string | number
 > = {
   [key in L]: LV;
-} &
-  {
-    [key in V]: VV;
-  };
+} & {
+  [key in V]: VV;
+};
 
 /**
  * Utility for generating a list of <code><option></code> tags

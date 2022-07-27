@@ -5,15 +5,14 @@ name: Test
 
 on:
   push:
-    branches: [ devel ]
+    branches: [devel]
   pull_request:
-    branches: [ devel ]
+    branches: [devel]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v2
         name: Checkout
@@ -24,6 +23,6 @@ jobs:
           install-command: yarn --frozen-lockfile --silent
           build: yarn build
           start: npx serve -s build -p 3000
-          wait-on: 'http://localhost:3000'
+          wait-on: "http://localhost:3000"
           config: baseUrl=http://localhost:3000
           timeout-minutes: 5

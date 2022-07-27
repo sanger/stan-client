@@ -1,3 +1,3 @@
 mutation Print($barcodes: [String!]!, $printer: String!) {
-    printLabware(barcodes: $barcodes, printer: $printer)
+  printLabware(barcodes: $barcodes, printer: $printer)
 }

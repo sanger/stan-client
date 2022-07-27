@@ -1,5 +1,5 @@
-mutation SetUserRole($username: String!, $role: UserRole!){
-    setUserRole(username: $username,role:$role){
-        ...UserFields
-    }
+mutation SetUserRole($username: String!, $role: UserRole!) {
+  setUserRole(username: $username, role: $role) {
+    ...UserFields
+  }
 }

@@ -154,9 +154,10 @@ export default function LabwareScanner({
     [send]
   );
 
-  const handleOnScan = useCallback(() => send({ type: "SUBMIT_BARCODE" }), [
-    send,
-  ]);
+  const handleOnScan = useCallback(
+    () => send({ type: "SUBMIT_BARCODE" }),
+    [send]
+  );
 
   return (
     <div className="space-y-4">

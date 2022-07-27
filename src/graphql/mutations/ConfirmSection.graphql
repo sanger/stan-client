@@ -1,16 +1,16 @@
 mutation ConfirmSection($request: ConfirmSectionRequest!) {
-    confirmSection(request: $request) {
-        labware {
-            ...LabwareFields
-        }
-        operations {
-            operationType {
-                name
-            }
-            user {
-                username
-            }
-            performed
-        }
+  confirmSection(request: $request) {
+    labware {
+      ...LabwareFields
     }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
 }

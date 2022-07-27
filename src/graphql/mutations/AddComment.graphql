@@ -1,5 +1,5 @@
 mutation AddComment($category: String!, $text: String!) {
-    addComment(category: $category, text: $text) {
-        ...CommentFields
-    }
+  addComment(category: $category, text: $text) {
+    ...CommentFields
+  }
 }

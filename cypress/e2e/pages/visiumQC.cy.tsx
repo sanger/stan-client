@@ -6,7 +6,7 @@ import {
 describe("Visium QC Page", () => {
   before(() => {
     cy.visit("/lab/visium_qc");
-    cy.get('select[name="workNumber"]').select("SGP1008")
+    cy.get('select[name="workNumber"]').select("SGP1008");
   });
 
   describe("On load", () => {
@@ -92,7 +92,7 @@ describe("Visium QC Page", () => {
     describe("On Save", () => {
       context("When there is no server error", () => {
         before(() => {
-          cy.get('select[name="workNumber"]').select("SGP1008")
+          cy.get('select[name="workNumber"]').select("SGP1008");
           cy.findByRole("button", { name: /Save/i })
             .should("not.be.disabled")
             .click();
@@ -129,7 +129,7 @@ describe("Visium QC Page", () => {
             );
           });
           cy.get("#labwareScanInput").type("STAN-2100{enter}");
-          cy.get('select[name="workNumber"]').select("SGP1008")
+          cy.get('select[name="workNumber"]').select("SGP1008");
           cy.findByRole("button", { name: /Save/i }).click();
         });
 
@@ -183,14 +183,13 @@ describe("Visium QC Page", () => {
 
     describe("On Save", () => {
       it("Save button should be disabled when there is no SGP number", () => {
-        cy.get('select[name="workNumber"]').select("")
-        cy.findByRole("button", { name: /Save/i })
-          .should("be.disabled");
-      })
+        cy.get('select[name="workNumber"]').select("");
+        cy.findByRole("button", { name: /Save/i }).should("be.disabled");
+      });
 
       context("When there is no server error", () => {
         before(() => {
-          cy.get('select[name="workNumber"]').select("SGP1008")
+          cy.get('select[name="workNumber"]').select("SGP1008");
           cy.findByRole("button", { name: /Save/i })
             .should("not.be.disabled")
             .click();
@@ -208,7 +207,7 @@ describe("Visium QC Page", () => {
 
   describe("On Visium QCType as cDNA Analysis", () => {
     before(() => {
-      cy.get('select[name="workNumber"]').select("SGP1008")
+      cy.get('select[name="workNumber"]').select("SGP1008");
       cy.findByTestId("qcType").select("cDNA analysis");
     });
 
@@ -228,7 +227,6 @@ describe("Visium QC Page", () => {
     });
 
     describe("On Save", () => {
-
       context("When all values are valid and there is no server error", () => {
         before(() => {
           cy.findByTestId("measurementValue0").clear().type("300.45");

@@ -1,5 +1,5 @@
 mutation SetFixativeEnabled($name: String!, $enabled: Boolean!) {
-    setFixativeEnabled(name: $name, enabled: $enabled) {
-        ...FixativeFields
-    }
+  setFixativeEnabled(name: $name, enabled: $enabled) {
+    ...FixativeFields
+  }
 }
