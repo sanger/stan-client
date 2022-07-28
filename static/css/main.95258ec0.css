@@ -2764,6 +2764,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   padding: 1rem;
 }
 
+.p-0 {
+  padding: 0;
+}
+
 .p-8 {
   padding: 2rem;
 }
@@ -4469,4 +4473,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.084ee518.css.map*/
+/*# sourceMappingURL=main.95258ec0.css.map*/
