@@ -257,7 +257,7 @@ function fillInForm() {
   cy.findByLabelText("External Identifier").type("EXT_ID_1");
   cy.findByLabelText("HuMFre").select("HuMFre1");
   cy.findByLabelText("Tissue Type").select("Liver");
-  cy.findByLabelText("Spatial Location").select("3");
+  cy.findByLabelText("Spatial Location").select("3 - Surface central region");
   cy.findByLabelText("Replicate Number").type("2");
   cy.findByLabelText("Last Known Section Number").type("5");
   cy.findByLabelText("Labware Type").select("Proviasette");

@@ -220,11 +220,11 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                           label="Spatial Location"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.spatialLocation`}
                         >
-                          {optionValues(
-                            availableSpatialLocations,
-                            "code",
-                            "code"
-                          )}
+                          {availableSpatialLocations.map((spatialLocation) => (
+                            <option value={spatialLocation.code} key={spatialLocation.code}>
+                              {spatialLocation.code + " - " + spatialLocation.name}
+                            </option>
+                          ))}
                         </FormikSelect>
 
                         <FormikInput

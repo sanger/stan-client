@@ -172,7 +172,11 @@ export default function SectionForm({
         label="Spatial Location"
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.spatialLocation`}
       >
-        {optionValues(availableSpatialLocations, "code", "code")}
+        {availableSpatialLocations.map((spatialLocation) => (
+          <option value={spatialLocation.code} key={spatialLocation.code}>
+            {spatialLocation.code + " - " + spatialLocation.name}
+          </option>
+        ))}
       </FormikSelect>
 
       <FormikInput
