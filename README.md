@@ -4,7 +4,6 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-
 ## Dependencies
 
 - `Node v16.15.1`
@@ -21,6 +20,7 @@ In order for `graphql-codegen` to generate TypeScript types to match the GraphQL
     GRAPHQL_SCHEMA_PATH=/path/to/schema.graphqls
 
 ## Front-end Architecture
+
 The architecture of the front-end is split into 3 layers:
 
 [comment]: <> (![Front-end Architecture]&#40;public/frontend_architecture.png&#41;)
@@ -63,7 +63,7 @@ STAN-4089 // Visium LP (4) with 0 samples in each slot
 
 ### `yarn codegen`
 
-Runs the [GraphQL Code Generator](https://graphql-code-generator.com/docs/getting-started/index). This command automatically runs before `yarn start`, `yarn start:msw`, and `yarn test:open`. 
+Runs the [GraphQL Code Generator](https://graphql-code-generator.com/docs/getting-started/index). This command automatically runs before `yarn start`, `yarn start:msw`, and `yarn test:open`.
 
 GraphQL Code Generator is a CLI tool that can generate TypeScript typings out of a GraphQL schema.
 
@@ -98,6 +98,14 @@ The build is minified and the filenames include the hashes.<br />
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `yarn format`
+This allows user to run prettier on all files manually and corrects all formatting errors.
+
+Every time you create a commit, [a git hook (using husky)](https://github.com/typicode/husky) will check for formatting errors in your files and run [prettier](https://prettier.io/).
+
+However,to make the coding environment better, it is recommended to integrate Prettier into the editor of your choice [Reformatting code with Prettier in IntelliJ](https://www.jetbrains.com/help/idea/prettier.html#ws_prettier_reformat_code)
+
 
 ### `yarn eject`
 
