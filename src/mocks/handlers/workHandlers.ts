@@ -15,6 +15,8 @@ import {
   UpdateWorkStatusMutation,
   UpdateWorkStatusMutationVariables,
   WorkStatus,
+  FindWorkInfoQuery,
+  FindWorkInfoQueryVariables,
 } from "../../types/sdk";
 import costCodeRepository from "../repositories/costCodeRepository";
 import projectRepository from "../repositories/projectRepository";
@@ -68,10 +70,40 @@ const workHandlers = [
           };
         }),
         workTypes: workTypeRepository.findAll().filter(isEnabled),
-        releaseRecipients: releaseRecipientRepository.findAll().filter(isEnabled)
+        releaseRecipients: releaseRecipientRepository
+          .findAll()
+          .filter(isEnabled),
       })
     );
   }),
+  graphql.query<FindWorkInfoQuery, FindWorkInfoQueryVariables>(
+    "FindWorkInfo",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          works: workRepository
+            .findAll()
+            .filter((w) => w.status === req.variables.status)
+            .map((work) => {
+              return {
+                __typename: "Work",
+                workNumber: work.workNumber,
+                project: {
+                  __typename: "Project",
+                  name: work.project.name,
+                },
+                workRequester: {
+                  __typename: "ReleaseRecipient",
+                  username: work.workRequester
+                    ? work.workRequester.username
+                    : "",
+                },
+              };
+            }),
+        })
+      );
+    }
+  ),
 
   graphql.mutation<CreateWorkMutation, CreateWorkMutationVariables>(
     "CreateWork",
@@ -79,7 +111,10 @@ const workHandlers = [
       const workType = workTypeRepository.find("name", req.variables.workType);
       const costCode = costCodeRepository.find("code", req.variables.costCode);
       const project = projectRepository.find("name", req.variables.project);
-      const workRequester = releaseRecipientRepository.find("username", req.variables.workRequester);
+      const workRequester = releaseRecipientRepository.find(
+        "username",
+        req.variables.workRequester
+      );
 
       if (!workType) {
         return res(
@@ -112,7 +147,9 @@ const workHandlers = [
       if (!workRequester) {
         return res(
           ctx.errors([
-            { message: `Work requester ${req.variables.workRequester} not found` },
+            {
+              message: `Work requester ${req.variables.workRequester} not found`,
+            },
           ])
         );
       }
@@ -121,7 +158,7 @@ const workHandlers = [
         {
           numSlides: req.variables.numSlides,
           numBlocks: req.variables.numBlocks,
-          numOriginalSamples: req.variables.numOriginalSamples
+          numOriginalSamples: req.variables.numOriginalSamples,
         },
         {
           associations: { workType, costCode, project, workRequester },

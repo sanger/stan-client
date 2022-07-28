@@ -5,12 +5,12 @@ import {
 import { labwareTypeInstances } from "../../../src/lib/factories/labwareTypeFactory";
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
 import { LabwareTypeName } from "../../../src/types/stan";
+import { shouldDisplyProjectAndUserNameForWorkNumber } from "../shared/workNumberExtraInfo.cy";
 
 describe("Pot Processing", () => {
-  before(() => {
-    cy.visit("/lab/original_sample_processing?type=pot");
-  });
-
+  shouldDisplyProjectAndUserNameForWorkNumber(
+    "/lab/original_sample_processing?type=pot"
+  );
   describe("Add Labware button", () => {
     context("when there is no source labware loaded", () => {
       it("is disabled", () => {
