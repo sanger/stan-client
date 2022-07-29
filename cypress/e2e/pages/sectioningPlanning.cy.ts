@@ -321,7 +321,7 @@ describe("Sectioning Planning", () => {
               return res.once(
                 ctx.errors([
                   {
-                    message: "Tube Printer failed to print",
+                    message: "Exception while fetching data (/print) : An error occured",
                   },
                 ])
               );
@@ -334,6 +334,7 @@ describe("Sectioning Planning", () => {
 
       it("shows an error message", () => {
         cy.findByText(/Tube Printer failed to print/).should("exist");
+        cy.findByText("An error occured").should("exist");
       });
     });
   });
