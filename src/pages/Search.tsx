@@ -8,7 +8,7 @@ import { optionValues } from "../components/forms";
 import DataTable from "../components/DataTable";
 import { Cell, Column } from "react-table";
 import StyledLink from "../components/StyledLink";
-import { SearchResultTableEntry } from "../types/stan";
+import { SearchResultTableEntry, alphaNumericSortDefault } from "../types/stan";
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 import Warning from "../components/notifications/Warning";
 import Heading from "../components/Heading";
@@ -300,9 +300,13 @@ const columns: Column<SearchResultTableEntry>[] = [
   },
   {
     Header: "SGP Numbers",
-    Cell: (props: Cell<SearchResultTableEntry>) => {
-      const workNumbers = props.row.original.workNumbers;
-      return workNumbers.join(", ");
+    accessor: (originalRow) => originalRow.workNumbers.join(", "),
+    sortType: (rowA, rowB) => {
+      console.log('getting called');
+      return alphaNumericSortDefault(
+        rowA.original.workNumbers.join(", "),
+        rowB.original.workNumbers.join(", ")
+      );
     },
   },
   {
