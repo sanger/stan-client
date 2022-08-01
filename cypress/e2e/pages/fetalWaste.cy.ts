@@ -1,8 +1,7 @@
-describe("Fetal Waste Page", () => {
-  before(() => {
-    cy.visit("/lab/fetal_waste");
-  });
+import { shouldDisplyProjectAndUserNameForWorkNumber } from "../shared/workNumberExtraInfo.cy";
 
+describe("Fetal Waste Page", () => {
+  shouldDisplyProjectAndUserNameForWorkNumber("/lab/fetal_waste");
   describe("Validation", () => {
     context("when submitting the form with nothing filled in", () => {
       before(() => {

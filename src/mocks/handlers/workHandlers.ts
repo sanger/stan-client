@@ -15,6 +15,8 @@ import {
   UpdateWorkStatusMutation,
   UpdateWorkStatusMutationVariables,
   WorkStatus,
+  FindWorkInfoQuery,
+  FindWorkInfoQueryVariables,
 } from "../../types/sdk";
 import costCodeRepository from "../repositories/costCodeRepository";
 import projectRepository from "../repositories/projectRepository";
@@ -74,6 +76,34 @@ const workHandlers = [
       })
     );
   }),
+  graphql.query<FindWorkInfoQuery, FindWorkInfoQueryVariables>(
+    "FindWorkInfo",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          works: workRepository
+            .findAll()
+            .filter((w) => w.status === req.variables.status)
+            .map((work) => {
+              return {
+                __typename: "Work",
+                workNumber: work.workNumber,
+                project: {
+                  __typename: "Project",
+                  name: work.project.name,
+                },
+                workRequester: {
+                  __typename: "ReleaseRecipient",
+                  username: work.workRequester
+                    ? work.workRequester.username
+                    : "",
+                },
+              };
+            }),
+        })
+      );
+    }
+  ),
 
   graphql.mutation<CreateWorkMutation, CreateWorkMutationVariables>(
     "CreateWork",

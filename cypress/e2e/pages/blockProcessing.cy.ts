@@ -5,8 +5,12 @@ import {
 import { labwareTypeInstances } from "../../../src/lib/factories/labwareTypeFactory";
 import labwareFactory from "../../../src/lib/factories/labwareFactory";
 import { LabwareTypeName } from "../../../src/types/stan";
+import { shouldDisplyProjectAndUserNameForWorkNumber } from "../shared/workNumberExtraInfo.cy";
 
 describe("Block Processing", () => {
+  shouldDisplyProjectAndUserNameForWorkNumber(
+    "/lab/original_sample_processing?type=block"
+  );
   before(() => {
     cy.visit("/lab/original_sample_processing?type=block");
   });
