@@ -99,6 +99,13 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+### `yarn format`
+This allows user to run prettier on all files manually and corrects all formatting errors.
+
+Every time you create a commit, [a git hook (using husky)](https://github.com/typicode/husky) will check for formatting errors in your files and run [prettier](https://prettier.io/).
+
+However,to make the coding environment better, it is recommended to integrate Prettier into the editor of your choice [Reformatting code with Prettier in IntelliJ](https://www.jetbrains.com/help/idea/prettier.html#ws_prettier_reformat_code)
+
 ### `yarn eject`
 
 **Note: this is a one-way operation. Once you `eject`, you can’t go back!**
