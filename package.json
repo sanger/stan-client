@@ -69,7 +69,8 @@
     "codegen:machine": "npx hygen machine new",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
-    "deploy-storybook": "storybook-to-ghpages"
+    "deploy-storybook": "storybook-to-ghpages",
+    "lint": "npx eslint . --ext .ts,.tsx"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -87,6 +88,7 @@
     ]
   },
   "devDependencies": {
+    "@arkweid/lefthook": "^0.7.7",
     "@graphql-codegen/cli": "^2.6.2",
     "@graphql-codegen/typescript": "^2.5.1",
     "@graphql-codegen/typescript-graphql-request": "^4.4.10",
@@ -106,6 +108,8 @@
     "babel-plugin-polyfill-corejs2": "^0.3.1",
     "cypress": "^10.2.0",
     "cypress-intellij-reporter": "^0.0.7",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "faker": "^5.5.3",
     "fishery": "^2.2.2",
     "msw": "^0.42.2",
