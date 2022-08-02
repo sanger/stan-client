@@ -85,6 +85,18 @@ If using IntelliJ, install the [Cypress](https://plugins.jetbrains.com/plugin/13
 
 Does the same as `yarn test:open` but runs all `cypress` tests on the command line, instead of using its launcher.
 
+### `yarn lint`
+
+Runs eslint in the project to identify syntax problems and suggest improvements in the code.
+
+### `yarn prettier (--check)`
+
+Runs prettier in the project to format the code
+
+### `yarn lefthook install`
+
+This should be run once to initialise the git hooks in the project.
+
 ### `yarn storybook`
 
 Runs [Storybook](https://storybook.js.org/docs/react/get-started/introduction). The development server will need to be simultaneously running in a separate process to build the CSS.
