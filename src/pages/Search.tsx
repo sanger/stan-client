@@ -302,7 +302,6 @@ const columns: Column<SearchResultTableEntry>[] = [
     Header: "SGP Numbers",
     accessor: (originalRow) => originalRow.workNumbers.join(", "),
     sortType: (rowA, rowB) => {
-      console.log('getting called');
       return alphaNumericSortDefault(
         rowA.original.workNumbers.join(", "),
         rowB.original.workNumbers.join(", ")
