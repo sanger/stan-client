@@ -1,7 +1,7 @@
-import React from "react";
-import * as H from "history";
-import { Prompt } from "react-router-dom";
-import { useConfirmLeave } from "../../lib/hooks";
+import React from 'react';
+import * as H from 'history';
+import { Prompt } from 'react-router-dom';
+import { useConfirmLeave } from '../../lib/hooks';
 
 interface PromptOnLeaveProps {
   /**Should a prompt dialog be displayed?**/
@@ -11,11 +11,7 @@ interface PromptOnLeaveProps {
   /**Extra handler to check on other conditions mainly based on the
    * - Action(e.g Go back,go forward etc) performed and
    * - Future Location going to navigate to */
-  messageHandler?: (
-    location: H.Location,
-    action: H.Action,
-    message: string
-  ) => string | boolean;
+  messageHandler?: (location: H.Location, action: H.Action, message: string) => string | boolean;
   /**Callback when user presses Ok in Prompt, i.e leaving from current page to another page**/
   onPromptLeave?: () => void;
   /**Callback when user presses Cancel in Prompt**/
@@ -27,7 +23,7 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({
   message,
   messageHandler,
   onPromptLeave,
-  onPromptCancel,
+  onPromptCancel
 }) => {
   //User hook to prompt Refresh and Exit events as these are not handled by Prompt
   const [, setShouldConfirm] = useConfirmLeave(true);
@@ -54,10 +50,8 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({
     <Prompt
       when={when}
       message={(location, action) => {
-        const ret = messageHandler
-          ? messageHandler(location, action, message)
-          : message;
-        promptReturnStatus.current = typeof ret === "string";
+        const ret = messageHandler ? messageHandler(location, action, message) : message;
+        promptReturnStatus.current = typeof ret === 'string';
         return ret;
       }}
     />

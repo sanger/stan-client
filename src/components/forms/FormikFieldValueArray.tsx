@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useFormikContext } from "formik";
+import { useEffect } from 'react';
+import { useFormikContext } from 'formik';
 
 type FormikFieldValueArrayProps = {
   /**
@@ -16,10 +16,7 @@ type FormikFieldValueArrayProps = {
 /**
  * Component that will keep the named Formik field updated with the given value
  */
-export function FormikFieldValueArray({
-  field,
-  values,
-}: FormikFieldValueArrayProps) {
+export function FormikFieldValueArray({ field, values }: FormikFieldValueArrayProps) {
   const { setFieldValue } = useFormikContext();
 
   useEffect(() => {

@@ -1,11 +1,7 @@
-import {
-  LabwareFieldsFragment,
-  SampleFieldsFragment,
-  SlotFieldsFragment,
-} from "../../types/sdk";
+import { LabwareFieldsFragment, SampleFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 
 function joinUnique(array: string[]) {
-  return Array.from(new Set<string>(array)).join(", ");
+  return Array.from(new Set<string>(array)).join(', ');
 }
 
 export function valueFromSamples(
@@ -14,7 +10,7 @@ export function valueFromSamples(
 ) {
   let samples: SampleFieldsFragment[];
 
-  if ("labwareType" in labwareOrSlot) {
+  if ('labwareType' in labwareOrSlot) {
     samples = labwareOrSlot.slots.flatMap((slot) => slot.samples);
   } else {
     samples = labwareOrSlot.samples;

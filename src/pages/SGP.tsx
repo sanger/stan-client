@@ -1,6 +1,6 @@
-import React from "react";
-import AppShell from "../components/AppShell";
-import WorkAllocation from "../components/workAllocation/WorkAllocation";
+import React from 'react';
+import AppShell from '../components/AppShell';
+import WorkAllocation from '../components/workAllocation/WorkAllocation';
 
 export default function SGP() {
   return (

@@ -1,6 +1,6 @@
-import React from "react";
-import { TableCell } from "../Table";
-import { Input } from "../forms/Input";
+import React from 'react';
+import { TableCell } from '../Table';
+import { Input } from '../forms/Input';
 
 type BooleanEntityRowParams = {
   /**
@@ -21,23 +21,14 @@ type BooleanEntityRowParams = {
   onChange: (enabled: boolean) => void;
 };
 
-export function BooleanEntityRow({
-  value,
-  disable,
-  onChange,
-}: BooleanEntityRowParams) {
+export function BooleanEntityRow({ value, disable, onChange }: BooleanEntityRowParams) {
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.checked);
   };
 
   return (
     <TableCell colSpan={2}>
-      <Input
-        type="checkbox"
-        disabled={disable}
-        defaultChecked={value}
-        onChange={handleOnChange}
-      />
+      <Input type="checkbox" disabled={disable} defaultChecked={value} onChange={handleOnChange} />
     </TableCell>
   );
 }

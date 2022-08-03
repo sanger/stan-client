@@ -1,27 +1,17 @@
-import React from "react";
-import classNames from "classnames";
-import { Maybe } from "../../types/sdk";
-import { extractServerErrors, ServerErrors } from "../../types/stan";
-import { ClientError } from "graphql-request";
+import React from 'react';
+import classNames from 'classnames';
+import { Maybe } from '../../types/sdk';
+import { extractServerErrors, ServerErrors } from '../../types/stan';
+import { ClientError } from 'graphql-request';
 
-interface WarningProps
-  extends React.DetailedHTMLProps<
-    React.HTMLAttributes<HTMLElement>,
-    HTMLElement
-  > {
+interface WarningProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> {
   message?: string;
   error?: Maybe<ClientError>;
 }
 
-const Warning = ({
-  message,
-  error,
-  children,
-  className,
-  ...rest
-}: WarningProps): JSX.Element => {
+const Warning = ({ message, error, children, className, ...rest }: WarningProps): JSX.Element => {
   const sectionClasses = classNames(
-    "flex flex-row items-start justify-between border-l-4 border-orange-600 p-2 bg-orange-200 text-orange-800",
+    'flex flex-row items-start justify-between border-l-4 border-orange-600 p-2 bg-orange-200 text-orange-800',
     className
   );
   let serverErrors: ServerErrors | undefined;
@@ -31,13 +21,7 @@ const Warning = ({
   }
   return (
     <section {...rest} className={sectionClasses}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        className="h-6 w-6"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -48,9 +32,7 @@ const Warning = ({
       <div className="ml-2 flex-grow">
         <p className="font-medium whitespace-pre-wrap">{message}</p>
 
-        {serverErrors?.message && (
-          <p className="mt-2">{serverErrors.message}</p>
-        )}
+        {serverErrors?.message && <p className="mt-2">{serverErrors.message}</p>}
 
         {serverErrors?.problems && (
           <div className="mt-2">

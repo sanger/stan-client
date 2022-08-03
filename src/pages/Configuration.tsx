@@ -1,14 +1,14 @@
-import React, { useContext } from "react";
-import AppShell from "../components/AppShell";
-import { GetConfigurationQuery, UserRole } from "../types/sdk";
-import EntityManager from "../components/entityManager/EntityManager";
-import Heading from "../components/Heading";
-import { groupBy } from "lodash";
-import StyledLink from "../components/StyledLink";
-import { StanCoreContext } from "../lib/sdk";
-import { TabList } from "../components/TabbedPane";
-import { Item } from "@react-stately/collections";
-import MutedText from "../components/MutedText";
+import React, { useContext } from 'react';
+import AppShell from '../components/AppShell';
+import { GetConfigurationQuery, UserRole } from '../types/sdk';
+import EntityManager from '../components/entityManager/EntityManager';
+import Heading from '../components/Heading';
+import { groupBy } from 'lodash';
+import StyledLink from '../components/StyledLink';
+import { StanCoreContext } from '../lib/sdk';
+import { TabList } from '../components/TabbedPane';
+import { Item } from '@react-stately/collections';
+import MutedText from '../components/MutedText';
 
 type ConfigurationParams = {
   configuration: GetConfigurationQuery;
@@ -16,24 +16,24 @@ type ConfigurationParams = {
 
 export default function Configuration({ configuration }: ConfigurationParams) {
   const stanCore = useContext(StanCoreContext);
-  const groupedComments = groupBy(configuration.comments, "category");
-  const groupedEquipments = groupBy(configuration.equipments, "category");
+  const groupedComments = groupBy(configuration.comments, 'category');
+  const groupedEquipments = groupBy(configuration.equipments, 'category');
 
   //Listed in alphabetical order
   const configElements = [
-    "Comments",
-    "Cost Codes",
-    "Destruction Reasons",
-    "Equipments",
-    "Fixatives",
-    "HuMFre Numbers",
-    "Projects",
-    "Release Destinations",
-    "Release Recipients",
-    "Species",
-    "Solutions",
-    "Users",
-    "Work Types",
+    'Comments',
+    'Cost Codes',
+    'Destruction Reasons',
+    'Equipments',
+    'Fixatives',
+    'HuMFre Numbers',
+    'Projects',
+    'Release Destinations',
+    'Release Recipients',
+    'Species',
+    'Solutions',
+    'Users',
+    'Work Types'
   ];
 
   //Fill in the Config panels in same order as config Elements
@@ -46,21 +46,17 @@ export default function Configuration({ configuration }: ConfigurationParams) {
             <Heading level={2}>Comments - {category}</Heading>
             <EntityManager
               initialEntities={groupedComments[category]}
-              displayKeyColumnName={"text"}
-              valueColumnName={"enabled"}
+              displayKeyColumnName={'text'}
+              valueColumnName={'enabled'}
               onChangeValue={(entity, value) => {
-                const enabled = typeof value === "boolean" ? value : false;
+                const enabled = typeof value === 'boolean' ? value : false;
                 return stanCore
                   .SetCommentEnabled({ commentId: entity.id, enabled })
                   .then((res) => res.setCommentEnabled);
               }}
-              onCreate={(text) =>
-                stanCore
-                  .AddComment({ category, text })
-                  .then((res) => res.addComment)
-              }
+              onCreate={(text) => stanCore.AddComment({ category, text }).then((res) => res.addComment)}
               valueFieldComponentInfo={{
-                type: "CHECKBOX",
+                type: 'CHECKBOX'
               }}
             />
           </div>
@@ -73,23 +69,21 @@ export default function Configuration({ configuration }: ConfigurationParams) {
         <p className="mt-3 mb-6 text-lg" />
         <EntityManager
           initialEntities={configuration.costCodes}
-          displayKeyColumnName={"code"}
-          valueColumnName={"enabled"}
+          displayKeyColumnName={'code'}
+          valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
-            const enabled = typeof value === "boolean" ? value : false;
+            const enabled = typeof value === 'boolean' ? value : false;
             return stanCore
               .SetCostCodeEnabled({
                 enabled,
-                code: entity.code,
+                code: entity.code
               })
               .then((res) => res.setCostCodeEnabled);
           }}
           valueFieldComponentInfo={{
-            type: "CHECKBOX",
+            type: 'CHECKBOX'
           }}
-          onCreate={(code) =>
-            stanCore.AddCostCode({ code }).then((res) => res.addCostCode)
-          }
+          onCreate={(code) => stanCore.AddCostCode({ code }).then((res) => res.addCostCode)}
         />
       </div>,
 
@@ -97,29 +91,24 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <div data-testid="config">
         <Heading level={2}>Destruction Reasons</Heading>
         <p className="mt-3 mb-6 text-lg">
-          Destruction Reasons are used on the{" "}
-          <StyledLink to={"/admin/destroy"}>Destroy</StyledLink> page.
+          Destruction Reasons are used on the <StyledLink to={'/admin/destroy'}>Destroy</StyledLink> page.
         </p>
         <EntityManager
           initialEntities={configuration.destructionReasons}
-          displayKeyColumnName={"text"}
-          valueColumnName={"enabled"}
+          displayKeyColumnName={'text'}
+          valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
-            const enabled = typeof value === "boolean" ? value : false;
+            const enabled = typeof value === 'boolean' ? value : false;
             return stanCore
               .SetDestructionReasonEnabled({
                 text: entity.text,
-                enabled,
+                enabled
               })
               .then((res) => res.setDestructionReasonEnabled);
           }}
-          onCreate={(text) =>
-            stanCore
-              .AddDestructionReason({ text })
-              .then((res) => res.addDestructionReason)
-          }
+          onCreate={(text) => stanCore.AddDestructionReason({ text }).then((res) => res.addDestructionReason)}
           valueFieldComponentInfo={{
-            type: "CHECKBOX",
+            type: 'CHECKBOX'
           }}
         />
       </div>,
@@ -131,24 +120,20 @@ export default function Configuration({ configuration }: ConfigurationParams) {
             <Heading level={2}>Equipment - {category}</Heading>
             <EntityManager
               initialEntities={groupedEquipments[category]}
-              displayKeyColumnName={"name"}
-              valueColumnName={"enabled"}
+              displayKeyColumnName={'name'}
+              valueColumnName={'enabled'}
               onChangeValue={(entity, value) => {
-                const enabled = typeof value === "boolean" ? value : false;
+                const enabled = typeof value === 'boolean' ? value : false;
                 return stanCore
                   .SetEquipmentEnabled({
                     equipmentId: entity.id,
-                    enabled,
+                    enabled
                   })
                   .then((res) => res.setEquipmentEnabled);
               }}
-              onCreate={(name) =>
-                stanCore
-                  .AddEquipment({ category, name })
-                  .then((res) => res.addEquipment)
-              }
+              onCreate={(name) => stanCore.AddEquipment({ category, name }).then((res) => res.addEquipment)}
               valueFieldComponentInfo={{
-                type: "CHECKBOX",
+                type: 'CHECKBOX'
               }}
             />
           </div>
@@ -159,33 +144,21 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <div data-testid="config">
         <Heading level={2}>Fixatives</Heading>
         <p className="mt-3 mb-6 text-lg">
-          Fixatives are available on the{" "}
-          <StyledLink to={"/admin/registration"}>Block Registration</StyledLink>{" "}
-          ,{" "}
-          <StyledLink to={"/admin/slide_registration"}>
-            Slide Registration
-          </StyledLink>{" "}
-          and{" "}
-          <StyledLink to={"/admin/tissue_registration"}>
-            Tissue Sample Registration
-          </StyledLink>{" "}
-          pages.
+          Fixatives are available on the <StyledLink to={'/admin/registration'}>Block Registration</StyledLink> ,{' '}
+          <StyledLink to={'/admin/slide_registration'}>Slide Registration</StyledLink> and{' '}
+          <StyledLink to={'/admin/tissue_registration'}>Tissue Sample Registration</StyledLink> pages.
         </p>
         <EntityManager
           initialEntities={configuration.fixatives}
-          displayKeyColumnName={"name"}
-          valueColumnName={"enabled"}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
-            const enabled = typeof value === "boolean" ? value : false;
-            return stanCore
-              .SetFixativeEnabled({ enabled, name: entity.name })
-              .then((res) => res.setFixativeEnabled);
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore.SetFixativeEnabled({ enabled, name: entity.name }).then((res) => res.setFixativeEnabled);
           }}
-          onCreate={(name) =>
-            stanCore.AddFixative({ name }).then((res) => res.addFixative)
-          }
+          onCreate={(name) => stanCore.AddFixative({ name }).then((res) => res.addFixative)}
           valueFieldComponentInfo={{
-            type: "CHECKBOX",
+            type: 'CHECKBOX'
           }}
         />
       </div>,
@@ -194,34 +167,22 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <div data-testid="config">
         <Heading level={2}>HuMFre Numbers</Heading>
         <p className="mt-3 mb-6 text-lg">
-          HuMFre Numbers are available on the{" "}
-          <StyledLink to={"/admin/registration"}>Block Registration</StyledLink>{" "}
-          ,{" "}
-          <StyledLink to={"/admin/slide_registration"}>
-            Slide Registration
-          </StyledLink>{" "}
-          and{" "}
-          <StyledLink to={"/admin/tissue_registration"}>
-            Tissue Sample Registration
-          </StyledLink>{" "}
-          pages.
+          HuMFre Numbers are available on the <StyledLink to={'/admin/registration'}>Block Registration</StyledLink> ,{' '}
+          <StyledLink to={'/admin/slide_registration'}>Slide Registration</StyledLink> and{' '}
+          <StyledLink to={'/admin/tissue_registration'}>Tissue Sample Registration</StyledLink> pages.
         </p>
         <EntityManager
           initialEntities={configuration.hmdmcs}
-          displayKeyColumnName={"hmdmc"}
-          alternateKeyColumnName={"HuMFre"}
-          valueColumnName={"enabled"}
+          displayKeyColumnName={'hmdmc'}
+          alternateKeyColumnName={'HuMFre'}
+          valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
-            const enabled = typeof value === "boolean" ? value : false;
-            return stanCore
-              .SetHmdmcEnabled({ enabled, hmdmc: entity.hmdmc })
-              .then((res) => res.setHmdmcEnabled);
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore.SetHmdmcEnabled({ enabled, hmdmc: entity.hmdmc }).then((res) => res.setHmdmcEnabled);
           }}
-          onCreate={(hmdmc) =>
-            stanCore.AddHmdmc({ hmdmc }).then((res) => res.addHmdmc)
-          }
+          onCreate={(hmdmc) => stanCore.AddHmdmc({ hmdmc }).then((res) => res.addHmdmc)}
           valueFieldComponentInfo={{
-            type: "CHECKBOX",
+            type: 'CHECKBOX'
           }}
         />
       </div>,
@@ -232,22 +193,20 @@ export default function Configuration({ configuration }: ConfigurationParams) {
         <p className="mt-3 mb-6 text-lg" />
         <EntityManager
           initialEntities={configuration.projects}
-          displayKeyColumnName={"name"}
-          valueColumnName={"enabled"}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
-            const enabled = typeof value === "boolean" ? value : false;
+            const enabled = typeof value === 'boolean' ? value : false;
             return stanCore
               .SetProjectEnabled({
                 enabled,
-                name: entity.name,
+                name: entity.name
               })
               .then((res) => res.setProjectEnabled);
           }}
-          onCreate={(name) =>
-            stanCore.AddProject({ name }).then((res) => res.addProject)
-          }
+          onCreate={(name) => stanCore.AddProject({ name }).then((res) => res.addProject)}
           valueFieldComponentInfo={{
-            type: "CHECKBOX",
+            type: 'CHECKBOX'
           }}
         />
       </div>,
@@ -256,29 +215,24 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <div data-testid="config">
         <Heading level={2}>Release Destinations</Heading>
         <p className="mt-3 mb-6 text-lg">
-          Release Destinations are available on the{" "}
-          <StyledLink to={"/admin/release"}>Release</StyledLink> page.
+          Release Destinations are available on the <StyledLink to={'/admin/release'}>Release</StyledLink> page.
         </p>
         <EntityManager
           initialEntities={configuration.releaseDestinations}
-          displayKeyColumnName={"name"}
-          valueColumnName={"enabled"}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
-            const enabled = typeof value === "boolean" ? value : false;
+            const enabled = typeof value === 'boolean' ? value : false;
             return stanCore
               .SetReleaseDestinationEnabled({
                 enabled,
-                name: entity.name,
+                name: entity.name
               })
               .then((res) => res.setReleaseDestinationEnabled);
           }}
-          onCreate={(name) =>
-            stanCore
-              .AddReleaseDestination({ name })
-              .then((res) => res.addReleaseDestination)
-          }
+          onCreate={(name) => stanCore.AddReleaseDestination({ name }).then((res) => res.addReleaseDestination)}
           valueFieldComponentInfo={{
-            type: "CHECKBOX",
+            type: 'CHECKBOX'
           }}
         />
       </div>,
@@ -287,32 +241,25 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <div data-testid="config">
         <Heading level={2}>Release Recipients</Heading>
         <p className="mt-3 mb-6 text-lg">
-          Release Recipients are available on the{" "}
-          <StyledLink to={"/admin/release"}>Release</StyledLink> page. They are
-          also available on the{" "}
-          <StyledLink to={"/sgp"}>SGP Management</StyledLink> page as "Work
-          Requester"
+          Release Recipients are available on the <StyledLink to={'/admin/release'}>Release</StyledLink> page. They are
+          also available on the <StyledLink to={'/sgp'}>SGP Management</StyledLink> page as "Work Requester"
         </p>
         <EntityManager
           initialEntities={configuration.releaseRecipients}
-          displayKeyColumnName={"username"}
-          valueColumnName={"enabled"}
+          displayKeyColumnName={'username'}
+          valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
-            const enabled = typeof value === "boolean" ? value : false;
+            const enabled = typeof value === 'boolean' ? value : false;
             return stanCore
               .SetReleaseRecipientEnabled({
                 enabled,
-                username: entity.username,
+                username: entity.username
               })
               .then((res) => res.setReleaseRecipientEnabled);
           }}
-          onCreate={(username) =>
-            stanCore
-              .AddReleaseRecipient({ username })
-              .then((res) => res.addReleaseRecipient)
-          }
+          onCreate={(username) => stanCore.AddReleaseRecipient({ username }).then((res) => res.addReleaseRecipient)}
           valueFieldComponentInfo={{
-            type: "CHECKBOX",
+            type: 'CHECKBOX'
           }}
         />
       </div>,
@@ -321,33 +268,21 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <div data-testid="config">
         <Heading level={2}>Species</Heading>
         <p className="mt-3 mb-6 text-lg">
-          Species are available on the{" "}
-          <StyledLink to={"/admin/registration"}>Block Registration</StyledLink>{" "}
-          ,{" "}
-          <StyledLink to={"/admin/slide_registration"}>
-            Slide Registration
-          </StyledLink>{" "}
-          and{" "}
-          <StyledLink to={"/admin/tissue_registration"}>
-            Tissue Sample Registration
-          </StyledLink>{" "}
-          pages.
+          Species are available on the <StyledLink to={'/admin/registration'}>Block Registration</StyledLink> ,{' '}
+          <StyledLink to={'/admin/slide_registration'}>Slide Registration</StyledLink> and{' '}
+          <StyledLink to={'/admin/tissue_registration'}>Tissue Sample Registration</StyledLink> pages.
         </p>
         <EntityManager
           initialEntities={configuration.species}
-          displayKeyColumnName={"name"}
-          valueColumnName={"enabled"}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
-            const enabled = typeof value === "boolean" ? value : false;
-            return stanCore
-              .SetSpeciesEnabled({ enabled, name: entity.name })
-              .then((res) => res.setSpeciesEnabled);
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore.SetSpeciesEnabled({ enabled, name: entity.name }).then((res) => res.setSpeciesEnabled);
           }}
-          onCreate={(name) =>
-            stanCore.AddSpecies({ name }).then((res) => res.addSpecies)
-          }
+          onCreate={(name) => stanCore.AddSpecies({ name }).then((res) => res.addSpecies)}
           valueFieldComponentInfo={{
-            type: "CHECKBOX",
+            type: 'CHECKBOX'
           }}
         />
       </div>,
@@ -355,30 +290,25 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <div data-testid="config">
         <Heading level={2}>Solutions</Heading>
         <p className="mt-3 mb-6 text-lg">
-          Solutions are available on the{" "}
-          <StyledLink to={"/admin/tissue_registration"}>
-            Original Sample Registration
-          </StyledLink>{" "}
-          page.
+          Solutions are available on the{' '}
+          <StyledLink to={'/admin/tissue_registration'}>Original Sample Registration</StyledLink> page.
         </p>
         <EntityManager
           initialEntities={configuration.solutions}
-          displayKeyColumnName={"name"}
-          valueColumnName={"enabled"}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
-            const enabled = typeof value === "boolean" ? value : false;
+            const enabled = typeof value === 'boolean' ? value : false;
             return stanCore
               .SetSolutionEnabled({
                 name: entity.name,
-                enabled,
+                enabled
               })
               .then((res) => res.setSolutionEnabled);
           }}
-          onCreate={(name) =>
-            stanCore.AddSolution({ name }).then((res) => res.addSolution)
-          }
+          onCreate={(name) => stanCore.AddSolution({ name }).then((res) => res.addSolution)}
           valueFieldComponentInfo={{
-            type: "CHECKBOX",
+            type: 'CHECKBOX'
           }}
         />
       </div>,
@@ -387,21 +317,16 @@ export default function Configuration({ configuration }: ConfigurationParams) {
         <Heading level={2}>Users</Heading>
         <EntityManager
           initialEntities={configuration.users}
-          displayKeyColumnName={"username"}
-          valueColumnName={"role"}
+          displayKeyColumnName={'username'}
+          valueColumnName={'role'}
           valueFieldComponentInfo={{
-            type: "SELECT",
-            valueOptions: Object.values(UserRole),
+            type: 'SELECT',
+            valueOptions: Object.values(UserRole)
           }}
-          onCreate={(username) =>
-            stanCore.AddUser({ username }).then((res) => res.addUser)
-          }
+          onCreate={(username) => stanCore.AddUser({ username }).then((res) => res.addUser)}
           onChangeValue={(entity, value) => {
-            const role: UserRole =
-              typeof value === "string" ? (value as UserRole) : UserRole.Normal;
-            return stanCore
-              .SetUserRole({ username: entity.username, role })
-              .then((res) => res.setUserRole);
+            const role: UserRole = typeof value === 'string' ? (value as UserRole) : UserRole.Normal;
+            return stanCore.SetUserRole({ username: entity.username, role }).then((res) => res.setUserRole);
           }}
         />
       </div>,
@@ -412,25 +337,23 @@ export default function Configuration({ configuration }: ConfigurationParams) {
         <p className="mt-3 mb-6 text-lg" />
         <EntityManager
           initialEntities={configuration.workTypes}
-          displayKeyColumnName={"name"}
-          valueColumnName={"enabled"}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
-            const enabled = typeof value === "boolean" ? value : false;
+            const enabled = typeof value === 'boolean' ? value : false;
             return stanCore
               .SetWorkTypeEnabled({
                 enabled,
-                name: entity.name,
+                name: entity.name
               })
               .then((res) => res.setWorkTypeEnabled);
           }}
-          onCreate={(name) =>
-            stanCore.AddWorkType({ name }).then((res) => res.addWorkType)
-          }
+          onCreate={(name) => stanCore.AddWorkType({ name }).then((res) => res.addWorkType)}
           valueFieldComponentInfo={{
-            type: "CHECKBOX",
+            type: 'CHECKBOX'
           }}
         />
-      </div>,
+      </div>
     ];
   }, [groupedComments, configuration, groupedEquipments, stanCore]);
 
@@ -442,14 +365,13 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           <MutedText className="mt-5">
-            Press left/right arrows in keyboard to navigate to tabs that are not
-            in display.
+            Press left/right arrows in keyboard to navigate to tabs that are not in display.
           </MutedText>
           {configPanels.length === configElements.length && (
             <TabList>
               {configElements.map((title, indx) => (
                 <Item key={title} title={title}>
-                  <div className={"mt-4"}>{configPanels[indx]}</div>
+                  <div className={'mt-4'}>{configPanels[indx]}</div>
                 </Item>
               ))}
             </TabList>

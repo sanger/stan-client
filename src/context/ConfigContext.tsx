@@ -1,6 +1,6 @@
-import React, { createContext } from "react";
-import { Maybe } from "../types/sdk";
-import { StanConfig } from "../types/stan";
+import React, { createContext } from 'react';
+import { Maybe } from '../types/sdk';
+import { StanConfig } from '../types/stan';
 
 export const configContext = createContext<Maybe<StanConfig>>(null);
 const { Provider } = configContext;

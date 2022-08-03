@@ -1,48 +1,42 @@
-import { stanCore } from "../sdk";
-import { HistoryProps, HistoryTableEntry } from "../../types/stan";
-import {
-  HistoryFieldsFragment,
-  LabwareFieldsFragment,
-  SampleFieldsFragment,
-} from "../../types/sdk";
+import { stanCore } from '../sdk';
+import { HistoryProps, HistoryTableEntry } from '../../types/stan';
+import { HistoryFieldsFragment, LabwareFieldsFragment, SampleFieldsFragment } from '../../types/sdk';
 
 /**
  * Retrieves the history for the given History props.
  */
-export async function findHistory(
-  historyProps: HistoryProps
-): Promise<Array<HistoryTableEntry>> {
+export async function findHistory(historyProps: HistoryProps): Promise<Array<HistoryTableEntry>> {
   let result;
   let history: HistoryFieldsFragment;
 
   switch (historyProps.kind) {
-    case "sampleId":
+    case 'sampleId':
       result = await stanCore.FindHistoryForSampleId({
-        sampleId: historyProps.value,
+        sampleId: historyProps.value
       });
       history = result.historyForSampleId;
       break;
-    case "externalName":
+    case 'externalName':
       result = await stanCore.FindHistoryForExternalName({
-        externalName: historyProps.value,
+        externalName: historyProps.value
       });
       history = result.historyForExternalName;
       break;
-    case "donorName":
+    case 'donorName':
       result = await stanCore.FindHistoryForDonorName({
-        donorName: historyProps.value,
+        donorName: historyProps.value
       });
       history = result.historyForDonorName;
       break;
-    case "labwareBarcode":
+    case 'labwareBarcode':
       result = await stanCore.FindHistoryForLabwareBarcode({
-        barcode: historyProps.value,
+        barcode: historyProps.value
       });
       history = result.historyForLabwareBarcode;
       break;
-    case "workNumber":
+    case 'workNumber':
       result = await stanCore.FindHistoryForWorkNumber({
-        workNumber: historyProps.value,
+        workNumber: historyProps.value
       });
       history = result.historyForWorkNumber;
       break;
@@ -72,7 +66,7 @@ export async function findHistory(
       labwareState: destinationLabware.state,
       username: entry.username,
       workNumber: entry.workNumber ?? undefined,
-      details: entry.details,
+      details: entry.details
     };
   });
 }

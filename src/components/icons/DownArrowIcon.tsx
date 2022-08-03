@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 interface AddIconProps extends React.SVGProps<SVGSVGElement> {}
 
 const DownArrowIcon: React.FC<AddIconProps> = () => {

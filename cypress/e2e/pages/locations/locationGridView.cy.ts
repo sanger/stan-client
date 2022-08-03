@@ -1,69 +1,69 @@
-describe("Location Grid View", () => {
+describe('Location Grid View', () => {
   before(() => {
-    cy.visit("/locations/STO-021");
+    cy.visit('/locations/STO-021');
   });
 
-  it("selects the first available address", () => {
-    cy.findByText("Selected Address: 1").should("exist");
+  it('selects the first available address', () => {
+    cy.findByText('Selected Address: 1').should('exist');
   });
 
-  context("when scanning in a barcode", () => {
+  context('when scanning in a barcode', () => {
     before(() => {
-      cy.findByPlaceholderText("Labware barcode...").type("STAN-2001{enter}");
+      cy.findByPlaceholderText('Labware barcode...').type('STAN-2001{enter}');
     });
 
-    it("stores it", () => {
-      cy.findByText("STAN-2001").should("be.visible");
+    it('stores it', () => {
+      cy.findByText('STAN-2001').should('be.visible');
     });
 
-    it("shows a success message", () => {
-      cy.findByText("Barcode successfully stored").should("be.visible");
+    it('shows a success message', () => {
+      cy.findByText('Barcode successfully stored').should('be.visible');
     });
 
-    it("selects the next available address", () => {
-      cy.findByText("Selected Address: 2").should("exist");
+    it('selects the next available address', () => {
+      cy.findByText('Selected Address: 2').should('exist');
     });
 
-    it("empties the value of the ScanInput", () => {
-      cy.findByPlaceholderText("Labware barcode...").should("have.value", "");
+    it('empties the value of the ScanInput', () => {
+      cy.findByPlaceholderText('Labware barcode...').should('have.value', '');
     });
   });
 
-  context("when selecting an occupied address", () => {
+  context('when selecting an occupied address', () => {
     before(() => {
-      cy.findByText("STAN-2001").click();
+      cy.findByText('STAN-2001').click();
     });
 
-    it("locks the ScanInput", () => {
-      cy.findByPlaceholderText("Labware barcode...").should("be.disabled");
+    it('locks the ScanInput', () => {
+      cy.findByPlaceholderText('Labware barcode...').should('be.disabled');
     });
 
-    it("shows a delete button", () => {
-      cy.findByTestId("selectedAddress").find("button").should("be.visible");
+    it('shows a delete button', () => {
+      cy.findByTestId('selectedAddress').find('button').should('be.visible');
     });
 
-    context("when clicking the button", () => {
+    context('when clicking the button', () => {
       before(() => {
-        cy.findByTestId("selectedAddress").find("button").click();
+        cy.findByTestId('selectedAddress').find('button').click();
       });
 
-      it("shows a confirmation modal", () => {
+      it('shows a confirmation modal', () => {
         cy.findByTextContent(
-          "Are you sure you want to remove STAN-2001 from Box 4 in Rack 2 in Freezer 1 in Room 1234?"
-        ).should("be.visible");
+          'Are you sure you want to remove STAN-2001 from Box 4 in Rack 2 in Freezer 1 in Room 1234?'
+        ).should('be.visible');
       });
 
-      context("when confirming", () => {
+      context('when confirming', () => {
         before(() => {
-          cy.findByRole("button", { name: /Unstore Barcode/i }).click();
+          cy.findByRole('button', { name: /Unstore Barcode/i }).click();
         });
 
-        it("unstores the barcode", () => {
-          cy.findByText("STAN-2001").should("not.exist");
+        it('unstores the barcode', () => {
+          cy.findByText('STAN-2001').should('not.exist');
         });
 
-        it("shows a success message", () => {
-          cy.findByText("Barcode successfully unstored").should("be.visible");
+        it('shows a success message', () => {
+          cy.findByText('Barcode successfully unstored').should('be.visible');
         });
       });
     });

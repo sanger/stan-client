@@ -1,17 +1,6 @@
-import React, {
-  MutableRefObject,
-  RefObject,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  GetPrintersQuery,
-  LabwareFieldsFragment,
-  Maybe,
-  PrinterFieldsFragment,
-} from "../../types/sdk";
-import { PrintResultType } from "../../types/stan";
+import React, { MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
+import { GetPrintersQuery, LabwareFieldsFragment, Maybe, PrinterFieldsFragment } from '../../types/sdk';
+import { PrintResultType } from '../../types/stan';
 
 /**
  * Hook to call a side effect after a given delay
@@ -46,10 +35,7 @@ export const useMinimumWait = (minimumWait: number) => {
  * @param handler Event handler
  * @param refs HTMLElement references to check if the click is inside of
  */
-export function useOnClickOutside(
-  handler: (event: Event) => void,
-  ...refs: RefObject<HTMLElement>[]
-) {
+export function useOnClickOutside(handler: (event: Event) => void, ...refs: RefObject<HTMLElement>[]) {
   useEffect(() => {
     const listener = (event: Event) => {
       const shouldRunHandler = !refs.some((ref) => {
@@ -84,7 +70,7 @@ export function useScrollToRef() {
 
   useEffect(() => {
     if (shouldScrollToRef) {
-      ref.current?.scrollIntoView({ behavior: "smooth" });
+      ref.current?.scrollIntoView({ behavior: 'smooth' });
       setShouldScrollToRef(false);
     }
   }, [shouldScrollToRef]);
@@ -109,10 +95,7 @@ export function useScrollToRef() {
  * // isIntersecting will be true when the whole element is visible
  * const isIntersecting = useOnScreen(ref, { threshold: 1.0 });
  */
-export function useOnScreen<E extends HTMLElement>(
-  ref: React.RefObject<E>,
-  options: IntersectionObserverInit
-) {
+export function useOnScreen<E extends HTMLElement>(ref: React.RefObject<E>, options: IntersectionObserverInit) {
   const [isIntersecting, setIntersecting] = useState(false);
 
   useEffect(() => {
@@ -154,13 +137,12 @@ export function useOnScreen<E extends HTMLElement>(
  *
  */
 export function usePrinters() {
-  const [currentPrinter, setCurrentPrinter] =
-    useState<Maybe<PrinterFieldsFragment>>(null);
+  const [currentPrinter, setCurrentPrinter] = useState<Maybe<PrinterFieldsFragment>>(null);
 
   const [printResult, setPrintResult] = useState<Maybe<PrintResultType>>(null);
 
   const handleOnPrinterChange = React.useCallback(
-    (printer: GetPrintersQuery["printers"][0]) => {
+    (printer: GetPrintersQuery['printers'][0]) => {
       setCurrentPrinter(printer);
       setPrintResult(null);
     },
@@ -168,26 +150,18 @@ export function usePrinters() {
   );
 
   const handleOnPrint = React.useCallback(
-    (
-      printer: PrinterFieldsFragment,
-      labwares: Array<LabwareFieldsFragment>,
-      labelsPerBarcode: number
-    ) => {
+    (printer: PrinterFieldsFragment, labwares: Array<LabwareFieldsFragment>, labelsPerBarcode: number) => {
       setPrintResult({ successful: true, labwares, printer, labelsPerBarcode });
     },
     [setPrintResult]
   );
   const handleOnPrintError = React.useCallback(
-    (
-      printer: PrinterFieldsFragment,
-      labwares: Array<LabwareFieldsFragment>,
-      labelsPerBarcode: number
-    ) => {
+    (printer: PrinterFieldsFragment, labwares: Array<LabwareFieldsFragment>, labelsPerBarcode: number) => {
       setPrintResult({
         successful: false,
         labwares,
         printer,
-        labelsPerBarcode,
+        labelsPerBarcode
       });
     },
     [setPrintResult]
@@ -198,16 +172,14 @@ export function usePrinters() {
     handleOnPrintError,
     handleOnPrinterChange,
     currentPrinter,
-    printResult,
+    printResult
   };
 }
 
 /**
  * Hook for tracking the previous value of state or props
  */
-export function usePrevious<T>(
-  value: T
-): MutableRefObject<T | undefined>["current"] {
+export function usePrevious<T>(value: T): MutableRefObject<T | undefined>['current'] {
   const ref = useRef<T>();
   useEffect(() => {
     ref.current = value;
@@ -233,18 +205,16 @@ export function useConfirmLeave(initialShouldConfirm = false) {
     const beforeunloadListener = (e: BeforeUnloadEvent) => {
       if (shouldConfirm) {
         e.preventDefault();
-        return (e.returnValue =
-          "You have unsaved data. Are you sure you want to leave?");
+        return (e.returnValue = 'You have unsaved data. Are you sure you want to leave?');
       }
     };
     if (shouldConfirm) {
-      window.addEventListener("beforeunload", beforeunloadListener);
+      window.addEventListener('beforeunload', beforeunloadListener);
     } else {
-      window.removeEventListener("beforeunload", beforeunloadListener);
+      window.removeEventListener('beforeunload', beforeunloadListener);
     }
 
-    return () =>
-      window.removeEventListener("beforeunload", beforeunloadListener);
+    return () => window.removeEventListener('beforeunload', beforeunloadListener);
   }, [shouldConfirm]);
 
   return [shouldConfirm, setShouldConfirm] as const;

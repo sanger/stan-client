@@ -1,10 +1,6 @@
-import React from "react";
+import React from 'react';
 
-interface ProseProps
-  extends React.DetailedHTMLProps<
-    React.HTMLAttributes<HTMLElement>,
-    HTMLElement
-  > {}
+interface ProseProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> {}
 
 /**
  * A component that will style all child HTML elements using Tailwind's Typography plugin
@@ -12,10 +8,7 @@ interface ProseProps
  */
 const Prose: React.FC<ProseProps> = ({ children, className, ...rest }) => {
   return (
-    <article
-      className={`prose prose-sm lg:prose-lg xl:prose-xl ${className}`}
-      {...rest}
-    >
+    <article className={`prose prose-sm lg:prose-lg xl:prose-xl ${className}`} {...rest}>
       {children}
     </article>
   );

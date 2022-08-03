@@ -1,7 +1,7 @@
-import { Maybe, SlotFieldsFragment } from "../../types/sdk";
+import { Maybe, SlotFieldsFragment } from '../../types/sdk';
 
-export type SelectionMode = "single" | "multi";
-export type Selectable = "none" | "any" | "non_empty" | "empty";
+export type SelectionMode = 'single' | 'multi';
+export type Selectable = 'none' | 'any' | 'non_empty' | 'empty';
 
 export interface LabwareMachineContext {
   slots: Array<SlotFieldsFragment>;
@@ -41,22 +41,22 @@ export interface LabwareMachineSchema {
   };
 }
 
-type SelectSlotEvent = { type: "SELECT_SLOT"; address: string };
-type CtrlSelectSlotEvent = { type: "CTRL_SELECT_SLOT"; address: string };
-type SelectToSlotEvent = { type: "SELECT_TO_SLOT"; address: string };
+type SelectSlotEvent = { type: 'SELECT_SLOT'; address: string };
+type CtrlSelectSlotEvent = { type: 'CTRL_SELECT_SLOT'; address: string };
+type SelectToSlotEvent = { type: 'SELECT_TO_SLOT'; address: string };
 
 export type ChangeSelectionModeEvent = {
-  type: "CHANGE_SELECTION_MODE";
+  type: 'CHANGE_SELECTION_MODE';
   selectionMode: SelectionMode;
   selectable: Selectable;
 };
 
 export type UpdateSlotsEvent = {
-  type: "UPDATE_SLOTS";
+  type: 'UPDATE_SLOTS';
   slots: Array<SlotFieldsFragment>;
 };
 
-type ResetSelected = { type: "RESET_SELECTED" };
+type ResetSelected = { type: 'RESET_SELECTED' };
 
 export type LabwareMachineEvent =
   | SelectSlotEvent

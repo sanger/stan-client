@@ -1,6 +1,6 @@
-import React from "react";
-import AppShell from "../components/AppShell";
-import LoadingSpinnerIcon from "../components/icons/LoadingSpinner";
+import React from 'react';
+import AppShell from '../components/AppShell';
+import LoadingSpinnerIcon from '../components/icons/LoadingSpinner';
 
 const Loading = () => {
   return (

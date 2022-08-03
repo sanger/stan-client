@@ -1,10 +1,10 @@
-import { Factory } from "fishery";
-import { GridDirection, Labware, LabwareState } from "../../types/sdk";
-import { labwareTypes } from "./labwareTypeFactory";
-import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
-import { uniqueId } from "lodash";
-import { buildAddresses } from "../helpers";
-import { slotFactory } from "./slotFactory";
+import { Factory } from 'fishery';
+import { GridDirection, Labware, LabwareState } from '../../types/sdk';
+import { labwareTypes } from './labwareTypeFactory';
+import { LabwareTypeName, NewLabwareLayout } from '../../types/stan';
+import { uniqueId } from 'lodash';
+import { buildAddresses } from '../helpers';
+import { slotFactory } from './slotFactory';
 
 export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
   ({ params, associations, afterBuild, transientParams }) => {
@@ -13,25 +13,21 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
         return;
       }
 
-      const addresses = buildAddresses(
-        labware.labwareType,
-        GridDirection.RightDown
-      );
+      const addresses = buildAddresses(labware.labwareType, GridDirection.RightDown);
 
       labware.slots = addresses.map((address) =>
         slotFactory.build(
           {
             address,
-            block: [
-              LabwareTypeName.PROVIASETTE,
-              LabwareTypeName.CASSETTE,
-            ].includes(labware.labwareType.name as LabwareTypeName),
-            labwareId: labware.id,
+            block: [LabwareTypeName.PROVIASETTE, LabwareTypeName.CASSETTE].includes(
+              labware.labwareType.name as LabwareTypeName
+            ),
+            labwareId: labware.id
           },
           {
             transient: {
-              numberOfSamples: transientParams.samplesPerSlot ?? 0,
-            },
+              numberOfSamples: transientParams.samplesPerSlot ?? 0
+            }
           }
         )
       );
@@ -45,7 +41,7 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
           if (i % 2 === 1 || i > 16) {
             return {
               ...slot,
-              samples: [],
+              samples: []
             };
           } else return slot;
         });
@@ -53,90 +49,84 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
     });
 
     return {
-      __typename: "Labware",
-      labwareType:
-        associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
+      __typename: 'Labware',
+      labwareType: associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
       id: params.id ?? -1,
       barcode: params.barcode ?? null,
-      externalBarcode: params.externalBarcode ?? "EXTERN-BARCODE",
+      externalBarcode: params.externalBarcode ?? 'EXTERN-BARCODE',
       slots: associations.slots ?? [],
       destroyed: params.destroyed ?? false,
       discarded: params.discarded ?? false,
       released: params.released ?? false,
       created: params.created ?? new Date().toISOString(),
-      state: params.state ?? LabwareState.Active,
+      state: params.state ?? LabwareState.Active
     };
   }
 );
 
-const labwareFactory = Factory.define<Labware>(
-  ({ sequence, params, associations, transientParams }) => {
-    params.id = params.id ?? -Number(uniqueId());
-    params.barcode = params.barcode ?? `STAN-${sequence + 1000}`;
-    return unregisteredLabwareFactory.build(params, {
-      associations,
-      transient: {
-        samplesPerSlot: transientParams.samplesPerSlot ?? 2,
-      },
-    }) as Labware;
-  }
-);
+const labwareFactory = Factory.define<Labware>(({ sequence, params, associations, transientParams }) => {
+  params.id = params.id ?? -Number(uniqueId());
+  params.barcode = params.barcode ?? `STAN-${sequence + 1000}`;
+  return unregisteredLabwareFactory.build(params, {
+    associations,
+    transient: {
+      samplesPerSlot: transientParams.samplesPerSlot ?? 2
+    }
+  }) as Labware;
+});
 export default labwareFactory;
 
 export const proviasetteFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.PROVIASETTE].build(),
+  labwareType: labwareTypes[LabwareTypeName.PROVIASETTE].build()
 });
 
 export const tubeFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.TUBE].build(),
+  labwareType: labwareTypes[LabwareTypeName.TUBE].build()
 });
 
 export const slideFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.SLIDE].build(),
+  labwareType: labwareTypes[LabwareTypeName.SLIDE].build()
 });
 
 export const visiumTOFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.VISIUM_TO].build(),
+  labwareType: labwareTypes[LabwareTypeName.VISIUM_TO].build()
 });
 
 export const visiumLPFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.VISIUM_LP].build(),
+  labwareType: labwareTypes[LabwareTypeName.VISIUM_LP].build()
 });
 
 export const plateFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.PLATE].build(),
+  labwareType: labwareTypes[LabwareTypeName.PLATE].build()
 });
 
 export const cassetteFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.CASSETTE].build(),
+  labwareType: labwareTypes[LabwareTypeName.CASSETTE].build()
 });
 
 export const visiumADHFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.VISIUM_ADH].build(),
+  labwareType: labwareTypes[LabwareTypeName.VISIUM_ADH].build()
 });
 
 export const fourSlotSlideFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.FOUR_SLOT_SLIDE].build(),
+  labwareType: labwareTypes[LabwareTypeName.FOUR_SLOT_SLIDE].build()
 });
 
 export const fetalWasteFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.FETAL_WASTE_CONTAINER].build(),
+  labwareType: labwareTypes[LabwareTypeName.FETAL_WASTE_CONTAINER].build()
 });
 export const dualIndexPlateFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.DUAL_INDEX_PLATE].build(),
+  labwareType: labwareTypes[LabwareTypeName.DUAL_INDEX_PLATE].build()
 });
 
 export const potFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.POT].build(),
+  labwareType: labwareTypes[LabwareTypeName.POT].build()
 });
 export const preBarcodedFactory = unregisteredLabwareFactory.associations({
-  labwareType: labwareTypes[LabwareTypeName.PRE_BARCODED_TUBE].build(),
+  labwareType: labwareTypes[LabwareTypeName.PRE_BARCODED_TUBE].build()
 });
 
-export const labwareFactories: Record<
-  LabwareTypeName,
-  Factory<NewLabwareLayout>
-> = {
+export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>> = {
   [LabwareTypeName.TUBE]: tubeFactory,
   [LabwareTypeName.PROVIASETTE]: proviasetteFactory,
   [LabwareTypeName.SLIDE]: slideFactory,
@@ -149,5 +139,5 @@ export const labwareFactories: Record<
   [LabwareTypeName.FETAL_WASTE_CONTAINER]: fetalWasteFactory,
   [LabwareTypeName.DUAL_INDEX_PLATE]: dualIndexPlateFactory,
   [LabwareTypeName.PRE_BARCODED_TUBE]: preBarcodedFactory,
-  [LabwareTypeName.POT]: potFactory,
+  [LabwareTypeName.POT]: potFactory
 };

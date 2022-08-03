@@ -80,4 +80,3 @@ jobs:
     - name: Lint using ESLint
       run: >-
         yarn lint
-

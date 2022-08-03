@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo } from "react";
-import DataLoader from "../dataLoader/DataLoader";
-import { stanCore } from "../../lib/sdk";
-import Labware from "../labware/Labware";
-import RadioGroup, { RadioButton } from "./RadioGroup";
-import { FindPermDataQuery, VisiumAnalysisRequest } from "../../types/sdk";
-import { useFormikContext } from "formik";
-import { mapify } from "../../lib/helpers";
-import Warning from "../notifications/Warning";
+import React, { useEffect, useMemo } from 'react';
+import DataLoader from '../dataLoader/DataLoader';
+import { stanCore } from '../../lib/sdk';
+import Labware from '../labware/Labware';
+import RadioGroup, { RadioButton } from './RadioGroup';
+import { FindPermDataQuery, VisiumAnalysisRequest } from '../../types/sdk';
+import { useFormikContext } from 'formik';
+import { mapify } from '../../lib/helpers';
+import Warning from '../notifications/Warning';
 
 type PermSelectFieldProps = {
   /**
@@ -33,19 +33,17 @@ type PermSelectFieldInnerProps = {
 function PermTimeSelectFieldInner({ data }: PermSelectFieldInnerProps) {
   const { setFieldValue, values } = useFormikContext<VisiumAnalysisRequest>();
   const addressPermDataMap = useMemo(() => {
-    return mapify(data.visiumPermData.addressPermData, "address");
+    return mapify(data.visiumPermData.addressPermData, 'address');
   }, [data]);
 
-  const initialSelectedAddress = data.visiumPermData.addressPermData.find(
-    (apd) => apd.selected
-  )?.address;
+  const initialSelectedAddress = data.visiumPermData.addressPermData.find((apd) => apd.selected)?.address;
 
   /**
    * If there's an initial selected address, make sure it's already selected in the form
    */
   useEffect(() => {
     if (initialSelectedAddress) {
-      setFieldValue("selectedAddress", initialSelectedAddress);
+      setFieldValue('selectedAddress', initialSelectedAddress);
     }
   }, [initialSelectedAddress, setFieldValue]);
 
@@ -53,15 +51,12 @@ function PermTimeSelectFieldInner({ data }: PermSelectFieldInnerProps) {
    * When a new slot is selected, set the selected time for that slot
    */
   useEffect(() => {
-    setFieldValue(
-      "selectedTime",
-      addressPermDataMap.get(values.selectedAddress)?.seconds
-    );
+    setFieldValue('selectedTime', addressPermDataMap.get(values.selectedAddress)?.seconds);
   }, [data, values.selectedAddress, setFieldValue, addressPermDataMap]);
 
   return (
     <>
-      <RadioGroup name={"selectedAddress"} label={""}>
+      <RadioGroup name={'selectedAddress'} label={''}>
         <Labware
           labware={data.visiumPermData.labware}
           slotBuilder={(slot) => {
@@ -73,15 +68,11 @@ function PermTimeSelectFieldInner({ data }: PermSelectFieldInnerProps) {
         />
 
         {/* Display a warning if a slide already has a selected perm time, and a new one has been chosen */}
-        {values.selectedAddress !== "" &&
-          initialSelectedAddress &&
-          values.selectedAddress !== initialSelectedAddress && (
-            <div className="mt-2">
-              <Warning message={"Warning"}>
-                The selected perm time is being changed for this slide
-              </Warning>
-            </div>
-          )}
+        {values.selectedAddress !== '' && initialSelectedAddress && values.selectedAddress !== initialSelectedAddress && (
+          <div className="mt-2">
+            <Warning message={'Warning'}>The selected perm time is being changed for this slide</Warning>
+          </div>
+        )}
       </RadioGroup>
     </>
   );

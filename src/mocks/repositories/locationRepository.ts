@@ -1,15 +1,6 @@
-import {
-  GridDirection,
-  Location,
-  Maybe,
-  StoredItem,
-  StoreInput,
-} from "../../types/sdk";
-import locationFactory, {
-  buildLinkedLocation,
-  locationItemFactory,
-} from "../../lib/factories/locationFactory";
-import { cloneDeep } from "lodash";
+import { GridDirection, Location, Maybe, StoredItem, StoreInput } from '../../types/sdk';
+import locationFactory, { buildLinkedLocation, locationItemFactory } from '../../lib/factories/locationFactory';
+import { cloneDeep } from 'lodash';
 
 interface Repository<T> {
   save<S extends T>(entity: S): void;
@@ -31,23 +22,14 @@ class LocationRepository implements Repository<Location> {
   }
 
   findByLabwareBarcode(barcodes: Array<string>): Array<StoredItem> {
-    return Array.from(this.locations.values()).reduce<Array<StoredItem>>(
-      (memo, location) => {
-        const matchingItems = location.stored.filter((item) =>
-          barcodes.includes(item.barcode)
-        );
-        memo.push(...matchingItems);
-        return memo;
-      },
-      []
-    );
+    return Array.from(this.locations.values()).reduce<Array<StoredItem>>((memo, location) => {
+      const matchingItems = location.stored.filter((item) => barcodes.includes(item.barcode));
+      memo.push(...matchingItems);
+      return memo;
+    }, []);
   }
 
-  storeBarcode(
-    barcode: string,
-    locationBarcode: string,
-    address?: string | undefined | null
-  ): StoredItem {
+  storeBarcode(barcode: string, locationBarcode: string, address?: string | undefined | null): StoredItem {
     const newLocation = this.locations.get(locationBarcode);
     if (!newLocation) {
       throw new Error(`Location with barcode ${locationBarcode} not found`);
@@ -56,14 +38,12 @@ class LocationRepository implements Repository<Location> {
       return location.stored.some((item) => item.barcode === barcode);
     });
     if (oldLocation) {
-      oldLocation.stored = oldLocation.stored.filter(
-        (item) => item.barcode !== barcode
-      );
+      oldLocation.stored = oldLocation.stored.filter((item) => item.barcode !== barcode);
     }
     const newItem: StoredItem = {
       barcode,
       address,
-      location: newLocation,
+      location: newLocation
     };
 
     newLocation.stored.push(newItem);
@@ -78,24 +58,18 @@ class LocationRepository implements Repository<Location> {
     }
     const storedItems = Array.isArray(store) ? store : [store];
     storedItems.forEach((storeItem) => {
-      const oldLocation = Array.from(this.locations.values()).find(
-        (location) => {
-          return location.stored.some(
-            (item) => item.barcode === storeItem.barcode
-          );
-        }
-      );
+      const oldLocation = Array.from(this.locations.values()).find((location) => {
+        return location.stored.some((item) => item.barcode === storeItem.barcode);
+      });
       if (oldLocation) {
-        oldLocation.stored = oldLocation.stored.filter(
-          (item) => item.barcode !== storeItem.barcode
-        );
+        oldLocation.stored = oldLocation.stored.filter((item) => item.barcode !== storeItem.barcode);
       }
     });
     storedItems.forEach((storeItem) => {
       const newItem: StoredItem = {
         barcode: storeItem.barcode,
         address: storeItem.address,
-        location: newLocation,
+        location: newLocation
       };
 
       newLocation.stored.push(newItem);
@@ -112,12 +86,9 @@ class LocationRepository implements Repository<Location> {
       return null;
     }
 
-    const item =
-      location.stored.find((item) => item.barcode === barcode) ?? null;
+    const item = location.stored.find((item) => item.barcode === barcode) ?? null;
 
-    location.stored = location.stored.filter(
-      (item) => item.barcode !== barcode
-    );
+    location.stored = location.stored.filter((item) => item.barcode !== barcode);
 
     return item;
   }
@@ -135,14 +106,14 @@ class LocationRepository implements Repository<Location> {
 
 const locationRepository = new LocationRepository();
 
-const room: Location = locationFactory.build({ customName: "Room 1234" });
+const room: Location = locationFactory.build({ customName: 'Room 1234' });
 
 const freezers: Location[] = [];
 
 for (let i = 1; i <= 3; i++) {
   let freezer = locationFactory.build({
     customName: `Freezer ${i} in Room 1234`,
-    parent: buildLinkedLocation(room),
+    parent: buildLinkedLocation(room)
   });
   freezers.push(freezer);
 }
@@ -153,14 +124,12 @@ freezers.forEach((freezer, index) => {
   for (let i = 1; i <= 3; i++) {
     let rack = locationFactory.build({
       customName: `Rack ${i} in ${freezer.customName}`,
-      parent: buildLinkedLocation(freezer),
+      parent: buildLinkedLocation(freezer)
     });
     racks.push(rack);
   }
 
-  freezer.children = racks
-    .slice(3 * index, 3 * index + 3)
-    .map(buildLinkedLocation);
+  freezer.children = racks.slice(3 * index, 3 * index + 3).map(buildLinkedLocation);
 });
 
 const boxes: Location[] = [];
@@ -174,7 +143,7 @@ racks.forEach((rack, index) => {
     locationFactory.build({
       customName: `Box 1 in ${rack.customName}`,
       direction: GridDirection.RightDown,
-      parent: buildLinkedLocation(rack),
+      parent: buildLinkedLocation(rack)
     })
   );
   /***
@@ -187,10 +156,10 @@ racks.forEach((rack, index) => {
       customName: `Box 2 in ${rack.customName}`,
       size: {
         numRows: 50,
-        numColumns: 2,
+        numColumns: 2
       },
       direction: GridDirection.DownRight,
-      parent: buildLinkedLocation(rack),
+      parent: buildLinkedLocation(rack)
     })
   );
 
@@ -199,10 +168,10 @@ racks.forEach((rack, index) => {
       customName: `Box 3 in ${rack.customName}`,
       size: {
         numRows: 5,
-        numColumns: 5,
+        numColumns: 5
       },
       direction: GridDirection.RightUp,
-      parent: buildLinkedLocation(rack),
+      parent: buildLinkedLocation(rack)
     })
   );
 
@@ -211,53 +180,24 @@ racks.forEach((rack, index) => {
       customName: `Box 4 in ${rack.customName}`,
       size: {
         numRows: 5,
-        numColumns: 5,
+        numColumns: 5
       },
       direction: GridDirection.UpRight,
-      parent: buildLinkedLocation(rack),
+      parent: buildLinkedLocation(rack)
     })
   );
 
-  rack.children = boxes
-    .slice(index * 4, index * 4 + 4)
-    .map(buildLinkedLocation);
+  rack.children = boxes.slice(index * 4, index * 4 + 4).map(buildLinkedLocation);
 });
 
 boxes.forEach((box) => {
   const items: StoredItem[] = [];
-  items.push(
-    locationItemFactory.build(
-      { address: "A1" },
-      { associations: { location: box } }
-    )
-  );
-  items.push(
-    locationItemFactory.build(
-      { address: "B2" },
-      { associations: { location: box } }
-    )
-  );
-  items.push(
-    locationItemFactory.build(
-      { address: "C3" },
-      { associations: { location: box } }
-    )
-  );
-  items.push(
-    locationItemFactory.build(
-      { address: "C4" },
-      { associations: { location: box } }
-    )
-  );
-  items.push(
-    locationItemFactory.build(
-      { address: "D5" },
-      { associations: { location: box } }
-    )
-  );
-  items.push(
-    locationItemFactory.build(undefined, { associations: { location: box } })
-  );
+  items.push(locationItemFactory.build({ address: 'A1' }, { associations: { location: box } }));
+  items.push(locationItemFactory.build({ address: 'B2' }, { associations: { location: box } }));
+  items.push(locationItemFactory.build({ address: 'C3' }, { associations: { location: box } }));
+  items.push(locationItemFactory.build({ address: 'C4' }, { associations: { location: box } }));
+  items.push(locationItemFactory.build({ address: 'D5' }, { associations: { location: box } }));
+  items.push(locationItemFactory.build(undefined, { associations: { location: box } }));
   box.stored = items;
 });
 

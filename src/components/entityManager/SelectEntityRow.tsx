@@ -1,6 +1,6 @@
-import React from "react";
-import { TableCell } from "../Table";
-import { Select } from "../forms/Select";
+import React from 'react';
+import { TableCell } from '../Table';
+import { Select } from '../forms/Select';
 
 type SelectEntityRowParams = {
   /**
@@ -21,11 +21,7 @@ type SelectEntityRowParams = {
   onChange: (value: string) => void;
 };
 
-export function SelectEntityRow({
-  value,
-  valueFieldOptions,
-  onChange,
-}: SelectEntityRowParams) {
+export function SelectEntityRow({ value, valueFieldOptions, onChange }: SelectEntityRowParams) {
   const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChange(e.currentTarget.value);
   };

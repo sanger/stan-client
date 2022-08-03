@@ -1,4 +1,4 @@
-import * as Yup from "yup";
+import * as Yup from 'yup';
 
 export const DEFAULT_PERMITTED_CHARS = /^[a-z0-9-_]+$/i;
 
@@ -66,16 +66,12 @@ export function optionalString(params: {
  * @param params.min the minimum number allowed
  * @param params.max the maximum number allowed
  */
-export function requiredNumber(params: {
-  label: string;
-  min?: number;
-  max?: number;
-}): Yup.NumberSchema {
+export function requiredNumber(params: { label: string; min?: number; max?: number }): Yup.NumberSchema {
   let validation = Yup.number().integer().required().label(params.label);
-  if (typeof params.min === "number") {
+  if (typeof params.min === 'number') {
     validation = validation.min(params.min);
   }
-  if (typeof params.max === "number") {
+  if (typeof params.max === 'number') {
     validation = validation.max(params.max);
   }
   return validation;

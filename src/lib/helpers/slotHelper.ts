@@ -1,21 +1,14 @@
-import { Maybe, SlotFieldsFragment } from "../../types/sdk";
+import { Maybe, SlotFieldsFragment } from '../../types/sdk';
 
 /**
  * Find a slot by its address. Throws an error if slot can not be found.
  * @param slots list of slots to search in
  * @param address the address of the slot to find
  */
-export function findSlotByAddress(
-  slots: Array<SlotFieldsFragment>,
-  address: string
-): SlotFieldsFragment {
+export function findSlotByAddress(slots: Array<SlotFieldsFragment>, address: string): SlotFieldsFragment {
   const slot = maybeFindSlotByAddress(slots, address);
   if (slot == null) {
-    throw new Error(
-      `Address ${address} could not be found in slots: ${slots.map(
-        (slot) => slot.address
-      )}`
-    );
+    throw new Error(`Address ${address} could not be found in slots: ${slots.map((slot) => slot.address)}`);
   }
   return slot;
 }
@@ -25,10 +18,7 @@ export function findSlotByAddress(
  * @param slots list of slots to search in
  * @param address the address of the slot to find
  */
-export function maybeFindSlotByAddress(
-  slots: Array<SlotFieldsFragment>,
-  address: string
-): Maybe<SlotFieldsFragment> {
+export function maybeFindSlotByAddress(slots: Array<SlotFieldsFragment>, address: string): Maybe<SlotFieldsFragment> {
   return slots.find((slot) => slot.address === address) ?? null;
 }
 
@@ -36,9 +26,7 @@ export function maybeFindSlotByAddress(
  * Filters out empty slots
  * @param slots list of slots
  */
-export function filledSlots(
-  slots: Array<SlotFieldsFragment>
-): Array<SlotFieldsFragment> {
+export function filledSlots(slots: Array<SlotFieldsFragment>): Array<SlotFieldsFragment> {
   return slots.filter(isSlotFilled);
 }
 
@@ -46,9 +34,7 @@ export function filledSlots(
  * Filters out filled slots
  * @param slots list of slots
  */
-export function emptySlots(
-  slots: Array<SlotFieldsFragment>
-): Array<SlotFieldsFragment> {
+export function emptySlots(slots: Array<SlotFieldsFragment>): Array<SlotFieldsFragment> {
   return slots.filter(isSlotEmpty);
 }
 
