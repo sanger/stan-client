@@ -10,13 +10,12 @@ on:
     branches: [devel]
 
 jobs:
-  build:
+  cypress:
+    name: Run cypress tests
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
         name: Checkout
-
       - name: Export node version
         id: node_version
         run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
@@ -38,7 +37,6 @@ jobs:
       - name: Install dependencides
         run: >-
           yarn install
-
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
@@ -48,3 +46,38 @@ jobs:
           wait-on: "http://localhost:3000"
           config: baseUrl=http://localhost:3000
           timeout-minutes: 5
+
+  prettier:
+    name: Check format with prettier
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'yarn'
+    - name: Install dependencides
+        run: >-
+          yarn install
+    - name: Run prettier
+      run: >-
+        yarn prettier --check .
+    
+  eslint:
+    name: Lint with ESLint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'yarn'
+    - name: Install dependencides
+        run: >-
+          yarn install
+    - name: Lint using ESLint
+      run: >-
+        yarn lint
+
