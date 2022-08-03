@@ -58,8 +58,8 @@ jobs:
         node-version-file: '.nvmrc'
         cache: 'yarn'
     - name: Install dependencides
-        run: >-
-          yarn install
+      run: >-
+        yarn install
     - name: Run prettier
       run: >-
         yarn prettier --check .
@@ -75,8 +75,8 @@ jobs:
         node-version-file: '.nvmrc'
         cache: 'yarn'
     - name: Install dependencides
-        run: >-
-          yarn install
+      run: >-
+        yarn install
     - name: Lint using ESLint
       run: >-
         yarn lint
