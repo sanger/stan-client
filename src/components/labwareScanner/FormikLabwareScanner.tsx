@@ -1,12 +1,9 @@
-import { LabwareFieldsFragment } from "../../types/sdk";
-import React from "react";
-import { FieldArray } from "formik";
-import LabwareScanner, { LabwareScannerProps } from "./LabwareScanner";
+import { LabwareFieldsFragment } from '../../types/sdk';
+import React from 'react';
+import { FieldArray } from 'formik';
+import LabwareScanner, { LabwareScannerProps } from './LabwareScanner';
 
-type FormikLabwareScannerProps<T> = Omit<
-  LabwareScannerProps,
-  "children" | "onAdd" | "onRemove"
-> & {
+type FormikLabwareScannerProps<T> = Omit<LabwareScannerProps, 'children' | 'onAdd' | 'onRemove'> & {
   /**
    * Optional: The name of the Formik field
    * @default labware
@@ -37,7 +34,7 @@ type FormikLabwareScannerProps<T> = Omit<
    </FormikLabwareScanner>
  */
 export function FormikLabwareScanner<T>({
-  name = "labware",
+  name = 'labware',
   buildLabware,
   children,
   ...props

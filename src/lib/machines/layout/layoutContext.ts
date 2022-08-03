@@ -1,5 +1,5 @@
-import { LabwareFieldsFragment, Maybe } from "../../../types/sdk";
-import { Address, NewLabwareLayout } from "../../../types/stan";
+import { LabwareFieldsFragment, Maybe } from '../../../types/sdk';
+import { Address, NewLabwareLayout } from '../../../types/stan';
 
 export interface LayoutPlan {
   /**
@@ -32,19 +32,17 @@ export interface Source {
 
 export interface LayoutContext {
   layoutPlan: LayoutPlan;
-  possibleActions?: LayoutPlan["plannedActions"];
+  possibleActions?: LayoutPlan['plannedActions'];
   selected: Maybe<Source>;
 }
 
 export function addressToSourceLabwareMap(layoutPlan: LayoutPlan) {
   const addressToLabwareMap: Map<string, LabwareFieldsFragment> = new Map();
-  Array.from(layoutPlan.plannedActions.entries()).forEach(
-    ([address, sources]) => {
-      const sourcesArr = Array.from(sources.values());
-      if (sourcesArr.length > 0) {
-        addressToLabwareMap.set(address, sourcesArr[0].labware);
-      }
+  Array.from(layoutPlan.plannedActions.entries()).forEach(([address, sources]) => {
+    const sourcesArr = Array.from(sources.values());
+    if (sourcesArr.length > 0) {
+      addressToLabwareMap.set(address, sourcesArr[0].labware);
     }
-  );
+  });
   return addressToLabwareMap;
 }

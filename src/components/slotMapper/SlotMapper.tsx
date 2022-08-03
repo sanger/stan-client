@@ -1,41 +1,30 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import Labware, { LabwareImperativeRef } from "../labware/Labware";
-import Pager from "../pagination/Pager";
-import slotMapperMachine from "./slotMapper.machine";
-import { SlotMapperProps } from "./slotMapper.types";
-import { usePrevious } from "../../lib/hooks";
-import WhiteButton from "../buttons/WhiteButton";
-import LabwareScanner from "../labwareScanner/LabwareScanner";
-import RemoveButton from "../buttons/RemoveButton";
-import {
-  LabwareFieldsFragment,
-  Maybe,
-  SlotFieldsFragment,
-  SlotPassFailFieldsFragment,
-} from "../../types/sdk";
-import SlotMapperTable from "./SlotMapperTable";
-import Heading from "../Heading";
-import MutedText from "../MutedText";
-import { usePager } from "../../lib/hooks/usePager";
-import { NewLabwareLayout } from "../../types/stan";
-import { useMachine } from "@xstate/react";
-import { find } from "lodash";
-import { ConfirmationModal } from "../modal/ConfirmationModal";
-import Warning from "../notifications/Warning";
-import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Labware, { LabwareImperativeRef } from '../labware/Labware';
+import Pager from '../pagination/Pager';
+import slotMapperMachine from './slotMapper.machine';
+import { SlotMapperProps } from './slotMapper.types';
+import { usePrevious } from '../../lib/hooks';
+import WhiteButton from '../buttons/WhiteButton';
+import LabwareScanner from '../labwareScanner/LabwareScanner';
+import RemoveButton from '../buttons/RemoveButton';
+import { LabwareFieldsFragment, Maybe, SlotFieldsFragment, SlotPassFailFieldsFragment } from '../../types/sdk';
+import SlotMapperTable from './SlotMapperTable';
+import Heading from '../Heading';
+import MutedText from '../MutedText';
+import { usePager } from '../../lib/hooks/usePager';
+import { NewLabwareLayout } from '../../types/stan';
+import { useMachine } from '@xstate/react';
+import { find } from 'lodash';
+import { ConfirmationModal } from '../modal/ConfirmationModal';
+import Warning from '../notifications/Warning';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 
 function SlotMapper({
   onChange,
   onInputLabwareChange,
   initialInputLabware = [],
   initialOutputLabware = [],
-  locked = false,
+  locked = false
 }: SlotMapperProps) {
   const [current, send] = useMachine(() =>
     slotMapperMachine.withContext({
@@ -44,17 +33,11 @@ function SlotMapper({
       slotCopyContent: [],
       colorByBarcode: new Map(),
       failedSlots: new Map(),
-      errors: new Map(),
+      errors: new Map()
     })
   );
 
-  const {
-    inputLabware,
-    slotCopyContent,
-    colorByBarcode,
-    failedSlots,
-    errors,
-  } = current.context;
+  const { inputLabware, slotCopyContent, colorByBarcode, failedSlots, errors } = current.context;
 
   const anySourceMapped = useMemo(() => {
     if (inputLabware.length === 0) {
@@ -69,15 +52,11 @@ function SlotMapper({
   }, [onInputLabwareChange, inputLabware]);
 
   const getSourceSlotColor = useCallback(
-    (
-      labware: LabwareFieldsFragment,
-      address: string,
-      slot: SlotFieldsFragment
-    ) => {
+    (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
       if (
         find(slotCopyContent, {
           sourceBarcode: labware.barcode,
-          sourceAddress: address,
+          sourceAddress: address
         })
       ) {
         return `bg-${colorByBarcode.get(labware.barcode)}-200`;
@@ -93,7 +72,7 @@ function SlotMapper({
   const getDestinationSlotColor = useCallback(
     (labware: NewLabwareLayout, address: string) => {
       const scc = find(slotCopyContent, {
-        destinationAddress: address,
+        destinationAddress: address
       });
 
       if (scc) {
@@ -106,9 +85,7 @@ function SlotMapper({
   /**
    * State to track the current input labware (for paging)
    */
-  const [currentInputLabware, setCurrentInputLabware] = useState<
-    Maybe<LabwareFieldsFragment>
-  >(() => {
+  const [currentInputLabware, setCurrentInputLabware] = useState<Maybe<LabwareFieldsFragment>>(() => {
     return initialInputLabware?.length === 0 ? null : initialInputLabware[0];
   });
 
@@ -125,40 +102,25 @@ function SlotMapper({
   /**
    * State to track the currently selected input and output addresses
    */
-  const [selectedInputAddresses, setSelectedInputAddresses] = useState<
-    Array<string>
-  >([]);
-  const [selectedOutputAddresses, setSelectedOutputAddresses] = useState<
-    Array<string>
-  >([]);
+  const [selectedInputAddresses, setSelectedInputAddresses] = useState<Array<string>>([]);
+  const [selectedOutputAddresses, setSelectedOutputAddresses] = useState<Array<string>>([]);
 
   /**
    * State to track the failed ones in selected input slots
    */
-  const [failedSelectSlots, setFailedSelectSlots] = useState<
-    SlotPassFailFieldsFragment[]
-  >([]);
+  const [failedSelectSlots, setFailedSelectSlots] = useState<SlotPassFailFieldsFragment[]>([]);
 
   /**
    * State to keep the output address clicked to transfer from input
    */
-  const [destinationAddress, setDestinationAddress] = useState<
-    string | undefined
-  >();
+  const [destinationAddress, setDestinationAddress] = useState<string | undefined>();
 
   /**
    * Hook for tracking state for Pager component
    */
-  const {
-    currentPage,
-    numberOfPages,
-    setNumberOfPages,
-    setCurrentPage,
-    goToLastPage,
-    ...pagerRest
-  } = usePager({
+  const { currentPage, numberOfPages, setNumberOfPages, setCurrentPage, goToLastPage, ...pagerRest } = usePager({
     initialCurrentPage: 1,
-    initialNumberOfPages: inputLabware.length,
+    initialNumberOfPages: inputLabware.length
   });
 
   /**
@@ -197,7 +159,7 @@ function SlotMapper({
    * If `locked` changes, tell the model
    */
   useEffect(() => {
-    locked ? send({ type: "LOCK" }) : send({ type: "UNLOCK" });
+    locked ? send({ type: 'LOCK' }) : send({ type: 'UNLOCK' });
   }, [locked, send]);
 
   /**
@@ -213,27 +175,19 @@ function SlotMapper({
   const handleCopySlots = React.useCallback(
     (givenDestinationAddress?: string) => {
       setFailedSelectSlots([]);
-      const address = destinationAddress
-        ? destinationAddress
-        : givenDestinationAddress;
+      const address = destinationAddress ? destinationAddress : givenDestinationAddress;
       if (currentInputId && currentOutputId && address) {
         send({
-          type: "COPY_SLOTS",
+          type: 'COPY_SLOTS',
           inputLabwareId: currentInputId,
           inputAddresses: selectedInputAddresses,
           outputLabwareId: currentOutputId,
-          outputAddress: address,
+          outputAddress: address
         });
       }
       setDestinationAddress(undefined);
     },
-    [
-      currentInputId,
-      currentOutputId,
-      destinationAddress,
-      selectedInputAddresses,
-      send,
-    ]
+    [currentInputId, currentOutputId, destinationAddress, selectedInputAddresses, send]
   );
 
   /**
@@ -247,10 +201,7 @@ function SlotMapper({
         const slotFails = failedSlots.get(currentInputLabware.barcode);
         if (slotFails) {
           const failedSelectSlots = slotFails.filter(
-            (slot) =>
-              selectedInputAddresses.findIndex(
-                (address) => address === slot.address
-              ) !== -1
+            (slot) => selectedInputAddresses.findIndex((address) => address === slot.address) !== -1
           );
           setFailedSelectSlots(failedSelectSlots);
           if (failedSelectSlots.length === 0) {
@@ -272,9 +223,9 @@ function SlotMapper({
   const handleOnClickClear = React.useCallback(() => {
     if (currentOutputId) {
       send({
-        type: "CLEAR_SLOTS",
+        type: 'CLEAR_SLOTS',
         outputLabwareId: currentOutputId,
-        outputAddresses: selectedOutputAddresses,
+        outputAddresses: selectedOutputAddresses
       });
       outputLabwareRef.current?.deselectAll();
     }
@@ -300,17 +251,14 @@ function SlotMapper({
    */
   const onLabwareScannerChange = React.useCallback(
     (labware: LabwareFieldsFragment[]) => {
-      send({ type: "UPDATE_INPUT_LABWARE", labware });
+      send({ type: 'UPDATE_INPUT_LABWARE', labware });
     },
     [send]
   );
 
   const selectedSlots = currentInputLabware
     ? currentInputLabware.slots.filter(
-        (slot) =>
-          selectedInputAddresses.findIndex(
-            (selectedAddress) => selectedAddress === slot.address
-          ) !== -1
+        (slot) => selectedInputAddresses.findIndex((selectedAddress) => selectedAddress === slot.address) !== -1
       )
     : [];
 
@@ -322,26 +270,17 @@ function SlotMapper({
         <Heading level={4}>Output Labwares</Heading>
 
         <div id="inputLabwares" className="bg-gray-100 p-4">
-          <LabwareScanner
-            initialLabwares={initialInputLabware}
-            onChange={onLabwareScannerChange}
-          >
+          <LabwareScanner initialLabwares={initialInputLabware} onChange={onLabwareScannerChange}>
             {(props) => {
               if (!currentInputLabware) {
-                return (
-                  <MutedText>Add labware using the scan input above</MutedText>
-                );
+                return <MutedText>Add labware using the scan input above</MutedText>;
               }
 
               return (
                 <>
                   {!locked && (
                     <div className="flex flex-row justify-end">
-                      <RemoveButton
-                        onClick={() =>
-                          props.removeLabware(currentInputLabware.barcode)
-                        }
-                      />
+                      <RemoveButton onClick={() => props.removeLabware(currentInputLabware.barcode)} />
                     </div>
                   )}
                   <div className="flex flex-col items-center justify-center">
@@ -351,11 +290,7 @@ function SlotMapper({
                       selectionMode="multi"
                       labwareRef={inputLabwareRef}
                       slotColor={(address, slot) => {
-                        return getSourceSlotColor(
-                          currentInputLabware,
-                          address,
-                          slot
-                        );
+                        return getSourceSlotColor(currentInputLabware, address, slot);
                       }}
                       name={currentInputLabware.labwareType.name}
                       onSelect={setSelectedInputAddresses}
@@ -367,10 +302,7 @@ function SlotMapper({
           </LabwareScanner>
         </div>
 
-        <div
-          id="outputLabwares"
-          className="p-4 flex flex-col items-center justify-center bg-gray-100"
-        >
+        <div id="outputLabwares" className="p-4 flex flex-col items-center justify-center bg-gray-100">
           {currentOutputLabware && (
             <Labware
               labware={currentOutputLabware}
@@ -380,59 +312,43 @@ function SlotMapper({
               name={currentOutputLabware.labwareType.name}
               onSlotClick={handleOnOutputLabwareSlotClick}
               onSelect={setSelectedOutputAddresses}
-              slotColor={(address) =>
-                getDestinationSlotColor(currentOutputLabware, address)
-              }
+              slotColor={(address) => getDestinationSlotColor(currentOutputLabware, address)}
             />
           )}
         </div>
 
         <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-between bg-gray-200">
-          {inputLabware.length > 0 && (
-            <Pager
-              currentPage={currentPage}
-              numberOfPages={numberOfPages}
-              {...pagerRest}
-            />
-          )}
+          {inputLabware.length > 0 && <Pager currentPage={currentPage} numberOfPages={numberOfPages} {...pagerRest} />}
         </div>
 
         <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-end bg-gray-200">
-          {!locked && (
-            <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>
-          )}
+          {!locked && <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>}
         </div>
       </div>
 
       {currentInputLabware && selectedSlots.length > 0 && (
         <div className="space-y-4">
           <Heading level={4}>Slot Mapping</Heading>
-          <SlotMapperTable
-            labware={currentInputLabware}
-            slots={selectedSlots}
-            slotCopyContent={slotCopyContent}
-          />
+          <SlotMapperTable labware={currentInputLabware} slots={selectedSlots} slotCopyContent={slotCopyContent} />
         </div>
       )}
       {
         <ConfirmationModal
           show={failedSelectSlots.length > 0}
-          header={"Slot transfer"}
-          message={{ type: "Warning", text: "Failed slot(s)" }}
+          header={'Slot transfer'}
+          message={{ type: 'Warning', text: 'Failed slot(s)' }}
           confirmOptions={[
             {
-              label: "Cancel",
+              label: 'Cancel',
               action: () => {
                 setFailedSelectSlots([]);
-              },
+              }
             },
-            { label: "Continue", action: handleCopySlots },
+            { label: 'Continue', action: handleCopySlots }
           ]}
         >
-          <p className={"font-bold mt-8"}>
-            {`Following slot(s) failed in slide processing : `}
-          </p>
-          <Table className={"mt-4 w-full"}>
+          <p className={'font-bold mt-8'}>{`Following slot(s) failed in slide processing : `}</p>
+          <Table className={'mt-4 w-full'}>
             <TableHead>
               <tr>
                 <TableHeader>Address</TableHeader>
@@ -449,11 +365,11 @@ function SlotMapper({
             </TableBody>
           </Table>
 
-          <p className={"mt-6 font-bold"}>Do you wish to continue or cancel?</p>
+          <p className={'mt-6 font-bold'}>Do you wish to continue or cancel?</p>
         </ConfirmationModal>
       }
 
-      <div className={"flex flex-col w-full"}>
+      <div className={'flex flex-col w-full'}>
         {errors.size > 0 && (
           <Warning
             message={`There is an error while fetching pass/fail status for the slots in ${currentInputLabware?.barcode}.`}

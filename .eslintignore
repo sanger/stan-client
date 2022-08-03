@@ -1,2 +1,12 @@
 # We want to ignore types directory
 src/types/*
+src/serviceWorker.ts
+src/index.tsx
+cypress/support/*
+cypress/plugins/*
+cypress.config.ts
+CHANGELOG.md
+README.md
+.github
+.storybook
+.prettierignore

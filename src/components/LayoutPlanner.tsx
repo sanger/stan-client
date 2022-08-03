@@ -1,32 +1,22 @@
-import React from "react";
-import { useActor } from "@xstate/react";
-import { isEqual } from "lodash";
-import Labware from "./labware/Labware";
-import {
-  LayoutEvents,
-  LayoutMachineActorRef,
-  LayoutMachineType,
-} from "../lib/machines/layout";
+import React from 'react';
+import { useActor } from '@xstate/react';
+import { isEqual } from 'lodash';
+import Labware from './labware/Labware';
+import { LayoutEvents, LayoutMachineActorRef, LayoutMachineType } from '../lib/machines/layout';
 import {
   removeSection,
   selectDestination,
   selectSource,
-  setAllDestinations,
-} from "../lib/machines/layout/layoutEvents";
-import {
-  buildSlotColor,
-  buildSlotSecondaryText,
-  buildSlotText,
-} from "../pages/sectioning/index";
+  setAllDestinations
+} from '../lib/machines/layout/layoutEvents';
+import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../pages/sectioning/index';
 
 interface LayoutPlannerProps {
   actor: LayoutMachineActorRef;
 }
 
 const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
-  const [current, send] = useActor<LayoutEvents, LayoutMachineType["state"]>(
-    actor
-  );
+  const [current, send] = useActor<LayoutEvents, LayoutMachineType['state']>(actor);
   const { layoutPlan, selected } = current.context;
 
   return (
@@ -38,13 +28,11 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
             <Labware
               labware={layoutPlan.destinationLabware}
               name={layoutPlan.destinationLabware.labwareType.name}
-              selectable={"none"}
+              selectable={'none'}
               onSlotClick={(address) => send(selectDestination(address))}
               onSlotCtrlClick={(address) => send(removeSection(address))}
               slotText={(address) => buildSlotText(layoutPlan, address)}
-              slotSecondaryText={(address) =>
-                buildSlotSecondaryText(layoutPlan, address)
-              }
+              slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
               slotColor={(address) => buildSlotColor(layoutPlan, address)}
             />
           )}
@@ -61,8 +49,7 @@ const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
                     send(setAllDestinations(source));
                   }}
                   className={`${
-                    isEqual(source, selected) &&
-                    "ring-2 ring-offset-2 ring-gray-700"
+                    isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'
                   } bg-${layoutPlan.sampleColors.get(
                     source.sampleId
                   )}-600 inline-block py-1 px-2 rounded-full text-xs text-white font-semibold cursor-pointer select-none`}

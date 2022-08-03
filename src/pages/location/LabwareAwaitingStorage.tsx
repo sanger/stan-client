@@ -1,15 +1,10 @@
-import React from "react";
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-} from "../../components/Table";
-import IconButton from "../../components/buttons/IconButton";
-import AddIcon from "../../components/icons/AddIcon";
-import BlueButton from "../../components/buttons/BlueButton";
-import Panel from "../../components/Panel";
-import { LabwareAwaitingStorageInfo } from "../Store";
+import React from 'react';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
+import IconButton from '../../components/buttons/IconButton';
+import AddIcon from '../../components/icons/AddIcon';
+import BlueButton from '../../components/buttons/BlueButton';
+import Panel from '../../components/Panel';
+import { LabwareAwaitingStorageInfo } from '../Store';
 
 interface LabwareAwaitingStorageProps {
   /***
@@ -31,12 +26,12 @@ interface LabwareAwaitingStorageProps {
 const LabwareAwaitingStorage: React.FC<LabwareAwaitingStorageProps> = ({
   labwares,
   storeEnabled = true,
-  onStoreLabwares,
+  onStoreLabwares
 }) => {
   return (
     <div className="mx-auto max-w-screen-xl">
       <Panel>
-        <div className={"mt-2 mb-4 font-semibold"}>Awaiting storage</div>
+        <div className={'mt-2 mb-4 font-semibold'}>Awaiting storage</div>
         <Table>
           <TableHead>
             <tr>
@@ -56,11 +51,7 @@ const LabwareAwaitingStorage: React.FC<LabwareAwaitingStorageProps> = ({
                     disabled={!storeEnabled}
                     onClick={() => onStoreLabwares([labware])}
                   >
-                    <AddIcon
-                      className={`inline-block h-5 w-4 ${
-                        storeEnabled ? "text-red-600" : "text-gray-600"
-                      }`}
-                    />
+                    <AddIcon className={`inline-block h-5 w-4 ${storeEnabled ? 'text-red-600' : 'text-gray-600'}`} />
                   </IconButton>
                 </TableCell>
               </tr>
@@ -68,11 +59,7 @@ const LabwareAwaitingStorage: React.FC<LabwareAwaitingStorageProps> = ({
           </TableBody>
         </Table>
         <div className=" mt-4 flex flex-row items-center justify-end">
-          <BlueButton
-            type="button"
-            onClick={() => onStoreLabwares(labwares)}
-            disabled={!storeEnabled}
-          >
+          <BlueButton type="button" onClick={() => onStoreLabwares(labwares)} disabled={!storeEnabled}>
             Store All
           </BlueButton>
         </div>

@@ -1,17 +1,10 @@
-import { Machine } from "xstate";
-import { LayoutContext, LayoutPlan } from "./layoutContext";
-import { LayoutSchema, State } from "./layoutStates";
-import { LayoutEvents } from "./layoutEvents";
-import {
-  Actions,
-  layoutMachineKey,
-  machineOptions,
-} from "./layoutMachineOptions";
+import { Machine } from 'xstate';
+import { LayoutContext, LayoutPlan } from './layoutContext';
+import { LayoutSchema, State } from './layoutStates';
+import { LayoutEvents } from './layoutEvents';
+import { Actions, layoutMachineKey, machineOptions } from './layoutMachineOptions';
 
-export const createLayoutMachine = (
-  layoutPlan: LayoutPlan,
-  possibleActions?: LayoutPlan["plannedActions"]
-) => {
+export const createLayoutMachine = (layoutPlan: LayoutPlan, possibleActions?: LayoutPlan['plannedActions']) => {
   return Machine<LayoutContext, LayoutSchema, LayoutEvents>(
     {
       key: layoutMachineKey,
@@ -19,27 +12,27 @@ export const createLayoutMachine = (
       context: {
         layoutPlan,
         possibleActions,
-        selected: null,
+        selected: null
       },
       on: {
         DONE: {
-          target: State.DONE,
+          target: State.DONE
         },
         CANCEL: {
-          target: State.CANCELLED,
-        },
+          target: State.CANCELLED
+        }
       },
       states: {
         [State.INIT]: {
           always: [
             {
               cond: (ctx) => ctx.layoutPlan.sources.length > 0,
-              target: State.SOURCE_DEST_MODE,
+              target: State.SOURCE_DEST_MODE
             },
             {
-              target: State.DEST_ONLY_MODE,
-            },
-          ],
+              target: State.DEST_ONLY_MODE
+            }
+          ]
         },
         [State.SOURCE_DEST_MODE]: {
           initial: State.SOURCE_NOT_SELECTED,
@@ -47,49 +40,49 @@ export const createLayoutMachine = (
             [State.SOURCE_NOT_SELECTED]: {
               on: {
                 SELECT_DESTINATION: {
-                  actions: Actions.REMOVE_PLANNED_ACTION,
-                },
-              },
+                  actions: Actions.REMOVE_PLANNED_ACTION
+                }
+              }
             },
             [State.SOURCE_SELECTED]: {
               on: {
                 SELECT_DESTINATION: {
-                  actions: Actions.ASSIGN_DESTINATION,
-                },
-              },
-            },
+                  actions: Actions.ASSIGN_DESTINATION
+                }
+              }
+            }
           },
           on: {
             SELECT_SOURCE: {
               target: `${State.SOURCE_DEST_MODE}.${State.SOURCE_SELECTED}`,
-              actions: Actions.ASSIGN_SELECTED,
+              actions: Actions.ASSIGN_SELECTED
             },
 
             SET_ALL_DESTINATIONS: {
-              actions: Actions.ASSIGN_DESTINATION_ACTIONS,
-            },
-          },
+              actions: Actions.ASSIGN_DESTINATION_ACTIONS
+            }
+          }
         },
         [State.DEST_ONLY_MODE]: {
           on: {
             SELECT_DESTINATION: {
-              actions: Actions.ADD_SECTION,
+              actions: Actions.ADD_SECTION
             },
             REMOVE_SECTION: {
-              actions: Actions.REMOVE_SECTION,
-            },
-          },
+              actions: Actions.REMOVE_SECTION
+            }
+          }
         },
         [State.DONE]: {
-          type: "final",
+          type: 'final',
           data: {
-            layoutPlan: (ctx: LayoutContext) => ctx.layoutPlan,
-          },
+            layoutPlan: (ctx: LayoutContext) => ctx.layoutPlan
+          }
         },
         [State.CANCELLED]: {
-          type: "final",
-        },
-      },
+          type: 'final'
+        }
+      }
     },
     machineOptions
   );

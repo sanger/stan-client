@@ -1,11 +1,11 @@
 export enum State {
-  INIT = "init",
-  SOURCE_DEST_MODE = "sourceDestMode",
-  DEST_ONLY_MODE = "destOnlyMode",
-  SOURCE_NOT_SELECTED = "sourceNotSelected",
-  SOURCE_SELECTED = "sourceSelected",
-  DONE = "done",
-  CANCELLED = "cancelled",
+  INIT = 'init',
+  SOURCE_DEST_MODE = 'sourceDestMode',
+  DEST_ONLY_MODE = 'destOnlyMode',
+  SOURCE_NOT_SELECTED = 'sourceNotSelected',
+  SOURCE_SELECTED = 'sourceSelected',
+  DONE = 'done',
+  CANCELLED = 'cancelled'
 }
 
 export interface LayoutSchema {

@@ -1,26 +1,22 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  GetRegistrationInfoQuery,
-  LabwareType,
-  LifeStage,
-} from "../../types/sdk";
-import { FieldArray, Form, useFormikContext } from "formik";
-import { AnimatePresence, motion } from "framer-motion";
-import Heading from "../../components/Heading";
-import FormikInput from "../../components/forms/Input";
-import RadioGroup, { RadioButton } from "../../components/forms/RadioGroup";
-import { objectKeys } from "../../lib/helpers";
-import FormikSelect from "../../components/forms/Select";
-import { optionValues } from "../../components/forms";
-import PinkButton from "../../components/buttons/PinkButton";
-import BlueButton from "../../components/buttons/BlueButton";
-import SummaryBox from "./SummaryBox";
-import variants from "../../lib/motionVariants";
-import GrayBox, { Sidebar } from "../../components/layouts/GrayBox";
-import { useScrollToRef } from "../../lib/hooks";
-import { RegistrationFormValues } from "../BlockRegistration";
-import { TissueValues } from "./Registration";
-export type TextType = "Block" | "Embedding";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { GetRegistrationInfoQuery, LabwareType, LifeStage } from '../../types/sdk';
+import { FieldArray, Form, useFormikContext } from 'formik';
+import { AnimatePresence, motion } from 'framer-motion';
+import Heading from '../../components/Heading';
+import FormikInput from '../../components/forms/Input';
+import RadioGroup, { RadioButton } from '../../components/forms/RadioGroup';
+import { objectKeys } from '../../lib/helpers';
+import FormikSelect from '../../components/forms/Select';
+import { optionValues } from '../../components/forms';
+import PinkButton from '../../components/buttons/PinkButton';
+import BlueButton from '../../components/buttons/BlueButton';
+import SummaryBox from './SummaryBox';
+import variants from '../../lib/motionVariants';
+import GrayBox, { Sidebar } from '../../components/layouts/GrayBox';
+import { useScrollToRef } from '../../lib/hooks';
+import { RegistrationFormValues } from '../BlockRegistration';
+import { TissueValues } from './Registration';
+export type TextType = 'Block' | 'Embedding';
 
 interface RegistrationFormParams<T> {
   /**
@@ -45,30 +41,27 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
   registrationInfo,
   availableLabwareTypes,
   defaultFormTissueValues,
-  keywordsMap,
+  keywordsMap
 }: RegistrationFormParams<T>) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { setFieldValue, values, errors, touched, isSubmitting } =
-    useFormikContext<RegistrationFormValues>();
+  const { setFieldValue, values, errors, touched, isSubmitting } = useFormikContext<RegistrationFormValues>();
 
   const keywords = keywordsMap ?? new Map();
-  const optionalFields = keywords.has("Optional") && keywords.get("Optional");
+  const optionalFields = keywords.has('Optional') && keywords.get('Optional');
 
   // Available spatial locations are determined by the current tissue type
-  const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] =
-    useMemo(() => {
-      return (
-        registrationInfo.tissueTypes.find(
-          (tt) => tt.name === values.tissues[currentIndex].tissueType
-        )?.spatialLocations ?? []
-      );
-    }, [registrationInfo.tissueTypes, values.tissues, currentIndex]);
+  const availableSpatialLocations: GetRegistrationInfoQuery['tissueTypes'][number]['spatialLocations'] = useMemo(() => {
+    return (
+      registrationInfo.tissueTypes.find((tt) => tt.name === values.tissues[currentIndex].tissueType)
+        ?.spatialLocations ?? []
+    );
+  }, [registrationInfo.tissueTypes, values.tissues, currentIndex]);
 
   // Only enable HMDMC when the species is Human
-  const isHMDMCEnabled = values.tissues[currentIndex].species === "Human";
+  const isHMDMCEnabled = values.tissues[currentIndex].species === 'Human';
   useEffect(() => {
     if (!isHMDMCEnabled) {
-      setFieldValue(`tissues.${currentIndex}.hmdmc`, "", true);
+      setFieldValue(`tissues.${currentIndex}.hmdmc`, '', true);
     }
   }, [isHMDMCEnabled, setFieldValue, currentIndex]);
 
@@ -78,9 +71,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
   const [lastBlockRef, scrollToLatestBlock] = useScrollToRef();
 
   const getOptionalTag = (fieldName: string) =>
-    optionalFields && optionalFields.includes(fieldName)
-      ? "Optional"
-      : undefined;
+    optionalFields && optionalFields.includes(fieldName) ? 'Optional' : undefined;
 
   return (
     <Form>
@@ -89,7 +80,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
           exitBeforeEnter
           onExitComplete={() => {
             setFieldValue(
-              "tissues",
+              'tissues',
               values.tissues.filter((t) => !!t.clientId)
             );
           }}
@@ -97,35 +88,20 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
           <motion.div
             ref={tissueRef}
             variants={variants.fadeInParent}
-            initial={"hidden"}
-            animate={"visible"}
-            exit={"hidden"}
+            initial={'hidden'}
+            animate={'visible'}
+            exit={'hidden'}
             className="md:w-2/3 space-y-6"
             key={values.tissues[currentIndex].clientId}
           >
-            <motion.div
-              variants={variants.fadeInWithLift}
-              className="space-y-4"
-            >
+            <motion.div variants={variants.fadeInWithLift} className="space-y-4">
               <Heading level={3}>Donor Information</Heading>
 
-              <FormikInput
-                label="Donor ID"
-                name={`tissues.${currentIndex}.donorId`}
-              />
+              <FormikInput label="Donor ID" name={`tissues.${currentIndex}.donorId`} />
 
-              <RadioGroup
-                label="Life Stage"
-                name={`tissues.${currentIndex}.lifeStage`}
-              >
+              <RadioGroup label="Life Stage" name={`tissues.${currentIndex}.lifeStage`}>
                 {objectKeys(LifeStage).map((key, index) => {
-                  return (
-                    <RadioButton
-                      key={index}
-                      name={key}
-                      value={LifeStage[key]}
-                    />
-                  );
+                  return <RadioButton key={index} name={key} value={LifeStage[key]} />;
                 })}
               </RadioGroup>
 
@@ -133,25 +109,17 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 <FormikInput
                   type="date"
                   name={`tissues.${currentIndex}.sampleCollectionDate`}
-                  label={"Sample Collection Date"}
+                  label={'Sample Collection Date'}
                   max={new Date()}
                 />
               )}
 
-              <FormikSelect
-                label={"Species"}
-                name={`tissues.${currentIndex}.species`}
-                emptyOption
-                className="mt-2"
-              >
-                {optionValues(registrationInfo.species, "name", "name")}
+              <FormikSelect label={'Species'} name={`tissues.${currentIndex}.species`} emptyOption className="mt-2">
+                {optionValues(registrationInfo.species, 'name', 'name')}
               </FormikSelect>
             </motion.div>
 
-            <motion.div
-              variants={variants.fadeInWithLift}
-              className="space-y-4"
-            >
+            <motion.div variants={variants.fadeInWithLift} className="space-y-4">
               <Heading level={3}>Tissue Information</Heading>
 
               <FormikSelect
@@ -161,7 +129,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 emptyOption
                 className="mt-2"
               >
-                {optionValues(registrationInfo.hmdmcs, "hmdmc", "hmdmc")}
+                {optionValues(registrationInfo.hmdmcs, 'hmdmc', 'hmdmc')}
               </FormikSelect>
 
               <FormikSelect
@@ -170,24 +138,17 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 name={`tissues.${currentIndex}.tissueType`}
                 className="mt-2"
               >
-                {optionValues(registrationInfo.tissueTypes, "name", "name")}
+                {optionValues(registrationInfo.tissueTypes, 'name', 'name')}
               </FormikSelect>
             </motion.div>
 
-            <motion.div
-              variants={variants.fadeInWithLift}
-              className="space-y-4"
-            >
-              <Heading level={3}>
-                {`${keywords.get("Block") ?? "Block"} Information`}
-              </Heading>
+            <motion.div variants={variants.fadeInWithLift} className="space-y-4">
+              <Heading level={3}>{`${keywords.get('Block') ?? 'Block'} Information`}</Heading>
               <AnimatePresence
                 onExitComplete={() => {
                   setFieldValue(
                     `tissues.[${currentIndex}].blocks`,
-                    values.tissues[currentIndex].blocks.filter(
-                      (block) => block.clientId !== null
-                    )
+                    values.tissues[currentIndex].blocks.filter((block) => block.clientId !== null)
                   );
                 }}
               >
@@ -196,22 +157,17 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                   .flatMap((block, blockIndex) => {
                     return (
                       <motion.div
-                        ref={
-                          blockIndex ===
-                          values.tissues[currentIndex].blocks.length - 1
-                            ? lastBlockRef
-                            : null
-                        }
+                        ref={blockIndex === values.tissues[currentIndex].blocks.length - 1 ? lastBlockRef : null}
                         key={block.clientId}
                         variants={variants.fadeIn}
-                        animate={"visible"}
-                        exit={"hidden"}
+                        animate={'visible'}
+                        exit={'hidden'}
                         className="relative p-4 shadow-lg bg-white space-y-4"
                       >
                         <FormikInput
                           label="External Identifier"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.externalIdentifier`}
-                          displayTag={getOptionalTag("External Identifier")}
+                          displayTag={getOptionalTag('External Identifier')}
                         />
 
                         <FormikSelect
@@ -222,7 +178,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                         >
                           {availableSpatialLocations.map((spatialLocation) => (
                             <option value={spatialLocation.code} key={spatialLocation.code}>
-                              {spatialLocation.code + " - " + spatialLocation.name}
+                              {spatialLocation.code + ' - ' + spatialLocation.name}
                             </option>
                           ))}
                         </FormikSelect>
@@ -230,10 +186,9 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                         <FormikInput
                           label="Replicate Number"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.replicateNumber`}
-                          displayTag={getOptionalTag("Replicate Number")}
+                          displayTag={getOptionalTag('Replicate Number')}
                         />
-                        {"lastKnownSectionNumber" in
-                          values.tissues[currentIndex].blocks[blockIndex] && (
+                        {'lastKnownSectionNumber' in values.tissues[currentIndex].blocks[blockIndex] && (
                           <FormikInput
                             label="Last Known Section Number"
                             type="number"
@@ -246,13 +201,11 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                           label="Labware Type"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.labwareType`}
                         >
-                          {optionValues(availableLabwareTypes, "name", "name")}
+                          {optionValues(availableLabwareTypes, 'name', 'name')}
                         </FormikSelect>
 
                         <Heading level={4} showBorder={false} className="mt-4">
-                          {`${
-                            keywords.get("Embedding") ?? "Embedding"
-                          } Information`}
+                          {`${keywords.get('Embedding') ?? 'Embedding'} Information`}
                         </Heading>
 
                         <FormikSelect
@@ -261,38 +214,26 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                           className="block mt-2"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.fixative`}
                         >
-                          {optionValues(
-                            registrationInfo.fixatives,
-                            "name",
-                            "name"
-                          )}
+                          {optionValues(registrationInfo.fixatives, 'name', 'name')}
                         </FormikSelect>
-                        {"medium" in block && (
+                        {'medium' in block && (
                           <FormikSelect
                             emptyOption
                             label="Medium"
                             className="block mt-2"
                             name={`tissues.${currentIndex}.blocks.${blockIndex}.medium`}
                           >
-                            {optionValues(
-                              registrationInfo.mediums,
-                              "name",
-                              "name"
-                            )}
+                            {optionValues(registrationInfo.mediums, 'name', 'name')}
                           </FormikSelect>
                         )}
-                        {"solution" in block && (
+                        {'solution' in block && (
                           <FormikSelect
                             emptyOption
                             label="Solution"
                             className="block mt-2"
                             name={`tissues.${currentIndex}.blocks.${blockIndex}.solution`}
                           >
-                            {optionValues(
-                              registrationInfo.solutions,
-                              "name",
-                              "name"
-                            )}
+                            {optionValues(registrationInfo.solutions, 'name', 'name')}
                           </FormikSelect>
                         )}
 
@@ -303,13 +244,10 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                               type="button"
                               action="tertiary"
                               onClick={() => {
-                                setFieldValue(
-                                  `tissues[${currentIndex}].blocks[${blockIndex}].clientId`,
-                                  null
-                                );
+                                setFieldValue(`tissues[${currentIndex}].blocks[${blockIndex}].clientId`, null);
                               }}
                             >
-                              {`Delete ${keywords.get("Block") ?? "Block"}`}
+                              {`Delete ${keywords.get('Block') ?? 'Block'}`}
                             </PinkButton>
                           </div>
                         )}
@@ -319,10 +257,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
               </AnimatePresence>
             </motion.div>
 
-            <motion.div
-              variants={variants.fadeInWithLift}
-              className="flex flex-row items-centre justify-between"
-            >
+            <motion.div variants={variants.fadeInWithLift} className="flex flex-row items-centre justify-between">
               <FieldArray name={`tissues.${currentIndex}.blocks`}>
                 {(blockHelpers) => (
                   <BlueButton
@@ -334,7 +269,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                       scrollToLatestBlock();
                     }}
                   >
-                    {`+ Add Another Tissue ${keywords.get("Block") ?? "Block"}`}
+                    {`+ Add Another Tissue ${keywords.get('Block') ?? 'Block'}`}
                   </BlueButton>
                 )}
               </FieldArray>
@@ -351,7 +286,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                       setCurrentIndex(currentIndex - 1);
                     }
                     tissueRef.current?.scrollIntoView({
-                      behavior: "smooth",
+                      behavior: 'smooth'
                     });
                   }}
                 >
@@ -377,7 +312,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                   tissueHelpers.push(defaultFormTissueValues);
                   setCurrentIndex(currentIndex + 1);
                   tissueRef.current?.scrollIntoView({
-                    behavior: "smooth",
+                    behavior: 'smooth'
                   });
                 }}
                 keywordsMap={keywordsMap}

@@ -1,6 +1,6 @@
 mutation UnstoreBarcode($barcode: String!) {
-    unstoreBarcode(barcode: $barcode) {
-        barcode
-        address
-    }
+  unstoreBarcode(barcode: $barcode) {
+    barcode
+    address
+  }
 }

@@ -1,5 +1,5 @@
 mutation AddEquipment($category: String!, $name: String!) {
-    addEquipment(category: $category, name: $name) {
-        ...EquipmentFields
-    }
+  addEquipment(category: $category, name: $name) {
+    ...EquipmentFields
+  }
 }

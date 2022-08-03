@@ -1,14 +1,9 @@
-import { createMachine } from "xstate";
-import { Maybe } from "../../types/sdk";
-import {
-  HistoryProps,
-  HistoryTableEntry,
-  MachineServiceDone,
-  MachineServiceError,
-} from "../../types/stan";
-import * as historyService from "../../lib/services/historyService";
-import { assign } from "@xstate/immer";
-import { ClientError } from "graphql-request";
+import { createMachine } from 'xstate';
+import { Maybe } from '../../types/sdk';
+import { HistoryProps, HistoryTableEntry, MachineServiceDone, MachineServiceError } from '../../types/stan';
+import * as historyService from '../../lib/services/historyService';
+import { assign } from '@xstate/immer';
+import { ClientError } from 'graphql-request';
 
 type HistoryContext = {
   historyProps: HistoryProps;
@@ -17,79 +12,77 @@ type HistoryContext = {
 };
 
 type HistoryEvent =
-  | { type: "UPDATE_HISTORY_PROPS"; props: HistoryProps }
-  | { type: "RETRY" }
-  | MachineServiceDone<"findHistory", Array<HistoryTableEntry>>
-  | MachineServiceError<"findHistory">;
+  | { type: 'UPDATE_HISTORY_PROPS'; props: HistoryProps }
+  | { type: 'RETRY' }
+  | MachineServiceDone<'findHistory', Array<HistoryTableEntry>>
+  | MachineServiceError<'findHistory'>;
 
-export default function createHistoryMachine(
-  initialHistoryProps: HistoryProps
-) {
+export default function createHistoryMachine(initialHistoryProps: HistoryProps) {
   return createMachine<HistoryContext, HistoryEvent>(
     {
-      id: "historyMachine",
-      initial: "searching",
+      id: 'historyMachine',
+      initial: 'searching',
       context: {
         historyProps: initialHistoryProps,
         history: [],
-        serverError: null,
+        serverError: null
       },
       states: {
         searching: {
           invoke: {
-            src: "findHistory",
-            id: "findHistory",
+            src: 'findHistory',
+            id: 'findHistory',
             onDone: {
-              target: "found",
-              actions: "assignHistory",
+              target: 'found',
+              actions: 'assignHistory'
             },
             onError: {
-              target: "error",
-              actions: "assignServerError",
-            },
-          },
+              target: 'error',
+              actions: 'assignServerError'
+            }
+          }
         },
         found: {
           on: {
             UPDATE_HISTORY_PROPS: {
-              target: "searching",
-              actions: "assignHistoryProps",
-            },
-          },
+              target: 'searching',
+              actions: 'assignHistoryProps'
+            }
+          }
         },
         error: {
           on: {
-            RETRY: "searching",
+            RETRY: 'searching',
             UPDATE_HISTORY_PROPS: {
-              target: "searching",
-              actions: "assignHistoryProps",
-            },
-          },
-        },
-      },
+              target: 'searching',
+              actions: 'assignHistoryProps'
+            }
+          }
+        }
+      }
     },
     {
       actions: {
         assignHistory: assign((ctx, e) => {
-          if (e.type !== "done.invoke.findHistory") return;
+          if (e.type !== 'done.invoke.findHistory') return;
           ctx.history = e.data;
         }),
 
         assignHistoryProps: assign((ctx, e) => {
-          if (e.type !== "UPDATE_HISTORY_PROPS") return;
+          if (e.type !== 'UPDATE_HISTORY_PROPS') return;
           ctx.historyProps = e.props;
         }),
 
         assignServerError: assign((ctx, e) => {
-          if (e.type !== "error.platform.findHistory") return;
+          if (e.type !== 'error.platform.findHistory') return;
           ctx.serverError = e.data;
-        }),
+        })
       },
       services: {
         findHistory: (context) => {
           return historyService.findHistory(context.historyProps);
-        },
-      },
+        }
+      }
     }
   );
 }

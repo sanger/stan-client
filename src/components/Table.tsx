@@ -1,13 +1,9 @@
-import React, { ReactNode } from "react";
-import IconButton from "./buttons/IconButton";
-import DownArrowIcon from "./icons/DownArrowIcon";
-import UpArrowIcon from "./icons/UpArrowIcon";
+import React, { ReactNode } from 'react';
+import IconButton from './buttons/IconButton';
+import DownArrowIcon from './icons/DownArrowIcon';
+import UpArrowIcon from './icons/UpArrowIcon';
 
-interface TableProps
-  extends React.DetailedHTMLProps<
-    React.TableHTMLAttributes<HTMLTableElement>,
-    HTMLTableElement
-  > {}
+interface TableProps extends React.DetailedHTMLProps<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement> {}
 
 export type SortProps = {
   sortFieldName: string;
@@ -62,11 +58,7 @@ export const TableHead = ({ children }: TableHeadProps) => {
   return <thead>{children}</thead>;
 };
 
-export const TableHeader = ({
-  children,
-  sortProps,
-  ...rest
-}: TableHeaderProps) => {
+export const TableHeader = ({ children, sortProps, ...rest }: TableHeaderProps) => {
   return (
     <th className="px-6 py-3 bg-gray-50 text-left select-none" {...rest}>
       <>
@@ -80,23 +72,13 @@ export const TableHeader = ({
           >
             {
               <span
-                className={
-                  "bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 tracking-wider uppercase"
-                }
+                className={'bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 tracking-wider uppercase'}
               >
                 {children}
               </span>
             }
             {sortProps &&
-              (sortProps.ascending !== undefined ? (
-                sortProps.ascending ? (
-                  <UpArrowIcon />
-                ) : (
-                  <DownArrowIcon />
-                )
-              ) : (
-                <></>
-              ))}
+              (sortProps.ascending !== undefined ? sortProps.ascending ? <UpArrowIcon /> : <DownArrowIcon /> : <></>)}
           </IconButton>
         }
       </>
@@ -112,10 +94,9 @@ export const TableBody = ({ children, ...rest }: TableHeadProps) => {
   );
 };
 
-export const TableCell: React.FC<React.DetailedHTMLProps<
-  React.TdHTMLAttributes<HTMLTableDataCellElement>,
-  HTMLTableDataCellElement
->> = ({ children, ...rest }) => {
+export const TableCell: React.FC<
+  React.DetailedHTMLProps<React.TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>
+> = ({ children, ...rest }) => {
   return (
     <td className="px-6 py-4 whitespace-nowrap" {...rest}>
       {children}

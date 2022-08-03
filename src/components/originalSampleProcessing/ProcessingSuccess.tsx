@@ -1,30 +1,26 @@
-import React from "react";
-import Success from "../notifications/Success";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { LabwareFieldsFragment } from "../../types/sdk";
-import variants from "../../lib/motionVariants";
-import DataTable from "../DataTable";
-import LabelPrinter from "../LabelPrinter";
-import ButtonBar from "../ButtonBar";
-import { Column } from "react-table";
-import Heading from "../Heading";
-import { ModalBody } from "../Modal";
-import BlueButton from "../buttons/BlueButton";
+import React from 'react';
+import Success from '../notifications/Success';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { LabwareFieldsFragment } from '../../types/sdk';
+import variants from '../../lib/motionVariants';
+import DataTable from '../DataTable';
+import LabelPrinter from '../LabelPrinter';
+import ButtonBar from '../ButtonBar';
+import { Column } from 'react-table';
+import Heading from '../Heading';
+import { ModalBody } from '../Modal';
+import BlueButton from '../buttons/BlueButton';
 interface ProcessingSuccessProps {
   labware: LabwareFieldsFragment[];
   columns: Column<LabwareFieldsFragment>[];
   successMessage: string;
 }
 
-const ProcessingSuccess: React.FC<ProcessingSuccessProps> = ({
-  labware,
-  columns,
-  successMessage,
-}) => {
+const ProcessingSuccess: React.FC<ProcessingSuccessProps> = ({ labware, columns, successMessage }) => {
   return (
     <div className="space-y-6">
-      <Heading level={2}>{"Operation Complete"}</Heading>
+      <Heading level={2}>{'Operation Complete'}</Heading>
       <ModalBody>{<Success message={successMessage} />}</ModalBody>
       <motion.div variants={variants.fadeInWithLift} className="flex flex-col">
         <DataTable columns={columns} data={labware} />
@@ -36,16 +32,14 @@ const ProcessingSuccess: React.FC<ProcessingSuccessProps> = ({
         >
           <LabelPrinter
             labwares={labware.filter(
-              (lw) =>
-                lw.labwareType.labelType !== null &&
-                lw.labwareType.labelType !== undefined
+              (lw) => lw.labwareType.labelType !== null && lw.labwareType.labelType !== undefined
             )}
           />
         </motion.div>
       </div>
 
       <ButtonBar>
-        <Link to={"/"}>
+        <Link to={'/'}>
           <BlueButton action="primary">Return Home</BlueButton>
         </Link>
       </ButtonBar>

@@ -1,5 +1,5 @@
 mutation AddProject($name: String!) {
-    addProject(name: $name) {
-        ...ProjectFields
-    }
+  addProject(name: $name) {
+    ...ProjectFields
+  }
 }

@@ -1,25 +1,18 @@
-import {
-  GetPotProcessingInfoQuery,
-  LabwareFieldsFragment,
-} from "../../../types/sdk";
-import React from "react";
-import { useMachine } from "@xstate/react";
-import { motion } from "framer-motion";
-import variants from "../../../lib/motionVariants";
-import Labware from "../../labware/Labware";
-import {
-  buildSlotColor,
-  buildSlotSecondaryText,
-  buildSlotText,
-} from "../../../pages/sectioning";
-import { LabwareTypeName, NewLabwareLayout } from "../../../types/stan";
-import FormikSelect from "../../forms/Select";
-import { optionValues } from "../../forms";
-import BlueButton from "../../buttons/BlueButton";
-import { useFormikContext } from "formik";
-import Warning from "../../notifications/Warning";
-import { createLabwarePlanMachine } from "../../planning/labwarePlan.machine";
-import { PotFormData } from "./PotProcessing";
+import { GetPotProcessingInfoQuery, LabwareFieldsFragment } from '../../../types/sdk';
+import React from 'react';
+import { useMachine } from '@xstate/react';
+import { motion } from 'framer-motion';
+import variants from '../../../lib/motionVariants';
+import Labware from '../../labware/Labware';
+import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../../pages/sectioning';
+import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
+import FormikSelect from '../../forms/Select';
+import { optionValues } from '../../forms';
+import BlueButton from '../../buttons/BlueButton';
+import { useFormikContext } from 'formik';
+import Warning from '../../notifications/Warning';
+import { createLabwarePlanMachine } from '../../planning/labwarePlan.machine';
+import { PotFormData } from './PotProcessing';
 
 type PotProcessingLabwarePlanProps = {
   /**
@@ -73,7 +66,7 @@ function buildInitialLayoutPlan(
             sampleId: sample.id,
             labware: lw,
             newSection: 0,
-            address: slot.address,
+            address: slot.address
           };
         })
       )
@@ -82,38 +75,21 @@ function buildInitialLayoutPlan(
     destinationLabware: outputLabware,
     plannedActions:
       sourceLabware.length > 0
-        ? new Map().set("A1", [
+        ? new Map().set('A1', [
             {
               sampleId: sourceLabware[0].slots[0].samples[0].id,
               labware: sourceLabware[0],
-              newSection: 0,
-            },
+              newSection: 0
+            }
           ])
-        : new Map(),
+        : new Map()
   };
 }
 
-const PotProcessingLabwarePlan = React.forwardRef<
-  HTMLDivElement,
-  PotProcessingLabwarePlanProps
->(
-  (
-    {
-      cid,
-      outputLabware,
-      potProcessInfo,
-      sourceLabware,
-      sampleColors,
-      onDelete,
-      rowIndex,
-      fixative,
-    },
-    ref
-  ) => {
+const PotProcessingLabwarePlan = React.forwardRef<HTMLDivElement, PotProcessingLabwarePlanProps>(
+  ({ cid, outputLabware, potProcessInfo, sourceLabware, sampleColors, onDelete, rowIndex, fixative }, ref) => {
     const [current] = useMachine(
-      createLabwarePlanMachine(
-        buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware)
-      )
+      createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware))
     );
     const { requestError, layoutPlan } = current.context;
     const { values, setFieldValue } = useFormikContext<PotFormData>();
@@ -123,20 +99,15 @@ const PotProcessingLabwarePlan = React.forwardRef<
      */
     React.useEffect(() => {
       if (sourceLabware.length > 0) {
-        setFieldValue("sourceBarcode", sourceLabware[0].barcode);
+        setFieldValue('sourceBarcode', sourceLabware[0].barcode);
       }
 
       if (outputLabware) {
-        setFieldValue(
-          `plans.${rowIndex}.labwareType`,
-          outputLabware.labwareType.name
-        );
+        setFieldValue(`plans.${rowIndex}.labwareType`, outputLabware.labwareType.name);
       }
       setFieldValue(
         `plans.${rowIndex}.fixative`,
-        outputLabware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER
-          ? "None"
-          : fixative
+        outputLabware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER ? 'None' : fixative
       );
     }, [setFieldValue, rowIndex, fixative, outputLabware, sourceLabware]);
 
@@ -144,10 +115,10 @@ const PotProcessingLabwarePlan = React.forwardRef<
       <motion.div
         variants={variants.fadeInWithLift}
         ref={ref}
-        initial={"hidden"}
-        animate={"visible"}
+        initial={'hidden'}
+        animate={'visible'}
         className="relative p-3 shadow"
-        data-testid={"plan"}
+        data-testid={'plan'}
       >
         <>
           <div className="md:grid md:grid-cols-2">
@@ -156,43 +127,30 @@ const PotProcessingLabwarePlan = React.forwardRef<
                 labware={outputLabware}
                 name={outputLabware.labwareType.name}
                 slotText={(address) => buildSlotText(layoutPlan, address)}
-                slotSecondaryText={(address) =>
-                  buildSlotSecondaryText(layoutPlan, address)
-                }
+                slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
                 slotColor={(address) => buildSlotColor(layoutPlan, address)}
               />
             </div>
             <div className="border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow">
               <div className="py-4 px-8 w-full space-y-4">
-                {current.matches("prep.errored") && (
+                {current.matches('prep.errored') && (
                   <Warning
-                    message={
-                      requestError?.message ??
-                      "There was an error creating the Labware"
-                    }
+                    message={requestError?.message ?? 'There was an error creating the Labware'}
                     error={requestError}
                   />
                 )}
                 {outputLabware.labwareType.name === LabwareTypeName.POT && (
-                  <FormikSelect
-                    label={"Fixative"}
-                    name={`plans.${rowIndex}.fixative`}
-                    emptyOption={true}
-                  >
-                    {optionValues(potProcessInfo.fixatives, "name", "name")}
+                  <FormikSelect label={'Fixative'} name={`plans.${rowIndex}.fixative`} emptyOption={true}>
+                    {optionValues(potProcessInfo.fixatives, 'name', 'name')}
                   </FormikSelect>
                 )}
 
-                <FormikSelect
-                  label={"Processing comments"}
-                  name={`plans.${rowIndex}.commentId`}
-                  emptyOption={true}
-                >
-                  {optionValues(potProcessInfo.comments, "text", "id")}
+                <FormikSelect label={'Processing comments'} name={`plans.${rowIndex}.commentId`} emptyOption={true}>
+                  {optionValues(potProcessInfo.comments, 'text', 'id')}
                 </FormikSelect>
               </div>
 
-              {current.matches("prep") && (
+              {current.matches('prep') && (
                 <div className="w-full border-t-2 border-gray-200 py-3 px-4 sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
                   <BlueButton
                     type="button"

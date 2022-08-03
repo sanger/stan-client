@@ -1,9 +1,9 @@
-import { ExtractResultQuery, PassFail } from "../../types/sdk";
-import { ClientError } from "graphql-request";
-import { createMachine } from "xstate";
-import { assign } from "@xstate/immer";
-import { stanCore } from "../../lib/sdk";
-import { castDraft } from "immer";
+import { ExtractResultQuery, PassFail } from '../../types/sdk';
+import { ClientError } from 'graphql-request';
+import { createMachine } from 'xstate';
+import { assign } from '@xstate/immer';
+import { stanCore } from '../../lib/sdk';
+import { castDraft } from 'immer';
 
 export interface ExtractResultContext {
   extractResults: ExtractResultQuery[];
@@ -13,23 +13,23 @@ export interface ExtractResultContext {
 }
 
 type SubmitBarcodeEvent = {
-  type: "SUBMIT_BARCODE";
+  type: 'SUBMIT_BARCODE';
   barcode: string;
 };
 type UpdateBarcodeEvent = {
-  type: "UPDATE_BARCODE";
+  type: 'UPDATE_BARCODE';
   barcode: string;
 };
 type ExtractResultSuccess = {
-  type: "done.invoke.extractResult";
+  type: 'done.invoke.extractResult';
   data: ExtractResultQuery;
 };
 type ExtractResultFailure = {
-  type: "error.platform.extractResult";
+  type: 'error.platform.extractResult';
   data: ClientError;
 };
 type RemoveExtractResultEvent = {
-  type: "REMOVE_EXTRACT_RESULT";
+  type: 'REMOVE_EXTRACT_RESULT';
   barcode: string;
 };
 
@@ -40,84 +40,80 @@ export type RNAAnalysisEvent =
   | ExtractResultFailure
   | RemoveExtractResultEvent;
 
-export const extractResultMachine = createMachine<
-  ExtractResultContext,
-  RNAAnalysisEvent
->(
+export const extractResultMachine = createMachine<ExtractResultContext, RNAAnalysisEvent>(
   {
-    id: "extract_result",
-    initial: "ready",
+    id: 'extract_result',
+    initial: 'ready',
     states: {
       ready: {
         on: {
           SUBMIT_BARCODE: [
             {
-              target: "submitBarcodeSuccess",
-              actions: "assignBarcode",
-              cond: "SubmitBarcodeValid",
+              target: 'submitBarcodeSuccess',
+              actions: 'assignBarcode',
+              cond: 'SubmitBarcodeValid'
             },
             {
-              target: "submitBarcodeFailed",
-              cond: "SubmitBarcodeInvalid",
-            },
+              target: 'submitBarcodeFailed',
+              cond: 'SubmitBarcodeInvalid'
+            }
           ],
           UPDATE_BARCODE: {
-            actions: ["unassignErrorMessage", "assignBarcode"],
+            actions: ['unassignErrorMessage', 'assignBarcode']
           },
           REMOVE_EXTRACT_RESULT: {
-            cond: "ExtractResultNotEmpty",
-            actions: "removeExtractResult",
-          },
-        },
+            cond: 'ExtractResultNotEmpty',
+            actions: 'removeExtractResult'
+          }
+        }
       },
       submitBarcodeSuccess: {
-        onEntry: ["unassignServerError", "unassignErrorMessage"],
+        onEntry: ['unassignServerError', 'unassignErrorMessage'],
         invoke: {
-          src: "extractResult",
-          id: "extractResult",
+          src: 'extractResult',
+          id: 'extractResult',
           onDone: {
-            target: "extractResultSuccess",
-            actions: "assignExtractResult",
+            target: 'extractResultSuccess',
+            actions: 'assignExtractResult'
           },
           onError: {
-            target: "extractResultFailed",
-            actions: "assignServerError",
-          },
-        },
+            target: 'extractResultFailed',
+            actions: 'assignServerError'
+          }
+        }
       },
       submitBarcodeFailed: {
-        entry: "assignSubmitBarcodeError",
+        entry: 'assignSubmitBarcodeError',
         always: {
-          actions: "assignBarcode",
-          target: "ready",
-        },
+          actions: 'assignBarcode',
+          target: 'ready'
+        }
       },
       extractResultSuccess: {
         always: {
-          target: "ready",
-        },
+          target: 'ready'
+        }
       },
       extractResultFailed: {
         always: {
-          target: "ready",
-        },
-      },
-    },
+          target: 'ready'
+        }
+      }
+    }
   },
   {
     actions: {
       assignBarcode: assign((ctx, e) => {
-        if (!(e.type === "UPDATE_BARCODE" || e.type === "SUBMIT_BARCODE"))
-          return;
+        if (!(e.type === 'UPDATE_BARCODE' || e.type === 'SUBMIT_BARCODE')) return;
 
         ctx.currentBarcode = e.barcode;
       }),
       assignSubmitBarcodeError: assign((ctx, e) => {
-        if (e.type !== "SUBMIT_BARCODE") return;
+        if (e.type !== 'SUBMIT_BARCODE') return;
         ctx.scanErrorMessage = `"${e.barcode}" has already been scanned`;
       }),
       assignExtractResult: assign((ctx, e) => {
-        if (e.type !== "done.invoke.extractResult") return;
+        if (e.type !== 'done.invoke.extractResult') return;
         if (!e.data.extractResult) {
           ctx.scanErrorMessage = `No extraction recorded for the tube ${ctx.currentBarcode}`;
           return;
@@ -132,52 +128,43 @@ export const extractResultMachine = createMachine<
           return;
         }
         ctx.extractResults.push(e.data);
-        ctx.currentBarcode = "";
+        ctx.currentBarcode = '';
       }),
       removeExtractResult: assign((ctx, e) => {
-        if (e.type !== "REMOVE_EXTRACT_RESULT") return;
-        ctx.extractResults = ctx.extractResults.filter(
-          (res) => res.extractResult.labware.barcode !== e.barcode
-        );
+        if (e.type !== 'REMOVE_EXTRACT_RESULT') return;
+        ctx.extractResults = ctx.extractResults.filter((res) => res.extractResult.labware.barcode !== e.barcode);
       }),
       assignServerError: assign((ctx, e) => {
-        if (e.type !== "error.platform.extractResult") return;
+        if (e.type !== 'error.platform.extractResult') return;
         ctx.serverError = castDraft(e.data);
       }),
       unassignServerError: assign((ctx, _e) => {
         ctx.serverError = undefined;
       }),
       unassignErrorMessage: assign((ctx) => {
-        ctx.scanErrorMessage = "";
-      }),
+        ctx.scanErrorMessage = '';
+      })
     },
 
     guards: {
       SubmitBarcodeValid: (ctx) => {
         return (
-          ctx.extractResults.filter(
-            (result) =>
-              result.extractResult.labware.barcode === ctx.currentBarcode
-          ).length <= 0
+          ctx.extractResults.filter((result) => result.extractResult.labware.barcode === ctx.currentBarcode).length <= 0
         );
       },
       SubmitBarcodeInvalid: (ctx) => {
         return (
-          ctx.extractResults.filter(
-            (result) =>
-              result.extractResult.labware.barcode === ctx.currentBarcode
-          ).length > 0
+          ctx.extractResults.filter((result) => result.extractResult.labware.barcode === ctx.currentBarcode).length > 0
         );
       },
-      ExtractResultNotEmpty: (ctx) =>
-        ctx.extractResults && ctx.extractResults.length > 0,
+      ExtractResultNotEmpty: (ctx) => ctx.extractResults && ctx.extractResults.length > 0
     },
     services: {
       extractResult: (ctx) => {
         return stanCore.ExtractResult({
-          barcode: ctx.currentBarcode,
+          barcode: ctx.currentBarcode
         });
-      },
-    },
+      }
+    }
   }
 );

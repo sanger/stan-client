@@ -1,4 +1,4 @@
 fragment ReleaseDestinationFields on ReleaseDestination {
-    name
-    enabled
+  name
+  enabled
 }

@@ -1,5 +1,5 @@
 mutation AddDestructionReason($text: String!) {
-    addDestructionReason(text: $text) {
-        ...DestructionReasonFields
-    }
+  addDestructionReason(text: $text) {
+    ...DestructionReasonFields
+  }
 }

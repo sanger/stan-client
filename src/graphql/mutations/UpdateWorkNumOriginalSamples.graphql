@@ -1,5 +1,5 @@
-mutation UpdateWorkNumOriginalSamples($workNumber:String!, $numOriginalSamples:Int) {
-    updateWorkNumOriginalSamples(workNumber: $workNumber, numOriginalSamples: $numOriginalSamples) {
-        ...WorkFields
-    }
+mutation UpdateWorkNumOriginalSamples($workNumber: String!, $numOriginalSamples: Int) {
+  updateWorkNumOriginalSamples(workNumber: $workNumber, numOriginalSamples: $numOriginalSamples) {
+    ...WorkFields
+  }
 }

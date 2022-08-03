@@ -1,115 +1,111 @@
-import { CommentFieldsFragment } from "../../types/sdk";
-import { createSessionStorageRepository } from "./index";
-import commentFactory from "../../lib/factories/commentFactory";
+import { CommentFieldsFragment } from '../../types/sdk';
+import { createSessionStorageRepository } from './index';
+import commentFactory from '../../lib/factories/commentFactory';
 
 const seeds: Array<CommentFieldsFragment> = [
-  commentFactory.build({ text: "Section Folded", category: "section" }),
-  commentFactory.build({ text: "Poor section quality", category: "section" }),
-  commentFactory.build({ text: "Sectioned well", category: "section" }),
-  commentFactory.build({ text: "Section exploded", category: "section" }),
-  commentFactory.build({ text: "This is good", category: "blah" }),
-  commentFactory.build({ text: "Optimal", category: "RNA analysis" }),
-  commentFactory.build({ text: "Potential to work", category: "RNA analysis" }),
+  commentFactory.build({ text: 'Section Folded', category: 'section' }),
+  commentFactory.build({ text: 'Poor section quality', category: 'section' }),
+  commentFactory.build({ text: 'Sectioned well', category: 'section' }),
+  commentFactory.build({ text: 'Section exploded', category: 'section' }),
+  commentFactory.build({ text: 'This is good', category: 'blah' }),
+  commentFactory.build({ text: 'Optimal', category: 'RNA analysis' }),
+  commentFactory.build({ text: 'Potential to work', category: 'RNA analysis' }),
   commentFactory.build({
-    text: " Not recommended to proceed",
-    category: "RNA analysis",
+    text: ' Not recommended to proceed',
+    category: 'RNA analysis'
   }),
 
   commentFactory.build({
-    text: "This is bad",
-    category: "blah",
-    enabled: false,
+    text: 'This is bad',
+    category: 'blah',
+    enabled: false
   }),
-  commentFactory.build({ text: "RIN number too low", category: "Work status" }),
+  commentFactory.build({ text: 'RIN number too low', category: 'Work status' }),
   commentFactory.build({
-    text: "Poor quality tissue",
-    category: "Work status",
-  }),
-  commentFactory.build({
-    text: "Waiting for reagents",
-    category: "Work status",
+    text: 'Poor quality tissue',
+    category: 'Work status'
   }),
   commentFactory.build({
-    text: "Waiting for customer",
-    category: "Work status",
+    text: 'Waiting for reagents',
+    category: 'Work status'
   }),
   commentFactory.build({
-    category: "stain QC",
-    text: "Slide damaged",
+    text: 'Waiting for customer',
+    category: 'Work status'
   }),
   commentFactory.build({
-    category: "stain QC",
-    text: "Wrong morphology",
+    category: 'stain QC',
+    text: 'Slide damaged'
   }),
   commentFactory.build({
-    category: "stain QC",
-    text: "Section invisible",
-    enabled: false,
+    category: 'stain QC',
+    text: 'Wrong morphology'
   }),
   commentFactory.build({
-    category: "extract result",
-    text: "Technical error",
+    category: 'stain QC',
+    text: 'Section invisible',
+    enabled: false
   }),
   commentFactory.build({
-    category: "extract result",
-    text: "Human error",
+    category: 'extract result',
+    text: 'Technical error'
   }),
   commentFactory.build({
-    category: "extract result",
-    text: "No RNA detected",
+    category: 'extract result',
+    text: 'Human error'
   }),
   commentFactory.build({
-    category: "extract result",
-    text: "Extra-Terrestrial error",
-    enabled: false,
+    category: 'extract result',
+    text: 'No RNA detected'
   }),
   commentFactory.build({
-    category: "Visium QC",
-    text: "Section invisible",
-    enabled: false,
+    category: 'extract result',
+    text: 'Extra-Terrestrial error',
+    enabled: false
   }),
   commentFactory.build({
-    category: "Visium QC",
-    text: "Wrong morphology for Visium",
+    category: 'Visium QC',
+    text: 'Section invisible',
+    enabled: false
   }),
   commentFactory.build({
-    category: "Visium QC",
-    text: "Slide damaged",
+    category: 'Visium QC',
+    text: 'Wrong morphology for Visium'
   }),
   commentFactory.build({
-    category: "Sample Processing",
-    text: "Issue while moving",
+    category: 'Visium QC',
+    text: 'Slide damaged'
   }),
   commentFactory.build({
-    category: "Sample Processing",
-    text: "Labware damaged",
+    category: 'Sample Processing',
+    text: 'Issue while moving'
   }),
   commentFactory.build({
-    category: "Sample Processing",
-    text: "Issue while fixing",
+    category: 'Sample Processing',
+    text: 'Labware damaged'
   }),
   commentFactory.build({
-    category: "Sample Processing",
-    text: "Fixatives damaged",
+    category: 'Sample Processing',
+    text: 'Issue while fixing'
   }),
   commentFactory.build({
-    category: "FFPE processing program",
-    text: "Rapid biopsy",
+    category: 'Sample Processing',
+    text: 'Fixatives damaged'
   }),
   commentFactory.build({
-    category: "FFPE processing program",
-    text: "Soft tissue",
+    category: 'FFPE processing program',
+    text: 'Rapid biopsy'
   }),
   commentFactory.build({
-    category: "FFPE processing program",
-    text: "Hard tissue",
+    category: 'FFPE processing program',
+    text: 'Soft tissue'
   }),
+  commentFactory.build({
+    category: 'FFPE processing program',
+    text: 'Hard tissue'
+  })
 ];
 
-const commentRepository = createSessionStorageRepository(
-  "COMMENTS",
-  "text",
-  seeds
-);
+const commentRepository = createSessionStorageRepository('COMMENTS', 'text', seeds);
 
 export default commentRepository;

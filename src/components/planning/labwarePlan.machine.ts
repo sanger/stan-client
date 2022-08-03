@@ -1,16 +1,16 @@
-import { createMachine } from "xstate";
-import { Maybe, PlanMutation, PlanRequestLabware } from "../../types/sdk";
-import { LabwareTypeName } from "../../types/stan";
-import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
-import { assign } from "@xstate/immer";
-import { createLayoutMachine } from "../../lib/machines/layout/layoutMachine";
-import { stanCore } from "../../lib/sdk";
-import { ClientError } from "graphql-request";
-import { LayoutMachineActorRef } from "../../lib/machines/layout";
+import { createMachine } from 'xstate';
+import { Maybe, PlanMutation, PlanRequestLabware } from '../../types/sdk';
+import { LabwareTypeName } from '../../types/stan';
+import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
+import { assign } from '@xstate/immer';
+import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
+import { stanCore } from '../../lib/sdk';
+import { ClientError } from 'graphql-request';
+import { LayoutMachineActorRef } from '../../lib/machines/layout';
 
 //region Events
 type CreateLabwareEvent = {
-  type: "CREATE_LABWARE";
+  type: 'CREATE_LABWARE';
   sectionThickness?: number;
   barcode?: string;
   quantity: number;
@@ -18,29 +18,29 @@ type CreateLabwareEvent = {
 };
 
 type UpdateLayoutPlanEvent = {
-  type: "UPDATE_LAYOUT_PLAN";
+  type: 'UPDATE_LAYOUT_PLAN';
   layoutPlan: LayoutPlan;
 };
 
 type PlanSectionResolveEvent = {
-  type: "done.invoke.planSection";
+  type: 'done.invoke.planSection';
   data: PlanMutation;
 };
 
 type PlanSectionRejectEvent = {
-  type: "error.platform.planSection";
+  type: 'error.platform.planSection';
   data: ClientError;
 };
 
 type LayoutMachineDone = {
-  type: "done.invoke.layoutMachine";
+  type: 'done.invoke.layoutMachine';
   data: { layoutPlan: LayoutPlan };
 };
 
 type LabwarePlanEvent =
-  | { type: "EDIT_LAYOUT" }
-  | { type: "CANCEL_EDIT_LAYOUT" }
-  | { type: "DONE_EDIT_LAYOUT" }
+  | { type: 'EDIT_LAYOUT' }
+  | { type: 'CANCEL_EDIT_LAYOUT' }
+  | { type: 'DONE_EDIT_LAYOUT' }
   | CreateLabwareEvent
   | UpdateLayoutPlanEvent
   | PlanSectionResolveEvent
@@ -89,88 +89,85 @@ interface LabwarePlanContext {
 export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
   createMachine<LabwarePlanContext, LabwarePlanEvent>(
     {
-      key: "labwarePlan",
+      key: 'labwarePlan',
       context: {
         requestError: null,
-        layoutPlan: initialLayoutPlan,
+        layoutPlan: initialLayoutPlan
       },
-      initial: "prep",
+      initial: 'prep',
       states: {
         prep: {
-          initial: "invalid",
+          initial: 'invalid',
           states: {
             valid: {
               on: {
                 CREATE_LABWARE: {
-                  target: "#labwarePlan.creating",
-                },
-              },
+                  target: '#labwarePlan.creating'
+                }
+              }
             },
             errored: {
               on: {
                 CREATE_LABWARE: {
-                  target: "#labwarePlan.creating",
-                },
-              },
+                  target: '#labwarePlan.creating'
+                }
+              }
             },
-            invalid: {},
+            invalid: {}
           },
           on: {
-            EDIT_LAYOUT: "editingLayout",
-          },
+            EDIT_LAYOUT: 'editingLayout'
+          }
         },
         editingLayout: {
           invoke: {
-            src: "layoutMachine",
-            id: "layoutMachine",
+            src: 'layoutMachine',
+            id: 'layoutMachine',
             onDone: {
-              target: "validatingLayout",
-              actions: "assignLayoutPlan",
-            },
-          },
+              target: 'validatingLayout',
+              actions: 'assignLayoutPlan'
+            }
+          }
         },
         validatingLayout: {
-          always: [
-            { cond: "isLayoutValid", target: "prep.valid" },
-            { target: "prep.invalid" },
-          ],
+          always: [{ cond: 'isLayoutValid', target: 'prep.valid' }, { target: 'prep.invalid' }]
         },
         creating: {
           invoke: {
-            id: "planSection",
-            src: "planSection",
+            id: 'planSection',
+            src: 'planSection',
             onDone: [
               {
-                cond: "isVisiumLP",
-                target: "done",
-                actions: ["assignPlanResponse"],
+                cond: 'isVisiumLP',
+                target: 'done',
+                actions: ['assignPlanResponse']
               },
               {
-                target: "printing",
-                actions: ["assignPlanResponse"],
-              },
+                target: 'printing',
+                actions: ['assignPlanResponse']
+              }
             ],
             onError: {
-              target: "prep.errored",
-              actions: "assignRequestErrors",
-            },
-          },
+              target: 'prep.errored',
+              actions: 'assignRequestErrors'
+            }
+          }
         },
         printing: {},
-        done: {},
-      },
+        done: {}
+      }
     },
     {
       actions: {
         assignLayoutPlan: assign((ctx, e) => {
-          if (e.type !== "done.invoke.layoutMachine" || !e.data) {
+          if (e.type !== 'done.invoke.layoutMachine' || !e.data) {
             return;
           }
           ctx.layoutPlan = e.data.layoutPlan;
         }),
 
         assignPlanResponse: assign((ctx, e) => {
-          if (e.type !== "done.invoke.planSection" || !e.data) {
+          if (e.type !== 'done.invoke.planSection' || !e.data) {
             return;
           }
 
@@ -178,19 +175,17 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
         }),
 
         assignRequestErrors: assign((ctx, e) => {
-          if (e.type !== "error.platform.planSection") {
+          if (e.type !== 'error.platform.planSection') {
             return;
           }
           ctx.requestError = e.data;
-        }),
+        })
       },
 
       guards: {
-        isVisiumLP: (ctx) =>
-          ctx.layoutPlan.destinationLabware.labwareType.name ===
-          LabwareTypeName.VISIUM_LP,
+        isVisiumLP: (ctx) => ctx.layoutPlan.destinationLabware.labwareType.name === LabwareTypeName.VISIUM_LP,
 
-        isLayoutValid: (ctx) => ctx.layoutPlan.plannedActions.size > 0,
+        isLayoutValid: (ctx) => ctx.layoutPlan.plannedActions.size > 0
       },
 
       services: {
@@ -199,25 +194,22 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
         },
 
         planSection: (ctx, e) => {
-          if (e.type !== "CREATE_LABWARE") {
+          if (e.type !== 'CREATE_LABWARE') {
             return Promise.reject();
           }
 
           const planRequestLabware = buildPlanRequestLabware({
             sampleThickness: e.sectionThickness,
             layoutPlan: ctx.layoutPlan,
-            destinationLabwareTypeName:
-              ctx.layoutPlan.destinationLabware.labwareType.name,
-            barcode: e.barcode,
+            destinationLabwareTypeName: ctx.layoutPlan.destinationLabware.labwareType.name,
+            barcode: e.barcode
           });
-          const labware: PlanRequestLabware[] = new Array(e.quantity).fill(
-            planRequestLabware
-          );
+          const labware: PlanRequestLabware[] = new Array(e.quantity).fill(planRequestLabware);
           return stanCore.Plan({
-            request: { labware, operationType: e.operationType },
+            request: { labware, operationType: e.operationType }
           });
-        },
-      },
+        }
+      }
     }
   );
 
@@ -232,7 +224,7 @@ function buildPlanRequestLabware({
   barcode,
   destinationLabwareTypeName,
   layoutPlan,
-  sampleThickness,
+  sampleThickness
 }: BuildPlanRequestLabwareParams): PlanRequestLabware {
   return {
     labwareType: destinationLabwareTypeName,
@@ -245,9 +237,9 @@ function buildPlanRequestLabware({
         sampleId: source.sampleId,
         source: {
           barcode: source.labware.barcode,
-          address: source.address,
-        },
+          address: source.address
+        }
       }));
-    }),
+    })
   };
 }

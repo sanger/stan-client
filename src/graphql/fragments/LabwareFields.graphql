@@ -1,16 +1,16 @@
 fragment LabwareFields on Labware {
-    id
-    barcode
-    externalBarcode
-    destroyed
-    discarded
-    released
-    state
-    created
-    labwareType {
-        ...LabwareTypeFields
-    }
-    slots {
-        ...SlotFields
-    }
+  id
+  barcode
+  externalBarcode
+  destroyed
+  discarded
+  released
+  state
+  created
+  labwareType {
+    ...LabwareTypeFields
+  }
+  slots {
+    ...SlotFields
+  }
 }

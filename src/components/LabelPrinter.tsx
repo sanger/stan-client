@@ -1,22 +1,18 @@
-import React, { useEffect } from "react";
-import { optionValues } from "./forms";
-import { useMachine } from "@xstate/react";
-import LoadingSpinner from "./icons/LoadingSpinner";
-import Success from "./notifications/Success";
-import Warning from "./notifications/Warning";
-import BlueButton from "./buttons/BlueButton";
-import { LabwareFieldsFragment, PrinterFieldsFragment } from "../types/sdk";
-import { PrintResultType } from "../types/stan";
-import createLabelPrinterMachine from "../lib/machines/labelPrinter/labelPrinterMachine";
+import React, { useEffect } from 'react';
+import { optionValues } from './forms';
+import { useMachine } from '@xstate/react';
+import LoadingSpinner from './icons/LoadingSpinner';
+import Success from './notifications/Success';
+import Warning from './notifications/Warning';
+import BlueButton from './buttons/BlueButton';
+import { LabwareFieldsFragment, PrinterFieldsFragment } from '../types/sdk';
+import { PrintResultType } from '../types/stan';
+import createLabelPrinterMachine from '../lib/machines/labelPrinter/labelPrinterMachine';
 
 interface LabelPrinterProps {
   labwares: Array<LabwareFieldsFragment>;
   labelsPerBarcode?: number;
-  onPrint?: (
-    printer: PrinterFieldsFragment,
-    labwares: Array<LabwareFieldsFragment>,
-    labelsPerBarcode: number
-  ) => void;
+  onPrint?: (printer: PrinterFieldsFragment, labwares: Array<LabwareFieldsFragment>, labelsPerBarcode: number) => void;
   onPrintError?: (
     printer: PrinterFieldsFragment,
     labwares: Array<LabwareFieldsFragment>,
@@ -32,39 +28,25 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
   onPrint,
   onPrintError,
   onPrinterChange,
-  showNotifications = true,
+  showNotifications = true
 }) => {
   const [current, send, service] = useMachine(
     createLabelPrinterMachine({
       context: {
         selectedPrinter: null,
-        labwares,
-      },
+        labwares
+      }
     })
   );
 
   useEffect(() => {
     const subscription = service.subscribe((state) => {
-      if (
-        state.context.selectedPrinter &&
-        state.matches({ ready: "printSuccess" })
-      ) {
-        onPrint?.(
-          state.context.selectedPrinter,
-          state.context.labwares,
-          labelsPerBarcode
-        );
+      if (state.context.selectedPrinter && state.matches({ ready: 'printSuccess' })) {
+        onPrint?.(state.context.selectedPrinter, state.context.labwares, labelsPerBarcode);
       }
 
-      if (
-        state.context.selectedPrinter &&
-        state.matches({ ready: "printError" })
-      ) {
-        onPrintError?.(
-          state.context.selectedPrinter,
-          state.context.labwares,
-          labelsPerBarcode
-        );
+      if (state.context.selectedPrinter && state.matches({ ready: 'printError' })) {
+        onPrintError?.(state.context.selectedPrinter, state.context.labwares, labelsPerBarcode);
       }
     });
 
@@ -75,54 +57,47 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
     onPrinterChange?.(current.context.selectedPrinter!);
   }, [current.context.selectedPrinter, onPrinterChange]);
 
-  if (current.matches("fetching")) {
+  if (current.matches('fetching')) {
     return <LoadingSpinner />;
   }
 
   const { context } = current;
 
-  const updateSelectedLabelPrinter = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const updateSelectedLabelPrinter = (e: React.ChangeEvent<HTMLSelectElement>) => {
     send({
-      type: "UPDATE_SELECTED_LABEL_PRINTER",
-      name: e.currentTarget.value,
+      type: 'UPDATE_SELECTED_LABEL_PRINTER',
+      name: e.currentTarget.value
     });
   };
 
-  const printLabels = () => send({ type: "PRINT", labelsPerBarcode });
+  const printLabels = () => send({ type: 'PRINT', labelsPerBarcode });
 
   return (
     <div className="space-y-4">
-      {showNotifications &&
-        (current.matches({ ready: "printSuccess" }) ||
-          current.matches({ ready: "printError" })) && (
-          <PrintResult
-            result={{
-              successful: current.matches({ ready: "printSuccess" }),
-              labelsPerBarcode,
-              printer: context.selectedPrinter!,
-              labwares: context.labwares,
-            }}
-          />
-        )}
+      {showNotifications && (current.matches({ ready: 'printSuccess' }) || current.matches({ ready: 'printError' })) && (
+        <PrintResult
+          result={{
+            successful: current.matches({ ready: 'printSuccess' }),
+            labelsPerBarcode,
+            printer: context.selectedPrinter!,
+            labwares: context.labwares
+          }}
+        />
+      )}
       <div className="sm:flex sm:flex-row space-y-2 items-center justify-end sm:space-x-2 sm:space-y-0">
         <select
           aria-label="printers"
-          disabled={current.matches("printing")}
+          disabled={current.matches('printing')}
           value={context.selectedPrinter?.name}
           className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 sm:w-1/2"
           onChange={updateSelectedLabelPrinter}
         >
-          {context.printers?.length > 0 &&
-            optionValues(context.printers, "name", "name")}
+          {context.printers?.length > 0 && optionValues(context.printers, 'name', 'name')}
         </select>
 
         <div>
           <BlueButton
-            disabled={
-              current.matches("printing") || context.printers?.length === 0
-            }
+            disabled={current.matches('printing') || context.printers?.length === 0}
             onClick={printLabels}
             className="flex flex-row items-center justify-center space-x-1"
           >
@@ -153,20 +128,16 @@ export function PrintResult(props: { result: PrintResultType }) {
     return (
       <Success
         message={`${props.result.printer.name} successfully printed${
-          props.result.labelsPerBarcode > 1
-            ? " " + props.result.labelsPerBarcode + " labels for"
-            : ""
-        } ${props.result.labwares.map((lw) => lw.barcode).join(", ")}`}
+          props.result.labelsPerBarcode > 1 ? ' ' + props.result.labelsPerBarcode + ' labels for' : ''
+        } ${props.result.labwares.map((lw) => lw.barcode).join(', ')}`}
       />
     );
   } else {
     return (
       <Warning
-        message={`${
-          props.result.printer.name
-        } failed to print ${props.result.labwares
+        message={`${props.result.printer.name} failed to print ${props.result.labwares
           .map((lw) => lw.barcode)
-          .join(", ")}`}
+          .join(', ')}`}
       />
     );
   }

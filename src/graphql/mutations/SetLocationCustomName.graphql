@@ -1,5 +1,5 @@
 mutation SetLocationCustomName($locationBarcode: String!, $newCustomName: String!) {
-    setLocationCustomName(locationBarcode: $locationBarcode, customName: $newCustomName) {
-        ...LocationFields
-    }
+  setLocationCustomName(locationBarcode: $locationBarcode, customName: $newCustomName) {
+    ...LocationFields
+  }
 }

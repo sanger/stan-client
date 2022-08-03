@@ -1,20 +1,20 @@
 query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatus!]) {
-    projects(includeDisabled: false) {
-        ...ProjectFields
-    }
-    costCodes(includeDisabled: false) {
-        ...CostCodeFields
-    }
-    worksWithComments(status: $workStatuses) {
-        ...WorkWithCommentFields
-    }
-    workTypes {
-        ...WorkTypeFields
-    }
-    comments(category: $commentCategory, includeDisabled: false) {
-        ...CommentFields
-    }
-    releaseRecipients(includeDisabled: false) {
-        ...ReleaseRecipientFields
-    }
+  projects(includeDisabled: false) {
+    ...ProjectFields
+  }
+  costCodes(includeDisabled: false) {
+    ...CostCodeFields
+  }
+  worksWithComments(status: $workStatuses) {
+    ...WorkWithCommentFields
+  }
+  workTypes {
+    ...WorkTypeFields
+  }
+  comments(category: $commentCategory, includeDisabled: false) {
+    ...CommentFields
+  }
+  releaseRecipients(includeDisabled: false) {
+    ...ReleaseRecipientFields
+  }
 }

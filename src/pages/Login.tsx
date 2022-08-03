@@ -1,36 +1,27 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { Link, Redirect, RouteComponentProps } from "react-router-dom";
-import { StaticContext } from "react-router";
-import {
-  ErrorMessage,
-  Field,
-  Form,
-  Formik,
-  FormikHelpers,
-  FormikValues,
-} from "formik";
-import * as Yup from "yup";
-import LoginButton from "../components/buttons/LoginButton";
-import Warning from "../components/notifications/Warning";
-import Success from "../components/notifications/Success";
-import Logo from "../components/Logo";
-import { motion } from "framer-motion";
-import { extractServerErrors, LocationState } from "../types/stan";
-import { StanCoreContext } from "../lib/sdk";
-import { ClientError } from "graphql-request";
+import React, { useContext, useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
+import { StaticContext } from 'react-router';
+import { ErrorMessage, Field, Form, Formik, FormikHelpers, FormikValues } from 'formik';
+import * as Yup from 'yup';
+import LoginButton from '../components/buttons/LoginButton';
+import Warning from '../components/notifications/Warning';
+import Success from '../components/notifications/Success';
+import Logo from '../components/Logo';
+import { motion } from 'framer-motion';
+import { extractServerErrors, LocationState } from '../types/stan';
+import { StanCoreContext } from '../lib/sdk';
+import { ClientError } from 'graphql-request';
 
 /**
  * Schema used by Formik in the login form.
  */
 const LoginSchema = Yup.object().shape({
-  username: Yup.string().required("Username is required"),
-  password: Yup.string().required("Password is required"),
+  username: Yup.string().required('Username is required'),
+  password: Yup.string().required('Password is required')
 });
 
-const Login = (
-  props: RouteComponentProps<{}, StaticContext, LocationState>
-): JSX.Element => {
+const Login = (props: RouteComponentProps<{}, StaticContext, LocationState>): JSX.Element => {
   const auth = useAuth();
 
   // If the user was redirected here because they were logged in, and then their session expired, clear the AuthState
@@ -45,8 +36,8 @@ const Login = (
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const formInitialValues = {
-    username: "",
-    password: "",
+    username: '',
+    password: ''
   };
 
   const submitCredentials = async (
@@ -58,11 +49,11 @@ const Login = (
 
       const { login } = await stanCore.Login({
         username: credentials.username,
-        password: credentials.password,
+        password: credentials.password
       });
 
       if (!login?.user?.username) {
-        setErrorMessage("Username or password is incorrect");
+        setErrorMessage('Username or password is incorrect');
         formikHelpers.setSubmitting(false);
         return;
       }
@@ -73,7 +64,7 @@ const Login = (
       // Allow some time for the user to see the success message before redirecting
       setTimeout(() => {
         auth.setAuthState({
-          user: userInfo,
+          user: userInfo
         });
         formikHelpers.setSubmitting(false);
       }, 1500);
@@ -85,9 +76,7 @@ const Login = (
 
   return (
     <>
-      {auth.isAuthenticated() && (
-        <Redirect to={props.location.state?.referrer ?? "/"} />
-      )}
+      {auth.isAuthenticated() && <Redirect to={props.location.state?.referrer ?? '/'} />}
 
       <div className="bg-gradient-to-bl from-sdb to-sdb-400">
         <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -103,36 +92,20 @@ const Login = (
               </Link>
             </div>
             <div>
-              <h2 className="mt-6 text-center text-3xl leading-9 font-extrabold text-white">
-                Sign in to STAN
-              </h2>
+              <h2 className="mt-6 text-center text-3xl leading-9 font-extrabold text-white">Sign in to STAN</h2>
             </div>
 
-            {showLoginSuccess && (
-              <Success message={"Login Successful!"} className="mt-8" />
+            {showLoginSuccess && <Success message={'Login Successful!'} className="mt-8" />}
+
+            {props.location.state?.success && !showLoginSuccess && errorMessage == null && (
+              <Success message={props.location.state.success} className="mt-8" />
             )}
 
-            {props.location.state?.success &&
-              !showLoginSuccess &&
-              errorMessage == null && (
-                <Success
-                  message={props.location.state.success}
-                  className="mt-8"
-                />
-              )}
-
-            {props.location.state?.warning &&
-              !showLoginSuccess &&
-              errorMessage == null && (
-                <Warning
-                  className="mt-8"
-                  message={props.location.state.warning}
-                />
-              )}
-
-            {errorMessage && (
-              <Warning className="mt-8" message={errorMessage} />
+            {props.location.state?.warning && !showLoginSuccess && errorMessage == null && (
+              <Warning className="mt-8" message={props.location.state.warning} />
             )}
+
+            {errorMessage && <Warning className="mt-8" message={errorMessage} />}
 
             <Formik
               initialValues={formInitialValues}
@@ -172,9 +145,7 @@ const Login = (
                   </div>
 
                   <div className="mt-6">
-                    <LoginButton loading={formik.isSubmitting}>
-                      Sign In
-                    </LoginButton>
+                    <LoginButton loading={formik.isSubmitting}>Sign In</LoginButton>
                   </div>
                 </Form>
               )}

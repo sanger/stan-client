@@ -1,8 +1,8 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { enableAllPlugins } from "immer";
-import "./styles/index.css";
-import App from "./App";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { enableAllPlugins } from 'immer';
+import './styles/index.css';
+import App from './App';
 
 // To use the XState Inspector, uncomment the following lines
 // import { inspect } from "@xstate/inspect";
@@ -22,8 +22,8 @@ enableAllPlugins();
  * @see cypress/support/commands.ts
  */
 async function prepare() {
-  if (process.env.REACT_APP_MOCK_API === "msw") {
-    const { worker } = require("./mocks/mswSetup");
+  if (process.env.REACT_APP_MOCK_API === 'msw') {
+    const { worker } = require('./mocks/mswSetup');
     await worker.start();
   }
 }
@@ -33,8 +33,8 @@ prepare().then(() => {
     <React.StrictMode>
       <App />
     </React.StrictMode>,
-    document.getElementById("root"),
-    () => window.dispatchEvent(new CustomEvent("reactRenderComplete"))
+    document.getElementById('root'),
+    () => window.dispatchEvent(new CustomEvent('reactRenderComplete'))
   );
 });
 

@@ -1,6 +1,6 @@
-import React, { useRef, useState } from "react";
-import { useOnClickOutside } from "../../lib/hooks";
-import { AnimatePresence, motion } from "framer-motion";
+import React, { useRef, useState } from 'react';
+import { useOnClickOutside } from '../../lib/hooks';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface MenuProps {
   caption: string;
@@ -10,13 +10,7 @@ interface MenuProps {
   children?: React.ReactNode;
 }
 
-const Menu: React.FC<MenuProps> = ({
-  caption,
-  description,
-  topMostMenu = false,
-  icon,
-  children,
-}) => {
+const Menu: React.FC<MenuProps> = ({ caption, description, topMostMenu = false, icon, children }) => {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuDropdownRef = useRef<HTMLDivElement>(null);
   const [menuDropdownOpen, setMenuDropdownOpen] = useState(false);
@@ -30,7 +24,7 @@ const Menu: React.FC<MenuProps> = ({
   );
 
   const MenuDropDownIcon: React.FC<{ open: boolean }> = ({ open }) => {
-    let rotatePos = open ? "180" : "0";
+    let rotatePos = open ? '180' : '0';
     return (
       <svg
         className={`ml-2 h-5 w-5 text-gray-400 group-hover:text-gray-500`}
@@ -50,12 +44,8 @@ const Menu: React.FC<MenuProps> = ({
   };
 
   return (
-    <div
-      className={`${
-        topMostMenu ? "relative" : "relative rounded-lg hover:bg-gray-50"
-      }`}
-    >
-      <div className={"flex"}>
+    <div className={`${topMostMenu ? 'relative' : 'relative rounded-lg hover:bg-gray-50'}`}>
+      <div className={'flex'}>
         <div className="flex flex-row w-full">
           {icon}
           <button
@@ -64,23 +54,19 @@ const Menu: React.FC<MenuProps> = ({
             type="button"
             className={`rounded-md inline-flex focus:outline-none ${
               topMostMenu
-                ? "group items-center px-3 py-2 rounded-md text-sm font-medium focus:text-white focus:bg-gray-700 text-gray-100 hover:text-white hover:bg-gray-700"
-                : "w-full ml-4 justify-between outline-none hover:bg-gray-50"
+                ? 'group items-center px-3 py-2 rounded-md text-sm font-medium focus:text-white focus:bg-gray-700 text-gray-100 hover:text-white hover:bg-gray-700'
+                : 'w-full ml-4 justify-between outline-none hover:bg-gray-50'
             }`}
           >
-            <div className={"flex flex-col"}>
-              <span className={"text-left"}>{caption}</span>
-              {description && !menuDropdownOpen && (
-                <div className={"mt-1 text-sm text-gray-500"}>
-                  {description}
-                </div>
-              )}
+            <div className={'flex flex-col'}>
+              <span className={'text-left'}>{caption}</span>
+              {description && !menuDropdownOpen && <div className={'mt-1 text-sm text-gray-500'}>{description}</div>}
             </div>
             <MenuDropDownIcon open={menuDropdownOpen} />
           </button>
         </div>
       </div>
-      <div className={"flex flex-row"}>
+      <div className={'flex flex-row'}>
         {menuDropdownOpen && (
           <AnimatePresence>
             <motion.div
@@ -92,17 +78,9 @@ const Menu: React.FC<MenuProps> = ({
             >
               <div
                 className={`rounded-lg  border-2 border-white
-                  ${
-                    topMostMenu
-                      ? "shadow-lg ring-black ring-1 ring-opacity-5"
-                      : "shadow-xl"
-                  }`}
+                  ${topMostMenu ? 'shadow-lg ring-black ring-1 ring-opacity-5' : 'shadow-xl'}`}
               >
-                <div
-                  className={`bg-white grid gap-6 px-5 py-6 sm:gap-8 sm:p-8`}
-                >
-                  {children}
-                </div>
+                <div className={`bg-white grid gap-6 px-5 py-6 sm:gap-8 sm:p-8`}>{children}</div>
               </div>
             </motion.div>
           </AnimatePresence>

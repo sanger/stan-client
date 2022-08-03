@@ -1,27 +1,27 @@
 query GetRegistrationInfo {
-    species {
-        name
+  species {
+    name
+  }
+  hmdmcs {
+    hmdmc
+  }
+  labwareTypes {
+    ...LabwareTypeFields
+  }
+  tissueTypes {
+    name
+    spatialLocations {
+      name
+      code
     }
-    hmdmcs {
-        hmdmc
-    }
-    labwareTypes {
-        ...LabwareTypeFields
-    }
-    tissueTypes {
-        name
-        spatialLocations {
-            name
-            code
-        }
-    }
-    fixatives {
-        name
-    }
-    mediums {
-        name
-    }
-    solutions {
-        name
-    }
+  }
+  fixatives {
+    name
+  }
+  mediums {
+    name
+  }
+  solutions {
+    name
+  }
 }

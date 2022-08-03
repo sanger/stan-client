@@ -1,7 +1,7 @@
 mutation VisiumAnalysis($request: VisiumAnalysisRequest!) {
-    visiumAnalysis(request: $request) {
-        operations {
-            id
-        }
+  visiumAnalysis(request: $request) {
+    operations {
+      id
     }
+  }
 }

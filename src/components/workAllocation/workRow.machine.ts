@@ -1,4 +1,4 @@
-import { createMachine } from "xstate";
+import { createMachine } from 'xstate';
 import {
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumOriginalSamplesMutation,
@@ -6,11 +6,11 @@ import {
   UpdateWorkPriorityMutation,
   UpdateWorkStatusMutation,
   WorkStatus,
-  WorkWithCommentFieldsFragment,
-} from "../../types/sdk";
-import { MachineServiceDone } from "../../types/stan";
-import { stanCore } from "../../lib/sdk";
-import { assign } from "@xstate/immer";
+  WorkWithCommentFieldsFragment
+} from '../../types/sdk';
+import { MachineServiceDone } from '../../types/stan';
+import { stanCore } from '../../lib/sdk';
+import { assign } from '@xstate/immer';
 
 type WorkRowMachineContext = {
   /**
@@ -25,170 +25,163 @@ type WorkRowMachineContext = {
 };
 
 export type WorkRowEvent =
-  | { type: "EDIT" }
-  | { type: "PAUSE"; commentId: number }
-  | { type: "COMPLETE"; commentId: undefined }
-  | { type: "FAIL"; commentId: number }
-  | { type: "WITHDRAW"; commentId: number }
-  | { type: "REACTIVATE"; commentId: undefined }
-  | { type: "ACTIVE"; commentId: undefined }
-  | { type: "UPDATE_NUM_BLOCKS"; numBlocks: number | undefined }
-  | { type: "UPDATE_NUM_SLIDES"; numSlides: number | undefined }
-  | { type: "UPDATE_NUM_ORIGINAL_SAMPLES"; numOriginalSamples: number | undefined }
-  | { type: "UPDATE_PRIORITY"; priority: string | undefined }
-  | MachineServiceDone<"updateWorkStatus", UpdateWorkStatusMutation>
-  | MachineServiceDone<"updateWorkNumBlocks", UpdateWorkNumBlocksMutation>
-  | MachineServiceDone<"updateWorkNumSlides", UpdateWorkNumSlidesMutation>
-  | MachineServiceDone<"updateWorkPriority", UpdateWorkPriorityMutation>
-  | MachineServiceDone<"updateWorkNumOriginalSamples", UpdateWorkNumOriginalSamplesMutation>;
+  | { type: 'EDIT' }
+  | { type: 'PAUSE'; commentId: number }
+  | { type: 'COMPLETE'; commentId: undefined }
+  | { type: 'FAIL'; commentId: number }
+  | { type: 'WITHDRAW'; commentId: number }
+  | { type: 'REACTIVATE'; commentId: undefined }
+  | { type: 'ACTIVE'; commentId: undefined }
+  | { type: 'UPDATE_NUM_BLOCKS'; numBlocks: number | undefined }
+  | { type: 'UPDATE_NUM_SLIDES'; numSlides: number | undefined }
+  | { type: 'UPDATE_NUM_ORIGINAL_SAMPLES'; numOriginalSamples: number | undefined }
+  | { type: 'UPDATE_PRIORITY'; priority: string | undefined }
+  | MachineServiceDone<'updateWorkStatus', UpdateWorkStatusMutation>
+  | MachineServiceDone<'updateWorkNumBlocks', UpdateWorkNumBlocksMutation>
+  | MachineServiceDone<'updateWorkNumSlides', UpdateWorkNumSlidesMutation>
+  | MachineServiceDone<'updateWorkPriority', UpdateWorkPriorityMutation>
+  | MachineServiceDone<'updateWorkNumOriginalSamples', UpdateWorkNumOriginalSamplesMutation>;
 
-type CreateWorkRowMachineParams = Pick<
-  WorkRowMachineContext,
-  "workWithComment"
->;
+type CreateWorkRowMachineParams = Pick<WorkRowMachineContext, 'workWithComment'>;
 
-export default function createWorkRowMachine({
-  workWithComment,
-}: CreateWorkRowMachineParams) {
+export default function createWorkRowMachine({ workWithComment }: CreateWorkRowMachineParams) {
   return createMachine<WorkRowMachineContext, WorkRowEvent>(
     {
-      id: "workRowMachine",
+      id: 'workRowMachine',
       context: {
         workWithComment,
-        editModeEnabled: false,
+        editModeEnabled: false
       },
-      initial: "deciding",
+      initial: 'deciding',
       states: {
         deciding: {
           always: [
-            maybeGoToStatus("unstarted"),
-            maybeGoToStatus("active"),
-            maybeGoToStatus("paused"),
-            maybeGoToStatus("completed"),
-            maybeGoToStatus("failed"),
-            maybeGoToStatus("withdrawn"),
-          ],
+            maybeGoToStatus('unstarted'),
+            maybeGoToStatus('active'),
+            maybeGoToStatus('paused'),
+            maybeGoToStatus('completed'),
+            maybeGoToStatus('failed'),
+            maybeGoToStatus('withdrawn')
+          ]
         },
         unstarted: {
           on: {
-            EDIT: { actions: "toggleEditMode" },
-            ACTIVE: "updating",
-            UPDATE_NUM_BLOCKS: "editNumberBlocks",
-            UPDATE_NUM_SLIDES: "editNumberSlides",
-            UPDATE_NUM_ORIGINAL_SAMPLES: "editNumberOriginalSamples",
-            UPDATE_PRIORITY: "editPriority",
-          },
+            EDIT: { actions: 'toggleEditMode' },
+            ACTIVE: 'updating',
+            UPDATE_NUM_BLOCKS: 'editNumberBlocks',
+            UPDATE_NUM_SLIDES: 'editNumberSlides',
+            UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
+            UPDATE_PRIORITY: 'editPriority'
+          }
         },
         active: {
           on: {
-            EDIT: { actions: "toggleEditMode" },
-            PAUSE: "updating",
-            COMPLETE: "updating",
-            FAIL: "updating",
-            WITHDRAW: "updating",
-            UPDATE_NUM_BLOCKS: "editNumberBlocks",
-            UPDATE_NUM_SLIDES: "editNumberSlides",
-            UPDATE_NUM_ORIGINAL_SAMPLES: "editNumberOriginalSamples",
-            UPDATE_PRIORITY: "editPriority",
-          },
+            EDIT: { actions: 'toggleEditMode' },
+            PAUSE: 'updating',
+            COMPLETE: 'updating',
+            FAIL: 'updating',
+            WITHDRAW: 'updating',
+            UPDATE_NUM_BLOCKS: 'editNumberBlocks',
+            UPDATE_NUM_SLIDES: 'editNumberSlides',
+            UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
+            UPDATE_PRIORITY: 'editPriority'
+          }
         },
         paused: {
           on: {
-            EDIT: { actions: "toggleEditMode" },
-            REACTIVATE: "updating",
-            COMPLETE: "updating",
-            FAIL: "updating",
-            WITHDRAW: "updating",
-            UPDATE_NUM_BLOCKS: "editNumberBlocks",
-            UPDATE_NUM_SLIDES: "editNumberSlides",
-            UPDATE_NUM_ORIGINAL_SAMPLES: "editNumberOriginalSamples",
-            UPDATE_PRIORITY: "editPriority",
-          },
+            EDIT: { actions: 'toggleEditMode' },
+            REACTIVATE: 'updating',
+            COMPLETE: 'updating',
+            FAIL: 'updating',
+            WITHDRAW: 'updating',
+            UPDATE_NUM_BLOCKS: 'editNumberBlocks',
+            UPDATE_NUM_SLIDES: 'editNumberSlides',
+            UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
+            UPDATE_PRIORITY: 'editPriority'
+          }
         },
         completed: {},
         failed: {},
         withdrawn: {},
         updating: {
           invoke: {
-            src: "updateWorkStatus",
-            id: "updateWorkStatus",
+            src: 'updateWorkStatus',
+            id: 'updateWorkStatus',
             onDone: {
-              actions: ["assignSgpNumber", "toggleEditMode"],
-              target: "deciding",
+              actions: ['assignSgpNumber', 'toggleEditMode'],
+              target: 'deciding'
             },
-            onError: { target: "deciding" },
-          },
+            onError: { target: 'deciding' }
+          }
         },
         editNumberBlocks: {
           invoke: {
-            src: "updateWorkNumBlocks",
-            id: "updateWorkNumBlocks",
+            src: 'updateWorkNumBlocks',
+            id: 'updateWorkNumBlocks',
             onDone: {
-              actions: "assignWorkNumBlocks",
-              target: "deciding",
+              actions: 'assignWorkNumBlocks',
+              target: 'deciding'
             },
-            onError: { target: "deciding" },
-          },
+            onError: { target: 'deciding' }
+          }
         },
         editNumberSlides: {
           invoke: {
-            src: "updateWorkNumSlides",
-            id: "updateWorkNumSlides",
+            src: 'updateWorkNumSlides',
+            id: 'updateWorkNumSlides',
             onDone: {
-              actions: "assignWorkNumSlides",
-              target: "deciding",
+              actions: 'assignWorkNumSlides',
+              target: 'deciding'
             },
-            onError: { target: "deciding" },
-          },
+            onError: { target: 'deciding' }
+          }
         },
         editNumberOriginalSamples: {
           invoke: {
-            src: "updateWorkNumOriginalSamples",
+            src: 'updateWorkNumOriginalSamples',
             onDone: {
-              actions: "assignWorkNumOriginalSamples",
-              target: "deciding",
+              actions: 'assignWorkNumOriginalSamples',
+              target: 'deciding'
             },
-            onError: { target: "deciding" },
-          },
+            onError: { target: 'deciding' }
+          }
         },
         editPriority: {
           invoke: {
-            src: "updateWorkPriority",
-            id: "updateWorkPriority",
+            src: 'updateWorkPriority',
+            id: 'updateWorkPriority',
             onDone: {
-              actions: "assignWorkPriority",
-              target: "deciding",
+              actions: 'assignWorkPriority',
+              target: 'deciding'
             },
-            onError: { target: "deciding" },
-          },
-        },
-      },
+            onError: { target: 'deciding' }
+          }
+        }
+      }
     },
     {
       actions: {
         assignSgpNumber: assign((ctx, e) => {
-          if (e.type !== "done.invoke.updateWorkStatus") return;
+          if (e.type !== 'done.invoke.updateWorkStatus') return;
           ctx.workWithComment = e.data.updateWorkStatus;
         }),
         assignWorkNumBlocks: assign((ctx, e) => {
-          if (e.type !== "done.invoke.updateWorkNumBlocks") return;
+          if (e.type !== 'done.invoke.updateWorkNumBlocks') return;
           ctx.workWithComment.work = e.data.updateWorkNumBlocks;
         }),
         assignWorkNumSlides: assign((ctx, e) => {
-          if (e.type !== "done.invoke.updateWorkNumSlides") return;
+          if (e.type !== 'done.invoke.updateWorkNumSlides') return;
           ctx.workWithComment.work = e.data.updateWorkNumSlides;
         }),
         assignWorkNumOriginalSamples: assign((ctx, e) => {
-          if (e.type !== "done.invoke.updateWorkNumOriginalSamples") return;
+          if (e.type !== 'done.invoke.updateWorkNumOriginalSamples') return;
           ctx.workWithComment.work = e.data.updateWorkNumOriginalSamples;
         }),
         assignWorkPriority: assign((ctx, e) => {
-          if (e.type !== "done.invoke.updateWorkPriority") return;
+          if (e.type !== 'done.invoke.updateWorkPriority') return;
           ctx.workWithComment.work = e.data.updateWorkPriority;
         }),
-        toggleEditMode: assign(
-          (ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled)
-        ),
+        toggleEditMode: assign((ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled))
       },
 
       services: {
@@ -196,44 +189,41 @@ export default function createWorkRowMachine({
           return stanCore.UpdateWorkStatus({
             workNumber: ctx.workWithComment.work.workNumber,
             status: getWorkStatusFromEventType(e),
-            commentId: "commentId" in e ? e.commentId : undefined,
+            commentId: 'commentId' in e ? e.commentId : undefined
           });
         },
         updateWorkNumBlocks: (ctx, e) => {
           let params: { workNumber: string; numBlocks?: number } = {
-            workNumber: ctx.workWithComment.work.workNumber,
+            workNumber: ctx.workWithComment.work.workNumber
           };
-          if ("numBlocks" in e && e.numBlocks)
-            params["numBlocks"] = e.numBlocks;
+          if ('numBlocks' in e && e.numBlocks) params['numBlocks'] = e.numBlocks;
 
           return stanCore.UpdateWorkNumBlocks(params);
         },
         updateWorkNumSlides: (ctx, e) => {
           let params: { workNumber: string; numSlides?: number } = {
-            workNumber: ctx.workWithComment.work.workNumber,
+            workNumber: ctx.workWithComment.work.workNumber
           };
-          if ("numSlides" in e && e.numSlides)
-            params["numSlides"] = e.numSlides;
+          if ('numSlides' in e && e.numSlides) params['numSlides'] = e.numSlides;
 
           return stanCore.UpdateWorkNumSlides(params);
         },
         updateWorkNumOriginalSamples: (ctx, e) => {
           let params: { workNumber: string; numOriginalSamples?: number } = {
-            workNumber: ctx.workWithComment.work.workNumber,
+            workNumber: ctx.workWithComment.work.workNumber
           };
-          if ("numOriginalSamples" in e && e.numOriginalSamples)
-            params["numOriginalSamples"] = e.numOriginalSamples;
+          if ('numOriginalSamples' in e && e.numOriginalSamples) params['numOriginalSamples'] = e.numOriginalSamples;
 
           return stanCore.UpdateWorkNumOriginalSamples(params);
         },
         updateWorkPriority: (ctx, e) => {
           let params: { workNumber: string; priority?: string } = {
-            workNumber: ctx.workWithComment.work.workNumber,
+            workNumber: ctx.workWithComment.work.workNumber
           };
-          if ("priority" in e && e.priority) params["priority"] = e.priority;
+          if ('priority' in e && e.priority) params['priority'] = e.priority;
           return stanCore.UpdateWorkPriority(params);
-        },
-      },
+        }
+      }
     }
   );
 }
@@ -244,17 +234,17 @@ export default function createWorkRowMachine({
  */
 function getWorkStatusFromEventType(e: WorkRowEvent): WorkStatus {
   switch (e.type) {
-    case "COMPLETE":
+    case 'COMPLETE':
       return WorkStatus.Completed;
-    case "FAIL":
+    case 'FAIL':
       return WorkStatus.Failed;
-    case "WITHDRAW":
+    case 'WITHDRAW':
       return WorkStatus.Withdrawn;
-    case "PAUSE":
+    case 'PAUSE':
       return WorkStatus.Paused;
-    case "REACTIVATE":
+    case 'REACTIVATE':
       return WorkStatus.Active;
-    case "ACTIVE":
+    case 'ACTIVE':
       return WorkStatus.Active;
   }
 
@@ -268,7 +258,6 @@ function getWorkStatusFromEventType(e: WorkRowEvent): WorkStatus {
 function maybeGoToStatus(status: string) {
   return {
     target: status,
-    cond: (ctx: WorkRowMachineContext) =>
-      ctx.workWithComment.work.status.toLowerCase() === status.toLowerCase(),
+    cond: (ctx: WorkRowMachineContext) => ctx.workWithComment.work.status.toLowerCase() === status.toLowerCase()
   };
 }

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Field, useFormikContext } from "formik";
-import { Input } from "./Input";
-import Label from "./Label";
-import { ControlType, LabwareFieldsFragment, PermData } from "../../types/sdk";
-import { FormikErrorMessage, formikName } from "./index";
+import React, { useState } from 'react';
+import { Field, useFormikContext } from 'formik';
+import { Input } from './Input';
+import Label from './Label';
+import { ControlType, LabwareFieldsFragment, PermData } from '../../types/sdk';
+import { FormikErrorMessage, formikName } from './index';
 
 type PermPositiveControlProps = {
   /**
@@ -30,7 +30,7 @@ type PermPositiveControlProps = {
 export default function PermPositiveControl<T>({
   name,
   controlTube,
-  onPositiveControlSelection,
+  onPositiveControlSelection
 }: PermPositiveControlProps) {
   const { setFieldValue, getFieldProps } = useFormikContext<T>();
   const permData = getFieldProps<PermData>(name).value;
@@ -40,15 +40,11 @@ export default function PermPositiveControl<T>({
    * Reset controlType, controlBarcode from permData if there is no Control Tube
    */
   React.useEffect(() => {
-    if (
-      !controlTube &&
-      permData.controlType === ControlType.Positive &&
-      permData.controlBarcode !== undefined
-    ) {
+    if (!controlTube && permData.controlType === ControlType.Positive && permData.controlBarcode !== undefined) {
       setFieldValue(name, {
         address: permData.address,
         controlType: undefined,
-        controlBarcode: undefined,
+        controlBarcode: undefined
       });
     }
     setIsControl(permData.controlType !== undefined);
@@ -62,8 +58,7 @@ export default function PermPositiveControl<T>({
     setFieldValue(name, {
       address: permData.address,
       controlType: isChecked ? ControlType.Positive : undefined,
-      controlBarcode:
-        isChecked && controlTube ? controlTube.barcode : undefined,
+      controlBarcode: isChecked && controlTube ? controlTube.barcode : undefined
     });
     setIsControl(isChecked);
     //Callback handler to notify selection
@@ -75,7 +70,7 @@ export default function PermPositiveControl<T>({
   return (
     <div className="space-y-2">
       <div className="flex flex-row items-center gap-x-2">
-        <Label htmlFor={`${name}checkbox`} name={"Positive Control?"} />
+        <Label htmlFor={`${name}checkbox`} name={'Positive Control?'} />
         <Input
           type="checkbox"
           id={`${name}checkbox`}
@@ -85,15 +80,11 @@ export default function PermPositiveControl<T>({
         />
       </div>
       <div className="flex flex-row gap-x-2">
-        <Label name={"Control Tube:"} />
-        <Field name={formikName(name, "controlBarcode")}>
+        <Label name={'Control Tube:'} />
+        <Field name={formikName(name, 'controlBarcode')}>
           {({ field }: any) => (
-            <Label
-              data-testid={`${name}.label`}
-              name={""}
-              className="font-bold text-blue-500"
-            >
-              {field.value ?? ""}
+            <Label data-testid={`${name}.label`} name={''} className="font-bold text-blue-500">
+              {field.value ?? ''}
             </Label>
           )}
         </Field>

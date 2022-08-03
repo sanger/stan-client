@@ -1,7 +1,7 @@
-import { Key } from "react";
-import { useImmer } from "use-immer";
-import { castDraft } from "immer";
-import { Maybe } from "../../types/sdk";
+import { Key } from 'react';
+import { useImmer } from 'use-immer';
+import { castDraft } from 'immer';
+import { Maybe } from '../../types/sdk';
 
 export interface Collection<T> {
   /**
@@ -48,10 +48,7 @@ type UseCollectionParams<T> = {
   initialItems?: T[];
 };
 
-export function useCollection<T>({
-  initialItems = [],
-  getKey,
-}: UseCollectionParams<T>): Collection<T> {
+export function useCollection<T>({ initialItems = [], getKey }: UseCollectionParams<T>): Collection<T> {
   const [items, updateItems] = useImmer(() => {
     // Convert the list of items into a map for internal use
     const items = new Map<Key, T>();
@@ -82,6 +79,6 @@ export function useCollection<T>({
       });
     },
 
-    getItem: (key) => items.get(key) ?? null,
+    getItem: (key) => items.get(key) ?? null
   };
 }

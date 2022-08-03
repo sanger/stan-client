@@ -1,14 +1,7 @@
-import React, { useImperativeHandle } from "react";
-import {
-  Column,
-  PluginHook,
-  SortingRule,
-  TableState,
-  useSortBy,
-  useTable,
-} from "react-table";
-import Table, { TableBody, TableCell, TableHead, TableHeader } from "./Table";
-import { motion } from "framer-motion";
+import React, { useImperativeHandle } from 'react';
+import { Column, PluginHook, SortingRule, TableState, useSortBy, useTable } from 'react-table';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from './Table';
+import { motion } from 'framer-motion';
 
 interface DataTableProps<T extends object> {
   columns: Column<T>[];
@@ -27,12 +20,7 @@ interface DataTableProps<T extends object> {
 }
 
 const DataTableComponent = <T extends Object>(
-  {
-    columns,
-    data,
-    defaultSort,
-    sortable = false,
-  }: React.PropsWithChildren<DataTableProps<T>>,
+  { columns, data, defaultSort, sortable = false }: React.PropsWithChildren<DataTableProps<T>>,
   ref?: React.Ref<T[]>
 ): React.ReactElement<DataTableProps<T>> => {
   /**
@@ -54,7 +42,7 @@ const DataTableComponent = <T extends Object>(
   if (sortable) {
     plugins.push(useSortBy);
     if (defaultSort) {
-      initialState["sortBy"] = defaultSort;
+      initialState['sortBy'] = defaultSort;
     }
   }
 
@@ -66,17 +54,11 @@ const DataTableComponent = <T extends Object>(
     {
       columns: memoedColumns,
       data: memoedData,
-      initialState,
+      initialState
     },
     ...plugins
   );
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = instance;
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = instance;
 
   // intended to be called outside of table via ref
   instance.download = () => {
@@ -84,9 +66,7 @@ const DataTableComponent = <T extends Object>(
     return rows.map((row) => {
       prepareRow(row);
       return row.cells.map((cell) => {
-        return cell.value instanceof Date
-          ? (cell.value as Date).toLocaleDateString()
-          : cell.value;
+        return cell.value instanceof Date ? (cell.value as Date).toLocaleDateString() : cell.value;
       });
     });
   };
@@ -102,12 +82,8 @@ const DataTableComponent = <T extends Object>(
         {headerGroups.map((headerGroup) => (
           <tr {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
-              <TableHeader
-                {...column.getHeaderProps(
-                  sortable ? column.getSortByToggleProps() : undefined
-                )}
-              >
-                {column.render("Header")}
+              <TableHeader {...column.getHeaderProps(sortable ? column.getSortByToggleProps() : undefined)}>
+                {column.render('Header')}
                 {column.isSorted ? (
                   column.isSortedDesc ? (
                     <svg
@@ -137,7 +113,7 @@ const DataTableComponent = <T extends Object>(
                     </svg>
                   )
                 ) : (
-                  ""
+                  ''
                 )}
               </TableHeader>
             ))}
@@ -148,17 +124,9 @@ const DataTableComponent = <T extends Object>(
         {rows.map((row) => {
           prepareRow(row);
           return (
-            <motion.tr
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              {...row.getRowProps()}
-            >
+            <motion.tr initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} {...row.getRowProps()}>
               {row.cells.map((cell) => {
-                return (
-                  <TableCell {...cell.getCellProps()}>
-                    {cell.render("Cell")}
-                  </TableCell>
-                );
+                return <TableCell {...cell.getCellProps()}>{cell.render('Cell')}</TableCell>;
               })}
             </motion.tr>
           );

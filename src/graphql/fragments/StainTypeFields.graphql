@@ -1,4 +1,4 @@
 fragment StainTypeFields on StainType {
-    name
-    measurementTypes
+  name
+  measurementTypes
 }

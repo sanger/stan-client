@@ -1,39 +1,31 @@
-import React, { useEffect, useMemo } from "react";
-import Heading from "../Heading";
-import { Form, Formik } from "formik";
-import FormikInput from "../forms/Input";
-import FormikSelect from "../forms/Select";
-import BlueButton from "../buttons/BlueButton";
-import createWorkAllocationMachine, {
-  WorkAllocationFormValues,
-} from "./workAllocation.machine";
-import { useMachine } from "@xstate/react";
-import { optionValues } from "../forms";
-import LoadingSpinner from "../icons/LoadingSpinner";
-import Table, { SortProps, TableBody, TableHead, TableHeader } from "../Table";
-import Success from "../notifications/Success";
-import Warning from "../notifications/Warning";
-import * as Yup from "yup";
-import WorkRow from "./WorkRow";
-import { WorkStatus, WorkWithCommentFieldsFragment } from "../../types/sdk";
-import {
-  getPropertyValue,
-  getTimestampStr,
-  objectKeys,
-  safeParseQueryString,
-  stringify,
-} from "../../lib/helpers";
-import { useLocation } from "react-router-dom";
-import { history } from "../../lib/sdk";
-import { useTableSort } from "../../lib/hooks/useTableSort";
-import { statusSort } from "../../types/stan";
-import DownloadIcon from "../icons/DownloadIcon";
-import { useDownload } from "../../lib/hooks/useDownload";
+import React, { useEffect, useMemo } from 'react';
+import Heading from '../Heading';
+import { Form, Formik } from 'formik';
+import FormikInput from '../forms/Input';
+import FormikSelect from '../forms/Select';
+import BlueButton from '../buttons/BlueButton';
+import createWorkAllocationMachine, { WorkAllocationFormValues } from './workAllocation.machine';
+import { useMachine } from '@xstate/react';
+import { optionValues } from '../forms';
+import LoadingSpinner from '../icons/LoadingSpinner';
+import Table, { SortProps, TableBody, TableHead, TableHeader } from '../Table';
+import Success from '../notifications/Success';
+import Warning from '../notifications/Warning';
+import * as Yup from 'yup';
+import WorkRow from './WorkRow';
+import { WorkStatus, WorkWithCommentFieldsFragment } from '../../types/sdk';
+import { getPropertyValue, getTimestampStr, objectKeys, safeParseQueryString, stringify } from '../../lib/helpers';
+import { useLocation } from 'react-router-dom';
+import { history } from '../../lib/sdk';
+import { useTableSort } from '../../lib/hooks/useTableSort';
+import { statusSort } from '../../types/stan';
+import DownloadIcon from '../icons/DownloadIcon';
+import { useDownload } from '../../lib/hooks/useDownload';
 const initialValues: WorkAllocationFormValues = {
-  workType: "",
-  workRequester: "",
-  costCode: "",
-  project: "",
+  workType: '',
+  workRequester: '',
+  costCode: '',
+  project: '',
   isRnD: false,
   numSlides: undefined,
   numBlocks: undefined,
@@ -49,16 +41,16 @@ export type WorkAllocationUrlParams = {
 };
 
 const tableColumnFieldInfo = [
-  { key: "Priority", path: ["work", "priority"] },
-  { key: "SGP Number", path: ["work", "workNumber"] },
-  { key: "Work Type", path: ["work", "workType", "name"] },
-  { key: "Work Requester", path: ["work", "workRequester", "username"] },
-  { key: "Project", path: ["work", "project", "name"] },
-  { key: "Cost Code", path: ["work", "costCode", "code"] },
-  { key: "Number of Blocks", path: ["work", "numBlocks"] },
-  { key: "Number of Slides", path: ["work", "numSlides"] },
-  { key: "Number of Original samples", path: ["work", "numOriginalSamples"] },
-  { key: "Status", path: ["work", "status"] },
+  { key: 'Priority', path: ['work', 'priority'] },
+  { key: 'SGP Number', path: ['work', 'workNumber'] },
+  { key: 'Work Type', path: ['work', 'workType', 'name'] },
+  { key: 'Work Requester', path: ['work', 'workRequester', 'username'] },
+  { key: 'Project', path: ['work', 'project', 'name'] },
+  { key: 'Cost Code', path: ['work', 'costCode', 'code'] },
+  { key: 'Number of Blocks', path: ['work', 'numBlocks'] },
+  { key: 'Number of Slides', path: ['work', 'numSlides'] },
+  { key: 'Number of Original samples', path: ['work', 'numOriginalSamples'] },
+  { key: 'Status', path: ['work', 'status'] }
 ];
 
 /**
@@ -67,7 +59,7 @@ const tableColumnFieldInfo = [
 const urlParamsSchema = Yup.object().shape({
   status: Yup.array()
     .of(Yup.string().oneOf(Object.values(WorkStatus)))
-    .required(),
+    .required()
 });
 
 export default function WorkAllocation() {
@@ -79,14 +71,12 @@ export default function WorkAllocation() {
     return (
       safeParseQueryString<WorkAllocationUrlParams>({
         query: location.search,
-        schema: urlParamsSchema,
+        schema: urlParamsSchema
       }) ?? { status: [WorkStatus.Active] }
     );
   }, [location.search]);
 
-  const [current, send] = useMachine(
-    createWorkAllocationMachine({ urlParams })
-  );
+  const [current, send] = useMachine(createWorkAllocationMachine({ urlParams }));
 
   /**This prevents duplicate submissions on double click**/
   const [submitted, setSubmitted] = React.useState(false);
@@ -98,16 +88,15 @@ export default function WorkAllocation() {
     workRequesters,
     availableComments,
     requestError,
-    successMessage,
+    successMessage
   } = current.context;
 
   /**Hook to sort table*/
-  const { sortedTableData, sort, sortConfig } =
-    useTableSort<WorkWithCommentFieldsFragment>(workWithComments, {
-      sortFieldName: "SGP Number",
-      direction: "descending",
-      accessPath: ["work", "workNumber"],
-    });
+  const { sortedTableData, sort, sortConfig } = useTableSort<WorkWithCommentFieldsFragment>(workWithComments, {
+    sortFieldName: 'SGP Number',
+    direction: 'descending',
+    accessPath: ['work', 'workNumber']
+  });
 
   /**
    * Rebuild the download data  whenever the worWithComments changes
@@ -115,13 +104,13 @@ export default function WorkAllocation() {
   const downloadData = React.useMemo(() => {
     return {
       columnData: {
-        columnNames: tableColumnFieldInfo.map((info) => info.key),
+        columnNames: tableColumnFieldInfo.map((info) => info.key)
       },
       entries: workWithComments.map((data) => {
         return tableColumnFieldInfo.map((columnInfo) => {
           return String(getPropertyValue(data, columnInfo.path));
         });
-      }),
+      })
     };
   }, [workWithComments]);
 
@@ -132,18 +121,18 @@ export default function WorkAllocation() {
    * When the URL search params change, send an event to the machine
    */
   useEffect(() => {
-    send({ type: "UPDATE_URL_PARAMS", urlParams });
+    send({ type: 'UPDATE_URL_PARAMS', urlParams });
   }, [send, urlParams]);
 
   /**Update the workWithComments with sort order**/
   useEffect(() => {
-    send({ type: "SORT_WORKS", workWithComments: sortedTableData });
+    send({ type: 'SORT_WORKS', workWithComments: sortedTableData });
   }, [sortedTableData, send]);
 
   /**Handler to update works with changes - Update work allocation data whenever any field is edited**/
   const onWorkUpdate = React.useCallback(
     (rowIndex: number, work: WorkWithCommentFieldsFragment) => {
-      send({ type: "UPDATE_WORK", workWithComment: work, rowIndex });
+      send({ type: 'UPDATE_WORK', workWithComment: work, rowIndex });
     },
     [send]
   );
@@ -151,10 +140,8 @@ export default function WorkAllocation() {
   /**Handler to do sorting on user action**/
   const handleSort = React.useCallback(
     (uniqueSortField: string) => {
-      let customSort = uniqueSortField === "status" ? statusSort : undefined;
-      const fieldInfo = tableColumnFieldInfo.find(
-        (fieldInfo) => fieldInfo.key === uniqueSortField
-      );
+      let customSort = uniqueSortField === 'status' ? statusSort : undefined;
+      const fieldInfo = tableColumnFieldInfo.find((fieldInfo) => fieldInfo.key === uniqueSortField);
       if (!fieldInfo) {
         return;
       }
@@ -168,10 +155,8 @@ export default function WorkAllocation() {
     return {
       sortFieldName,
       ascending:
-        sortConfig && sortFieldName !== sortConfig?.sortFieldName
-          ? undefined
-          : sortConfig?.direction === "ascending"!!,
-      sortHandler: handleSort,
+        sortConfig && sortFieldName !== sortConfig?.sortFieldName ? undefined : sortConfig?.direction === 'ascending'!!,
+      sortHandler: handleSort
     };
   };
 
@@ -182,38 +167,37 @@ export default function WorkAllocation() {
     workType: Yup.string()
       .oneOf(workTypes.map((wt) => wt.name))
       .required()
-      .label("Work Type"),
+      .label('Work Type'),
     workRequester: Yup.string()
       .oneOf(workRequesters.map((wr) => wr.username))
       .required()
-      .label("Work Requester"),
+      .label('Work Requester'),
     project: Yup.string()
       .oneOf(projects.map((p) => p.name))
       .required()
-      .label("Project"),
+      .label('Project'),
     costCode: Yup.string()
       .oneOf(costCodes.map((cc) => cc.code))
       .required()
-      .label("Cost Code"),
+      .label('Cost Code'),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
     numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
-    numOriginalSamples: Yup.number().max(MAX_NUM_BLOCKANDSLIDES)
-      .when(["numBlocks", "numSlides"], (numBlocks: any, numSlides: any, schema: any) => {
+    numOriginalSamples: Yup.number()
+      .max(MAX_NUM_BLOCKANDSLIDES)
+      .when(['numBlocks', 'numSlides'], (numBlocks: any, numSlides: any, schema: any) => {
         if (!numBlocks && !numSlides) {
-          return schema.required("Number of blocks, slides or original samples required");
+          return schema.required('Number of blocks, slides or original samples required');
         }
         return schema;
-      }),
+      })
   });
 
   return (
     <div>
       <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
         {successMessage && <Success message={successMessage} />}
-        {requestError && (
-          <Warning message={"SGP Request Error"} error={requestError} />
-        )}
+        {requestError && <Warning message={'SGP Request Error'} error={requestError} />}
 
         <Heading level={3} showBorder={false}>
           Allocate a new SGP number
@@ -226,71 +210,59 @@ export default function WorkAllocation() {
             setTimeout(() => {
               setSubmitted(false);
             }, 500);
-            send({ type: "ALLOCATE_WORK", values });
+            send({ type: 'ALLOCATE_WORK', values });
           }}
           validationSchema={validationSchema}
         >
           <Form>
             <div className="space-y-2 md:grid md:grid-cols-3 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
               <div className="md:flex-grow">
-                <FormikSelect
-                  label="Work Type"
-                  name="workType"
-                  emptyOption={true}
-                >
-                  {optionValues(workTypes, "name", "name")}
+                <FormikSelect label="Work Type" name="workType" emptyOption={true}>
+                  {optionValues(workTypes, 'name', 'name')}
                 </FormikSelect>
               </div>
 
               <div className="md:flex-grow">
-                <FormikSelect
-                  label="Work Requester"
-                  name="workRequester"
-                  emptyOption={true}
-                >
-                  {optionValues(workRequesters, "username", "username")}
+                <FormikSelect label="Work Requester" name="workRequester" emptyOption={true}>
+                  {optionValues(workRequesters, 'username', 'username')}
                 </FormikSelect>
               </div>
 
               <div className="md:flex-grow">
                 <FormikSelect label="Project" name="project" emptyOption={true}>
-                  {optionValues(projects, "name", "name")}
+                  {optionValues(projects, 'name', 'name')}
                 </FormikSelect>
               </div>
 
               <div className="md:flex-grow">
-                <FormikSelect
-                  label="Cost Code"
-                  name="costCode"
-                  emptyOption={true}
-                >
-                  {optionValues(costCodes, "code", "code")}
+                <FormikSelect label="Cost Code" name="costCode" emptyOption={true}>
+                  {optionValues(costCodes, 'code', 'code')}
                 </FormikSelect>
               </div>
 
               <div className="md:flex-grow">
                 <FormikInput
-                  label={"Number of blocks"}
-                  name={"numBlocks"}
-                  type={"number"}
+                  label={'Number of blocks'}
+                  name={'numBlocks'}
+                  type={'number'}
                   maxLength={MAX_NUM_BLOCKANDSLIDES}
                   min={0}
                 />
               </div>
               <div className="md:flex-grow">
                 <FormikInput
-                  label={"Number of slides"}
-                  name={"numSlides"}
-                  type={"number"}
+                  label={'Number of slides'}
+                  name={'numSlides'}
+                  type={'number'}
                   maxLength={MAX_NUM_BLOCKANDSLIDES}
                   min={0}
                 />
               </div>
               <div className="md:flex-grow">
                 <FormikInput
-                  label={"Number of original samples"}
-                  name={"numOriginalSamples"}
-                  type={"number"}
+                  label={'Number of original samples'}
+                  name={'numOriginalSamples'}
+                  type={'number'}
                   maxLength={MAX_NUM_BLOCKANDSLIDES}
                   min={0}
                 />
@@ -298,11 +270,8 @@ export default function WorkAllocation() {
             </div>
 
             <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
-              <FormikInput label={"R&D?"} name={"isRnD"} type={"checkbox"} />
-              <BlueButton
-                disabled={current.matches("allocating") || submitted}
-                type="submit"
-              >
+              <FormikInput label={'R&D?'} name={'isRnD'} type={'checkbox'} />
+              <BlueButton disabled={current.matches('allocating') || submitted} type="submit">
                 Submit
               </BlueButton>
             </div>
@@ -319,8 +288,8 @@ export default function WorkAllocation() {
           initialValues={urlParams}
           onSubmit={async (values) => {
             history.push({
-              pathname: "/sgp",
-              search: stringify(values),
+              pathname: '/sgp',
+              search: stringify(values)
             });
           }}
         >
@@ -337,7 +306,7 @@ export default function WorkAllocation() {
               </div>
             </div>
             <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
-              <BlueButton disabled={current.matches("loading")} type="submit">
+              <BlueButton disabled={current.matches('loading')} type="submit">
                 Search
               </BlueButton>
             </div>
@@ -346,62 +315,33 @@ export default function WorkAllocation() {
       </div>
 
       <div className="mx-auto max-w-screen-xl">
-        {current.matches("loading") ? (
+        {current.matches('loading') ? (
           <div className="flex flex-row items-center justify-around">
             <LoadingSpinner />
           </div>
         ) : (
           <>
             <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
-              <p className="text-sm text-gray-700">
-                Records for SGP management
-              </p>
-              <a
-                href={downloadURL}
-                download={`${getTimestampStr()}_sgp_management${extension}`}
-              >
+              <p className="text-sm text-gray-700">Records for SGP management</p>
+              <a href={downloadURL} download={`${getTimestampStr()}_sgp_management${extension}`}>
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
             <Table data-testid="work-allocation-table">
               <TableHead>
                 <tr>
-                  <TableHeader sortProps={getTableSortProps("Priority")}>
-                    Priority
-                  </TableHeader>
-                  <TableHeader sortProps={getTableSortProps("SGP Number")}>
-                    SGP Number
-                  </TableHeader>
-                  <TableHeader sortProps={getTableSortProps("Work Type")}>
-                    Work Type
-                  </TableHeader>
-                  <TableHeader sortProps={getTableSortProps("Work Requester")}>
-                    Work Requester
-                  </TableHeader>
-                  <TableHeader sortProps={getTableSortProps("Project")}>
-                    Project
-                  </TableHeader>
-                  <TableHeader sortProps={getTableSortProps("Cost Code")}>
-                    Cost Code
-                  </TableHeader>
-                  <TableHeader
-                    sortProps={getTableSortProps("Number of Blocks")}
-                  >
-                    Number of Blocks
-                  </TableHeader>
-                  <TableHeader
-                    sortProps={getTableSortProps("Number of Slides")}
-                  >
-                    Number of Slides
-                  </TableHeader>
-                  <TableHeader
-                    sortProps={getTableSortProps("Number of Original Samples")}
-                  >
+                  <TableHeader sortProps={getTableSortProps('Priority')}>Priority</TableHeader>
+                  <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
+                  <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
+                  <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
+                  <TableHeader sortProps={getTableSortProps('Project')}>Project</TableHeader>
+                  <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
+                  <TableHeader sortProps={getTableSortProps('Number of Blocks')}>Number of Blocks</TableHeader>
+                  <TableHeader sortProps={getTableSortProps('Number of Slides')}>Number of Slides</TableHeader>
+                  <TableHeader sortProps={getTableSortProps('Number of Original Samples')}>
                     Number of Original Samples
                   </TableHeader>
-                  <TableHeader sortProps={getTableSortProps("Status")}>
-                    Status
-                  </TableHeader>
+                  <TableHeader sortProps={getTableSortProps('Status')}>Status</TableHeader>
                   <TableHeader />
                 </tr>
               </TableHead>

@@ -1,35 +1,28 @@
-import React, { useCallback, useMemo } from "react";
-import AppShell from "../components/AppShell";
-import BlueButton from "../components/buttons/BlueButton";
-import Heading from "../components/Heading";
-import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
-import labwareScanTableColumns from "../components/dataTable/labwareColumns";
-import Warning from "../components/notifications/Warning";
-import { motion } from "framer-motion";
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-} from "../components/Table";
-import LabelPrinterButton from "../components/LabelPrinterButton";
-import LabelPrinter, { PrintResult } from "../components/LabelPrinter";
-import Success from "../components/notifications/Success";
-import variants from "../lib/motionVariants";
-import { usePrinters } from "../lib/hooks";
-import MutedText from "../components/MutedText";
-import LabwareScanner from "../components/labwareScanner/LabwareScanner";
-import { useMachine } from "@xstate/react";
-import { LabwareFieldsFragment } from "../types/sdk";
-import { Link } from "react-router-dom";
-import ButtonBar from "../components/ButtonBar";
-import { reload } from "../lib/sdk";
-import WorkNumberSelect from "../components/WorkNumberSelect";
-import aliquotMachine, {
-  AliquotContext,
-} from "../lib/machines/aliquot/aliquotMachine";
-import { Input } from "../components/forms/Input";
-import WhiteButton from "../components/buttons/WhiteButton";
+import React, { useCallback, useMemo } from 'react';
+import AppShell from '../components/AppShell';
+import BlueButton from '../components/buttons/BlueButton';
+import Heading from '../components/Heading';
+import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
+import labwareScanTableColumns from '../components/dataTable/labwareColumns';
+import Warning from '../components/notifications/Warning';
+import { motion } from 'framer-motion';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
+import LabelPrinterButton from '../components/LabelPrinterButton';
+import LabelPrinter, { PrintResult } from '../components/LabelPrinter';
+import Success from '../components/notifications/Success';
+import variants from '../lib/motionVariants';
+import { usePrinters } from '../lib/hooks';
+import MutedText from '../components/MutedText';
+import LabwareScanner from '../components/labwareScanner/LabwareScanner';
+import { useMachine } from '@xstate/react';
+import { LabwareFieldsFragment } from '../types/sdk';
+import { Link } from 'react-router-dom';
+import ButtonBar from '../components/ButtonBar';
+import { reload } from '../lib/sdk';
+import WorkNumberSelect from '../components/WorkNumberSelect';
+import aliquotMachine, { AliquotContext } from '../lib/machines/aliquot/aliquotMachine';
+import { Input } from '../components/forms/Input';
+import WhiteButton from '../components/buttons/WhiteButton';
 
 /**Create table data from Aliquot mutation results*/
 function buildAliquotTableData(ctx: AliquotContext) {
@@ -42,9 +35,7 @@ function buildAliquotTableData(ctx: AliquotContext) {
       return operation.actions.map((action) => {
         return {
           sourceLabware: sourceLabware,
-          destinationLabware: destinationLabwares.find(
-            (lw) => lw.id === action.destination.labwareId
-          ),
+          destinationLabware: destinationLabwares.find((lw) => lw.id === action.destination.labwareId)
         };
       });
     })
@@ -56,27 +47,17 @@ function Aliquot() {
     aliquotMachine.withContext({
       labware: undefined,
       numLabware: 0,
-      workNumber: ""
+      workNumber: ''
     })
   );
 
-  const {
-    handleOnPrint,
-    handleOnPrintError,
-    handleOnPrinterChange,
-    printResult,
-    currentPrinter,
-  } = usePrinters();
+  const { handleOnPrint, handleOnPrintError, handleOnPrinterChange, printResult, currentPrinter } = usePrinters();
 
   const { labware, serverErrors, aliquotResult, numLabware, workNumber } = current.context;
 
   /**Table column for scanned source tube*/
   const columns = useMemo(
-    () => [
-      labwareScanTableColumns.barcode(),
-      labwareScanTableColumns.donorId(),
-      labwareScanTableColumns.tissueType(),
-    ],
+    () => [labwareScanTableColumns.barcode(), labwareScanTableColumns.donorId(), labwareScanTableColumns.tissueType()],
     []
   );
 
@@ -87,7 +68,7 @@ function Aliquot() {
   /**Callback for Work number change**/
   const handleWorkNumberChange = useCallback(
     (workNumber: string) => {
-      send({ type: "UPDATE_WORK_NUMBER", workNumber });
+      send({ type: 'UPDATE_WORK_NUMBER', workNumber });
     },
     [send]
   );
@@ -95,26 +76,25 @@ function Aliquot() {
   /**Callback for changing number of destination labwares**/
   const handleNumLabwareChange = useCallback(
     (numLabware: number) => {
-      send({ type: "UPDATE_NUM_LABWARE", numLabware });
+      send({ type: 'UPDATE_NUM_LABWARE', numLabware });
     },
     [send]
   );
 
   /**Callback for scanning a new labware**/
   const onLabwareScannerChange = (labware: LabwareFieldsFragment) => {
-    send({ type: "UPDATE_LABWARE", labware });
+    send({ type: 'UPDATE_LABWARE', labware });
   };
-  const scannerLocked =
-    !current.matches("ready") && !current.matches("aliquotFailed");
+  const scannerLocked = !current.matches('ready') && !current.matches('aliquotFailed');
 
   // TODO Move this type of valdation into state machine and add validation to 'ready' state
   const blueButtonDisabled = !(
-    (current.matches("ready") || current.matches("aliquotFailed")) &&
-    labware !== undefined && workNumber !== "" &&
+    (current.matches('ready') || current.matches('aliquotFailed')) &&
+    labware !== undefined &&
+    workNumber !== '' &&
     numLabware > 0
   );
-  const showGrayPanel =
-    current.matches("ready") || current.matches("aliquotFailed");
+  const showGrayPanel = current.matches('ready') || current.matches('aliquotFailed');
 
   return (
     <AppShell>
@@ -125,9 +105,7 @@ function Aliquot() {
         <div className="max-w-screen-xl mx-auto">
           <div>
             <Heading level={3}>SGP Number</Heading>
-            <p className="mt-2">
-              Select an SGP number to associate with this aliquoting.
-            </p>
+            <p className="mt-2">Select an SGP number to associate with this aliquoting.</p>
             <div className="mt-4 md:w-1/2">
               <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
             </div>
@@ -151,25 +129,23 @@ function Aliquot() {
               type="number"
               value={numLabware}
               min={0}
-              data-testid={"numLabware"}
+              data-testid={'numLabware'}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleNumLabwareChange(Number(e.currentTarget.value))
               }
-              className={"md:w-1/2 "}
+              className={'md:w-1/2 '}
             />
           </div>
-          {current.matches("aliquotingDone") && (
+          {current.matches('aliquotingDone') && (
             <motion.div
-              initial={"hidden"}
-              animate={"visible"}
+              initial={'hidden'}
+              animate={'visible'}
               variants={variants.fadeIn}
               className="mt-12 space-y-4"
-              data-testid={"newLabelDiv"}
+              data-testid={'newLabelDiv'}
             >
               <Heading level={3}>New Labels</Heading>
-              <Success message={"Aliquoting Complete"}>
-                Your source tube has been marked as discarded.
-              </Success>
+              <Success message={'Aliquoting Complete'}>Your source tube has been marked as discarded.</Success>
               <Table>
                 <TableHead>
                   <tr>
@@ -199,10 +175,7 @@ function Aliquot() {
                 </TableBody>
               </Table>
 
-              <div
-                className="flex flex-row items-center sm:justify-end"
-                data-testid={"printDiv"}
-              >
+              <div className="flex flex-row items-center sm:justify-end" data-testid={'printDiv'}>
                 <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
                   {printResult && <PrintResult result={printResult} />}
                   <LabelPrinter
@@ -229,13 +202,9 @@ function Aliquot() {
 
           <div className="my-4 mx-4 sm:mx-auto p-4 rounded-md bg-gray-100">
             <p className="my-3 text-gray-800 text-sm leading-normal">
-              Once <span className="font-bold text-gray-900">source tube</span>{" "}
-              is scanned and
-              <span className="font-bold text-gray-900">
-                {" "}
-                number of destination tubes{" "}
-              </span>{" "}
-              are entered, <p>click Aliquot to create destination tubes.</p>
+              Once <span className="font-bold text-gray-900">source tube</span> is scanned and
+              <span className="font-bold text-gray-900"> number of destination tubes </span> are entered,{' '}
+              <p>click Aliquot to create destination tubes.</p>
             </p>
 
             <p className="my-4 text-gray-800 text-xs leading-relaxed italic text-center">
@@ -247,8 +216,8 @@ function Aliquot() {
                 id="#aliquot"
                 disabled={blueButtonDisabled}
                 className="whitespace-nowrap"
-                action={"primary"}
-                onClick={() => send({ type: "ALIQUOT" })}
+                action={'primary'}
+                onClick={() => send({ type: 'ALIQUOT' })}
               >
                 Aliquot
               </BlueButton>
@@ -257,15 +226,15 @@ function Aliquot() {
         </div>
       )}
 
-      {current.matches("aliquotingDone") && (
+      {current.matches('aliquotingDone') && (
         <ButtonBar>
           <BlueButton onClick={reload} action="tertiary">
             Reset Form
           </BlueButton>
-          <Link to={"/store"}>
+          <Link to={'/store'}>
             <WhiteButton action="primary">Store</WhiteButton>
           </Link>
-          <Link to={"/"}>
+          <Link to={'/'}>
             <BlueButton action="primary">Return Home</BlueButton>
           </Link>
         </ButtonBar>

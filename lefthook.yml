@@ -16,4 +16,3 @@ pre-commit:
     prettier:
       glob: '*.{js,ts,tsx}'
       run: yarn prettier --check {staged_files}
-

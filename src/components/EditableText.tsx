@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import EditIcon from "./icons/EditIcon";
-import { Input } from "./forms/Input";
-import LoadingSpinner from "./icons/LoadingSpinner";
+import React, { useEffect, useRef, useState } from 'react';
+import EditIcon from './icons/EditIcon';
+import { Input } from './forms/Input';
+import LoadingSpinner from './icons/LoadingSpinner';
 
 interface EditableTextProps {
   children: string;
@@ -9,7 +9,7 @@ interface EditableTextProps {
   defaultValue: string;
 }
 
-const EditableText: React.FC<EditableTextProps> = ({ onChange, children, defaultValue}) => {
+const EditableText: React.FC<EditableTextProps> = ({ onChange, children, defaultValue }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editableText, setEditableText] = useState<string | null>(null);
@@ -46,7 +46,7 @@ const EditableText: React.FC<EditableTextProps> = ({ onChange, children, default
       const onChangeResponse = await onChange(updatedText);
       setEditableText(onChangeResponse);
     } catch (e) {
-      console.error("Failed to update editable text");
+      console.error('Failed to update editable text');
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +60,7 @@ const EditableText: React.FC<EditableTextProps> = ({ onChange, children, default
           ref={inputRef}
           onBlur={handleEdit}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === 'Enter') {
               e.currentTarget.blur();
             }
           }}
@@ -69,7 +69,7 @@ const EditableText: React.FC<EditableTextProps> = ({ onChange, children, default
       ) : (
         <div
           className={`flex flex-row items-center justify-start space-x-1 cursor-pointer group ${
-            isLoading && "opacity-50"
+            isLoading && 'opacity-50'
           }`}
           onClick={handleOnClick}
         >

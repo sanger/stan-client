@@ -1,5 +1,5 @@
-import React from "react";
-import classNames from "classnames";
+import React from 'react';
+import classNames from 'classnames';
 
 interface LoadingSpinnerProps extends React.SVGProps<SVGSVGElement> {}
 
@@ -9,26 +9,10 @@ interface LoadingSpinnerProps extends React.SVGProps<SVGSVGElement> {}
  * @constructor
  */
 function LoadingSpinner({ className }: LoadingSpinnerProps) {
-  const svgClasses = classNames(
-    "animate-spin",
-    { "h-5 w-5 text-sdb": !className },
-    { [`${className}`]: !!className }
-  );
+  const svgClasses = classNames('animate-spin', { 'h-5 w-5 text-sdb': !className }, { [`${className}`]: !!className });
   return (
-    <svg
-      className={svgClasses}
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
+    <svg className={svgClasses} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
         className="opacity-75"
         fill="currentColor"

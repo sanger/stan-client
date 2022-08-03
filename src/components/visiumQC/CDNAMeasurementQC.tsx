@@ -1,12 +1,12 @@
-import Panel from "../Panel";
-import { QCType } from "../../pages/VisiumQC";
-import React from "react";
-import { LabwareFieldsFragment, SlotMeasurementRequest } from "../../types/sdk";
-import Labware from "../labware/Labware";
-import { isSlotFilled } from "../../lib/helpers/slotHelper";
-import RemoveButton from "../buttons/RemoveButton";
-import SlotMeasurements from "../slotMeasurement/SlotMeasurements";
-import { useFormikContext } from "formik";
+import Panel from '../Panel';
+import { QCType } from '../../pages/VisiumQC';
+import React from 'react';
+import { LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import Labware from '../labware/Labware';
+import { isSlotFilled } from '../../lib/helpers/slotHelper';
+import RemoveButton from '../buttons/RemoveButton';
+import SlotMeasurements from '../slotMeasurement/SlotMeasurements';
+import { useFormikContext } from 'formik';
 
 type CDNAMeasurementQCProps = {
   qcType: string;
@@ -15,25 +15,17 @@ type CDNAMeasurementQCProps = {
   removeLabware: (barcode: string) => void;
 };
 
-const CDNAMeasurementQC = ({
-  qcType,
-  labware,
-  slotMeasurements,
-  removeLabware,
-}: CDNAMeasurementQCProps) => {
+const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware }: CDNAMeasurementQCProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext();
 
   const measurementConfigMemo = React.useMemo(() => {
     return {
-      measurementName:
-        qcType === QCType.CDNA_AMPLIFICATION ? "Cq value" : "cDNA concentration",
-      stepIncrement: qcType === QCType.CDNA_AMPLIFICATION ? "1" : ".01",
-      initialMeasurementVal: qcType === QCType.CDNA_AMPLIFICATION ? "" : "0",
+      measurementName: qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration',
+      stepIncrement: qcType === QCType.CDNA_AMPLIFICATION ? '1' : '.01',
+      initialMeasurementVal: qcType === QCType.CDNA_AMPLIFICATION ? '' : '0',
       validateFunction:
-        qcType === QCType.CDNA_AMPLIFICATION
-          ? validateAmplificationMeasurementValue
-          : validateAnalysisMeasurementValue,
-      isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION,
+        qcType === QCType.CDNA_AMPLIFICATION ? validateAmplificationMeasurementValue : validateAnalysisMeasurementValue,
+      isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION
     };
   }, [qcType]);
 
@@ -48,17 +40,15 @@ const CDNAMeasurementQC = ({
     if (!labware || !qcType) {
       return;
     }
-    setFieldValue("barcode", labware.barcode);
-    const slotMeasurements: SlotMeasurementRequest[] = labware.slots
-      .filter(isSlotFilled)
-      .map((slot) => {
-        return {
-          address: slot.address,
-          name: measurementConfigMemo.measurementName,
-          value: measurementConfigMemo.initialMeasurementVal,
-        };
-      });
-    setFieldValue("slotMeasurements", slotMeasurements);
+    setFieldValue('barcode', labware.barcode);
+    const slotMeasurements: SlotMeasurementRequest[] = labware.slots.filter(isSlotFilled).map((slot) => {
+      return {
+        address: slot.address,
+        name: measurementConfigMemo.measurementName,
+        value: measurementConfigMemo.initialMeasurementVal
+      };
+    });
+    setFieldValue('slotMeasurements', slotMeasurements);
   }, [
     labware,
     measurementConfigMemo.measurementName,
@@ -66,7 +56,7 @@ const CDNAMeasurementQC = ({
     qcType,
     setErrors,
     setTouched,
-    setFieldValue,
+    setFieldValue
   ]);
 
   const handleChangeMeasurement = React.useCallback(
@@ -86,7 +76,7 @@ const CDNAMeasurementQC = ({
       slotMeasurements.forEach((measurement) => {
         measurement.value = measurementValue;
       });
-      setFieldValue("slotMeasurements", slotMeasurements);
+      setFieldValue('slotMeasurements', slotMeasurements);
     },
     [slotMeasurements, setErrors, setTouched, setFieldValue]
   );
@@ -97,10 +87,10 @@ const CDNAMeasurementQC = ({
    */
   function validateAnalysisMeasurementValue(value: string) {
     let error;
-    if (value === "") {
-      error = "Required";
+    if (value === '') {
+      error = 'Required';
     } else if (Number(value) < 0) {
-      error = "Positive value required";
+      error = 'Positive value required';
     }
     return error;
   }
@@ -111,14 +101,14 @@ const CDNAMeasurementQC = ({
    */
   function validateAmplificationMeasurementValue(value: string) {
     let error;
-    if (value === "") {
-      error = "Required";
+    if (value === '') {
+      error = 'Required';
     } else {
       if (Number(value) < 0) {
-        error = "Positive value required";
+        error = 'Positive value required';
       }
       if (!Number.isInteger(Number(value))) {
-        error = "Integer value required";
+        error = 'Integer value required';
       }
     }
     return error;
@@ -127,35 +117,27 @@ const CDNAMeasurementQC = ({
   return (
     <div className="max-w-screen-xl mx-auto">
       {labware && (
-        <div className={"flex flex-col mt-2"}>
+        <div className={'flex flex-col mt-2'}>
           <Panel>
             <div className="flex flex-row items-center justify-end">
-              {
-                <RemoveButton
-                  data-testid={"remove"}
-                  onClick={() => removeLabware(labware.barcode)}
-                />
-              }
+              {<RemoveButton data-testid={'remove'} onClick={() => removeLabware(labware.barcode)} />}
             </div>
             {measurementConfigMemo.isApplySameValueForAllMeasurements && (
-              <div className={"flex flex-row w-1/4 ml-2"}>
-                <label className={" mt-2"}>
-                  {measurementConfigMemo.measurementName}
-                </label>
+              <div className={'flex flex-row w-1/4 ml-2'}>
+                <label className={' mt-2'}>{measurementConfigMemo.measurementName}</label>
                 <input
-                  className={"rounded-md ml-3"}
-                  type={"number"}
-                  data-testid={"allMeasurementValue"}
+                  className={'rounded-md ml-3'}
+                  type={'number'}
+                  data-testid={'allMeasurementValue'}
                   onChange={(e: any) => {
-                    if (!Number.isInteger(Number(e.currentTarget.value)))
-                      return;
+                    if (!Number.isInteger(Number(e.currentTarget.value))) return;
                     handleChangeAllMeasurements(e.currentTarget.value);
                   }}
                   min={0}
                 />
               </div>
             )}
-            <div className={"flex flex-row mt-8 justify-between"}>
+            <div className={'flex flex-row mt-8 justify-between'}>
               {slotMeasurements && slotMeasurements.length > 0 && (
                 <SlotMeasurements
                   slotMeasurements={slotMeasurements}
@@ -165,7 +147,7 @@ const CDNAMeasurementQC = ({
                   stepIncrement={measurementConfigMemo.stepIncrement}
                 />
               )}
-              <div className="flex flex-col" data-testid={"labware"}>
+              <div className="flex flex-col" data-testid={'labware'}>
                 <Labware labware={labware} name={labware.labwareType.name} />
               </div>
             </div>

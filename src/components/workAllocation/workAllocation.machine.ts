@@ -1,5 +1,5 @@
-import { createMachine } from "xstate";
-import { MachineServiceDone, MachineServiceError } from "../../types/stan";
+import { createMachine } from 'xstate';
+import { MachineServiceDone, MachineServiceError } from '../../types/stan';
 import {
   CommentFieldsFragment,
   CostCodeFieldsFragment,
@@ -8,16 +8,16 @@ import {
   ProjectFieldsFragment,
   ReleaseRecipientFieldsFragment,
   WorkTypeFieldsFragment,
-  WorkWithCommentFieldsFragment,
-} from "../../types/sdk";
-import { stanCore } from "../../lib/sdk";
-import { assign } from "@xstate/immer";
-import { ClientError } from "graphql-request";
-import { WorkAllocationUrlParams } from "./WorkAllocation";
+  WorkWithCommentFieldsFragment
+} from '../../types/sdk';
+import { stanCore } from '../../lib/sdk';
+import { assign } from '@xstate/immer';
+import { ClientError } from 'graphql-request';
+import { WorkAllocationUrlParams } from './WorkAllocation';
 
 export enum NUMBER_TYPE_FIELD {
-  BLOCKS = "Number of blocks",
-  SLIDES = "Number of slides",
+  BLOCKS = 'Number of blocks',
+  SLIDES = 'Number of slides'
 }
 
 export type WorkAllocationFormValues = {
@@ -62,22 +62,22 @@ export type WorkAllocationFormValues = {
 };
 
 type WorkAllocationEvent =
-  | MachineServiceDone<"loadWorkAllocationInfo", GetWorkAllocationInfoQuery>
-  | MachineServiceDone<"allocateWork", CreateWorkMutation>
-  | MachineServiceError<"loadWorkAllocationInfo">
-  | MachineServiceError<"allocateWork">
+  | MachineServiceDone<'loadWorkAllocationInfo', GetWorkAllocationInfoQuery>
+  | MachineServiceDone<'allocateWork', CreateWorkMutation>
+  | MachineServiceError<'loadWorkAllocationInfo'>
+  | MachineServiceError<'allocateWork'>
   | {
-      type: "ALLOCATE_WORK";
+      type: 'ALLOCATE_WORK';
       values: WorkAllocationFormValues;
     }
-  | { type: "UPDATE_URL_PARAMS"; urlParams: WorkAllocationUrlParams }
+  | { type: 'UPDATE_URL_PARAMS'; urlParams: WorkAllocationUrlParams }
   | {
-      type: "UPDATE_WORK";
+      type: 'UPDATE_WORK';
       workWithComment: WorkWithCommentFieldsFragment;
       rowIndex: number;
     }
   | {
-      type: "SORT_WORKS";
+      type: 'SORT_WORKS';
       workWithComments: WorkWithCommentFieldsFragment[];
     };
 
@@ -132,13 +132,11 @@ type CreateWorkAllocationMachineParams = {
   urlParams: WorkAllocationUrlParams;
 };
 
-export default function createWorkAllocationMachine({
-  urlParams,
-}: CreateWorkAllocationMachineParams) {
+export default function createWorkAllocationMachine({ urlParams }: CreateWorkAllocationMachineParams) {
   /**Hook to sort table*/
   return createMachine<WorkAllocationContext, WorkAllocationEvent>(
     {
-      id: "workAllocation",
+      id: 'workAllocation',
       context: {
         workWithComments: [],
         workTypes: [],
@@ -146,62 +144,55 @@ export default function createWorkAllocationMachine({
         projects: [],
         costCodes: [],
         availableComments: [],
-        urlParams,
+        urlParams
       },
-      initial: "loading",
+      initial: 'loading',
       states: {
         loading: {
           invoke: {
-            src: "loadWorkAllocationInfo",
-            id: "loadWorkAllocationInfo",
-            onDone: { actions: "assignWorkAllocationInfo", target: "ready" },
-            onError: { actions: "assignServerError", target: "ready" },
-          },
+            src: 'loadWorkAllocationInfo',
+            id: 'loadWorkAllocationInfo',
+            onDone: { actions: 'assignWorkAllocationInfo', target: 'ready' },
+            onError: { actions: 'assignServerError', target: 'ready' }
+          }
         },
         ready: {
-          exit: "clearNotifications",
+          exit: 'clearNotifications',
           on: {
-            ALLOCATE_WORK: "allocating",
+            ALLOCATE_WORK: 'allocating',
             UPDATE_URL_PARAMS: {
-              actions: "assignUrlParams",
-              target: "loading",
+              actions: 'assignUrlParams',
+              target: 'loading'
             },
             UPDATE_WORK: {
-              actions: "updateWork",
-              target: "ready",
+              actions: 'updateWork',
+              target: 'ready'
             },
             SORT_WORKS: {
-              actions: "assignSortedWorks",
-            },
-          },
+              actions: 'assignSortedWorks'
+            }
+          }
         },
         allocating: {
           invoke: {
-            src: "allocateWork",
-            id: "allocateWork",
-            onDone: { actions: "assignSuccessMessage", target: "loading" },
-            onError: { actions: "assignServerError", target: "loading" },
-          },
-        },
-      },
+            src: 'allocateWork',
+            id: 'allocateWork',
+            onDone: { actions: 'assignSuccessMessage', target: 'loading' },
+            onError: { actions: 'assignServerError', target: 'loading' }
+          }
+        }
+      }
     },
     {
       actions: {
         assignUrlParams: assign((ctx, e) => {
-          if (e.type !== "UPDATE_URL_PARAMS") return;
+          if (e.type !== 'UPDATE_URL_PARAMS') return;
           ctx.urlParams = e.urlParams;
         }),
 
         assignWorkAllocationInfo: assign((ctx, e) => {
-          if (e.type !== "done.invoke.loadWorkAllocationInfo") return;
-          const {
-            comments,
-            projects,
-            worksWithComments,
-            workTypes,
-            costCodes,
-            releaseRecipients
-          } = e.data;
+          if (e.type !== 'done.invoke.loadWorkAllocationInfo') return;
+          const { comments, projects, worksWithComments, workTypes, costCodes, releaseRecipients } = e.data;
           ctx.availableComments = comments;
           ctx.projects = projects;
           ctx.workWithComments = worksWithComments;
@@ -211,42 +202,33 @@ export default function createWorkAllocationMachine({
         }),
 
         assignServerError: assign((ctx, e) => {
-          if (
-            e.type !== "error.platform.loadWorkAllocationInfo" &&
-            e.type !== "error.platform.allocateWork"
-          ) {
+          if (e.type !== 'error.platform.loadWorkAllocationInfo' && e.type !== 'error.platform.allocateWork') {
             return;
           }
           ctx.requestError = e.data;
         }),
 
         assignSuccessMessage: assign((ctx, e) => {
-          if (e.type !== "done.invoke.allocateWork") return;
-          const {
-            workNumber,
-            workRequester,
-            workType,
-            project,
-            costCode,
-            numBlocks,
-            numSlides,
-            numOriginalSamples
-          } = e.data.createWork;
+          if (e.type !== 'done.invoke.allocateWork') return;
+          const { workNumber, workRequester, workType, project, costCode, numBlocks, numSlides, numOriginalSamples } =
+            e.data.createWork;
           const blockSlideSampleMsg = [
             numBlocks ? `${numBlocks} blocks` : undefined,
             numSlides ? `${numSlides} slides` : undefined,
             numOriginalSamples ? `${numOriginalSamples} original samples` : undefined
-          ].filter(msg => msg).join(' and ');
+          ]
+            .filter((msg) => msg)
+            .join(' and ');
           ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideSampleMsg}) to project ${project.name} 
                                 and cost code ${costCode.code} with the work requester ${workRequester?.username}`;
         }),
 
         updateWork: assign((ctx, e) => {
-          if (e.type !== "UPDATE_WORK") return;
+          if (e.type !== 'UPDATE_WORK') return;
           ctx.workWithComments.splice(e.rowIndex, 1, e.workWithComment);
         }),
         assignSortedWorks: assign((ctx, e) => {
-          if (e.type !== "SORT_WORKS") return;
+          if (e.type !== 'SORT_WORKS') return;
           e.workWithComments.forEach((workWithComment, indx) => {
             ctx.workWithComments.splice(indx, 1, workWithComment);
           });
@@ -254,29 +236,21 @@ export default function createWorkAllocationMachine({
         clearNotifications: assign((ctx) => {
           ctx.successMessage = undefined;
           ctx.requestError = undefined;
-        }),
+        })
       },
 
       services: {
         allocateWork: (ctx, e) => {
-          if (e.type !== "ALLOCATE_WORK") return Promise.reject();
-          const {
-            workType,
-            workRequester,
-            project,
-            costCode,
-            isRnD,
-            numBlocks,
-            numSlides,
-            numOriginalSamples
-          } = e.values;
+          if (e.type !== 'ALLOCATE_WORK') return Promise.reject();
+          const { workType, workRequester, project, costCode, isRnD, numBlocks, numSlides, numOriginalSamples } =
+            e.values;
 
           return stanCore.CreateWork({
             workType,
             workRequester,
             project,
             costCode,
-            prefix: isRnD ? "R&D" : "SGP",
+            prefix: isRnD ? 'R&D' : 'SGP',
             numBlocks,
             numSlides,
             numOriginalSamples
@@ -285,8 +259,8 @@ export default function createWorkAllocationMachine({
 
         loadWorkAllocationInfo: (ctx) =>
           stanCore.GetWorkAllocationInfo({
-            commentCategory: "Work status",
-            workStatuses: ctx.urlParams.status,
+            commentCategory: 'Work status',
+            workStatuses: ctx.urlParams.status
           })
       }
     }

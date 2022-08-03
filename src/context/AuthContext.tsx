@@ -1,15 +1,9 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import { useMinimumWait } from "../lib/hooks";
-import Splash from "../pages/Splash";
-import { UserFieldsFragment } from "../types/sdk";
-import { UserRole } from "../types/sdk";
-import { StanCoreContext } from "../lib/sdk";
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useMinimumWait } from '../lib/hooks';
+import Splash from '../pages/Splash';
+import { UserFieldsFragment } from '../types/sdk';
+import { UserRole } from '../types/sdk';
+import { StanCoreContext } from '../lib/sdk';
 
 /**
  * Includes other properties the application is interested in for authentication
@@ -36,7 +30,7 @@ const initialContext: AuthContext = {
   setAuthState: () => {},
   clearAuthState: () => {},
   logout: () => {},
-  authState: null,
+  authState: null
 };
 
 const authContext = createContext<AuthContext>(initialContext);
@@ -47,7 +41,7 @@ interface AuthProviderProps {
 }
 
 const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
-  const minimumWait = process.env.NODE_ENV === "production" ? 1500 : 0;
+  const minimumWait = process.env.NODE_ENV === 'production' ? 1500 : 0;
   const waitElapsed = useMinimumWait(minimumWait);
   // Set the current auth state. null if user is not logged in.
   const [authState, setAuthState] = useState<AuthState | null>(null);
@@ -66,7 +60,7 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         }
       } catch (e) {
         setAuthState(null);
-        console.error("Current user query failed");
+        console.error('Current user query failed');
       } finally {
         setIsLoading(false);
       }
@@ -132,7 +126,7 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         clearAuthState,
         isAuthenticated,
         userRoleIncludes,
-        logout,
+        logout
       }}
     >
       {!waitElapsed || isLoading ? <Splash /> : children}
