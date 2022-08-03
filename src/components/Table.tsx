@@ -112,10 +112,12 @@ export const TableBody = ({ children, ...rest }: TableHeadProps) => {
   );
 };
 
-export const TableCell: React.FC<React.DetailedHTMLProps<
-  React.TdHTMLAttributes<HTMLTableDataCellElement>,
-  HTMLTableDataCellElement
->> = ({ children, ...rest }) => {
+export const TableCell: React.FC<
+  React.DetailedHTMLProps<
+    React.TdHTMLAttributes<HTMLTableDataCellElement>,
+    HTMLTableDataCellElement
+  >
+> = ({ children, ...rest }) => {
   return (
     <td className="px-6 py-4 whitespace-nowrap" {...rest}>
       {children}

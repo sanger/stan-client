@@ -1,12 +1,11 @@
 query GetPotProcessingInfo {
-
-    fixatives {
-        name
-    }
-    comments(includeDisabled: false, category: "Sample Processing") {
-        ...CommentFields
-    }
-    labwareTypes {
-        ...LabwareTypeFields
-    }
+  fixatives {
+    name
+  }
+  comments(includeDisabled: false, category: "Sample Processing") {
+    ...CommentFields
+  }
+  labwareTypes {
+    ...LabwareTypeFields
+  }
 }

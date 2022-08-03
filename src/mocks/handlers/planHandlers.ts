@@ -34,8 +34,8 @@ const planHandlers = [
             const newLabware = labwareFactory.build({ labwareType, barcode });
             memo.labware.push(newLabware);
 
-            const planActions: PlanMutation["plan"]["operations"][number]["planActions"] = planRequestLabware.actions.map(
-              (planAction) => {
+            const planActions: PlanMutation["plan"]["operations"][number]["planActions"] =
+              planRequestLabware.actions.map((planAction) => {
                 const labwareJson = sessionStorage.getItem(
                   `labware-${planAction.source.barcode}`
                 );
@@ -67,8 +67,7 @@ const planHandlers = [
                     labwareId: newLabware.id,
                   },
                 };
-              }
-            );
+              });
 
             memo.operations[0].planActions = [
               ...memo.operations[0].planActions,

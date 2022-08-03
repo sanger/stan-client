@@ -5,13 +5,12 @@ name: Deploy Storybook
 
 on:
   push:
-    branches: [ devel ]
+    branches: [devel]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v2
         name: Checkout
@@ -21,7 +20,7 @@ jobs:
           yarn --frozen-lockfile --silent
           yarn build:css
           yarn build-storybook
-      
+
       - name: Deploy storybook
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:

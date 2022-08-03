@@ -129,7 +129,7 @@ export default function WorkProgressInput({
                   value: values.searchValues ?? [],
                 }}
               />
-              <div className="flex flex-row items-center justify-end space-x-4">
+              <div className="flex flex-row items-center justify-end space-x-4 mt-6">
                 <BlueButton
                   type="submit"
                   disabled={

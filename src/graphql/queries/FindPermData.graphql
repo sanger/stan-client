@@ -1,13 +1,13 @@
 query FindPermData($barcode: String!) {
-    visiumPermData(barcode: $barcode) {
-        labware {
-            ...LabwareFields
-        }
-        addressPermData {
-            address
-            controlType
-            seconds
-            selected
-        }
+  visiumPermData(barcode: $barcode) {
+    labware {
+      ...LabwareFields
     }
+    addressPermData {
+      address
+      controlType
+      seconds
+      selected
+    }
+  }
 }

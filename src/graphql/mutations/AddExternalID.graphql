@@ -1,13 +1,13 @@
 mutation AddExternalID($request: AddExternalIDRequest!) {
-    addExternalID(request: $request) {
-        operations {
-            operationType {
-                name
-            }
-            user {
-                username
-            }
-            performed
-        }
+  addExternalID(request: $request) {
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
     }
+  }
 }

@@ -1,5 +1,5 @@
 fragment DestructionReasonFields on DestructionReason {
-    id
-    text
-    enabled
+  id
+  text
+  enabled
 }

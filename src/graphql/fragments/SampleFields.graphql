@@ -1,29 +1,29 @@
 fragment SampleFields on Sample {
-    id
-    section
-    tissue {
-        donor {
-            donorName
-            lifeStage
-        }
-        externalName
-        spatialLocation {
-            tissueType {
-                name
-            }
-            code
-        }
-        replicate
-        medium {
-            name
-        }
-        fixative {
-            name
-            enabled
-        }
-        collectionDate
+  id
+  section
+  tissue {
+    donor {
+      donorName
+      lifeStage
     }
-    bioState {
+    externalName
+    spatialLocation {
+      tissueType {
         name
+      }
+      code
     }
+    replicate
+    medium {
+      name
+    }
+    fixative {
+      name
+      enabled
+    }
+    collectionDate
+  }
+  bioState {
+    name
+  }
 }

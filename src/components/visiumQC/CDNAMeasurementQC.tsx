@@ -26,7 +26,9 @@ const CDNAMeasurementQC = ({
   const measurementConfigMemo = React.useMemo(() => {
     return {
       measurementName:
-        qcType === QCType.CDNA_AMPLIFICATION ? "Cq value" : "cDNA concentration",
+        qcType === QCType.CDNA_AMPLIFICATION
+          ? "Cq value"
+          : "cDNA concentration",
       stepIncrement: qcType === QCType.CDNA_AMPLIFICATION ? "1" : ".01",
       initialMeasurementVal: qcType === QCType.CDNA_AMPLIFICATION ? "" : "0",
       validateFunction:

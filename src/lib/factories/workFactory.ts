@@ -19,7 +19,8 @@ export default Factory.define<WorkFieldsFragment, { isRnD: boolean }>(
     return {
       __typename: "Work",
       workType: associations.workType ?? workTypeFactory.build(),
-      workRequester: associations.workRequester ?? releaseRecipientFactory.build(),
+      workRequester:
+        associations.workRequester ?? releaseRecipientFactory.build(),
       costCode: associations.costCode ?? costCodeFactory.build(),
       project: associations.project ?? projectFactory.build(),
       status: params.status ?? WorkStatus.Unstarted,

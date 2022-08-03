@@ -1,5 +1,5 @@
 query GetRecordExtractResultInfo {
-    comments(category: "extract result", includeDisabled: false) {
-        ...CommentFields
-    }
+  comments(category: "extract result", includeDisabled: false) {
+    ...CommentFields
+  }
 }

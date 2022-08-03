@@ -1,4 +1,4 @@
 fragment CostCodeFields on CostCode {
-    code
-    enabled
+  code
+  enabled
 }

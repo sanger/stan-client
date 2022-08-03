@@ -1,5 +1,5 @@
 mutation SetCostCodeEnabled($code: String!, $enabled: Boolean!) {
-    setCostCodeEnabled(code: $code, enabled: $enabled) {
-        ...CostCodeFields
-    }
+  setCostCodeEnabled(code: $code, enabled: $enabled) {
+    ...CostCodeFields
+  }
 }

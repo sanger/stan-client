@@ -236,7 +236,7 @@ function fillInForm() {
   cy.findByTestId("External Identifier").type("EXT_ID_1");
   cy.findByLabelText("HuMFre").select("HuMFre1");
   cy.findByLabelText("Tissue Type").select("Liver");
-  cy.findByLabelText("Spatial Location").select("3");
+  cy.findByLabelText("Spatial Location").select("3 - Surface central region");
   cy.findByTestId("Replicate Number").type("2");
   cy.findByLabelText("Labware Type").select("Pot");
   cy.findByLabelText("Fixative").select("None");

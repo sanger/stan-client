@@ -1,5 +1,5 @@
 query GetSectioningConfirmInfo {
-    comments(category: "section") {
-        ...CommentFields
-    }
+  comments(category: "section") {
+    ...CommentFields
+  }
 }

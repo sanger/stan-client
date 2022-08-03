@@ -12,9 +12,9 @@ const meta: Meta = {
 };
 export default meta;
 
-export const LabwareScannerList: Story<ComponentProps<
-  typeof LabwareScanner
->> = (args) => {
+export const LabwareScannerList: Story<
+  ComponentProps<typeof LabwareScanner>
+> = (args) => {
   return (
     <LabwareScanner {...args}>
       <List />
@@ -42,9 +42,9 @@ const List = () => {
   );
 };
 
-export const LabwareScannerTable: Story<ComponentProps<
-  typeof LabwareScanner
->> = (args) => {
+export const LabwareScannerTable: Story<
+  ComponentProps<typeof LabwareScanner>
+> = (args) => {
   return (
     <LabwareScanner {...args}>
       <LabwareScanPanel
@@ -58,9 +58,9 @@ export const LabwareScannerTable: Story<ComponentProps<
   );
 };
 
-export const LabwareScannerSlotsTableStory: Story<ComponentProps<
-  typeof LabwareScanner
->> = (args) => {
+export const LabwareScannerSlotsTableStory: Story<
+  ComponentProps<typeof LabwareScanner>
+> = (args) => {
   return (
     <LabwareScanner {...args}>
       <LabwareScannerSlotsTable />

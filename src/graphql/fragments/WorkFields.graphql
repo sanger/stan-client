@@ -1,20 +1,20 @@
 fragment WorkFields on Work {
-    workNumber
-    status
-    workRequester {
-        ...ReleaseRecipientFields
-    }
-    project {
-        ...ProjectFields
-    }
-    costCode {
-        ...CostCodeFields
-    }
-    workType {
-        ...WorkTypeFields
-    }
-    numBlocks
-    numSlides
-    numOriginalSamples
-    priority
+  workNumber
+  status
+  workRequester {
+    ...ReleaseRecipientFields
+  }
+  project {
+    ...ProjectFields
+  }
+  costCode {
+    ...CostCodeFields
+  }
+  workType {
+    ...WorkTypeFields
+  }
+  numBlocks
+  numSlides
+  numOriginalSamples
+  priority
 }

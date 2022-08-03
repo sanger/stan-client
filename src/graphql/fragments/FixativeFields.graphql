@@ -1,4 +1,4 @@
 fragment FixativeFields on Fixative {
-    name
-    enabled
+  name
+  enabled
 }

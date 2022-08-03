@@ -1,5 +1,5 @@
 mutation AddCostCode($code: String!) {
-    addCostCode(code: $code) {
-        ...CostCodeFields
-    }
+  addCostCode(code: $code) {
+    ...CostCodeFields
+  }
 }
