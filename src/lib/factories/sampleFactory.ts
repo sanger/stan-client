@@ -1,5 +1,5 @@
-import { Factory } from 'fishery';
-import _ from 'lodash';
+import { Factory } from "fishery";
+import _ from "lodash";
 import {
   BioState,
   Donor,
@@ -11,9 +11,9 @@ import {
   SpatialLocation,
   Species,
   Tissue,
-  TissueType
-} from '../../types/sdk';
-import * as faker from 'faker';
+  TissueType,
+} from "../../types/sdk";
+import { faker } from "@faker-js/faker";
 
 export const sampleFactory = Factory.define<Sample>(({ sequence, params, associations }) => ({
   __typename: 'Sample',

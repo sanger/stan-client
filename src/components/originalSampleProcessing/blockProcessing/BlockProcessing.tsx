@@ -233,7 +233,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   /**
    * Builds a yup validator for the labware plan form
    */
-  function buildValidationSchema(): Yup.ObjectSchema {
+  function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({
       workNumber: Yup.string().required('SGP Number is required'),
       plans: Yup.array()

@@ -28,7 +28,7 @@ type StanFormParams<V, R> = {
   /**
    * Validation schema passed to the Formik form
    */
-  validationSchema: Yup.ObjectSchema;
+  validationSchema: Yup.AnyObjectSchema;
 
   /**
    * The initial values of the form

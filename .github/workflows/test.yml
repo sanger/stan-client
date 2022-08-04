@@ -5,19 +5,66 @@ name: Test
 
 on:
   push:
-    branches: [ devel ]
+    branches: [devel]
   pull_request:
-    branches: [ devel ]
+    branches: [devel]
 
 jobs:
-  cypress:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout
+      - name: Export node version
+        id: node_version
+        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: >-
+         echo "::set-output name=dir::$(yarn cache dir)"
+      - uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Install dependencides
+        run: >-
+          yarn install
+ cypress:
     name: Run cypress tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         name: Checkout
+      - name: Export node version
+        id: node_version
+        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: >-
+         echo "::set-output name=dir::$(yarn cache dir)"
+      - uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Install dependencides
+        run: >-
+          yarn install
       - name: Cypress run
-        uses: cypress-io/github-action@v4
+      - uses: cypress-io/github-action@v4
         with:
           install-command: yarn --frozen-lockfile --silent
           build: yarn build
@@ -25,7 +72,7 @@ jobs:
           wait-on: 'http://localhost:3000'
           config: baseUrl=http://localhost:3000
           timeout-minutes: 5
-  
+
   prettier:
     name: Check format with prettier
     runs-on: ubuntu-latest
@@ -42,7 +89,7 @@ jobs:
     - name: Run prettier
       run: >-
         yarn prettier --check .
-    
+
   eslint:
     name: Lint with ESLint
     runs-on: ubuntu-latest
@@ -59,4 +106,3 @@ jobs:
     - name: Lint using ESLint
       run: >-
         yarn lint
-    
