@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import AppShell from '../components/AppShell';
 import { Form, Formik } from 'formik';
 import FormikInput from '../components/forms/Input';
@@ -8,11 +8,12 @@ import { optionValues } from '../components/forms';
 import DataTable from '../components/DataTable';
 import { Cell, Column } from 'react-table';
 import StyledLink from '../components/StyledLink';
-import { SearchResultTableEntry } from '../types/stan';
+import { SearchResultTableEntry, alphaNumericSortDefault } from '../types/stan';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';
-import { FindRequest, GetSearchInfoQuery } from '../types/sdk';
+import { FindRequest, GetSearchInfoQuery, Work } from '../types/sdk';
+import { stanCore } from '../lib/sdk';
 import { useMachine } from '@xstate/react';
 import * as Yup from 'yup';
 import { cleanParams, objectKeys, parseQueryString, stringify } from '../lib/helpers';
@@ -31,6 +32,7 @@ const validationSchema = Yup.object()
     tissueExternalName: Yup.string().ensure(),
     donorName: Yup.string().ensure(),
     tissueTypeName: Yup.string().ensure(),
+    workNumber: Yup.string().ensure(),
     createdAfter: Yup.date().notRequired(),
     createdBefore: Yup.date().notRequired()
   })
@@ -41,13 +43,15 @@ const validationSchema = Yup.object()
         value?.labwareBarcode.trim() ||
         value?.tissueExternalName.trim() ||
         value?.donorName.trim() ||
-        value?.tissueTypeName.trim()
+        value?.tissueTypeName.trim() ||
+        value?.workNumber
       );
 
       if (isValid) return true;
       return this.createError({
-        path: 'labwareBarcode | tissueExternalName | donorName | tissueTypeName',
-        message: 'At least one of STAN Barcode, External Identifier, Donor ID, or Tissue Type must not be empty.'
+        path: 'labwareBarcode | tissueExternalName | donorName | tissueTypeName | workNumber',
+        message:
+          'At least one of STAN Barcode, External Identifier, Donor ID, Tissue Type or SGP Number must not be empty.'
       });
     }
   });
@@ -58,7 +62,8 @@ const emptyFindRequest: FindRequest = {
   donorName: '',
   labwareBarcode: '',
   tissueExternalName: '',
-  tissueTypeName: ''
+  tissueTypeName: '',
+  workNumber: ''
 };
 
 const emptyFindRequestKeys: Array<keyof FindRequest> = objectKeys(emptyFindRequest);
@@ -91,6 +96,15 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
     // Replace instead of push so user doesn't have to go through a load of old searches when going back
     history.replace(`/search?${stringify(values)}`);
   };
+
+  const [works, setWorks] = useState<Array<Pick<Work, 'workNumber'>>>([]);
+  useEffect(() => {
+    async function fetchActiveWorkNumbers() {
+      const response = await stanCore.GetWorkNumbers();
+      setWorks(response.works);
+    }
+    fetchActiveWorkNumbers();
+  }, [setWorks]);
 
   return (
     <AppShell>
@@ -127,6 +141,11 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                     </div>
                     <div>
                       <FormikInput name="donorName" label="Donor ID" />
+                    </div>
+                    <div>
+                      <FormikSelect label="SGP Number" name="workNumber" emptyOption={true}>
+                        {optionValues(works, 'workNumber', 'workNumber')}
+                      </FormikSelect>
                     </div>
                     <div>
                       <FormikInput type="date" name="createdMin" label="Created After" />
@@ -208,6 +227,13 @@ const columns: Column<SearchResultTableEntry>[] = [
   {
     Header: 'Labware Type',
     accessor: 'labwareType'
+  },
+  {
+    Header: 'SGP Numbers',
+    accessor: (originalRow) => originalRow.workNumbers.join(', '),
+    sortType: (rowA, rowB) => {
+      return alphaNumericSortDefault(rowA.original.workNumbers.join(', '), rowB.original.workNumbers.join(', '));
+    }
   },
   {
     Header: 'External ID',

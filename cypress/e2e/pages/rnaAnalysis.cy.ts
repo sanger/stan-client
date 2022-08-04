@@ -154,7 +154,7 @@ describe('RNA Analysis', () => {
               return res(
                 ctx.errors([
                   {
-                    message: `Failed to record RNA Analysis results`
+                    message: 'Exception while fetching data (/performRnaAnalysis) : An error occured'
                   }
                 ])
               );
@@ -167,6 +167,7 @@ describe('RNA Analysis', () => {
     });
     it('should display Submit failure message', () => {
       cy.findByText('Failed to record RNA Analysis results').should('be.visible');
+      cy.findByText('An error occured').should('be.visible');
     });
   });
 

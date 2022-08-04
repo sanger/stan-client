@@ -177,7 +177,13 @@ describe('labwareMachine', () => {
               findLabwareByBarcode: (_ctx: LabwareContext) => {
                 return new Promise<FindLabwareQuery>((_resolve, reject) => {
                   reject({
-                    message: 'Exception while fetching data (/labware) : No labware found with barcode: STAN-321'
+                    response: {
+                      errors: [
+                        {
+                          message: 'Exception while fetching data (/labware) : No labware found with barcode: STAN-321'
+                        }
+                      ]
+                    }
                   });
                 });
               }
@@ -250,18 +256,19 @@ describe('labwareMachine', () => {
                                   donorName: 'Donor 3',
                                   lifeStage: LifeStage.Adult
                                 },
-                                medium: {
-                                  name: 'None'
-                                },
-                                fixative: {
-                                  name: 'None',
-                                  enabled: false
-                                },
                                 spatialLocation: {
                                   code: 3,
                                   tissueType: {
                                     name: 'Lung'
                                   }
+                                },
+                                collectionDate: '',
+                                medium: {
+                                  name: ''
+                                },
+                                fixative: {
+                                  name: '',
+                                  enabled: false
                                 }
                               }
                             }

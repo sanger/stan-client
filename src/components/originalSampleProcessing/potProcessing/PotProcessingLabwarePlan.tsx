@@ -134,10 +134,7 @@ const PotProcessingLabwarePlan = React.forwardRef<HTMLDivElement, PotProcessingL
             <div className="border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow">
               <div className="py-4 px-8 w-full space-y-4">
                 {current.matches('prep.errored') && (
-                  <Warning
-                    message={requestError?.message ?? 'There was an error creating the Labware'}
-                    error={requestError}
-                  />
+                  <Warning message={'There was an error creating the Labware'} error={requestError} />
                 )}
                 {outputLabware.labwareType.name === LabwareTypeName.POT && (
                   <FormikSelect label={'Fixative'} name={`plans.${rowIndex}.fixative`} emptyOption={true}>
