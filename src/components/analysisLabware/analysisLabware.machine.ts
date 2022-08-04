@@ -138,16 +138,15 @@ export const analysisLabwareMachine = createMachine<
             )
               updateAnalysisLabware.measurements = [measurement];
             else {
-              updateAnalysisLabware.measurements = updateAnalysisLabware.measurements.map(
-                (measurement) => {
+              updateAnalysisLabware.measurements =
+                updateAnalysisLabware.measurements.map((measurement) => {
                   if (measurement.name === e.labware.measurementType) {
                     return {
                       ...measurement,
                       value: e.labware.value,
                     };
                   } else return measurement;
-                }
-              );
+                });
             }
             break;
           }

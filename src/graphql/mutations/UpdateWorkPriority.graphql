@@ -1,5 +1,5 @@
-mutation UpdateWorkPriority($workNumber:String!,$priority:String) {
-updateWorkPriority(workNumber: $workNumber,priority: $priority) {
+mutation UpdateWorkPriority($workNumber: String!, $priority: String) {
+  updateWorkPriority(workNumber: $workNumber, priority: $priority) {
     ...WorkFields
-}
+  }
 }

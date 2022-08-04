@@ -100,9 +100,8 @@ describe("Sectioning Confirmation", () => {
           { barcode: "STAN-0002D" },
           {
             associations: {
-              labwareType: labwareTypes[
-                LabwareTypeName.FETAL_WASTE_CONTAINER
-              ].build(),
+              labwareType:
+                labwareTypes[LabwareTypeName.FETAL_WASTE_CONTAINER].build(),
             },
           }
         );

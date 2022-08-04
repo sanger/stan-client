@@ -56,7 +56,7 @@ function Aliquot() {
     aliquotMachine.withContext({
       labware: undefined,
       numLabware: 0,
-      workNumber: ""
+      workNumber: "",
     })
   );
 
@@ -68,7 +68,8 @@ function Aliquot() {
     currentPrinter,
   } = usePrinters();
 
-  const { labware, serverErrors, aliquotResult, numLabware, workNumber } = current.context;
+  const { labware, serverErrors, aliquotResult, numLabware, workNumber } =
+    current.context;
 
   /**Table column for scanned source tube*/
   const columns = useMemo(
@@ -110,7 +111,8 @@ function Aliquot() {
   // TODO Move this type of valdation into state machine and add validation to 'ready' state
   const blueButtonDisabled = !(
     (current.matches("ready") || current.matches("aliquotFailed")) &&
-    labware !== undefined && workNumber !== "" &&
+    labware !== undefined &&
+    workNumber !== "" &&
     numLabware > 0
   );
   const showGrayPanel =

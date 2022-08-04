@@ -48,13 +48,8 @@ function SlotMapper({
     })
   );
 
-  const {
-    inputLabware,
-    slotCopyContent,
-    colorByBarcode,
-    failedSlots,
-    errors,
-  } = current.context;
+  const { inputLabware, slotCopyContent, colorByBarcode, failedSlots, errors } =
+    current.context;
 
   const anySourceMapped = useMemo(() => {
     if (inputLabware.length === 0) {

@@ -1,5 +1,5 @@
 mutation AddUser($username: String!) {
-    addUser(username:$username) {
-            ...UserFields
-    }
+  addUser(username: $username) {
+    ...UserFields
+  }
 }

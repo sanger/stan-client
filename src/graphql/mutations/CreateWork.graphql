@@ -1,5 +1,23 @@
-mutation CreateWork($prefix: String!, $workType: String!,$workRequester: String!, $project: String!, $costCode: String!,$numBlocks:Int,$numSlides:Int,$numOriginalSamples: Int) {
-    createWork(prefix: $prefix, workType: $workType,workRequester: $workRequester, project: $project, costCode: $costCode,numBlocks: $numBlocks,numSlides:$numSlides,numOriginalSamples:$numOriginalSamples) {
-        ...WorkFields
-    }
+mutation CreateWork(
+  $prefix: String!
+  $workType: String!
+  $workRequester: String!
+  $project: String!
+  $costCode: String!
+  $numBlocks: Int
+  $numSlides: Int
+  $numOriginalSamples: Int
+) {
+  createWork(
+    prefix: $prefix
+    workType: $workType
+    workRequester: $workRequester
+    project: $project
+    costCode: $costCode
+    numBlocks: $numBlocks
+    numSlides: $numSlides
+    numOriginalSamples: $numOriginalSamples
+  ) {
+    ...WorkFields
+  }
 }

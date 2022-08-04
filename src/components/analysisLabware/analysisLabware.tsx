@@ -38,7 +38,7 @@ export default function AnalysisLabware({
     return {
       barcode: barcode,
       measurements: [{ name: AnalysisMeasurementType.RIN, value: "" }],
-      workNumber: ""
+      workNumber: "",
     };
   });
 

@@ -1,6 +1,6 @@
 fragment CommentFields on Comment {
-    id
-    text
-    category
-    enabled
+  id
+  text
+  category
+  enabled
 }

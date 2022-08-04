@@ -1,5 +1,5 @@
-mutation Store($store:[StoreInput!]!,$locationBarcode:String!) {
-    store(store:$store,locationBarcode:$locationBarcode) {
-        ...LocationFields
-    }
-} 
+mutation Store($store: [StoreInput!]!, $locationBarcode: String!) {
+  store(store: $store, locationBarcode: $locationBarcode) {
+    ...LocationFields
+  }
+}

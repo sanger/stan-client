@@ -1,7 +1,4 @@
-import {
-  SlotCopyMutation,
-  SlotCopyMutationVariables,
-} from "../../types/sdk";
+import { SlotCopyMutation, SlotCopyMutationVariables } from "../../types/sdk";
 import { graphql } from "msw";
 import labwareFactory from "../../lib/factories/labwareFactory";
 import { labwareTypeInstances } from "../../lib/factories/labwareTypeFactory";

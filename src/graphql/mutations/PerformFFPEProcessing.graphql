@@ -1,16 +1,16 @@
-mutation PerformFFPEProcessing($request:FFPEProcessingRequest!) {
+mutation PerformFFPEProcessing($request: FFPEProcessingRequest!) {
   performFFPEProcessing(request: $request) {
-      labware {
-          ...LabwareFields
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
       }
-      operations {
-          operationType {
-              name
-          }
-          user {
-              username
-          }
-          performed
+      user {
+        username
       }
+      performed
+    }
   }
 }

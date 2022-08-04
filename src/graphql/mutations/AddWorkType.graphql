@@ -1,5 +1,5 @@
 mutation AddWorkType($name: String!) {
-    addWorkType(name: $name) {
-        ...WorkTypeFields
-    }
+  addWorkType(name: $name) {
+    ...WorkTypeFields
+  }
 }

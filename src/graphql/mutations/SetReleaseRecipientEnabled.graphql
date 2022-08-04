@@ -1,5 +1,5 @@
 mutation SetReleaseRecipientEnabled($username: String!, $enabled: Boolean!) {
-    setReleaseRecipientEnabled(username: $username, enabled: $enabled) {
-        ...ReleaseRecipientFields
-    }
+  setReleaseRecipientEnabled(username: $username, enabled: $enabled) {
+    ...ReleaseRecipientFields
+  }
 }

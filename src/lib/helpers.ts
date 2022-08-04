@@ -72,7 +72,7 @@ type SchemaParams = {
   /**
    * A Yup schema. Used to cast and validate the parsed URL query string.
    */
-  schema: Yup.ObjectSchema;
+  schema: Yup.AnyObjectSchema;
 };
 type SafeParseQueryStringParams<T> = GuardAndTransformParams<T> | SchemaParams;
 

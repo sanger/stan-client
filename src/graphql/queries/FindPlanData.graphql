@@ -1,18 +1,18 @@
 query FindPlanData($barcode: String!) {
-    planData(barcode: $barcode) {
-        sources {
-            ...LabwareFields
-        }
-        destination {
-            ...LabwareFields
-        }
-        plan {
-            operationType {
-                name
-            }
-            planActions {
-                ...PlanActionFields
-            }
-        }
+  planData(barcode: $barcode) {
+    sources {
+      ...LabwareFields
     }
+    destination {
+      ...LabwareFields
+    }
+    plan {
+      operationType {
+        name
+      }
+      planActions {
+        ...PlanActionFields
+      }
+    }
+  }
 }

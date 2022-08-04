@@ -94,12 +94,14 @@ export function usePager({
     () => dispatch({ type: "GO_TO_LAST_PAGE" }),
     [dispatch]
   );
-  const onPageUpClick = useCallback(() => dispatch({ type: "PAGE_UP" }), [
-    dispatch,
-  ]);
-  const onPageDownClick = useCallback(() => dispatch({ type: "PAGE_DOWN" }), [
-    dispatch,
-  ]);
+  const onPageUpClick = useCallback(
+    () => dispatch({ type: "PAGE_UP" }),
+    [dispatch]
+  );
+  const onPageDownClick = useCallback(
+    () => dispatch({ type: "PAGE_DOWN" }),
+    [dispatch]
+  );
   const setCurrentPage = useCallback(
     (currentPage: number) =>
       dispatch({ type: "SET_CURRENT_PAGE", currentPage }),

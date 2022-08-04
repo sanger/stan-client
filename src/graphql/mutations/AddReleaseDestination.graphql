@@ -1,5 +1,5 @@
 mutation AddReleaseDestination($name: String!) {
-    addReleaseDestination(name: $name) {
-        ...ReleaseDestinationFields
-    }
+  addReleaseDestination(name: $name) {
+    ...ReleaseDestinationFields
+  }
 }

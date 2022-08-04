@@ -10,10 +10,9 @@ import { createMachineBuilder } from "../index";
 /**
  * DataFetcher Machine Options
  */
-export const machineOptions: Partial<MachineOptions<
-  DataFetcherContext,
-  DataFetcherEvent
->> = {
+export const machineOptions: Partial<
+  MachineOptions<DataFetcherContext, DataFetcherEvent>
+> = {
   services: {
     fetchData: (ctx) => ctx.dataFetcher(),
   },

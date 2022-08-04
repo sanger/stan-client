@@ -1,6 +1,6 @@
 import { Factory } from "fishery";
 import { DestructionReasonFieldsFragment } from "../../types/sdk";
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 
 export default Factory.define<DestructionReasonFieldsFragment>(
   ({ params, sequence }) => ({

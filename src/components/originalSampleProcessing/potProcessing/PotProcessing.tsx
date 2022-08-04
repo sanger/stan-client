@@ -249,7 +249,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
   /**
    * Builds a yup validator for the labware plan form
    */
-  function buildValidationSchema(): Yup.ObjectSchema {
+  function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({
       workNumber: Yup.string().required(),
       sourceBarcode: Yup.string().required(),

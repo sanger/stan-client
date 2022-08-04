@@ -1,9 +1,9 @@
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 import { Factory } from "fishery";
 import { ReleaseDestinationFieldsFragment } from "../../types/sdk";
 
 export default Factory.define<ReleaseDestinationFieldsFragment>(
-  ({ params, sequence }) => ({
+  ({ params }) => ({
     __typename: "ReleaseDestination",
     name: params.name ?? faker.name.jobArea(),
     enabled: params.enabled ?? true,

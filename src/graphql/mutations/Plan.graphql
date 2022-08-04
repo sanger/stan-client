@@ -1,15 +1,15 @@
 mutation Plan($request: PlanRequest!) {
-    plan(request: $request) {
-        labware {
-            ...LabwareFields
-        }
-        operations {
-            operationType {
-                name
-            }
-            planActions {
-                ...PlanActionFields
-            }
-        }
+  plan(request: $request) {
+    labware {
+      ...LabwareFields
     }
+    operations {
+      operationType {
+        name
+      }
+      planActions {
+        ...PlanActionFields
+      }
+    }
+  }
 }

@@ -1,9 +1,9 @@
 fragment SlotFields on Slot {
-    address
-    labwareId
-    samples {
-        ...SampleFields
-    }
-    blockHighestSection
-    block
+  address
+  labwareId
+  samples {
+    ...SampleFields
+  }
+  blockHighestSection
+  block
 }

@@ -1,4 +1,4 @@
 fragment SolutionFields on Solution {
-    name
-    enabled
+  name
+  enabled
 }

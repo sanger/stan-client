@@ -1,8 +1,8 @@
-query FindReagentPlate ($barcode:String!) {
-    reagentPlate(barcode: $barcode) {
-        barcode,
-        slots {
-            ...ReagentSlotFields
-        }
+query FindReagentPlate($barcode: String!) {
+  reagentPlate(barcode: $barcode) {
+    barcode
+    slots {
+      ...ReagentSlotFields
     }
+  }
 }

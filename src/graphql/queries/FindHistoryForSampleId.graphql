@@ -1,5 +1,5 @@
 query FindHistoryForSampleId($sampleId: Int!) {
-    historyForSampleId(sampleId: $sampleId) {
-        ...HistoryFields
-    }
+  historyForSampleId(sampleId: $sampleId) {
+    ...HistoryFields
+  }
 }

@@ -131,7 +131,10 @@ export default function WorkRow({
       } else if (workNumValueType === "slide") {
         send({ type: "UPDATE_NUM_SLIDES", numSlides: value });
       } else if (workNumValueType === "originalSamples") {
-        send({ type: "UPDATE_NUM_ORIGINAL_SAMPLES", numOriginalSamples: value });
+        send({
+          type: "UPDATE_NUM_ORIGINAL_SAMPLES",
+          numOriginalSamples: value,
+        });
       }
     },
     [send]

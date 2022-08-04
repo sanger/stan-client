@@ -1,6 +1,6 @@
 import { Factory } from "fishery";
 import { ProjectFieldsFragment } from "../../types/sdk";
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 
 export default Factory.define<ProjectFieldsFragment>(({ params }) => ({
   __typename: "Project",

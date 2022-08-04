@@ -1,6 +1,8 @@
 import { worker } from "../mocks/browser";
 import { graphql } from "msw";
 import { StanConfig } from "./stan";
+import { Faker } from "@faker-js/faker";
+import allLocales from "@faker-js/faker/locales";
 
 export type workerType = typeof worker;
 
@@ -17,3 +19,6 @@ declare global {
     postMSWStart?: (worker: workerType, graphql: graphqlType) => void;
   }
 }
+const faker: Faker = new Faker({
+  locales: allLocales,
+});

@@ -1,5 +1,5 @@
 query GetFFPEProcessingInfo {
-    comments(includeDisabled: false, category: "FFPE processing program") {
-        ...CommentFields
-    }
+  comments(includeDisabled: false, category: "FFPE processing program") {
+    ...CommentFields
+  }
 }

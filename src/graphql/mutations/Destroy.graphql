@@ -1,9 +1,9 @@
 mutation Destroy($request: DestroyRequest!) {
-    destroy(request: $request) {
-        destructions {
-            labware {
-                barcode
-            }
-        }
+  destroy(request: $request) {
+    destructions {
+      labware {
+        barcode
+      }
     }
+  }
 }

@@ -29,7 +29,9 @@ const initialValues: DestroyRequest = {
   reasonId: -1,
 };
 
-function buildValidationSchema(destroyInfo: GetDestroyInfoQuery) {
+function buildValidationSchema(
+  destroyInfo: GetDestroyInfoQuery
+): Yup.AnyObjectSchema {
   const destructionReasonIds = destroyInfo.destructionReasons.map(
     (dr) => dr.id
   );

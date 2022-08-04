@@ -1,8 +1,7 @@
-mutation RecordReagentTransfer($request:ReagentTransferRequest!) {
-    reagentTransfer(request:$request) {
-        operations {
-            id
-        }
+mutation RecordReagentTransfer($request: ReagentTransferRequest!) {
+  reagentTransfer(request: $request) {
+    operations {
+      id
     }
-
+  }
 }

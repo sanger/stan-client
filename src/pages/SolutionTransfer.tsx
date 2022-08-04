@@ -60,7 +60,7 @@ const SolutionTransfer: React.FC<SolutionTransferParams> = ({
 
   const { serverError, submissionResult } = current.context;
 
-  function buildValidationSchema(): Yup.ObjectSchema {
+  function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({
       workNumber: Yup.string().required("SGP Number is a required field"),
       labware: Yup.array()
