@@ -122,6 +122,7 @@ export type SearchResultsType<T> = {
 export type SearchResultTableEntry = {
   barcode: string;
   labwareType: string;
+  workNumbers: Array<Maybe<string>>;
   externalId?: Maybe<string>;
   donorId: string;
   tissueType: string;

@@ -9,6 +9,9 @@ describe("Search Service", () => {
   describe("#formatFindResult", () => {
     let findResult: FindQuery["find"];
 
+    const workNumber1 = "SGP1008"
+    const workNumber2 = "SGP1009"
+
     const sample10 = sampleFactory.build({ id: 10 });
     const sample11 = sampleFactory.build({ id: 11 });
     const sample12 = sampleFactory.build({ id: 12 });
@@ -29,11 +32,11 @@ describe("Search Service", () => {
     findResult = {
       numRecords: 5,
       entries: [
-        { labwareId: 1, sampleId: 10 },
-        { labwareId: 2, sampleId: 11 },
-        { labwareId: 3, sampleId: 12 },
-        { labwareId: 2, sampleId: 13 },
-        { labwareId: 1, sampleId: 14 },
+        { labwareId: 1, sampleId: 10, workNumbers: [workNumber1] },
+        { labwareId: 2, sampleId: 11, workNumbers: [workNumber2] },
+        { labwareId: 3, sampleId: 12, workNumbers: [workNumber1, workNumber2] },
+        { labwareId: 2, sampleId: 13, workNumbers: []},
+        { labwareId: 1, sampleId: 14, workNumbers: [] },
       ],
       samples: [sample10, sample11, sample12, sample13, sample14],
       labware: [labware1, labware2, labware3],
@@ -51,6 +54,7 @@ describe("Search Service", () => {
       {
         barcode: labware1.barcode,
         labwareType: labware1.labwareType.name,
+        workNumbers: [workNumber1],
         externalId: sample10.tissue.externalName,
         donorId: sample10.tissue.donor.donorName,
         tissueType: sample10.tissue.spatialLocation.tissueType.name,
@@ -67,6 +71,7 @@ describe("Search Service", () => {
       {
         barcode: labware2.barcode,
         labwareType: labware2.labwareType.name,
+        workNumbers: [workNumber2],
         externalId: sample11.tissue.externalName,
         donorId: sample11.tissue.donor.donorName,
         tissueType: sample11.tissue.spatialLocation.tissueType.name,
@@ -79,6 +84,7 @@ describe("Search Service", () => {
       {
         barcode: labware3.barcode,
         labwareType: labware3.labwareType.name,
+        workNumbers: [workNumber1, workNumber2],
         externalId: sample12.tissue.externalName,
         donorId: sample12.tissue.donor.donorName,
         tissueType: sample12.tissue.spatialLocation.tissueType.name,
@@ -99,6 +105,7 @@ describe("Search Service", () => {
       {
         barcode: labware2.barcode,
         labwareType: labware2.labwareType.name,
+        workNumbers: [],
         externalId: sample13.tissue.externalName,
         donorId: sample13.tissue.donor.donorName,
         tissueType: sample13.tissue.spatialLocation.tissueType.name,
@@ -111,6 +118,7 @@ describe("Search Service", () => {
       {
         barcode: labware1.barcode,
         labwareType: labware1.labwareType.name,
+        workNumbers: [],
         externalId: sample14.tissue.externalName,
         donorId: sample14.tissue.donor.donorName,
         tissueType: sample14.tissue.spatialLocation.tissueType.name,

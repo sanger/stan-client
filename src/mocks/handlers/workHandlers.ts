@@ -4,6 +4,8 @@ import {
   CreateWorkMutationVariables,
   FindWorkNumbersQuery,
   FindWorkNumbersQueryVariables,
+  GetWorkNumbersQuery,
+  GetWorkNumbersQueryVariables,
   GetWorkAllocationInfoQuery,
   GetWorkAllocationInfoQueryVariables,
   UpdateWorkNumBlocksMutation,
@@ -287,6 +289,17 @@ const workHandlers = [
           works: workRepository
             .findAll()
             .filter((w) => w.status === req.variables.status),
+        })
+      );
+    }
+  ),
+
+  graphql.query<GetWorkNumbersQuery, GetWorkNumbersQueryVariables>(
+    "GetWorkNumbers",
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          works: workRepository.findAll()
         })
       );
     }
