@@ -1,5 +1,5 @@
-import { Factory } from "fishery";
-import _ from "lodash";
+import { Factory } from 'fishery';
+import _ from 'lodash';
 import {
   BioState,
   Donor,
@@ -11,9 +11,9 @@ import {
   SpatialLocation,
   Species,
   Tissue,
-  TissueType,
-} from "../../types/sdk";
-import { faker } from "@faker-js/faker";
+  TissueType
+} from '../../types/sdk';
+import { faker } from '@faker-js/faker';
 
 export const sampleFactory = Factory.define<Sample>(({ sequence, params, associations }) => ({
   __typename: 'Sample',
@@ -25,7 +25,7 @@ export const sampleFactory = Factory.define<Sample>(({ sequence, params, associa
 
 export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(({ params, associations }) => ({
   __typename: 'Tissue',
-  externalName: params.externalName ?? `${faker.name.lastName()}${faker.random.number()}`,
+  externalName: params.externalName ?? `${faker.name.lastName()}${faker.random.numeric()}`,
   replicate: params.replicate ?? String(_.random(10)),
   spatialLocation: associations.spatialLocation ?? spatialLocationFactory.build(),
   donor: associations.donor ?? donorFactory.build(),
@@ -58,7 +58,7 @@ export const hmdmcFactory: Factory<Hmdmc> = Factory.define<Hmdmc>(({ params }) =
 
 export const donorFactory: Factory<Donor> = Factory.define<Donor>(({ params, associations }) => ({
   __typename: 'Donor',
-  donorName: params.donorName ?? `${_.capitalize(faker.random.word())}${faker.random.number()}`,
+  donorName: params.donorName ?? `${_.capitalize(faker.random.word())}${faker.random.numeric()}`,
   lifeStage: params.lifeStage ?? _.shuffle([LifeStage.Fetal, LifeStage.Paediatric, LifeStage.Adult])[0],
   species: associations.species ?? speciesFactory.build()
 }));

@@ -17,4 +17,3 @@ generates:
     config:
       gqlImport: graphql-request#gql
       dedupeFragments: true
-

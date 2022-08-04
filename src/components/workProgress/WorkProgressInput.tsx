@@ -118,7 +118,7 @@ export default function WorkProgressInput({ urlParams, workTypes }: WorkProgress
                   value: values.searchValues ?? []
                 }}
               />
-              <div className="flex flex-row items-center justify-end space-x-4">
+              <div className="flex flex-row items-center justify-end space-x-4 mt-6">
                 <BlueButton type="submit" disabled={!values.searchValues || values.searchValues.length <= 0}>
                   Search
                 </BlueButton>

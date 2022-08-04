@@ -33,7 +33,7 @@ export default function AddExternalID() {
     })
   );
 
-  function buildValidationSchema(): Yup.ObjectSchema {
+  function buildValidationSchema() {
     return Yup.object().shape({
       labwareBarcode: Yup.string().required('A labware must be scanned in'),
       externalName: Yup.string().required('External Identifier is a required field').min(1)
@@ -62,7 +62,7 @@ export default function AddExternalID() {
             }}
             validationSchema={buildValidationSchema()}
           >
-            {({ values, setFieldValue }) => (
+            {({ setFieldValue }) => (
               <Form>
                 <GrayBox>
                   <motion.div

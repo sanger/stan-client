@@ -1,6 +1,6 @@
-import { Factory } from "fishery";
-import { CommentFieldsFragment } from "../../types/sdk";
-import { faker } from "@faker-js/faker";
+import { Factory } from 'fishery';
+import { CommentFieldsFragment } from '../../types/sdk';
+import { faker } from '@faker-js/faker';
 
 export default Factory.define<CommentFieldsFragment>(({ params, sequence }) => ({
   __typename: 'Comment',
