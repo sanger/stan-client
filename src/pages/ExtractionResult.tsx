@@ -32,6 +32,7 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
   const state = location.state as { labware?: Array<LabwareFieldsFragment> };
   const initialLabware: Array<LabwareFieldsFragment> =
     state === null ? [] : state.labware ?? [];
+
   const initialValues: ExtractResultRequest = {
     workNumber: "",
     labware: initialLabware.map(buildExtractResultLabware),

@@ -59,7 +59,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
 
   const { serverError, submissionResult } = current.context;
 
-  function buildValidationSchema(): Yup.ObjectSchema {
+  function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({
       labware: Yup.array()
         .of(

@@ -154,9 +154,8 @@ export function useOnScreen<E extends HTMLElement>(
  *
  */
 export function usePrinters() {
-  const [currentPrinter, setCurrentPrinter] = useState<
-    Maybe<PrinterFieldsFragment>
-  >(null);
+  const [currentPrinter, setCurrentPrinter] =
+    useState<Maybe<PrinterFieldsFragment>>(null);
 
   const [printResult, setPrintResult] = useState<Maybe<PrintResultType>>(null);
 

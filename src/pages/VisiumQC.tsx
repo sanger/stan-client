@@ -98,9 +98,8 @@ export default function VisiumQC({ info }: VisiumQCProps) {
     })
   );
 
-  const {
-    serverError: serverErrorSlideProcessing,
-  } = currentSlideProcessing.context;
+  const { serverError: serverErrorSlideProcessing } =
+    currentSlideProcessing.context;
   const { serverError: serverErrorCDNA } = currentCDNA.context;
 
   const onSubmit = (values: VisiumQCFormData) => {
@@ -131,7 +130,9 @@ export default function VisiumQC({ info }: VisiumQCProps) {
   };
 
   const isEnableSubmit = (value: VisiumQCFormData) => {
-    if (value.workNumber === "") { return false }
+    if (value.workNumber === "") {
+      return false;
+    }
     if (
       value.qcType === QCType.CDNA_AMPLIFICATION ||
       value.qcType === QCType.CDNA_ANALYSIS
@@ -183,9 +184,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
               <Form>
                 <div className="space-y-2 mb-8 ">
                   <Heading level={2}>SGP Number</Heading>
-                  <p>
-                    Select an SGP number to associate with this operation.
-                  </p>
+                  <p>Select an SGP number to associate with this operation.</p>
 
                   <div className="mt-4 md:w-1/2">
                     <WorkNumberSelect

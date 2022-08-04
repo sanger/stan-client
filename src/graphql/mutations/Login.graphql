@@ -1,7 +1,7 @@
 mutation Login($username: String!, $password: String!) {
-    login(username: $username, password: $password) {
-        user {
-            ...UserFields
-        }
+  login(username: $username, password: $password) {
+    user {
+      ...UserFields
     }
+  }
 }

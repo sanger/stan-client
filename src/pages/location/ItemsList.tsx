@@ -27,9 +27,8 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
     LocationParentContext
   )!;
 
-  const [selectedItem, setSelectedItem] = useState<Maybe<StoredItemFragment>>(
-    null
-  );
+  const [selectedItem, setSelectedItem] =
+    useState<Maybe<StoredItemFragment>>(null);
 
   const scanInputRef = useRef<HTMLInputElement>(null);
 

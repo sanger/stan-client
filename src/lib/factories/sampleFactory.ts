@@ -13,7 +13,7 @@ import {
   Tissue,
   TissueType,
 } from "../../types/sdk";
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 
 export const sampleFactory = Factory.define<Sample>(
   ({ sequence, params, associations }) => ({
@@ -29,7 +29,8 @@ export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(
   ({ params, associations }) => ({
     __typename: "Tissue",
     externalName:
-      params.externalName ?? `${faker.name.lastName()}${faker.random.number()}`,
+      params.externalName ??
+      `${faker.name.lastName()}${faker.random.numeric()}`,
     replicate: params.replicate ?? String(_.random(10)),
     spatialLocation:
       associations.spatialLocation ?? spatialLocationFactory.build(),
@@ -75,7 +76,7 @@ export const donorFactory: Factory<Donor> = Factory.define<Donor>(
     __typename: "Donor",
     donorName:
       params.donorName ??
-      `${_.capitalize(faker.random.word())}${faker.random.number()}`,
+      `${_.capitalize(faker.random.word())}${faker.random.numeric()}`,
     lifeStage:
       params.lifeStage ??
       _.shuffle([LifeStage.Fetal, LifeStage.Paediatric, LifeStage.Adult])[0],

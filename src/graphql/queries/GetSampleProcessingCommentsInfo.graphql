@@ -1,5 +1,5 @@
 query GetSampleProcessingCommentsInfo {
-    comments:  comments(includeDisabled: false, category: "Sample Processing") {
-            ...CommentFields
-        }
+  comments: comments(includeDisabled: false, category: "Sample Processing") {
+    ...CommentFields
+  }
 }

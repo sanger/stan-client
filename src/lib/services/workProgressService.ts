@@ -29,6 +29,7 @@ export type WorkProgressResultTableEntry = {
   lastStainTODate: Date | undefined;
   lastStainLPDate: Date | undefined;
   lastRelease96WellPlateData: Date | undefined;
+  workRequester: String | undefined;
 };
 /**
  * The keys to store the timestamp data
@@ -51,7 +52,8 @@ export class WorkProgressService
     SearchServiceInterface<
       FindWorkProgressQueryVariables,
       WorkProgressResultTableEntry
-    > {
+    >
+{
   /**
    * Do a findWorkProgress query on core. Format the response into a list of table rows
    * @param workProgressRequest the variables that go into a FindWorkProgress query
@@ -135,6 +137,9 @@ export class WorkProgressService
         lastRelease96WellPlateData:
           lastRelease96WellPlateData &&
           new Date(lastRelease96WellPlateData.toString()),
+        workRequester: entry.work.workRequester
+          ? entry.work.workRequester.username
+          : "",
       };
     });
   };

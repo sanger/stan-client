@@ -1,11 +1,11 @@
 query GetBlockProcessingInfo {
-    mediums {
-        name
-    }
-    comments(includeDisabled: false, category: "Sample Processing") {
-        ...CommentFields
-    }
-    labwareTypes {
-        ...LabwareTypeFields
-    }
+  mediums {
+    name
+  }
+  comments(includeDisabled: false, category: "Sample Processing") {
+    ...CommentFields
+  }
+  labwareTypes {
+    ...LabwareTypeFields
+  }
 }

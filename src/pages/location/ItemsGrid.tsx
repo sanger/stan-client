@@ -127,9 +127,10 @@ const GridItem: React.FC<GridItemParams> = ({
 
   const gridItemClassNames = classNames(
     {
-      "border-2 border-blue-800 bg-sdb-100 hover:bg-sp-300 text-gray-300": labwareBarcodeToAddressMap.has(
-        addressToItemMap.get(storelightAddress)?.barcode ?? ""
-      ),
+      "border-2 border-blue-800 bg-sdb-100 hover:bg-sp-300 text-gray-300":
+        labwareBarcodeToAddressMap.has(
+          addressToItemMap.get(storelightAddress)?.barcode ?? ""
+        ),
       "bg-blue-800 hover:bg-sp-300 text-gray-300":
         storelightAddress !== selectedAddress &&
         addressToItemMap.get(storelightAddress) != null &&

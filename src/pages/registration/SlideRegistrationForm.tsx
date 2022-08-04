@@ -38,15 +38,10 @@ type SlideRegistrationFormParams = {
 function SlideRegistrationForm({
   registrationInfo,
 }: SlideRegistrationFormParams) {
-  const {
-    availableSlides,
-    buildLabware,
-    buildSample,
-    isSubmitting,
-  } = useContext(SlideRegistrationContext);
-  const { values, setFieldValue, errors, touched } = useFormikContext<
-    SlideRegistrationFormValues
-  >();
+  const { availableSlides, buildLabware, buildSample, isSubmitting } =
+    useContext(SlideRegistrationContext);
+  const { values, setFieldValue, errors, touched } =
+    useFormikContext<SlideRegistrationFormValues>();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scrollToSlot, setScrollToSlot] = useState<string | null>(null);
@@ -65,9 +60,10 @@ function SlideRegistrationForm({
     () => getNumErrorsPerLabware(values.labwares, errors, touched),
     [values.labwares, errors, touched]
   );
-  const totalSections = useMemo(() => getTotalSectionsCount(values.labwares), [
-    values.labwares,
-  ]);
+  const totalSections = useMemo(
+    () => getTotalSectionsCount(values.labwares),
+    [values.labwares]
+  );
   const labware = useMemo(() => {
     const labwareType = registrationInfo.labwareTypes.find(
       (lt) => lt.name === currentLabware.labwareTypeName
@@ -198,23 +194,22 @@ function SlideRegistrationForm({
               </FormikSelect>
             </motion.div>
 
-            {Object.keys(
-              values.labwares[currentIndex].slots
-            ).flatMap((slotAddress) =>
-              values.labwares[currentIndex].slots[
-                slotAddress
-              ].map((sample, slotIndex) => (
-                <SectionForm
-                  key={sample.clientId}
-                  sectionIndex={slotIndex}
-                  registrationInfo={registrationInfo}
-                  currentIndex={currentIndex}
-                  slotAddress={slotAddress}
-                  scrollIntoView={slotAddress === scrollToSlot}
-                  showRemoveSectionButton={currentLabwareSectionCount > 1}
-                  onScreen={debouncedSetCurrentSlot}
-                />
-              ))
+            {Object.keys(values.labwares[currentIndex].slots).flatMap(
+              (slotAddress) =>
+                values.labwares[currentIndex].slots[slotAddress].map(
+                  (sample, slotIndex) => (
+                    <SectionForm
+                      key={sample.clientId}
+                      sectionIndex={slotIndex}
+                      registrationInfo={registrationInfo}
+                      currentIndex={currentIndex}
+                      slotAddress={slotAddress}
+                      scrollIntoView={slotAddress === scrollToSlot}
+                      showRemoveSectionButton={currentLabwareSectionCount > 1}
+                      onScreen={debouncedSetCurrentSlot}
+                    />
+                  )
+                )
             )}
           </motion.div>
         </div>

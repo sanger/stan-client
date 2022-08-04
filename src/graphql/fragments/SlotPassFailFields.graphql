@@ -1,5 +1,5 @@
 fragment SlotPassFailFields on SlotPassFail {
-    address
-    result
-    comment
+  address
+  result
+  comment
 }

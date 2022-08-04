@@ -1,5 +1,5 @@
 query FindWorkNumbers($status: WorkStatus!) {
-    works(status: [$status]) {
-        workNumber
-    }
+  works(status: [$status]) {
+    workNumber
+  }
 }

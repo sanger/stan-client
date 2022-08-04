@@ -1,8 +1,8 @@
 fragment WorkProgressFields on WorkProgress {
-    work {
-        ...WorkFields
-    }
-    timestamps {
-        ...WorkProgressTimeStampField
-    }
+  work {
+    ...WorkFields
+  }
+  timestamps {
+    ...WorkProgressTimeStampField
+  }
 }

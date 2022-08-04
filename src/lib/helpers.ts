@@ -72,7 +72,7 @@ type SchemaParams = {
   /**
    * A Yup schema. Used to cast and validate the parsed URL query string.
    */
-  schema: Yup.ObjectSchema;
+  schema: Yup.AnyObjectSchema;
 };
 type SafeParseQueryStringParams<T> = GuardAndTransformParams<T> | SchemaParams;
 
@@ -405,3 +405,4 @@ export function getNumberOfDaysBetween(firstDate: string, secondDate: string) {
 }
 /**This type allows to create a new type from given type with specified fields as optional **/
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;

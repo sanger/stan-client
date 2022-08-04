@@ -1,29 +1,28 @@
-mutation Aliquot($request:AliquotRequest!) {
-    aliquot(request: $request) {
-        labware {
-            ...LabwareFields
-        }
-        operations {
-            operationType {
-                name
-            }
-            actions {
-                sample {
-                    id
-                }
-                source {
-                    address
-                    labwareId
-                    samples {
-                        id
-                    }
-                }
-                destination {
-                    address
-                    labwareId
-                }
-            }
-        }
+mutation Aliquot($request: AliquotRequest!) {
+  aliquot(request: $request) {
+    labware {
+      ...LabwareFields
     }
-
+    operations {
+      operationType {
+        name
+      }
+      actions {
+        sample {
+          id
+        }
+        source {
+          address
+          labwareId
+          samples {
+            id
+          }
+        }
+        destination {
+          address
+          labwareId
+        }
+      }
+    }
+  }
 }

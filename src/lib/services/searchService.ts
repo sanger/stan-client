@@ -6,7 +6,8 @@ import { stanCore } from "../sdk";
 import { SearchServiceInterface } from "./searchServiceInterface";
 
 export class SearchService
-  implements SearchServiceInterface<FindRequest, SearchResultTableEntry> {
+  implements SearchServiceInterface<FindRequest, SearchResultTableEntry>
+{
   /**
    * Do a find query on core. Format the response into a list of table rows
    * @param findRequest the variables that go into a Find query

@@ -1,11 +1,9 @@
-query ExtractResult($barcode:String!) {
-    extractResult(barcode: $barcode) {
-        result
-        concentration
-        labware
-        {
-            ...LabwareFields
-        }
-
+query ExtractResult($barcode: String!) {
+  extractResult(barcode: $barcode) {
+    result
+    concentration
+    labware {
+      ...LabwareFields
     }
+  }
 }

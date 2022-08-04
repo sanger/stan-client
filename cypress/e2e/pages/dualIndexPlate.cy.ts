@@ -2,6 +2,7 @@ import {
   RecordReagentTransferMutation,
   RecordReagentTransferMutationVariables,
 } from "../../../src/types/sdk";
+import { shouldDisplyProjectAndUserNameForWorkNumber } from "../shared/workNumberExtraInfo.cy";
 
 function scanInDestinationLabware() {
   cy.get("#labwareScanInput").type("STAN-5111{enter}");
@@ -18,9 +19,10 @@ function saveButton() {
 }
 
 describe("Dual Index Plate", () => {
+  shouldDisplyProjectAndUserNameForWorkNumber("/lab/dual_index_plate");
+
   context("when source and destination labware are not scanned", () => {
     before(() => {
-      cy.visit("/lab/dual_index_plate");
       cy.get("select").select("SGP1008");
     });
     it("disables the Save button", () => {

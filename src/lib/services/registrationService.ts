@@ -25,8 +25,10 @@ export async function registerTissues(
 export async function registerOriginalSamples(
   mutationVariables: RegisterOriginalSamplesMutationVariables
 ) {
-  const response = await graphQLClient.rawRequest<
-    RegisterOriginalSamplesMutation
-  >(RegisterOriginalSamplesDocument, mutationVariables);
+  const response =
+    await graphQLClient.rawRequest<RegisterOriginalSamplesMutation>(
+      RegisterOriginalSamplesDocument,
+      mutationVariables
+    );
   return response.data.registerOriginalSamples;
 }

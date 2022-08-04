@@ -1,5 +1,11 @@
-mutation SetLocationCustomName($locationBarcode: String!, $newCustomName: String!) {
-    setLocationCustomName(locationBarcode: $locationBarcode, customName: $newCustomName) {
-        ...LocationFields
-    }
+mutation SetLocationCustomName(
+  $locationBarcode: String!
+  $newCustomName: String!
+) {
+  setLocationCustomName(
+    locationBarcode: $locationBarcode
+    customName: $newCustomName
+  ) {
+    ...LocationFields
+  }
 }

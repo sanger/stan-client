@@ -1,5 +1,5 @@
 mutation SetHmdmcEnabled($hmdmc: String!, $enabled: Boolean!) {
-    setHmdmcEnabled(hmdmc: $hmdmc, enabled: $enabled) {
-        ...HmdmcFields
-    }
+  setHmdmcEnabled(hmdmc: $hmdmc, enabled: $enabled) {
+    ...HmdmcFields
+  }
 }

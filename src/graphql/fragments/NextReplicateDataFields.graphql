@@ -1,6 +1,6 @@
 fragment NextReplicateDataFields on NextReplicateData {
-    barcodes
-    donorId
-    nextReplicateNumber
-    spatialLocationId
-} 
+  barcodes
+  donorId
+  nextReplicateNumber
+  spatialLocationId
+}

@@ -1,12 +1,11 @@
-describe("Fetal Waste Page", () => {
-  before(() => {
-    cy.visit("/lab/fetal_waste");
-  });
+import { shouldDisplyProjectAndUserNameForWorkNumber } from "../shared/workNumberExtraInfo.cy";
 
+describe("Fetal Waste Page", () => {
+  shouldDisplyProjectAndUserNameForWorkNumber("/lab/fetal_waste");
   describe("Validation", () => {
     context("when submitting the form with nothing filled in", () => {
       before(() => {
-        cy.findByRole("button", { name: "Submit" }).click()
+        cy.findByRole("button", { name: "Submit" }).click();
       });
 
       it("shows a validation error for labware", () => {
@@ -16,11 +15,8 @@ describe("Fetal Waste Page", () => {
       });
 
       it("shows a validation error for the work number", () => {
-        cy.findByText("SGP Number is a required field").should(
-          "be.visible"
-        );
+        cy.findByText("SGP Number is a required field").should("be.visible");
       });
     });
-
   });
 });
