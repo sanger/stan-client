@@ -213,8 +213,11 @@ describe("labwareMachine", () => {
               findLabwareByBarcode: (_ctx: LabwareContext) => {
                 return new Promise<FindLabwareQuery>((_resolve, reject) => {
                   reject({
-                    message:
-                      "Exception while fetching data (/labware) : No labware found with barcode: STAN-321",
+                    response: {
+                      errors: [
+                        { message: "Exception while fetching data (/labware) : No labware found with barcode: STAN-321" }
+                      ]
+                    }
                   });
                 });
               },

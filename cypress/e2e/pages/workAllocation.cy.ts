@@ -69,22 +69,23 @@ describe("Work Allocation", () => {
         it("shows an error when the request errors", () => {
           cy.msw().then(({ graphql, worker }) => {
             worker.use(
-              graphql.mutation<CreateWorkMutation, CreateWorkMutationVariables>(
-                "CreateWork",
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
-                      {
-                        message: "SGP Request Error",
-                      },
-                    ])
-                  );
-                }
-              )
+              graphql.mutation<
+                CreateWorkMutation,
+                CreateWorkMutationVariables
+              >("CreateWork", (req, res, ctx) => {
+                return res.once(
+                  ctx.errors([
+                    {
+                      message: "Exception while fetching data (/createWork) : An error occured",
+                    },
+                  ])
+                );
+              })
             );
           });
           cy.findByRole("button", { name: /Submit/i }).click();
           cy.findByText("SGP Request Error").should("exist");
+          cy.findByText("An error occured").should("exist");
         });
       }
     );

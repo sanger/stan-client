@@ -321,7 +321,7 @@ describe("Sectioning Planning", () => {
               return res.once(
                 ctx.errors([
                   {
-                    message: "Tube Printer failed to print",
+                    message: "Exception while fetching data (/print) : An error occured",
                   },
                 ])
               );

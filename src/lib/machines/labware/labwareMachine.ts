@@ -6,6 +6,7 @@ import {
   LabwareFieldsFragment,
   Maybe,
 } from "../../../types/sdk";
+import { extractServerErrors } from "../../../types/stan";
 import { assign } from "@xstate/immer";
 import { stanCore } from "../../sdk";
 import { ClientError } from "graphql-request";
@@ -424,10 +425,7 @@ export const createLabwareMachine = (
           ) {
             return;
           }
-          const matchResult = e.data.message.match(/^.*\s:\s(.*)$/);
-          if (matchResult && matchResult.length > 1) {
-            ctx.errorMessage = matchResult[1];
-          }
+          ctx.errorMessage = handleFindError(e.data);
         }),
       },
       guards: {
@@ -466,4 +464,9 @@ export const createLabwareMachine = (
 
 const alreadyScannedBarcodeError = (barcode: string) => {
   return `"${barcode}" has already been scanned`;
+};
+
+const handleFindError = (error: ClientError) => {
+  let errors = extractServerErrors(error);
+  return errors?.message;
 };

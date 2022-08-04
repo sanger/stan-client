@@ -116,7 +116,7 @@ describe("History Page", () => {
             return res.once(
               ctx.errors([
                 {
-                  message: `History Search Error`,
+                  message: "Exception while fetching data (/history) : An error occured",
                 },
               ])
             );
@@ -127,6 +127,7 @@ describe("History Page", () => {
 
     it("displays an error", () => {
       cy.findByText("History Search Error").should("exist");
+      cy.findByText("An error occured").should("exist");
     });
   });
 });

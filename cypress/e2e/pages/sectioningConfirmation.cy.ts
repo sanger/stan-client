@@ -24,7 +24,7 @@ describe("Sectioning Confirmation", () => {
               return res.once(
                 ctx.errors([
                   {
-                    message: "Plan Search Error",
+                    message: "Exception while fetching data (/confirmSection) : An error occured",
                   },
                 ])
               );
@@ -38,6 +38,7 @@ describe("Sectioning Confirmation", () => {
 
     it("shows an error", () => {
       cy.findByText("Plan Search Error").should("be.visible");
+      cy.findByText("An error occured").should("be.visible");
     });
   });
 

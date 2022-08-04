@@ -168,10 +168,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                   <div className="py-4 px-8 w-full space-y-4">
                     {current.matches("prep.errored") && (
                       <Warning
-                        message={
-                          requestError?.message ??
-                          "There was an error creating the Labware"
-                        }
+                        message={"There was an error creating the Labware"}
                         error={requestError}
                       />
                     )}
