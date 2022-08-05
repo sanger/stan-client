@@ -1,28 +1,37 @@
-import React, { useEffect } from 'react';
-import labwareScanTableColumns from '../dataTable/labwareColumns';
-import PinkButton from '../buttons/PinkButton';
-import { useMachine } from '@xstate/react';
-import Modal, { ModalBody, ModalFooter } from '../Modal';
-import BlueButton from '../buttons/BlueButton';
-import Heading from '../Heading';
-import LayoutPlanner from '../LayoutPlanner';
-import Labware from '../labware/Labware';
-import { motion } from 'framer-motion';
-import variants from '../../lib/motionVariants';
-import Warning from '../notifications/Warning';
-import { LabwareTypeName, NewLabwareLayout } from '../../types/stan';
-import LabelPrinter, { PrintResult } from '../LabelPrinter';
-import LabelPrinterButton from '../LabelPrinterButton';
-import DataTable from '../DataTable';
-import { CellProps } from 'react-table';
-import { LabwareFieldsFragment, LabwareType, LabwareTypeFieldsFragment, PlanMutation } from '../../types/sdk';
-import WhiteButton from '../buttons/WhiteButton';
-import FormikInput from '../forms/Input';
-import { usePrinters } from '../../lib/hooks';
-import * as Yup from 'yup';
-import { Form, Formik } from 'formik';
-import { createLabwarePlanMachine } from './labwarePlan.machine';
-import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pages/sectioning';
+import React, { useEffect } from "react";
+import labwareScanTableColumns from "../dataTable/labwareColumns";
+import PinkButton from "../buttons/PinkButton";
+import { useMachine } from "@xstate/react";
+import Modal, { ModalBody, ModalFooter } from "../Modal";
+import BlueButton from "../buttons/BlueButton";
+import Heading from "../Heading";
+import LayoutPlanner from "../LayoutPlanner";
+import Labware from "../labware/Labware";
+import { motion } from "framer-motion";
+import variants from "../../lib/motionVariants";
+import Warning from "../notifications/Warning";
+import { LabwareTypeName, NewLabwareLayout } from "../../types/stan";
+import LabelPrinter, { PrintResult } from "../LabelPrinter";
+import LabelPrinterButton from "../LabelPrinterButton";
+import DataTable from "../DataTable";
+import { CellProps } from "react-table";
+import {
+  LabwareFieldsFragment,
+  LabwareType,
+  LabwareTypeFieldsFragment,
+  PlanMutation,
+} from "../../types/sdk";
+import WhiteButton from "../buttons/WhiteButton";
+import FormikInput from "../forms/Input";
+import { usePrinters } from "../../lib/hooks";
+import * as Yup from "yup";
+import { Form, Formik } from "formik";
+import { createLabwarePlanMachine } from "./labwarePlan.machine";
+import {
+  buildSlotColor,
+  buildSlotSecondaryText,
+  buildSlotText,
+} from "../../pages/sectioning";
 
 type LabwarePlanProps = {
   /**
@@ -55,14 +64,30 @@ type LabwarePlanProps = {
 };
 
 const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
-  ({ cid, outputLabware, onDeleteButtonClick, onComplete, sampleColors, operationType, sourceLabware }, ref) => {
+  (
+    {
+      cid,
+      outputLabware,
+      onDeleteButtonClick,
+      onComplete,
+      sampleColors,
+      operationType,
+      sourceLabware,
+    },
+    ref
+  ) => {
     const [current, send, service] = useMachine(
-      createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware))
+      createLabwarePlanMachine(
+        buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware)
+      )
     );
 
     useEffect(() => {
       const subscription = service.subscribe((state) => {
-        if (state.context.plan && (state.matches('done') || state.matches('printing'))) {
+        if (
+          state.context.plan &&
+          (state.matches("done") || state.matches("printing"))
+        ) {
           onComplete(cid, state.context.plan);
         }
       });
@@ -70,7 +95,13 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
       return subscription.unsubscribe;
     }, [service, onComplete, cid]);
 
-    const { handleOnPrint, handleOnPrintError, handleOnPrinterChange, printResult, currentPrinter } = usePrinters();
+    const {
+      handleOnPrint,
+      handleOnPrintError,
+      handleOnPrinterChange,
+      printResult,
+      currentPrinter,
+    } = usePrinters();
 
     const { requestError, layoutPlan, plan } = current.context;
 
@@ -80,8 +111,8 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
     // Special case column that renders a label printer button for each row
     const printColumn = {
-      id: 'printer',
-      Header: '',
+      id: "printer",
+      Header: "",
       Cell: (props: CellProps<LabwareFieldsFragment>) => (
         <LabelPrinterButton
           labwares={[props.row.original]}
@@ -89,7 +120,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
           onPrint={handleOnPrint}
           onPrintError={handleOnPrintError}
         />
-      )
+      ),
     };
 
     const columns = [labwareScanTableColumns.barcode(), printColumn];
@@ -98,15 +129,18 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
       <motion.div
         ref={ref}
         variants={variants.fadeInWithLift}
-        initial={'hidden'}
-        animate={'visible'}
+        initial={"hidden"}
+        animate={"visible"}
         className="relative p-3 shadow"
       >
         <Formik<FormValues>
-          initialValues={buildInitialValues(operationType, outputLabware.labwareType)}
+          initialValues={buildInitialValues(
+            operationType,
+            outputLabware.labwareType
+          )}
           validationSchema={buildValidationSchema(outputLabware.labwareType)}
           onSubmit={async (values) => {
-            send({ type: 'CREATE_LABWARE', ...values });
+            send({ type: "CREATE_LABWARE", ...values });
           }}
         >
           {({ isValid }) => (
@@ -115,54 +149,72 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                 <div className="py-4 flex flex-col items-center justify-between space-y-8">
                   <Labware
                     labware={outputLabware}
-                    onClick={() => send({ type: 'EDIT_LAYOUT' })}
+                    onClick={() => send({ type: "EDIT_LAYOUT" })}
                     name={outputLabware.labwareType.name}
                     slotText={(address) => buildSlotText(layoutPlan, address)}
-                    slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
+                    slotSecondaryText={(address) =>
+                      buildSlotSecondaryText(layoutPlan, address)
+                    }
                     slotColor={(address) => buildSlotColor(layoutPlan, address)}
                   />
 
-                  {current.matches('prep') && (
-                    <PinkButton onClick={() => send({ type: 'EDIT_LAYOUT' })}>Edit Layout</PinkButton>
+                  {current.matches("prep") && (
+                    <PinkButton onClick={() => send({ type: "EDIT_LAYOUT" })}>
+                      Edit Layout
+                    </PinkButton>
                   )}
                 </div>
                 <div className="border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow">
                   <div className="py-4 px-8 w-full space-y-4">
-                    {current.matches('prep.errored') && (
+                    {current.matches("prep.errored") && (
                       <Warning
-                        message={requestError?.message ?? 'There was an error creating the Labware'}
+                        message={"There was an error creating the Labware"}
                         error={requestError}
                       />
                     )}
 
-                    <FormikInput label={''} type={'hidden'} name={'operationType'} value={operationType} />
+                    <FormikInput
+                      label={""}
+                      type={"hidden"}
+                      name={"operationType"}
+                      value={operationType}
+                    />
 
-                    {outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP && (
+                    {outputLabware.labwareType.name ===
+                      LabwareTypeName.VISIUM_LP && (
                       <FormikInput
-                        name={'barcode'}
-                        label={'Barcode'}
-                        type={'text'}
-                        disabled={current.matches('printing') || current.matches('done')}
+                        name={"barcode"}
+                        label={"Barcode"}
+                        type={"text"}
+                        disabled={
+                          current.matches("printing") || current.matches("done")
+                        }
                       />
                     )}
 
-                    {outputLabware.labwareType.name !== LabwareTypeName.VISIUM_LP && (
+                    {outputLabware.labwareType.name !==
+                      LabwareTypeName.VISIUM_LP && (
                       <FormikInput
-                        label={'Number of Labware'}
-                        name={'quantity'}
-                        type={'number'}
+                        label={"Number of Labware"}
+                        name={"quantity"}
+                        type={"number"}
                         min={1}
                         step={1}
-                        disabled={current.matches('printing') || current.matches('done')}
+                        disabled={
+                          current.matches("printing") || current.matches("done")
+                        }
                       />
                     )}
 
-                    {outputLabware.labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER && (
+                    {outputLabware.labwareType.name !==
+                      LabwareTypeName.FETAL_WASTE_CONTAINER && (
                       <FormikInput
-                        disabled={current.matches('printing') || current.matches('done')}
-                        label={'Section Thickness'}
-                        name={'sectionThickness'}
-                        type={'number'}
+                        disabled={
+                          current.matches("printing") || current.matches("done")
+                        }
+                        label={"Section Thickness"}
+                        name={"sectionThickness"}
+                        type={"number"}
                         min={1}
                         step={1}
                       />
@@ -170,14 +222,17 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                   </div>
 
                   {plannedLabware.length > 0 && (
-                    <div data-testid="plan-destination-labware" className="w-full space-y-4 py-4 px-8">
+                    <div
+                      data-testid="plan-destination-labware"
+                      className="w-full space-y-4 py-4 px-8"
+                    >
                       <DataTable columns={columns} data={plannedLabware} />
 
                       {printResult && <PrintResult result={printResult} />}
                     </div>
                   )}
 
-                  {current.matches('printing') && (
+                  {current.matches("printing") && (
                     <div className="w-full border-t-2 border-gray-200 py-3 px-4 space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
                       <LabelPrinter
                         labwares={plannedLabware}
@@ -189,10 +244,17 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                     </div>
                   )}
 
-                  {current.matches('prep') && (
+                  {current.matches("prep") && (
                     <div className="w-full border-t-2 border-gray-200 py-3 px-4 sm:flex sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 bg-gray-100">
-                      <WhiteButton onClick={() => onDeleteButtonClick(cid)}>Delete Layout</WhiteButton>
-                      <BlueButton type="submit" disabled={current.matches({ prep: 'invalid' }) || !isValid}>
+                      <WhiteButton onClick={() => onDeleteButtonClick(cid)}>
+                        Delete Layout
+                      </WhiteButton>
+                      <BlueButton
+                        type="submit"
+                        disabled={
+                          current.matches({ prep: "invalid" }) || !isValid
+                        }
+                      >
                         Create Labware
                       </BlueButton>
                     </div>
@@ -203,15 +265,16 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
           )}
         </Formik>
 
-        <Modal show={current.matches('editingLayout')}>
+        <Modal show={current.matches("editingLayout")}>
           <ModalBody>
             <Heading level={3}>Set Layout</Heading>
             {layoutMachine && (
               <LayoutPlanner actor={layoutMachine}>
                 <div className="my-2">
                   <p className="text-gray-900 text-sm leading-normal">
-                    To add sections to a slot, select a source for the buttons on the right, and then click a
-                    destination slot. Clicking a filled slot will empty it.
+                    To add sections to a slot, select a source for the buttons
+                    on the right, and then click a destination slot. Clicking a
+                    filled slot will empty it.
                   </p>
                 </div>
               </LayoutPlanner>
@@ -219,13 +282,13 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
           </ModalBody>
           <ModalFooter>
             <BlueButton
-              onClick={() => layoutMachine.send({ type: 'DONE' })}
+              onClick={() => layoutMachine.send({ type: "DONE" })}
               className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
             >
               Done
             </BlueButton>
             <WhiteButton
-              onClick={() => layoutMachine.send({ type: 'CANCEL' })}
+              onClick={() => layoutMachine.send({ type: "CANCEL" })}
               className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
             >
               Cancel
@@ -267,14 +330,17 @@ type FormValues = {
 /**
  * The initial values for the labware plan form
  */
-function buildInitialValues(operationType: string, labwareType: LabwareTypeFieldsFragment): FormValues {
+function buildInitialValues(
+  operationType: string,
+  labwareType: LabwareTypeFieldsFragment
+): FormValues {
   let formValues: FormValues = {
     operationType,
-    quantity: 1
+    quantity: 1,
   };
 
   if (labwareType.name === LabwareTypeName.VISIUM_LP) {
-    formValues.barcode = '';
+    formValues.barcode = "";
   }
   if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
     formValues.sectionThickness = 0;
@@ -295,7 +361,7 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
   };
 
   let formShape: FormShape = {
-    quantity: Yup.number().required().integer().min(1).max(99)
+    quantity: Yup.number().required().integer().min(1).max(99),
   };
 
   if (labwareType.name === LabwareTypeName.VISIUM_LP) {
@@ -324,13 +390,13 @@ function buildInitialLayoutPlan(
             sampleId: sample.id,
             labware: lw,
             newSection: 0,
-            address: slot.address
+            address: slot.address,
           };
         });
       });
     }),
     sampleColors,
     destinationLabware: outputLabware,
-    plannedActions: new Map()
+    plannedActions: new Map(),
   };
 }
