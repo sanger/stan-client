@@ -38,7 +38,7 @@ export default function History() {
               }}
             >
               <Form>
-                <div className="md:flex md:flex-row md:justify-center md:items-center md:gap-10">
+                <div className="md:flex md:flex-row md:justify-center md:items-center md:gap-4">
                   <div className="md:flex-grow">
                     <FormikInput name="value" label="" />
                   </div>
@@ -55,7 +55,7 @@ export default function History() {
                     </FormikSelect>
                   </div>
 
-                  <div className="flex flex-row items-center justify-end space-x-4">
+                  <div className="flex flex-row items-center justify-end space-x-4 mt-6">
                     <BlueButton type="submit">Search</BlueButton>
                   </div>
                 </div>

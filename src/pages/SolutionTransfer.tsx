@@ -36,14 +36,9 @@ type SolutionTransferFormData = Required<SolutionTransferRequest> & {
   /**Solution to apply to all labware**/
   applyAllSolution: string;
 };
-const SolutionTransfer: React.FC<SolutionTransferParams> = ({
-  solutionTransferInfo,
-}: SolutionTransferParams) => {
-  const [current, send] = useMachine(
-    createFormMachine<
-      SolutionTransferRequest,
-      PerformSolutionTransferMutation
-    >().withConfig({
+const SolutionTransfer: React.FC<SolutionTransferParams> = ({ solutionTransferInfo }: SolutionTransferParams) => {
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<SolutionTransferRequest, PerformSolutionTransferMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
@@ -53,8 +48,8 @@ const SolutionTransfer: React.FC<SolutionTransferParams> = ({
               workNumber: e.values.workNumber
             }
           });
-        },
-      },
+        }
+      }
     });
   }, []);
   const [current, send] = useMachine(formMachine);
