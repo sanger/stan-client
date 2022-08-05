@@ -1,28 +1,19 @@
-import React, {
-  createContext,
-  useCallback,
-  useEffect,
-  useReducer,
-} from "react";
-import {
-  LabwareFieldsFragment,
-  LabwareTypeFieldsFragment,
-  Maybe,
-} from "../../types/sdk";
-import { uniqueId } from "lodash";
-import BlueButton from "../buttons/BlueButton";
-import { NewLabwareLayout } from "../../types/stan";
-import produce, { castDraft } from "immer";
-import { unregisteredLabwareFactory } from "../../lib/factories/labwareFactory";
-import LabwareScanTable from "../labwareScanPanel/LabwareScanPanel";
-import LabwareScanner from "../labwareScanner/LabwareScanner";
-import { buildSampleColors } from "../../lib/helpers/labwareHelper";
-import Heading from "../Heading";
-import { getNumberOfDaysBetween } from "../../lib/helpers";
-import Warning from "../notifications/Warning";
-import { Column } from "react-table";
-import labwareScanTableColumns from "../dataTable/labwareColumns";
-import { useScrollToRef } from "../../lib/hooks";
+import React, { createContext, useCallback, useEffect, useReducer } from 'react';
+import { LabwareFieldsFragment, LabwareTypeFieldsFragment, Maybe } from '../../types/sdk';
+import { uniqueId } from 'lodash';
+import BlueButton from '../buttons/BlueButton';
+import { NewLabwareLayout } from '../../types/stan';
+import produce, { castDraft } from 'immer';
+import { unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
+import LabwareScanTable from '../labwareScanPanel/LabwareScanPanel';
+import LabwareScanner from '../labwareScanner/LabwareScanner';
+import { buildSampleColors } from '../../lib/helpers/labwareHelper';
+import Heading from '../Heading';
+import { getNumberOfDaysBetween } from '../../lib/helpers';
+import Warning from '../notifications/Warning';
+import { Column } from 'react-table';
+import labwareScanTableColumns from '../dataTable/labwareColumns';
+import { useScrollToRef } from '../../lib/hooks';
 
 /**
  * The props passed to the Planner component
@@ -64,7 +55,7 @@ type PlannerProps<M> = {
   /**
    * The operation the user is planning for , if any. Will be sent to core in the plan request.
    */
-  operationType?: "Section";
+  operationType?: 'Section';
 
   /**
    * Called when a plan is added or removed from the {@link Planner}. Note that once complete, plans can not be
@@ -141,42 +132,39 @@ const initialState = {
   labwarePlans: new Map(),
   completedPlans: new Map(),
   isLabwareScannerLocked: false,
-  isAddLabwareButtonDisabled: true,
+  isAddLabwareButtonDisabled: true
 };
 
 type Action<M> =
-  | { type: "SET_SOURCE_LABWARE"; labware: Array<LabwareFieldsFragment> }
+  | { type: 'SET_SOURCE_LABWARE'; labware: Array<LabwareFieldsFragment> }
   | {
-      type: "ADD_LABWARE_PLAN";
+      type: 'ADD_LABWARE_PLAN';
       labwareType: LabwareTypeFieldsFragment;
       numLabwareAdd: number;
     }
-  | { type: "REMOVE_LABWARE_PLAN"; cid: string }
-  | { type: "PLAN_COMPLETE"; cid: string; plan: M };
+  | { type: 'REMOVE_LABWARE_PLAN'; cid: string }
+  | { type: 'PLAN_COMPLETE'; cid: string; plan: M };
 
 const FETAL_STORAGE_WEEKS = 12;
 
-function reducer<M>(
-  state: PlannerState<M>,
-  action: Action<M>
-): PlannerState<M> {
+function reducer<M>(state: PlannerState<M>, action: Action<M>): PlannerState<M> {
   return produce(state, (draft) => {
     switch (action.type) {
-      case "SET_SOURCE_LABWARE":
+      case 'SET_SOURCE_LABWARE':
         draft.sourceLabware = action.labware;
         draft.isAddLabwareButtonDisabled = action.labware.length === 0;
         break;
 
-      case "ADD_LABWARE_PLAN": {
+      case 'ADD_LABWARE_PLAN': {
         for (let indx = 0; indx < action.numLabwareAdd; indx++) {
           draft.labwarePlans.set(
-            uniqueId("labware_plan_"),
+            uniqueId('labware_plan_'),
             unregisteredLabwareFactory.build(
               {},
               {
                 associations: {
-                  labwareType: action.labwareType,
-                },
+                  labwareType: action.labwareType
+                }
               }
             )
           );
@@ -187,13 +175,12 @@ function reducer<M>(
         break;
       }
 
-      case "REMOVE_LABWARE_PLAN":
+      case 'REMOVE_LABWARE_PLAN':
         draft.labwarePlans.delete(action.cid);
-        draft.isLabwareScannerLocked =
-          draft.labwarePlans.size > 0 || draft.completedPlans.size > 0;
+        draft.isLabwareScannerLocked = draft.labwarePlans.size > 0 || draft.completedPlans.size > 0;
         break;
 
-      case "PLAN_COMPLETE":
+      case 'PLAN_COMPLETE':
         draft.completedPlans.set(action.cid, castDraft(action.plan));
         break;
 
@@ -213,7 +200,7 @@ export default function Planner<M>({
   columns,
   singleSourceAllowed,
   buildPlanLayouts,
-  buildPlanCreationSettings,
+  buildPlanCreationSettings
 }: PlannerProps<M>) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -232,20 +219,15 @@ export default function Planner<M>({
       completedPlans: Array.from(state.completedPlans.values()) as M[],
       sourceLabware: state.sourceLabware,
       numberOfPlans: state.labwarePlans.size,
-      layoutPlans: state.labwarePlans,
+      layoutPlans: state.labwarePlans
     });
-  }, [
-    state.labwarePlans,
-    state.completedPlans,
-    state.sourceLabware,
-    onPlanChanged,
-  ]);
+  }, [state.labwarePlans, state.completedPlans, state.sourceLabware, onPlanChanged]);
   /**
    * Handler for LabwareScanner's onChange event
    */
   const onLabwareScannerChange = useCallback(
     (labware: Array<LabwareFieldsFragment>) => {
-      dispatch({ type: "SET_SOURCE_LABWARE", labware });
+      dispatch({ type: 'SET_SOURCE_LABWARE', labware });
     },
     [dispatch]
   );
@@ -258,9 +240,9 @@ export default function Planner<M>({
       return;
     }
     dispatch({
-      type: "ADD_LABWARE_PLAN",
+      type: 'ADD_LABWARE_PLAN',
       labwareType: selectedLabwareType,
-      numLabwareAdd: numPlansToCreate ?? 1,
+      numLabwareAdd: numPlansToCreate ?? 1
     });
     scrollToRef();
   }, [selectedLabwareType, numPlansToCreate, dispatch, scrollToRef]);
@@ -270,7 +252,7 @@ export default function Planner<M>({
    */
   const onLabwarePlanDelete = useCallback(
     (cid: string) => {
-      dispatch({ type: "REMOVE_LABWARE_PLAN", cid });
+      dispatch({ type: 'REMOVE_LABWARE_PLAN', cid });
     },
     [dispatch]
   );
@@ -279,7 +261,7 @@ export default function Planner<M>({
    * Handler for when a labware plan is completed
    */
   const onLabwarePlanComplete = useCallback(
-    (cid: string, plan: M) => dispatch({ type: "PLAN_COMPLETE", cid, plan }),
+    (cid: string, plan: M) => dispatch({ type: 'PLAN_COMPLETE', cid, plan }),
     [dispatch]
   );
 
@@ -287,9 +269,7 @@ export default function Planner<M>({
    * A map of sample ID to Tailwind CSS colours.
    * Used by various components to keep the same samples the same colours within different components.
    */
-  const sampleColors: Map<number, string> = buildSampleColors(
-    state.sourceLabware
-  );
+  const sampleColors: Map<number, string> = buildSampleColors(state.sourceLabware);
 
   /**
    *  Find all labwares having fetal waste samples with collection date less than 12 weeks after scanning
@@ -303,10 +283,7 @@ export default function Planner<M>({
               slot.samples.find((sample) => {
                 const numDays =
                   sample.tissue.collectionDate &&
-                  getNumberOfDaysBetween(
-                    sample.tissue.collectionDate,
-                    new Date().toDateString()
-                  );
+                  getNumberOfDaysBetween(sample.tissue.collectionDate, new Date().toDateString());
                 return numDays && numDays < FETAL_STORAGE_WEEKS * 7;
               }) !== undefined
           ) !== undefined
@@ -318,22 +295,15 @@ export default function Planner<M>({
     <div className="space-y-10">
       <Heading level={3}>Source Labware</Heading>
       <LabwareScanner
-        locked={
-          state.isLabwareScannerLocked ||
-          (singleSourceAllowed && state.sourceLabware.length === 1)
-        }
+        locked={state.isLabwareScannerLocked || (singleSourceAllowed && state.sourceLabware.length === 1)}
         onChange={onLabwareScannerChange}
       >
-        <LabwareScanTable
-          columns={[labwareScanTableColumns.color(sampleColors), ...columns]}
-        />
+        <LabwareScanTable columns={[labwareScanTableColumns.color(sampleColors), ...columns]} />
       </LabwareScanner>
       {fetalSampleWarningLabware.length > 0 && (
         <Warning
-          message={`The labware ${fetalSampleWarningLabware
-            .map((lw) => lw.barcode)
-            .join(",")} ${
-            fetalSampleWarningLabware.length > 1 ? " have" : " has"
+          message={`The labware ${fetalSampleWarningLabware.map((lw) => lw.barcode).join(',')} ${
+            fetalSampleWarningLabware.length > 1 ? ' have' : ' has'
           } fetal waste samples collected less than ${FETAL_STORAGE_WEEKS} weeks ago. Please keep the fetal waste for ${FETAL_STORAGE_WEEKS} weeks.`}
         />
       )}
@@ -347,28 +317,24 @@ export default function Planner<M>({
         onLabwarePlanComplete,
         scrollRef
       )}
-      <div
-        ref={scrollRef}
-        className="my-4 max-w-2xl mx-auto p-4 rounded-md bg-gray-100"
-      >
+      <div ref={scrollRef} className="my-4 max-w-2xl mx-auto p-4 rounded-md bg-gray-100">
         <p className="my-3 text-gray-800 text-sm text-center leading-normal">
-          Once{" "}
-          <span className="font-bold text-gray-900">all source labware</span>{" "}
-          has been scanned, select a type of labware to plan layouts:
+          Once <span className="font-bold text-gray-900">all source labware</span> has been scanned, select a type of
+          labware to plan layouts:
         </p>
         <div className="flex flex-row items-end gap-x-4 justify-center">
           {
             /**Render plan creation settings panel using the callback method (passed as props) so that it will be done by the parent component **/
             buildPlanCreationSettings()
           }
-          <div className={"flex-shrink-0 align-bottom justify-end content-end"}>
+          <div className={'flex-shrink-0 align-bottom justify-end content-end'}>
             <BlueButton
               id="#addLabware"
               onClick={onAddLabwareClick}
               className="whitespace-nowrap"
               disabled={state.isAddLabwareButtonDisabled}
-              action={"primary"}
-              type={"button"}
+              action={'primary'}
+              type={'button'}
             >
               + Add Labware
             </BlueButton>

@@ -1,19 +1,14 @@
-import React, { useContext, useRef, useState } from "react";
-import ScanInput from "../../components/scanInput/ScanInput";
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-} from "../../components/Table";
-import RemoveButton from "../../components/buttons/RemoveButton";
-import { LocationParentContext } from "../Location";
-import UnstoreBarcodeModal from "./UnstoreBarcodeModal";
-import { Maybe } from "../../types/sdk";
-import { StoredItemFragment } from "../../lib/machines/locations/locationMachineTypes";
-import MutedText from "../../components/MutedText";
-import { addressToLocationAddress } from "../../lib/helpers/locationHelper";
-import { Authenticated } from "../../components/Authenticated";
+import React, { useContext, useRef, useState } from 'react';
+import ScanInput from '../../components/scanInput/ScanInput';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
+import RemoveButton from '../../components/buttons/RemoveButton';
+import { LocationParentContext } from '../Location';
+import UnstoreBarcodeModal from './UnstoreBarcodeModal';
+import { Maybe } from '../../types/sdk';
+import { StoredItemFragment } from '../../lib/machines/locations/locationMachineTypes';
+import MutedText from '../../components/MutedText';
+import { addressToLocationAddress } from '../../lib/helpers/locationHelper';
+import { Authenticated } from '../../components/Authenticated';
 
 interface ItemsListParams {
   freeformAddress?: boolean;
@@ -23,19 +18,16 @@ interface ItemsListParams {
  * Component for showing the stored items in a location as a list
  */
 export const ItemsList: React.FC<ItemsListParams> = () => {
-  const { location, storeBarcode, unstoreBarcode } = useContext(
-    LocationParentContext
-  )!;
+  const { location, storeBarcode, unstoreBarcode } = useContext(LocationParentContext)!;
 
-  const [selectedItem, setSelectedItem] =
-    useState<Maybe<StoredItemFragment>>(null);
+  const [selectedItem, setSelectedItem] = useState<Maybe<StoredItemFragment>>(null);
 
   const scanInputRef = useRef<HTMLInputElement>(null);
 
   const handleOnScan = (barcode: string) => {
     storeBarcode(barcode);
     if (scanInputRef.current) {
-      scanInputRef.current.value = "";
+      scanInputRef.current.value = '';
     }
   };
 
@@ -43,17 +35,12 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
     <div>
       <Authenticated>
         <MutedText>
-          To store an item, first select the destination address (if required),
-          then scan the piece of labware.
+          To store an item, first select the destination address (if required), then scan the piece of labware.
         </MutedText>
 
         <div className="my-6 space-y-2 md:space-y-0 md:flex md:flex-row items-center justify-start md:gap-4">
           <div className="md:w-1/2">
-            <ScanInput
-              ref={scanInputRef}
-              placeholder="Labware barcode..."
-              onScan={handleOnScan}
-            />
+            <ScanInput ref={scanInputRef} placeholder="Labware barcode..." onScan={handleOnScan} />
           </div>
         </div>
       </Authenticated>
@@ -73,8 +60,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
                 <div className="my-3 flex flex-col items-center justify-center">
                   <MutedText>Location is empty</MutedText>
                   <p className="my-2 text-gray-900 text-sm">
-                    Scan a labware barcode in to the input above to add it to
-                    this Location.
+                    Scan a labware barcode in to the input above to add it to this Location.
                   </p>
                 </div>
               </td>
@@ -86,11 +72,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
                 {item.address ? (
                   <span className="font-bold">
                     {location.size && location.direction
-                      ? addressToLocationAddress(
-                          item.address,
-                          location.size!,
-                          location.direction!
-                        )
+                      ? addressToLocationAddress(item.address, location.size!, location.direction!)
                       : item.address}
                   </span>
                 ) : (

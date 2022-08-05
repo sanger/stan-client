@@ -1,21 +1,15 @@
-import {
-  Labware,
-  LabwareFieldsFragment,
-  LabwareState,
-  LabwareType,
-  SlotFieldsFragment,
-} from "../../types/sdk";
-import { cycleColors } from "../helpers";
-import { orderBy } from "lodash";
-import { Addressable, LabwareTypeName } from "../../types/stan";
-import * as slotHelper from "./slotHelper";
+import { Labware, LabwareFieldsFragment, LabwareState, LabwareType, SlotFieldsFragment } from '../../types/sdk';
+import { cycleColors } from '../helpers';
+import { orderBy } from 'lodash';
+import { Addressable, LabwareTypeName } from '../../types/stan';
+import * as slotHelper from './slotHelper';
 
 /**
  * Determines whether a labware type is a tube or not.
  * @param maybeTube the labware type that might be a tube
  * @return true if maybeTube is a tube; false otherwise
  */
-export function isTube(maybeTube: Pick<LabwareType, "name">): boolean {
+export function isTube(maybeTube: Pick<LabwareType, 'name'>): boolean {
   return maybeTube.name === LabwareTypeName.TUBE;
 }
 
@@ -38,9 +32,7 @@ export function labwareSamples(labware: LabwareFieldsFragment) {
  *
  * @param labwares list of labwares to get colors for
  */
-export function buildSampleColors(
-  labwares: LabwareFieldsFragment[]
-): Map<number, string> {
+export function buildSampleColors(labwares: LabwareFieldsFragment[]): Map<number, string> {
   const colors = cycleColors();
   const sampleColors = new Map();
   labwares.forEach((labware) => {
@@ -54,40 +46,26 @@ export function buildSampleColors(
 }
 
 export function getRowIndex(address: string): number {
-  return address.charCodeAt(0) - "A".charCodeAt(0) + 1;
+  return address.charCodeAt(0) - 'A'.charCodeAt(0) + 1;
 }
 
 export function getColumnIndex(address: string): number {
   return parseInt(address.substr(1));
 }
 
-export function sortRightDown<T extends Addressable>(
-  addressable: Array<T>
-): Array<T> {
-  return orderBy(
-    addressable,
-    [(a) => getRowIndex(a.address), (a) => getColumnIndex(a.address)],
-    ["asc", "asc"]
-  );
+export function sortRightDown<T extends Addressable>(addressable: Array<T>): Array<T> {
+  return orderBy(addressable, [(a) => getRowIndex(a.address), (a) => getColumnIndex(a.address)], ['asc', 'asc']);
 }
 
-export function sortDownRight<T extends Addressable>(
-  addressable: Array<T>
-): Array<T> {
-  return orderBy(
-    addressable,
-    [(a) => getColumnIndex(a.address), (a) => getRowIndex(a.address)],
-    ["asc", "asc"]
-  );
+export function sortDownRight<T extends Addressable>(addressable: Array<T>): Array<T> {
+  return orderBy(addressable, [(a) => getColumnIndex(a.address), (a) => getRowIndex(a.address)], ['asc', 'asc']);
 }
 
 /**
  * Returns the filled slots for the given labware
  * @param labware a {@link LabwareFieldsFragment}
  */
-export function filledSlots(
-  labware: LabwareFieldsFragment
-): Array<SlotFieldsFragment> {
+export function filledSlots(labware: LabwareFieldsFragment): Array<SlotFieldsFragment> {
   return slotHelper.filledSlots(labware.slots);
 }
 
@@ -95,9 +73,7 @@ export function filledSlots(
  * Returns the empty slots for the given labware
  * @param labware a {@link LabwareFieldsFragment}
  */
-export function emptySlots(
-  labware: LabwareFieldsFragment
-): Array<SlotFieldsFragment> {
+export function emptySlots(labware: LabwareFieldsFragment): Array<SlotFieldsFragment> {
   return slotHelper.emptySlots(labware.slots);
 }
 
@@ -106,7 +82,7 @@ export function emptySlots(
  */
 export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
   return {
-    __typename: "Labware",
+    __typename: 'Labware',
     id: labware.id,
     barcode: labware.barcode,
     externalBarcode: labware.externalBarcode,
@@ -116,14 +92,14 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
     created: labware.created,
     state: labware.state,
     labwareType: {
-      __typename: "LabwareType",
+      __typename: 'LabwareType',
       name: labware.labwareType.name,
       numRows: labware.labwareType.numRows,
       numColumns: labware.labwareType.numColumns,
-      labelType: labware.labwareType.labelType,
+      labelType: labware.labwareType.labelType
     },
     slots: labware.slots.map((slot) => ({
-      __typename: "Slot",
+      __typename: 'Slot',
       address: slot.address,
       labwareId: slot.labwareId,
       blockHighestSection: slot.blockHighestSection,
@@ -132,46 +108,46 @@ export function buildLabwareFragment(labware: Labware): LabwareFieldsFragment {
         id: sample.id,
         section: sample.section,
         bioState: {
-          __typename: "BioState",
-          name: sample.bioState.name,
+          __typename: 'BioState',
+          name: sample.bioState.name
         },
         tissue: {
           donor: {
             donorName: sample.tissue.donor.donorName,
             lifeStage: sample.tissue.donor.lifeStage,
-            __typename: "Donor",
+            __typename: 'Donor'
           },
           externalName: sample.tissue.externalName,
           spatialLocation: {
             tissueType: {
               name: sample.tissue.spatialLocation.tissueType.name,
-              __typename: "TissueType",
+              __typename: 'TissueType'
             },
             code: sample.tissue.spatialLocation.code,
-            __typename: "SpatialLocation",
+            __typename: 'SpatialLocation'
           },
           replicate: sample.tissue.replicate,
           medium: {
             name: sample.tissue.medium.name,
-            __typename: "Medium",
+            __typename: 'Medium'
           },
           fixative: {
             name: sample.tissue.fixative.name,
             enabled: sample.tissue.fixative.enabled,
-            __typename: "Fixative",
+            __typename: 'Fixative'
           },
-          __typename: "Tissue",
+          __typename: 'Tissue'
         },
-        __typename: "Sample",
-      })),
-    })),
+        __typename: 'Sample'
+      }))
+    }))
   };
 }
 
 /**
  * Returns true if a piece of labware is usable; false otherwise.
  */
-export function isLabwareUsable(labware: Pick<Labware, "state">): boolean {
+export function isLabwareUsable(labware: Pick<Labware, 'state'>): boolean {
   return [LabwareState.Empty, LabwareState.Active].includes(labware.state);
 }
 
@@ -181,8 +157,6 @@ export function isLabwareUsable(labware: Pick<Labware, "state">): boolean {
  * @param labware the labware to check
  * @return true if labware has one slot with a block inside; false otherwise
  */
-export function hasBlock(
-  labware: Pick<LabwareFieldsFragment, "slots">
-): boolean {
+export function hasBlock(labware: Pick<LabwareFieldsFragment, 'slots'>): boolean {
   return labware.slots.length === 1 && labware.slots[0].block;
 }

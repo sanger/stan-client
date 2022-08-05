@@ -1,16 +1,16 @@
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
 import {
   BlockRegisterRequest,
   GetRegistrationInfoQuery,
   LifeStage,
-  RegisterTissuesMutationVariables,
-} from "../types/sdk";
-import * as Yup from "yup";
-import RegistrationValidation from "../lib/validation/registrationValidation";
-import columns from "../components/dataTable/labwareColumns";
-import { LabwareTypeName } from "../types/stan";
-import * as registrationService from "../lib/services/registrationService";
-import Registration from "./registration/Registration";
+  RegisterTissuesMutationVariables
+} from '../types/sdk';
+import * as Yup from 'yup';
+import RegistrationValidation from '../lib/validation/registrationValidation';
+import columns from '../components/dataTable/labwareColumns';
+import { LabwareTypeName } from '../types/stan';
+import * as registrationService from '../lib/services/registrationService';
+import Registration from './registration/Registration';
 
 export interface RegistrationFormBlock {
   clientId: number;
@@ -40,26 +40,26 @@ export interface RegistrationFormValues {
 function getRegistrationFormBlock(): RegistrationFormBlock {
   return {
     clientId: Date.now(),
-    externalIdentifier: "",
+    externalIdentifier: '',
     spatialLocation: -1, // Initialise it as invalid so user has to select something
-    replicateNumber: "",
+    replicateNumber: '',
     lastKnownSectionNumber: 0,
-    labwareType: "",
-    fixative: "",
-    medium: "",
+    labwareType: '',
+    fixative: '',
+    medium: ''
   };
 }
 
 function getRegistrationFormTissue(): RegistrationFormTissue {
   return {
     clientId: Date.now(),
-    donorId: "",
-    species: "",
+    donorId: '',
+    species: '',
     lifeStage: LifeStage.Fetal,
-    hmdmc: "",
-    tissueType: "",
+    hmdmc: '',
+    tissueType: '',
     blocks: [getRegistrationFormBlock()],
-    sampleCollectionDate: "",
+    sampleCollectionDate: ''
   };
 }
 
@@ -86,11 +86,11 @@ function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
                 lastKnownSectionNumber: validation.lastKnownSectionNumber,
                 labwareType: validation.labwareType,
                 fixative: validation.fixative,
-                medium: validation.medium,
+                medium: validation.medium
               })
-            ),
+            )
         })
-      ),
+      )
   });
 }
 
@@ -105,43 +105,38 @@ export function buildRegisterTissuesMutationVariables(
   existingTissues: Array<string> = []
 ): Promise<RegisterTissuesMutationVariables> {
   return new Promise((resolve) => {
-    const blocks = formValues.tissues.reduce<BlockRegisterRequest[]>(
-      (memo, tissue) => {
-        return [
-          ...memo,
-          ...tissue.blocks.map<BlockRegisterRequest>((block) => {
-            const blockRegisterRequest: BlockRegisterRequest = {
-              species: tissue.species.trim(),
-              donorIdentifier: tissue.donorId.trim(),
-              externalIdentifier: block.externalIdentifier.trim(),
-              highestSection: block.lastKnownSectionNumber,
-              hmdmc: tissue.hmdmc.trim(),
-              labwareType: block.labwareType.trim(),
-              lifeStage: tissue.lifeStage,
-              tissueType: tissue.tissueType.trim(),
-              spatialLocation: block.spatialLocation,
-              replicateNumber: block.replicateNumber,
-              fixative: block.fixative.trim(),
-              medium: block.medium.trim(),
-              sampleCollectionDate: tissue.sampleCollectionDate
-                ? tissue.sampleCollectionDate instanceof Date
-                  ? tissue.sampleCollectionDate.toLocaleDateString()
-                  : tissue.sampleCollectionDate
-                : undefined,
-            };
+    const blocks = formValues.tissues.reduce<BlockRegisterRequest[]>((memo, tissue) => {
+      return [
+        ...memo,
+        ...tissue.blocks.map<BlockRegisterRequest>((block) => {
+          const blockRegisterRequest: BlockRegisterRequest = {
+            species: tissue.species.trim(),
+            donorIdentifier: tissue.donorId.trim(),
+            externalIdentifier: block.externalIdentifier.trim(),
+            highestSection: block.lastKnownSectionNumber,
+            hmdmc: tissue.hmdmc.trim(),
+            labwareType: block.labwareType.trim(),
+            lifeStage: tissue.lifeStage,
+            tissueType: tissue.tissueType.trim(),
+            spatialLocation: block.spatialLocation,
+            replicateNumber: block.replicateNumber,
+            fixative: block.fixative.trim(),
+            medium: block.medium.trim(),
+            sampleCollectionDate: tissue.sampleCollectionDate
+              ? tissue.sampleCollectionDate instanceof Date
+                ? tissue.sampleCollectionDate.toLocaleDateString()
+                : tissue.sampleCollectionDate
+              : undefined
+          };
 
-            if (
-              existingTissues.includes(blockRegisterRequest.externalIdentifier)
-            ) {
-              blockRegisterRequest.existingTissue = true;
-            }
+          if (existingTissues.includes(blockRegisterRequest.externalIdentifier)) {
+            blockRegisterRequest.existingTissue = true;
+          }
 
-            return blockRegisterRequest;
-          }),
-        ];
-      },
-      []
-    );
+          return blockRegisterRequest;
+        })
+      ];
+    }, []);
 
     resolve({ request: { blocks } });
   });
@@ -152,30 +147,20 @@ interface RegistrationParams {
 }
 
 function BlockRegistration({ registrationInfo }: RegistrationParams) {
-  const resultColumns = [
-    columns.barcode(),
-    columns.labwareType(),
-    columns.externalName(),
-  ];
+  const resultColumns = [columns.barcode(), columns.labwareType(), columns.externalName()];
   const validationSchema = useMemo(() => {
     return buildRegistrationSchema(registrationInfo);
   }, [registrationInfo]);
 
   const availableLabwareTypes = useMemo(() => {
     return registrationInfo.labwareTypes.filter((lt) =>
-      [LabwareTypeName.PROVIASETTE, LabwareTypeName.CASSETTE].includes(
-        lt.name as LabwareTypeName
-      )
+      [LabwareTypeName.PROVIASETTE, LabwareTypeName.CASSETTE].includes(lt.name as LabwareTypeName)
     );
   }, [registrationInfo]);
 
   return (
-    <Registration<
-      RegisterTissuesMutationVariables,
-      RegistrationFormTissue,
-      RegistrationFormBlock
-    >
-      title={"Block Registration"}
+    <Registration<RegisterTissuesMutationVariables, RegistrationFormTissue, RegistrationFormBlock>
+      title={'Block Registration'}
       availableLabwareTypes={availableLabwareTypes}
       registrationInfo={registrationInfo}
       defaultFormTissueValues={getRegistrationFormTissue()}

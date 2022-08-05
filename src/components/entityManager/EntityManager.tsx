@@ -1,23 +1,23 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
-import { Input } from "../forms/Input";
-import BlueButton from "../buttons/BlueButton";
-import { useMachine } from "@xstate/react";
-import Success from "../notifications/Success";
-import Warning from "../notifications/Warning";
-import { capitalize } from "lodash";
-import WhiteButton from "../buttons/WhiteButton";
-import PinkButton from "../buttons/PinkButton";
-import LoadingSpinner from "../icons/LoadingSpinner";
-import { SelectEntityRow } from "./SelectEntityRow";
-import { BooleanEntityRow } from "./BooleanEntityRow";
-import { createEntityManagerMachine } from "./entityManager.machine";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
+import { Input } from '../forms/Input';
+import BlueButton from '../buttons/BlueButton';
+import { useMachine } from '@xstate/react';
+import Success from '../notifications/Success';
+import Warning from '../notifications/Warning';
+import { capitalize } from 'lodash';
+import WhiteButton from '../buttons/WhiteButton';
+import PinkButton from '../buttons/PinkButton';
+import LoadingSpinner from '../icons/LoadingSpinner';
+import { SelectEntityRow } from './SelectEntityRow';
+import { BooleanEntityRow } from './BooleanEntityRow';
+import { createEntityManagerMachine } from './entityManager.machine';
 
 export type EntityValueType = boolean | string | number;
 
 /**Component type to display in value field**/
 type ValueFieldComponentInfo = {
-  type: "CHECKBOX" | "SELECT";
+  type: 'CHECKBOX' | 'SELECT';
   valueOptions?: string[];
 };
 
@@ -61,40 +61,34 @@ type EntityManagerProps<E> = {
   onChangeValue(entity: E, value: EntityValueType): Promise<E>;
 };
 
-export default function EntityManager<
-  E extends Record<string, EntityValueType>
->({
+export default function EntityManager<E extends Record<string, EntityValueType>>({
   initialEntities,
   displayKeyColumnName,
   alternateKeyColumnName,
   valueColumnName,
   valueFieldComponentInfo,
   onCreate,
-  onChangeValue,
+  onChangeValue
 }: EntityManagerProps<E>) {
   const [current, send] = useMachine(
-    createEntityManagerMachine<E>(
-      initialEntities,
-      displayKeyColumnName,
-      valueColumnName
-    ).withConfig({
+    createEntityManagerMachine<E>(initialEntities, displayKeyColumnName, valueColumnName).withConfig({
       services: {
         createEntity: (ctx, e) => {
-          if (e.type !== "CREATE_NEW_ENTITY") return Promise.reject();
+          if (e.type !== 'CREATE_NEW_ENTITY') return Promise.reject();
           return onCreate(e.value);
         },
         valueChanged: (context, e) => {
-          if (e.type !== "VALUE_CHANGE") return Promise.reject();
+          if (e.type !== 'VALUE_CHANGE') return Promise.reject();
           return onChangeValue(e.entity, e.value);
-        },
-      },
+        }
+      }
     })
   );
 
   /**
    * The value of the input used for creating new entities
    */
-  const [draftValue, setDraftValue] = useState("");
+  const [draftValue, setDraftValue] = useState('');
 
   /**
    * The ref to the input element used for creating new entities.
@@ -102,7 +96,7 @@ export default function EntityManager<
    */
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (current.matches("draftCreation")) {
+    if (current.matches('draftCreation')) {
       inputRef.current?.select();
     }
   }, [current]);
@@ -112,11 +106,11 @@ export default function EntityManager<
    */
   const handleOnSave = useCallback(() => {
     const value = draftValue.trim();
-    if (value === "") {
+    if (value === '') {
       return;
     }
-    send({ type: "CREATE_NEW_ENTITY", value });
-    setDraftValue("");
+    send({ type: 'CREATE_NEW_ENTITY', value });
+    setDraftValue('');
   }, [draftValue, setDraftValue, send]);
 
   /**
@@ -124,7 +118,7 @@ export default function EntityManager<
    */
   const handleOnRowChange = useCallback(
     (entity: E, value: EntityValueType) => {
-      send({ type: "VALUE_CHANGE", entity, value });
+      send({ type: 'VALUE_CHANGE', entity, value });
     },
     [send]
   );
@@ -132,19 +126,18 @@ export default function EntityManager<
   /**
    * Callback handler for the draft input
    */
-  const handleOnInputChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setDraftValue(e.target.value);
+  const handleOnInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setDraftValue(e.target.value);
 
   /**
    * Callback handler for when the draft is discarded
    */
-  const handleOnCancel = () => send({ type: "DISCARD_DRAFT" });
+  const handleOnCancel = () => send({ type: 'DISCARD_DRAFT' });
 
   const { entities, successMessage, error } = current.context;
 
-  const isLoading = current.matches("loading");
-  const isDrafting = current.matches("draftCreation");
-  const isCreatingEntity = current.matches({ loading: "creatingEntity" });
+  const isLoading = current.matches('loading');
+  const isDrafting = current.matches('draftCreation');
+  const isCreatingEntity = current.matches({ loading: 'creatingEntity' });
   const showDraft = isDrafting || isCreatingEntity;
 
   const getValueFieldComponent = (
@@ -154,7 +147,7 @@ export default function EntityManager<
     valueColumn: string
   ) => {
     switch (valueFieldComponentInfo.type) {
-      case "SELECT": {
+      case 'SELECT': {
         return (
           <SelectEntityRow
             key={keyColumn}
@@ -164,7 +157,7 @@ export default function EntityManager<
           />
         );
       }
-      case "CHECKBOX": {
+      case 'CHECKBOX': {
         return (
           <BooleanEntityRow
             disable={isLoading || isDrafting}
@@ -181,7 +174,7 @@ export default function EntityManager<
   return (
     <div className="space-y-4">
       {successMessage && <Success message={successMessage} />}
-      {error && <Warning message={"Save Failed"} error={error} />}
+      {error && <Warning message={'Save Failed'} error={error} />}
       <Table>
         <TableHead>
           <tr>
@@ -206,14 +199,14 @@ export default function EntityManager<
               <TableCell colSpan={2}>
                 <Input
                   ref={inputRef}
-                  data-testid={"input-field"}
+                  data-testid={'input-field'}
                   type="text"
                   disabled={isCreatingEntity}
                   onChange={handleOnInputChange}
                   onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === "Enter") {
+                    if (e.key === 'Enter') {
                       handleOnSave();
-                    } else if (e.key === "Escape") {
+                    } else if (e.key === 'Escape') {
                       handleOnCancel();
                     }
                   }}
@@ -227,16 +220,9 @@ export default function EntityManager<
         {isLoading && <LoadingSpinner />}
 
         {!showDraft && (
-          <BlueButton
-            disabled={isLoading}
-            onClick={() => send({ type: "DRAFT_NEW_ENTITY" })}
-          >
-            + Add{" "}
-            {capitalize(
-              alternateKeyColumnName
-                ? alternateKeyColumnName.toString()
-                : displayKeyColumnName.toString()
-            )}
+          <BlueButton disabled={isLoading} onClick={() => send({ type: 'DRAFT_NEW_ENTITY' })}>
+            + Add{' '}
+            {capitalize(alternateKeyColumnName ? alternateKeyColumnName.toString() : displayKeyColumnName.toString())}
           </BlueButton>
         )}
 

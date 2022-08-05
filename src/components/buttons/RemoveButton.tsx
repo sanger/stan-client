@@ -1,11 +1,8 @@
-import React from "react";
-import RemoveIcon from "../icons/RemoveIcon";
+import React from 'react';
+import RemoveIcon from '../icons/RemoveIcon';
 
 interface RemoveButtonProps
-  extends React.DetailedHTMLProps<
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
-    HTMLButtonElement
-  > {}
+  extends React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {}
 
 const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
   return (

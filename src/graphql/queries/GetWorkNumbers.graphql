@@ -1,5 +1,5 @@
 query GetWorkNumbers {
-    works {
-        workNumber
-    }
+  works {
+    workNumber
+  }
 }

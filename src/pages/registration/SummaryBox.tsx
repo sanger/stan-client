@@ -1,26 +1,20 @@
-import Heading from "../../components/Heading";
-import { motion } from "framer-motion";
-import GuestIcon from "../../components/icons/GuestIcon";
-import EditIcon from "../../components/icons/EditIcon";
-import BlockIcon from "../../components/icons/BlockIcon";
-import WhiteButton from "../../components/buttons/WhiteButton";
-import PinkButton from "../../components/buttons/PinkButton";
-import React, { useState } from "react";
-import { FormikErrors, FormikTouched, FormikValues, getIn } from "formik";
-import Pill from "../../components/Pill";
-import {
-  RegistrationFormTissue,
-  RegistrationFormValues,
-} from "../BlockRegistration";
-import { TextType } from "./RegistrationForm";
+import Heading from '../../components/Heading';
+import { motion } from 'framer-motion';
+import GuestIcon from '../../components/icons/GuestIcon';
+import EditIcon from '../../components/icons/EditIcon';
+import BlockIcon from '../../components/icons/BlockIcon';
+import WhiteButton from '../../components/buttons/WhiteButton';
+import PinkButton from '../../components/buttons/PinkButton';
+import React, { useState } from 'react';
+import { FormikErrors, FormikTouched, FormikValues, getIn } from 'formik';
+import Pill from '../../components/Pill';
+import { RegistrationFormTissue, RegistrationFormValues } from '../BlockRegistration';
+import { TextType } from './RegistrationForm';
 
 function getNumberOfBlocks(values: FormikValues) {
-  return values.tissues.reduce(
-    (memo: number, tissue: RegistrationFormTissue) => {
-      return memo + tissue.blocks.length;
-    },
-    0
-  );
+  return values.tissues.reduce((memo: number, tissue: RegistrationFormTissue) => {
+    return memo + tissue.blocks.length;
+  }, 0);
 }
 
 function getNumErrorsPerTissue(
@@ -28,31 +22,28 @@ function getNumErrorsPerTissue(
   errors: FormikErrors<RegistrationFormValues>,
   touched: FormikTouched<RegistrationFormValues>
 ): { [key: number]: number } {
-  return tissues.reduce<{ [key: number]: number }>(
-    (memo, tissue, tissueIndex) => {
-      let count = 0;
+  return tissues.reduce<{ [key: number]: number }>((memo, tissue, tissueIndex) => {
+    let count = 0;
 
-      tissue.blocks.forEach((block, blockIndex) => {
-        Object.keys(block).forEach((blockKey) => {
-          const fieldName = `tissues[${tissueIndex}].blocks[${blockIndex}].${blockKey}`;
-          if (getIn(touched, fieldName) && getIn(errors, fieldName)) {
-            count++;
-          }
-        });
+    tissue.blocks.forEach((block, blockIndex) => {
+      Object.keys(block).forEach((blockKey) => {
+        const fieldName = `tissues[${tissueIndex}].blocks[${blockIndex}].${blockKey}`;
+        if (getIn(touched, fieldName) && getIn(errors, fieldName)) {
+          count++;
+        }
       });
-      Object.keys(tissue)
-        .filter((k) => k !== "blocks")
-        .forEach((tissueKey) => {
-          const fieldName = `tissues[${tissueIndex}].${tissueKey}`;
-          if (getIn(touched, fieldName) && getIn(errors, fieldName)) {
-            count++;
-          }
-        });
+    });
+    Object.keys(tissue)
+      .filter((k) => k !== 'blocks')
+      .forEach((tissueKey) => {
+        const fieldName = `tissues[${tissueIndex}].${tissueKey}`;
+        if (getIn(touched, fieldName) && getIn(errors, fieldName)) {
+          count++;
+        }
+      });
 
-      return Object.assign(memo, { [tissue.clientId]: count });
-    },
-    {}
-  );
+    return Object.assign(memo, { [tissue.clientId]: count });
+  }, {});
 }
 
 interface SummaryBoxParams {
@@ -74,11 +65,11 @@ const SummaryBox = ({
   onNewTissueButton,
   currentFormIndex,
   setCurrentFormIndex,
-  keywordsMap,
+  keywordsMap
 }: SummaryBoxParams) => {
   const errorCount = getNumErrorsPerTissue(values.tissues, errors, touched);
   const [whiteButtonDisabled, setWhiteButtonDisabled] = useState(false);
-  const keyword = (keywordsMap && keywordsMap.get("Block")) ?? "Block";
+  const keyword = (keywordsMap && keywordsMap.get('Block')) ?? 'Block';
   return (
     <div className="sticky top-0 space-y-2">
       <Heading level={3} showBorder={false}>
@@ -86,11 +77,9 @@ const SummaryBox = ({
       </Heading>
 
       <p>
-        There {values.tissues.length === 1 ? "is" : "are"} currently{" "}
-        <span className="font-bold">{values.tissues.length}</span> tissue(s) and
-        a total of{" "}
-        <span className="font-bold">{getNumberOfBlocks(values)}</span>{" "}
-        {`${keyword.toLowerCase()}(s)`}
+        There {values.tissues.length === 1 ? 'is' : 'are'} currently{' '}
+        <span className="font-bold">{values.tissues.length}</span> tissue(s) and a total of{' '}
+        <span className="font-bold">{getNumberOfBlocks(values)}</span> {`${keyword.toLowerCase()}(s)`}
       </p>
 
       <div id="tissue-summaries" className="space-y-2">
@@ -108,8 +97,7 @@ const SummaryBox = ({
               }}
               key={tissue.clientId}
               className={`group block px-2 py-1 outline-none rounded-r hover:bg-sdb-300 ${
-                tissueIndex === currentFormIndex &&
-                "border-l-4 border-sp pl-1 bg-sdb-500"
+                tissueIndex === currentFormIndex && 'border-l-4 border-sp pl-1 bg-sdb-500'
               }`}
             >
               <div className="flex flex-row items-center justify-between">
@@ -120,9 +108,9 @@ const SummaryBox = ({
 
                 <div className="flex flex-row justify-between items-center">
                   {errorCount[tissue.clientId] > 0 && (
-                    <Pill color={"pink"}>
+                    <Pill color={'pink'}>
                       {errorCount[tissue.clientId]} Error
-                      {errorCount[tissue.clientId] > 1 && "s"}
+                      {errorCount[tissue.clientId] > 1 && 's'}
                     </Pill>
                   )}
                   <EditIcon className="group-hover:block hidden ml-2 h-4 w-4 text-white" />

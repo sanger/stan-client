@@ -1,5 +1,5 @@
-import React from "react";
-import { NavLink, NavLinkProps } from "react-router-dom";
+import React from 'react';
+import { NavLink, NavLinkProps } from 'react-router-dom';
 
 interface StanNavLinkProps extends NavLinkProps {}
 const StanNavLink = ({ children, ...rest }: StanNavLinkProps) => {

@@ -1,4 +1,4 @@
-describe("Logout", () => {
+describe('Logout', () => {
   // before(() => {
   //   cy.visit("/");
   //   cy.wait(3000)

@@ -1,59 +1,46 @@
-import React, { useState } from "react";
-import AppShell from "../components/AppShell";
-import Heading from "../components/Heading";
-import WorkNumberSelect from "../components/WorkNumberSelect";
-import LabwareScanner, {
-  useLabwareContext,
-} from "../components/labwareScanner/LabwareScanner";
-import LabwareScannerSlotsTable from "../components/labwareScanner/LabwareScannerSlotsTable";
-import { FieldArray, Form, Formik, useFormikContext } from "formik";
-import { useMachine } from "@xstate/react";
-import createFormMachine from "../lib/machines/form/formMachine";
+import React, { useState } from 'react';
+import AppShell from '../components/AppShell';
+import Heading from '../components/Heading';
+import WorkNumberSelect from '../components/WorkNumberSelect';
+import LabwareScanner, { useLabwareContext } from '../components/labwareScanner/LabwareScanner';
+import LabwareScannerSlotsTable from '../components/labwareScanner/LabwareScannerSlotsTable';
+import { FieldArray, Form, Formik, useFormikContext } from 'formik';
+import { useMachine } from '@xstate/react';
+import createFormMachine from '../lib/machines/form/formMachine';
 import {
   ControlType,
   LabwareFieldsFragment,
   RecordPermMutation,
   RecordPermRequest,
-  SlotFieldsFragment,
-} from "../types/sdk";
-import Labware from "../components/labware/Labware";
-import PermDataField from "../components/forms/PermDataField";
-import FormikInput from "../components/forms/Input";
-import BlueButton from "../components/buttons/BlueButton";
-import { reload, stanCore } from "../lib/sdk";
-import * as Yup from "yup";
-import { FormikErrorMessage } from "../components/forms";
-import Warning from "../components/notifications/Warning";
-import OperationCompleteModal from "../components/modal/OperationCompleteModal";
-import {
-  emptySlots,
-  isSlotEmpty,
-  isSlotFilled,
-} from "../lib/helpers/slotHelper";
-import columns from "../components/dataTable/labwareColumns";
-import LabwareScanPanel from "../components/labwareScanPanel/LabwareScanPanel";
-import PermPositiveControl from "../components/forms/PermPositiveControl";
+  SlotFieldsFragment
+} from '../types/sdk';
+import Labware from '../components/labware/Labware';
+import PermDataField from '../components/forms/PermDataField';
+import FormikInput from '../components/forms/Input';
+import BlueButton from '../components/buttons/BlueButton';
+import { reload, stanCore } from '../lib/sdk';
+import * as Yup from 'yup';
+import { FormikErrorMessage } from '../components/forms';
+import Warning from '../components/notifications/Warning';
+import OperationCompleteModal from '../components/modal/OperationCompleteModal';
+import { emptySlots, isSlotEmpty, isSlotFilled } from '../lib/helpers/slotHelper';
+import columns from '../components/dataTable/labwareColumns';
+import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
+import PermPositiveControl from '../components/forms/PermPositiveControl';
 
 const validationSchema = Yup.object().shape({
-  workNumber: Yup.string().required().label("SGP number"),
-  barcode: Yup.string().required().label("Barcode"),
+  workNumber: Yup.string().required().label('SGP number'),
+  barcode: Yup.string().required().label('Barcode'),
   permData: Yup.array()
     .min(1)
     .of(
       Yup.object().shape({
-        address: Yup.string().required().label("Address"),
-        seconds: Yup.number()
-          .integer()
-          .positive()
-          .optional()
-          .label("Perm time"),
-        controlType: Yup.string()
-          .optional()
-          .oneOf(Object.values(ControlType))
-          .label("Control type"),
-        controlBarcode: Yup.string().optional().label("Control barcode"),
+        address: Yup.string().required().label('Address'),
+        seconds: Yup.number().integer().positive().optional().label('Perm time'),
+        controlType: Yup.string().optional().oneOf(Object.values(ControlType)).label('Control type'),
+        controlBarcode: Yup.string().optional().label('Control barcode')
       })
-    ),
+    )
 });
 
 export default function VisiumPerm() {
@@ -61,10 +48,10 @@ export default function VisiumPerm() {
     createFormMachine<RecordPermRequest, RecordPermMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          if (e.type !== "SUBMIT_FORM") return Promise.reject();
+          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordPerm({ request: e.values });
-        },
-      },
+        }
+      }
     })
   );
 
@@ -84,8 +71,8 @@ export default function VisiumPerm() {
     //Clone data so as to not alter the form data
     const submitValues = { ...values, permData: submitPermData };
     send({
-      type: "SUBMIT_FORM",
-      values: submitValues,
+      type: 'SUBMIT_FORM',
+      values: submitValues
     });
   };
 
@@ -97,7 +84,7 @@ export default function VisiumPerm() {
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           <Formik<RecordPermRequest>
-            initialValues={{ barcode: "", workNumber: "", permData: [] }}
+            initialValues={{ barcode: '', workNumber: '', permData: [] }}
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
@@ -110,10 +97,8 @@ export default function VisiumPerm() {
 
                   <div className="mt-4 md:w-1/2">
                     <WorkNumberSelect
-                      name={"workNumber"}
-                      onWorkNumberChange={(workNumber) =>
-                        setFieldValue("workNumber", workNumber)
-                      }
+                      name={'workNumber'}
+                      onWorkNumberChange={(workNumber) => setFieldValue('workNumber', workNumber)}
                     />
                   </div>
                 </div>
@@ -121,29 +106,26 @@ export default function VisiumPerm() {
                 <div className="mt-8 space-y-2">
                   <Heading level={2}>Labware</Heading>
 
-                  <p>
-                    Please scan in the slide you wish to add permeabilisation
-                    times for.
-                  </p>
+                  <p>Please scan in the slide you wish to add permeabilisation times for.</p>
 
-                  <FieldArray name={"permData"}>
+                  <FieldArray name={'permData'}>
                     {({ push, remove }) => (
                       <LabwareScanner
                         onAdd={(labware) => {
-                          setFieldValue("barcode", labware.barcode);
+                          setFieldValue('barcode', labware.barcode);
                           labware.slots.forEach((slot) =>
                             push(
                               isSlotFilled(slot)
                                 ? {
                                     address: slot.address,
-                                    seconds: 1,
+                                    seconds: 1
                                   }
                                 : { address: slot.address }
                             )
                           );
                         }}
                         onRemove={() => {
-                          setFieldValue("barcode", "");
+                          setFieldValue('barcode', '');
                           values.permData.forEach((value, i) => remove(i));
                         }}
                         limit={1}
@@ -154,15 +136,10 @@ export default function VisiumPerm() {
                     )}
                   </FieldArray>
 
-                  <FormikErrorMessage name={"barcode"} />
+                  <FormikErrorMessage name={'barcode'} />
                 </div>
 
-                {serverError && (
-                  <Warning
-                    message={"Failed to record perm times"}
-                    error={serverError}
-                  />
-                )}
+                {serverError && <Warning message={'Failed to record perm times'} error={serverError} />}
 
                 <div className="flex flex-row items-center justify-end">
                   <BlueButton type="submit">Submit</BlueButton>
@@ -172,13 +149,13 @@ export default function VisiumPerm() {
           </Formik>
         </div>
         <OperationCompleteModal
-          show={current.matches("submitted")}
-          message={"Visium Permeabilisation complete"}
+          show={current.matches('submitted')}
+          message={'Visium Permeabilisation complete'}
           onReset={reload}
         >
           <p>
-            If you wish to start the process again, click the "Reset Form"
-            button. Otherwise you can return to the Home screen.
+            If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the Home
+            screen.
           </p>
         </OperationCompleteModal>
       </AppShell.Main>
@@ -189,9 +166,7 @@ export default function VisiumPerm() {
 function VisiumPermForm() {
   const { labwares } = useLabwareContext();
   const { values, setFieldValue } = useFormikContext<RecordPermRequest>();
-  const [controlTube, setControlTube] = useState<
-    LabwareFieldsFragment | undefined
-  >(undefined);
+  const [controlTube, setControlTube] = useState<LabwareFieldsFragment | undefined>(undefined);
 
   /**
    * Initialize the control tube when there is no labware scanned (Removing a labware)
@@ -221,20 +196,15 @@ function VisiumPermForm() {
         setFieldValue(`permData.${indx}`, {
           address: permData.address,
           controlType: undefined,
-          controlBarcode: undefined,
+          controlBarcode: undefined
         });
       }
     });
   };
 
   return (
-    <div data-testid={"controltubeDiv"} className={"space-y-2"}>
-      <FormikInput
-        label={""}
-        name={"barcode"}
-        type={"hidden"}
-        value={labwares[0].barcode}
-      />
+    <div data-testid={'controltubeDiv'} className={'space-y-2'}>
+      <FormikInput label={''} name={'barcode'} type={'hidden'} value={labwares[0].barcode} />
       {labwares[0] && emptySlots(labwares[0].slots).length !== 0 && (
         <>
           <div className="flex flex-row" />
@@ -268,9 +238,7 @@ function VisiumPermForm() {
                   onPositiveControlSelection={onPositiveControlSelection}
                 />
               ) : (
-                <PermDataField
-                  name={`permData.${addressToIndexMap.get(slot.address)}`}
-                />
+                <PermDataField name={`permData.${addressToIndexMap.get(slot.address)}`} />
               );
             } else {
               return null;

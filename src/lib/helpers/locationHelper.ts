@@ -1,8 +1,8 @@
-import { Address, SizeInput } from "../../types/stan";
-import { GridDirection, Maybe } from "../../types/sdk";
-import { chain, range, zip } from "lodash";
-import { buildAddresses } from "../helpers";
-import { StoredItemFragment } from "../machines/locations/locationMachineTypes";
+import { Address, SizeInput } from '../../types/stan';
+import { GridDirection, Maybe } from '../../types/sdk';
+import { chain, range, zip } from 'lodash';
+import { buildAddresses } from '../helpers';
+import { StoredItemFragment } from '../machines/locations/locationMachineTypes';
 
 /**
  * Convert a StoreLight address into a STAN address
@@ -10,11 +10,7 @@ import { StoredItemFragment } from "../machines/locations/locationMachineTypes";
  * @param locationSize the size of the location
  * @param direction the grid direction of the location
  */
-export function addressToLocationAddress(
-  address: Address,
-  locationSize: SizeInput,
-  direction: GridDirection
-): number {
+export function addressToLocationAddress(address: Address, locationSize: SizeInput, direction: GridDirection): number {
   const orderedAddresses = buildOrderedAddresses(locationSize, direction);
   if (!orderedAddresses.has(address)) {
     throw Error(`Address ${address} is out of bounds`);
@@ -40,10 +36,7 @@ export function addressToLocationAddress(
  * @param size the size of the location
  * @param direction the grid direction of the location
  */
-export function buildOrderedAddresses(
-  size: SizeInput,
-  direction: GridDirection
-): Map<string, number> {
+export function buildOrderedAddresses(size: SizeInput, direction: GridDirection): Map<string, number> {
   const numberOfAddresses = size.numRows * size.numColumns;
   const stanAddresses = chain(range(1, numberOfAddresses + 1));
 
@@ -59,29 +52,16 @@ export function buildOrderedAddresses(
 
   switch (direction) {
     case GridDirection.RightUp:
-      sortedAddresses = stanAddresses
-        .chunk(size.numColumns)
-        .reverse()
-        .flatten()
-        .value();
+      sortedAddresses = stanAddresses.chunk(size.numColumns).reverse().flatten().value();
       break;
     case GridDirection.UpRight:
-      sortedAddresses = stanAddresses
-        .chunk(size.numRows)
-        .thru(zipList)
-        .reverse()
-        .flatten()
-        .value();
+      sortedAddresses = stanAddresses.chunk(size.numRows).thru(zipList).reverse().flatten().value();
       break;
     case GridDirection.RightDown:
       sortedAddresses = stanAddresses.value();
       break;
     case GridDirection.DownRight:
-      sortedAddresses = stanAddresses
-        .chunk(size.numRows)
-        .thru(zipList)
-        .flatten()
-        .value();
+      sortedAddresses = stanAddresses.chunk(size.numRows).thru(zipList).flatten().value();
   }
 
   const storelightAddresses = buildAddresses(size);
@@ -127,21 +107,15 @@ export function findNextAvailableAddress({
   locationAddresses,
   addressToItemMap,
   minimumAddress = null,
-  numAddresses,
+  numAddresses
 }: NextAvailableAddressParams): string[] {
   // Build a list of [storelightAddress, stanAddress] tuples, ordered by Stan address
-  let addressEntries = Array.from(locationAddresses.entries()).sort(
-    (a, b) => a[1] - b[1]
-  );
+  let addressEntries = Array.from(locationAddresses.entries()).sort((a, b) => a[1] - b[1]);
 
   // Filter out any addresses below the specified minimum (if not null))
   if (minimumAddress) {
-    const currentIndex = addressEntries.findIndex(
-      (entry) => entry[0] === minimumAddress
-    );
-    addressEntries = addressEntries.filter(
-      (entry, index) => index >= currentIndex
-    );
+    const currentIndex = addressEntries.findIndex((entry) => entry[0] === minimumAddress);
+    addressEntries = addressEntries.filter((entry, index) => index >= currentIndex);
   }
   /**
    Go through the ordered addresses checking if there's an item in each one.
@@ -160,9 +134,7 @@ export function findNextAvailableAddress({
       }
     }
   } else {
-    const address =
-      addressEntries.find((entry) => !addressToItemMap.get(entry[0]))?.[0] ??
-      null;
+    const address = addressEntries.find((entry) => !addressToItemMap.get(entry[0]))?.[0] ?? null;
     if (address) {
       retAddressArr.push(address);
     }

@@ -1,11 +1,11 @@
 query FindWorkInfo($status: WorkStatus!) {
-    works(status: [$status]) {
-        workNumber
-        workRequester {
-            username
-        }
-        project {
-            name
-        }
+  works(status: [$status]) {
+    workNumber
+    workRequester {
+      username
     }
+    project {
+      name
+    }
+  }
 }

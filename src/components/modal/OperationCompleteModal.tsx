@@ -1,9 +1,9 @@
-import React from "react";
-import Modal, { ModalBody, ModalFooter, ModalHeader } from "../Modal";
-import Success from "../notifications/Success";
-import { Link } from "react-router-dom";
-import BlueButton from "../buttons/BlueButton";
-import WhiteButton from "../buttons/WhiteButton";
+import React from 'react';
+import Modal, { ModalBody, ModalFooter, ModalHeader } from '../Modal';
+import Success from '../notifications/Success';
+import { Link } from 'react-router-dom';
+import BlueButton from '../buttons/BlueButton';
+import WhiteButton from '../buttons/WhiteButton';
 
 type OperationCompleteModalProps = {
   /**
@@ -41,7 +41,7 @@ export default function OperationCompleteModal({
   message,
   show,
   additionalButtons,
-  onReset,
+  onReset
 }: OperationCompleteModalProps) {
   return (
     <Modal show={show}>
@@ -51,19 +51,12 @@ export default function OperationCompleteModal({
         <div className="my-4">{children}</div>
       </ModalBody>
       <ModalFooter>
-        <Link to={"/"}>
-          <BlueButton
-            type="button"
-            className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-          >
+        <Link to={'/'}>
+          <BlueButton type="button" className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
             Return Home
           </BlueButton>
         </Link>
-        <WhiteButton
-          type="button"
-          onClick={onReset}
-          className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-        >
+        <WhiteButton type="button" onClick={onReset} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
           Reset Form
         </WhiteButton>
         {additionalButtons}

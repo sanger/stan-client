@@ -1,18 +1,15 @@
-import React, { ComponentProps } from "react";
-import { Meta, Story } from "@storybook/react";
+import React, { ComponentProps } from 'react';
+import { Meta, Story } from '@storybook/react';
 
-import Prose from "./Prose";
+import Prose from './Prose';
 
 const meta: Meta = {
-  title: "Prose",
-  component: Prose,
+  title: 'Prose',
+  component: Prose
 };
 export default meta;
 
-const Template: Story<ComponentProps<typeof Prose>> = ({
-  children,
-  ...args
-}) => <Prose {...args}>{children}</Prose>;
+const Template: Story<ComponentProps<typeof Prose>> = ({ children, ...args }) => <Prose {...args}>{children}</Prose>;
 
 export const documentation = Template.bind({});
 documentation.args = {
@@ -24,13 +21,10 @@ documentation.args = {
 
       <blockquote>Here's a very important quote!</blockquote>
 
-      <p>
-        This is what some code looks like out the box (No syntax highlighting
-        though).
-      </p>
+      <p>This is what some code looks like out the box (No syntax highlighting though).</p>
       <pre>
         <code>[7, 30, 99].sort(); // [30, 7, 99]</code>
       </pre>
     </>
-  ),
+  )
 };

@@ -1,25 +1,25 @@
-import React, { useContext, useEffect, useState } from "react";
-import AppShell from "../components/AppShell";
-import LocationSearch from "../components/LocationSearch";
-import { safeParseQueryString, stringify } from "../lib/helpers";
-import { findLabwareLocation } from "../lib/services/locationService";
-import Warning from "../components/notifications/Warning";
-import MutedText from "../components/MutedText";
-import LocationIcon from "../components/icons/LocationIcon";
-import Heading from "../components/Heading";
+import React, { useContext, useEffect, useState } from 'react';
+import AppShell from '../components/AppShell';
+import LocationSearch from '../components/LocationSearch';
+import { safeParseQueryString, stringify } from '../lib/helpers';
+import { findLabwareLocation } from '../lib/services/locationService';
+import Warning from '../components/notifications/Warning';
+import MutedText from '../components/MutedText';
+import LocationIcon from '../components/icons/LocationIcon';
+import Heading from '../components/Heading';
 
-import storeConfig from "../static/store.json";
-import { Link, useLocation } from "react-router-dom";
-import BarcodeIcon from "../components/icons/BarcodeIcon";
-import { FindLocationByBarcodeQuery, Maybe } from "../types/sdk";
-import LoadingSpinner from "../components/icons/LoadingSpinner";
-import { isLocationSearch, LocationSearchParams } from "../types/stan";
-import { StanCoreContext } from "../lib/sdk";
-import { ClientError } from "graphql-request";
-import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
-import * as H from "history";
-import { history } from "../lib/sdk";
-import PromptOnLeave from "../components/notifications/PromptOnLeave";
+import storeConfig from '../static/store.json';
+import { Link, useLocation } from 'react-router-dom';
+import BarcodeIcon from '../components/icons/BarcodeIcon';
+import { FindLocationByBarcodeQuery, Maybe } from '../types/sdk';
+import LoadingSpinner from '../components/icons/LoadingSpinner';
+import { isLocationSearch, LocationSearchParams } from '../types/stan';
+import { StanCoreContext } from '../lib/sdk';
+import { ClientError } from 'graphql-request';
+import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
+import * as H from 'history';
+import { history } from '../lib/sdk';
+import PromptOnLeave from '../components/notifications/PromptOnLeave';
 
 export type LabwareAwaitingStorageInfo = {
   barcode: string;
@@ -36,20 +36,13 @@ export type LabwareAwaitingStorageInfo = {
  * a) Go back and Go forward operation to a Location/Store page
  * b) Going to a new location page by invoking a store location link or through a search
  */
-export function awaitingStorageCheckOnExit(
-  location: H.Location,
-  action: H.Action,
-  message: string
-) {
+export function awaitingStorageCheckOnExit(location: H.Location, action: H.Action, message: string) {
   /**PUSH is the action for  invoking/visiting a link or for pushing a new entry onto the history stack
    * POP is the action send while you navigate using the browser's forward/back buttons.
    * **/
   if (
-    (action === "POP" &&
-      ["/locations", "/store"].some((path) =>
-        location.pathname.startsWith(path)
-      )) ||
-    (action === "PUSH" && location.pathname.startsWith("/locations"))
+    (action === 'POP' && ['/locations', '/store'].some((path) => location.pathname.startsWith(path))) ||
+    (action === 'PUSH' && location.pathname.startsWith('/locations'))
   ) {
     return true;
   } else {
@@ -59,26 +52,23 @@ export function awaitingStorageCheckOnExit(
 
 /**Get awaiting labware list from session storage**/
 export function getAwaitingLabwaresFromSession() {
-  const awaitingLabwareValue = sessionStorage.getItem("awaitingLabwares");
+  const awaitingLabwareValue = sessionStorage.getItem('awaitingLabwares');
   if (!awaitingLabwareValue || awaitingLabwareValue.length <= 0) return [];
-  const awaitingLabwareInfo = awaitingLabwareValue.split(",");
+  const awaitingLabwareInfo = awaitingLabwareValue.split(',');
   if (awaitingLabwareInfo.length % 2 !== 0) {
     return [];
   }
-  return awaitingLabwareInfo.reduce(
-    (previousValue: LabwareAwaitingStorageInfo[], currentValue, index) => {
-      if (index % 2 === 0) {
-        return [...previousValue, { barcode: currentValue, labwareType: "" }];
-      } else {
-        previousValue[previousValue.length - 1] = {
-          barcode: previousValue[previousValue.length - 1].barcode,
-          labwareType: currentValue,
-        };
-        return [...previousValue];
-      }
-    },
-    []
-  );
+  return awaitingLabwareInfo.reduce((previousValue: LabwareAwaitingStorageInfo[], currentValue, index) => {
+    if (index % 2 === 0) {
+      return [...previousValue, { barcode: currentValue, labwareType: '' }];
+    } else {
+      previousValue[previousValue.length - 1] = {
+        barcode: previousValue[previousValue.length - 1].barcode,
+        labwareType: currentValue
+      };
+      return [...previousValue];
+    }
+  }, []);
 }
 
 const Store = () => {
@@ -87,7 +77,7 @@ const Store = () => {
 
   /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
   const onLeave = React.useCallback(() => {
-    sessionStorage.removeItem("awaitingLabwares");
+    sessionStorage.removeItem('awaitingLabwares');
   }, []);
 
   /**
@@ -102,8 +92,8 @@ const Store = () => {
         history.push({
           pathname: `/locations/${locationBarcode}`,
           search: stringify({
-            labwareBarcode: labwareBarcode,
-          }),
+            labwareBarcode: labwareBarcode
+          })
         });
       } else {
         setErrorMessage(`${labwareBarcode} could not be found in storage`);
@@ -112,7 +102,7 @@ const Store = () => {
     if (location.search) {
       const locationSearchParams = safeParseQueryString<LocationSearchParams>({
         query: location.search,
-        guard: isLocationSearch,
+        guard: isLocationSearch
       });
       if (locationSearchParams) {
         invokeFindLabwareLocation(locationSearchParams.labwareBarcode.trim());
@@ -129,48 +119,34 @@ const Store = () => {
       </AppShell.Header>
       <AppShell.Main>
         <div className="mx-auto max-w-screen-xl">
-          {errorMessage && (
-            <Warning message={"Labware not found"}>{errorMessage}</Warning>
-          )}
+          {errorMessage && <Warning message={'Labware not found'}>{errorMessage}</Warning>}
           <MutedText className="mt-5">
-            To get started, scan either the location you want to find, or scan a
-            piece of labware to find its location.
+            To get started, scan either the location you want to find, or scan a piece of labware to find its location.
           </MutedText>
           <LocationSearch />
           <div className="my-10 space-y-24">
-            {Object.entries(storeConfig.locationType).map(
-              ([groupTitle, locations]) => (
-                <div key={groupTitle}>
-                  <Heading level={2}>{groupTitle}</Heading>
-                  <div className="mt-10">
-                    <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
-                      {locations.map((location) => (
-                        <LocationLink
-                          key={location.barcode}
-                          barcode={location.barcode}
-                        />
-                      ))}
-                    </dl>
-                  </div>
+            {Object.entries(storeConfig.locationType).map(([groupTitle, locations]) => (
+              <div key={groupTitle}>
+                <Heading level={2}>{groupTitle}</Heading>
+                <div className="mt-10">
+                  <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+                    {locations.map((location) => (
+                      <LocationLink key={location.barcode} barcode={location.barcode} />
+                    ))}
+                  </dl>
                 </div>
-              )
-            )}
+              </div>
+            ))}
           </div>
           {awaitingLabwares && awaitingLabwares.length > 0 && (
-            <LabwareAwaitingStorage
-              labwares={awaitingLabwares}
-              storeEnabled={false}
-              onStoreLabwares={() => {}}
-            />
+            <LabwareAwaitingStorage labwares={awaitingLabwares} storeEnabled={false} onStoreLabwares={() => {}} />
           )}
         </div>
       </AppShell.Main>
       <PromptOnLeave
         when={awaitingLabwares.length > 0}
         messageHandler={awaitingStorageCheckOnExit}
-        message={
-          "You have labwares that are not stored. Are you sure you want to leave?"
-        }
+        message={'You have labwares that are not stored. Are you sure you want to leave?'}
         onPromptLeave={onLeave}
       />
     </AppShell>
@@ -188,15 +164,13 @@ const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
   const stanCore = useContext(StanCoreContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Maybe<ClientError>>(null);
-  const [location, setLocation] = useState<
-    FindLocationByBarcodeQuery["location"] | null
-  >(null);
+  const [location, setLocation] = useState<FindLocationByBarcodeQuery['location'] | null>(null);
 
   useEffect(() => {
     async function findLocationByBarcode() {
       try {
         const { location } = await stanCore.FindLocationByBarcode({
-          barcode,
+          barcode
         });
         setLocation(location);
       } catch (e) {
@@ -220,7 +194,7 @@ const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
     <Link
       key={location?.barcode}
       to={{
-        pathname: `/locations/${location?.barcode}`,
+        pathname: `/locations/${location?.barcode}`
       }}
     >
       <div className="border border-gray-200 p-4 flex bg-gray-50 hover:bg-gray-200 rounded">
@@ -230,12 +204,9 @@ const LocationLink: React.FC<LocationLinkProps> = ({ barcode }) => {
           </div>
         </div>
         <div className="ml-4">
-          <dt className="text-lg leading-6 font-medium text-gray-900">
-            {location?.customName}
-          </dt>
+          <dt className="text-lg leading-6 font-medium text-gray-900">{location?.customName}</dt>
           <dd className="mt-2 text-base text-gray-500">
-            <BarcodeIcon className="inline-block -mt-1 h-5 w-5" />{" "}
-            {location?.barcode}
+            <BarcodeIcon className="inline-block -mt-1 h-5 w-5" /> {location?.barcode}
           </dd>
         </div>
       </div>

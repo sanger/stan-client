@@ -1,11 +1,11 @@
-import { NewLabwareLayout } from "../../types/stan";
+import { NewLabwareLayout } from '../../types/stan';
 import {
   FindPassFailsQuery,
   LabwareFieldsFragment,
   SlotCopyContent,
-  SlotPassFailFieldsFragment,
-} from "../../types/sdk";
-import { ClientError } from "graphql-request";
+  SlotPassFailFieldsFragment
+} from '../../types/sdk';
+import { ClientError } from 'graphql-request';
 
 export interface SlotMapperProps {
   /**
@@ -14,10 +14,7 @@ export interface SlotMapperProps {
    * @param slotCopyContent the current mapping of source to destination slots
    * @param allSourcesMapped true if input labware exists and their non-empty slots have been mapped, false otherwise
    */
-  onChange?: (
-    slotCopyContent: Array<SlotCopyContent>,
-    allSourcesMapped: boolean
-  ) => void;
+  onChange?: (slotCopyContent: Array<SlotCopyContent>, allSourcesMapped: boolean) => void;
 
   /**
    * Callback to notify whenever an input labware is scanned
@@ -58,16 +55,16 @@ export interface SlotMapperSchema {
 }
 
 type UpdateInputLabwareEvent = {
-  type: "UPDATE_INPUT_LABWARE";
+  type: 'UPDATE_INPUT_LABWARE';
   labware: Array<LabwareFieldsFragment>;
 };
 type UpdateOutputLabwareEvent = {
-  type: "UPDATE_OUTPUT_LABWARE";
+  type: 'UPDATE_OUTPUT_LABWARE';
   labware: Array<LabwareFieldsFragment>;
 };
 
 type CopySlotsEvent = {
-  type: "COPY_SLOTS";
+  type: 'COPY_SLOTS';
   inputLabwareId: number;
   inputAddresses: Array<string>;
   outputLabwareId: number;
@@ -75,26 +72,26 @@ type CopySlotsEvent = {
 };
 
 type ClearSlotsEvent = {
-  type: "CLEAR_SLOTS";
+  type: 'CLEAR_SLOTS';
   outputLabwareId: number;
   outputAddresses: Array<string>;
 };
 
 type SlotPassFailEvent = {
-  type: "done.invoke.passFailsSlots";
+  type: 'done.invoke.passFailsSlots';
   data: {
     barcode: string;
     result: FindPassFailsQuery;
   };
 };
 type SlotPassFailErrorEvent = {
-  type: "error.platform.passFailsSlots";
+  type: 'error.platform.passFailsSlots';
   barcode: string;
   error: ClientError;
 };
 
-type LockEvent = { type: "LOCK" };
-type UnlockEvent = { type: "UNLOCK" };
+type LockEvent = { type: 'LOCK' };
+type UnlockEvent = { type: 'UNLOCK' };
 
 export type SlotMapperEvent =
   | UpdateInputLabwareEvent

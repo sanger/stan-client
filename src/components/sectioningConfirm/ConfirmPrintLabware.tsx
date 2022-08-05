@@ -1,34 +1,25 @@
-import React from "react";
-import Heading from "../Heading";
-import { motion } from "framer-motion";
-import variants from "../../lib/motionVariants";
-import DataTable from "../DataTable";
-import LabelPrinter, { PrintResult } from "../LabelPrinter";
-import { LabwareFieldsFragment } from "../../types/sdk";
-import { usePrinters } from "../../lib/hooks";
-import { CellProps } from "react-table";
-import LabelPrinterButton from "../LabelPrinterButton";
-import labwareScanTableColumns from "../dataTable/labwareColumns";
+import React from 'react';
+import Heading from '../Heading';
+import { motion } from 'framer-motion';
+import variants from '../../lib/motionVariants';
+import DataTable from '../DataTable';
+import LabelPrinter, { PrintResult } from '../LabelPrinter';
+import { LabwareFieldsFragment } from '../../types/sdk';
+import { usePrinters } from '../../lib/hooks';
+import { CellProps } from 'react-table';
+import LabelPrinterButton from '../LabelPrinterButton';
+import labwareScanTableColumns from '../dataTable/labwareColumns';
 type ConfirmPrintLabwareProps = {
   labwareType: string;
   labwares: LabwareFieldsFragment[];
 };
-export const ConfirmPrintLabware = ({
-  labwareType,
-  labwares,
-}: ConfirmPrintLabwareProps) => {
-  const {
-    handleOnPrint,
-    handleOnPrintError,
-    printResult,
-    currentPrinter,
-    handleOnPrinterChange,
-  } = usePrinters();
+export const ConfirmPrintLabware = ({ labwareType, labwares }: ConfirmPrintLabwareProps) => {
+  const { handleOnPrint, handleOnPrintError, printResult, currentPrinter, handleOnPrinterChange } = usePrinters();
 
   // Special case column that renders a label printer button for each row
   const printColumn = {
-    id: "printer",
-    Header: "",
+    id: 'printer',
+    Header: '',
     Cell: (props: CellProps<LabwareFieldsFragment>) => (
       <LabelPrinterButton
         labwares={[props.row.original]}
@@ -36,7 +27,7 @@ export const ConfirmPrintLabware = ({
         onPrint={handleOnPrint}
         onPrintError={handleOnPrintError}
       />
-    ),
+    )
   };
   const columns = [labwareScanTableColumns.barcode(), printColumn];
 
@@ -45,8 +36,8 @@ export const ConfirmPrintLabware = ({
       <Heading level={3}>{`${labwareType}`}</Heading>
       <motion.div
         variants={variants.fadeInWithLift}
-        initial={"hidden"}
-        animate={"visible"}
+        initial={'hidden'}
+        animate={'visible'}
         className="relative p-3 shadow space-y-4 px-4"
       >
         <DataTable columns={columns} data={labwares} />

@@ -1,25 +1,25 @@
-import React, { useEffect } from "react";
-import Labware from "../labware/Labware";
-import { Select } from "../forms/Select";
-import BlueButton from "../buttons/BlueButton";
-import PinkButton from "../buttons/PinkButton";
-import createLabwareResultMachine from "./labwareResult.machine";
-import { useMachine } from "@xstate/react";
+import React, { useEffect } from 'react';
+import Labware from '../labware/Labware';
+import { Select } from '../forms/Select';
+import BlueButton from '../buttons/BlueButton';
+import PinkButton from '../buttons/PinkButton';
+import createLabwareResultMachine from './labwareResult.machine';
+import { useMachine } from '@xstate/react';
 import {
   CommentFieldsFragment,
   LabwareFieldsFragment,
   LabwareResult as CoreLabwareResult,
   PassFail,
   SlotFieldsFragment,
-  SlotMeasurementRequest,
-} from "../../types/sdk";
-import { isSlotFilled } from "../../lib/helpers/slotHelper";
-import RemoveButton from "../buttons/RemoveButton";
-import { mapify } from "../../lib/helpers";
-import PassIcon from "../icons/PassIcon";
-import FailIcon from "../icons/FailIcon";
-import { Input } from "../forms/Input";
-import { optionValues } from "../forms";
+  SlotMeasurementRequest
+} from '../../types/sdk';
+import { isSlotFilled } from '../../lib/helpers/slotHelper';
+import RemoveButton from '../buttons/RemoveButton';
+import { mapify } from '../../lib/helpers';
+import PassIcon from '../icons/PassIcon';
+import FailIcon from '../icons/FailIcon';
+import { Input } from '../forms/Input';
+import { optionValues } from '../forms';
 
 type LabwareResultComponentProps = {
   labware: LabwareFieldsFragment;
@@ -48,27 +48,27 @@ export default function LabwareResult({
   initialLabwareResult,
   availableComments,
   onRemoveClick,
-  onChange,
+  onChange
 }: LabwareResultComponentProps) {
   const [current, send] = useMachine(
     createLabwareResultMachine({
       labwareResult: initialLabwareResult,
-      availableComments,
+      availableComments
     })
   );
 
   const { labwareResult } = current.context;
 
-  const sampleResults = mapify(labwareResult.sampleResults, "address");
+  const sampleResults = mapify(labwareResult.sampleResults, 'address');
   const slotMeasurements = labwareResult.slotMeasurements
-    ? mapify(labwareResult.slotMeasurements, "address")
+    ? mapify(labwareResult.slotMeasurements, 'address')
     : new Map<string, SlotMeasurementRequest>();
 
   useEffect(() => {
     onChange(labwareResult);
   }, [labwareResult, onChange]);
 
-  const isMeasurementExist = "slotMeasurements" in labwareResult;
+  const isMeasurementExist = 'slotMeasurements' in labwareResult;
 
   /**Ensure Tissue Coverage value is in the range 0 to 100 inclusive**/
   const validateMeasurementField = (value: string) => {
@@ -86,55 +86,44 @@ export default function LabwareResult({
     return (
       isSlotFilled(slot) && (
         <div
-          className={`flex flex-col ${
-            isMeasurementExist &&
-            labware.slots.length > 1 &&
-            "border-b border-gray-300"
-          }`}
+          className={`flex flex-col ${isMeasurementExist && labware.slots.length > 1 && 'border-b border-gray-300'}`}
         >
           <div className="flex flex-row items-center justify-between gap-x-2">
             <div>
               <div className="flex flex-row items-center justify-between">
                 <PassIcon
-                  data-testid={"passIcon"}
+                  data-testid={'passIcon'}
                   className={`h-6 w-6 cursor-pointer ${
-                    sampleResults.get(slot.address)!.result === PassFail.Pass
-                      ? "text-green-700"
-                      : "text-gray-500"
+                    sampleResults.get(slot.address)!.result === PassFail.Pass ? 'text-green-700' : 'text-gray-500'
                   }`}
                   onClick={() => {
-                    send({ type: "PASS", address: slot.address });
+                    send({ type: 'PASS', address: slot.address });
                   }}
                 />
 
                 <FailIcon
-                  data-testid={"failIcon"}
+                  data-testid={'failIcon'}
                   className={`h-6 w-6 cursor-pointer ${
-                    sampleResults.get(slot.address)!.result === PassFail.Fail
-                      ? "text-red-700"
-                      : "text-gray-500"
+                    sampleResults.get(slot.address)!.result === PassFail.Fail ? 'text-red-700' : 'text-gray-500'
                   }`}
-                  onClick={() => send({ type: "FAIL", address: slot.address })}
+                  onClick={() => send({ type: 'FAIL', address: slot.address })}
                 />
               </div>
             </div>
             <div className="w-full">
               <Select
-                value={sampleResults.get(slot.address)!.commentId ?? ""}
+                value={sampleResults.get(slot.address)!.commentId ?? ''}
                 emptyOption={true}
-                data-testid={"comment"}
+                data-testid={'comment'}
                 onChange={(e) =>
                   send({
-                    type: "SET_COMMENT",
+                    type: 'SET_COMMENT',
                     address: slot.address,
-                    commentId:
-                      e.currentTarget.value !== ""
-                        ? Number(e.currentTarget.value)
-                        : undefined,
+                    commentId: e.currentTarget.value !== '' ? Number(e.currentTarget.value) : undefined
                   })
                 }
               >
-                {optionValues(availableComments, "text", "id")}
+                {optionValues(availableComments, 'text', 'id')}
               </Select>
             </div>
           </div>
@@ -150,9 +139,9 @@ export default function LabwareResult({
                 onChange={(e) => {
                   if (validateMeasurementField(e.currentTarget.value)) {
                     send({
-                      type: "SET_TISSUE_COVERAGE",
+                      type: 'SET_TISSUE_COVERAGE',
                       address: slot.address,
-                      value: e.currentTarget.value,
+                      value: e.currentTarget.value
                     });
                   }
                 }}
@@ -168,17 +157,11 @@ export default function LabwareResult({
   return (
     <div>
       <div className="flex flex-row items-center justify-end">
-        {
-          <RemoveButton
-            data-testid={"remove"}
-            type="button"
-            onClick={() => onRemoveClick(labware.barcode)}
-          />
-        }
+        {<RemoveButton data-testid={'remove'} type="button" onClick={() => onRemoveClick(labware.barcode)} />}
       </div>
       <div className="flex flex-col items-center justify-around">
         {/* Display the layout of the labware */}
-        <div className="bg-blue-100" data-testid={"passFailComments"}>
+        <div className="bg-blue-100" data-testid={'passFailComments'}>
           <Labware labware={labware} slotBuilder={slotBuilder} />
         </div>
 
@@ -186,34 +169,31 @@ export default function LabwareResult({
         <div className="mt-8 flex flex-row items-end justify-between gap-x-4">
           <BlueButton
             className="flex-shrink-0"
-            data-testid={"passAll"}
+            data-testid={'passAll'}
             type="button"
-            onClick={() => send({ type: "PASS_ALL" })}
+            onClick={() => send({ type: 'PASS_ALL' })}
           >
             Pass All
           </BlueButton>
           <PinkButton
             className="flex-shrink-0"
-            data-testid={"failAll"}
+            data-testid={'failAll'}
             type="button"
-            onClick={() => send({ type: "FAIL_ALL" })}
+            onClick={() => send({ type: 'FAIL_ALL' })}
           >
             Fail All
           </PinkButton>
           <Select
-            data-testid={"commentAll"}
+            data-testid={'commentAll'}
             emptyOption
             onChange={(e) =>
               send({
-                type: "SET_ALL_COMMENTS",
-                commentId:
-                  e.currentTarget.value !== ""
-                    ? Number(e.currentTarget.value)
-                    : undefined,
+                type: 'SET_ALL_COMMENTS',
+                commentId: e.currentTarget.value !== '' ? Number(e.currentTarget.value) : undefined
               })
             }
           >
-            {optionValues(availableComments, "text", "id")}
+            {optionValues(availableComments, 'text', 'id')}
           </Select>
         </div>
       </div>

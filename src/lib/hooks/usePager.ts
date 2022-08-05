@@ -1,5 +1,5 @@
-import { PagerProps } from "../../components/pagination/Pager";
-import { useCallback, useReducer } from "react";
+import { PagerProps } from '../../components/pagination/Pager';
+import { useCallback, useReducer } from 'react';
 
 export type UsePagerProps = {
   initialCurrentPage: number;
@@ -18,32 +18,32 @@ type PagerState = {
 };
 
 type PagerAction =
-  | { type: "SET_CURRENT_PAGE"; currentPage: number }
-  | { type: "SET_NUMBER_OF_PAGES"; numberOfPages: number }
-  | { type: "GO_TO_LAST_PAGE" }
-  | { type: "PAGE_UP" }
-  | { type: "PAGE_DOWN" };
+  | { type: 'SET_CURRENT_PAGE'; currentPage: number }
+  | { type: 'SET_NUMBER_OF_PAGES'; numberOfPages: number }
+  | { type: 'GO_TO_LAST_PAGE' }
+  | { type: 'PAGE_UP' }
+  | { type: 'PAGE_DOWN' };
 
 function pagerReducer(state: PagerState, action: PagerAction): PagerState {
   let currentPage: number;
   let numberOfPages: number;
 
   switch (action.type) {
-    case "PAGE_UP":
+    case 'PAGE_UP':
       if (state.currentPage < state.numberOfPages) {
         return { ...state, currentPage: state.currentPage + 1 };
       } else {
         return state;
       }
-    case "PAGE_DOWN":
+    case 'PAGE_DOWN':
       if (state.currentPage > 1) {
         return { ...state, currentPage: state.currentPage - 1 };
       } else {
         return state;
       }
-    case "GO_TO_LAST_PAGE":
+    case 'GO_TO_LAST_PAGE':
       return { ...state, currentPage: state.numberOfPages };
-    case "SET_NUMBER_OF_PAGES":
+    case 'SET_NUMBER_OF_PAGES':
       numberOfPages = action.numberOfPages;
       if (numberOfPages < 0) {
         numberOfPages = 0;
@@ -59,7 +59,7 @@ function pagerReducer(state: PagerState, action: PagerAction): PagerState {
         currentPage = 1;
       }
       return { ...state, numberOfPages, currentPage };
-    case "SET_CURRENT_PAGE":
+    case 'SET_CURRENT_PAGE':
       currentPage = action.currentPage;
       if (currentPage < 1) {
         currentPage = 1;
@@ -76,35 +76,21 @@ function pagerReducer(state: PagerState, action: PagerAction): PagerState {
  *
  * Plays nicely with the {@link Pager} component.
  */
-export function usePager({
-  initialCurrentPage,
-  initialNumberOfPages,
-}: UsePagerProps): UsePagerReturnProps {
+export function usePager({ initialCurrentPage, initialNumberOfPages }: UsePagerProps): UsePagerReturnProps {
   const [state, dispatch] = useReducer(pagerReducer, {
     currentPage: initialCurrentPage,
-    numberOfPages: initialNumberOfPages,
+    numberOfPages: initialNumberOfPages
   });
 
   const setNumberOfPages = useCallback(
-    (numberOfPages: number) =>
-      dispatch({ type: "SET_NUMBER_OF_PAGES", numberOfPages }),
+    (numberOfPages: number) => dispatch({ type: 'SET_NUMBER_OF_PAGES', numberOfPages }),
     [dispatch]
   );
-  const goToLastPage = useCallback(
-    () => dispatch({ type: "GO_TO_LAST_PAGE" }),
-    [dispatch]
-  );
-  const onPageUpClick = useCallback(
-    () => dispatch({ type: "PAGE_UP" }),
-    [dispatch]
-  );
-  const onPageDownClick = useCallback(
-    () => dispatch({ type: "PAGE_DOWN" }),
-    [dispatch]
-  );
+  const goToLastPage = useCallback(() => dispatch({ type: 'GO_TO_LAST_PAGE' }), [dispatch]);
+  const onPageUpClick = useCallback(() => dispatch({ type: 'PAGE_UP' }), [dispatch]);
+  const onPageDownClick = useCallback(() => dispatch({ type: 'PAGE_DOWN' }), [dispatch]);
   const setCurrentPage = useCallback(
-    (currentPage: number) =>
-      dispatch({ type: "SET_CURRENT_PAGE", currentPage }),
+    (currentPage: number) => dispatch({ type: 'SET_CURRENT_PAGE', currentPage }),
     [dispatch]
   );
 
@@ -116,6 +102,6 @@ export function usePager({
     onPageUpClick,
     onPageDownClick,
     pageUpDisabled: state.currentPage === state.numberOfPages,
-    pageDownDisabled: state.currentPage === 1,
+    pageDownDisabled: state.currentPage === 1
   };
 }

@@ -1,27 +1,23 @@
-import React, { useCallback, useEffect } from "react";
-import { useMachine, useSelector } from "@xstate/react";
-import classNames from "classnames";
-import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
-import RemoveIcon from "../icons/RemoveIcon";
-import { createConfirmLabwareMachine } from "./confirmLabware.machine";
-import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
-import {
-  buildSlotColor,
-  buildSlotSecondaryText,
-  buildSlotText,
-} from "../../pages/sectioning";
-import { Input } from "../forms/Input";
-import Modal, { ModalBody, ModalFooter } from "../Modal";
-import Heading from "../Heading";
-import LayoutPlanner from "../LayoutPlanner";
-import BlueButton from "../buttons/BlueButton";
-import WhiteButton from "../buttons/WhiteButton";
-import PinkButton from "../buttons/PinkButton";
-import Labware from "../labware/Labware";
-import { CommentFieldsFragment, ConfirmSectionLabware } from "../../types/sdk";
-import { selectConfirmOperationLabware } from "./index";
-import { ConfirmationModal } from "../modal/ConfirmationModal";
-import { SectionNumberMode } from "./SectioningConfirm";
+import React, { useCallback, useEffect } from 'react';
+import { useMachine, useSelector } from '@xstate/react';
+import classNames from 'classnames';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
+import RemoveIcon from '../icons/RemoveIcon';
+import { createConfirmLabwareMachine } from './confirmLabware.machine';
+import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
+import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pages/sectioning';
+import { Input } from '../forms/Input';
+import Modal, { ModalBody, ModalFooter } from '../Modal';
+import Heading from '../Heading';
+import LayoutPlanner from '../LayoutPlanner';
+import BlueButton from '../buttons/BlueButton';
+import WhiteButton from '../buttons/WhiteButton';
+import PinkButton from '../buttons/PinkButton';
+import Labware from '../labware/Labware';
+import { CommentFieldsFragment, ConfirmSectionLabware } from '../../types/sdk';
+import { selectConfirmOperationLabware } from './index';
+import { ConfirmationModal } from '../modal/ConfirmationModal';
+import { SectionNumberMode } from './SectioningConfirm';
 
 interface ConfirmTubesProps {
   layoutPlans: Array<LayoutPlan>;
@@ -43,16 +39,14 @@ const ConfirmTubes: React.FC<ConfirmTubesProps> = ({
   onChange,
   onSectionNumberChange,
   onSectionUpdate,
-  mode,
+  mode
 }) => {
   return (
     <div className="p-4 lg:w-2/3 lg:mx-auto rounded-lg bg-gray-100 space-y-4">
       <div>
         <p className="text-gray-800 text-sm leading-normal">
-          For any tubes that were created but did not receive any sections, you
-          can mark them as{" "}
-          <span className="font-bold text-gray-900">unused</span> by clicking
-          its cancel button.
+          For any tubes that were created but did not receive any sections, you can mark them as{' '}
+          <span className="font-bold text-gray-900">unused</span> by clicking its cancel button.
         </p>
       </div>
       <div className="">
@@ -106,24 +100,17 @@ const TubeRow: React.FC<TubeRowProps> = ({
   onChange,
   onSectionNumberChange,
   onSectionUpdate,
-  mode,
+  mode
 }) => {
   const [current, send, service] = useMachine(
-    createConfirmLabwareMachine(
-      comments,
-      initialLayoutPlan.destinationLabware,
-      initialLayoutPlan
-    )
+    createConfirmLabwareMachine(comments, initialLayoutPlan.destinationLabware, initialLayoutPlan)
   );
   const { cancelled, layoutPlan, labware } = current.context;
   const { layoutMachine } = current.children;
   const [notifyCancel, setNotifyCancel] = React.useState(false);
   const notifySectionChange = React.useRef(false);
 
-  const confirmOperationLabware = useSelector(
-    service,
-    selectConfirmOperationLabware
-  );
+  const confirmOperationLabware = useSelector(service, selectConfirmOperationLabware);
 
   useEffect(() => {
     if (confirmOperationLabware) {
@@ -135,9 +122,8 @@ const TubeRow: React.FC<TubeRowProps> = ({
   useEffect(() => {
     if (
       layoutPlan &&
-      ((current.event.type === "done.invoke.layoutMachine" &&
-        notifySectionChange.current) ||
-        current.event.type === "TOGGLE_CANCEL")
+      ((current.event.type === 'done.invoke.layoutMachine' && notifySectionChange.current) ||
+        current.event.type === 'TOGGLE_CANCEL')
     ) {
       notifySectionChange.current = false;
       onSectionUpdate(layoutPlan);
@@ -146,21 +132,21 @@ const TubeRow: React.FC<TubeRowProps> = ({
 
   /**Update for source changes in parent**/
   useEffect(() => {
-    send("UPDATE_ALL_SOURCES", initialLayoutPlan);
+    send('UPDATE_ALL_SOURCES', initialLayoutPlan);
   }, [initialLayoutPlan, send]);
 
   const rowClassnames = classNames(
     {
-      "opacity-50": cancelled,
+      'opacity-50': cancelled
     },
-    "cursor-pointer hover:opacity-90 text-sm tracking-wide"
+    'cursor-pointer hover:opacity-90 text-sm tracking-wide'
   );
 
   const handleOnClick = useCallback(() => {
     if (mode === SectionNumberMode.Auto) {
       setNotifyCancel(true);
     } else {
-      send({ type: "TOGGLE_CANCEL" });
+      send({ type: 'TOGGLE_CANCEL' });
     }
   }, [send, mode, setNotifyCancel]);
 
@@ -168,17 +154,12 @@ const TubeRow: React.FC<TubeRowProps> = ({
   const handleOnChange = useCallback(
     (slotAddress: string, sectionNumber: number, sectionIndex: number) => {
       /**Notify parent, so as to modify section number in original layout**/
-      onSectionNumberChange(
-        layoutPlan,
-        slotAddress,
-        sectionIndex,
-        sectionNumber
-      );
+      onSectionNumberChange(layoutPlan, slotAddress, sectionIndex, sectionNumber);
       send({
-        type: "UPDATE_SECTION_NUMBER",
+        type: 'UPDATE_SECTION_NUMBER',
         slotAddress,
         sectionNumber,
-        sectionIndex,
+        sectionIndex
       });
     },
     [send, layoutPlan, onSectionNumberChange]
@@ -189,27 +170,25 @@ const TubeRow: React.FC<TubeRowProps> = ({
       {
         <ConfirmationModal
           show={notifyCancel}
-          header={`${cancelled ? "Enabling" : "Cancelling"} tube`}
-          message={{ type: "Warning", text: "Section number update" }}
+          header={`${cancelled ? 'Enabling' : 'Cancelling'} tube`}
+          message={{ type: 'Warning', text: 'Section number update' }}
           confirmOptions={[
             {
-              label: "Cancel",
+              label: 'Cancel',
               action: () => {
                 setNotifyCancel(false);
-              },
+              }
             },
             {
-              label: "Continue",
+              label: 'Continue',
               action: () => {
-                send({ type: "TOGGLE_CANCEL" });
+                send({ type: 'TOGGLE_CANCEL' });
                 setNotifyCancel(false);
-              },
-            },
+              }
+            }
           ]}
         >
-          <p className={"font-bold mt-8"}>
-            Planned section numbers of other labware will be updated.
-          </p>
+          <p className={'font-bold mt-8'}>Planned section numbers of other labware will be updated.</p>
         </ConfirmationModal>
       }
       <tr className={rowClassnames}>
@@ -218,28 +197,21 @@ const TubeRow: React.FC<TubeRowProps> = ({
             <Labware
               labware={labware}
               onClick={() => {
-                !cancelled && send({ type: "EDIT_LAYOUT" });
+                !cancelled && send({ type: 'EDIT_LAYOUT' });
               }}
               slotText={(address) => buildSlotText(layoutPlan, address)}
-              slotSecondaryText={(address) =>
-                buildSlotSecondaryText(layoutPlan, address)
-              }
+              slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
               slotColor={(address) => buildSlotColor(layoutPlan, address)}
             />
 
-            <PinkButton
-              disabled={current.matches("done")}
-              onClick={() => !cancelled && send({ type: "EDIT_LAYOUT" })}
-            >
+            <PinkButton disabled={current.matches('done')} onClick={() => !cancelled && send({ type: 'EDIT_LAYOUT' })}>
               Edit Layout
             </PinkButton>
           </div>
         </TableCell>
 
         <TableCell>
-          <span className={`${cancelled ? "line-through" : ""}`}>
-            {layoutPlan.destinationLabware.barcode}
-          </span>
+          <span className={`${cancelled ? 'line-through' : ''}`}>{layoutPlan.destinationLabware.barcode}</span>
 
           {layoutMachine && (
             <Modal show={true}>
@@ -249,13 +221,9 @@ const TubeRow: React.FC<TubeRowProps> = ({
                   <LayoutPlanner actor={layoutMachine}>
                     <div className="my-2">
                       <p className="text-gray-900 text-sm leading-normal">
-                        Click a slot to increase the number of sections in that
-                        slot.
+                        Click a slot to increase the number of sections in that slot.
                       </p>
-                      <p>
-                        To reduce the number of sections in a slot, use
-                        Ctrl-Click.
-                      </p>
+                      <p>To reduce the number of sections in a slot, use Ctrl-Click.</p>
                     </div>
                   </LayoutPlanner>
                 )}
@@ -264,14 +232,14 @@ const TubeRow: React.FC<TubeRowProps> = ({
                 <BlueButton
                   onClick={() => {
                     notifySectionChange.current = true;
-                    layoutMachine.send({ type: "DONE" });
+                    layoutMachine.send({ type: 'DONE' });
                   }}
                   className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   Done
                 </BlueButton>
                 <WhiteButton
-                  onClick={() => layoutMachine.send({ type: "CANCEL" })}
+                  onClick={() => layoutMachine.send({ type: 'CANCEL' })}
                   className="mt-3 w-full sm:mt-0 sm:ml-3"
                 >
                   Cancel
@@ -281,19 +249,17 @@ const TubeRow: React.FC<TubeRowProps> = ({
           )}
         </TableCell>
         <TableCell>
-          {layoutPlan.plannedActions.get("A1")?.map((source, index) => (
+          {layoutPlan.plannedActions.get('A1')?.map((source, index) => (
             <Input
               key={source.address + String(index)}
               data-testid={`sectionnumber-tube-${layoutPlan.destinationLabware.barcode}`}
               type="number"
-              value={source.newSection === 0 ? "" : String(source.newSection)}
+              value={source.newSection === 0 ? '' : String(source.newSection)}
               min={1}
               disabled={cancelled || mode === SectionNumberMode.Auto}
               // So the row click handler doesn't get triggered
               onClick={(e) => e.stopPropagation()}
-              onChange={(e) =>
-                handleOnChange("A1", Number(e.target.value), index)
-              }
+              onChange={(e) => handleOnChange('A1', Number(e.target.value), index)}
             />
           ))}
         </TableCell>

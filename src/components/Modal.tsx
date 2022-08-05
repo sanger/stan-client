@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode } from 'react';
 
 interface ModalProps {
   show?: boolean;
@@ -16,10 +16,7 @@ const Modal: React.FC<ModalProps> = ({ children, show }) => {
           <div className="absolute inset-0 bg-gray-500 opacity-75" />
         </div>
 
-        <span
-          className="hidden sm:inline-block sm:align-middle sm:h-screen"
-          aria-hidden="true"
-        >
+        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
           &#8203;
         </span>
 
@@ -50,15 +47,9 @@ export const ModalHeader = ({ children }: ModalProps) => {
 };
 
 export const ModalBody = ({ children }: ModalProps) => {
-  return (
-    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">{children}</div>
-  );
+  return <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">{children}</div>;
 };
 
 export const ModalFooter = ({ children }: ModalProps) => {
-  return (
-    <div className="bg-gray-100 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-      {children}
-    </div>
-  );
+  return <div className="bg-gray-100 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">{children}</div>;
 };

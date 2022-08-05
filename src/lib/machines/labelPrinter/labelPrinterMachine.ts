@@ -1,30 +1,22 @@
-import { MachineConfig, MachineOptions } from "xstate";
-import {
-  LabelPrinterContext,
-  LabelPrinterEvent,
-  LabelPrinterSchema,
-} from "./labelPrinterMachineTypes";
-import { find } from "lodash";
-import { assign } from "@xstate/immer";
-import { createMachineBuilder } from "../index";
-import { castDraft } from "immer";
-import { stanCore } from "../../sdk";
+import { MachineConfig, MachineOptions } from 'xstate';
+import { LabelPrinterContext, LabelPrinterEvent, LabelPrinterSchema } from './labelPrinterMachineTypes';
+import { find } from 'lodash';
+import { assign } from '@xstate/immer';
+import { createMachineBuilder } from '../index';
+import { castDraft } from 'immer';
+import { stanCore } from '../../sdk';
 
 /**
  * LabelPrinter Machine Options
  */
-export const machineOptions: Partial<
-  MachineOptions<LabelPrinterContext, LabelPrinterEvent>
-> = {
+export const machineOptions: Partial<MachineOptions<LabelPrinterContext, LabelPrinterEvent>> = {
   actions: {
     assignPrinters: assign((ctx, e) => {
-      if (e.type !== "done.invoke.fetchPrinters") {
+      if (e.type !== 'done.invoke.fetchPrinters') {
         return;
       }
 
-      const labwareLabelTypes = new Set(
-        ctx.labwares.map((lw) => lw.labwareType?.labelType?.name)
-      );
+      const labwareLabelTypes = new Set(ctx.labwares.map((lw) => lw.labwareType?.labelType?.name));
 
       // Only have available printers of the labwares' label type (if there is one)
       ctx.printers = e.data.printers.filter((printer) =>
@@ -34,22 +26,21 @@ export const machineOptions: Partial<
     }),
 
     assignServerErrors: assign((ctx, e) => {
-      if (e.type !== "error.platform.fetchPrinters") {
+      if (e.type !== 'error.platform.fetchPrinters') {
         return;
       }
       ctx.serverErrors = castDraft(e.data);
     }),
 
     assignLabelPrinter: assign((ctx, e) => {
-      if (e.type === "UPDATE_SELECTED_LABEL_PRINTER") {
-        ctx.selectedPrinter =
-          find(ctx.printers, (printer) => printer.name === e.name) ?? null;
+      if (e.type === 'UPDATE_SELECTED_LABEL_PRINTER') {
+        ctx.selectedPrinter = find(ctx.printers, (printer) => printer.name === e.name) ?? null;
       }
-    }),
+    })
   },
 
   guards: {
-    labelPrinterAssigned: (ctx, _e) => !!ctx.selectedPrinter,
+    labelPrinterAssigned: (ctx, _e) => !!ctx.selectedPrinter
   },
 
   services: {
@@ -57,94 +48,87 @@ export const machineOptions: Partial<
 
     printLabels: (ctx, e) => {
       if (!ctx.selectedPrinter) {
-        return Promise.reject("No selected printer");
+        return Promise.reject('No selected printer');
       }
 
       let labelsPerBarcode = 1;
-      if (e.type === "PRINT" && e.labelsPerBarcode) {
+      if (e.type === 'PRINT' && e.labelsPerBarcode) {
         labelsPerBarcode = e.labelsPerBarcode;
       }
 
       return stanCore.Print({
         printer: ctx.selectedPrinter.name,
-        barcodes: ctx.labwares
-          .map((lw) => new Array(labelsPerBarcode).fill(lw.barcode))
-          .flat(),
+        barcodes: ctx.labwares.map((lw) => new Array(labelsPerBarcode).fill(lw.barcode)).flat()
       });
-    },
-  },
+    }
+  }
 };
 
 /**
  * LabelPrinter Machine Config
  */
-export const machineConfig: MachineConfig<
-  LabelPrinterContext,
-  LabelPrinterSchema,
-  LabelPrinterEvent
-> = {
-  id: "labelPrinter",
-  initial: "init",
+export const machineConfig: MachineConfig<LabelPrinterContext, LabelPrinterSchema, LabelPrinterEvent> = {
+  id: 'labelPrinter',
+  initial: 'init',
   states: {
     init: {
       always: [
         // Go to ready if there's already a pre-selected label printer (used for LabelPrinterButton)
-        { target: "ready", cond: "labelPrinterAssigned" },
-        { target: "fetching" },
-      ],
+        { target: 'ready', cond: 'labelPrinterAssigned' },
+        { target: 'fetching' }
+      ]
     },
     fetching: {
       invoke: {
-        src: "fetchPrinters",
-        id: "fetchPrinters",
+        src: 'fetchPrinters',
+        id: 'fetchPrinters',
         onDone: {
-          target: "ready",
-          actions: "assignPrinters",
+          target: 'ready',
+          actions: 'assignPrinters'
         },
         onError: {
-          target: "error",
-          actions: "assignServerErrors",
-        },
-      },
+          target: 'error',
+          actions: 'assignServerErrors'
+        }
+      }
     },
     error: {},
     ready: {
-      initial: "idle",
+      initial: 'idle',
       states: {
         idle: {},
         printSuccess: {},
-        printError: {},
+        printError: {}
       },
       on: {
         UPDATE_SELECTED_LABEL_PRINTER: {
-          actions: ["assignLabelPrinter"],
-          target: ".idle",
+          actions: ['assignLabelPrinter'],
+          target: '.idle'
         },
         PRINT: {
-          target: "printing",
-        },
-      },
+          target: 'printing'
+        }
+      }
     },
     printing: {
       invoke: {
-        src: "printLabels",
-        id: "printLabels",
+        src: 'printLabels',
+        id: 'printLabels',
         onDone: {
-          target: "ready.printSuccess",
+          target: 'ready.printSuccess'
         },
         onError: {
-          target: "ready.printError",
-          actions: ["assignServerErrors"],
-        },
-      },
-    },
-  },
+          target: 'ready.printError',
+          actions: ['assignServerErrors']
+        }
+      }
+    }
+  }
 };
 
-const createLabelPrinterMachine = createMachineBuilder<
-  LabelPrinterContext,
-  LabelPrinterSchema,
-  LabelPrinterEvent
->(machineConfig, machineOptions);
+const createLabelPrinterMachine = createMachineBuilder<LabelPrinterContext, LabelPrinterSchema, LabelPrinterEvent>(
+  machineConfig,
+  machineOptions
+);
 
 export default createLabelPrinterMachine;

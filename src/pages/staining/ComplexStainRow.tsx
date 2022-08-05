@@ -1,14 +1,10 @@
-import React from "react";
-import {
-  ComplexStainLabware,
-  ComplexStainRequest,
-  StainPanel,
-} from "../../types/sdk";
-import { TableCell } from "../../components/Table";
-import FormikInput from "../../components/forms/Input";
-import WorkNumberSelect from "../../components/WorkNumberSelect";
-import FormikSelect from "../../components/forms/Select";
-import { objectKeys } from "../../lib/helpers";
+import React from 'react';
+import { ComplexStainLabware, ComplexStainRequest, StainPanel } from '../../types/sdk';
+import { TableCell } from '../../components/Table';
+import FormikInput from '../../components/forms/Input';
+import WorkNumberSelect from '../../components/WorkNumberSelect';
+import FormikSelect from '../../components/forms/Select';
+import { objectKeys } from '../../lib/helpers';
 
 /**Properties for the setting the values for all rows**/
 type ComplexStainValueSetterProps = {
@@ -22,11 +18,7 @@ type ComplexStainValueSetterProps = {
    * @param value
    * @param shouldValidate
    */
-  setValueToAllStainRows: (
-    field: string,
-    value: any,
-    shouldValidate?: boolean | undefined
-  ) => void;
+  setValueToAllStainRows: (field: string, value: any, shouldValidate?: boolean | undefined) => void;
 };
 
 type ComplexStainRowProps = {
@@ -35,11 +27,7 @@ type ComplexStainRowProps = {
   plexMin: number;
   plexMax: number;
   stainFormValues: ComplexStainRequest;
-  setFieldValue: (
-    field: string,
-    value: any,
-    shouldValidate?: boolean | undefined
-  ) => void;
+  setFieldValue: (field: string, value: any, shouldValidate?: boolean | undefined) => void;
   rowID?: number;
   stainRowApplyAllSettings?: ComplexStainValueSetterProps;
 };
@@ -52,13 +40,13 @@ const ComplexStainRow = ({
   rowID,
   stainFormValues,
   stainRowApplyAllSettings,
-  setFieldValue,
+  setFieldValue
 }: ComplexStainRowProps) => {
   const handleChange = React.useCallback(
     (e: React.ChangeEvent<any> | { fieldName: string; value: string }) => {
-      let fieldName = "";
-      let fieldValue = "";
-      if ("fieldName" in e) {
+      let fieldName = '';
+      let fieldValue = '';
+      if ('fieldName' in e) {
         fieldName = e.fieldName;
         fieldValue = e.value;
       } else {
@@ -70,66 +58,50 @@ const ComplexStainRow = ({
       if (!stainRowApplyAllSettings) return;
       //Globally set values for all rows
       stainFormValues.labware.forEach((_, i) => {
-        stainRowApplyAllSettings.setValueToAllStainRows(
-          `labware.${i}.${fieldName}`,
-          fieldValue
-        );
+        stainRowApplyAllSettings.setValueToAllStainRows(`labware.${i}.${fieldName}`, fieldValue);
       });
     },
     [stainRowApplyAllSettings, stainFormValues, setFieldValue]
   );
 
-  const cellClassNames = `p-4 ${
-    stainRowApplyAllSettings && "font-medium text-gray-600 font-bold"
-  }`;
+  const cellClassNames = `p-4 ${stainRowApplyAllSettings && 'font-medium text-gray-600 font-bold'}`;
   return (
     <tr key={barcode}>
-      <TableCell className={`text-center ${cellClassNames}`}>
-        {barcode}
-      </TableCell>
+      <TableCell className={`text-center ${cellClassNames}`}>{barcode}</TableCell>
       <TableCell className={cellClassNames}>
         <FormikInput
-          label={""}
-          name={
-            rowID !== undefined ? `labware.${rowID}.bondBarcode` : `bondBarcode`
-          }
+          label={''}
+          name={rowID !== undefined ? `labware.${rowID}.bondBarcode` : `bondBarcode`}
           onChange={handleChange}
         />
       </TableCell>
       <TableCell className={cellClassNames}>
         <FormikInput
-          label={""}
+          label={''}
           name={rowID !== undefined ? `labware.${rowID}.bondRun` : `bondRun`}
-          type={"number"}
+          type={'number'}
           min={0}
           onChange={handleChange}
         />
       </TableCell>
       <TableCell className={cellClassNames}>
         <WorkNumberSelect
-          label={""}
-          name={
-            rowID !== undefined ? `labware.${rowID}.workNumber` : `workNumber`
-          }
+          label={''}
+          name={rowID !== undefined ? `labware.${rowID}.workNumber` : `workNumber`}
           onWorkNumberChange={(workNumber) => {
             handleChange({
-              fieldName:
-                rowID !== undefined
-                  ? `labware.${rowID}.workNumber`
-                  : `workNumber`,
-              value: workNumber ?? "",
+              fieldName: rowID !== undefined ? `labware.${rowID}.workNumber` : `workNumber`,
+              value: workNumber ?? ''
             });
           }}
         />
       </TableCell>
       <TableCell className={cellClassNames}>
         <FormikSelect
-          label={""}
+          label={''}
           name={rowID !== undefined ? `labware.${rowID}.panel` : `panel`}
           onChange={handleChange}
-          data-testid={
-            stainRowApplyAllSettings ? "all-panel" : `${barcode}-panel`
-          }
+          data-testid={stainRowApplyAllSettings ? 'all-panel' : `${barcode}-panel`}
         >
           {objectKeys(StainPanel).map((stainPanel) => (
             <option key={stainPanel} value={StainPanel[stainPanel]}>
@@ -140,21 +112,17 @@ const ComplexStainRow = ({
       </TableCell>
       <TableCell className={cellClassNames}>
         <FormikInput
-          label={""}
+          label={''}
           data-testid={`${barcode}-plexRNAscope`}
-          name={
-            rowID !== undefined
-              ? `labware.${rowID}.plexRNAscope`
-              : `plexRNAscope`
-          }
-          type={"number"}
+          name={rowID !== undefined ? `labware.${rowID}.plexRNAscope` : `plexRNAscope`}
+          type={'number'}
           min={plexMin}
           max={plexMax}
           step={1}
-          disabled={stainType === "IHC"}
+          disabled={stainType === 'IHC'}
           value={
-            stainType === "IHC"
-              ? ""
+            stainType === 'IHC'
+              ? ''
               : stainRowApplyAllSettings
               ? stainRowApplyAllSettings.stainValuesToAll.plexRNAscope
               : stainFormValues.labware[rowID!].plexRNAscope
@@ -165,17 +133,17 @@ const ComplexStainRow = ({
       <TableCell className={cellClassNames}>
         <FormikInput
           data-testid={`${barcode}-plexIHC`}
-          label={""}
+          label={''}
           name={rowID !== undefined ? `labware.${rowID}.plexIHC` : `plexIHC`}
-          type={"number"}
+          type={'number'}
           min={plexMin}
           max={plexMax}
           step={1}
-          disabled={stainType === "RNAscope"}
+          disabled={stainType === 'RNAscope'}
           onChange={handleChange}
           value={
-            stainType === "RNAscope"
-              ? ""
+            stainType === 'RNAscope'
+              ? ''
               : stainRowApplyAllSettings
               ? stainRowApplyAllSettings.stainValuesToAll.plexIHC
               : stainFormValues.labware[rowID!].plexIHC

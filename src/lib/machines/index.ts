@@ -6,8 +6,8 @@
  *
  * @see {@link https://xstate.js.org/docs/guides/communication.html#invoking-promises}
  */
-import { EventObject, StateSchema } from "xstate/lib/types";
-import { Machine, MachineConfig, MachineOptions } from "xstate";
+import { EventObject, StateSchema } from 'xstate/lib/types';
+import { Machine, MachineConfig, MachineOptions } from 'xstate';
 
 export const createMinimumWaitService = <TResult>(
   minimumWait: number,
@@ -44,30 +44,19 @@ export interface CreateMachineParams<TContext, TEvent extends EventObject> {
  * // build a dataFetcherMachine
  * const machine = createDataFetcherMachine({ context: myCustomContext, options: myCustomOptions });
  */
-export function createMachineBuilder<
-  TContext,
-  TStateSchema extends StateSchema,
-  TEvent extends EventObject
->(
+export function createMachineBuilder<TContext, TStateSchema extends StateSchema, TEvent extends EventObject>(
   machineConfig: MachineConfig<TContext, TStateSchema, TEvent>,
   machineOptions: Partial<MachineOptions<TContext, TEvent>>
 ) {
   return (params?: CreateMachineParams<TContext, TEvent>) => {
-    let machine = Machine<TContext, TStateSchema, TEvent>(
-      machineConfig,
-      machineOptions
-    );
+    let machine = Machine<TContext, TStateSchema, TEvent>(machineConfig, machineOptions);
 
     if (params?.options) {
       machine = machine.withConfig(params.options);
     }
 
     if (params?.context) {
-      const newContext: TContext = Object.assign(
-        {},
-        machine.context,
-        params.context
-      );
+      const newContext: TContext = Object.assign({}, machine.context, params.context);
       machine = machine.withContext(newContext);
     }
 

@@ -1,12 +1,12 @@
-import React, { ComponentProps } from "react";
-import { Meta, Story } from "@storybook/react";
+import React, { ComponentProps } from 'react';
+import { Meta, Story } from '@storybook/react';
 
-import Pager from "./Pager";
-import { usePager } from "../../lib/hooks/usePager";
+import Pager from './Pager';
+import { usePager } from '../../lib/hooks/usePager';
 
 const meta: Meta = {
-  title: "Pager",
-  component: Pager,
+  title: 'Pager',
+  component: Pager
 };
 export default meta;
 

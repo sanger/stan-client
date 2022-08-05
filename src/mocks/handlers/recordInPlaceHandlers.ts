@@ -1,39 +1,34 @@
-import { graphql } from "msw";
+import { graphql } from 'msw';
 import {
   GetRecordInPlaceInfoQuery,
   GetRecordInPlaceInfoQueryVariables,
   RecordInPlaceMutation,
-  RecordInPlaceMutationVariables,
-} from "../../types/sdk";
-import equipmentRepository from "../repositories/equipmentRepository";
-import { isEnabled } from "../../lib/helpers";
+  RecordInPlaceMutationVariables
+} from '../../types/sdk';
+import equipmentRepository from '../repositories/equipmentRepository';
+import { isEnabled } from '../../lib/helpers';
 
 const recordInPlaceHandlers = [
   graphql.query<GetRecordInPlaceInfoQuery, GetRecordInPlaceInfoQueryVariables>(
-    "GetRecordInPlaceInfo",
+    'GetRecordInPlaceInfo',
     (req, res, ctx) => {
       let equipments = equipmentRepository.findAll().filter(isEnabled);
 
       if (req.variables.category) {
-        equipments = equipments.filter(
-          (equipment) => equipment.category === req.variables.category
-        );
+        equipments = equipments.filter((equipment) => equipment.category === req.variables.category);
       }
 
       return res(
         ctx.data({
-          equipments,
+          equipments
         })
       );
     }
   ),
 
-  graphql.mutation<RecordInPlaceMutation, RecordInPlaceMutationVariables>(
-    "RecordInPlace",
-    (req, res, ctx) => {
-      return res(ctx.data({ recordInPlace: { labware: [] } }));
-    }
-  ),
+  graphql.mutation<RecordInPlaceMutation, RecordInPlaceMutationVariables>('RecordInPlace', (req, res, ctx) => {
+    return res(ctx.data({ recordInPlace: { labware: [] } }));
+  })
 ];
 
 export default recordInPlaceHandlers;

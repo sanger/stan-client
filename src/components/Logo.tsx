@@ -1,12 +1,8 @@
-import React from "react";
-import classNames from "classnames";
-import LogoSVG from "../images/LogoSVG";
+import React from 'react';
+import classNames from 'classnames';
+import LogoSVG from '../images/LogoSVG';
 
-interface LogoProps
-  extends React.DetailedHTMLProps<
-    React.ImgHTMLAttributes<HTMLImageElement>,
-    HTMLImageElement
-  > {}
+interface LogoProps extends React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement> {}
 
 /**
  * Stan logo. Defaults to h-8 w-8.
@@ -15,7 +11,7 @@ interface LogoProps
  * @constructor
  */
 const Logo = ({ className }: LogoProps) => {
-  const imgClassName = classNames("h-8 w-8", className);
+  const imgClassName = classNames('h-8 w-8', className);
   return <LogoSVG className={imgClassName} />;
 };
 export default Logo;

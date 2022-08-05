@@ -1,4 +1,4 @@
-import { graphql } from "msw";
+import { graphql } from 'msw';
 import {
   FindHistoryForDonorNameQuery,
   FindHistoryForDonorNameQueryVariables,
@@ -11,11 +11,11 @@ import {
   FindHistoryForWorkNumberQuery,
   FindHistoryForWorkNumberQueryVariables,
   HistoryEntry,
-  HistoryFieldsFragment,
-} from "../../types/sdk";
-import labwareFactory from "../../lib/factories/labwareFactory";
-import { buildLabwareFragment } from "../../lib/helpers/labwareHelper";
-import { sampleFactory } from "../../lib/factories/sampleFactory";
+  HistoryFieldsFragment
+} from '../../types/sdk';
+import labwareFactory from '../../lib/factories/labwareFactory';
+import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
+import { sampleFactory } from '../../lib/factories/sampleFactory';
 
 function buildHistory(): HistoryFieldsFragment {
   const sourceLabware = labwareFactory.build();
@@ -24,87 +24,87 @@ function buildHistory(): HistoryFieldsFragment {
 
   const entries: Array<HistoryEntry> = [
     {
-      __typename: "HistoryEntry",
+      __typename: 'HistoryEntry',
       destinationLabwareId: destinationLabware.id,
       sourceLabwareId: sourceLabware.id,
       eventId: 1,
       sampleId: sample.id,
       time: new Date().toISOString(),
-      type: "Eat",
-      username: "user1",
-      details: ["Taste: Great", "Monkey: Foo"],
-      workNumber: "SGP123",
-    },
+      type: 'Eat',
+      username: 'user1',
+      details: ['Taste: Great', 'Monkey: Foo'],
+      workNumber: 'SGP123'
+    }
   ];
 
   return {
-    __typename: "History",
+    __typename: 'History',
     samples: [sample],
     labware: [sourceLabware, destinationLabware].map(buildLabwareFragment),
-    entries,
+    entries
   };
 }
 
 const historyHandlers = [
-  graphql.query<
-    FindHistoryForDonorNameQuery,
-    FindHistoryForDonorNameQueryVariables
-  >("FindHistoryForDonorName", (req, res, ctx) => {
-    return res(
-      ctx.data({
-        __typename: "Query",
-        historyForDonorName: buildHistory(),
-      })
-    );
-  }),
+  graphql.query<FindHistoryForDonorNameQuery, FindHistoryForDonorNameQueryVariables>(
+    'FindHistoryForDonorName',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          historyForDonorName: buildHistory()
+        })
+      );
+    }
+  ),
 
-  graphql.query<
-    FindHistoryForExternalNameQuery,
-    FindHistoryForExternalNameQueryVariables
-  >("FindHistoryForExternalName", (req, res, ctx) => {
-    return res(
-      ctx.data({
-        __typename: "Query",
-        historyForExternalName: buildHistory(),
-      })
-    );
-  }),
+  graphql.query<FindHistoryForExternalNameQuery, FindHistoryForExternalNameQueryVariables>(
+    'FindHistoryForExternalName',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          historyForExternalName: buildHistory()
+        })
+      );
+    }
+  ),
 
-  graphql.query<
-    FindHistoryForLabwareBarcodeQuery,
-    FindHistoryForLabwareBarcodeQueryVariables
-  >("FindHistoryForLabwareBarcode", (req, res, ctx) => {
-    return res(
-      ctx.data({
-        __typename: "Query",
-        historyForLabwareBarcode: buildHistory(),
-      })
-    );
-  }),
+  graphql.query<FindHistoryForLabwareBarcodeQuery, FindHistoryForLabwareBarcodeQueryVariables>(
+    'FindHistoryForLabwareBarcode',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          historyForLabwareBarcode: buildHistory()
+        })
+      );
+    }
+  ),
 
-  graphql.query<
-    FindHistoryForSampleIdQuery,
-    FindHistoryForSampleIdQueryVariables
-  >("FindHistoryForSampleId", (req, res, ctx) => {
-    return res(
-      ctx.data({
-        __typename: "Query",
-        historyForSampleId: buildHistory(),
-      })
-    );
-  }),
+  graphql.query<FindHistoryForSampleIdQuery, FindHistoryForSampleIdQueryVariables>(
+    'FindHistoryForSampleId',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          historyForSampleId: buildHistory()
+        })
+      );
+    }
+  ),
 
-  graphql.query<
-    FindHistoryForWorkNumberQuery,
-    FindHistoryForWorkNumberQueryVariables
-  >("FindHistoryForWorkNumber", (req, res, ctx) => {
-    return res(
-      ctx.data({
-        __typename: "Query",
-        historyForWorkNumber: buildHistory(),
-      })
-    );
-  }),
+  graphql.query<FindHistoryForWorkNumberQuery, FindHistoryForWorkNumberQueryVariables>(
+    'FindHistoryForWorkNumber',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          historyForWorkNumber: buildHistory()
+        })
+      );
+    }
+  )
 ];
 
 export default historyHandlers;

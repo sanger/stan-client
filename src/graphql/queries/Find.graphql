@@ -1,54 +1,54 @@
 query Find($request: FindRequest!) {
-    find(request: $request) {
-        numRecords
-        entries {
-            labwareId
-            sampleId
-            workNumbers
-        }
-        samples {
-            id
-            section
-            tissue {
-                replicate
-                spatialLocation {
-                    tissueType {
-                        name
-                    }
-                }
-                externalName
-                donor {
-                    donorName
-                }
-                medium {
-                    name
-                }
-            }
-        }
-        labware {
-            id
-            barcode
-            created
-            labwareType {
-                name
-            }
-        }
-        locations {
-            id
-            barcode
-            customName
-            fixedName
-            direction
-            size {
-                numRows
-                numColumns
-            }
-            qualifiedNameWithFirstBarcode
-        }
-        labwareLocations {
-            labwareId
-            locationId
-            address
-        }
+  find(request: $request) {
+    numRecords
+    entries {
+      labwareId
+      sampleId
+      workNumbers
     }
+    samples {
+      id
+      section
+      tissue {
+        replicate
+        spatialLocation {
+          tissueType {
+            name
+          }
+        }
+        externalName
+        donor {
+          donorName
+        }
+        medium {
+          name
+        }
+      }
+    }
+    labware {
+      id
+      barcode
+      created
+      labwareType {
+        name
+      }
+    }
+    locations {
+      id
+      barcode
+      customName
+      fixedName
+      direction
+      size {
+        numRows
+        numColumns
+      }
+      qualifiedNameWithFirstBarcode
+    }
+    labwareLocations {
+      labwareId
+      locationId
+      address
+    }
+  }
 }

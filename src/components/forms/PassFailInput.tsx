@@ -1,8 +1,8 @@
-import React, { useCallback } from "react";
-import PassIcon from "../icons/PassIcon";
-import { PassFail } from "../../types/sdk";
-import FailIcon from "../icons/FailIcon";
-import { useFormikContext } from "formik";
+import React, { useCallback } from 'react';
+import PassIcon from '../icons/PassIcon';
+import { PassFail } from '../../types/sdk';
+import FailIcon from '../icons/FailIcon';
+import { useFormikContext } from 'formik';
 
 type PassFailInputProps = {
   /**
@@ -18,27 +18,21 @@ type PassFailInputProps = {
 };
 
 export function PassFailInput({ value, onChange }: PassFailInputProps) {
-  const handleOnPassClick = () =>
-    value === PassFail.Fail && onChange?.(PassFail.Pass);
-  const handleOnFailClick = () =>
-    value === PassFail.Pass && onChange?.(PassFail.Fail);
+  const handleOnPassClick = () => value === PassFail.Fail && onChange?.(PassFail.Pass);
+  const handleOnFailClick = () => value === PassFail.Pass && onChange?.(PassFail.Fail);
 
   return (
     <span>
       <PassIcon
         onClick={handleOnPassClick}
         className={`inline-block h-8 w-8 cursor-pointer ${
-          value === PassFail.Pass
-            ? "text-green-700"
-            : "text-gray-400 hover:text-green-300"
+          value === PassFail.Pass ? 'text-green-700' : 'text-gray-400 hover:text-green-300'
         }`}
       />
       <FailIcon
         onClick={handleOnFailClick}
         className={`inline-block h-8 w-8 cursor-pointer ${
-          value === PassFail.Fail
-            ? "text-red-600"
-            : "text-gray-400 hover:text-red-300"
+          value === PassFail.Fail ? 'text-red-600' : 'text-gray-400 hover:text-red-300'
         }`}
       />
     </span>

@@ -1,20 +1,18 @@
-import React, { ComponentProps } from "react";
-import { Meta, Story } from "@storybook/react";
+import React, { ComponentProps } from 'react';
+import { Meta, Story } from '@storybook/react';
 
-import LabwareScanner, { useLabwareContext } from "./LabwareScanner";
-import LabwareScanPanel from "../labwareScanPanel/LabwareScanPanel";
-import columns from "../dataTable/labwareColumns";
-import LabwareScannerSlotsTable from "./LabwareScannerSlotsTable";
+import LabwareScanner, { useLabwareContext } from './LabwareScanner';
+import LabwareScanPanel from '../labwareScanPanel/LabwareScanPanel';
+import columns from '../dataTable/labwareColumns';
+import LabwareScannerSlotsTable from './LabwareScannerSlotsTable';
 
 const meta: Meta = {
-  title: "LabwareScanner",
-  component: LabwareScanner,
+  title: 'LabwareScanner',
+  component: LabwareScanner
 };
 export default meta;
 
-export const LabwareScannerList: Story<
-  ComponentProps<typeof LabwareScanner>
-> = (args) => {
+export const LabwareScannerList: Story<ComponentProps<typeof LabwareScanner>> = (args) => {
   return (
     <LabwareScanner {...args}>
       <List />
@@ -29,11 +27,8 @@ const List = () => {
     <ul>
       {labwares.map((lw) => (
         <li>
-          {lw.barcode}{" "}
-          <button
-            onClick={() => removeLabware(lw.barcode)}
-            className="text-red-500 font-bold underline"
-          >
+          {lw.barcode}{' '}
+          <button onClick={() => removeLabware(lw.barcode)} className="text-red-500 font-bold underline">
             Remove
           </button>
         </li>
@@ -42,25 +37,15 @@ const List = () => {
   );
 };
 
-export const LabwareScannerTable: Story<
-  ComponentProps<typeof LabwareScanner>
-> = (args) => {
+export const LabwareScannerTable: Story<ComponentProps<typeof LabwareScanner>> = (args) => {
   return (
     <LabwareScanner {...args}>
-      <LabwareScanPanel
-        columns={[
-          columns.barcode(),
-          columns.externalName(),
-          columns.labwareType(),
-        ]}
-      />
+      <LabwareScanPanel columns={[columns.barcode(), columns.externalName(), columns.labwareType()]} />
     </LabwareScanner>
   );
 };
 
-export const LabwareScannerSlotsTableStory: Story<
-  ComponentProps<typeof LabwareScanner>
-> = (args) => {
+export const LabwareScannerSlotsTableStory: Story<ComponentProps<typeof LabwareScanner>> = (args) => {
   return (
     <LabwareScanner {...args}>
       <LabwareScannerSlotsTable />

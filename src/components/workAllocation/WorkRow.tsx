@@ -1,21 +1,17 @@
-import React, { useCallback } from "react";
-import { TableCell } from "../Table";
-import {
-  CommentFieldsFragment,
-  WorkStatus,
-  WorkWithCommentFieldsFragment,
-} from "../../types/sdk";
-import { useMachine } from "@xstate/react";
-import createWorkRowMachine, { WorkRowEvent } from "./workRow.machine";
-import { optionValues } from "../forms";
-import WhiteButton from "../buttons/WhiteButton";
-import BlueButton from "../buttons/BlueButton";
-import { capitalize } from "lodash";
-import FormikSelect from "../forms/Select";
-import { Form, Formik } from "formik";
-import PinkButton from "../buttons/PinkButton";
-import { MAX_NUM_BLOCKANDSLIDES } from "./WorkAllocation";
-import FormikInput from "../forms/Input";
+import React, { useCallback } from 'react';
+import { TableCell } from '../Table';
+import { CommentFieldsFragment, WorkStatus, WorkWithCommentFieldsFragment } from '../../types/sdk';
+import { useMachine } from '@xstate/react';
+import createWorkRowMachine, { WorkRowEvent } from './workRow.machine';
+import { optionValues } from '../forms';
+import WhiteButton from '../buttons/WhiteButton';
+import BlueButton from '../buttons/BlueButton';
+import { capitalize } from 'lodash';
+import FormikSelect from '../forms/Select';
+import { Form, Formik } from 'formik';
+import PinkButton from '../buttons/PinkButton';
+import { MAX_NUM_BLOCKANDSLIDES } from './WorkAllocation';
+import FormikInput from '../forms/Input';
 
 /**
  * The type of values for the edit form
@@ -24,7 +20,7 @@ type FormValues = {
   /**
    * A union of the machine's event types
    */
-  type: WorkRowEvent["type"];
+  type: WorkRowEvent['type'];
 
   /**
    * ID of a comment about why Work status changed
@@ -44,38 +40,28 @@ type WorkRowProps = {
   availableComments: Array<CommentFieldsFragment>;
 
   rowIndex: number;
-  onWorkFieldUpdate: (
-    index: number,
-    work: WorkWithCommentFieldsFragment
-  ) => void;
+  onWorkFieldUpdate: (index: number, work: WorkWithCommentFieldsFragment) => void;
 };
 
 /**
  * Component for displaying information about Work in a table row, as well as the ability
  * to edit its status
  */
-export default function WorkRow({
-  initialWork,
-  availableComments,
-  rowIndex,
-  onWorkFieldUpdate,
-}: WorkRowProps) {
-  const [current, send] = useMachine(
-    createWorkRowMachine({ workWithComment: initialWork })
-  );
+export default function WorkRow({ initialWork, availableComments, rowIndex, onWorkFieldUpdate }: WorkRowProps) {
+  const [current, send] = useMachine(createWorkRowMachine({ workWithComment: initialWork }));
 
   const {
     editModeEnabled,
-    workWithComment: { work, comment },
+    workWithComment: { work, comment }
   } = current.context;
 
   /**Notify the changes in work fields*/
   React.useEffect(() => {
     if (
-      current.event.type === "done.invoke.updateWorkPriority" ||
-      current.event.type === "done.invoke.updateWorkNumSlides" ||
-      current.event.type === "done.invoke.updateWorkNumBlocks" ||
-      current.event.type === "done.invoke.updateWorkStatus"
+      current.event.type === 'done.invoke.updateWorkPriority' ||
+      current.event.type === 'done.invoke.updateWorkNumSlides' ||
+      current.event.type === 'done.invoke.updateWorkNumBlocks' ||
+      current.event.type === 'done.invoke.updateWorkStatus'
     ) {
       onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
     }
@@ -83,18 +69,13 @@ export default function WorkRow({
   /**
    * Should the edit button by displayed to the user right now
    */
-  const showEditButton =
-    !editModeEnabled && current.nextEvents.includes("EDIT");
+  const showEditButton = !editModeEnabled && current.nextEvents.includes('EDIT');
 
   /**
    * List of possible events that can change the current status (excluding edit)
    */
   const nextStatuses = current.nextEvents.filter(
-    (e) =>
-      e !== "EDIT" &&
-      e !== "UPDATE_NUM_SLIDES" &&
-      e !== "UPDATE_NUM_BLOCKS" &&
-      e !== "UPDATE_PRIORITY"
+    (e) => e !== 'EDIT' && e !== 'UPDATE_NUM_SLIDES' && e !== 'UPDATE_NUM_BLOCKS' && e !== 'UPDATE_PRIORITY'
   );
 
   /**
@@ -102,8 +83,8 @@ export default function WorkRow({
    * The comment will only be shown if the selected next status requires one
    */
   const initialValues: FormValues = {
-    type: nextStatuses[0] as WorkRowEvent["type"],
-    commentId: availableComments[0].id,
+    type: nextStatuses[0] as WorkRowEvent['type'],
+    commentId: availableComments[0].id
   };
 
   /**
@@ -112,9 +93,7 @@ export default function WorkRow({
    */
   const onFormSubmit = async (values: FormValues) => {
     send(values.type, {
-      commentId: requiresComment(values.type)
-        ? Number(values.commentId)
-        : undefined,
+      commentId: requiresComment(values.type) ? Number(values.commentId) : undefined
     });
   };
 
@@ -123,32 +102,27 @@ export default function WorkRow({
    */
   const handleWorkNumValueChange = useCallback(
     (workNumValue: string | number, workNumValueType: string) => {
-      let value = workNumValue === "" ? undefined : Number(workNumValue);
-      if (value && value > MAX_NUM_BLOCKANDSLIDES)
-        value = MAX_NUM_BLOCKANDSLIDES;
-      if (workNumValueType === "block") {
-        send({ type: "UPDATE_NUM_BLOCKS", numBlocks: value });
-      } else if (workNumValueType === "slide") {
-        send({ type: "UPDATE_NUM_SLIDES", numSlides: value });
-      } else if (workNumValueType === "originalSamples") {
+      let value = workNumValue === '' ? undefined : Number(workNumValue);
+      if (value && value > MAX_NUM_BLOCKANDSLIDES) value = MAX_NUM_BLOCKANDSLIDES;
+      if (workNumValueType === 'block') {
+        send({ type: 'UPDATE_NUM_BLOCKS', numBlocks: value });
+      } else if (workNumValueType === 'slide') {
+        send({ type: 'UPDATE_NUM_SLIDES', numSlides: value });
+      } else if (workNumValueType === 'originalSamples') {
         send({
-          type: "UPDATE_NUM_ORIGINAL_SAMPLES",
-          numOriginalSamples: value,
+          type: 'UPDATE_NUM_ORIGINAL_SAMPLES',
+          numOriginalSamples: value
         });
       }
     },
     [send]
   );
 
-  const renderWorkNumValueField = (
-    workNumber: string,
-    workNumValue: number | undefined,
-    workNumValueType: string
-  ) => {
+  const renderWorkNumValueField = (workNumber: string, workNumValue: number | undefined, workNumValueType: string) => {
     return (
       <input
-        data-testid={workNumber + "-" + workNumValueType}
-        className={"border-0 border-gray-100"}
+        data-testid={workNumber + '-' + workNumValueType}
+        className={'border-0 border-gray-100'}
         type="number"
         min="0"
         max={MAX_NUM_BLOCKANDSLIDES}
@@ -156,30 +130,26 @@ export default function WorkRow({
         onChange={(e) => {
           handleWorkNumValueChange(e.currentTarget.value, workNumValueType);
         }}
-        defaultValue={workNumValue ?? ""}
+        defaultValue={workNumValue ?? ''}
       />
     );
   };
 
   const validateWorkPriority = (priority: string) => {
-    let errorMessage = "";
+    let errorMessage = '';
     if (priority.length === 0) return errorMessage;
     if (priority.length > 3) {
-      errorMessage = "Invalid format";
+      errorMessage = 'Invalid format';
     }
     const priorityRegEx = /^[A-Z]\d+$/;
     if (!priorityRegEx.test(priority.toUpperCase())) {
-      errorMessage = "Invalid format";
+      errorMessage = 'Invalid format';
     }
     return errorMessage;
   };
 
   const isEditEnabledForStatus = (status: WorkStatus) => {
-    return (
-      status !== WorkStatus.Failed &&
-      status !== WorkStatus.Completed &&
-      status !== WorkStatus.Withdrawn
-    );
+    return status !== WorkStatus.Failed && status !== WorkStatus.Completed && status !== WorkStatus.Withdrawn;
   };
   return (
     <tr>
@@ -187,26 +157,23 @@ export default function WorkRow({
         {
           /**Once workrequest is failed or completed then priority need to be cleared**/
           isEditEnabledForStatus(work.status) ? (
-            <Formik
-              initialValues={{ priority: work.priority ?? "" }}
-              onSubmit={() => {}}
-            >
+            <Formik initialValues={{ priority: work.priority ?? '' }} onSubmit={() => {}}>
               {({ setFieldValue }) => {
                 return (
                   <Form>
                     <FormikInput
-                      style={{ width: "100%" }}
-                      label={""}
-                      name={"priority"}
+                      style={{ width: '100%' }}
+                      label={''}
+                      name={'priority'}
                       data-testid={`${work.workNumber}-priority`}
                       className={`border-0 border-gray-100`}
                       onChange={(e: React.FormEvent<HTMLInputElement>) => {
                         const priority = e.currentTarget.value.toUpperCase();
-                        setFieldValue("priority", priority);
+                        setFieldValue('priority', priority);
                         if (validateWorkPriority(priority).length === 0) {
                           send({
-                            type: "UPDATE_PRIORITY",
-                            priority: e.currentTarget.value.toUpperCase(),
+                            type: 'UPDATE_PRIORITY',
+                            priority: e.currentTarget.value.toUpperCase()
                           });
                         }
                       }}
@@ -228,27 +195,15 @@ export default function WorkRow({
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
         {isEditEnabledForStatus(work.status) &&
-          renderWorkNumValueField(
-            work.workNumber,
-            work.numBlocks ?? undefined,
-            "block"
-          )}
+          renderWorkNumValueField(work.workNumber, work.numBlocks ?? undefined, 'block')}
       </TableCell>
       <TableCell>
         {isEditEnabledForStatus(work.status) &&
-          renderWorkNumValueField(
-            work.workNumber,
-            work.numSlides ?? undefined,
-            "slide"
-          )}
+          renderWorkNumValueField(work.workNumber, work.numSlides ?? undefined, 'slide')}
       </TableCell>
       <TableCell>
         {isEditEnabledForStatus(work.status) &&
-          renderWorkNumValueField(
-            work.workNumber,
-            work.numOriginalSamples ?? undefined,
-            "originalSamples"
-          )}
+          renderWorkNumValueField(work.workNumber, work.numOriginalSamples ?? undefined, 'originalSamples')}
       </TableCell>
       {!editModeEnabled && (
         <TableCell>
@@ -258,26 +213,16 @@ export default function WorkRow({
       )}
       <TableCell colSpan={showEditButton ? 1 : 2}>
         {showEditButton && (
-          <PinkButton
-            action={"tertiary"}
-            onClick={() => send({ type: "EDIT" })}
-          >
+          <PinkButton action={'tertiary'} onClick={() => send({ type: 'EDIT' })}>
             Edit Status
           </PinkButton>
         )}
         {editModeEnabled && (
-          <Formik<FormValues>
-            initialValues={initialValues}
-            onSubmit={onFormSubmit}
-          >
+          <Formik<FormValues> initialValues={initialValues} onSubmit={onFormSubmit}>
             {({ values }) => (
               <Form>
                 <div className="space-y-4">
-                  <FormikSelect
-                    disabled={current.matches("updating")}
-                    name={"type"}
-                    label={"New Status"}
-                  >
+                  <FormikSelect disabled={current.matches('updating')} name={'type'} label={'New Status'}>
                     {nextStatuses.map((nextStatus) => (
                       <option key={nextStatus} value={nextStatus}>
                         {capitalize(nextStatus)}
@@ -285,26 +230,19 @@ export default function WorkRow({
                     ))}
                   </FormikSelect>
                   {requiresComment(values.type) && (
-                    <FormikSelect
-                      disabled={current.matches("updating")}
-                      name={"commentId"}
-                      label={"Comment"}
-                    >
-                      {optionValues(availableComments, "text", "id")}
+                    <FormikSelect disabled={current.matches('updating')} name={'commentId'} label={'Comment'}>
+                      {optionValues(availableComments, 'text', 'id')}
                     </FormikSelect>
                   )}
                   <div className="flex flex-row items-center justify-end space-x-2">
                     <WhiteButton
                       type="button"
-                      disabled={current.matches("updating")}
-                      onClick={() => send({ type: "EDIT" })}
+                      disabled={current.matches('updating')}
+                      onClick={() => send({ type: 'EDIT' })}
                     >
                       Cancel
                     </WhiteButton>
-                    <BlueButton
-                      type="submit"
-                      disabled={current.matches("updating")}
-                    >
+                    <BlueButton type="submit" disabled={current.matches('updating')}>
                       Save
                     </BlueButton>
                   </div>
@@ -322,6 +260,6 @@ export default function WorkRow({
  * Determines if the type of event requires a comment
  * @param type an {@link WorkRowEvent} type
  */
-function requiresComment(type: WorkRowEvent["type"]): boolean {
-  return ["PAUSE", "FAIL", "WITHDRAW"].includes(type);
+function requiresComment(type: WorkRowEvent['type']): boolean {
+  return ['PAUSE', 'FAIL', 'WITHDRAW'].includes(type);
 }

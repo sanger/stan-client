@@ -1,12 +1,12 @@
-import React, { useCallback, useContext, useEffect, useRef } from "react";
-import { LabwareFieldsFragment } from "../../types/sdk";
-import { useMachine } from "@xstate/react";
-import { createLabwareMachine } from "../../lib/machines/labware/labwareMachine";
-import ScanInput from "../scanInput/ScanInput";
-import Success from "../notifications/Success";
-import Warning from "../notifications/Warning";
-import { isFunction } from "lodash";
-import { usePrevious } from "../../lib/hooks";
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import { LabwareFieldsFragment } from '../../types/sdk';
+import { useMachine } from '@xstate/react';
+import { createLabwareMachine } from '../../lib/machines/labware/labwareMachine';
+import ScanInput from '../scanInput/ScanInput';
+import Success from '../notifications/Success';
+import Warning from '../notifications/Warning';
+import { isFunction } from 'lodash';
+import { usePrevious } from '../../lib/hooks';
 
 export type LabwareScannerProps = {
   /**
@@ -27,10 +27,7 @@ export type LabwareScannerProps = {
   /**
    * A function to check for problems with new labware because it is added
    */
-  labwareCheckFunction?: (
-    labwares: LabwareFieldsFragment[],
-    foundLabware: LabwareFieldsFragment
-  ) => string[];
+  labwareCheckFunction?: (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment) => string[];
 
   /**
    * Called when labware is added or removed
@@ -55,9 +52,7 @@ export type LabwareScannerProps = {
    * Children can either be a react node (if using the useLabware hook)
    * Or it can be a function that will have the context passed in
    */
-  children:
-    | React.ReactNode
-    | ((props: LabwareScannerContextType) => React.ReactNode);
+  children: React.ReactNode | ((props: LabwareScannerContextType) => React.ReactNode);
 
   enableLocationScanner?: boolean;
 };
@@ -71,24 +66,15 @@ export default function LabwareScanner({
   onAdd,
   onRemove,
   children,
-  enableLocationScanner,
+  enableLocationScanner
 }: LabwareScannerProps) {
   if (limit && initialLabwares.length > limit) {
     initialLabwares = initialLabwares.slice(0, limit);
   }
 
-  const [current, send, service] = useMachine(
-    createLabwareMachine(initialLabwares, labwareCheckFunction, limit)
-  );
+  const [current, send, service] = useMachine(createLabwareMachine(initialLabwares, labwareCheckFunction, limit));
 
-  const {
-    labwares,
-    removedLabware,
-    successMessage,
-    errorMessage,
-    currentBarcode,
-    locationScan,
-  } = current.context;
+  const { labwares, removedLabware, successMessage, errorMessage, currentBarcode, locationScan } = current.context;
 
   /**
    * After transition into the "idle" state, focus the scan input
@@ -96,7 +82,7 @@ export default function LabwareScanner({
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const subscription = service.subscribe((observer) => {
-      if (observer.matches("idle") && !observer.context.locationScan) {
+      if (observer.matches('idle') && !observer.context.locationScan) {
         inputRef.current?.focus();
       }
     });
@@ -104,13 +90,13 @@ export default function LabwareScanner({
   }, [service]);
 
   useEffect(() => {
-    send(locked ? { type: "LOCK" } : { type: "UNLOCK" });
+    send(locked ? { type: 'LOCK' } : { type: 'UNLOCK' });
   }, [send, locked]);
 
   // Call relevant handlers whenever labwares change
   const previousLabwareLength = usePrevious(labwares.length);
   useEffect(() => {
-    if (typeof previousLabwareLength === "undefined") return;
+    if (typeof previousLabwareLength === 'undefined') return;
     if (labwares.length !== previousLabwareLength) {
       onChange?.(labwares);
     }
@@ -120,69 +106,52 @@ export default function LabwareScanner({
     }
 
     if (labwares.length < previousLabwareLength) {
-      removedLabware &&
-        onRemove?.(removedLabware.labware, removedLabware.index);
+      removedLabware && onRemove?.(removedLabware.labware, removedLabware.index);
     }
-  }, [
-    labwares,
-    onChange,
-    onAdd,
-    removedLabware,
-    onRemove,
-    previousLabwareLength,
-  ]);
+  }, [labwares, onChange, onAdd, removedLabware, onRemove, previousLabwareLength]);
 
   const ctxValue: LabwareScannerContextType = {
-    locked: current.matches("locked"),
+    locked: current.matches('locked'),
     labwares: labwares,
     removeLabware: React.useCallback(
       (barcode) => {
-        send({ type: "REMOVE_LABWARE", value: barcode });
+        send({ type: 'REMOVE_LABWARE', value: barcode });
       },
       [send]
-    ),
+    )
   };
 
   const handleOnScanInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, locationScan = false) => {
       send({
-        type: "UPDATE_CURRENT_BARCODE",
+        type: 'UPDATE_CURRENT_BARCODE',
         value: e.currentTarget.value,
-        locationScan: locationScan,
+        locationScan: locationScan
       });
     },
     [send]
   );
 
-  const handleOnScan = useCallback(
-    () => send({ type: "SUBMIT_BARCODE" }),
-    [send]
-  );
+  const handleOnScan = useCallback(() => send({ type: 'SUBMIT_BARCODE' }), [send]);
 
   return (
     <div className="space-y-4">
-      {current.matches("idle.success") && successMessage && (
-        <Success className="my-2" message={successMessage} />
-      )}
+      {current.matches('idle.success') && successMessage && <Success className="my-2" message={successMessage} />}
 
-      {((current.matches("idle.error") && errorMessage) ||
-        (locationScan && errorMessage)) && (
+      {((current.matches('idle.error') && errorMessage) || (locationScan && errorMessage)) && (
         <Warning className="my-2" message={errorMessage} />
       )}
       <div className="flex flex-row">
         {enableLocationScanner && (
-          <div className={"sm:w-2/3 md:w-1/2 mr-4 space-y-2"}>
-            <label
-              htmlFor={"locationScanInput"}
-              className={"w-full ml-2 font-sans font-medium text-gray-700"}
-            >
+          <div className={'sm:w-2/3 md:w-1/2 mr-4 space-y-2'}>
+            <label htmlFor={'locationScanInput'} className={'w-full ml-2 font-sans font-medium text-gray-700'}>
               Location:
             </label>
             <ScanInput
               id="locationScanInput"
               type="text"
-              value={locationScan ? currentBarcode : ""}
-              disabled={!current.matches("idle")}
+              value={locationScan ? currentBarcode : ''}
+              disabled={!current.matches('idle')}
               onChange={(e) => handleOnScanInputChange(e, true)}
               onScan={handleOnScan}
             />
@@ -190,18 +159,15 @@ export default function LabwareScanner({
         )}
         <div className="sm:w-2/3 md:w-1/2 space-y-2">
           {enableLocationScanner && (
-            <label
-              htmlFor={"labwareScanInput"}
-              className={"w-full ml-2 font-sans font-medium text-gray-700"}
-            >
+            <label htmlFor={'labwareScanInput'} className={'w-full ml-2 font-sans font-medium text-gray-700'}>
               Labware:
             </label>
           )}
           <ScanInput
             id="labwareScanInput"
             type="text"
-            value={locationScan ? "" : currentBarcode}
-            disabled={!current.matches("idle")}
+            value={locationScan ? '' : currentBarcode}
+            disabled={!current.matches('idle')}
             onChange={handleOnScanInputChange}
             onScan={handleOnScan}
             ref={inputRef}
@@ -225,7 +191,7 @@ type LabwareScannerContextType = {
 const LabwareScannerContext = React.createContext<LabwareScannerContextType>({
   locked: false,
   labwares: [],
-  removeLabware: (_barcode) => {},
+  removeLabware: (_barcode) => {}
 });
 
 export function useLabwareContext() {

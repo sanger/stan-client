@@ -1,58 +1,52 @@
-import React, { useCallback, useEffect } from "react";
-import AppShell from "../components/AppShell";
-import BlueButton from "../components/buttons/BlueButton";
-import { LabwareTypeName } from "../types/stan";
-import Warning from "../components/notifications/Warning";
-import Success from "../components/notifications/Success";
-import { toast } from "react-toastify";
-import { useScrollToRef } from "../lib/hooks";
-import { useMachine } from "@xstate/react";
-import { SlotCopyContent } from "../types/sdk";
-import { Link } from "react-router-dom";
-import { reload } from "../lib/sdk";
-import WorkNumberSelect from "../components/WorkNumberSelect";
-import Heading from "../components/Heading";
-import reagentTransferMachine from "../lib/machines/reagentTransfer/reagentTransferMachine";
-import ScanInput from "../components/scanInput/ScanInput";
-import LabwareScanner from "../components/labwareScanner/LabwareScanner";
-import ReagentTransferSlotMapper from "../components/slotMapper/ReagentTransferSlotMapper";
-import labwareFactory from "../lib/factories/labwareFactory";
-import { labwareTypeInstances } from "../lib/factories/labwareTypeFactory";
-import MutedText from "../components/MutedText";
-import { buildLabwareFragment } from "../lib/helpers/labwareHelper";
+import React, { useCallback, useEffect } from 'react';
+import AppShell from '../components/AppShell';
+import BlueButton from '../components/buttons/BlueButton';
+import { LabwareTypeName } from '../types/stan';
+import Warning from '../components/notifications/Warning';
+import Success from '../components/notifications/Success';
+import { toast } from 'react-toastify';
+import { useScrollToRef } from '../lib/hooks';
+import { useMachine } from '@xstate/react';
+import { SlotCopyContent } from '../types/sdk';
+import { Link } from 'react-router-dom';
+import { reload } from '../lib/sdk';
+import WorkNumberSelect from '../components/WorkNumberSelect';
+import Heading from '../components/Heading';
+import reagentTransferMachine from '../lib/machines/reagentTransfer/reagentTransferMachine';
+import ScanInput from '../components/scanInput/ScanInput';
+import LabwareScanner from '../components/labwareScanner/LabwareScanner';
+import ReagentTransferSlotMapper from '../components/slotMapper/ReagentTransferSlotMapper';
+import labwareFactory from '../lib/factories/labwareFactory';
+import { labwareTypeInstances } from '../lib/factories/labwareTypeFactory';
+import MutedText from '../components/MutedText';
+import { buildLabwareFragment } from '../lib/helpers/labwareHelper';
 
-import { ErrorMessage } from "../components/forms";
+import { ErrorMessage } from '../components/forms';
 
 /**
  * Success notification when slots have been copied
  */
-const ToastSuccess = () => <Success message={"Reagents transferred"} />;
+const ToastSuccess = () => <Success message={'Reagents transferred'} />;
 
 function DualIndexPlate() {
   const [current, send] = useMachine(() =>
     reagentTransferMachine.withContext({
-      operationType: "Dual index plate",
+      operationType: 'Dual index plate',
       sourceReagentPlate: undefined,
       destLabware: undefined,
-      workNumber: "",
+      workNumber: '',
       reagentTransfers: [],
-      reagentTransferResult: undefined,
+      reagentTransferResult: undefined
     })
   );
 
-  const {
-    serverErrors,
-    sourceReagentPlate,
-    destLabware,
-    reagentTransfers,
-    workNumber,
-    validationError,
-  } = current.context;
+  const { serverErrors, sourceReagentPlate, destLabware, reagentTransfers, workNumber, validationError } =
+    current.context;
 
   const handleWorkNumberChange = useCallback(
     (workNumber: string) => {
       if (workNumber) {
-        send({ type: "UPDATE_WORK_NUMBER", workNumber });
+        send({ type: 'UPDATE_WORK_NUMBER', workNumber });
       }
     },
     [send]
@@ -61,11 +55,11 @@ function DualIndexPlate() {
    * When we get into the "copied" state, show a success message
    */
   useEffect(() => {
-    if (current.value === "transferred") {
+    if (current.value === 'transferred') {
       toast(ToastSuccess, {
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 4000,
-        hideProgressBar: true,
+        hideProgressBar: true
       });
     }
   }, [current.value]);
@@ -75,10 +69,8 @@ function DualIndexPlate() {
       return undefined;
     }
     const plate = labwareFactory.build({
-      labwareType: labwareTypeInstances.find(
-        (lt) => lt.name === LabwareTypeName.DUAL_INDEX_PLATE
-      ),
-      barcode: sourceReagentPlate.barcode,
+      labwareType: labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.DUAL_INDEX_PLATE),
+      barcode: sourceReagentPlate.barcode
     });
     plate.barcode = sourceReagentPlate.barcode;
     if (sourceReagentPlate.slots) {
@@ -97,10 +89,10 @@ function DualIndexPlate() {
         return {
           reagentPlateBarcode: memoInputLabware!.barcode,
           reagentSlotAddress: scc.sourceAddress,
-          destinationAddress: scc.destinationAddress,
+          destinationAddress: scc.destinationAddress
         };
       });
-      send({ type: "UPDATE_TRANSFER_CONTENT", reagentTransfers });
+      send({ type: 'UPDATE_TRANSFER_CONTENT', reagentTransfers });
     },
     [send, memoInputLabware]
   );
@@ -130,9 +122,7 @@ function DualIndexPlate() {
 
           <div className="mb-8">
             <Heading level={3}>SGP Number</Heading>
-            <p className="mt-2">
-              Please select an SGP number to associate with this operation.
-            </p>
+            <p className="mt-2">Please select an SGP number to associate with this operation.</p>
             <div className="my-4 md:w-1/2">
               <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
             </div>
@@ -143,18 +133,16 @@ function DualIndexPlate() {
               <div className="w-1/2" id="sourceScanInput">
                 <ScanInput
                   onScan={(value) => {
-                    send({ type: "SET_SOURCE_LABWARE", barcode: value });
+                    send({ type: 'SET_SOURCE_LABWARE', barcode: value });
                   }}
                   disabled={sourceReagentPlate !== undefined}
                 />
                 {validationError && (
-                  <div className={"mt-2"}>
+                  <div className={'mt-2'}>
                     <ErrorMessage>{validationError}</ErrorMessage>
                   </div>
                 )}
-                <MutedText>
-                  Add source labware using the scan input above
-                </MutedText>
+                <MutedText>Add source labware using the scan input above</MutedText>
               </div>
             </div>
             <div className="space-y-4">
@@ -163,17 +151,15 @@ function DualIndexPlate() {
                 <LabwareScanner
                   onChange={(labwares) =>
                     send({
-                      type: "SET_DESTINATION_LABWARE",
-                      labware: labwares[0],
+                      type: 'SET_DESTINATION_LABWARE',
+                      labware: labwares[0]
                     })
                   }
                   locked={destLabware !== undefined}
                 >
                   {}
                 </LabwareScanner>
-                <MutedText>
-                  Add destination labware using the scan input above
-                </MutedText>
+                <MutedText>Add destination labware using the scan input above</MutedText>
               </div>
             </div>
           </div>
@@ -182,17 +168,17 @@ function DualIndexPlate() {
             initialDestLabware={destLabware}
             initialSourceLabware={memoInputLabware}
             onChange={handleOnSlotMapperChange}
-            disabled={current.matches("transferred")}
+            disabled={current.matches('transferred')}
           />
         </div>
       </AppShell.Main>
 
       <div className="border border-t-2 border-gray-200 w-full py-4 px-4 sm:px-6 lg:px-8 bg-gray-100 flex-shrink-0">
         <div className="flex flex-row items-center justify-end space-x-2">
-          {!current.matches("transferred") ? (
+          {!current.matches('transferred') ? (
             <BlueButton
-              disabled={reagentTransfers.length <= 0 || workNumber === ""}
-              onClick={() => send({ type: "SAVE" })}
+              disabled={reagentTransfers.length <= 0 || workNumber === ''}
+              onClick={() => send({ type: 'SAVE' })}
             >
               Save
             </BlueButton>
@@ -201,7 +187,7 @@ function DualIndexPlate() {
               <BlueButton onClick={reload} action="tertiary">
                 Reset Form
               </BlueButton>
-              <Link to={"/"}>
+              <Link to={'/'}>
                 <BlueButton action="primary">Return Home</BlueButton>
               </Link>
             </>

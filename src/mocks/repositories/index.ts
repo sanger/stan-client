@@ -1,4 +1,4 @@
-import { Maybe } from "../../types/sdk";
+import { Maybe } from '../../types/sdk';
 
 type Repository<T> = {
   save: (entity: T) => T;
@@ -6,11 +6,7 @@ type Repository<T> = {
   find: (key: keyof T, value: string | number) => Maybe<T>;
 };
 
-export function createSessionStorageRepository<T>(
-  storageKey: string,
-  primaryKey: keyof T,
-  seeds: T[]
-): Repository<T> {
+export function createSessionStorageRepository<T>(storageKey: string, primaryKey: keyof T, seeds: T[]): Repository<T> {
   sessionStorage.setItem(storageKey, JSON.stringify(seeds));
 
   function all() {
@@ -31,9 +27,7 @@ export function createSessionStorageRepository<T>(
   }
 
   function save(entity: T) {
-    const newEntities = all().filter(
-      (e) => e[primaryKey] !== entity[primaryKey]
-    );
+    const newEntities = all().filter((e) => e[primaryKey] !== entity[primaryKey]);
     newEntities.push(entity);
     sessionStorage.setItem(storageKey, JSON.stringify(newEntities));
     return entity;
@@ -42,6 +36,6 @@ export function createSessionStorageRepository<T>(
   return {
     find,
     findAll,
-    save,
+    save
   };
 }
