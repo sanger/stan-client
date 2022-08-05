@@ -86,27 +86,10 @@ function buildInitialLayoutPlan(
   };
 }
 
-const PotProcessingLabwarePlan = React.forwardRef<
-  HTMLDivElement,
-  PotProcessingLabwarePlanProps
->(
-  (
-    {
-      cid,
-      outputLabware,
-      potProcessInfo,
-      sourceLabware,
-      sampleColors,
-      onDelete,
-      rowIndex,
-      fixative,
-    },
-    ref
-  ) => {
+const PotProcessingLabwarePlan = React.forwardRef<HTMLDivElement, PotProcessingLabwarePlanProps>(
+  ({ cid, outputLabware, potProcessInfo, sourceLabware, sampleColors, onDelete, rowIndex, fixative }, ref) => {
     const labwarePlanMachine = React.useMemo(() => {
-      return createLabwarePlanMachine(
-        buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware)
-      );
+      return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware));
     }, [sourceLabware, sampleColors, outputLabware]);
     const [current] = useMachine(labwarePlanMachine);
     const { requestError, layoutPlan } = current.context;

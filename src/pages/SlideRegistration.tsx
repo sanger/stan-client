@@ -164,16 +164,13 @@ export const SlideRegistration: React.FC<PageParams> = ({ registrationInfo }) =>
   const stanCore = useContext(StanCoreContext);
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      SectionRegisterRequest,
-      RegisterSectionsMutation
-    >().withConfig({
+    return createFormMachine<SectionRegisterRequest, RegisterSectionsMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RegisterSections({ request: e.values });
-        },
-      },
+        }
+      }
     });
   }, [stanCore]);
   const [current, send] = useMachine(() => formMachine);

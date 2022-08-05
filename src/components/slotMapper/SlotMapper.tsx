@@ -33,7 +33,7 @@ function SlotMapper({
       slotCopyContent: [],
       colorByBarcode: new Map(),
       failedSlots: new Map(),
-      errors: new Map(),
+      errors: new Map()
     });
   }, [initialInputLabware, initialOutputLabware]);
   const [current, send] = useMachine(() => memoSlotMapperMachine);

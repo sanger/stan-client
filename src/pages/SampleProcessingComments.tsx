@@ -40,10 +40,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
   sampleCommentsInfo
 }: SampleProcessingCommentsParams) => {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      SampleProcessingCommentRequest,
-      RecordSampleProcessingCommentsMutation
-    >().withConfig({
+    return createFormMachine<SampleProcessingCommentRequest, RecordSampleProcessingCommentsMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
@@ -52,8 +49,8 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
               labware: e.values.labware
             }
           });
-        },
-      },
+        }
+      }
     });
   }, []);
   const [current, send] = useMachine(formMachine);

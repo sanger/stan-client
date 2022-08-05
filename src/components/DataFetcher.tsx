@@ -17,15 +17,12 @@ export interface DataFetcherProps<E> {
  * @param children render function that accepts the fetched data
  * @constructor
  */
-const DataFetcher = <E extends unknown>({
-  dataFetcher,
-  children,
-}: DataFetcherProps<E>) => {
+const DataFetcher = <E extends unknown>({ dataFetcher, children }: DataFetcherProps<E>) => {
   const dataFetcherMachine = React.useMemo(() => {
     return createDataFetcherMachine({
       context: {
-        dataFetcher,
-      },
+        dataFetcher
+      }
     });
   }, [dataFetcher]);
   const [state, send] = useMachine(dataFetcherMachine);

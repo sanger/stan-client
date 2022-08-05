@@ -33,8 +33,8 @@ export default function DataLoader<E>({
   const dataFetcherMachine = React.useMemo(() => {
     return createDataFetcherMachine({
       context: {
-        dataFetcher: loader,
-      },
+        dataFetcher: loader
+      }
     });
   }, [loader]);
   const [state, send] = useMachine(dataFetcherMachine);

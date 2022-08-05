@@ -23,16 +23,13 @@ export default function AddExternalID() {
   type AddExternalIDFormData = Required<AddExternalIdRequest>;
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      AddExternalIdRequest,
-      AddExternalIdMutation
-    >().withConfig({
+    return createFormMachine<AddExternalIdRequest, AddExternalIdMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.AddExternalID({ request: e.values });
-        },
-      },
+        }
+      }
     });
   }, []);
   const [current, send] = useMachine(formMachine);

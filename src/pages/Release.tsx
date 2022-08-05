@@ -88,16 +88,13 @@ function Release({ releaseInfo }: PageParams) {
   const stanCore = useContext(StanCoreContext);
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      ReleaseRequest,
-      ReleaseLabwareMutation
-    >().withConfig({
+    return createFormMachine<ReleaseRequest, ReleaseLabwareMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.ReleaseLabware({ releaseRequest: e.values });
-        },
-      },
+        }
+      }
     });
   }, [stanCore]);
   const [current, send] = useMachine(() => formMachine);

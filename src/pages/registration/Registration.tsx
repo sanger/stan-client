@@ -89,10 +89,7 @@ function Registration<M, T extends TissueValues<B>, B>({
   keywordsMap
 }: RegistrationParams<M, T>) {
   const registrationMachine = React.useMemo(() => {
-    return createRegistrationMachine<FormInput<T>, M>(
-      buildRegistrationInput,
-      registrationService
-    );
+    return createRegistrationMachine<FormInput<T>, M>(buildRegistrationInput, registrationService);
   }, [buildRegistrationInput, registrationService]);
   const [current, send, service] = useMachine(registrationMachine);
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);

@@ -58,20 +58,15 @@ type StainFormProps = {
   onLabwareChange: (labware: LabwareFieldsFragment[]) => void;
 };
 
-export default function StainForm({
-  stainType,
-  stainingInfo,
-  initialLabware,
-  onLabwareChange,
-}: StainFormProps) {
+export default function StainForm({ stainType, stainingInfo, initialLabware, onLabwareChange }: StainFormProps) {
   const formMachine = React.useMemo(() => {
     return createFormMachine<StainRequest, StainMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.Stain({ request: e.values });
-        },
-      },
+        }
+      }
     });
   }, []);
   const [current, send] = useMachine(formMachine);

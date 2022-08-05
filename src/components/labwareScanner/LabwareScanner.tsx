@@ -66,7 +66,7 @@ export default function LabwareScanner({
   onAdd,
   onRemove,
   children,
-  enableLocationScanner,
+  enableLocationScanner
 }: LabwareScannerProps) {
   const slicedInitialLabware = React.useMemo(() => {
     if (!initialLabwares) return [];
@@ -76,11 +76,7 @@ export default function LabwareScanner({
   }, [initialLabwares, limit]);
 
   const labwareMachine = React.useMemo(() => {
-    return createLabwareMachine(
-      slicedInitialLabware,
-      labwareCheckFunction,
-      limit
-    );
+    return createLabwareMachine(slicedInitialLabware, labwareCheckFunction, limit);
   }, [limit, labwareCheckFunction, slicedInitialLabware]);
 
   const [current, send, service] = useMachine(labwareMachine);

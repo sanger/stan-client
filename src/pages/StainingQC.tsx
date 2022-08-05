@@ -37,10 +37,7 @@ export default function StainingQC({ info }: StainingQCProps) {
   const stanCore = useContext(StanCoreContext);
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      ResultRequest,
-      RecordStainResultMutation
-    >().withConfig({
+    return createFormMachine<ResultRequest, RecordStainResultMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
@@ -64,8 +61,8 @@ export default function StainingQC({ info }: StainingQCProps) {
               operationType: e.values.operationType
             }
           });
-        },
-      },
+        }
+      }
     });
   }, [stanCore]);
   const [current, send] = useMachine(formMachine);

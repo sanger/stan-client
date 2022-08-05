@@ -52,17 +52,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   mode
 }) => {
   const confirmLabwareMachine = React.useMemo(() => {
-    return createConfirmLabwareMachine(
-      comments,
-      originalLayoutPlan.destinationLabware,
-      originalLayoutPlan
-    );
+    return createConfirmLabwareMachine(comments, originalLayoutPlan.destinationLabware, originalLayoutPlan);
   }, [comments, originalLayoutPlan]);
   const [current, send, service] = useMachine(confirmLabwareMachine);
-  const confirmOperationLabware = useSelector(
-    service,
-    selectConfirmOperationLabware
-  );
+  const confirmOperationLabware = useSelector(service, selectConfirmOperationLabware);
 
   const { addressToCommentMap, labware, layoutPlan } = current.context;
   const { layoutMachine } = current.children;

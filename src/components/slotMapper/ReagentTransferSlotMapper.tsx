@@ -50,7 +50,7 @@ function ReagentTransferSlotMapper({
       slotCopyContent: [],
       colorByBarcode: new Map(),
       failedSlots: new Map(),
-      errors: new Map(),
+      errors: new Map()
     });
   }, [initialSourceLabware, initialDestLabware]);
   const [current, send] = useMachine(() => memoSlotMapperMachine);

@@ -59,11 +59,7 @@ interface LocationProps extends RouteComponentProps<LocationMatchParams> {
   locationSearchParams: Maybe<LocationSearchParams>;
 }
 
-const Location: React.FC<LocationProps> = ({
-  storageLocation,
-  locationSearchParams,
-  match,
-}) => {
+const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchParams, match }) => {
   const locationMachine = React.useMemo(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> =
@@ -99,15 +95,8 @@ const Location: React.FC<LocationProps> = ({
   //Custom hook to retain the updated labware state
   const [current, send] = useMachine(locationMachine);
 
-  const {
-    location,
-    locationAddresses,
-    successMessage,
-    errorMessage,
-    serverError,
-    addressToItemMap,
-    selectedAddress,
-  } = current.context;
+  const { location, locationAddresses, successMessage, errorMessage, serverError, addressToItemMap, selectedAddress } =
+    current.context;
 
   const locationHasGrid = !!location.size;
 

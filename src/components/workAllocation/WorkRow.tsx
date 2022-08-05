@@ -47,12 +47,7 @@ type WorkRowProps = {
  * Component for displaying information about Work in a table row, as well as the ability
  * to edit its status
  */
-export default function WorkRow({
-  initialWork,
-  availableComments,
-  rowIndex,
-  onWorkFieldUpdate,
-}: WorkRowProps) {
+export default function WorkRow({ initialWork, availableComments, rowIndex, onWorkFieldUpdate }: WorkRowProps) {
   const workRowMachine = React.useMemo(() => {
     return createWorkRowMachine({ workWithComment: initialWork });
   }, [initialWork]);

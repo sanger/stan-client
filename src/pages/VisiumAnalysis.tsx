@@ -25,16 +25,13 @@ const validationSchema = Yup.object().shape({
 
 export default function VisiumAnalysis() {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      VisiumAnalysisRequest,
-      VisiumAnalysisMutation
-    >().withConfig({
+    return createFormMachine<VisiumAnalysisRequest, VisiumAnalysisMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.VisiumAnalysis({ request: e.values });
-        },
-      },
+        }
+      }
     });
   }, []);
   const [current, send] = useMachine(formMachine);

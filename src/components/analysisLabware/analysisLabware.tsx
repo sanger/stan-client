@@ -37,7 +37,7 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
   const memoAnalysisLabwareMachine = React.useMemo(() => {
     return analysisLabwareMachine.withContext({
       analysisLabwares: defaultLabwareValues,
-      operationType: OperationType.RIN,
+      operationType: OperationType.RIN
     });
   }, [defaultLabwareValues]);
 

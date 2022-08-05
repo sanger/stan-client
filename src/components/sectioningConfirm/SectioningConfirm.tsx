@@ -42,11 +42,7 @@ export enum SectionNumberMode {
  * Component for managing the confirmation of a list of Sectioning Plans.
  * Responsible for calling core with the {@code confirmSection} request.
  */
-export default function SectioningConfirm({
-  comments,
-  initialPlans,
-  onConfirmed,
-}: SectioningConfirmProps) {
+export default function SectioningConfirm({ comments, initialPlans, onConfirmed }: SectioningConfirmProps) {
   const sectioningMachine = React.useMemo(() => {
     return createSectioningConfirmMachine();
   }, []);

@@ -63,8 +63,8 @@ export default function StanForm<V, R>({
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return onSubmit(e.values);
-        },
-      },
+        }
+      }
     });
   }, [onSubmit]);
   const [current, send] = useMachine(() => formMachine);

@@ -28,14 +28,11 @@ type ExtractResultPanelProps = {
   locked: boolean;
 };
 
-const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
-  onChangeExtractResults,
-  locked,
-}) => {
+const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({ onChangeExtractResults, locked }) => {
   const machine = React.useMemo(() => {
     return extractResultMachine.withContext({
       extractResults: [],
-      currentBarcode: "",
+      currentBarcode: ''
     });
   }, []);
   const [current, send] = useMachine(() => machine);

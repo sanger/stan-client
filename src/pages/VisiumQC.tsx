@@ -70,18 +70,15 @@ const validationSchema = Yup.object().shape({
 export default function VisiumQC({ info }: VisiumQCProps) {
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      ResultRequest,
-      RecordVisiumQcMutation
-    >().withConfig({
+    return createFormMachine<ResultRequest, RecordVisiumQcMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordVisiumQC({
             request: e.values
           });
-        },
-      },
+        }
+      }
     });
   }, [stanCore]);
   const [currentSlideProcessing, sendSlideProcessing] = useMachine(formMachine);

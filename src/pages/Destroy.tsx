@@ -44,10 +44,10 @@ const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
     return createFormMachine<DestroyRequest, DestroyMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          if (e.type !== "SUBMIT_FORM") return Promise.reject();
+          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.Destroy({ request: e.values });
-        },
-      },
+        }
+      }
     });
   }, [stanCore]);
   const [current, send] = useMachine(() => formMachine);

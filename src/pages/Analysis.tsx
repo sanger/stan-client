@@ -37,18 +37,15 @@ function Analysis({ comments }: AnalysisProps) {
   const [analysisMode, setAnalysisMode] = React.useState(false);
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      RnaAnalysisRequest,
-      RecordRnaAnalysisMutation
-    >().withConfig({
+    return createFormMachine<RnaAnalysisRequest, RecordRnaAnalysisMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          if (e.type !== "SUBMIT_FORM") return Promise.reject();
+          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordRNAAnalysis({
-            request: e.values,
+            request: e.values
           });
-        },
-      },
+        }
+      }
     });
   }, []);
   const [current, send] = useMachine(formMachine);

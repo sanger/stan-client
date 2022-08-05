@@ -55,22 +55,9 @@ type LabwarePlanProps = {
 };
 
 const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
-  (
-    {
-      cid,
-      outputLabware,
-      onDeleteButtonClick,
-      onComplete,
-      sampleColors,
-      operationType,
-      sourceLabware,
-    },
-    ref
-  ) => {
+  ({ cid, outputLabware, onDeleteButtonClick, onComplete, sampleColors, operationType, sourceLabware }, ref) => {
     const labwarePlanMachine = React.useMemo(() => {
-      return createLabwarePlanMachine(
-        buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware)
-      );
+      return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware));
     }, [sourceLabware, sampleColors, outputLabware]);
     const [current, send, service] = useMachine(labwarePlanMachine);
 

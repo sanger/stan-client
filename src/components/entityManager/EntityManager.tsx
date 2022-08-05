@@ -68,14 +68,10 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
   valueColumnName,
   valueFieldComponentInfo,
   onCreate,
-  onChangeValue,
+  onChangeValue
 }: EntityManagerProps<E>) {
   const entityManagerMachine = React.useMemo(() => {
-    return createEntityManagerMachine<E>(
-      initialEntities,
-      displayKeyColumnName,
-      valueColumnName
-    ).withConfig({
+    return createEntityManagerMachine<E>(initialEntities, displayKeyColumnName, valueColumnName).withConfig({
       services: {
         createEntity: (ctx, e) => {
           if (e.type !== 'CREATE_NEW_ENTITY') return Promise.reject();
@@ -84,16 +80,10 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
         valueChanged: (context, e) => {
           if (e.type !== 'VALUE_CHANGE') return Promise.reject();
           return onChangeValue(e.entity, e.value);
-        },
-      },
+        }
+      }
     });
-  }, [
-    initialEntities,
-    displayKeyColumnName,
-    valueColumnName,
-    onChangeValue,
-    onCreate,
-  ]);
+  }, [initialEntities, displayKeyColumnName, valueColumnName, onChangeValue, onCreate]);
 
   const [current, send] = useMachine(entityManagerMachine);
 

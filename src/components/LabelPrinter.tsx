@@ -34,8 +34,8 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
     return createLabelPrinterMachine({
       context: {
         selectedPrinter: null,
-        labwares,
-      },
+        labwares
+      }
     });
   }, [labwares]);
   const [current, send, service] = useMachine(labelPrinterMachine);

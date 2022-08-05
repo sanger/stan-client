@@ -48,12 +48,12 @@ export default function LabwareResult({
   initialLabwareResult,
   availableComments,
   onRemoveClick,
-  onChange,
+  onChange
 }: LabwareResultComponentProps) {
   const labwareResultMachine = React.useMemo(() => {
     return createLabwareResultMachine({
       labwareResult: initialLabwareResult,
-      availableComments,
+      availableComments
     });
   }, [initialLabwareResult, availableComments]);
   const [current, send] = useMachine(labwareResultMachine);

@@ -147,7 +147,7 @@ const Labware = ({
     return createLabwareMachine({
       selectionMode,
       selectable,
-      slots: labware.slots,
+      slots: labware.slots
     });
   }, [selectionMode, selectable, labware]);
   const [current, send] = useMachine(labwareMachine);

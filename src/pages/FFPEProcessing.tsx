@@ -24,22 +24,17 @@ interface FFPEProcessingParams {
   ffPeInfo: GetFfpeProcessingInfoQuery;
 }
 
-const FFPEProcessing: React.FC<FFPEProcessingParams> = ({
-  ffPeInfo,
-}: FFPEProcessingParams) => {
+const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProcessingParams) => {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      FfpeProcessingRequest,
-      PerformFfpeProcessingMutation
-    >().withConfig({
+    return createFormMachine<FfpeProcessingRequest, PerformFfpeProcessingMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.PerformFFPEProcessing({
-            request: e.values,
+            request: e.values
           });
-        },
-      },
+        }
+      }
     });
   }, []);
 

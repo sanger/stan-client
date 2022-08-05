@@ -78,14 +78,12 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   const findRequest: FindRequest = merge({}, emptyFindRequest, cleanParams(params, emptyFindRequestKeys));
 
   const config = useContext(configContext)!;
-  const search = searchMachine<FindRequest, SearchResultTableEntry>(
-    new SearchService()
-  );
+  const search = searchMachine<FindRequest, SearchResultTableEntry>(new SearchService());
 
   const memoSearchMachine = React.useMemo(() => {
     return search.withContext({
       findRequest,
-      maxRecords: config.maxSearchRecords,
+      maxRecords: config.maxSearchRecords
     });
   }, [findRequest, search, config]);
   const [current, send] = useMachine(() => memoSearchMachine);

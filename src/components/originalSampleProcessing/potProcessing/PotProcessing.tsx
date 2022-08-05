@@ -52,18 +52,15 @@ type PotProcessingParams = {
 
 export default function PotProcessing({ processingInfo }: PotProcessingParams) {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      PotProcessingRequest,
-      PerformTissuePotMutation
-    >().withConfig({
+    return createFormMachine<PotProcessingRequest, PerformTissuePotMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          if (e.type !== "SUBMIT_FORM") return Promise.reject();
+          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.PerformTissuePot({
-            request: e.values,
+            request: e.values
           });
-        },
-      },
+        }
+      }
     });
   }, []);
   const [current, send] = useMachine(formMachine);

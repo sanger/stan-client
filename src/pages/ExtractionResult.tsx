@@ -38,16 +38,13 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
   };
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<
-      ExtractResultRequest,
-      RecordExtractResultMutation
-    >().withConfig({
+    return createFormMachine<ExtractResultRequest, RecordExtractResultMutation>().withConfig({
       services: {
         submitForm: (context, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordExtractResult({ request: e.values });
-        },
-      },
+        }
+      }
     });
   }, []);
 

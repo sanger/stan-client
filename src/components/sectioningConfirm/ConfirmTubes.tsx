@@ -103,11 +103,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
   mode
 }) => {
   const confirmLabwareMachine = React.useMemo(() => {
-    return createConfirmLabwareMachine(
-      comments,
-      initialLayoutPlan.destinationLabware,
-      initialLayoutPlan
-    );
+    return createConfirmLabwareMachine(comments, initialLayoutPlan.destinationLabware, initialLayoutPlan);
   }, [comments, initialLayoutPlan]);
   const [current, send, service] = useMachine(confirmLabwareMachine);
   const { cancelled, layoutPlan, labware } = current.context;
