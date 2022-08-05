@@ -1,6 +1,4 @@
-mutation RecordSampleProcessingComments(
-  $request: SampleProcessingCommentRequest!
-) {
+mutation RecordSampleProcessingComments($request: SampleProcessingCommentRequest!) {
   recordSampleProcessingComments(request: $request) {
     labware {
       ...LabwareFields

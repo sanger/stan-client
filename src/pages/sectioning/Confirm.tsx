@@ -1,22 +1,18 @@
-import React from "react";
-import AppShell from "../../components/AppShell";
-import { reload } from "../../lib/sdk";
-import {
-  FindPlanDataQuery,
-  GetSectioningConfirmInfoQuery,
-  LabwareFieldsFragment,
-} from "../../types/sdk";
-import SectioningConfirm from "../../components/sectioningConfirm/SectioningConfirm";
-import { Link, Prompt, useLocation } from "react-router-dom";
-import { useConfirmLeave } from "../../lib/hooks";
-import { history } from "../../lib/sdk";
-import Heading from "../../components/Heading";
-import BlueButton from "../../components/buttons/BlueButton";
-import { motion } from "framer-motion";
-import { ModalBody } from "../../components/Modal";
-import Success from "../../components/notifications/Success";
-import variants from "../../lib/motionVariants";
-import { ConfirmPrintLabware } from "../../components/sectioningConfirm/ConfirmPrintLabware";
+import React from 'react';
+import AppShell from '../../components/AppShell';
+import { reload } from '../../lib/sdk';
+import { FindPlanDataQuery, GetSectioningConfirmInfoQuery, LabwareFieldsFragment } from '../../types/sdk';
+import SectioningConfirm from '../../components/sectioningConfirm/SectioningConfirm';
+import { Link, Prompt, useLocation } from 'react-router-dom';
+import { useConfirmLeave } from '../../lib/hooks';
+import { history } from '../../lib/sdk';
+import Heading from '../../components/Heading';
+import BlueButton from '../../components/buttons/BlueButton';
+import { motion } from 'framer-motion';
+import { ModalBody } from '../../components/Modal';
+import Success from '../../components/notifications/Success';
+import variants from '../../lib/motionVariants';
+import { ConfirmPrintLabware } from '../../components/sectioningConfirm/ConfirmPrintLabware';
 
 type SectioningConfirmProps = {
   readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
@@ -27,28 +23,19 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
   const state = location.state as { plans?: Array<FindPlanDataQuery> };
   const plans: Array<FindPlanDataQuery> = state?.plans ?? [];
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
-  const [confirmedLabwares, setConfirmedLabwares] = React.useState<
-    LabwareFieldsFragment[]
-  >([]);
+  const [confirmedLabwares, setConfirmedLabwares] = React.useState<LabwareFieldsFragment[]>([]);
 
   const labwaresGroupedByType = React.useMemo(() => {
-    const confirmedLabwareTypes = confirmedLabwares.reduce(
-      (prev: string[], labware) => {
-        if (!prev.includes(labware.labwareType.name)) {
-          prev.push(labware.labwareType.name);
-        }
-        return prev;
-      },
-      []
-    );
+    const confirmedLabwareTypes = confirmedLabwares.reduce((prev: string[], labware) => {
+      if (!prev.includes(labware.labwareType.name)) {
+        prev.push(labware.labwareType.name);
+      }
+      return prev;
+    }, []);
 
     const labwareGroups: LabwareFieldsFragment[][] = [];
     confirmedLabwareTypes.forEach((labwareType) => {
-      labwareGroups.push(
-        confirmedLabwares.filter(
-          (labware) => labware.labwareType.name === labwareType
-        )
-      );
+      labwareGroups.push(confirmedLabwares.filter((labware) => labware.labwareType.name === labwareType));
     });
     return labwareGroups;
   }, [confirmedLabwares]);
@@ -74,16 +61,10 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
             />
           ) : (
             <>
-              <motion.div
-                variants={variants.fadeInWithLift}
-                data-testid="print-div"
-                className="w-full py-4 px-8 mb-6"
-              >
+              <motion.div variants={variants.fadeInWithLift} data-testid="print-div" className="w-full py-4 px-8 mb-6">
                 <div className="space-y-6">
-                  <Heading level={2}>{"Operation Complete"}</Heading>
-                  <ModalBody>
-                    {<Success message={"Sections Confirmed"} />}
-                  </ModalBody>
+                  <Heading level={2}>{'Operation Complete'}</Heading>
+                  <ModalBody>{<Success message={'Sections Confirmed'} />}</ModalBody>
                   {labwaresGroupedByType.map((labwaresByType) => (
                     <ConfirmPrintLabware
                       key={labwaresByType[0].labwareType.name}
@@ -98,34 +79,26 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
                       If you wish to store all sectioned slides click
                       <span className="font-bold text-gray-900"> Store </span>
                       button.
-                    </p>{" "}
+                    </p>{' '}
                     <p className="my-3 text-gray-800 text-center text-sm  leading-normal">
-                      Otherwise click{" "}
-                      <span className="font-bold text-gray-900">
-                        Reset Form
-                      </span>{" "}
-                      to start the process again or return to the{" "}
-                      <span className="font-bold text-gray-900">Home</span>{" "}
-                      screen.
+                      Otherwise click <span className="font-bold text-gray-900">Reset Form</span> to start the process
+                      again or return to the <span className="font-bold text-gray-900">Home</span> screen.
                     </p>
                     <div className="flex flex-row items-center justify-center gap-4 mt-8">
                       <BlueButton
                         type="button"
-                        style={{ marginLeft: "auto" }}
+                        style={{ marginLeft: 'auto' }}
                         className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
                         onClick={() => {
                           if (confirmedLabwares.length > 0) {
                             sessionStorage.setItem(
-                              "awaitingLabwares",
+                              'awaitingLabwares',
                               confirmedLabwares
-                                .map(
-                                  (labware) =>
-                                    `${labware.barcode}, ${labware.labwareType.name}`
-                                )
-                                .join(",")
+                                .map((labware) => `${labware.barcode}, ${labware.labwareType.name}`)
+                                .join(',')
                             );
                           }
-                          history.push("/store");
+                          history.push('/store');
                         }}
                       >
                         Store
@@ -133,7 +106,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
                       <BlueButton onClick={reload} action="tertiary">
                         Reset Form
                       </BlueButton>
-                      <Link to={"/"}>
+                      <Link to={'/'}>
                         <BlueButton action="primary">Return Home</BlueButton>
                       </Link>
                     </div>
@@ -145,10 +118,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
         </div>
       </AppShell.Main>
 
-      <Prompt
-        when={shouldConfirm}
-        message={"You have unsaved changes. Are you sure you want to leave?"}
-      />
+      <Prompt when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
     </AppShell>
   );
 }

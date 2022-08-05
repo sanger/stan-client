@@ -1,21 +1,18 @@
-import React, { useContext, useEffect, useMemo, useRef } from "react";
-import { FieldArray, useFormikContext } from "formik";
-import { GetRegistrationInfoQuery, LifeStage } from "../../types/sdk";
-import { useOnScreen } from "../../lib/hooks";
-import { motion } from "framer-motion";
-import variants from "../../lib/motionVariants";
-import Pill from "../../components/Pill";
-import Heading from "../../components/Heading";
-import FormikInput from "../../components/forms/Input";
-import RadioGroup, { RadioButton } from "../../components/forms/RadioGroup";
-import { objectKeys } from "../../lib/helpers";
-import FormikSelect from "../../components/forms/Select";
-import { optionValues } from "../../components/forms";
-import PinkButton from "../../components/buttons/PinkButton";
-import {
-  SlideRegistrationContext,
-  SlideRegistrationFormValues,
-} from "../SlideRegistration";
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
+import { FieldArray, useFormikContext } from 'formik';
+import { GetRegistrationInfoQuery, LifeStage } from '../../types/sdk';
+import { useOnScreen } from '../../lib/hooks';
+import { motion } from 'framer-motion';
+import variants from '../../lib/motionVariants';
+import Pill from '../../components/Pill';
+import Heading from '../../components/Heading';
+import FormikInput from '../../components/forms/Input';
+import RadioGroup, { RadioButton } from '../../components/forms/RadioGroup';
+import { objectKeys } from '../../lib/helpers';
+import FormikSelect from '../../components/forms/Select';
+import { optionValues } from '../../components/forms';
+import PinkButton from '../../components/buttons/PinkButton';
+import { SlideRegistrationContext, SlideRegistrationFormValues } from '../SlideRegistration';
 
 type SectionFormParams = {
   registrationInfo: GetRegistrationInfoQuery;
@@ -58,11 +55,10 @@ export default function SectionForm({
   currentIndex,
   onScreen,
   showRemoveSectionButton = false,
-  scrollIntoView = false,
+  scrollIntoView = false
 }: SectionFormParams) {
   const { buildSample } = useContext(SlideRegistrationContext);
-  const { setFieldValue, values } =
-    useFormikContext<SlideRegistrationFormValues>();
+  const { setFieldValue, values } = useFormikContext<SlideRegistrationFormValues>();
   const slotRef = useRef<HTMLDivElement>(null);
   const isOnScreen = useOnScreen(slotRef, { threshold: 0.4 });
 
@@ -80,28 +76,20 @@ export default function SectionForm({
    */
   useEffect(() => {
     if (scrollIntoView) {
-      slotRef.current?.scrollIntoView({ behavior: "smooth" });
+      slotRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [scrollIntoView]);
 
-  const selectedTissueType =
-    values.labwares[currentIndex].slots[slotAddress][sectionIndex].tissueType;
+  const selectedTissueType = values.labwares[currentIndex].slots[slotAddress][sectionIndex].tissueType;
 
-  const availableSpatialLocations: GetRegistrationInfoQuery["tissueTypes"][number]["spatialLocations"] =
-    useMemo(() => {
-      return (
-        registrationInfo.tissueTypes.find(
-          (tt) => tt.name === selectedTissueType
-        )?.spatialLocations ?? []
-      );
-    }, [registrationInfo.tissueTypes, selectedTissueType]);
+  const availableSpatialLocations: GetRegistrationInfoQuery['tissueTypes'][number]['spatialLocations'] = useMemo(() => {
+    return registrationInfo.tissueTypes.find((tt) => tt.name === selectedTissueType)?.spatialLocations ?? [];
+  }, [registrationInfo.tissueTypes, selectedTissueType]);
 
   /**
    * Only when the species is "Human", should the HMDMC field be enabled
    */
-  const isHMDMCEnabled =
-    values.labwares[currentIndex]?.slots[slotAddress]?.[sectionIndex]
-      .species === "Human";
+  const isHMDMCEnabled = values.labwares[currentIndex]?.slots[slotAddress]?.[sectionIndex].species === 'Human';
   const hmdmcField = `labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.hmdmc`;
 
   /**
@@ -109,43 +97,33 @@ export default function SectionForm({
    */
   useEffect(() => {
     if (!isHMDMCEnabled) {
-      setFieldValue(hmdmcField, "", true);
+      setFieldValue(hmdmcField, '', true);
     }
   }, [isHMDMCEnabled, hmdmcField, setFieldValue]);
 
   return (
-    <motion.div
-      variants={variants.fadeInWithLift}
-      ref={slotRef}
-      className="relative p-4 shadow-lg bg-white space-y-4"
-    >
+    <motion.div variants={variants.fadeInWithLift} ref={slotRef} className="relative p-4 shadow-lg bg-white space-y-4">
       <div className="sticky py-2 top-0 bg-white">
         <Pill color="pink">{slotAddress}</Pill>
       </div>
 
       <Heading level={4}>Donor Information</Heading>
 
-      <FormikInput
-        label="Donor ID"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.donorId`}
-      />
+      <FormikInput label="Donor ID" name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.donorId`} />
 
-      <RadioGroup
-        label="Life Stage"
-        name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.lifeStage`}
-      >
+      <RadioGroup label="Life Stage" name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.lifeStage`}>
         {objectKeys(LifeStage).map((key, index) => {
           return <RadioButton key={index} name={key} value={LifeStage[key]} />;
         })}
       </RadioGroup>
 
       <FormikSelect
-        label={"Species"}
+        label={'Species'}
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.species`}
         emptyOption
         className="mt-2"
       >
-        {optionValues(registrationInfo.species, "name", "name")}
+        {optionValues(registrationInfo.species, 'name', 'name')}
       </FormikSelect>
 
       <Heading level={4}>Tissue Information</Heading>
@@ -157,7 +135,7 @@ export default function SectionForm({
         emptyOption
         className="mt-2"
       >
-        {optionValues(registrationInfo.hmdmcs, "hmdmc", "hmdmc")}
+        {optionValues(registrationInfo.hmdmcs, 'hmdmc', 'hmdmc')}
       </FormikSelect>
 
       <FormikSelect
@@ -166,7 +144,7 @@ export default function SectionForm({
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.tissueType`}
         className="mt-2"
       >
-        {optionValues(registrationInfo.tissueTypes, "name", "name")}
+        {optionValues(registrationInfo.tissueTypes, 'name', 'name')}
       </FormikSelect>
 
       <FormikSelect
@@ -175,7 +153,7 @@ export default function SectionForm({
       >
         {availableSpatialLocations.map((spatialLocation) => (
           <option value={spatialLocation.code} key={spatialLocation.code}>
-            {spatialLocation.code + " - " + spatialLocation.name}
+            {spatialLocation.code + ' - ' + spatialLocation.name}
           </option>
         ))}
       </FormikSelect>
@@ -208,19 +186,11 @@ export default function SectionForm({
         <FieldArray name={`labwares.${currentIndex}.slots.${slotAddress}`}>
           {(samplesHelper) => (
             <>
-              <PinkButton
-                type="button"
-                action={"tertiary"}
-                onClick={() => samplesHelper.push(buildSample())}
-              >
+              <PinkButton type="button" action={'tertiary'} onClick={() => samplesHelper.push(buildSample())}>
                 + Add Another Section to {slotAddress}
               </PinkButton>
               {showRemoveSectionButton && (
-                <PinkButton
-                  type="button"
-                  action={"tertiary"}
-                  onClick={() => samplesHelper.remove(sectionIndex)}
-                >
+                <PinkButton type="button" action={'tertiary'} onClick={() => samplesHelper.remove(sectionIndex)}>
                   - Remove Section
                 </PinkButton>
               )}

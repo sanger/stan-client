@@ -1,27 +1,24 @@
-import React from "react";
-import Success from "../../components/notifications/Success";
-import BlueButton from "../../components/buttons/BlueButton";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { LabwareFieldsFragment } from "../../types/sdk";
-import variants from "../../lib/motionVariants";
-import DataTable from "../../components/DataTable";
-import LabelPrinter from "../../components/LabelPrinter";
-import PinkButton from "../../components/buttons/PinkButton";
-import ButtonBar from "../../components/ButtonBar";
-import AppShell from "../../components/AppShell";
-import { Column } from "react-table";
-import { history } from "../../lib/sdk";
+import React from 'react';
+import Success from '../../components/notifications/Success';
+import BlueButton from '../../components/buttons/BlueButton';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { LabwareFieldsFragment } from '../../types/sdk';
+import variants from '../../lib/motionVariants';
+import DataTable from '../../components/DataTable';
+import LabelPrinter from '../../components/LabelPrinter';
+import PinkButton from '../../components/buttons/PinkButton';
+import ButtonBar from '../../components/ButtonBar';
+import AppShell from '../../components/AppShell';
+import { Column } from 'react-table';
+import { history } from '../../lib/sdk';
 
 interface RegistrationSuccessProps {
   labware: LabwareFieldsFragment[];
   columns: Column<LabwareFieldsFragment>[];
 }
 
-const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
-  labware,
-  columns,
-}) => {
+const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({ labware, columns }) => {
   return (
     <AppShell>
       <AppShell.Header>
@@ -30,18 +27,15 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
       <AppShell.Main>
         <motion.div
           variants={variants.fadeInParent}
-          initial={"hidden"}
-          animate={"visible"}
+          initial={'hidden'}
+          animate={'visible'}
           className="max-w-screen-xl mx-auto space-y-4"
         >
           <motion.div variants={variants.fadeInWithLift}>
-            <Success message={"Registration complete"} />
+            <Success message={'Registration complete'} />
           </motion.div>
 
-          <motion.div
-            variants={variants.fadeInWithLift}
-            className="flex flex-col"
-          >
+          <motion.div variants={variants.fadeInWithLift} className="flex flex-col">
             <DataTable columns={columns} data={labware} />
           </motion.div>
 
@@ -57,28 +51,23 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
       </AppShell.Main>
 
       <ButtonBar>
-        <Link to={"/store"}>
+        <Link to={'/store'}>
           <BlueButton
             action="secondary"
             onClick={() => {
               if (labware.length > 0) {
                 sessionStorage.setItem(
-                  "awaitingLabwares",
-                  labware
-                    .map(
-                      (labware) =>
-                        `${labware.barcode}, ${labware.labwareType.name}`
-                    )
-                    .join(",")
+                  'awaitingLabwares',
+                  labware.map((labware) => `${labware.barcode}, ${labware.labwareType.name}`).join(',')
                 );
               }
-              history.push("/store");
+              history.push('/store');
             }}
           >
             Store
           </BlueButton>
         </Link>
-        <Link to={"/"}>
+        <Link to={'/'}>
           <PinkButton action="primary">Return Home</PinkButton>
         </Link>
       </ButtonBar>

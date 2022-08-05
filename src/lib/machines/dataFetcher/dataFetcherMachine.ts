@@ -1,61 +1,50 @@
-import { MachineConfig, MachineOptions } from "xstate";
-import {
-  DataFetcherContext,
-  DataFetcherEvent,
-  DataFetcherSchema,
-} from "./dataFetcherMachineTypes";
-import { assign } from "@xstate/immer";
-import { createMachineBuilder } from "../index";
+import { MachineConfig, MachineOptions } from 'xstate';
+import { DataFetcherContext, DataFetcherEvent, DataFetcherSchema } from './dataFetcherMachineTypes';
+import { assign } from '@xstate/immer';
+import { createMachineBuilder } from '../index';
 
 /**
  * DataFetcher Machine Options
  */
-export const machineOptions: Partial<
-  MachineOptions<DataFetcherContext, DataFetcherEvent>
-> = {
+export const machineOptions: Partial<MachineOptions<DataFetcherContext, DataFetcherEvent>> = {
   services: {
-    fetchData: (ctx) => ctx.dataFetcher(),
-  },
+    fetchData: (ctx) => ctx.dataFetcher()
+  }
 };
 
 /**
  * DataFetcher Machine Config
  */
-export const machineConfig: MachineConfig<
-  DataFetcherContext,
-  DataFetcherSchema,
-  DataFetcherEvent
-> = {
-  id: "dataFetcher",
-  initial: "loading",
+export const machineConfig: MachineConfig<DataFetcherContext, DataFetcherSchema, DataFetcherEvent> = {
+  id: 'dataFetcher',
+  initial: 'loading',
   states: {
     loading: {
       invoke: {
-        src: "fetchData",
+        src: 'fetchData',
         onDone: {
-          target: "done",
+          target: 'done',
           actions: assign((ctx, e) => {
             ctx.data = e.data;
-          }),
+          })
         },
-        onError: "failed",
-      },
+        onError: 'failed'
+      }
     },
     failed: {
       on: {
-        RETRY: "loading",
-      },
+        RETRY: 'loading'
+      }
     },
     done: {
-      type: "final",
-    },
-  },
+      type: 'final'
+    }
+  }
 };
 
-const createDataFetcherMachine = createMachineBuilder<
-  DataFetcherContext,
-  DataFetcherSchema,
-  DataFetcherEvent
->(machineConfig, machineOptions);
+const createDataFetcherMachine = createMachineBuilder<DataFetcherContext, DataFetcherSchema, DataFetcherEvent>(
+  machineConfig,
+  machineOptions
+);
 
 export default createDataFetcherMachine;

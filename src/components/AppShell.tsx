@@ -1,25 +1,25 @@
-import React, { useContext, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Authenticated, Unauthenticated } from "./Authenticated";
-import { StanMobileNavLink, StanNavLink } from "./nav";
-import { useOnClickOutside } from "../lib/hooks";
-import Logo from "./Logo";
-import GuestIcon from "./icons/GuestIcon";
-import { useAuth } from "../context/AuthContext";
-import { AnimatePresence, motion } from "framer-motion";
-import Heading from "./Heading";
-import variants from "../lib/motionVariants";
-import { Slide, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import LabwareIcon from "./icons/LabwareIcon";
-import SupportIcon from "./icons/SupportIcon";
-import Warning from "./notifications/Warning";
-import { LocationState } from "../types/stan";
-import Success from "./notifications/Success";
-import { UserRole } from "../types/sdk";
-import { configContext } from "../context/ConfigContext";
-import NavLinkMenuItem from "./menu/NavlinkMenuItem";
-import Menu from "./menu/Menu";
+import React, { useContext, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Authenticated, Unauthenticated } from './Authenticated';
+import { StanMobileNavLink, StanNavLink } from './nav';
+import { useOnClickOutside } from '../lib/hooks';
+import Logo from './Logo';
+import GuestIcon from './icons/GuestIcon';
+import { useAuth } from '../context/AuthContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import Heading from './Heading';
+import variants from '../lib/motionVariants';
+import { Slide, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import LabwareIcon from './icons/LabwareIcon';
+import SupportIcon from './icons/SupportIcon';
+import Warning from './notifications/Warning';
+import { LocationState } from '../types/stan';
+import Success from './notifications/Success';
+import { UserRole } from '../types/sdk';
+import { configContext } from '../context/ConfigContext';
+import NavLinkMenuItem from './menu/NavlinkMenuItem';
+import Menu from './menu/Menu';
 
 interface AppShellParams {
   children?: React.ReactNode | React.ReactNode[];
@@ -62,31 +62,11 @@ function AppShell({ children }: AppShellParams) {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-100 hover:text-white hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:text-white"
               >
-                <svg
-                  className="block h-6 w-6"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+                <svg className="block h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
-                <svg
-                  className="hidden h-6 w-6"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                <svg className="hidden h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
@@ -103,306 +83,204 @@ function AppShell({ children }: AppShellParams) {
                 <StanNavLink to="/sgp">SGP Management</StanNavLink>
               </Authenticated>
               <Authenticated>
-                <Menu caption={"Lab Work"} topMostMenu={true}>
+                <Menu caption={'Lab Work'} topMostMenu={true}>
                   <Menu
-                    caption={"Sectioning"}
-                    icon={
-                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={
-                      "Recording sectioning planning and confirmation."
-                    }
+                    caption={'Sectioning'}
+                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Recording sectioning planning and confirmation.'}
                   >
                     <NavLinkMenuItem
-                      caption={"Planning"}
-                      path={"/lab/sectioning"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Slice up some tissue and place sections into pre-labelled pieces of labware."
-                      }
+                      caption={'Planning'}
+                      path={'/lab/sectioning'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Slice up some tissue and place sections into pre-labelled pieces of labware.'}
                     />
                     <NavLinkMenuItem
-                      caption={"Confirmation"}
-                      path={"/lab/sectioning/confirm"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
+                      caption={'Confirmation'}
+                      path={'/lab/sectioning/confirm'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                       description={
-                        "Confirm the number of sections taken, along with section numbers and comments, post-sectioning."
+                        'Confirm the number of sections taken, along with section numbers and comments, post-sectioning.'
                       }
                     />
                   </Menu>
                   <Menu
-                    caption={"Original Sample"}
-                    icon={
-                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={"Original sample operations"}
+                    caption={'Original Sample'}
+                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Original sample operations'}
                   >
                     <NavLinkMenuItem
-                      caption={"Sample Processing"}
+                      caption={'Sample Processing'}
                       path="/lab/original_sample_processing"
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                       description={
-                        "Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative."
+                        'Divide original tissue samples into new labware to become tissue blocks or to different types of pots of fixative.'
                       }
                     />
                     <NavLinkMenuItem
-                      caption={"FFPE Processing"}
+                      caption={'FFPE Processing'}
                       path="/lab/ffpe_processing"
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Records the type of processing cycle run on the sample."
-                      }
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Records the type of processing cycle run on the sample.'}
                     />
 
                     <NavLinkMenuItem
-                      caption={"Solution Transfer"}
+                      caption={'Solution Transfer'}
                       path="/lab/solution_transfer"
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Records solution transfer operation of samples."
-                      }
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Records solution transfer operation of samples.'}
                     />
                     <NavLinkMenuItem
-                      caption={"Add External ID"}
+                      caption={'Add External ID'}
                       path="/lab/add_external_id"
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={"Add an External ID to an original sample."}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Add an External ID to an original sample.'}
                     />
 
                     <NavLinkMenuItem
-                      caption={"Sample processing comments"}
+                      caption={'Sample processing comments'}
                       path="/lab/sample_processing_comments"
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={"Records extra sample processing commentas."}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Records extra sample processing commentas.'}
                     />
                   </Menu>
 
                   <NavLinkMenuItem
-                    caption={"Fetal Waste"}
+                    caption={'Fetal Waste'}
                     path="/lab/fetal_waste"
-                    icon={
-                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={"Convert bio state to Fetal Waste."}
+                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Convert bio state to Fetal Waste.'}
                   />
                   <Menu
-                    caption={"RNA"}
-                    icon={
-                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={"Recording RNA extraction and analysis"}
+                    caption={'RNA'}
+                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Recording RNA extraction and analysis'}
                   >
                     <NavLinkMenuItem
-                      caption={"Extraction"}
+                      caption={'Extraction'}
                       path="/lab/extraction"
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Extract RNA from scraps obtained from Sectioning."
-                      }
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Extract RNA from scraps obtained from Sectioning.'}
                     />
                     <NavLinkMenuItem
-                      caption={"Extraction Result"}
-                      path={"/lab/extraction_result"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Record pass/fail results and concentration for RNA extractions."
-                      }
+                      caption={'Extraction Result'}
+                      path={'/lab/extraction_result'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Record pass/fail results and concentration for RNA extractions.'}
                     />
                     <NavLinkMenuItem
-                      caption={"Analysis"}
-                      path={"/lab/rna_analysis"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Record RNA Analysis on tubes from RNA Extraction"
-                      }
+                      caption={'Analysis'}
+                      path={'/lab/rna_analysis'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Record RNA Analysis on tubes from RNA Extraction'}
                     />
                     <NavLinkMenuItem
-                      caption={"Aliquoting"}
+                      caption={'Aliquoting'}
                       path="/lab/aliquoting"
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Aliquot a tube of solution out into multiple new tubes."
-                      }
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Aliquot a tube of solution out into multiple new tubes.'}
                     />
                   </Menu>
                   <Menu
-                    caption={"Staining"}
-                    description={"Recording staining slides and QC"}
-                    icon={
-                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
+                    caption={'Staining'}
+                    description={'Recording staining slides and QC'}
+                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                   >
                     <NavLinkMenuItem
-                      caption={"Stain slides"}
-                      path={"/lab/staining"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Stain slides and record incubation details."
-                      }
+                      caption={'Stain slides'}
+                      path={'/lab/staining'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Stain slides and record incubation details.'}
                     />
                     <NavLinkMenuItem
-                      caption={"Staining QC"}
-                      path={"/lab/staining_qc"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={"Pass or fail samples on a stained slide."}
+                      caption={'Staining QC'}
+                      path={'/lab/staining_qc'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Pass or fail samples on a stained slide.'}
                     />
                   </Menu>
                   <Menu
-                    caption={"Visium"}
-                    icon={
-                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={"Recording Visium process"}
+                    caption={'Visium'}
+                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Recording Visium process'}
                   >
                     <NavLinkMenuItem
-                      caption={"Visium cDNA"}
-                      path={"/lab/visium_cdna"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Transfer cDNA from slides onto a new 96 well plate."
-                      }
+                      caption={'Visium cDNA'}
+                      path={'/lab/visium_cdna'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Transfer cDNA from slides onto a new 96 well plate.'}
                     />
                     <NavLinkMenuItem
-                      caption={"Visium QC"}
-                      path={"/lab/visium_qc"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={"Pass or fail samples on a visium slide."}
+                      caption={'Visium QC'}
+                      path={'/lab/visium_qc'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Pass or fail samples on a visium slide.'}
                     />
 
                     <NavLinkMenuItem
-                      caption={"Visium Permeabilisation"}
-                      path={"/lab/visium_perm"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Record permeabilisation times for each slot of a stained slide."
-                      }
+                      caption={'Visium Permeabilisation'}
+                      path={'/lab/visium_perm'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Record permeabilisation times for each slot of a stained slide.'}
                     />
                     <NavLinkMenuItem
-                      caption={"Visium Analysis"}
-                      path={"/lab/visium_analysis"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Select the best permeabilisation time for a slide."
-                      }
+                      caption={'Visium Analysis'}
+                      path={'/lab/visium_analysis'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Select the best permeabilisation time for a slide.'}
                     />
                     <NavLinkMenuItem
-                      caption={"Dual Index Plate"}
-                      path={"/lab/dual_index_plate"}
-                      icon={
-                        <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                      }
-                      description={
-                        "Record the transfer of dual-index reagent to 96 well plate."
-                      }
+                      caption={'Dual Index Plate'}
+                      path={'/lab/dual_index_plate'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Record the transfer of dual-index reagent to 96 well plate.'}
                     />
                   </Menu>
                   <NavLinkMenuItem
-                    caption={"Imaging"}
-                    path={"/lab/imaging"}
-                    icon={
-                      <LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={
-                      "Record that images have been taken for a batch of labware."
-                    }
+                    caption={'Imaging'}
+                    path={'/lab/imaging'}
+                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Record that images have been taken for a batch of labware.'}
                   />
                 </Menu>
               </Authenticated>
               <Authenticated>
-                <Menu caption={"Admin"} topMostMenu={true}>
+                <Menu caption={'Admin'} topMostMenu={true}>
                   <NavLinkMenuItem
-                    caption={"Block Registration"}
-                    path={"/admin/registration"}
-                    icon={
-                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={
-                      "Register blocks of tissue into STAN and obtain new barcodes for its labware."
-                    }
+                    caption={'Block Registration'}
+                    path={'/admin/registration'}
+                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Register blocks of tissue into STAN and obtain new barcodes for its labware.'}
                   />
                   <NavLinkMenuItem
-                    caption={"Slide Registration"}
-                    path={"/admin/slide_registration"}
-                    icon={
-                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={
-                      "Register sections of tissue on pre-barcoded slides into STAN."
-                    }
+                    caption={'Slide Registration'}
+                    path={'/admin/slide_registration'}
+                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Register sections of tissue on pre-barcoded slides into STAN.'}
                   />
                   <NavLinkMenuItem
-                    caption={"Original Sample Registration"}
-                    path={"/admin/tissue_registration"}
-                    icon={
-                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={
-                      "Register tissue samples which can be either fixed or fresh into STAN."
-                    }
+                    caption={'Original Sample Registration'}
+                    path={'/admin/tissue_registration'}
+                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Register tissue samples which can be either fixed or fresh into STAN.'}
                   />
                   <NavLinkMenuItem
-                    caption={"Destroy"}
-                    path={"/admin/destroy"}
-                    icon={
-                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={
-                      "Destroy multiple pieces of labware and have STAN remove them from storage."
-                    }
+                    caption={'Destroy'}
+                    path={'/admin/destroy'}
+                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Destroy multiple pieces of labware and have STAN remove them from storage.'}
                   />
                   <NavLinkMenuItem
-                    caption={"Release"}
-                    path={"/admin/release"}
-                    icon={
-                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={
-                      "Release samples in STAN to teams within the Institute."
-                    }
+                    caption={'Release'}
+                    path={'/admin/release'}
+                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Release samples in STAN to teams within the Institute.'}
                   />
                   <NavLinkMenuItem
-                    caption={"Unrelease"}
-                    path={"/admin/unrelease"}
-                    icon={
-                      <SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />
-                    }
-                    description={
-                      " Re-use STAN labware that has previously been released."
-                    }
+                    caption={'Unrelease'}
+                    path={'/admin/unrelease'}
+                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={' Re-use STAN labware that has previously been released.'}
                   />
                 </Menu>
               </Authenticated>
@@ -488,147 +366,78 @@ function AppShell({ children }: AppShellParams) {
               variants={variants.menuVariants}
               className="block md:hidden"
             >
-              <motion.div
-                variants={variants.menuItemVariants}
-                className="px-2 pt-2 space-y-1 sm:px-3"
-              >
+              <motion.div variants={variants.menuItemVariants} className="px-2 pt-2 space-y-1 sm:px-3">
                 <StanMobileNavLink to="/">Home</StanMobileNavLink>
                 <StanMobileNavLink to="/search">Search</StanMobileNavLink>
                 <StanMobileNavLink to="/store">Store</StanMobileNavLink>
                 <StanMobileNavLink to="/history">History</StanMobileNavLink>
                 <Authenticated>
-                  <StanMobileNavLink to="/sgp">
-                    SGP Management
-                  </StanMobileNavLink>
+                  <StanMobileNavLink to="/sgp">SGP Management</StanMobileNavLink>
                 </Authenticated>
               </motion.div>
               <Authenticated>
-                <motion.div
-                  variants={variants.menuItemVariants}
-                  className="py-6 px-2 space-y-6"
-                >
+                <motion.div variants={variants.menuItemVariants} className="py-6 px-2 space-y-6">
                   <div className="pt-4 border-t border-gray-700">
-                    <h3 className="px-3 text-sm font-bold text-sp-600">
-                      Lab Work
-                    </h3>
-                    <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">
-                      Sectioning
-                    </h4>
+                    <h3 className="px-3 text-sm font-bold text-sp-600">Lab Work</h3>
+                    <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">Sectioning</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/sectioning">
-                        Planning
-                      </StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/sectioning/confirm">
-                        Confirmation
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/sectioning">Planning</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/sectioning/confirm">Confirmation</StanMobileNavLink>
                     </div>
-                    <StanMobileNavLink to="/lab/fetal_waste">
-                      Fetal Waste
-                    </StanMobileNavLink>
-                    <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">
-                      Original Sample
-                    </h4>
+                    <StanMobileNavLink to="/lab/fetal_waste">Fetal Waste</StanMobileNavLink>
+                    <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">Original Sample</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/original_sample_processing">
                         Original Sample Processing
                       </StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/original_sample_processing">
-                        FFPE Processing
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/original_sample_processing">FFPE Processing</StanMobileNavLink>
                     </div>
-                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">
-                      RNA
-                    </h4>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">RNA</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/extraction">
-                        Extraction
-                      </StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/extraction_result">
-                        Extraction Result
-                      </StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/rna_analysis">
-                        Analysis
-                      </StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/aliquoting">
-                        Aliquoting
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/extraction">Extraction</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/extraction_result">Extraction Result</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/rna_analysis">Analysis</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/aliquoting">Aliquoting</StanMobileNavLink>
                     </div>
-                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">
-                      Staining
-                    </h4>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Staining</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/staining">
-                        Stain slides
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/staining">Stain slides</StanMobileNavLink>
 
-                      <StanMobileNavLink to="/lab/staining_qc">
-                        Staining QC
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/staining_qc">Staining QC</StanMobileNavLink>
                     </div>
-                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">
-                      Visium
-                    </h4>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Visium</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/visium_cdna">
-                        Visium cDNA
-                      </StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/visium_perm">
-                        Visium Permeabilisation
-                      </StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/visium_analysis">
-                        Visium Analysis
-                      </StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/dual_index_plate">
-                        Dual Index Plate
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/visium_cdna">Visium cDNA</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/visium_perm">Visium Permeabilisation</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/visium_analysis">Visium Analysis</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/dual_index_plate">Dual Index Plate</StanMobileNavLink>
                     </div>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/visium_qc">
-                        Visium QC
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/visium_qc">Visium QC</StanMobileNavLink>
                     </div>
                     <div className="grid grid-cols-2 mt-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/imaging">
-                        Imaging
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/imaging">Imaging</StanMobileNavLink>
                     </div>
                   </div>
 
                   <div className="pt-4 border-t border-gray-700">
-                    <h3 className="px-3 text-sm font-bold text-sp-600">
-                      Admin
-                    </h3>
+                    <h3 className="px-3 text-sm font-bold text-sp-600">Admin</h3>
                     <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/admin/registration">
-                        Registration
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/admin/registration">Registration</StanMobileNavLink>
 
-                      <StanMobileNavLink to="/admin/slide_registration">
-                        Slide Registration
-                      </StanMobileNavLink>
-                      <StanMobileNavLink to={"/admin/tissue_registration"}>
-                        Tissue Registration
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/admin/slide_registration">Slide Registration</StanMobileNavLink>
+                      <StanMobileNavLink to={'/admin/tissue_registration'}>Tissue Registration</StanMobileNavLink>
 
-                      <StanMobileNavLink to="/admin/destroy">
-                        Destroy
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/admin/destroy">Destroy</StanMobileNavLink>
 
-                      <StanMobileNavLink to="/admin/release">
-                        Release
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/admin/release">Release</StanMobileNavLink>
 
-                      <StanMobileNavLink to="/admin/unrelease">
-                        Unrelease
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/admin/unrelease">Unrelease</StanMobileNavLink>
                     </div>
                   </div>
                 </motion.div>
               </Authenticated>
-              <motion.div
-                variants={variants.menuItemVariants}
-                className="pt-4 pb-3 border-t border-gray-700"
-              >
+              <motion.div variants={variants.menuItemVariants} className="pt-4 pb-3 border-t border-gray-700">
                 <Authenticated>
                   <div className="flex items-center px-5 space-x-3 mb-3">
                     <div className="flex-shrink-0">
@@ -638,9 +447,7 @@ function AppShell({ children }: AppShellParams) {
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-base font-medium leading-none text-white">
-                        Logged In
-                      </div>
+                      <div className="text-base font-medium leading-none text-white">Logged In</div>
                       <div className="text-sm font-medium leading-none text-gray-400">
                         {auth.authState?.user.username}
                         @sanger.ac.uk
@@ -685,9 +492,7 @@ function AppShell({ children }: AppShellParams) {
       {location.state?.warning && <Warning message={location.state.warning} />}
       {location.state?.success && <Success message={location.state.success} />}
       {children}
-      <footer
-        className={`border border-t-2 pt-5 pb-3 flex-shrink-0 ${config?.footerColor}`}
-      >
+      <footer className={`border border-t-2 pt-5 pb-3 flex-shrink-0 ${config?.footerColor}`}>
         <div className="max-w-sm mx-auto px-4 sm:px-6">
           <ul className="flex flex-row items-center justify-between my-2 text-xs text-gray-500">
             <li>
@@ -704,10 +509,7 @@ function AppShell({ children }: AppShellParams) {
                     clipRule="evenodd"
                   />
                 </svg>
-                Version{" "}
-                <span className="font-bold">
-                  {process.env.REACT_APP_VERSION}
-                </span>
+                Version <span className="font-bold">{process.env.REACT_APP_VERSION}</span>
               </div>
             </li>
             <li>
@@ -724,15 +526,11 @@ function AppShell({ children }: AppShellParams) {
                     clipRule="evenodd"
                   />
                 </svg>
-                Deployed{" "}
-                <span className="font-bold">{config?.deploymentDate}</span>
+                Deployed <span className="font-bold">{config?.deploymentDate}</span>
               </div>
             </li>
             <li>
-              <a
-                className="flex flex-row items-center justify-start gap-1"
-                href={`mailto:${config?.supportEmail}`}
-              >
+              <a className="flex flex-row items-center justify-start gap-1" href={`mailto:${config?.supportEmail}`}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 h-4 inline-block"
@@ -755,16 +553,10 @@ function AppShell({ children }: AppShellParams) {
   );
 }
 
-AppShell.Header = function ({
-  children,
-}: {
-  children: JSX.Element | JSX.Element[];
-}) {
+AppShell.Header = function ({ children }: { children: JSX.Element | JSX.Element[] }) {
   return (
     <header className="bg-white shadow">
-      <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8">
-        {children}
-      </div>
+      <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8">{children}</div>
     </header>
   );
 };
@@ -778,12 +570,7 @@ AppShell.Title = function ({ children }: { children: string }) {
 };
 
 const Main: React.FC = ({ children }) => (
-  <motion.main
-    className="flex-auto"
-    initial={{ opacity: 0.1 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.4 }}
-  >
+  <motion.main className="flex-auto" initial={{ opacity: 0.1 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
     <div className="py-6 px-4 sm:px-6 lg:px-8">
       {children}
       <ToastContainer autoClose={false} transition={Slide} />

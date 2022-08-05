@@ -1,51 +1,43 @@
-import React, { useEffect, useMemo, useState } from "react";
-import AppShell from "../components/AppShell";
-import LocationSearch from "../components/LocationSearch";
-import StripyCard, { StripyCardDetail } from "../components/StripyCard";
-import Heading from "../components/Heading";
-import PinkButton from "../components/buttons/PinkButton";
-import Modal, {
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-} from "../components/Modal";
-import WhiteButton from "../components/buttons/WhiteButton";
-import BinIcon from "../components/icons/BinIcon";
-import StyledLink from "../components/StyledLink";
-import ItemsList from "./location/ItemsList";
-import ItemsGrid from "./location/ItemsGrid";
-import Success from "../components/notifications/Success";
-import EditableText from "../components/EditableText";
-import { setLocationCustomName } from "../lib/services/locationService";
-import Warning from "../components/notifications/Warning";
-import { toast } from "react-toastify";
+import React, { useEffect, useMemo, useState } from 'react';
+import AppShell from '../components/AppShell';
+import LocationSearch from '../components/LocationSearch';
+import StripyCard, { StripyCardDetail } from '../components/StripyCard';
+import Heading from '../components/Heading';
+import PinkButton from '../components/buttons/PinkButton';
+import Modal, { ModalBody, ModalFooter, ModalHeader } from '../components/Modal';
+import WhiteButton from '../components/buttons/WhiteButton';
+import BinIcon from '../components/icons/BinIcon';
+import StyledLink from '../components/StyledLink';
+import ItemsList from './location/ItemsList';
+import ItemsGrid from './location/ItemsGrid';
+import Success from '../components/notifications/Success';
+import EditableText from '../components/EditableText';
+import { setLocationCustomName } from '../lib/services/locationService';
+import Warning from '../components/notifications/Warning';
+import { toast } from 'react-toastify';
 import {
   addressToLocationAddress,
   buildOrderedAddresses,
-  findNextAvailableAddress,
-} from "../lib/helpers/locationHelper";
-import { Authenticated, Unauthenticated } from "../components/Authenticated";
-import { RouteComponentProps } from "react-router-dom";
-import { LocationMatchParams, LocationSearchParams } from "../types/stan";
-import { LocationFieldsFragment, Maybe, StoreInput } from "../types/sdk";
-import { useMachine } from "@xstate/react";
-import { StoredItemFragment } from "../lib/machines/locations/locationMachineTypes";
-import createLocationMachine from "../lib/machines/locations/locationMachine";
-import {
-  awaitingStorageCheckOnExit,
-  getAwaitingLabwaresFromSession,
-  LabwareAwaitingStorageInfo,
-} from "./Store";
-import LabwareAwaitingStorage from "./location/LabwareAwaitingStorage";
-import warningToast from "../components/notifications/WarningToast";
-import PromptOnLeave from "../components/notifications/PromptOnLeave";
+  findNextAvailableAddress
+} from '../lib/helpers/locationHelper';
+import { Authenticated, Unauthenticated } from '../components/Authenticated';
+import { RouteComponentProps } from 'react-router-dom';
+import { LocationMatchParams, LocationSearchParams } from '../types/stan';
+import { LocationFieldsFragment, Maybe, StoreInput } from '../types/sdk';
+import { useMachine } from '@xstate/react';
+import { StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
+import createLocationMachine from '../lib/machines/locations/locationMachine';
+import { awaitingStorageCheckOnExit, getAwaitingLabwaresFromSession, LabwareAwaitingStorageInfo } from './Store';
+import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
+import warningToast from '../components/notifications/WarningToast';
+import PromptOnLeave from '../components/notifications/PromptOnLeave';
 
 /**
  * The different ways of displaying stored items
  */
 enum ViewType {
   GRID,
-  LIST,
+  LIST
 }
 
 type LocationParentContextType = {
@@ -60,8 +52,7 @@ type LocationParentContextType = {
   storeBarcodes: (storeData: { barcode: string; address: string }[]) => void;
 };
 
-export const LocationParentContext =
-  React.createContext<Maybe<LocationParentContextType>>(null);
+export const LocationParentContext = React.createContext<Maybe<LocationParentContextType>>(null);
 
 interface LocationProps extends RouteComponentProps<LocationMatchParams> {
   storageLocation: LocationFieldsFragment;
@@ -91,19 +82,18 @@ const Location: React.FC<LocationProps> = ({
     // Get the first selected address (which is the first empty address)
     const selectedAddresses = findNextAvailableAddress({
       locationAddresses: locationAddresses,
-      addressToItemMap: addressToItemMap,
+      addressToItemMap: addressToItemMap
     });
 
-    const selectedAddress =
-      selectedAddresses.length > 0 ? selectedAddresses[0] : undefined;
+    const selectedAddress = selectedAddresses.length > 0 ? selectedAddresses[0] : undefined;
     return createLocationMachine({
       context: {
         location: storageLocation,
         locationSearchParams,
         locationAddresses,
         addressToItemMap,
-        selectedAddress,
-      },
+        selectedAddress
+      }
     });
   }, [storageLocation, locationSearchParams]);
   //Custom hook to retain the updated labware state
@@ -129,9 +119,7 @@ const Location: React.FC<LocationProps> = ({
   /**
    *Labware list awaiting to be stored
    */
-  const [awaitingLabwares, setAwaitingLabwares] = useState<
-    LabwareAwaitingStorageInfo[]
-  >([]);
+  const [awaitingLabwares, setAwaitingLabwares] = useState<LabwareAwaitingStorageInfo[]>([]);
 
   /**
    * Is the "Empty Location" modal open
@@ -150,7 +138,7 @@ const Location: React.FC<LocationProps> = ({
 
   /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
   const onLeave = React.useCallback(() => {
-    sessionStorage.removeItem("awaitingLabwares");
+    sessionStorage.removeItem('awaitingLabwares');
   }, []);
 
   /**
@@ -163,13 +151,10 @@ const Location: React.FC<LocationProps> = ({
       const prevAwaitingLabwares = getAwaitingLabwaresFromSession();
       let currAwaitingLabwares: LabwareAwaitingStorageInfo[] = [];
       if (labwaresAddInProgress.current.length > 0) {
-        if (
-          labwaresAddInProgress.current.length !== prevAwaitingLabwares.length
-        ) {
+        if (labwaresAddInProgress.current.length !== prevAwaitingLabwares.length) {
           /**This is storing an individual awaiting labware operation, so remove that labware**/
           const indx = prevAwaitingLabwares.findIndex(
-            (labware) =>
-              labware.barcode === labwaresAddInProgress.current[0].barcode
+            (labware) => labware.barcode === labwaresAddInProgress.current[0].barcode
           );
           currAwaitingLabwares = [...prevAwaitingLabwares];
           currAwaitingLabwares.splice(indx, 1);
@@ -178,13 +163,11 @@ const Location: React.FC<LocationProps> = ({
         if (currAwaitingLabwares.length > 0) {
           //Update sessionStorage if any awaitingLabwares
           sessionStorage.setItem(
-            "awaitingLabwares",
-            currAwaitingLabwares
-              .map((labware) => `${labware.barcode},${labware.labwareType}`)
-              .join(",")
+            'awaitingLabwares',
+            currAwaitingLabwares.map((labware) => `${labware.barcode},${labware.labwareType}`).join(',')
           );
           //Otherwise remove it from sessionStorage
-        } else sessionStorage.removeItem("awaitingLabwares");
+        } else sessionStorage.removeItem('awaitingLabwares');
       }
       //Store operation is complete, so empty the list
       labwaresAddInProgress.current = [];
@@ -196,7 +179,7 @@ const Location: React.FC<LocationProps> = ({
       toast(<SuccessToast />, {
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 5000,
-        hideProgressBar: true,
+        hideProgressBar: true
       });
     }
   }, [successMessage, setAwaitingLabwares]);
@@ -210,7 +193,7 @@ const Location: React.FC<LocationProps> = ({
         message: errorMessage,
         error: serverError,
         position: toast.POSITION.TOP_RIGHT,
-        autoClose: 5000,
+        autoClose: 5000
       });
       labwaresAddInProgress.current = [];
     }
@@ -222,24 +205,18 @@ const Location: React.FC<LocationProps> = ({
    */
   const onCustomNameChange = async (newCustomName: string) => {
     try {
-      const updatedLocation = await setLocationCustomName(
-        location.barcode,
-        newCustomName
-      );
-      send({ type: "UPDATE_LOCATION", location: updatedLocation });
+      const updatedLocation = await setLocationCustomName(location.barcode, newCustomName);
+      send({ type: 'UPDATE_LOCATION', location: updatedLocation });
       return newCustomName;
     } catch (e) {
-      throw new Error("Failed to update Location");
+      throw new Error('Failed to update Location');
     }
   };
 
   const labwareBarcodeToAddressMap: Map<string, string> = useMemo(() => {
     const map = new Map<string, string>();
     for (const item of location.stored) {
-      if (
-        item.address &&
-        item.barcode === locationSearchParams?.labwareBarcode
-      ) {
+      if (item.address && item.barcode === locationSearchParams?.labwareBarcode) {
         map.set(item.barcode, item.address);
       }
     }
@@ -253,22 +230,12 @@ const Location: React.FC<LocationProps> = ({
       locationAddresses,
       labwareBarcodeToAddressMap,
       selectedAddress,
-      storeBarcode: (barcode, address) =>
-        send({ type: "STORE_BARCODE", barcode, address }),
-      unstoreBarcode: (barcode) => send({ type: "UNSTORE_BARCODE", barcode }),
-      setSelectedAddress: (address) =>
-        send({ type: "SET_SELECTED_ADDRESS", address }),
-      storeBarcodes: (storeData: StoreInput[]) =>
-        send({ type: "STORE", data: storeData }),
+      storeBarcode: (barcode, address) => send({ type: 'STORE_BARCODE', barcode, address }),
+      unstoreBarcode: (barcode) => send({ type: 'UNSTORE_BARCODE', barcode }),
+      setSelectedAddress: (address) => send({ type: 'SET_SELECTED_ADDRESS', address }),
+      storeBarcodes: (storeData: StoreInput[]) => send({ type: 'STORE', data: storeData })
     }),
-    [
-      addressToItemMap,
-      location,
-      locationAddresses,
-      labwareBarcodeToAddressMap,
-      selectedAddress,
-      send,
-    ]
+    [addressToItemMap, location, locationAddresses, labwareBarcodeToAddressMap, selectedAddress, send]
   );
 
   /***
@@ -283,9 +250,9 @@ const Location: React.FC<LocationProps> = ({
       /**Handle storing of one labware at a time*/
       if (awaitingLabwares.length === 1) {
         send({
-          type: "STORE_BARCODE",
+          type: 'STORE_BARCODE',
           barcode: awaitingLabwares[0].barcode,
-          address: selectedAddress ?? undefined,
+          address: selectedAddress ?? undefined
         });
         return;
       }
@@ -298,15 +265,14 @@ const Location: React.FC<LocationProps> = ({
           locationAddresses: locationAddresses,
           addressToItemMap: addressToItemMap,
           minimumAddress: selectedAddress,
-          numAddresses: awaitingLabwares.length,
+          numAddresses: awaitingLabwares.length
         });
         /**Not enough consecutive empty addresses to store the labwares**/
         if (nextAvailableAddresses.length !== awaitingLabwares.length) {
           warningToast({
-            message:
-              "Not enough consecutive free addresses available to store all labwares",
+            message: 'Not enough consecutive free addresses available to store all labwares',
             position: toast.POSITION.TOP_RIGHT,
-            autoClose: 5000,
+            autoClose: 5000
           });
           return;
         }
@@ -314,26 +280,16 @@ const Location: React.FC<LocationProps> = ({
       const storeData = awaitingLabwares.map((labware, indx) => {
         return {
           barcode: labware.barcode,
-          address: nextAvailableAddresses
-            ? nextAvailableAddresses[indx]
-            : undefined,
+          address: nextAvailableAddresses ? nextAvailableAddresses[indx] : undefined
         };
       });
       labwaresAddInProgress.current = awaitingLabwares;
-      send({ type: "STORE", data: storeData });
+      send({ type: 'STORE', data: storeData });
     },
-    [
-      addressToItemMap,
-      locationAddresses,
-      selectedAddress,
-      send,
-      currentViewType,
-    ]
+    [addressToItemMap, locationAddresses, selectedAddress, send, currentViewType]
   );
 
-  const showLocation =
-    ["ready", "updating"].some((activeState) => current.matches(activeState)) &&
-    !!location;
+  const showLocation = ['ready', 'updating'].some((activeState) => current.matches(activeState)) && !!location;
 
   return (
     <AppShell>
@@ -343,31 +299,22 @@ const Location: React.FC<LocationProps> = ({
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           {labwareBarcodeToAddressMap &&
-            Array.from(labwareBarcodeToAddressMap.keys()).map(
-              (labwareBarcode) => (
-                <Success
-                  className="mb-5"
-                  key={labwareBarcode}
-                  message={`Labware found`}
-                >
-                  Labware <span className="font-bold">{labwareBarcode}</span> is
-                  in address{" "}
-                  <span className="font-bold">
-                    {location.size && location.direction
-                      ? addressToLocationAddress(
-                          labwareBarcodeToAddressMap.get(labwareBarcode) ?? "",
-                          location.size,
-                          location.direction
-                        )
-                      : labwareBarcodeToAddressMap.get(labwareBarcode)}
-                  </span>
-                </Success>
-              )
-            )}
-          {current.matches("notFound") && (
-            <Warning
-              message={`Location ${match.params.locationBarcode} could not be found`}
-            />
+            Array.from(labwareBarcodeToAddressMap.keys()).map((labwareBarcode) => (
+              <Success className="mb-5" key={labwareBarcode} message={`Labware found`}>
+                Labware <span className="font-bold">{labwareBarcode}</span> is in address{' '}
+                <span className="font-bold">
+                  {location.size && location.direction
+                    ? addressToLocationAddress(
+                        labwareBarcodeToAddressMap.get(labwareBarcode) ?? '',
+                        location.size,
+                        location.direction
+                      )
+                    : labwareBarcodeToAddressMap.get(labwareBarcode)}
+                </span>
+              </Success>
+            ))}
+          {current.matches('notFound') && (
+            <Warning message={`Location ${match.params.locationBarcode} could not be found`} />
           )}
           <LocationSearch />
           {showLocation && (
@@ -378,35 +325,28 @@ const Location: React.FC<LocationProps> = ({
                     {
                       <>
                         <Authenticated>
-                          <EditableText
-                            onChange={onCustomNameChange}
-                            defaultValue={location.customName || ""}
-                          >
+                          <EditableText onChange={onCustomNameChange} defaultValue={location.customName || ''}>
                             {location.customName || location.barcode}
                           </EditableText>
                         </Authenticated>
 
-                        <Unauthenticated>
-                          {location.customName || location.barcode}
-                        </Unauthenticated>
+                        <Unauthenticated>{location.customName || location.barcode}</Unauthenticated>
                       </>
                     }
                   </Heading>
                 }
                 description={location.barcode}
               >
-                <StripyCardDetail term={"Name"}>
+                <StripyCardDetail term={'Name'}>
                   {location.fixedName ?? <span className="italic">None</span>}
                 </StripyCardDetail>
 
                 {location.parent && (
-                  <StripyCardDetail term={"Parent"}>
+                  <StripyCardDetail term={'Parent'}>
                     <StyledLink
                       to={{
                         pathname: `/locations/${location.parent.barcode}`,
-                        state: awaitingLabwares
-                          ? { awaitingLabwares: awaitingLabwares }
-                          : {},
+                        state: awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}
                       }}
                     >
                       {location.parent.customName ?? location.parent.barcode}
@@ -415,20 +355,14 @@ const Location: React.FC<LocationProps> = ({
                 )}
 
                 {location.size && (
-                  <StripyCardDetail term={"Size"}>
-                    <span className="font-semibold">
-                      {location.size.numRows}
-                    </span>{" "}
-                    row(s) and{" "}
-                    <span className="font-semibold">
-                      {location.size.numColumns}
-                    </span>{" "}
-                    column(s)
+                  <StripyCardDetail term={'Size'}>
+                    <span className="font-semibold">{location.size.numRows}</span> row(s) and{' '}
+                    <span className="font-semibold">{location.size.numColumns}</span> column(s)
                   </StripyCardDetail>
                 )}
 
                 {location.children.length > 0 && (
-                  <StripyCardDetail term={"Children"}>
+                  <StripyCardDetail term={'Children'}>
                     <ul className="list-disc list-inside">
                       {location.children.map((child) => {
                         return (
@@ -436,14 +370,10 @@ const Location: React.FC<LocationProps> = ({
                             <StyledLink
                               to={{
                                 pathname: `/locations/${child.barcode}`,
-                                state: awaitingLabwares
-                                  ? { awaitingLabwares: awaitingLabwares }
-                                  : {},
+                                state: awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}
                               }}
                             >
-                              {child.customName ??
-                                child.fixedName ??
-                                child.barcode}
+                              {child.customName ?? child.fixedName ?? child.barcode}
                             </StyledLink>
                           </li>
                         );
@@ -453,18 +383,15 @@ const Location: React.FC<LocationProps> = ({
                 )}
 
                 {location.children.length === 0 && (
-                  <StripyCardDetail term={"Number of Stored Items"}>
-                    <span
-                      data-testid={"storedItemsCount"}
-                      className="font-semibold"
-                    >
+                  <StripyCardDetail term={'Number of Stored Items'}>
+                    <span data-testid={'storedItemsCount'} className="font-semibold">
                       {location.stored.length}
                     </span>
                   </StripyCardDetail>
                 )}
 
                 {location.direction && (
-                  <StripyCardDetail term={"Layout"}>
+                  <StripyCardDetail term={'Layout'}>
                     <span className="font-semibold">{location.direction}</span>
                   </StripyCardDetail>
                 )}
@@ -481,24 +408,19 @@ const Location: React.FC<LocationProps> = ({
                       labwares={awaitingLabwares}
                       storeEnabled={
                         currentViewType === ViewType.LIST ||
-                        (currentViewType === ViewType.GRID &&
-                          selectedAddress !== undefined)
+                        (currentViewType === ViewType.GRID && selectedAddress !== undefined)
                       }
                       onStoreLabwares={storeLabwares}
                     />
                   )}
                   <LocationParentContext.Provider value={locationParentContext}>
                     {currentViewType === ViewType.LIST && <ItemsList />}
-                    {locationHasGrid && currentViewType === ViewType.GRID && (
-                      <ItemsGrid />
-                    )}
+                    {locationHasGrid && currentViewType === ViewType.GRID && <ItemsGrid />}
                   </LocationParentContext.Provider>
 
                   <Authenticated>
                     <div className="my-5 flex flex-row items-center justify-end">
-                      <PinkButton
-                        onClick={() => setEmptyLocationModalOpen(true)}
-                      >
+                      <PinkButton onClick={() => setEmptyLocationModalOpen(true)}>
                         <BinIcon className="inline-block h-5 w-5 -ml-1 mr-2" />
                         Empty Location
                       </PinkButton>
@@ -508,11 +430,9 @@ const Location: React.FC<LocationProps> = ({
                       <ModalHeader>Remove All Labware</ModalHeader>
                       <ModalBody>
                         <p className="text-sm text-gray-700">
-                          Are you sure you want to remove all labware from{" "}
+                          Are you sure you want to remove all labware from{' '}
                           <span className="font-semibold">
-                            {location.customName ??
-                              location.fixedName ??
-                              location.barcode}
+                            {location.customName ?? location.fixedName ?? location.barcode}
                           </span>
                           ?
                         </p>
@@ -521,16 +441,13 @@ const Location: React.FC<LocationProps> = ({
                         <PinkButton
                           className="sm:ml-3"
                           onClick={() => {
-                            send({ type: "EMPTY_LOCATION" });
+                            send({ type: 'EMPTY_LOCATION' });
                             setEmptyLocationModalOpen(false);
                           }}
                         >
                           Remove All Labware
                         </PinkButton>
-                        <WhiteButton
-                          className="sm:ml-3 mt-1"
-                          onClick={() => setEmptyLocationModalOpen(false)}
-                        >
+                        <WhiteButton className="sm:ml-3 mt-1" onClick={() => setEmptyLocationModalOpen(false)}>
                           Close
                         </WhiteButton>
                       </ModalFooter>
@@ -555,9 +472,7 @@ const Location: React.FC<LocationProps> = ({
       <PromptOnLeave
         when={awaitingLabwares.length > 0}
         messageHandler={awaitingStorageCheckOnExit}
-        message={
-          "You have labwares that are not stored. Are you sure you want to leave?"
-        }
+        message={'You have labwares that are not stored. Are you sure you want to leave?'}
         onPromptLeave={onLeave}
       />
     </AppShell>

@@ -1,20 +1,11 @@
-import React from "react";
-import Modal, {
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-} from "../../components/Modal";
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-} from "../../components/Table";
-import StyledLink from "../../components/StyledLink";
-import ExternalIcon from "../../components/icons/ExternalIcon";
-import PinkButton from "../../components/buttons/PinkButton";
-import WhiteButton from "../../components/buttons/WhiteButton";
-import { RegisterResultFieldsFragment } from "../../types/sdk";
+import React from 'react';
+import Modal, { ModalBody, ModalFooter, ModalHeader } from '../../components/Modal';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
+import StyledLink from '../../components/StyledLink';
+import ExternalIcon from '../../components/icons/ExternalIcon';
+import PinkButton from '../../components/buttons/PinkButton';
+import WhiteButton from '../../components/buttons/WhiteButton';
+import { RegisterResultFieldsFragment } from '../../types/sdk';
 
 type ClashModalProps = {
   registrationResult: RegisterResultFieldsFragment;
@@ -22,20 +13,13 @@ type ClashModalProps = {
   onCancel: () => void;
 };
 
-export default function ClashModal({
-  registrationResult,
-  onConfirm,
-  onCancel,
-}: ClashModalProps) {
+export default function ClashModal({ registrationResult, onConfirm, onCancel }: ClashModalProps) {
   return (
     <Modal show={true}>
       <ModalHeader>External Name Already In Use</ModalHeader>
       <ModalBody>
         <div className="space-y-8">
-          <p>
-            Tissue with the following external identifiers already exist in the
-            given labware:
-          </p>
+          <p>Tissue with the following external identifiers already exist in the given labware:</p>
 
           <Table>
             <TableHead>
@@ -49,16 +33,9 @@ export default function ClashModal({
               {registrationResult.clashes.map((clash) => {
                 return clash.labware.map((lw, index) => (
                   <tr key={lw.barcode}>
-                    {index === 0 && (
-                      <TableCell rowSpan={clash.labware.length}>
-                        {clash.tissue.externalName}
-                      </TableCell>
-                    )}
+                    {index === 0 && <TableCell rowSpan={clash.labware.length}>{clash.tissue.externalName}</TableCell>}
                     <TableCell>
-                      <StyledLink
-                        target="_blank"
-                        to={`/store?labwareBarcode=${lw.barcode}`}
-                      >
+                      <StyledLink target="_blank" to={`/store?labwareBarcode=${lw.barcode}`}>
                         {lw.barcode}
                       </StyledLink>
                       <ExternalIcon className="inline-block mb-1 ml-1 h-4 w-4" />
@@ -71,24 +48,16 @@ export default function ClashModal({
           </Table>
 
           <p>
-            Are you sure you want to continue? New labware will be created for
-            tissues with pre-existing external identifiers.
+            Are you sure you want to continue? New labware will be created for tissues with pre-existing external
+            identifiers.
           </p>
         </div>
       </ModalBody>
       <ModalFooter>
-        <PinkButton
-          type="button"
-          onClick={onConfirm}
-          className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-        >
+        <PinkButton type="button" onClick={onConfirm} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
           Confirm
         </PinkButton>
-        <WhiteButton
-          type="button"
-          onClick={onCancel}
-          className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-        >
+        <WhiteButton type="button" onClick={onCancel} className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
           Cancel
         </WhiteButton>
       </ModalFooter>

@@ -1,7 +1,7 @@
-import { Interpreter, State, StateNode } from "xstate";
-import { LocationFieldsFragment, Maybe, StoreInput } from "../../../types/sdk";
-import { ClientError } from "graphql-request";
-import { LocationSearchParams } from "../../../types/stan";
+import { Interpreter, State, StateNode } from 'xstate';
+import { LocationFieldsFragment, Maybe, StoreInput } from '../../../types/sdk';
+import { ClientError } from 'graphql-request';
+import { LocationSearchParams } from '../../../types/stan';
 
 /**
  * Context for a Location Machine
@@ -72,98 +72,98 @@ export interface LocationSchema {
  * Location events
  */
 type FetchLocationEvent = {
-  type: "FETCH_LOCATION";
+  type: 'FETCH_LOCATION';
   barcode: string;
   locationSearchParams: Maybe<LocationSearchParams>;
 };
 
 type FetchLocationResolveEvent = {
-  type: "done.invoke.fetchLocation";
+  type: 'done.invoke.fetchLocation';
   data: LocationFieldsFragment;
 };
 
 type FetchLocationErrorEvent = {
-  type: "error.platform.fetchLocation";
+  type: 'error.platform.fetchLocation';
   data: ClientError;
 };
 
 type StoreBarcodeEvent = {
-  type: "STORE_BARCODE";
+  type: 'STORE_BARCODE';
   barcode: string;
   address?: string;
 };
 
 type StoreBarcodeResolveEvent = {
-  type: "done.invoke.storeBarcode";
+  type: 'done.invoke.storeBarcode';
   data: LocationFieldsFragment;
 };
 
 type StoreBarcodeErrorEvent = {
-  type: "error.platform.storeBarcode";
+  type: 'error.platform.storeBarcode';
   data: ClientError;
 };
 
 type UnstoreBarcodeEvent = {
-  type: "UNSTORE_BARCODE";
+  type: 'UNSTORE_BARCODE';
   barcode: string;
 };
 
 type UnstoreBarcodeResolveEvent = {
-  type: "done.invoke.unstoreBarcode";
+  type: 'done.invoke.unstoreBarcode';
   data: LocationFieldsFragment;
 };
 
 type UnstoreBarcodeErrorEvent = {
-  type: "error.platform.unstoreBarcode";
+  type: 'error.platform.unstoreBarcode';
   data: ClientError;
 };
 
 type EmptyLocationEvent = {
-  type: "EMPTY_LOCATION";
+  type: 'EMPTY_LOCATION';
 };
 
 type EmptyLocationResolveEvent = {
-  type: "done.invoke.emptyLocation";
+  type: 'done.invoke.emptyLocation';
   data: LocationFieldsFragment;
 };
 
 type EmptyLocationErrorEvent = {
-  type: "error.platform.emptyLocation";
+  type: 'error.platform.emptyLocation';
   data: ClientError;
 };
 
 type UpdateLocationEvent = {
-  type: "UPDATE_LOCATION";
+  type: 'UPDATE_LOCATION';
   location: LocationFieldsFragment;
 };
 
 type SetSelectedAddressEvent = {
-  type: "SET_SELECTED_ADDRESS";
+  type: 'SET_SELECTED_ADDRESS';
   address: string;
 };
 
 type SetSuccessMessageEvent = {
-  type: "SET_SUCCESS_MESSAGE";
+  type: 'SET_SUCCESS_MESSAGE';
   message: string;
 };
 
 type SetErrorMessageEvent = {
-  type: "SET_ERROR_MESSAGE";
+  type: 'SET_ERROR_MESSAGE';
   message: string;
 };
 
 type StoreEvent = {
-  type: "STORE";
+  type: 'STORE';
   data: StoreInput[];
 };
 
 type StoreResolveEvent = {
-  type: "done.invoke.store";
+  type: 'done.invoke.store';
   data: LocationFieldsFragment;
 };
 
 type StoreErrorEvent = {
-  type: "error.platform.store";
+  type: 'error.platform.store';
   data: ClientError;
 };
 
@@ -191,25 +191,13 @@ export type LocationEvent =
 /**
  * The type of an interpreted Location Machine
  */
-export type LocationMachineService = Interpreter<
-  LocationContext,
-  LocationSchema,
-  LocationEvent
->;
+export type LocationMachineService = Interpreter<LocationContext, LocationSchema, LocationEvent>;
 
-export type LocationMachine = StateNode<
-  LocationContext,
-  LocationSchema,
-  LocationEvent
->;
+export type LocationMachine = StateNode<LocationContext, LocationSchema, LocationEvent>;
 
-export type LocationState = State<
-  LocationContext,
-  LocationEvent,
-  LocationSchema
->;
+export type LocationState = State<LocationContext, LocationEvent, LocationSchema>;
 
-export type StoredItemFragment = LocationFieldsFragment["stored"][number];
+export type StoredItemFragment = LocationFieldsFragment['stored'][number];
 
 /**
  * Event creator for {@link SetSuccessMessageEvent}
@@ -217,8 +205,8 @@ export type StoredItemFragment = LocationFieldsFragment["stored"][number];
  */
 export function setSuccessMessage(message: string): LocationEvent {
   return {
-    type: "SET_SUCCESS_MESSAGE",
-    message,
+    type: 'SET_SUCCESS_MESSAGE',
+    message
   };
 }
 
@@ -228,7 +216,7 @@ export function setSuccessMessage(message: string): LocationEvent {
  */
 export function setErrorMessage(message: string): LocationEvent {
   return {
-    type: "SET_ERROR_MESSAGE",
-    message,
+    type: 'SET_ERROR_MESSAGE',
+    message
   };
 }

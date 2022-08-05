@@ -1,24 +1,20 @@
-import React, { useCallback, useEffect } from "react";
-import { PlanFinder } from "../planFinder/PlanFinder";
-import Heading from "../Heading";
-import DataTable from "../DataTable";
-import columns from "../dataTable/labwareColumns";
-import { LabwareTypeName } from "../../types/stan";
-import ConfirmTubes from "./ConfirmTubes";
-import ConfirmLabware from "./ConfirmLabware";
-import PinkButton from "../buttons/PinkButton";
-import {
-  CommentFieldsFragment,
-  FindPlanDataQuery,
-  LabwareFieldsFragment,
-} from "../../types/sdk";
-import { useMachine } from "@xstate/react";
-import { createSectioningConfirmMachine } from "./sectioningConfirm.machine";
-import Warning from "../notifications/Warning";
-import WorkNumberSelect from "../WorkNumberSelect";
-import RadioGroup, { RadioButtonInput } from "../forms/RadioGroup";
-import { objectKeys } from "../../lib/helpers";
-import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
+import React, { useCallback, useEffect } from 'react';
+import { PlanFinder } from '../planFinder/PlanFinder';
+import Heading from '../Heading';
+import DataTable from '../DataTable';
+import columns from '../dataTable/labwareColumns';
+import { LabwareTypeName } from '../../types/stan';
+import ConfirmTubes from './ConfirmTubes';
+import ConfirmLabware from './ConfirmLabware';
+import PinkButton from '../buttons/PinkButton';
+import { CommentFieldsFragment, FindPlanDataQuery, LabwareFieldsFragment } from '../../types/sdk';
+import { useMachine } from '@xstate/react';
+import { createSectioningConfirmMachine } from './sectioningConfirm.machine';
+import Warning from '../notifications/Warning';
+import WorkNumberSelect from '../WorkNumberSelect';
+import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
+import { objectKeys } from '../../lib/helpers';
+import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
 
 type SectioningConfirmProps = {
   /**
@@ -38,8 +34,8 @@ type SectioningConfirmProps = {
 };
 
 export enum SectionNumberMode {
-  Auto = "Auto",
-  Manual = "Manual",
+  Auto = 'Auto',
+  Manual = 'Manual'
 }
 
 /**
@@ -56,20 +52,15 @@ export default function SectioningConfirm({
   }, []);
   const [current, send, service] = useMachine(sectioningMachine);
 
-  const {
-    sourceLabware,
-    layoutPlansByLabwareType,
-    requestError,
-    confirmSectionResultLabwares,
-    sectionNumberMode,
-  } = current.context;
+  const { sourceLabware, layoutPlansByLabwareType, requestError, confirmSectionResultLabwares, sectionNumberMode } =
+    current.context;
 
   /**
    * Call the {@code onConfirmed} callback when machine reaches the {@code confirmed} state
    */
   useEffect(() => {
     const subscription = service.subscribe((state) => {
-      if (state.matches("confirmed")) {
+      if (state.matches('confirmed')) {
         onConfirmed(confirmSectionResultLabwares);
       }
     });
@@ -81,7 +72,7 @@ export default function SectioningConfirm({
    */
   const handleWorkNumberChange = useCallback(
     (workNumber: string) => {
-      send({ type: "UPDATE_WORK_NUMBER", workNumber });
+      send({ type: 'UPDATE_WORK_NUMBER', workNumber });
     },
     [send]
   );
@@ -91,7 +82,7 @@ export default function SectioningConfirm({
    */
   const handlePlanChange = useCallback(
     (plans: Array<FindPlanDataQuery>) => {
-      send({ type: "UPDATE_PLANS", plans });
+      send({ type: 'UPDATE_PLANS', plans });
     },
     [send]
   );
@@ -103,8 +94,8 @@ export default function SectioningConfirm({
   const handleConfirmChange = useCallback(
     (confirmSectionLabware) => {
       send({
-        type: "UPDATE_CONFIRM_SECTION_LABWARE",
-        confirmSectionLabware,
+        type: 'UPDATE_CONFIRM_SECTION_LABWARE',
+        confirmSectionLabware
       });
     },
     [send]
@@ -115,7 +106,7 @@ export default function SectioningConfirm({
    */
   const handleSectionUpdate = useCallback(
     (layoutPlan: LayoutPlan) => {
-      send({ type: "UPDATE_SECTION_LAYOUT", layoutPlan });
+      send({ type: 'UPDATE_SECTION_LAYOUT', layoutPlan });
     },
     [send]
   );
@@ -125,24 +116,19 @@ export default function SectioningConfirm({
    */
   const handleSectionNumberingModeChange = useCallback(
     (mode: SectionNumberMode) => {
-      send({ type: "UPDATE_SECTION_NUMBERING_MODE", mode });
+      send({ type: 'UPDATE_SECTION_NUMBERING_MODE', mode });
     },
     [send]
   );
 
   const handleSectionNumberChange = useCallback(
-    (
-      layoutPlan: LayoutPlan,
-      slotAddress: string,
-      sectionIndex: number,
-      sectionNumber: number
-    ) => {
+    (layoutPlan: LayoutPlan, slotAddress: string, sectionIndex: number, sectionNumber: number) => {
       send({
-        type: "UPDATE_SECTION_NUMBER",
+        type: 'UPDATE_SECTION_NUMBER',
         layoutPlan,
         slotAddress,
         sectionIndex,
-        sectionNumber,
+        sectionNumber
       });
     },
     [send]
@@ -151,8 +137,7 @@ export default function SectioningConfirm({
   const sectionNumberEnabled = () => {
     return (
       Object.entries(layoutPlansByLabwareType).filter(
-        ([labwareTypeName, _]) =>
-          labwareTypeName !== LabwareTypeName.FETAL_WASTE_CONTAINER
+        ([labwareTypeName, _]) => labwareTypeName !== LabwareTypeName.FETAL_WASTE_CONTAINER
       ).length !== 0
     );
   };
@@ -160,9 +145,7 @@ export default function SectioningConfirm({
     <div className="my-4 mx-auto max-w-screen-xl space-y-12">
       <div>
         <Heading level={3}>SGP Number</Heading>
-        <p className="mt-2">
-          Select an SGP number to associate with this confirmation.
-        </p>
+        <p className="mt-2">Select an SGP number to associate with this confirmation.</p>
         <div className="mt-4 md:w-1/2">
           <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
         </div>
@@ -171,10 +154,7 @@ export default function SectioningConfirm({
       <div>
         <Heading level={3}>Find Plans</Heading>
 
-        <p className="mt-2">
-          Find sectioning plans for labware by scanning the labware barcode into
-          the input below:
-        </p>
+        <p className="mt-2">Find sectioning plans for labware by scanning the labware barcode into the input below:</p>
 
         <div className="mt-4">
           <PlanFinder initialPlans={initialPlans} onChange={handlePlanChange}>
@@ -186,35 +166,21 @@ export default function SectioningConfirm({
                       <Heading level={3}>Source Labware</Heading>
                       <DataTable
                         data={sourceLabware}
-                        columns={[
-                          columns.barcode(),
-                          columns.highestSectionForSlot("A1"),
-                        ]}
+                        columns={[columns.barcode(), columns.highestSectionForSlot('A1')]}
                       />
                     </div>
 
-                    <div className={"sm:justify-between"}>
+                    <div className={'sm:justify-between'}>
                       <Heading level={3}>Section Numbering</Heading>
-                      <RadioGroup
-                        label="Select mode"
-                        name={"sectionNumber"}
-                        withFormik={false}
-                      >
+                      <RadioGroup label="Select mode" name={'sectionNumber'} withFormik={false}>
                         {objectKeys(SectionNumberMode).map((key) => {
                           return (
                             <RadioButtonInput
                               key={key}
-                              name={"sectionNumber"}
+                              name={'sectionNumber'}
                               value={SectionNumberMode[key]}
-                              checked={
-                                sectionNumberEnabled() &&
-                                sectionNumberMode === SectionNumberMode[key]
-                              }
-                              onChange={() =>
-                                handleSectionNumberingModeChange(
-                                  SectionNumberMode[key]
-                                )
-                              }
+                              checked={sectionNumberEnabled() && sectionNumberMode === SectionNumberMode[key]}
+                              onChange={() => handleSectionNumberingModeChange(SectionNumberMode[key])}
                               label={SectionNumberMode[key]}
                               disabled={!sectionNumberEnabled()}
                             />
@@ -226,19 +192,10 @@ export default function SectioningConfirm({
                 )}
                 <div className="space-y-4">
                   {/* Always show fetal waste first (if there are any) */}
-                  {layoutPlansByLabwareType?.[
-                    LabwareTypeName.FETAL_WASTE_CONTAINER
-                  ] && (
-                    <div
-                      key={LabwareTypeName.FETAL_WASTE_CONTAINER}
-                      className="space-y-4"
-                    >
-                      <Heading level={3}>
-                        {LabwareTypeName.FETAL_WASTE_CONTAINER}
-                      </Heading>
-                      {layoutPlansByLabwareType?.[
-                        LabwareTypeName.FETAL_WASTE_CONTAINER
-                      ].map((layoutPlan) => (
+                  {layoutPlansByLabwareType?.[LabwareTypeName.FETAL_WASTE_CONTAINER] && (
+                    <div key={LabwareTypeName.FETAL_WASTE_CONTAINER} className="space-y-4">
+                      <Heading level={3}>{LabwareTypeName.FETAL_WASTE_CONTAINER}</Heading>
+                      {layoutPlansByLabwareType?.[LabwareTypeName.FETAL_WASTE_CONTAINER].map((layoutPlan) => (
                         <ConfirmLabware
                           onChange={handleConfirmChange}
                           removePlan={removePlanByBarcode}
@@ -260,9 +217,7 @@ export default function SectioningConfirm({
                         onChange={handleConfirmChange}
                         onSectionUpdate={handleSectionUpdate}
                         onSectionNumberChange={handleSectionNumberChange}
-                        layoutPlans={
-                          layoutPlansByLabwareType[LabwareTypeName.TUBE]
-                        }
+                        layoutPlans={layoutPlansByLabwareType[LabwareTypeName.TUBE]}
                         comments={comments}
                         mode={sectionNumberMode}
                       />
@@ -274,8 +229,7 @@ export default function SectioningConfirm({
                     .filter(
                       ([labwareTypeName, _]) =>
                         labwareTypeName !== LabwareTypeName.TUBE &&
-                        labwareTypeName !==
-                          LabwareTypeName.FETAL_WASTE_CONTAINER
+                        labwareTypeName !== LabwareTypeName.FETAL_WASTE_CONTAINER
                     )
                     .map(([labwareTypeName, lps]) => {
                       return (
@@ -301,9 +255,7 @@ export default function SectioningConfirm({
                     <div>
                       <Warning
                         error={requestError}
-                        message={
-                          "There was an error confirming the Sectioning operation"
-                        }
+                        message={'There was an error confirming the Sectioning operation'}
                       />
                     </div>
                   )}
@@ -311,8 +263,8 @@ export default function SectioningConfirm({
                   {Object.keys(layoutPlansByLabwareType).length > 0 && (
                     <div className="flex flex-row items-center justify-end">
                       <PinkButton
-                        disabled={!current.matches({ ready: "valid" })}
-                        onClick={() => send("CONFIRM")}
+                        disabled={!current.matches({ ready: 'valid' })}
+                        onClick={() => send('CONFIRM')}
                         action="primary"
                       >
                         Save

@@ -4,7 +4,7 @@
  */
 export function brightenColor(color?: string): string {
   if (!color) {
-    return "";
+    return '';
   }
   const currentVariantNumber = getColorVariant(color);
   if (currentVariantNumber === -1) {
@@ -25,7 +25,7 @@ export function brightenColor(color?: string): string {
  */
 export function darkenColor(color?: string): string {
   if (!color) {
-    return "";
+    return '';
   }
   const currentVariantNumber = getColorVariant(color);
   if (currentVariantNumber === -1) {

@@ -1,6 +1,6 @@
 overwrite: true
 schema: ${GRAPHQL_SCHEMA_PATH}
-documents: "src/**/*.graphql"
+documents: 'src/**/*.graphql'
 config:
   scalars:
     Address: string
@@ -11,9 +11,9 @@ config:
 generates:
   src/types/sdk.ts:
     plugins:
-      - "typescript"
-      - "typescript-operations"
-      - "typescript-graphql-request"
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-graphql-request'
     config:
       gqlImport: graphql-request#gql
       dedupeFragments: true

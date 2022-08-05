@@ -1,26 +1,21 @@
-import React from "react";
-import { CellProps, Column } from "react-table";
-import { Labware, LabwareFieldsFragment } from "../../types/sdk";
-import Circle from "../Circle";
-import { maybeFindSlotByAddress } from "../../lib/helpers/slotHelper";
-import { valueFromSamples } from "./index";
+import React from 'react';
+import { CellProps, Column } from 'react-table';
+import { Labware, LabwareFieldsFragment } from '../../types/sdk';
+import Circle from '../Circle';
+import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
+import { valueFromSamples } from './index';
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
  */
-export type ColumnFactory<E = any> = (
-  meta?: E
-) => Column<LabwareFieldsFragment>;
+export type ColumnFactory<E = any> = (meta?: E) => Column<LabwareFieldsFragment>;
 
 const color: ColumnFactory<Map<number, any>> = (meta) => {
   return {
-    id: "color",
-    Header: "",
-    accessor: (originalRow) =>
-      meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? "#FFF",
-    Cell: (props: CellProps<Labware>) => (
-      <Circle backgroundColor={props.value} />
-    ),
+    id: 'color',
+    Header: '',
+    accessor: (originalRow) => meta?.get(originalRow.slots[0]?.samples[0]?.id) ?? '#FFF',
+    Cell: (props: CellProps<Labware>) => <Circle backgroundColor={props.value} />
   };
 };
 
@@ -29,8 +24,8 @@ const color: ColumnFactory<Map<number, any>> = (meta) => {
  */
 const barcode: ColumnFactory = () => {
   return {
-    Header: "Barcode",
-    accessor: "barcode",
+    Header: 'Barcode',
+    accessor: 'barcode'
   };
 };
 
@@ -39,9 +34,8 @@ const barcode: ColumnFactory = () => {
  */
 const donorId: ColumnFactory = () => {
   return {
-    Header: "Donor ID",
-    accessor: (labware) =>
-      valueFromSamples(labware, (sample) => sample.tissue.donor.donorName),
+    Header: 'Donor ID',
+    accessor: (labware) => valueFromSamples(labware, (sample) => sample.tissue.donor.donorName)
   };
 };
 
@@ -50,12 +44,8 @@ const donorId: ColumnFactory = () => {
  */
 const tissueType: ColumnFactory = () => {
   return {
-    Header: "Tissue type",
-    accessor: (labware) =>
-      valueFromSamples(
-        labware,
-        (sample) => sample.tissue.spatialLocation.tissueType.name
-      ),
+    Header: 'Tissue type',
+    accessor: (labware) => valueFromSamples(labware, (sample) => sample.tissue.spatialLocation.tissueType.name)
   };
 };
 
@@ -64,11 +54,8 @@ const tissueType: ColumnFactory = () => {
  */
 const spatialLocation: ColumnFactory = () => {
   return {
-    Header: "Spatial location",
-    accessor: (labware) =>
-      valueFromSamples(labware, (sample) =>
-        String(sample.tissue.spatialLocation.code)
-      ),
+    Header: 'Spatial location',
+    accessor: (labware) => valueFromSamples(labware, (sample) => String(sample.tissue.spatialLocation.code))
   };
 };
 
@@ -77,9 +64,8 @@ const spatialLocation: ColumnFactory = () => {
  */
 const replicate: ColumnFactory = () => {
   return {
-    Header: "Replicate",
-    accessor: (labware) =>
-      valueFromSamples(labware, (sample) => String(sample.tissue.replicate)),
+    Header: 'Replicate',
+    accessor: (labware) => valueFromSamples(labware, (sample) => String(sample.tissue.replicate))
   };
 };
 
@@ -88,8 +74,8 @@ const replicate: ColumnFactory = () => {
  */
 const labwareType: ColumnFactory = () => {
   return {
-    Header: "Labware Type",
-    accessor: (labware) => labware.labwareType.name,
+    Header: 'Labware Type',
+    accessor: (labware) => labware.labwareType.name
   };
 };
 
@@ -98,26 +84,22 @@ const labwareType: ColumnFactory = () => {
  */
 const externalName: ColumnFactory = () => {
   return {
-    Header: "External ID",
-    accessor: (labware) =>
-      valueFromSamples(labware, (sample) => sample.tissue.externalName ?? ""),
+    Header: 'External ID',
+    accessor: (labware) => valueFromSamples(labware, (sample) => sample.tissue.externalName ?? '')
   };
 };
 
 const bioState: ColumnFactory = () => {
   return {
-    Header: "Bio state",
-    accessor: (labware) =>
-      valueFromSamples(labware, (sample) => sample.bioState.name),
+    Header: 'Bio state',
+    accessor: (labware) => valueFromSamples(labware, (sample) => sample.bioState.name)
   };
 };
 
 const highestSectionForSlot: ColumnFactory = (slotAddress) => {
   return {
-    Header: "Highest Section for Block",
-    accessor: (labware) =>
-      maybeFindSlotByAddress(labware.slots, slotAddress)?.blockHighestSection ??
-      "-",
+    Header: 'Highest Section for Block',
+    accessor: (labware) => maybeFindSlotByAddress(labware.slots, slotAddress)?.blockHighestSection ?? '-'
   };
 };
 
@@ -126,11 +108,8 @@ const highestSectionForSlot: ColumnFactory = (slotAddress) => {
  */
 const medium: ColumnFactory = () => {
   return {
-    Header: "Medium",
-    accessor: (labware) =>
-      labware.slots[0].samples.length > 0
-        ? labware.slots[0].samples[0].tissue.medium.name
-        : "",
+    Header: 'Medium',
+    accessor: (labware) => (labware.slots[0].samples.length > 0 ? labware.slots[0].samples[0].tissue.medium.name : '')
   };
 };
 
@@ -139,11 +118,8 @@ const medium: ColumnFactory = () => {
  */
 const fixative: ColumnFactory = () => {
   return {
-    Header: "Fixative",
-    accessor: (labware) =>
-      labware.slots[0].samples.length > 0
-        ? labware.slots[0].samples[0].tissue.fixative.name
-        : "",
+    Header: 'Fixative',
+    accessor: (labware) => (labware.slots[0].samples.length > 0 ? labware.slots[0].samples[0].tissue.fixative.name : '')
   };
 };
 
@@ -159,7 +135,7 @@ const columns = {
   bioState,
   highestSectionForSlot,
   medium,
-  fixative,
+  fixative
 };
 
 export default columns;

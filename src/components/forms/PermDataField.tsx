@@ -1,11 +1,11 @@
-import React, { ChangeEvent, useState } from "react";
-import { Field, useFormikContext } from "formik";
-import { Input } from "./Input";
-import Label from "./Label";
-import FormikSelect from "./Select";
-import { ControlType, PermData } from "../../types/sdk";
-import { objectKeys } from "../../lib/helpers";
-import { FormikErrorMessage, formikName } from "./index";
+import React, { ChangeEvent, useState } from 'react';
+import { Field, useFormikContext } from 'formik';
+import { Input } from './Input';
+import Label from './Label';
+import FormikSelect from './Select';
+import { ControlType, PermData } from '../../types/sdk';
+import { objectKeys } from '../../lib/helpers';
+import { FormikErrorMessage, formikName } from './index';
 
 type PermDataFieldProps = {
   /**
@@ -32,7 +32,7 @@ export default function PermDataField<T>({ name }: PermDataFieldProps) {
     setFieldValue(name, {
       address: permData.address,
       seconds: isChecked ? undefined : 1,
-      controlType: isChecked ? ControlType.Positive : undefined,
+      controlType: isChecked ? ControlType.Positive : undefined
     });
 
     setIsControl(isChecked);
@@ -41,20 +41,12 @@ export default function PermDataField<T>({ name }: PermDataFieldProps) {
   return (
     <div className="space-y-2">
       <div className="flex flex-row items-center gap-x-2">
-        <Label htmlFor={`${name}checkbox`} name={"Control?"} />
-        <Input
-          type="checkbox"
-          id={`${name}checkbox`}
-          checked={isControl}
-          onChange={onIsControlChange}
-        />
+        <Label htmlFor={`${name}checkbox`} name={'Control?'} />
+        <Input type="checkbox" id={`${name}checkbox`} checked={isControl} onChange={onIsControlChange} />
       </div>
 
       {permData.controlType && (
-        <FormikSelect
-          name={formikName(name, "controlType")}
-          label={"Control Type"}
-        >
+        <FormikSelect name={formikName(name, 'controlType')} label={'Control Type'}>
           {objectKeys(ControlType).map((controlTypeKey) => (
             <option key={controlTypeKey} value={ControlType[controlTypeKey]}>
               {controlTypeKey}
@@ -65,20 +57,17 @@ export default function PermDataField<T>({ name }: PermDataFieldProps) {
 
       {!!permData.seconds && (
         <>
-          <Label name={"Perm Time (minutes)"}>
-            <Field name={formikName(name, "seconds")}>
+          <Label name={'Perm Time (minutes)'}>
+            <Field name={formikName(name, 'seconds')}>
               {({ field }: any) => (
                 <Input
-                  type={"number"}
+                  type={'number'}
                   min={1}
                   step={1}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setFieldValue(
-                      formikName(name, "seconds"),
-                      Number(e.currentTarget.value)
-                    )
+                    setFieldValue(formikName(name, 'seconds'), Number(e.currentTarget.value))
                   }
-                  value={field.value ?? ""} // Stops react complaining about "controlled/uncontrolled" inputs
+                  value={field.value ?? ''} // Stops react complaining about "controlled/uncontrolled" inputs
                 />
               )}
             </Field>

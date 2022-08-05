@@ -1,33 +1,29 @@
-import React, { useEffect } from "react";
-import { useMachine, useSelector } from "@xstate/react";
-import variants from "../../lib/motionVariants";
-import Labware from "../labware/Labware";
-import PinkButton from "../buttons/PinkButton";
-import Modal, { ModalBody, ModalFooter } from "../Modal";
-import Heading from "../Heading";
-import BlueButton from "../buttons/BlueButton";
-import { motion } from "framer-motion";
-import { optionValues } from "../forms";
-import LayoutPlanner from "../LayoutPlanner";
-import Label from "../forms/Label";
-import WhiteButton from "../buttons/WhiteButton";
-import { sortRightDown } from "../../lib/helpers/labwareHelper";
-import { Select } from "../forms/Select";
-import LabwareComments, { SectionNumberSetting } from "./LabwareComments";
-import classNames from "classnames";
-import {
-  buildSlotColor,
-  buildSlotSecondaryText,
-  buildSlotText,
-} from "../../pages/sectioning";
-import { createConfirmLabwareMachine } from "./confirmLabware.machine";
-import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
-import { CommentFieldsFragment, ConfirmSectionLabware } from "../../types/sdk";
-import { selectConfirmOperationLabware } from "./index";
-import RemoveButton from "../buttons/RemoveButton";
-import { ConfirmationModal } from "../modal/ConfirmationModal";
-import { SectionNumberMode } from "./SectioningConfirm";
-import { LabwareTypeName } from "../../types/stan";
+import React, { useEffect } from 'react';
+import { useMachine, useSelector } from '@xstate/react';
+import variants from '../../lib/motionVariants';
+import Labware from '../labware/Labware';
+import PinkButton from '../buttons/PinkButton';
+import Modal, { ModalBody, ModalFooter } from '../Modal';
+import Heading from '../Heading';
+import BlueButton from '../buttons/BlueButton';
+import { motion } from 'framer-motion';
+import { optionValues } from '../forms';
+import LayoutPlanner from '../LayoutPlanner';
+import Label from '../forms/Label';
+import WhiteButton from '../buttons/WhiteButton';
+import { sortRightDown } from '../../lib/helpers/labwareHelper';
+import { Select } from '../forms/Select';
+import LabwareComments, { SectionNumberSetting } from './LabwareComments';
+import classNames from 'classnames';
+import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pages/sectioning';
+import { createConfirmLabwareMachine } from './confirmLabware.machine';
+import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
+import { CommentFieldsFragment, ConfirmSectionLabware } from '../../types/sdk';
+import { selectConfirmOperationLabware } from './index';
+import RemoveButton from '../buttons/RemoveButton';
+import { ConfirmationModal } from '../modal/ConfirmationModal';
+import { SectionNumberMode } from './SectioningConfirm';
+import { LabwareTypeName } from '../../types/stan';
 
 interface ConfirmLabwareProps {
   originalLayoutPlan: LayoutPlan;
@@ -53,7 +49,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   onSectionUpdate,
   onSectionNumberChange,
   removePlan,
-  mode,
+  mode
 }) => {
   const confirmLabwareMachine = React.useMemo(() => {
     return createConfirmLabwareMachine(
@@ -75,10 +71,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
 
   const gridClassNames = classNames(
     {
-      "sm:grid-cols-1": labware.labwareType.numColumns === 1,
-      "sm:grid-cols-2": labware.labwareType.numColumns === 2,
+      'sm:grid-cols-1': labware.labwareType.numColumns === 1,
+      'sm:grid-cols-2': labware.labwareType.numColumns === 2
     },
-    "grid grid-cols-1 gap-x-8 gap-y-2"
+    'grid grid-cols-1 gap-x-8 gap-y-2'
   );
 
   useEffect(() => {
@@ -89,11 +85,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
 
   useEffect(() => {
     //Notify parent only for layout changes
-    if (
-      layoutPlan &&
-      current.event.type === "done.invoke.layoutMachine" &&
-      notifySectionChange.current
-    ) {
+    if (layoutPlan && current.event.type === 'done.invoke.layoutMachine' && notifySectionChange.current) {
       notifySectionChange.current = false;
 
       onSectionUpdate && onSectionUpdate(layoutPlan);
@@ -103,7 +95,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   /***Update sources whenever there is an update in a source in parent**/
   useEffect(() => {
     if (originalLayoutPlan) {
-      send("UPDATE_ALL_SOURCES", originalLayoutPlan);
+      send('UPDATE_ALL_SOURCES', originalLayoutPlan);
     }
   }, [originalLayoutPlan, send]);
 
@@ -113,48 +105,30 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     } else {
       removePlan(layoutPlan.destinationLabware.barcode!);
     }
-  }, [
-    mode,
-    setNotifyDelete,
-    removePlan,
-    layoutPlan.destinationLabware.barcode,
-    sectionNumberEnabled,
-  ]);
+  }, [mode, setNotifyDelete, removePlan, layoutPlan.destinationLabware.barcode, sectionNumberEnabled]);
 
   return (
     <motion.div
       variants={variants.fadeInWithLift}
-      initial={"hidden"}
-      animate={"visible"}
-      className={`relative p-3 shadow ${
-        !sectionNumberEnabled && "lg:w-2/3 lg:mx-auto rounded-lg"
-      }`}
+      initial={'hidden'}
+      animate={'visible'}
+      className={`relative p-3 shadow ${!sectionNumberEnabled && 'lg:w-2/3 lg:mx-auto rounded-lg'}`}
     >
-      <RemoveButton
-        data-testid={`remove-slide-${labware.barcode}`}
-        onClick={handleRemovePlan}
-      />
+      <RemoveButton data-testid={`remove-slide-${labware.barcode}`} onClick={handleRemovePlan} />
       <div
         data-testid={`div-slide-${labware.barcode}`}
-        className={`${sectionNumberEnabled && "md:grid md:grid-cols-2"}`}
+        className={`${sectionNumberEnabled && 'md:grid md:grid-cols-2'}`}
       >
         <div className="py-4 flex flex-col items-center justify-between space-y-8">
           <Labware
             labware={labware}
-            onClick={() =>
-              sectionNumberEnabled && send({ type: "EDIT_LAYOUT" })
-            }
+            onClick={() => sectionNumberEnabled && send({ type: 'EDIT_LAYOUT' })}
             slotText={(address) => buildSlotText(layoutPlan, address)}
-            slotSecondaryText={(address) =>
-              buildSlotSecondaryText(layoutPlan, address)
-            }
+            slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
             slotColor={(address) => buildSlotColor(layoutPlan, address)}
           />
           {sectionNumberEnabled && (
-            <PinkButton
-              disabled={current.matches("done")}
-              onClick={() => send({ type: "EDIT_LAYOUT" })}
-            >
+            <PinkButton disabled={current.matches('done')} onClick={() => send({ type: 'EDIT_LAYOUT' })}>
               Edit Layout
             </PinkButton>
           )}
@@ -171,14 +145,12 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                   <LabwareComments
                     key={slot.address}
                     slot={slot}
-                    value={addressToCommentMap.get(slot.address) ?? ""}
-                    disabledComment={current.matches("done")}
+                    value={addressToCommentMap.get(slot.address) ?? ''}
+                    disabledComment={current.matches('done')}
                     sectionNumberDisplay={
-                      labware.labwareType.name ===
-                      LabwareTypeName.FETAL_WASTE_CONTAINER
+                      labware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER
                         ? SectionNumberSetting.HIDE
-                        : mode === SectionNumberMode.Auto ||
-                          current.matches("done")
+                        : mode === SectionNumberMode.Auto || current.matches('done')
                         ? SectionNumberSetting.DISABLE
                         : SectionNumberSetting.NORMAL
                     }
@@ -186,54 +158,45 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                     layoutPlan={layoutPlan}
                     onCommentChange={(e) => {
                       send({
-                        type: "SET_COMMENT_FOR_ADDRESS",
+                        type: 'SET_COMMENT_FOR_ADDRESS',
                         address: slot.address,
-                        commentId: e.currentTarget.value,
+                        commentId: e.currentTarget.value
                       });
                     }}
-                    onSectionNumberChange={(
-                      slotAddress,
-                      sectionIndex,
-                      sectionNumber
-                    ) => {
+                    onSectionNumberChange={(slotAddress, sectionIndex, sectionNumber) => {
                       /**Notify parent, so as to modify section number in original layout*/
                       onSectionNumberChange &&
-                        onSectionNumberChange(
-                          layoutPlan,
-                          slotAddress,
-                          sectionIndex,
-                          sectionNumber
-                        );
+                        onSectionNumberChange(layoutPlan, slotAddress, sectionIndex, sectionNumber);
                       send({
-                        type: "UPDATE_SECTION_NUMBER",
+                        type: 'UPDATE_SECTION_NUMBER',
                         slotAddress,
                         sectionIndex,
-                        sectionNumber,
+                        sectionNumber
                       });
                     }}
                   />
                 ))}
               </div>
             </div>
-            <Label name={"All slots:"}>
+            <Label name={'All slots:'}>
               <Select
-                disabled={current.matches("done")}
+                disabled={current.matches('done')}
                 onChange={(e) =>
                   send({
-                    type: "SET_COMMENT_FOR_ALL",
-                    commentId: e.currentTarget.value,
+                    type: 'SET_COMMENT_FOR_ALL',
+                    commentId: e.currentTarget.value
                   })
                 }
               >
                 <option />
-                {optionValues(comments, "text", "id")}
+                {optionValues(comments, 'text', 'id')}
               </Select>
             </Label>
           </div>
         )}
       </div>
 
-      <Modal show={current.matches("editingLayout")}>
+      <Modal show={current.matches('editingLayout')}>
         <ModalBody>
           <Heading level={3}>Set Layout</Heading>
           {layoutMachine && (
@@ -242,9 +205,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                 <p className="text-gray-900 text-sm leading-normal">
                   Click a slot to increase the number of sections in that slot.
                 </p>
-                <p>
-                  To reduce the number of sections in a slot, use Ctrl-Click.
-                </p>
+                <p>To reduce the number of sections in a slot, use Ctrl-Click.</p>
               </div>
             </LayoutPlanner>
           )}
@@ -253,16 +214,13 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
           <BlueButton
             onClick={() => {
               notifySectionChange.current = true;
-              layoutMachine.send({ type: "DONE" });
+              layoutMachine.send({ type: 'DONE' });
             }}
             className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
           >
             Done
           </BlueButton>
-          <WhiteButton
-            onClick={() => layoutMachine.send({ type: "CANCEL" })}
-            className="mt-3 w-full sm:mt-0 sm:ml-3"
-          >
+          <WhiteButton onClick={() => layoutMachine.send({ type: 'CANCEL' })} className="mt-3 w-full sm:mt-0 sm:ml-3">
             Cancel
           </WhiteButton>
         </ModalFooter>
@@ -270,29 +228,27 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
       {
         <ConfirmationModal
           show={notifyDelete}
-          header={"Removing labware"}
-          message={{ type: "Warning", text: "Section number update" }}
+          header={'Removing labware'}
+          message={{ type: 'Warning', text: 'Section number update' }}
           confirmOptions={[
             {
-              label: "Cancel",
+              label: 'Cancel',
               action: () => {
                 setNotifyDelete(false);
-              },
+              }
             },
             {
-              label: "Continue",
+              label: 'Continue',
               action: () => {
                 layoutPlan &&
                   layoutPlan.destinationLabware.barcode &&
                   removePlan(layoutPlan.destinationLabware.barcode);
                 setNotifyDelete(false);
-              },
-            },
+              }
+            }
           ]}
         >
-          <p className={"font-bold mt-8"}>
-            Planned section numbers of other labware will be updated.
-          </p>
+          <p className={'font-bold mt-8'}>Planned section numbers of other labware will be updated.</p>
         </ConfirmationModal>
       }
     </motion.div>

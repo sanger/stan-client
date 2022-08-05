@@ -1,8 +1,8 @@
-import React from "react";
-import Modal, { ModalBody, ModalFooter, ModalHeader } from "../Modal";
-import Success from "../notifications/Success";
-import WhiteButton from "../buttons/WhiteButton";
-import Warning from "../notifications/Warning";
+import React from 'react';
+import Modal, { ModalBody, ModalFooter, ModalHeader } from '../Modal';
+import Success from '../notifications/Success';
+import WhiteButton from '../buttons/WhiteButton';
+import Warning from '../notifications/Warning';
 
 interface ConfirmationProps {
   /**
@@ -21,7 +21,7 @@ interface ConfirmationProps {
   /**
    * Message to display
    */
-  message?: { type: "Warning" | "Success"; text: string };
+  message?: { type: 'Warning' | 'Success'; text: string };
 
   /**
    * Labels and action handlers for different options to display
@@ -34,18 +34,14 @@ export const ConfirmationModal = ({
   header,
   message,
   confirmOptions,
-  children,
+  children
 }: ConfirmationProps): JSX.Element => {
   return (
     <Modal show={show}>
       <ModalHeader>{header}</ModalHeader>
       <ModalBody>
-        {message && message.type === "Success" && (
-          <Success message={message.text} />
-        )}
-        {message && message.type === "Warning" && (
-          <Warning message={message.text} />
-        )}
+        {message && message.type === 'Success' && <Success message={message.text} />}
+        {message && message.type === 'Warning' && <Warning message={message.text} />}
         <div className="my-4">{children}</div>
       </ModalBody>
       <ModalFooter>

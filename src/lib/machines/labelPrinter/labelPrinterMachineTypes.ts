@@ -1,16 +1,11 @@
-import {
-  GetPrintersQuery,
-  LabwareFieldsFragment,
-  Maybe,
-  PrinterFieldsFragment,
-} from "../../../types/sdk";
-import { ClientError } from "graphql-request";
+import { GetPrintersQuery, LabwareFieldsFragment, Maybe, PrinterFieldsFragment } from '../../../types/sdk';
+import { ClientError } from 'graphql-request';
 
 export interface LabelPrinterContext {
   /**
    * Printers from the GetPrinters query
    */
-  printers: GetPrintersQuery["printers"];
+  printers: GetPrintersQuery['printers'];
 
   /**
    * Error message from core
@@ -48,32 +43,32 @@ export interface LabelPrinterSchema {
 }
 
 type FetchPrintersDoneEvent = {
-  type: "done.invoke.fetchPrinters";
+  type: 'done.invoke.fetchPrinters';
   data: GetPrintersQuery;
 };
 
 type FetchPrintersErrorEvent = {
-  type: "error.platform.fetchPrinters";
+  type: 'error.platform.fetchPrinters';
   data: ClientError;
 };
 
-type PrintEvent = { type: "PRINT"; labelsPerBarcode?: number };
+type PrintEvent = { type: 'PRINT'; labelsPerBarcode?: number };
 
 type UpdateSelectedLabelPrinterEvent = {
-  type: "UPDATE_SELECTED_LABEL_PRINTER";
+  type: 'UPDATE_SELECTED_LABEL_PRINTER';
   name: string;
 };
 
 export type PrintSuccessEvent = {
-  type: "PRINT_SUCCESS";
+  type: 'PRINT_SUCCESS';
   message: string;
-  labelPrinter: GetPrintersQuery["printers"][number];
+  labelPrinter: GetPrintersQuery['printers'][number];
 };
 
 export type PrintErrorEvent = {
-  type: "PRINT_ERROR";
+  type: 'PRINT_ERROR';
   message: string;
-  labelPrinter: GetPrintersQuery["printers"][number];
+  labelPrinter: GetPrintersQuery['printers'][number];
 };
 
 export type LabelPrinterEvent =

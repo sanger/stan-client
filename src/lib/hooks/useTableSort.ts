@@ -1,6 +1,6 @@
-import React from "react";
-import { getPropertyValue, SortDirection, StringKeyedProps } from "../helpers";
-import { alphaNumericSortDefault } from "../../types/stan";
+import React from 'react';
+import { getPropertyValue, SortDirection, StringKeyedProps } from '../helpers';
+import { alphaNumericSortDefault } from '../../types/stan';
 
 export type SortConfigProps = {
   /**
@@ -30,10 +30,7 @@ export type SortConfigProps = {
  * Works with any <Table> component data
  * Sorts any array even using fields of contained objects in any depth, supports alphanumeric value sort as well
  */
-export function useTableSort<T extends StringKeyedProps>(
-  items: T[],
-  config: SortConfigProps | null = null
-) {
+export function useTableSort<T extends StringKeyedProps>(items: T[], config: SortConfigProps | null = null) {
   /**
    * Sort configuration state
    */
@@ -50,34 +47,24 @@ export function useTableSort<T extends StringKeyedProps>(
 
         /**If custom sort function is given, use that to sort values**/
         if (sortConfig.customSort) {
-          return sortConfig.direction === "ascending"
+          return sortConfig.direction === 'ascending'
             ? sortConfig.customSort(aVal, bVal)
             : sortConfig.customSort(bVal, aVal);
         } else {
           /**Use alphanumeric sort for string values*/
-          if (typeof aVal === "string" && typeof bVal == "string") {
-            return sortConfig.direction === "ascending"
+          if (typeof aVal === 'string' && typeof bVal == 'string') {
+            return sortConfig.direction === 'ascending'
               ? alphaNumericSortDefault(aVal.toLowerCase(), bVal.toLowerCase())
               : alphaNumericSortDefault(bVal.toLowerCase(), aVal.toLowerCase());
           } else {
             //Make sure empty strings will be at the bottom for both sorting
-            aVal =
-              aVal === ""
-                ? sortConfig.direction === "ascending"
-                  ? Number.MAX_VALUE
-                  : Number.MIN_VALUE
-                : aVal;
-            bVal =
-              bVal === ""
-                ? sortConfig.direction === "ascending"
-                  ? Number.MAX_VALUE
-                  : Number.MIN_VALUE
-                : bVal;
+            aVal = aVal === '' ? (sortConfig.direction === 'ascending' ? Number.MAX_VALUE : Number.MIN_VALUE) : aVal;
+            bVal = bVal === '' ? (sortConfig.direction === 'ascending' ? Number.MAX_VALUE : Number.MIN_VALUE) : bVal;
             if (aVal < bVal) {
-              return sortConfig.direction === "ascending" ? -1 : 1;
+              return sortConfig.direction === 'ascending' ? -1 : 1;
             }
             if (aVal > bVal) {
-              return sortConfig.direction === "ascending" ? 1 : -1;
+              return sortConfig.direction === 'ascending' ? 1 : -1;
             }
           }
           return 0;
@@ -89,24 +76,16 @@ export function useTableSort<T extends StringKeyedProps>(
 
   /**sort action call*/
 
-  const sort = (
-    sortFieldName: string,
-    accessPath: string[],
-    customSort?: (a: any, b: any) => number
-  ) => {
-    let direction: SortDirection = "descending";
-    if (
-      sortConfig &&
-      sortConfig.sortFieldName === sortFieldName &&
-      sortConfig.direction === "descending"
-    ) {
-      direction = "ascending";
+  const sort = (sortFieldName: string, accessPath: string[], customSort?: (a: any, b: any) => number) => {
+    let direction: SortDirection = 'descending';
+    if (sortConfig && sortConfig.sortFieldName === sortFieldName && sortConfig.direction === 'descending') {
+      direction = 'ascending';
     }
     setSortConfig({
       sortFieldName,
       accessPath,
       direction,
-      customSort,
+      customSort
     });
   };
 

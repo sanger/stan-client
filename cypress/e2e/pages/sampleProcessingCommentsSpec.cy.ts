@@ -1,122 +1,112 @@
 import {
   RecordSampleProcessingCommentsMutation,
-  RecordSampleProcessingCommentsMutationVariables,
-} from "../../../src/types/sdk";
-import { labwareTypeInstances } from "../../../src/lib/factories/labwareTypeFactory";
-import { LabwareTypeName } from "../../../src/types/stan";
-import labwareFactory from "../../../src/lib/factories/labwareFactory";
+  RecordSampleProcessingCommentsMutationVariables
+} from '../../../src/types/sdk';
+import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFactory';
+import { LabwareTypeName } from '../../../src/types/stan';
+import labwareFactory from '../../../src/lib/factories/labwareFactory';
 
-describe("Sample Processing Comments", () => {
+describe('Sample Processing Comments', () => {
   before(() => {
-    cy.visit("/lab/sample_processing_comments");
+    cy.visit('/lab/sample_processing_comments');
   });
 
-  describe("Validation", () => {
-    context("when the form with nothing filled in", () => {
+  describe('Validation', () => {
+    context('when the form with nothing filled in', () => {
       before(() => {
-        cy.findByRole("button", { name: "Submit" }).click();
+        cy.findByRole('button', { name: 'Submit' }).click();
       });
 
-      it("shows a validation error for labware", () => {
-        cy.findByText("At least one labware must be scanned").should(
-          "be.visible"
-        );
+      it('shows a validation error for labware', () => {
+        cy.findByText('At least one labware must be scanned').should('be.visible');
       });
     });
-    context("when labware is scanned", () => {
+    context('when labware is scanned', () => {
       before(() => {
-        cy.get("#labwareScanInput").type("STAN-3111{enter}");
+        cy.get('#labwareScanInput').type('STAN-3111{enter}');
       });
-      it("shows a table", () => {
-        cy.findByRole("table").should("be.visible");
+      it('shows a table', () => {
+        cy.findByRole('table').should('be.visible');
       });
     });
-    context(
-      "when Submit clicked for scanned labware with no comment selected",
-      () => {
-        before(() => {
-          cy.findByRole("button", { name: "Submit" }).click();
-        });
-        it("shows a validation error for the Comment", () => {
-          cy.findByText("Comment is a required field").should("be.visible");
-        });
-      }
-    );
+    context('when Submit clicked for scanned labware with no comment selected', () => {
+      before(() => {
+        cy.findByRole('button', { name: 'Submit' }).click();
+      });
+      it('shows a validation error for the Comment', () => {
+        cy.findByText('Comment is a required field').should('be.visible');
+      });
+    });
   });
 
-  describe("when comment is selected to apply to all", () => {
+  describe('when comment is selected to apply to all', () => {
     before(() => {
-      cy.get('select[name="applyAllComment"]').select("Issue while fixing");
+      cy.get('select[name="applyAllComment"]').select('Issue while fixing');
     });
-    it("all comment dropdowns in table must select the selected comment", () => {
-      cy.findByRole("table").contains("td", "Labware damaged");
+    it('all comment dropdowns in table must select the selected comment', () => {
+      cy.findByRole('table').contains('td', 'Labware damaged');
     });
   });
 
-  describe("API Requests", () => {
-    context("when request is successful", () => {
+  describe('API Requests', () => {
+    context('when request is successful', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<
-              RecordSampleProcessingCommentsMutation,
-              RecordSampleProcessingCommentsMutationVariables
-            >("RecordSampleProcessingComments", (req, res, ctx) => {
-              const labwareType = labwareTypeInstances.find(
-                (lt) => lt.name === LabwareTypeName.POT
-              );
-              const labware = req.variables.request.labware.map((lw) =>
-                labwareFactory.build({ labwareType, barcode: lw.barcode })
-              );
-              return res(
-                ctx.data({
-                  recordSampleProcessingComments: {
-                    labware,
-                    operations: [],
-                  },
-                })
-              );
-            })
+            graphql.mutation<RecordSampleProcessingCommentsMutation, RecordSampleProcessingCommentsMutationVariables>(
+              'RecordSampleProcessingComments',
+              (req, res, ctx) => {
+                const labwareType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.POT);
+                const labware = req.variables.request.labware.map((lw) =>
+                  labwareFactory.build({ labwareType, barcode: lw.barcode })
+                );
+                return res(
+                  ctx.data({
+                    recordSampleProcessingComments: {
+                      labware,
+                      operations: []
+                    }
+                  })
+                );
+              }
+            )
           );
         });
-        cy.findByRole("button", { name: /Submit/i }).click();
+        cy.findByRole('button', { name: /Submit/i }).click();
       });
-      it("displays Operation complete message", () => {
-        cy.findByText("Operation Complete").should("be.visible");
+      it('displays Operation complete message', () => {
+        cy.findByText('Operation Complete').should('be.visible');
       });
     });
 
-    context("when request is unsuccessful", () => {
+    context('when request is unsuccessful', () => {
       before(() => {
-        cy.visit("/lab/sample_processing_comments");
-        cy.get("#labwareScanInput").type("STAN-3111{enter}");
-        cy.get('select[name="applyAllComment"]').select("Issue while fixing");
+        cy.visit('/lab/sample_processing_comments');
+        cy.get('#labwareScanInput').type('STAN-3111{enter}');
+        cy.get('select[name="applyAllComment"]').select('Issue while fixing');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<
-              RecordSampleProcessingCommentsMutation,
-              RecordSampleProcessingCommentsMutationVariables
-            >("RecordSampleProcessingComments", (req, res, ctx) => {
-              return res.once(
-                ctx.errors([
-                  {
-                    extensions: {
-                      problems: [
-                        "This thing went wrong",
-                        "This other thing went wrong",
-                      ],
-                    },
-                  },
-                ])
-              );
-            })
+            graphql.mutation<RecordSampleProcessingCommentsMutation, RecordSampleProcessingCommentsMutationVariables>(
+              'RecordSampleProcessingComments',
+              (req, res, ctx) => {
+                return res.once(
+                  ctx.errors([
+                    {
+                      extensions: {
+                        problems: ['This thing went wrong', 'This other thing went wrong']
+                      }
+                    }
+                  ])
+                );
+              }
+            )
           );
         });
-        cy.findByRole("button", { name: /Submit/i }).click();
+        cy.findByRole('button', { name: /Submit/i }).click();
       });
-      it("shows the errors", () => {
-        cy.findByText("This thing went wrong").should("be.visible");
-        cy.findByText("This other thing went wrong").should("be.visible");
+      it('shows the errors', () => {
+        cy.findByText('This thing went wrong').should('be.visible');
+        cy.findByText('This other thing went wrong').should('be.visible');
       });
     });
   });

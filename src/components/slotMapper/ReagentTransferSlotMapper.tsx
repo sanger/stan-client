@@ -1,26 +1,16 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import Labware, { LabwareImperativeRef } from "../labware/Labware";
-import slotMapperMachine from "./slotMapper.machine";
-import WhiteButton from "../buttons/WhiteButton";
-import {
-  LabwareFieldsFragment,
-  SlotCopyContent,
-  SlotFieldsFragment,
-} from "../../types/sdk";
-import { useMachine } from "@xstate/react";
-import { find } from "lodash";
-import { findSlotByAddress, isSlotEmpty } from "../../lib/helpers/slotHelper";
-import { toast } from "react-toastify";
-import warningToast from "../notifications/WarningToast";
-import Heading from "../Heading";
-import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
-import RemoveButton from "../buttons/RemoveButton";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Labware, { LabwareImperativeRef } from '../labware/Labware';
+import slotMapperMachine from './slotMapper.machine';
+import WhiteButton from '../buttons/WhiteButton';
+import { LabwareFieldsFragment, SlotCopyContent, SlotFieldsFragment } from '../../types/sdk';
+import { useMachine } from '@xstate/react';
+import { find } from 'lodash';
+import { findSlotByAddress, isSlotEmpty } from '../../lib/helpers/slotHelper';
+import { toast } from 'react-toastify';
+import warningToast from '../notifications/WarningToast';
+import Heading from '../Heading';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
+import RemoveButton from '../buttons/RemoveButton';
 
 export interface ReagentTransferMappingProps {
   /**
@@ -29,10 +19,7 @@ export interface ReagentTransferMappingProps {
    * @param slotCopyContent the current mapping of source to destination slots
    * @param allSourcesMapped true if input labware exists and their non-empty slots have been mapped, false otherwise
    */
-  onChange?: (
-    slotCopyContent: Array<SlotCopyContent>,
-    allSourcesMapped: boolean
-  ) => void;
+  onChange?: (slotCopyContent: Array<SlotCopyContent>, allSourcesMapped: boolean) => void;
 
   /**
    * Lock the SlotMapper.
@@ -54,7 +41,7 @@ function ReagentTransferSlotMapper({
   onChange,
   initialSourceLabware,
   initialDestLabware,
-  disabled,
+  disabled
 }: ReagentTransferMappingProps) {
   const memoSlotMapperMachine = React.useMemo(() => {
     return slotMapperMachine.withContext({
@@ -72,19 +59,13 @@ function ReagentTransferSlotMapper({
   /**
    * State to track the currently selected input and output addresses
    */
-  const [selectedInputAddresses, setSelectedInputAddresses] = useState<
-    Array<string>
-  >([]);
-  const [selectedOutputAddresses, setSelectedOutputAddresses] = useState<
-    Array<string>
-  >([]);
+  const [selectedInputAddresses, setSelectedInputAddresses] = useState<Array<string>>([]);
+  const [selectedOutputAddresses, setSelectedOutputAddresses] = useState<Array<string>>([]);
 
   /**
    * State to keep the output address clicked to transfer from input
    */
-  const [destinationAddress, setDestinationAddress] = useState<
-    string | undefined
-  >();
+  const [destinationAddress, setDestinationAddress] = useState<string | undefined>();
 
   /**
    * These refs are passed into the Labware components so we can imperatively
@@ -98,7 +79,7 @@ function ReagentTransferSlotMapper({
    */
   React.useEffect(() => {
     if (!initialSourceLabware) return;
-    send({ type: "UPDATE_INPUT_LABWARE", labware: [initialSourceLabware] });
+    send({ type: 'UPDATE_INPUT_LABWARE', labware: [initialSourceLabware] });
   }, [send, initialSourceLabware]);
 
   /**
@@ -106,7 +87,7 @@ function ReagentTransferSlotMapper({
    */
   React.useEffect(() => {
     if (!initialDestLabware) return;
-    send({ type: "UPDATE_OUTPUT_LABWARE", labware: [initialDestLabware] });
+    send({ type: 'UPDATE_OUTPUT_LABWARE', labware: [initialDestLabware] });
   }, [send, initialDestLabware]);
 
   React.useEffect(() => {
@@ -126,18 +107,14 @@ function ReagentTransferSlotMapper({
   }, [slotCopyContent, initialSourceLabware, initialDestLabware]);
 
   const getSourceSlotColor = useCallback(
-    (
-      labware: LabwareFieldsFragment,
-      address: string,
-      slot: SlotFieldsFragment
-    ) => {
+    (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
       if (disabled) {
         return `bg-gray-400 `;
       } else {
         if (
           find(slotCopyContent, {
             sourceBarcode: labware.barcode,
-            sourceAddress: address,
+            sourceAddress: address
           })
         ) {
           return `bg-blue-200`;
@@ -152,16 +129,12 @@ function ReagentTransferSlotMapper({
   );
 
   const getDestinationSlotColor = useCallback(
-    (
-      labware: LabwareFieldsFragment,
-      address: string,
-      slot: SlotFieldsFragment
-    ) => {
+    (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
       if (disabled) {
         return `bg-gray-400`;
       } else {
         const scc = find(slotCopyContent, {
-          destinationAddress: address,
+          destinationAddress: address
         });
         if (scc) {
           return `bg-blue-500`;
@@ -180,31 +153,19 @@ function ReagentTransferSlotMapper({
   const handleCopySlots = React.useCallback(
     (givenDestinationAddress?: string) => {
       if (!initialSourceLabware || !initialDestLabware) return;
-      const address = destinationAddress
-        ? destinationAddress
-        : givenDestinationAddress;
-      if (
-        initialSourceLabware.barcode &&
-        initialDestLabware.barcode &&
-        address
-      ) {
+      const address = destinationAddress ? destinationAddress : givenDestinationAddress;
+      if (initialSourceLabware.barcode && initialDestLabware.barcode && address) {
         send({
-          type: "COPY_SLOTS",
+          type: 'COPY_SLOTS',
           inputLabwareId: initialSourceLabware.id,
           inputAddresses: selectedInputAddresses,
           outputLabwareId: initialDestLabware.id,
-          outputAddress: address,
+          outputAddress: address
         });
       }
       setDestinationAddress(undefined);
     },
-    [
-      initialSourceLabware,
-      initialDestLabware,
-      destinationAddress,
-      selectedInputAddresses,
-      send,
-    ]
+    [initialSourceLabware, initialDestLabware, destinationAddress, selectedInputAddresses, send]
   );
 
   /**
@@ -216,13 +177,11 @@ function ReagentTransferSlotMapper({
       if (disabled) {
         return;
       }
-      if (
-        isSlotEmpty(findSlotByAddress(initialDestLabware!.slots, outputAddress))
-      ) {
+      if (isSlotEmpty(findSlotByAddress(initialDestLabware!.slots, outputAddress))) {
         warningToast({
-          message: "Cannot transfer reagent to an empty slot.",
+          message: 'Cannot transfer reagent to an empty slot.',
           position: toast.POSITION.TOP_RIGHT,
-          autoClose: 5000,
+          autoClose: 5000
         });
         return;
       }
@@ -238,9 +197,9 @@ function ReagentTransferSlotMapper({
   const handleOnClickClear = React.useCallback(() => {
     if (initialDestLabware && initialDestLabware.id) {
       send({
-        type: "CLEAR_SLOTS",
+        type: 'CLEAR_SLOTS',
         outputLabwareId: initialDestLabware.id,
-        outputAddresses: slotCopyContent.map((scc) => scc.destinationAddress),
+        outputAddresses: slotCopyContent.map((scc) => scc.destinationAddress)
       });
       outputLabwareRef.current?.deselectAll();
     }
@@ -249,9 +208,9 @@ function ReagentTransferSlotMapper({
   const handleOnRemoveMapping = React.useCallback(
     (destAddress: string) => {
       send({
-        type: "CLEAR_SLOTS",
+        type: 'CLEAR_SLOTS',
         outputLabwareId: initialDestLabware!.id,
-        outputAddresses: [destAddress],
+        outputAddresses: [destAddress]
       });
       if (selectedOutputAddresses.includes(destAddress)) {
         outputLabwareRef.current?.deselectAll();
@@ -304,9 +263,7 @@ function ReagentTransferSlotMapper({
               name={initialDestLabware.labwareType.name}
               onSlotClick={handleOnOutputLabwareSlotClick}
               onSelect={setSelectedOutputAddresses}
-              slotColor={(address, slot) =>
-                getDestinationSlotColor(initialDestLabware, address, slot)
-              }
+              slotColor={(address, slot) => getDestinationSlotColor(initialDestLabware, address, slot)}
             />
           )}
         </div>
@@ -329,9 +286,7 @@ function ReagentTransferSlotMapper({
                   <TableCell>
                     <RemoveButton
                       type="button"
-                      onClick={() =>
-                        handleOnRemoveMapping(scc.destinationAddress)
-                      }
+                      onClick={() => handleOnRemoveMapping(scc.destinationAddress)}
                       disabled={disabled}
                     />
                   </TableCell>

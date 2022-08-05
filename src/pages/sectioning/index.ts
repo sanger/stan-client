@@ -1,4 +1,4 @@
-import { LayoutPlan } from "../../lib/machines/layout/layoutContext";
+import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
 
 export function buildSlotText(layoutPlan: LayoutPlan, address: string) {
   const action = layoutPlan.plannedActions.get(address);
@@ -7,10 +7,7 @@ export function buildSlotText(layoutPlan: LayoutPlan, address: string) {
   }
 }
 
-export function buildSlotSecondaryText(
-  layoutPlan: LayoutPlan,
-  address: string
-) {
+export function buildSlotSecondaryText(layoutPlan: LayoutPlan, address: string) {
   const action = layoutPlan.plannedActions.get(address);
   if (action && action.length > 1) {
     return `\u00d7${action.length}`;

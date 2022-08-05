@@ -1,6 +1,6 @@
-import React from "react";
-import { UserRole } from "../types/sdk";
-import { useAuth } from "../context/AuthContext";
+import React from 'react';
+import { UserRole } from '../types/sdk';
+import { useAuth } from '../context/AuthContext';
 
 interface AuthProps {
   role?: UserRole;

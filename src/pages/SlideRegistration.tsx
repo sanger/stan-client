@@ -1,31 +1,26 @@
-import React, { useContext, useEffect, useMemo, useRef } from "react";
-import AppShell from "../components/AppShell";
-import { Formik } from "formik";
-import SlideRegistrationForm from "./registration/SlideRegistrationForm";
-import columns from "../components/dataTable/labwareColumns";
-import RegistrationSuccess from "./registration/RegistrationSuccess";
-import Warning from "../components/notifications/Warning";
-import {
-  GetRegistrationInfoQuery,
-  LifeStage,
-  RegisterSectionsMutation,
-  SectionRegisterRequest,
-} from "../types/sdk";
-import { LabwareTypeName } from "../types/stan";
-import _, { uniqueId } from "lodash";
-import RegistrationValidation from "../lib/validation/registrationValidation";
-import * as Yup from "yup";
-import { useMachine } from "@xstate/react";
-import createFormMachine from "../lib/machines/form/formMachine";
-import { parseQueryString } from "../lib/helpers";
-import { history, StanCoreContext } from "../lib/sdk";
-import { useLocation } from "react-router-dom";
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
+import AppShell from '../components/AppShell';
+import { Formik } from 'formik';
+import SlideRegistrationForm from './registration/SlideRegistrationForm';
+import columns from '../components/dataTable/labwareColumns';
+import RegistrationSuccess from './registration/RegistrationSuccess';
+import Warning from '../components/notifications/Warning';
+import { GetRegistrationInfoQuery, LifeStage, RegisterSectionsMutation, SectionRegisterRequest } from '../types/sdk';
+import { LabwareTypeName } from '../types/stan';
+import _, { uniqueId } from 'lodash';
+import RegistrationValidation from '../lib/validation/registrationValidation';
+import * as Yup from 'yup';
+import { useMachine } from '@xstate/react';
+import createFormMachine from '../lib/machines/form/formMachine';
+import { parseQueryString } from '../lib/helpers';
+import { history, StanCoreContext } from '../lib/sdk';
+import { useLocation } from 'react-router-dom';
 
 const availableSlides: Array<LabwareTypeName> = [
   LabwareTypeName.SLIDE,
   LabwareTypeName.VISIUM_LP,
   LabwareTypeName.VISIUM_TO,
-  LabwareTypeName.FOUR_SLOT_SLIDE,
+  LabwareTypeName.FOUR_SLOT_SLIDE
 ];
 
 type SlideRegistrationFormSection = {
@@ -55,9 +50,7 @@ export type SlideRegistrationFormValues = {
   labwares: Array<SlideRegistrationFormLabware>;
 };
 
-function buildSectionRegisterRequest(
-  values: SlideRegistrationFormValues
-): SectionRegisterRequest {
+function buildSectionRegisterRequest(values: SlideRegistrationFormValues): SectionRegisterRequest {
   return {
     labware: values.labwares.map((labware) => {
       return {
@@ -77,46 +70,44 @@ function buildSectionRegisterRequest(
             sectionThickness: sample.sectionThickness,
             spatialLocation: sample.spatialLocation,
             species: sample.species.trim(),
-            tissueType: sample.tissueType.trim(),
+            tissueType: sample.tissueType.trim()
           }));
-        }),
+        })
       };
-    }),
+    })
   };
 }
 
 function buildInitialFormValues(initialLabwareType: LabwareTypeName) {
   return {
-    labwares: [buildLabware(initialLabwareType)],
+    labwares: [buildLabware(initialLabwareType)]
   };
 }
 
-function buildLabware(
-  labwareTypeName: LabwareTypeName
-): SlideRegistrationFormLabware {
+function buildLabware(labwareTypeName: LabwareTypeName): SlideRegistrationFormLabware {
   return {
-    clientId: uniqueId("labware_id"),
+    clientId: uniqueId('labware_id'),
     labwareTypeName,
-    externalSlideBarcode: "",
-    fixative: "",
-    medium: "",
-    slots: { A1: [buildSample()] },
+    externalSlideBarcode: '',
+    fixative: '',
+    medium: '',
+    slots: { A1: [buildSample()] }
   };
 }
 
 function buildSample(): SlideRegistrationFormSection {
   return {
-    clientId: uniqueId("sample_id"),
-    donorId: "",
+    clientId: uniqueId('sample_id'),
+    donorId: '',
     lifeStage: LifeStage.Adult,
-    species: "",
-    hmdmc: "",
-    tissueType: "",
-    externalIdentifier: "",
+    species: '',
+    hmdmc: '',
+    tissueType: '',
+    externalIdentifier: '',
     spatialLocation: 0,
-    replicateNumber: "",
+    replicateNumber: '',
     sectionNumber: 0,
-    sectionThickness: 0,
+    sectionThickness: 0
   };
 }
 
@@ -144,14 +135,14 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
                     spatialLocation: validation.spatialLocation,
                     replicateNumber: validation.replicateNumber,
                     sectionNumber: validation.sectionNumber,
-                    sectionThickness: validation.sectionThickness,
+                    sectionThickness: validation.sectionThickness
                   })
                 )
               )
             );
-          }),
+          })
         })
-      ),
+      )
   });
 }
 
@@ -159,20 +150,16 @@ const defaultSlideRegistrationContext = {
   buildSample,
   buildLabware,
   availableSlides,
-  isSubmitting: false,
+  isSubmitting: false
 };
 
-export const SlideRegistrationContext = React.createContext(
-  defaultSlideRegistrationContext
-);
+export const SlideRegistrationContext = React.createContext(defaultSlideRegistrationContext);
 
 interface PageParams {
   registrationInfo: GetRegistrationInfoQuery;
 }
 
-export const SlideRegistration: React.FC<PageParams> = ({
-  registrationInfo,
-}) => {
+export const SlideRegistration: React.FC<PageParams> = ({ registrationInfo }) => {
   const location = useLocation();
   const stanCore = useContext(StanCoreContext);
 
@@ -183,7 +170,7 @@ export const SlideRegistration: React.FC<PageParams> = ({
     >().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          if (e.type !== "SUBMIT_FORM") return Promise.reject();
+          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RegisterSections({ request: e.values });
         },
       },
@@ -194,10 +181,10 @@ export const SlideRegistration: React.FC<PageParams> = ({
   const initialSlide = useMemo(() => {
     const queryString = parseQueryString(location.search);
     if (
-      typeof queryString["initialSlide"] === "string" &&
-      availableSlides.includes(queryString["initialSlide"] as LabwareTypeName)
+      typeof queryString['initialSlide'] === 'string' &&
+      availableSlides.includes(queryString['initialSlide'] as LabwareTypeName)
     ) {
-      return queryString["initialSlide"] as LabwareTypeName;
+      return queryString['initialSlide'] as LabwareTypeName;
     }
   }, [location]);
 
@@ -207,22 +194,19 @@ export const SlideRegistration: React.FC<PageParams> = ({
     }
   }, [initialSlide]);
 
-  const validationSchema = useMemo(
-    () => buildValidationSchema(registrationInfo),
-    [registrationInfo]
-  );
+  const validationSchema = useMemo(() => buildValidationSchema(registrationInfo), [registrationInfo]);
 
   const warningRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    warningRef.current?.scrollIntoView({ behavior: "smooth" });
+    warningRef.current?.scrollIntoView({ behavior: 'smooth' });
   });
 
   const { serverError, submissionResult } = current.context;
   const submitForm = async (values: SlideRegistrationFormValues) =>
-    send({ type: "SUBMIT_FORM", values: buildSectionRegisterRequest(values) });
-  const isSubmitting = !current.matches("fillingOutForm");
+    send({ type: 'SUBMIT_FORM', values: buildSectionRegisterRequest(values) });
+  const isSubmitting = !current.matches('fillingOutForm');
 
-  if (current.matches("submitted") && submissionResult) {
+  if (current.matches('submitted') && submissionResult) {
     return (
       <RegistrationSuccess
         labware={submissionResult.registerSections.labware}
@@ -240,15 +224,13 @@ export const SlideRegistration: React.FC<PageParams> = ({
         <div className="max-w-screen-xl mx-auto">
           {!initialSlide && (
             <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
-              <p className="my-3 text-gray-800 text-sm leading-normal">
-                Pick a type of slide to begin:
-              </p>
+              <p className="my-3 text-gray-800 text-sm leading-normal">Pick a type of slide to begin:</p>
 
               <div className="flex flex-row items-center justify-center gap-4">
                 <select
                   onChange={(e) =>
                     history.replace({
-                      search: `?initialSlide=${e.target.value}`,
+                      search: `?initialSlide=${e.target.value}`
                     })
                   }
                   className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
@@ -266,17 +248,12 @@ export const SlideRegistration: React.FC<PageParams> = ({
 
           {serverError && (
             <div className="my-4" ref={warningRef}>
-              <Warning
-                error={serverError}
-                message={"There was a problem registering your slides"}
-              />
+              <Warning error={serverError} message={'There was a problem registering your slides'} />
             </div>
           )}
 
           {initialValues && (
-            <SlideRegistrationContext.Provider
-              value={{ ...defaultSlideRegistrationContext, isSubmitting }}
-            >
+            <SlideRegistrationContext.Provider value={{ ...defaultSlideRegistrationContext, isSubmitting }}>
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}

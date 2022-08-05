@@ -1,6 +1,6 @@
-import React from "react";
-import FormikSelect from "./forms/Select";
-import FormikInput from "./forms/Input";
+import React from 'react';
+import FormikSelect from './forms/Select';
+import FormikInput from './forms/Input';
 
 type KeyValueViewerProps = {
   /**
@@ -59,7 +59,7 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
   keyLabel,
   valueLabel,
   schemaNameKey,
-  schemaNameValue,
+  schemaNameValue
 }) => {
   const getValues = React.useCallback(
     (key: string): string[] => {
@@ -90,9 +90,9 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
     <div className="space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:flex-grow  md:justify-center md:items-center md:gap-4">
       <div className="md:flex-grow">
         <FormikSelect
-          label={keyLabel ?? ""}
-          name={schemaNameKey ?? ""}
-          data-testid={"type"}
+          label={keyLabel ?? ''}
+          name={schemaNameKey ?? ''}
+          data-testid={'type'}
           value={selected.key}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             handleSelectKey(e.currentTarget.value);
@@ -108,9 +108,9 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
       <div className="md:flex-grow">
         {selected.key && getValues(selected.key).length <= 0 ? (
           <FormikInput
-            name={schemaNameValue ?? ""}
-            label={valueLabel ?? ""}
-            data-testid={"valueInput"}
+            name={schemaNameValue ?? ''}
+            label={valueLabel ?? ''}
+            data-testid={'valueInput'}
             value={selected.value}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               handleSelectValue([e.currentTarget.value]);
@@ -118,22 +118,20 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
           />
         ) : (
           <FormikSelect
-            label={valueLabel ?? ""}
-            name={schemaNameValue ?? ""}
-            data-testid={"valueSelect"}
+            label={valueLabel ?? ''}
+            name={schemaNameValue ?? ''}
+            data-testid={'valueSelect'}
             value={
               selected.value
                 ? multiSelectValues
                   ? selected.value
                   : selected.value.length > 0
                   ? selected.value[0]
-                  : ""
-                : ""
+                  : ''
+                : ''
             }
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              handleSelectValue(
-                Array.from(e.target.selectedOptions, (option) => option.value)
-              );
+              handleSelectValue(Array.from(e.target.selectedOptions, (option) => option.value));
             }}
             multiple={multiSelectValues}
           >

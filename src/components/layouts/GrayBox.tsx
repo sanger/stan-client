@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 /**
  * A layout for a big gray box that can have a sidebar

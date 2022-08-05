@@ -1,18 +1,13 @@
-import React, { useCallback } from "react";
-import { useFormikContext } from "formik";
-import {
-  CommentFieldsFragment,
-  ExtractResultLabware,
-  ExtractResultRequest,
-  PassFail,
-} from "../../types/sdk";
-import Table, { TableBody, TableCell, TableHead, TableHeader } from "../Table";
-import { useLabwareContext } from "../labwareScanner/LabwareScanner";
-import { PassFailInput } from "../forms/PassFailInput";
-import FormikInput from "../forms/Input";
-import FormikSelect from "../forms/Select";
-import { optionValues } from "../forms";
-import RemoveButton from "../buttons/RemoveButton";
+import React, { useCallback } from 'react';
+import { useFormikContext } from 'formik';
+import { CommentFieldsFragment, ExtractResultLabware, ExtractResultRequest, PassFail } from '../../types/sdk';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
+import { useLabwareContext } from '../labwareScanner/LabwareScanner';
+import { PassFailInput } from '../forms/PassFailInput';
+import FormikInput from '../forms/Input';
+import FormikSelect from '../forms/Select';
+import { optionValues } from '../forms';
+import RemoveButton from '../buttons/RemoveButton';
 
 type ExtractResultLabwareTableProps = {
   /**
@@ -24,9 +19,7 @@ type ExtractResultLabwareTableProps = {
 /**
  * Component to build an {@link ExtractResultLabware}. Must be used inside a Formik form.
  */
-export function ExtractResultLabwareTable({
-  availableComments,
-}: ExtractResultLabwareTableProps) {
+export function ExtractResultLabwareTable({ availableComments }: ExtractResultLabwareTableProps) {
   const { values } = useFormikContext<ExtractResultRequest>();
 
   if (values.labware.length === 0) {
@@ -76,11 +69,7 @@ type ExtractResultLabwareRowProps = {
   availableComments: Array<CommentFieldsFragment>;
 };
 
-function ExtractResultLabwareRow({
-  labware,
-  index,
-  availableComments,
-}: ExtractResultLabwareRowProps) {
+function ExtractResultLabwareRow({ labware, index, availableComments }: ExtractResultLabwareRowProps) {
   const { removeLabware } = useLabwareContext();
   const { setFieldValue } = useFormikContext<ExtractResultRequest>();
 
@@ -93,15 +82,15 @@ function ExtractResultLabwareRow({
         setFieldValue(`labware.${index}`, {
           barcode: labware.barcode,
           commentId: undefined,
-          concentration: "0.00",
-          result: PassFail.Pass,
+          concentration: '0.00',
+          result: PassFail.Pass
         });
       } else {
         setFieldValue(`labware.${index}`, {
           barcode: labware.barcode,
           commentId: availableComments[0].id,
           concentration: undefined,
-          result: PassFail.Fail,
+          result: PassFail.Fail
         });
       }
     },
@@ -116,38 +105,28 @@ function ExtractResultLabwareRow({
       </TableCell>
       <TableCell>
         {labware.result === PassFail.Pass ? (
-          <FormikInput
-            label={""}
-            name={`labware.${index}.concentration`}
-            type={"text"}
-          />
+          <FormikInput label={''} name={`labware.${index}.concentration`} type={'text'} />
         ) : (
-          "-"
+          '-'
         )}
       </TableCell>
       <TableCell>
         {!!labware.commentId ? (
           <FormikSelect
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setFieldValue(
-                `labware.${index}.commentId`,
-                parseInt(e.currentTarget.value)
-              )
+              setFieldValue(`labware.${index}.commentId`, parseInt(e.currentTarget.value))
             }
-            label={""}
+            label={''}
             name={`labware.${index}.commentId`}
           >
-            {optionValues(availableComments, "text", "id")}
+            {optionValues(availableComments, 'text', 'id')}
           </FormikSelect>
         ) : (
-          "-"
+          '-'
         )}
       </TableCell>
       <TableCell>
-        <RemoveButton
-          type="button"
-          onClick={() => removeLabware(labware.barcode)}
-        />
+        <RemoveButton type="button" onClick={() => removeLabware(labware.barcode)} />
       </TableCell>
     </tr>
   );

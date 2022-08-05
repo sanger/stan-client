@@ -1,8 +1,8 @@
-import React from "react";
-import { AriaTabListProps } from "@react-types/tabs";
-import { useTabListState, TabListState } from "@react-stately/tabs";
-import { useTab, useTabList, useTabPanel } from "@react-aria/tabs";
-import { Node } from "@react-types/shared";
+import React from 'react';
+import { AriaTabListProps } from '@react-types/tabs';
+import { useTabListState, TabListState } from '@react-stately/tabs';
+import { useTab, useTabList, useTabPanel } from '@react-aria/tabs';
+import { Node } from '@react-types/shared';
 
 type TabItemProps<T extends object> = {
   state: TabListState<T>;
@@ -15,12 +15,12 @@ const TabList = (props: AriaTabListProps<object>) => {
   const ref = React.useRef(null);
   const { tabListProps } = useTabList(props, state, ref);
   return (
-    <div className={"h-full"}>
+    <div className={'h-full'}>
       <div
         {...tabListProps}
         ref={ref}
         className={
-          "rounded-tl overflow-hidden rounded-tr grid grid-flow-col justify-start items-center gap-x-1 bg-primary-200 border border-t-0 "
+          'rounded-tl overflow-hidden rounded-tr grid grid-flow-col justify-start items-center gap-x-1 bg-primary-200 border border-t-0 '
         }
       >
         {Array.from(state.collection).map((item) => (
@@ -46,8 +46,8 @@ function TabItem<T extends object>({ state, item }: TabItemProps<T>) {
       {...tabProps}
       ref={ref}
       className={`rounded-tl-lg rounded-tr-lg whitespace-nowrap transition focus:outline-none py-2 cursor-pointer px-8 h-full ${
-        isSelected ? "bg-sdb-400 text-white" : "bg-gray-200"
-      } ${isDisabled && "text-gray-300 cursor-not-allowed"}`}
+        isSelected ? 'bg-sdb-400 text-white' : 'bg-gray-200'
+      } ${isDisabled && 'text-gray-300 cursor-not-allowed'}`}
     >
       {rendered}
     </div>
@@ -55,20 +55,13 @@ function TabItem<T extends object>({ state, item }: TabItemProps<T>) {
 }
 
 /**Panel to display when a tab is selected**/
-const TabContentPanel = ({
-  state,
-  ...props
-}: {
-  state: TabListState<object>;
-}) => {
+const TabContentPanel = ({ state, ...props }: { state: TabListState<object> }) => {
   const ref = React.useRef(null);
   const { tabPanelProps } = useTabPanel(props, state, ref);
 
   return (
     <div
-      className={
-        "p-4  h-full border-primary-200 -mt-px rounded rounded-tl-none overflow-y-auto overflow-x-hidden"
-      }
+      className={'p-4  h-full border-primary-200 -mt-px rounded rounded-tl-none overflow-y-auto overflow-x-hidden'}
       {...tabPanelProps}
       ref={ref}
     >

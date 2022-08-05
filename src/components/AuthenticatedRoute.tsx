@@ -1,7 +1,7 @@
-import React from "react";
-import { Redirect, Route, RouteProps } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { UserRole } from "../types/sdk";
+import React from 'react';
+import { Redirect, Route, RouteProps } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { UserRole } from '../types/sdk';
 
 interface AuthenticatedRouteProps extends RouteProps {
   /**
@@ -15,11 +15,7 @@ interface AuthenticatedRouteProps extends RouteProps {
  * If the user is authenticated, acts like a route.
  * If the user is not authenticated, redirects them to the login page.
  */
-function AuthenticatedRoute({
-  render,
-  role,
-  ...rest
-}: AuthenticatedRouteProps) {
+function AuthenticatedRoute({ render, role, ...rest }: AuthenticatedRouteProps) {
   const auth = useAuth();
 
   if (role) {
@@ -30,11 +26,11 @@ function AuthenticatedRoute({
         <Route {...rest}>
           <Redirect
             to={{
-              pathname: "/",
+              pathname: '/',
               state: {
                 referrer: rest.location,
-                warning: `You are not authorised to access ${rest.path}`,
-              },
+                warning: `You are not authorised to access ${rest.path}`
+              }
             }}
           />
         </Route>
@@ -47,11 +43,11 @@ function AuthenticatedRoute({
       <Route {...rest}>
         <Redirect
           to={{
-            pathname: "/login",
+            pathname: '/login',
             state: {
               referrer: rest.location,
-              warning: `Please sign in to access ${rest.path}`,
-            },
+              warning: `Please sign in to access ${rest.path}`
+            }
           }}
         />
       </Route>

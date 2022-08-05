@@ -1,22 +1,18 @@
-import { createMachine } from "xstate";
-import { assign } from "@xstate/immer";
-import { castDraft } from "immer";
+import { createMachine } from 'xstate';
+import { assign } from '@xstate/immer';
+import { castDraft } from 'immer';
 
-import { ClientError } from "graphql-request";
+import { ClientError } from 'graphql-request';
 import {
   FindReagentPlateQuery,
   LabwareFieldsFragment,
   Maybe,
   ReagentPlate,
   ReagentTransfer,
-  RecordReagentTransferMutation,
-} from "../../../types/sdk";
-import {
-  MachineServiceDone,
-  MachineServiceError,
-  OperationTypeName,
-} from "../../../types/stan";
-import { stanCore } from "../../sdk";
+  RecordReagentTransferMutation
+} from '../../../types/sdk';
+import { MachineServiceDone, MachineServiceError, OperationTypeName } from '../../../types/stan';
+import { stanCore } from '../../sdk';
 
 /**
  * Context for SlotCopy Machine
@@ -62,26 +58,26 @@ export interface ReagentTransferContext {
 }
 
 type UpdateTransferContent = {
-  type: "UPDATE_TRANSFER_CONTENT";
+  type: 'UPDATE_TRANSFER_CONTENT';
   reagentTransfers: Array<ReagentTransfer>;
 };
 
 type UpdateWorkNumber = {
-  type: "UPDATE_WORK_NUMBER";
+  type: 'UPDATE_WORK_NUMBER';
   workNumber: string;
 };
 
 type SetSourceLabware = {
-  type: "SET_SOURCE_LABWARE";
+  type: 'SET_SOURCE_LABWARE';
   barcode: string;
 };
 
 type SetDestinationLabware = {
-  type: "SET_DESTINATION_LABWARE";
+  type: 'SET_DESTINATION_LABWARE';
   labware: LabwareFieldsFragment;
 };
 
-type SaveEvent = { type: "SAVE" };
+type SaveEvent = { type: 'SAVE' };
 
 export type ReagentTransferEvent =
   | UpdateWorkNumber
@@ -89,144 +85,131 @@ export type ReagentTransferEvent =
   | SetDestinationLabware
   | UpdateTransferContent
   | SaveEvent
-  | MachineServiceDone<"reagentTransfer", RecordReagentTransferMutation>
-  | MachineServiceError<"reagentTransfer">
-  | MachineServiceDone<"findReagentPlate", FindReagentPlateQuery>
-  | MachineServiceError<"findReagentPlate">;
+  | MachineServiceDone<'reagentTransfer', RecordReagentTransferMutation>
+  | MachineServiceError<'reagentTransfer'>
+  | MachineServiceDone<'findReagentPlate', FindReagentPlateQuery>
+  | MachineServiceError<'findReagentPlate'>;
 
 /**
  * Reagent Transfer Machine Config
  */
-export const reagentTransferMachine = createMachine<
-  ReagentTransferContext,
-  ReagentTransferEvent
->(
+export const reagentTransferMachine = createMachine<ReagentTransferContext, ReagentTransferEvent>(
   {
-    id: "slotCopy",
-    initial: "ready",
+    id: 'slotCopy',
+    initial: 'ready',
     states: {
       ready: {
         on: {
           UPDATE_WORK_NUMBER: {
-            actions: "assignWorkNumber",
+            actions: 'assignWorkNumber'
           },
           SET_SOURCE_LABWARE: [
             {
-              target: "finding",
+              target: 'finding',
               cond: (ctx, e) => /^[0-9]{24}$/.test(e.barcode),
-              actions: ["emptyValidationError", "assignSourceBarcode"],
+              actions: ['emptyValidationError', 'assignSourceBarcode']
             },
             {
-              actions: "assignValidationError",
-            },
+              actions: 'assignValidationError'
+            }
           ],
           SET_DESTINATION_LABWARE: {
-            actions: "assignDestination",
+            actions: 'assignDestination'
           },
           UPDATE_TRANSFER_CONTENT: [
             {
-              target: "readyToCopy",
-              cond: (ctx) =>
-                ctx.sourceReagentPlate !== undefined &&
-                ctx.destLabware !== undefined,
-              actions: "assignTransfers",
+              target: 'readyToCopy',
+              cond: (ctx) => ctx.sourceReagentPlate !== undefined && ctx.destLabware !== undefined,
+              actions: 'assignTransfers'
             },
             {
-              actions: "assignTransfers",
-            },
-          ],
-        },
+              actions: 'assignTransfers'
+            }
+          ]
+        }
       },
       finding: {
         invoke: {
-          src: "findReagentPlate",
-          id: "findReagentPlate",
+          src: 'findReagentPlate',
+          id: 'findReagentPlate',
           onDone: {
-            target: "ready",
-            actions: "assignReagentPlate",
+            target: 'ready',
+            actions: 'assignReagentPlate'
           },
           onError: {
-            target: "ready",
-            actions: ["assignServerError"],
-          },
-        },
+            target: 'ready',
+            actions: ['assignServerError']
+          }
+        }
       },
       readyToCopy: {
         on: {
           UPDATE_WORK_NUMBER: {
-            actions: "assignWorkNumber",
+            actions: 'assignWorkNumber'
           },
           UPDATE_TRANSFER_CONTENT: {
-            actions: ["assignTransfers"],
+            actions: ['assignTransfers']
           },
-          SAVE: "transferring",
-        },
+          SAVE: 'transferring'
+        }
       },
       transferring: {
-        entry: ["emptyServerError"],
+        entry: ['emptyServerError'],
         invoke: {
-          src: "reagentTransfer",
-          id: "reagentTransfer",
+          src: 'reagentTransfer',
+          id: 'reagentTransfer',
           onDone: {
-            target: "transferred",
-            actions: "assignResult",
+            target: 'transferred',
+            actions: 'assignResult'
           },
           onError: {
-            target: "readyToCopy",
-            actions: ["assignServerError"],
-          },
-        },
+            target: 'readyToCopy',
+            actions: ['assignServerError']
+          }
+        }
       },
       transferred: {
-        type: "final",
-      },
-    },
+        type: 'final'
+      }
+    }
   },
   {
     actions: {
       assignWorkNumber: assign((ctx, e) => {
-        if (e.type !== "UPDATE_WORK_NUMBER") return;
+        if (e.type !== 'UPDATE_WORK_NUMBER') return;
         ctx.workNumber = e.workNumber;
       }),
       assignSourceBarcode: assign((ctx, e) => {
-        if (e.type !== "SET_SOURCE_LABWARE") return;
+        if (e.type !== 'SET_SOURCE_LABWARE') return;
         ctx.sourceBarcode = e.barcode;
       }),
       assignDestination: assign((ctx, e) => {
-        if (e.type !== "SET_DESTINATION_LABWARE") return;
+        if (e.type !== 'SET_DESTINATION_LABWARE') return;
         ctx.destLabware = e.labware;
       }),
 
       assignReagentPlate: assign((ctx, e) => {
-        if (
-          e.type !== "done.invoke.findReagentPlate" ||
-          ctx.sourceBarcode === undefined
-        )
-          return;
+        if (e.type !== 'done.invoke.findReagentPlate' || ctx.sourceBarcode === undefined) return;
         ctx.sourceReagentPlate = e.data.reagentPlate
           ? {
               barcode: e.data.reagentPlate.barcode,
-              slots: e.data.reagentPlate.slots ?? [],
+              slots: e.data.reagentPlate.slots ?? []
             }
           : { barcode: ctx.sourceBarcode, slots: [] };
       }),
       assignTransfers: assign((ctx, e) => {
-        e.type === "UPDATE_TRANSFER_CONTENT" &&
-          (ctx.reagentTransfers = e.reagentTransfers);
+        e.type === 'UPDATE_TRANSFER_CONTENT' && (ctx.reagentTransfers = e.reagentTransfers);
       }),
 
       assignResult: assign((ctx, e) => {
-        if (e.type !== "done.invoke.reagentTransfer") {
+        if (e.type !== 'done.invoke.reagentTransfer') {
           return;
         }
         ctx.reagentTransferResult = e.data;
       }),
 
       assignServerError: assign((ctx, e) => {
-        if (
-          e.type !== "error.platform.reagentTransfer" &&
-          e.type !== "error.platform.findReagentPlate"
-        ) {
+        if (e.type !== 'error.platform.reagentTransfer' && e.type !== 'error.platform.findReagentPlate') {
           return;
         }
         ctx.serverErrors = castDraft(e.data);
@@ -236,11 +219,11 @@ export const reagentTransferMachine = createMachine<
         ctx.serverErrors = null;
       }),
       assignValidationError: assign((ctx) => {
-        ctx.validationError = "24 digit number required";
+        ctx.validationError = '24 digit number required';
       }),
       emptyValidationError: assign((ctx) => {
         ctx.validationError = undefined;
-      }),
+      })
     },
     services: {
       reagentTransfer: (ctx) => {
@@ -252,15 +235,15 @@ export const reagentTransferMachine = createMachine<
             workNumber: ctx.workNumber,
             operationType: ctx.operationType,
             destinationBarcode: ctx.destLabware!.barcode,
-            transfers: ctx.reagentTransfers,
-          },
+            transfers: ctx.reagentTransfers
+          }
         });
       },
       findReagentPlate: (ctx, e) => {
-        if (e.type !== "SET_SOURCE_LABWARE") return Promise.reject();
+        if (e.type !== 'SET_SOURCE_LABWARE') return Promise.reject();
         return stanCore.FindReagentPlate({ barcode: e.barcode });
-      },
-    },
+      }
+    }
   }
 );
 

@@ -1,16 +1,16 @@
-import React, { useCallback, useEffect, useImperativeHandle } from "react";
-import classNames from "classnames";
-import BarcodeIcon from "../icons/BarcodeIcon";
-import { Slot } from "./Slot";
-import { buildAddresses } from "../../lib/helpers";
-import _ from "lodash";
-import { LabwareFieldsFragment, SlotFieldsFragment } from "../../types/sdk";
-import createLabwareMachine from "./labware.machine";
-import { Selectable, SelectionMode } from "./labware.types";
-import { NewLabwareLayout } from "../../types/stan";
-import { useMachine } from "@xstate/react";
-import * as slotHelper from "../../lib/helpers/slotHelper";
-import SlotColumnInfo from "./SlotColumnInfo";
+import React, { useCallback, useEffect, useImperativeHandle } from 'react';
+import classNames from 'classnames';
+import BarcodeIcon from '../icons/BarcodeIcon';
+import { Slot } from './Slot';
+import { buildAddresses } from '../../lib/helpers';
+import _ from 'lodash';
+import { LabwareFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
+import createLabwareMachine from './labware.machine';
+import { Selectable, SelectionMode } from './labware.types';
+import { NewLabwareLayout } from '../../types/stan';
+import { useMachine } from '@xstate/react';
+import * as slotHelper from '../../lib/helpers/slotHelper';
+import SlotColumnInfo from './SlotColumnInfo';
 
 export interface LabwareProps {
   /**
@@ -95,10 +95,7 @@ export interface LabwareProps {
    * @param address the address of the slot to customise secondary text of
    * @param slot the slot
    */
-  slotSecondaryText?: (
-    address: string,
-    slot: SlotFieldsFragment
-  ) => string | undefined;
+  slotSecondaryText?: (address: string, slot: SlotFieldsFragment) => string | undefined;
 
   /**
    * Callback to customise the text for an individual slot
@@ -134,8 +131,8 @@ const Labware = ({
   onClick,
   onSlotClick,
   onSlotCtrlClick,
-  selectionMode = "single",
-  selectable = "none",
+  selectionMode = 'single',
+  selectable = 'none',
   name,
   onSelect,
   onSlotMouseEnter,
@@ -144,7 +141,7 @@ const Labware = ({
   slotSecondaryText,
   slotColor,
   labwareRef,
-  slotBuilder,
+  slotBuilder
 }: React.PropsWithChildren<LabwareProps>) => {
   const labwareMachine = React.useMemo(() => {
     return createLabwareMachine({
@@ -160,23 +157,23 @@ const Labware = ({
   const {
     labwareType: { numRows, numColumns },
     slots,
-    barcode,
+    barcode
   } = labware;
 
   useImperativeHandle(labwareRef, () => ({
-    deselectAll: () => send({ type: "RESET_SELECTED" }),
+    deselectAll: () => send({ type: 'RESET_SELECTED' })
   }));
 
   useEffect(() => {
     send({
-      type: "CHANGE_SELECTION_MODE",
+      type: 'CHANGE_SELECTION_MODE',
       selectionMode,
-      selectable,
+      selectable
     });
   }, [send, selectionMode, selectable]);
 
   useEffect(() => {
-    send({ type: "UPDATE_SLOTS", slots: slots ?? [] });
+    send({ type: 'UPDATE_SLOTS', slots: slots ?? [] });
   }, [send, slots]);
 
   useEffect(() => {
@@ -184,12 +181,12 @@ const Labware = ({
   }, [onSelect, selectedAddresses]);
 
   const labwareClasses =
-    "inline-block border border-sdb py-2 bg-blue-100 rounded-lg transition duration-300 ease-in-out";
+    'inline-block border border-sdb py-2 bg-blue-100 rounded-lg transition duration-300 ease-in-out';
 
   const gridClasses = classNames(
     {
-      "px-12 gap-4": numColumns <= 6,
-      "px-6 gap-2": numColumns > 6,
+      'px-12 gap-4': numColumns <= 6,
+      'px-6 gap-2': numColumns > 6
     },
     `grid grid-rows-${numRows} grid-cols-${numColumns} py-4 select-none`
   );
@@ -199,18 +196,18 @@ const Labware = ({
     slotColor ??
     ((address, slot) => {
       if (slotHelper.hasMultipleSamples(slot)) {
-        return "bg-gradient-to-r from-purple-400 via-pink-500 to-red-500";
+        return 'bg-gradient-to-r from-purple-400 via-pink-500 to-red-500';
       } else if (slotHelper.isSlotFilled(slot)) {
-        return "bg-sdb-300";
+        return 'bg-sdb-300';
       }
     });
 
-  const slotByAddress = _.keyBy(slots, "address");
+  const slotByAddress = _.keyBy(slots, 'address');
 
   const internalOnClick = React.useCallback(
     (address: string, slot: SlotFieldsFragment) => {
       onSlotClick?.(address, slot);
-      send({ type: "SELECT_SLOT", address });
+      send({ type: 'SELECT_SLOT', address });
     },
     [onSlotClick, send]
   );
@@ -218,14 +215,14 @@ const Labware = ({
   const onCtrlClick = useCallback(
     (address: string, slot: SlotFieldsFragment) => {
       onSlotCtrlClick?.(address, slot);
-      send({ type: "CTRL_SELECT_SLOT", address });
+      send({ type: 'CTRL_SELECT_SLOT', address });
     },
     [send, onSlotCtrlClick]
   );
 
   const onShiftClick = useCallback(
     (address: string) => {
-      send({ type: "SELECT_TO_SLOT", address });
+      send({ type: 'SELECT_TO_SLOT', address });
     },
     [send]
   );
@@ -235,26 +232,19 @@ const Labware = ({
    */
   const slotColumns = React.useMemo(() => {
     if (numColumns > 2) return [];
-    const slotColumns: Array<SlotFieldsFragment[]> = new Array<
-      SlotFieldsFragment[]
-    >(numColumns);
+    const slotColumns: Array<SlotFieldsFragment[]> = new Array<SlotFieldsFragment[]>(numColumns);
     slots.forEach((slot, index) => {
       const colIndex = index % numColumns;
-      if (!slotColumns[colIndex])
-        slotColumns[colIndex] = new Array<SlotFieldsFragment>();
+      if (!slotColumns[colIndex]) slotColumns[colIndex] = new Array<SlotFieldsFragment>();
       slotColumns[index % numColumns].push(slot);
     });
     return slotColumns;
   }, [numColumns, slots]);
 
   return (
-    <div className={"flex flex-row"}>
+    <div className={'flex flex-row'}>
       {slotColumns.length > 0 && slotBuilder && (
-        <SlotColumnInfo
-          slotColumn={slotColumns[0]}
-          slotBuilder={slotBuilder}
-          numRows={numRows}
-        />
+        <SlotColumnInfo slotColumn={slotColumns[0]} slotBuilder={slotBuilder} numRows={numRows} />
       )}
       <div onClick={() => onClick?.()} className={labwareClasses}>
         <div className={gridClasses}>
@@ -263,7 +253,7 @@ const Labware = ({
               key={i}
               address={address}
               slot={slotByAddress[address]}
-              size={numColumns > 6 || numRows > 6 ? "small" : "large"}
+              size={numColumns > 6 || numRows > 6 ? 'small' : 'large'}
               onClick={internalOnClick}
               onCtrlClick={onCtrlClick}
               onShiftClick={onShiftClick}
@@ -288,12 +278,7 @@ const Labware = ({
         </div>
       </div>
       {slotColumns.length > 1 && slotBuilder && (
-        <SlotColumnInfo
-          slotColumn={slotColumns[1]}
-          slotBuilder={slotBuilder}
-          numRows={numRows}
-          alignRight={true}
-        />
+        <SlotColumnInfo slotColumn={slotColumns[1]} slotBuilder={slotBuilder} numRows={numRows} alignRight={true} />
       )}
     </div>
   );

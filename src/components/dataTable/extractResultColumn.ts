@@ -1,5 +1,5 @@
-import { Column } from "react-table";
-import { ExtractResultQuery } from "../../types/sdk";
+import { Column } from 'react-table';
+import { ExtractResultQuery } from '../../types/sdk';
 
 /**
  * Defined type for a function that returns a column that displays some property of ExtractResultQuery
@@ -11,8 +11,8 @@ type ColumnFactory<E = any> = (meta?: E) => Column<ExtractResultQuery>;
  */
 const barcode: ColumnFactory = () => {
   return {
-    Header: "Barcode",
-    accessor: (result) => result.extractResult.labware.barcode,
+    Header: 'Barcode',
+    accessor: (result) => result.extractResult.labware.barcode
   };
 };
 
@@ -21,9 +21,8 @@ const barcode: ColumnFactory = () => {
  */
 const externalName: ColumnFactory = () => {
   return {
-    Header: "External Name",
-    accessor: (result) =>
-      result.extractResult.labware.slots[0].samples[0].tissue.externalName,
+    Header: 'External Name',
+    accessor: (result) => result.extractResult.labware.slots[0].samples[0].tissue.externalName
   };
 };
 
@@ -32,10 +31,8 @@ const externalName: ColumnFactory = () => {
  */
 const tissueType: ColumnFactory = () => {
   return {
-    Header: "Tissue type",
-    accessor: (result) =>
-      result.extractResult.labware.slots[0].samples[0].tissue.spatialLocation
-        .tissueType.name,
+    Header: 'Tissue type',
+    accessor: (result) => result.extractResult.labware.slots[0].samples[0].tissue.spatialLocation.tissueType.name
   };
 };
 
@@ -44,9 +41,8 @@ const tissueType: ColumnFactory = () => {
  */
 const medium: ColumnFactory = () => {
   return {
-    Header: "Medium",
-    accessor: (result) =>
-      result.extractResult.labware.slots[0].samples[0].tissue.medium.name,
+    Header: 'Medium',
+    accessor: (result) => result.extractResult.labware.slots[0].samples[0].tissue.medium.name
   };
 };
 
@@ -55,9 +51,8 @@ const medium: ColumnFactory = () => {
  */
 const fixative: ColumnFactory = () => {
   return {
-    Header: "Fixative",
-    accessor: (result) =>
-      result.extractResult.labware.slots[0].samples[0].tissue.fixative.name,
+    Header: 'Fixative',
+    accessor: (result) => result.extractResult.labware.slots[0].samples[0].tissue.fixative.name
   };
 };
 
@@ -66,8 +61,8 @@ const fixative: ColumnFactory = () => {
  */
 const nanodropResult: ColumnFactory = () => {
   return {
-    Header: "Nanodrop Result",
-    accessor: (result) => result.extractResult.concentration,
+    Header: 'Nanodrop Result',
+    accessor: (result) => result.extractResult.concentration
   };
 };
 
@@ -77,6 +72,6 @@ const columns = {
   tissueType,
   medium,
   fixative,
-  nanodropResult,
+  nanodropResult
 };
 export default columns;

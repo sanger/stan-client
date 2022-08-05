@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect } from "react";
-import { FindPlanDataQuery } from "../../types/sdk";
-import { useMachine } from "@xstate/react";
-import { planFinderMachine } from "./planFinder.machine";
-import Warning from "../notifications/Warning";
-import LabwareScanner from "../labwareScanner/LabwareScanner";
+import React, { useCallback, useEffect } from 'react';
+import { FindPlanDataQuery } from '../../types/sdk';
+import { useMachine } from '@xstate/react';
+import { planFinderMachine } from './planFinder.machine';
+import Warning from '../notifications/Warning';
+import LabwareScanner from '../labwareScanner/LabwareScanner';
 
 type PlanFinderParams = {
   /**
@@ -50,8 +50,8 @@ export function PlanFinder({
   const memoPlanFinderMachine = React.useMemo(() => {
     // Plans are kept as a map of destination barcode to plan
     // by the planFinderMachine so we need to convert the initial plans list first
-    const planMap = initialPlans.reduce<Map<string, FindPlanDataQuery>>(
-      (memo, plan) => {
+  const planMap = initialPlans.reduce<Map<string, FindPlanDataQuery>>(
+    (memo, plan) => {
         memo.set(plan.planData.destination.barcode, plan);
         return memo;
       },
@@ -79,7 +79,7 @@ export function PlanFinder({
    */
   const handleOnScan = useCallback(
     (labware) => {
-      send({ type: "SUBMIT_LABWARE", labware });
+      send({ type: 'SUBMIT_LABWARE', labware });
     },
     [send]
   );
@@ -88,18 +88,13 @@ export function PlanFinder({
    * Callback for removing a plan by barcode
    */
   const removePlanByBarcode = useCallback(
-    (barcode: string) => send({ type: "REMOVE_PLAN_BY_BARCODE", barcode }),
+    (barcode: string) => send({ type: 'REMOVE_PLAN_BY_BARCODE', barcode }),
     [send]
   );
 
   return (
-    <div className={"max-w-screen-xl mx-auto"}>
-      {showError && (
-        <Warning
-          message={validationError ?? "Plan Search Error"}
-          error={requestError}
-        />
-      )}
+    <div className={'max-w-screen-xl mx-auto'}>
+      {showError && <Warning message={validationError ?? 'Plan Search Error'} error={requestError} />}
       <div data-testid="plan-finder">
         <LabwareScanner onAdd={handleOnScan}>{}</LabwareScanner>
       </div>

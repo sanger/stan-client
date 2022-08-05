@@ -1,11 +1,11 @@
-import * as queryString from "query-string";
-import * as Yup from "yup";
-import { ParsedQuery } from "query-string";
-import { GridDirection, Maybe } from "../types/sdk";
-import { HasEnabled, SizeInput } from "../types/stan";
-import _, { isNaN } from "lodash";
-import { Key } from "react";
-import { Column } from "react-table";
+import * as queryString from 'query-string';
+import * as Yup from 'yup';
+import { ParsedQuery } from 'query-string';
+import { GridDirection, Maybe } from '../types/sdk';
+import { HasEnabled, SizeInput } from '../types/stan';
+import _, { isNaN } from 'lodash';
+import { Key } from 'react';
+import { Column } from 'react-table';
 
 /**
  * Utility for retrieving a list of correctly typed object keys.
@@ -21,10 +21,7 @@ export function objectKeys<E>(o: E): (keyof E)[] {
  * @param enumObject enum to retrieve the key
  * @param enumVal value for which the key to be retrieved
  */
-export function enumKey<E extends { [index: string]: string }>(
-  enumObject: E,
-  enumVal: string
-): keyof E | undefined {
+export function enumKey<E extends { [index: string]: string }>(enumObject: E, enumVal: string): keyof E | undefined {
   return Object.keys(enumObject).find((key) => enumObject[key] === enumVal);
 }
 
@@ -80,21 +77,17 @@ type SafeParseQueryStringParams<T> = GuardAndTransformParams<T> | SchemaParams;
  * Will attempt to deserialize a URL query string into a given type <T>
  * @return object if query can be parsed and conforms to the type guard or schema; null otherwise
  */
-export function safeParseQueryString<T>(
-  params: SafeParseQueryStringParams<T>
-): Maybe<T> {
+export function safeParseQueryString<T>(params: SafeParseQueryStringParams<T>): Maybe<T> {
   let parsed = parseQueryString(params.query, {
-    arrayFormat: "bracket",
+    arrayFormat: 'bracket',
     parseNumbers: false,
-    parseBooleans: true,
+    parseBooleans: true
   });
 
-  if ("schema" in params) {
+  if ('schema' in params) {
     try {
       const castValue = params.schema.cast(parsed);
-      return params.schema.isValidSync(castValue)
-        ? (castValue as unknown as T) ?? null
-        : null;
+      return params.schema.isValidSync(castValue) ? (castValue as unknown as T) ?? null : null;
     } catch {
       return null;
     }
@@ -122,7 +115,7 @@ export const parseQueryString = queryString.parse;
 export function stringify(obj: object): string {
   return queryString.stringify(obj, {
     skipEmptyString: true,
-    arrayFormat: "bracket",
+    arrayFormat: 'bracket'
   });
 }
 
@@ -140,7 +133,7 @@ export function createAddress(rowNumber: number, columnNumber: number): string {
   if (rowNumber > 26) {
     return `${rowNumber},${columnNumber}`;
   }
-  const aCharCode = "A".charCodeAt(0);
+  const aCharCode = 'A'.charCodeAt(0);
   const row = String.fromCharCode(rowNumber + aCharCode - 1);
   return `${row}${columnNumber}`;
 }
@@ -150,14 +143,9 @@ export function createAddress(rowNumber: number, columnNumber: number): string {
  * @param size an object with `numRows` and `numColumns` properties
  * @param direction the grid direction
  */
-export function buildAddresses(
-  size: SizeInput,
-  direction: GridDirection = GridDirection.RightDown
-): Array<string> {
-  let directionSize =
-    direction === GridDirection.RightDown ? size.numRows : size.numColumns;
-  let orthogonalDirectionSize =
-    direction === GridDirection.RightDown ? size.numColumns : size.numRows;
+export function buildAddresses(size: SizeInput, direction: GridDirection = GridDirection.RightDown): Array<string> {
+  let directionSize = direction === GridDirection.RightDown ? size.numRows : size.numColumns;
+  let orthogonalDirectionSize = direction === GridDirection.RightDown ? size.numColumns : size.numRows;
 
   const addresses = new Array<string>();
 
@@ -181,23 +169,15 @@ export function buildAddresses(
  * @param params the URL params
  * @param allowedKeys list of keys to pick from params
  */
-export function cleanParams<T>(
-  params: ParsedQuery<T>,
-  allowedKeys: Array<string>
-) {
-  return _(params)
-    .pick(allowedKeys)
-    .omitBy(_.isNil)
-    .omitBy(_.isEmpty)
-    .omitBy(_.isArray)
-    .value();
+export function cleanParams<T>(params: ParsedQuery<T>, allowedKeys: Array<string>) {
+  return _(params).pick(allowedKeys).omitBy(_.isNil).omitBy(_.isEmpty).omitBy(_.isArray).value();
 }
 
 /**
  * Create a generator for cycling through a list of colors
  */
 export function cycleColors() {
-  return cycle(["red", "green", "indigo", "pink", "blue", "purple"]);
+  return cycle(['red', 'green', 'indigo', 'pink', 'blue', 'purple']);
 }
 
 /**
@@ -210,8 +190,8 @@ export function getTimestampStr(date?: Date): string {
   }
   return date
     .toISOString()
-    .split(".")[0]
-    .replace(/[^0-9]+/g, "");
+    .split('.')[0]
+    .replace(/[^0-9]+/g, '');
 }
 
 /**
@@ -232,10 +212,7 @@ type Mapify<K extends string> = {
  * @param items the list of items to convert to a map
  * @param key the name of the property to use as the map's key
  */
-export function mapify<K extends string, T extends Mapify<K>>(
-  items: T[],
-  key: K
-): Map<Key, T> {
+export function mapify<K extends string, T extends Mapify<K>>(items: T[], key: K): Map<Key, T> {
   return new Map<Key, T>(items.map((item) => [item[key], item] as const));
 }
 
@@ -269,23 +246,21 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
       return entry;
     } else {
       return columns.map((column) => {
-        if (typeof column.accessor === "string") {
+        if (typeof column.accessor === 'string') {
           const value = entry[column.accessor];
           if (Array.isArray(value)) {
-            return value.join(",");
+            return value.join(',');
           }
-          if (typeof value === "object" && (value as Object) instanceof Date) {
+          if (typeof value === 'object' && (value as Object) instanceof Date) {
             const date = value as Date;
             return date.toLocaleDateString();
           }
-          if (typeof value === "number") {
+          if (typeof value === 'number') {
             return String(value);
           }
           return value;
         }
-        throw new Error(
-          "createDownloadFileContent requires all column accessors to be strings"
-        );
+        throw new Error('createDownloadFileContent requires all column accessors to be strings');
       });
     }
   });
@@ -301,9 +276,7 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
  * @param columnAccessPath member field names in an object to access column values
  * @param entries the data to go into the file, or as a string array of values (assumes that it is in same order of columns)
  */
-export function createDownloadFileContentFromObjectKeys<
-  T extends StringKeyedProps
->(
+export function createDownloadFileContentFromObjectKeys<T extends StringKeyedProps>(
   columnNames: Array<string>,
   columnAccessPath: Array<Array<string>>,
   entries: Array<T> | Array<Array<string>>
@@ -322,7 +295,7 @@ export function createDownloadFileContentFromObjectKeys<
   return rows;
 }
 
-export type SortDirection = "ascending" | "descending";
+export type SortDirection = 'ascending' | 'descending';
 /**
  * Function to sort alphaNumeric values based on reg expressions given. Thisvsorts
  * @param a
@@ -341,14 +314,12 @@ export function regexSort(
   let bPrim: string | number;
   let bSec: string | number;
 
-  let aAlpha = (aPrim = a.replace(regExp.alpha, ""));
-  const bAlpha = (bPrim = b.replace(regExp.alpha, ""));
-  const aNumericVal = a.replace(regExp.numeric, "");
-  const bNumericVal = b.replace(regExp.numeric, "");
-  const aNumeric = (aSec =
-    aNumericVal !== "" ? parseInt(aNumericVal, 10) : Number.MAX_VALUE);
-  const bNumeric = (bSec =
-    bNumericVal !== "" ? parseInt(bNumericVal, 10) : Number.MAX_VALUE);
+  let aAlpha = (aPrim = a.replace(regExp.alpha, ''));
+  const bAlpha = (bPrim = b.replace(regExp.alpha, ''));
+  const aNumericVal = a.replace(regExp.numeric, '');
+  const bNumericVal = b.replace(regExp.numeric, '');
+  const aNumeric = (aSec = aNumericVal !== '' ? parseInt(aNumericVal, 10) : Number.MAX_VALUE);
+  const bNumeric = (bSec = bNumericVal !== '' ? parseInt(bNumericVal, 10) : Number.MAX_VALUE);
   if (!alphaFirst) {
     aPrim = aNumeric;
     bPrim = bNumeric;
@@ -369,22 +340,19 @@ export function regexSort(
  * @example  To get 'name' field value in a 'work' object - 'work'  holds a property 'workType' which is an object with 'name' field
  *            the path should be ["workType","name"]
  ***/
-export const getPropertyValue = (
-  obj: StringKeyedProps,
-  propertyPath: string[]
-): number | string => {
+export const getPropertyValue = (obj: StringKeyedProps, propertyPath: string[]): number | string => {
   let propValue: any = obj;
   for (let indx = 0; indx < propertyPath.length; indx++) {
     const val = propValue[propertyPath[indx]];
     if (!val) {
-      return "";
+      return '';
     }
     propValue = val;
   }
   if (propValue instanceof Date) {
     propValue = propValue.getTime();
   }
-  if (typeof propValue !== "string" && typeof propValue !== "number") return "";
+  if (typeof propValue !== 'string' && typeof propValue !== 'number') return '';
   return propValue;
 };
 

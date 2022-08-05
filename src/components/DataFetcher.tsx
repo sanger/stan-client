@@ -1,10 +1,10 @@
-import React from "react";
-import LoadingSpinner from "./icons/LoadingSpinner";
-import Warning from "./notifications/Warning";
-import WhiteButton from "./buttons/WhiteButton";
-import { useMachine } from "@xstate/react";
-import createDataFetcherMachine from "../lib/machines/dataFetcher/dataFetcherMachine";
-import AppShell from "./AppShell";
+import React from 'react';
+import LoadingSpinner from './icons/LoadingSpinner';
+import Warning from './notifications/Warning';
+import WhiteButton from './buttons/WhiteButton';
+import { useMachine } from '@xstate/react';
+import createDataFetcherMachine from '../lib/machines/dataFetcher/dataFetcherMachine';
+import AppShell from './AppShell';
 
 export interface DataFetcherProps<E> {
   dataFetcher: () => Promise<E>;
@@ -31,11 +31,11 @@ const DataFetcher = <E extends unknown>({
   const [state, send] = useMachine(dataFetcherMachine);
   const { data } = state.context;
 
-  if (state.matches("done")) {
+  if (state.matches('done')) {
     return <>{children(data)}</>;
   }
 
-  const title = state.matches("loading") ? "Loading" : "Error";
+  const title = state.matches('loading') ? 'Loading' : 'Error';
 
   return (
     <AppShell>
@@ -44,16 +44,10 @@ const DataFetcher = <E extends unknown>({
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          {state.matches("loading") && <LoadingSpinner />}
-          {state.matches("failed") && (
-            <Warning
-              message={
-                "There was an error while trying to load the page. Please try again."
-              }
-            >
-              <WhiteButton onClick={() => send({ type: "RETRY" })}>
-                Retry
-              </WhiteButton>
+          {state.matches('loading') && <LoadingSpinner />}
+          {state.matches('failed') && (
+            <Warning message={'There was an error while trying to load the page. Please try again.'}>
+              <WhiteButton onClick={() => send({ type: 'RETRY' })}>Retry</WhiteButton>
             </Warning>
           )}
         </div>

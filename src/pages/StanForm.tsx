@@ -1,17 +1,17 @@
-import React from "react";
-import AppShell from "../components/AppShell";
-import { Form, Formik, FormikProps } from "formik";
-import * as Yup from "yup";
-import { useMachine } from "@xstate/react";
-import GrayBox, { Sidebar } from "../components/layouts/GrayBox";
-import { motion } from "framer-motion";
-import variants from "../lib/motionVariants";
-import Warning from "../components/notifications/Warning";
-import Heading from "../components/Heading";
-import PinkButton from "../components/buttons/PinkButton";
-import createFormMachine from "../lib/machines/form/formMachine";
-import { reload } from "../lib/sdk";
-import OperationCompleteModal from "../components/modal/OperationCompleteModal";
+import React from 'react';
+import AppShell from '../components/AppShell';
+import { Form, Formik, FormikProps } from 'formik';
+import * as Yup from 'yup';
+import { useMachine } from '@xstate/react';
+import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
+import { motion } from 'framer-motion';
+import variants from '../lib/motionVariants';
+import Warning from '../components/notifications/Warning';
+import Heading from '../components/Heading';
+import PinkButton from '../components/buttons/PinkButton';
+import createFormMachine from '../lib/machines/form/formMachine';
+import { reload } from '../lib/sdk';
+import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 
 type StanFormParams<V, R> = {
   /**
@@ -55,13 +55,13 @@ export default function StanForm<V, R>({
   validationSchema,
   initialValues,
   summary,
-  children,
+  children
 }: StanFormParams<V, R>) {
   const formMachine = React.useMemo(() => {
     return createFormMachine<V, R>().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          if (e.type !== "SUBMIT_FORM") return Promise.reject();
+          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return onSubmit(e.values);
         },
       },
@@ -69,9 +69,9 @@ export default function StanForm<V, R>({
   }, [onSubmit]);
   const [current, send] = useMachine(() => formMachine);
 
-  const submitForm = async (values: V) => send({ type: "SUBMIT_FORM", values });
+  const submitForm = async (values: V) => send({ type: 'SUBMIT_FORM', values });
   const serverError = current.context.serverError;
-  const formLocked = !current.matches("fillingOutForm");
+  const formLocked = !current.matches('fillingOutForm');
 
   return (
     <AppShell>
@@ -80,19 +80,15 @@ export default function StanForm<V, R>({
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={submitForm}
-          >
+          <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={submitForm}>
             {(formikProps) => (
               <Form>
                 <GrayBox>
                   <motion.div
                     variants={variants.fadeInParent}
-                    initial={"hidden"}
-                    animate={"visible"}
-                    exit={"hidden"}
+                    initial={'hidden'}
+                    animate={'visible'}
+                    exit={'hidden'}
                     className="md:w-2/3 space-y-10"
                   >
                     {serverError && <Warning error={serverError} />}
@@ -107,24 +103,20 @@ export default function StanForm<V, R>({
 
                     {summary(formikProps)}
 
-                    <PinkButton
-                      disabled={formLocked}
-                      type="submit"
-                      className="sm:w-full"
-                    >
+                    <PinkButton disabled={formLocked} type="submit" className="sm:w-full">
                       Submit
                     </PinkButton>
                   </Sidebar>
                 </GrayBox>
 
                 <OperationCompleteModal
-                  show={current.matches("submitted")}
-                  message={"Operation Complete"}
+                  show={current.matches('submitted')}
+                  message={'Operation Complete'}
                   onReset={reload}
                 >
                   <p>
-                    If you wish to start the process again, click the "Reset
-                    Form" button. Otherwise you can return to the Home screen.
+                    If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
+                    the Home screen.
                   </p>
                 </OperationCompleteModal>
               </Form>

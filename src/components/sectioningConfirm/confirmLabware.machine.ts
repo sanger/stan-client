@@ -1,16 +1,10 @@
-import { createMachine } from "xstate";
-import {
-  Comment,
-  ConfirmOperationLabware,
-  ConfirmSection,
-  ConfirmSectionLabware,
-  Maybe,
-} from "../../types/sdk";
-import { LayoutPlan, Source } from "../../lib/machines/layout/layoutContext";
-import { assign } from "@xstate/immer";
-import { createLayoutMachine } from "../../lib/machines/layout/layoutMachine";
-import { cloneDeep } from "lodash";
-import { Address, NewLabwareLayout } from "../../types/stan";
+import { createMachine } from 'xstate';
+import { Comment, ConfirmOperationLabware, ConfirmSection, ConfirmSectionLabware, Maybe } from '../../types/sdk';
+import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
+import { assign } from '@xstate/immer';
+import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
+import { cloneDeep } from 'lodash';
+import { Address, NewLabwareLayout } from '../../types/stan';
 
 export interface ConfirmLabwareContext {
   /**
@@ -47,46 +41,46 @@ export interface ConfirmLabwareContext {
 }
 
 type SetCommentForAddressEvent = {
-  type: "SET_COMMENT_FOR_ADDRESS";
+  type: 'SET_COMMENT_FOR_ADDRESS';
   address: string;
   commentId: string;
 };
 
 type SetCommentForAllEvent = {
-  type: "SET_COMMENT_FOR_ALL";
+  type: 'SET_COMMENT_FOR_ALL';
   commentId: string;
 };
 
-type EditLayoutEvent = { type: "EDIT_LAYOUT" };
-type CancelEditLayoutEvent = { type: "CANCEL_EDIT_LAYOUT" };
-type DoneEditLayoutEvent = { type: "DONE_EDIT_LAYOUT" };
+type EditLayoutEvent = { type: 'EDIT_LAYOUT' };
+type CancelEditLayoutEvent = { type: 'CANCEL_EDIT_LAYOUT' };
+type DoneEditLayoutEvent = { type: 'DONE_EDIT_LAYOUT' };
 
 export type LayoutMachineDone = {
-  type: "done.invoke.layoutMachine";
+  type: 'done.invoke.layoutMachine';
   data: { layoutPlan: LayoutPlan };
 };
 
-type ToggleCancelEvent = { type: "TOGGLE_CANCEL" };
+type ToggleCancelEvent = { type: 'TOGGLE_CANCEL' };
 
 type UpdateSectionNumberEvent = {
-  type: "UPDATE_SECTION_NUMBER";
+  type: 'UPDATE_SECTION_NUMBER';
   slotAddress: string;
   sectionIndex: number;
   sectionNumber: number;
 };
 
 type UpdateAllSourcesEvent = {
-  type: "UPDATE_ALL_SOURCES";
+  type: 'UPDATE_ALL_SOURCES';
   plannedActions: Map<Address, Array<Source>>;
 };
 
 export type CommitConfirmationEvent = {
-  type: "COMMIT_CONFIRMATION";
+  type: 'COMMIT_CONFIRMATION';
   confirmOperationLabware: ConfirmOperationLabware;
 };
 
 export type SectioningConfirmationCompleteEvent = {
-  type: "SECTIONING_CONFIRMATION_COMPLETE";
+  type: 'SECTIONING_CONFIRMATION_COMPLETE';
 };
 
 export type ConfirmLabwareEvent =
@@ -102,24 +96,16 @@ export type ConfirmLabwareEvent =
   | CommitConfirmationEvent
   | SectioningConfirmationCompleteEvent;
 
-function buildConfirmSection(
-  destinationAddress: string,
-  plannedAction: Source
-): ConfirmSection {
+function buildConfirmSection(destinationAddress: string, plannedAction: Source): ConfirmSection {
   return {
     destinationAddress,
     newSection: plannedAction.newSection,
-    sampleId: plannedAction.sampleId,
+    sampleId: plannedAction.sampleId
   };
 }
 
-function buildConfirmSections(
-  destinationAddress: string,
-  plannedActions: Array<Source>
-): Array<ConfirmSection> {
-  return plannedActions.map((action) =>
-    buildConfirmSection(destinationAddress, action)
-  );
+function buildConfirmSections(destinationAddress: string, plannedActions: Array<Source>): Array<ConfirmSection> {
+  return plannedActions.map((action) => buildConfirmSection(destinationAddress, action));
 }
 
 /**
@@ -132,8 +118,8 @@ export const createConfirmLabwareMachine = (
 ) =>
   createMachine<ConfirmLabwareContext, ConfirmLabwareEvent>(
     {
-      id: "sectioningOutcome",
-      initial: "editableMode",
+      id: 'sectioningOutcome',
+      initial: 'editableMode',
       context: {
         comments,
         labware,
@@ -141,49 +127,49 @@ export const createConfirmLabwareMachine = (
         layoutPlan: cloneDeep(layoutPlan),
         addressToCommentMap: new Map(),
         cancelled: false,
-        confirmSectionLabware: null,
+        confirmSectionLabware: null
       },
       on: {
-        SECTIONING_CONFIRMATION_COMPLETE: "done",
+        SECTIONING_CONFIRMATION_COMPLETE: 'done'
       },
-      entry: "commitConfirmation",
+      entry: 'commitConfirmation',
       states: {
         editableMode: {
           on: {
             TOGGLE_CANCEL: {
-              actions: ["toggleCancel", "commitConfirmation"],
+              actions: ['toggleCancel', 'commitConfirmation']
             },
             SET_COMMENT_FOR_ADDRESS: {
-              actions: ["assignAddressComment", "commitConfirmation"],
+              actions: ['assignAddressComment', 'commitConfirmation']
             },
             SET_COMMENT_FOR_ALL: {
-              actions: ["assignAllComment", "commitConfirmation"],
+              actions: ['assignAllComment', 'commitConfirmation']
             },
             EDIT_LAYOUT: {
-              target: "editingLayout",
+              target: 'editingLayout'
             },
             UPDATE_SECTION_NUMBER: {
-              actions: ["updateSectionNumber", "commitConfirmation"],
+              actions: ['updateSectionNumber', 'commitConfirmation']
             },
             UPDATE_ALL_SOURCES: {
-              actions: ["updateAllSources", "commitConfirmation"],
-            },
-          },
+              actions: ['updateAllSources', 'commitConfirmation']
+            }
+          }
         },
         editingLayout: {
           invoke: {
-            src: "layoutMachine",
-            id: "layoutMachine",
+            src: 'layoutMachine',
+            id: 'layoutMachine',
             onDone: {
-              target: "editableMode",
-              actions: ["assignLayoutPlan", "commitConfirmation"],
-            },
-          },
+              target: 'editableMode',
+              actions: ['assignLayoutPlan', 'commitConfirmation']
+            }
+          }
         },
         done: {
-          type: "final",
-        },
-      },
+          type: 'final'
+        }
+      }
     },
     {
       actions: {
@@ -191,11 +177,11 @@ export const createConfirmLabwareMachine = (
          * Assign a comment to a particular address
          */
         assignAddressComment: assign((ctx, e) => {
-          if (e.type !== "SET_COMMENT_FOR_ADDRESS") {
+          if (e.type !== 'SET_COMMENT_FOR_ADDRESS') {
             return;
           }
 
-          if (e.commentId === "") {
+          if (e.commentId === '') {
             ctx.addressToCommentMap.delete(e.address);
           } else {
             ctx.addressToCommentMap.set(e.address, Number(e.commentId));
@@ -206,10 +192,10 @@ export const createConfirmLabwareMachine = (
          * Assign all the addresses with planned actions in the same comment
          */
         assignAllComment: assign((ctx, e) => {
-          if (e.type !== "SET_COMMENT_FOR_ALL") {
+          if (e.type !== 'SET_COMMENT_FOR_ALL') {
             return;
           }
-          if (e.commentId === "") {
+          if (e.commentId === '') {
             ctx.addressToCommentMap.clear();
           } else {
             ctx.layoutPlan.plannedActions.forEach((value, key) => {
@@ -223,14 +209,12 @@ export const createConfirmLabwareMachine = (
          * If there are any comments for slots that have now been removed, removed the comment also
          */
         assignLayoutPlan: assign((ctx, e) => {
-          if (e.type !== "done.invoke.layoutMachine" || !e.data) {
+          if (e.type !== 'done.invoke.layoutMachine' || !e.data) {
             return;
           }
           ctx.layoutPlan = e.data.layoutPlan;
 
-          const unemptyAddresses = new Set(
-            ctx.layoutPlan.plannedActions.keys()
-          );
+          const unemptyAddresses = new Set(ctx.layoutPlan.plannedActions.keys());
           ctx.addressToCommentMap.forEach((_, key) => {
             if (!unemptyAddresses.has(key)) {
               ctx.addressToCommentMap.delete(key);
@@ -242,19 +226,17 @@ export const createConfirmLabwareMachine = (
          * Toggles whether this labware was used or not
          */
         toggleCancel: assign((ctx, e) => {
-          if (e.type !== "TOGGLE_CANCEL") {
+          if (e.type !== 'TOGGLE_CANCEL') {
             return;
           }
           ctx.cancelled = !ctx.cancelled;
         }),
 
         updateSectionNumber: assign((ctx, e) => {
-          if (e.type !== "UPDATE_SECTION_NUMBER") {
+          if (e.type !== 'UPDATE_SECTION_NUMBER') {
             return;
           }
-          const plannedAction = ctx.layoutPlan.plannedActions.get(
-            e.slotAddress
-          );
+          const plannedAction = ctx.layoutPlan.plannedActions.get(e.slotAddress);
 
           if (plannedAction && plannedAction[e.sectionIndex]) {
             plannedAction[e.sectionIndex].newSection = e.sectionNumber;
@@ -262,7 +244,7 @@ export const createConfirmLabwareMachine = (
         }),
 
         updateAllSources: assign((ctx, e) => {
-          if (e.type !== "UPDATE_ALL_SOURCES") {
+          if (e.type !== 'UPDATE_ALL_SOURCES') {
             return;
           }
           /**There is a change in sections (precisely section numbers) from parent , so update the plans in this machine context**/
@@ -279,34 +261,24 @@ export const createConfirmLabwareMachine = (
         }),
         commitConfirmation: assign((ctx) => {
           const confirmSections: Array<ConfirmSection> = [];
-          for (let [
-            destinationAddress,
-            originalPlannedActions,
-          ] of ctx.layoutPlan.plannedActions.entries()) {
-            confirmSections.push(
-              ...buildConfirmSections(
-                destinationAddress,
-                originalPlannedActions
-              )
-            );
+          for (let [destinationAddress, originalPlannedActions] of ctx.layoutPlan.plannedActions.entries()) {
+            confirmSections.push(...buildConfirmSections(destinationAddress, originalPlannedActions));
           }
           ctx.confirmSectionLabware = {
             barcode: ctx.labware.barcode!,
             cancelled: ctx.cancelled,
             confirmSections: ctx.cancelled ? undefined : confirmSections,
-            addressComments: Array.from(ctx.addressToCommentMap.entries()).map(
-              ([address, commentId]) => ({ address, commentId })
-            ),
+            addressComments: Array.from(ctx.addressToCommentMap.entries()).map(([address, commentId]) => ({
+              address,
+              commentId
+            }))
           };
-        }),
+        })
       },
       services: {
         layoutMachine: (ctx, _e) => {
-          return createLayoutMachine(
-            ctx.layoutPlan,
-            ctx.originalLayoutPlan.plannedActions
-          );
-        },
-      },
+          return createLayoutMachine(ctx.layoutPlan, ctx.originalLayoutPlan.plannedActions);
+        }
+      }
     }
   );

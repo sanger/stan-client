@@ -1,9 +1,9 @@
-import { AliquotMutation, LabwareFieldsFragment } from "../../../types/sdk";
-import { ClientError } from "graphql-request";
-import { createMachine } from "xstate";
-import { assign } from "@xstate/immer";
-import { castDraft } from "immer";
-import { stanCore } from "../../sdk";
+import { AliquotMutation, LabwareFieldsFragment } from '../../../types/sdk';
+import { ClientError } from 'graphql-request';
+import { createMachine } from 'xstate';
+import { assign } from '@xstate/immer';
+import { castDraft } from 'immer';
+import { stanCore } from '../../sdk';
 
 export interface AliquotContext {
   /**The work number to associate with this aliquot operation**/
@@ -21,32 +21,32 @@ export interface AliquotContext {
   /**Error returned from server**/
   serverErrors?: ClientError;
 }
-const aliquotLabwareType: string = "Tube";
-const aliquotOperationType: string = "Aliquot";
+const aliquotLabwareType: string = 'Tube';
+const aliquotOperationType: string = 'Aliquot';
 
 type UpdateLabwareEvent = {
-  type: "UPDATE_LABWARE";
+  type: 'UPDATE_LABWARE';
   labware: LabwareFieldsFragment;
 };
 type UpdateNumLabwareEvent = {
-  type: "UPDATE_NUM_LABWARE";
+  type: 'UPDATE_NUM_LABWARE';
   numLabware: number;
 };
 
 type AliquotEvent = {
-  type: "ALIQUOT";
+  type: 'ALIQUOT';
 };
 type AliquotDoneEvent = {
-  type: "done.invoke.aliquot";
+  type: 'done.invoke.aliquot';
   data: AliquotMutation;
 };
 type AliquotErrorEvent = {
-  type: "error.platform.aliquot";
+  type: 'error.platform.aliquot';
   data: ClientError;
 };
 
 export type AliquottingEvent =
-  | { type: "UPDATE_WORK_NUMBER"; workNumber: string }
+  | { type: 'UPDATE_WORK_NUMBER'; workNumber: string }
   | AliquotEvent
   | AliquotDoneEvent
   | AliquotErrorEvent
@@ -55,79 +55,76 @@ export type AliquottingEvent =
 
 export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
   {
-    id: "aliquot",
-    initial: "ready",
+    id: 'aliquot',
+    initial: 'ready',
     states: {
       ready: {
         on: {
-          UPDATE_WORK_NUMBER: { actions: "assignWorkNumber" },
-          UPDATE_LABWARE: { actions: "assignLabware" },
-          UPDATE_NUM_LABWARE: { actions: "assignNumLabware" },
-          ALIQUOT: { target: "aliquoting", cond: "validAliquotInput" },
-        },
+          UPDATE_WORK_NUMBER: { actions: 'assignWorkNumber' },
+          UPDATE_LABWARE: { actions: 'assignLabware' },
+          UPDATE_NUM_LABWARE: { actions: 'assignNumLabware' },
+          ALIQUOT: { target: 'aliquoting', cond: 'validAliquotInput' }
+        }
       },
       aliquoting: {
         invoke: {
-          src: "aliquot",
-          id: "aliquot",
+          src: 'aliquot',
+          id: 'aliquot',
           onDone: {
-            target: "aliquotingDone",
-            actions: "assignAliquotResult",
+            target: 'aliquotingDone',
+            actions: 'assignAliquotResult'
           },
           onError: {
-            target: "aliquotFailed",
-            actions: "assignServerErrors",
-          },
-        },
+            target: 'aliquotFailed',
+            actions: 'assignServerErrors'
+          }
+        }
       },
       aliquotFailed: {
         on: {
-          ALIQUOT: { target: "aliquoting", cond: "validAliquotInput" },
-          UPDATE_WORK_NUMBER: { actions: "assignWorkNumber" },
-          UPDATE_LABWARE: { actions: "assignLabware" },
-          UPDATE_NUM_LABWARE: { actions: "assignNumLabware" },
-        },
+          ALIQUOT: { target: 'aliquoting', cond: 'validAliquotInput' },
+          UPDATE_WORK_NUMBER: { actions: 'assignWorkNumber' },
+          UPDATE_LABWARE: { actions: 'assignLabware' },
+          UPDATE_NUM_LABWARE: { actions: 'assignNumLabware' }
+        }
       },
-      aliquotingDone: {},
-    },
+      aliquotingDone: {}
+    }
   },
   {
     actions: {
       assignLabware: assign((ctx, e) => {
-        if (e.type !== "UPDATE_LABWARE") {
+        if (e.type !== 'UPDATE_LABWARE') {
           return;
         }
         ctx.labware = e.labware;
         ctx.serverErrors = undefined;
       }),
       assignNumLabware: assign((ctx, e) => {
-        if (e.type !== "UPDATE_NUM_LABWARE") {
+        if (e.type !== 'UPDATE_NUM_LABWARE') {
           return;
         }
         ctx.numLabware = e.numLabware;
       }),
       assignWorkNumber: assign((ctx, e) => {
-        if (e.type !== "UPDATE_WORK_NUMBER") {
+        if (e.type !== 'UPDATE_WORK_NUMBER') {
           return;
         }
         ctx.workNumber = e.workNumber;
       }),
       assignAliquotResult: assign((ctx, e) => {
-        if (e.type !== "done.invoke.aliquot") {
+        if (e.type !== 'done.invoke.aliquot') {
           return;
         }
         ctx.aliquotResult = e.data;
       }),
       assignServerErrors: assign((ctx, e) => {
-        if (e.type !== "error.platform.aliquot") return;
+        if (e.type !== 'error.platform.aliquot') return;
         ctx.serverErrors = castDraft(e.data);
-      }),
+      })
     },
     guards: {
-      validAliquotInput: (ctx) =>
-        ctx.labware !== undefined &&
-        ctx.labware.barcode.length > 0 &&
-        ctx.numLabware > 0,
+      validAliquotInput: (ctx) => ctx.labware !== undefined && ctx.labware.barcode.length > 0 && ctx.numLabware > 0
     },
     services: {
       aliquot: (ctx, _e) => {
@@ -138,14 +135,14 @@ export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
               labwareType: aliquotLabwareType,
               barcode: ctx.labware.barcode,
               numLabware: ctx.numLabware,
-              operationType: aliquotOperationType,
-            },
+              operationType: aliquotOperationType
+            }
           });
         } else {
           return Promise.reject();
         }
-      },
-    },
+      }
+    }
   }
 );
 

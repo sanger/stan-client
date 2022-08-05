@@ -1,7 +1,4 @@
-query GetWorkAllocationInfo(
-  $commentCategory: String!
-  $workStatuses: [WorkStatus!]
-) {
+query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatus!]) {
   projects(includeDisabled: false) {
     ...ProjectFields
   }

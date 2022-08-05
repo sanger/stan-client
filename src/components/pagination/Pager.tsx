@@ -1,5 +1,5 @@
-import React from "react";
-import IconButton from "../buttons/IconButton";
+import React from 'react';
+import IconButton from '../buttons/IconButton';
 
 export type PagerProps = {
   /**
@@ -44,7 +44,7 @@ function Pager({
   pageDownDisabled,
   pageUpDisabled,
   onPageDownClick,
-  onPageUpClick,
+  onPageUpClick
 }: PagerProps) {
   return (
     <div className="flex flex-row items-center gap-6 text-sm text-gray-700">
@@ -64,8 +64,7 @@ function Pager({
         </svg>
       </IconButton>
       <div>
-        <span className="font-medium">{currentPage}</span> of{" "}
-        <span className="font-medium">{numberOfPages}</span>
+        <span className="font-medium">{currentPage}</span> of <span className="font-medium">{numberOfPages}</span>
       </div>
       <IconButton disabled={pageUpDisabled} onClick={onPageUpClick}>
         <svg
