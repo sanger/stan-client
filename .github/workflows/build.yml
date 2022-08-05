@@ -1,5 +1,4 @@
 name: Build
-
 # Controls when the action will run. Triggers the workflow on pushes to rc branch.
 on:
   push:
