@@ -1,16 +1,16 @@
-import labwareFactory from "../../../src/lib/factories/labwareFactory";
-import { sampleFactory } from "../../../src/lib/factories/sampleFactory";
-import { FindQuery, GridDirection } from "../../../src/types/sdk";
-import locationFactory from "../../../src/lib/factories/locationFactory";
-import { addressToLocationAddress } from "../../../src/lib/helpers/locationHelper";
-import SearchService from "../../../src/lib/services/searchService";
+import labwareFactory from '../../../src/lib/factories/labwareFactory';
+import { sampleFactory } from '../../../src/lib/factories/sampleFactory';
+import { FindQuery, GridDirection } from '../../../src/types/sdk';
+import locationFactory from '../../../src/lib/factories/locationFactory';
+import { addressToLocationAddress } from '../../../src/lib/helpers/locationHelper';
+import SearchService from '../../../src/lib/services/searchService';
 
-describe("Search Service", () => {
-  describe("#formatFindResult", () => {
-    let findResult: FindQuery["find"];
+describe('Search Service', () => {
+  describe('#formatFindResult', () => {
+    let findResult: FindQuery['find'];
 
-    const workNumber1 = "SGP1008"
-    const workNumber2 = "SGP1009"
+    const workNumber1 = 'SGP1008';
+    const workNumber2 = 'SGP1009';
 
     const sample10 = sampleFactory.build({ id: 10 });
     const sample11 = sampleFactory.build({ id: 11 });
@@ -26,7 +26,7 @@ describe("Search Service", () => {
     const location102 = locationFactory.build({
       id: 102,
       size: { numRows: 50, numColumns: 2 },
-      direction: GridDirection.DownRight,
+      direction: GridDirection.DownRight
     });
 
     findResult = {
@@ -35,8 +35,8 @@ describe("Search Service", () => {
         { labwareId: 1, sampleId: 10, workNumbers: [workNumber1] },
         { labwareId: 2, sampleId: 11, workNumbers: [workNumber2] },
         { labwareId: 3, sampleId: 12, workNumbers: [workNumber1, workNumber2] },
-        { labwareId: 2, sampleId: 13, workNumbers: []},
-        { labwareId: 1, sampleId: 14, workNumbers: [] },
+        { labwareId: 2, sampleId: 13, workNumbers: [] },
+        { labwareId: 1, sampleId: 14, workNumbers: [] }
       ],
       samples: [sample10, sample11, sample12, sample13, sample14],
       labware: [labware1, labware2, labware3],
@@ -44,10 +44,10 @@ describe("Search Service", () => {
       labwareLocations: [
         {
           labwareId: 1,
-          locationId: 100,
+          locationId: 100
         },
-        { labwareId: 3, locationId: 102, address: "40,2" },
-      ],
+        { labwareId: 3, locationId: 102, address: '40,2' }
+      ]
     };
 
     const expected = [
@@ -61,12 +61,12 @@ describe("Search Service", () => {
         location: {
           barcode: location100.barcode,
           displayName: location100.qualifiedNameWithFirstBarcode,
-          address: null,
+          address: null
         },
         sectionNumber: sample10.section,
         replicate: sample10.tissue.replicate,
         labwareCreated: new Date(labware1.created),
-        embeddingMedium: sample10.tissue.medium.name,
+        embeddingMedium: sample10.tissue.medium.name
       },
       {
         barcode: labware2.barcode,
@@ -79,7 +79,7 @@ describe("Search Service", () => {
         sectionNumber: sample11.section,
         replicate: sample11.tissue.replicate,
         labwareCreated: new Date(labware2.created),
-        embeddingMedium: sample11.tissue.medium.name,
+        embeddingMedium: sample11.tissue.medium.name
       },
       {
         barcode: labware3.barcode,
@@ -91,16 +91,12 @@ describe("Search Service", () => {
         location: {
           barcode: location102.barcode,
           displayName: location102.qualifiedNameWithFirstBarcode,
-          address: addressToLocationAddress(
-            "40,2",
-            location102.size!,
-            location102.direction!
-          ),
+          address: addressToLocationAddress('40,2', location102.size!, location102.direction!)
         },
         sectionNumber: sample12.section,
         replicate: sample12.tissue.replicate,
         labwareCreated: new Date(labware3.created),
-        embeddingMedium: sample12.tissue.medium.name,
+        embeddingMedium: sample12.tissue.medium.name
       },
       {
         barcode: labware2.barcode,
@@ -113,7 +109,7 @@ describe("Search Service", () => {
         sectionNumber: sample13.section,
         replicate: sample13.tissue.replicate,
         labwareCreated: new Date(labware2.created),
-        embeddingMedium: sample13.tissue.medium.name,
+        embeddingMedium: sample13.tissue.medium.name
       },
       {
         barcode: labware1.barcode,
@@ -125,16 +121,16 @@ describe("Search Service", () => {
         location: {
           barcode: location100.barcode,
           displayName: location100.qualifiedNameWithFirstBarcode,
-          address: location100.address,
+          address: location100.address
         },
         sectionNumber: sample14.section,
         replicate: sample14.tissue.replicate,
         labwareCreated: new Date(labware1.created),
-        embeddingMedium: sample14.tissue.medium.name,
-      },
+        embeddingMedium: sample14.tissue.medium.name
+      }
     ];
 
-    it("formats FindResult into a SearchResultsType", () => {
+    it('formats FindResult into a SearchResultsType', () => {
       const service = new SearchService();
       const result = service.formatFindResult(findResult);
       expect(result).to.deep.equal(expected);

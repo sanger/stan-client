@@ -1,34 +1,29 @@
-import React, { useContext, useEffect, useState } from "react";
-import AppShell from "../components/AppShell";
-import { Form, Formik } from "formik";
-import FormikInput from "../components/forms/Input";
-import FormikSelect from "../components/forms/Select";
-import BlueButton from "../components/buttons/BlueButton";
-import { optionValues } from "../components/forms";
-import DataTable from "../components/DataTable";
-import { Cell, Column } from "react-table";
-import StyledLink from "../components/StyledLink";
-import { SearchResultTableEntry, alphaNumericSortDefault } from "../types/stan";
-import LoadingSpinner from "../components/icons/LoadingSpinner";
-import Warning from "../components/notifications/Warning";
-import Heading from "../components/Heading";
-import { FindRequest, GetSearchInfoQuery, Work } from "../types/sdk";
-import { stanCore } from "../lib/sdk";
-import { useMachine } from "@xstate/react";
-import * as Yup from "yup";
-import {
-  cleanParams,
-  objectKeys,
-  parseQueryString,
-  stringify,
-} from "../lib/helpers";
-import { history } from "../lib/sdk";
-import WhiteButton from "../components/buttons/WhiteButton";
-import { ParsedQuery } from "query-string";
-import { merge } from "lodash";
-import { configContext } from "../context/ConfigContext";
-import searchMachine from "../lib/machines/search/searchMachine";
-import SearchService from "../lib/services/searchService";
+import React, { useContext, useEffect, useState } from 'react';
+import AppShell from '../components/AppShell';
+import { Form, Formik } from 'formik';
+import FormikInput from '../components/forms/Input';
+import FormikSelect from '../components/forms/Select';
+import BlueButton from '../components/buttons/BlueButton';
+import { optionValues } from '../components/forms';
+import DataTable from '../components/DataTable';
+import { Cell, Column } from 'react-table';
+import StyledLink from '../components/StyledLink';
+import { SearchResultTableEntry, alphaNumericSortDefault } from '../types/stan';
+import LoadingSpinner from '../components/icons/LoadingSpinner';
+import Warning from '../components/notifications/Warning';
+import Heading from '../components/Heading';
+import { FindRequest, GetSearchInfoQuery, Work } from '../types/sdk';
+import { stanCore } from '../lib/sdk';
+import { useMachine } from '@xstate/react';
+import * as Yup from 'yup';
+import { cleanParams, objectKeys, parseQueryString, stringify } from '../lib/helpers';
+import { history } from '../lib/sdk';
+import WhiteButton from '../components/buttons/WhiteButton';
+import { ParsedQuery } from 'query-string';
+import { merge } from 'lodash';
+import { configContext } from '../context/ConfigContext';
+import searchMachine from '../lib/machines/search/searchMachine';
+import SearchService from '../lib/services/searchService';
 
 const validationSchema = Yup.object()
   .shape({
@@ -39,10 +34,10 @@ const validationSchema = Yup.object()
     tissueTypeName: Yup.string().ensure(),
     workNumber: Yup.string().ensure(),
     createdAfter: Yup.date().notRequired(),
-    createdBefore: Yup.date().notRequired(),
+    createdBefore: Yup.date().notRequired()
   })
   .test({
-    name: "atLeastOneRequired",
+    name: 'atLeastOneRequired',
     test: function (value) {
       const isValid = !!(
         value?.labwareBarcode.trim() ||
@@ -54,25 +49,24 @@ const validationSchema = Yup.object()
 
       if (isValid) return true;
       return this.createError({
-        path: "labwareBarcode | tissueExternalName | donorName | tissueTypeName | workNumber",
+        path: 'labwareBarcode | tissueExternalName | donorName | tissueTypeName | workNumber',
         message:
-          "At least one of STAN Barcode, External Identifier, Donor ID, Tissue Type or SGP Number must not be empty.",
+          'At least one of STAN Barcode, External Identifier, Donor ID, Tissue Type or SGP Number must not be empty.'
       });
-    },
+    }
   });
 
 const emptyFindRequest: FindRequest = {
-  createdMin: "",
-  createdMax: "",
-  donorName: "",
-  labwareBarcode: "",
-  tissueExternalName: "",
-  tissueTypeName: "",
-  workNumber: ""
+  createdMin: '',
+  createdMax: '',
+  donorName: '',
+  labwareBarcode: '',
+  tissueExternalName: '',
+  tissueTypeName: '',
+  workNumber: ''
 };
 
-const emptyFindRequestKeys: Array<keyof FindRequest> =
-  objectKeys(emptyFindRequest);
+const emptyFindRequestKeys: Array<keyof FindRequest> = objectKeys(emptyFindRequest);
 
 type SearchProps = {
   searchInfo: GetSearchInfoQuery;
@@ -81,39 +75,29 @@ type SearchProps = {
 
 function Search({ searchInfo, urlParamsString }: SearchProps) {
   const params: ParsedQuery = parseQueryString(urlParamsString);
-  const findRequest: FindRequest = merge(
-    {},
-    emptyFindRequest,
-    cleanParams(params, emptyFindRequestKeys)
-  );
+  const findRequest: FindRequest = merge({}, emptyFindRequest, cleanParams(params, emptyFindRequestKeys));
 
   const config = useContext(configContext)!;
-  const search = searchMachine<FindRequest, SearchResultTableEntry>(
-    new SearchService()
-  );
+  const search = searchMachine<FindRequest, SearchResultTableEntry>(new SearchService());
   const [current, send] = useMachine(() =>
     search.withContext({
       findRequest,
-      maxRecords: config.maxSearchRecords,
+      maxRecords: config.maxSearchRecords
     })
   );
 
   const { serverError, searchResult } = current.context;
 
-  const showWarning =
-    searchResult && searchResult.numRecords! > searchResult.numDisplayed!;
-  const showSearchResult =
-    current.matches("searched") &&
-    searchResult &&
-    searchResult?.numRecords! > 0;
+  const showWarning = searchResult && searchResult.numRecords! > searchResult.numDisplayed!;
+  const showSearchResult = current.matches('searched') && searchResult && searchResult?.numRecords! > 0;
 
   const onFormSubmit = (values: FindRequest) => {
-    send({ type: "FIND", request: values });
+    send({ type: 'FIND', request: values });
     // Replace instead of push so user doesn't have to go through a load of old searches when going back
     history.replace(`/search?${stringify(values)}`);
   };
 
-  const [works, setWorks] = useState<Array<Pick<Work, "workNumber">>>([]);
+  const [works, setWorks] = useState<Array<Pick<Work, 'workNumber'>>>([]);
   useEffect(() => {
     async function fetchActiveWorkNumbers() {
       const response = await stanCore.GetWorkNumbers();
@@ -144,7 +128,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
               {({ errors, isValid, resetForm }) => (
                 <Form>
                   {!isValid && (
-                    <Warning className={"mb-5"} message={"Validation Error"}>
+                    <Warning className={'mb-5'} message={'Validation Error'}>
                       {Object.values(errors)}
                     </Warning>
                   )}
@@ -153,60 +137,34 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                       <FormikInput name="labwareBarcode" label="STAN Barcode" />
                     </div>
                     <div className="">
-                      <FormikInput
-                        name="tissueExternalName"
-                        label="External Identifier"
-                      />
+                      <FormikInput name="tissueExternalName" label="External Identifier" />
                     </div>
                     <div>
                       <FormikInput name="donorName" label="Donor ID" />
                     </div>
                     <div>
-                      <FormikSelect
-                        label="SGP Number"
-                        name="workNumber"
-                        emptyOption={true}
-                      >
-                        {optionValues(works, "workNumber", "workNumber")}
+                      <FormikSelect label="SGP Number" name="workNumber" emptyOption={true}>
+                        {optionValues(works, 'workNumber', 'workNumber')}
                       </FormikSelect>
                     </div>
                     <div>
-                      <FormikInput
-                        type="date"
-                        name="createdMin"
-                        label="Created After"
-                      />
+                      <FormikInput type="date" name="createdMin" label="Created After" />
                     </div>
                     <div>
-                      <FormikInput
-                        type="date"
-                        name="createdMax"
-                        label="Created Before"
-                      />
+                      <FormikInput type="date" name="createdMax" label="Created Before" />
                     </div>
                     <div>
-                      <FormikSelect
-                        label="Tissue Type"
-                        name="tissueTypeName"
-                        emptyOption={true}
-                      >
-                        {optionValues(searchInfo.tissueTypes, "name", "name")}
+                      <FormikSelect label="Tissue Type" name="tissueTypeName" emptyOption={true}>
+                        {optionValues(searchInfo.tissueTypes, 'name', 'name')}
                       </FormikSelect>
                     </div>
                   </div>
                   <div className="sm:flex sm:flex-row sm:mt-8 mt-4 items-center justify-end">
-                    <WhiteButton
-                      className="mr-4"
-                      type="button"
-                      onClick={() => resetForm({ values: emptyFindRequest })}
-                    >
+                    <WhiteButton className="mr-4" type="button" onClick={() => resetForm({ values: emptyFindRequest })}>
                       Reset
                     </WhiteButton>
 
-                    <BlueButton
-                      disabled={current.matches("searching")}
-                      type="submit"
-                    >
+                    <BlueButton disabled={current.matches('searching')} type="submit">
                       Search
                     </BlueButton>
                   </div>
@@ -216,54 +174,29 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
           </div>
 
           <div className="my-10">
-            {current.matches("searching") && (
+            {current.matches('searching') && (
               <div className="flex flex-row justify-center">
                 <LoadingSpinner />
               </div>
             )}
 
             <div>
-              {serverError && (
-                <Warning message="Search Error" error={serverError} />
+              {serverError && <Warning message="Search Error" error={serverError} />}
+              {current.matches('searched') && searchResult?.numRecords === 0 && (
+                <Warning message={'There were no results for the given search. Please try again.'} />
               )}
-              {current.matches("searched") &&
-                searchResult?.numRecords === 0 && (
-                  <Warning
-                    message={
-                      "There were no results for the given search. Please try again."
-                    }
-                  />
-                )}
-              {showWarning && (
-                <Warning
-                  message={
-                    "Not all results can be displayed. Please refine your search."
-                  }
-                />
-              )}
+              {showWarning && <Warning message={'Not all results can be displayed. Please refine your search.'} />}
               {showSearchResult && searchResult && (
                 <div>
                   <div className="mt-6 mb-2 flex flex-row items-center justify-end">
                     <p className="text-sm text-gray-700">
-                      Displaying{" "}
-                      <span className="font-medium">
-                        {" "}
-                        {searchResult.numDisplayed}{" "}
-                      </span>
+                      Displaying <span className="font-medium"> {searchResult.numDisplayed} </span>
                       of
-                      <span className="font-medium">
-                        {" "}
-                        {searchResult.numRecords}{" "}
-                      </span>
+                      <span className="font-medium"> {searchResult.numRecords} </span>
                       results
                     </p>
                   </div>
-                  <DataTable
-                    sortable
-                    defaultSort={[{ id: "donorId" }]}
-                    columns={columns}
-                    data={searchResult.entries}
-                  />
+                  <DataTable sortable defaultSort={[{ id: 'donorId' }]} columns={columns} data={searchResult.entries} />
                 </div>
               )}
             </div>
@@ -278,51 +211,45 @@ export default Search;
 
 const columns: Column<SearchResultTableEntry>[] = [
   {
-    Header: "Barcode",
+    Header: 'Barcode',
     Cell: (props: Cell<SearchResultTableEntry>) => {
       const barcode = props.row.original.barcode;
       return <StyledLink to={`/labware/${barcode}`}>{barcode}</StyledLink>;
-    },
+    }
   },
   {
-    Header: "Created",
+    Header: 'Created',
     accessor: (originalRow) => originalRow.labwareCreated.toLocaleDateString(),
     sortType: (rowA, rowB) => {
-      return (
-        rowA.original.labwareCreated.getTime() -
-        rowB.original.labwareCreated.getTime()
-      );
-    },
+      return rowA.original.labwareCreated.getTime() - rowB.original.labwareCreated.getTime();
+    }
   },
   {
-    Header: "Labware Type",
-    accessor: "labwareType",
+    Header: 'Labware Type',
+    accessor: 'labwareType'
   },
   {
-    Header: "SGP Numbers",
-    accessor: (originalRow) => originalRow.workNumbers.join(", "),
+    Header: 'SGP Numbers',
+    accessor: (originalRow) => originalRow.workNumbers.join(', '),
     sortType: (rowA, rowB) => {
-      return alphaNumericSortDefault(
-        rowA.original.workNumbers.join(", "),
-        rowB.original.workNumbers.join(", ")
-      );
-    },
+      return alphaNumericSortDefault(rowA.original.workNumbers.join(', '), rowB.original.workNumbers.join(', '));
+    }
   },
   {
-    Header: "External ID",
-    accessor: "externalId",
+    Header: 'External ID',
+    accessor: 'externalId'
   },
   {
-    Header: "Donor ID",
-    accessor: "donorId",
+    Header: 'Donor ID',
+    accessor: 'donorId'
   },
   {
-    Header: "Tissue Type",
-    accessor: "tissueType",
+    Header: 'Tissue Type',
+    accessor: 'tissueType'
   },
   {
-    Header: "Location",
-    accessor: "location",
+    Header: 'Location',
+    accessor: 'location',
     sortType: (rowA, rowB) => {
       const displayNameA = rowA.original.location?.displayName;
       const displayNameB = rowB.original.location?.displayName;
@@ -348,24 +275,22 @@ const columns: Column<SearchResultTableEntry>[] = [
       }
 
       return (
-        <StyledLink
-          to={`/locations/${location.barcode}?labwareBarcode=${props.row.original.barcode}`}
-        >
+        <StyledLink to={`/locations/${location.barcode}?labwareBarcode=${props.row.original.barcode}`}>
           {linkText}
         </StyledLink>
       );
-    },
+    }
   },
   {
-    Header: "Section Number",
-    accessor: "sectionNumber",
+    Header: 'Section Number',
+    accessor: 'sectionNumber'
   },
   {
-    Header: "Replicate",
-    accessor: "replicate",
+    Header: 'Replicate',
+    accessor: 'replicate'
   },
   {
-    Header: "Embedding Medium",
-    accessor: "embeddingMedium",
-  },
+    Header: 'Embedding Medium',
+    accessor: 'embeddingMedium'
+  }
 ];
