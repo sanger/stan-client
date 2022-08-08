@@ -48,7 +48,10 @@ type WorkRowProps = {
  * to edit its status
  */
 export default function WorkRow({ initialWork, availableComments, rowIndex, onWorkFieldUpdate }: WorkRowProps) {
-  const [current, send] = useMachine(createWorkRowMachine({ workWithComment: initialWork }));
+  const workRowMachine = React.useMemo(() => {
+    return createWorkRowMachine({ workWithComment: initialWork });
+  }, [initialWork]);
+  const [current, send] = useMachine(workRowMachine);
 
   const {
     editModeEnabled,

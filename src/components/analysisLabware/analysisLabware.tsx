@@ -34,12 +34,14 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
 
   const workNumberCommon = React.useRef('');
 
-  const [current, send] = useMachine(() =>
-    analysisLabwareMachine.withContext({
+  const memoAnalysisLabwareMachine = React.useMemo(() => {
+    return analysisLabwareMachine.withContext({
       analysisLabwares: defaultLabwareValues,
       operationType: OperationType.RIN
-    })
-  );
+    });
+  }, [defaultLabwareValues]);
+
+  const [current, send] = useMachine(() => memoAnalysisLabwareMachine);
   const { operationType, analysisLabwares } = current.context;
 
   React.useEffect(() => {

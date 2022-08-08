@@ -60,8 +60,8 @@ type BlockProcessingParams = {
 };
 
 export default function BlockProcessing({ processingInfo }: BlockProcessingParams) {
-  const [current, send] = useMachine(
-    createFormMachine<TissueBlockRequest, PerformTissueBlockMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<TissueBlockRequest, PerformTissueBlockMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
@@ -70,8 +70,9 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
           });
         }
       }
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
 
   const { submissionResult, serverError } = current.context;
   /**

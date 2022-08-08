@@ -26,16 +26,17 @@ function SlotMapper({
   initialOutputLabware = [],
   locked = false
 }: SlotMapperProps) {
-  const [current, send] = useMachine(() =>
-    slotMapperMachine.withContext({
+  const memoSlotMapperMachine = React.useMemo(() => {
+    return slotMapperMachine.withContext({
       inputLabware: initialInputLabware,
       outputLabware: initialOutputLabware,
       slotCopyContent: [],
       colorByBarcode: new Map(),
       failedSlots: new Map(),
       errors: new Map()
-    })
-  );
+    });
+  }, [initialInputLabware, initialOutputLabware]);
+  const [current, send] = useMachine(() => memoSlotMapperMachine);
 
   const { inputLabware, slotCopyContent, colorByBarcode, failedSlots, errors } = current.context;
 

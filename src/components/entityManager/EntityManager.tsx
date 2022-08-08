@@ -70,8 +70,8 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
   onCreate,
   onChangeValue
 }: EntityManagerProps<E>) {
-  const [current, send] = useMachine(
-    createEntityManagerMachine<E>(initialEntities, displayKeyColumnName, valueColumnName).withConfig({
+  const entityManagerMachine = React.useMemo(() => {
+    return createEntityManagerMachine<E>(initialEntities, displayKeyColumnName, valueColumnName).withConfig({
       services: {
         createEntity: (ctx, e) => {
           if (e.type !== 'CREATE_NEW_ENTITY') return Promise.reject();
@@ -82,8 +82,10 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
           return onChangeValue(e.entity, e.value);
         }
       }
-    })
-  );
+    });
+  }, [initialEntities, displayKeyColumnName, valueColumnName, onChangeValue, onCreate]);
+
+  const [current, send] = useMachine(entityManagerMachine);
 
   /**
    * The value of the input used for creating new entities
@@ -183,8 +185,8 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
           </tr>
         </TableHead>
         <TableBody>
-          {entities.map((entity) => (
-            <tr key={String(displayKeyColumnName)}>
+          {entities.map((entity, indx) => (
+            <tr key={indx}>
               <TableCell>{entity[displayKeyColumnName]}</TableCell>
               {getValueFieldComponent(
                 valueFieldComponentInfo,

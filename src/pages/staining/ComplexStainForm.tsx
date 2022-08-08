@@ -36,16 +36,17 @@ type ComplexStainFormProps = {
 };
 
 export default function ComplexStainForm({ stainType, initialLabware, onLabwareChange }: ComplexStainFormProps) {
-  const [current, send] = useMachine(
-    createFormMachine<ComplexStainRequest, RecordComplexStainMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<ComplexStainRequest, RecordComplexStainMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordComplexStain({ request: e.values });
         }
       }
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
 

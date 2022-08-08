@@ -37,16 +37,18 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
     labware: initialLabware.map(buildExtractResultLabware)
   };
 
-  const [current, send] = useMachine(
-    createFormMachine<ExtractResultRequest, RecordExtractResultMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<ExtractResultRequest, RecordExtractResultMutation>().withConfig({
       services: {
         submitForm: (context, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordExtractResult({ request: e.values });
         }
       }
-    })
-  );
+    });
+  }, []);
+
+  const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
 

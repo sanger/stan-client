@@ -102,9 +102,10 @@ const TubeRow: React.FC<TubeRowProps> = ({
   onSectionUpdate,
   mode
 }) => {
-  const [current, send, service] = useMachine(
-    createConfirmLabwareMachine(comments, initialLayoutPlan.destinationLabware, initialLayoutPlan)
-  );
+  const confirmLabwareMachine = React.useMemo(() => {
+    return createConfirmLabwareMachine(comments, initialLayoutPlan.destinationLabware, initialLayoutPlan);
+  }, [comments, initialLayoutPlan]);
+  const [current, send, service] = useMachine(confirmLabwareMachine);
   const { cancelled, layoutPlan, labware } = current.context;
   const { layoutMachine } = current.children;
   const [notifyCancel, setNotifyCancel] = React.useState(false);

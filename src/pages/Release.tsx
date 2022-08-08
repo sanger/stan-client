@@ -86,16 +86,18 @@ interface PageParams {
 
 function Release({ releaseInfo }: PageParams) {
   const stanCore = useContext(StanCoreContext);
-  const [current, send] = useMachine(() =>
-    createFormMachine<ReleaseRequest, ReleaseLabwareMutation>().withConfig({
+
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<ReleaseRequest, ReleaseLabwareMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.ReleaseLabware({ releaseRequest: e.values });
         }
       }
-    })
-  );
+    });
+  }, [stanCore]);
+  const [current, send] = useMachine(() => formMachine);
 
   const { serverError, submissionResult } = current.context;
   const formLocked = !current.matches('fillingOutForm');

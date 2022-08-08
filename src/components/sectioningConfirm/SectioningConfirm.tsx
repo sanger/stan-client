@@ -43,7 +43,10 @@ export enum SectionNumberMode {
  * Responsible for calling core with the {@code confirmSection} request.
  */
 export default function SectioningConfirm({ comments, initialPlans, onConfirmed }: SectioningConfirmProps) {
-  const [current, send, service] = useMachine(createSectioningConfirmMachine());
+  const sectioningMachine = React.useMemo(() => {
+    return createSectioningConfirmMachine();
+  }, []);
+  const [current, send, service] = useMachine(sectioningMachine);
 
   const { sourceLabware, layoutPlansByLabwareType, requestError, confirmSectionResultLabwares, sectionNumberMode } =
     current.context;

@@ -51,8 +51,8 @@ type PotProcessingParams = {
 };
 
 export default function PotProcessing({ processingInfo }: PotProcessingParams) {
-  const [current, send] = useMachine(
-    createFormMachine<PotProcessingRequest, PerformTissuePotMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<PotProcessingRequest, PerformTissuePotMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
@@ -61,8 +61,9 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
           });
         }
       }
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
 
   const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(LabwareTypeName.POT);
   const [numLabware, setNumLabware] = React.useState<number>(1);

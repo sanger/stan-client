@@ -37,8 +37,8 @@ type SolutionTransferFormData = Required<SolutionTransferRequest> & {
   applyAllSolution: string;
 };
 const SolutionTransfer: React.FC<SolutionTransferParams> = ({ solutionTransferInfo }: SolutionTransferParams) => {
-  const [current, send] = useMachine(
-    createFormMachine<SolutionTransferRequest, PerformSolutionTransferMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<SolutionTransferRequest, PerformSolutionTransferMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
@@ -50,8 +50,9 @@ const SolutionTransfer: React.FC<SolutionTransferParams> = ({ solutionTransferIn
           });
         }
       }
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError, submissionResult } = current.context;
 

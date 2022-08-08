@@ -157,7 +157,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           }
         },
         ready: {
-          exit: 'clearNotifications',
+          exit: ['clearNotifications'],
           on: {
             ALLOCATE_WORK: 'allocating',
             UPDATE_URL_PARAMS: {

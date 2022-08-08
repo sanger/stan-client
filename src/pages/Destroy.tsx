@@ -39,16 +39,18 @@ interface PageParams {
 
 const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
   const stanCore = useContext(StanCoreContext);
-  const [current, send] = useMachine(() =>
-    createFormMachine<DestroyRequest, DestroyMutation>().withConfig({
+
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<DestroyRequest, DestroyMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.Destroy({ request: e.values });
         }
       }
-    })
-  );
+    });
+  }, [stanCore]);
+  const [current, send] = useMachine(() => formMachine);
 
   const validationSchema = useMemo(() => buildValidationSchema(destroyInfo), [destroyInfo]);
 

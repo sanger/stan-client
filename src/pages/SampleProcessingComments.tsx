@@ -39,8 +39,8 @@ type SampleCommentsFormData = Required<SampleProcessingCommentRequest> & {
 const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
   sampleCommentsInfo
 }: SampleProcessingCommentsParams) => {
-  const [current, send] = useMachine(
-    createFormMachine<SampleProcessingCommentRequest, RecordSampleProcessingCommentsMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<SampleProcessingCommentRequest, RecordSampleProcessingCommentsMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
@@ -51,8 +51,9 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
           });
         }
       }
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError, submissionResult } = current.context;
 

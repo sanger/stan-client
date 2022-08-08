@@ -36,8 +36,8 @@ function Analysis({ comments }: AnalysisProps) {
   const [operationType, setOperationType] = React.useState('');
   const [analysisMode, setAnalysisMode] = React.useState(false);
 
-  const [current, send] = useMachine(
-    createFormMachine<RnaAnalysisRequest, RecordRnaAnalysisMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<RnaAnalysisRequest, RecordRnaAnalysisMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
@@ -46,8 +46,9 @@ function Analysis({ comments }: AnalysisProps) {
           });
         }
       }
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
   const { serverError } = current.context;
 
   const onChangeExtractResults = useCallback((result: ExtractResultQuery[]) => {

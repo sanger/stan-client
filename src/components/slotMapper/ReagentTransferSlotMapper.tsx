@@ -43,16 +43,17 @@ function ReagentTransferSlotMapper({
   initialDestLabware,
   disabled
 }: ReagentTransferMappingProps) {
-  const [current, send] = useMachine(() =>
-    slotMapperMachine.withContext({
+  const memoSlotMapperMachine = React.useMemo(() => {
+    return slotMapperMachine.withContext({
       inputLabware: initialSourceLabware ? [initialSourceLabware] : [],
       outputLabware: initialDestLabware ? [initialDestLabware] : [],
       slotCopyContent: [],
       colorByBarcode: new Map(),
       failedSlots: new Map(),
       errors: new Map()
-    })
-  );
+    });
+  }, [initialSourceLabware, initialDestLabware]);
+  const [current, send] = useMachine(() => memoSlotMapperMachine);
 
   const { slotCopyContent } = current.context;
   /**

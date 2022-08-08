@@ -30,13 +30,14 @@ export default function DataLoader<E>({
   children,
   errorMessage = 'There was an error while loading. Please try again.'
 }: DataLoaderProps<E>) {
-  const [state, send] = useMachine(
-    createDataFetcherMachine({
+  const dataFetcherMachine = React.useMemo(() => {
+    return createDataFetcherMachine({
       context: {
         dataFetcher: loader
       }
-    })
-  );
+    });
+  }, [loader]);
+  const [state, send] = useMachine(dataFetcherMachine);
 
   const { data } = state.context;
 

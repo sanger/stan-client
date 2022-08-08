@@ -18,13 +18,14 @@ export interface DataFetcherProps<E> {
  * @constructor
  */
 const DataFetcher = <E extends unknown>({ dataFetcher, children }: DataFetcherProps<E>) => {
-  const [state, send] = useMachine(
-    createDataFetcherMachine({
+  const dataFetcherMachine = React.useMemo(() => {
+    return createDataFetcherMachine({
       context: {
         dataFetcher
       }
-    })
-  );
+    });
+  }, [dataFetcher]);
+  const [state, send] = useMachine(dataFetcherMachine);
   const { data } = state.context;
 
   if (state.matches('done')) {

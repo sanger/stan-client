@@ -98,9 +98,10 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
     },
     ref
   ) => {
-    const [current, send] = useMachine(
-      createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware))
-    );
+    const labwarePlanMachine = React.useMemo(() => {
+      return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware));
+    }, [sourceLabware, sampleColors, outputLabware]);
+    const [current, send] = useMachine(labwarePlanMachine);
     const { requestError, layoutPlan } = current.context;
     const { layoutMachine } = current.children;
     const { setFieldValue, values } = useFormikContext<BlockFormData>();

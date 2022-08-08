@@ -88,9 +88,10 @@ function buildInitialLayoutPlan(
 
 const PotProcessingLabwarePlan = React.forwardRef<HTMLDivElement, PotProcessingLabwarePlanProps>(
   ({ cid, outputLabware, potProcessInfo, sourceLabware, sampleColors, onDelete, rowIndex, fixative }, ref) => {
-    const [current] = useMachine(
-      createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware))
-    );
+    const labwarePlanMachine = React.useMemo(() => {
+      return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware));
+    }, [sourceLabware, sampleColors, outputLabware]);
+    const [current] = useMachine(labwarePlanMachine);
     const { requestError, layoutPlan } = current.context;
     const { values, setFieldValue } = useFormikContext<PotFormData>();
 

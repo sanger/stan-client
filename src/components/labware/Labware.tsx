@@ -143,13 +143,14 @@ const Labware = ({
   labwareRef,
   slotBuilder
 }: React.PropsWithChildren<LabwareProps>) => {
-  const [current, send] = useMachine(
-    createLabwareMachine({
+  const labwareMachine = React.useMemo(() => {
+    return createLabwareMachine({
       selectionMode,
       selectable,
       slots: labware.slots
-    })
-  );
+    });
+  }, [selectionMode, selectable, labware]);
+  const [current, send] = useMachine(labwareMachine);
 
   const { selectedAddresses } = current.context;
 

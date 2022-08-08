@@ -76,7 +76,10 @@ export default function WorkAllocation() {
     );
   }, [location.search]);
 
-  const [current, send] = useMachine(createWorkAllocationMachine({ urlParams }));
+  const workAllocationMachine = React.useMemo(() => {
+    return createWorkAllocationMachine({ urlParams });
+  }, [urlParams]);
+  const [current, send] = useMachine(workAllocationMachine);
 
   /**This prevents duplicate submissions on double click**/
   const [submitted, setSubmitted] = React.useState(false);

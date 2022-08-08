@@ -43,19 +43,20 @@ type PlanFinderChildrenProps = {
  * A component for finding plans (from core) via scanning labware barcodes
  */
 export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParams) {
-  // Plans are kept as a map of destination barcode to plan
-  // by the planFinderMachine so we need to convert the initial plans list first
-  const planMap = initialPlans.reduce<Map<string, FindPlanDataQuery>>((memo, plan) => {
-    memo.set(plan.planData.destination.barcode, plan);
-    return memo;
-  }, new Map());
-
-  const [current, send] = useMachine(
-    planFinderMachine.withContext({
+  const memoPlanFinderMachine = React.useMemo(() => {
+    // Plans are kept as a map of destination barcode to plan
+    // by the planFinderMachine so we need to convert the initial plans list first
+    const planMap = initialPlans.reduce<Map<string, FindPlanDataQuery>>((memo, plan) => {
+      memo.set(plan.planData.destination.barcode, plan);
+      return memo;
+    }, new Map());
+    return planFinderMachine.withContext({
       ...planFinderMachine.context,
       plans: planMap
-    })
-  );
+    });
+  }, [initialPlans]);
+
+  const [current, send] = useMachine(memoPlanFinderMachine);
   const { plans, requestError, validationError } = current.context;
   const showError = requestError || validationError;
 

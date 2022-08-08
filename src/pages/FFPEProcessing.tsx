@@ -25,8 +25,8 @@ interface FFPEProcessingParams {
 }
 
 const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProcessingParams) => {
-  const [current, send] = useMachine(
-    createFormMachine<FfpeProcessingRequest, PerformFfpeProcessingMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<FfpeProcessingRequest, PerformFfpeProcessingMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
@@ -35,8 +35,10 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProces
           });
         }
       }
-    })
-  );
+    });
+  }, []);
+
+  const [current, send] = useMachine(formMachine);
 
   const { serverError, submissionResult } = current.context;
 

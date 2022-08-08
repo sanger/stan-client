@@ -56,9 +56,10 @@ type LabwarePlanProps = {
 
 const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
   ({ cid, outputLabware, onDeleteButtonClick, onComplete, sampleColors, operationType, sourceLabware }, ref) => {
-    const [current, send, service] = useMachine(
-      createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware))
-    );
+    const labwarePlanMachine = React.useMemo(() => {
+      return createLabwarePlanMachine(buildInitialLayoutPlan(sourceLabware, sampleColors, outputLabware));
+    }, [sourceLabware, sampleColors, outputLabware]);
+    const [current, send, service] = useMachine(labwarePlanMachine);
 
     useEffect(() => {
       const subscription = service.subscribe((state) => {

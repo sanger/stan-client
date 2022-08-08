@@ -22,16 +22,17 @@ import { AddExternalIdMutation, AddExternalIdRequest } from '../types/sdk';
 export default function AddExternalID() {
   type AddExternalIDFormData = Required<AddExternalIdRequest>;
 
-  const [current, send] = useMachine(
-    createFormMachine<AddExternalIdRequest, AddExternalIdMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<AddExternalIdRequest, AddExternalIdMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.AddExternalID({ request: e.values });
         }
       }
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
 
   function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({

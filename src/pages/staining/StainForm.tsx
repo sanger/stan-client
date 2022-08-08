@@ -59,16 +59,17 @@ type StainFormProps = {
 };
 
 export default function StainForm({ stainType, stainingInfo, initialLabware, onLabwareChange }: StainFormProps) {
-  const [current, send] = useMachine(
-    createFormMachine<StainRequest, StainMutation>().withConfig({
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<StainRequest, StainMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.Stain({ request: e.values });
         }
       }
-    })
-  );
+    });
+  }, []);
+  const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
 

@@ -269,7 +269,9 @@ export default function Planner<M>({
    * A map of sample ID to Tailwind CSS colours.
    * Used by various components to keep the same samples the same colours within different components.
    */
-  const sampleColors: Map<number, string> = buildSampleColors(state.sourceLabware);
+  const sampleColors: Map<number, string> = React.useMemo(() => {
+    return buildSampleColors(state.sourceLabware);
+  }, [state.sourceLabware]);
 
   /**
    *  Find all labwares having fetal waste samples with collection date less than 12 weeks after scanning

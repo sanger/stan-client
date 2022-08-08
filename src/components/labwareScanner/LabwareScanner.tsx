@@ -58,7 +58,7 @@ export type LabwareScannerProps = {
 };
 
 export default function LabwareScanner({
-  initialLabwares = [],
+  initialLabwares,
   locked = false,
   limit,
   labwareCheckFunction,
@@ -68,11 +68,18 @@ export default function LabwareScanner({
   children,
   enableLocationScanner
 }: LabwareScannerProps) {
-  if (limit && initialLabwares.length > limit) {
-    initialLabwares = initialLabwares.slice(0, limit);
-  }
+  const slicedInitialLabware = React.useMemo(() => {
+    if (!initialLabwares) return [];
+    if (limit && initialLabwares.length > limit) {
+      return initialLabwares.slice(0, limit);
+    } else return initialLabwares;
+  }, [initialLabwares, limit]);
 
-  const [current, send, service] = useMachine(createLabwareMachine(initialLabwares, labwareCheckFunction, limit));
+  const labwareMachine = React.useMemo(() => {
+    return createLabwareMachine(slicedInitialLabware, labwareCheckFunction, limit);
+  }, [limit, labwareCheckFunction, slicedInitialLabware]);
+
+  const [current, send, service] = useMachine(labwareMachine);
 
   const { labwares, removedLabware, successMessage, errorMessage, currentBarcode, locationScan } = current.context;
 
