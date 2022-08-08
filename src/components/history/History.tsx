@@ -24,6 +24,80 @@ export default function History(props: HistoryProps) {
 
   const { history, historyProps, serverError } = current.context;
 
+  const historyColumns: Array<Column<HistoryTableEntry>> = React.useMemo(() => [
+    {
+      Header: 'Date',
+      accessor: 'date'
+    },
+    {
+      Header: 'Event Type',
+      accessor: 'eventType'
+    },
+    {
+      Header: 'Work number',
+      accessor: 'workNumber'
+    },
+    {
+      Header: 'User',
+      accessor: 'username'
+    },
+    {
+      Header: 'Source',
+      accessor: 'sourceBarcode',
+      Cell: (props: Cell<HistoryTableEntry>) => {
+        const barcode = props.row.original.sourceBarcode;
+        let style = undefined;
+        if (historyProps.kind === "labwareBarcode" && (barcode === historyProps.value)) {
+          style = { backgroundColor: 'yellow' };
+        }
+        return <StyledLink to={`/labware/${barcode}`} style={style}>{barcode}</StyledLink>;
+      },
+    },
+    {
+      Header: 'Destination',
+      accessor: 'destinationBarcode',
+      Cell: (props: Cell<HistoryTableEntry>) => {
+        const barcode = props.row.original.destinationBarcode;
+        let style = undefined;
+        if (historyProps.kind === "labwareBarcode" && (barcode === historyProps.value)) {
+          style = { backgroundColor: 'yellow' };
+        }
+        return <StyledLink to={`/labware/${barcode}`} style={style}>{barcode}</StyledLink>;
+      }
+    },
+    {
+      Header: 'Donor ID',
+      accessor: 'donorName'
+    },
+    {
+      Header: 'External ID',
+      accessor: 'externalName'
+    },
+    {
+      Header: 'Section Number',
+      accessor: 'sectionNumber'
+    },
+    {
+      Header: 'Biological State',
+      accessor: 'biologicalState'
+    },
+    {
+      Header: 'Labware State',
+      accessor: 'labwareState',
+      Cell: (props: Cell<HistoryTableEntry>) => <LabwareStatePill labware={{ state: props.row.original.labwareState }} />
+    },
+    {
+      Header: 'Details',
+      accessor: 'details',
+      Cell: (props: Cell<HistoryTableEntry>) => {
+        const details = props.row.original.details.map((detail) => {
+          return <li key={detail}>{detail}</li>;
+        });
+        return <ul>{details}</ul>;
+      }
+    }
+  ], [historyProps]);
+
   /**
    * Rebuild the file object whenever the history changes
    */
@@ -34,7 +108,7 @@ export default function History(props: HistoryProps) {
       },
       entries: history
     };
-  }, [history]);
+  }, [history, historyColumns]);
 
   const { downloadURL, extension } = useDownload(downloadData);
 
@@ -81,72 +155,6 @@ export default function History(props: HistoryProps) {
     </div>
   );
 }
-
-const historyColumns: Array<Column<HistoryTableEntry>> = [
-  {
-    Header: 'Date',
-    accessor: 'date'
-  },
-  {
-    Header: 'Event Type',
-    accessor: 'eventType'
-  },
-  {
-    Header: 'Work number',
-    accessor: 'workNumber'
-  },
-  {
-    Header: 'User',
-    accessor: 'username'
-  },
-  {
-    Header: 'Source',
-    accessor: 'sourceBarcode',
-    Cell: (props: Cell<HistoryTableEntry>) => {
-      const barcode = props.row.original.sourceBarcode;
-      return <StyledLink to={`/labware/${barcode}`}>{barcode}</StyledLink>;
-    }
-  },
-  {
-    Header: 'Destination',
-    accessor: 'destinationBarcode',
-    Cell: (props: Cell<HistoryTableEntry>) => {
-      const barcode = props.row.original.destinationBarcode;
-      return <StyledLink to={`/labware/${barcode}`}>{barcode}</StyledLink>;
-    }
-  },
-  {
-    Header: 'Donor ID',
-    accessor: 'donorName'
-  },
-  {
-    Header: 'External ID',
-    accessor: 'externalName'
-  },
-  {
-    Header: 'Section Number',
-    accessor: 'sectionNumber'
-  },
-  {
-    Header: 'Biological State',
-    accessor: 'biologicalState'
-  },
-  {
-    Header: 'Labware State',
-    accessor: 'labwareState',
-    Cell: (props: Cell<HistoryTableEntry>) => <LabwareStatePill labware={{ state: props.row.original.labwareState }} />
-  },
-  {
-    Header: 'Details',
-    accessor: 'details',
-    Cell: (props: Cell<HistoryTableEntry>) => {
-      const details = props.row.original.details.map((detail) => {
-        return <li key={detail}>{detail}</li>;
-      });
-      return <ul>{details}</ul>;
-    }
-  }
-];
 
 export const historyDisplayValues: { [key in HistoryProps['kind']]: string } = {
   labwareBarcode: 'Labware Barcode',
