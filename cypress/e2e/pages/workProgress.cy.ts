@@ -195,4 +195,20 @@ describe('Work Progress', () => {
       });
     });
   });
+  describe('Summary dashboard', () => {
+    before(() => {
+      cy.visit('./');
+    });
+    it('shows a summary dashboard link', () => {
+      cy.findByText('Work Progress Summary').should('be.visible');
+    });
+    context('when work progress summary link is clicked', () => {
+      before(() => {
+        cy.contains('Work Progress Summary').click();
+      });
+      it('goes to summary page', () => {
+        cy.url().should('be.equal', 'http://localhost:3000/work_progress_summary');
+      });
+    });
+  });
 });

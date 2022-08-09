@@ -43,6 +43,7 @@ import originalSampleProcessingHandlers from './handlers/originalSampleProcessin
 import solutionHandlers from './handlers/solutionHandlers';
 import solutionTransferHandlers from './handlers/solutionTransferHandlers';
 import ffpeProcessingHandlers from './handlers/ffpeProcessingHandlers';
+import workProgressSummaryHandlers from './handlers/summaryWorkProgressHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -86,5 +87,6 @@ export const handlers = [
   ...originalSampleProcessingHandlers,
   ...solutionHandlers,
   ...ffpeProcessingHandlers,
-  ...solutionTransferHandlers
+  ...solutionTransferHandlers,
+  ...workProgressSummaryHandlers
 ];

@@ -25,6 +25,7 @@ import WorkProgressInput, {
 import StyledLink from '../components/StyledLink';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
+import Heading from '../components/Heading';
 
 /**
  * Data structure to keep the data associated with this component
@@ -161,10 +162,24 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>STAN</AppShell.Title>
+        <div className="flex flex-row">
+          <AppShell.Title>STAN</AppShell.Title>
+        </div>
       </AppShell.Header>
       <AppShell.Main>
         <div className="mx-auto">
+          <div className="mx-auto max-w-screen-lg mt-2 my-6 rounded-md space-y-4">
+            <div className={'flex flex-col w-full border border-gray-200 bg-gray-100 p-4 gap-y-4 text-lg'}>
+              <Heading level={3} showBorder={false}>
+                Summary Dashboard
+              </Heading>
+              <div className={' mx-auto flex w-full p-4 rounded-md justify-center bg-gray-200'}>
+                <StyledLink to={`work_progress_summary`} className={'text-lg'}>
+                  Work Progress Summary
+                </StyledLink>
+              </div>
+            </div>
+          </div>
           <WorkProgressInput urlParams={memoUrlParams ?? defaultInitialValues} workTypes={workTypes} />
           <div className={'my-10 mx-auto max-w-screen-xl'}>
             {serverError && <Warning message="Search Error" error={serverError} />}

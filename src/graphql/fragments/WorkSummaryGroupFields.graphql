@@ -1,0 +1,8 @@
+fragment WorkSummaryGroupFields on WorkSummaryGroup {
+    workType {
+        ...WorkTypeFields
+    }
+    numWorks
+    status
+    totalLabwareRequired
+}
