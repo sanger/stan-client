@@ -199,12 +199,12 @@ describe('Work Progress', () => {
     before(() => {
       cy.visit('./');
     });
-    it('shows a summary dashboard link', () => {
-      cy.findByText('Work Progress Summary').should('be.visible');
+    it('shows a Spatial Genomics Platform Status link', () => {
+      cy.findByText('Spatial Genomics Platform Status').should('be.visible');
     });
-    context('when work progress summary link is clicked', () => {
+    context('when Spatial Genomics Platform Status link is clicked', () => {
       before(() => {
-        cy.contains('Work Progress Summary').click();
+        cy.contains('Spatial Genomics Platform Status').click();
       });
       it('goes to summary page', () => {
         cy.url().should('be.equal', 'http://localhost:3000/work_progress_summary');

@@ -1,9 +1,9 @@
-describe('Work Progress', () => {
+describe('Work Progress Summary', () => {
   before(() => {
     cy.visit('./work_progress_summary');
   });
-  it('should display Work Progress Summary', () => {
-    cy.findByText('Work Progress Summary').should('be.visible');
+  it('should display Spatial Genomics Platform Status', () => {
+    cy.findByText('Spatial Genomics Platform Status').should('be.visible');
   });
   it('should display summary table', () => {
     cy.findByRole('table').should('be.visible');
