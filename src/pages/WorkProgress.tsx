@@ -175,7 +175,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
               </Heading>
               <div className={' mx-auto flex w-full p-4 rounded-md justify-center bg-gray-200'}>
                 <StyledLink to={`work_progress_summary`} className={'text-lg'}>
-                  Work Progress Summary
+                  Spatial Genomics Platform Status
                 </StyledLink>
               </div>
             </div>
