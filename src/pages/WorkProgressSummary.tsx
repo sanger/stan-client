@@ -72,7 +72,7 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Work Progress Summary</AppShell.Title>
+        <AppShell.Title>Spatial Genomics Platform Status</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="mx-auto">
