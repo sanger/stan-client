@@ -47,12 +47,13 @@ export default function History(props: HistoryProps) {
         accessor: 'sourceBarcode',
         Cell: (props: Cell<HistoryTableEntry>) => {
           const barcode = props.row.original.sourceBarcode;
-          let style = undefined;
+          let classes = '';
           if (historyProps.kind === 'labwareBarcode' && barcode === historyProps.value) {
-            style = { backgroundColor: 'yellow' };
+            classes =
+              'bg-yellow-400 text-sp-600 hover:text-sp-700 font-semibold hover:underline text-base tracking-wide';
           }
           return (
-            <StyledLink to={`/labware/${barcode}`} style={style}>
+            <StyledLink to={`/labware/${barcode}`} className={classes ? classes : undefined}>
               {barcode}
             </StyledLink>
           );
@@ -63,12 +64,13 @@ export default function History(props: HistoryProps) {
         accessor: 'destinationBarcode',
         Cell: (props: Cell<HistoryTableEntry>) => {
           const barcode = props.row.original.destinationBarcode;
-          let style = undefined;
+          let classes = '';
           if (historyProps.kind === 'labwareBarcode' && barcode === historyProps.value) {
-            style = { backgroundColor: 'yellow' };
+            classes =
+              'bg-yellow-400 text-sp-600 hover:text-sp-700 font-semibold hover:underline text-base tracking-wide';
           }
           return (
-            <StyledLink to={`/labware/${barcode}`} style={style}>
+            <StyledLink to={`/labware/${barcode}`} className={classes ? classes : undefined}>
               {barcode}
             </StyledLink>
           );
