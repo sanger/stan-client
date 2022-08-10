@@ -126,7 +126,9 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({ onChangeExtract
 
       {extractResults.length > 0 && (
         <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} className="mt-3">
-          <DataTable columns={columns} data={extractResults} />
+          <div className="overflow-x-auto overflow-y-auto">
+            <DataTable columns={columns} data={extractResults} />
+          </div>
         </motion.div>
       )}
     </div>

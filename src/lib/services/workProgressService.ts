@@ -25,7 +25,8 @@ export type WorkProgressResultTableEntry = {
   lastStainTODate: Date | undefined;
   lastStainLPDate: Date | undefined;
   lastRelease96WellPlateData: Date | undefined;
-  workRequester: String | undefined;
+  workRequester: string | undefined;
+  mostRecentOperation: string | undefined;
 };
 /**
  * The keys to store the timestamp data
@@ -91,6 +92,13 @@ export class WorkProgressService
       const lastSlideImagedDate = timeStampMap.get('Image');
       const lastRNAAnalysisDate = timeStampMap.get('Analysis');
       const lastRelease96WellPlateData = timeStampMap.get('Release 96 well plate');
+      let mostRecentOperation: any[] = [];
+      if (timeStampMap.size !== 0) {
+        mostRecentOperation = [...timeStampMap.entries()].reduce((mostRecentOperation, item) =>
+          item[1] > mostRecentOperation[1] ? item : mostRecentOperation
+        );
+      }
+
       return {
         priority: entry.work.priority ?? undefined,
         workNumber: entry.work.workNumber,
@@ -108,7 +116,8 @@ export class WorkProgressService
         lastVisiumADHStainDate: lastVisiumADHStainDate && new Date(lastVisiumADHStainDate.toString()),
         lastSlideImagedDate: lastSlideImagedDate && new Date(lastSlideImagedDate.toString()),
         lastRelease96WellPlateData: lastRelease96WellPlateData && new Date(lastRelease96WellPlateData.toString()),
-        workRequester: entry.work.workRequester ? entry.work.workRequester.username : ''
+        workRequester: entry.work.workRequester ? entry.work.workRequester.username : '',
+        mostRecentOperation: mostRecentOperation.length > 0 ? mostRecentOperation[0].toString() : ''
       };
     });
   };

@@ -73,7 +73,9 @@ export default function History(props: HistoryProps) {
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
-            <DataTable columns={historyColumns} data={history} />
+            <div className="overflow-x-auto overflow-y-auto">
+              <DataTable columns={historyColumns} data={history} />
+            </div>
           </>
         ) : (
           <Warning message={'No results found.'} />

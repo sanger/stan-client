@@ -169,7 +169,9 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
                   {plannedLabware.length > 0 && (
                     <div data-testid="plan-destination-labware" className="w-full space-y-4 py-4 px-8">
-                      <DataTable columns={columns} data={plannedLabware} />
+                      <div className="overflow-x-auto overflow-y-auto">
+                        <DataTable columns={columns} data={plannedLabware} />
+                      </div>
 
                       {printResult && <PrintResult result={printResult} />}
                     </div>

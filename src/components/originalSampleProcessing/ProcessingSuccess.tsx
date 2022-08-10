@@ -23,7 +23,9 @@ const ProcessingSuccess: React.FC<ProcessingSuccessProps> = ({ labware, columns,
       <Heading level={2}>{'Operation Complete'}</Heading>
       <ModalBody>{<Success message={successMessage} />}</ModalBody>
       <motion.div variants={variants.fadeInWithLift} className="flex flex-col">
-        <DataTable columns={columns} data={labware} />
+        <div className="overflow-x-auto overflow-y-auto">
+          <DataTable columns={columns} data={labware} />
+        </div>
       </motion.div>
       <div className="flex flex-row items-center sm:justify-end">
         <motion.div

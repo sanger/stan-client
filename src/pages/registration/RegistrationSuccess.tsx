@@ -36,7 +36,9 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({ labware, colu
           </motion.div>
 
           <motion.div variants={variants.fadeInWithLift} className="flex flex-col">
-            <DataTable columns={columns} data={labware} />
+            <div className="overflow-x-auto overflow-y-auto">
+              <DataTable columns={columns} data={labware} />
+            </div>
           </motion.div>
 
           <div className="flex flex-row items-center sm:justify-end">

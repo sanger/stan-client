@@ -200,23 +200,25 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                       <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
                     </a>
                   </div>
-                  <DataTable
-                    sortable
-                    defaultSort={[
-                      //Sort by Status and within status sort with WorkNumber in descending order
-                      {
-                        id: 'status',
-                        desc: false
-                      },
-                      {
-                        id: 'workNumber',
-                        desc: true
-                      }
-                    ]}
-                    columns={columns}
-                    data={searchResult.entries}
-                    ref={sortedTableDataRef}
-                  />
+                  <div className="max-h-[750px] overflow-y-auto overflow-x-auto">
+                    <DataTable
+                      sortable
+                      defaultSort={[
+                        //Sort by Status and within status sort with WorkNumber in descending order
+                        {
+                          id: 'status',
+                          desc: false
+                        },
+                        {
+                          id: 'workNumber',
+                          desc: true
+                        }
+                      ]}
+                      columns={columns}
+                      data={searchResult.entries}
+                      ref={sortedTableDataRef}
+                    />
+                  </div>
                 </>
               ) : (
                 <Warning message={'There were no results for the given search. Please try again.'} />
@@ -291,7 +293,14 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     Header: 'Work Requester',
     accessor: 'workRequester',
     sortType: (rowA, rowB) => {
-      return statusSort(rowA.original.status, rowB.original.status);
+      if (rowA.original.workRequester && rowB.original.workRequester) {
+        return alphaNumericSortDefault(rowA.original.workRequester, rowB.original.workRequester);
+      } else if (rowA.original.workRequester && !rowB.original.workRequester) {
+        return 1;
+      } else if (!rowA.original.workRequester && rowB.original.workRequester) {
+        return -1;
+      }
+      return 0;
     }
   },
   {
@@ -302,7 +311,10 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     Header: 'Project',
     accessor: 'project'
   },
-
+  {
+    Header: 'Most recent operation',
+    accessor: 'mostRecentOperation'
+  },
   {
     Header: 'Last Sectioning Date',
     accessor: 'lastSectionDate',

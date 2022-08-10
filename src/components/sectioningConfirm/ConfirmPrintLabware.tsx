@@ -40,7 +40,9 @@ export const ConfirmPrintLabware = ({ labwareType, labwares }: ConfirmPrintLabwa
         animate={'visible'}
         className="relative p-3 shadow space-y-4 px-4"
       >
-        <DataTable columns={columns} data={labwares} />
+        <div className="overflow-x-auto overflow-y-auto">
+          <DataTable columns={columns} data={labwares} />
+        </div>
 
         <LabelPrinter
           labwares={labwares}

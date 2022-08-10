@@ -62,7 +62,13 @@ const SlotMeasurements = ({
   }, [measurementName, onChangeMeasurement, validateValue, stepIncrement]);
 
   return (
-    <>{slotMeasurements && slotMeasurements.length > 0 && <DataTable columns={columns} data={slotMeasurements} />}</>
+    <>
+      {slotMeasurements && slotMeasurements.length > 0 && (
+        <div className="overflow-x-auto overflow-y-auto">
+          <DataTable columns={columns} data={slotMeasurements} />
+        </div>
+      )}
+    </>
   );
 };
 

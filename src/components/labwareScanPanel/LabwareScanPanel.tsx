@@ -56,7 +56,9 @@ const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns }) => {
 
       {labwares.length > 0 && (
         <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} className="mt-3">
-          <DataTable columns={allColumns} data={data} />
+          <div className="overflow-x-auto overflow-y-auto">
+            <DataTable columns={allColumns} data={data} />
+          </div>
         </motion.div>
       )}
     </div>
