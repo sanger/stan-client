@@ -57,9 +57,40 @@ describe('Work Progress', () => {
     });
   });
 
+  // TEST CASES for Work progess results
+  describe('Testing work progress table', () => {
+    context('Table headers', () => {
+      before(() => {
+        cy.visit('?searchType=SGP%2FR%26D%20Number&searchValues[]=SGP1001');
+      });
+
+      it('has the correct table headers in the correct order', () => {
+        cy.get('table thead tr > th').eq(0).contains('Priority');
+        cy.get('table thead tr > th').eq(1).contains('SGP/R&D Number');
+        cy.get('table thead tr > th').eq(2).contains('Status');
+        cy.get('table thead tr > th').eq(3).contains('Work Requester');
+        cy.get('table thead tr > th').eq(4).contains('Work Type');
+        cy.get('table thead tr > th').eq(5).contains('Project');
+        cy.get('table thead tr > th').eq(6).contains('Most Recent Operation');
+        cy.get('table thead tr > th').eq(7).contains('Last Sectioning Date');
+        cy.get('table thead tr > th').eq(8).contains('Last Staining Date');
+        cy.get('table thead tr > th').eq(9).contains('Last RNAscope/IHC Staining Date');
+        cy.get('table thead tr > th').eq(10).contains('Last Imaging Date');
+        cy.get('table thead tr > th').eq(11).contains('Last RNA Extraction Date');
+        cy.get('table thead tr > th').eq(12).contains('Last RNA Analysis Date');
+        cy.get('table thead tr > th').eq(13).contains('Last Visium ADH Stain Date');
+        cy.get('table thead tr > th').eq(14).contains('Last Visium TO Staining Date');
+        cy.get('table thead tr > th').eq(15).contains('Last Visium LP Staining Date');
+        cy.get('table thead tr > th').eq(16).contains('Last cDNA Transfer Date');
+        cy.get('table thead tr > th').eq(17).contains('Last Date 96 Well Plate Released');
+      });
+    });
+  });
+
   // TESTCASES for  Work Number Search action
   describe('Testcases for  Work Number based search action', () => {
     before(() => {
+      cy.visit('');
       cy.findByTestId('type').select('SGP/R&D Number');
     });
     context('no value is entered', () => {

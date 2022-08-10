@@ -312,7 +312,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     accessor: 'project'
   },
   {
-    Header: 'Most recent operation',
+    Header: 'Most Recent Operation',
     accessor: 'mostRecentOperation'
   },
   {
@@ -332,7 +332,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     }
   },
   {
-    Header: 'Last RNAscope/IHC staining Date',
+    Header: 'Last RNAscope/IHC Staining Date',
     accessor: 'lastRNAScopeIHCStainDate',
     Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRNAScopeIHCStainDate'),
     sortType: (rowA, rowB) => {
@@ -364,7 +364,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     }
   },
   {
-    Header: 'Last Visium ADH stain date',
+    Header: 'Last Visium ADH Stain Date',
     accessor: 'lastVisiumADHStainDate',
     Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastVisiumADHStainDate'),
     sortType: (rowA, rowB) => {
@@ -396,7 +396,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     }
   },
   {
-    Header: 'Last date 96 well plate Released',
+    Header: 'Last Date 96 Well Plate Released',
     accessor: 'lastRelease96WellPlateData',
     Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRelease96WellPlateData'),
     sortType: (rowA, rowB) => {
