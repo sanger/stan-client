@@ -18,7 +18,9 @@ const workProgressSummaryHandlers = [
               workType: workType,
               status: WorkStatus[keys[generateRandomIntegerInRange(0, keys.length)]],
               numWorks: generateRandomIntegerInRange(1, 10),
-              totalLabwareRequired: generateRandomIntegerInRange(1, 5)
+              totalNumBlocks: generateRandomIntegerInRange(1, 5),
+              totalNumSlides: generateRandomIntegerInRange(1, 5),
+              totalNumOriginalSamples: generateRandomIntegerInRange(1, 5)
             };
           })
       })

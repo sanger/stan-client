@@ -13,6 +13,8 @@ describe('Work Progress Summary', () => {
     cy.findByRole('table').get('th').eq(0).should('have.text', 'Work Type');
     cy.findByRole('table').get('th').eq(1).should('have.text', 'Status');
     cy.findByRole('table').get('th').eq(2).should('have.text', 'Number of Work Requests');
-    cy.findByRole('table').get('th').eq(3).should('have.text', 'Total Labware Required');
+    cy.findByRole('table').get('th').eq(3).should('have.text', 'Total Number of Blocks');
+    cy.findByRole('table').get('th').eq(4).should('have.text', 'Total Number of Slides');
+    cy.findByRole('table').get('th').eq(5).should('have.text', 'Total Number of Original Samples');
   });
 });

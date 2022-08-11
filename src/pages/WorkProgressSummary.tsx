@@ -6,7 +6,7 @@ import Warning from '../components/notifications/Warning';
 
 import DataTable from '../components/DataTable';
 import { Column } from 'react-table';
-import { statusSort } from '../types/stan';
+import { alphaNumericSortDefault, statusSort } from '../types/stan';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
 import { getTimestampStr } from '../lib/helpers';
@@ -15,7 +15,9 @@ type WorkProgressSummaryTableEntry = {
   status: WorkStatus;
   workType: string;
   numWorks: number;
-  totalLabwareRequired: number;
+  totalNumBlocks: number;
+  totalNumSlides: number;
+  totalNumOriginalSamples: number;
 };
 type WorkProgressSummaryProps = {
   summaryData: GetWorkSummaryQuery;
@@ -32,7 +34,9 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
           workType: data.workType.name,
           status: data.status,
           numWorks: data.numWorks,
-          totalLabwareRequired: data.totalLabwareRequired
+          totalNumBlocks: data.totalNumBlocks,
+          totalNumSlides: data.totalNumSlides,
+          totalNumOriginalSamples: data.totalNumOriginalSamples
         };
       })
     );
@@ -91,15 +95,14 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
               <DataTable
                 sortable
                 defaultSort={[
-                  //Sort by Status and within status sort with WorkNumber in descending order
+                  {
+                    id: 'workType',
+                    desc: false
+                  },
                   {
                     id: 'status',
                     desc: false
                   },
-                  {
-                    id: 'workNumber',
-                    desc: true
-                  }
                 ]}
                 columns={columns}
                 data={workProgressSummaryData}
@@ -119,7 +122,10 @@ export default WorkProgressSummary;
 const columns: Column<WorkProgressSummaryTableEntry>[] = [
   {
     Header: 'Work Type',
-    accessor: 'workType'
+    accessor: 'workType',
+    sortType: (rowA, rowB) => {
+      return alphaNumericSortDefault(rowA.original.workType, rowB.original.workType);
+    }
   },
   {
     Header: 'Status',
@@ -133,7 +139,15 @@ const columns: Column<WorkProgressSummaryTableEntry>[] = [
     accessor: 'numWorks'
   },
   {
-    Header: 'Total Labware Required',
-    accessor: 'totalLabwareRequired'
+    Header: 'Total Number of Blocks',
+    accessor: 'totalNumBlocks'
+  },
+  {
+    Header: 'Total Number of Slides',
+    accessor: 'totalNumSlides'
+  },
+  {
+    Header: 'Total Number of Original Samples',
+    accessor: 'totalNumOriginalSamples'
   }
 ];

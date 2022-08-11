@@ -4,5 +4,7 @@ fragment WorkSummaryGroupFields on WorkSummaryGroup {
   }
   numWorks
   status
-  totalLabwareRequired
+  totalNumBlocks
+  totalNumSlides
+  totalNumOriginalSamples
 }
