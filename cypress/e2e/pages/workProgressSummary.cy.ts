@@ -8,8 +8,8 @@ describe('Work Progress Summary', () => {
   it('should display summary table', () => {
     cy.findByRole('table').should('be.visible');
   });
-  it('it should display Work Type,status, number of work requests and total labware required columns', () => {
-    cy.findByRole('table').get('th').should('have.length', 4);
+  it('it should display Work Type, status, number of work requests and total number of blocks, slides and original samples required columns', () => {
+    cy.findByRole('table').get('th').should('have.length', 6);
     cy.findByRole('table').get('th').eq(0).should('have.text', 'Work Type');
     cy.findByRole('table').get('th').eq(1).should('have.text', 'Status');
     cy.findByRole('table').get('th').eq(2).should('have.text', 'Number of Work Requests');
