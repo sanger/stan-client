@@ -102,7 +102,7 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
                   {
                     id: 'status',
                     desc: false
-                  },
+                  }
                 ]}
                 columns={columns}
                 data={workProgressSummaryData}
