@@ -35,7 +35,7 @@ interface TableHeaderProps {
  */
 const Table: React.FC<TableProps> = ({ children, ...rest }) => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col overflow-y-auto overflow-x-auto max-h-screen">
       <div>
         <div className="py-2 align-middle inline-block min-w-full">
           <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">

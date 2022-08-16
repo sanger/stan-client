@@ -200,25 +200,23 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                       <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
                     </a>
                   </div>
-                  <div className="max-h-[750px] overflow-y-auto overflow-x-auto">
-                    <DataTable
-                      sortable
-                      defaultSort={[
-                        //Sort by Status and within status sort with WorkNumber in descending order
-                        {
-                          id: 'status',
-                          desc: false
-                        },
-                        {
-                          id: 'workNumber',
-                          desc: true
-                        }
-                      ]}
-                      columns={columns}
-                      data={searchResult.entries}
-                      ref={sortedTableDataRef}
-                    />
-                  </div>
+                  <DataTable
+                    sortable
+                    defaultSort={[
+                      //Sort by Status and within status sort with WorkNumber in descending order
+                      {
+                        id: 'status',
+                        desc: false
+                      },
+                      {
+                        id: 'workNumber',
+                        desc: true
+                      }
+                    ]}
+                    columns={columns}
+                    data={searchResult.entries}
+                    ref={sortedTableDataRef}
+                  />
                 </>
               ) : (
                 <Warning message={'There were no results for the given search. Please try again.'} />

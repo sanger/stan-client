@@ -160,12 +160,10 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
                   <>
                     <div className="space-y-4">
                       <Heading level={3}>Source Labware</Heading>
-                      <div className="overflow-x-auto overflow-y-auto">
-                        <DataTable
-                          data={sourceLabware}
-                          columns={[columns.barcode(), columns.highestSectionForSlot('A1')]}
-                        />
-                      </div>
+                      <DataTable
+                        data={sourceLabware}
+                        columns={[columns.barcode(), columns.highestSectionForSlot('A1')]}
+                      />
                     </div>
 
                     <div className={'sm:justify-between'}>

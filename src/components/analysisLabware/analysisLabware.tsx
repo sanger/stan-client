@@ -185,9 +185,7 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
       </Formik>
       {barcodes.length > 0 && (
         <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
-          <div className="overflow-x-auto overflow-y-auto">
-            <DataTable columns={columns} data={analysisLabwares} />
-          </div>
+          <DataTable columns={columns} data={analysisLabwares} />
         </motion.div>
       )}
     </div>

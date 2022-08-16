@@ -198,14 +198,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                       results
                     </p>
                   </div>
-                  <div className="overflow-x-auto overflow-y-auto">
-                    <DataTable
-                      sortable
-                      defaultSort={[{ id: 'donorId' }]}
-                      columns={columns}
-                      data={searchResult.entries}
-                    />
-                  </div>
+                  <DataTable sortable defaultSort={[{ id: 'donorId' }]} columns={columns} data={searchResult.entries} />
                 </div>
               )}
             </div>

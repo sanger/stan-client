@@ -101,21 +101,19 @@ export default function LabwareDetails({ labware, permData }: LabwareDetailsProp
             <div className="space-y-4">
               <Heading level={2}>Samples</Heading>
 
-              <div className="overflow-x-auto overflow-y-auto">
-                <DataTable
-                  columns={[
-                    sampleColumns.slotAddress(),
-                    sampleColumns.tissueType(),
-                    sampleColumns.sectionNumber(),
-                    sampleColumns.bioState(),
-                    sampleColumns.replicateNumber(),
-                    sampleColumns.spatialLocation(),
-                    sampleColumns.lifeStage(),
-                    sampleColumns.donorName()
-                  ]}
-                  data={sampleColumns.buildSampleDataTableRows(labware)}
-                />
-              </div>
+              <DataTable
+                columns={[
+                  sampleColumns.slotAddress(),
+                  sampleColumns.tissueType(),
+                  sampleColumns.sectionNumber(),
+                  sampleColumns.bioState(),
+                  sampleColumns.replicateNumber(),
+                  sampleColumns.spatialLocation(),
+                  sampleColumns.lifeStage(),
+                  sampleColumns.donorName()
+                ]}
+                data={sampleColumns.buildSampleDataTableRows(labware)}
+              />
             </div>
           </div>
           <div className="space-y-4">
