@@ -6,7 +6,7 @@ import Warning from '../components/notifications/Warning';
 
 import DataTable from '../components/DataTable';
 import { Column } from 'react-table';
-import { alphaNumericSortDefault, statusSort } from '../types/stan';
+import { alphaNumericSortDefault } from '../types/stan';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
 import { getTimestampStr } from '../lib/helpers';
@@ -118,6 +118,22 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
   );
 };
 
+/**
+ * Sort functionality for Status in Work Summary page. The status need to be sorted in the order "active", "completed", "paused", "failed"
+ * @param rowAStatus
+ * @param rowBStatus
+ */
+export const summaryStatusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
+  const statusArray: WorkStatus[] = [
+    WorkStatus.Unstarted,
+    WorkStatus.Active,
+    WorkStatus.Paused,
+    WorkStatus.Completed,
+    WorkStatus.Failed,
+    WorkStatus.Withdrawn
+  ];
+  return statusArray.findIndex((val) => val === rowAStatus) - statusArray.findIndex((val) => val === rowBStatus);
+};
 export default WorkProgressSummary;
 const columns: Column<WorkProgressSummaryTableEntry>[] = [
   {
@@ -131,7 +147,7 @@ const columns: Column<WorkProgressSummaryTableEntry>[] = [
     Header: 'Status',
     accessor: 'status',
     sortType: (rowA, rowB) => {
-      return statusSort(rowA.original.status, rowB.original.status);
+      return summaryStatusSort(rowA.original.status, rowB.original.status);
     }
   },
   {
