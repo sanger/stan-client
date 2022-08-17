@@ -162,9 +162,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
   return (
     <AppShell>
       <AppShell.Header>
-        <div className="flex flex-row">
-          <AppShell.Title>STAN</AppShell.Title>
-        </div>
+        <AppShell.Title>STAN</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="mx-auto">
@@ -173,7 +171,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
               <Heading level={3} showBorder={false}>
                 Summary Dashboard
               </Heading>
-              <div className={' mx-auto flex w-full p-4 rounded-md justify-center bg-gray-200'}>
+              <div className={'mx-auto flex w-full p-4 rounded-md justify-center bg-gray-200'}>
                 <StyledLink to={`work_progress_summary`} className={'text-lg'}>
                   Spatial Genomics Platform Status
                 </StyledLink>
