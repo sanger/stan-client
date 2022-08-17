@@ -555,7 +555,7 @@ function AppShell({ children }: AppShellParams) {
 
 AppShell.Header = function ({ children }: { children: JSX.Element | JSX.Element[] }) {
   return (
-    <header className="bg-white shadow">
+    <header className="sticky top-0 bg-white shadow">
       <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8">{children}</div>
     </header>
   );
