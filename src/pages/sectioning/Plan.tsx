@@ -100,7 +100,7 @@ function Plan({ sectioningInfo }: SectioningParams) {
         {optionValues(allowedLabwareTypes, 'name', 'name')}
       </select>
     );
-  }, [allowedLabwareTypes]);
+  }, [allowedLabwareTypes, setSelectedLabwareType, selectedLabwareType]);
 
   return (
     <AppShell>
