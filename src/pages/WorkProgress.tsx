@@ -164,7 +164,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
         <AppShell.Title>STAN</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        <div className="mx-auto max-h-screen">
+        <div className="mx-auto">
           <WorkProgressInput urlParams={memoUrlParams ?? defaultInitialValues} workTypes={workTypes} />
           <div className={'my-10 mx-auto max-w-screen-xl'}>
             {serverError && <Warning message="Search Error" error={serverError} />}
@@ -200,7 +200,6 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
                       <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
                     </a>
                   </div>
-
                   <DataTable
                     sortable
                     defaultSort={[
