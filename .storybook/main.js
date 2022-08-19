@@ -1,14 +1,11 @@
 module.exports = {
   stories: ["../src/**/*.stories.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
-  addons: [
-    "@storybook/addon-links",
-    "@storybook/addon-essentials",
-    "@storybook/preset-create-react-app",
-  ],
+  addons: ["@storybook/addon-links", "@storybook/addon-essentials", "@storybook/preset-create-react-app"],
   features: {
-    storyStoreV7: true,
+    storyStoreV7: true
   },
   core: {
-    builder: "webpack5",
+    builder: "webpack5"
   },
+  framework: "@storybook/react"
 };
