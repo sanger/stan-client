@@ -95,6 +95,7 @@ function Plan({ sectioningInfo }: SectioningParams) {
       <select
         className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
         onChange={(e) => setSelectedLabwareType(e.currentTarget.value)}
+        value={selectedLabwareType}
       >
         {optionValues(allowedLabwareTypes, 'name', 'name')}
       </select>
