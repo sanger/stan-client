@@ -100,6 +100,15 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   };
 
   const [works, setWorks] = useState<Array<Pick<Work, 'workNumber'>>>([]);
+
+  const sortedWorks = () => {
+    return works
+      .sort((a, b) => {
+        return alphaNumericSortDefault(a.workNumber, b.workNumber);
+      })
+      .reverse();
+  };
+
   useEffect(() => {
     async function fetchActiveWorkNumbers() {
       const response = await stanCore.GetWorkNumbers();
@@ -146,7 +155,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                     </div>
                     <div>
                       <FormikSelect label="SGP Number" name="workNumber" emptyOption={true}>
-                        {optionValues(works, 'workNumber', 'workNumber')}
+                        {optionValues(sortedWorks(), 'workNumber', 'workNumber')}
                       </FormikSelect>
                     </div>
                     <div>
