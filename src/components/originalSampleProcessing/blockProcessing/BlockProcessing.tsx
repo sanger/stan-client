@@ -349,6 +349,9 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
         labware={submissionResult.performTissueBlock.labware}
         columns={[
           columns.barcode(),
+          columns.labwareType(),
+          columns.medium(),
+          columns.fixative(),
           columns.donorId(),
           columns.tissueType(),
           columns.spatialLocation(),
