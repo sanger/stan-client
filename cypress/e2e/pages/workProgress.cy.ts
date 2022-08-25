@@ -226,4 +226,20 @@ describe('Work Progress', () => {
       });
     });
   });
+  describe('Summary dashboard', () => {
+    before(() => {
+      cy.visit('./');
+    });
+    it('shows a Spatial Genomics Platform Status link', () => {
+      cy.findByText('Spatial Genomics Platform Status').should('be.visible');
+    });
+    context('when Spatial Genomics Platform Status link is clicked', () => {
+      before(() => {
+        cy.contains('Spatial Genomics Platform Status').click();
+      });
+      it('goes to summary page', () => {
+        cy.url().should('be.equal', 'http://localhost:3000/work_progress_summary');
+      });
+    });
+  });
 });

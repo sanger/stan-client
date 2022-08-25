@@ -374,3 +374,8 @@ export function getNumberOfDaysBetween(firstDate: string, secondDate: string) {
 /**This type allows to create a new type from given type with specified fields as optional **/
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+/**Generate a random integer number between min and max**/
+export function generateRandomIntegerInRange(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
