@@ -23,16 +23,33 @@ describe('History Page', () => {
 
   describe('By Labware Barcode', () => {
     context('when I visit the page with good URL params', () => {
-      before(() => cy.visit('/history?kind=labwareBarcode&value=STAN-0001F'));
+      before(() => cy.visit('/history?kind=labwareBarcode&value=STAN-1001'));
 
       it('uses the params to fill in the form', () => {
-        cy.get("input[name='value']").invoke('val').should('eq', 'STAN-0001F');
+        cy.get("input[name='value']").invoke('val').should('eq', 'STAN-1001');
         cy.get("select[name='kind']").invoke('val').should('eq', 'labwareBarcode');
       });
 
-      it('does performs a history search', () => {
+      it('performs a history search', () => {
         cy.findByTestId('history').should('exist');
-        cy.findByTextContent('History for Labware Barcode STAN-0001F');
+        cy.findByTextContent('History for Labware Barcode STAN-1001');
+      });
+
+      it('hightlights the searched barcode in the table', () => {
+        cy.findByTestId('history').should('exist');
+        // Non-searched barcode should not be highlighted yellow
+        cy.findByRole('table')
+          .find('tr')
+          .contains('td', 'STAN-1002')
+          .find('a')
+          .should('have.css', 'background-color', 'rgba(0, 0, 0, 0)');
+        cy.findByRole('table').find('tr').contains('td', 'STAN-1001').should('exist');
+        // Searched barcode should be highlighted yellow
+        cy.findByRole('table')
+          .find('tr')
+          .contains('td', 'STAN-1001')
+          .find('a')
+          .should('have.css', 'background-color', 'rgb(246, 224, 94)');
       });
     });
   });
