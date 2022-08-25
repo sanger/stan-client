@@ -1,6 +1,6 @@
 import Panel from '../Panel';
 import { QCType } from '../../pages/VisiumQC';
-import React from 'react';
+import React, { useState } from 'react';
 import { CommentFieldsFragment, LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
@@ -18,25 +18,19 @@ type CDNAMeasurementQCProps = {
 
 const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, comments }: CDNAMeasurementQCProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext();
+  const [measurementName, setMeasurementName] = useState(
+    qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration'
+  );
 
   const measurementConfigMemo = React.useMemo(() => {
-    const measurementName = () => {
-      switch (qcType) {
-        case QCType.CDNA_AMPLIFICATION:
-          return 'Cq value';
-        case QCType.CDNA_CONCENTRATION:
-          return 'cDNA concentration';
-        default:
-          return 'Library concentration';
-      }
-    };
+    setMeasurementName(qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration');
     return {
-      measurementName: measurementName(),
       stepIncrement: qcType === QCType.CDNA_AMPLIFICATION ? '1' : '.01',
       initialMeasurementVal: qcType === QCType.CDNA_AMPLIFICATION ? '' : '0',
       validateFunction:
         qcType === QCType.CDNA_AMPLIFICATION ? validateAmplificationMeasurementValue : validateAnalysisMeasurementValue,
       isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION,
+      isSelectMeasurementName: qcType === QCType.CDNA_ANALYSIS,
       comments: qcType === QCType.CDNA_AMPLIFICATION ? [] : comments
     };
   }, [qcType, comments]);
@@ -56,14 +50,14 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, c
     const slotMeasurements: SlotMeasurementRequest[] = labware.slots.filter(isSlotFilled).map((slot) => {
       return {
         address: slot.address,
-        name: measurementConfigMemo.measurementName,
+        name: measurementName,
         value: measurementConfigMemo.initialMeasurementVal
       };
     });
     setFieldValue('slotMeasurements', slotMeasurements);
   }, [
     labware,
-    measurementConfigMemo.measurementName,
+    measurementName,
     measurementConfigMemo.initialMeasurementVal,
     qcType,
     setErrors,
@@ -136,7 +130,7 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, c
             </div>
             {measurementConfigMemo.isApplySameValueForAllMeasurements && (
               <div className={'flex flex-row w-1/4 ml-2'}>
-                <label className={' mt-2'}>{measurementConfigMemo.measurementName}</label>
+                <label className={' mt-2'}>{measurementName}</label>
                 <input
                   className={'rounded-md ml-3'}
                   type={'number'}
@@ -149,11 +143,29 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, c
                 />
               </div>
             )}
+            {measurementConfigMemo.isSelectMeasurementName && (
+              <div className={'flex flex-col w-1/4 ml-2'}>
+                <label className={'my-3'}>Measurement type</label>
+                <select
+                  className={'rounded-md'}
+                  value={measurementName}
+                  data-testid={'measurementType'}
+                  onChange={(e) => setMeasurementName(e.currentTarget.value)}
+                >
+                  <option value={'cDNA concentration'} key={'cDNAconcentrationOpt'}>
+                    cDNA concentration
+                  </option>
+                  <option value={'Library concentration'} key={'LibraryconcentrationOpt'}>
+                    Library concentration
+                  </option>
+                </select>
+              </div>
+            )}
             <div className={'flex flex-row mt-8 justify-between'}>
               {slotMeasurements && slotMeasurements.length > 0 && (
                 <SlotMeasurements
                   slotMeasurements={slotMeasurements}
-                  measurementName={measurementConfigMemo.measurementName}
+                  measurementName={measurementName}
                   onChangeMeasurement={handleChangeMeasurement}
                   validateValue={measurementConfigMemo.validateFunction}
                   stepIncrement={measurementConfigMemo.stepIncrement}
