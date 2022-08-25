@@ -63,25 +63,33 @@ const SlotMeasurements = ({
           );
         }
       },
-      ...(comments?.length ? [{
-        Header: 'Comments',
-        id: 'Comments',
-        Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
-          return (
-            <FormikSelect
-              label={''}
-              data-testid={`comments${row.index}`}
-              name={`slotMeasurements.${row.index}.commentId`}
-              emptyOption={true}
-              onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                onChangeMeasurement(row.original.address, `slotMeasurements.${row.index}.commentId`, e.currentTarget.value);
-              }}
-            >
-              { optionValues(comments, 'text', 'id') }
-            </FormikSelect>
-          );
-        }
-      }] : [])
+      ...(comments?.length
+        ? [
+            {
+              Header: 'Comments',
+              id: 'Comments',
+              Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
+                return (
+                  <FormikSelect
+                    label={''}
+                    data-testid={`comments${row.index}`}
+                    name={`slotMeasurements.${row.index}.commentId`}
+                    emptyOption={true}
+                    onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                      onChangeMeasurement(
+                        row.original.address,
+                        `slotMeasurements.${row.index}.commentId`,
+                        e.currentTarget.value
+                      );
+                    }}
+                  >
+                    {optionValues(comments, 'text', 'id')}
+                  </FormikSelect>
+                );
+              }
+            }
+          ]
+        : [])
     ];
   }, [measurementName, onChangeMeasurement, validateValue, stepIncrement, comments]);
 

@@ -21,15 +21,15 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, c
 
   const measurementConfigMemo = React.useMemo(() => {
     const measurementName = () => {
-      switch(qcType) {
-        case(QCType.CDNA_AMPLIFICATION):
-          return 'Cq value'
-        case (QCType.CDNA_CONCENTRATION):
-          return 'cDNA concentration'
+      switch (qcType) {
+        case QCType.CDNA_AMPLIFICATION:
+          return 'Cq value';
+        case QCType.CDNA_CONCENTRATION:
+          return 'cDNA concentration';
         default:
-          return 'Library concentration'
+          return 'Library concentration';
       }
-    }
+    };
     return {
       measurementName: measurementName(),
       stepIncrement: qcType === QCType.CDNA_AMPLIFICATION ? '1' : '.01',

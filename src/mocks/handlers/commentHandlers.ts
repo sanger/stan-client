@@ -45,10 +45,10 @@ const commentHandlers = [
       ctx.data({
         comments: commentRepository
           .findAll()
-          .filter(
-            (comment) => 
-              req.variables.commentCategory ? (comment.category === req.variables.commentCategory) : true &&
-              (req.variables.includeDisabled ? true : isEnabled(comment))
+          .filter((comment) =>
+            req.variables.commentCategory
+              ? comment.category === req.variables.commentCategory
+              : true && (req.variables.includeDisabled ? true : isEnabled(comment))
           )
       })
     );

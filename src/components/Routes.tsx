@@ -166,7 +166,10 @@ export function Routes() {
       <AuthenticatedRoute
         path="/lab/visium_qc"
         render={(routeProps) => (
-          <DataFetcher key={routeProps.location.key} dataFetcher={() => stanCore.GetComments({includeDisabled: false})}>
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() => stanCore.GetComments({ includeDisabled: false })}
+          >
             {(visiumQCInfo) => <VisiumQC info={visiumQCInfo} />}
           </DataFetcher>
         )}

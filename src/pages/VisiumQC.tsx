@@ -85,12 +85,12 @@ export default function VisiumQC({ info }: VisiumQCProps) {
   const [currentSlideProcessing, sendSlideProcessing] = useMachine(formMachine);
 
   const slideProcessingComments = React.useMemo(() => {
-    return info.comments.filter(comment => comment.category === "Visium QC")
-  }, [info])
+    return info.comments.filter((comment) => comment.category === 'Visium QC');
+  }, [info]);
 
   const concentrationComments = React.useMemo(() => {
-    return info.comments.filter(comment => comment.category === "Visium QC")
-  }, [info])
+    return info.comments.filter((comment) => comment.category === 'Visium QC');
+  }, [info]);
 
   const [currentCDNA, sendCDNA] = useMachine(
     createFormMachine<OpWithSlotMeasurementsRequest, RecordOpWithSlotMeasurementsMutation>().withConfig({
@@ -120,7 +120,8 @@ export default function VisiumQC({ info }: VisiumQCProps) {
       });
     }
     if (
-      values.qcType === QCType.CDNA_CONCENTRATION || values.qcType === QCType.LIBRARY_CONCENTRATION ||
+      values.qcType === QCType.CDNA_CONCENTRATION ||
+      values.qcType === QCType.LIBRARY_CONCENTRATION ||
       (values.qcType === QCType.CDNA_AMPLIFICATION && values.slotMeasurements)
     ) {
       sendCDNA({
@@ -139,7 +140,11 @@ export default function VisiumQC({ info }: VisiumQCProps) {
     if (value.workNumber === '') {
       return false;
     }
-    if (value.qcType === QCType.CDNA_AMPLIFICATION || value.qcType === QCType.CDNA_CONCENTRATION || value.qcType === QCType.LIBRARY_CONCENTRATION) {
+    if (
+      value.qcType === QCType.CDNA_AMPLIFICATION ||
+      value.qcType === QCType.CDNA_CONCENTRATION ||
+      value.qcType === QCType.LIBRARY_CONCENTRATION
+    ) {
       if (value.slotMeasurements) {
         const val = value.slotMeasurements.filter((measurement) => measurement.value === '');
         return val.length <= 0;
@@ -150,7 +155,11 @@ export default function VisiumQC({ info }: VisiumQCProps) {
   };
 
   const getServerError = (value: VisiumQCFormData) => {
-    if (value.qcType === QCType.CDNA_AMPLIFICATION || value.qcType === QCType.CDNA_CONCENTRATION || value.qcType === QCType.LIBRARY_CONCENTRATION) {
+    if (
+      value.qcType === QCType.CDNA_AMPLIFICATION ||
+      value.qcType === QCType.CDNA_CONCENTRATION ||
+      value.qcType === QCType.LIBRARY_CONCENTRATION
+    ) {
       return value.slotMeasurements && value.slotMeasurements.length > 0 ? serverErrorCDNA : undefined;
     } else if (value.qcType === QCType.SLIDE_PROCESSING) {
       return value.labwareResult ? serverErrorSlideProcessing : undefined;
