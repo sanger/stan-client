@@ -1,7 +1,7 @@
 import Panel from '../Panel';
 import { QCType } from '../../pages/VisiumQC';
 import React from 'react';
-import { LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import { CommentFieldsFragment, LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
@@ -12,22 +12,34 @@ type CDNAMeasurementQCProps = {
   qcType: string;
   labware: LabwareFieldsFragment;
   slotMeasurements: SlotMeasurementRequest[] | undefined;
+  comments: CommentFieldsFragment[];
   removeLabware: (barcode: string) => void;
 };
 
-const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware }: CDNAMeasurementQCProps) => {
+const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, comments }: CDNAMeasurementQCProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext();
 
   const measurementConfigMemo = React.useMemo(() => {
+    const measurementName = () => {
+      switch(qcType) {
+        case(QCType.CDNA_AMPLIFICATION):
+          return 'Cq value'
+        case (QCType.CDNA_CONCENTRATION):
+          return 'cDNA concentration'
+        default:
+          return 'Library concentration'
+      }
+    }
     return {
-      measurementName: qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration',
+      measurementName: measurementName(),
       stepIncrement: qcType === QCType.CDNA_AMPLIFICATION ? '1' : '.01',
       initialMeasurementVal: qcType === QCType.CDNA_AMPLIFICATION ? '' : '0',
       validateFunction:
         qcType === QCType.CDNA_AMPLIFICATION ? validateAmplificationMeasurementValue : validateAnalysisMeasurementValue,
-      isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION
+      isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION,
+      comments: qcType === QCType.CDNA_AMPLIFICATION ? [] : comments
     };
-  }, [qcType]);
+  }, [qcType, comments]);
 
   /***
    * When labwares changes, the slotMeasurements has to be initialized accordingly
@@ -145,6 +157,7 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware }:
                   onChangeMeasurement={handleChangeMeasurement}
                   validateValue={measurementConfigMemo.validateFunction}
                   stepIncrement={measurementConfigMemo.stepIncrement}
+                  comments={measurementConfigMemo.comments}
                 />
               )}
               <div className="flex flex-col" data-testid={'labware'}>

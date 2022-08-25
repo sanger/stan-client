@@ -46,8 +46,8 @@ const commentHandlers = [
         comments: commentRepository
           .findAll()
           .filter(
-            (comment) =>
-              comment.category === req.variables.commentCategory &&
+            (comment) => 
+              req.variables.commentCategory ? (comment.category === req.variables.commentCategory) : true &&
               (req.variables.includeDisabled ? true : isEnabled(comment))
           )
       })

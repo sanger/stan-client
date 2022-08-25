@@ -199,10 +199,10 @@ describe('Visium QC Page', () => {
     });
   });
 
-  describe('On Visium QCType as cDNA Analysis', () => {
+  describe('On Visium QCType as cDNA concentration', () => {
     before(() => {
       cy.get('select[name="workNumber"]').select('SGP1008');
-      cy.findByTestId('qcType').select('cDNA analysis');
+      cy.findByTestId('qcType').select('cDNA concentration');
     });
 
     context('When user scans in a 96 well plate ', () => {
@@ -216,6 +216,8 @@ describe('Visium QC Page', () => {
       it('display text boxes to enter concentration value for all slots with samples', () => {
         cy.findByRole('table').within(() => {
           cy.findByText('A1').should('be.visible');
+          cy.findByTestId('measurementValue0').should('be.visible');
+          cy.findByTestId('comments0').should('be.visible');
         });
       });
     });
@@ -224,6 +226,49 @@ describe('Visium QC Page', () => {
       context('When all values are valid and there is no server error', () => {
         before(() => {
           cy.findByTestId('measurementValue0').clear().type('300.45');
+          cy.findByTestId('comments0').select('Slide damaged');
+          saveButton().click();
+        });
+
+        it('shows a success message', () => {
+          cy.findByText('Visium QC complete').should('be.visible');
+        });
+
+        after(() => {
+          cy.findByRole('button', { name: /Reset/i }).click();
+        });
+      });
+    });
+  });
+
+  describe('On Visium QCType as Library concentration', () => {
+    before(() => {
+      cy.get('select[name="workNumber"]').select('SGP1008');
+      cy.findByTestId('qcType').select('Library concentration');
+    });
+
+    context('When user scans in a 96 well plate ', () => {
+      before(() => {
+        cy.get('#labwareScanInput').type('STAN-5100{enter}');
+      });
+      it('displays the labware layout  on the page', () => {
+        cy.findByText('STAN-5100').should('be.visible');
+      });
+
+      it('display text boxes to enter concentration value for all slots with samples', () => {
+        cy.findByRole('table').within(() => {
+          cy.findByText('A1').should('be.visible');
+          cy.findByTestId('measurementValue0').should('be.visible');
+          cy.findByTestId('comments0').should('be.visible');
+        });
+      });
+    });
+
+    describe('On Save', () => {
+      context('When all values are valid and there is no server error', () => {
+        before(() => {
+          cy.findByTestId('measurementValue0').clear().type('300.45');
+          cy.findByTestId('comments0').select('Slide damaged');
           saveButton().click();
         });
 
@@ -233,6 +278,7 @@ describe('Visium QC Page', () => {
       });
     });
   });
+
   function saveButton() {
     return cy.findByRole('button', { name: /Save/i });
   }
