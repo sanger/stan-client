@@ -89,7 +89,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
   }, [info]);
 
   const concentrationComments = React.useMemo(() => {
-    return info.comments.filter((comment) => comment.category === 'Visium QC');
+    return info.comments.filter((comment) => comment.category === 'Concentration');
   }, [info]);
 
   const [currentCDNA, sendCDNA] = useMachine(

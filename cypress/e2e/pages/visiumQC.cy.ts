@@ -226,7 +226,7 @@ describe('Visium QC Page', () => {
       context('When all values are valid and there is no server error', () => {
         before(() => {
           cy.findByTestId('measurementValue0').clear().type('300.45');
-          cy.findByTestId('comments0').select('Slide damaged');
+          cy.findByTestId('comments0').select('Potential to work');
           saveButton().click();
         });
 
@@ -268,7 +268,7 @@ describe('Visium QC Page', () => {
       context('When all values are valid and there is no server error', () => {
         before(() => {
           cy.findByTestId('measurementValue0').clear().type('300.45');
-          cy.findByTestId('comments0').select('Slide damaged');
+          cy.findByTestId('comments0').select('Potential to work');
           saveButton().click();
         });
 

@@ -1,23 +1,12 @@
 import { graphql } from 'msw';
 import {
-  GetCommentsQuery,
-  GetCommentsQueryVariables,
   RecordOpWithSlotMeasurementsMutation,
   RecordOpWithSlotMeasurementsMutationVariables,
   RecordVisiumQcMutation,
   RecordVisiumQcMutationVariables
 } from '../../types/sdk';
-import commentRepository from '../repositories/commentRepository';
 
 const visiumQCHandllers = [
-  // graphql.query<GetCommentsQuery, GetCommentsQueryVariables>('GetComments', (req, res, ctx) => {
-  //   return res(
-  //     ctx.data({
-  //       comments: commentRepository.findAll()// .filter((comment) => comment.enabled)
-  //     })
-  //   );
-  // }),
-
   graphql.mutation<RecordVisiumQcMutation, RecordVisiumQcMutationVariables>('RecordVisiumQC', (req, res, ctx) => {
     return res(
       ctx.data({
