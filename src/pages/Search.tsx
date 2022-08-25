@@ -259,6 +259,18 @@ const columns: Column<SearchResultTableEntry>[] = [
     accessor: 'tissueType'
   },
   {
+    Header: 'Section Number',
+    accessor: 'sectionNumber'
+  },
+  {
+    Header: 'Replicate',
+    accessor: 'replicate'
+  },
+  {
+    Header: 'Embedding Medium',
+    accessor: 'embeddingMedium'
+  },
+  {
     Header: 'Location',
     accessor: 'location',
     sortType: (rowA, rowB) => {
@@ -291,17 +303,5 @@ const columns: Column<SearchResultTableEntry>[] = [
         </StyledLink>
       );
     }
-  },
-  {
-    Header: 'Section Number',
-    accessor: 'sectionNumber'
-  },
-  {
-    Header: 'Replicate',
-    accessor: 'replicate'
-  },
-  {
-    Header: 'Embedding Medium',
-    accessor: 'embeddingMedium'
   }
 ];
