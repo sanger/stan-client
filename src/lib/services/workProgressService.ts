@@ -25,7 +25,8 @@ export type WorkProgressResultTableEntry = {
   lastStainTODate: Date | undefined;
   lastStainLPDate: Date | undefined;
   lastRelease96WellPlateData: Date | undefined;
-  workRequester: String | undefined;
+  workRequester: string | undefined;
+  mostRecentOperation: string | undefined;
 };
 /**
  * The keys to store the timestamp data
@@ -41,7 +42,8 @@ export type WorkProgressTimeStampType =
   | 'Stain Visium LP'
   | 'Image'
   | 'Release 96 well plate'
-  | 'Analysis';
+  | 'Analysis'
+  | 'Most Recent Operation';
 
 export class WorkProgressService
   implements SearchServiceInterface<FindWorkProgressQueryVariables, WorkProgressResultTableEntry>
@@ -91,6 +93,7 @@ export class WorkProgressService
       const lastSlideImagedDate = timeStampMap.get('Image');
       const lastRNAAnalysisDate = timeStampMap.get('Analysis');
       const lastRelease96WellPlateData = timeStampMap.get('Release 96 well plate');
+
       return {
         priority: entry.work.priority ?? undefined,
         workNumber: entry.work.workNumber,
@@ -108,7 +111,8 @@ export class WorkProgressService
         lastVisiumADHStainDate: lastVisiumADHStainDate && new Date(lastVisiumADHStainDate.toString()),
         lastSlideImagedDate: lastSlideImagedDate && new Date(lastSlideImagedDate.toString()),
         lastRelease96WellPlateData: lastRelease96WellPlateData && new Date(lastRelease96WellPlateData.toString()),
-        workRequester: entry.work.workRequester ? entry.work.workRequester.username : ''
+        workRequester: entry.work.workRequester ? entry.work.workRequester.username : '',
+        mostRecentOperation: entry.mostRecentOperation ? entry.mostRecentOperation : ''
       };
     });
   };

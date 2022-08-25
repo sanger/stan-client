@@ -268,7 +268,14 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
     return (
       <ProcessingSuccess
         labware={submissionResult.performPotProcessing.labware}
-        columns={[columns.barcode(), columns.donorId(), columns.tissueType(), columns.spatialLocation()]}
+        columns={[
+          columns.barcode(),
+          columns.labwareType(),
+          columns.fixative(),
+          columns.donorId(),
+          columns.tissueType(),
+          columns.spatialLocation()
+        ]}
         successMessage={'Pot processing complete'}
       />
     );

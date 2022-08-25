@@ -265,6 +265,17 @@ describe('Block Processing', () => {
           cy.findByRole('table').should('exist');
         });
 
+        it('displays the table column headers in correct order', () => {
+          cy.get('th').eq(0).contains('Barcode');
+          cy.get('th').eq(1).contains('Labware Type');
+          cy.get('th').eq(2).contains('Medium');
+          cy.get('th').eq(3).contains('Fixative');
+          cy.get('th').eq(4).contains('Donor ID');
+          cy.get('th').eq(5).contains('Tissue type');
+          cy.get('th').eq(6).contains('Spatial location');
+          cy.get('th').eq(7).contains('Replicate');
+        });
+
         it('should not display all destination labware except Pre-barcoded Tube', function () {
           cy.findAllByText('Dest-STAN-111').its('length').should('be.gte', 1);
         });

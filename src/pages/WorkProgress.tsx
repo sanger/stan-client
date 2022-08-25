@@ -304,7 +304,14 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     Header: 'Work Requester',
     accessor: 'workRequester',
     sortType: (rowA, rowB) => {
-      return statusSort(rowA.original.status, rowB.original.status);
+      if (rowA.original.workRequester && rowB.original.workRequester) {
+        return alphaNumericSortDefault(rowA.original.workRequester, rowB.original.workRequester);
+      } else if (rowA.original.workRequester && !rowB.original.workRequester) {
+        return 1;
+      } else if (!rowA.original.workRequester && rowB.original.workRequester) {
+        return -1;
+      }
+      return 0;
     }
   },
   {
@@ -315,7 +322,10 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     Header: 'Project',
     accessor: 'project'
   },
-
+  {
+    Header: 'Most Recent Operation',
+    accessor: 'mostRecentOperation'
+  },
   {
     Header: 'Last Sectioning Date',
     accessor: 'lastSectionDate',
@@ -333,7 +343,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     }
   },
   {
-    Header: 'Last RNAscope/IHC staining Date',
+    Header: 'Last RNAscope/IHC Staining Date',
     accessor: 'lastRNAScopeIHCStainDate',
     Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRNAScopeIHCStainDate'),
     sortType: (rowA, rowB) => {
@@ -365,7 +375,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     }
   },
   {
-    Header: 'Last Visium ADH stain date',
+    Header: 'Last Visium ADH Stain Date',
     accessor: 'lastVisiumADHStainDate',
     Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastVisiumADHStainDate'),
     sortType: (rowA, rowB) => {
@@ -397,7 +407,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     }
   },
   {
-    Header: 'Last date 96 well plate Released',
+    Header: 'Last Date 96 Well Plate Released',
     accessor: 'lastRelease96WellPlateData',
     Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRelease96WellPlateData'),
     sortType: (rowA, rowB) => {

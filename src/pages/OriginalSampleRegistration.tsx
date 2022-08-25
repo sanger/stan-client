@@ -146,7 +146,15 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
     return registrationInfo.labwareTypes.filter((lt) => [LabwareTypeName.POT].includes(lt.name as LabwareTypeName));
   }, [registrationInfo]);
 
-  const resultColumns = [columns.barcode(), columns.labwareType(), columns.externalName()];
+  const resultColumns = [
+    columns.barcode(),
+    columns.labwareType(),
+    columns.externalName(),
+    columns.donorId(),
+    columns.tissueType(),
+    columns.spatialLocation(),
+    columns.replicate()
+  ];
 
   /**These are changes required for labels in Registration page for Original sample registration
    * The changes are mapped here so that Registration and RegistrationForm components  can be reused **/
