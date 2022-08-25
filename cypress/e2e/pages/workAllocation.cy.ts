@@ -151,7 +151,7 @@ describe('Work Allocation', () => {
       });
 
       it('updates priority', () => {
-        cy.findByTestId('SGP1009' + '-' + 'priority').should('have.value', 'A12');
+        cy.findByTestId('SGP1009-priority').should('have.value', 'A12');
       });
     });
 

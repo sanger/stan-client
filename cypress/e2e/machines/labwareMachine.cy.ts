@@ -16,7 +16,11 @@ describe('labwareMachine', () => {
   describe('UPDATE_CURRENT_BARCODE', () => {
     it('updates the current barcode', (done) => {
       const machine = interpret(createLabwareMachine()).onTransition((state) => {
-        if (state.matches('idle.normal') && state.context.currentBarcode == 'STAN-123' && !state.context.locationScan) {
+        if (
+          state.matches('idle.normal') &&
+          state.context.currentBarcode === 'STAN-123' &&
+          !state.context.locationScan
+        ) {
           done();
         }
       });
@@ -110,8 +114,6 @@ describe('labwareMachine', () => {
                       },
                       barcode: 'STAN-123',
                       externalBarcode: 'EXTERNAL-1',
-                      state: LabwareState.Empty,
-                      created: '',
                       slots: [
                         {
                           address: 'A1',
@@ -127,7 +129,7 @@ describe('labwareMachine', () => {
                               tissue: {
                                 __typename: 'Tissue',
                                 externalName: 'External 1',
-                                replicate: 5,
+                                replicate: '5',
                                 donor: {
                                   donorName: 'Donor 3',
                                   lifeStage: LifeStage.Adult
@@ -253,10 +255,17 @@ describe('labwareMachine', () => {
                               tissue: {
                                 __typename: 'Tissue',
                                 externalName: 'External 1',
-                                replicate: 5,
+                                replicate: '5',
                                 donor: {
                                   donorName: 'Donor 3',
                                   lifeStage: LifeStage.Adult
+                                },
+                                medium: {
+                                  name: 'None'
+                                },
+                                fixative: {
+                                  name: 'None',
+                                  enabled: false
                                 },
                                 spatialLocation: {
                                   code: 3,

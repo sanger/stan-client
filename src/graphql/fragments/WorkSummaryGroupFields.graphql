@@ -1,0 +1,10 @@
+fragment WorkSummaryGroupFields on WorkSummaryGroup {
+  workType {
+    ...WorkTypeFields
+  }
+  numWorks
+  status
+  totalNumBlocks
+  totalNumSlides
+  totalNumOriginalSamples
+}

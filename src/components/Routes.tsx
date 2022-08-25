@@ -45,6 +45,7 @@ import SolutionTransfer from '../pages/SolutionTransfer';
 import FFPEProcessing from '../pages/FFPEProcessing';
 import SampleProcessingComments from '../pages/SampleProcessingComments';
 import AddExternalID from '../pages/AddExternalID';
+import WorkProgressSummary from '../pages/WorkProgressSummary';
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -365,6 +366,16 @@ export function Routes() {
           return (
             <DataFetcher dataFetcher={stanCore.GetSearchInfo} key={routeProps.location.key}>
               {(searchInfo) => <Search searchInfo={searchInfo} urlParamsString={routeProps.location.search} />}
+            </DataFetcher>
+          );
+        }}
+      />
+      <Route
+        path={'/work_progress_summary'}
+        render={(routeProps) => {
+          return (
+            <DataFetcher dataFetcher={stanCore.GetWorkSummary} key={routeProps.location.key}>
+              {(summaryData) => <WorkProgressSummary summaryData={summaryData} />}
             </DataFetcher>
           );
         }}

@@ -117,6 +117,16 @@ describe('Registration', () => {
         cy.findByText('LW_BC_1').should('be.visible');
         cy.findByText('EXT1').should('be.visible');
       });
+
+      it('displays the result table column headers in correct order', () => {
+        cy.get('th').eq(0).contains('Barcode');
+        cy.get('th').eq(1).contains('Labware Type');
+        cy.get('th').eq(2).contains('External ID');
+        cy.get('th').eq(3).contains('Donor ID');
+        cy.get('th').eq(4).contains('Tissue type');
+        cy.get('th').eq(5).contains('Spatial location');
+        cy.get('th').eq(6).contains('Replicate');
+      });
     });
 
     context('when store button is clicked after successful registration', () => {

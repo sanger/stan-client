@@ -100,6 +100,15 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   };
 
   const [works, setWorks] = useState<Array<Pick<Work, 'workNumber'>>>([]);
+
+  const sortedWorks = () => {
+    return works
+      .sort((a, b) => {
+        return alphaNumericSortDefault(a.workNumber, b.workNumber);
+      })
+      .reverse();
+  };
+
   useEffect(() => {
     async function fetchActiveWorkNumbers() {
       const response = await stanCore.GetWorkNumbers();
@@ -146,7 +155,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                     </div>
                     <div>
                       <FormikSelect label="SGP Number" name="workNumber" emptyOption={true}>
-                        {optionValues(works, 'workNumber', 'workNumber')}
+                        {optionValues(sortedWorks(), 'workNumber', 'workNumber')}
                       </FormikSelect>
                     </div>
                     <div>
@@ -250,6 +259,18 @@ const columns: Column<SearchResultTableEntry>[] = [
     accessor: 'tissueType'
   },
   {
+    Header: 'Section Number',
+    accessor: 'sectionNumber'
+  },
+  {
+    Header: 'Replicate',
+    accessor: 'replicate'
+  },
+  {
+    Header: 'Embedding Medium',
+    accessor: 'embeddingMedium'
+  },
+  {
     Header: 'Location',
     accessor: 'location',
     sortType: (rowA, rowB) => {
@@ -282,17 +303,5 @@ const columns: Column<SearchResultTableEntry>[] = [
         </StyledLink>
       );
     }
-  },
-  {
-    Header: 'Section Number',
-    accessor: 'sectionNumber'
-  },
-  {
-    Header: 'Replicate',
-    accessor: 'replicate'
-  },
-  {
-    Header: 'Embedding Medium',
-    accessor: 'embeddingMedium'
   }
 ];

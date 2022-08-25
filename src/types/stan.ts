@@ -298,11 +298,11 @@ export type HistoryProps = HistoryStrProps | HistoryNumProps;
 export const statusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
   const statusArray: WorkStatus[] = [
     WorkStatus.Active,
-    WorkStatus.Completed,
     WorkStatus.Paused,
-    WorkStatus.Failed,
-    WorkStatus.Withdrawn,
     WorkStatus.Unstarted,
+    WorkStatus.Completed,
+    WorkStatus.Failed,
+    WorkStatus.Withdrawn
   ];
   return (
     statusArray.findIndex((val) => val === rowAStatus) -
