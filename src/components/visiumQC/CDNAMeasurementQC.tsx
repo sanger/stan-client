@@ -30,7 +30,7 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, c
       validateFunction:
         qcType === QCType.CDNA_AMPLIFICATION ? validateAmplificationMeasurementValue : validateAnalysisMeasurementValue,
       isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION,
-      isSelectMeasurementName: qcType === QCType.CDNA_ANALYSIS,
+      isSelectMeasurementName: qcType === QCType.VISIUM_CONCENTRATION,
       comments: qcType === QCType.CDNA_AMPLIFICATION ? [] : comments
     };
   }, [qcType, comments]);

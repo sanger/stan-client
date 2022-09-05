@@ -199,10 +199,10 @@ describe('Visium QC Page', () => {
     });
   });
 
-  describe('On Visium QCType as cDNA analysis', () => {
+  describe('On Visium QCType as Visium concentration', () => {
     before(() => {
       cy.get('select[name="workNumber"]').select('SGP1008');
-      cy.findByTestId('qcType').select('cDNA analysis');
+      cy.findByTestId('qcType').select('Visium concentration');
     });
 
     context('When user scans in a 96 well plate ', () => {
