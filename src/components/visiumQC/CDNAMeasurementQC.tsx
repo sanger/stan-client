@@ -28,7 +28,9 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, c
       stepIncrement: qcType === QCType.CDNA_AMPLIFICATION ? '1' : '.01',
       initialMeasurementVal: qcType === QCType.CDNA_AMPLIFICATION ? '' : '0',
       validateFunction:
-        qcType === QCType.CDNA_AMPLIFICATION ? validateAmplificationMeasurementValue : validateConcentrationMeasurementValue,
+        qcType === QCType.CDNA_AMPLIFICATION
+          ? validateAmplificationMeasurementValue
+          : validateConcentrationMeasurementValue,
       isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION,
       isSelectMeasurementName: qcType === QCType.VISIUM_CONCENTRATION,
       comments: qcType === QCType.CDNA_AMPLIFICATION ? [] : comments
