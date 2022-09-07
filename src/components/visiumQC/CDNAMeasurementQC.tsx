@@ -16,7 +16,13 @@ type CDNAMeasurementQCProps = {
   removeLabware: (barcode: string) => void;
 };
 
-const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, concentrationComments }: CDNAMeasurementQCProps) => {
+const CDNAMeasurementQC = ({
+  qcType,
+  labware,
+  slotMeasurements,
+  removeLabware,
+  concentrationComments
+}: CDNAMeasurementQCProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext();
   const [measurementName, setMeasurementName] = useState(
     qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration'
