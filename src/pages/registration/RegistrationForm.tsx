@@ -236,21 +236,57 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                             {optionValues(registrationInfo.solutions, 'name', 'name')}
                           </FormikSelect>
                         )}
+                        <div className={'flex flex-row justify-end'}>
+                          {'solution' in block && (
+                            <FieldArray name={`tissues.${currentIndex}.blocks`}>
+                              {(blockHelpers) => (
+                                <BlueButton
+                                  type="button"
+                                  action="secondary"
+                                  className="mt-4 inline-flex"
+                                  onClick={() => {
+                                    //Create new sample fields refilled with the sample from which this is invoked. Reset Solution,Fixative and Replicate Number fields
+                                    blockHelpers.push(block);
+                                    setFieldValue(
+                                      `tissues[${currentIndex}].blocks[${values.tissues[currentIndex].blocks.length}].solution`,
+                                      ''
+                                    );
+                                    setFieldValue(
+                                      `tissues[${currentIndex}].blocks[${values.tissues[currentIndex].blocks.length}].fixative`,
+                                      ''
+                                    );
+                                    setFieldValue(
+                                      `tissues[${currentIndex}].blocks[${values.tissues[currentIndex].blocks.length}].replicateNumber`,
+                                      ''
+                                    );
+                                    scrollToLatestBlock();
+                                  }}
+                                >
+                                  {`+ Add Identical Tissue ${keywords.get('Block') ?? 'Block'}`}
+                                </BlueButton>
+                              )}
+                            </FieldArray>
+                          )}
 
-                        {/* Only show the delete button if we've got more than 1 block */}
-                        {values.tissues[currentIndex].blocks.length > 1 && (
-                          <div className="flex justify-end">
-                            <PinkButton
-                              type="button"
-                              action="tertiary"
-                              onClick={() => {
-                                setFieldValue(`tissues[${currentIndex}].blocks[${blockIndex}].clientId`, null);
-                              }}
-                            >
-                              {`Delete ${keywords.get('Block') ?? 'Block'}`}
-                            </PinkButton>
-                          </div>
-                        )}
+                          {/* Only show the delete button if we've got more than 1 block */}
+                          {values.tissues[currentIndex].blocks.length > 1 && (
+                            <div className="flex justify-end">
+                              <FieldArray name={`tissues.${currentIndex}.blocks`}>
+                                {(blockHelpers) => (
+                                  <PinkButton
+                                    type="button"
+                                    action="tertiary"
+                                    onClick={() => {
+                                      blockHelpers.remove(blockIndex);
+                                    }}
+                                  >
+                                    {`Delete ${keywords.get('Block') ?? 'Block'}`}
+                                  </PinkButton>
+                                )}
+                              </FieldArray>
+                            </div>
+                          )}
+                        </div>
                       </motion.div>
                     );
                   })}
