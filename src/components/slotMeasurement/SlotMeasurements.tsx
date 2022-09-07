@@ -21,7 +21,7 @@ type SlotMeasurementProps = {
  * @param slotMeasurements - SlotMeasurement data
  * @param measurementName  - Name of the measurement
  * @param stepIncrement - Measurement value increment step
- * @param comments - List of comments to select from
+ * @param comments - List of (concentration) comments to select from
  * @param onChangeMeasurement - Callback for measurementValue
  * @param validateValue - Function validate the format of data in value field
  *
@@ -74,6 +74,7 @@ const SlotMeasurements = ({
                     label={''}
                     data-testid={`comments${row.index}`}
                     name={`slotMeasurements.${row.index}.commentId`}
+                    className={'flex'}
                     emptyOption={true}
                     onChange={(e: React.FormEvent<HTMLInputElement>) => {
                       onChangeMeasurement(

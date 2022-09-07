@@ -12,11 +12,11 @@ type CDNAMeasurementQCProps = {
   qcType: string;
   labware: LabwareFieldsFragment;
   slotMeasurements: SlotMeasurementRequest[] | undefined;
-  comments: CommentFieldsFragment[];
+  concentrationComments: CommentFieldsFragment[];
   removeLabware: (barcode: string) => void;
 };
 
-const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, comments }: CDNAMeasurementQCProps) => {
+const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, concentrationComments }: CDNAMeasurementQCProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext();
   const [measurementName, setMeasurementName] = useState(
     qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration'
@@ -33,9 +33,9 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, c
           : validateConcentrationMeasurementValue,
       isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION,
       isSelectMeasurementName: qcType === QCType.VISIUM_CONCENTRATION,
-      comments: qcType === QCType.CDNA_AMPLIFICATION ? [] : comments
+      concentrationComments: qcType === QCType.CDNA_AMPLIFICATION ? [] : concentrationComments
     };
-  }, [qcType, comments]);
+  }, [qcType, concentrationComments]);
 
   /***
    * When labwares changes, the slotMeasurements has to be initialized accordingly
@@ -171,7 +171,7 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware, c
                   onChangeMeasurement={handleChangeMeasurement}
                   validateValue={measurementConfigMemo.validateFunction}
                   stepIncrement={measurementConfigMemo.stepIncrement}
-                  comments={measurementConfigMemo.comments}
+                  comments={measurementConfigMemo.concentrationComments}
                 />
               )}
               <div className="flex flex-col" data-testid={'labware'}>

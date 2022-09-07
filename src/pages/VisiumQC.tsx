@@ -230,7 +230,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                             slotMeasurements={values.slotMeasurements}
                             labware={labwares[0]}
                             removeLabware={removeLabware}
-                            comments={concentrationComments}
+                            concentrationComments={concentrationComments}
                           />
                         );
                       }
