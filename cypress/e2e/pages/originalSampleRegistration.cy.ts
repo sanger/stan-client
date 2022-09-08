@@ -67,11 +67,11 @@ describe('Registration', () => {
       cy.findAllByTestId('Replicate Number').eq(1).should('have.value', '');
       cy.findAllByLabelText('Fixative').eq(1).should('have.value', '');
       cy.findAllByLabelText('Solution').eq(1).should('have.value', '');
+      cy.findAllByTestId('External Identifier').eq(1).should('have.value', '');
       cy.findAllByLabelText('Spatial Location')
         .eq(1)
         .find('option:selected')
         .should('have.text', '3 - Surface central region');
-      cy.findAllByTestId('External Identifier').eq(1).should('have.value', 'EXT_ID_1');
       cy.findAllByLabelText('Labware Type').eq(1).find('option:selected').should('have.text', 'Pot');
     });
   });

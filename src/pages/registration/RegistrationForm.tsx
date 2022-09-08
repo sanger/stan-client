@@ -245,7 +245,8 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                                   action="secondary"
                                   className="mt-4 inline-flex"
                                   onClick={() => {
-                                    //Create new sample fields refilled with the sample from which this is invoked. Reset Solution,Fixative and Replicate Number fields
+                                    //Create new duplicate sample with sample fields refilled using the sample from which it is created.
+                                    //Reset Solution,Fixative and Replicate Number,External Identifier fields
                                     blockHelpers.push(block);
                                     setFieldValue(
                                       `tissues[${currentIndex}].blocks[${values.tissues[currentIndex].blocks.length}].solution`,
@@ -257,6 +258,10 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                                     );
                                     setFieldValue(
                                       `tissues[${currentIndex}].blocks[${values.tissues[currentIndex].blocks.length}].replicateNumber`,
+                                      ''
+                                    );
+                                    setFieldValue(
+                                      `tissues[${currentIndex}].blocks[${values.tissues[currentIndex].blocks.length}].externalIdentifier`,
                                       ''
                                     );
                                     scrollToLatestBlock();
