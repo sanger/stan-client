@@ -236,21 +236,62 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                             {optionValues(registrationInfo.solutions, 'name', 'name')}
                           </FormikSelect>
                         )}
+                        <div className={'flex flex-row justify-end'}>
+                          {'solution' in block && (
+                            <FieldArray name={`tissues.${currentIndex}.blocks`}>
+                              {(blockHelpers) => (
+                                <BlueButton
+                                  type="button"
+                                  action="secondary"
+                                  className="mt-4 inline-flex"
+                                  onClick={() => {
+                                    //Create new duplicate sample with sample fields refilled using the sample from which it is created.
+                                    //Reset Solution,Fixative and Replicate Number,External Identifier fields
+                                    blockHelpers.push(block);
+                                    setFieldValue(
+                                      `tissues[${currentIndex}].blocks[${values.tissues[currentIndex].blocks.length}].solution`,
+                                      ''
+                                    );
+                                    setFieldValue(
+                                      `tissues[${currentIndex}].blocks[${values.tissues[currentIndex].blocks.length}].fixative`,
+                                      ''
+                                    );
+                                    setFieldValue(
+                                      `tissues[${currentIndex}].blocks[${values.tissues[currentIndex].blocks.length}].replicateNumber`,
+                                      ''
+                                    );
+                                    setFieldValue(
+                                      `tissues[${currentIndex}].blocks[${values.tissues[currentIndex].blocks.length}].externalIdentifier`,
+                                      ''
+                                    );
+                                    scrollToLatestBlock();
+                                  }}
+                                >
+                                  {`+ Add Identical Tissue ${keywords.get('Block') ?? 'Block'}`}
+                                </BlueButton>
+                              )}
+                            </FieldArray>
+                          )}
 
-                        {/* Only show the delete button if we've got more than 1 block */}
-                        {values.tissues[currentIndex].blocks.length > 1 && (
-                          <div className="flex justify-end">
-                            <PinkButton
-                              type="button"
-                              action="tertiary"
-                              onClick={() => {
-                                setFieldValue(`tissues[${currentIndex}].blocks[${blockIndex}].clientId`, null);
-                              }}
-                            >
-                              {`Delete ${keywords.get('Block') ?? 'Block'}`}
-                            </PinkButton>
-                          </div>
-                        )}
+                          {/* Only show the delete button if we've got more than 1 block */}
+                          {values.tissues[currentIndex].blocks.length > 1 && (
+                            <div className="flex justify-end">
+                              <FieldArray name={`tissues.${currentIndex}.blocks`}>
+                                {(blockHelpers) => (
+                                  <PinkButton
+                                    type="button"
+                                    action="tertiary"
+                                    onClick={() => {
+                                      blockHelpers.remove(blockIndex);
+                                    }}
+                                  >
+                                    {`Delete ${keywords.get('Block') ?? 'Block'}`}
+                                  </PinkButton>
+                                )}
+                              </FieldArray>
+                            </div>
+                          )}
+                        </div>
                       </motion.div>
                     );
                   })}
@@ -310,6 +351,24 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 setCurrentFormIndex={setCurrentIndex}
                 onNewTissueButton={() => {
                   tissueHelpers.push(defaultFormTissueValues);
+                  setCurrentIndex(currentIndex + 1);
+                  tissueRef.current?.scrollIntoView({
+                    behavior: 'smooth'
+                  });
+                }}
+                onIdenticalTissueButton={() => {
+                  tissueHelpers.push(values.tissues[currentIndex]);
+                  values.tissues[currentIndex].blocks.forEach((block, indx) => {
+                    setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].solution`, '');
+                    setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].fixative`, '');
+                    setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].replicateNumber`, '');
+                    setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].externalIdentifier`, '');
+                    setFieldValue(
+                      `tissues[${currentIndex + 1}].blocks[${indx}].spatialLocation`,
+                      values.tissues[currentIndex].blocks[indx].spatialLocation
+                    );
+                  });
+
                   setCurrentIndex(currentIndex + 1);
                   tissueRef.current?.scrollIntoView({
                     behavior: 'smooth'

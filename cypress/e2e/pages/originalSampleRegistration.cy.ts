@@ -28,6 +28,9 @@ describe('Registration', () => {
       cy.findByLabelText('Labware Type').focus().blur();
       cy.findByText('Labware Type is a required field').should('be.visible');
     });
+    it('displays add button for identical samples', () => {
+      cy.findByText('+ Add Identical Tissue Sample').should('be.visible');
+    });
   });
 
   context('when clicking the Add Another Tissue Sample button', () => {
@@ -46,15 +49,64 @@ describe('Registration', () => {
     });
   });
 
-  context('when clicking the Add Another Tissue button', () => {
+  context('when clicking the Add Identical Tissue Sample button', () => {
     before(() => {
-      cy.findByText('- Delete Tissue').should('not.exist');
+      cy.visit('/admin/tissue_registration');
+      fillInForm();
+      cy.findByText('+ Add Identical Tissue Sample').focus().click();
+    });
+
+    it('adds another tissue sample', () => {
+      cy.findByText('Sample Information').siblings().should('have.length', 2);
+    });
+
+    it('shows the Delete Sample button for each sample', () => {
+      cy.findAllByText('Delete Sample').should('be.visible');
+    });
+    it('shows identical information for the created sample with Replicate Number, Fixative, Solution as empty', () => {
+      cy.findAllByTestId('Replicate Number').eq(1).should('have.value', '');
+      cy.findAllByLabelText('Fixative').eq(1).should('have.value', '');
+      cy.findAllByLabelText('Solution').eq(1).should('have.value', '');
+      cy.findAllByTestId('External Identifier').eq(1).should('have.value', '');
+      cy.findAllByLabelText('Spatial Location')
+        .eq(1)
+        .find('option:selected')
+        .should('have.text', '3 - Surface central region');
+      cy.findAllByLabelText('Labware Type').eq(1).find('option:selected').should('have.text', 'Pot');
+    });
+  });
+  context('when clicking the Add Identical Tissue button', () => {
+    before(() => {
       cy.get('#tissue-summaries').children().should('have.length', 1);
-      cy.findByText('+ Add Another Tissue').click();
+      cy.findByText('- Remove Tissue').should('not.exist');
+      cy.findByText('+ Add Identical Tissue').click();
     });
 
     it('adds another tissue', () => {
       cy.get('#tissue-summaries').children().should('have.length', 2);
+      cy.findByText('- Remove Tissue').should('exist');
+    });
+    it('shows identical information for the created sample with Replicate Number, Fixative, Solution as empty', () => {
+      cy.findAllByTestId('Replicate Number').eq(1).should('have.value', '');
+      cy.findAllByLabelText('Fixative').eq(1).should('have.value', '');
+      cy.findAllByLabelText('Solution').eq(1).should('have.value', '');
+      cy.findAllByTestId('External Identifier').eq(1).should('have.value', '');
+      cy.findAllByLabelText('Spatial Location')
+        .eq(1)
+        .find('option:selected')
+        .should('have.text', '3 - Surface central region');
+      cy.findAllByLabelText('Labware Type').eq(1).find('option:selected').should('have.text', 'Pot');
+    });
+  });
+
+  context('when clicking the Add Another Tissue button', () => {
+    before(() => {
+      cy.get('#tissue-summaries').children().should('have.length', 2);
+      cy.findByText('+ Add Another Tissue').click();
+    });
+
+    it('adds another tissue', () => {
+      cy.get('#tissue-summaries').children().should('have.length', 3);
     });
   });
 
