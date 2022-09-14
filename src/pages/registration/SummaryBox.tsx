@@ -52,7 +52,7 @@ interface SummaryBoxParams {
   errors: FormikErrors<RegistrationFormValues>;
   touched: FormikTouched<RegistrationFormValues>;
   onNewTissueButton: () => void;
-  onIdenticalTissueButton: () => void;
+  onIdenticalTissueButton?: () => void;
   currentFormIndex: number;
   setCurrentFormIndex: (n: number) => void;
   keywordsMap?: Map<TextType, string>;
@@ -154,23 +154,25 @@ const SummaryBox = ({
         >
           + Add Another Tissue
         </WhiteButton>
-        <WhiteButton
-          disabled={whiteButtonDisabled}
-          type="button"
-          action="primary"
-          className="mt-2 w-full"
-          onClick={(e) => {
-            e.preventDefault();
-            if (whiteButtonDisabled) {
-              return;
-            }
-            setWhiteButtonDisabled(true);
-            onIdenticalTissueButton();
-            setTimeout(() => setWhiteButtonDisabled(false), 1500);
-          }}
-        >
-          + Add Identical Tissue
-        </WhiteButton>
+        {onIdenticalTissueButton && (
+          <WhiteButton
+            disabled={whiteButtonDisabled}
+            type="button"
+            action="primary"
+            className="mt-2 w-full"
+            onClick={(e) => {
+              e.preventDefault();
+              if (whiteButtonDisabled) {
+                return;
+              }
+              setWhiteButtonDisabled(true);
+              onIdenticalTissueButton();
+              setTimeout(() => setWhiteButtonDisabled(false), 1500);
+            }}
+          >
+            + Add Identical Tissue
+          </WhiteButton>
+        )}
 
         {}
         <PinkButton loading={submitting} type="submit" className="mt-4 w-full">

@@ -356,24 +356,29 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                     behavior: 'smooth'
                   });
                 }}
-                onIdenticalTissueButton={() => {
-                  tissueHelpers.push(values.tissues[currentIndex]);
-                  values.tissues[currentIndex].blocks.forEach((block, indx) => {
-                    setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].solution`, '');
-                    setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].fixative`, '');
-                    setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].replicateNumber`, '');
-                    setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].externalIdentifier`, '');
-                    setFieldValue(
-                      `tissues[${currentIndex + 1}].blocks[${indx}].spatialLocation`,
-                      values.tissues[currentIndex].blocks[indx].spatialLocation
-                    );
-                  });
+                //Only add identical tissue button for original sample registration
+                onIdenticalTissueButton={
+                  'solution' in values.tissues[0].blocks[0]
+                    ? () => {
+                        tissueHelpers.push(values.tissues[currentIndex]);
+                        values.tissues[currentIndex].blocks.forEach((block, indx) => {
+                          setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].solution`, '');
+                          setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].fixative`, '');
+                          setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].replicateNumber`, '');
+                          setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].externalIdentifier`, '');
+                          setFieldValue(
+                            `tissues[${currentIndex + 1}].blocks[${indx}].spatialLocation`,
+                            values.tissues[currentIndex].blocks[indx].spatialLocation
+                          );
+                        });
 
-                  setCurrentIndex(currentIndex + 1);
-                  tissueRef.current?.scrollIntoView({
-                    behavior: 'smooth'
-                  });
-                }}
+                        setCurrentIndex(currentIndex + 1);
+                        tissueRef.current?.scrollIntoView({
+                          behavior: 'smooth'
+                        });
+                      }
+                    : undefined
+                }
                 keywordsMap={keywordsMap}
               />
             )}
