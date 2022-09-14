@@ -114,7 +114,7 @@ const PotProcessingLabwarePlan = React.forwardRef<HTMLDivElement, PotProcessingL
           outputLabware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER ? 'None' : fixative
         );
       }
-    }, [setFieldValue, rowIndex, fixative, outputLabware, sourceLabware]);
+    }, [values, setFieldValue, rowIndex, fixative, outputLabware, sourceLabware]);
 
     return (
       <motion.div
