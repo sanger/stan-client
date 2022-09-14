@@ -22,11 +22,14 @@ import MutedText from '../components/MutedText';
 import { buildLabwareFragment } from '../lib/helpers/labwareHelper';
 
 import { ErrorMessage } from '../components/forms';
+import Label from '../components/forms/Label';
+import { Select } from '../components/forms/Select';
 
 /**
  * Success notification when slots have been copied
  */
 const ToastSuccess = () => <Success message={'Reagents transferred'} />;
+const PLATE_TYPES = ['Fresh frozen', 'FFPE'];
 
 function DualIndexPlate() {
   const [current, send] = useMachine(() =>
@@ -36,18 +39,24 @@ function DualIndexPlate() {
       destLabware: undefined,
       workNumber: '',
       reagentTransfers: [],
-      reagentTransferResult: undefined
+      reagentTransferResult: undefined,
+      plateType: ''
     })
   );
 
-  const { serverErrors, sourceReagentPlate, destLabware, reagentTransfers, workNumber, validationError } =
+  const { serverErrors, sourceReagentPlate, destLabware, reagentTransfers, workNumber, plateType, validationError } =
     current.context;
 
   const handleWorkNumberChange = useCallback(
     (workNumber: string) => {
-      if (workNumber) {
-        send({ type: 'UPDATE_WORK_NUMBER', workNumber });
-      }
+      send({ type: 'UPDATE_WORK_NUMBER', workNumber });
+    },
+    [send]
+  );
+
+  const handlePlateTypeChange = useCallback(
+    (plateType: string) => {
+      send({ type: 'SET_PLATE_TYPE', plateType });
     },
     [send]
   );
@@ -163,6 +172,20 @@ function DualIndexPlate() {
               </div>
             </div>
           </div>
+          {sourceReagentPlate && (
+            <div className="w-1/4 mt-4 mb-4" id="plateType">
+              <Label name={'Plate Type'}>
+                <Select emptyOption onChange={(e) => handlePlateTypeChange(e.currentTarget.value)}>
+                  {PLATE_TYPES.map((plateType, index) => (
+                    <option key={index} value={plateType}>
+                      {plateType}
+                    </option>
+                  ))}
+                </Select>
+              </Label>
+              <MutedText>Select a dual index plate type</MutedText>
+            </div>
+          )}
 
           <ReagentTransferSlotMapper
             initialDestLabware={destLabware}
@@ -177,7 +200,7 @@ function DualIndexPlate() {
         <div className="flex flex-row items-center justify-end space-x-2">
           {!current.matches('transferred') ? (
             <BlueButton
-              disabled={reagentTransfers.length <= 0 || workNumber === ''}
+              disabled={reagentTransfers.length <= 0 || workNumber === '' || !PLATE_TYPES.includes(plateType)}
               onClick={() => send({ type: 'SAVE' })}
             >
               Save

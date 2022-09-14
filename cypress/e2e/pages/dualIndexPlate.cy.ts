@@ -133,9 +133,20 @@ describe('Dual Index Plate', () => {
   });
 
   describe('On Save', () => {
-    context('When user selects a work number and have a mapping', () => {
+    context('When user selects a work number and have a mapping, but no plateType', () => {
       before(() => {
-        cy.get('select').select('SGP1008');
+        cy.findByTestId('workNumber').select('SGP1008');
+      });
+      it('should disable save', () => {
+        saveButton().should('be.disabled');
+      });
+    });
+    context('When user selects a work number,plateType and have a mapping', () => {
+      before(() => {
+        cy.get('#plateType').within(() => {
+          cy.findByRole('combobox').select('FFPE');
+        });
+        cy.findByTestId('workNumber').select('SGP1008');
       });
       it('should enable save', () => {
         saveButton().should('be.enabled');
