@@ -199,23 +199,31 @@ describe('Visium QC Page', () => {
     });
   });
 
-  describe('On Visium QCType as cDNA Analysis', () => {
+  describe('On Visium QCType as Visium concentration', () => {
     before(() => {
       cy.get('select[name="workNumber"]').select('SGP1008');
-      cy.findByTestId('qcType').select('cDNA analysis');
+      cy.findByTestId('qcType').select('Visium concentration');
     });
 
     context('When user scans in a 96 well plate ', () => {
       before(() => {
         cy.get('#labwareScanInput').type('STAN-5100{enter}');
       });
+
       it('displays the labware layout  on the page', () => {
         cy.findByText('STAN-5100').should('be.visible');
+      });
+
+      it('shows measurementType dropdown with fields', () => {
+        cy.findByTestId('measurementType').select('Library concentration');
+        cy.findByRole('table').get('th').eq(1).should('have.text', 'Library concentration');
       });
 
       it('display text boxes to enter concentration value for all slots with samples', () => {
         cy.findByRole('table').within(() => {
           cy.findByText('A1').should('be.visible');
+          cy.findByTestId('measurementValue0').should('be.visible');
+          cy.findByTestId('comments0').should('be.visible');
         });
       });
     });
@@ -224,15 +232,21 @@ describe('Visium QC Page', () => {
       context('When all values are valid and there is no server error', () => {
         before(() => {
           cy.findByTestId('measurementValue0').clear().type('300.45');
+          cy.findByTestId('comments0').select('Potential to work');
           saveButton().click();
         });
 
         it('shows a success message', () => {
           cy.findByText('Visium QC complete').should('be.visible');
         });
+
+        after(() => {
+          cy.findByRole('button', { name: /Reset/i }).click();
+        });
       });
     });
   });
+
   function saveButton() {
     return cy.findByRole('button', { name: /Save/i });
   }
