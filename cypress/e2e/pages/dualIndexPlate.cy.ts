@@ -1,4 +1,9 @@
-import { RecordReagentTransferMutation, RecordReagentTransferMutationVariables } from '../../../src/types/sdk';
+import {
+  FindReagentPlateQuery,
+  FindReagentPlateQueryVariables,
+  RecordReagentTransferMutation,
+  RecordReagentTransferMutationVariables
+} from '../../../src/types/sdk';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 
 function scanInDestinationLabware() {
@@ -35,14 +40,46 @@ describe('Dual Index Plate', () => {
       cy.findByText('24 digit number required').should('be.visible');
     });
   });
+  context('when a dual index plate with a plate type already assigned is scanned', () => {
+    before(() => {
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.query<FindReagentPlateQuery, FindReagentPlateQueryVariables>('FindReagentPlate', (req, res, ctx) => {
+            return res.once(
+              ctx.data({
+                reagentPlate: {
+                  plateType: 'FFPE',
+                  barcode: '123456789123456789012345',
+                  slots: []
+                }
+              })
+            );
+          })
+        );
+      });
+      scanInSourceLabware('123456789123456789012345');
+    });
+    it('should display plate type that is alreAdy assigned to dual index plate', () => {
+      cy.get('#plateType').within(() => {
+        cy.findByRole('combobox').should('have.value', 'FFPE');
+      });
+    });
+    it('should disable plate type selection combo', () => {
+      cy.get('#plateType').within(() => {
+        cy.findByRole('combobox').should('be.disabled');
+      });
+    });
+  });
   context('when a valid source labware (dual index plate) barcode is entered', () => {
     before(() => {
+      cy.url().reload();
       scanInSourceLabware('300051128832186720221202');
     });
     it('should display the dual index plate', () => {
       cy.get('#sourceLabwares').should('exist');
     });
   });
+
   context('when a destination labware (96 well plate) is scanned', () => {
     before(() => {
       scanInDestinationLabware();

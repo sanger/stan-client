@@ -49,7 +49,9 @@ function DualIndexPlate() {
 
   const handleWorkNumberChange = useCallback(
     (workNumber: string) => {
-      send({ type: 'UPDATE_WORK_NUMBER', workNumber });
+      if (workNumber) {
+        send({ type: 'UPDATE_WORK_NUMBER', workNumber });
+      }
     },
     [send]
   );
@@ -175,9 +177,14 @@ function DualIndexPlate() {
           {sourceReagentPlate && (
             <div className="w-1/4 mt-4 mb-4" id="plateType">
               <Label name={'Plate Type'}>
-                <Select emptyOption onChange={(e) => handlePlateTypeChange(e.currentTarget.value)}>
-                  {PLATE_TYPES.map((plateType, index) => (
-                    <option key={index} value={plateType}>
+                <Select
+                  emptyOption
+                  onChange={(e) => handlePlateTypeChange(e.currentTarget.value)}
+                  value={sourceReagentPlate ? sourceReagentPlate.plateType ?? '' : ''}
+                  disabled={sourceReagentPlate && PLATE_TYPES.includes(sourceReagentPlate.plateType ?? '')}
+                >
+                  {PLATE_TYPES.map((plateType) => (
+                    <option key={plateType} value={plateType}>
                       {plateType}
                     </option>
                   ))}

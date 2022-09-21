@@ -169,7 +169,7 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
         }
       },
       transferring: {
-        entry: ['emptyServerError'],
+        entry: 'emptyServerError',
         invoke: {
           src: 'reagentTransfer',
           id: 'reagentTransfer',
@@ -179,7 +179,7 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
           },
           onError: {
             target: 'readyToCopy',
-            actions: ['assignServerError']
+            actions: 'assignServerError'
           }
         }
       },
@@ -211,7 +211,8 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
         ctx.sourceReagentPlate = e.data.reagentPlate
           ? {
               barcode: e.data.reagentPlate.barcode,
-              slots: e.data.reagentPlate.slots ?? []
+              slots: e.data.reagentPlate.slots ?? [],
+              plateType: e.data.reagentPlate.plateType
             }
           : { barcode: ctx.sourceBarcode, slots: [] };
       }),
