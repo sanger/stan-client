@@ -77,6 +77,14 @@ const seeds: Array<CommentFieldsFragment> = [
     text: 'Slide damaged'
   }),
   commentFactory.build({
+    category: 'Concentration',
+    text: 'Potential to work'
+  }),
+  commentFactory.build({
+    category: 'Concentration',
+    text: 'Not recommended to proceed'
+  }),
+  commentFactory.build({
     category: 'Sample Processing',
     text: 'Issue while moving'
   }),

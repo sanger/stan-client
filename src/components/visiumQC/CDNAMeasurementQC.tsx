@@ -1,7 +1,7 @@
 import Panel from '../Panel';
 import { QCType } from '../../pages/VisiumQC';
-import React from 'react';
-import { LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import React, { useState } from 'react';
+import { CommentFieldsFragment, LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
@@ -12,22 +12,36 @@ type CDNAMeasurementQCProps = {
   qcType: string;
   labware: LabwareFieldsFragment;
   slotMeasurements: SlotMeasurementRequest[] | undefined;
+  concentrationComments: CommentFieldsFragment[];
   removeLabware: (barcode: string) => void;
 };
 
-const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware }: CDNAMeasurementQCProps) => {
+const CDNAMeasurementQC = ({
+  qcType,
+  labware,
+  slotMeasurements,
+  removeLabware,
+  concentrationComments
+}: CDNAMeasurementQCProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext();
+  const [measurementName, setMeasurementName] = useState(
+    qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration'
+  );
 
   const measurementConfigMemo = React.useMemo(() => {
+    setMeasurementName(qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration');
     return {
-      measurementName: qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration',
       stepIncrement: qcType === QCType.CDNA_AMPLIFICATION ? '1' : '.01',
       initialMeasurementVal: qcType === QCType.CDNA_AMPLIFICATION ? '' : '0',
       validateFunction:
-        qcType === QCType.CDNA_AMPLIFICATION ? validateAmplificationMeasurementValue : validateAnalysisMeasurementValue,
-      isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION
+        qcType === QCType.CDNA_AMPLIFICATION
+          ? validateAmplificationMeasurementValue
+          : validateConcentrationMeasurementValue,
+      isApplySameValueForAllMeasurements: qcType === QCType.CDNA_AMPLIFICATION,
+      isSelectMeasurementName: qcType === QCType.VISIUM_CONCENTRATION,
+      concentrationComments: qcType === QCType.CDNA_AMPLIFICATION ? [] : concentrationComments
     };
-  }, [qcType]);
+  }, [qcType, concentrationComments]);
 
   /***
    * When labwares changes, the slotMeasurements has to be initialized accordingly
@@ -44,14 +58,14 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware }:
     const slotMeasurements: SlotMeasurementRequest[] = labware.slots.filter(isSlotFilled).map((slot) => {
       return {
         address: slot.address,
-        name: measurementConfigMemo.measurementName,
+        name: measurementName,
         value: measurementConfigMemo.initialMeasurementVal
       };
     });
     setFieldValue('slotMeasurements', slotMeasurements);
   }, [
     labware,
-    measurementConfigMemo.measurementName,
+    measurementName,
     measurementConfigMemo.initialMeasurementVal,
     qcType,
     setErrors,
@@ -82,10 +96,10 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware }:
   );
 
   /***
-   *  Only acceptable 0 and decimal numbers of format ###.## for cDNA Analysis
+   *  Only acceptable 0 and decimal numbers of format ###.## Visium concentration
    * @param value
    */
-  function validateAnalysisMeasurementValue(value: string) {
+  function validateConcentrationMeasurementValue(value: string) {
     let error;
     if (value === '') {
       error = 'Required';
@@ -124,7 +138,7 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware }:
             </div>
             {measurementConfigMemo.isApplySameValueForAllMeasurements && (
               <div className={'flex flex-row w-1/4 ml-2'}>
-                <label className={' mt-2'}>{measurementConfigMemo.measurementName}</label>
+                <label className={' mt-2'}>{measurementName}</label>
                 <input
                   className={'rounded-md ml-3'}
                   type={'number'}
@@ -137,14 +151,33 @@ const CDNAMeasurementQC = ({ qcType, labware, slotMeasurements, removeLabware }:
                 />
               </div>
             )}
+            {measurementConfigMemo.isSelectMeasurementName && (
+              <div className={'flex flex-col w-1/4 ml-2'}>
+                <label className={'my-3'}>Measurement type</label>
+                <select
+                  className={'rounded-md'}
+                  value={measurementName}
+                  data-testid={'measurementType'}
+                  onChange={(e) => setMeasurementName(e.currentTarget.value)}
+                >
+                  <option value={'cDNA concentration'} key={'cDNAconcentrationOpt'}>
+                    cDNA concentration
+                  </option>
+                  <option value={'Library concentration'} key={'LibraryconcentrationOpt'}>
+                    Library concentration
+                  </option>
+                </select>
+              </div>
+            )}
             <div className={'flex flex-row mt-8 justify-between'}>
               {slotMeasurements && slotMeasurements.length > 0 && (
                 <SlotMeasurements
                   slotMeasurements={slotMeasurements}
-                  measurementName={measurementConfigMemo.measurementName}
+                  measurementName={measurementName}
                   onChangeMeasurement={handleChangeMeasurement}
                   validateValue={measurementConfigMemo.validateFunction}
                   stepIncrement={measurementConfigMemo.stepIncrement}
+                  comments={measurementConfigMemo.concentrationComments}
                 />
               )}
               <div className="flex flex-col" data-testid={'labware'}>

@@ -91,6 +91,6 @@ describe('FFPE Processing', () => {
   function fillForm() {
     cy.get('#labwareScanInput').type('STAN-3111{enter}');
     cy.get('select[name="workNumber"]').select('SGP1008');
-    cy.get('select[name="commentId"]').select('29');
+    cy.get('select[name="commentId"]').select('Soft tissue');
   }
 });

@@ -106,11 +106,15 @@ const PotProcessingLabwarePlan = React.forwardRef<HTMLDivElement, PotProcessingL
       if (outputLabware) {
         setFieldValue(`plans.${rowIndex}.labwareType`, outputLabware.labwareType.name);
       }
-      setFieldValue(
-        `plans.${rowIndex}.fixative`,
-        outputLabware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER ? 'None' : fixative
-      );
-    }, [setFieldValue, rowIndex, fixative, outputLabware, sourceLabware]);
+
+      //Initialize with selected fixative only during creation
+      if (!values.plans[rowIndex]) {
+        setFieldValue(
+          `plans.${rowIndex}.fixative`,
+          outputLabware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER ? 'None' : fixative
+        );
+      }
+    }, [values, setFieldValue, rowIndex, fixative, outputLabware, sourceLabware]);
 
     return (
       <motion.div

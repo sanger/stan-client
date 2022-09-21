@@ -47,8 +47,8 @@ const commentHandlers = [
           .findAll()
           .filter(
             (comment) =>
-              comment.category === req.variables.commentCategory &&
-              (req.variables.includeDisabled ? true : isEnabled(comment))
+              (!req.variables.commentCategory || req.variables.commentCategory === comment.category) &&
+              (req.variables.includeDisabled || isEnabled(comment))
           )
       })
     );
