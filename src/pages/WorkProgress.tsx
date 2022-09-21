@@ -301,6 +301,10 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     }
   },
   {
+    Header: 'Status Comment',
+    accessor: 'workComment'
+  },
+  {
     Header: 'Work Requester',
     accessor: 'workRequester',
     sortType: (rowA, rowB) => {

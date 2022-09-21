@@ -27,6 +27,7 @@ export type WorkProgressResultTableEntry = {
   lastRelease96WellPlateData: Date | undefined;
   workRequester: string | undefined;
   mostRecentOperation: string | undefined;
+  workComment: string | undefined;
 };
 /**
  * The keys to store the timestamp data
@@ -43,7 +44,8 @@ export type WorkProgressTimeStampType =
   | 'Image'
   | 'Release 96 well plate'
   | 'Analysis'
-  | 'Most Recent Operation';
+  | 'Most Recent Operation'
+  | 'Work Comment';
 
 export class WorkProgressService
   implements SearchServiceInterface<FindWorkProgressQueryVariables, WorkProgressResultTableEntry>
@@ -112,7 +114,8 @@ export class WorkProgressService
         lastSlideImagedDate: lastSlideImagedDate && new Date(lastSlideImagedDate.toString()),
         lastRelease96WellPlateData: lastRelease96WellPlateData && new Date(lastRelease96WellPlateData.toString()),
         workRequester: entry.work.workRequester ? entry.work.workRequester.username : '',
-        mostRecentOperation: entry.mostRecentOperation ? entry.mostRecentOperation : ''
+        mostRecentOperation: entry.mostRecentOperation ? entry.mostRecentOperation : '',
+        workComment: entry.workComment ? entry.workComment : ''
       };
     });
   };
