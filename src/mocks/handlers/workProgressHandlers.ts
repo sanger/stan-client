@@ -2,6 +2,7 @@ import { graphql } from 'msw';
 import {
   FindWorkProgressQuery,
   FindWorkProgressQueryVariables,
+  Work,
   WorkProgressTimestamp,
   WorkStatus
 } from '../../types/sdk';
@@ -23,6 +24,19 @@ function buildWorkProgressTimeStamps(): Array<WorkProgressTimestamp> {
   ];
 }
 
+function buildWorkComment(work: Work) {
+  switch (work.status) {
+    case WorkStatus.Paused:
+      return 'This work is paused';
+    case WorkStatus.Failed:
+      return 'This work is failed';
+    case WorkStatus.Withdrawn:
+      return 'This work is withdrawn';
+    default:
+      return '';
+  }
+}
+
 const workProgressHandlers = [
   graphql.query<FindWorkProgressQuery, FindWorkProgressQueryVariables>('FindWorkProgress', (req, res, ctx) => {
     const { workNumber, workTypes, statuses } = req.variables;
@@ -39,7 +53,8 @@ const workProgressHandlers = [
             return {
               __typename: 'WorkProgress',
               work: work,
-              timestamps: buildWorkProgressTimeStamps()
+              timestamps: buildWorkProgressTimeStamps(),
+              workComment: buildWorkComment(work)
             };
           })
         })
@@ -57,7 +72,8 @@ const workProgressHandlers = [
             return {
               __typename: 'WorkProgress',
               work: work,
-              timestamps: buildWorkProgressTimeStamps()
+              timestamps: buildWorkProgressTimeStamps(),
+              workComment: buildWorkComment(work)
             };
           })
         })
@@ -74,7 +90,8 @@ const workProgressHandlers = [
             return {
               __typename: 'WorkProgress',
               work: work,
-              timestamps: buildWorkProgressTimeStamps()
+              timestamps: buildWorkProgressTimeStamps(),
+              workComment: buildWorkComment(work)
             };
           })
         })
