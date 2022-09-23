@@ -36,6 +36,9 @@ export interface ReagentTransferContext {
    */
   sourceReagentPlate: ReagentPlate | undefined;
 
+  /**The type of reagent plate involved.**/
+  plateType: string;
+
   /**
    * 96 well plate, which is the destination labware, to which the reagent is copied
    */
@@ -77,12 +80,18 @@ type SetDestinationLabware = {
   labware: LabwareFieldsFragment;
 };
 
+type SetPlateType = {
+  type: 'SET_PLATE_TYPE';
+  plateType: string;
+};
+
 type SaveEvent = { type: 'SAVE' };
 
 export type ReagentTransferEvent =
   | UpdateWorkNumber
   | SetSourceLabware
   | SetDestinationLabware
+  | SetPlateType
   | UpdateTransferContent
   | SaveEvent
   | MachineServiceDone<'reagentTransfer', RecordReagentTransferMutation>
@@ -113,6 +122,9 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
               actions: 'assignValidationError'
             }
           ],
+          SET_PLATE_TYPE: {
+            actions: 'assignPlateType'
+          },
           SET_DESTINATION_LABWARE: {
             actions: 'assignDestination'
           },
@@ -150,11 +162,14 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
           UPDATE_TRANSFER_CONTENT: {
             actions: ['assignTransfers']
           },
+          SET_PLATE_TYPE: {
+            actions: 'assignPlateType'
+          },
           SAVE: 'transferring'
         }
       },
       transferring: {
-        entry: ['emptyServerError'],
+        entry: 'emptyServerError',
         invoke: {
           src: 'reagentTransfer',
           id: 'reagentTransfer',
@@ -164,7 +179,7 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
           },
           onError: {
             target: 'readyToCopy',
-            actions: ['assignServerError']
+            actions: 'assignServerError'
           }
         }
       },
@@ -187,13 +202,17 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
         if (e.type !== 'SET_DESTINATION_LABWARE') return;
         ctx.destLabware = e.labware;
       }),
-
+      assignPlateType: assign((ctx, e) => {
+        if (e.type !== 'SET_PLATE_TYPE') return;
+        ctx.plateType = e.plateType;
+      }),
       assignReagentPlate: assign((ctx, e) => {
         if (e.type !== 'done.invoke.findReagentPlate' || ctx.sourceBarcode === undefined) return;
         ctx.sourceReagentPlate = e.data.reagentPlate
           ? {
               barcode: e.data.reagentPlate.barcode,
-              slots: e.data.reagentPlate.slots ?? []
+              slots: e.data.reagentPlate.slots ?? [],
+              plateType: e.data.reagentPlate.plateType
             }
           : { barcode: ctx.sourceBarcode, slots: [] };
       }),
@@ -235,7 +254,8 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
             workNumber: ctx.workNumber,
             operationType: ctx.operationType,
             destinationBarcode: ctx.destLabware!.barcode,
-            transfers: ctx.reagentTransfers
+            transfers: ctx.reagentTransfers,
+            plateType: ctx.plateType
           }
         });
       },
