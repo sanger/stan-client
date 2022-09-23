@@ -68,21 +68,22 @@ describe('Work Progress', () => {
         cy.get('th').eq(0).contains('Priority');
         cy.get('th').eq(1).contains('SGP/R&D Number');
         cy.get('th').eq(2).contains('Status');
-        cy.get('th').eq(3).contains('Work Requester');
-        cy.get('th').eq(4).contains('Work Type');
-        cy.get('th').eq(5).contains('Project');
-        cy.get('th').eq(6).contains('Most Recent Operation');
-        cy.get('th').eq(7).contains('Last Sectioning Date');
-        cy.get('th').eq(8).contains('Last Staining Date');
-        cy.get('th').eq(9).contains('Last RNAscope/IHC Staining Date');
-        cy.get('th').eq(10).contains('Last Imaging Date');
-        cy.get('th').eq(11).contains('Last RNA Extraction Date');
-        cy.get('th').eq(12).contains('Last RNA Analysis Date');
-        cy.get('th').eq(13).contains('Last Visium ADH Stain Date');
-        cy.get('th').eq(14).contains('Last Visium TO Staining Date');
-        cy.get('th').eq(15).contains('Last Visium LP Staining Date');
-        cy.get('th').eq(16).contains('Last cDNA Transfer Date');
-        cy.get('th').eq(17).contains('Last Date 96 Well Plate Released');
+        cy.get('th').eq(3).contains('Status Comment');
+        cy.get('th').eq(4).contains('Work Requester');
+        cy.get('th').eq(5).contains('Work Type');
+        cy.get('th').eq(6).contains('Project');
+        cy.get('th').eq(7).contains('Most Recent Operation');
+        cy.get('th').eq(8).contains('Last Sectioning Date');
+        cy.get('th').eq(9).contains('Last Staining Date');
+        cy.get('th').eq(10).contains('Last RNAscope/IHC Staining Date');
+        cy.get('th').eq(11).contains('Last Imaging Date');
+        cy.get('th').eq(12).contains('Last RNA Extraction Date');
+        cy.get('th').eq(13).contains('Last RNA Analysis Date');
+        cy.get('th').eq(14).contains('Last Visium ADH Stain Date');
+        cy.get('th').eq(15).contains('Last Visium TO Staining Date');
+        cy.get('th').eq(16).contains('Last Visium LP Staining Date');
+        cy.get('th').eq(17).contains('Last cDNA Transfer Date');
+        cy.get('th').eq(18).contains('Last Date 96 Well Plate Released');
       });
     });
   });
@@ -157,6 +158,16 @@ describe('Work Progress', () => {
       });
       it('will show a notification', () => {
         cy.findByText('There were no results for the given search. Please try again.').should('be.visible');
+      });
+    });
+    context('when a paused value is given', () => {
+      before(() => {
+        cy.findByTestId('valueSelect').select('paused');
+        cy.findByRole('button', { name: /Search/i }).click();
+      });
+      it('will show a table with results', () => {
+        cy.findByRole('table').contains('paused');
+        cy.findByRole('table').contains('This work is paused');
       });
     });
   });

@@ -6,4 +6,5 @@ fragment WorkProgressFields on WorkProgress {
     ...WorkProgressTimeStampField
   }
   mostRecentOperation
+  workComment
 }
