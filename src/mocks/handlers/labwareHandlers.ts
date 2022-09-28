@@ -1,5 +1,11 @@
 import { graphql } from 'msw';
-import { FindLabwareQuery, FindLabwareQueryVariables, GetLabwareOperationsQuery, GetLabwareOperationsQueryVariables, UserRole } from '../../types/sdk';
+import {
+  FindLabwareQuery,
+  FindLabwareQueryVariables,
+  GetLabwareOperationsQuery,
+  GetLabwareOperationsQueryVariables,
+  UserRole
+} from '../../types/sdk';
 import labwareFactory from '../../lib/factories/labwareFactory';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
@@ -65,27 +71,30 @@ const labwareHandlers = [
     return res(ctx.data(payload));
   }),
 
-  graphql.query<GetLabwareOperationsQuery, GetLabwareOperationsQueryVariables>('GetLabwareOperations', (req, res, ctx) => {
-    const optype = req.variables.operationType;
-    return res(
-      ctx.data({
-        labwareOperations: [
-          {
-            id: 1,
-            operationType: {
-              name: optype
-            },
-            actions: [],
-            user: {
-              username: 'test',
-              role: UserRole.Normal
-            },
-            performed: ""
-          }
-        ]
-      })
-    );
-  })
+  graphql.query<GetLabwareOperationsQuery, GetLabwareOperationsQueryVariables>(
+    'GetLabwareOperations',
+    (req, res, ctx) => {
+      const optype = req.variables.operationType;
+      return res(
+        ctx.data({
+          labwareOperations: [
+            {
+              id: 1,
+              operationType: {
+                name: optype
+              },
+              actions: [],
+              user: {
+                username: 'test',
+                role: UserRole.Normal
+              },
+              performed: ''
+            }
+          ]
+        })
+      );
+    }
+  )
 ];
 
 export default labwareHandlers;

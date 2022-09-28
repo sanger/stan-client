@@ -1,8 +1,4 @@
-import { 
-  GetLabwareOperationsQuery,
-  GetLabwareOperationsQueryVariables, 
-  UserRole
-} from "../../../src/types/sdk";
+import { GetLabwareOperationsQuery, GetLabwareOperationsQueryVariables } from '../../../src/types/sdk';
 import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
 
 describe('Visium Perm', () => {
@@ -132,13 +128,16 @@ describe('Visium Perm', () => {
     cy.msw().then(({ worker, graphql }) => {
       createLabware('STAN-3200');
       worker.use(
-        graphql.query<GetLabwareOperationsQuery, GetLabwareOperationsQueryVariables>('GetLabwareOperations', (req, res, ctx) => {
-          return res.once(
-            ctx.data({
-              labwareOperations: []
-            })
-          );
-        })
+        graphql.query<GetLabwareOperationsQuery, GetLabwareOperationsQueryVariables>(
+          'GetLabwareOperations',
+          (req, res, ctx) => {
+            return res.once(
+              ctx.data({
+                labwareOperations: []
+              })
+            );
+          }
+        )
       );
     });
     cy.get('#labwareScanInput').type('STAN-3200{enter}');

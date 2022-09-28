@@ -60,21 +60,24 @@ export default function VisiumPerm() {
   const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
   const { serverError } = current.context;
 
-  const onSubmit = async (values : RecordPermRequest) => {
-    const isLabwareStained = await stanCore.GetLabwareOperations({
-      barcode: values.barcode, operationType: "Stain"
-    }).then(r => r.labwareOperations?.length);
-  
+  const onSubmit = async (values: RecordPermRequest) => {
+    const isLabwareStained = await stanCore
+      .GetLabwareOperations({
+        barcode: values.barcode,
+        operationType: 'Stain'
+      })
+      .then((r) => r.labwareOperations?.length);
+
     if (!!isLabwareStained) {
-      handleSave(values)
+      handleSave(values);
     } else {
-      setWarnBeforeSave(true)
+      setWarnBeforeSave(true);
     }
   };
 
-  const handleSave = (values : RecordPermRequest) => {
+  const handleSave = (values: RecordPermRequest) => {
     setWarnBeforeSave(false);
-  
+
     const submitPermData = [...values.permData]
       .map((pm) => {
         if (pm.seconds) {
@@ -163,7 +166,7 @@ export default function VisiumPerm() {
                 <div className="flex flex-row items-center justify-end">
                   <BlueButton type="submit">Submit</BlueButton>
                 </div>
-                
+
                 <ConfirmationModal
                   show={warnBeforeSave}
                   header={'Save visium permeabilisation'}
@@ -178,10 +181,10 @@ export default function VisiumPerm() {
                         setWarnBeforeSave(false);
                       }
                     },
-                    { 
+                    {
                       label: 'Continue',
                       action: () => {
-                        handleSave(values) 
+                        handleSave(values);
                       }
                     }
                   ]}
@@ -195,7 +198,6 @@ export default function VisiumPerm() {
                     Otherwise click <span className="font-bold text-gray-900">Continue</span> to record this operation
                   </p>
                 </ConfirmationModal>
-                
               </Form>
             )}
           </Formik>
