@@ -1,0 +1,5 @@
+query GetLabwareOperations($barcode: String!, $operationType: String!) {
+  labwareOperations(barcode: $barcode, operationType: $operationType) {
+    ...OperationFields
+  }
+}
