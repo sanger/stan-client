@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Labware, { LabwareImperativeRef } from '../labware/Labware';
 import Pager from '../pagination/Pager';
-import slotMapperMachine from './slotMapper.machine';
 import { SlotMapperProps } from './slotMapper.types';
 import { usePrevious } from '../../lib/hooks';
 import WhiteButton from '../buttons/WhiteButton';
@@ -18,24 +17,27 @@ import { find } from 'lodash';
 import { ConfirmationModal } from '../modal/ConfirmationModal';
 import Warning from '../notifications/Warning';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
+import createSlotMapperMachine from './slotMapper.machine';
 
-function SlotMapper({
+const SlotMapper: React.FC<SlotMapperProps> = ({
   onChange,
   onInputLabwareChange,
   initialInputLabware = [],
   initialOutputLabware = [],
-  locked = false
-}: SlotMapperProps) {
+  locked = false,
+  inputLabwareLimit,
+  failedSlotsCheck = true,
+  children,
+  disabledOutputSlotAddresses = []
+}) => {
   const memoSlotMapperMachine = React.useMemo(() => {
-    return slotMapperMachine.withContext({
+    return createSlotMapperMachine({
       inputLabware: initialInputLabware,
       outputLabware: initialOutputLabware,
-      slotCopyContent: [],
-      colorByBarcode: new Map(),
-      failedSlots: new Map(),
-      errors: new Map()
+      failedSlotsCheck
     });
-  }, [initialInputLabware, initialOutputLabware]);
+  }, [initialInputLabware, initialOutputLabware, failedSlotsCheck]);
+
   const [current, send] = useMachine(() => memoSlotMapperMachine);
 
   const { inputLabware, slotCopyContent, colorByBarcode, failedSlots, errors } = current.context;
@@ -72,6 +74,9 @@ function SlotMapper({
 
   const getDestinationSlotColor = useCallback(
     (labware: NewLabwareLayout, address: string) => {
+      if (disabledOutputSlotAddresses?.includes(address)) {
+        return 'bg-gray-300 ring-0 ring-offset-0 text-gray-300 border-0 border-gray-300';
+      }
       const scc = find(slotCopyContent, {
         destinationAddress: address
       });
@@ -80,7 +85,7 @@ function SlotMapper({
         return `bg-${colorByBarcode.get(scc.sourceBarcode)}-500`;
       }
     },
-    [slotCopyContent, colorByBarcode]
+    [slotCopyContent, colorByBarcode, disabledOutputSlotAddresses]
   );
 
   /**
@@ -93,12 +98,9 @@ function SlotMapper({
   /**
    * State to track the current output labware (in case there's multiple one day)
    */
-  const [currentOutputLabware] = useState<Maybe<NewLabwareLayout>>(() => {
+  const [currentOutputLabware, setCurrentOutputLabware] = useState<Maybe<NewLabwareLayout>>(() => {
     return initialOutputLabware?.length === 0 ? null : initialOutputLabware[0];
   });
-
-  const currentInputId = currentInputLabware?.id;
-  const currentOutputId = currentOutputLabware?.id;
 
   /**
    * State to track the currently selected input and output addresses
@@ -123,6 +125,21 @@ function SlotMapper({
     initialCurrentPage: 1,
     initialNumberOfPages: inputLabware.length
   });
+
+  /**Update machine context, if there is a change in output labware**/
+  React.useEffect(() => {
+    setCurrentOutputLabware((prev) => {
+      /**This is only used by CytAssist. But, if any other use cases come in future which require a different condition (for e.g change in barcode)
+       * to clear mappings them this can be moved to a callback handler
+       */
+      if (initialOutputLabware.length > 0 && prev?.labwareType !== initialOutputLabware[0].labwareType) {
+        send('CLEAR_SLOT_MAPPINGS');
+        outputLabwareRef.current?.deselectAll();
+      }
+      return initialOutputLabware[0];
+    });
+    send({ type: 'UPDATE_OUTPUT_LABWARE', labware: initialOutputLabware });
+  }, [initialOutputLabware, send]);
 
   /**
    * Whenever the number of input labwares changes, set the number of pages on the pager
@@ -177,18 +194,18 @@ function SlotMapper({
     (givenDestinationAddress?: string) => {
       setFailedSelectSlots([]);
       const address = destinationAddress ? destinationAddress : givenDestinationAddress;
-      if (currentInputId && currentOutputId && address) {
+      if (currentInputLabware?.id && currentOutputLabware?.id && address) {
         send({
           type: 'COPY_SLOTS',
-          inputLabwareId: currentInputId,
+          inputLabwareId: currentInputLabware?.id,
           inputAddresses: selectedInputAddresses,
-          outputLabwareId: currentOutputId,
+          outputLabwareId: currentOutputLabware?.id,
           outputAddress: address
         });
       }
       setDestinationAddress(undefined);
     },
-    [currentInputId, currentOutputId, destinationAddress, selectedInputAddresses, send]
+    [currentInputLabware, currentOutputLabware, destinationAddress, selectedInputAddresses, send]
   );
 
   /**
@@ -196,6 +213,9 @@ function SlotMapper({
    */
   const handleOnOutputLabwareSlotClick = React.useCallback(
     (outputAddress: string) => {
+      if (disabledOutputSlotAddresses?.includes(outputAddress)) {
+        return;
+      }
       setDestinationAddress(outputAddress);
       //Check whether any selected input slots are failed in QC
       if (currentInputLabware) {
@@ -215,22 +235,22 @@ function SlotMapper({
         }
       }
     },
-    [currentInputLabware, handleCopySlots, failedSlots, selectedInputAddresses]
+    [currentInputLabware, handleCopySlots, failedSlots, selectedInputAddresses, disabledOutputSlotAddresses]
   );
 
   /**
    * Handler for the "Clear" button
    */
   const handleOnClickClear = React.useCallback(() => {
-    if (currentOutputId) {
+    if (currentOutputLabware?.id) {
       send({
         type: 'CLEAR_SLOTS',
-        outputLabwareId: currentOutputId,
+        outputLabwareId: currentOutputLabware?.id,
         outputAddresses: selectedOutputAddresses
       });
       outputLabwareRef.current?.deselectAll();
     }
-  }, [send, currentOutputId, selectedOutputAddresses, outputLabwareRef]);
+  }, [send, currentOutputLabware, selectedOutputAddresses, outputLabwareRef]);
 
   /**
    * Whenever the SlotCopyContent map changes, or the current input labware changes,
@@ -271,12 +291,15 @@ function SlotMapper({
         <Heading level={4}>Output Labwares</Heading>
 
         <div id="inputLabwares" className="bg-gray-100 p-4">
-          <LabwareScanner initialLabwares={initialInputLabware} onChange={onLabwareScannerChange}>
+          <LabwareScanner
+            initialLabwares={initialInputLabware}
+            onChange={onLabwareScannerChange}
+            limit={inputLabwareLimit}
+          >
             {(props) => {
               if (!currentInputLabware) {
                 return <MutedText>Add labware using the scan input above</MutedText>;
               }
-
               return (
                 <>
                   {!locked && (
@@ -302,20 +325,22 @@ function SlotMapper({
             }}
           </LabwareScanner>
         </div>
-
-        <div id="outputLabwares" className="p-4 flex flex-col items-center justify-center bg-gray-100">
-          {currentOutputLabware && (
-            <Labware
-              labware={currentOutputLabware}
-              selectable="any"
-              selectionMode="multi"
-              labwareRef={outputLabwareRef}
-              name={currentOutputLabware.labwareType.name}
-              onSlotClick={handleOnOutputLabwareSlotClick}
-              onSelect={setSelectedOutputAddresses}
-              slotColor={(address) => getDestinationSlotColor(currentOutputLabware, address)}
-            />
-          )}
+        <div id="outputLabwares" className="p-4 flex flex-col  bg-gray-100 border-l-2">
+          <div className="flex mb-8">{children}</div>
+          <div className={'flex items-center justify-center'}>
+            {currentOutputLabware && (
+              <Labware
+                labware={currentOutputLabware}
+                selectable="any"
+                selectionMode="multi"
+                labwareRef={outputLabwareRef}
+                name={currentOutputLabware.labwareType.name}
+                onSlotClick={handleOnOutputLabwareSlotClick}
+                onSelect={setSelectedOutputAddresses}
+                slotColor={(address) => getDestinationSlotColor(currentOutputLabware, address)}
+              />
+            )}
+          </div>
         </div>
 
         <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-between bg-gray-200">
@@ -333,42 +358,40 @@ function SlotMapper({
           <SlotMapperTable labware={currentInputLabware} slots={selectedSlots} slotCopyContent={slotCopyContent} />
         </div>
       )}
-      {
-        <ConfirmationModal
-          show={failedSelectSlots.length > 0}
-          header={'Slot transfer'}
-          message={{ type: 'Warning', text: 'Failed slot(s)' }}
-          confirmOptions={[
-            {
-              label: 'Cancel',
-              action: () => {
-                setFailedSelectSlots([]);
-              }
-            },
-            { label: 'Continue', action: handleCopySlots }
-          ]}
-        >
-          <p className={'font-bold mt-8'}>{`Following slot(s) failed in slide processing : `}</p>
-          <Table className={'mt-4 w-full'}>
-            <TableHead>
-              <tr>
-                <TableHeader>Address</TableHeader>
-                <TableHeader>Comment</TableHeader>
+      <ConfirmationModal
+        show={failedSelectSlots.length > 0}
+        header={'Slot transfer'}
+        message={{ type: 'Warning', text: 'Failed slot(s)' }}
+        confirmOptions={[
+          {
+            label: 'Cancel',
+            action: () => {
+              setFailedSelectSlots([]);
+            }
+          },
+          { label: 'Continue', action: handleCopySlots }
+        ]}
+      >
+        <p className={'font-bold mt-8'}>{`Following slot(s) failed in slide processing : `}</p>
+        <Table className={'mt-4 w-full'}>
+          <TableHead>
+            <tr>
+              <TableHeader>Address</TableHeader>
+              <TableHeader>Comment</TableHeader>
+            </tr>
+          </TableHead>
+          <TableBody>
+            {failedSelectSlots.map((slot) => (
+              <tr key={slot.address}>
+                <TableCell>{slot.address}</TableCell>
+                <TableCell>{slot.comment}</TableCell>
               </tr>
-            </TableHead>
-            <TableBody>
-              {failedSelectSlots.map((slot) => (
-                <tr key={slot.address}>
-                  <TableCell>{slot.address}</TableCell>
-                  <TableCell>{slot.comment}</TableCell>
-                </tr>
-              ))}
-            </TableBody>
-          </Table>
+            ))}
+          </TableBody>
+        </Table>
 
-          <p className={'mt-6 font-bold'}>Do you wish to continue or cancel?</p>
-        </ConfirmationModal>
-      }
+        <p className={'mt-6 font-bold'}>Do you wish to continue or cancel?</p>
+      </ConfirmationModal>
 
       <div className={'flex flex-col w-full'}>
         {errors.size > 0 && (
@@ -379,6 +402,6 @@ function SlotMapper({
       </div>
     </div>
   );
-}
+};
 
 export default SlotMapper;

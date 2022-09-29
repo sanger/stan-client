@@ -15,11 +15,13 @@ export interface SlotCopyContext {
    */
   workNumber: string;
   operationType: OperationTypeName;
-  outputLabwareType: LabwareTypeName;
+  outputLabwareType: LabwareTypeName | undefined;
   slotCopyContent: Array<SlotCopyContent>;
   serverErrors?: Maybe<ClientError>;
   outputLabwares: Array<LabwareFieldsFragment>;
-  inputLabwarePermData: FindPermDataQuery[];
+  inputLabwarePermData?: FindPermDataQuery[];
+  preBarcode?: string;
+  outputLabwareCosting?: string;
 }
 
 type UpdateSlotCopyContentType = {
@@ -28,9 +30,23 @@ type UpdateSlotCopyContentType = {
   anySourceMapped: boolean;
 };
 
-type UPDATE_INPUT_LABWARE_PERMTIME = {
+type UpdateInputLabwarePermTime = {
   type: 'UPDATE_INPUT_LABWARE_PERMTIME';
   labwares: Array<LabwareFieldsFragment>;
+};
+
+type UupdatePreBarcode = {
+  type: 'UPDATE_PRE_BARCODE';
+  preBarcode: string;
+};
+
+type UpdateOutputLabwareType = {
+  type: 'UPDATE_OUTPUT_LABWARE_TYPE';
+  labwareType: LabwareTypeName | undefined;
+};
+type UpdateOutputLabwareCosting = {
+  type: 'UPDATE_OUTPUT_LABWARE_COSTING';
+  labwareCosting: COSTING | undefined;
 };
 
 type FindPermDataEvent = {
@@ -46,12 +62,19 @@ type SaveEvent = { type: 'SAVE' };
 export type SlotCopyEvent =
   | { type: 'UPDATE_WORK_NUMBER'; workNumber: string }
   | UpdateSlotCopyContentType
-  | UPDATE_INPUT_LABWARE_PERMTIME
+  | UpdateInputLabwarePermTime
+  | UpdateOutputLabwareType
+  | UupdatePreBarcode
+  | UpdateOutputLabwareCosting
   | SaveEvent
   | FindPermDataEvent
   | MachineServiceDone<'copySlots', SlotCopyMutation>
   | MachineServiceError<'copySlots'>;
 
+export enum COSTING {
+  FACULTY = 'Faculty',
+  CELL_GEN = 'SGP'
+}
 /**
  * SlotCopy Machine Config
  */
@@ -77,6 +100,15 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           ],
           UPDATE_INPUT_LABWARE_PERMTIME: {
             target: 'updateLabwarePermTime'
+          },
+          UPDATE_PRE_BARCODE: {
+            actions: 'assignPreBarcode'
+          },
+          UPDATE_OUTPUT_LABWARE_TYPE: {
+            actions: 'assignOutputLabwareType'
+          },
+          UPDATE_OUTPUT_LABWARE_COSTING: {
+            actions: 'assignOutputLabwareCosting'
           }
         }
       },
@@ -99,6 +131,15 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
             target: 'updateLabwarePermTime'
           },
 
+          UPDATE_PRE_BARCODE: {
+            actions: 'assignPreBarcode'
+          },
+          UPDATE_OUTPUT_LABWARE_TYPE: {
+            actions: 'assignOutputLabwareType'
+          },
+          UPDATE_OUTPUT_LABWARE_COSTING: {
+            actions: 'assignOutputLabwareCosting'
+          },
           SAVE: 'copying'
         }
       },
@@ -166,19 +207,30 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       assignLabwarePermTimes: assign((ctx, e) => {
         if (e.type !== 'done.invoke.findPermTime') return;
         //Sync the permData array with current input labware list
-        ctx.inputLabwarePermData = ctx.inputLabwarePermData.filter((permData) =>
+        ctx.inputLabwarePermData = ctx.inputLabwarePermData?.filter((permData) =>
           e.data.inputLabwares.some((lw) => lw.barcode === permData.visiumPermData.labware.barcode)
         );
         //Add newly fetched perm times if any
         e.data.findPermTimes.forEach((permData) => {
-          ctx.inputLabwarePermData.push(permData);
+          ctx.inputLabwarePermData?.push(permData);
         });
         //update slot copy content with updated labware
         ctx.slotCopyContent = ctx.slotCopyContent.filter((scc) =>
           e.data.inputLabwares.some((lw) => lw.barcode === scc.sourceBarcode)
         );
       }),
-
+      assignPreBarcode: assign((ctx, e) => {
+        if (e.type !== 'UPDATE_PRE_BARCODE') return;
+        ctx.preBarcode = e.preBarcode;
+      }),
+      assignOutputLabwareType: assign((ctx, e) => {
+        if (e.type !== 'UPDATE_OUTPUT_LABWARE_TYPE') return;
+        ctx.outputLabwareType = e.labwareType;
+      }),
+      assignOutputLabwareCosting: assign((ctx, e) => {
+        if (e.type !== 'UPDATE_OUTPUT_LABWARE_COSTING') return;
+        ctx.outputLabwareCosting = e.labwareCosting;
+      }),
       emptyServerError: assign((ctx) => {
         ctx.serverErrors = null;
       })
@@ -189,8 +241,10 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           request: {
             workNumber: ctx.workNumber,
             operationType: ctx.operationType,
-            labwareType: ctx.outputLabwareType,
-            contents: ctx.slotCopyContent
+            labwareType: ctx.outputLabwareType!,
+            contents: ctx.slotCopyContent,
+            preBarcode: ctx.preBarcode,
+            costing: ctx.outputLabwareCosting
           }
         });
       },
@@ -199,7 +253,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         if (e.type !== 'UPDATE_INPUT_LABWARE_PERMTIME') return Promise.reject();
         for (const inputlw of e.labwares) {
           if (
-            !ctx.inputLabwarePermData.some((permData) => permData.visiumPermData.labware.barcode === inputlw.barcode)
+            !ctx.inputLabwarePermData?.some((permData) => permData.visiumPermData.labware.barcode === inputlw.barcode)
           ) {
             const val = await stanCore.FindPermData({
               barcode: inputlw.barcode

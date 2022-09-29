@@ -317,6 +317,7 @@ export const createLabwareMachine = (
           if (e.type !== 'REMOVE_LABWARE') {
             return;
           }
+
           const removeLabwareIndex = findIndex(ctx.labwares, {
             barcode: e.value
           });

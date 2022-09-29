@@ -1,11 +1,12 @@
 import { Machine, MachineOptions } from 'xstate';
 import { SlotMapperContext, SlotMapperEvent, SlotMapperSchema } from './slotMapper.types';
 import { assign } from '@xstate/immer';
-import { GridDirection, PassFail, SlotCopyContent } from '../../types/sdk';
+import { GridDirection, LabwareFieldsFragment, PassFail, SlotCopyContent } from '../../types/sdk';
 import { buildAddresses, cycleColors } from '../../lib/helpers';
 import { sortWithDirection } from '../../lib/helpers/addressHelper';
 import { find, indexOf, intersection, map } from 'lodash';
 import { stanCore } from '../../lib/sdk';
+import { NewLabwareLayout } from '../../types/stan';
 
 const colors = cycleColors();
 
@@ -53,7 +54,12 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
       }
       ctx.slotCopyContent = ctx.slotCopyContent.filter((scc) => !e.outputAddresses.includes(scc.destinationAddress));
     }),
-
+    clearSlotMappings: assign((ctx, e) => {
+      if (e.type !== 'CLEAR_SLOT_MAPPINGS') {
+        return;
+      }
+      ctx.slotCopyContent = [];
+    }),
     copySlots: assign((ctx, e) => {
       if (e.type !== 'COPY_SLOTS') {
         return;
@@ -156,53 +162,76 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
   }
 };
 
-const slotMapperMachine = Machine<SlotMapperContext, SlotMapperSchema, SlotMapperEvent>(
-  {
-    id: 'slotMapperMachine',
-    initial: 'ready',
-    states: {
-      ready: {
-        entry: 'assignLabwareColors',
-
-        on: {
-          COPY_SLOTS: {
-            actions: 'copySlots'
-          },
-          CLEAR_SLOTS: {
-            actions: ['clearSlots']
-          },
-          UPDATE_INPUT_LABWARE: {
-            target: ['updatingLabware'],
-            actions: ['assignInputLabware', 'assignLabwareColors', 'checkSlots']
-          },
-          UPDATE_OUTPUT_LABWARE: {
-            actions: 'assignOutputLabware'
-          },
-          LOCK: 'locked'
-        }
+interface SlotMapperMachineParams {
+  inputLabware: Array<LabwareFieldsFragment>;
+  outputLabware: Array<NewLabwareLayout>;
+  failedSlotsCheck?: boolean;
+}
+function createSlotMapperMachine({ inputLabware, outputLabware, failedSlotsCheck = true }: SlotMapperMachineParams) {
+  return Machine<SlotMapperContext, SlotMapperSchema, SlotMapperEvent>(
+    {
+      id: 'slotMapperMachine',
+      initial: 'ready',
+      context: {
+        inputLabware,
+        outputLabware,
+        failedSlotsCheck,
+        slotCopyContent: [],
+        colorByBarcode: new Map(),
+        failedSlots: new Map(),
+        errors: new Map()
       },
-      updatingLabware: {
-        invoke: {
-          src: 'passFailsSlots',
-          id: 'passFailsSlots',
-          onDone: {
-            target: 'ready',
-            actions: 'assignFailedSlots'
-          },
-          onError: {
-            target: 'ready',
-            actions: 'assignPassFailError'
+      states: {
+        ready: {
+          entry: 'assignLabwareColors',
+
+          on: {
+            COPY_SLOTS: {
+              actions: 'copySlots'
+            },
+            CLEAR_SLOTS: {
+              actions: 'clearSlots'
+            },
+            CLEAR_SLOT_MAPPINGS: {
+              actions: 'clearSlotMappings'
+            },
+            UPDATE_INPUT_LABWARE: [
+              {
+                target: 'updatingLabware',
+                cond: (ctx) => ctx.failedSlotsCheck,
+                actions: ['assignInputLabware', 'assignLabwareColors', 'checkSlots']
+              },
+              { actions: ['assignInputLabware', 'assignLabwareColors', 'checkSlots'] }
+            ],
+            UPDATE_OUTPUT_LABWARE: {
+              actions: 'assignOutputLabware'
+            },
+            LOCK: 'locked'
+          }
+        },
+        updatingLabware: {
+          invoke: {
+            src: 'passFailsSlots',
+            id: 'passFailsSlots',
+            onDone: {
+              target: 'ready',
+              actions: 'assignFailedSlots'
+            },
+            onError: {
+              target: 'ready',
+              actions: 'assignPassFailError'
+            }
+          }
+        },
+        locked: {
+          on: {
+            UNLOCK: 'ready'
           }
         }
-      },
-      locked: {
-        on: {
-          UNLOCK: 'ready'
-        }
       }
-    }
-  },
-  machineConfig
-);
+    },
+    machineConfig
+  );
+}
 
-export default slotMapperMachine;
+export default createSlotMapperMachine;

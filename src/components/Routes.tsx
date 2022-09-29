@@ -46,6 +46,7 @@ import FFPEProcessing from '../pages/FFPEProcessing';
 import SampleProcessingComments from '../pages/SampleProcessingComments';
 import AddExternalID from '../pages/AddExternalID';
 import WorkProgressSummary from '../pages/WorkProgressSummary';
+import CytAssist from '../pages/CytAssist';
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -187,6 +188,7 @@ export function Routes() {
         path="/lab/dual_index_plate"
         render={(routeProps) => <DualIndexPlate key={routeProps.location.key} />}
       />
+      <AuthenticatedRoute path="/lab/cytassist" render={(routeProps) => <CytAssist key={routeProps.location.key} />} />
       <AuthenticatedRoute
         path="/lab/staining"
         render={(routeProps) => (

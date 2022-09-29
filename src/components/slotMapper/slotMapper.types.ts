@@ -35,6 +35,21 @@ export interface SlotMapperProps {
    * Initial output labware
    */
   initialOutputLabware?: Array<NewLabwareLayout>;
+
+  /**
+   *Is it required to check failed slots in slide processing
+   */
+  failedSlotsCheck?: boolean;
+
+  /**
+   * Maximum number of input labware allowed to scan, if required
+   */
+  inputLabwareLimit?: number;
+
+  /**
+   * Disabled slots in output labware , if any
+   */
+  disabledOutputSlotAddresses?: string[];
 }
 
 export interface SlotMapperContext {
@@ -44,6 +59,7 @@ export interface SlotMapperContext {
   colorByBarcode: Map<string, string>;
   failedSlots: Map<string, SlotPassFailFieldsFragment[]>;
   errors: Map<string, ClientError>;
+  failedSlotsCheck: boolean;
 }
 
 export interface SlotMapperSchema {
@@ -60,7 +76,7 @@ type UpdateInputLabwareEvent = {
 };
 type UpdateOutputLabwareEvent = {
   type: 'UPDATE_OUTPUT_LABWARE';
-  labware: Array<LabwareFieldsFragment>;
+  labware: Array<NewLabwareLayout>;
 };
 
 type CopySlotsEvent = {
@@ -75,6 +91,10 @@ type ClearSlotsEvent = {
   type: 'CLEAR_SLOTS';
   outputLabwareId: number;
   outputAddresses: Array<string>;
+};
+
+type ClearAllSlotMappingsEvent = {
+  type: 'CLEAR_SLOT_MAPPINGS';
 };
 
 type SlotPassFailEvent = {
@@ -98,6 +118,7 @@ export type SlotMapperEvent =
   | UpdateOutputLabwareEvent
   | CopySlotsEvent
   | ClearSlotsEvent
+  | ClearAllSlotMappingsEvent
   | LockEvent
   | UnlockEvent
   | SlotPassFailEvent

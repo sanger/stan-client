@@ -10,7 +10,7 @@ type SlotMapperTableProps = {
 
 export default function SlotMapperTable({ labware, slots, slotCopyContent }: SlotMapperTableProps) {
   return (
-    <Table>
+    <Table data-testid="mapping_table">
       <TableHead>
         <tr>
           <TableHeader>Source Barcode</TableHeader>

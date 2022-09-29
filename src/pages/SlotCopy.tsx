@@ -80,13 +80,14 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
    ***/
   const onSaveAction = React.useCallback(() => {
     /**Get all input lawares that didn't perform perm operation and are mapped/copied to 96 well plate*/
-    const labwareWithoutPermData = inputLabwarePermData.filter(
+
+    const labwareWithoutPermData = inputLabwarePermData?.filter(
       (permData) =>
         permData.visiumPermData.addressPermData.length === 0 &&
         slotCopyContent.some((scc) => scc.sourceBarcode === permData.visiumPermData.labware.barcode)
     );
 
-    if (labwareWithoutPermData.length > 0) {
+    if (labwareWithoutPermData && labwareWithoutPermData.length > 0) {
       setLabwaresWithoutPerm(labwareWithoutPermData.map((permData) => permData.visiumPermData.labware));
       setWarnBeforeSave(true);
     } else {

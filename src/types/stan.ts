@@ -14,7 +14,7 @@ import { regexSort } from "../lib/helpers";
 /**
  * Union of STAN's {@link OperationType} names
  */
-export type OperationTypeName = "Section" | "Visium cDNA" | "Dual index plate";
+export type OperationTypeName = "Section" | "Visium cDNA" | "Dual index plate" |"CytAssist";
 
 /**
  * Enum for all of STAN's {@link LabwareType} names
@@ -33,6 +33,9 @@ export enum LabwareTypeName {
   DUAL_INDEX_PLATE = "Dual index plate",
   POT = "Pot",
   PRE_BARCODED_TUBE = "Prebarcoded tube",
+  VISIUM_LP_CYTASSIST= "Visium LP CytAssist",
+  VISIUM_LP_CYTASSIST_XL= "Visium LP CytAssist XL",
+
 }
 
 export type Address = string;

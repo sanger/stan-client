@@ -125,6 +125,12 @@ export const potFactory = unregisteredLabwareFactory.associations({
 export const preBarcodedFactory = unregisteredLabwareFactory.associations({
   labwareType: labwareTypes[LabwareTypeName.PRE_BARCODED_TUBE].build()
 });
+export const visiumLPCytAssistFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.VISIUM_LP_CYTASSIST].build()
+});
+export const visiumLPCytAssistXLFactory = unregisteredLabwareFactory.associations({
+  labwareType: labwareTypes[LabwareTypeName.VISIUM_LP_CYTASSIST_XL].build()
+});
 
 export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>> = {
   [LabwareTypeName.TUBE]: tubeFactory,
@@ -139,5 +145,7 @@ export const labwareFactories: Record<LabwareTypeName, Factory<NewLabwareLayout>
   [LabwareTypeName.FETAL_WASTE_CONTAINER]: fetalWasteFactory,
   [LabwareTypeName.DUAL_INDEX_PLATE]: dualIndexPlateFactory,
   [LabwareTypeName.PRE_BARCODED_TUBE]: preBarcodedFactory,
-  [LabwareTypeName.POT]: potFactory
+  [LabwareTypeName.POT]: potFactory,
+  [LabwareTypeName.VISIUM_LP_CYTASSIST]: visiumLPCytAssistFactory,
+  [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory
 };

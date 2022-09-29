@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Labware, { LabwareImperativeRef } from '../labware/Labware';
-import slotMapperMachine from './slotMapper.machine';
 import WhiteButton from '../buttons/WhiteButton';
 import { LabwareFieldsFragment, SlotCopyContent, SlotFieldsFragment } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
@@ -11,6 +10,7 @@ import warningToast from '../notifications/WarningToast';
 import Heading from '../Heading';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import RemoveButton from '../buttons/RemoveButton';
+import createSlotMapperMachine from './slotMapper.machine';
 
 export interface ReagentTransferMappingProps {
   /**
@@ -44,15 +44,12 @@ function ReagentTransferSlotMapper({
   disabled
 }: ReagentTransferMappingProps) {
   const memoSlotMapperMachine = React.useMemo(() => {
-    return slotMapperMachine.withContext({
+    return createSlotMapperMachine({
       inputLabware: initialSourceLabware ? [initialSourceLabware] : [],
-      outputLabware: initialDestLabware ? [initialDestLabware] : [],
-      slotCopyContent: [],
-      colorByBarcode: new Map(),
-      failedSlots: new Map(),
-      errors: new Map()
+      outputLabware: initialDestLabware ? [initialDestLabware] : []
     });
   }, [initialSourceLabware, initialDestLabware]);
+
   const [current, send] = useMachine(() => memoSlotMapperMachine);
 
   const { slotCopyContent } = current.context;

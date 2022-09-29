@@ -235,6 +235,12 @@ function AppShell({ children }: AppShellParams) {
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Record the transfer of dual-index reagent to 96 well plate.'}
                     />
+                    <NavLinkMenuItem
+                      caption={'CytAssist'}
+                      path={'/lab/cytassist'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Record the transfer of sections to a CytAssist slide.'}
+                    />
                   </Menu>
                   <NavLinkMenuItem
                     caption={'Imaging'}

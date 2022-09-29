@@ -89,6 +89,18 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     name: LabwareTypeName.PRE_BARCODED_TUBE,
     numRows: 1,
     numColumns: 1
+  }),
+  [LabwareTypeName.VISIUM_LP_CYTASSIST]: labwareTypeFactory.params({
+    __typename: 'LabwareType',
+    name: LabwareTypeName.VISIUM_LP_CYTASSIST,
+    numRows: 4,
+    numColumns: 1
+  }),
+  [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: labwareTypeFactory.params({
+    __typename: 'LabwareType',
+    name: LabwareTypeName.VISIUM_LP_CYTASSIST_XL,
+    numRows: 2,
+    numColumns: 1
   })
 };
 
