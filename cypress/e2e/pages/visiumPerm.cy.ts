@@ -97,7 +97,7 @@ describe('Visium Perm', () => {
 
   context('scanning a labware with no staining done', () => {
     before(() => {
-      saveSlotForLabwareWithNoPerm();
+      saveLabwareWithNoStain();
     });
     it('shows a warning message', () => {
       cy.findByText('Labware has not been stained').should('be.visible');
@@ -113,7 +113,7 @@ describe('Visium Perm', () => {
     });
     context('when Cancel button is clicked', () => {
       before(() => {
-        saveSlotForLabwareWithNoPerm();
+        saveLabwareWithNoStain();
         cy.findByRole('button', { name: /Cancel/i }).click();
       });
       it('cancels the operation', () => {
@@ -122,7 +122,7 @@ describe('Visium Perm', () => {
     });
   });
 
-  function saveSlotForLabwareWithNoPerm() {
+  function saveLabwareWithNoStain() {
     cy.visit('/lab/visium_perm');
     cy.get('select').select('SGP1008');
     cy.msw().then(({ worker, graphql }) => {
