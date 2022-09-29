@@ -4,5 +4,6 @@ query FindReagentPlate($barcode: String!) {
     slots {
       ...ReagentSlotFields
     }
+    plateType
   }
 }
