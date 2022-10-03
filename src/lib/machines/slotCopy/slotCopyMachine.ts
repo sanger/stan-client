@@ -2,7 +2,14 @@ import { createMachine } from 'xstate';
 import { assign } from '@xstate/immer';
 import { castDraft } from 'immer';
 import { LabwareTypeName, MachineServiceDone, MachineServiceError, OperationTypeName } from '../../../types/stan';
-import { FindPermDataQuery, LabwareFieldsFragment, Maybe, SlotCopyContent, SlotCopyMutation } from '../../../types/sdk';
+import {
+  FindPermDataQuery,
+  LabwareFieldsFragment,
+  Maybe,
+  SlideCosting,
+  SlotCopyContent,
+  SlotCopyMutation
+} from '../../../types/sdk';
 import { stanCore } from '../../sdk';
 import { ClientError } from 'graphql-request';
 
@@ -21,7 +28,7 @@ export interface SlotCopyContext {
   outputLabwares: Array<LabwareFieldsFragment>;
   inputLabwarePermData?: FindPermDataQuery[];
   preBarcode?: string;
-  outputLabwareCosting?: string;
+  outputLabwareCosting?: SlideCosting;
 }
 
 type UpdateSlotCopyContentType = {
@@ -46,7 +53,7 @@ type UpdateOutputLabwareType = {
 };
 type UpdateOutputLabwareCosting = {
   type: 'UPDATE_OUTPUT_LABWARE_COSTING';
-  labwareCosting: COSTING | undefined;
+  labwareCosting: SlideCosting | undefined;
 };
 
 type FindPermDataEvent = {
@@ -71,10 +78,6 @@ export type SlotCopyEvent =
   | MachineServiceDone<'copySlots', SlotCopyMutation>
   | MachineServiceError<'copySlots'>;
 
-export enum COSTING {
-  FACULTY = 'Faculty',
-  CELL_GEN = 'SGP'
-}
 /**
  * SlotCopy Machine Config
  */

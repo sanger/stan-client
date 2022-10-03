@@ -8,8 +8,8 @@ import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
 import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
-import { SlotCopyContent } from '../types/sdk';
-import slotCopyMachine, { COSTING } from '../lib/machines/slotCopy/slotCopyMachine';
+import { SlideCosting, SlotCopyContent } from '../types/sdk';
+import slotCopyMachine from '../lib/machines/slotCopy/slotCopyMachine';
 import { Link } from 'react-router-dom';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -105,9 +105,9 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
           emptyOption={true}
           data-testid="output-labware-costing"
         >
-          {objectKeys(COSTING).map((key) => (
-            <option key={key} value={COSTING[key]}>
-              {COSTING[key]}
+          {objectKeys(SlideCosting).map((key) => (
+            <option key={key} value={SlideCosting[key]}>
+              {SlideCosting[key]}
             </option>
           ))}
         </Select>
@@ -209,7 +209,7 @@ const CytAssist = () => {
     (costing: string) => {
       send({
         type: 'UPDATE_OUTPUT_LABWARE_COSTING',
-        labwareCosting: costing.length === 0 ? undefined : (costing as unknown as COSTING)
+        labwareCosting: costing.length === 0 ? undefined : (costing as unknown as SlideCosting)
       });
     },
     [send]
