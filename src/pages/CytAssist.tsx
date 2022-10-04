@@ -64,11 +64,11 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
             }
           }}
           allowEmptyValue={true}
-          placeholder={'V42A20-3752023-10-20'}
+          placeholder={'e.g V42A20-3752023-10-20'}
         />
         {preBarcodeValidationError.length > 0 ? (
           <MutedText className={'text-red-400'}>{preBarcodeValidationError}</MutedText>
-        ) : preBarcode === undefined || preBarcode.length <= 0 ? (
+        ) : !preBarcode?.length ? (
           <MutedText>Input barcode and press 'Enter' key</MutedText>
         ) : (
           ''

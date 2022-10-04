@@ -51,7 +51,7 @@ describe('CytAssist Page', () => {
         cy.findByTestId('mapping_table').contains('td', 'A1');
       });
       it('displays the table with D1 slot', () => {
-        cy.findByTestId('mapping_table').contains('td', 'B1');
+        cy.findByTestId('mapping_table').contains('td', 'D1');
       });
     });
 
@@ -69,7 +69,7 @@ describe('CytAssist Page', () => {
       it('displays the mapping table with A1 slot', () => {
         cy.findByTestId('mapped_table').contains('td', 'A1');
       });
-      it('displays the mapped table with A1 slot', () => {
+      it('displays the mapped table with D1 slot', () => {
         cy.findByTestId('mapped_table').contains('td', 'D1');
       });
 
