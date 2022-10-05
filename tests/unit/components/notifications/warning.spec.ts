@@ -1,5 +1,4 @@
 import { render, screen, cleanup } from '@testing-library/react';
-import { describe, test } from '@jest/globals';
 import Warning from '../../../../src/components/notifications/Warning';
 import { ClientError } from 'graphql-request';
 
@@ -30,7 +29,7 @@ const warningProps = {
 };
 
 describe('Warning.ts', () => {
-  test('displays the warning message, errors and problems passed in', () => {
+  it('displays the warning message, errors and problems passed in', () => {
     render(Warning(warningProps));
     // Shows the message
     expect(screen.getByText('Warning message')).toBeInTheDocument();
@@ -41,7 +40,7 @@ describe('Warning.ts', () => {
     expect(screen.getByText('and another problem')).toBeInTheDocument();
   });
 
-  test('Propagates the passed in classes', () => {
+  it('Propagates the passed in classes', () => {
     const extraClasses = 'font-bold';
     render(Warning({ ...warningProps, className: extraClasses }));
     expect(screen.getByTestId('warning')).toHaveClass('font-bold');

@@ -45,7 +45,7 @@ export function buildFindResult(numRecords: number, maxRecords: number): FindRes
   const locations = [...Array(locationCount)].map(() =>
     locationFactory.build({
       fixedName: faker.address.countryCode(),
-      customName: _.sample([faker.address.streetName(), null])
+      customName: _.sample([faker.address.street(), null])
     })
   );
 
