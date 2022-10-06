@@ -30,7 +30,7 @@ const warningProps = {
 
 describe('Warning.ts', () => {
   it('displays the warning message, errors and problems passed in', () => {
-    render(<Warning {...warningProps}/>);
+    render(<Warning {...warningProps} />);
     // Shows the message
     expect(screen.getByText('Warning message')).toBeInTheDocument();
     // Shows the error message
@@ -42,7 +42,7 @@ describe('Warning.ts', () => {
 
   it('Propagates the passed in classes', () => {
     const extraClasses = 'font-bold';
-    render(<Warning {...warningProps} className={extraClasses}/>);
+    render(<Warning {...warningProps} className={extraClasses} />);
     expect(screen.getByTestId('warning')).toHaveClass('font-bold');
   });
 });
