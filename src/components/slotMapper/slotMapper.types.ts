@@ -50,6 +50,15 @@ export interface SlotMapperProps {
    * Disabled slots in output labware , if any
    */
   disabledOutputSlotAddresses?: string[];
+
+  inputLabwareConfigPanel?: React.ReactNode;
+
+  outputLabwareConfigPanel?: React.ReactNode;
+
+  onRemoveOutputLabware?: (removeIndex: number) => void;
+  onRemoveInputLabware?: (barcode: string) => void;
+  onSelectOutputLabware?: (index: number) => void;
+  onSelectInputLabware?: (barcode: string) => void;
 }
 
 export interface SlotMapperContext {

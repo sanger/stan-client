@@ -27,8 +27,12 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
   locked = false,
   inputLabwareLimit,
   failedSlotsCheck = true,
-  children,
-  disabledOutputSlotAddresses = []
+  disabledOutputSlotAddresses = [],
+  inputLabwareConfigPanel,
+  outputLabwareConfigPanel,
+  onSelectInputLabware,
+  onSelectOutputLabware,
+  onRemoveOutputLabware
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine({
@@ -119,11 +123,33 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
   const [destinationAddress, setDestinationAddress] = useState<string | undefined>();
 
   /**
-   * Hook for tracking state for Pager component
+   * Hook for tracking state for Pager component for input
    */
-  const { currentPage, numberOfPages, setNumberOfPages, setCurrentPage, goToLastPage, ...pagerRest } = usePager({
+  const {
+    currentPage: currentInputPage,
+    numberOfPages: numberOfInputPages,
+    setNumberOfPages: setNumberOfInputPages,
+    setCurrentPage: setCurrentInputPage,
+    goToLastPage: goToLastInputPage,
+    ...pagerRestInput
+  } = usePager({
     initialCurrentPage: 1,
     initialNumberOfPages: inputLabware.length
+  });
+
+  /**
+   * Hook for tracking state for Pager component for output
+   */
+  const {
+    currentPage: currentOutputPage,
+    numberOfPages: numberOfOutputPages,
+    setNumberOfPages: setNumberOfOutputPages,
+    setCurrentPage: setCurrentOutputPage,
+    goToLastPage: goToLastOutputPage,
+    ...pageRestOutput
+  } = usePager({
+    initialCurrentPage: 1,
+    initialNumberOfPages: initialOutputLabware.length
   });
 
   /**Update machine context, if there is a change in output labware**/
@@ -146,25 +172,56 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
    */
   const numberOfInputLabware = inputLabware.length;
   useEffect(() => {
-    setNumberOfPages(numberOfInputLabware);
-  }, [numberOfInputLabware, setNumberOfPages]);
+    setNumberOfInputPages(numberOfInputLabware);
+  }, [numberOfInputLabware, setNumberOfInputPages]);
 
   /**
    * Whenever the number of input labwares increases, go to the last page
    */
-  const previousLength = usePrevious(inputLabware.length);
+  const previousInputLength = usePrevious(inputLabware.length);
   useEffect(() => {
-    if (previousLength && inputLabware.length > previousLength) {
-      goToLastPage();
+    if (previousInputLength && inputLabware.length > previousInputLength) {
+      goToLastInputPage();
     }
-  }, [inputLabware.length, goToLastPage, previousLength]);
+  }, [inputLabware.length, goToLastInputPage, previousInputLength]);
 
   /**
    * Whenever the current page changes, set the current input labware
    */
   useEffect(() => {
-    setCurrentInputLabware(inputLabware[currentPage - 1]);
-  }, [currentPage, inputLabware]);
+    setCurrentInputLabware(inputLabware[currentInputPage - 1]);
+    if (onSelectInputLabware) {
+      onSelectInputLabware(inputLabware[currentInputPage - 1].barcode);
+    }
+  }, [currentInputPage, inputLabware]);
+
+  /**
+   * Whenever the number of input labwares changes, set the number of pages on the pager
+   */
+  const numberOfOutputLabware = initialOutputLabware.length;
+  useEffect(() => {
+    setNumberOfOutputPages(numberOfOutputLabware);
+  }, [numberOfOutputLabware, setNumberOfOutputPages]);
+
+  /**
+   * Whenever the number of input labwares increases, go to the last page
+   */
+  const previousOutputLength = usePrevious(initialOutputLabware.length);
+  useEffect(() => {
+    if (previousOutputLength && inputLabware.length > previousOutputLength) {
+      goToLastOutputPage();
+    }
+  }, [inputLabware.length, goToLastOutputPage, previousOutputLength]);
+
+  /**
+   * Whenever the current page changes, set the current input labware
+   */
+  useEffect(() => {
+    setCurrentOutputLabware(initialOutputLabware[currentOutputPage - 1]);
+    if (onSelectOutputLabware) {
+      onSelectOutputLabware(currentOutputPage - 1);
+    }
+  }, [currentOutputPage, initialOutputLabware]);
 
   /**
    * When the current input labware changes, unset the selected input addresses
@@ -302,9 +359,14 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
               }
               return (
                 <>
+                  <div className="flex mb-8">{inputLabwareConfigPanel}</div>
                   {!locked && (
                     <div className="flex flex-row justify-end">
-                      <RemoveButton onClick={() => props.removeLabware(currentInputLabware.barcode)} />
+                      <RemoveButton
+                        onClick={() => {
+                          props.removeLabware(currentInputLabware.barcode);
+                        }}
+                      />
                     </div>
                   )}
                   <div className="flex flex-col items-center justify-center">
@@ -324,9 +386,15 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
               );
             }}
           </LabwareScanner>
+          {}
         </div>
         <div id="outputLabwares" className="p-4 flex flex-col  bg-gray-100 border-l-2">
-          <div className="flex mb-8">{children}</div>
+          <div className="flex mb-8">{outputLabwareConfigPanel}</div>
+          {initialOutputLabware?.length > 1 && (
+            <div className="flex flex-row justify-end">
+              <RemoveButton onClick={() => onRemoveOutputLabware && onRemoveOutputLabware(currentOutputPage - 1)} />
+            </div>
+          )}
           <div className={'flex items-center justify-center'}>
             {currentOutputLabware && (
               <Labware
@@ -344,11 +412,18 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
         </div>
 
         <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-between bg-gray-200">
-          {inputLabware.length > 0 && <Pager currentPage={currentPage} numberOfPages={numberOfPages} {...pagerRest} />}
+          {inputLabware.length > 0 && (
+            <Pager currentPage={currentInputPage} numberOfPages={numberOfInputPages} {...pagerRestInput} />
+          )}
         </div>
 
-        <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-end bg-gray-200">
-          {!locked && <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>}
+        <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-between bg-gray-200">
+          {initialOutputLabware.length > 0 && (
+            <Pager currentPage={currentOutputPage} numberOfPages={numberOfOutputPages} {...pageRestOutput} />
+          )}
+          <div className="border-gray-300  flex flex-row items-center justify-end bg-gray-200">
+            {!locked && <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>}
+          </div>
         </div>
       </div>
 

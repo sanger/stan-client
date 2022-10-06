@@ -2,13 +2,13 @@ import React, { useCallback, useEffect } from 'react';
 import AppShell from '../components/AppShell';
 import SlotMapper from '../components/slotMapper/SlotMapper';
 import BlueButton from '../components/buttons/BlueButton';
-import { LabwareTypeName, NewLabwareLayout } from '../types/stan';
+import { LabwareTypeName } from '../types/stan';
 import Warning from '../components/notifications/Warning';
 import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
 import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
-import { SlideCosting, SlotCopyContent } from '../types/sdk';
+import { Maybe, SlideCosting, SlotCopyContent } from '../types/sdk';
 import slotCopyMachine from '../lib/machines/slotCopy/slotCopyMachine';
 import { Link } from 'react-router-dom';
 import { reload } from '../lib/sdk';
@@ -28,7 +28,7 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from '../componen
 const ToastSuccess = () => <Success message={'Slots copied'} />;
 
 interface OutputLabwareScanPanelProps {
-  preBarcode: string | undefined;
+  preBarcode: Maybe<string> | undefined;
   onChangeBarcode: (barcode: string) => void;
   onChangeLabwareType: (labwareType: string) => void;
   onChangeCosting: (costing: string) => void;
@@ -146,15 +146,24 @@ const CytAssist = () => {
     slotCopyMachine.withContext({
       workNumber: '',
       operationType: 'CytAssist',
-      outputLabwareType: LabwareTypeName.VISIUM_LP_CYTASSIST,
-      outputLabwares: [],
-      slotCopyContent: []
+      slotCopyResults: [],
+      destinations: [
+        {
+          labware: visiumLPCytAssistFactory.build(),
+          slotCopyDetails: { labwareType: LabwareTypeName.VISIUM_LP_CYTASSIST, contents: [] }
+        }
+      ],
+      sources: [],
+      selectedSrcBarcode: undefined,
+      selectedDestIndex: 0
     })
   );
 
-  const { serverErrors, preBarcode, outputLabwareType, slotCopyContent, outputLabwareCosting } = current.context;
+  const { serverErrors, destinations, selectedDestIndex } = current.context;
 
-  const [outputLabware, setOutputlabware] = React.useState<NewLabwareLayout[]>([]);
+  const destSlotCopyDetails = React.useMemo(() => {
+    return selectedDestIndex < destinations.length ? destinations[selectedDestIndex].slotCopyDetails : undefined;
+  }, [destinations, selectedDestIndex]);
 
   /**Handler for changes in slot mappings**/
   const handleOnSlotMapperChange = useCallback(
@@ -168,30 +177,6 @@ const CytAssist = () => {
     [send]
   );
 
-  /**Update output labware state if there is a change in labware type or external barcode**/
-  React.useEffect(() => {
-    setOutputlabware((prev) => {
-      let outputLabware = prev;
-      //Create a new labware only if there is no output labware or if the labware type is changed
-      if (prev.length === 0 || (prev.length > 0 && prev[0].labwareType.name !== outputLabwareType)) {
-        if (outputLabwareType === LabwareTypeName.VISIUM_LP_CYTASSIST)
-          outputLabware = [visiumLPCytAssistFactory.build()];
-        else outputLabware = [visiumLPCytAssistXLFactory.build()];
-        outputLabware[0].barcode = preBarcode ?? '';
-      }
-      //assign preBarcode if there is a change in preBarcode
-      else if (prev.length > 0 && prev[0].barcode !== preBarcode) {
-        outputLabware = [
-          {
-            ...prev[0],
-            barcode: preBarcode ?? ''
-          }
-        ];
-      }
-      return outputLabware;
-    });
-  }, [outputLabwareType, preBarcode]);
-
   const handleWorkNumberChange = useCallback(
     (workNumber: string) => {
       send({ type: 'UPDATE_WORK_NUMBER', workNumber });
@@ -201,14 +186,14 @@ const CytAssist = () => {
 
   const handleChangeOutputLabwareBarcode = React.useCallback(
     (preBarcode: string) => {
-      send({ type: 'UPDATE_PRE_BARCODE', preBarcode });
+      send({ type: 'UPDATE_DESTINATION_PRE_BARCODE', preBarcode });
     },
     [send]
   );
   const handleChangeCosting = React.useCallback(
     (costing: string) => {
       send({
-        type: 'UPDATE_OUTPUT_LABWARE_COSTING',
+        type: 'UPDATE_DESTINATION_COSTING',
         labwareCosting: costing.length === 0 ? undefined : (costing as unknown as SlideCosting)
       });
     },
@@ -217,9 +202,12 @@ const CytAssist = () => {
 
   const handleChangeOutputLabwareType = React.useCallback(
     (labwareType: string) => {
+      let destLabware;
+      if (labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST) destLabware = visiumLPCytAssistFactory.build();
+      else destLabware = visiumLPCytAssistXLFactory.build();
       send({
-        type: 'UPDATE_OUTPUT_LABWARE_TYPE',
-        labwareType: labwareType.length === 0 ? undefined : (labwareType as unknown as LabwareTypeName)
+        type: 'UPDATE_DESTINATION_LABWARE_TYPE',
+        labware: destLabware
       });
     },
     [send]
@@ -278,25 +266,30 @@ const CytAssist = () => {
 
           <SlotMapper
             locked={current.matches('copied')}
-            initialOutputLabware={outputLabware}
+            initialOutputLabware={destinations.map((dest) => dest.labware)}
             onChange={handleOnSlotMapperChange}
             onInputLabwareChange={() => {}}
             inputLabwareLimit={2}
             failedSlotsCheck={false}
-            disabledOutputSlotAddresses={outputLabwareType === LabwareTypeName.VISIUM_LP_CYTASSIST ? ['B1', 'C1'] : []}
+            disabledOutputSlotAddresses={
+              destinations.length > 0 &&
+              destinations[0].labware.labwareType.name === LabwareTypeName.VISIUM_LP_CYTASSIST
+                ? ['B1', 'C1']
+                : []
+            }
           >
             <CytAssistOutputlabwareScanPanel
-              preBarcode={preBarcode}
+              preBarcode={destSlotCopyDetails && destSlotCopyDetails.preBarcode}
               onChangeBarcode={handleChangeOutputLabwareBarcode}
               onChangeLabwareType={handleChangeOutputLabwareType}
               onChangeCosting={handleChangeCosting}
             />
           </SlotMapper>
 
-          {slotCopyContent.length > 0 && (
+          {destSlotCopyDetails && destSlotCopyDetails.contents.length > 0 && (
             <div className="space-y-4">
               <Heading level={4}>Mapped slots</Heading>
-              <SlotMappingContentTable slotCopyContent={slotCopyContent} />
+              <SlotMappingContentTable slotCopyContent={destSlotCopyDetails.contents} />
             </div>
           )}
         </div>
@@ -309,8 +302,9 @@ const CytAssist = () => {
               disabled={
                 !current.matches('readyToCopy') ||
                 current.context.workNumber === '' ||
-                !preBarcode ||
-                !outputLabwareCosting
+                !destSlotCopyDetails ||
+                !destSlotCopyDetails.preBarcode ||
+                !destSlotCopyDetails.costing
               }
               onClick={onSaveAction}
             >
