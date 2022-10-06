@@ -28,20 +28,6 @@ describe('searchMachine', () => {
     machine.start();
   });
 
-  it('has an unknown state if created without context', (done) => {
-    const mockSearchMachine = createSearchMachine(new SearchService());
-
-    const machine = interpret(mockSearchMachine).onTransition((state) => {
-      if (state.matches('unknown')) {
-        expect(state.context).toEqual(undefined);
-        done();
-      }
-      done();
-    });
-
-    machine.start();
-  });
-
   describe('FIND', () => {
     it('calls the find query and sets state to searched', (done) => {
       const mockSearchResults = {
