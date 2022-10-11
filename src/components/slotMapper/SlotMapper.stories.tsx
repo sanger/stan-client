@@ -22,5 +22,5 @@ Default.args = {
       labwareType: labwareTypes[LabwareTypeName.VISIUM_LP].build()
     }
   }),
-  initialOutputLabware: [plateFactory.build()]
+  initialOutputLabware: [{ labware: plateFactory.build(), slotCopyContent: [] }]
 };

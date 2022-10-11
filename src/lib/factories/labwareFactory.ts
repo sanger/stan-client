@@ -13,6 +13,7 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
         return;
       }
 
+      labware.id = Date.parse(labware.created);
       const addresses = buildAddresses(labware.labwareType, GridDirection.RightDown);
 
       labware.slots = addresses.map((address) =>

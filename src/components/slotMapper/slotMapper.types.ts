@@ -14,7 +14,7 @@ export interface SlotMapperProps {
    * @param slotCopyContent the current mapping of source to destination slots
    * @param allSourcesMapped true if input labware exists and their non-empty slots have been mapped, false otherwise
    */
-  onChange?: (slotCopyContent: Array<SlotCopyContent>, allSourcesMapped: boolean) => void;
+  onChange?: (labware: NewLabwareLayout, slotCopyContent: Array<SlotCopyContent>, allSourcesMapped: boolean) => void;
 
   /**
    * Callback to notify whenever an input labware is scanned
@@ -22,19 +22,24 @@ export interface SlotMapperProps {
   onInputLabwareChange?: (labwaresWithoutPerm: LabwareFieldsFragment[]) => void;
 
   /**
+   * Callback to notify whenever an input labware is scanned
+   */
+  onOutputLabwareChange?: (labwaresWithoutPerm: NewLabwareLayout[]) => void;
+
+  /**
    * Lock the SlotMapper.
    */
   locked?: boolean;
 
   /**
-   * Initial input labware
+   * Input labware
    */
   initialInputLabware?: Array<LabwareFieldsFragment>;
 
   /**
-   * Initial output labware
+   * Output labware
    */
-  initialOutputLabware?: Array<NewLabwareLayout>;
+  initialOutputLabware?: Array<OutputSlotCopyData>;
 
   /**
    *Is it required to check failed slots in slide processing
@@ -55,16 +60,16 @@ export interface SlotMapperProps {
 
   outputLabwareConfigPanel?: React.ReactNode;
 
-  onRemoveOutputLabware?: (removeIndex: number) => void;
-  onRemoveInputLabware?: (barcode: string) => void;
-  onSelectOutputLabware?: (index: number) => void;
-  onSelectInputLabware?: (barcode: string) => void;
+  onSelectOutputLabware?: (labware: NewLabwareLayout) => void;
+  onSelectInputLabware?: (labware: LabwareFieldsFragment) => void;
 }
-
+export type OutputSlotCopyData = {
+  labware: NewLabwareLayout;
+  slotCopyContent: Array<SlotCopyContent>;
+};
 export interface SlotMapperContext {
   inputLabware: Array<LabwareFieldsFragment>;
-  outputLabware: Array<NewLabwareLayout>;
-  slotCopyContent: Array<SlotCopyContent>;
+  outputSlotCopies: Array<OutputSlotCopyData>;
   colorByBarcode: Map<string, string>;
   failedSlots: Map<string, SlotPassFailFieldsFragment[]>;
   errors: Map<string, ClientError>;
@@ -85,7 +90,7 @@ type UpdateInputLabwareEvent = {
 };
 type UpdateOutputLabwareEvent = {
   type: 'UPDATE_OUTPUT_LABWARE';
-  labware: Array<NewLabwareLayout>;
+  outputSlotCopyContent: Array<OutputSlotCopyData>;
 };
 
 type CopySlotsEvent = {
@@ -103,7 +108,14 @@ type ClearSlotsEvent = {
 };
 
 type ClearAllSlotMappingsEvent = {
-  type: 'CLEAR_SLOT_MAPPINGS';
+  type: 'CLEAR_ALL_SLOT_MAPPINGS';
+  outputLabwareId: number;
+};
+
+type ClearAllSlotMappingsBetweenEvent = {
+  type: 'CLEAR_ALL_SLOT_MAPPINGS_BETWEEN';
+  outputLabwareId: number;
+  inputLabwareBarcode: string;
 };
 
 type SlotPassFailEvent = {
@@ -128,6 +140,7 @@ export type SlotMapperEvent =
   | CopySlotsEvent
   | ClearSlotsEvent
   | ClearAllSlotMappingsEvent
+  | ClearAllSlotMappingsBetweenEvent
   | LockEvent
   | UnlockEvent
   | SlotPassFailEvent

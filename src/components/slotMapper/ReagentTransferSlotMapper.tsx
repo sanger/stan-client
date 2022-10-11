@@ -46,13 +46,17 @@ function ReagentTransferSlotMapper({
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine({
       inputLabware: initialSourceLabware ? [initialSourceLabware] : [],
-      outputLabware: initialDestLabware ? [initialDestLabware] : []
+      outputSlotCopies: initialDestLabware ? [{ labware: initialDestLabware, slotCopyContent: [] }] : []
     });
   }, [initialSourceLabware, initialDestLabware]);
 
   const [current, send] = useMachine(() => memoSlotMapperMachine);
 
-  const { slotCopyContent } = current.context;
+  const memoOutputSlotCopies = React.useMemo(() => {
+    return current.context.outputSlotCopies.length > 0
+      ? current.context.outputSlotCopies[0]
+      : { labware: initialDestLabware, slotCopyContent: [] };
+  }, [current.context.outputSlotCopies, initialDestLabware]);
   /**
    * State to track the currently selected input and output addresses
    */
@@ -84,7 +88,10 @@ function ReagentTransferSlotMapper({
    */
   React.useEffect(() => {
     if (!initialDestLabware) return;
-    send({ type: 'UPDATE_OUTPUT_LABWARE', labware: [initialDestLabware] });
+    send({
+      type: 'UPDATE_OUTPUT_LABWARE',
+      outputSlotCopyContent: [{ labware: initialDestLabware, slotCopyContent: [] }]
+    });
   }, [send, initialDestLabware]);
 
   React.useEffect(() => {
@@ -100,8 +107,8 @@ function ReagentTransferSlotMapper({
     if (!initialSourceLabware || !initialDestLabware) {
       return false;
     }
-    return slotCopyContent.length > 0;
-  }, [slotCopyContent, initialSourceLabware, initialDestLabware]);
+    return memoOutputSlotCopies.slotCopyContent.length > 0;
+  }, [memoOutputSlotCopies, initialSourceLabware, initialDestLabware]);
 
   const getSourceSlotColor = useCallback(
     (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
@@ -109,7 +116,7 @@ function ReagentTransferSlotMapper({
         return `bg-gray-400 `;
       } else {
         if (
-          find(slotCopyContent, {
+          find(memoOutputSlotCopies.slotCopyContent, {
             sourceBarcode: labware.barcode,
             sourceAddress: address
           })
@@ -122,7 +129,7 @@ function ReagentTransferSlotMapper({
         }
       }
     },
-    [slotCopyContent, disabled]
+    [memoOutputSlotCopies, disabled]
   );
 
   const getDestinationSlotColor = useCallback(
@@ -130,7 +137,7 @@ function ReagentTransferSlotMapper({
       if (disabled) {
         return `bg-gray-400`;
       } else {
-        const scc = find(slotCopyContent, {
+        const scc = find(memoOutputSlotCopies.slotCopyContent, {
           destinationAddress: address
         });
         if (scc) {
@@ -141,7 +148,7 @@ function ReagentTransferSlotMapper({
         }
       }
     },
-    [slotCopyContent, disabled]
+    [memoOutputSlotCopies, disabled]
   );
 
   /**
@@ -196,11 +203,11 @@ function ReagentTransferSlotMapper({
       send({
         type: 'CLEAR_SLOTS',
         outputLabwareId: initialDestLabware.id,
-        outputAddresses: slotCopyContent.map((scc) => scc.destinationAddress)
+        outputAddresses: memoOutputSlotCopies.slotCopyContent.map((scc) => scc.destinationAddress)
       });
       outputLabwareRef.current?.deselectAll();
     }
-  }, [send, initialDestLabware, outputLabwareRef, slotCopyContent]);
+  }, [send, initialDestLabware, outputLabwareRef, memoOutputSlotCopies]);
 
   const handleOnRemoveMapping = React.useCallback(
     (destAddress: string) => {
@@ -222,14 +229,14 @@ function ReagentTransferSlotMapper({
    */
   useEffect(() => {
     inputLabwareRef.current?.deselectAll();
-  }, [slotCopyContent, initialSourceLabware]);
+  }, [memoOutputSlotCopies, initialSourceLabware]);
 
   /**
    * Whenever the SlotCopyContent map changes, call the onChange handler
    */
   useEffect(() => {
-    onChange?.(slotCopyContent, anySourceMapped);
-  }, [onChange, slotCopyContent, anySourceMapped]);
+    onChange?.(memoOutputSlotCopies.slotCopyContent, anySourceMapped);
+  }, [onChange, memoOutputSlotCopies, anySourceMapped]);
 
   return (
     <div className="mt-3 space-y-8">
@@ -265,7 +272,7 @@ function ReagentTransferSlotMapper({
           )}
         </div>
       </div>
-      {slotCopyContent.length > 0 && (
+      {memoOutputSlotCopies.slotCopyContent.length > 0 && (
         <div className="flex flex-col p-4 bg-gray-100 space-y-8">
           <Heading level={4}>Mapping</Heading>
           <Table>
@@ -276,7 +283,7 @@ function ReagentTransferSlotMapper({
               </tr>
             </TableHead>
             <TableBody>
-              {slotCopyContent.map((scc) => (
+              {memoOutputSlotCopies.slotCopyContent.map((scc) => (
                 <tr key={scc.sourceBarcode + scc.sourceAddress}>
                   <TableCell>{scc.sourceAddress}</TableCell>
                   <TableCell>{scc.destinationAddress}</TableCell>

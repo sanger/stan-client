@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
 import { LabwareFieldsFragment, LabwareState, SlotCopyContent } from '../types/sdk';
-import slotCopyMachine from '../lib/machines/slotCopy/slotCopyMachine';
+import slotCopyMachine, { Destination, Source } from '../lib/machines/slotCopy/slotCopyMachine';
 import { Link } from 'react-router-dom';
 import { history, reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -31,27 +31,32 @@ type PageParams = {
  */
 const ToastSuccess = () => <Success message={'Slots copied'} />;
 
-interface OutputLabwareScanPanelProps {
+interface DestinationLabwareScanPanelProps {
+  labware: Destination | undefined;
   onAddLabware: () => void;
   onChangeBioState: (bioState: string) => void;
 }
 
 const transferTypes = ['cDNA', 'Probe', 'Library'];
 
-interface InputLabwareScanPanelProps {
+interface SourceLabwareScanPanelProps {
+  selectedSource: Source | undefined;
   onChangeState: (state: string) => void;
 }
 
 /**Component to configure the output labware**/
-const SlotCopyDestinationConfigPanel: React.FC<OutputLabwareScanPanelProps> = ({ onAddLabware, onChangeBioState }) => {
+const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps> = ({
+  labware,
+  onAddLabware,
+  onChangeBioState
+}) => {
   return (
     <div className={'w-full flex flex-row space-x-4 mb-8'} data-testid="input-labware">
       <div className={'w-1/2 flex flex-col'}>
         <Label className={'flex items-center whitespace-nowrap'} name={'Bio State'} />
         <Select
-          onChange={(e) => {
-            onChangeBioState(e.currentTarget.value);
-          }}
+          onChange={(e) => onChangeBioState(e.currentTarget.value)}
+          value={labware && labware.slotCopyDetails.bioState ? labware.slotCopyDetails.bioState : ''}
           emptyOption={true}
           data-testid="transfer-type"
         >
@@ -72,7 +77,7 @@ const SlotCopyDestinationConfigPanel: React.FC<OutputLabwareScanPanelProps> = ({
 };
 
 /**Component to configure the input labware**/
-const SlotCopySourceConfigPanel: React.FC<InputLabwareScanPanelProps> = ({ onChangeState }) => {
+const SlotCopySourceConfigPanel: React.FC<SourceLabwareScanPanelProps> = ({ selectedSource, onChangeState }) => {
   return (
     <div className={'w-1/2 mt-4 flex flex-col'} data-testid="input-labware">
       <Label name={'Labware state'} className={'whitespace-nowrap'} />
@@ -80,6 +85,7 @@ const SlotCopySourceConfigPanel: React.FC<InputLabwareScanPanelProps> = ({ onCha
         onChange={(e) => {
           onChangeState(e.currentTarget.value);
         }}
+        value={selectedSource && selectedSource.labwareState ? selectedSource.labwareState : ''}
         emptyOption={true}
         data-testid="input-labware-state"
       >
@@ -94,39 +100,44 @@ const SlotCopySourceConfigPanel: React.FC<InputLabwareScanPanelProps> = ({ onCha
 };
 
 function SlotCopy({ title, initialOutputLabware }: PageParams) {
-  const outputLabwareDetails = React.useMemo(() => {
+  const initialOutputSlotCopy = React.useMemo(() => {
     return initialOutputLabware.map((lw) => {
       return {
-        labware: lw,
+        labware: { ...lw, id: Date.parse(lw.created) },
         slotCopyDetails: {
           labwareType: lw.labwareType.name,
           contents: []
         }
       };
     });
-  }, []);
-  const [current, send] = useMachine(() =>
-    slotCopyMachine.withContext({
+  }, [initialOutputLabware]);
+
+  const memoSlotCopyMachine = React.useMemo(() => {
+    return slotCopyMachine.withContext({
       workNumber: '',
       operationType: 'Visium cDNA',
-      destinations: outputLabwareDetails,
+      destinations: initialOutputSlotCopy,
       sources: [],
-      selectedDestIndex: -1,
-      selectedSrcBarcode: '',
       slotCopyResults: [],
       sourceLabwarePermData: []
-    })
-  );
+    });
+  }, [initialOutputSlotCopy]);
+
+  const [current, send] = useMachine(() => memoSlotCopyMachine);
 
   const [labwaresWithoutPerm, setLabwaresWithoutPerm] = React.useState<LabwareFieldsFragment[]>([]);
   const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
-  const { serverErrors, sourceLabwarePermData, sources, destinations, slotCopyResults, selectedSrcBarcode } =
-    current.context;
+  const [selectedSource, setSelectedSource] = React.useState<LabwareFieldsFragment | undefined>(undefined);
+  const [selectedDestination, setSelectedDestination] = React.useState<NewLabwareLayout>(
+    initialOutputSlotCopy[0].labware
+  );
+  const { serverErrors, sourceLabwarePermData, sources, destinations, slotCopyResults } = current.context;
 
   const handleOnSlotMapperChange = useCallback(
-    (slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
+    (labware: NewLabwareLayout, slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
       send({
         type: 'UPDATE_SLOT_COPY_CONTENT',
+        labware,
         slotCopyContent,
         anySourceMapped
       });
@@ -148,58 +159,62 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   const handleInputLabwareChange = React.useCallback(
     (sourcesChanged: LabwareFieldsFragment[]) => {
-      /**Check a new labware is added**/
-      if (sourcesChanged.length < sources.length) {
-        const removedSource = sources.filter(
-          (org) => !sourcesChanged.some((changed) => changed.barcode === org.barcode)
-        );
-        if (removedSource.length > 0) {
-          send({ type: 'REMOVE_SOURCE_LABWARE', barcode: removedSource[0].barcode });
-        }
-      } /**Check any labware is removed**/ else if (sourcesChanged.length > sources.length) {
-        const addedSource = sourcesChanged.filter((changed) => !sources.some((org) => changed.barcode === org.barcode));
-        if (addedSource.length > 0) {
-          send({ type: 'ADD_SOURCE_LABWARE', labware: addedSource[0] });
-        }
-      }
-      send({ type: 'UPDATE_SOURCE_LABWARE_PERMTIME', labwares: sourcesChanged });
+      send({ type: 'UPDATE_SOURCE_LABWARE', labware: sourcesChanged });
+      send({
+        type: 'UPDATE_SOURCE_LABWARE_PERMTIME',
+        labwares: sourcesChanged,
+        destinaton: destinations.find((dest) => dest.labware.id === selectedDestination.id)
+      });
+    },
+    [send, selectedDestination, destinations]
+  );
+  const handleOutputLabwareChange = React.useCallback(
+    (destinations: NewLabwareLayout[]) => {
+      send({ type: 'UPDATE_DESTINATION_LABWARE', labware: destinations });
     },
     [send]
   );
 
   const onAddDestinationLabware = React.useCallback(() => {
-    send({ type: 'ADD_DESTINATION_LABWARE', labware: plateFactory.build() });
-  }, [send]);
-
-  const onRemoveDestinationLabware = React.useCallback(
-    (removeIndex: number) => {
-      send({ type: 'REMOVE_DESTINATION_LABWARE', index: removeIndex });
-    },
-    [send]
-  );
+    const labware = plateFactory.build({});
+    const labwareArray = destinations.map((dest) => dest.labware);
+    labwareArray.push(labware);
+    send({ type: 'UPDATE_DESTINATION_LABWARE', labware: labwareArray });
+  }, [send, destinations]);
 
   const onSourceLabwareStateChange = React.useCallback(
     (labwareState: string) => {
-      if (!selectedSrcBarcode) {
+      if (!selectedSource) {
         return;
       }
       send({
         type: 'UPDATE_SOURCE_LABWARE_STATE',
-        barcode: selectedSrcBarcode!,
+        labware: selectedSource,
         labwareState: labwareState as unknown as LabwareState
       });
     },
-    [send, selectedSrcBarcode]
+    [send, selectedSource]
   );
 
   const onChangeBioState = React.useCallback(
     (bioState: string) => {
+      if (!selectedDestination) {
+        return;
+      }
       send({
         type: 'UPDATE_DESTINATION_BIO_STATE',
+        labware: selectedDestination,
         bioState
       });
     },
-    [send]
+    [selectedDestination, send]
+  );
+
+  const onSourceSelection = React.useCallback(
+    (labware) => {
+      setSelectedSource(labware);
+    },
+    [setSelectedSource]
   );
 
   /**
@@ -222,7 +237,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     } else {
       handleSave();
     }
-  }, [handleSave, sourceLabwarePermData]);
+  }, [handleSave, sourceLabwarePermData, destinations]);
 
   /**
    * When we get into the "copied" state, show a success message
@@ -270,17 +285,27 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
           <SlotMapper
             locked={current.matches('copied')}
-            initialOutputLabware={destinations.map((dest) => dest.labware)}
-            onChange={handleOnSlotMapperChange}
+            initialOutputLabware={destinations.map((output) => {
+              return { labware: output.labware, slotCopyContent: output.slotCopyDetails.contents };
+            })}
             onInputLabwareChange={handleInputLabwareChange}
-            inputLabwareConfigPanel={<SlotCopySourceConfigPanel onChangeState={onSourceLabwareStateChange} />}
+            onChange={handleOnSlotMapperChange}
+            onOutputLabwareChange={handleOutputLabwareChange}
+            inputLabwareConfigPanel={
+              <SlotCopySourceConfigPanel
+                onChangeState={onSourceLabwareStateChange}
+                selectedSource={sources.find((src) => src.labware.barcode === selectedSource?.barcode)}
+              />
+            }
             outputLabwareConfigPanel={
               <SlotCopyDestinationConfigPanel
                 onAddLabware={onAddDestinationLabware}
                 onChangeBioState={onChangeBioState}
+                labware={destinations.find((dest) => dest.labware.id === selectedDestination.id)}
               />
             }
-            onRemoveOutputLabware={onRemoveDestinationLabware}
+            onSelectInputLabware={onSourceSelection}
+            onSelectOutputLabware={setSelectedDestination}
           />
 
           {destinations.length > 0 && (

@@ -1,12 +1,11 @@
 import { Machine, MachineOptions } from 'xstate';
-import { SlotMapperContext, SlotMapperEvent, SlotMapperSchema } from './slotMapper.types';
+import { OutputSlotCopyData, SlotMapperContext, SlotMapperEvent, SlotMapperSchema } from './slotMapper.types';
 import { assign } from '@xstate/immer';
 import { GridDirection, LabwareFieldsFragment, PassFail, SlotCopyContent } from '../../types/sdk';
 import { buildAddresses, cycleColors } from '../../lib/helpers';
 import { sortWithDirection } from '../../lib/helpers/addressHelper';
 import { find, indexOf, intersection, map } from 'lodash';
 import { stanCore } from '../../lib/sdk';
-import { NewLabwareLayout } from '../../types/stan';
 
 const colors = cycleColors();
 
@@ -26,13 +25,15 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
       );
       keys.forEach((key) => ctx.errors.delete(key));
 
-      //Update slotCopyContent if it  has entries for any removed labware
-      ctx.slotCopyContent = ctx.slotCopyContent.filter((scc) =>
-        ctx.inputLabware.some((lw) => lw.barcode === scc.sourceBarcode)
-      );
+      //Update destination slotCopyContent if it  has entries for any removed labware
+      ctx.outputSlotCopies.forEach((outputScc) => {
+        outputScc.slotCopyContent = outputScc.slotCopyContent.filter((scc) =>
+          ctx.inputLabware.some((lw) => lw.barcode === scc.sourceBarcode)
+        );
+      });
     }),
     assignOutputLabware: assign((ctx, e) => {
-      e.type === 'UPDATE_OUTPUT_LABWARE' && (ctx.outputLabware = e.labware);
+      e.type === 'UPDATE_OUTPUT_LABWARE' && (ctx.outputSlotCopies = e.outputSlotCopyContent);
     }),
 
     assignLabwareColors: assign((ctx) => {
@@ -45,36 +46,56 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
 
     checkSlots: assign((ctx) => {
       const inputLabwareBarcodes = map(ctx.inputLabware, 'barcode');
-      ctx.slotCopyContent = ctx.slotCopyContent.filter((scc) => inputLabwareBarcodes.includes(scc.sourceBarcode));
+      ctx.outputSlotCopies.forEach((outputScc) => {
+        outputScc.slotCopyContent = outputScc.slotCopyContent.filter((scc) =>
+          inputLabwareBarcodes.includes(scc.sourceBarcode)
+        );
+      });
     }),
 
     clearSlots: assign((ctx, e) => {
       if (e.type !== 'CLEAR_SLOTS') {
         return;
       }
-      ctx.slotCopyContent = ctx.slotCopyContent.filter((scc) => !e.outputAddresses.includes(scc.destinationAddress));
+      const outputScc = ctx.outputSlotCopies.find((outputScc) => outputScc.labware.id === e.outputLabwareId);
+      if (outputScc) {
+        outputScc.slotCopyContent = outputScc.slotCopyContent.filter(
+          (scc) => !e.outputAddresses.includes(scc.destinationAddress)
+        );
+      }
     }),
-    clearSlotMappings: assign((ctx, e) => {
-      if (e.type !== 'CLEAR_SLOT_MAPPINGS') {
+    clearSlotMappingsBetween: assign((ctx, e) => {
+      if (e.type !== 'CLEAR_ALL_SLOT_MAPPINGS_BETWEEN') {
         return;
       }
-      ctx.slotCopyContent = [];
+      const outputScc = ctx.outputSlotCopies.find((outputScc) => outputScc.labware.id === e.outputLabwareId);
+      if (outputScc) {
+        outputScc.slotCopyContent = outputScc.slotCopyContent.filter(
+          (scc) => scc.sourceBarcode !== e.inputLabwareBarcode
+        );
+      }
+    }),
+    clearAllSlotMappings: assign((ctx, e) => {
+      if (e.type !== 'CLEAR_ALL_SLOT_MAPPINGS') {
+        return;
+      }
+      ctx.outputSlotCopies.forEach((outputScc) => {
+        outputScc.slotCopyContent = [];
+      });
     }),
     copySlots: assign((ctx, e) => {
       if (e.type !== 'COPY_SLOTS') {
         return;
       }
       const inputLabware = find(ctx.inputLabware, { id: e.inputLabwareId });
-      const outputLabware = find(ctx.outputLabware, {
-        id: e.outputLabwareId
-      });
+      const outputScc = ctx.outputSlotCopies.find((outputScc) => outputScc.labware.id === e.outputLabwareId);
 
-      if (!inputLabware || !outputLabware) {
+      if (!inputLabware || !outputScc) {
         return;
       }
 
       // Get all the addresses of the output labware
-      const outputAddresses = buildAddresses(outputLabware.labwareType, GridDirection.DownRight);
+      const outputAddresses = buildAddresses(outputScc.labware.labwareType, GridDirection.DownRight);
 
       // Get the index of the clicked destination address
       const destinationAddressIndex = indexOf(outputAddresses, e.outputAddress);
@@ -95,7 +116,10 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
       }, {});
 
       // Don't map if any of the destination addresses are already filled.
-      if (intersection(map(ctx.slotCopyContent, 'destinationAddress'), Object.values(sourceToDestination)).length > 0) {
+      if (
+        intersection(map(outputScc.slotCopyContent, 'destinationAddress'), Object.values(sourceToDestination)).length >
+        0
+      ) {
         return;
       }
 
@@ -113,7 +137,7 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
         })
       );
 
-      ctx.slotCopyContent = ctx.slotCopyContent
+      outputScc.slotCopyContent = outputScc.slotCopyContent
         // Remove sources that have already been copied
         .filter((scc) => {
           return !(scc.sourceBarcode === inputLabware.barcode && e.inputAddresses.includes(scc.sourceAddress));
@@ -164,19 +188,18 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
 
 interface SlotMapperMachineParams {
   inputLabware: Array<LabwareFieldsFragment>;
-  outputLabware: Array<NewLabwareLayout>;
+  outputSlotCopies: Array<OutputSlotCopyData>;
   failedSlotsCheck?: boolean;
 }
-function createSlotMapperMachine({ inputLabware, outputLabware, failedSlotsCheck = true }: SlotMapperMachineParams) {
+function createSlotMapperMachine({ inputLabware, outputSlotCopies, failedSlotsCheck = true }: SlotMapperMachineParams) {
   return Machine<SlotMapperContext, SlotMapperSchema, SlotMapperEvent>(
     {
       id: 'slotMapperMachine',
       initial: 'ready',
       context: {
         inputLabware,
-        outputLabware,
+        outputSlotCopies,
         failedSlotsCheck,
-        slotCopyContent: [],
         colorByBarcode: new Map(),
         failedSlots: new Map(),
         errors: new Map()
@@ -192,8 +215,8 @@ function createSlotMapperMachine({ inputLabware, outputLabware, failedSlotsCheck
             CLEAR_SLOTS: {
               actions: 'clearSlots'
             },
-            CLEAR_SLOT_MAPPINGS: {
-              actions: 'clearSlotMappings'
+            CLEAR_ALL_SLOT_MAPPINGS_BETWEEN: {
+              actions: 'clearSlotMappingsBetween'
             },
             UPDATE_INPUT_LABWARE: [
               {

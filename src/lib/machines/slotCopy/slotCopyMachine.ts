@@ -15,13 +15,12 @@ import {
 } from '../../../types/sdk';
 import { stanCore } from '../../sdk';
 import { ClientError } from 'graphql-request';
-import { Optional } from '../../helpers';
 
 /**
  * Context for SlotCopy Machine
  */
 
-type DestinationData = {
+export type Destination = {
   labware: NewLabwareLayout;
   slotCopyDetails: SlotCopyDestination;
 };
@@ -29,7 +28,10 @@ type DestinationData = {
 /**
  * Making 'labwareState' field optional thereby allowing to keep a list of source labware without state
  */
-type SlotCopySourceOptional = Optional<SlotCopySource, 'labwareState'>;
+export type Source = {
+  labware: LabwareFieldsFragment;
+  labwareState?: LabwareState;
+};
 
 export interface SlotCopyContext {
   /**
@@ -38,16 +40,15 @@ export interface SlotCopyContext {
   workNumber: string;
   operationType: OperationTypeName;
   sourceLabwarePermData?: FindPermDataQuery[];
-  destinations: Array<DestinationData>;
-  sources: Array<SlotCopySourceOptional>;
-  selectedSrcBarcode: string | undefined;
-  selectedDestIndex: number;
+  sources: Array<Source>;
+  destinations: Array<Destination>;
   slotCopyResults: Array<LabwareFieldsFragment>;
   serverErrors?: Maybe<ClientError>;
 }
 
 type UpdateSlotCopyContentType = {
   type: 'UPDATE_SLOT_COPY_CONTENT';
+  labware: NewLabwareLayout;
   slotCopyContent: Array<SlotCopyContent>;
   anySourceMapped: boolean;
 };
@@ -55,48 +56,45 @@ type UpdateSlotCopyContentType = {
 type UpdateSourceLabwarePermTime = {
   type: 'UPDATE_SOURCE_LABWARE_PERMTIME';
   labwares: Array<LabwareFieldsFragment>;
+  destinaton: Destination | undefined;
 };
 
 type UpdateDestinationPreBarcode = {
   type: 'UPDATE_DESTINATION_PRE_BARCODE';
   preBarcode: string;
+  labware: NewLabwareLayout;
 };
 
 type UpdateDestinationLabwareType = {
   type: 'UPDATE_DESTINATION_LABWARE_TYPE';
+  labwareToReplace: NewLabwareLayout;
   labware: NewLabwareLayout;
 };
 type UpdateDestinationCosting = {
   type: 'UPDATE_DESTINATION_COSTING';
+  labware: NewLabwareLayout;
   labwareCosting: SlideCosting | undefined;
 };
 type UpdateDestinationBioState = {
   type: 'UPDATE_DESTINATION_BIO_STATE';
+  labware: NewLabwareLayout;
   bioState: string;
 };
 
 type UpdateSourceLabwareState = {
   type: 'UPDATE_SOURCE_LABWARE_STATE';
-  barcode: string;
+  labware: LabwareFieldsFragment;
   labwareState: LabwareState;
 };
 
-type AddSourceLabware = {
-  type: 'ADD_SOURCE_LABWARE';
-  labware: LabwareFieldsFragment;
+type UpdateSourceLabware = {
+  type: 'UPDATE_SOURCE_LABWARE';
+  labware: LabwareFieldsFragment[];
 };
 
-type RemoveSourceLabware = {
-  type: 'REMOVE_SOURCE_LABWARE';
-  barcode: string;
-};
-type AddDestinationLabware = {
-  type: 'ADD_DESTINATION_LABWARE';
-  labware: NewLabwareLayout;
-};
-type RemoveDestinationLabware = {
-  type: 'REMOVE_DESTINATION_LABWARE';
-  index: number;
+type UpdateDestinationLabware = {
+  type: 'UPDATE_DESTINATION_LABWARE';
+  labware: NewLabwareLayout[];
 };
 
 type FindPermDataEvent = {
@@ -104,6 +102,7 @@ type FindPermDataEvent = {
   data: {
     findPermTimes: FindPermDataQuery[];
     inputLabwares: LabwareFieldsFragment[];
+    destination: Destination | undefined;
   };
 };
 
@@ -111,10 +110,8 @@ type SaveEvent = { type: 'SAVE' };
 
 export type SlotCopyEvent =
   | { type: 'UPDATE_WORK_NUMBER'; workNumber: string }
-  | AddSourceLabware
-  | AddDestinationLabware
-  | RemoveSourceLabware
-  | RemoveDestinationLabware
+  | UpdateSourceLabware
+  | UpdateDestinationLabware
   | UpdateSlotCopyContentType
   | UpdateSourceLabwarePermTime
   | UpdateSourceLabwareState
@@ -137,17 +134,11 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
     states: {
       mapping: {
         on: {
-          ADD_SOURCE_LABWARE: {
-            actions: 'addSourceLabware'
+          UPDATE_SOURCE_LABWARE: {
+            actions: 'assignSourceLabware'
           },
-          ADD_DESTINATION_LABWARE: {
-            actions: 'addDestinationLabware'
-          },
-          REMOVE_SOURCE_LABWARE: {
-            actions: 'removeSourceLabware'
-          },
-          REMOVE_DESTINATION_LABWARE: {
-            actions: 'removeDestinationLabware'
+          UPDATE_DESTINATION_LABWARE: {
+            actions: 'assignDestinationLabware'
           },
           UPDATE_WORK_NUMBER: {
             actions: 'assignWorkNumber'
@@ -184,17 +175,11 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       },
       readyToCopy: {
         on: {
-          ADD_SOURCE_LABWARE: {
-            actions: 'addSourceLabware'
+          UPDATE_SOURCE_LABWARE: {
+            actions: 'assignSourceLabware'
           },
-          ADD_DESTINATION_LABWARE: {
-            actions: 'addDestinationLabware'
-          },
-          REMOVE_SOURCE_LABWARE: {
-            actions: 'removeSourceLabware'
-          },
-          REMOVE_DESTINATION_LABWARE: {
-            actions: 'removeDestinationLabware'
+          UPDATE_DESTINATION_LABWARE: {
+            actions: 'assignDestinationLabware'
           },
           UPDATE_WORK_NUMBER: {
             actions: 'assignWorkNumber'
@@ -253,13 +238,11 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
             {
               target: 'readyToCopy',
               cond: (context, e) => {
-                if (!selectedDestination(context)) {
+                if (e.data.inputLabwares.length > 0) {
+                  return e.data.destination !== undefined && e.data.destination.slotCopyDetails.contents.length > 0;
+                } else {
                   return false;
                 }
-                return (
-                  e.data.inputLabwares.length > 0 &&
-                  context.destinations[context.selectedDestIndex].slotCopyDetails.contents.length > 0
-                );
               },
               actions: 'assignSourceLabwarePermTimes'
             },
@@ -277,46 +260,46 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
   },
   {
     actions: {
-      addSourceLabware: assign((ctx, e) => {
-        if (e.type !== 'ADD_SOURCE_LABWARE') {
+      assignSourceLabware: assign((ctx, e) => {
+        if (e.type !== 'UPDATE_SOURCE_LABWARE') {
           return;
         }
-        ctx.sources.push({
-          barcode: e.labware.barcode
+        ctx.sources = e.labware.map((newSource) => {
+          const source = ctx.sources.find((src) => src.labware.barcode === newSource.barcode);
+          if (!source) {
+            return {
+              labware: newSource
+            };
+          } else {
+            return source;
+          }
         });
       }),
-      removeSourceLabware: assign((ctx, e) => {
-        if (e.type !== 'REMOVE_SOURCE_LABWARE') {
+      assignDestinationLabware: assign((ctx, e) => {
+        if (e.type !== 'UPDATE_DESTINATION_LABWARE') {
           return;
         }
-        const indx = ctx.sources.findIndex((src) => src.barcode === e.barcode);
-        ctx.sources.splice(indx, 1);
-      }),
-      addDestinationLabware: assign((ctx, e) => {
-        if (e.type !== 'ADD_DESTINATION_LABWARE') {
-          return;
-        }
-        ctx.destinations.push({
-          labware: e.labware,
-          slotCopyDetails: { labwareType: e.labware.labwareType.name, contents: [] }
+        ctx.destinations = e.labware.map((newDest) => {
+          const destination = ctx.destinations.find((dest) => dest.labware.id === newDest.id);
+          if (!destination) {
+            return {
+              labware: newDest,
+              slotCopyDetails: { labwareType: newDest.labwareType.name, contents: [] }
+            };
+          } else {
+            return destination;
+          }
         });
-      }),
-      removeDestinationLabware: assign((ctx, e) => {
-        if (e.type !== 'REMOVE_DESTINATION_LABWARE') {
-          return;
-        }
-        ctx.destinations.splice(e.index, 1);
       }),
 
       assignSCC: assign((ctx, e) => {
         if (e.type !== 'UPDATE_SLOT_COPY_CONTENT') {
           return;
         }
-        const destination = selectedDestination(ctx);
-        if (!destination) {
-          return;
+        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
+        if (destination) {
+          destination.slotCopyDetails.contents = e.slotCopyContent;
         }
-        destination.slotCopyDetails.contents = e.slotCopyContent;
       }),
 
       assignResult: assign((ctx, e) => {
@@ -357,7 +340,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       }),
       assignDestinationBioState: assign((ctx, e) => {
         if (e.type !== 'UPDATE_DESTINATION_BIO_STATE') return;
-        const destination = selectedDestination(ctx);
+        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
         if (!destination) {
           return;
         }
@@ -365,15 +348,18 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       }),
       assignDestinationPreBarcode: assign((ctx, e) => {
         if (e.type !== 'UPDATE_DESTINATION_PRE_BARCODE') return;
-        const destination = selectedDestination(ctx);
+        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
         if (!destination) {
           return;
         }
+        //update barcode in destination labware and in slotCopy details
+        destination.labware.barcode = e.preBarcode;
         destination.slotCopyDetails.preBarcode = e.preBarcode;
       }),
       assignDestinationLabwareType: assign((ctx, e) => {
         if (e.type !== 'UPDATE_DESTINATION_LABWARE_TYPE') return;
-        const destination = selectedDestination(ctx);
+        const destinations = [...ctx.destinations];
+        const destination = destinations.find((dest) => dest.labware.id === e.labwareToReplace.id);
         if (!destination || destination.labware.labwareType.name === e.labware.labwareType.name) {
           return;
         }
@@ -383,10 +369,11 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           labwareType: e.labware.labwareType.name,
           contents: []
         };
+        ctx.destinations = destinations;
       }),
       assignDestinationCosting: assign((ctx, e) => {
         if (e.type !== 'UPDATE_DESTINATION_COSTING') return;
-        const destination = selectedDestination(ctx);
+        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
         if (!destination) {
           return;
         }
@@ -394,13 +381,14 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       }),
       assignSourceLabwareState: assign((ctx, e) => {
         if (e.type !== 'UPDATE_SOURCE_LABWARE_STATE') return;
-        const src = ctx.sources.find((src) => src.barcode === e.barcode);
+        const src = ctx.sources.find((src) => src.labware.barcode === e.labware.barcode);
         if (src) {
           src.labwareState = e.labwareState;
         } else {
-          ctx.sources.push({ barcode: e.barcode, labwareState: e.labwareState });
+          ctx.sources.push({ labware: e.labware, labwareState: e.labwareState });
         }
       }),
+
       emptyServerError: assign((ctx) => {
         ctx.serverErrors = null;
       })
@@ -414,7 +402,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
             destinations: ctx.destinations.map((dest) => dest.slotCopyDetails),
             sources: ctx.sources.reduce((arr: SlotCopySource[], curr) => {
               if (curr.labwareState) {
-                arr.push({ ...curr, labwareState: curr.labwareState! });
+                arr.push({ barcode: curr.labware.barcode, labwareState: curr.labwareState });
               }
               return arr;
             }, [])
@@ -437,20 +425,17 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         return new Promise<{
           findPermTimes: FindPermDataQuery[];
           inputLabwares: LabwareFieldsFragment[];
+          destination: Destination | undefined;
         }>((resolve) => {
           return resolve({
             findPermTimes: findPermDataQueries,
-            inputLabwares: e.labwares
+            inputLabwares: e.labwares,
+            destination: e.destinaton
           });
         });
       }
     }
   }
 );
-
-const selectedDestination = (ctx: SlotCopyContext): DestinationData | undefined => {
-  if (ctx.selectedDestIndex >= ctx.destinations.length || ctx.destinations.length === 0) return undefined;
-  return ctx.destinations[ctx.selectedDestIndex];
-};
 
 export default slotCopyMachine;

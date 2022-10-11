@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Labware, { LabwareImperativeRef } from '../labware/Labware';
 import Pager from '../pagination/Pager';
-import { SlotMapperProps } from './slotMapper.types';
+import { OutputSlotCopyData, SlotMapperProps } from './slotMapper.types';
 import { usePrevious } from '../../lib/hooks';
 import WhiteButton from '../buttons/WhiteButton';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
@@ -11,7 +11,6 @@ import SlotMapperTable from './SlotMapperTable';
 import Heading from '../Heading';
 import MutedText from '../MutedText';
 import { usePager } from '../../lib/hooks/usePager';
-import { NewLabwareLayout } from '../../types/stan';
 import { useMachine } from '@xstate/react';
 import { find } from 'lodash';
 import { ConfirmationModal } from '../modal/ConfirmationModal';
@@ -22,6 +21,7 @@ import createSlotMapperMachine from './slotMapper.machine';
 const SlotMapper: React.FC<SlotMapperProps> = ({
   onChange,
   onInputLabwareChange,
+  onOutputLabwareChange,
   initialInputLabware = [],
   initialOutputLabware = [],
   locked = false,
@@ -31,66 +31,19 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
   inputLabwareConfigPanel,
   outputLabwareConfigPanel,
   onSelectInputLabware,
-  onSelectOutputLabware,
-  onRemoveOutputLabware
+  onSelectOutputLabware
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine({
-      inputLabware: initialInputLabware,
-      outputLabware: initialOutputLabware,
+      inputLabware: [],
+      outputSlotCopies: initialOutputLabware,
       failedSlotsCheck
     });
-  }, [initialInputLabware, initialOutputLabware, failedSlotsCheck]);
+  }, [initialOutputLabware, failedSlotsCheck]);
 
   const [current, send] = useMachine(() => memoSlotMapperMachine);
 
-  const { inputLabware, slotCopyContent, colorByBarcode, failedSlots, errors } = current.context;
-
-  const anySourceMapped = useMemo(() => {
-    if (inputLabware.length === 0) {
-      return false;
-    }
-    return slotCopyContent.length > 0;
-  }, [inputLabware, slotCopyContent]);
-
-  useEffect(() => {
-    if (!onInputLabwareChange) return;
-    onInputLabwareChange(inputLabware);
-  }, [onInputLabwareChange, inputLabware]);
-
-  const getSourceSlotColor = useCallback(
-    (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
-      if (
-        find(slotCopyContent, {
-          sourceBarcode: labware.barcode,
-          sourceAddress: address
-        })
-      ) {
-        return `bg-${colorByBarcode.get(labware.barcode)}-200`;
-      }
-
-      if (slot?.samples?.length) {
-        return `bg-${colorByBarcode.get(labware.barcode)}-500`;
-      }
-    },
-    [slotCopyContent, colorByBarcode]
-  );
-
-  const getDestinationSlotColor = useCallback(
-    (labware: NewLabwareLayout, address: string) => {
-      if (disabledOutputSlotAddresses?.includes(address)) {
-        return 'bg-gray-300 ring-0 ring-offset-0 text-gray-300 border-0 border-gray-300';
-      }
-      const scc = find(slotCopyContent, {
-        destinationAddress: address
-      });
-
-      if (scc) {
-        return `bg-${colorByBarcode.get(scc.sourceBarcode)}-500`;
-      }
-    },
-    [slotCopyContent, colorByBarcode, disabledOutputSlotAddresses]
-  );
+  const { inputLabware, outputSlotCopies, colorByBarcode, failedSlots, errors } = current.context;
 
   /**
    * State to track the current input labware (for paging)
@@ -102,10 +55,9 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
   /**
    * State to track the current output labware (in case there's multiple one day)
    */
-  const [currentOutputLabware, setCurrentOutputLabware] = useState<Maybe<NewLabwareLayout>>(() => {
+  const [currentOutput, setCurrentOutput] = useState<Maybe<OutputSlotCopyData>>(() => {
     return initialOutputLabware?.length === 0 ? null : initialOutputLabware[0];
   });
-
   /**
    * State to track the currently selected input and output addresses
    */
@@ -149,31 +101,86 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
     ...pageRestOutput
   } = usePager({
     initialCurrentPage: 1,
-    initialNumberOfPages: initialOutputLabware.length
+    initialNumberOfPages: outputSlotCopies.length
   });
 
-  /**Update machine context, if there is a change in output labware**/
-  React.useEffect(() => {
-    setCurrentOutputLabware((prev) => {
-      /**This is only used by CytAssist. But, if any other use cases come in future which require a different condition (for e.g change in barcode)
-       * to clear mappings them this can be moved to a callback handler
-       */
-      if (initialOutputLabware.length > 0 && prev?.labwareType !== initialOutputLabware[0].labwareType) {
-        send('CLEAR_SLOT_MAPPINGS');
-        outputLabwareRef.current?.deselectAll();
+  const anySourceMapped = useMemo(() => {
+    if (inputLabware.length === 0) {
+      return false;
+    }
+    if (!currentOutput) {
+      return false;
+    }
+    return currentOutput.slotCopyContent.length > 0;
+  }, [currentOutput, inputLabware]);
+
+  //Address of Slots copied between current selected source and destination labware other than currently selected one
+  const memoInputAddressesDisabled = React.useMemo(() => {
+    if (!currentOutput || !currentInputLabware) return [];
+    const outputSlotCopiesFromNotSelected = outputSlotCopies.filter(
+      (osc) => osc.labware.id !== currentOutput.labware.id
+    );
+    const slots = outputSlotCopiesFromNotSelected
+      .flatMap((item) => item.slotCopyContent)
+      .filter((scc) => scc.sourceBarcode === currentInputLabware.barcode);
+    return slots.map((slot) => slot.sourceAddress);
+  }, [currentOutput, currentInputLabware, outputSlotCopies]);
+
+  useEffect(() => {
+    if (initialOutputLabware.some((lw) => !outputSlotCopies.map((osc) => osc.labware.id).includes(lw.labware.id))) {
+      send({ type: 'UPDATE_OUTPUT_LABWARE', outputSlotCopyContent: initialOutputLabware });
+    }
+  }, [initialOutputLabware, outputSlotCopies, send]);
+
+  const getSourceSlotColor = useCallback(
+    (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
+      if (!currentOutput) {
+        return 'bg-white';
       }
-      return initialOutputLabware[0];
-    });
-    send({ type: 'UPDATE_OUTPUT_LABWARE', labware: initialOutputLabware });
-  }, [initialOutputLabware, send]);
+      //Slots copied between current selected source and destination labware
+      if (
+        find(currentOutput.slotCopyContent, {
+          sourceBarcode: labware.barcode,
+          sourceAddress: address
+        })
+      ) {
+        return `bg-${colorByBarcode.get(labware.barcode)}-200`;
+      }
+
+      if (memoInputAddressesDisabled.includes(address)) {
+        return `bg-gray-300 ring-0 ring-offset-0 text-white border-0 border-gray-300`;
+      }
+
+      if (slot?.samples?.length) {
+        return `bg-${colorByBarcode.get(labware.barcode)}-500`;
+      }
+    },
+    [currentOutput, colorByBarcode, memoInputAddressesDisabled]
+  );
+
+  const getDestinationSlotColor = useCallback(
+    (outputSlotCopyData: OutputSlotCopyData, address: string) => {
+      if (disabledOutputSlotAddresses?.includes(address)) {
+        return 'bg-gray-300 ring-0 ring-offset-0 text-gray-300 border-0 border-gray-300';
+      }
+      const scc = find(outputSlotCopyData.slotCopyContent, {
+        destinationAddress: address
+      });
+
+      if (scc) {
+        return `bg-${colorByBarcode.get(scc.sourceBarcode)}-500`;
+      }
+    },
+    [colorByBarcode, disabledOutputSlotAddresses]
+  );
 
   /**
    * Whenever the number of input labwares changes, set the number of pages on the pager
    */
-  const numberOfInputLabware = inputLabware.length;
+
   useEffect(() => {
-    setNumberOfInputPages(numberOfInputLabware);
-  }, [numberOfInputLabware, setNumberOfInputPages]);
+    setNumberOfInputPages(inputLabware.length);
+  }, [inputLabware, setNumberOfInputPages]);
 
   /**
    * Whenever the number of input labwares increases, go to the last page
@@ -189,16 +196,15 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
    * Whenever the current page changes, set the current input labware
    */
   useEffect(() => {
+    if (inputLabware.length === 0 || currentInputPage <= 0 || inputLabware.length <= currentInputPage - 1) return;
     setCurrentInputLabware(inputLabware[currentInputPage - 1]);
-    if (onSelectInputLabware) {
-      onSelectInputLabware(inputLabware[currentInputPage - 1].barcode);
-    }
-  }, [currentInputPage, inputLabware]);
+    onSelectInputLabware?.(inputLabware[currentInputPage - 1]);
+  }, [currentInputPage, inputLabware, onSelectInputLabware, setCurrentInputLabware]);
 
   /**
    * Whenever the number of input labwares changes, set the number of pages on the pager
    */
-  const numberOfOutputLabware = initialOutputLabware.length;
+  const numberOfOutputLabware = outputSlotCopies.length;
   useEffect(() => {
     setNumberOfOutputPages(numberOfOutputLabware);
   }, [numberOfOutputLabware, setNumberOfOutputPages]);
@@ -206,22 +212,23 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
   /**
    * Whenever the number of input labwares increases, go to the last page
    */
-  const previousOutputLength = usePrevious(initialOutputLabware.length);
+  const previousOutputLength = usePrevious(outputSlotCopies.length);
   useEffect(() => {
-    if (previousOutputLength && inputLabware.length > previousOutputLength) {
+    if (previousOutputLength && outputSlotCopies.length > previousOutputLength) {
       goToLastOutputPage();
     }
-  }, [inputLabware.length, goToLastOutputPage, previousOutputLength]);
+  }, [outputSlotCopies.length, goToLastOutputPage, previousOutputLength]);
 
   /**
    * Whenever the current page changes, set the current input labware
    */
   useEffect(() => {
-    setCurrentOutputLabware(initialOutputLabware[currentOutputPage - 1]);
-    if (onSelectOutputLabware) {
-      onSelectOutputLabware(currentOutputPage - 1);
-    }
-  }, [currentOutputPage, initialOutputLabware]);
+    if (outputSlotCopies.length === 0 || currentOutputPage <= 0 || outputSlotCopies.length <= currentOutputPage - 1)
+      return;
+
+    setCurrentOutput(outputSlotCopies[currentOutputPage - 1]);
+    onSelectOutputLabware?.(outputSlotCopies[currentOutputPage - 1].labware);
+  }, [currentOutputPage, outputSlotCopies, onSelectOutputLabware, setCurrentOutput]);
 
   /**
    * When the current input labware changes, unset the selected input addresses
@@ -251,28 +258,33 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
     (givenDestinationAddress?: string) => {
       setFailedSelectSlots([]);
       const address = destinationAddress ? destinationAddress : givenDestinationAddress;
-      if (currentInputLabware?.id && currentOutputLabware?.id && address) {
+      if (currentInputLabware?.id && currentOutput?.labware?.id && address) {
         send({
           type: 'COPY_SLOTS',
           inputLabwareId: currentInputLabware?.id,
           inputAddresses: selectedInputAddresses,
-          outputLabwareId: currentOutputLabware?.id,
+          outputLabwareId: currentOutput?.labware?.id,
           outputAddress: address
         });
       }
       setDestinationAddress(undefined);
     },
-    [currentInputLabware, currentOutputLabware, destinationAddress, selectedInputAddresses, send]
+    [currentInputLabware, currentOutput, destinationAddress, selectedInputAddresses, send]
   );
 
+  const handleOnInputLabwareSlotClick = React.useCallback(
+    (inputAddress: string[]) => {
+      setSelectedInputAddresses(inputAddress.filter((address) => !memoInputAddressesDisabled.includes(address)));
+    },
+    [setSelectedInputAddresses, memoInputAddressesDisabled]
+  );
   /**
    * Callback to handle click on destination address for tranferring slots
    */
   const handleOnOutputLabwareSlotClick = React.useCallback(
     (outputAddress: string) => {
-      if (disabledOutputSlotAddresses?.includes(outputAddress)) {
-        return;
-      }
+      if (disabledOutputSlotAddresses?.includes(outputAddress)) return;
+
       setDestinationAddress(outputAddress);
       //Check whether any selected input slots are failed in QC
       if (currentInputLabware) {
@@ -299,15 +311,29 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
    * Handler for the "Clear" button
    */
   const handleOnClickClear = React.useCallback(() => {
-    if (currentOutputLabware?.id) {
+    if (currentOutput?.labware?.id) {
       send({
         type: 'CLEAR_SLOTS',
-        outputLabwareId: currentOutputLabware?.id,
+        outputLabwareId: currentOutput?.labware?.id,
         outputAddresses: selectedOutputAddresses
       });
       outputLabwareRef.current?.deselectAll();
     }
-  }, [send, currentOutputLabware, selectedOutputAddresses, outputLabwareRef]);
+  }, [send, currentOutput, selectedOutputAddresses, outputLabwareRef]);
+
+  /**
+   * Handler for the "Clear" button
+   */
+  const handleOnClickClearAll = React.useCallback(() => {
+    if (currentOutput?.labware?.id && currentInputLabware?.barcode) {
+      send({
+        type: 'CLEAR_ALL_SLOT_MAPPINGS_BETWEEN',
+        outputLabwareId: currentOutput?.labware?.id,
+        inputLabwareBarcode: currentInputLabware?.barcode
+      });
+      outputLabwareRef.current?.deselectAll();
+    }
+  }, [send, currentOutput, currentInputLabware, outputLabwareRef]);
 
   /**
    * Whenever the SlotCopyContent map changes, or the current input labware changes,
@@ -315,14 +341,15 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
    */
   useEffect(() => {
     inputLabwareRef.current?.deselectAll();
-  }, [slotCopyContent, currentInputLabware]);
+  }, [currentOutput?.slotCopyContent, currentInputLabware]);
 
   /**
    * Whenever the SlotCopyContent map changes, call the onChange handler
    */
   useEffect(() => {
-    onChange?.(slotCopyContent, anySourceMapped);
-  }, [onChange, slotCopyContent, anySourceMapped]);
+    if (!currentOutput?.slotCopyContent) return;
+    onChange?.(currentOutput.labware, currentOutput?.slotCopyContent, anySourceMapped);
+  }, [onChange, currentOutput, anySourceMapped]);
 
   /**
    * Callback whenever labware is added or removed by the labware scanner
@@ -330,11 +357,21 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
   const onLabwareScannerChange = React.useCallback(
     (labware: LabwareFieldsFragment[]) => {
       send({ type: 'UPDATE_INPUT_LABWARE', labware });
+      onInputLabwareChange?.(labware);
     },
-    [send]
+    [send, onInputLabwareChange]
   );
 
-  const selectedSlots = currentInputLabware
+  const onRemoveOutputLabware = React.useCallback(() => {
+    const outputs = outputSlotCopies.filter((osc) => osc.labware.id !== currentOutput?.labware.id);
+    send({
+      type: 'UPDATE_OUTPUT_LABWARE',
+      outputSlotCopyContent: outputs
+    });
+    onOutputLabwareChange?.(outputs.map((o) => o.labware));
+  }, [send, onOutputLabwareChange, currentOutput, outputSlotCopies]);
+
+  const selectedInputSlots = currentInputLabware
     ? currentInputLabware.slots.filter(
         (slot) => selectedInputAddresses.findIndex((selectedAddress) => selectedAddress === slot.address) !== -1
       )
@@ -348,11 +385,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
         <Heading level={4}>Output Labwares</Heading>
 
         <div id="inputLabwares" className="bg-gray-100 p-4">
-          <LabwareScanner
-            initialLabwares={initialInputLabware}
-            onChange={onLabwareScannerChange}
-            limit={inputLabwareLimit}
-          >
+          <LabwareScanner initialLabwares={inputLabware} onChange={onLabwareScannerChange} limit={inputLabwareLimit}>
             {(props) => {
               if (!currentInputLabware) {
                 return <MutedText>Add labware using the scan input above</MutedText>;
@@ -365,6 +398,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
                       <RemoveButton
                         onClick={() => {
                           props.removeLabware(currentInputLabware.barcode);
+                          onInputLabwareChange?.(inputLabware);
                         }}
                       />
                     </div>
@@ -379,7 +413,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
                         return getSourceSlotColor(currentInputLabware, address, slot);
                       }}
                       name={currentInputLabware.labwareType.name}
-                      onSelect={setSelectedInputAddresses}
+                      onSelect={handleOnInputLabwareSlotClick}
                     />
                   </div>
                 </>
@@ -392,20 +426,24 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
           <div className="flex mb-8">{outputLabwareConfigPanel}</div>
           {initialOutputLabware?.length > 1 && (
             <div className="flex flex-row justify-end">
-              <RemoveButton onClick={() => onRemoveOutputLabware && onRemoveOutputLabware(currentOutputPage - 1)} />
+              <RemoveButton
+                onClick={() => {
+                  onRemoveOutputLabware();
+                }}
+              />
             </div>
           )}
           <div className={'flex items-center justify-center'}>
-            {currentOutputLabware && (
+            {currentOutput?.labware && (
               <Labware
-                labware={currentOutputLabware}
+                labware={currentOutput.labware}
                 selectable="any"
                 selectionMode="multi"
                 labwareRef={outputLabwareRef}
-                name={currentOutputLabware.labwareType.name}
+                name={currentOutput?.labware.labwareType.name}
                 onSlotClick={handleOnOutputLabwareSlotClick}
                 onSelect={setSelectedOutputAddresses}
-                slotColor={(address) => getDestinationSlotColor(currentOutputLabware, address)}
+                slotColor={(address) => getDestinationSlotColor(currentOutput, address)}
               />
             )}
           </div>
@@ -418,19 +456,28 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
         </div>
 
         <div className="border-gray-300 border-t-2 p-4 flex flex-row items-center justify-between bg-gray-200">
-          {initialOutputLabware.length > 0 && (
+          {outputSlotCopies.length > 1 && (
             <Pager currentPage={currentOutputPage} numberOfPages={numberOfOutputPages} {...pageRestOutput} />
           )}
           <div className="border-gray-300  flex flex-row items-center justify-end bg-gray-200">
-            {!locked && <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>}
+            {!locked && (
+              <div className={'flex flex-row space-x-4'}>
+                <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>
+                <WhiteButton onClick={handleOnClickClearAll}>Clear all</WhiteButton>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {currentInputLabware && selectedSlots.length > 0 && (
+      {currentInputLabware && selectedInputSlots.length > 0 && (
         <div className="space-y-4">
           <Heading level={4}>Slot Mapping</Heading>
-          <SlotMapperTable labware={currentInputLabware} slots={selectedSlots} slotCopyContent={slotCopyContent} />
+          <SlotMapperTable
+            labware={currentInputLabware}
+            slots={selectedInputSlots}
+            slotCopyContent={currentOutput?.slotCopyContent ?? []}
+          />
         </div>
       )}
       <ConfirmationModal
