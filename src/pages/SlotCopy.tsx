@@ -37,14 +37,14 @@ interface DestinationLabwareScanPanelProps {
   onChangeBioState: (bioState: string) => void;
 }
 
-const transferTypes = ['cDNA', 'Probe', 'Library'];
+const transferTypes = ['cDNA', 'Probes', 'Library'];
 
 interface SourceLabwareScanPanelProps {
   selectedSource: Source | undefined;
   onChangeState: (state: string) => void;
 }
 
-/**Component to configure the output labware**/
+/**Component to display fields above the output labware**/
 const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps> = ({
   labware,
   onAddLabware,
@@ -69,14 +69,14 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
       </div>
       <div className={'w-1/2 flex justify-end items-center'}>
         <BlueButton onClick={onAddLabware} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
-          + Add Labware
+          + Add Plate
         </BlueButton>
       </div>
     </div>
   );
 };
 
-/**Component to configure the input labware**/
+/**Component to display fields above the input labware**/
 const SlotCopySourceConfigPanel: React.FC<SourceLabwareScanPanelProps> = ({ selectedSource, onChangeState }) => {
   return (
     <div className={'w-1/2 mt-4 flex flex-col'} data-testid="input-labware">
@@ -100,6 +100,7 @@ const SlotCopySourceConfigPanel: React.FC<SourceLabwareScanPanelProps> = ({ sele
 };
 
 function SlotCopy({ title, initialOutputLabware }: PageParams) {
+  /**Reformat the props to 'Destination' type**/
   const initialOutputSlotCopy = React.useMemo(() => {
     return initialOutputLabware.map((lw) => {
       return {
@@ -115,7 +116,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
   const memoSlotCopyMachine = React.useMemo(() => {
     return slotCopyMachine.withContext({
       workNumber: '',
-      operationType: 'Visium cDNA',
+      operationType: 'Transfer',
       destinations: initialOutputSlotCopy,
       sources: [],
       slotCopyResults: [],
@@ -125,14 +126,21 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   const [current, send] = useMachine(() => memoSlotCopyMachine);
 
+  /**Keep track of input labware with no permeabilisation done**/
   const [labwaresWithoutPerm, setLabwaresWithoutPerm] = React.useState<LabwareFieldsFragment[]>([]);
+
   const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
+
+  /** State to keep  track of selected source labware**/
   const [selectedSource, setSelectedSource] = React.useState<LabwareFieldsFragment | undefined>(undefined);
+
+  /** State to keep track of selected destination labware**/
   const [selectedDestination, setSelectedDestination] = React.useState<NewLabwareLayout>(
     initialOutputSlotCopy[0].labware
   );
   const { serverErrors, sourceLabwarePermData, sources, destinations, slotCopyResults } = current.context;
 
+  /**Handler action to perform when a mapping is done  between source and destination**/
   const handleOnSlotMapperChange = useCallback(
     (labware: NewLabwareLayout, slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
       send({
@@ -145,6 +153,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     [send]
   );
 
+  /**Handler for work number chnage**/
   const handleWorkNumberChange = useCallback(
     (workNumber: string) => {
       send({ type: 'UPDATE_WORK_NUMBER', workNumber });
@@ -152,11 +161,13 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     [send]
   );
 
+  /**Save action handler**/
   const handleSave = React.useCallback(() => {
     setWarnBeforeSave(false);
     send({ type: 'SAVE' });
   }, [setWarnBeforeSave, send]);
 
+  /**Action callback(from SlotMapper) when there is a change in source labware (addition/deletion)**/
   const handleInputLabwareChange = React.useCallback(
     (sourcesChanged: LabwareFieldsFragment[]) => {
       send({ type: 'UPDATE_SOURCE_LABWARE', labware: sourcesChanged });
@@ -168,6 +179,10 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     },
     [send, selectedDestination, destinations]
   );
+
+  /**Action callback(from SlotMapper) when there is a change in destination labware
+   * (It will be normally a deletion operation as the addition is handled within SlotCopy itself)
+   * **/
   const handleOutputLabwareChange = React.useCallback(
     (destinations: NewLabwareLayout[]) => {
       send({ type: 'UPDATE_DESTINATION_LABWARE', labware: destinations });
@@ -175,6 +190,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     [send]
   );
 
+  /**Handler for 'Add Plate' button click**/
   const onAddDestinationLabware = React.useCallback(() => {
     const labware = plateFactory.build({});
     const labwareArray = destinations.map((dest) => dest.labware);
@@ -182,6 +198,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     send({ type: 'UPDATE_DESTINATION_LABWARE', labware: labwareArray });
   }, [send, destinations]);
 
+  /**Handler for a labware state change in source**/
   const onSourceLabwareStateChange = React.useCallback(
     (labwareState: string) => {
       if (!selectedSource) {
@@ -196,6 +213,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     [send, selectedSource]
   );
 
+  /**Handler for Bio-state change in destination**/
   const onChangeBioState = React.useCallback(
     (bioState: string) => {
       if (!selectedDestination) {
@@ -210,19 +228,11 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     [selectedDestination, send]
   );
 
-  const onSourceSelection = React.useCallback(
-    (labware) => {
-      setSelectedSource(labware);
-    },
-    [setSelectedSource]
-  );
-
   /**
    * Save action invoked, so check whether a warning to be given to user if any labware with no perm done is copied
    ***/
   const onSaveAction = React.useCallback(() => {
     /**Get all input lawares that didn't perform perm operation and are mapped/copied to 96 well plate*/
-
     const slotCopyContents = destinations.flatMap((dest) => dest.slotCopyDetails.contents);
 
     const labwareWithoutPermData = sourceLabwarePermData?.filter(
@@ -251,6 +261,11 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
       });
     }
   }, [current.value]);
+
+  /**Check Labware state and Bio state is selected respectively for all source and destinations**/
+  const isValidationFailure = () => {
+    return sources.some((src) => !src.labwareState) || destinations.some((dest) => !dest.slotCopyDetails.bioState);
+  };
 
   /**
    * When there's an error returned from the server, scroll to it
@@ -292,10 +307,12 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             onChange={handleOnSlotMapperChange}
             onOutputLabwareChange={handleOutputLabwareChange}
             inputLabwareConfigPanel={
-              <SlotCopySourceConfigPanel
-                onChangeState={onSourceLabwareStateChange}
-                selectedSource={sources.find((src) => src.labware.barcode === selectedSource?.barcode)}
-              />
+              sources.length > 0 && (
+                <SlotCopySourceConfigPanel
+                  onChangeState={onSourceLabwareStateChange}
+                  selectedSource={sources.find((src) => src.labware.barcode === selectedSource?.barcode)}
+                />
+              )
             }
             outputLabwareConfigPanel={
               <SlotCopyDestinationConfigPanel
@@ -304,11 +321,11 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
                 labware={destinations.find((dest) => dest.labware.id === selectedDestination.id)}
               />
             }
-            onSelectInputLabware={onSourceSelection}
+            onSelectInputLabware={setSelectedSource}
             onSelectOutputLabware={setSelectedDestination}
           />
 
-          {destinations.length > 0 && (
+          {slotCopyResults.length > 0 && (
             <div className="mt-8 flex flex-row items-center sm:justify-end">
               <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
                 <LabelPrinter labwares={slotCopyResults} />
@@ -322,7 +339,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
         <div className="flex flex-row items-center justify-end space-x-2">
           {!current.matches('copied') && (
             <BlueButton
-              disabled={!current.matches('readyToCopy') || current.context.workNumber === ''}
+              disabled={!current.matches('readyToCopy') || current.context.workNumber === '' || isValidationFailure()}
               onClick={onSaveAction}
             >
               Save

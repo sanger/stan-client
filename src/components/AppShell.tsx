@@ -205,8 +205,8 @@ function AppShell({ children }: AppShellParams) {
                     description={'Recording Visium process'}
                   >
                     <NavLinkMenuItem
-                      caption={'Visium cDNA'}
-                      path={'/lab/visium_cdna'}
+                      caption={'Transfer'}
+                      path={'/lab/transfer'}
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Transfer cDNA from slides onto a new 96 well plate.'}
                     />
@@ -413,7 +413,7 @@ function AppShell({ children }: AppShellParams) {
                     </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Visium</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/visium_cdna">Visium cDNA</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/transfer">Transfer</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/visium_perm">Visium Permeabilisation</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/visium_analysis">Visium Analysis</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/dual_index_plate">Dual Index Plate</StanMobileNavLink>

@@ -160,9 +160,9 @@ export function Routes() {
       />
       <AuthenticatedRoute path="/lab/aliquoting" render={(routerProps) => <Aliquot key={routerProps.location.key} />} />
       <AuthenticatedRoute
-        path="/lab/visium_cdna"
+        path="/lab/transfer"
         render={(routeProps) => (
-          <SlotCopy key={routeProps.location.key} title={'Visium cDNA'} initialOutputLabware={[plateFactory.build()]} />
+          <SlotCopy key={routeProps.location.key} title={'Transfer'} initialOutputLabware={[plateFactory.build()]} />
         )}
       />
       <AuthenticatedRoute

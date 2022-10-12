@@ -75,14 +75,6 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
         );
       }
     }),
-    clearAllSlotMappings: assign((ctx, e) => {
-      if (e.type !== 'CLEAR_ALL_SLOT_MAPPINGS') {
-        return;
-      }
-      ctx.outputSlotCopies.forEach((outputScc) => {
-        outputScc.slotCopyContent = [];
-      });
-    }),
     copySlots: assign((ctx, e) => {
       if (e.type !== 'COPY_SLOTS') {
         return;

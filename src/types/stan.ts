@@ -14,7 +14,7 @@ import { regexSort } from "../lib/helpers";
 /**
  * Union of STAN's {@link OperationType} names
  */
-export type OperationTypeName = "Section" | "Visium cDNA" | "Dual index plate" |"CytAssist";
+export type OperationTypeName = "Section" | "Transfer" | "Dual index plate" |"CytAssist";
 
 /**
  * Enum for all of STAN's {@link LabwareType} names

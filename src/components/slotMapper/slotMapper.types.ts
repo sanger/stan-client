@@ -17,12 +17,12 @@ export interface SlotMapperProps {
   onChange?: (labware: NewLabwareLayout, slotCopyContent: Array<SlotCopyContent>, allSourcesMapped: boolean) => void;
 
   /**
-   * Callback to notify whenever an input labware is scanned
+   * Callback to notify whenever an input labware is scanned/removed
    */
   onInputLabwareChange?: (labwaresWithoutPerm: LabwareFieldsFragment[]) => void;
 
   /**
-   * Callback to notify whenever an input labware is scanned
+   * Callback to notify whenever an output labware is removed
    */
   onOutputLabwareChange?: (labwaresWithoutPerm: NewLabwareLayout[]) => void;
 
@@ -56,11 +56,16 @@ export interface SlotMapperProps {
    */
   disabledOutputSlotAddresses?: string[];
 
+  /**Panel to display on top of input labware, if any**/
   inputLabwareConfigPanel?: React.ReactNode;
 
+  /**Panel to display on top of output labware, if any**/
   outputLabwareConfigPanel?: React.ReactNode;
 
+  /**Callback to notify when an output labware is selected (through pagination)**/
   onSelectOutputLabware?: (labware: NewLabwareLayout) => void;
+
+  /**Callback to notify when an output labware is selected (through pagination)**/
   onSelectInputLabware?: (labware: LabwareFieldsFragment) => void;
 }
 export type OutputSlotCopyData = {
@@ -68,11 +73,17 @@ export type OutputSlotCopyData = {
   slotCopyContent: Array<SlotCopyContent>;
 };
 export interface SlotMapperContext {
+  /**All input labware scanned**/
   inputLabware: Array<LabwareFieldsFragment>;
+  /**Mapped slots data**/
   outputSlotCopies: Array<OutputSlotCopyData>;
+  /**Map between color to display in slots and labware**/
   colorByBarcode: Map<string, string>;
+  /**Failed slots, if any**/
   failedSlots: Map<string, SlotPassFailFieldsFragment[]>;
+  /**Any mapping errors*/
   errors: Map<string, ClientError>;
+  /**Is it required to failed slots check**/
   failedSlotsCheck: boolean;
 }
 
@@ -101,17 +112,14 @@ type CopySlotsEvent = {
   outputAddress: string;
 };
 
+/**Clears the mapping in slot for the given slot address and output labware id**/
 type ClearSlotsEvent = {
   type: 'CLEAR_SLOTS';
   outputLabwareId: number;
   outputAddresses: Array<string>;
 };
 
-type ClearAllSlotMappingsEvent = {
-  type: 'CLEAR_ALL_SLOT_MAPPINGS';
-  outputLabwareId: number;
-};
-
+/**Clears all mappings between given input and output labware**/
 type ClearAllSlotMappingsBetweenEvent = {
   type: 'CLEAR_ALL_SLOT_MAPPINGS_BETWEEN';
   outputLabwareId: number;
@@ -139,7 +147,6 @@ export type SlotMapperEvent =
   | UpdateOutputLabwareEvent
   | CopySlotsEvent
   | ClearSlotsEvent
-  | ClearAllSlotMappingsEvent
   | ClearAllSlotMappingsBetweenEvent
   | LockEvent
   | UnlockEvent

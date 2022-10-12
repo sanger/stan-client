@@ -38,11 +38,31 @@ export interface SlotCopyContext {
    * The work number associated with this operation
    */
   workNumber: string;
+  /**
+   * Operation type
+   */
   operationType: OperationTypeName;
+  /**
+   * Perm data for source labware, if any
+   */
   sourceLabwarePermData?: FindPermDataQuery[];
+  /**
+   * All source labware in slot copy operation
+   * 'barcode' is the identifier field
+   */
   sources: Array<Source>;
+  /**
+   * All destination labware in slot copy operation
+   * 'id' is the identifier field as the destination is not yet created
+   */
   destinations: Array<Destination>;
+  /**
+   * Results returned from server on slotCopy mutation
+   */
   slotCopyResults: Array<LabwareFieldsFragment>;
+  /**
+   * Errors from server, if any
+   */
   serverErrors?: Maybe<ClientError>;
 }
 
@@ -67,7 +87,9 @@ type UpdateDestinationPreBarcode = {
 
 type UpdateDestinationLabwareType = {
   type: 'UPDATE_DESTINATION_LABWARE_TYPE';
+  /**Old labware**/
   labwareToReplace: NewLabwareLayout;
+  /**New labware**/
   labware: NewLabwareLayout;
 };
 type UpdateDestinationCosting = {
@@ -266,6 +288,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         }
         ctx.sources = e.labware.map((newSource) => {
           const source = ctx.sources.find((src) => src.labware.barcode === newSource.barcode);
+          //There is no source exists , so add this
           if (!source) {
             return {
               labware: newSource
@@ -281,6 +304,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         }
         ctx.destinations = e.labware.map((newDest) => {
           const destination = ctx.destinations.find((dest) => dest.labware.id === newDest.id);
+          //There is no destination exists , so add this
           if (!destination) {
             return {
               labware: newDest,
@@ -358,8 +382,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       }),
       assignDestinationLabwareType: assign((ctx, e) => {
         if (e.type !== 'UPDATE_DESTINATION_LABWARE_TYPE') return;
-        const destinations = [...ctx.destinations];
-        const destination = destinations.find((dest) => dest.labware.id === e.labwareToReplace.id);
+        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labwareToReplace.id);
         if (!destination || destination.labware.labwareType.name === e.labware.labwareType.name) {
           return;
         }
@@ -369,7 +392,6 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           labwareType: e.labware.labwareType.name,
           contents: []
         };
-        ctx.destinations = destinations;
       }),
       assignDestinationCosting: assign((ctx, e) => {
         if (e.type !== 'UPDATE_DESTINATION_COSTING') return;

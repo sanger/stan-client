@@ -6,10 +6,10 @@ import {
 } from '../../../src/types/sdk';
 import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
 
-describe('Visium cDNA Page', () => {
+describe('Transfer Page', () => {
   before(() => {
-    cy.visit('/lab/visium_cdna');
-    cy.get('select').select('SGP1008');
+    cy.visit('/lab/transfer');
+    cy.findByTestId('workNumber').select('SGP1008');
   });
 
   describe('On load', () => {
@@ -22,7 +22,7 @@ describe('Visium cDNA Page', () => {
     });
   });
 
-  context('When a user scans in a TP Slide', () => {
+  context('When a user scans slides', () => {
     before(() => {
       cy.get('#labwareScanInput').type('STAN-3100{enter}');
     });
@@ -34,7 +34,74 @@ describe('Visium cDNA Page', () => {
     it('keeps the Save button disabled', () => {
       saveButton().should('be.disabled');
     });
+  });
 
+  context('when user scans multiple slides', () => {
+    before(() => {
+      cy.get('#labwareScanInput').type('STAN-3200{enter}');
+      cy.get('#labwareScanInput').type('STAN-3300{enter}');
+    });
+
+    it('updates page with added labware ', () => {
+      cy.contains('3 of 3').should('be.visible');
+    });
+
+    it('shows the last added labware', () => {
+      cy.findByText('STAN-3300').should('be.visible');
+    });
+  });
+
+  context('when user removes slide', () => {
+    before(() => {
+      cy.findByTestId('removeButton').click();
+    });
+
+    it('updates page with removed labware ', () => {
+      cy.contains('2 of 2').should('be.visible');
+    });
+
+    it('shows the labware before the deleted one', () => {
+      cy.findByText('STAN-3200').should('be.visible');
+    });
+  });
+  context('when user presses page navigation', () => {
+    context('when pressing left button', () => {
+      before(() => {
+        cy.findAllByTestId('icon-button').eq(0).click();
+      });
+
+      it('shows the previous labware', () => {
+        cy.findByText('STAN-3100').should('be.visible');
+      });
+    });
+    context('when pressing right button', () => {
+      before(() => {
+        cy.findAllByTestId('icon-button').eq(1).click();
+      });
+
+      it('shows the previous labware', () => {
+        cy.findByText('STAN-3200').should('be.visible');
+      });
+    });
+  });
+  context('when entering labware state values', () => {
+    before(() => {
+      cy.findByTestId('input-labware-state').select('used');
+    });
+
+    it('shows the selected state', () => {
+      cy.findByText('used').should('be.visible');
+    });
+    context('when navigating away and coming to the labware with state selected', () => {
+      before(() => {
+        cy.findAllByTestId('icon-button').eq(0).click();
+        cy.findAllByTestId('icon-button').eq(1).click();
+      });
+
+      it('shows the previously selected state for labware', () => {
+        cy.findByText('used').should('be.visible');
+      });
+    });
     context('When user selects some source slots', () => {
       before(() => {
         cy.get('#inputLabwares').within(() => {
@@ -49,10 +116,58 @@ describe('Visium cDNA Page', () => {
       it('displays the table with D1 slot', () => {
         cy.findByRole('table').contains('td', 'D1');
       });
+
+      after(() => {
+        cy.findByTestId('removeButton').click();
+      });
+    });
+
+    context('when user adds a destination well plate', () => {
+      before(() => {
+        cy.findByTestId('removeButton').click();
+        cy.wait(200);
+        cy.findByRole('button', { name: '+ Add Plate' }).click();
+      });
+      it('updates page with added labware ', () => {
+        cy.contains('2 of 2').should('be.visible');
+      });
+    });
+    context('when user removes a destination well plate', () => {
+      before(() => {
+        cy.findByTestId('removeButton').click();
+      });
+      it('removes labware from  page ', () => {
+        cy.contains('1 of 1').should('be.visible');
+      });
+      it('should not display remove button', () => {
+        cy.findByTestId('removeButton').should('not.exist');
+      });
+    });
+    context('when user selects a bio-state for a destination well plate', () => {
+      before(() => {
+        cy.findByRole('button', { name: '+ Add Plate' }).click();
+        cy.findByTestId('transfer-type').select('Probes');
+      });
+      it('should display selected labware state', () => {
+        cy.findByText('Probes').should('be.visible');
+      });
+      context('when user navigates away and the come back to destination plate with bio-state', () => {
+        before(() => {
+          cy.findAllByTestId('icon-button').eq(0).click();
+          cy.findAllByTestId('icon-button').eq(1).click();
+        });
+        it('should display previous selected labware state', () => {
+          cy.findByText('Probes').should('be.visible');
+        });
+      });
+      after(() => {
+        cy.findByTestId('removeButton').click();
+      });
     });
 
     context('When user maps some source slots', () => {
       before(() => {
+        cy.get('#labwareScanInput').type('STAN-3100{enter}');
         cy.get('#inputLabwares').within(() => {
           cy.findByText('A1').click();
           cy.findByText('D1').click({ shiftKey: true });
@@ -61,10 +176,19 @@ describe('Visium cDNA Page', () => {
         cy.get('#outputLabwares').within(() => {
           cy.findByText('G1').click();
         });
+        it('does not enable Save Button', () => {
+          saveButton().should('not.be.enabled');
+        });
       });
 
-      it('enables the Save Button', () => {
-        saveButton().should('not.be.disabled');
+      context('when all required field are entered', () => {
+        before(() => {
+          cy.findByTestId('transfer-type').select('Probes');
+          cy.findByTestId('input-labware-state').select('used');
+        });
+        it('enables Save Button', () => {
+          saveButton().should('be.enabled');
+        });
       });
     });
     context('When user maps slots that failed in Visium QC- Slide processing', () => {
@@ -175,8 +299,9 @@ function saveButton() {
 }
 
 function saveSlotForLabwareWithNoPerm() {
-  cy.visit('/lab/visium_cdna');
-  cy.get('select').select('SGP1008');
+  cy.visit('/lab/transfer');
+
+  cy.findByTestId('workNumber').select('SGP1008');
   cy.msw().then(({ worker, graphql }) => {
     const labware = createLabware('STAN-3200');
     worker.use(
@@ -201,5 +326,7 @@ function saveSlotForLabwareWithNoPerm() {
     cy.findByText('A1').click();
   });
 
+  cy.findByTestId('transfer-type').select('Probes');
+  cy.findByTestId('input-labware-state').select('used');
   saveButton().click();
 }
