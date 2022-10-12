@@ -4,9 +4,10 @@ import React from 'react';
 interface IconButtonProps
   extends React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {
   disabled?: boolean;
+  dataTestId?: string;
 }
 
-const IconButton: React.FC<IconButtonProps> = ({ children, disabled = false, ...rest }) => {
+const IconButton: React.FC<IconButtonProps> = ({ children, disabled = false, dataTestId, ...rest }) => {
   const buttonClassNames = classNames(
     {
       'hover:bg-gray-100 focus:outline-none focus:bg-gray-100 hover:text-gray-600': !disabled,
@@ -16,7 +17,7 @@ const IconButton: React.FC<IconButtonProps> = ({ children, disabled = false, ...
   );
 
   return (
-    <button {...rest} className={buttonClassNames} data-testid={'icon-button'}>
+    <button {...rest} className={buttonClassNames} data-testid={dataTestId ?? ''}>
       {children}
     </button>
   );

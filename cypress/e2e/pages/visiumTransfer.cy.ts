@@ -67,7 +67,7 @@ describe('Transfer Page', () => {
   context('when user presses page navigation', () => {
     context('when pressing left button', () => {
       before(() => {
-        cy.findAllByTestId('icon-button').eq(0).click();
+        cy.findAllByTestId('left-button').eq(0).click();
       });
 
       it('shows the previous labware', () => {
@@ -76,7 +76,7 @@ describe('Transfer Page', () => {
     });
     context('when pressing right button', () => {
       before(() => {
-        cy.findAllByTestId('icon-button').eq(1).click();
+        cy.findAllByTestId('right-button').eq(0).click();
       });
 
       it('shows the previous labware', () => {
@@ -94,8 +94,8 @@ describe('Transfer Page', () => {
     });
     context('when navigating away and coming to the labware with state selected', () => {
       before(() => {
-        cy.findAllByTestId('icon-button').eq(0).click();
-        cy.findAllByTestId('icon-button').eq(1).click();
+        cy.findAllByTestId('left-button').eq(0).click();
+        cy.findAllByTestId('right-button').eq(0).click();
       });
 
       it('shows the previously selected state for labware', () => {
@@ -124,8 +124,6 @@ describe('Transfer Page', () => {
 
     context('when user adds a destination well plate', () => {
       before(() => {
-        cy.findByTestId('removeButton').click();
-        cy.wait(200);
         cy.findByRole('button', { name: '+ Add Plate' }).click();
       });
       it('updates page with added labware ', () => {
@@ -134,13 +132,13 @@ describe('Transfer Page', () => {
     });
     context('when user removes a destination well plate', () => {
       before(() => {
-        cy.findByTestId('removeButton').click();
+        cy.findAllByTestId('removeButton').eq(1).click();
       });
       it('removes labware from  page ', () => {
         cy.contains('1 of 1').should('be.visible');
       });
       it('should not display remove button', () => {
-        cy.findByTestId('removeButton').should('not.exist');
+        cy.findAllByTestId('removeButton').should('have.length', 1);
       });
     });
     context('when user selects a bio-state for a destination well plate', () => {
@@ -153,21 +151,20 @@ describe('Transfer Page', () => {
       });
       context('when user navigates away and the come back to destination plate with bio-state', () => {
         before(() => {
-          cy.findAllByTestId('icon-button').eq(0).click();
-          cy.findAllByTestId('icon-button').eq(1).click();
+          cy.findAllByTestId('left-button').eq(1).click();
+          cy.findAllByTestId('right-button').eq(1).click();
         });
         it('should display previous selected labware state', () => {
           cy.findByText('Probes').should('be.visible');
         });
       });
       after(() => {
-        cy.findByTestId('removeButton').click();
+        cy.findAllByTestId('removeButton').eq(1).click();
       });
     });
 
     context('When user maps some source slots', () => {
       before(() => {
-        cy.get('#labwareScanInput').type('STAN-3100{enter}');
         cy.get('#inputLabwares').within(() => {
           cy.findByText('A1').click();
           cy.findByText('D1').click({ shiftKey: true });

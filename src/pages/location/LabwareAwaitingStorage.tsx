@@ -47,7 +47,7 @@ const LabwareAwaitingStorage: React.FC<LabwareAwaitingStorageProps> = ({
                 <TableCell>{labware.labwareType}</TableCell>
                 <TableCell>
                   <IconButton
-                    data-testid={`addIcon-${labware.barcode}`}
+                    dataTestId={`addIcon-${labware.barcode}`}
                     disabled={!storeEnabled}
                     onClick={() => onStoreLabwares([labware])}
                   >

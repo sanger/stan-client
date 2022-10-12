@@ -48,7 +48,7 @@ function Pager({
 }: PagerProps) {
   return (
     <div className="flex flex-row items-center gap-6 text-sm text-gray-700">
-      <IconButton disabled={pageDownDisabled} onClick={onPageDownClick}>
+      <IconButton disabled={pageDownDisabled} dataTestId={'left-button'} onClick={onPageDownClick}>
         <svg
           className="h-5 w-5"
           xmlns="http://www.w3.org/2000/svg"
@@ -66,7 +66,7 @@ function Pager({
       <div>
         <span className="font-medium">{currentPage}</span> of <span className="font-medium">{numberOfPages}</span>
       </div>
-      <IconButton disabled={pageUpDisabled} onClick={onPageUpClick}>
+      <IconButton disabled={pageUpDisabled} onClick={onPageUpClick} dataTestId={'right-button'}>
         <svg
           className="h-5 w-5"
           xmlns="http://www.w3.org/2000/svg"
