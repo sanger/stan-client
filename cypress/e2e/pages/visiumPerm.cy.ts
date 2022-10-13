@@ -1,3 +1,6 @@
+import { GetLabwareOperationsQuery, GetLabwareOperationsQueryVariables } from '../../../src/types/sdk';
+import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
+
 describe('Visium Perm', () => {
   before(() => cy.visit('/lab/visium_perm'));
 
@@ -91,4 +94,54 @@ describe('Visium Perm', () => {
       });
     });
   });
+
+  context('scanning a labware with no staining done', () => {
+    before(() => {
+      saveLabwareWithNoStain();
+    });
+    it('shows a warning message', () => {
+      cy.findByText('Labware has not been stained').should('be.visible');
+    });
+
+    context('when Continue button is clicked', () => {
+      before(() => {
+        cy.findByRole('button', { name: /Continue/i }).click();
+      });
+      it('shows a success message', () => {
+        cy.findByText('Visium Permeabilisation complete').should('be.visible');
+      });
+    });
+    context('when Cancel button is clicked', () => {
+      before(() => {
+        saveLabwareWithNoStain();
+        cy.findByRole('button', { name: /Cancel/i }).click();
+      });
+      it('cancels the operation', () => {
+        cy.findByRole('button', { name: /Submit/i }).should('be.enabled');
+      });
+    });
+  });
+
+  function saveLabwareWithNoStain() {
+    cy.visit('/lab/visium_perm');
+    cy.get('select').select('SGP1008');
+    cy.msw().then(({ worker, graphql }) => {
+      createLabware('STAN-3200');
+      worker.use(
+        graphql.query<GetLabwareOperationsQuery, GetLabwareOperationsQueryVariables>(
+          'GetLabwareOperations',
+          (req, res, ctx) => {
+            return res.once(
+              ctx.data({
+                labwareOperations: []
+              })
+            );
+          }
+        )
+      );
+    });
+    cy.get('#labwareScanInput').type('STAN-3200{enter}');
+    cy.findAllByRole('checkbox').eq(1).click();
+    cy.findByRole('button', { name: 'Submit' }).click();
+  }
 });

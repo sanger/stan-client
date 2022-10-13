@@ -27,6 +27,7 @@ import { emptySlots, isSlotEmpty, isSlotFilled } from '../lib/helpers/slotHelper
 import columns from '../components/dataTable/labwareColumns';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import PermPositiveControl from '../components/forms/PermPositiveControl';
+import { ConfirmationModal } from '../components/modal/ConfirmationModal';
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
@@ -54,11 +55,29 @@ export default function VisiumPerm() {
       }
     });
   }, []);
-  const [current, send] = useMachine(formMachine);
 
+  const [current, send] = useMachine(formMachine);
+  const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
   const { serverError } = current.context;
 
   const onSubmit = async (values: RecordPermRequest) => {
+    const isLabwareStained = await stanCore
+      .GetLabwareOperations({
+        barcode: values.barcode,
+        operationType: 'Stain'
+      })
+      .then((r) => r.labwareOperations?.length);
+
+    if (!!isLabwareStained) {
+      handleSave(values);
+    } else {
+      setWarnBeforeSave(true);
+    }
+  };
+
+  const handleSave = (values: RecordPermRequest) => {
+    setWarnBeforeSave(false);
+
     const submitPermData = [...values.permData]
       .map((pm) => {
         if (pm.seconds) {
@@ -69,8 +88,10 @@ export default function VisiumPerm() {
         }
       })
       .filter((pm) => pm.seconds || pm.controlType);
+
     //Clone data so as to not alter the form data
     const submitValues = { ...values, permData: submitPermData };
+
     send({
       type: 'SUBMIT_FORM',
       values: submitValues
@@ -145,6 +166,38 @@ export default function VisiumPerm() {
                 <div className="flex flex-row items-center justify-end">
                   <BlueButton type="submit">Submit</BlueButton>
                 </div>
+
+                <ConfirmationModal
+                  show={warnBeforeSave}
+                  header={'Save visium permeabilisation'}
+                  message={{
+                    type: 'Warning',
+                    text: 'Labware has not been stained'
+                  }}
+                  confirmOptions={[
+                    {
+                      label: 'Cancel',
+                      action: () => {
+                        setWarnBeforeSave(false);
+                      }
+                    },
+                    {
+                      label: 'Continue',
+                      action: () => {
+                        handleSave(values);
+                      }
+                    }
+                  ]}
+                >
+                  <p className="mt-8 my-3 text-gray-800 text-center text-sm  leading-normal">
+                    If you wish to cancel this operation, click the
+                    <span className="font-bold text-gray-900"> Cancel </span>
+                    button.
+                  </p>{' '}
+                  <p className="my-3 text-gray-800 text-center text-sm  leading-normal">
+                    Otherwise click <span className="font-bold text-gray-900">Continue</span> to record this operation
+                  </p>
+                </ConfirmationModal>
               </Form>
             )}
           </Formik>
