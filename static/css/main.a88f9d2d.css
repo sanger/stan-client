@@ -2181,6 +2181,11 @@ svg.logo.loading rect:nth-child(3n+1) {
   margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
 }
+.space-x-6 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(1.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(1.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
 .space-y-10 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(2.5rem * calc(1 - var(--tw-space-y-reverse)));
@@ -2200,11 +2205,6 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-space-y-reverse: 0;
   margin-top: calc(6rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(6rem * var(--tw-space-y-reverse));
-}
-.space-x-6 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-x-reverse: 0;
-  margin-right: calc(1.5rem * var(--tw-space-x-reverse));
-  margin-left: calc(1.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
 .space-y-12 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
@@ -2334,6 +2334,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .border-l-4 {
   border-left-width: 4px;
+}
+.border-l-2 {
+  border-left-width: 2px;
 }
 .border-green-600 {
   --tw-border-opacity: 1;
@@ -2888,6 +2891,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-text-opacity: 1;
   color: rgb(226 232 240 / var(--tw-text-opacity));
 }
+.text-red-400 {
+  --tw-text-opacity: 1;
+  color: rgb(252 129 129 / var(--tw-text-opacity));
+}
 .text-blue-600 {
   --tw-text-opacity: 1;
   color: rgb(49 130 206 / var(--tw-text-opacity));
@@ -2899,10 +2906,6 @@ svg.logo.loading rect:nth-child(3n+1) {
 .text-sp-800 {
   --tw-text-opacity: 1;
   color: rgb(105 14 45 / var(--tw-text-opacity));
-}
-.text-red-400 {
-  --tw-text-opacity: 1;
-  color: rgb(252 129 129 / var(--tw-text-opacity));
 }
 .text-gray-200 {
   --tw-text-opacity: 1;
@@ -3013,6 +3016,12 @@ svg.logo.loading rect:nth-child(3n+1) {
   box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), 0 0 #0000;
   box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
 }
+.ring-0 {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), 0 0 #0000;
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
 .ring-gray-700 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(74 85 104 / var(--tw-ring-opacity));
@@ -3027,6 +3036,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .ring-offset-2 {
   --tw-ring-offset-width: 2px;
+}
+.ring-offset-0 {
+  --tw-ring-offset-width: 0px;
 }
 .blur {
   --tw-blur: blur(8px);
@@ -4152,4 +4164,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.537b6c74.css.map*/
+/*# sourceMappingURL=main.a88f9d2d.css.map*/
