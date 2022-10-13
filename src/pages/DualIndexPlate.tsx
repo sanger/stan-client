@@ -180,7 +180,7 @@ function DualIndexPlate() {
                 <Select
                   emptyOption
                   onChange={(e) => handlePlateTypeChange(e.currentTarget.value)}
-                  value={sourceReagentPlate ? sourceReagentPlate.plateType ?? '' : ''}
+                  value={sourceReagentPlate ? sourceReagentPlate.plateType ?? plateType : plateType}
                   disabled={sourceReagentPlate && PLATE_TYPES.includes(sourceReagentPlate.plateType ?? '')}
                 >
                   {PLATE_TYPES.map((plateType) => (
