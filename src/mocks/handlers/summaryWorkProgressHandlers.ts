@@ -8,21 +8,24 @@ const workProgressSummaryHandlers = [
     return res(
       ctx.data({
         __typename: 'Query',
-        worksSummary: workTypeRepository
-          .findAll()
-          .filter((type) => type.enabled)
-          .map((workType) => {
-            const keys = objectKeys(WorkStatus);
-            return {
-              __typename: 'WorkSummaryGroup',
-              workType: workType,
-              status: WorkStatus[keys[generateRandomIntegerInRange(0, keys.length)]],
-              numWorks: generateRandomIntegerInRange(1, 10),
-              totalNumBlocks: generateRandomIntegerInRange(1, 5),
-              totalNumSlides: generateRandomIntegerInRange(1, 5),
-              totalNumOriginalSamples: generateRandomIntegerInRange(1, 5)
-            };
-          })
+        worksSummary: {
+          workSummaryGroups: workTypeRepository
+            .findAll()
+            .filter((type) => type.enabled)
+            .map((workType) => {
+              const keys = objectKeys(WorkStatus);
+              return {
+                __typename: 'WorkSummaryGroup',
+                workType: workType,
+                status: WorkStatus[keys[generateRandomIntegerInRange(0, keys.length)]],
+                numWorks: generateRandomIntegerInRange(1, 10),
+                totalNumBlocks: generateRandomIntegerInRange(1, 5),
+                totalNumSlides: generateRandomIntegerInRange(1, 5),
+                totalNumOriginalSamples: generateRandomIntegerInRange(1, 5)
+              };
+            }),
+          workTypes: workTypeRepository.findAll()
+        }
       })
     );
   })

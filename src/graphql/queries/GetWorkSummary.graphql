@@ -1,5 +1,10 @@
 query GetWorkSummary {
   worksSummary {
-    ...WorkSummaryGroupFields
+    workSummaryGroups {
+      ...WorkSummaryGroupFields
+    }
+    workTypes {
+      name
+    }
   }
 }

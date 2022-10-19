@@ -9,7 +9,18 @@ import { Column } from 'react-table';
 import { alphaNumericSortDefault } from '../types/stan';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
-import { getTimestampStr } from '../lib/helpers';
+import { getTimestampStr, safeParseQueryString } from '../lib/helpers';
+import WorkProgressInput, {
+  workProgressSearchSchema,
+  WorkProgressSearchType
+} from '../components/workProgress/WorkProgressInput';
+import { useLocation } from 'react-router-dom';
+import { WorkProgressUrlParams } from './WorkProgress';
+
+const defaultInitialValues: WorkProgressUrlParams = {
+  searchType: WorkProgressSearchType.WorkType,
+  searchValues: undefined
+};
 
 type WorkProgressSummaryTableEntry = {
   status: WorkStatus;
@@ -19,28 +30,18 @@ type WorkProgressSummaryTableEntry = {
   totalNumSlides: number;
   totalNumOriginalSamples: number;
 };
+
 type WorkProgressSummaryProps = {
   summaryData: GetWorkSummaryQuery;
 };
+
 const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
   const sortedTableDataRef = React.useRef<WorkProgressSummaryTableEntry[]>([]);
   const [downloadFileURL, setFileDownloadURL] = React.useState<string>('');
   const [workProgressSummaryData, setWorkProgressSummaryData] = React.useState<WorkProgressSummaryTableEntry[]>([]);
+  const [workTypes, setWorkTypes] = React.useState<string[]>([]);
+  const location = useLocation();
 
-  React.useEffect(() => {
-    setWorkProgressSummaryData(
-      summaryData.worksSummary.map((data) => {
-        return {
-          workType: data.workType.name,
-          status: data.status,
-          numWorks: data.numWorks,
-          totalNumBlocks: data.totalNumBlocks,
-          totalNumSlides: data.totalNumSlides,
-          totalNumOriginalSamples: data.totalNumOriginalSamples
-        };
-      })
-    );
-  }, [summaryData, setWorkProgressSummaryData]);
   /**
    * Rebuild the file object whenever the searchResult changes
    */
@@ -53,11 +54,84 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
     };
   }, [workProgressSummaryData]);
 
+  /**
+   * Build the worktypes list
+   */
+  React.useEffect(() => {
+    setWorkTypes(summaryData.worksSummary.workTypes.map((data) => data.name));
+  }, [summaryData]);
+
   const { downloadURL, requestDownload, extension } = useDownload(downloadData);
 
   React.useEffect(() => {
     setFileDownloadURL(downloadURL);
   }, [downloadURL, setFileDownloadURL]);
+
+  const memoUrlParams = React.useMemo(() => {
+    /**
+     *Schema to validate the deserialized URL search params
+     */
+    const params = safeParseQueryString<WorkProgressUrlParams>({
+      query: location.search,
+      schema: workProgressSearchSchema(workTypes)
+    });
+    if (params) {
+      return {
+        ...defaultInitialValues,
+        ...params
+      };
+    } else return params;
+  }, [location.search, workTypes]);
+
+  /**
+   * Builds the summary table data
+   */
+  React.useEffect(() => {
+    let workSummaryGroups = summaryData.worksSummary.workSummaryGroups.map((data) => {
+      return {
+        workType: data.workType.name,
+        status: data.status,
+        numWorks: data.numWorks,
+        totalNumBlocks: data.totalNumBlocks,
+        totalNumSlides: data.totalNumSlides,
+        totalNumOriginalSamples: data.totalNumOriginalSamples
+      };
+    });
+    workSummaryGroups = memoUrlParams ? filterWorkSummary(workSummaryGroups, memoUrlParams) : workSummaryGroups;
+    setWorkProgressSummaryData(workSummaryGroups);
+  }, [summaryData, setWorkProgressSummaryData, memoUrlParams]);
+
+  /**
+   * filters the workSummarGroups based on URL params
+   * @param workSummaryGroups
+   * @param memoUrlParams
+   */
+  const filterWorkSummary = (
+    workSummaryGroups: WorkProgressSummaryTableEntry[],
+    memoUrlParams: { searchType: string; searchValues: string[] | undefined }
+  ) => {
+    if (
+      !memoUrlParams ||
+      !memoUrlParams.searchValues ||
+      !memoUrlParams.searchType ||
+      memoUrlParams.searchValues.length <= 0
+    ) {
+      return workSummaryGroups;
+    }
+
+    switch (memoUrlParams.searchType) {
+      case 'Work Type':
+        return (workSummaryGroups = workSummaryGroups.filter((group) => {
+          return memoUrlParams.searchValues?.includes(group.workType) ? true : false;
+        }));
+      case 'Status':
+        return (workSummaryGroups = workSummaryGroups.filter((group) => {
+          return memoUrlParams.searchValues?.includes(group.status) ? true : false;
+        }));
+      default:
+        return workSummaryGroups;
+    }
+  };
 
   /**
    * Rebuild the blob object on download action
@@ -79,6 +153,11 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
         <AppShell.Title>Spatial Genomics Platform Status</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
+        <WorkProgressInput
+          urlParams={memoUrlParams ?? defaultInitialValues}
+          workTypes={workTypes}
+          searchTypes={[WorkProgressSearchType.WorkType, WorkProgressSearchType.Status]}
+        />
         <div className="mx-auto">
           {workProgressSummaryData.length > 0 ? (
             <>
