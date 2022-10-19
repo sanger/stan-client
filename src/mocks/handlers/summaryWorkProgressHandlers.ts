@@ -9,21 +9,19 @@ const workProgressSummaryHandlers = [
       ctx.data({
         __typename: 'Query',
         worksSummary: {
-          workSummaryGroups: workTypeRepository
-            .findAll()
-            .filter((type) => type.enabled)
-            .map((workType) => {
-              const keys = objectKeys(WorkStatus);
-              return {
-                __typename: 'WorkSummaryGroup',
-                workType: workType,
-                status: WorkStatus[keys[generateRandomIntegerInRange(0, keys.length)]],
-                numWorks: generateRandomIntegerInRange(1, 10),
-                totalNumBlocks: generateRandomIntegerInRange(1, 5),
-                totalNumSlides: generateRandomIntegerInRange(1, 5),
-                totalNumOriginalSamples: generateRandomIntegerInRange(1, 5)
-              };
-            }),
+          workSummaryGroups: workTypeRepository.findAll().map((workType, index) => {
+            let keys = objectKeys(WorkStatus);
+            keys = keys.filter((key) => key !== 'Failed');
+            return {
+              __typename: 'WorkSummaryGroup',
+              workType: workType,
+              status: WorkStatus[keys[index % keys.length]],
+              numWorks: generateRandomIntegerInRange(1, 10),
+              totalNumBlocks: generateRandomIntegerInRange(1, 5),
+              totalNumSlides: generateRandomIntegerInRange(1, 5),
+              totalNumOriginalSamples: generateRandomIntegerInRange(1, 5)
+            };
+          }),
           workTypes: workTypeRepository.findAll()
         }
       })
