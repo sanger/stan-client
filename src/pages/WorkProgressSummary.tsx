@@ -5,7 +5,7 @@ import AppShell from '../components/AppShell';
 import Warning from '../components/notifications/Warning';
 
 import DataTable from '../components/DataTable';
-import { Column } from 'react-table';
+import { Cell, Column } from 'react-table';
 import { alphaNumericSortDefault } from '../types/stan';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
@@ -216,33 +216,45 @@ export const summaryStatusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus
 export default WorkProgressSummary;
 const columns: Column<WorkProgressSummaryTableEntry>[] = [
   {
-    Header: 'Work Type',
+    Header: () => <p className="font-bold text-center inline-block">Work Type</p>,
     accessor: 'workType',
     sortType: (rowA, rowB) => {
       return alphaNumericSortDefault(rowA.original.workType, rowB.original.workType);
     }
   },
   {
-    Header: 'Status',
+    Header: () => <p className="font-bold text-center">Status</p>,
     accessor: 'status',
     sortType: (rowA, rowB) => {
       return summaryStatusSort(rowA.original.status, rowB.original.status);
     }
   },
   {
-    Header: 'Number of Work Requests',
-    accessor: 'numWorks'
+    Header: () => <p className="font-bold text-center">Number of Work Requests</p>,
+    accessor: 'numWorks',
+    Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
+      return <p className="text-center">{props.row.original.numWorks}</p>;
+    }
   },
   {
-    Header: 'Total Number of Blocks',
-    accessor: 'totalNumBlocks'
+    Header: () => <p className="font-bold text-center">Total Number of Blocks</p>,
+    accessor: 'totalNumBlocks',
+    Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
+      return <p className="text-center">{props.row.original.totalNumBlocks}</p>;
+    }
   },
   {
-    Header: 'Total Number of Slides',
-    accessor: 'totalNumSlides'
+    Header: () => <p className="font-bold text-center">Total Number of Slides</p>,
+    accessor: 'totalNumSlides',
+    Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
+      return <p className="text-center">{props.row.original.totalNumSlides}</p>;
+    }
   },
   {
-    Header: 'Total Number of Original Samples',
-    accessor: 'totalNumOriginalSamples'
+    Header: () => <p className="font-bold text-center">Total Number of Original Samples</p>,
+    accessor: 'totalNumOriginalSamples',
+    Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
+      return <p className="text-center">{props.row.original.totalNumOriginalSamples}</p>;
+    }
   }
 ];
