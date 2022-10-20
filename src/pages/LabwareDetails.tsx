@@ -6,7 +6,7 @@ import StripyCard, { StripyCardDetail } from '../components/StripyCard';
 import Heading from '../components/Heading';
 import LabelPrinter from '../components/LabelPrinter';
 import DataTable from '../components/DataTable';
-import * as sampleColumns from '../components/dataTable/sampleColumns';
+import * as sampleColumns from '../components/dataTableColumns/sampleColumns';
 import { Authenticated } from '../components/Authenticated';
 import { isLabwareUsable } from '../lib/helpers/labwareHelper';
 import History from '../components/history/History';

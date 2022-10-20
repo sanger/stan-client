@@ -12,7 +12,7 @@ import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
 import { Column } from 'react-table';
-import labwareScanTableColumns from '../dataTable/labwareColumns';
+import labwareScanTableColumns from '../dataTableColumns/labwareColumns';
 import { useScrollToRef } from '../../lib/hooks';
 
 /**

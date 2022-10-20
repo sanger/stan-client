@@ -13,7 +13,7 @@ import variants from '../../lib/motionVariants';
 import Heading from '../../components/Heading';
 import MutedText from '../../components/MutedText';
 import LabwareScanPanel from '../../components/labwareScanPanel/LabwareScanPanel';
-import columns from '../../components/dataTable/labwareColumns';
+import columns from '../../components/dataTableColumns/labwareColumns';
 import PinkButton from '../../components/buttons/PinkButton';
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';

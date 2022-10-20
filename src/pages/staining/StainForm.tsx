@@ -15,7 +15,7 @@ import { FormikErrorMessage } from '../../components/forms';
 import MutedText from '../../components/MutedText';
 import LabwareScanner from '../../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../../components/labwareScanPanel/LabwareScanPanel';
-import columns from '../../components/dataTable/labwareColumns';
+import columns from '../../components/dataTableColumns/labwareColumns';
 import FormikInput from '../../components/forms/Input';
 import PinkButton from '../../components/buttons/PinkButton';
 import OperationCompleteModal from '../../components/modal/OperationCompleteModal';

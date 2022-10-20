@@ -4,7 +4,7 @@ import LockIcon from '../icons/LockIcon';
 import RemoveButton from '../buttons/RemoveButton';
 import { useLabwareContext } from './LabwareScanner';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
-import { valueFromSamples } from '../dataTable/index';
+import { valueFromSamples } from '../dataTableColumns';
 
 /**
  * Table that shows all slots in a Labware. Can only be used within a {@link LabwareScanner}.

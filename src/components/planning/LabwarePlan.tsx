@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import labwareScanTableColumns from '../dataTable/labwareColumns';
+import labwareScanTableColumns from '../dataTableColumns/labwareColumns';
 import PinkButton from '../buttons/PinkButton';
 import { useMachine } from '@xstate/react';
 import Modal, { ModalBody, ModalFooter } from '../Modal';

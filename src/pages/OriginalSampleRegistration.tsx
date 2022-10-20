@@ -3,7 +3,9 @@ import {
   GetRegistrationInfoQuery,
   LifeStage,
   RegisterOriginalSamplesMutationVariables,
-  OriginalSampleData
+  OriginalSampleData,
+  LabwareFieldsFragment,
+  SampleFieldsFragment
 } from '../types/sdk';
 import * as Yup from 'yup';
 import RegistrationValidation from '../lib/validation/registrationValidation';
@@ -11,8 +13,9 @@ import { LabwareTypeName } from '../types/stan';
 import { PartialBy } from '../lib/helpers';
 import { RegistrationFormBlock, RegistrationFormTissue } from './BlockRegistration';
 import Registration from './registration/Registration';
-import columns from '../components/dataTable/labwareColumns';
 import { registerOriginalSamples } from '../lib/services/registrationService';
+import { valueFromSamples } from '../components/dataTableColumns';
+import { Column } from 'react-table';
 
 /**Following modifications required for RegistrationFormBlock Type so that it can be reused
  - "medium" and "lastknownSectionNumber" fields are omitted
@@ -36,6 +39,10 @@ type RegistrationFormOriginalSample = Omit<RegistrationFormTissue, 'blocks'> & {
 export interface RegistrationFormOriginalSampleValues {
   tissues: Array<RegistrationFormOriginalSample>;
 }
+export type LabwareResultData = {
+  labware: LabwareFieldsFragment;
+  extraData?: string;
+};
 
 /**Define default values**/
 export function getRegistrationFormSample(): RegistrationFormBlockSample {
@@ -146,15 +153,76 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
     return registrationInfo.labwareTypes.filter((lt) => [LabwareTypeName.POT].includes(lt.name as LabwareTypeName));
   }, [registrationInfo]);
 
-  const resultColumns = [
-    columns.barcode(),
-    columns.labwareType(),
-    columns.externalName(),
-    columns.donorId(),
-    columns.tissueType(),
-    columns.spatialLocation(),
-    columns.replicate()
-  ];
+  const resultColumns: Array<Column<LabwareResultData>> = React.useMemo(() => {
+    return [
+      {
+        Header: 'Barcode',
+        id: 'barcode',
+        accessor: (result: LabwareResultData) => result.labware.barcode
+      },
+      {
+        Header: 'Labware Type',
+        id: 'labwareType',
+        accessor: (result: LabwareResultData) => result.labware.labwareType.name
+      },
+      {
+        Header: 'External Name',
+        id: 'externalName',
+        accessor: (result: LabwareResultData) =>
+          valueFromSamples(result.labware, (sample: SampleFieldsFragment) => sample.tissue.externalName ?? '')
+      },
+      {
+        Header: 'Donor Id',
+        id: 'donorId',
+        accessor: (result: LabwareResultData) =>
+          valueFromSamples(result.labware, (sample: SampleFieldsFragment) => sample.tissue.donor.donorName ?? '')
+      },
+      {
+        Header: 'Tissue Type',
+        id: 'tissueType',
+        accessor: (result: LabwareResultData) =>
+          valueFromSamples(
+            result.labware,
+            (sample: SampleFieldsFragment) => sample.tissue.spatialLocation.tissueType.name ?? ''
+          )
+      },
+      {
+        Header: 'Spatial location',
+        id: 'spatialLocation',
+        accessor: (result: LabwareResultData) =>
+          valueFromSamples(result.labware, (sample: SampleFieldsFragment) => String(sample.tissue.spatialLocation.code))
+      },
+      {
+        Header: 'Replicate',
+        id: 'replicate',
+        accessor: (result: LabwareResultData) =>
+          valueFromSamples(result.labware, (sample: SampleFieldsFragment) => String(sample.tissue.replicate))
+      },
+      {
+        Header: 'Fixative',
+        id: 'fixative',
+        accessor: (result: LabwareResultData) =>
+          result.labware.slots[0].samples.length > 0 ? result.labware.slots[0].samples[0].tissue.fixative.name : ''
+      },
+      {
+        Header: 'Solution',
+        id: 'solution',
+        accessor: (result: LabwareResultData) => result.extraData ?? ''
+      }
+    ];
+  }, []);
+
+  const formatSuccessData = React.useCallback(
+    (labware: LabwareFieldsFragment[]) => {
+      return labware.map((lw, indx) => {
+        return {
+          labware: lw,
+          extraData: registrationInfo.solutions[indx].name
+        };
+      });
+    },
+    [registrationInfo.solutions]
+  );
 
   /**These are changes required for labels in Registration page for Original sample registration
    * The changes are mapped here so that Registration and RegistrationForm components  can be reused **/
@@ -163,7 +231,12 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
     .set('Embedding', 'Solution')
     .set('Optional', ['Replicate Number', 'External Identifier']);
   return (
-    <Registration<RegisterOriginalSamplesMutationVariables, RegistrationFormOriginalSample, RegistrationFormBlockSample>
+    <Registration<
+      RegisterOriginalSamplesMutationVariables,
+      RegistrationFormOriginalSample,
+      RegistrationFormBlockSample,
+      LabwareResultData
+    >
       title={'Original Sample Registration'}
       availableLabwareTypes={availableLabwareTypes}
       registrationInfo={registrationInfo}
@@ -173,6 +246,7 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
       registrationValidationSchema={validationSchema}
       successDisplayTableColumns={resultColumns}
       keywordsMap={keywords}
+      formatSuccessData={formatSuccessData}
     />
   );
 }

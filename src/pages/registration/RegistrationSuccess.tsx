@@ -13,12 +13,33 @@ import AppShell from '../../components/AppShell';
 import { Column } from 'react-table';
 import { history } from '../../lib/sdk';
 
-interface RegistrationSuccessProps {
-  labware: LabwareFieldsFragment[];
-  columns: Column<LabwareFieldsFragment>[];
+export interface LabwareIncludeType extends Object {
+  labware: LabwareFieldsFragment;
 }
 
-const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({ labware, columns }) => {
+type RegistrationSuccessProps<T extends Required<LabwareIncludeType> | LabwareFieldsFragment> = {
+  successData: T[];
+  columns: Column<T>[];
+};
+
+const RegistrationSuccess = <T extends Required<LabwareIncludeType> | LabwareFieldsFragment>({
+  successData,
+  columns
+}: RegistrationSuccessProps<T>) => {
+  const labware = React.useMemo(() => {
+    if (successData.length > 0 && 'id' in successData[0] && 'barcode' in successData[0]) {
+      return successData as LabwareFieldsFragment[];
+    } else {
+      if (successData.length > 0 && 'labware' in successData[0]) {
+        return successData.map((data) => {
+          const labwareType: LabwareIncludeType = data as LabwareIncludeType;
+          return labwareType.labware;
+        });
+      }
+    }
+    return [];
+  }, [successData]);
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -36,7 +57,7 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({ labware, colu
           </motion.div>
 
           <motion.div variants={variants.fadeInWithLift} className="flex flex-col">
-            <DataTable columns={columns} data={labware} />
+            <DataTable columns={columns} data={successData} />
           </motion.div>
 
           <div className="flex flex-row items-center sm:justify-end">
@@ -44,7 +65,7 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({ labware, colu
               variants={variants.fadeInWithLift}
               className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow"
             >
-              <LabelPrinter labwares={labware} />
+              {<LabelPrinter labwares={labware} />}
             </motion.div>
           </div>
         </motion.div>
@@ -58,7 +79,7 @@ const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({ labware, colu
               if (labware.length > 0) {
                 sessionStorage.setItem(
                   'awaitingLabwares',
-                  labware.map((labware) => `${labware.barcode}, ${labware.labwareType.name}`).join(',')
+                  labware.map((lw) => `${lw.barcode}, ${lw.labwareType.name}`).join(',')
                 );
               }
               history.push('/store');

@@ -9,7 +9,7 @@ import ButtonBar from '../../ButtonBar';
 import BlueButton from '../../buttons/BlueButton';
 import React from 'react';
 import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
-import labwareScanTableColumns from '../../dataTable/labwareColumns';
+import labwareScanTableColumns from '../../dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import { Dictionary, groupBy } from 'lodash';
@@ -25,7 +25,7 @@ import { optionValues } from '../../forms';
 import FormikInput from '../../forms/Input';
 import PotProcessingLabwarePlan from './PotProcessingLabwarePlan';
 import ProcessingSuccess from '../ProcessingSuccess';
-import columns from '../../dataTable/labwareColumns';
+import columns from '../../dataTableColumns/labwareColumns';
 import { Prompt } from 'react-router-dom';
 import { useConfirmLeave } from '../../../lib/hooks';
 
