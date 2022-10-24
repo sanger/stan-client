@@ -29,6 +29,7 @@ import { Select } from '../components/forms/Select';
  * Success notification when slots have been copied
  */
 const ToastSuccess = () => <Success message={'Reagents transferred'} />;
+
 const PLATE_TYPES = ['Fresh Frozen - Dual Index TT Set A', 'FFPE - Dual Index TS Set A'];
 
 function DualIndexPlate() {
