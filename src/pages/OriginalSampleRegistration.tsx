@@ -39,9 +39,12 @@ type RegistrationFormOriginalSample = Omit<RegistrationFormTissue, 'blocks'> & {
 export interface RegistrationFormOriginalSampleValues {
   tissues: Array<RegistrationFormOriginalSample>;
 }
+/**Data used to display in confirmation page**/
 export type LabwareResultData = {
   labware: LabwareFieldsFragment;
-  extraData?: string;
+
+  //Any information other than labware data
+  extraData?: string[];
 };
 
 /**Define default values**/
@@ -104,47 +107,6 @@ interface RegistrationParams {
   registrationInfo: GetRegistrationInfoQuery;
 }
 
-/**
- * Builds the registerTissueSample mutation variables from the RegistrationFormTissueSampleValues
- * @param formValues
- * @return Promise<RegisterTissueSamplesMutationVariables> mutation variables wrapped in a promise
- */
-export function buildOriginalSampleMutationVariables(
-  formValues: RegistrationFormOriginalSampleValues
-): Promise<RegisterOriginalSamplesMutationVariables> {
-  return new Promise((resolve) => {
-    const samples = formValues.tissues.reduce<OriginalSampleData[]>((memo, tissue) => {
-      return [
-        ...memo,
-        ...tissue.blocks.map<OriginalSampleData>((block) => {
-          const sampleRegisterData: OriginalSampleData = {
-            species: tissue.species.trim(),
-            donorIdentifier: tissue.donorId.trim(),
-            externalIdentifier: block.externalIdentifier ? block.externalIdentifier.trim() : undefined,
-            hmdmc: tissue.hmdmc.trim(),
-            labwareType: block.labwareType.trim(),
-            lifeStage: tissue.lifeStage,
-            tissueType: tissue.tissueType.trim(),
-            spatialLocation: block.spatialLocation,
-            replicateNumber: block.replicateNumber ?? undefined,
-            fixative: block.fixative.trim(),
-            solution: block.solution.trim(),
-            sampleCollectionDate: tissue.sampleCollectionDate
-              ? tissue.sampleCollectionDate instanceof Date
-                ? tissue.sampleCollectionDate.toLocaleDateString()
-                : tissue.sampleCollectionDate
-              : undefined
-          };
-
-          return sampleRegisterData;
-        })
-      ];
-    }, []);
-
-    resolve({ request: { samples } });
-  });
-}
-
 function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
   const validationSchema = useMemo(() => {
     return buildRegistrationSchema(registrationInfo);
@@ -152,6 +114,50 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
   const availableLabwareTypes = useMemo(() => {
     return registrationInfo.labwareTypes.filter((lt) => [LabwareTypeName.POT].includes(lt.name as LabwareTypeName));
   }, [registrationInfo]);
+
+  const [sampleRegistrationData, setSampleRegistrationData] = React.useState<OriginalSampleData[]>([]);
+
+  /**
+   * Builds the registerTissueSample mutation variables from the RegistrationFormTissueSampleValues
+   * @param formValues
+   * @return Promise<RegisterTissueSamplesMutationVariables> mutation variables wrapped in a promise
+   */
+  const buildOriginalSampleMutationVariables = React.useCallback(
+    (formValues: RegistrationFormOriginalSampleValues): Promise<RegisterOriginalSamplesMutationVariables> => {
+      const samples = formValues.tissues.reduce<OriginalSampleData[]>((memo, tissue) => {
+        return [
+          ...memo,
+          ...tissue.blocks.map<OriginalSampleData>((block) => {
+            const sampleRegisterData: OriginalSampleData = {
+              species: tissue.species.trim(),
+              donorIdentifier: tissue.donorId.trim(),
+              externalIdentifier: block.externalIdentifier ? block.externalIdentifier.trim() : undefined,
+              hmdmc: tissue.hmdmc.trim(),
+              labwareType: block.labwareType.trim(),
+              lifeStage: tissue.lifeStage,
+              tissueType: tissue.tissueType.trim(),
+              spatialLocation: block.spatialLocation,
+              replicateNumber: block.replicateNumber ?? undefined,
+              fixative: block.fixative.trim(),
+              solution: block.solution.trim(),
+              sampleCollectionDate: tissue.sampleCollectionDate
+                ? tissue.sampleCollectionDate instanceof Date
+                  ? tissue.sampleCollectionDate.toLocaleDateString()
+                  : tissue.sampleCollectionDate
+                : undefined
+            };
+
+            return sampleRegisterData;
+          })
+        ];
+      }, []);
+      setSampleRegistrationData(samples);
+      return new Promise((resolve) => {
+        resolve({ request: { samples } });
+      });
+    },
+    [setSampleRegistrationData]
+  );
 
   const resultColumns: Array<Column<LabwareResultData>> = React.useMemo(() => {
     return [
@@ -166,19 +172,19 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
         accessor: (result: LabwareResultData) => result.labware.labwareType.name
       },
       {
-        Header: 'External Name',
-        id: 'externalName',
+        Header: 'External ID',
+        id: 'externalID',
         accessor: (result: LabwareResultData) =>
           valueFromSamples(result.labware, (sample: SampleFieldsFragment) => sample.tissue.externalName ?? '')
       },
       {
-        Header: 'Donor Id',
+        Header: 'Donor ID',
         id: 'donorId',
         accessor: (result: LabwareResultData) =>
           valueFromSamples(result.labware, (sample: SampleFieldsFragment) => sample.tissue.donor.donorName ?? '')
       },
       {
-        Header: 'Tissue Type',
+        Header: 'Tissue type',
         id: 'tissueType',
         accessor: (result: LabwareResultData) =>
           valueFromSamples(
@@ -207,7 +213,8 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
       {
         Header: 'Solution',
         id: 'solution',
-        accessor: (result: LabwareResultData) => result.extraData ?? ''
+        accessor: (result: LabwareResultData) =>
+          result.extraData && result.extraData.length > 0 ? result.extraData[0] : ''
       }
     ];
   }, []);
@@ -217,11 +224,14 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
       return labware.map((lw, indx) => {
         return {
           labware: lw,
-          extraData: registrationInfo.solutions[indx].name
+          extraData:
+            sampleRegistrationData && sampleRegistrationData.length > indx
+              ? [sampleRegistrationData[indx].solution]
+              : []
         };
       });
     },
-    [registrationInfo.solutions]
+    [registrationInfo.solutions, sampleRegistrationData]
   );
 
   /**These are changes required for labels in Registration page for Original sample registration

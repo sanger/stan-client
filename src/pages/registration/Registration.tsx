@@ -12,7 +12,7 @@ import {
 } from '../../types/sdk';
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
-import RegistrationSuccess, { LabwareIncludeType } from './RegistrationSuccess';
+import RegistrationSuccess, { LabwareContainType } from './RegistrationSuccess';
 import { useConfirmLeave } from '../../lib/hooks';
 import { Column } from 'react-table';
 import { createRegistrationMachine } from '../../lib/machines/registration/registrationMachine';
@@ -66,6 +66,7 @@ interface RegistrationParams<M, T, R extends Object> {
    * Validation schema for form input
    */
   registrationValidationSchema: Yup.ObjectSchema<any>;
+
   /**
    * Columns to display on succesful registration
    */
@@ -79,7 +80,14 @@ interface RegistrationParams<M, T, R extends Object> {
   keywordsMap?: Map<TextType, string>;
 }
 
-function Registration<M, T extends TissueValues<B>, B, R extends Required<LabwareIncludeType> | LabwareFieldsFragment>({
+/**
+ * M - Represents mutation data structure
+ * T - Tissue data structure
+ * B - Block data structure
+ * R - Mutation result data
+ **/
+
+function Registration<M, T extends TissueValues<B>, B, R extends Required<LabwareContainType> | LabwareFieldsFragment>({
   title,
   availableLabwareTypes,
   registrationInfo,

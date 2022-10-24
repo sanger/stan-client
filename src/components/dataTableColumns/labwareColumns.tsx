@@ -65,7 +65,7 @@ const spatialLocation: ColumnFactory = () => {
 const replicate: ColumnFactory = () => {
   return {
     Header: 'Replicate',
-    accessor: (labware) => valueFromSamples(labware, (sample) => String(sample.tissue.replicate))
+    accessor: (labware) => valueFromSamples(labware, (sample) => String(sample.tissue.replicate ?? ''))
   };
 };
 

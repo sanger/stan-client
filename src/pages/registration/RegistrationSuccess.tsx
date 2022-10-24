@@ -13,26 +13,30 @@ import AppShell from '../../components/AppShell';
 import { Column } from 'react-table';
 import { history } from '../../lib/sdk';
 
-export interface LabwareIncludeType extends Object {
+/**Represent an object containing LabwareFieldsFragment member**/
+export interface LabwareContainType extends Object {
   labware: LabwareFieldsFragment;
 }
-
-type RegistrationSuccessProps<T extends Required<LabwareIncludeType> | LabwareFieldsFragment> = {
+/**Registration results on success should be either of LabwareContainType ( to accommodate any fields additional to LabwareFieldsFragment members) or LabwareFieldsFragment**/
+type RegistrationSuccessProps<T extends Required<LabwareContainType> | LabwareFieldsFragment> = {
   successData: T[];
   columns: Column<T>[];
 };
 
-const RegistrationSuccess = <T extends Required<LabwareIncludeType> | LabwareFieldsFragment>({
+const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFieldsFragment>({
   successData,
   columns
 }: RegistrationSuccessProps<T>) => {
+  /**Memoised labware from successData**/
   const labware = React.useMemo(() => {
+    /**Is Result of type LabwareFieldsFragment**/
     if (successData.length > 0 && 'id' in successData[0] && 'barcode' in successData[0]) {
       return successData as LabwareFieldsFragment[];
     } else {
+      /**Is Result of type LabwareContainType**/
       if (successData.length > 0 && 'labware' in successData[0]) {
         return successData.map((data) => {
-          const labwareType: LabwareIncludeType = data as LabwareIncludeType;
+          const labwareType: LabwareContainType = data as LabwareContainType;
           return labwareType.labware;
         });
       }
