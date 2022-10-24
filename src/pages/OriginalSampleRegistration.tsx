@@ -231,7 +231,7 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
         };
       });
     },
-    [registrationInfo.solutions, sampleRegistrationData]
+    [sampleRegistrationData]
   );
 
   /**These are changes required for labels in Registration page for Original sample registration
