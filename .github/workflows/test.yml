@@ -29,10 +29,11 @@ jobs:
         with:
           install-command: yarn --frozen-lockfile --silent
           build: yarn build
-          start: npx serve -s build -p 3000
+          start: yarn start
           wait-on: "http://localhost:3000"
           config: baseUrl=http://localhost:3000
           timeout-minutes: 5
+          browser: chrome
 
   jest:
     name: Run unit tests
