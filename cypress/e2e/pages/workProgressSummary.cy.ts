@@ -37,6 +37,24 @@ describe('Work Progress Summary', () => {
             });
         });
       });
+      context('clear filter', () => {
+        it('is disabled when there are no url params', () => {
+          cy.findByRole('button', { name: /Clear filter/i }).should('be.disabled');
+        });
+        it('is enabled when there are url params', () => {
+          cy.visit('./work_progress_summary?searchType=Work%20Type&searchValues[]=Work%20Type%201');
+          cy.findByRole('button', { name: /Clear filter/i }).should('be.enabled');
+        });
+        it('it clears the url params and resets the table when clicked', () => {
+          cy.visit('./work_progress_summary?searchType=Work%20Type&searchValues[]=Work%20Type%201');
+          cy.findByRole('button', { name: /Clear filter/i }).click();
+          // Check url has removed params
+          cy.url().should('equal', 'http://localhost:3000/work_progress_summary');
+          // Check table has data (bit crude but difficult to check fully)
+          cy.findByRole('table').contains('unstarted');
+          cy.findByRole('table').contains('active');
+        });
+      });
     });
   });
 
@@ -71,6 +89,8 @@ describe('Work Progress Summary', () => {
       it('correctly applies the filters on the table data when given through a url param', () => {
         cy.visit('./work_progress_summary?searchType=Work%20Type&searchValues[]=Work%20Type%201');
         cy.findByRole('table').contains('Work Type 1');
+        // Check there are no other work types
+        cy.findByRole('table').get('Work Type 2').should('not.exist');
       });
 
       it('shows a notification when no results match the filter', () => {

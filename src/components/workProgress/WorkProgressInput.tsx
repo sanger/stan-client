@@ -82,7 +82,7 @@ export default function WorkProgressInput({ urlParams, workTypes, searchTypes }:
 
   return (
     <div
-      className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4"
+      className="mx-auto max-w-screen-lg mb-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4"
       data-testid={'search'}
     >
       <Heading level={3} showBorder={false}>

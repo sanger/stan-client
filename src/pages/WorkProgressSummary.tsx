@@ -16,6 +16,8 @@ import WorkProgressInput, {
 } from '../components/workProgress/WorkProgressInput';
 import { useLocation } from 'react-router-dom';
 import { WorkProgressUrlParams } from './WorkProgress';
+import BlueButton from '../components/buttons/BlueButton';
+import { history } from '../lib/sdk';
 
 const defaultInitialValues: WorkProgressUrlParams = {
   searchType: WorkProgressSearchType.WorkType,
@@ -153,11 +155,18 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
         <AppShell.Title>Spatial Genomics Platform Status</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
-        <WorkProgressInput
-          urlParams={memoUrlParams ?? defaultInitialValues}
-          workTypes={workTypes}
-          searchTypes={[WorkProgressSearchType.WorkType, WorkProgressSearchType.Status]}
-        />
+        <div className="mx-auto max-w-screen-lg bg-gray-100 border border-gray-200 bg-gray-100 rounded-md">
+          <WorkProgressInput
+            urlParams={memoUrlParams ?? defaultInitialValues}
+            workTypes={workTypes}
+            searchTypes={[WorkProgressSearchType.WorkType, WorkProgressSearchType.Status]}
+          />
+          <div className="flex justify-end px-6 pb-6">
+            <BlueButton type="reset" disabled={!memoUrlParams} onClick={() => history.push(location.pathname)}>
+              Clear filter
+            </BlueButton>
+          </div>
+        </div>
         <div className="mx-auto">
           {workProgressSummaryData.length > 0 ? (
             <>
@@ -216,42 +225,42 @@ export const summaryStatusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus
 export default WorkProgressSummary;
 const columns: Column<WorkProgressSummaryTableEntry>[] = [
   {
-    Header: () => <p className="font-bold text-center inline-block">Work Type</p>,
+    Header: 'Work Type',
     accessor: 'workType',
     sortType: (rowA, rowB) => {
       return alphaNumericSortDefault(rowA.original.workType, rowB.original.workType);
     }
   },
   {
-    Header: () => <p className="font-bold text-center">Status</p>,
+    Header: 'Status',
     accessor: 'status',
     sortType: (rowA, rowB) => {
       return summaryStatusSort(rowA.original.status, rowB.original.status);
     }
   },
   {
-    Header: () => <p className="font-bold text-center">Number of Work Requests</p>,
+    Header: 'Number of Work Requests',
     accessor: 'numWorks',
     Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
       return <p className="text-center">{props.row.original.numWorks}</p>;
     }
   },
   {
-    Header: () => <p className="font-bold text-center">Total Number of Blocks</p>,
+    Header: 'Total Number of Blocks',
     accessor: 'totalNumBlocks',
     Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
       return <p className="text-center">{props.row.original.totalNumBlocks}</p>;
     }
   },
   {
-    Header: () => <p className="font-bold text-center">Total Number of Slides</p>,
+    Header: 'Total Number of Slides',
     accessor: 'totalNumSlides',
     Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
       return <p className="text-center">{props.row.original.totalNumSlides}</p>;
     }
   },
   {
-    Header: () => <p className="font-bold text-center">Total Number of Original Samples</p>,
+    Header: 'Total Number of Original Samples',
     accessor: 'totalNumOriginalSamples',
     Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
       return <p className="text-center">{props.row.original.totalNumOriginalSamples}</p>;
