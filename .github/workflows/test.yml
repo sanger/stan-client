@@ -13,7 +13,7 @@ jobs:
   cypress:
     name: Run cypress tests
     runs-on: ubuntu-latest
-    container: cypress/browsers:chrome69
+    container: cypress/included:9.4.1
     steps:
       - uses: actions/checkout@v2
         name: Checkout
