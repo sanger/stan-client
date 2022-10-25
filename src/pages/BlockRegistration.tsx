@@ -174,7 +174,7 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
       registrationService={registrationService.registerTissues}
       registrationValidationSchema={validationSchema}
       successDisplayTableColumns={resultColumns}
-      formatSuccessData={(labware) => labware}
+      formatSuccessData={(registrationResult) => registrationResult.labware}
     />
   );
 }

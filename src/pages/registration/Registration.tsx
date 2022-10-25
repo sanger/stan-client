@@ -72,7 +72,7 @@ interface RegistrationParams<M, T, R extends Object> {
    */
   successDisplayTableColumns: Column<R>[];
 
-  formatSuccessData: (labware: LabwareFieldsFragment[]) => R[];
+  formatSuccessData: (registrationResult: RegisterResultFieldsFragment) => R[];
 
   /**
    * Change in default keywords to display
@@ -128,7 +128,7 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
   if (current.matches('complete') && registrationResult) {
     return (
       <RegistrationSuccess<R>
-        successData={formatSuccessData(registrationResult.labware)}
+        successData={formatSuccessData(registrationResult)}
         columns={successDisplayTableColumns}
       />
     );

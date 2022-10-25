@@ -5,7 +5,8 @@ import {
   RegisterOriginalSamplesMutationVariables,
   OriginalSampleData,
   LabwareFieldsFragment,
-  SampleFieldsFragment
+  SampleFieldsFragment,
+  RegisterResultFieldsFragment
 } from '../types/sdk';
 import * as Yup from 'yup';
 import RegistrationValidation from '../lib/validation/registrationValidation';
@@ -115,8 +116,6 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
     return registrationInfo.labwareTypes.filter((lt) => [LabwareTypeName.POT].includes(lt.name as LabwareTypeName));
   }, [registrationInfo]);
 
-  const [sampleRegistrationData, setSampleRegistrationData] = React.useState<OriginalSampleData[]>([]);
-
   /**
    * Builds the registerTissueSample mutation variables from the RegistrationFormTissueSampleValues
    * @param formValues
@@ -151,12 +150,11 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
           })
         ];
       }, []);
-      setSampleRegistrationData(samples);
       return new Promise((resolve) => {
         resolve({ request: { samples } });
       });
     },
-    [setSampleRegistrationData]
+    []
   );
 
   const resultColumns: Array<Column<LabwareResultData>> = React.useMemo(() => {
@@ -202,7 +200,7 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
         Header: 'Replicate',
         id: 'replicate',
         accessor: (result: LabwareResultData) =>
-          valueFromSamples(result.labware, (sample: SampleFieldsFragment) => String(sample.tissue.replicate))
+          valueFromSamples(result.labware, (sample: SampleFieldsFragment) => String(sample.tissue.replicate ?? ''))
       },
       {
         Header: 'Fixative',
@@ -219,20 +217,16 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
     ];
   }, []);
 
-  const formatSuccessData = React.useCallback(
-    (labware: LabwareFieldsFragment[]) => {
-      return labware.map((lw, indx) => {
-        return {
-          labware: lw,
-          extraData:
-            sampleRegistrationData && sampleRegistrationData.length > indx
-              ? [sampleRegistrationData[indx].solution]
-              : []
-        };
-      });
-    },
-    [sampleRegistrationData]
-  );
+  const formatSuccessData = React.useCallback((registerResult: RegisterResultFieldsFragment) => {
+    return registerResult.labware.map((lw) => {
+      return {
+        labware: lw,
+        extraData: [
+          registerResult.labwareSolutions.find((lwSolution) => lwSolution?.barcode === lw.barcode)?.solutionName ?? ''
+        ]
+      };
+    });
+  }, []);
 
   /**These are changes required for labels in Registration page for Original sample registration
    * The changes are mapped here so that Registration and RegistrationForm components  can be reused **/
