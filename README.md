@@ -81,9 +81,14 @@ The default handlers for `msw` are in `/src/mocks/handlers.ts`.
 
 If using IntelliJ, install the [Cypress](https://plugins.jetbrains.com/plugin/13819-cypress-support) plugin to allow running tests inside the IDE.
 
+### `yarn test:unit`
+
+Does the same as `yarn jest`. It runs all the unit tests in the `/tests` directory using jest.
+
 ### `yarn test`
 
 Does the same as `yarn test:open` but runs all `cypress` tests on the command line, instead of using its launcher.
+
 
 ### `yarn lint`
 
