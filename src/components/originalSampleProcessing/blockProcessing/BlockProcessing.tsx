@@ -10,7 +10,7 @@ import ButtonBar from '../../ButtonBar';
 import BlueButton from '../../buttons/BlueButton';
 import React from 'react';
 import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
-import labwareScanTableColumns from '../../dataTableColumns/labwareColumns';
+import columns from '../../dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import BlockProcessingLabwarePlan from './BlockProcessingLabwarePlan';
@@ -20,7 +20,6 @@ import Planner, { PlanChangedProps } from '../../planning/Planner';
 import createFormMachine from '../../../lib/machines/form/formMachine';
 import { stanCore } from '../../../lib/sdk';
 import WorkNumberSelect from '../../WorkNumberSelect';
-import columns from '../../dataTableColumns/labwareColumns';
 import Warning from '../../notifications/Warning';
 import variants from '../../../lib/motionVariants';
 import { motion } from 'framer-motion';
@@ -405,11 +404,11 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                     onPlanChanged={onPlanChanged}
                     buildPlanLayouts={buildPlanLayouts}
                     columns={[
-                      labwareScanTableColumns.barcode(),
+                      columns.barcode(),
                       discardSourceColumn,
-                      labwareScanTableColumns.donorId(),
-                      labwareScanTableColumns.tissueType(),
-                      labwareScanTableColumns.spatialLocation()
+                      columns.donorId(),
+                      columns.tissueType(),
+                      columns.spatialLocation()
                     ]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                   />
