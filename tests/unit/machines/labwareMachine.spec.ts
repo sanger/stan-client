@@ -45,7 +45,7 @@ describe('labwareMachine', () => {
     });
   });
   describe('BARCODE_SCANNED', () => {
-    context('when the labware with this barcode is already in the table', () => {
+    describe('when the labware with this barcode is already in the table', () => {
       it('transitions to idle.error with an error message', (done) => {
         const mockLabwareTableMachine = createLabwareMachine().withContext(
           Object.assign({}, createLabwareMachine().context, {
@@ -59,7 +59,7 @@ describe('labwareMachine', () => {
 
         const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
           if (state.matches('idle.error')) {
-            expect(state.context.errorMessage).to.eq('"STAN-123" has already been scanned');
+            expect(state.context.errorMessage).toEqual('"STAN-123" has already been scanned');
             done();
           }
         });
@@ -73,12 +73,12 @@ describe('labwareMachine', () => {
       });
     });
 
-    context('when the barcode is not in the table', () => {
-      context('when the barcode is empty', () => {
+    describe('when the barcode is not in the table', () => {
+      describe('when the barcode is empty', () => {
         it('assigns an error message', (done) => {
           const machine = interpret(createLabwareMachine()).onTransition((state) => {
             if (state.matches('idle.error')) {
-              expect(state.context.errorMessage).to.eq('Barcode is required');
+              expect(state.context.errorMessage).toEqual('Barcode is required');
               done();
             }
           });
@@ -87,7 +87,7 @@ describe('labwareMachine', () => {
         });
       });
 
-      context('when barcode is valid', () => {
+      describe('when barcode is valid', () => {
         it('will look up the labware via a service', (done) => {
           const labwareMachine = createLabwareMachine();
           const mockLTMachine = labwareMachine.withConfig({
@@ -160,7 +160,7 @@ describe('labwareMachine', () => {
           });
           const machine = interpret(mockLTMachine).onTransition((state) => {
             if (state.matches('idle.normal') && state.context.labwares.length > 0) {
-              expect(state.context.labwares.length).to.eq(1);
+              expect(state.context.labwares.length).toEqual(1);
               done();
             }
           });
@@ -174,7 +174,7 @@ describe('labwareMachine', () => {
         });
       });
 
-      context("when barcode can't be found", () => {
+      describe("when barcode can't be found", () => {
         it('assigns an error message', (done) => {
           const mockLTMachine = createLabwareMachine().withConfig({
             services: {
@@ -196,7 +196,7 @@ describe('labwareMachine', () => {
 
           const machine = interpret(mockLTMachine).onTransition((state) => {
             if (state.matches('idle.error')) {
-              expect(state.context.errorMessage).to.eq('No labware found with barcode: STAN-321');
+              expect(state.context.errorMessage).toEqual('No labware found with barcode: STAN-321');
               done();
             }
           });
@@ -213,7 +213,7 @@ describe('labwareMachine', () => {
   });
 
   describe('BARCODE_SCANNED FOR LOCATION', () => {
-    context('when barcode is valid for location scan', () => {
+    describe('when barcode is valid for location scan', () => {
       it('will look up for labware in location via a service', (done) => {
         const labwareMachine = createLabwareMachine();
         const mockLTMachine = labwareMachine.withConfig({
@@ -287,7 +287,7 @@ describe('labwareMachine', () => {
         });
         const machine = interpret(mockLTMachine).onTransition((state) => {
           if (state.matches('idle.normal') && state.context.labwares.length > 0) {
-            expect(state.context.labwares.length).to.eq(2);
+            expect(state.context.labwares.length).toEqual(2);
             done();
           }
         });
@@ -322,8 +322,8 @@ describe('labwareMachine', () => {
 
       const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         if (state.matches('idle.success')) {
-          expect(state.context.successMessage).to.eq('"STAN-123" removed');
-          expect(state.context.labwares.length).to.eq(0);
+          expect(state.context.successMessage).toEqual('"STAN-123" removed');
+          expect(state.context.labwares.length).toEqual(0);
           done();
         }
       });
