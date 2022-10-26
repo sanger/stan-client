@@ -161,6 +161,8 @@ describe('WorkProgressInput.tsx', () => {
       expect(searchTypeSelector.value).toEqual('Work Type');
       const searchValues = screen.getByTestId('valueSelect') as HTMLSelectElement;
       expect(searchValues.value).toEqual('Work Type 1');
+      expect(searchValues.options.length).toEqual(1);
+      expect(searchValues.options[0].value).toEqual('Work Type 1');
 
       expect(screen.getByRole('button')).toBeEnabled();
     });
