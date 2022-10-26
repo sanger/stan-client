@@ -1,7 +1,6 @@
 import { render, screen, cleanup, act } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import WorkNumberSelect from '../../../src/components/WorkNumberSelect';
-import userEvent from '@testing-library/user-event';
 import { FindWorkInfoQuery } from '../../../src/types/sdk';
 
 afterEach(() => {
@@ -11,7 +10,7 @@ afterEach(() => {
 // Mocking FindWorkInfo
 jest.mock('../../../src/lib/sdk', () => ({
   stanCore: {
-    FindWorkInfo: jest.fn().mockImplementationOnce(() => {
+    FindWorkInfo: jest.fn().mockImplementation(() => {
       return new Promise<FindWorkInfoQuery>((resolve) => {
         resolve({
           works: [
@@ -62,29 +61,23 @@ describe('WorkNumberSelect.tsx', () => {
         render(<WorkNumberSelect label={'Work Number'} />);
       });
 
-      const workNumberSelect = screen.getByTestId('workNumber');
+      const workNumberSelect = screen.getByTestId('workNumber') as HTMLSelectElement;
       // Shows the select component
       expect(workNumberSelect).toBeInTheDocument();
 
       //Shows an empty value
       expect(workNumberSelect).toHaveValue('');
-      expect(screen.getAllByRole('option').length).toBe(3);
     });
   });
 
   describe('onSelection', () => {
     it('displays selected work number', () => {
-      render(<WorkNumberSelect label={'Work Number'} />);
+      act(() => {
+        render(<WorkNumberSelect label={'Work Number'} />);
+      });
       const workNumberSelect = screen.getByTestId('workNumber') as HTMLSelectElement;
-
-      userEvent.selectOptions(
-        // Find the select element,
-        workNumberSelect,
-        // Find and select the WORK_1 option
-        screen.getByRole('option', { name: 'WORK_1', selected: true })
-      );
-      const selectedOptionElement = screen.getByRole('option', { name: 'WORK_1' }) as HTMLOptionElement;
-      expect(selectedOptionElement.selected).toBe(true);
+      workNumberSelect.options[1].selected = true;
+      expect(workNumberSelect.selectedIndex).toBe(1);
     });
   });
 });
