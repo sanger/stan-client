@@ -3,27 +3,29 @@ import {
   CommentFieldsFragment,
   LabwareFieldsFragment,
   LabwareResult as CoreLabwareResult,
-  PassFail
+  PassFail,
+  SlideCosting
 } from '../../types/sdk';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import Panel from '../Panel';
 import LabwareResult from '../labwareResult/LabwareResult';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
+import { objectKeys } from '../../lib/helpers';
+import FormikSelect from '../forms/Select';
 
 type SlideProcessingProps = {
   comments: CommentFieldsFragment[];
   labware: LabwareFieldsFragment;
-  labwareResult: CoreLabwareResult | undefined;
+  labwareResultProps: CoreLabwareResult | undefined;
   removeLabware: (barcode: string) => void;
 };
-const SlideProcessing = ({ comments, labware, labwareResult, removeLabware }: SlideProcessingProps) => {
-  const { setFieldValue } = useFormikContext<VisiumQCFormData>();
+const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware }: SlideProcessingProps) => {
+  const { setFieldValue, values } = useFormikContext<VisiumQCFormData>();
   /***
    * When labwares changes, the labwareResults has to be initialized accordingly
    */
-
-  const [labwareResultTest, setLabwareResult] = React.useState<CoreLabwareResult | undefined>(labwareResult);
+  const [labwareResult, setLabwareResult] = React.useState<CoreLabwareResult | undefined>(labwareResultProps);
 
   React.useEffect(() => {
     if (!labware) {
@@ -35,20 +37,54 @@ const SlideProcessing = ({ comments, labware, labwareResult, removeLabware }: Sl
       sampleResults: labware.slots.filter(isSlotFilled).map((slot) => ({
         address: slot.address,
         result: PassFail.Pass
-      }))
+      })),
+      costing: values.costing
     });
-  }, [setFieldValue, labware]);
+  }, [setFieldValue, labware, values.costing]);
 
   React.useEffect(() => {
-    setFieldValue('labwareResult', labwareResultTest);
-  }, [labwareResultTest, setFieldValue]);
+    if (values.costing) {
+      setFieldValue('labwareResult', { ...labwareResult, costing: values.costing });
+    }
+  }, [labwareResult, setFieldValue]);
 
   return (
     <>
-      {labwareResult && labware && (
+      {labwareResultProps && labware && (
         <Panel key={labware.barcode}>
+          <div className={'w-1/2'}>
+            <FormikSelect
+              label={'Slide costings'}
+              name={'costing'}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                const slideCosting =
+                  e.currentTarget.value.length === 0 ? undefined : (e.currentTarget.value as unknown as SlideCosting);
+                setFieldValue('costing', e.currentTarget.value);
+                setLabwareResult(
+                  labwareResult
+                    ? {
+                        ...labwareResult,
+                        costing: slideCosting
+                      }
+                    : {
+                        barcode: labware.barcode,
+                        sampleResults: labwareResultProps.sampleResults,
+                        costing: slideCosting
+                      }
+                );
+              }}
+              emptyOption={true}
+              data-testid="slide-costing"
+            >
+              {objectKeys(SlideCosting).map((key) => (
+                <option key={key} value={SlideCosting[key]}>
+                  {SlideCosting[key]}
+                </option>
+              ))}
+            </FormikSelect>
+          </div>
           <LabwareResult
-            initialLabwareResult={labwareResult}
+            initialLabwareResult={labwareResultProps}
             labware={labware}
             availableComments={comments ? comments : []}
             onRemoveClick={removeLabware}

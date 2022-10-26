@@ -6,6 +6,7 @@ import {
   RecordOpWithSlotMeasurementsMutation,
   RecordVisiumQcMutation,
   ResultRequest,
+  SlideCosting,
   SlotMeasurementRequest
 } from '../types/sdk';
 import AppShell from '../components/AppShell';
@@ -41,6 +42,7 @@ export interface VisiumQCFormData {
   barcode: string;
   slotMeasurements?: Array<SlotMeasurementRequest>;
   labwareResult?: CoreLabwareResult;
+  costing?: SlideCosting;
 }
 
 const validationSchema = Yup.object().shape({
@@ -64,7 +66,12 @@ const validationSchema = Yup.object().shape({
       is: (value: string) => value === QCType.SLIDE_PROCESSING,
       then: Yup.array().notRequired(),
       otherwise: Yup.array().required()
-    })
+    }),
+  costing: Yup.string().when('qcType', {
+    is: (value: string) => value === QCType.SLIDE_PROCESSING,
+    then: Yup.string().oneOf(Object.values(SlideCosting)).required('Slide costing is a required field'),
+    otherwise: Yup.string().optional()
+  })
 });
 
 export default function VisiumQC({ info }: VisiumQCProps) {
@@ -73,6 +80,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
     return createFormMachine<ResultRequest, RecordVisiumQcMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
+          debugger;
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordVisiumQC({
             request: e.values
@@ -220,7 +228,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                             labware={labwares[0]}
                             removeLabware={removeLabware}
                             comments={slideProcessingComments}
-                            labwareResult={values.labwareResult}
+                            labwareResultProps={values.labwareResult}
                           />
                         );
                       } else {

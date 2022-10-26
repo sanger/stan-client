@@ -31,6 +31,9 @@ describe('Visium QC Page', () => {
       it('shows it on the page', () => {
         cy.findByText('STAN-2100').should('be.visible');
       });
+      it('shows Slide costing drop down', () => {
+        cy.findByText('Slide costings').should('be.visible');
+      });
       it('has all slots as passed', () => {
         cy.findAllByTestId('passIcon').then(($passIcons) => {
           $passIcons.each((i, icon) => {
@@ -90,13 +93,40 @@ describe('Visium QC Page', () => {
     });
     describe('On Save', () => {
       context('When there is no server error', () => {
-        before(() => {
-          cy.get('select[name="workNumber"]').select('SGP1008');
-          cy.findByRole('button', { name: /Save/i }).should('not.be.disabled').click();
+        context('When slide costing field is empty, but work number selected', () => {
+          before(() => {
+            cy.get('select[name="costing"]').select('');
+            cy.get('select[name="workNumber"]').select('SGP1008');
+          });
+          it('should display error message for Slide costing', () => {
+            cy.findByText('Slide costing is a required field').should('be.visible');
+          });
         });
-
-        it('shows a success message', () => {
-          cy.findByText('Visium QC complete').should('be.visible');
+        context('When work number is empty and slide costing field selected', () => {
+          before(() => {
+            cy.get('select[name="workNumber"]').select('');
+            cy.get('select[name="costing"]').select('Faculty');
+          });
+          it('should not enable Save button', () => {
+            cy.findByRole('button', { name: /Save/i }).should('be.disabled');
+          });
+        });
+        context('When both work number and slide costing fields are selected', () => {
+          before(() => {
+            cy.get('select[name="workNumber"]').select('SGP1008');
+            cy.get('select[name="costing"]').select('Faculty');
+          });
+          it('should  enable Save button', () => {
+            cy.findByRole('button', { name: /Save/i }).should('be.enabled');
+          });
+        });
+        context('When Save button is pressed', () => {
+          before(() => {
+            cy.findByRole('button', { name: /Save/i }).click();
+          });
+          it('shows a success message', () => {
+            cy.findByText('Visium QC complete').should('be.visible');
+          });
         });
 
         after(() => {
@@ -126,6 +156,7 @@ describe('Visium QC Page', () => {
           });
           cy.get('#labwareScanInput').type('STAN-2100{enter}');
           cy.get('select[name="workNumber"]').select('SGP1008');
+          cy.get('select[name="costing"]').select('Faculty');
           cy.findByRole('button', { name: /Save/i }).click();
         });
 
