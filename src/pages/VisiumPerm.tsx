@@ -24,7 +24,7 @@ import { FormikErrorMessage } from '../components/forms';
 import Warning from '../components/notifications/Warning';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { emptySlots, isSlotEmpty, isSlotFilled } from '../lib/helpers/slotHelper';
-import columns from '../components/dataTable/labwareColumns';
+import columns from '../components/dataTableColumns/labwareColumns';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import PermPositiveControl from '../components/forms/PermPositiveControl';
 import { ConfirmationModal } from '../components/modal/ConfirmationModal';

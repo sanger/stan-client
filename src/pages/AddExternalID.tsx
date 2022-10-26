@@ -3,7 +3,7 @@ import AppShell from '../components/AppShell';
 import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanTable from '../components/labwareScanPanel/LabwareScanPanel';
-import labwareScanTableColumns from '../components/dataTable/labwareColumns';
+import labwareScanTableColumns from '../components/dataTableColumns/labwareColumns';
 import PasteRestrictedBox from '../components/PasteRestrictedBox';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { FormikErrorMessage } from '../components/forms';

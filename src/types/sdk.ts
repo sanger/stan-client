@@ -372,6 +372,15 @@ export type RegisterClash = {
   labware: Array<Labware>;
 };
 
+/** A labware barcode and name of a solution. */
+export type LabwareSolutionName = {
+  __typename?: 'LabwareSolutionName';
+  /** The barcode of an item of labware. */
+  barcode: Scalars['String'];
+  /** The name of a solution. */
+  solutionName: Scalars['String'];
+};
+
 /** The result of a register request. It is expected to contain either labware or clashes. */
 export type RegisterResult = {
   __typename?: 'RegisterResult';
@@ -379,6 +388,8 @@ export type RegisterResult = {
   labware: Array<Labware>;
   /** The clashes that prevented registration. */
   clashes: Array<RegisterClash>;
+  /** The names of solutions used for labware barcodes, if any. */
+  labwareSolutions: Array<Maybe<LabwareSolutionName>>;
 };
 
 /** A description of a source slot in a plan request. */
@@ -2701,77 +2712,73 @@ export type MutationSetLocationCustomNameArgs = {
   customName?: InputMaybe<Scalars['String']>;
 };
 
-export type AddressPermDataFieldsFragment = { __typename?: 'AddressPermData', address: string, controlType?: ControlType | null, seconds?: number | null, selected: boolean };
-
 export type ActionFieldsFragment = { __typename?: 'Action', operationId: number, source: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, destination: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, sample: { __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } } };
 
 export type CostCodeFieldsFragment = { __typename?: 'CostCode', code: string, enabled: boolean };
-
-export type EquipmentFieldsFragment = { __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean };
 
 export type CommentFieldsFragment = { __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean };
 
 export type DestructionReasonFieldsFragment = { __typename?: 'DestructionReason', id: number, text: string, enabled: boolean };
 
-export type FixativeFieldsFragment = { __typename?: 'Fixative', name: string, enabled: boolean };
+export type HistoryEntryFieldsFragment = { __typename?: 'HistoryEntry', destinationLabwareId: number, details: Array<string>, eventId: number, sampleId?: number | null, sourceLabwareId: number, time: string, username: string, type: string, workNumber?: string | null };
+
+export type AddressPermDataFieldsFragment = { __typename?: 'AddressPermData', address: string, controlType?: ControlType | null, seconds?: number | null, selected: boolean };
+
+export type EquipmentFieldsFragment = { __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean };
 
 export type HistoryFieldsFragment = { __typename?: 'History', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }>, entries: Array<{ __typename?: 'HistoryEntry', destinationLabwareId: number, details: Array<string>, eventId: number, sampleId?: number | null, sourceLabwareId: number, time: string, username: string, type: string, workNumber?: string | null }> };
 
-export type HmdmcFieldsFragment = { __typename?: 'Hmdmc', hmdmc: string, enabled: boolean };
+export type FixativeFieldsFragment = { __typename?: 'Fixative', name: string, enabled: boolean };
 
-export type HistoryEntryFieldsFragment = { __typename?: 'HistoryEntry', destinationLabwareId: number, details: Array<string>, eventId: number, sampleId?: number | null, sourceLabwareId: number, time: string, username: string, type: string, workNumber?: string | null };
+export type HmdmcFieldsFragment = { __typename?: 'Hmdmc', hmdmc: string, enabled: boolean };
 
 export type LocationFieldsFragment = { __typename?: 'Location', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null, direction?: GridDirection | null, parent?: { __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null } | null, size?: { __typename?: 'Size', numRows: number, numColumns: number } | null, stored: Array<{ __typename?: 'StoredItem', barcode: string, address?: string | null }>, children: Array<{ __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null }> };
 
-export type LabwareTypeFieldsFragment = { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null };
-
 export type NextReplicateDataFieldsFragment = { __typename?: 'NextReplicateData', barcodes: Array<string>, donorId: number, nextReplicateNumber: number, spatialLocationId: number };
-
-export type OperationFieldsFragment = { __typename?: 'Operation', id: number, performed: string, operationType: { __typename?: 'OperationType', name: string }, actions: Array<{ __typename?: 'Action', operationId: number, source: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, destination: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, sample: { __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } } }>, user: { __typename?: 'User', username: string, role: UserRole } };
-
-export type PrinterFieldsFragment = { __typename?: 'Printer', name: string, labelTypes: Array<{ __typename?: 'LabelType', name: string }> };
-
-export type PlanActionFieldsFragment = { __typename?: 'PlanAction', newSection?: number | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } };
 
 export type LabwareFieldsFragment = { __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> };
 
-export type ReagentPlateFieldsFragment = { __typename?: 'ReagentPlate', barcode: string, plateType?: string | null, slots: Array<{ __typename?: 'ReagentSlot', address: string, used: boolean }> };
+export type OperationFieldsFragment = { __typename?: 'Operation', id: number, performed: string, operationType: { __typename?: 'OperationType', name: string }, actions: Array<{ __typename?: 'Action', operationId: number, source: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, destination: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, sample: { __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } } }>, user: { __typename?: 'User', username: string, role: UserRole } };
+
+export type LabwareTypeFieldsFragment = { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null };
+
+export type PrinterFieldsFragment = { __typename?: 'Printer', name: string, labelTypes: Array<{ __typename?: 'LabelType', name: string }> };
 
 export type ProjectFieldsFragment = { __typename?: 'Project', name: string, enabled: boolean };
 
+export type RegisterResultFieldsFragment = { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, clashes: Array<{ __typename?: 'RegisterClash', tissue: { __typename?: 'Tissue', externalName?: string | null, donor: { __typename?: 'Donor', donorName: string }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } } }, labware: Array<{ __typename?: 'Labware', barcode: string, labwareType: { __typename?: 'LabwareType', name: string } }> }>, labwareSolutions: Array<{ __typename?: 'LabwareSolutionName', barcode: string, solutionName: string } | null> };
+
+export type PlanActionFieldsFragment = { __typename?: 'PlanAction', newSection?: number | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } };
+
 export type ReleaseDestinationFieldsFragment = { __typename?: 'ReleaseDestination', name: string, enabled: boolean };
 
-export type ReagentSlotFieldsFragment = { __typename?: 'ReagentSlot', address: string, used: boolean };
-
-export type RegisterResultFieldsFragment = { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, clashes: Array<{ __typename?: 'RegisterClash', tissue: { __typename?: 'Tissue', externalName?: string | null, donor: { __typename?: 'Donor', donorName: string }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } } }, labware: Array<{ __typename?: 'Labware', barcode: string, labwareType: { __typename?: 'LabwareType', name: string } }> }> };
-
-export type SampleFieldsFragment = { __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } };
+export type ReagentPlateFieldsFragment = { __typename?: 'ReagentPlate', barcode: string, plateType?: string | null, slots: Array<{ __typename?: 'ReagentSlot', address: string, used: boolean }> };
 
 export type ReleaseRecipientFieldsFragment = { __typename?: 'ReleaseRecipient', username: string, enabled: boolean };
 
 export type SlotFieldsFragment = { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> };
 
-export type SolutionFieldsFragment = { __typename?: 'Solution', name: string, enabled: boolean };
-
 export type SlotPassFailFieldsFragment = { __typename?: 'SlotPassFail', address: string, result: PassFail, comment?: string | null };
 
-export type WorkFieldsFragment = { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } };
+export type ReagentSlotFieldsFragment = { __typename?: 'ReagentSlot', address: string, used: boolean };
 
-export type StainTypeFieldsFragment = { __typename?: 'StainType', name: string, measurementTypes: Array<string> };
+export type SampleFieldsFragment = { __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } };
 
 export type SpeciesFieldsFragment = { __typename?: 'Species', name: string, enabled: boolean };
 
 export type UserFieldsFragment = { __typename?: 'User', username: string, role: UserRole };
 
+export type SolutionFieldsFragment = { __typename?: 'Solution', name: string, enabled: boolean };
+
+export type StainTypeFieldsFragment = { __typename?: 'StainType', name: string, measurementTypes: Array<string> };
+
+export type WorkFieldsFragment = { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } };
+
 export type WorkProgressTimeStampFieldFragment = { __typename?: 'WorkProgressTimestamp', type: string, timestamp: string };
 
-export type WorkProgressFieldsFragment = { __typename?: 'WorkProgress', mostRecentOperation?: string | null, workComment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } }, timestamps: Array<{ __typename?: 'WorkProgressTimestamp', type: string, timestamp: string }> };
+export type WorkTypeFieldsFragment = { __typename?: 'WorkType', name: string, enabled: boolean };
 
 export type WorkWithCommentFieldsFragment = { __typename?: 'WorkWithComment', comment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } };
-
-export type WorkSummaryGroupFieldsFragment = { __typename?: 'WorkSummaryGroup', numWorks: number, status: WorkStatus, totalNumBlocks: number, totalNumSlides: number, totalNumOriginalSamples: number, workType: { __typename?: 'WorkType', name: string, enabled: boolean } };
-
-export type WorkTypeFieldsFragment = { __typename?: 'WorkType', name: string, enabled: boolean };
 
 export type AddCostCodeMutationVariables = Exact<{
   code: Scalars['String'];
@@ -2779,6 +2786,15 @@ export type AddCostCodeMutationVariables = Exact<{
 
 
 export type AddCostCodeMutation = { __typename?: 'Mutation', addCostCode: { __typename?: 'CostCode', code: string, enabled: boolean } };
+
+export type AddDestructionReasonMutationVariables = Exact<{
+  text: Scalars['String'];
+}>;
+
+
+export type AddDestructionReasonMutation = { __typename?: 'Mutation', addDestructionReason: { __typename?: 'DestructionReason', id: number, text: string, enabled: boolean } };
+
+export type WorkProgressFieldsFragment = { __typename?: 'WorkProgress', mostRecentOperation?: string | null, workComment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } }, timestamps: Array<{ __typename?: 'WorkProgressTimestamp', type: string, timestamp: string }> };
 
 export type AddCommentMutationVariables = Exact<{
   category: Scalars['String'];
@@ -2788,13 +2804,6 @@ export type AddCommentMutationVariables = Exact<{
 
 export type AddCommentMutation = { __typename?: 'Mutation', addComment: { __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean } };
 
-export type AddDestructionReasonMutationVariables = Exact<{
-  text: Scalars['String'];
-}>;
-
-
-export type AddDestructionReasonMutation = { __typename?: 'Mutation', addDestructionReason: { __typename?: 'DestructionReason', id: number, text: string, enabled: boolean } };
-
 export type AddEquipmentMutationVariables = Exact<{
   category: Scalars['String'];
   name: Scalars['String'];
@@ -2803,20 +2812,6 @@ export type AddEquipmentMutationVariables = Exact<{
 
 export type AddEquipmentMutation = { __typename?: 'Mutation', addEquipment: { __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean } };
 
-export type AddExternalIdMutationVariables = Exact<{
-  request: AddExternalIdRequest;
-}>;
-
-
-export type AddExternalIdMutation = { __typename?: 'Mutation', addExternalID: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
-
-export type AddFixativeMutationVariables = Exact<{
-  name: Scalars['String'];
-}>;
-
-
-export type AddFixativeMutation = { __typename?: 'Mutation', addFixative: { __typename?: 'Fixative', name: string, enabled: boolean } };
-
 export type AddProjectMutationVariables = Exact<{
   name: Scalars['String'];
 }>;
@@ -2824,12 +2819,7 @@ export type AddProjectMutationVariables = Exact<{
 
 export type AddProjectMutation = { __typename?: 'Mutation', addProject: { __typename?: 'Project', name: string, enabled: boolean } };
 
-export type AddReleaseDestinationMutationVariables = Exact<{
-  name: Scalars['String'];
-}>;
-
-
-export type AddReleaseDestinationMutation = { __typename?: 'Mutation', addReleaseDestination: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } };
+export type WorkSummaryGroupFieldsFragment = { __typename?: 'WorkSummaryGroup', numWorks: number, status: WorkStatus, totalNumBlocks: number, totalNumSlides: number, totalNumOriginalSamples: number, workType: { __typename?: 'WorkType', name: string, enabled: boolean } };
 
 export type AddHmdmcMutationVariables = Exact<{
   hmdmc: Scalars['String'];
@@ -2845,12 +2835,33 @@ export type AddSolutionMutationVariables = Exact<{
 
 export type AddSolutionMutation = { __typename?: 'Mutation', addSolution: { __typename?: 'Solution', name: string, enabled: boolean } };
 
+export type AddExternalIdMutationVariables = Exact<{
+  request: AddExternalIdRequest;
+}>;
+
+
+export type AddExternalIdMutation = { __typename?: 'Mutation', addExternalID: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
+
+export type AddFixativeMutationVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type AddFixativeMutation = { __typename?: 'Mutation', addFixative: { __typename?: 'Fixative', name: string, enabled: boolean } };
+
 export type AddSpeciesMutationVariables = Exact<{
   name: Scalars['String'];
 }>;
 
 
 export type AddSpeciesMutation = { __typename?: 'Mutation', addSpecies: { __typename?: 'Species', name: string, enabled: boolean } };
+
+export type AddUserMutationVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type AddUserMutation = { __typename?: 'Mutation', addUser: { __typename?: 'User', username: string, role: UserRole } };
 
 export type AddReleaseRecipientMutationVariables = Exact<{
   username: Scalars['String'];
@@ -2866,26 +2877,12 @@ export type AddWorkTypeMutationVariables = Exact<{
 
 export type AddWorkTypeMutation = { __typename?: 'Mutation', addWorkType: { __typename?: 'WorkType', name: string, enabled: boolean } };
 
-export type AliquotMutationVariables = Exact<{
-  request: AliquotRequest;
+export type AddReleaseDestinationMutationVariables = Exact<{
+  name: Scalars['String'];
 }>;
 
 
-export type AliquotMutation = { __typename?: 'Mutation', aliquot: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', operationType: { __typename?: 'OperationType', name: string }, actions: Array<{ __typename?: 'Action', sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } }> }> } };
-
-export type AddUserMutationVariables = Exact<{
-  username: Scalars['String'];
-}>;
-
-
-export type AddUserMutation = { __typename?: 'Mutation', addUser: { __typename?: 'User', username: string, role: UserRole } };
-
-export type ConfirmSectionMutationVariables = Exact<{
-  request: ConfirmSectionRequest;
-}>;
-
-
-export type ConfirmSectionMutation = { __typename?: 'Mutation', confirmSection: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
+export type AddReleaseDestinationMutation = { __typename?: 'Mutation', addReleaseDestination: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } };
 
 export type ConfirmMutationVariables = Exact<{
   request: ConfirmOperationRequest;
@@ -2894,19 +2891,12 @@ export type ConfirmMutationVariables = Exact<{
 
 export type ConfirmMutation = { __typename?: 'Mutation', confirmOperation: { __typename?: 'ConfirmOperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
 
-export type DestroyMutationVariables = Exact<{
-  request: DestroyRequest;
+export type ConfirmSectionMutationVariables = Exact<{
+  request: ConfirmSectionRequest;
 }>;
 
 
-export type DestroyMutation = { __typename?: 'Mutation', destroy: { __typename?: 'DestroyResult', destructions: Array<{ __typename?: 'Destruction', labware?: { __typename?: 'Labware', barcode: string } | null }> } };
-
-export type EmptyLocationMutationVariables = Exact<{
-  barcode: Scalars['String'];
-}>;
-
-
-export type EmptyLocationMutation = { __typename?: 'Mutation', empty: { __typename?: 'UnstoreResult', numUnstored: number } };
+export type ConfirmSectionMutation = { __typename?: 'Mutation', confirmSection: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
 
 export type CreateWorkMutationVariables = Exact<{
   prefix: Scalars['String'];
@@ -2922,12 +2912,38 @@ export type CreateWorkMutationVariables = Exact<{
 
 export type CreateWorkMutation = { __typename?: 'Mutation', createWork: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } };
 
+export type AliquotMutationVariables = Exact<{
+  request: AliquotRequest;
+}>;
+
+
+export type AliquotMutation = { __typename?: 'Mutation', aliquot: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', operationType: { __typename?: 'OperationType', name: string }, actions: Array<{ __typename?: 'Action', sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } }> }> } };
+
+export type DestroyMutationVariables = Exact<{
+  request: DestroyRequest;
+}>;
+
+
+export type DestroyMutation = { __typename?: 'Mutation', destroy: { __typename?: 'DestroyResult', destructions: Array<{ __typename?: 'Destruction', labware?: { __typename?: 'Labware', barcode: string } | null }> } };
+
 export type ExtractMutationVariables = Exact<{
   request: ExtractRequest;
 }>;
 
 
 export type ExtractMutation = { __typename?: 'Mutation', extract: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', operationType: { __typename?: 'OperationType', name: string }, actions: Array<{ __typename?: 'Action', sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } }> }> } };
+
+export type EmptyLocationMutationVariables = Exact<{
+  barcode: Scalars['String'];
+}>;
+
+
+export type EmptyLocationMutation = { __typename?: 'Mutation', empty: { __typename?: 'UnstoreResult', numUnstored: number } };
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutMutation = { __typename?: 'Mutation', logout?: string | null };
 
 export type LoginMutationVariables = Exact<{
   username: Scalars['String'];
@@ -2937,24 +2953,12 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResult', user?: { __typename?: 'User', username: string, role: UserRole } | null } };
 
-export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LogoutMutation = { __typename?: 'Mutation', logout?: string | null };
-
 export type PerformFfpeProcessingMutationVariables = Exact<{
   request: FfpeProcessingRequest;
 }>;
 
 
 export type PerformFfpeProcessingMutation = { __typename?: 'Mutation', performFFPEProcessing: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
-
-export type PerformTissuePotMutationVariables = Exact<{
-  request: PotProcessingRequest;
-}>;
-
-
-export type PerformTissuePotMutation = { __typename?: 'Mutation', performPotProcessing: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
 
 export type PerformSolutionTransferMutationVariables = Exact<{
   request: SolutionTransferRequest;
@@ -2977,21 +2981,6 @@ export type PlanMutationVariables = Exact<{
 
 export type PlanMutation = { __typename?: 'Mutation', plan: { __typename?: 'PlanResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'PlanOperation', operationType?: { __typename?: 'OperationType', name: string } | null, planActions: Array<{ __typename?: 'PlanAction', newSection?: number | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } }> }> } };
 
-export type PrintMutationVariables = Exact<{
-  barcodes: Array<Scalars['String']> | Scalars['String'];
-  printer: Scalars['String'];
-}>;
-
-
-export type PrintMutation = { __typename?: 'Mutation', printLabware?: string | null };
-
-export type RecordExtractResultMutationVariables = Exact<{
-  request: ExtractResultRequest;
-}>;
-
-
-export type RecordExtractResultMutation = { __typename?: 'Mutation', recordExtractResult: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
-
 export type RecordInPlaceMutationVariables = Exact<{
   request: InPlaceOpRequest;
 }>;
@@ -2999,26 +2988,12 @@ export type RecordInPlaceMutationVariables = Exact<{
 
 export type RecordInPlaceMutation = { __typename?: 'Mutation', recordInPlace: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }> } };
 
-export type RecordComplexStainMutationVariables = Exact<{
-  request: ComplexStainRequest;
+export type PerformTissuePotMutationVariables = Exact<{
+  request: PotProcessingRequest;
 }>;
 
 
-export type RecordComplexStainMutation = { __typename?: 'Mutation', recordComplexStain: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
-
-export type RecordOpWithSlotMeasurementsMutationVariables = Exact<{
-  request: OpWithSlotMeasurementsRequest;
-}>;
-
-
-export type RecordOpWithSlotMeasurementsMutation = { __typename?: 'Mutation', recordOpWithSlotMeasurements: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
-
-export type RecordRnaAnalysisMutationVariables = Exact<{
-  request: RnaAnalysisRequest;
-}>;
-
-
-export type RecordRnaAnalysisMutation = { __typename?: 'Mutation', recordRNAAnalysis: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
+export type PerformTissuePotMutation = { __typename?: 'Mutation', performPotProcessing: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
 
 export type RecordPermMutationVariables = Exact<{
   request: RecordPermRequest;
@@ -3027,33 +3002,34 @@ export type RecordPermMutationVariables = Exact<{
 
 export type RecordPermMutation = { __typename?: 'Mutation', recordPerm: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
 
-export type RecordReagentTransferMutationVariables = Exact<{
-  request: ReagentTransferRequest;
+export type RecordExtractResultMutationVariables = Exact<{
+  request: ExtractResultRequest;
 }>;
 
 
-export type RecordReagentTransferMutation = { __typename?: 'Mutation', reagentTransfer: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
+export type RecordExtractResultMutation = { __typename?: 'Mutation', recordExtractResult: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
 
-export type RegisterOriginalSamplesMutationVariables = Exact<{
-  request: OriginalSampleRegisterRequest;
+export type PrintMutationVariables = Exact<{
+  barcodes: Array<Scalars['String']> | Scalars['String'];
+  printer: Scalars['String'];
 }>;
 
 
-export type RegisterOriginalSamplesMutation = { __typename?: 'Mutation', registerOriginalSamples: { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, clashes: Array<{ __typename?: 'RegisterClash', tissue: { __typename?: 'Tissue', externalName?: string | null, donor: { __typename?: 'Donor', donorName: string }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } } }, labware: Array<{ __typename?: 'Labware', barcode: string, labwareType: { __typename?: 'LabwareType', name: string } }> }> } };
+export type PrintMutation = { __typename?: 'Mutation', printLabware?: string | null };
 
-export type RecordSampleProcessingCommentsMutationVariables = Exact<{
-  request: SampleProcessingCommentRequest;
+export type RecordRnaAnalysisMutationVariables = Exact<{
+  request: RnaAnalysisRequest;
 }>;
 
 
-export type RecordSampleProcessingCommentsMutation = { __typename?: 'Mutation', recordSampleProcessingComments: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
+export type RecordRnaAnalysisMutation = { __typename?: 'Mutation', recordRNAAnalysis: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
 
-export type RegisterTissuesMutationVariables = Exact<{
-  request: RegisterRequest;
+export type RecordComplexStainMutationVariables = Exact<{
+  request: ComplexStainRequest;
 }>;
 
 
-export type RegisterTissuesMutation = { __typename?: 'Mutation', register: { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, clashes: Array<{ __typename?: 'RegisterClash', tissue: { __typename?: 'Tissue', externalName?: string | null, donor: { __typename?: 'Donor', donorName: string }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } } }, labware: Array<{ __typename?: 'Labware', barcode: string, labwareType: { __typename?: 'LabwareType', name: string } }> }> } };
+export type RecordComplexStainMutation = { __typename?: 'Mutation', recordComplexStain: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
 
 export type RecordStainResultMutationVariables = Exact<{
   request: ResultRequest;
@@ -3062,12 +3038,19 @@ export type RecordStainResultMutationVariables = Exact<{
 
 export type RecordStainResultMutation = { __typename?: 'Mutation', recordStainResult: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
 
-export type ReleaseLabwareMutationVariables = Exact<{
-  releaseRequest: ReleaseRequest;
+export type RecordSampleProcessingCommentsMutationVariables = Exact<{
+  request: SampleProcessingCommentRequest;
 }>;
 
 
-export type ReleaseLabwareMutation = { __typename?: 'Mutation', release: { __typename?: 'ReleaseResult', releases: Array<{ __typename?: 'Release', id: number, labware: { __typename?: 'Labware', barcode: string }, destination: { __typename?: 'ReleaseDestination', name: string }, recipient: { __typename?: 'ReleaseRecipient', username: string } }> } };
+export type RecordSampleProcessingCommentsMutation = { __typename?: 'Mutation', recordSampleProcessingComments: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, operations: Array<{ __typename?: 'Operation', performed: string, operationType: { __typename?: 'OperationType', name: string }, user: { __typename?: 'User', username: string } }> } };
+
+export type RecordOpWithSlotMeasurementsMutationVariables = Exact<{
+  request: OpWithSlotMeasurementsRequest;
+}>;
+
+
+export type RecordOpWithSlotMeasurementsMutation = { __typename?: 'Mutation', recordOpWithSlotMeasurements: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
 
 export type RecordVisiumQcMutationVariables = Exact<{
   request: ResultRequest;
@@ -3075,6 +3058,27 @@ export type RecordVisiumQcMutationVariables = Exact<{
 
 
 export type RecordVisiumQcMutation = { __typename?: 'Mutation', recordVisiumQC: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
+
+export type RegisterOriginalSamplesMutationVariables = Exact<{
+  request: OriginalSampleRegisterRequest;
+}>;
+
+
+export type RegisterOriginalSamplesMutation = { __typename?: 'Mutation', registerOriginalSamples: { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, clashes: Array<{ __typename?: 'RegisterClash', tissue: { __typename?: 'Tissue', externalName?: string | null, donor: { __typename?: 'Donor', donorName: string }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } } }, labware: Array<{ __typename?: 'Labware', barcode: string, labwareType: { __typename?: 'LabwareType', name: string } }> }>, labwareSolutions: Array<{ __typename?: 'LabwareSolutionName', barcode: string, solutionName: string } | null> } };
+
+export type RegisterTissuesMutationVariables = Exact<{
+  request: RegisterRequest;
+}>;
+
+
+export type RegisterTissuesMutation = { __typename?: 'Mutation', register: { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, clashes: Array<{ __typename?: 'RegisterClash', tissue: { __typename?: 'Tissue', externalName?: string | null, donor: { __typename?: 'Donor', donorName: string }, spatialLocation: { __typename?: 'SpatialLocation', code: number, name: string, tissueType: { __typename?: 'TissueType', name: string } } }, labware: Array<{ __typename?: 'Labware', barcode: string, labwareType: { __typename?: 'LabwareType', name: string } }> }>, labwareSolutions: Array<{ __typename?: 'LabwareSolutionName', barcode: string, solutionName: string } | null> } };
+
+export type RegisterSectionsMutationVariables = Exact<{
+  request: SectionRegisterRequest;
+}>;
+
+
+export type RegisterSectionsMutation = { __typename?: 'Mutation', registerSections: { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }> } };
 
 export type SetCommentEnabledMutationVariables = Exact<{
   commentId: Scalars['Int'];
@@ -3084,6 +3088,13 @@ export type SetCommentEnabledMutationVariables = Exact<{
 
 export type SetCommentEnabledMutation = { __typename?: 'Mutation', setCommentEnabled: { __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean } };
 
+export type ReleaseLabwareMutationVariables = Exact<{
+  releaseRequest: ReleaseRequest;
+}>;
+
+
+export type ReleaseLabwareMutation = { __typename?: 'Mutation', release: { __typename?: 'ReleaseResult', releases: Array<{ __typename?: 'Release', id: number, labware: { __typename?: 'Labware', barcode: string }, destination: { __typename?: 'ReleaseDestination', name: string }, recipient: { __typename?: 'ReleaseRecipient', username: string } }> } };
+
 export type SetCostCodeEnabledMutationVariables = Exact<{
   code: Scalars['String'];
   enabled: Scalars['Boolean'];
@@ -3091,6 +3102,21 @@ export type SetCostCodeEnabledMutationVariables = Exact<{
 
 
 export type SetCostCodeEnabledMutation = { __typename?: 'Mutation', setCostCodeEnabled: { __typename?: 'CostCode', code: string, enabled: boolean } };
+
+export type RecordReagentTransferMutationVariables = Exact<{
+  request: ReagentTransferRequest;
+}>;
+
+
+export type RecordReagentTransferMutation = { __typename?: 'Mutation', reagentTransfer: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
+
+export type SetEquipmentEnabledMutationVariables = Exact<{
+  equipmentId: Scalars['Int'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetEquipmentEnabledMutation = { __typename?: 'Mutation', setEquipmentEnabled: { __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean } };
 
 export type SetDestructionReasonEnabledMutationVariables = Exact<{
   text: Scalars['String'];
@@ -3108,21 +3134,13 @@ export type SetFixativeEnabledMutationVariables = Exact<{
 
 export type SetFixativeEnabledMutation = { __typename?: 'Mutation', setFixativeEnabled: { __typename?: 'Fixative', name: string, enabled: boolean } };
 
-export type SetEquipmentEnabledMutationVariables = Exact<{
-  equipmentId: Scalars['Int'];
+export type SetProjectEnabledMutationVariables = Exact<{
+  name: Scalars['String'];
   enabled: Scalars['Boolean'];
 }>;
 
 
-export type SetEquipmentEnabledMutation = { __typename?: 'Mutation', setEquipmentEnabled: { __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean } };
-
-export type SetLocationCustomNameMutationVariables = Exact<{
-  locationBarcode: Scalars['String'];
-  newCustomName: Scalars['String'];
-}>;
-
-
-export type SetLocationCustomNameMutation = { __typename?: 'Mutation', setLocationCustomName: { __typename?: 'Location', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null, direction?: GridDirection | null, parent?: { __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null } | null, size?: { __typename?: 'Size', numRows: number, numColumns: number } | null, stored: Array<{ __typename?: 'StoredItem', barcode: string, address?: string | null }>, children: Array<{ __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null }> } };
+export type SetProjectEnabledMutation = { __typename?: 'Mutation', setProjectEnabled: { __typename?: 'Project', name: string, enabled: boolean } };
 
 export type SetHmdmcEnabledMutationVariables = Exact<{
   hmdmc: Scalars['String'];
@@ -3132,36 +3150,21 @@ export type SetHmdmcEnabledMutationVariables = Exact<{
 
 export type SetHmdmcEnabledMutation = { __typename?: 'Mutation', setHmdmcEnabled: { __typename?: 'Hmdmc', hmdmc: string, enabled: boolean } };
 
-export type SetProjectEnabledMutationVariables = Exact<{
+export type SetSolutionEnabledMutationVariables = Exact<{
   name: Scalars['String'];
   enabled: Scalars['Boolean'];
 }>;
 
 
-export type SetProjectEnabledMutation = { __typename?: 'Mutation', setProjectEnabled: { __typename?: 'Project', name: string, enabled: boolean } };
+export type SetSolutionEnabledMutation = { __typename?: 'Mutation', setSolutionEnabled: { __typename?: 'Solution', name: string, enabled: boolean } };
 
-export type SetReleaseRecipientEnabledMutationVariables = Exact<{
-  username: Scalars['String'];
-  enabled: Scalars['Boolean'];
+export type SetLocationCustomNameMutationVariables = Exact<{
+  locationBarcode: Scalars['String'];
+  newCustomName: Scalars['String'];
 }>;
 
 
-export type SetReleaseRecipientEnabledMutation = { __typename?: 'Mutation', setReleaseRecipientEnabled: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } };
-
-export type SetReleaseDestinationEnabledMutationVariables = Exact<{
-  name: Scalars['String'];
-  enabled: Scalars['Boolean'];
-}>;
-
-
-export type SetReleaseDestinationEnabledMutation = { __typename?: 'Mutation', setReleaseDestinationEnabled: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } };
-
-export type RegisterSectionsMutationVariables = Exact<{
-  request: SectionRegisterRequest;
-}>;
-
-
-export type RegisterSectionsMutation = { __typename?: 'Mutation', registerSections: { __typename?: 'RegisterResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }> } };
+export type SetLocationCustomNameMutation = { __typename?: 'Mutation', setLocationCustomName: { __typename?: 'Location', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null, direction?: GridDirection | null, parent?: { __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null } | null, size?: { __typename?: 'Size', numRows: number, numColumns: number } | null, stored: Array<{ __typename?: 'StoredItem', barcode: string, address?: string | null }>, children: Array<{ __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null }> } };
 
 export type SetSpeciesEnabledMutationVariables = Exact<{
   name: Scalars['String'];
@@ -3171,6 +3174,22 @@ export type SetSpeciesEnabledMutationVariables = Exact<{
 
 export type SetSpeciesEnabledMutation = { __typename?: 'Mutation', setSpeciesEnabled: { __typename?: 'Species', name: string, enabled: boolean } };
 
+export type SetReleaseDestinationEnabledMutationVariables = Exact<{
+  name: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetReleaseDestinationEnabledMutation = { __typename?: 'Mutation', setReleaseDestinationEnabled: { __typename?: 'ReleaseDestination', name: string, enabled: boolean } };
+
+export type SetReleaseRecipientEnabledMutationVariables = Exact<{
+  username: Scalars['String'];
+  enabled: Scalars['Boolean'];
+}>;
+
+
+export type SetReleaseRecipientEnabledMutation = { __typename?: 'Mutation', setReleaseRecipientEnabled: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } };
+
 export type SetUserRoleMutationVariables = Exact<{
   username: Scalars['String'];
   role: UserRole;
@@ -3178,14 +3197,6 @@ export type SetUserRoleMutationVariables = Exact<{
 
 
 export type SetUserRoleMutation = { __typename?: 'Mutation', setUserRole: { __typename?: 'User', username: string, role: UserRole } };
-
-export type SetSolutionEnabledMutationVariables = Exact<{
-  name: Scalars['String'];
-  enabled: Scalars['Boolean'];
-}>;
-
-
-export type SetSolutionEnabledMutation = { __typename?: 'Mutation', setSolutionEnabled: { __typename?: 'Solution', name: string, enabled: boolean } };
 
 export type SetWorkTypeEnabledMutationVariables = Exact<{
   name: Scalars['String'];
@@ -3195,13 +3206,6 @@ export type SetWorkTypeEnabledMutationVariables = Exact<{
 
 export type SetWorkTypeEnabledMutation = { __typename?: 'Mutation', setWorkTypeEnabled: { __typename?: 'WorkType', name: string, enabled: boolean } };
 
-export type StainMutationVariables = Exact<{
-  request: StainRequest;
-}>;
-
-
-export type StainMutation = { __typename?: 'Mutation', stain: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
-
 export type StoreMutationVariables = Exact<{
   store: Array<StoreInput> | StoreInput;
   locationBarcode: Scalars['String'];
@@ -3210,12 +3214,12 @@ export type StoreMutationVariables = Exact<{
 
 export type StoreMutation = { __typename?: 'Mutation', store: { __typename?: 'Location', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null, direction?: GridDirection | null, parent?: { __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null } | null, size?: { __typename?: 'Size', numRows: number, numColumns: number } | null, stored: Array<{ __typename?: 'StoredItem', barcode: string, address?: string | null }>, children: Array<{ __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null }> } };
 
-export type SlotCopyMutationVariables = Exact<{
-  request: SlotCopyRequest;
+export type UnreleaseMutationVariables = Exact<{
+  request: UnreleaseRequest;
 }>;
 
 
-export type SlotCopyMutation = { __typename?: 'Mutation', slotCopy: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }> } };
+export type UnreleaseMutation = { __typename?: 'Mutation', unrelease: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
 
 export type StoreBarcodeMutationVariables = Exact<{
   barcode: Scalars['String'];
@@ -3226,28 +3230,12 @@ export type StoreBarcodeMutationVariables = Exact<{
 
 export type StoreBarcodeMutation = { __typename?: 'Mutation', storeBarcode: { __typename?: 'StoredItem', location: { __typename?: 'Location', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null, direction?: GridDirection | null, parent?: { __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null } | null, size?: { __typename?: 'Size', numRows: number, numColumns: number } | null, stored: Array<{ __typename?: 'StoredItem', barcode: string, address?: string | null }>, children: Array<{ __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null }> } } };
 
-export type UnreleaseMutationVariables = Exact<{
-  request: UnreleaseRequest;
+export type StainMutationVariables = Exact<{
+  request: StainRequest;
 }>;
 
 
-export type UnreleaseMutation = { __typename?: 'Mutation', unrelease: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
-
-export type UpdateWorkNumBlocksMutationVariables = Exact<{
-  workNumber: Scalars['String'];
-  numBlocks?: InputMaybe<Scalars['Int']>;
-}>;
-
-
-export type UpdateWorkNumBlocksMutation = { __typename?: 'Mutation', updateWorkNumBlocks: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } };
-
-export type UpdateWorkNumOriginalSamplesMutationVariables = Exact<{
-  workNumber: Scalars['String'];
-  numOriginalSamples?: InputMaybe<Scalars['Int']>;
-}>;
-
-
-export type UpdateWorkNumOriginalSamplesMutation = { __typename?: 'Mutation', updateWorkNumOriginalSamples: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } };
+export type StainMutation = { __typename?: 'Mutation', stain: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
 
 export type UnstoreBarcodeMutationVariables = Exact<{
   barcode: Scalars['String'];
@@ -3256,29 +3244,12 @@ export type UnstoreBarcodeMutationVariables = Exact<{
 
 export type UnstoreBarcodeMutation = { __typename?: 'Mutation', unstoreBarcode?: { __typename?: 'UnstoredItem', barcode: string, address?: string | null } | null };
 
-export type UpdateWorkNumSlidesMutationVariables = Exact<{
-  workNumber: Scalars['String'];
-  numSlides?: InputMaybe<Scalars['Int']>;
+export type SlotCopyMutationVariables = Exact<{
+  request: SlotCopyRequest;
 }>;
 
 
-export type UpdateWorkNumSlidesMutation = { __typename?: 'Mutation', updateWorkNumSlides: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } };
-
-export type UpdateWorkStatusMutationVariables = Exact<{
-  workNumber: Scalars['String'];
-  status: WorkStatus;
-  commentId?: InputMaybe<Scalars['Int']>;
-}>;
-
-
-export type UpdateWorkStatusMutation = { __typename?: 'Mutation', updateWorkStatus: { __typename?: 'WorkWithComment', comment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } } };
-
-export type VisiumAnalysisMutationVariables = Exact<{
-  request: VisiumAnalysisRequest;
-}>;
-
-
-export type VisiumAnalysisMutation = { __typename?: 'Mutation', visiumAnalysis: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
+export type SlotCopyMutation = { __typename?: 'Mutation', slotCopy: { __typename?: 'OperationResult', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }> } };
 
 export type UpdateWorkPriorityMutationVariables = Exact<{
   workNumber: Scalars['String'];
@@ -3288,12 +3259,52 @@ export type UpdateWorkPriorityMutationVariables = Exact<{
 
 export type UpdateWorkPriorityMutation = { __typename?: 'Mutation', updateWorkPriority: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } };
 
+export type UpdateWorkNumSlidesMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  numSlides?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type UpdateWorkNumSlidesMutation = { __typename?: 'Mutation', updateWorkNumSlides: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } };
+
+export type UpdateWorkNumBlocksMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  numBlocks?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type UpdateWorkNumBlocksMutation = { __typename?: 'Mutation', updateWorkNumBlocks: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } };
+
+export type VisiumAnalysisMutationVariables = Exact<{
+  request: VisiumAnalysisRequest;
+}>;
+
+
+export type VisiumAnalysisMutation = { __typename?: 'Mutation', visiumAnalysis: { __typename?: 'OperationResult', operations: Array<{ __typename?: 'Operation', id: number }> } };
+
+export type UpdateWorkNumOriginalSamplesMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  numOriginalSamples?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type UpdateWorkNumOriginalSamplesMutation = { __typename?: 'Mutation', updateWorkNumOriginalSamples: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } };
+
 export type ExtractResultQueryVariables = Exact<{
   barcode: Scalars['String'];
 }>;
 
 
 export type ExtractResultQuery = { __typename?: 'Query', extractResult: { __typename?: 'ExtractResult', result?: PassFail | null, concentration?: string | null, labware: { __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> } } };
+
+export type UpdateWorkStatusMutationVariables = Exact<{
+  workNumber: Scalars['String'];
+  status: WorkStatus;
+  commentId?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type UpdateWorkStatusMutation = { __typename?: 'Mutation', updateWorkStatus: { __typename?: 'WorkWithComment', comment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } } };
 
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3335,26 +3346,12 @@ export type FindHistoryForLabwareBarcodeQueryVariables = Exact<{
 
 export type FindHistoryForLabwareBarcodeQuery = { __typename?: 'Query', historyForLabwareBarcode: { __typename?: 'History', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }>, entries: Array<{ __typename?: 'HistoryEntry', destinationLabwareId: number, details: Array<string>, eventId: number, sampleId?: number | null, sourceLabwareId: number, time: string, username: string, type: string, workNumber?: string | null }> } };
 
-export type FindLabwareQueryVariables = Exact<{
-  barcode: Scalars['String'];
-}>;
-
-
-export type FindLabwareQuery = { __typename?: 'Query', labware: { __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> } };
-
 export type FindHistoryForWorkNumberQueryVariables = Exact<{
   workNumber: Scalars['String'];
 }>;
 
 
 export type FindHistoryForWorkNumberQuery = { __typename?: 'Query', historyForWorkNumber: { __typename?: 'History', labware: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }>, entries: Array<{ __typename?: 'HistoryEntry', destinationLabwareId: number, details: Array<string>, eventId: number, sampleId?: number | null, sourceLabwareId: number, time: string, username: string, type: string, workNumber?: string | null }> } };
-
-export type FindLocationByBarcodeQueryVariables = Exact<{
-  barcode: Scalars['String'];
-}>;
-
-
-export type FindLocationByBarcodeQuery = { __typename?: 'Query', location: { __typename?: 'Location', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null, direction?: GridDirection | null, parent?: { __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null } | null, size?: { __typename?: 'Size', numRows: number, numColumns: number } | null, stored: Array<{ __typename?: 'StoredItem', barcode: string, address?: string | null }>, children: Array<{ __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null }> } };
 
 export type FindLabwareLocationQueryVariables = Exact<{
   barcodes: Array<Scalars['String']> | Scalars['String'];
@@ -3371,12 +3368,26 @@ export type FindPassFailsQueryVariables = Exact<{
 
 export type FindPassFailsQuery = { __typename?: 'Query', passFails: Array<{ __typename?: 'OpPassFail', operation: { __typename?: 'Operation', id: number, performed: string, operationType: { __typename?: 'OperationType', name: string }, actions: Array<{ __typename?: 'Action', operationId: number, source: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, destination: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, sample: { __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } } }>, user: { __typename?: 'User', username: string, role: UserRole } }, slotPassFails: Array<{ __typename?: 'SlotPassFail', address: string, result: PassFail, comment?: string | null }> }> };
 
-export type FindPlanDataQueryVariables = Exact<{
+export type FindLabwareQueryVariables = Exact<{
   barcode: Scalars['String'];
 }>;
 
 
-export type FindPlanDataQuery = { __typename?: 'Query', planData: { __typename?: 'PlanData', sources: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, destination: { __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }, plan: { __typename?: 'PlanOperation', operationType?: { __typename?: 'OperationType', name: string } | null, planActions: Array<{ __typename?: 'PlanAction', newSection?: number | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } }> } } };
+export type FindLabwareQuery = { __typename?: 'Query', labware: { __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> } };
+
+export type FindLocationByBarcodeQueryVariables = Exact<{
+  barcode: Scalars['String'];
+}>;
+
+
+export type FindLocationByBarcodeQuery = { __typename?: 'Query', location: { __typename?: 'Location', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null, direction?: GridDirection | null, parent?: { __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null } | null, size?: { __typename?: 'Size', numRows: number, numColumns: number } | null, stored: Array<{ __typename?: 'StoredItem', barcode: string, address?: string | null }>, children: Array<{ __typename?: 'LinkedLocation', barcode: string, fixedName?: string | null, customName?: string | null, address?: string | null }> } };
+
+export type FindWorkInfoQueryVariables = Exact<{
+  status: WorkStatus;
+}>;
+
+
+export type FindWorkInfoQuery = { __typename?: 'Query', works: Array<{ __typename?: 'Work', workNumber: string, workRequester?: { __typename?: 'ReleaseRecipient', username: string } | null, project: { __typename?: 'Project', name: string } }> };
 
 export type FindPermDataQueryVariables = Exact<{
   barcode: Scalars['String'];
@@ -3385,12 +3396,12 @@ export type FindPermDataQueryVariables = Exact<{
 
 export type FindPermDataQuery = { __typename?: 'Query', visiumPermData: { __typename?: 'VisiumPermData', labware: { __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }, addressPermData: Array<{ __typename?: 'AddressPermData', address: string, controlType?: ControlType | null, seconds?: number | null, selected: boolean }> } };
 
-export type FindWorkNumbersQueryVariables = Exact<{
-  status: WorkStatus;
+export type FindPlanDataQueryVariables = Exact<{
+  barcode: Scalars['String'];
 }>;
 
 
-export type FindWorkNumbersQuery = { __typename?: 'Query', works: Array<{ __typename?: 'Work', workNumber: string }> };
+export type FindPlanDataQuery = { __typename?: 'Query', planData: { __typename?: 'PlanData', sources: Array<{ __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }>, destination: { __typename?: 'Labware', id: number, barcode: string, externalBarcode?: string | null, destroyed: boolean, discarded: boolean, released: boolean, state: LabwareState, created: string, labwareType: { __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }, slots: Array<{ __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }> }, plan: { __typename?: 'PlanOperation', operationType?: { __typename?: 'OperationType', name: string } | null, planActions: Array<{ __typename?: 'PlanAction', newSection?: number | null, sample: { __typename?: 'Sample', id: number }, source: { __typename?: 'Slot', address: string, labwareId: number, samples: Array<{ __typename?: 'Sample', id: number }> }, destination: { __typename?: 'Slot', address: string, labwareId: number } }> } } };
 
 export type FindReagentPlateQueryVariables = Exact<{
   barcode: Scalars['String'];
@@ -3398,13 +3409,6 @@ export type FindReagentPlateQueryVariables = Exact<{
 
 
 export type FindReagentPlateQuery = { __typename?: 'Query', reagentPlate?: { __typename?: 'ReagentPlate', barcode: string, plateType?: string | null, slots: Array<{ __typename?: 'ReagentSlot', address: string, used: boolean }> } | null };
-
-export type FindWorkInfoQueryVariables = Exact<{
-  status: WorkStatus;
-}>;
-
-
-export type FindWorkInfoQuery = { __typename?: 'Query', works: Array<{ __typename?: 'Work', workNumber: string, workRequester?: { __typename?: 'ReleaseRecipient', username: string } | null, project: { __typename?: 'Project', name: string } }> };
 
 export type GetBlockProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3433,17 +3437,24 @@ export type GetConfigurationQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetConfigurationQuery = { __typename?: 'Query', destructionReasons: Array<{ __typename?: 'DestructionReason', id: number, text: string, enabled: boolean }>, comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }>, hmdmcs: Array<{ __typename?: 'Hmdmc', hmdmc: string, enabled: boolean }>, species: Array<{ __typename?: 'Species', name: string, enabled: boolean }>, fixatives: Array<{ __typename?: 'Fixative', name: string, enabled: boolean }>, releaseDestinations: Array<{ __typename?: 'ReleaseDestination', name: string, enabled: boolean }>, releaseRecipients: Array<{ __typename?: 'ReleaseRecipient', username: string, enabled: boolean }>, projects: Array<{ __typename?: 'Project', name: string, enabled: boolean }>, costCodes: Array<{ __typename?: 'CostCode', code: string, enabled: boolean }>, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, equipments: Array<{ __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean }>, users: Array<{ __typename?: 'User', username: string, role: UserRole }>, solutions: Array<{ __typename?: 'Solution', name: string, enabled: boolean }> };
 
+export type FindWorkNumbersQueryVariables = Exact<{
+  status: WorkStatus;
+}>;
+
+
+export type FindWorkNumbersQuery = { __typename?: 'Query', works: Array<{ __typename?: 'Work', workNumber: string }> };
+
+export type GetDestroyInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetDestroyInfoQuery = { __typename?: 'Query', destructionReasons: Array<{ __typename?: 'DestructionReason', id: number, text: string, enabled: boolean }> };
+
 export type GetDestructionReasonsQueryVariables = Exact<{
   includeDisabled?: InputMaybe<Scalars['Boolean']>;
 }>;
 
 
 export type GetDestructionReasonsQuery = { __typename?: 'Query', destructionReasons: Array<{ __typename?: 'DestructionReason', id: number, text: string, enabled: boolean }> };
-
-export type GetDestroyInfoQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetDestroyInfoQuery = { __typename?: 'Query', destructionReasons: Array<{ __typename?: 'DestructionReason', id: number, text: string, enabled: boolean }> };
 
 export type GetFfpeProcessingInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3462,13 +3473,10 @@ export type GetPotProcessingInfoQueryVariables = Exact<{ [key: string]: never; }
 
 export type GetPotProcessingInfoQuery = { __typename?: 'Query', fixatives: Array<{ __typename?: 'Fixative', name: string }>, comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }>, labwareTypes: Array<{ __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }> };
 
-export type GetLabwareOperationsQueryVariables = Exact<{
-  barcode: Scalars['String'];
-  operationType: Scalars['String'];
-}>;
+export type GetPrintersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetLabwareOperationsQuery = { __typename?: 'Query', labwareOperations?: Array<{ __typename?: 'Operation', id: number, performed: string, operationType: { __typename?: 'OperationType', name: string }, actions: Array<{ __typename?: 'Action', operationId: number, source: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, destination: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, sample: { __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } } }>, user: { __typename?: 'User', username: string, role: UserRole } } | null> | null };
+export type GetPrintersQuery = { __typename?: 'Query', printers: Array<{ __typename?: 'Printer', name: string, labelTypes: Array<{ __typename?: 'LabelType', name: string }> }> };
 
 export type GetNextReplicateNumberQueryVariables = Exact<{
   barcodes: Array<Scalars['String']> | Scalars['String'];
@@ -3477,15 +3485,18 @@ export type GetNextReplicateNumberQueryVariables = Exact<{
 
 export type GetNextReplicateNumberQuery = { __typename?: 'Query', nextReplicateNumbers: Array<{ __typename?: 'NextReplicateData', barcodes: Array<string>, donorId: number, nextReplicateNumber: number, spatialLocationId: number }> };
 
-export type GetRecordExtractResultInfoQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetLabwareOperationsQueryVariables = Exact<{
+  barcode: Scalars['String'];
+  operationType: Scalars['String'];
+}>;
 
 
-export type GetRecordExtractResultInfoQuery = { __typename?: 'Query', comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }> };
+export type GetLabwareOperationsQuery = { __typename?: 'Query', labwareOperations?: Array<{ __typename?: 'Operation', id: number, performed: string, operationType: { __typename?: 'OperationType', name: string }, actions: Array<{ __typename?: 'Action', operationId: number, source: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, destination: { __typename?: 'Slot', address: string, labwareId: number, blockHighestSection?: number | null, block: boolean, samples: Array<{ __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } }> }, sample: { __typename?: 'Sample', id: number, section?: number | null, tissue: { __typename?: 'Tissue', externalName?: string | null, replicate?: string | null, collectionDate?: string | null, donor: { __typename?: 'Donor', donorName: string, lifeStage: LifeStage }, spatialLocation: { __typename?: 'SpatialLocation', code: number, tissueType: { __typename?: 'TissueType', name: string } }, medium: { __typename?: 'Medium', name: string }, fixative: { __typename?: 'Fixative', name: string, enabled: boolean } }, bioState: { __typename?: 'BioState', name: string } } }>, user: { __typename?: 'User', username: string, role: UserRole } } | null> | null };
 
-export type GetPrintersQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetRegistrationInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetPrintersQuery = { __typename?: 'Query', printers: Array<{ __typename?: 'Printer', name: string, labelTypes: Array<{ __typename?: 'LabelType', name: string }> }> };
+export type GetRegistrationInfoQuery = { __typename?: 'Query', species: Array<{ __typename?: 'Species', name: string }>, hmdmcs: Array<{ __typename?: 'Hmdmc', hmdmc: string }>, labwareTypes: Array<{ __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }>, tissueTypes: Array<{ __typename?: 'TissueType', name: string, spatialLocations: Array<{ __typename?: 'SpatialLocation', name: string, code: number }> }>, fixatives: Array<{ __typename?: 'Fixative', name: string }>, mediums: Array<{ __typename?: 'Medium', name: string }>, solutions: Array<{ __typename?: 'Solution', name: string }> };
 
 export type GetRecordInPlaceInfoQueryVariables = Exact<{
   category?: InputMaybe<Scalars['String']>;
@@ -3494,65 +3505,50 @@ export type GetRecordInPlaceInfoQueryVariables = Exact<{
 
 export type GetRecordInPlaceInfoQuery = { __typename?: 'Query', equipments: Array<{ __typename?: 'Equipment', id: number, name: string, category: string, enabled: boolean }> };
 
-export type GetRegistrationInfoQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetRecordExtractResultInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetRegistrationInfoQuery = { __typename?: 'Query', species: Array<{ __typename?: 'Species', name: string }>, hmdmcs: Array<{ __typename?: 'Hmdmc', hmdmc: string }>, labwareTypes: Array<{ __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }>, tissueTypes: Array<{ __typename?: 'TissueType', name: string, spatialLocations: Array<{ __typename?: 'SpatialLocation', name: string, code: number }> }>, fixatives: Array<{ __typename?: 'Fixative', name: string }>, mediums: Array<{ __typename?: 'Medium', name: string }>, solutions: Array<{ __typename?: 'Solution', name: string }> };
+export type GetRecordExtractResultInfoQuery = { __typename?: 'Query', comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }> };
 
 export type GetSampleProcessingCommentsInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetSampleProcessingCommentsInfoQuery = { __typename?: 'Query', comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }> };
 
+export type GetSectioningConfirmInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSectioningConfirmInfoQuery = { __typename?: 'Query', comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }> };
+
 export type GetReleaseInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetReleaseInfoQuery = { __typename?: 'Query', releaseDestinations: Array<{ __typename?: 'ReleaseDestination', name: string, enabled: boolean }>, releaseRecipients: Array<{ __typename?: 'ReleaseRecipient', username: string, enabled: boolean }> };
-
-export type GetSearchInfoQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetSearchInfoQuery = { __typename?: 'Query', tissueTypes: Array<{ __typename?: 'TissueType', name: string }> };
 
 export type GetSectioningInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetSectioningInfoQuery = { __typename?: 'Query', labwareTypes: Array<{ __typename?: 'LabwareType', name: string, numRows: number, numColumns: number, labelType?: { __typename?: 'LabelType', name: string } | null }> };
 
-export type GetSectioningConfirmInfoQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetSearchInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetSectioningConfirmInfoQuery = { __typename?: 'Query', comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }> };
+export type GetSearchInfoQuery = { __typename?: 'Query', tissueTypes: Array<{ __typename?: 'TissueType', name: string }> };
 
 export type GetStainingQcInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetStainingQcInfoQuery = { __typename?: 'Query', comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }> };
 
-export type GetSolutionTransferInfoQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetSolutionTransferInfoQuery = { __typename?: 'Query', solutions: Array<{ __typename?: 'Solution', name: string }> };
-
 export type GetStainInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetStainInfoQuery = { __typename?: 'Query', stainTypes: Array<{ __typename?: 'StainType', name: string, measurementTypes: Array<string> }> };
 
-export type GetWorkNumbersQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetSolutionTransferInfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetWorkNumbersQuery = { __typename?: 'Query', works: Array<{ __typename?: 'Work', workNumber: string }> };
-
-export type GetWorkSummaryQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetWorkSummaryQuery = { __typename?: 'Query', worksSummary: Array<{ __typename?: 'WorkSummaryGroup', numWorks: number, status: WorkStatus, totalNumBlocks: number, totalNumSlides: number, totalNumOriginalSamples: number, workType: { __typename?: 'WorkType', name: string, enabled: boolean } }> };
-
-export type GetVisiumQcInfoQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetVisiumQcInfoQuery = { __typename?: 'Query', comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }> };
+export type GetSolutionTransferInfoQuery = { __typename?: 'Query', solutions: Array<{ __typename?: 'Solution', name: string }> };
 
 export type GetWorkAllocationInfoQueryVariables = Exact<{
   commentCategory: Scalars['String'];
@@ -3562,27 +3558,26 @@ export type GetWorkAllocationInfoQueryVariables = Exact<{
 
 export type GetWorkAllocationInfoQuery = { __typename?: 'Query', projects: Array<{ __typename?: 'Project', name: string, enabled: boolean }>, costCodes: Array<{ __typename?: 'CostCode', code: string, enabled: boolean }>, worksWithComments: Array<{ __typename?: 'WorkWithComment', comment?: string | null, work: { __typename?: 'Work', workNumber: string, status: WorkStatus, numBlocks?: number | null, numSlides?: number | null, numOriginalSamples?: number | null, priority?: string | null, workRequester?: { __typename?: 'ReleaseRecipient', username: string, enabled: boolean } | null, project: { __typename?: 'Project', name: string, enabled: boolean }, costCode: { __typename?: 'CostCode', code: string, enabled: boolean }, workType: { __typename?: 'WorkType', name: string, enabled: boolean } } }>, workTypes: Array<{ __typename?: 'WorkType', name: string, enabled: boolean }>, comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }>, releaseRecipients: Array<{ __typename?: 'ReleaseRecipient', username: string, enabled: boolean }> };
 
+export type GetVisiumQcInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetVisiumQcInfoQuery = { __typename?: 'Query', comments: Array<{ __typename?: 'Comment', id: number, text: string, category: string, enabled: boolean }> };
+
+export type GetWorkNumbersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetWorkNumbersQuery = { __typename?: 'Query', works: Array<{ __typename?: 'Work', workNumber: string }> };
+
 export type GetWorkTypesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetWorkTypesQuery = { __typename?: 'Query', workTypes: Array<{ __typename?: 'WorkType', name: string }> };
 
-export const AddressPermDataFieldsFragmentDoc = gql`
-    fragment AddressPermDataFields on AddressPermData {
-  address
-  controlType
-  seconds
-  selected
-}
-    `;
-export const EquipmentFieldsFragmentDoc = gql`
-    fragment EquipmentFields on Equipment {
-  id
-  name
-  category
-  enabled
-}
-    `;
+export type GetWorkSummaryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetWorkSummaryQuery = { __typename?: 'Query', worksSummary: Array<{ __typename?: 'WorkSummaryGroup', numWorks: number, status: WorkStatus, totalNumBlocks: number, totalNumSlides: number, totalNumOriginalSamples: number, workType: { __typename?: 'WorkType', name: string, enabled: boolean } }> };
+
 export const CommentFieldsFragmentDoc = gql`
     fragment CommentFields on Comment {
   id
@@ -3598,9 +3593,19 @@ export const DestructionReasonFieldsFragmentDoc = gql`
   enabled
 }
     `;
-export const FixativeFieldsFragmentDoc = gql`
-    fragment FixativeFields on Fixative {
+export const AddressPermDataFieldsFragmentDoc = gql`
+    fragment AddressPermDataFields on AddressPermData {
+  address
+  controlType
+  seconds
+  selected
+}
+    `;
+export const EquipmentFieldsFragmentDoc = gql`
+    fragment EquipmentFields on Equipment {
+  id
   name
+  category
   enabled
 }
     `;
@@ -3700,6 +3705,12 @@ export const HistoryFieldsFragmentDoc = gql`
   }
 }
     `;
+export const FixativeFieldsFragmentDoc = gql`
+    fragment FixativeFields on Fixative {
+  name
+  enabled
+}
+    `;
 export const HmdmcFieldsFragmentDoc = gql`
     fragment HmdmcFields on Hmdmc {
   hmdmc
@@ -3785,46 +3796,6 @@ export const PrinterFieldsFragmentDoc = gql`
   }
 }
     `;
-export const PlanActionFieldsFragmentDoc = gql`
-    fragment PlanActionFields on PlanAction {
-  newSection
-  sample {
-    id
-  }
-  source {
-    address
-    labwareId
-    samples {
-      id
-    }
-  }
-  destination {
-    address
-    labwareId
-  }
-}
-    `;
-export const ReagentSlotFieldsFragmentDoc = gql`
-    fragment ReagentSlotFields on ReagentSlot {
-  address
-  used
-}
-    `;
-export const ReagentPlateFieldsFragmentDoc = gql`
-    fragment ReagentPlateFields on ReagentPlate {
-  barcode
-  slots {
-    ...ReagentSlotFields
-  }
-  plateType
-}
-    `;
-export const ReleaseDestinationFieldsFragmentDoc = gql`
-    fragment ReleaseDestinationFields on ReleaseDestination {
-  name
-  enabled
-}
-    `;
 export const RegisterResultFieldsFragmentDoc = gql`
     fragment RegisterResultFields on RegisterResult {
   labware {
@@ -3851,12 +3822,50 @@ export const RegisterResultFieldsFragmentDoc = gql`
       }
     }
   }
+  labwareSolutions {
+    barcode
+    solutionName
+  }
 }
     `;
-export const SolutionFieldsFragmentDoc = gql`
-    fragment SolutionFields on Solution {
+export const PlanActionFieldsFragmentDoc = gql`
+    fragment PlanActionFields on PlanAction {
+  newSection
+  sample {
+    id
+  }
+  source {
+    address
+    labwareId
+    samples {
+      id
+    }
+  }
+  destination {
+    address
+    labwareId
+  }
+}
+    `;
+export const ReleaseDestinationFieldsFragmentDoc = gql`
+    fragment ReleaseDestinationFields on ReleaseDestination {
   name
   enabled
+}
+    `;
+export const ReagentSlotFieldsFragmentDoc = gql`
+    fragment ReagentSlotFields on ReagentSlot {
+  address
+  used
+}
+    `;
+export const ReagentPlateFieldsFragmentDoc = gql`
+    fragment ReagentPlateFields on ReagentPlate {
+  barcode
+  slots {
+    ...ReagentSlotFields
+  }
+  plateType
 }
     `;
 export const SlotPassFailFieldsFragmentDoc = gql`
@@ -3866,16 +3875,22 @@ export const SlotPassFailFieldsFragmentDoc = gql`
   comment
 }
     `;
-export const StainTypeFieldsFragmentDoc = gql`
-    fragment StainTypeFields on StainType {
-  name
-  measurementTypes
-}
-    `;
 export const SpeciesFieldsFragmentDoc = gql`
     fragment SpeciesFields on Species {
   name
   enabled
+}
+    `;
+export const SolutionFieldsFragmentDoc = gql`
+    fragment SolutionFields on Solution {
+  name
+  enabled
+}
+    `;
+export const StainTypeFieldsFragmentDoc = gql`
+    fragment StainTypeFields on StainType {
+  name
+  measurementTypes
 }
     `;
 export const ReleaseRecipientFieldsFragmentDoc = gql`
@@ -3924,6 +3939,14 @@ export const WorkFieldsFragmentDoc = gql`
   priority
 }
     `;
+export const WorkWithCommentFieldsFragmentDoc = gql`
+    fragment WorkWithCommentFields on WorkWithComment {
+  work {
+    ...WorkFields
+  }
+  comment
+}
+    `;
 export const WorkProgressTimeStampFieldFragmentDoc = gql`
     fragment WorkProgressTimeStampField on WorkProgressTimestamp {
   type
@@ -3940,14 +3963,6 @@ export const WorkProgressFieldsFragmentDoc = gql`
   }
   mostRecentOperation
   workComment
-}
-    `;
-export const WorkWithCommentFieldsFragmentDoc = gql`
-    fragment WorkWithCommentFields on WorkWithComment {
-  work {
-    ...WorkFields
-  }
-  comment
 }
     `;
 export const WorkSummaryGroupFieldsFragmentDoc = gql`
@@ -3969,13 +3984,6 @@ export const AddCostCodeDocument = gql`
   }
 }
     ${CostCodeFieldsFragmentDoc}`;
-export const AddCommentDocument = gql`
-    mutation AddComment($category: String!, $text: String!) {
-  addComment(category: $category, text: $text) {
-    ...CommentFields
-  }
-}
-    ${CommentFieldsFragmentDoc}`;
 export const AddDestructionReasonDocument = gql`
     mutation AddDestructionReason($text: String!) {
   addDestructionReason(text: $text) {
@@ -3983,6 +3991,13 @@ export const AddDestructionReasonDocument = gql`
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
+export const AddCommentDocument = gql`
+    mutation AddComment($category: String!, $text: String!) {
+  addComment(category: $category, text: $text) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const AddEquipmentDocument = gql`
     mutation AddEquipment($category: String!, $name: String!) {
   addEquipment(category: $category, name: $name) {
@@ -3990,6 +4005,27 @@ export const AddEquipmentDocument = gql`
   }
 }
     ${EquipmentFieldsFragmentDoc}`;
+export const AddProjectDocument = gql`
+    mutation AddProject($name: String!) {
+  addProject(name: $name) {
+    ...ProjectFields
+  }
+}
+    ${ProjectFieldsFragmentDoc}`;
+export const AddHmdmcDocument = gql`
+    mutation AddHmdmc($hmdmc: String!) {
+  addHmdmc(hmdmc: $hmdmc) {
+    ...HmdmcFields
+  }
+}
+    ${HmdmcFieldsFragmentDoc}`;
+export const AddSolutionDocument = gql`
+    mutation AddSolution($name: String!) {
+  addSolution(name: $name) {
+    ...SolutionFields
+  }
+}
+    ${SolutionFieldsFragmentDoc}`;
 export const AddExternalIdDocument = gql`
     mutation AddExternalID($request: AddExternalIDRequest!) {
   addExternalID(request: $request) {
@@ -4012,34 +4048,6 @@ export const AddFixativeDocument = gql`
   }
 }
     ${FixativeFieldsFragmentDoc}`;
-export const AddProjectDocument = gql`
-    mutation AddProject($name: String!) {
-  addProject(name: $name) {
-    ...ProjectFields
-  }
-}
-    ${ProjectFieldsFragmentDoc}`;
-export const AddReleaseDestinationDocument = gql`
-    mutation AddReleaseDestination($name: String!) {
-  addReleaseDestination(name: $name) {
-    ...ReleaseDestinationFields
-  }
-}
-    ${ReleaseDestinationFieldsFragmentDoc}`;
-export const AddHmdmcDocument = gql`
-    mutation AddHmdmc($hmdmc: String!) {
-  addHmdmc(hmdmc: $hmdmc) {
-    ...HmdmcFields
-  }
-}
-    ${HmdmcFieldsFragmentDoc}`;
-export const AddSolutionDocument = gql`
-    mutation AddSolution($name: String!) {
-  addSolution(name: $name) {
-    ...SolutionFields
-  }
-}
-    ${SolutionFieldsFragmentDoc}`;
 export const AddSpeciesDocument = gql`
     mutation AddSpecies($name: String!) {
   addSpecies(name: $name) {
@@ -4047,6 +4055,13 @@ export const AddSpeciesDocument = gql`
   }
 }
     ${SpeciesFieldsFragmentDoc}`;
+export const AddUserDocument = gql`
+    mutation AddUser($username: String!) {
+  addUser(username: $username) {
+    ...UserFields
+  }
+}
+    ${UserFieldsFragmentDoc}`;
 export const AddReleaseRecipientDocument = gql`
     mutation AddReleaseRecipient($username: String!) {
   addReleaseRecipient(username: $username) {
@@ -4061,6 +4076,75 @@ export const AddWorkTypeDocument = gql`
   }
 }
     ${WorkTypeFieldsFragmentDoc}`;
+export const AddReleaseDestinationDocument = gql`
+    mutation AddReleaseDestination($name: String!) {
+  addReleaseDestination(name: $name) {
+    ...ReleaseDestinationFields
+  }
+}
+    ${ReleaseDestinationFieldsFragmentDoc}`;
+export const ConfirmDocument = gql`
+    mutation Confirm($request: ConfirmOperationRequest!) {
+  confirmOperation(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}`;
+export const ConfirmSectionDocument = gql`
+    mutation ConfirmSection($request: ConfirmSectionRequest!) {
+  confirmSection(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}`;
+export const CreateWorkDocument = gql`
+    mutation CreateWork($prefix: String!, $workType: String!, $workRequester: String!, $project: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int) {
+  createWork(
+    prefix: $prefix
+    workType: $workType
+    workRequester: $workRequester
+    project: $project
+    costCode: $costCode
+    numBlocks: $numBlocks
+    numSlides: $numSlides
+    numOriginalSamples: $numOriginalSamples
+  ) {
+    ...WorkFields
+  }
+}
+    ${WorkFieldsFragmentDoc}
+${ReleaseRecipientFieldsFragmentDoc}
+${ProjectFieldsFragmentDoc}
+${CostCodeFieldsFragmentDoc}
+${WorkTypeFieldsFragmentDoc}`;
 export const AliquotDocument = gql`
     mutation Aliquot($request: AliquotRequest!) {
   aliquot(request: $request) {
@@ -4094,55 +4178,6 @@ export const AliquotDocument = gql`
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}`;
-export const AddUserDocument = gql`
-    mutation AddUser($username: String!) {
-  addUser(username: $username) {
-    ...UserFields
-  }
-}
-    ${UserFieldsFragmentDoc}`;
-export const ConfirmSectionDocument = gql`
-    mutation ConfirmSection($request: ConfirmSectionRequest!) {
-  confirmSection(request: $request) {
-    labware {
-      ...LabwareFields
-    }
-    operations {
-      operationType {
-        name
-      }
-      user {
-        username
-      }
-      performed
-    }
-  }
-}
-    ${LabwareFieldsFragmentDoc}
-${LabwareTypeFieldsFragmentDoc}
-${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
-export const ConfirmDocument = gql`
-    mutation Confirm($request: ConfirmOperationRequest!) {
-  confirmOperation(request: $request) {
-    labware {
-      ...LabwareFields
-    }
-    operations {
-      operationType {
-        name
-      }
-      user {
-        username
-      }
-      performed
-    }
-  }
-}
-    ${LabwareFieldsFragmentDoc}
-${LabwareTypeFieldsFragmentDoc}
-${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
 export const DestroyDocument = gql`
     mutation Destroy($request: DestroyRequest!) {
   destroy(request: $request) {
@@ -4154,33 +4189,6 @@ export const DestroyDocument = gql`
   }
 }
     `;
-export const EmptyLocationDocument = gql`
-    mutation EmptyLocation($barcode: String!) {
-  empty(locationBarcode: $barcode) {
-    numUnstored
-  }
-}
-    `;
-export const CreateWorkDocument = gql`
-    mutation CreateWork($prefix: String!, $workType: String!, $workRequester: String!, $project: String!, $costCode: String!, $numBlocks: Int, $numSlides: Int, $numOriginalSamples: Int) {
-  createWork(
-    prefix: $prefix
-    workType: $workType
-    workRequester: $workRequester
-    project: $project
-    costCode: $costCode
-    numBlocks: $numBlocks
-    numSlides: $numSlides
-    numOriginalSamples: $numOriginalSamples
-  ) {
-    ...WorkFields
-  }
-}
-    ${WorkFieldsFragmentDoc}
-${ReleaseRecipientFieldsFragmentDoc}
-${ProjectFieldsFragmentDoc}
-${CostCodeFieldsFragmentDoc}
-${WorkTypeFieldsFragmentDoc}`;
 export const ExtractDocument = gql`
     mutation Extract($request: ExtractRequest!) {
   extract(request: $request) {
@@ -4214,6 +4222,18 @@ export const ExtractDocument = gql`
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}`;
+export const EmptyLocationDocument = gql`
+    mutation EmptyLocation($barcode: String!) {
+  empty(locationBarcode: $barcode) {
+    numUnstored
+  }
+}
+    `;
+export const LogoutDocument = gql`
+    mutation Logout {
+  logout
+}
+    `;
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(username: $username, password: $password) {
@@ -4223,35 +4243,9 @@ export const LoginDocument = gql`
   }
 }
     ${UserFieldsFragmentDoc}`;
-export const LogoutDocument = gql`
-    mutation Logout {
-  logout
-}
-    `;
 export const PerformFfpeProcessingDocument = gql`
     mutation PerformFFPEProcessing($request: FFPEProcessingRequest!) {
   performFFPEProcessing(request: $request) {
-    labware {
-      ...LabwareFields
-    }
-    operations {
-      operationType {
-        name
-      }
-      user {
-        username
-      }
-      performed
-    }
-  }
-}
-    ${LabwareFieldsFragmentDoc}
-${LabwareTypeFieldsFragmentDoc}
-${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
-export const PerformTissuePotDocument = gql`
-    mutation PerformTissuePot($request: PotProcessingRequest!) {
-  performPotProcessing(request: $request) {
     labware {
       ...LabwareFields
     }
@@ -4333,20 +4327,6 @@ ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
 ${PlanActionFieldsFragmentDoc}`;
-export const PrintDocument = gql`
-    mutation Print($barcodes: [String!]!, $printer: String!) {
-  printLabware(barcodes: $barcodes, printer: $printer)
-}
-    `;
-export const RecordExtractResultDocument = gql`
-    mutation RecordExtractResult($request: ExtractResultRequest!) {
-  recordExtractResult(request: $request) {
-    operations {
-      id
-    }
-  }
-}
-    `;
 export const RecordInPlaceDocument = gql`
     mutation RecordInPlace($request: InPlaceOpRequest!) {
   recordInPlace(request: $request) {
@@ -4359,22 +4339,48 @@ export const RecordInPlaceDocument = gql`
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}`;
-export const RecordComplexStainDocument = gql`
-    mutation RecordComplexStain($request: ComplexStainRequest!) {
-  recordComplexStain(request: $request) {
+export const PerformTissuePotDocument = gql`
+    mutation PerformTissuePot($request: PotProcessingRequest!) {
+  performPotProcessing(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+    operations {
+      operationType {
+        name
+      }
+      user {
+        username
+      }
+      performed
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}`;
+export const RecordPermDocument = gql`
+    mutation RecordPerm($request: RecordPermRequest!) {
+  recordPerm(request: $request) {
     operations {
       id
     }
   }
 }
     `;
-export const RecordOpWithSlotMeasurementsDocument = gql`
-    mutation RecordOpWithSlotMeasurements($request: OpWithSlotMeasurementsRequest!) {
-  recordOpWithSlotMeasurements(request: $request) {
+export const RecordExtractResultDocument = gql`
+    mutation RecordExtractResult($request: ExtractResultRequest!) {
+  recordExtractResult(request: $request) {
     operations {
       id
     }
   }
+}
+    `;
+export const PrintDocument = gql`
+    mutation Print($barcodes: [String!]!, $printer: String!) {
+  printLabware(barcodes: $barcodes, printer: $printer)
 }
     `;
 export const RecordRnaAnalysisDocument = gql`
@@ -4386,35 +4392,24 @@ export const RecordRnaAnalysisDocument = gql`
   }
 }
     `;
-export const RecordPermDocument = gql`
-    mutation RecordPerm($request: RecordPermRequest!) {
-  recordPerm(request: $request) {
+export const RecordComplexStainDocument = gql`
+    mutation RecordComplexStain($request: ComplexStainRequest!) {
+  recordComplexStain(request: $request) {
     operations {
       id
     }
   }
 }
     `;
-export const RecordReagentTransferDocument = gql`
-    mutation RecordReagentTransfer($request: ReagentTransferRequest!) {
-  reagentTransfer(request: $request) {
+export const RecordStainResultDocument = gql`
+    mutation RecordStainResult($request: ResultRequest!) {
+  recordStainResult(request: $request) {
     operations {
       id
     }
   }
 }
     `;
-export const RegisterOriginalSamplesDocument = gql`
-    mutation RegisterOriginalSamples($request: OriginalSampleRegisterRequest!) {
-  registerOriginalSamples(request: $request) {
-    ...RegisterResultFields
-  }
-}
-    ${RegisterResultFieldsFragmentDoc}
-${LabwareFieldsFragmentDoc}
-${LabwareTypeFieldsFragmentDoc}
-${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
 export const RecordSampleProcessingCommentsDocument = gql`
     mutation RecordSampleProcessingComments($request: SampleProcessingCommentRequest!) {
   recordSampleProcessingComments(request: $request) {
@@ -4436,6 +4431,35 @@ export const RecordSampleProcessingCommentsDocument = gql`
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}`;
+export const RecordOpWithSlotMeasurementsDocument = gql`
+    mutation RecordOpWithSlotMeasurements($request: OpWithSlotMeasurementsRequest!) {
+  recordOpWithSlotMeasurements(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
+export const RecordVisiumQcDocument = gql`
+    mutation RecordVisiumQC($request: ResultRequest!) {
+  recordVisiumQC(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
+export const RegisterOriginalSamplesDocument = gql`
+    mutation RegisterOriginalSamples($request: OriginalSampleRegisterRequest!) {
+  registerOriginalSamples(request: $request) {
+    ...RegisterResultFields
+  }
+}
+    ${RegisterResultFieldsFragmentDoc}
+${LabwareFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}`;
 export const RegisterTissuesDocument = gql`
     mutation RegisterTissues($request: RegisterRequest!) {
   register(request: $request) {
@@ -4447,15 +4471,25 @@ ${LabwareFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}`;
-export const RecordStainResultDocument = gql`
-    mutation RecordStainResult($request: ResultRequest!) {
-  recordStainResult(request: $request) {
-    operations {
-      id
+export const RegisterSectionsDocument = gql`
+    mutation RegisterSections($request: SectionRegisterRequest!) {
+  registerSections(request: $request) {
+    labware {
+      ...LabwareFields
     }
   }
 }
-    `;
+    ${LabwareFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}`;
+export const SetCommentEnabledDocument = gql`
+    mutation SetCommentEnabled($commentId: Int!, $enabled: Boolean!) {
+  setCommentEnabled(commentId: $commentId, enabled: $enabled) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const ReleaseLabwareDocument = gql`
     mutation ReleaseLabware($releaseRequest: ReleaseRequest!) {
   release(request: $releaseRequest) {
@@ -4474,22 +4508,6 @@ export const ReleaseLabwareDocument = gql`
   }
 }
     `;
-export const RecordVisiumQcDocument = gql`
-    mutation RecordVisiumQC($request: ResultRequest!) {
-  recordVisiumQC(request: $request) {
-    operations {
-      id
-    }
-  }
-}
-    `;
-export const SetCommentEnabledDocument = gql`
-    mutation SetCommentEnabled($commentId: Int!, $enabled: Boolean!) {
-  setCommentEnabled(commentId: $commentId, enabled: $enabled) {
-    ...CommentFields
-  }
-}
-    ${CommentFieldsFragmentDoc}`;
 export const SetCostCodeEnabledDocument = gql`
     mutation SetCostCodeEnabled($code: String!, $enabled: Boolean!) {
   setCostCodeEnabled(code: $code, enabled: $enabled) {
@@ -4497,6 +4515,22 @@ export const SetCostCodeEnabledDocument = gql`
   }
 }
     ${CostCodeFieldsFragmentDoc}`;
+export const RecordReagentTransferDocument = gql`
+    mutation RecordReagentTransfer($request: ReagentTransferRequest!) {
+  reagentTransfer(request: $request) {
+    operations {
+      id
+    }
+  }
+}
+    `;
+export const SetEquipmentEnabledDocument = gql`
+    mutation SetEquipmentEnabled($equipmentId: Int!, $enabled: Boolean!) {
+  setEquipmentEnabled(equipmentId: $equipmentId, enabled: $enabled) {
+    ...EquipmentFields
+  }
+}
+    ${EquipmentFieldsFragmentDoc}`;
 export const SetDestructionReasonEnabledDocument = gql`
     mutation SetDestructionReasonEnabled($text: String!, $enabled: Boolean!) {
   setDestructionReasonEnabled(text: $text, enabled: $enabled) {
@@ -4511,13 +4545,27 @@ export const SetFixativeEnabledDocument = gql`
   }
 }
     ${FixativeFieldsFragmentDoc}`;
-export const SetEquipmentEnabledDocument = gql`
-    mutation SetEquipmentEnabled($equipmentId: Int!, $enabled: Boolean!) {
-  setEquipmentEnabled(equipmentId: $equipmentId, enabled: $enabled) {
-    ...EquipmentFields
+export const SetProjectEnabledDocument = gql`
+    mutation SetProjectEnabled($name: String!, $enabled: Boolean!) {
+  setProjectEnabled(name: $name, enabled: $enabled) {
+    ...ProjectFields
   }
 }
-    ${EquipmentFieldsFragmentDoc}`;
+    ${ProjectFieldsFragmentDoc}`;
+export const SetHmdmcEnabledDocument = gql`
+    mutation SetHmdmcEnabled($hmdmc: String!, $enabled: Boolean!) {
+  setHmdmcEnabled(hmdmc: $hmdmc, enabled: $enabled) {
+    ...HmdmcFields
+  }
+}
+    ${HmdmcFieldsFragmentDoc}`;
+export const SetSolutionEnabledDocument = gql`
+    mutation SetSolutionEnabled($name: String!, $enabled: Boolean!) {
+  setSolutionEnabled(name: $name, enabled: $enabled) {
+    ...SolutionFields
+  }
+}
+    ${SolutionFieldsFragmentDoc}`;
 export const SetLocationCustomNameDocument = gql`
     mutation SetLocationCustomName($locationBarcode: String!, $newCustomName: String!) {
   setLocationCustomName(
@@ -4528,46 +4576,6 @@ export const SetLocationCustomNameDocument = gql`
   }
 }
     ${LocationFieldsFragmentDoc}`;
-export const SetHmdmcEnabledDocument = gql`
-    mutation SetHmdmcEnabled($hmdmc: String!, $enabled: Boolean!) {
-  setHmdmcEnabled(hmdmc: $hmdmc, enabled: $enabled) {
-    ...HmdmcFields
-  }
-}
-    ${HmdmcFieldsFragmentDoc}`;
-export const SetProjectEnabledDocument = gql`
-    mutation SetProjectEnabled($name: String!, $enabled: Boolean!) {
-  setProjectEnabled(name: $name, enabled: $enabled) {
-    ...ProjectFields
-  }
-}
-    ${ProjectFieldsFragmentDoc}`;
-export const SetReleaseRecipientEnabledDocument = gql`
-    mutation SetReleaseRecipientEnabled($username: String!, $enabled: Boolean!) {
-  setReleaseRecipientEnabled(username: $username, enabled: $enabled) {
-    ...ReleaseRecipientFields
-  }
-}
-    ${ReleaseRecipientFieldsFragmentDoc}`;
-export const SetReleaseDestinationEnabledDocument = gql`
-    mutation SetReleaseDestinationEnabled($name: String!, $enabled: Boolean!) {
-  setReleaseDestinationEnabled(name: $name, enabled: $enabled) {
-    ...ReleaseDestinationFields
-  }
-}
-    ${ReleaseDestinationFieldsFragmentDoc}`;
-export const RegisterSectionsDocument = gql`
-    mutation RegisterSections($request: SectionRegisterRequest!) {
-  registerSections(request: $request) {
-    labware {
-      ...LabwareFields
-    }
-  }
-}
-    ${LabwareFieldsFragmentDoc}
-${LabwareTypeFieldsFragmentDoc}
-${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
 export const SetSpeciesEnabledDocument = gql`
     mutation SetSpeciesEnabled($name: String!, $enabled: Boolean!) {
   setSpeciesEnabled(name: $name, enabled: $enabled) {
@@ -4575,6 +4583,20 @@ export const SetSpeciesEnabledDocument = gql`
   }
 }
     ${SpeciesFieldsFragmentDoc}`;
+export const SetReleaseDestinationEnabledDocument = gql`
+    mutation SetReleaseDestinationEnabled($name: String!, $enabled: Boolean!) {
+  setReleaseDestinationEnabled(name: $name, enabled: $enabled) {
+    ...ReleaseDestinationFields
+  }
+}
+    ${ReleaseDestinationFieldsFragmentDoc}`;
+export const SetReleaseRecipientEnabledDocument = gql`
+    mutation SetReleaseRecipientEnabled($username: String!, $enabled: Boolean!) {
+  setReleaseRecipientEnabled(username: $username, enabled: $enabled) {
+    ...ReleaseRecipientFields
+  }
+}
+    ${ReleaseRecipientFieldsFragmentDoc}`;
 export const SetUserRoleDocument = gql`
     mutation SetUserRole($username: String!, $role: UserRole!) {
   setUserRole(username: $username, role: $role) {
@@ -4582,13 +4604,6 @@ export const SetUserRoleDocument = gql`
   }
 }
     ${UserFieldsFragmentDoc}`;
-export const SetSolutionEnabledDocument = gql`
-    mutation SetSolutionEnabled($name: String!, $enabled: Boolean!) {
-  setSolutionEnabled(name: $name, enabled: $enabled) {
-    ...SolutionFields
-  }
-}
-    ${SolutionFieldsFragmentDoc}`;
 export const SetWorkTypeEnabledDocument = gql`
     mutation SetWorkTypeEnabled($name: String!, $enabled: Boolean!) {
   setWorkTypeEnabled(name: $name, enabled: $enabled) {
@@ -4596,15 +4611,6 @@ export const SetWorkTypeEnabledDocument = gql`
   }
 }
     ${WorkTypeFieldsFragmentDoc}`;
-export const StainDocument = gql`
-    mutation Stain($request: StainRequest!) {
-  stain(request: $request) {
-    operations {
-      id
-    }
-  }
-}
-    `;
 export const StoreDocument = gql`
     mutation Store($store: [StoreInput!]!, $locationBarcode: String!) {
   store(store: $store, locationBarcode: $locationBarcode) {
@@ -4612,18 +4618,15 @@ export const StoreDocument = gql`
   }
 }
     ${LocationFieldsFragmentDoc}`;
-export const SlotCopyDocument = gql`
-    mutation SlotCopy($request: SlotCopyRequest!) {
-  slotCopy(request: $request) {
-    labware {
-      ...LabwareFields
+export const UnreleaseDocument = gql`
+    mutation Unrelease($request: UnreleaseRequest!) {
+  unrelease(request: $request) {
+    operations {
+      id
     }
   }
 }
-    ${LabwareFieldsFragmentDoc}
-${LabwareTypeFieldsFragmentDoc}
-${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
+    `;
 export const StoreBarcodeDocument = gql`
     mutation StoreBarcode($barcode: String!, $locationBarcode: String!, $address: Address) {
   storeBarcode(
@@ -4637,40 +4640,15 @@ export const StoreBarcodeDocument = gql`
   }
 }
     ${LocationFieldsFragmentDoc}`;
-export const UnreleaseDocument = gql`
-    mutation Unrelease($request: UnreleaseRequest!) {
-  unrelease(request: $request) {
+export const StainDocument = gql`
+    mutation Stain($request: StainRequest!) {
+  stain(request: $request) {
     operations {
       id
     }
   }
 }
     `;
-export const UpdateWorkNumBlocksDocument = gql`
-    mutation UpdateWorkNumBlocks($workNumber: String!, $numBlocks: Int) {
-  updateWorkNumBlocks(workNumber: $workNumber, numBlocks: $numBlocks) {
-    ...WorkFields
-  }
-}
-    ${WorkFieldsFragmentDoc}
-${ReleaseRecipientFieldsFragmentDoc}
-${ProjectFieldsFragmentDoc}
-${CostCodeFieldsFragmentDoc}
-${WorkTypeFieldsFragmentDoc}`;
-export const UpdateWorkNumOriginalSamplesDocument = gql`
-    mutation UpdateWorkNumOriginalSamples($workNumber: String!, $numOriginalSamples: Int) {
-  updateWorkNumOriginalSamples(
-    workNumber: $workNumber
-    numOriginalSamples: $numOriginalSamples
-  ) {
-    ...WorkFields
-  }
-}
-    ${WorkFieldsFragmentDoc}
-${ReleaseRecipientFieldsFragmentDoc}
-${ProjectFieldsFragmentDoc}
-${CostCodeFieldsFragmentDoc}
-${WorkTypeFieldsFragmentDoc}`;
 export const UnstoreBarcodeDocument = gql`
     mutation UnstoreBarcode($barcode: String!) {
   unstoreBarcode(barcode: $barcode) {
@@ -4679,6 +4657,29 @@ export const UnstoreBarcodeDocument = gql`
   }
 }
     `;
+export const SlotCopyDocument = gql`
+    mutation SlotCopy($request: SlotCopyRequest!) {
+  slotCopy(request: $request) {
+    labware {
+      ...LabwareFields
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}`;
+export const UpdateWorkPriorityDocument = gql`
+    mutation UpdateWorkPriority($workNumber: String!, $priority: String) {
+  updateWorkPriority(workNumber: $workNumber, priority: $priority) {
+    ...WorkFields
+  }
+}
+    ${WorkFieldsFragmentDoc}
+${ReleaseRecipientFieldsFragmentDoc}
+${ProjectFieldsFragmentDoc}
+${CostCodeFieldsFragmentDoc}
+${WorkTypeFieldsFragmentDoc}`;
 export const UpdateWorkNumSlidesDocument = gql`
     mutation UpdateWorkNumSlides($workNumber: String!, $numSlides: Int) {
   updateWorkNumSlides(workNumber: $workNumber, numSlides: $numSlides) {
@@ -4690,18 +4691,13 @@ ${ReleaseRecipientFieldsFragmentDoc}
 ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}`;
-export const UpdateWorkStatusDocument = gql`
-    mutation UpdateWorkStatus($workNumber: String!, $status: WorkStatus!, $commentId: Int) {
-  updateWorkStatus(
-    workNumber: $workNumber
-    status: $status
-    commentId: $commentId
-  ) {
-    ...WorkWithCommentFields
+export const UpdateWorkNumBlocksDocument = gql`
+    mutation UpdateWorkNumBlocks($workNumber: String!, $numBlocks: Int) {
+  updateWorkNumBlocks(workNumber: $workNumber, numBlocks: $numBlocks) {
+    ...WorkFields
   }
 }
-    ${WorkWithCommentFieldsFragmentDoc}
-${WorkFieldsFragmentDoc}
+    ${WorkFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}
 ${ProjectFieldsFragmentDoc}
 ${CostCodeFieldsFragmentDoc}
@@ -4715,9 +4711,12 @@ export const VisiumAnalysisDocument = gql`
   }
 }
     `;
-export const UpdateWorkPriorityDocument = gql`
-    mutation UpdateWorkPriority($workNumber: String!, $priority: String) {
-  updateWorkPriority(workNumber: $workNumber, priority: $priority) {
+export const UpdateWorkNumOriginalSamplesDocument = gql`
+    mutation UpdateWorkNumOriginalSamples($workNumber: String!, $numOriginalSamples: Int) {
+  updateWorkNumOriginalSamples(
+    workNumber: $workNumber
+    numOriginalSamples: $numOriginalSamples
+  ) {
     ...WorkFields
   }
 }
@@ -4740,6 +4739,22 @@ export const ExtractResultDocument = gql`
 ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}`;
+export const UpdateWorkStatusDocument = gql`
+    mutation UpdateWorkStatus($workNumber: String!, $status: WorkStatus!, $commentId: Int) {
+  updateWorkStatus(
+    workNumber: $workNumber
+    status: $status
+    commentId: $commentId
+  ) {
+    ...WorkWithCommentFields
+  }
+}
+    ${WorkWithCommentFieldsFragmentDoc}
+${WorkFieldsFragmentDoc}
+${ReleaseRecipientFieldsFragmentDoc}
+${ProjectFieldsFragmentDoc}
+${CostCodeFieldsFragmentDoc}
+${WorkTypeFieldsFragmentDoc}`;
 export const CurrentUserDocument = gql`
     query CurrentUser {
   user {
@@ -4851,16 +4866,6 @@ ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
 ${HistoryEntryFieldsFragmentDoc}`;
-export const FindLabwareDocument = gql`
-    query FindLabware($barcode: String!) {
-  labware(barcode: $barcode) {
-    ...LabwareFields
-  }
-}
-    ${LabwareFieldsFragmentDoc}
-${LabwareTypeFieldsFragmentDoc}
-${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
 export const FindHistoryForWorkNumberDocument = gql`
     query FindHistoryForWorkNumber($workNumber: String!) {
   historyForWorkNumber(workNumber: $workNumber) {
@@ -4873,13 +4878,6 @@ ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
 ${HistoryEntryFieldsFragmentDoc}`;
-export const FindLocationByBarcodeDocument = gql`
-    query FindLocationByBarcode($barcode: String!) {
-  location(locationBarcode: $barcode) {
-    ...LocationFields
-  }
-}
-    ${LocationFieldsFragmentDoc}`;
 export const FindLabwareLocationDocument = gql`
     query FindLabwareLocation($barcodes: [String!]!) {
   stored(barcodes: $barcodes) {
@@ -4906,6 +4904,54 @@ ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
 ${UserFieldsFragmentDoc}
 ${SlotPassFailFieldsFragmentDoc}`;
+export const FindLabwareDocument = gql`
+    query FindLabware($barcode: String!) {
+  labware(barcode: $barcode) {
+    ...LabwareFields
+  }
+}
+    ${LabwareFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}`;
+export const FindLocationByBarcodeDocument = gql`
+    query FindLocationByBarcode($barcode: String!) {
+  location(locationBarcode: $barcode) {
+    ...LocationFields
+  }
+}
+    ${LocationFieldsFragmentDoc}`;
+export const FindWorkInfoDocument = gql`
+    query FindWorkInfo($status: WorkStatus!) {
+  works(status: [$status]) {
+    workNumber
+    workRequester {
+      username
+    }
+    project {
+      name
+    }
+  }
+}
+    `;
+export const FindPermDataDocument = gql`
+    query FindPermData($barcode: String!) {
+  visiumPermData(barcode: $barcode) {
+    labware {
+      ...LabwareFields
+    }
+    addressPermData {
+      address
+      controlType
+      seconds
+      selected
+    }
+  }
+}
+    ${LabwareFieldsFragmentDoc}
+${LabwareTypeFieldsFragmentDoc}
+${SlotFieldsFragmentDoc}
+${SampleFieldsFragmentDoc}`;
 export const FindPlanDataDocument = gql`
     query FindPlanData($barcode: String!) {
   planData(barcode: $barcode) {
@@ -4930,31 +4976,6 @@ ${LabwareTypeFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
 ${PlanActionFieldsFragmentDoc}`;
-export const FindPermDataDocument = gql`
-    query FindPermData($barcode: String!) {
-  visiumPermData(barcode: $barcode) {
-    labware {
-      ...LabwareFields
-    }
-    addressPermData {
-      address
-      controlType
-      seconds
-      selected
-    }
-  }
-}
-    ${LabwareFieldsFragmentDoc}
-${LabwareTypeFieldsFragmentDoc}
-${SlotFieldsFragmentDoc}
-${SampleFieldsFragmentDoc}`;
-export const FindWorkNumbersDocument = gql`
-    query FindWorkNumbers($status: WorkStatus!) {
-  works(status: [$status]) {
-    workNumber
-  }
-}
-    `;
 export const FindReagentPlateDocument = gql`
     query FindReagentPlate($barcode: String!) {
   reagentPlate(barcode: $barcode) {
@@ -4966,19 +4987,6 @@ export const FindReagentPlateDocument = gql`
   }
 }
     ${ReagentSlotFieldsFragmentDoc}`;
-export const FindWorkInfoDocument = gql`
-    query FindWorkInfo($status: WorkStatus!) {
-  works(status: [$status]) {
-    workNumber
-    workRequester {
-      username
-    }
-    project {
-      name
-    }
-  }
-}
-    `;
 export const GetBlockProcessingInfoDocument = gql`
     query GetBlockProcessingInfo {
   mediums {
@@ -5072,16 +5080,23 @@ ${WorkTypeFieldsFragmentDoc}
 ${EquipmentFieldsFragmentDoc}
 ${UserFieldsFragmentDoc}
 ${SolutionFieldsFragmentDoc}`;
-export const GetDestructionReasonsDocument = gql`
-    query GetDestructionReasons($includeDisabled: Boolean) {
-  destructionReasons(includeDisabled: $includeDisabled) {
+export const FindWorkNumbersDocument = gql`
+    query FindWorkNumbers($status: WorkStatus!) {
+  works(status: [$status]) {
+    workNumber
+  }
+}
+    `;
+export const GetDestroyInfoDocument = gql`
+    query GetDestroyInfo {
+  destructionReasons {
     ...DestructionReasonFields
   }
 }
     ${DestructionReasonFieldsFragmentDoc}`;
-export const GetDestroyInfoDocument = gql`
-    query GetDestroyInfo {
-  destructionReasons {
+export const GetDestructionReasonsDocument = gql`
+    query GetDestructionReasons($includeDisabled: Boolean) {
+  destructionReasons(includeDisabled: $includeDisabled) {
     ...DestructionReasonFields
   }
 }
@@ -5117,6 +5132,20 @@ export const GetPotProcessingInfoDocument = gql`
 }
     ${CommentFieldsFragmentDoc}
 ${LabwareTypeFieldsFragmentDoc}`;
+export const GetPrintersDocument = gql`
+    query GetPrinters {
+  printers {
+    ...PrinterFields
+  }
+}
+    ${PrinterFieldsFragmentDoc}`;
+export const GetNextReplicateNumberDocument = gql`
+    query GetNextReplicateNumber($barcodes: [String!]!) {
+  nextReplicateNumbers(barcodes: $barcodes) {
+    ...NextReplicateDataFields
+  }
+}
+    ${NextReplicateDataFieldsFragmentDoc}`;
 export const GetLabwareOperationsDocument = gql`
     query GetLabwareOperations($barcode: String!, $operationType: String!) {
   labwareOperations(barcode: $barcode, operationType: $operationType) {
@@ -5128,34 +5157,6 @@ ${ActionFieldsFragmentDoc}
 ${SlotFieldsFragmentDoc}
 ${SampleFieldsFragmentDoc}
 ${UserFieldsFragmentDoc}`;
-export const GetNextReplicateNumberDocument = gql`
-    query GetNextReplicateNumber($barcodes: [String!]!) {
-  nextReplicateNumbers(barcodes: $barcodes) {
-    ...NextReplicateDataFields
-  }
-}
-    ${NextReplicateDataFieldsFragmentDoc}`;
-export const GetRecordExtractResultInfoDocument = gql`
-    query GetRecordExtractResultInfo {
-  comments(category: "extract result", includeDisabled: false) {
-    ...CommentFields
-  }
-}
-    ${CommentFieldsFragmentDoc}`;
-export const GetPrintersDocument = gql`
-    query GetPrinters {
-  printers {
-    ...PrinterFields
-  }
-}
-    ${PrinterFieldsFragmentDoc}`;
-export const GetRecordInPlaceInfoDocument = gql`
-    query GetRecordInPlaceInfo($category: String) {
-  equipments(includeDisabled: false, category: $category) {
-    ...EquipmentFields
-  }
-}
-    ${EquipmentFieldsFragmentDoc}`;
 export const GetRegistrationInfoDocument = gql`
     query GetRegistrationInfo {
   species {
@@ -5185,9 +5186,30 @@ export const GetRegistrationInfoDocument = gql`
   }
 }
     ${LabwareTypeFieldsFragmentDoc}`;
+export const GetRecordInPlaceInfoDocument = gql`
+    query GetRecordInPlaceInfo($category: String) {
+  equipments(includeDisabled: false, category: $category) {
+    ...EquipmentFields
+  }
+}
+    ${EquipmentFieldsFragmentDoc}`;
+export const GetRecordExtractResultInfoDocument = gql`
+    query GetRecordExtractResultInfo {
+  comments(category: "extract result", includeDisabled: false) {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
 export const GetSampleProcessingCommentsInfoDocument = gql`
     query GetSampleProcessingCommentsInfo {
   comments: comments(includeDisabled: false, category: "Sample Processing") {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
+export const GetSectioningConfirmInfoDocument = gql`
+    query GetSectioningConfirmInfo {
+  comments(category: "section") {
     ...CommentFields
   }
 }
@@ -5203,13 +5225,6 @@ export const GetReleaseInfoDocument = gql`
 }
     ${ReleaseDestinationFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}`;
-export const GetSearchInfoDocument = gql`
-    query GetSearchInfo {
-  tissueTypes {
-    name
-  }
-}
-    `;
 export const GetSectioningInfoDocument = gql`
     query GetSectioningInfo {
   labwareTypes {
@@ -5217,13 +5232,13 @@ export const GetSectioningInfoDocument = gql`
   }
 }
     ${LabwareTypeFieldsFragmentDoc}`;
-export const GetSectioningConfirmInfoDocument = gql`
-    query GetSectioningConfirmInfo {
-  comments(category: "section") {
-    ...CommentFields
+export const GetSearchInfoDocument = gql`
+    query GetSearchInfo {
+  tissueTypes {
+    name
   }
 }
-    ${CommentFieldsFragmentDoc}`;
+    `;
 export const GetStainingQcInfoDocument = gql`
     query GetStainingQCInfo {
   comments(includeDisabled: false, category: "stain QC") {
@@ -5231,13 +5246,6 @@ export const GetStainingQcInfoDocument = gql`
   }
 }
     ${CommentFieldsFragmentDoc}`;
-export const GetSolutionTransferInfoDocument = gql`
-    query GetSolutionTransferInfo {
-  solutions {
-    name
-  }
-}
-    `;
 export const GetStainInfoDocument = gql`
     query GetStainInfo {
   stainTypes {
@@ -5245,28 +5253,13 @@ export const GetStainInfoDocument = gql`
   }
 }
     ${StainTypeFieldsFragmentDoc}`;
-export const GetWorkNumbersDocument = gql`
-    query GetWorkNumbers {
-  works {
-    workNumber
+export const GetSolutionTransferInfoDocument = gql`
+    query GetSolutionTransferInfo {
+  solutions {
+    name
   }
 }
     `;
-export const GetWorkSummaryDocument = gql`
-    query GetWorkSummary {
-  worksSummary {
-    ...WorkSummaryGroupFields
-  }
-}
-    ${WorkSummaryGroupFieldsFragmentDoc}
-${WorkTypeFieldsFragmentDoc}`;
-export const GetVisiumQcInfoDocument = gql`
-    query GetVisiumQCInfo {
-  comments(includeDisabled: false, category: "Visium QC") {
-    ...CommentFields
-  }
-}
-    ${CommentFieldsFragmentDoc}`;
 export const GetWorkAllocationInfoDocument = gql`
     query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatus!]) {
   projects(includeDisabled: false) {
@@ -5295,6 +5288,20 @@ ${WorkFieldsFragmentDoc}
 ${ReleaseRecipientFieldsFragmentDoc}
 ${WorkTypeFieldsFragmentDoc}
 ${CommentFieldsFragmentDoc}`;
+export const GetVisiumQcInfoDocument = gql`
+    query GetVisiumQCInfo {
+  comments(includeDisabled: false, category: "Visium QC") {
+    ...CommentFields
+  }
+}
+    ${CommentFieldsFragmentDoc}`;
+export const GetWorkNumbersDocument = gql`
+    query GetWorkNumbers {
+  works {
+    workNumber
+  }
+}
+    `;
 export const GetWorkTypesDocument = gql`
     query GetWorkTypes {
   workTypes(includeDisabled: true) {
@@ -5302,6 +5309,14 @@ export const GetWorkTypesDocument = gql`
   }
 }
     `;
+export const GetWorkSummaryDocument = gql`
+    query GetWorkSummary {
+  worksSummary {
+    ...WorkSummaryGroupFields
+  }
+}
+    ${WorkSummaryGroupFieldsFragmentDoc}
+${WorkTypeFieldsFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string) => Promise<T>;
 
@@ -5313,26 +5328,17 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AddCostCode(variables: AddCostCodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddCostCodeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddCostCodeMutation>(AddCostCodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddCostCode', 'mutation');
     },
-    AddComment(variables: AddCommentMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddCommentMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<AddCommentMutation>(AddCommentDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddComment', 'mutation');
-    },
     AddDestructionReason(variables: AddDestructionReasonMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddDestructionReasonMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddDestructionReasonMutation>(AddDestructionReasonDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddDestructionReason', 'mutation');
+    },
+    AddComment(variables: AddCommentMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddCommentMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddCommentMutation>(AddCommentDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddComment', 'mutation');
     },
     AddEquipment(variables: AddEquipmentMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddEquipmentMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddEquipmentMutation>(AddEquipmentDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddEquipment', 'mutation');
     },
-    AddExternalID(variables: AddExternalIdMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddExternalIdMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<AddExternalIdMutation>(AddExternalIdDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddExternalID', 'mutation');
-    },
-    AddFixative(variables: AddFixativeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddFixativeMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<AddFixativeMutation>(AddFixativeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddFixative', 'mutation');
-    },
     AddProject(variables: AddProjectMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddProjectMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddProjectMutation>(AddProjectDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddProject', 'mutation');
-    },
-    AddReleaseDestination(variables: AddReleaseDestinationMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddReleaseDestinationMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<AddReleaseDestinationMutation>(AddReleaseDestinationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddReleaseDestination', 'mutation');
     },
     AddHmdmc(variables: AddHmdmcMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddHmdmcMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddHmdmcMutation>(AddHmdmcDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddHmdmc', 'mutation');
@@ -5340,8 +5346,17 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AddSolution(variables: AddSolutionMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSolutionMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddSolutionMutation>(AddSolutionDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSolution', 'mutation');
     },
+    AddExternalID(variables: AddExternalIdMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddExternalIdMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddExternalIdMutation>(AddExternalIdDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddExternalID', 'mutation');
+    },
+    AddFixative(variables: AddFixativeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddFixativeMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddFixativeMutation>(AddFixativeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddFixative', 'mutation');
+    },
     AddSpecies(variables: AddSpeciesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddSpeciesMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddSpeciesMutation>(AddSpeciesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddSpecies', 'mutation');
+    },
+    AddUser(variables: AddUserMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddUserMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddUserMutation>(AddUserDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddUser', 'mutation');
     },
     AddReleaseRecipient(variables: AddReleaseRecipientMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddReleaseRecipientMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddReleaseRecipientMutation>(AddReleaseRecipientDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddReleaseRecipient', 'mutation');
@@ -5349,41 +5364,38 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     AddWorkType(variables: AddWorkTypeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddWorkTypeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AddWorkTypeMutation>(AddWorkTypeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddWorkType', 'mutation');
     },
-    Aliquot(variables: AliquotMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AliquotMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<AliquotMutation>(AliquotDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Aliquot', 'mutation');
-    },
-    AddUser(variables: AddUserMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddUserMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<AddUserMutation>(AddUserDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddUser', 'mutation');
-    },
-    ConfirmSection(variables: ConfirmSectionMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmSectionMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<ConfirmSectionMutation>(ConfirmSectionDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ConfirmSection', 'mutation');
+    AddReleaseDestination(variables: AddReleaseDestinationMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AddReleaseDestinationMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AddReleaseDestinationMutation>(AddReleaseDestinationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AddReleaseDestination', 'mutation');
     },
     Confirm(variables: ConfirmMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<ConfirmMutation>(ConfirmDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Confirm', 'mutation');
     },
-    Destroy(variables: DestroyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DestroyMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<DestroyMutation>(DestroyDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Destroy', 'mutation');
-    },
-    EmptyLocation(variables: EmptyLocationMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<EmptyLocationMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<EmptyLocationMutation>(EmptyLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'EmptyLocation', 'mutation');
+    ConfirmSection(variables: ConfirmSectionMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ConfirmSectionMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ConfirmSectionMutation>(ConfirmSectionDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ConfirmSection', 'mutation');
     },
     CreateWork(variables: CreateWorkMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CreateWorkMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateWorkMutation>(CreateWorkDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CreateWork', 'mutation');
     },
+    Aliquot(variables: AliquotMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AliquotMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AliquotMutation>(AliquotDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Aliquot', 'mutation');
+    },
+    Destroy(variables: DestroyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DestroyMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<DestroyMutation>(DestroyDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Destroy', 'mutation');
+    },
     Extract(variables: ExtractMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ExtractMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<ExtractMutation>(ExtractDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Extract', 'mutation');
     },
-    Login(variables: LoginMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LoginMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<LoginMutation>(LoginDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Login', 'mutation');
+    EmptyLocation(variables: EmptyLocationMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<EmptyLocationMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<EmptyLocationMutation>(EmptyLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'EmptyLocation', 'mutation');
     },
     Logout(variables?: LogoutMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LogoutMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<LogoutMutation>(LogoutDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Logout', 'mutation');
     },
+    Login(variables: LoginMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<LoginMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<LoginMutation>(LoginDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Login', 'mutation');
+    },
     PerformFFPEProcessing(variables: PerformFfpeProcessingMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformFfpeProcessingMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PerformFfpeProcessingMutation>(PerformFfpeProcessingDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformFFPEProcessing', 'mutation');
-    },
-    PerformTissuePot(variables: PerformTissuePotMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformTissuePotMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<PerformTissuePotMutation>(PerformTissuePotDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformTissuePot', 'mutation');
     },
     PerformSolutionTransfer(variables: PerformSolutionTransferMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformSolutionTransferMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PerformSolutionTransferMutation>(PerformSolutionTransferDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformSolutionTransfer', 'mutation');
@@ -5394,53 +5406,62 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     Plan(variables: PlanMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PlanMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PlanMutation>(PlanDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Plan', 'mutation');
     },
-    Print(variables: PrintMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PrintMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<PrintMutation>(PrintDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Print', 'mutation');
-    },
-    RecordExtractResult(variables: RecordExtractResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordExtractResultMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RecordExtractResultMutation>(RecordExtractResultDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordExtractResult', 'mutation');
-    },
     RecordInPlace(variables: RecordInPlaceMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordInPlaceMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordInPlaceMutation>(RecordInPlaceDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordInPlace', 'mutation');
     },
-    RecordComplexStain(variables: RecordComplexStainMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordComplexStainMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RecordComplexStainMutation>(RecordComplexStainDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordComplexStain', 'mutation');
-    },
-    RecordOpWithSlotMeasurements(variables: RecordOpWithSlotMeasurementsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordOpWithSlotMeasurementsMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RecordOpWithSlotMeasurementsMutation>(RecordOpWithSlotMeasurementsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordOpWithSlotMeasurements', 'mutation');
-    },
-    RecordRNAAnalysis(variables: RecordRnaAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordRnaAnalysisMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordRNAAnalysis', 'mutation');
+    PerformTissuePot(variables: PerformTissuePotMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PerformTissuePotMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformTissuePotMutation>(PerformTissuePotDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PerformTissuePot', 'mutation');
     },
     RecordPerm(variables: RecordPermMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordPermMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordPermMutation>(RecordPermDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordPerm', 'mutation');
     },
-    RecordReagentTransfer(variables: RecordReagentTransferMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordReagentTransferMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RecordReagentTransferMutation>(RecordReagentTransferDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordReagentTransfer', 'mutation');
+    RecordExtractResult(variables: RecordExtractResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordExtractResultMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordExtractResultMutation>(RecordExtractResultDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordExtractResult', 'mutation');
     },
-    RegisterOriginalSamples(variables: RegisterOriginalSamplesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterOriginalSamplesMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RegisterOriginalSamplesMutation>(RegisterOriginalSamplesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterOriginalSamples', 'mutation');
+    Print(variables: PrintMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<PrintMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PrintMutation>(PrintDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Print', 'mutation');
     },
-    RecordSampleProcessingComments(variables: RecordSampleProcessingCommentsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordSampleProcessingCommentsMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RecordSampleProcessingCommentsMutation>(RecordSampleProcessingCommentsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordSampleProcessingComments', 'mutation');
+    RecordRNAAnalysis(variables: RecordRnaAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordRnaAnalysisMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordRnaAnalysisMutation>(RecordRnaAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordRNAAnalysis', 'mutation');
     },
-    RegisterTissues(variables: RegisterTissuesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterTissuesMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RegisterTissuesMutation>(RegisterTissuesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterTissues', 'mutation');
+    RecordComplexStain(variables: RecordComplexStainMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordComplexStainMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordComplexStainMutation>(RecordComplexStainDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordComplexStain', 'mutation');
     },
     RecordStainResult(variables: RecordStainResultMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordStainResultMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordStainResultMutation>(RecordStainResultDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordStainResult', 'mutation');
     },
-    ReleaseLabware(variables: ReleaseLabwareMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ReleaseLabwareMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<ReleaseLabwareMutation>(ReleaseLabwareDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ReleaseLabware', 'mutation');
+    RecordSampleProcessingComments(variables: RecordSampleProcessingCommentsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordSampleProcessingCommentsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordSampleProcessingCommentsMutation>(RecordSampleProcessingCommentsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordSampleProcessingComments', 'mutation');
+    },
+    RecordOpWithSlotMeasurements(variables: RecordOpWithSlotMeasurementsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordOpWithSlotMeasurementsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordOpWithSlotMeasurementsMutation>(RecordOpWithSlotMeasurementsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordOpWithSlotMeasurements', 'mutation');
     },
     RecordVisiumQC(variables: RecordVisiumQcMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordVisiumQcMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RecordVisiumQcMutation>(RecordVisiumQcDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordVisiumQC', 'mutation');
     },
+    RegisterOriginalSamples(variables: RegisterOriginalSamplesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterOriginalSamplesMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RegisterOriginalSamplesMutation>(RegisterOriginalSamplesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterOriginalSamples', 'mutation');
+    },
+    RegisterTissues(variables: RegisterTissuesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterTissuesMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RegisterTissuesMutation>(RegisterTissuesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterTissues', 'mutation');
+    },
+    RegisterSections(variables: RegisterSectionsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterSectionsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterSections', 'mutation');
+    },
     SetCommentEnabled(variables: SetCommentEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetCommentEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetCommentEnabledMutation>(SetCommentEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetCommentEnabled', 'mutation');
     },
+    ReleaseLabware(variables: ReleaseLabwareMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ReleaseLabwareMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ReleaseLabwareMutation>(ReleaseLabwareDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ReleaseLabware', 'mutation');
+    },
     SetCostCodeEnabled(variables: SetCostCodeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetCostCodeEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetCostCodeEnabledMutation>(SetCostCodeEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetCostCodeEnabled', 'mutation');
+    },
+    RecordReagentTransfer(variables: RecordReagentTransferMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RecordReagentTransferMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<RecordReagentTransferMutation>(RecordReagentTransferDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RecordReagentTransfer', 'mutation');
+    },
+    SetEquipmentEnabled(variables: SetEquipmentEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetEquipmentEnabledMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetEquipmentEnabledMutation>(SetEquipmentEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetEquipmentEnabled', 'mutation');
     },
     SetDestructionReasonEnabled(variables: SetDestructionReasonEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetDestructionReasonEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetDestructionReasonEnabledMutation>(SetDestructionReasonEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetDestructionReasonEnabled', 'mutation');
@@ -5448,77 +5469,71 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     SetFixativeEnabled(variables: SetFixativeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetFixativeEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetFixativeEnabledMutation>(SetFixativeEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetFixativeEnabled', 'mutation');
     },
-    SetEquipmentEnabled(variables: SetEquipmentEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetEquipmentEnabledMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SetEquipmentEnabledMutation>(SetEquipmentEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetEquipmentEnabled', 'mutation');
-    },
-    SetLocationCustomName(variables: SetLocationCustomNameMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetLocationCustomNameMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SetLocationCustomNameMutation>(SetLocationCustomNameDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetLocationCustomName', 'mutation');
+    SetProjectEnabled(variables: SetProjectEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetProjectEnabledMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetProjectEnabledMutation>(SetProjectEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetProjectEnabled', 'mutation');
     },
     SetHmdmcEnabled(variables: SetHmdmcEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetHmdmcEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetHmdmcEnabledMutation>(SetHmdmcEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetHmdmcEnabled', 'mutation');
     },
-    SetProjectEnabled(variables: SetProjectEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetProjectEnabledMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SetProjectEnabledMutation>(SetProjectEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetProjectEnabled', 'mutation');
+    SetSolutionEnabled(variables: SetSolutionEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSolutionEnabledMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetSolutionEnabledMutation>(SetSolutionEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSolutionEnabled', 'mutation');
     },
-    SetReleaseRecipientEnabled(variables: SetReleaseRecipientEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetReleaseRecipientEnabledMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SetReleaseRecipientEnabledMutation>(SetReleaseRecipientEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetReleaseRecipientEnabled', 'mutation');
-    },
-    SetReleaseDestinationEnabled(variables: SetReleaseDestinationEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetReleaseDestinationEnabledMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SetReleaseDestinationEnabledMutation>(SetReleaseDestinationEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetReleaseDestinationEnabled', 'mutation');
-    },
-    RegisterSections(variables: RegisterSectionsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<RegisterSectionsMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<RegisterSectionsMutation>(RegisterSectionsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'RegisterSections', 'mutation');
+    SetLocationCustomName(variables: SetLocationCustomNameMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetLocationCustomNameMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetLocationCustomNameMutation>(SetLocationCustomNameDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetLocationCustomName', 'mutation');
     },
     SetSpeciesEnabled(variables: SetSpeciesEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSpeciesEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetSpeciesEnabledMutation>(SetSpeciesEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSpeciesEnabled', 'mutation');
     },
+    SetReleaseDestinationEnabled(variables: SetReleaseDestinationEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetReleaseDestinationEnabledMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetReleaseDestinationEnabledMutation>(SetReleaseDestinationEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetReleaseDestinationEnabled', 'mutation');
+    },
+    SetReleaseRecipientEnabled(variables: SetReleaseRecipientEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetReleaseRecipientEnabledMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetReleaseRecipientEnabledMutation>(SetReleaseRecipientEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetReleaseRecipientEnabled', 'mutation');
+    },
     SetUserRole(variables: SetUserRoleMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetUserRoleMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetUserRoleMutation>(SetUserRoleDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetUserRole', 'mutation');
-    },
-    SetSolutionEnabled(variables: SetSolutionEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetSolutionEnabledMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SetSolutionEnabledMutation>(SetSolutionEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetSolutionEnabled', 'mutation');
     },
     SetWorkTypeEnabled(variables: SetWorkTypeEnabledMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SetWorkTypeEnabledMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<SetWorkTypeEnabledMutation>(SetWorkTypeEnabledDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SetWorkTypeEnabled', 'mutation');
     },
-    Stain(variables: StainMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StainMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<StainMutation>(StainDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Stain', 'mutation');
-    },
     Store(variables: StoreMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StoreMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<StoreMutation>(StoreDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Store', 'mutation');
-    },
-    SlotCopy(variables: SlotCopyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SlotCopyMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SlotCopyMutation>(SlotCopyDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SlotCopy', 'mutation');
-    },
-    StoreBarcode(variables: StoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StoreBarcodeMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<StoreBarcodeMutation>(StoreBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'StoreBarcode', 'mutation');
     },
     Unrelease(variables: UnreleaseMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnreleaseMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UnreleaseMutation>(UnreleaseDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Unrelease', 'mutation');
     },
-    UpdateWorkNumBlocks(variables: UpdateWorkNumBlocksMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumBlocksMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumBlocksMutation>(UpdateWorkNumBlocksDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumBlocks', 'mutation');
+    StoreBarcode(variables: StoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StoreBarcodeMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StoreBarcodeMutation>(StoreBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'StoreBarcode', 'mutation');
     },
-    UpdateWorkNumOriginalSamples(variables: UpdateWorkNumOriginalSamplesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumOriginalSamplesMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumOriginalSamplesMutation>(UpdateWorkNumOriginalSamplesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumOriginalSamples', 'mutation');
+    Stain(variables: StainMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<StainMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StainMutation>(StainDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Stain', 'mutation');
     },
     UnstoreBarcode(variables: UnstoreBarcodeMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UnstoreBarcodeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UnstoreBarcodeMutation>(UnstoreBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UnstoreBarcode', 'mutation');
     },
-    UpdateWorkNumSlides(variables: UpdateWorkNumSlidesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumSlidesMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumSlidesMutation>(UpdateWorkNumSlidesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumSlides', 'mutation');
-    },
-    UpdateWorkStatus(variables: UpdateWorkStatusMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkStatusMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkStatusMutation>(UpdateWorkStatusDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkStatus', 'mutation');
-    },
-    VisiumAnalysis(variables: VisiumAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<VisiumAnalysisMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<VisiumAnalysisMutation>(VisiumAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'VisiumAnalysis', 'mutation');
+    SlotCopy(variables: SlotCopyMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<SlotCopyMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SlotCopyMutation>(SlotCopyDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SlotCopy', 'mutation');
     },
     UpdateWorkPriority(variables: UpdateWorkPriorityMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkPriorityMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkPriorityMutation>(UpdateWorkPriorityDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkPriority', 'mutation');
     },
+    UpdateWorkNumSlides(variables: UpdateWorkNumSlidesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumSlidesMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumSlidesMutation>(UpdateWorkNumSlidesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumSlides', 'mutation');
+    },
+    UpdateWorkNumBlocks(variables: UpdateWorkNumBlocksMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumBlocksMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumBlocksMutation>(UpdateWorkNumBlocksDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumBlocks', 'mutation');
+    },
+    VisiumAnalysis(variables: VisiumAnalysisMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<VisiumAnalysisMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<VisiumAnalysisMutation>(VisiumAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'VisiumAnalysis', 'mutation');
+    },
+    UpdateWorkNumOriginalSamples(variables: UpdateWorkNumOriginalSamplesMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkNumOriginalSamplesMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkNumOriginalSamplesMutation>(UpdateWorkNumOriginalSamplesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkNumOriginalSamples', 'mutation');
+    },
     ExtractResult(variables: ExtractResultQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<ExtractResultQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<ExtractResultQuery>(ExtractResultDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'ExtractResult', 'query');
+    },
+    UpdateWorkStatus(variables: UpdateWorkStatusMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateWorkStatusMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateWorkStatusMutation>(UpdateWorkStatusDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateWorkStatus', 'mutation');
     },
     CurrentUser(variables?: CurrentUserQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CurrentUserQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<CurrentUserQuery>(CurrentUserDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CurrentUser', 'query');
@@ -5538,14 +5553,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     FindHistoryForLabwareBarcode(variables: FindHistoryForLabwareBarcodeQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForLabwareBarcodeQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindHistoryForLabwareBarcodeQuery>(FindHistoryForLabwareBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindHistoryForLabwareBarcode', 'query');
     },
-    FindLabware(variables: FindLabwareQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLabwareQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<FindLabwareQuery>(FindLabwareDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindLabware', 'query');
-    },
     FindHistoryForWorkNumber(variables: FindHistoryForWorkNumberQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindHistoryForWorkNumberQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindHistoryForWorkNumberQuery>(FindHistoryForWorkNumberDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindHistoryForWorkNumber', 'query');
-    },
-    FindLocationByBarcode(variables: FindLocationByBarcodeQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLocationByBarcodeQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<FindLocationByBarcodeQuery>(FindLocationByBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindLocationByBarcode', 'query');
     },
     FindLabwareLocation(variables: FindLabwareLocationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLabwareLocationQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindLabwareLocationQuery>(FindLabwareLocationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindLabwareLocation', 'query');
@@ -5553,20 +5562,23 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     FindPassFails(variables: FindPassFailsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPassFailsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindPassFailsQuery>(FindPassFailsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindPassFails', 'query');
     },
-    FindPlanData(variables: FindPlanDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPlanDataQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<FindPlanDataQuery>(FindPlanDataDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindPlanData', 'query');
+    FindLabware(variables: FindLabwareQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLabwareQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FindLabwareQuery>(FindLabwareDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindLabware', 'query');
+    },
+    FindLocationByBarcode(variables: FindLocationByBarcodeQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindLocationByBarcodeQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FindLocationByBarcodeQuery>(FindLocationByBarcodeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindLocationByBarcode', 'query');
+    },
+    FindWorkInfo(variables: FindWorkInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FindWorkInfoQuery>(FindWorkInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindWorkInfo', 'query');
     },
     FindPermData(variables: FindPermDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPermDataQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindPermDataQuery>(FindPermDataDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindPermData', 'query');
     },
-    FindWorkNumbers(variables: FindWorkNumbersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkNumbersQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<FindWorkNumbersQuery>(FindWorkNumbersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindWorkNumbers', 'query');
+    FindPlanData(variables: FindPlanDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindPlanDataQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FindPlanDataQuery>(FindPlanDataDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindPlanData', 'query');
     },
     FindReagentPlate(variables: FindReagentPlateQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindReagentPlateQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<FindReagentPlateQuery>(FindReagentPlateDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindReagentPlate', 'query');
-    },
-    FindWorkInfo(variables: FindWorkInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkInfoQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<FindWorkInfoQuery>(FindWorkInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindWorkInfo', 'query');
     },
     GetBlockProcessingInfo(variables?: GetBlockProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetBlockProcessingInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetBlockProcessingInfoQuery>(GetBlockProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetBlockProcessingInfo', 'query');
@@ -5580,11 +5592,14 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     GetConfiguration(variables?: GetConfigurationQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetConfigurationQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetConfigurationQuery>(GetConfigurationDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetConfiguration', 'query');
     },
-    GetDestructionReasons(variables?: GetDestructionReasonsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestructionReasonsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetDestructionReasons', 'query');
+    FindWorkNumbers(variables: FindWorkNumbersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<FindWorkNumbersQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FindWorkNumbersQuery>(FindWorkNumbersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FindWorkNumbers', 'query');
     },
     GetDestroyInfo(variables?: GetDestroyInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestroyInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetDestroyInfoQuery>(GetDestroyInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetDestroyInfo', 'query');
+    },
+    GetDestructionReasons(variables?: GetDestructionReasonsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetDestructionReasonsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetDestructionReasonsQuery>(GetDestructionReasonsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetDestructionReasons', 'query');
     },
     GetFFPEProcessingInfo(variables?: GetFfpeProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetFfpeProcessingInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetFfpeProcessingInfoQuery>(GetFfpeProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetFFPEProcessingInfo', 'query');
@@ -5595,62 +5610,62 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     GetPotProcessingInfo(variables?: GetPotProcessingInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPotProcessingInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetPotProcessingInfoQuery>(GetPotProcessingInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetPotProcessingInfo', 'query');
     },
-    GetLabwareOperations(variables: GetLabwareOperationsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetLabwareOperationsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetLabwareOperationsQuery>(GetLabwareOperationsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetLabwareOperations', 'query');
+    GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetPrintersQuery>(GetPrintersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetPrinters', 'query');
     },
     GetNextReplicateNumber(variables: GetNextReplicateNumberQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetNextReplicateNumberQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetNextReplicateNumberQuery>(GetNextReplicateNumberDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetNextReplicateNumber', 'query');
     },
-    GetRecordExtractResultInfo(variables?: GetRecordExtractResultInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordExtractResultInfoQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetRecordExtractResultInfoQuery>(GetRecordExtractResultInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetRecordExtractResultInfo', 'query');
-    },
-    GetPrinters(variables?: GetPrintersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetPrintersQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetPrintersQuery>(GetPrintersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetPrinters', 'query');
-    },
-    GetRecordInPlaceInfo(variables?: GetRecordInPlaceInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordInPlaceInfoQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetRecordInPlaceInfoQuery>(GetRecordInPlaceInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetRecordInPlaceInfo', 'query');
+    GetLabwareOperations(variables: GetLabwareOperationsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetLabwareOperationsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetLabwareOperationsQuery>(GetLabwareOperationsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetLabwareOperations', 'query');
     },
     GetRegistrationInfo(variables?: GetRegistrationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRegistrationInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetRegistrationInfoQuery>(GetRegistrationInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetRegistrationInfo', 'query');
     },
+    GetRecordInPlaceInfo(variables?: GetRecordInPlaceInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordInPlaceInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetRecordInPlaceInfoQuery>(GetRecordInPlaceInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetRecordInPlaceInfo', 'query');
+    },
+    GetRecordExtractResultInfo(variables?: GetRecordExtractResultInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRecordExtractResultInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetRecordExtractResultInfoQuery>(GetRecordExtractResultInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetRecordExtractResultInfo', 'query');
+    },
     GetSampleProcessingCommentsInfo(variables?: GetSampleProcessingCommentsInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSampleProcessingCommentsInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetSampleProcessingCommentsInfoQuery>(GetSampleProcessingCommentsInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSampleProcessingCommentsInfo', 'query');
-    },
-    GetReleaseInfo(variables?: GetReleaseInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetReleaseInfoQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetReleaseInfoQuery>(GetReleaseInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetReleaseInfo', 'query');
-    },
-    GetSearchInfo(variables?: GetSearchInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSearchInfoQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetSearchInfoQuery>(GetSearchInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSearchInfo', 'query');
-    },
-    GetSectioningInfo(variables?: GetSectioningInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSectioningInfoQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetSectioningInfoQuery>(GetSectioningInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSectioningInfo', 'query');
     },
     GetSectioningConfirmInfo(variables?: GetSectioningConfirmInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSectioningConfirmInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetSectioningConfirmInfoQuery>(GetSectioningConfirmInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSectioningConfirmInfo', 'query');
     },
+    GetReleaseInfo(variables?: GetReleaseInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetReleaseInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetReleaseInfoQuery>(GetReleaseInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetReleaseInfo', 'query');
+    },
+    GetSectioningInfo(variables?: GetSectioningInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSectioningInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSectioningInfoQuery>(GetSectioningInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSectioningInfo', 'query');
+    },
+    GetSearchInfo(variables?: GetSearchInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSearchInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSearchInfoQuery>(GetSearchInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSearchInfo', 'query');
+    },
     GetStainingQCInfo(variables?: GetStainingQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainingQcInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetStainingQcInfoQuery>(GetStainingQcInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetStainingQCInfo', 'query');
-    },
-    GetSolutionTransferInfo(variables?: GetSolutionTransferInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSolutionTransferInfoQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetSolutionTransferInfoQuery>(GetSolutionTransferInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSolutionTransferInfo', 'query');
     },
     GetStainInfo(variables?: GetStainInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetStainInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetStainInfoQuery>(GetStainInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetStainInfo', 'query');
     },
-    GetWorkNumbers(variables?: GetWorkNumbersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkNumbersQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetWorkNumbersQuery>(GetWorkNumbersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetWorkNumbers', 'query');
-    },
-    GetWorkSummary(variables?: GetWorkSummaryQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkSummaryQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetWorkSummaryQuery>(GetWorkSummaryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetWorkSummary', 'query');
-    },
-    GetVisiumQCInfo(variables?: GetVisiumQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetVisiumQcInfoQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetVisiumQcInfoQuery>(GetVisiumQcInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetVisiumQCInfo', 'query');
+    GetSolutionTransferInfo(variables?: GetSolutionTransferInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetSolutionTransferInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetSolutionTransferInfoQuery>(GetSolutionTransferInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetSolutionTransferInfo', 'query');
     },
     GetWorkAllocationInfo(variables: GetWorkAllocationInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkAllocationInfoQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetWorkAllocationInfoQuery>(GetWorkAllocationInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetWorkAllocationInfo', 'query');
     },
+    GetVisiumQCInfo(variables?: GetVisiumQcInfoQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetVisiumQcInfoQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetVisiumQcInfoQuery>(GetVisiumQcInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetVisiumQCInfo', 'query');
+    },
+    GetWorkNumbers(variables?: GetWorkNumbersQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkNumbersQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetWorkNumbersQuery>(GetWorkNumbersDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetWorkNumbers', 'query');
+    },
     GetWorkTypes(variables?: GetWorkTypesQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkTypesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetWorkTypesQuery>(GetWorkTypesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetWorkTypes', 'query');
+    },
+    GetWorkSummary(variables?: GetWorkSummaryQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetWorkSummaryQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetWorkSummaryQuery>(GetWorkSummaryDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetWorkSummary', 'query');
     }
   };
 }

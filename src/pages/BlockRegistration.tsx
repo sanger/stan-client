@@ -2,12 +2,13 @@ import React, { useMemo } from 'react';
 import {
   BlockRegisterRequest,
   GetRegistrationInfoQuery,
+  LabwareFieldsFragment,
   LifeStage,
   RegisterTissuesMutationVariables
 } from '../types/sdk';
 import * as Yup from 'yup';
 import RegistrationValidation from '../lib/validation/registrationValidation';
-import columns from '../components/dataTable/labwareColumns';
+import columns from '../components/dataTableColumns/labwareColumns';
 import { LabwareTypeName } from '../types/stan';
 import * as registrationService from '../lib/services/registrationService';
 import Registration from './registration/Registration';
@@ -159,7 +160,12 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
   }, [registrationInfo]);
 
   return (
-    <Registration<RegisterTissuesMutationVariables, RegistrationFormTissue, RegistrationFormBlock>
+    <Registration<
+      RegisterTissuesMutationVariables,
+      RegistrationFormTissue,
+      RegistrationFormBlock,
+      LabwareFieldsFragment
+    >
       title={'Block Registration'}
       availableLabwareTypes={availableLabwareTypes}
       registrationInfo={registrationInfo}
@@ -168,6 +174,7 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
       registrationService={registrationService.registerTissues}
       registrationValidationSchema={validationSchema}
       successDisplayTableColumns={resultColumns}
+      formatSuccessData={(registrationResult) => registrationResult.labware}
     />
   );
 }

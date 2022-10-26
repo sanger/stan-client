@@ -8,7 +8,7 @@ import { Link, Prompt } from 'react-router-dom';
 import _ from 'lodash';
 import { useConfirmLeave } from '../../lib/hooks';
 import LabwarePlan from '../../components/planning/LabwarePlan';
-import labwareScanTableColumns from '../../components/dataTable/labwareColumns';
+import labwareScanTableColumns from '../../components/dataTableColumns/labwareColumns';
 import Planner, { PlanChangedProps } from '../../components/planning/Planner';
 import { optionValues } from '../../components/forms';
 
