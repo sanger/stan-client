@@ -9,7 +9,6 @@ import ButtonBar from '../../ButtonBar';
 import BlueButton from '../../buttons/BlueButton';
 import React from 'react';
 import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
-import labwareScanTableColumns from '../../dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import { Dictionary, groupBy } from 'lodash';
@@ -337,12 +336,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
                     numPlansToCreate={numLabware}
                     onPlanChanged={() => {}}
                     buildPlanLayouts={buildPlanLayouts}
-                    columns={[
-                      labwareScanTableColumns.barcode(),
-                      labwareScanTableColumns.donorId(),
-                      labwareScanTableColumns.tissueType(),
-                      labwareScanTableColumns.spatialLocation()
-                    ]}
+                    columns={[columns.barcode(), columns.donorId(), columns.tissueType(), columns.spatialLocation()]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                     singleSourceAllowed={true}
                   />
