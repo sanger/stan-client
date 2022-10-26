@@ -20,7 +20,11 @@ const Heading = ({ children, level, className, showBorder = true }: HeadingProps
     className
   );
 
-  return <HeadingTag className={headingClasses}>{children}</HeadingTag>;
+  return (
+    <HeadingTag data-testid="heading" className={headingClasses}>
+      {children}
+    </HeadingTag>
+  );
 };
 
 export default Heading;
