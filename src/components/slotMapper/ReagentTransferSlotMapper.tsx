@@ -241,7 +241,7 @@ function ReagentTransferSlotMapper({
   return (
     <div className="mt-3 space-y-8">
       <div className="grid grid-cols-2 auto-rows-auto">
-        <div id="sourceLabwares" className="bg-gray-100">
+        <div id="sourceLabwares" className="bg-gray-100" data-testid="sourceLabwares">
           {initialSourceLabware && (
             <Labware
               labware={initialSourceLabware}
@@ -257,7 +257,7 @@ function ReagentTransferSlotMapper({
           )}
         </div>
 
-        <div id="destLabwares" className="bg-gray-100">
+        <div id="destLabwares" className="bg-gray-100" data-testid="destLabwares">
           {initialDestLabware && (
             <Labware
               labware={initialDestLabware}
