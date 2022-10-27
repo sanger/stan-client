@@ -46,7 +46,7 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
     if (values.costing) {
       setFieldValue('labwareResult', { ...labwareResult, costing: values.costing });
     }
-  }, [labwareResult, setFieldValue]);
+  }, [labwareResult, setFieldValue, values.costing]);
 
   return (
     <>
