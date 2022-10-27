@@ -178,7 +178,15 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
               </div>
             </div>
           </div>
-          <WorkProgressInput urlParams={memoUrlParams ?? defaultInitialValues} workTypes={workTypes} />
+          <WorkProgressInput
+            urlParams={memoUrlParams ?? defaultInitialValues}
+            workTypes={workTypes}
+            searchTypes={[
+              WorkProgressSearchType.WorkType,
+              WorkProgressSearchType.Status,
+              WorkProgressSearchType.WorkNumber
+            ]}
+          />
           <div className={'my-10 mx-auto max-w-screen-xl'}>
             {serverError && <Warning message="Search Error" error={serverError} />}
             <div className="my-10">

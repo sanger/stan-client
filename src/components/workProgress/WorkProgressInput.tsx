@@ -8,6 +8,7 @@ import { KeyValueSelector } from '../KeyValueSelector';
 import { WorkProgressUrlParams } from '../../pages/WorkProgress';
 import { history } from '../../lib/sdk';
 import { stringify } from '../../lib/helpers';
+import { useLocation } from 'react-router-dom';
 
 /**
  * Enum to fill the Search Type field
@@ -39,16 +40,21 @@ export const workProgressSearchSchema = (workTypes: string[]) => {
 
 type WorkProgressInputParams = {
   /**
-   * Ssearch type and Search values (representation of url structure)
+   * Search type and Search values (representation of url structure)
    */
   urlParams: WorkProgressUrlParams;
   /**
    * All Work types available
    */
   workTypes: string[];
+  /**
+   * All search
+   */
+  searchTypes: WorkProgressSearchType[];
 };
 
-export default function WorkProgressInput({ urlParams, workTypes }: WorkProgressInputParams) {
+export default function WorkProgressInput({ urlParams, workTypes, searchTypes }: WorkProgressInputParams) {
+  const location = useLocation();
   const generateValuesForType = React.useCallback(
     (type: WorkProgressSearchType): string[] => {
       switch (type) {
@@ -68,7 +74,7 @@ export default function WorkProgressInput({ urlParams, workTypes }: WorkProgress
   /***Get key-value data for search **/
   const getSearchInputKeyValues = () => {
     const map = new Map<string, string[]>();
-    Object.values(WorkProgressSearchType).forEach((key) => {
+    Object.values(searchTypes).forEach((key) => {
       map.set(key, generateValuesForType(key));
     });
     return map;
@@ -76,7 +82,7 @@ export default function WorkProgressInput({ urlParams, workTypes }: WorkProgress
 
   return (
     <div
-      className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4"
+      className="mx-auto max-w-screen-lg mb-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4"
       data-testid={'search'}
     >
       <Heading level={3} showBorder={false}>
@@ -89,7 +95,7 @@ export default function WorkProgressInput({ urlParams, workTypes }: WorkProgress
         validateOnMount={false}
         onSubmit={async (values) => {
           history.push({
-            pathname: '/',
+            pathname: location.pathname,
             search: stringify({
               searchType: values.searchType,
               searchValues: values.searchValues
@@ -100,7 +106,7 @@ export default function WorkProgressInput({ urlParams, workTypes }: WorkProgress
       >
         {({ values, setFieldValue }) => (
           <Form>
-            <div className={' flex flex-row md:flex-grow'}>
+            <div className={'flex flex-row md:flex-grow'}>
               <KeyValueSelector
                 keyValueMap={getSearchInputKeyValues()}
                 onChangeKey={(selectedKey, values: string[]) => {
