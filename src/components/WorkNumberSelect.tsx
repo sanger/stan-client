@@ -104,7 +104,7 @@ export default function WorkNumberSelect({ name, label, workNumber, onWorkNumber
         onBlur={validateWorkNumber}
         onChange={handleWorkNumberChange}
         className={'flex-grow w-full'}
-        data-testid={'workNumber'}
+        data-testid={'formikWorkNumber'}
       >
         {optionValues(works, 'workNumber', 'workNumber')}
       </FormikSelect>
