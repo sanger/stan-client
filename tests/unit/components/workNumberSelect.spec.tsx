@@ -2,6 +2,7 @@ import { render, screen, cleanup, act } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import WorkNumberSelect from '../../../src/components/WorkNumberSelect';
 import { FindWorkInfoQuery } from '../../../src/types/sdk';
+import { Formik } from 'formik';
 
 afterEach(() => {
   cleanup();
@@ -56,28 +57,60 @@ jest.mock('../../../src/lib/sdk', () => ({
 
 describe('WorkNumberSelect.tsx', () => {
   describe('OnMount', () => {
-    it('displays select component with work numbers', () => {
+    it('displays select component with work numbers', async() => {
       act(() => {
         render(<WorkNumberSelect label={'Work Number'} />);
       });
 
-      const workNumberSelect = screen.getByTestId('workNumber') as HTMLSelectElement;
+      const workNumberSelect = await screen.findByTestId('workNumber') as HTMLSelectElement;
       // Shows the select component
       expect(workNumberSelect).toBeInTheDocument();
 
       //Shows an empty value
       expect(workNumberSelect).toHaveValue('');
+
+      //Expect the select option to have the correct work numbers
+      console.log("Work number options")
+      console.log(workNumberSelect.options[0].value)
+      console.log(workNumberSelect.options[1].value)
+      console.log(workNumberSelect.options[2].value)
+    });
+
+    it('displays formik select component with work numbers', async() => {
+      const FormikProps = {
+        onSubmit: () => {},
+        initialValues: {}
+      }
+      act(() => {
+        render(
+          <Formik {...FormikProps}>
+            <WorkNumberSelect name={'name'} label={'Work Number'} />
+          </Formik>
+        );
+      });
+
+      const workNumberSelect = await screen.findByTestId('formikWorkNumber') as HTMLSelectElement;
+      // Shows the select component
+      expect(workNumberSelect).toBeInTheDocument();
+
+      //Shows an empty value
+      expect(workNumberSelect).toHaveValue('');
+
+      //Expect the select option to have the correct work numbers
+      console.log(workNumberSelect.options[0].value)
+      console.log(workNumberSelect.options[1].value)
+      console.log(workNumberSelect.options[2].value)
     });
   });
 
-  describe('onSelection', () => {
-    it('displays selected work number', () => {
-      act(() => {
-        render(<WorkNumberSelect label={'Work Number'} />);
-      });
-      const workNumberSelect = screen.getByTestId('workNumber') as HTMLSelectElement;
-      workNumberSelect.options[1].selected = true;
-      expect(workNumberSelect.selectedIndex).toBe(1);
-    });
-  });
+  // describe('onSelection', () => {
+  //   it('displays selected work number', () => {
+  //     act(() => {
+  //       render(<WorkNumberSelect label={'Work Number'} />);
+  //     });
+  //     const workNumberSelect = screen.getByTestId('workNumber') as HTMLSelectElement;
+  //     workNumberSelect.options[1].selected = true;
+  //     expect(workNumberSelect.selectedIndex).toBe(1);
+  //   });
+  // });
 });
