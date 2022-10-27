@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import AppShell from '../components/AppShell';
 import { Formik } from 'formik';
 import SlideRegistrationForm from './registration/SlideRegistrationForm';
-import columns from '../components/dataTable/labwareColumns';
+import columns from '../components/dataTableColumns/labwareColumns';
 import RegistrationSuccess from './registration/RegistrationSuccess';
 import Warning from '../components/notifications/Warning';
 import { GetRegistrationInfoQuery, LifeStage, RegisterSectionsMutation, SectionRegisterRequest } from '../types/sdk';
@@ -206,7 +206,7 @@ export const SlideRegistration: React.FC<PageParams> = ({ registrationInfo }) =>
   if (current.matches('submitted') && submissionResult) {
     return (
       <RegistrationSuccess
-        labware={submissionResult.registerSections.labware}
+        successData={submissionResult.registerSections.labware}
         columns={[columns.barcode(), columns.labwareType()]}
       />
     );

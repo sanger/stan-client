@@ -13,7 +13,7 @@ import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import FormikSelect from '../components/forms/Select';
 import LabwareScanTable from '../components/labwareScanPanel/LabwareScanPanel';
-import labwareScanTableColumns from '../components/dataTable/labwareColumns';
+import labwareScanTableColumns from '../components/dataTableColumns/labwareColumns';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
 import PinkButton from '../components/buttons/PinkButton';

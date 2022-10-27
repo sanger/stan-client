@@ -5,7 +5,7 @@ describe('initData.machine', () => {
   describe('creation', () => {
     it('can be created with default config and context', () => {
       const machine = createDataFetcherMachine();
-      expect(machine.id).to.equal('dataFetcher');
+      expect(machine.id).toEqual('dataFetcher');
     });
 
     it('can be created with extended options', () => {
@@ -17,7 +17,7 @@ describe('initData.machine', () => {
         }
       });
 
-      expect(machine.options.actions).to.have.property('log');
+      expect(machine.options.actions).toHaveProperty('log');
     });
 
     it('can be created with extended context', () => {
@@ -27,12 +27,12 @@ describe('initData.machine', () => {
         }
       });
 
-      expect(machine.context?.dataFetcher).to.be.instanceOf(Function);
+      expect(machine.context?.dataFetcher).toBeInstanceOf(Function);
     });
   });
 
   describe('fetching data', () => {
-    context('when successful', () => {
+    describe('when successful', () => {
       it('transitions to done', (done) => {
         const machine = createDataFetcherMachine({
           context: {
@@ -42,7 +42,7 @@ describe('initData.machine', () => {
 
         const service = interpret(machine).onTransition((state) => {
           if (state.matches('done')) {
-            expect(state.context.data).to.deep.equal({ some: 'data' });
+            expect(state.context.data).toEqual({ some: 'data' });
             done();
           }
         });
@@ -51,7 +51,7 @@ describe('initData.machine', () => {
       });
     });
 
-    context('when unsucessful', () => {
+    describe('when unsucessful', () => {
       it('transitions to failed', (done) => {
         const machine = createDataFetcherMachine({
           context: {
@@ -61,7 +61,7 @@ describe('initData.machine', () => {
 
         const service = interpret(machine).onTransition((state) => {
           if (state.matches('failed')) {
-            expect(state.context.data).to.eql(undefined);
+            expect(state.context.data).toEqual(undefined);
             done();
           }
         });

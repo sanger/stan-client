@@ -178,6 +178,8 @@ describe('Registration', () => {
         cy.get('th').eq(4).contains('Tissue type');
         cy.get('th').eq(5).contains('Spatial location');
         cy.get('th').eq(6).contains('Replicate');
+        cy.get('th').eq(7).contains('Fixative');
+        cy.get('th').eq(8).contains('Solution');
       });
     });
 

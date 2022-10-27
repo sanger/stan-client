@@ -37,7 +37,9 @@ function searchMachine<E, T>(searchService: SearchServiceInterface<E, T>) {
         unknown: {
           always: [
             {
-              cond: (context) => Object.values(context.findRequest).some((v) => !!v),
+              cond: (context) => {
+                return Object.values(context?.findRequest ?? {}).some((v) => !!v);
+              },
               target: 'ready',
               actions: send((ctx, _e) => ({
                 type: 'FIND',

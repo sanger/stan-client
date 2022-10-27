@@ -3,7 +3,7 @@ import { Meta, Story } from '@storybook/react';
 
 import LabwareScanner, { useLabwareContext } from './LabwareScanner';
 import LabwareScanPanel from '../labwareScanPanel/LabwareScanPanel';
-import columns from '../dataTable/labwareColumns';
+import columns from '../dataTableColumns/labwareColumns';
 import LabwareScannerSlotsTable from './LabwareScannerSlotsTable';
 
 const meta: Meta = {

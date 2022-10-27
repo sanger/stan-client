@@ -5,7 +5,7 @@ import MutedText from '../MutedText';
 import LockIcon from '../icons/LockIcon';
 import DataTable from '../DataTable';
 import RemoveButton from '../buttons/RemoveButton';
-import extractResultColumn from '../dataTable/extractResultColumn';
+import extractResultColumn from '../dataTableColumns/extractResultColumn';
 import { Row } from 'react-table';
 import { useMachine } from '@xstate/react';
 import { extractResultMachine } from './extractResult.machine';
