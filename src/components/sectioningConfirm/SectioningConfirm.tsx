@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { PlanFinder } from '../planFinder/PlanFinder';
 import Heading from '../Heading';
 import DataTable from '../DataTable';
-import columns from '../dataTable/labwareColumns';
+import columns from '../dataTableColumns/labwareColumns';
 import { LabwareTypeName } from '../../types/stan';
 import ConfirmTubes from './ConfirmTubes';
 import ConfirmLabware from './ConfirmLabware';

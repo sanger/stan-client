@@ -12,7 +12,7 @@ import {
 } from '../../types/sdk';
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
-import RegistrationSuccess from './RegistrationSuccess';
+import RegistrationSuccess, { LabwareContainType } from './RegistrationSuccess';
 import { useConfirmLeave } from '../../lib/hooks';
 import { Column } from 'react-table';
 import { createRegistrationMachine } from '../../lib/machines/registration/registrationMachine';
@@ -32,7 +32,7 @@ export interface TissueValues<B> {
   blocks: B[];
 }
 
-interface RegistrationParams<M, T> {
+interface RegistrationParams<M, T, R extends Object> {
   /**
    * Title to be displayed in the page
    * **/
@@ -66,10 +66,13 @@ interface RegistrationParams<M, T> {
    * Validation schema for form input
    */
   registrationValidationSchema: Yup.ObjectSchema<any>;
+
   /**
    * Columns to display on succesful registration
    */
-  successDisplayTableColumns: Column<LabwareFieldsFragment>[];
+  successDisplayTableColumns: Column<R>[];
+
+  formatSuccessData: (registrationResult: RegisterResultFieldsFragment) => R[];
 
   /**
    * Change in default keywords to display
@@ -77,7 +80,14 @@ interface RegistrationParams<M, T> {
   keywordsMap?: Map<TextType, string>;
 }
 
-function Registration<M, T extends TissueValues<B>, B>({
+/**
+ * M - Represents mutation data structure
+ * T - Tissue data structure
+ * B - Block data structure
+ * R - Mutation result data
+ **/
+
+function Registration<M, T extends TissueValues<B>, B, R extends Required<LabwareContainType> | LabwareFieldsFragment>({
   title,
   availableLabwareTypes,
   registrationInfo,
@@ -85,9 +95,10 @@ function Registration<M, T extends TissueValues<B>, B>({
   registrationService,
   registrationValidationSchema,
   successDisplayTableColumns,
+  formatSuccessData,
   defaultFormTissueValues,
   keywordsMap
-}: RegistrationParams<M, T>) {
+}: RegistrationParams<M, T, R>) {
   const registrationMachine = React.useMemo(() => {
     return createRegistrationMachine<FormInput<T>, M>(buildRegistrationInput, registrationService);
   }, [buildRegistrationInput, registrationService]);
@@ -115,7 +126,12 @@ function Registration<M, T extends TissueValues<B>, B>({
   const formIsReady = ['ready', 'submitting', 'clashed', 'submissionError'].some((val) => current.matches(val));
 
   if (current.matches('complete') && registrationResult) {
-    return <RegistrationSuccess labware={registrationResult.labware} columns={successDisplayTableColumns} />;
+    return (
+      <RegistrationSuccess<R>
+        successData={formatSuccessData(registrationResult)}
+        columns={successDisplayTableColumns}
+      />
+    );
   }
 
   return (

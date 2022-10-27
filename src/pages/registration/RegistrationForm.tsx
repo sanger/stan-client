@@ -158,7 +158,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                     return (
                       <motion.div
                         ref={blockIndex === values.tissues[currentIndex].blocks.length - 1 ? lastBlockRef : null}
-                        key={block.clientId}
+                        key={blockIndex}
                         variants={variants.fadeIn}
                         animate={'visible'}
                         exit={'hidden'}

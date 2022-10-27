@@ -9,7 +9,6 @@ import ButtonBar from '../../ButtonBar';
 import BlueButton from '../../buttons/BlueButton';
 import React from 'react';
 import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
-import labwareScanTableColumns from '../../dataTable/labwareColumns';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import { Dictionary, groupBy } from 'lodash';
@@ -25,7 +24,7 @@ import { optionValues } from '../../forms';
 import FormikInput from '../../forms/Input';
 import PotProcessingLabwarePlan from './PotProcessingLabwarePlan';
 import ProcessingSuccess from '../ProcessingSuccess';
-import columns from '../../dataTable/labwareColumns';
+import columns from '../../dataTableColumns/labwareColumns';
 import { Prompt } from 'react-router-dom';
 import { useConfirmLeave } from '../../../lib/hooks';
 
@@ -337,12 +336,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
                     numPlansToCreate={numLabware}
                     onPlanChanged={() => {}}
                     buildPlanLayouts={buildPlanLayouts}
-                    columns={[
-                      labwareScanTableColumns.barcode(),
-                      labwareScanTableColumns.donorId(),
-                      labwareScanTableColumns.tissueType(),
-                      labwareScanTableColumns.spatialLocation()
-                    ]}
+                    columns={[columns.barcode(), columns.donorId(), columns.tissueType(), columns.spatialLocation()]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                     singleSourceAllowed={true}
                   />

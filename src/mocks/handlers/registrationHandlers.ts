@@ -115,6 +115,12 @@ const registrationHandlers = [
       ctx.data({
         register: {
           clashes: [],
+          labwareSolutions: [
+            {
+              barcode: 'LW_BC_1',
+              solutionName: 'Ethanol'
+            }
+          ],
           labware: [
             {
               id: 1,
@@ -237,6 +243,12 @@ const registrationHandlers = [
       return res(
         ctx.data({
           registerOriginalSamples: {
+            labwareSolutions: [
+              {
+                barcode: 'LW_BC_1',
+                solutionName: 'Ethanol'
+              }
+            ],
             clashes: [],
             labware: [
               {

@@ -3,7 +3,7 @@ import AppShell from '../components/AppShell';
 import BlueButton from '../components/buttons/BlueButton';
 import Heading from '../components/Heading';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
-import labwareScanTableColumns from '../components/dataTable/labwareColumns';
+import labwareScanTableColumns from '../components/dataTableColumns/labwareColumns';
 import Warning from '../components/notifications/Warning';
 import { motion } from 'framer-motion';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';

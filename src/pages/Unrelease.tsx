@@ -5,7 +5,7 @@ import { LabwareFieldsFragment, UnreleaseMutation, UnreleaseRequest } from '../t
 import * as Yup from 'yup';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
-import columns from '../components/dataTable/labwareColumns';
+import columns from '../components/dataTableColumns/labwareColumns';
 import { FormikErrorMessage } from '../components/forms';
 import { motion } from 'framer-motion';
 import variants from '../lib/motionVariants';

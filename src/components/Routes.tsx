@@ -35,7 +35,7 @@ import VisiumPerm from '../pages/VisiumPerm';
 import VisiumAnalysis from '../pages/VisiumAnalysis';
 import Aliquot from '../pages/Aliquot';
 import DualIndexPlate from '../pages/DualIndexPlate';
-import columns from './dataTable/labwareColumns';
+import columns from './dataTableColumns/labwareColumns';
 import OriginalSampleRegistration from '../pages/OriginalSampleRegistration';
 import BlockRegistration from '../pages/BlockRegistration';
 import { OriginalSampleProcessing } from '../pages/OriginalSampleProcessing';

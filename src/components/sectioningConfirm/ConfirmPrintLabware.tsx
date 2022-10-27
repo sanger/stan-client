@@ -8,7 +8,7 @@ import { LabwareFieldsFragment } from '../../types/sdk';
 import { usePrinters } from '../../lib/hooks';
 import { CellProps } from 'react-table';
 import LabelPrinterButton from '../LabelPrinterButton';
-import labwareScanTableColumns from '../dataTable/labwareColumns';
+import labwareScanTableColumns from '../dataTableColumns/labwareColumns';
 type ConfirmPrintLabwareProps = {
   labwareType: string;
   labwares: LabwareFieldsFragment[];
