@@ -5,7 +5,7 @@ import { LabwareTypeName } from '../../../src/types/stan';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 
 describe('Pot Processing', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=pot');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=pot', 'select_workNumber');
   describe('Add Labware button', () => {
     context('when there is no source labware loaded', () => {
       it('is disabled', () => {

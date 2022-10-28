@@ -1,7 +1,7 @@
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 
 describe('Fetal Waste Page', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/fetal_waste');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/fetal_waste', 'workNumber');
   describe('Validation', () => {
     context('when submitting the form with nothing filled in', () => {
       before(() => {

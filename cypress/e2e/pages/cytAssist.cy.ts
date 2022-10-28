@@ -108,7 +108,7 @@ describe('CytAssist Page', () => {
         });
         context('When SGP number is entered', () => {
           before(() => {
-            cy.findByTestId('workNumber').select('SGP1008');
+            cy.findByTestId('select_workNumber').select('SGP1008');
           });
           it('should enable Save button', () => {
             saveButton().should('be.enabled');

@@ -5,7 +5,7 @@ import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 
 describe('Solution Transfer', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/solution_transfer');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/solution_transfer', 'workNumber');
 
   describe('Validation', () => {
     context('when the form with nothing filled in', () => {

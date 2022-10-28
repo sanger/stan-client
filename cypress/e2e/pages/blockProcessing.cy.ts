@@ -5,7 +5,7 @@ import { LabwareTypeName } from '../../../src/types/stan';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 
 describe('Block Processing', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=block');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=block', 'select_workNumber');
   before(() => {
     cy.visit('/lab/original_sample_processing?type=block');
   });
