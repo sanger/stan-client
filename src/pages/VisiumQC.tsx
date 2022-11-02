@@ -80,7 +80,6 @@ export default function VisiumQC({ info }: VisiumQCProps) {
     return createFormMachine<ResultRequest, RecordVisiumQcMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          debugger;
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordVisiumQC({
             request: e.values
