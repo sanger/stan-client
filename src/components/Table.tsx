@@ -60,7 +60,7 @@ export const TableHead = ({ children }: TableHeadProps) => {
 
 export const TableHeader = ({ children, sortProps, ...rest }: TableHeaderProps) => {
   return (
-    <th className="px-6 py-3 bg-gray-50 text-left select-none" {...rest}>
+    <th className="px-6 py-3 bg-gray-50 text-center select-none" {...rest}>
       <>
         {
           <IconButton
