@@ -91,9 +91,7 @@ export default function WorkNumberSelect({ name, label, workNumber, onWorkNumber
   );
 
   const validateWorkNumber = () => {
-    console.log('worknumber=' + workNumber);
     if (!selectedWork) {
-      console.log('There is error');
       setError('SGP number is required');
     } else {
       setError('');
