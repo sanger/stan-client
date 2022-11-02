@@ -21,7 +21,7 @@ function saveButton() {
 }
 
 describe('Dual Index Plate', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/dual_index_plate');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/dual_index_plate', 'select_workNumber');
 
   context('when source and destination labware are not scanned', () => {
     before(() => {
@@ -172,7 +172,7 @@ describe('Dual Index Plate', () => {
   describe('On Save', () => {
     context('When user selects a work number and have a mapping, but no plateType', () => {
       before(() => {
-        cy.findByTestId('workNumber').select('SGP1008');
+        cy.findByTestId('select_workNumber').select('SGP1008');
       });
       it('should disable save', () => {
         saveButton().should('be.disabled');
@@ -183,7 +183,7 @@ describe('Dual Index Plate', () => {
         cy.get('#plateType').within(() => {
           cy.findByRole('combobox').select('Fresh Frozen - Dual Index TT Set A');
         });
-        cy.findByTestId('workNumber').select('SGP1008');
+        cy.findByTestId('select_workNumber').select('SGP1008');
       });
       it('should enable save', () => {
         saveButton().should('be.enabled');

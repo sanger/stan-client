@@ -2,7 +2,7 @@ import { RecordVisiumQcMutation, RecordVisiumQcMutationVariables } from '../../.
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 
 describe('Visium QC Page', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/visium_qc');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/visium_qc', 'workNumber');
   before(() => {
     cy.visit('/lab/visium_qc');
     cy.get('select[name="workNumber"]').select('SGP1008');

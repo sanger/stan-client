@@ -9,7 +9,7 @@ import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
 describe('Transfer Page', () => {
   before(() => {
     cy.visit('/lab/transfer');
-    cy.findByTestId('workNumber').select('SGP1008');
+    cy.findByTestId('select_workNumber').select('SGP1008');
   });
 
   describe('On load', () => {
@@ -298,7 +298,7 @@ function saveButton() {
 function saveSlotForLabwareWithNoPerm() {
   cy.visit('/lab/transfer');
 
-  cy.findByTestId('workNumber').select('SGP1008');
+  cy.findByTestId('select_workNumber').select('SGP1008');
   cy.msw().then(({ worker, graphql }) => {
     const labware = createLabware('STAN-3200');
     worker.use(

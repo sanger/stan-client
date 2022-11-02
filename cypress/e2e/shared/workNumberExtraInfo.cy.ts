@@ -1,6 +1,6 @@
 import { FindWorkInfoQuery, FindWorkInfoQueryVariables } from '../../../src/types/sdk';
 
-export function shouldDisplyProjectAndUserNameForWorkNumber(url: string) {
+export function shouldDisplyProjectAndUserNameForWorkNumber(url: string, testId: string) {
   describe('Check work number selection displays work requester and project names', () => {
     before(() => {
       cy.visit(url);
@@ -28,7 +28,7 @@ export function shouldDisplyProjectAndUserNameForWorkNumber(url: string) {
             );
           })
         );
-        cy.findByTestId('workNumber').select('SGP1008');
+        cy.findByTestId(testId).select('SGP1008');
       });
     });
     it('displays Work requester and Project name  ', () => {

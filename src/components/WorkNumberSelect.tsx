@@ -66,6 +66,9 @@ export default function WorkNumberSelect({ name, label, workNumber, onWorkNumber
       );
     }
     fetchActiveWorkNumbers();
+    return () => {
+      setWorks([]);
+    };
   }, [setWorks]);
 
   useEffect(() => {
@@ -94,7 +97,6 @@ export default function WorkNumberSelect({ name, label, workNumber, onWorkNumber
       setError('');
     }
   };
-
   return name ? (
     <div className={'flex flex-col'}>
       <FormikSelect
@@ -123,7 +125,7 @@ export default function WorkNumberSelect({ name, label, workNumber, onWorkNumber
           onChange={handleWorkNumberChange}
           emptyOption={true}
           onBlur={validateWorkNumber}
-          data-testid={'workNumber'}
+          data-testid={'select_workNumber'}
         >
           {optionValues(works, 'workNumber', 'workNumber')}
         </Select>
@@ -134,6 +136,7 @@ export default function WorkNumberSelect({ name, label, workNumber, onWorkNumber
           )}
         </div>
       </div>
+
       {error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
     </>
   );

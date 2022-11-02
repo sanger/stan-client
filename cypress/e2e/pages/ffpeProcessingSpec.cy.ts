@@ -5,7 +5,7 @@ import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 
 describe('FFPE Processing', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/ffpe_processing');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/ffpe_processing', 'workNumber');
 
   describe('Validation', () => {
     context('when all form fields are empty', () => {
