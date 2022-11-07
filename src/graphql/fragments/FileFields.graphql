@@ -1,0 +1,8 @@
+fragment FileFields on StanFile {
+    created
+    name
+    url
+    work {
+        workNumber
+    }
+}

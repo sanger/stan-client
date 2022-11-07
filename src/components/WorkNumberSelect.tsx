@@ -42,7 +42,9 @@ export default function WorkNumberSelect({ name, label, workNumber, onWorkNumber
    */
 
   const [works, setWorks] = useState<Array<WorkInfo>>([]);
-  const [selectedWork, setSelectedWork] = useState<WorkInfo | undefined>(undefined);
+  const [selectedWork, setSelectedWork] = useState<WorkInfo | undefined>(
+    workNumber ? works.find((work) => work.workNumber === workNumber) : undefined
+  );
   /**
    * State for validating select field
    */
