@@ -8,6 +8,7 @@ import Success from '../notifications/Success';
 import FileIcon from '../icons/FileIcon';
 import FailIcon from '../icons/FailIcon';
 import { ConfirmationModal } from '../modal/ConfirmationModal';
+import UploadIcon from '../icons/UploadIcon';
 
 export type ConfirmUploadProps = {
   confirmMessage: string;
@@ -115,9 +116,10 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
           </div>
         </div>
       )}
-      <div className="flex bg-white p-2 justify-end">
+      <div className="flex bg-white mt-2 p-4 justify-end">
         <BlueButton type={'button'} disabled={!file || !enableUpload} onClick={onUploadAction}>
           Upload
+          <UploadIcon className={!file || !enableUpload ? 'ml-2 text-gray-300' : 'ml-4 text-white'} />
         </BlueButton>
       </div>
       <ConfirmationModal
