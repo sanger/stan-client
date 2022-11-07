@@ -47,7 +47,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
       });
       setFile(undefined);
     }
-  }, [uploadSuccess, error, file, notifyUploadOutcome]);
+  }, [uploadSuccess, error, file, notifyUploadOutcome, setUploadInProgress, uploadInProgress]);
 
   /**State when confirmation received for upload**/
   const handleUpload = React.useCallback(() => {
