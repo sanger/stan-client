@@ -31,7 +31,6 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
   }, [location, setWorkNumber, workNumbers]);
 
   const memoURL = React.useMemo(() => {
-    debugger;
     return `/files/${encodeURIComponent(workNumber)}`;
   }, [workNumber]);
 
@@ -49,7 +48,6 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
     const findFiles = fetchUploadedFilesForWorkNumber();
     findFiles.then((response) => setUploadedFilesForWorkNumber(response.listFiles));
     return () => {
-      debugger;
       setUploadedFilesForWorkNumber([]);
     };
   }, [setUploadedFilesForWorkNumber, workNumber, fetchUploadedFilesForWorkNumber]);
@@ -66,7 +64,6 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
   const onConfirmUpload = React.useCallback(
     (file: File): ConfirmUploadProps | undefined => {
       if (uploadedFilesForWorkNumber.length > 0) {
-        debugger;
         const confirm = uploadedFilesForWorkNumber.some((fileExist) => fileExist.name === file.name);
         if (confirm) {
           return {
@@ -102,7 +99,7 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
           <WhiteButton className="sm:w-full">
             <a
               className="w-full text-gray-800 focus:outline-none"
-              download={'release.tsv'}
+              download={props.row.original.name}
               href={props.row.original.url}
             >
               <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />

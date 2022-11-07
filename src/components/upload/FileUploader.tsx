@@ -33,7 +33,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
 
   /**Handle actions when we get to 'error' or 'uploadSuccess' state after upload**/
   React.useEffect(() => {
-    debugger;
     if ((!error && !uploadSuccess) || !uploadInProgress) return;
     setUploadInProgress(false);
     if (uploadSuccess && file) {
