@@ -124,7 +124,7 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
         return (
           <WhiteButton className="sm:w-full">
             <a
-              className="w-full text-gray-800 focus:outline-none"
+              className="w-full text-gray-800 focus:outline-none  text-left"
               download={props.row.original.name}
               href={props.row.original.url}
             >
