@@ -7,68 +7,93 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import { parseQueryString } from '../lib/helpers';
 import { useLocation } from 'react-router-dom';
 import FileUploader, { ConfirmUploadProps } from '../components/upload/FileUploader';
-import { stanCore } from '../lib/sdk';
+import { history, stanCore } from '../lib/sdk';
 import { FileFieldsFragment } from '../types/sdk';
 import DataTable from '../components/DataTable';
 import { Cell, Column } from 'react-table';
 import WhiteButton from '../components/buttons/WhiteButton';
 import DownloadIcon from '../components/icons/DownloadIcon';
+import { toast } from 'react-toastify';
+import Success from '../components/notifications/Success';
 
 type FileManagerProps = {
   workNumbers: string[];
 };
 
+/**Component to render File Manager page**/
 const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerProps) => {
   const [workNumber, setWorkNumber] = React.useState<string>('');
   const [uploadedFilesForWorkNumber, setUploadedFilesForWorkNumber] = React.useState<FileFieldsFragment[]>([]);
   const location = useLocation();
 
+  /**
+   * Success notification when file is uploaded
+   */
+  const ToastSuccess = (fileName: string) => <Success message={`${fileName} uploaded succesfully.`} />;
+
+  /**Update work number when ever query string in location changes **/
   React.useEffect(() => {
     const queryString = parseQueryString(location.search);
     if (typeof queryString['workNumber'] === 'string' && workNumbers.includes(queryString['workNumber'])) {
       setWorkNumber(queryString['workNumber']);
     }
-  }, [location, setWorkNumber, workNumbers]);
+  }, [location.search, setWorkNumber, workNumbers]);
 
+  /**Upload URL**/
   const memoURL = React.useMemo(() => {
-    return `/files/${encodeURIComponent(workNumber)}`;
-  }, [workNumber]);
-
-  const fetchUploadedFilesForWorkNumber = React.useCallback(async () => {
-    return await stanCore.FindFiles({
-      workNumber: workNumber
-    });
+    return `/files?workNumber=${encodeURIComponent(workNumber)}`;
   }, [workNumber]);
 
   /**
-   * Fetch active work and set them to state
+   * State to handle work number changes
+   * Fetch all files uploaded for this work number
    */
   React.useEffect(() => {
     if (!workNumber) return;
-    const findFiles = fetchUploadedFilesForWorkNumber();
-    findFiles.then((response) => setUploadedFilesForWorkNumber(response.listFiles));
-    return () => {
-      setUploadedFilesForWorkNumber([]);
-    };
-  }, [setUploadedFilesForWorkNumber, workNumber, fetchUploadedFilesForWorkNumber]);
+    async function fetchUploadedFilesForWorkNumber() {
+      const response = await stanCore.FindFiles({
+        workNumber: workNumber
+      });
+      setUploadedFilesForWorkNumber(response.listFiles);
+    }
+    fetchUploadedFilesForWorkNumber();
+  }, [setUploadedFilesForWorkNumber, workNumber]);
 
+  /**Callback notification send fron child after finishing upload**/
   const onFileUploadFinished = React.useCallback(
     (file: File, isSuccess: boolean) => {
+      //If upload failed, return
       if (!isSuccess) return;
-      const findFiles = fetchUploadedFilesForWorkNumber();
-      findFiles.then((response) => setUploadedFilesForWorkNumber(response.listFiles));
+
+      /** Notify user with success message and also update the files section with this new uploaded file**/
+      toast(ToastSuccess(file.name), {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 4000,
+        hideProgressBar: true
+      });
+      async function fetchUploadedFilesForWorkNumber() {
+        const response = await stanCore.FindFiles({
+          workNumber: workNumber
+        });
+        setUploadedFilesForWorkNumber(response.listFiles);
+      }
+      fetchUploadedFilesForWorkNumber();
     },
-    [setUploadedFilesForWorkNumber, fetchUploadedFilesForWorkNumber]
+    [setUploadedFilesForWorkNumber, workNumber]
   );
 
+  /**Callback function to confirm the upload which is called before upload action**/
   const onConfirmUpload = React.useCallback(
     (file: File): ConfirmUploadProps | undefined => {
+      /**
+       * If a file already exists in the same name, give a warning to user about file getting overwritten
+       */
       if (uploadedFilesForWorkNumber.length > 0) {
         const confirm = uploadedFilesForWorkNumber.some((fileExist) => fileExist.name === file.name);
         if (confirm) {
           return {
             title: confirm ? 'File already exists' : '',
-            confirmMessage: `File ${file?.name} already uploaded for ${workNumber}. Upload action will overwrite the file.`
+            confirmMessage: `File ${file?.name} already uploaded for ${workNumber} and will be over-written.`
           };
         } else {
           return undefined;
@@ -79,6 +104,7 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
     [uploadedFilesForWorkNumber, workNumber]
   );
 
+  /**Colums to display in 'Files' section table**/
   const columns: Column<FileFieldsFragment>[] = [
     {
       Header: 'Name',
@@ -122,7 +148,13 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
               <Heading level={3}>SGP Number</Heading>
               <p className="mt-2">Please select an SGP number.</p>
               <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
-                <WorkNumberSelect workNumber={workNumber} onWorkNumberChange={setWorkNumber} />
+                <WorkNumberSelect
+                  workNumber={workNumber}
+                  onWorkNumberChange={(workNumber) => {
+                    // Replace instead of push so user doesn't have to go through a load of old searches when going back
+                    history.replace(`/file_manager?workNumber=${encodeURIComponent(workNumber)}`);
+                  }}
+                />
               </motion.div>
             </motion.div>
             <motion.div variants={variants.fadeInWithLift} className={'space-y-4'}>

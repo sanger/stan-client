@@ -1,10 +1,14 @@
 import React from 'react';
 
+/**
+ * React hook for uploading a file
+ * @param url - Upload url
+ */
 export function useUpload(url: string) {
   const [error, setError] = React.useState<Error | undefined>(undefined);
   const [uploadSuccess, setUploadSuccess] = React.useState<boolean>(false);
 
-  /**External request for download**/
+  /**External request for upload**/
   const requestUpload = React.useCallback(
     (file: File) => {
       async function postUpload(url: string, file: File) {

@@ -3,8 +3,6 @@ import { Input } from '../forms/Input';
 import BlueButton from '../buttons/BlueButton';
 import { useUpload } from './useUpload';
 import LoadingSpinner from '../icons/LoadingSpinner';
-import { toast } from 'react-toastify';
-import Success from '../notifications/Success';
 import FileIcon from '../icons/FileIcon';
 import FailIcon from '../icons/FailIcon';
 import { ConfirmationModal } from '../modal/ConfirmationModal';
@@ -21,14 +19,19 @@ interface FileUploaderProps {
   notifyUploadOutcome?: (file: File, isSuccess: boolean) => void;
 }
 
+/**
+ * File upload Component which displays a file input with an upload button
+ * @param url - url to upload
+ * @param enableUpload - Upload is possible only if a file is selected. This serves
+ *                       as an additional external condition to enable/disable Upload
+ * @param confirmUpload - Callback function to confirm upload
+ * @param notifyUploadOutcome - Callback function to notify upload outcome
+ * @constructor
+ */
 const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmUpload, notifyUploadOutcome }) => {
   const [file, setFile] = React.useState<File | undefined>(undefined);
   const [uploadInProgress, setUploadInProgress] = React.useState<boolean>(false);
   const [confirmUploadResult, setConfirmUploadResult] = React.useState<ConfirmUploadProps | undefined>();
-  /**
-   * Success notification when file is uploaded
-   */
-  const ToastSuccess = (fileName: string) => <Success message={`${fileName} uploaded succesfully.`} />;
 
   const { requestUpload, uploadSuccess, error } = useUpload(url);
 
@@ -40,23 +43,19 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
       if (file) {
         notifyUploadOutcome?.(file, uploadSuccess);
       }
-      toast(ToastSuccess(file.name), {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 4000,
-        hideProgressBar: true
-      });
       setFile(undefined);
     }
   }, [uploadSuccess, error, file, notifyUploadOutcome, setUploadInProgress, uploadInProgress]);
 
-  /**State when confirmation received for upload**/
-  const handleUpload = React.useCallback(() => {
+  /**Callback function to perform upload**/
+  const uploadFile = React.useCallback(() => {
     if (!file) return;
     setUploadInProgress(true);
     setConfirmUploadResult(undefined);
     requestUpload(file);
   }, [setUploadInProgress, setConfirmUploadResult, file, requestUpload]);
 
+  /**Callback function to handle file change**/
   const onFileChange = React.useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => {
       if (!evt.currentTarget.files || evt.currentTarget.files.length <= 0) return;
@@ -66,16 +65,18 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
     [setFile]
   );
 
+  /**Handler for 'Upload' button click**/
   const onUploadAction = React.useCallback(() => {
     if (!file) return;
     const confirmResult = confirmUpload?.(file);
     if (confirmResult) {
       setConfirmUploadResult(confirmResult);
     } else {
-      handleUpload();
+      uploadFile();
     }
-  }, [setConfirmUploadResult, confirmUpload, file, handleUpload]);
+  }, [setConfirmUploadResult, confirmUpload, file, uploadFile]);
 
+  /**Handler for 'Remove' button click for file**/
   const onRemoveFile = React.useCallback(() => {
     setFile(undefined);
     setUploadInProgress(false);
@@ -111,13 +112,23 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
                 <LoadingSpinner className={'text-blue-600'} />
               </div>
             )}
-            {error && <div className={'text-red-600 text-sm whitespace-nowrap'}>{`Error: ${error?.message}`}</div>}
+            {error && (
+              <div
+                data-testid={'error-div'}
+                className={'text-red-600 text-sm whitespace-nowrap'}
+              >{`Error: ${error?.message}`}</div>
+            )}
             <FailIcon className={'h-4 w-4 cursor-pointer text-black  hover:bg-gray-200 '} onClick={onRemoveFile} />
           </div>
         </div>
       )}
       <div className="flex bg-white mt-2 p-4 justify-end">
-        <BlueButton type={'button'} disabled={!file || !enableUpload} onClick={onUploadAction}>
+        <BlueButton
+          type={'button'}
+          disabled={!file || !enableUpload}
+          onClick={onUploadAction}
+          data-testid={'upload-btn'}
+        >
           Upload
           <UploadIcon className={!file || !enableUpload ? 'ml-2 text-gray-300' : 'ml-4 text-white'} />
         </BlueButton>
@@ -136,7 +147,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
               setConfirmUploadResult(undefined);
             }
           },
-          { label: 'Continue', action: handleUpload }
+          { label: 'Continue', action: uploadFile }
         ]}
       >
         <p className={'mt-6 font-bold'}>Do you wish to continue or cancel?</p>{' '}
