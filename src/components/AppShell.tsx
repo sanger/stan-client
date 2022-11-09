@@ -251,6 +251,9 @@ function AppShell({ children }: AppShellParams) {
                 </Menu>
               </Authenticated>
               <Authenticated>
+                <StanNavLink to="/file_manager">File Manager</StanNavLink>
+              </Authenticated>
+              <Authenticated>
                 <Menu caption={'Admin'} topMostMenu={true}>
                   <NavLinkMenuItem
                     caption={'Block Registration'}
@@ -425,6 +428,9 @@ function AppShell({ children }: AppShellParams) {
                       <StanMobileNavLink to="/lab/imaging">Imaging</StanMobileNavLink>
                     </div>
                   </div>
+                  <Authenticated>
+                    <StanMobileNavLink to="/file_manager">File Manager</StanMobileNavLink>
+                  </Authenticated>
 
                   <div className="pt-4 border-t border-gray-700">
                     <h3 className="px-3 text-sm font-bold text-sp-600">Admin</h3>

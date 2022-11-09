@@ -18,7 +18,7 @@ import { plateFactory } from '../lib/factories/labwareFactory';
 import DataFetcher from './DataFetcher';
 import { safeParseQueryString } from '../lib/helpers';
 import { isLocationSearch, LocationSearchParams } from '../types/stan';
-import { Maybe, UserRole } from '../types/sdk';
+import { Maybe, UserRole, WorkStatus } from '../types/sdk';
 import Configuration from '../pages/Configuration';
 import { StanCoreContext } from '../lib/sdk';
 import LabwareDetails from '../pages/LabwareDetails';
@@ -47,6 +47,7 @@ import SampleProcessingComments from '../pages/SampleProcessingComments';
 import AddExternalID from '../pages/AddExternalID';
 import WorkProgressSummary from '../pages/WorkProgressSummary';
 import CytAssist from '../pages/CytAssist';
+import FileManager from '../pages/FileManager';
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -378,6 +379,25 @@ export function Routes() {
           return (
             <DataFetcher dataFetcher={stanCore.GetWorkSummary} key={routeProps.location.key}>
               {(summaryData) => <WorkProgressSummary summaryData={summaryData} />}
+            </DataFetcher>
+          );
+        }}
+      />
+      <AuthenticatedRoute
+        path="/file_manager"
+        render={(routeProps) => {
+          return (
+            <DataFetcher
+              key={routeProps.location.key}
+              dataFetcher={() => {
+                return stanCore.FindWorkInfo({
+                  status: WorkStatus.Active
+                });
+              }}
+            >
+              {(dataFetcher) => {
+                return <FileManager workNumbers={dataFetcher.works.map((work) => work.workNumber)} />;
+              }}
             </DataFetcher>
           );
         }}
