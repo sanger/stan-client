@@ -7,7 +7,7 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import { parseQueryString } from '../lib/helpers';
 import { useLocation } from 'react-router-dom';
 import FileUploader, { ConfirmUploadProps } from '../components/upload/FileUploader';
-import { history, stanCore } from '../lib/sdk';
+import { history } from '../lib/sdk';
 import { FileFieldsFragment } from '../types/sdk';
 import DataTable from '../components/DataTable';
 import { Cell, Column } from 'react-table';
@@ -15,6 +15,7 @@ import WhiteButton from '../components/buttons/WhiteButton';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { toast } from 'react-toastify';
 import Success from '../components/notifications/Success';
+import { findUploadedFiles } from '../lib/services/fileService';
 
 type FileManagerProps = {
   workNumbers: string[];
@@ -50,19 +51,13 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
    */
   React.useEffect(() => {
     if (!workNumber) return;
-    async function fetchUploadedFilesForWorkNumber() {
-      const response = await stanCore.FindFiles({
-        workNumber: workNumber
-      });
-      setUploadedFilesForWorkNumber(response.listFiles);
-    }
-    fetchUploadedFilesForWorkNumber();
+    findUploadedFiles(workNumber).then((files) => setUploadedFilesForWorkNumber(files));
   }, [setUploadedFilesForWorkNumber, workNumber]);
 
   /**Callback notification send fron child after finishing upload**/
   const onFileUploadFinished = React.useCallback(
     (file: File, isSuccess: boolean) => {
-      //If upload failed, return
+      //Upload failed, return
       if (!isSuccess) return;
 
       /** Notify user with success message and also update the files section with this new uploaded file**/
@@ -71,13 +66,8 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
         autoClose: 4000,
         hideProgressBar: true
       });
-      async function fetchUploadedFilesForWorkNumber() {
-        const response = await stanCore.FindFiles({
-          workNumber: workNumber
-        });
-        setUploadedFilesForWorkNumber(response.listFiles);
-      }
-      fetchUploadedFilesForWorkNumber();
+      //Update the display of listed files with the newly uploaded file
+      findUploadedFiles(workNumber).then((files) => setUploadedFilesForWorkNumber(files));
     },
     [setUploadedFilesForWorkNumber, workNumber]
   );
