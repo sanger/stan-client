@@ -33,7 +33,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
   const [uploadInProgress, setUploadInProgress] = React.useState<boolean>(false);
   const [confirmUploadResult, setConfirmUploadResult] = React.useState<ConfirmUploadProps | undefined>();
 
-  const { requestUpload, uploadSuccess, error } = useUpload(url);
+  const { initializeUpload, requestUpload, uploadSuccess, error } = useUpload(url);
 
   /**Handle actions when we get to 'error' or 'uploadSuccess' state after upload**/
   React.useEffect(() => {
@@ -58,6 +58,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
   /**Callback function to handle file change**/
   const onFileChange = React.useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => {
+      initializeUpload();
       if (!evt.currentTarget.files || evt.currentTarget.files.length <= 0) return;
       setFile(evt.currentTarget.files[0]);
       evt.target.value = '';
@@ -78,6 +79,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
 
   /**Handler for 'Remove' button click for file**/
   const onRemoveFile = React.useCallback(() => {
+    initializeUpload();
     setFile(undefined);
     setUploadInProgress(false);
     setConfirmUploadResult(undefined);
