@@ -16,7 +16,7 @@ describe('FileManager', () => {
       before(() => {
         cy.visit('/file_manager?workNumber=SGP1008');
       });
-      it('should select SGP8 in select box', () => {
+      it('should select SGP1008 in select box', () => {
         workNumber().should('have.value', 'SGP1008');
       });
       it('should display a table with files uploaded for the selected SGP Numbers', () => {
