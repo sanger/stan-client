@@ -63,7 +63,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
       setFile(evt.currentTarget.files[0]);
       evt.target.value = '';
     },
-    [setFile]
+    [setFile, initializeUpload]
   );
 
   /**Handler for 'Upload' button click**/
@@ -83,7 +83,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
     setFile(undefined);
     setUploadInProgress(false);
     setConfirmUploadResult(undefined);
-  }, []);
+  }, [initializeUpload]);
 
   return (
     <div className={'mx-auto  max-w-screen-lg bg-gray-100 border border-gray-200 bg-gray-100 rounded-md'}>
