@@ -1698,11 +1698,8 @@ svg.logo.loading rect:nth-child(3n+1) {
 .mb-8 {
   margin-bottom: 2rem;
 }
-.mb-5 {
-  margin-bottom: 1.25rem;
-}
-.mt-10 {
-  margin-top: 2.5rem;
+.-mt-1 {
+  margin-top: -0.25rem;
 }
 .-ml-1 {
   margin-left: -0.25rem;
@@ -1710,8 +1707,11 @@ svg.logo.loading rect:nth-child(3n+1) {
 .mr-2 {
   margin-right: 0.5rem;
 }
-.-mt-1 {
-  margin-top: -0.25rem;
+.mb-5 {
+  margin-bottom: 1.25rem;
+}
+.mt-10 {
+  margin-top: 2.5rem;
 }
 .mr-4 {
   margin-right: 1rem;
@@ -2942,6 +2942,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-text-opacity: 1;
   color: rgb(246 165 193 / var(--tw-text-opacity));
 }
+.text-black {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity));
+}
 .underline {
   -webkit-text-decoration-line: underline;
           text-decoration-line: underline;
@@ -4167,4 +4171,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.b924445a.css.map*/
+/*# sourceMappingURL=main.c936d052.css.map*/
