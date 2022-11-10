@@ -75,6 +75,22 @@ export default function History(props: HistoryProps) {
         }
       },
       {
+        Header: 'Uploaded files',
+        accessor: 'destinationBarcode',
+        Cell: (props: Cell<HistoryTableEntry>) => {
+          const barcode = props.row.original.destinationBarcode;
+          let classes =
+            historyProps.kind === 'labwareBarcode' && barcode === historyProps.value
+              ? 'bg-yellow-400 text-sp-600 hover:text-sp-700 font-semibold hover:underline text-base tracking-wide'
+              : '';
+          return (
+            <StyledLink to={`/labware/${barcode}`} className={classes ? classes : undefined}>
+              {barcode}
+            </StyledLink>
+          );
+        }
+      },
+      {
         Header: 'Donor ID',
         accessor: 'donorName'
       },
