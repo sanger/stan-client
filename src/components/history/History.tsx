@@ -24,8 +24,8 @@ export default function History(props: HistoryProps) {
 
   const { history, historyProps, serverError } = current.context;
 
-  const historyColumns: Array<Column<HistoryTableEntry>> = React.useMemo(
-    () => [
+  const historyColumns: Array<Column> = React.useMemo(() => {
+    const columns = [
       {
         Header: 'Date',
         accessor: 'date'
@@ -74,22 +74,7 @@ export default function History(props: HistoryProps) {
           );
         }
       },
-      {
-        Header: 'Uploaded files',
-        accessor: 'destinationBarcode',
-        Cell: (props: Cell<HistoryTableEntry>) => {
-          const barcode = props.row.original.destinationBarcode;
-          let classes =
-            historyProps.kind === 'labwareBarcode' && barcode === historyProps.value
-              ? 'bg-yellow-400 text-sp-600 hover:text-sp-700 font-semibold hover:underline text-base tracking-wide'
-              : '';
-          return (
-            <StyledLink to={`/labware/${barcode}`} className={classes ? classes : undefined}>
-              {barcode}
-            </StyledLink>
-          );
-        }
-      },
+
       {
         Header: 'Donor ID',
         accessor: 'donorName'
@@ -123,9 +108,24 @@ export default function History(props: HistoryProps) {
           return <ul>{details}</ul>;
         }
       }
-    ],
-    [historyProps]
-  );
+    ];
+    if (historyProps.kind !== 'workNumber') {
+      const index = columns.findIndex((col) => col.Header === 'Destination');
+      columns.splice(index + 1, 0, {
+        Header: 'Files uploaded',
+        accessor: 'files',
+        Cell: (props: Cell<HistoryTableEntry>) => {
+          const workNumber = props.row.original.workNumber;
+          if (workNumber) {
+            return <StyledLink to={`/file_manager?workNumber=${workNumber}`}>{`Files for ${workNumber}`}</StyledLink>;
+          } else {
+            return <></>;
+          }
+        }
+      });
+    }
+    return columns;
+  }, [historyProps]);
 
   /**
    * Rebuild the file object whenever the history changes
@@ -165,6 +165,15 @@ export default function History(props: HistoryProps) {
       {current.matches('found') &&
         (history.length > 0 ? (
           <>
+            {historyProps.kind === 'workNumber' && (
+              <div
+                className={'mx-auto max-w-screen-lg flex mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'}
+              >
+                <StyledLink
+                  to={`/file_manager/?workNumber=${historyProps?.value.toUpperCase()}`}
+                >{`Uploaded files for ${historyProps?.value}`}</StyledLink>
+              </div>
+            )}
             <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
               <p className="text-sm text-gray-700">
                 History for {historyDisplayValues[props.kind]} <span className="font-medium">{props.value}</span>

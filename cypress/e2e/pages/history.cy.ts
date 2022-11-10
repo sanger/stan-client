@@ -110,6 +110,18 @@ describe('History Page', () => {
         cy.findByTestId('history').should('exist');
         cy.findByTextContent('History for Work Number SGP1');
       });
+      it('displays uploaded files section', () => {
+        cy.findByText('Uploaded files for SGP1').should('be.visible');
+      });
+    });
+
+    context('when clicking on uploaded files link', () => {
+      before(() => {
+        cy.contains('Uploaded files for SGP1').click();
+      });
+      it('goes to file manager page for SGP1', () => {
+        cy.url().should('be.equal', 'http://localhost:3000/file_manager/?workNumber=SGP1');
+      });
     });
   });
 
