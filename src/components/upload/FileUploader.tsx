@@ -101,27 +101,29 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
       {file && (
         <div
           data-testid={'file-description'}
-          className={'flex flex-row w-full p-2 space-x-2 border-b-2 border-gray-200 bg-white'}
+          className={'flex flex-col w-full p-2 space-x-2 border-b-2 border-gray-200 bg-white'}
         >
-          <div>
-            <FileIcon data-testid={'fileIcon'} className={'text-gray-600'} />
+          <div className={'flex flex-row '}>
+            <div>
+              <FileIcon data-testid={'fileIcon'} className={'text-gray-600'} />
+            </div>
+            <span className={'whitespace-nowrap'}>{file?.name}</span>
+            <div className={'w-full flex justify-end p-2 space-x-4'}>
+              {uploadInProgress && (
+                <div className="flex flex-row ml-3 -mr-1 whitespace-nowrap space-x-6 justify-end">
+                  <div className={'text-blue-600 text-sm'}>{`Uploading in progress...`}</div>
+                  <LoadingSpinner className={'text-blue-600'} />
+                </div>
+              )}
+              <FailIcon className={'h-4 w-4 cursor-pointer text-black  hover:bg-gray-200 '} onClick={onRemoveFile} />
+            </div>
           </div>
-          <span className={'whitespace-nowrap'}>{file?.name}</span>
-          <div className={'w-full flex justify-end p-2 space-x-4'}>
-            {uploadInProgress && (
-              <div className="flex flex-row ml-3 -mr-1 whitespace-nowrap space-x-6 justify-end">
-                <div className={'text-blue-600 text-sm'}>{`Uploading in progress...`}</div>
-                <LoadingSpinner className={'text-blue-600'} />
-              </div>
-            )}
-            {error && (
-              <div
-                data-testid={'error-div'}
-                className={'text-red-600 text-sm whitespace-nowrap'}
-              >{`Error: ${error?.message}`}</div>
-            )}
-            <FailIcon className={'h-4 w-4 cursor-pointer text-black  hover:bg-gray-200 '} onClick={onRemoveFile} />
-          </div>
+          {error && (
+            <div
+              data-testid={'error-div'}
+              className={'text-red-600 text-sm whitespace-nowrap'}
+            >{`Error: ${error?.message}`}</div>
+          )}
         </div>
       )}
       <div className="flex bg-white mt-2 p-4 justify-end">
