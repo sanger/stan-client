@@ -187,7 +187,7 @@ describe('FileManager', () => {
         selectFile();
         uploadButton().click();
       });
-      it('should displau upload failure message', () => {
+      it('should display upload failure message', () => {
         cy.findByTestId('error-div').should('exist');
       });
     });
