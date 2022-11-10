@@ -172,7 +172,14 @@ describe('FileManager', () => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             rest.post('/files', (req, res, ctx) => {
-              return res(ctx.status(403));
+              return res(
+                ctx.status(500),
+                ctx.json({
+                  response: {
+                    message: 'Error'
+                  }
+                })
+              );
             })
           );
         });
