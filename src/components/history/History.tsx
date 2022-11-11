@@ -12,6 +12,8 @@ import { LabwareStatePill } from '../LabwareStatePill';
 import DownloadIcon from '../icons/DownloadIcon';
 import { getTimestampStr } from '../../lib/helpers';
 import { useDownload } from '../../lib/hooks/useDownload';
+import Heading from '../Heading';
+import Table, { TableBody, TableCell } from '../Table';
 
 /**
  * Component for looking up and displaying the history of labware and samples
@@ -24,8 +26,8 @@ export default function History(props: HistoryProps) {
 
   const { history, historyProps, serverError } = current.context;
 
-  const historyColumns: Array<Column> = React.useMemo(() => {
-    const columns = [
+  const historyColumns: Array<Column> = React.useMemo(
+    () => [
       {
         Header: 'Date',
         accessor: 'date'
@@ -108,24 +110,9 @@ export default function History(props: HistoryProps) {
           return <ul>{details}</ul>;
         }
       }
-    ];
-    if (historyProps.kind !== 'workNumber') {
-      const index = columns.findIndex((col) => col.Header === 'Destination');
-      columns.splice(index + 1, 0, {
-        Header: 'Files uploaded',
-        accessor: 'files',
-        Cell: (props: Cell<HistoryTableEntry>) => {
-          const workNumber = props.row.original.workNumber;
-          if (workNumber) {
-            return <StyledLink to={`/file_manager?workNumber=${workNumber}`}>{`Files for ${workNumber}`}</StyledLink>;
-          } else {
-            return <></>;
-          }
-        }
-      });
-    }
-    return columns;
-  }, [historyProps]);
+    ],
+    [historyProps]
+  );
 
   /**
    * Rebuild the file object whenever the history changes
@@ -140,6 +127,17 @@ export default function History(props: HistoryProps) {
   }, [history, historyColumns]);
 
   const { downloadURL, extension } = useDownload(downloadData);
+
+  const uniqueWorkNumbers = React.useMemo(() => {
+    const uniqueWorkNumbers = [...new Set(history.map((item) => item.workNumber))];
+    const workNumbers: string[] = [];
+    uniqueWorkNumbers.forEach((wrkNumber) => {
+      if (wrkNumber && wrkNumber.length > 0) {
+        workNumbers.push(wrkNumber);
+      }
+    });
+    return workNumbers;
+  }, [history]);
 
   /**
    * If the props change, send an update event to the machine
@@ -165,13 +163,29 @@ export default function History(props: HistoryProps) {
       {current.matches('found') &&
         (history.length > 0 ? (
           <>
-            {historyProps.kind === 'workNumber' && (
+            {uniqueWorkNumbers.length > 0 && (
               <div
-                className={'mx-auto max-w-screen-lg flex mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'}
+                className={
+                  'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
+                }
               >
-                <StyledLink
-                  to={`/file_manager/?workNumber=${historyProps?.value.toUpperCase()}`}
-                >{`Uploaded files for ${historyProps?.value}`}</StyledLink>
+                <Heading level={4} showBorder={false}>
+                  Files Uploaded
+                </Heading>
+                <div className={'flex flex-col mt-4 justify-center'}>
+                  <Table>
+                    <TableBody>
+                      <TableCell className={'flex flex-col justify-center  p-2'}>
+                        {uniqueWorkNumbers.map((workNumber, indx) => (
+                          <StyledLink
+                            to={`/file_manager?workNumber=${workNumber}`}
+                            className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
+                          >{`Files for ${workNumber}`}</StyledLink>
+                        ))}
+                      </TableCell>
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             )}
             <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
@@ -185,7 +199,7 @@ export default function History(props: HistoryProps) {
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
-            <DataTable columns={historyColumns} data={history} />
+            <DataTable data-testid={'history-table'} columns={historyColumns} data={history} />
           </>
         ) : (
           <Warning message={'No results found.'} />

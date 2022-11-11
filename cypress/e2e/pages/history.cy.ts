@@ -38,18 +38,23 @@ describe('History Page', () => {
       it('hightlights the searched barcode in the table', () => {
         cy.findByTestId('history').should('exist');
         // Non-searched barcode should not be highlighted yellow
-        cy.findByRole('table')
+        cy.findAllByRole('table')
+          .eq(1)
           .find('tr')
           .contains('td', 'STAN-1002')
           .find('a')
           .should('have.css', 'background-color', 'rgba(0, 0, 0, 0)');
-        cy.findByRole('table').find('tr').contains('td', 'STAN-1001').should('exist');
+        cy.findAllByRole('table').eq(1).find('tr').contains('td', 'STAN-1001').should('exist');
         // Searched barcode should be highlighted yellow
-        cy.findByRole('table')
+        cy.findAllByRole('table')
+          .eq(1)
           .find('tr')
           .contains('td', 'STAN-1001')
           .find('a')
           .should('have.css', 'background-color', 'rgb(246, 224, 94)');
+      });
+      it('displays uploaded files section', () => {
+        cy.findByText('Files Uploaded').should('be.visible');
       });
     });
   });
@@ -61,6 +66,9 @@ describe('History Page', () => {
       it('does performs a history search', () => {
         cy.findByTestId('history').should('exist');
         cy.findByTextContent('History for Sample ID 10');
+      });
+      it('displays uploaded files section', () => {
+        cy.findByText('Files Uploaded').should('be.visible');
       });
     });
   });
@@ -78,6 +86,9 @@ describe('History Page', () => {
         cy.findByTestId('history').should('exist');
         cy.findByTextContent('History for External ID EXT123');
       });
+      it('displays uploaded files section', () => {
+        cy.findByText('Files Uploaded').should('be.visible');
+      });
     });
   });
 
@@ -93,6 +104,9 @@ describe('History Page', () => {
       it('does performs a history search', () => {
         cy.findByTestId('history').should('exist');
         cy.findByTextContent('History for Donor Name DNR123');
+      });
+      it('displays uploaded files section', () => {
+        cy.findByText('Files Uploaded').should('be.visible');
       });
     });
   });
@@ -111,16 +125,16 @@ describe('History Page', () => {
         cy.findByTextContent('History for Work Number SGP1');
       });
       it('displays uploaded files section', () => {
-        cy.findByText('Uploaded files for SGP1').should('be.visible');
+        cy.findByText('Files Uploaded').should('be.visible');
       });
     });
 
     context('when clicking on uploaded files link', () => {
       before(() => {
-        cy.contains('Uploaded files for SGP1').click();
+        cy.contains('Files for SGP123').click();
       });
       it('goes to file manager page for SGP1', () => {
-        cy.url().should('be.equal', 'http://localhost:3000/file_manager/?workNumber=SGP1');
+        cy.url().should('be.equal', 'http://localhost:3000/file_manager?workNumber=SGP123');
       });
     });
   });
