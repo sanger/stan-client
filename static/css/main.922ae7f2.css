@@ -2373,6 +2373,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
 }
+.border-gray-100 {
+  --tw-border-opacity: 1;
+  border-color: rgb(247 250 252 / var(--tw-border-opacity));
+}
 .border-sdb {
   --tw-border-opacity: 1;
   border-color: rgb(35 38 67 / var(--tw-border-opacity));
@@ -2384,10 +2388,6 @@ svg.logo.loading rect:nth-child(3n+1) {
 .border-orange-600 {
   --tw-border-opacity: 1;
   border-color: rgb(221 107 32 / var(--tw-border-opacity));
-}
-.border-gray-100 {
-  --tw-border-opacity: 1;
-  border-color: rgb(247 250 252 / var(--tw-border-opacity));
 }
 .border-blue-800 {
   --tw-border-opacity: 1;
@@ -3199,6 +3199,10 @@ svg.logo.loading rect:nth-child(3n+1) {
 .hover\:bg-gray-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity));
+}
+.hover\:bg-gray-300:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(226 232 240 / var(--tw-bg-opacity));
 }
 .hover\:bg-sp-300:hover {
   --tw-bg-opacity: 1;
@@ -4171,4 +4175,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.c936d052.css.map*/
+/*# sourceMappingURL=main.922ae7f2.css.map*/
