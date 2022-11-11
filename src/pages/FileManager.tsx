@@ -42,6 +42,7 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
 
   /**Upload URL**/
   const memoURL = React.useMemo(() => {
+    if (!workNumber) return '';
     return `/files?workNumber=${encodeURIComponent(workNumber)}`;
   }, [workNumber]);
 

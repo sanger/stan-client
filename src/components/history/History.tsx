@@ -12,6 +12,8 @@ import { LabwareStatePill } from '../LabwareStatePill';
 import DownloadIcon from '../icons/DownloadIcon';
 import { getTimestampStr } from '../../lib/helpers';
 import { useDownload } from '../../lib/hooks/useDownload';
+import Heading from '../Heading';
+import Table, { TableBody, TableCell } from '../Table';
 
 /**
  * Component for looking up and displaying the history of labware and samples
@@ -24,7 +26,7 @@ export default function History(props: HistoryProps) {
 
   const { history, historyProps, serverError } = current.context;
 
-  const historyColumns: Array<Column<HistoryTableEntry>> = React.useMemo(
+  const historyColumns: Array<Column> = React.useMemo(
     () => [
       {
         Header: 'Date',
@@ -74,6 +76,7 @@ export default function History(props: HistoryProps) {
           );
         }
       },
+
       {
         Header: 'Donor ID',
         accessor: 'donorName'
@@ -125,6 +128,17 @@ export default function History(props: HistoryProps) {
 
   const { downloadURL, extension } = useDownload(downloadData);
 
+  const uniqueWorkNumbers = React.useMemo(() => {
+    const uniqueWorkNumbers = [...new Set(history.map((item) => item.workNumber))];
+    const workNumbers: string[] = [];
+    uniqueWorkNumbers.forEach((wrkNumber) => {
+      if (wrkNumber && wrkNumber.length > 0) {
+        workNumbers.push(wrkNumber);
+      }
+    });
+    return workNumbers;
+  }, [history]);
+
   /**
    * If the props change, send an update event to the machine
    */
@@ -149,6 +163,31 @@ export default function History(props: HistoryProps) {
       {current.matches('found') &&
         (history.length > 0 ? (
           <>
+            {uniqueWorkNumbers.length > 0 && (
+              <div
+                className={
+                  'mx-auto max-w-screen-lg flex flex-col mt-4 mb-4 w-full p-4 rounded-md justify-center bg-gray-200'
+                }
+              >
+                <Heading level={4} showBorder={false}>
+                  Files Uploaded
+                </Heading>
+                <div className={'flex flex-col mt-4 justify-center'}>
+                  <Table>
+                    <TableBody>
+                      <TableCell className={'flex flex-col justify-center  p-2'}>
+                        {uniqueWorkNumbers.map((workNumber, indx) => (
+                          <StyledLink
+                            to={`/file_manager?workNumber=${workNumber}`}
+                            className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
+                          >{`Files for ${workNumber}`}</StyledLink>
+                        ))}
+                      </TableCell>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
             <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
               <p className="text-sm text-gray-700">
                 History for {historyDisplayValues[props.kind]} <span className="font-medium">{props.value}</span>
@@ -160,7 +199,7 @@ export default function History(props: HistoryProps) {
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
-            <DataTable columns={historyColumns} data={history} />
+            <DataTable data-testid={'history-table'} columns={historyColumns} data={history} />
           </>
         ) : (
           <Warning message={'No results found.'} />

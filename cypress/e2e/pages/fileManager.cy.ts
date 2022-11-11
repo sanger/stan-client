@@ -19,6 +19,10 @@ describe('FileManager', () => {
       it('should select SGP1008 in select box', () => {
         workNumber().should('have.value', 'SGP1008');
       });
+      it('should  enable file selection button', () => {
+        cy.get('input[type=file]').should('be.enabled');
+        cy.findByText('Please select an SGP Number to enable file selection').should('not.exist');
+      });
       it('should display a table with files uploaded for the selected SGP Numbers', () => {
         cy.findByRole('table').should('exist');
         cy.findByRole('table').find('tr').should('have.length.above', 0);
@@ -54,6 +58,15 @@ describe('FileManager', () => {
       it('should not display a table', () => {
         cy.findByRole('table').should('not.exist');
         cy.findByText('No files uploaded for SGP1008').should('be.visible');
+      });
+    });
+    context('on removing SGP Number selection', () => {
+      before(() => {
+        cy.visit('/file_manager');
+      });
+      it('should  disable file selection button', () => {
+        cy.get('input[type=file]').should('be.disabled');
+        cy.findByText('Please select an SGP Number to enable file selection').should('be.visible');
       });
     });
   });
@@ -174,7 +187,7 @@ describe('FileManager', () => {
         selectFile();
         uploadButton().click();
       });
-      it('should displau upload failure message', () => {
+      it('should display upload failure message', () => {
         cy.findByTestId('error-div').should('exist');
       });
     });

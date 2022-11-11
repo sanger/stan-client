@@ -7,6 +7,7 @@ import FileIcon from '../icons/FileIcon';
 import FailIcon from '../icons/FailIcon';
 import { ConfirmationModal } from '../modal/ConfirmationModal';
 import UploadIcon from '../icons/UploadIcon';
+import MutedText from '../MutedText';
 
 export type ConfirmUploadProps = {
   confirmMessage: string;
@@ -87,16 +88,28 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
 
   return (
     <div className={'mx-auto  max-w-screen-lg bg-gray-100 border border-gray-200 bg-gray-100 rounded-md'}>
-      <div className="flex flex-row border-b-2 border-gray-200 space-x-4 py-2" data-testid={'upload'}>
-        <Input type="file" id="file" onChange={onFileChange} data-testid="file-input" className="hidden" />
-        <label
-          htmlFor="file"
-          className={
-            'bg-gray-100 border-2 border-gray-200 whitespace-nowrap hover:bg-gray-200 text-black  py-2 px-4 rounded'
-          }
-        >
-          Select file...
-        </label>
+      <div className="flex flex-col border-b-2 border-gray-200 space-x-6 py-2" data-testid={'upload'}>
+        <div className="flex flex-row space-x-4">
+          <Input
+            type="file"
+            id="file"
+            disabled={!url}
+            onChange={onFileChange}
+            data-testid="file-input"
+            className="hidden"
+          />
+          <label
+            htmlFor="file"
+            className={`${
+              url ? 'bg-gray-200 text-black hover:bg-gray-300 border-2 border-gray-200' : 'bg-white text-gray-400'
+            }  whitespace-nowrap  py-2 px-4 rounded`}
+          >
+            Select file...
+          </label>
+        </div>
+        {!url && (
+          <MutedText className={'text-gray-600'}>Please select an SGP Number to enable file selection</MutedText>
+        )}
       </div>
       {file && (
         <div
