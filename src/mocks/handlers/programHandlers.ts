@@ -1,33 +1,32 @@
 import { graphql } from 'msw';
 import {
-  AddProjectMutation,
-  AddProjectMutationVariables,
-  SetProjectEnabledMutation,
-  SetProjectEnabledMutationVariables
+  AddProgramMutation,
+  AddProgramMutationVariables,
+  SetProgramEnabledMutation,
+  SetProgramEnabledMutationVariables
 } from '../../types/sdk';
-import projectFactory from '../../lib/factories/projectFactory';
-import projectRepository from '../repositories/projectRepository';
+import programFactory from '../../lib/factories/programFactory';
+import programRepository from '../repositories/programRepository';
 
-const projectHandlers = [
-  graphql.mutation<AddProjectMutation, AddProjectMutationVariables>('AddProject', (req, res, ctx) => {
-    const addProject = projectFactory.build({ name: req.variables.name });
-    projectRepository.save(addProject);
-    return res(ctx.data({ addProject }));
+const programHandlers = [
+  graphql.mutation<AddProgramMutation, AddProgramMutationVariables>('AddProgram', (req, res, ctx) => {
+    const addProgram = programFactory.build({ name: req.variables.name });
+    programRepository.save(addProgram);
+    return res(ctx.data({ addProgram }));
   }),
-
-  graphql.mutation<SetProjectEnabledMutation, SetProjectEnabledMutationVariables>(
-    'SetProjectEnabled',
+  graphql.mutation<SetProgramEnabledMutation, SetProgramEnabledMutationVariables>(
+    'SetProgramEnabled',
     (req, res, ctx) => {
-      const project = projectRepository.find('name', req.variables.name);
-      if (project) {
-        project.enabled = req.variables.enabled;
-        projectRepository.save(project);
-        return res(ctx.data({ setProjectEnabled: project }));
+      const program = programRepository.find('name', req.variables.name);
+      if (program) {
+        program.enabled = req.variables.enabled;
+        programRepository.save(program);
+        return res(ctx.data({ setProgramEnabled: program }));
       } else {
-        return res(ctx.errors([{ message: `Could not find Project: "${req.variables.name}"` }]));
+        return res(ctx.errors([{ message: `Could not find Program: "${req.variables.name}"` }]));
       }
     }
   )
 ];
 
-export default projectHandlers;
+export default programHandlers;

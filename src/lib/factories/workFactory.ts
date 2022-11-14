@@ -4,6 +4,7 @@ import costCodeFactory from './costCodeFactory';
 import projectFactory from './projectFactory';
 import workTypeFactory from './workTypeFactory';
 import releaseRecipientFactory from './releaseRecipientFactory';
+import programFactory from './programFactory';
 
 export default Factory.define<WorkFieldsFragment, { isRnD: boolean }>(
   ({ params, sequence, associations, transientParams }) => {
@@ -20,6 +21,7 @@ export default Factory.define<WorkFieldsFragment, { isRnD: boolean }>(
       workRequester: associations.workRequester ?? releaseRecipientFactory.build(),
       costCode: associations.costCode ?? costCodeFactory.build(),
       project: associations.project ?? projectFactory.build(),
+      program: associations.program ?? programFactory.build(),
       status: params.status ?? WorkStatus.Unstarted,
       numBlocks: params.numBlocks,
       numSlides: params.numSlides,

@@ -38,4 +38,7 @@ query GetConfiguration {
   solutions(includeDisabled: true) {
     ...SolutionFields
   }
+  programs(includeDisabled: true) {
+    ...ProgramFields
+  }
 }

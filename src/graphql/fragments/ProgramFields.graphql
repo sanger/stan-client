@@ -1,0 +1,4 @@
+fragment ProgramFields on Program {
+    name
+    enabled
+}

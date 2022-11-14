@@ -2,6 +2,9 @@ query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatu
   projects(includeDisabled: false) {
     ...ProjectFields
   }
+  programs(includeDisabled: false) {
+    ...ProgramFields
+  }
   costCodes(includeDisabled: false) {
     ...CostCodeFields
   }

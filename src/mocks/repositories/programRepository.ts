@@ -1,11 +1,11 @@
-import { ProjectFieldsFragment } from '../../types/sdk';
-import projectFactory from '../../lib/factories/projectFactory';
+import { ProgramFieldsFragment } from '../../types/sdk';
+import programFactory from '../../lib/factories/programFactory';
 import { createSessionStorageRepository } from './index';
 
-const seeds: Array<ProjectFieldsFragment> = projectFactory.buildList(5);
-seeds.push(projectFactory.build({ enabled: false }));
-seeds.push(projectFactory.build({ name: 'TEST999' }));
+const seeds: Array<ProgramFieldsFragment> = programFactory.buildList(5);
+seeds.push(programFactory.build({ enabled: false }));
+seeds.push(programFactory.build({ name: 'PROGRAM_999' }));
 
-const projectRepository = createSessionStorageRepository('PROJECTS', 'name', seeds);
+const programRepository = createSessionStorageRepository('PROGRAMS', 'name', seeds);
 
-export default projectRepository;
+export default programRepository;

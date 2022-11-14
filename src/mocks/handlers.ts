@@ -45,6 +45,7 @@ import solutionTransferHandlers from './handlers/solutionTransferHandlers';
 import ffpeProcessingHandlers from './handlers/ffpeProcessingHandlers';
 import workProgressSummaryHandlers from './handlers/summaryWorkProgressHandlers';
 import fileHandlers from './handlers/fileHandlers';
+import programHandlers from './handlers/programHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -90,5 +91,6 @@ export const handlers = [
   ...ffpeProcessingHandlers,
   ...solutionTransferHandlers,
   ...workProgressSummaryHandlers,
-  ...fileHandlers
+  ...fileHandlers,
+  ...programHandlers
 ];

@@ -7,6 +7,9 @@ fragment WorkFields on Work {
   project {
     ...ProjectFields
   }
+  program {
+    ...ProgramFields
+  }
   costCode {
     ...CostCodeFields
   }
