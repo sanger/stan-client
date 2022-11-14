@@ -1,0 +1,6 @@
+query GetPrograms {
+    programs {
+        name
+        enabled
+    }
+}

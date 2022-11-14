@@ -46,7 +46,7 @@ const defaultInitialValues: WorkProgressUrlParams = {
  * or
  * ?searchType=Work%20Type&searchValues[]=WorkType1&searchValues[]=Worktype2
  * */
-const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
+const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: string[] }) => {
   const location = useLocation();
 
   const workProgressMachine = searchMachine<FindWorkProgressQueryVariables, WorkProgressResultTableEntry>(
@@ -95,7 +95,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
 
     const params = safeParseQueryString<WorkProgressUrlParams>({
       query: location.search,
-      schema: workProgressSearchSchema(workTypes)
+      schema: workProgressSearchSchema(workTypes, programs)
     });
     if (params) {
       return {
@@ -103,7 +103,7 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
         ...params
       };
     } else return params;
-  }, [location.search, workTypes]);
+  }, [location.search, workTypes, programs]);
 
   /**
    * Rebuild the blob object on download action
@@ -137,7 +137,8 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
     const queryInput: WorkProgressQueryInput = {
       workNumber: undefined,
       workTypes: undefined,
-      statuses: undefined
+      statuses: undefined,
+      programs: undefined
     };
     switch (workProgressUrl.searchType) {
       case WorkProgressSearchType.WorkNumber: {
@@ -149,6 +150,10 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
       }
       case WorkProgressSearchType.WorkType: {
         queryInput.workTypes = workProgressUrl.searchValues;
+        break;
+      }
+      case WorkProgressSearchType.Program: {
+        queryInput.programs = workProgressUrl.searchValues;
         break;
       }
       case WorkProgressSearchType.Status: {
@@ -181,10 +186,12 @@ const WorkProgress = ({ workTypes }: { workTypes: string[] }) => {
           <WorkProgressInput
             urlParams={memoUrlParams ?? defaultInitialValues}
             workTypes={workTypes}
+            programs={programs}
             searchTypes={[
               WorkProgressSearchType.WorkType,
               WorkProgressSearchType.Status,
-              WorkProgressSearchType.WorkNumber
+              WorkProgressSearchType.WorkNumber,
+              WorkProgressSearchType.Program
             ]}
           />
           <div className={'my-10 mx-auto max-w-screen-xl'}>
@@ -333,6 +340,10 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Project',
     accessor: 'project'
+  },
+  {
+    Header: 'Program',
+    accessor: 'program'
   },
   {
     Header: 'Most Recent Operation',
