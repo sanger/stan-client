@@ -129,12 +129,21 @@ describe('History Page', () => {
       });
     });
 
-    context('when clicking on uploaded files link', () => {
+    context(' when clicking on uploaded files link for authenticated users', () => {
       before(() => {
         cy.contains('Files for SGP123').click();
       });
-      it('goes to file manager page for SGP1', () => {
+      it('goes to file manager page for SGP123', () => {
         cy.url().should('be.equal', 'http://localhost:3000/file_manager?workNumber=SGP123');
+      });
+    });
+    context('for non-authenticated users', () => {
+      before(() => {
+        cy.visitAsGuest('/history?kind=workNumber&value=SGP1');
+        cy.contains('Files for SGP123').click();
+      });
+      it('goes to file viewer page for SGP123', () => {
+        cy.url().should('be.equal', 'http://localhost:3000/file_view?workNumber=SGP123');
       });
     });
   });

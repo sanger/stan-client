@@ -14,6 +14,7 @@ import { getTimestampStr } from '../../lib/helpers';
 import { useDownload } from '../../lib/hooks/useDownload';
 import Heading from '../Heading';
 import Table, { TableBody, TableCell } from '../Table';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * Component for looking up and displaying the history of labware and samples
@@ -23,6 +24,8 @@ export default function History(props: HistoryProps) {
     return createHistoryMachine(props);
   }, [props]);
   const [current, send] = useMachine(historyMachine);
+
+  const { isAuthenticated } = useAuth();
 
   const { history, historyProps, serverError } = current.context;
 
@@ -146,6 +149,13 @@ export default function History(props: HistoryProps) {
     send({ type: 'UPDATE_HISTORY_PROPS', props });
   }, [props, send]);
 
+  /**
+   * File upload option is only for authenticated users, so
+   * only allow permission to view or download uploaded files if not authenticated
+   */
+  const fileAccessUrlPath = (workNumber: string) => {
+    return isAuthenticated() ? `/file_manager?workNumber=${workNumber}` : `/file_view?workNumber=${workNumber}`;
+  };
   return (
     <div data-testid="history">
       {current.matches('error') && serverError && (
@@ -178,7 +188,7 @@ export default function History(props: HistoryProps) {
                       <TableCell className={'flex flex-col justify-center  p-2'}>
                         {uniqueWorkNumbers.map((workNumber, indx) => (
                           <StyledLink
-                            to={`/file_manager?workNumber=${workNumber}`}
+                            to={fileAccessUrlPath(workNumber)}
                             className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
                           >{`Files for ${workNumber}`}</StyledLink>
                         ))}
