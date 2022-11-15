@@ -3,7 +3,7 @@ mutation CreateWork(
   $workType: String!
   $workRequester: String!
   $project: String!
-  $program:String!
+  $program: String!
   $costCode: String!
   $numBlocks: Int
   $numSlides: Int
