@@ -248,16 +248,15 @@ describe('Work Progress', () => {
         cy.findByTestId('valueSelect').invoke('val').should('deep.equal', ['active']);
       });
     });
-
     context('when valid url is given for searching Program', () => {
       before(() => {
-        cy.visit('?searchType=Program&searchValues[]=Program%201');
+        cy.visit('?searchType=Program&searchValues[]=PROGRAM_999');
       });
       it('shows a list of results', () => {
-        cy.findByRole('table').contains('Program 1');
+        cy.findByRole('table').contains('PROGRAM_999');
       });
-      it('will display the given Status in value dropdown', () => {
-        cy.findByTestId('valueSelect').invoke('val').should('deep.equal', ['Program 1']);
+      it('will display the given PROGRAM in value dropdown', () => {
+        cy.findByTestId('valueSelect').invoke('val').should('deep.equal', ['PROGRAM_999']);
       });
     });
   });

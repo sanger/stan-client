@@ -92,7 +92,6 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
     /**
      *Schema to validate the deserialized URL search params
      */
-
     const params = safeParseQueryString<WorkProgressUrlParams>({
       query: location.search,
       schema: workProgressSearchSchema(workTypes, programs)
