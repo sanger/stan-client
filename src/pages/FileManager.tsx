@@ -19,10 +19,11 @@ import { findUploadedFiles } from '../lib/services/fileService';
 
 type FileManagerProps = {
   workNumbers: string[];
+  showUpload?: boolean;
 };
 
 /**Component to render File Manager page**/
-const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerProps) => {
+const FileManager: React.FC<FileManagerProps> = ({ workNumbers, showUpload = true }: FileManagerProps) => {
   const [workNumber, setWorkNumber] = React.useState<string>('');
   const [uploadedFilesForWorkNumber, setUploadedFilesForWorkNumber] = React.useState<FileFieldsFragment[]>([]);
   const location = useLocation();
@@ -135,28 +136,32 @@ const FileManager: React.FC<FileManagerProps> = ({ workNumbers }: FileManagerPro
       <AppShell.Main>
         <div className="mx-auto mb-8">
           <div className={'flex flex-col w-full p-4 gap-y-4 text-lg'}>
-            <motion.div variants={variants.fadeInWithLift}>
-              <Heading level={3}>SGP Number</Heading>
-              <p className="mt-2">Please select an SGP number.</p>
-              <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
-                <WorkNumberSelect
-                  workNumber={workNumber}
-                  onWorkNumberChange={(workNumber) => {
-                    // Replace instead of push so user doesn't have to go through a load of old searches when going back
-                    history.replace(`/file_manager?workNumber=${encodeURIComponent(workNumber)}`);
-                  }}
-                />
-              </motion.div>
-            </motion.div>
-            <motion.div variants={variants.fadeInWithLift} className={'space-y-4'}>
-              <Heading level={3}>Upload file</Heading>
-              <FileUploader
-                url={memoURL}
-                enableUpload={workNumber.length > 0}
-                confirmUpload={onConfirmUpload}
-                notifyUploadOutcome={onFileUploadFinished}
-              />
-            </motion.div>
+            {showUpload && (
+              <div className={'flex flex-col p-4 gap-y-4 text-lg'}>
+                <motion.div variants={variants.fadeInWithLift}>
+                  <Heading level={3}>SGP Number</Heading>
+                  <p className="mt-2">Please select an SGP number.</p>
+                  <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
+                    <WorkNumberSelect
+                      workNumber={workNumber}
+                      onWorkNumberChange={(workNumber) => {
+                        // Replace instead of push so user doesn't have to go through a load of old searches when going back
+                        history.replace(`/file_manager?workNumber=${encodeURIComponent(workNumber)}`);
+                      }}
+                    />
+                  </motion.div>
+                </motion.div>
+                <motion.div variants={variants.fadeInWithLift} className={'space-y-4'}>
+                  <Heading level={3}>Upload file</Heading>
+                  <FileUploader
+                    url={memoURL}
+                    enableUpload={workNumber.length > 0}
+                    confirmUpload={onConfirmUpload}
+                    notifyUploadOutcome={onFileUploadFinished}
+                  />
+                </motion.div>
+              </div>
+            )}
             {workNumber && (
               <motion.div variants={variants.fadeInWithLift} className={'flex flex-col space-y-4'}>
                 <Heading level={3}>Files</Heading>
