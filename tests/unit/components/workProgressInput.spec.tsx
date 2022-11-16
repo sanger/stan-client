@@ -40,13 +40,15 @@ describe('WorkProgressInput.tsx', () => {
         }
       });
 
-      it('returns a valididation error if search type is invalid', async () => {
+      it('returns a validation error if search type is invalid', async () => {
         expect.assertions(1);
         try {
           await schema.validate({ searchType: 'invalid' });
         } catch (e) {
           expect(e).toEqual(
-            new ValidationError('searchType must be one of the following values: SGP/R&D Number, Work Type, Status')
+            new ValidationError(
+              'searchType must be one of the following values: SGP/R&D Number, Work Type, Status, Program'
+            )
           );
         }
       });
