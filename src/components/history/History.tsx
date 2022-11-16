@@ -10,7 +10,7 @@ import WhiteButton from '../buttons/WhiteButton';
 import LoadingSpinner from '../icons/LoadingSpinner';
 import { LabwareStatePill } from '../LabwareStatePill';
 import DownloadIcon from '../icons/DownloadIcon';
-import { getTimestampStr } from '../../lib/helpers';
+import { getTimestampStr, stringify } from '../../lib/helpers';
 import { useDownload } from '../../lib/hooks/useDownload';
 import Heading from '../Heading';
 import Table, { TableBody, TableCell } from '../Table';
@@ -154,7 +154,10 @@ export default function History(props: HistoryProps) {
    * only allow permission to view or download uploaded files if not authenticated
    */
   const fileAccessUrlPath = (workNumber: string) => {
-    return isAuthenticated() ? `/file_manager?workNumber=${workNumber}` : `/file_view?workNumber=${workNumber}`;
+    const queryParamsStr = stringify({
+      workNumber: workNumber
+    });
+    return isAuthenticated() ? `/file_manager?${queryParamsStr}` : `/file_view?${queryParamsStr}`;
   };
   return (
     <div data-testid="history">
