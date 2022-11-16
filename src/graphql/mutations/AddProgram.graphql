@@ -1,5 +1,5 @@
-mutation AddProgram($name:String!) {
-    addProgram(name: $name) {
-        ...ProgramFields
-    }
+mutation AddProgram($name: String!) {
+  addProgram(name: $name) {
+    ...ProgramFields
+  }
 }

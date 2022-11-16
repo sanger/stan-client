@@ -1,8 +1,8 @@
 query GetWorkProgressInputs {
-    workTypes(includeDisabled: true) {
-        name
-    }
-    programs(includeDisabled: true){
-        name
-    }
+  workTypes(includeDisabled: true) {
+    name
+  }
+  programs(includeDisabled: true) {
+    name
+  }
 }

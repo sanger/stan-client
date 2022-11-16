@@ -1,4 +1,4 @@
 fragment ProgramFields on Program {
-    name
-    enabled
+  name
+  enabled
 }
