@@ -149,13 +149,13 @@ describe('Work Allocation', () => {
         cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
         cy.get('td').eq(0).type('A12');
         //change the focus
-        cy.findAllByRole('button', { name: /Edit Status/i }).then((editButtons) => {
-          editButtons[0].focus();
-        });
+        cy.findAllByRole('button', { name: /Edit Status/i })
+          .eq(0)
+          .focus();
       });
 
       it('updates priority', () => {
-        cy.findByTestId('SGP1009-priority').should('have.value', 'A12');
+        cy.findByTestId('SGP1010-priority').scrollIntoView().should('have.value', 'A12');
       });
     });
 
@@ -210,7 +210,7 @@ describe('Work Allocation', () => {
         cy.findByRole('button', { name: /Search/i })
           .should('be.visible')
           .click();
-        cy.get("table[data-testid='work-allocation-table']").find('tr').should('have.length', 10);
+        cy.get("table[data-testid='work-allocation-table']").find('tr').should('have.length', 11);
       });
     });
 

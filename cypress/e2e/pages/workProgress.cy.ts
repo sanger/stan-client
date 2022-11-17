@@ -1,3 +1,10 @@
+import {
+  GetLabwareOperationsQuery,
+  GetLabwareOperationsQueryVariables,
+  GetProgramsQuery,
+  GetProgramsQueryVariables
+} from '../../../src/types/sdk';
+
 describe('Work Progress', () => {
   before(() => {
     cy.visit('./');
@@ -41,16 +48,21 @@ describe('Work Progress', () => {
                 'Work Type 2',
                 'Work Type 3',
                 'TEST_WT_1',
-                'Work Type 5',
-                'Work Type 6',
-                'Work Type 7',
-                'Work Type 8',
-                'Work Type 9',
-                'Work Type 10',
-                'Work Type 11',
-                'Work Type 12',
-                'Work Type 13'
+                'Work Type 5'
               ]);
+            });
+        });
+      });
+      context(' when Program is selected in dropdown for program', () => {
+        before(() => {
+          cy.findByTestId('type').select('Program');
+        });
+        it('shows a drop down box with value', () => {
+          cy.get('[data-testid = valueSelect]')
+            .children('option')
+            .then(($options) => {
+              const optionValues = $options.toArray().map((elem) => elem.label);
+              expect(optionValues).to.have.length(7);
             });
         });
       });
@@ -72,18 +84,19 @@ describe('Work Progress', () => {
         cy.get('th').eq(4).contains('Work Requester');
         cy.get('th').eq(5).contains('Work Type');
         cy.get('th').eq(6).contains('Project');
-        cy.get('th').eq(7).contains('Most Recent Operation');
-        cy.get('th').eq(8).contains('Last Sectioning Date');
-        cy.get('th').eq(9).contains('Last Staining Date');
-        cy.get('th').eq(10).contains('Last RNAscope/IHC Staining Date');
-        cy.get('th').eq(11).contains('Last Imaging Date');
-        cy.get('th').eq(12).contains('Last RNA Extraction Date');
-        cy.get('th').eq(13).contains('Last RNA Analysis Date');
-        cy.get('th').eq(14).contains('Last Visium ADH Stain Date');
-        cy.get('th').eq(15).contains('Last Visium TO Staining Date');
-        cy.get('th').eq(16).contains('Last Visium LP Staining Date');
-        cy.get('th').eq(17).contains('Last cDNA Transfer Date');
-        cy.get('th').eq(18).contains('Last Date 96 Well Plate Released');
+        cy.get('th').eq(7).contains('Program');
+        cy.get('th').eq(8).contains('Most Recent Operation');
+        cy.get('th').eq(9).contains('Last Sectioning Date');
+        cy.get('th').eq(10).contains('Last Staining Date');
+        cy.get('th').eq(11).contains('Last RNAscope/IHC Staining Date');
+        cy.get('th').eq(12).contains('Last Imaging Date');
+        cy.get('th').eq(13).contains('Last RNA Extraction Date');
+        cy.get('th').eq(14).contains('Last RNA Analysis Date');
+        cy.get('th').eq(15).contains('Last Visium ADH Stain Date');
+        cy.get('th').eq(16).contains('Last Visium TO Staining Date');
+        cy.get('th').eq(17).contains('Last Visium LP Staining Date');
+        cy.get('th').eq(18).contains('Last cDNA Transfer Date');
+        cy.get('th').eq(19).contains('Last Date 96 Well Plate Released');
       });
     });
   });
@@ -120,12 +133,11 @@ describe('Work Progress', () => {
     });
     context('when a value is given ', () => {
       before(() => {
-        cy.findByTestId('valueSelect').select(['Work Type 10', 'Work Type 11']);
-
+        cy.findByTestId('valueSelect').select(['Work Type 1', 'Work Type 2']);
         cy.findByRole('button', { name: /Search/i }).click();
       });
       it('will show table with result', () => {
-        cy.findByRole('table').contains('Work Type 11');
+        cy.findByRole('table').contains('Work Type 1');
       });
     });
     context('when a value is given which has no results', () => {
@@ -215,13 +227,13 @@ describe('Work Progress', () => {
     });
     context('when valid url is given for searching WorkType', () => {
       before(() => {
-        cy.visit('/?searchType=Work%20Type&searchValues[]=Work%20Type%2010');
+        cy.visit('/?searchType=Work%20Type&searchValues[]=Work%20Type%201');
       });
       it('shows a list of results', () => {
         cy.findByRole('table').contains('SGP/R&D Number');
       });
       it('will display the given Work type in value dropdown', () => {
-        cy.findByTestId('valueSelect').invoke('val').should('deep.equal', ['Work Type 10']);
+        cy.findByTestId('valueSelect').invoke('val').should('deep.equal', ['Work Type 1']);
       });
     });
 
@@ -234,6 +246,17 @@ describe('Work Progress', () => {
       });
       it('will display the given Status in value dropdown', () => {
         cy.findByTestId('valueSelect').invoke('val').should('deep.equal', ['active']);
+      });
+    });
+    context('when valid url is given for searching Program', () => {
+      before(() => {
+        cy.visit('?searchType=Program&searchValues[]=PROGRAM_999');
+      });
+      it('shows a list of results', () => {
+        cy.findByRole('table').contains('PROGRAM_999');
+      });
+      it('will display the given PROGRAM in value dropdown', () => {
+        cy.findByTestId('valueSelect').invoke('val').should('deep.equal', ['PROGRAM_999']);
       });
     });
   });

@@ -2,11 +2,16 @@ import { graphql } from 'msw';
 import {
   FindWorkProgressQuery,
   FindWorkProgressQueryVariables,
+  GetWorkProgressInputsQuery,
+  GetWorkProgressInputsQueryVariables,
   Work,
   WorkProgressTimestamp,
   WorkStatus
 } from '../../types/sdk';
 import workRepository from '../repositories/workRepository';
+import programRepository from '../repositories/programRepository';
+import workTypeRepository from '../repositories/workTypeRepository';
+import { generateRandomIntegerInRange } from '../../lib/helpers';
 
 function buildWorkProgressTimeStamps(): Array<WorkProgressTimestamp> {
   return [
@@ -38,8 +43,19 @@ function buildWorkComment(work: Work) {
 }
 
 const workProgressHandlers = [
+  graphql.query<GetWorkProgressInputsQuery, GetWorkProgressInputsQueryVariables>(
+    'GetWorkProgressInputs',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          workTypes: workTypeRepository.findAll(),
+          programs: programRepository.findAll()
+        })
+      );
+    }
+  ),
   graphql.query<FindWorkProgressQuery, FindWorkProgressQueryVariables>('FindWorkProgress', (req, res, ctx) => {
-    const { workNumber, workTypes, statuses } = req.variables;
+    const { workNumber, workTypes, statuses, programs } = req.variables;
     const works = workRepository.findAll().map((work, indx) => {
       const status = indx % 2 === 0 ? WorkStatus.Active : indx % 3 === 1 ? WorkStatus.Completed : WorkStatus.Paused;
       return { ...work, status: status };
@@ -72,6 +88,28 @@ const workProgressHandlers = [
             return {
               __typename: 'WorkProgress',
               work: work,
+              timestamps: buildWorkProgressTimeStamps(),
+              workComment: buildWorkComment(work)
+            };
+          })
+        })
+      );
+    }
+    if (programs) {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          workProgress: works.map((work) => {
+            return {
+              __typename: 'WorkProgress',
+              work: {
+                ...work,
+                program: {
+                  name:
+                    programs.length > 1 ? programs[generateRandomIntegerInRange(0, programs.length - 1)] : programs[0],
+                  enabled: true
+                }
+              },
               timestamps: buildWorkProgressTimeStamps(),
               workComment: buildWorkComment(work)
             };
