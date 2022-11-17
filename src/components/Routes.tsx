@@ -11,7 +11,7 @@ import Release from '../pages/Release';
 import Store from '../pages/Store';
 import Search from '../pages/Search';
 import Destroy from '../pages/Destroy';
-import SlideRegistration from '../pages/SlideRegistration';
+import SectionRegistration from '../pages/SectionRegistration';
 import SlotCopy from '../pages/SlotCopy';
 import History from '../pages/History';
 import { plateFactory } from '../lib/factories/labwareFactory';
@@ -239,10 +239,10 @@ export function Routes() {
         )}
       />
       <AuthenticatedRoute
-        path="/admin/slide_registration"
+        path="/admin/section_registration"
         render={(routeProps) => (
           <DataFetcher key={routeProps.location.key} dataFetcher={stanCore.GetRegistrationInfo}>
-            {(registrationInfo) => <SlideRegistration registrationInfo={registrationInfo} {...routeProps} />}
+            {(registrationInfo) => <SectionRegistration registrationInfo={registrationInfo} {...routeProps} />}
           </DataFetcher>
         )}
       />
@@ -383,27 +383,6 @@ export function Routes() {
           );
         }}
       />
-      <Route
-        path="/file_view"
-        render={(routeProps) => {
-          return (
-            <DataFetcher
-              key={routeProps.location.key}
-              dataFetcher={() => {
-                return stanCore.FindWorkInfo({
-                  status: WorkStatus.Active
-                });
-              }}
-            >
-              {(dataFetcher) => {
-                return (
-                  <FileManager workNumbers={dataFetcher.works.map((work) => work.workNumber)} showUpload={false} />
-                );
-              }}
-            </DataFetcher>
-          );
-        }}
-      />
       <AuthenticatedRoute
         path="/file_manager"
         render={(routeProps) => {
@@ -417,7 +396,7 @@ export function Routes() {
               }}
             >
               {(dataFetcher) => {
-                return <FileManager workNumbers={dataFetcher.works.map((work) => work.workNumber)} showUpload={true} />;
+                return <FileManager workNumbers={dataFetcher.works.map((work) => work.workNumber)} />;
               }}
             </DataFetcher>
           );

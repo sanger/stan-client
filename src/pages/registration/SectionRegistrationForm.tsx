@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useRef, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import Labware from '../../components/labware/Labware';
 import { unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
 import { FieldArray, Form, FormikErrors, FormikTouched, getIn, useFormikContext } from 'formik';
@@ -19,20 +19,20 @@ import variants from '../../lib/motionVariants';
 import MutedText from '../../components/MutedText';
 import SectionForm from './SectionForm';
 import { GetRegistrationInfoQuery } from '../../types/sdk';
-import { SlideRegistrationContext, SlideRegistrationFormValues } from '../SlideRegistration';
+import { SectionRegistrationContext, SectionRegistrationFormValues } from '../SectionRegistration';
 
-type SlideRegistrationFormParams = {
+type SectionRegistrationFormParams = {
   registrationInfo: GetRegistrationInfoQuery;
 };
 
-function SlideRegistrationForm({ registrationInfo }: SlideRegistrationFormParams) {
-  const { availableSlides, buildLabware, buildSample, isSubmitting } = useContext(SlideRegistrationContext);
-  const { values, setFieldValue, errors, touched } = useFormikContext<SlideRegistrationFormValues>();
+function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormParams) {
+  const { availableLabware, buildLabware, buildSample, isSubmitting } = useContext(SectionRegistrationContext);
+  const { values, setFieldValue, errors, touched } = useFormikContext<SectionRegistrationFormValues>();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scrollToSlot, setScrollToSlot] = useState<string | null>(null);
   const [currentSlotAddress, setCurrentSlotAddress] = useState<string | null>(null);
-  const labwareTypeSelectRef = useRef<HTMLSelectElement>(null);
+  const [labwareTypeSelect, setLabwareTypeSelect] = useState<string>(values.labwares[currentIndex].labwareTypeName);
 
   // Derived states
   const currentLabware = values.labwares[currentIndex];
@@ -122,7 +122,7 @@ function SlideRegistrationForm({ registrationInfo }: SlideRegistrationFormParams
                       }
                     }}
                   >
-                    - Remove Slide
+                    {`- Remove ${currentLabware.labwareTypeName}`}
                   </PinkButton>
                 )}
               </FieldArray>
@@ -138,7 +138,10 @@ function SlideRegistrationForm({ registrationInfo }: SlideRegistrationFormParams
             className="space-y-8"
           >
             <motion.div variants={variants.fadeInWithLift}>
-              <FormikInput label={'External Slide Barcode'} name={`labwares.${currentIndex}.externalSlideBarcode`} />
+              <FormikInput
+                label={'External Labware Barcode'}
+                name={`labwares.${currentIndex}.externalLabwareBarcode`}
+              />
             </motion.div>
 
             <motion.div variants={variants.fadeInWithLift}>
@@ -204,7 +207,7 @@ function SlideRegistrationForm({ registrationInfo }: SlideRegistrationFormParams
                   <div className="flex flex-row items-center justify-between">
                     <div className="flex flex-row items-center justify-between">
                       <BarcodeIcon className="h-4 w-4 inline-block text-white" />
-                      <span className="ml-1 text-sm">{labware.externalSlideBarcode}</span>
+                      <span className="ml-1 text-sm">{labware.externalLabwareBarcode}</span>
                     </div>
 
                     <div className="flex flex-row justify-between items-center">
@@ -236,8 +239,12 @@ function SlideRegistrationForm({ registrationInfo }: SlideRegistrationFormParams
             </div>
 
             <div className="my-2 w-full py-4 px-2 bg-sdb-500 rounded-md flex flex-col space-y-2">
-              <Select id="labwareTypesSelect" ref={labwareTypeSelectRef}>
-                {availableSlides.map((labwareTypeName) => (
+              <Select
+                id="labwareTypesSelect"
+                onChange={(e) => setLabwareTypeSelect(e.currentTarget.value)}
+                value={labwareTypeSelect}
+              >
+                {availableLabware.map((labwareTypeName) => (
                   <option key={labwareTypeName} value={labwareTypeName}>
                     {labwareTypeName}
                   </option>
@@ -252,14 +259,14 @@ function SlideRegistrationForm({ registrationInfo }: SlideRegistrationFormParams
                     className="mt-2 w-full"
                     onClick={(e) => {
                       e.preventDefault();
-                      const labwareType = labwareTypeSelectRef.current?.value;
+                      const labwareType = labwareTypeSelect;
                       const numberOfLabwares = values.labwares.length;
                       labwareHelpers.push(buildLabware(labwareType as LabwareTypeName));
                       setCurrentSlotAddress(null);
                       setCurrentIndex(numberOfLabwares);
                     }}
                   >
-                    + Add Slide
+                    {`+ Add  ${labwareTypeSelect}`}
                   </WhiteButton>
                 )}
               </FieldArray>
@@ -277,12 +284,12 @@ function SlideRegistrationForm({ registrationInfo }: SlideRegistrationFormParams
   );
 }
 
-export default SlideRegistrationForm;
+export default SectionRegistrationForm;
 
 function getNumErrorsPerLabware(
-  labwares: SlideRegistrationFormValues['labwares'],
-  errors: FormikErrors<SlideRegistrationFormValues>,
-  touched: FormikTouched<SlideRegistrationFormValues>
+  labwares: SectionRegistrationFormValues['labwares'],
+  errors: FormikErrors<SectionRegistrationFormValues>,
+  touched: FormikTouched<SectionRegistrationFormValues>
 ): { [key: string]: number } {
   return labwares.reduce<{ [key: number]: number }>((memo, labware, labwareIndex) => {
     let count = 0;
@@ -316,7 +323,7 @@ function getNumErrorsPerLabware(
 /**
  * Return the number of sections in this labware
  */
-function getSectionsCount(labware: SlideRegistrationFormValues['labwares'][number]): number {
+function getSectionsCount(labware: SectionRegistrationFormValues['labwares'][number]): number {
   return Object.values(labware.slots).reduce((memo, sections) => {
     memo += sections.length;
     return memo;
@@ -326,7 +333,7 @@ function getSectionsCount(labware: SlideRegistrationFormValues['labwares'][numbe
 /**
  * Return the number of sections for a list of labware
  */
-function getTotalSectionsCount(labwares: SlideRegistrationFormValues['labwares']): number {
+function getTotalSectionsCount(labwares: SectionRegistrationFormValues['labwares']): number {
   return labwares.reduce<number>((memo, labware) => {
     memo += getSectionsCount(labware);
     return memo;

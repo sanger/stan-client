@@ -262,10 +262,10 @@ function AppShell({ children }: AppShellParams) {
                     description={'Register blocks of tissue into STAN and obtain new barcodes for its labware.'}
                   />
                   <NavLinkMenuItem
-                    caption={'Slide Registration'}
-                    path={'/admin/slide_registration'}
+                    caption={'Section Registration'}
+                    path={'/admin/section_registration'}
                     icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Register sections of tissue on pre-barcoded slides into STAN.'}
+                    description={'Register sections of tissue on pre-barcoded labware into STAN.'}
                   />
                   <NavLinkMenuItem
                     caption={'Original Sample Registration'}

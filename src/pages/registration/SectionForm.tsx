@@ -12,7 +12,7 @@ import { objectKeys } from '../../lib/helpers';
 import FormikSelect from '../../components/forms/Select';
 import { optionValues } from '../../components/forms';
 import PinkButton from '../../components/buttons/PinkButton';
-import { SlideRegistrationContext, SlideRegistrationFormValues } from '../SlideRegistration';
+import { SectionRegistrationContext, SectionRegistrationFormValues } from '../SectionRegistration';
 
 type SectionFormParams = {
   registrationInfo: GetRegistrationInfoQuery;
@@ -57,8 +57,8 @@ export default function SectionForm({
   showRemoveSectionButton = false,
   scrollIntoView = false
 }: SectionFormParams) {
-  const { buildSample } = useContext(SlideRegistrationContext);
-  const { setFieldValue, values } = useFormikContext<SlideRegistrationFormValues>();
+  const { buildSample } = useContext(SectionRegistrationContext);
+  const { setFieldValue, values } = useFormikContext<SectionRegistrationFormValues>();
   const slotRef = useRef<HTMLDivElement>(null);
   const isOnScreen = useOnScreen(slotRef, { threshold: 0.4 });
 

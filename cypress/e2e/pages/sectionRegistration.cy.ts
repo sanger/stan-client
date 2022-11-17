@@ -1,9 +1,9 @@
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
 import { RegisterSectionsMutation, RegisterSectionsMutationVariables } from '../../../src/types/sdk';
 
-describe('Slide Registration Page', () => {
+describe('Section Registration Page', () => {
   before(() => {
-    cy.visit('/admin/slide_registration');
+    cy.visit('/admin/section_registration');
     cy.get('select').select('Slide');
   });
 
@@ -13,17 +13,16 @@ describe('Slide Registration Page', () => {
         cy.findByLabelText('Tissue Type').select('Liver');
         cy.findByLabelText('Spatial Location').select('3 - Surface central region');
         cy.get('#labwareTypesSelect').select('Visium LP');
-        cy.findByText('+ Add Slide').click();
+        cy.findByText('+ Add Visium LP').click();
       });
-
-      after(() => {
-        cy.findByRole('button', { name: '- Remove Slide' }).click();
-      });
-
       it('should still be set when going back to the first slide', () => {
         cy.get('#labware-summaries > a').eq(0).click();
         cy.findByLabelText('Tissue Type').should('have.value', 'Liver');
         cy.findByLabelText('Spatial Location').should('have.value', '3');
+      });
+
+      after(() => {
+        cy.findByRole('button', { name: '- Remove Slide' }).click();
       });
     });
   });
@@ -32,8 +31,8 @@ describe('Slide Registration Page', () => {
     shouldBehaveLikeARegistrationForm(RegistrationType.SLIDE);
 
     it('requires External Slide Barcode', () => {
-      cy.findByLabelText('External Slide Barcode').focus().blur();
-      cy.findByText('External Slide Barcode is a required field').should('be.visible');
+      cy.findByLabelText('External Labware Barcode').focus().blur();
+      cy.findByText('External Labware Barcode is a required field').should('be.visible');
     });
 
     it('requires Section External Identifier', () => {
@@ -110,23 +109,23 @@ describe('Slide Registration Page', () => {
   });
 
   describe('Adding/Removing slides', () => {
-    context('when selecting a slide type and clicking Add Slide', () => {
+    context('when selecting a slide type and clicking Add Visium TO', () => {
       before(() => {
         cy.get('#labwareTypesSelect').select('Visium TO');
-        cy.findByText('+ Add Slide').click();
+        cy.findByText('+ Add Visium TO').click();
       });
 
-      it('adds another slide', () => {
+      it('adds Visium TO slide', () => {
         cy.get('#labware-summaries').children().should('have.length', 2);
       });
 
       it('should show the Remove Slide button', () => {
-        cy.findAllByRole('button', { name: /- Remove Slide/ }).should('be.visible');
+        cy.findAllByRole('button', { name: /- Remove Visium TO/ }).should('be.visible');
       });
 
-      context('when clicking the Remove Slide button', () => {
+      context('when clicking the Remove Visium TO button', () => {
         before(() => {
-          cy.findAllByRole('button', { name: /- Remove Slide/ }).click();
+          cy.findAllByRole('button', { name: /- Remove Visium TO/ }).click();
         });
 
         it('removes the slide', () => {
@@ -186,7 +185,7 @@ describe('Slide Registration Page', () => {
 });
 
 function fillInForm() {
-  cy.findByLabelText('External Slide Barcode').clear().type('ExtBC1');
+  cy.findByLabelText('External Labware Barcode').clear().type('ExtBC1');
   cy.findByLabelText('Fixative').select('None');
   cy.findByLabelText('Medium').select('Paraffin');
   cy.findByLabelText('Donor ID').clear().type('DONOR_1');
