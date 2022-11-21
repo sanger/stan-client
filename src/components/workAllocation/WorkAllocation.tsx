@@ -26,6 +26,7 @@ const initialValues: WorkAllocationFormValues = {
   workRequester: '',
   costCode: '',
   project: '',
+  program: '',
   isRnD: false,
   numSlides: undefined,
   numBlocks: undefined,
@@ -75,7 +76,6 @@ export default function WorkAllocation() {
       }) ?? { status: [WorkStatus.Active] }
     );
   }, [location.search]);
-
   const workAllocationMachine = React.useMemo(() => {
     return createWorkAllocationMachine({ urlParams });
   }, [urlParams]);
@@ -85,6 +85,7 @@ export default function WorkAllocation() {
   const [submitted, setSubmitted] = React.useState(false);
   const {
     projects,
+    programs,
     costCodes,
     workWithComments,
     workTypes,
@@ -179,6 +180,10 @@ export default function WorkAllocation() {
       .oneOf(projects.map((p) => p.name))
       .required()
       .label('Project'),
+    program: Yup.string()
+      .oneOf(programs.map((p) => p.name))
+      .required()
+      .label('Program'),
     costCode: Yup.string()
       .oneOf(costCodes.map((cc) => cc.code))
       .required()
@@ -214,7 +219,7 @@ export default function WorkAllocation() {
           validationSchema={validationSchema}
         >
           <Form>
-            <div className="space-y-2 md:grid md:grid-cols-3 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
+            <div className="space-y-2 md:grid md:grid-cols-4 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
               <div className="md:flex-grow">
                 <FormikSelect label="Work Type" name="workType" emptyOption={true}>
                   {optionValues(workTypes, 'name', 'name')}
@@ -230,6 +235,12 @@ export default function WorkAllocation() {
               <div className="md:flex-grow">
                 <FormikSelect label="Project" name="project" emptyOption={true}>
                   {optionValues(projects, 'name', 'name')}
+                </FormikSelect>
+              </div>
+
+              <div className="md:flex-grow">
+                <FormikSelect label="Program" name="program" emptyOption={true}>
+                  {optionValues(programs, 'name', 'name')}
                 </FormikSelect>
               </div>
 
@@ -334,6 +345,7 @@ export default function WorkAllocation() {
                   <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
                   <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
                   <TableHeader sortProps={getTableSortProps('Project')}>Project</TableHeader>
+                  <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
                   <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
                   <TableHeader sortProps={getTableSortProps('Number of Blocks')}>Number of Blocks</TableHeader>
                   <TableHeader sortProps={getTableSortProps('Number of Slides')}>Number of Slides</TableHeader>

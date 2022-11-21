@@ -5,6 +5,7 @@ import {
   CostCodeFieldsFragment,
   CreateWorkMutation,
   GetWorkAllocationInfoQuery,
+  ProgramFieldsFragment,
   ProjectFieldsFragment,
   ReleaseRecipientFieldsFragment,
   WorkTypeFieldsFragment,
@@ -35,6 +36,11 @@ export type WorkAllocationFormValues = {
    * The name of the project
    */
   project: string;
+
+  /**
+   * The name of the program
+   */
+  program: string;
 
   /**
    * Cost code
@@ -103,6 +109,11 @@ type WorkAllocationContext = {
   projects: Array<ProjectFieldsFragment>;
 
   /**
+   * List of possible programs to allocate a Work to
+   */
+  programs: Array<ProgramFieldsFragment>;
+
+  /**
    * List of cost codes to to allocate Work to
    */
   costCodes: Array<CostCodeFieldsFragment>;
@@ -142,6 +153,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
         workTypes: [],
         workRequesters: [],
         projects: [],
+        programs: [],
         costCodes: [],
         availableComments: [],
         urlParams
@@ -192,9 +204,10 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
 
         assignWorkAllocationInfo: assign((ctx, e) => {
           if (e.type !== 'done.invoke.loadWorkAllocationInfo') return;
-          const { comments, projects, worksWithComments, workTypes, costCodes, releaseRecipients } = e.data;
+          const { comments, projects, programs, worksWithComments, workTypes, costCodes, releaseRecipients } = e.data;
           ctx.availableComments = comments;
           ctx.projects = projects;
+          ctx.programs = programs;
           ctx.workWithComments = worksWithComments;
           ctx.workTypes = workTypes;
           ctx.costCodes = costCodes;
@@ -210,8 +223,17 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
 
         assignSuccessMessage: assign((ctx, e) => {
           if (e.type !== 'done.invoke.allocateWork') return;
-          const { workNumber, workRequester, workType, project, costCode, numBlocks, numSlides, numOriginalSamples } =
-            e.data.createWork;
+          const {
+            workNumber,
+            workRequester,
+            workType,
+            project,
+            program,
+            costCode,
+            numBlocks,
+            numSlides,
+            numOriginalSamples
+          } = e.data.createWork;
           const blockSlideSampleMsg = [
             numBlocks ? `${numBlocks} blocks` : undefined,
             numSlides ? `${numSlides} slides` : undefined,
@@ -220,7 +242,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             .filter((msg) => msg)
             .join(' and ');
           ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideSampleMsg}) to project ${project.name} 
-                                and cost code ${costCode.code} with the work requester ${workRequester?.username}`;
+                                and program ${program.name} using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
         }),
 
         updateWork: assign((ctx, e) => {
@@ -242,13 +264,23 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
       services: {
         allocateWork: (ctx, e) => {
           if (e.type !== 'ALLOCATE_WORK') return Promise.reject();
-          const { workType, workRequester, project, costCode, isRnD, numBlocks, numSlides, numOriginalSamples } =
-            e.values;
+          const {
+            workType,
+            workRequester,
+            project,
+            program,
+            costCode,
+            isRnD,
+            numBlocks,
+            numSlides,
+            numOriginalSamples
+          } = e.values;
 
           return stanCore.CreateWork({
             workType,
             workRequester,
             project,
+            program,
             costCode,
             prefix: isRnD ? 'R&D' : 'SGP',
             numBlocks,

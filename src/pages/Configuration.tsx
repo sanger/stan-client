@@ -28,6 +28,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
     'Fixatives',
     'HuMFre Numbers',
     'Projects',
+    'Programs',
     'Release Destinations',
     'Release Recipients',
     'Species',
@@ -205,6 +206,29 @@ export default function Configuration({ configuration }: ConfigurationParams) {
               .then((res) => res.setProjectEnabled);
           }}
           onCreate={(name) => stanCore.AddProject({ name }).then((res) => res.addProject)}
+          valueFieldComponentInfo={{
+            type: 'CHECKBOX'
+          }}
+        />
+      </div>,
+      /**Programs**/
+      <div data-testid="config">
+        <Heading level={2}>Programs</Heading>
+        <p className="mt-3 mb-6 text-lg" />
+        <EntityManager
+          initialEntities={configuration.programs}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
+          onChangeValue={(entity, value) => {
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore
+              .SetProgramEnabled({
+                enabled,
+                name: entity.name
+              })
+              .then((res) => res.setProgramEnabled);
+          }}
+          onCreate={(name) => stanCore.AddProgram({ name }).then((res) => res.addProgram)}
           valueFieldComponentInfo={{
             type: 'CHECKBOX'
           }}

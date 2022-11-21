@@ -16,13 +16,14 @@ import { useLocation } from 'react-router-dom';
 export enum WorkProgressSearchType {
   WorkNumber = 'SGP/R&D Number',
   WorkType = 'Work Type',
-  Status = 'Status'
+  Status = 'Status',
+  Program = 'Program'
 }
 
 /**
  * Form validation schema
  */
-export const workProgressSearchSchema = (workTypes: string[]) => {
+export const workProgressSearchSchema = (workTypes: string[], programs?: string[]) => {
   return Yup.object().shape({
     searchType: Yup.string().oneOf(Object.values(WorkProgressSearchType)).required(),
     searchValues: Yup.array()
@@ -34,6 +35,14 @@ export const workProgressSearchSchema = (workTypes: string[]) => {
       .when('searchType', {
         is: (value: string) => value === WorkProgressSearchType.Status,
         then: Yup.array().of(Yup.string().oneOf(Object.values(WorkStatus)).required())
+      })
+      .when('searchType', {
+        is: (value: string) => value === WorkProgressSearchType.Program,
+        then: Yup.array().of(
+          Yup.string()
+            .oneOf(programs ?? [])
+            .required()
+        )
       })
   });
 };
@@ -51,9 +60,13 @@ type WorkProgressInputParams = {
    * All search
    */
   searchTypes: WorkProgressSearchType[];
+  /**
+   * All programs available
+   */
+  programs?: string[];
 };
 
-export default function WorkProgressInput({ urlParams, workTypes, searchTypes }: WorkProgressInputParams) {
+export default function WorkProgressInput({ urlParams, workTypes, searchTypes, programs }: WorkProgressInputParams) {
   const location = useLocation();
   const generateValuesForType = React.useCallback(
     (type: WorkProgressSearchType): string[] => {
@@ -64,11 +77,13 @@ export default function WorkProgressInput({ urlParams, workTypes, searchTypes }:
           return workTypes ?? [];
         case WorkProgressSearchType.Status:
           return Object.values(WorkStatus);
+        case WorkProgressSearchType.Program:
+          return programs ?? [];
         default:
           return [];
       }
     },
-    [workTypes]
+    [workTypes, programs]
   );
 
   /***Get key-value data for search **/
@@ -102,7 +117,7 @@ export default function WorkProgressInput({ urlParams, workTypes, searchTypes }:
             })
           });
         }}
-        validationSchema={workProgressSearchSchema(workTypes)}
+        validationSchema={workProgressSearchSchema(workTypes, programs)}
       >
         {({ values, setFieldValue }) => (
           <Form>

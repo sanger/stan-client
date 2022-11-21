@@ -29,6 +29,7 @@ import { isEnabled } from '../../lib/helpers';
 import workTypeRepository from '../repositories/workTypeRepository';
 import { sample } from 'lodash';
 import releaseRecipientRepository from '../repositories/releaseRecipientRepository';
+import programRepository from '../repositories/programRepository';
 
 const workHandlers = [
   graphql.query<GetWorkAllocationInfoQuery, GetWorkAllocationInfoQueryVariables>(
@@ -53,6 +54,7 @@ const workHandlers = [
         ctx.data({
           costCodes: costCodeRepository.findAll().filter(isEnabled),
           projects: projectRepository.findAll().filter(isEnabled),
+          programs: programRepository.findAll().filter(isEnabled),
           comments,
           worksWithComments: works.map((work) => {
             return {
@@ -82,6 +84,10 @@ const workHandlers = [
                 __typename: 'Project',
                 name: work.project.name
               },
+              program: {
+                __typename: 'Program',
+                name: work.program.name
+              },
               workRequester: {
                 __typename: 'ReleaseRecipient',
                 username: work.workRequester ? work.workRequester.username : ''
@@ -96,6 +102,7 @@ const workHandlers = [
     const workType = workTypeRepository.find('name', req.variables.workType);
     const costCode = costCodeRepository.find('code', req.variables.costCode);
     const project = projectRepository.find('name', req.variables.project);
+    const program = programRepository.find('name', req.variables.program) ?? undefined;
     const workRequester = releaseRecipientRepository.find('username', req.variables.workRequester);
 
     if (!workType) {
@@ -139,7 +146,7 @@ const workHandlers = [
         numOriginalSamples: req.variables.numOriginalSamples
       },
       {
-        associations: { workType, costCode, project, workRequester },
+        associations: { workType, costCode, project, program, workRequester },
         transient: { isRnD: req.variables.prefix === 'R&D' }
       }
     );

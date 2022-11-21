@@ -26,6 +26,9 @@ describe('Work Allocation', () => {
         it('says project is required', () => {
           cy.findByText('Project is a required field').should('exist');
         });
+        it('says program is required', () => {
+          cy.findByText('Program is a required field').should('exist');
+        });
 
         it('says cost code is required', () => {
           cy.findByText('Cost Code is a required field').should('exist');
@@ -44,6 +47,7 @@ describe('Work Allocation', () => {
           cy.findByLabelText('Work Type').select('TEST_WT_1');
           cy.findByLabelText('Work Requester').select('et2');
           cy.findByLabelText('Project').select('TEST999');
+          cy.findByLabelText('Program').select('PROGRAM_999');
           cy.findByLabelText('Cost Code').select('S999');
           cy.findByLabelText('Number of blocks').type('5');
           cy.findByLabelText('Number of slides').type('15');
@@ -53,7 +57,7 @@ describe('Work Allocation', () => {
         it('allocates new Work', () => {
           cy.findByRole('button', { name: /Submit/i }).click();
           cy.findByText(
-            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999 and cost code S999 with the work requester et2/
+            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
           ).should('exist');
         });
 
@@ -145,13 +149,13 @@ describe('Work Allocation', () => {
         cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
         cy.get('td').eq(0).type('A12');
         //change the focus
-        cy.findAllByRole('button', { name: /Edit Status/i }).then((editButtons) => {
-          editButtons[0].focus();
-        });
+        cy.findAllByRole('button', { name: /Edit Status/i })
+          .eq(0)
+          .focus();
       });
 
       it('updates priority', () => {
-        cy.findByTestId('SGP1009-priority').should('have.value', 'A12');
+        cy.findByTestId('SGP1010-priority').scrollIntoView().should('have.value', 'A12');
       });
     });
 
@@ -206,7 +210,7 @@ describe('Work Allocation', () => {
         cy.findByRole('button', { name: /Search/i })
           .should('be.visible')
           .click();
-        cy.get("table[data-testid='work-allocation-table']").find('tr').should('have.length', 10);
+        cy.get("table[data-testid='work-allocation-table']").find('tr').should('have.length', 11);
       });
     });
 

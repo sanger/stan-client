@@ -195,6 +195,7 @@ export default function WorkRow({ initialWork, availableComments, rowIndex, onWo
       <TableCell>{work.workType.name}</TableCell>
       <TableCell>{work.workRequester?.username}</TableCell>
       <TableCell>{work.project.name}</TableCell>
+      <TableCell>{work.program.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
         {isEditEnabledForStatus(work.status) &&

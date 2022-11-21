@@ -3,6 +3,7 @@ mutation CreateWork(
   $workType: String!
   $workRequester: String!
   $project: String!
+  $program: String!
   $costCode: String!
   $numBlocks: Int
   $numSlides: Int
@@ -13,6 +14,7 @@ mutation CreateWork(
     workType: $workType
     workRequester: $workRequester
     project: $project
+    program: $program
     costCode: $costCode
     numBlocks: $numBlocks
     numSlides: $numSlides

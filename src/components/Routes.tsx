@@ -427,8 +427,15 @@ export function Routes() {
         path="/"
         render={(routeProps) => {
           return (
-            <DataFetcher dataFetcher={stanCore.GetWorkTypes} key={routeProps.location.key}>
-              {(workTypes) => <WorkProgress workTypes={workTypes.workTypes.map((val) => val.name)} />}
+            <DataFetcher dataFetcher={stanCore.GetWorkProgressInputs} key={routeProps.location.key}>
+              {(dataFetcher) => {
+                return (
+                  <WorkProgress
+                    workTypes={dataFetcher.workTypes.map((val) => val.name)}
+                    programs={dataFetcher.programs.map((val) => val.name)}
+                  />
+                );
+              }}
             </DataFetcher>
           );
         }}

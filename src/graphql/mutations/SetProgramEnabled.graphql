@@ -1,0 +1,5 @@
+mutation SetProgramEnabled($name: String!, $enabled: Boolean!) {
+  setProgramEnabled(name: $name, enabled: $enabled) {
+    ...ProgramFields
+  }
+}
