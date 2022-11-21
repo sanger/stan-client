@@ -30,15 +30,17 @@ function buildExtractionTableData(ctx: ExtractionContext) {
   const destinationLabwares = ctx.extraction.extract.labware;
   const sampleColors = buildSampleColors(destinationLabwares);
 
+  /**
+   * The result will contain one operation per labware, and each operation will contain one action per sample in the labware.
+   * Here it is refined to show  one result per operation.
+   */
   return ctx.extraction.extract.operations
     .map((operation) => {
-      return operation.actions.map((action) => {
-        return {
-          sampleColor: sampleColors.get(action.sample.id),
-          sourceLabware: sourceLabwares.find((lw) => lw.id === action.source.labwareId),
-          destinationLabware: destinationLabwares.find((lw) => lw.id === action.destination.labwareId)
-        };
-      });
+      return {
+        sampleColor: sampleColors.get(operation.actions[0].sample.id),
+        sourceLabware: sourceLabwares.find((lw) => lw.id === operation.actions[0].source.labwareId),
+        destinationLabware: destinationLabwares.find((lw) => lw.id === operation.actions[0].destination.labwareId)
+      };
     })
     .flat();
 }
