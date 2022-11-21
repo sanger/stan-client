@@ -3626,6 +3626,10 @@ svg.logo.loading rect:nth-child(3n+1) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .md\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .md\:flex-row {
     flex-direction: row;
   }
@@ -4175,4 +4179,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.922ae7f2.css.map*/
+/*# sourceMappingURL=main.c39bef25.css.map*/
