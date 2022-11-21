@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import AppShell from '../components/AppShell';
 import { Formik } from 'formik';
-import SlideRegistrationForm from './registration/SlideRegistrationForm';
+import SectionRegistrationForm from './registration/SectionRegistrationForm';
 import columns from '../components/dataTableColumns/labwareColumns';
 import RegistrationSuccess from './registration/RegistrationSuccess';
 import Warning from '../components/notifications/Warning';
@@ -16,14 +16,15 @@ import { parseQueryString } from '../lib/helpers';
 import { history, StanCoreContext } from '../lib/sdk';
 import { useLocation } from 'react-router-dom';
 
-const availableSlides: Array<LabwareTypeName> = [
+const availableLabware: Array<LabwareTypeName> = [
   LabwareTypeName.SLIDE,
   LabwareTypeName.VISIUM_LP,
   LabwareTypeName.VISIUM_TO,
-  LabwareTypeName.FOUR_SLOT_SLIDE
+  LabwareTypeName.FOUR_SLOT_SLIDE,
+  LabwareTypeName.TUBE
 ];
 
-type SlideRegistrationFormSection = {
+type SectionRegistrationFormSection = {
   clientId: string;
   donorId: string;
   lifeStage: LifeStage;
@@ -37,24 +38,24 @@ type SlideRegistrationFormSection = {
   sectionThickness: number;
 };
 
-type SlideRegistrationFormLabware = {
+type SectionRegistrationFormLabware = {
   clientId: string;
   labwareTypeName: LabwareTypeName;
-  externalSlideBarcode: string;
+  externalLabwareBarcode: string;
   fixative: string;
   medium: string;
-  slots: { [key: string]: Array<SlideRegistrationFormSection> };
+  slots: { [key: string]: Array<SectionRegistrationFormSection> };
 };
 
-export type SlideRegistrationFormValues = {
-  labwares: Array<SlideRegistrationFormLabware>;
+export type SectionRegistrationFormValues = {
+  labwares: Array<SectionRegistrationFormLabware>;
 };
 
-function buildSectionRegisterRequest(values: SlideRegistrationFormValues): SectionRegisterRequest {
+function buildSectionRegisterRequest(values: SectionRegistrationFormValues): SectionRegisterRequest {
   return {
     labware: values.labwares.map((labware) => {
       return {
-        externalBarcode: labware.externalSlideBarcode.trim(),
+        externalBarcode: labware.externalLabwareBarcode.trim(),
         labwareType: labware.labwareTypeName.trim(),
         contents: Object.keys(labware.slots).flatMap((address) => {
           return labware.slots[address].map((sample) => ({
@@ -84,18 +85,18 @@ function buildInitialFormValues(initialLabwareType: LabwareTypeName) {
   };
 }
 
-function buildLabware(labwareTypeName: LabwareTypeName): SlideRegistrationFormLabware {
+function buildLabware(labwareTypeName: LabwareTypeName): SectionRegistrationFormLabware {
   return {
     clientId: uniqueId('labware_id'),
     labwareTypeName,
-    externalSlideBarcode: '',
+    externalLabwareBarcode: '',
     fixative: '',
     medium: '',
     slots: { A1: [buildSample()] }
   };
 }
 
-function buildSample(): SlideRegistrationFormSection {
+function buildSample(): SectionRegistrationFormSection {
   return {
     clientId: uniqueId('sample_id'),
     donorId: '',
@@ -118,7 +119,7 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
       .min(1)
       .of(
         Yup.object().shape({
-          externalSlideBarcode: validation.externalSlideBarcode,
+          externalLabwareBarcode: validation.externalLabwareBarcode,
           fixative: validation.fixative,
           medium: validation.medium,
           slots: Yup.lazy((obj: any) => {
@@ -146,20 +147,20 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
   });
 }
 
-const defaultSlideRegistrationContext = {
+const defaultSectionRegistrationContext = {
   buildSample,
   buildLabware,
-  availableSlides,
+  availableLabware: availableLabware,
   isSubmitting: false
 };
 
-export const SlideRegistrationContext = React.createContext(defaultSlideRegistrationContext);
+export const SectionRegistrationContext = React.createContext(defaultSectionRegistrationContext);
 
 interface PageParams {
   registrationInfo: GetRegistrationInfoQuery;
 }
 
-export const SlideRegistration: React.FC<PageParams> = ({ registrationInfo }) => {
+export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) => {
   const location = useLocation();
   const stanCore = useContext(StanCoreContext);
 
@@ -175,21 +176,21 @@ export const SlideRegistration: React.FC<PageParams> = ({ registrationInfo }) =>
   }, [stanCore]);
   const [current, send] = useMachine(() => formMachine);
 
-  const initialSlide = useMemo(() => {
+  const initialLabware = useMemo(() => {
     const queryString = parseQueryString(location.search);
     if (
-      typeof queryString['initialSlide'] === 'string' &&
-      availableSlides.includes(queryString['initialSlide'] as LabwareTypeName)
+      typeof queryString['initialLabware'] === 'string' &&
+      availableLabware.includes(queryString['initialLabware'] as LabwareTypeName)
     ) {
-      return queryString['initialSlide'] as LabwareTypeName;
+      return queryString['initialLabware'] as LabwareTypeName;
     }
   }, [location]);
 
   const initialValues = useMemo(() => {
-    if (initialSlide) {
-      return buildInitialFormValues(initialSlide);
+    if (initialLabware) {
+      return buildInitialFormValues(initialLabware);
     }
-  }, [initialSlide]);
+  }, [initialLabware]);
 
   const validationSchema = useMemo(() => buildValidationSchema(registrationInfo), [registrationInfo]);
 
@@ -199,7 +200,7 @@ export const SlideRegistration: React.FC<PageParams> = ({ registrationInfo }) =>
   });
 
   const { serverError, submissionResult } = current.context;
-  const submitForm = async (values: SlideRegistrationFormValues) =>
+  const submitForm = async (values: SectionRegistrationFormValues) =>
     send({ type: 'SUBMIT_FORM', values: buildSectionRegisterRequest(values) });
   const isSubmitting = !current.matches('fillingOutForm');
 
@@ -215,25 +216,25 @@ export const SlideRegistration: React.FC<PageParams> = ({ registrationInfo }) =>
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Slide Registration</AppShell.Title>
+        <AppShell.Title>Section Registration</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          {!initialSlide && (
+          {!initialLabware && (
             <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
-              <p className="my-3 text-gray-800 text-sm leading-normal">Pick a type of slide to begin:</p>
+              <p className="my-3 text-gray-800 text-sm leading-normal">Pick a type of labware to begin:</p>
 
               <div className="flex flex-row items-center justify-center gap-4">
                 <select
                   onChange={(e) =>
                     history.replace({
-                      search: `?initialSlide=${e.target.value}`
+                      search: `?initialLabware=${e.target.value}`
                     })
                   }
                   className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
                 >
                   <option value="" />
-                  {availableSlides.map((labwareTypeName) => (
+                  {availableLabware.map((labwareTypeName) => (
                     <option key={labwareTypeName} value={labwareTypeName}>
                       {labwareTypeName}
                     </option>
@@ -250,7 +251,7 @@ export const SlideRegistration: React.FC<PageParams> = ({ registrationInfo }) =>
           )}
 
           {initialValues && (
-            <SlideRegistrationContext.Provider value={{ ...defaultSlideRegistrationContext, isSubmitting }}>
+            <SectionRegistrationContext.Provider value={{ ...defaultSectionRegistrationContext, isSubmitting }}>
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
@@ -258,9 +259,9 @@ export const SlideRegistration: React.FC<PageParams> = ({ registrationInfo }) =>
                 validateOnBlur={true}
                 onSubmit={submitForm}
               >
-                <SlideRegistrationForm registrationInfo={registrationInfo} />
+                <SectionRegistrationForm registrationInfo={registrationInfo} />
               </Formik>
-            </SlideRegistrationContext.Provider>
+            </SectionRegistrationContext.Provider>
           )}
         </div>
       </AppShell.Main>
@@ -268,4 +269,4 @@ export const SlideRegistration: React.FC<PageParams> = ({ registrationInfo }) =>
   );
 };
 
-export default SlideRegistration;
+export default SectionRegistration;

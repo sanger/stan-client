@@ -10,9 +10,9 @@ export default class RegistrationValidation {
     this.registrationInfo = registrationInfo;
     this.tissueSampleRegistration = tissueSampleRegistration ?? false;
   }
-  get externalSlideBarcode() {
+  get externalLabwareBarcode() {
     return validation.requiredString({
-      label: 'External Slide Barcode'
+      label: 'External Labware Barcode'
     });
   }
 
