@@ -9,6 +9,9 @@
       },
       {
         "barcode": "STO-12DC"
+      },
+      {
+        "barcode": "STO-1351"
       }
     ],
 
@@ -27,6 +30,9 @@
       },
       {
         "barcode": "STO-0EF7"
+      },
+      {
+        "barcode": "STO-1333"
       }
     ]
   }
