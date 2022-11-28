@@ -65,7 +65,14 @@ const ScanInput = React.forwardRef<HTMLInputElement, ScanInputProps>(
           </span>
           {name ? (
             <>
-              <Field type={type} data-testid={'formInput'} className={inputClassNames} name={name} {...inputProps} />
+              <Field
+                type={type}
+                data-testid={'formInput'}
+                className={inputClassNames}
+                name={name}
+                {...inputProps}
+                onKeyDown={onKeyDownHandler}
+              />
             </>
           ) : (
             <input

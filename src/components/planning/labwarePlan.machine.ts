@@ -1,5 +1,5 @@
 import { createMachine } from 'xstate';
-import { Maybe, PlanMutation, PlanRequestLabware } from '../../types/sdk';
+import { Maybe, PlanMutation, PlanRequestLabware, SlideCosting } from '../../types/sdk';
 import { LabwareTypeName } from '../../types/stan';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
 import { assign } from '@xstate/immer';
@@ -15,7 +15,7 @@ type CreateLabwareEvent = {
   barcode?: string;
   quantity: number;
   lotNumber?: string;
-  costing?: string;
+  costing?: SlideCosting;
   operationType: string;
 };
 
@@ -223,7 +223,7 @@ type BuildPlanRequestLabwareParams = {
   barcode?: string;
   sampleThickness?: number;
   lotNumber?: string;
-  costing?: string;
+  costing?: SlideCosting;
 };
 
 function buildPlanRequestLabware({
@@ -237,13 +237,13 @@ function buildPlanRequestLabware({
   return {
     labwareType: destinationLabwareTypeName,
     barcode,
+    lotNumber,
+    costing,
     actions: Array.from(layoutPlan.plannedActions.keys()).flatMap((address) => {
       const sources = layoutPlan.plannedActions.get(address)!;
       return sources.map((source) => ({
         address,
         sampleThickness,
-        lotNumber,
-        costing,
         sampleId: source.sampleId,
         source: {
           barcode: source.labware.barcode,

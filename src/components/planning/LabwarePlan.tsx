@@ -117,7 +117,11 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
           initialValues={buildInitialValues(operationType, outputLabware.labwareType)}
           validationSchema={buildValidationSchema(outputLabware.labwareType)}
           onSubmit={async (values) => {
-            send({ type: 'CREATE_LABWARE', ...values });
+            const newValues = {
+              ...values,
+              costing: values.costing === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
+            };
+            send({ type: 'CREATE_LABWARE', ...newValues });
           }}
         >
           {({ isValid, validateForm }) => (
@@ -316,6 +320,14 @@ function buildInitialValues(operationType: string, labwareType: LabwareTypeField
   }
   if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
     formValues.sectionThickness = 0;
+  }
+  if (
+    labwareType.name === LabwareTypeName.VISIUM_LP ||
+    labwareType.name === LabwareTypeName.VISIUM_TO ||
+    labwareType.name === LabwareTypeName.VISIUM_ADH
+  ) {
+    formValues.costing = '';
+    formValues.lotNumber = '';
   }
 
   return formValues;
