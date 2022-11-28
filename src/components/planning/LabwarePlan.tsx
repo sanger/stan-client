@@ -190,9 +190,18 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                       outputLabware.labwareType.name === LabwareTypeName.VISIUM_TO ||
                       outputLabware.labwareType.name === LabwareTypeName.VISIUM_ADH) && (
                       <>
-                        <ScanInput label={'Slide LOT number'} name={'lotNumber'} />
+                        <ScanInput
+                          label={'Slide LOT number'}
+                          name={'lotNumber'}
+                          disabled={current.matches('printing') || current.matches('done')}
+                        />
                         <FormikErrorMessage name={'lotNumber'} />
-                        <FormikSelect label={'Slide costings'} name={'costing'} emptyOption={true}>
+                        <FormikSelect
+                          label={'Slide costings'}
+                          name={'costing'}
+                          emptyOption={true}
+                          disabled={current.matches('printing') || current.matches('done')}
+                        >
                           {objectKeys(SlideCosting).map((key) => (
                             <option key={key} value={SlideCosting[key]}>
                               {SlideCosting[key]}
