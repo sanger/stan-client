@@ -112,6 +112,9 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
           ))}
         </Select>
       </div>
+      <div>
+        <ScanInput onScan={(value) => {}} />
+      </div>
     </div>
   );
 };
