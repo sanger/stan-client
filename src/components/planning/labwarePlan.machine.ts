@@ -14,6 +14,8 @@ type CreateLabwareEvent = {
   sectionThickness?: number;
   barcode?: string;
   quantity: number;
+  lotNumber?: string;
+  costing?: string;
   operationType: string;
 };
 
@@ -200,6 +202,8 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
 
           const planRequestLabware = buildPlanRequestLabware({
             sampleThickness: e.sectionThickness,
+            lotNumber: e.lotNumber,
+            costing: e.costing,
             layoutPlan: ctx.layoutPlan,
             destinationLabwareTypeName: ctx.layoutPlan.destinationLabware.labwareType.name,
             barcode: e.barcode
@@ -218,13 +222,17 @@ type BuildPlanRequestLabwareParams = {
   layoutPlan: LayoutPlan;
   barcode?: string;
   sampleThickness?: number;
+  lotNumber?: string;
+  costing?: string;
 };
 
 function buildPlanRequestLabware({
   barcode,
   destinationLabwareTypeName,
   layoutPlan,
-  sampleThickness
+  sampleThickness,
+  lotNumber,
+  costing
 }: BuildPlanRequestLabwareParams): PlanRequestLabware {
   return {
     labwareType: destinationLabwareTypeName,
@@ -234,6 +242,8 @@ function buildPlanRequestLabware({
       return sources.map((source) => ({
         address,
         sampleThickness,
+        lotNumber,
+        costing,
         sampleId: source.sampleId,
         source: {
           barcode: source.labware.barcode,

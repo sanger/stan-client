@@ -15,7 +15,13 @@ import LabelPrinter, { PrintResult } from '../LabelPrinter';
 import LabelPrinterButton from '../LabelPrinterButton';
 import DataTable from '../DataTable';
 import { CellProps } from 'react-table';
-import { LabwareFieldsFragment, LabwareType, LabwareTypeFieldsFragment, PlanMutation } from '../../types/sdk';
+import {
+  LabwareFieldsFragment,
+  LabwareType,
+  LabwareTypeFieldsFragment,
+  PlanMutation,
+  SlideCosting
+} from '../../types/sdk';
 import WhiteButton from '../buttons/WhiteButton';
 import FormikInput from '../forms/Input';
 import { usePrinters } from '../../lib/hooks';
@@ -23,6 +29,10 @@ import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import { createLabwarePlanMachine } from './labwarePlan.machine';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pages/sectioning';
+import ScanInput from '../scanInput/ScanInput';
+import FormikSelect from '../forms/Select';
+import { objectKeys } from '../../lib/helpers';
+import { FormikErrorMessage } from '../forms';
 
 type LabwarePlanProps = {
   /**
@@ -110,7 +120,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
             send({ type: 'CREATE_LABWARE', ...values });
           }}
         >
-          {({ isValid }) => (
+          {({ isValid, validateForm }) => (
             <Form>
               <div className="md:grid md:grid-cols-2">
                 <div className="py-4 flex flex-col items-center justify-between space-y-8">
@@ -124,11 +134,18 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                   />
 
                   {current.matches('prep') && (
-                    <PinkButton onClick={() => send({ type: 'EDIT_LAYOUT' })}>Edit Layout</PinkButton>
+                    <PinkButton
+                      onClick={() => {
+                        send({ type: 'EDIT_LAYOUT' });
+                        validateForm();
+                      }}
+                    >
+                      Edit Layout
+                    </PinkButton>
                   )}
                 </div>
                 <div className="border border-gray-300 rounded-md flex flex-col items-center justify-between space-y-4 shadow">
-                  <div className="py-4 px-8 w-full space-y-4">
+                  <div className="py-4 px-8 w-full space-y-6">
                     {current.matches('prep.errored') && (
                       <Warning message={'There was an error creating the Labware'} error={requestError} />
                     )}
@@ -165,12 +182,26 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                         step={1}
                       />
                     )}
+                    {(outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP ||
+                      outputLabware.labwareType.name === LabwareTypeName.VISIUM_TO ||
+                      outputLabware.labwareType.name === LabwareTypeName.VISIUM_ADH) && (
+                      <>
+                        <ScanInput label={'Slide LOT number'} name={'lotNumber'} />
+                        <FormikErrorMessage name={'lotNumber'} />
+                        <FormikSelect label={'Slide costings'} name={'costing'} emptyOption={true}>
+                          {objectKeys(SlideCosting).map((key) => (
+                            <option key={key} value={SlideCosting[key]}>
+                              {SlideCosting[key]}
+                            </option>
+                          ))}
+                        </FormikSelect>
+                      </>
+                    )}
                   </div>
 
                   {plannedLabware.length > 0 && (
                     <div data-testid="plan-destination-labware" className="w-full space-y-4 py-4 px-8">
                       <DataTable columns={columns} data={plannedLabware} />
-
                       {printResult && <PrintResult result={printResult} />}
                     </div>
                   )}
@@ -260,6 +291,15 @@ type FormValues = {
    * The thickness of the sections being taken, in micrometres
    */
   sectionThickness?: number;
+
+  /**
+   * The Slide lot number (only for Visium slides)
+   */
+  lotNumber?: string;
+  /**
+   * The Slide costing (only for Visium slides)
+   */
+  costing?: string;
 };
 
 /**
@@ -290,6 +330,8 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
     quantity: Yup.NumberSchema;
     sectionThickness?: Yup.NumberSchema;
     barcode?: Yup.StringSchema;
+    lotNumber?: Yup.StringSchema;
+    costing?: Yup.StringSchema;
   };
 
   let formShape: FormShape = {
@@ -302,7 +344,16 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
   if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
     formShape.sectionThickness = Yup.number().required().integer().min(1);
   }
-
+  if (
+    labwareType.name === LabwareTypeName.VISIUM_LP ||
+    labwareType.name === LabwareTypeName.VISIUM_TO ||
+    labwareType.name === LabwareTypeName.VISIUM_ADH
+  ) {
+    formShape.lotNumber = Yup.string()
+      .required()
+      .matches(/^(\d{6}|\d{7})$/, 'Slide lot number should be a 6-7 digits number');
+    formShape.costing = Yup.string().oneOf(Object.values(SlideCosting)).required('Slide costing is a required field');
+  }
   return Yup.object().shape(formShape).defined();
 }
 
