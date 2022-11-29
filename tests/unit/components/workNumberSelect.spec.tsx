@@ -1,7 +1,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import WorkNumberSelect from '../../../src/components/WorkNumberSelect';
-import { FindWorkInfoQuery } from '../../../src/types/sdk';
+import { FindWorkInfoQuery, GetAllWorkInfoQuery, WorkStatus } from '../../../src/types/sdk';
 import { Formik } from 'formik';
 import userEvent from '@testing-library/user-event';
 
@@ -51,6 +51,50 @@ jest.mock('../../../src/lib/sdk', () => ({
           ]
         });
       });
+    }),
+    GetAllWorkInfo: jest.fn().mockImplementation(() => {
+      return new Promise<GetAllWorkInfoQuery>((resolve) => {
+        resolve({
+          works: [
+            {
+              workNumber: 'WORK_1',
+              project: {
+                __typename: 'Project',
+                name: 'Project 1'
+              },
+              workRequester: {
+                __typename: 'ReleaseRecipient',
+                username: 'User 1'
+              },
+              status: WorkStatus.Active
+            },
+            {
+              workNumber: 'WORK_2',
+              project: {
+                __typename: 'Project',
+                name: 'Project 2'
+              },
+              workRequester: {
+                __typename: 'ReleaseRecipient',
+                username: 'User 2'
+              },
+              status: WorkStatus.Active
+            },
+            {
+              workNumber: 'WORK_3',
+              project: {
+                __typename: 'Project',
+                name: 'Project 3'
+              },
+              workRequester: {
+                __typename: 'ReleaseRecipient',
+                username: 'User 3'
+              },
+              status: WorkStatus.Failed
+            }
+          ]
+        });
+      });
     })
   }
 }));
@@ -69,6 +113,24 @@ describe('WorkNumberSelect.tsx', () => {
         expect(workNumberSelect).toHaveValue('');
 
         //Expect the select has got all options including empty string
+        expect(workNumberSelect.options.length).toEqual(3);
+
+        //Expect the select option to have the correct work numbers
+        expect(workNumberSelect.options[0].value).toEqual('');
+        expect(workNumberSelect.options[1].value).toEqual('WORK_1');
+        expect(workNumberSelect.options[2].value).toEqual('WORK_2');
+      });
+      it('displays select component with all work numbers', async () => {
+        act(() => {
+          render(<WorkNumberSelect label={'Work Number'} workNumberType={'ALL'} />);
+        });
+        const workNumberSelect = (await screen.findByTestId('select_workNumber')) as HTMLSelectElement;
+        // Shows the select component
+        expect(workNumberSelect).toBeInTheDocument();
+        //Shows an empty value
+        expect(workNumberSelect).toHaveValue('');
+
+        //Expect the select has got all options including empty string
         expect(workNumberSelect.options.length).toEqual(4);
 
         //Expect the select option to have the correct work numbers
@@ -76,6 +138,23 @@ describe('WorkNumberSelect.tsx', () => {
         expect(workNumberSelect.options[1].value).toEqual('WORK_1');
         expect(workNumberSelect.options[2].value).toEqual('WORK_2');
         expect(workNumberSelect.options[3].value).toEqual('WORK_3');
+      });
+      it('displays select component with all work numbers', async () => {
+        act(() => {
+          render(<WorkNumberSelect label={'Work Number'} workNumberType={WorkStatus.Failed} />);
+        });
+        const workNumberSelect = (await screen.findByTestId('select_workNumber')) as HTMLSelectElement;
+        // Shows the select component
+        expect(workNumberSelect).toBeInTheDocument();
+        //Shows an empty value
+        expect(workNumberSelect).toHaveValue('');
+
+        //Expect the select has got all options including empty string
+        expect(workNumberSelect.options.length).toEqual(2);
+
+        //Expect the select option to have the correct work numbers
+        expect(workNumberSelect.options[0].value).toEqual('');
+        expect(workNumberSelect.options[1].value).toEqual('WORK_3');
       });
       describe('onSelection', () => {
         it('displays selected work number', async () => {
@@ -125,13 +204,12 @@ describe('WorkNumberSelect.tsx', () => {
         expect(workNumberSelect).toHaveValue('');
 
         //Expect the select has got all options including empty string
-        expect(workNumberSelect.options.length).toEqual(4);
+        expect(workNumberSelect.options.length).toEqual(3);
 
         //Expect the select option to have the correct work numbers
         expect(workNumberSelect.options[0].value).toEqual('');
         expect(workNumberSelect.options[1].value).toEqual('WORK_1');
         expect(workNumberSelect.options[2].value).toEqual('WORK_2');
-        expect(workNumberSelect.options[3].value).toEqual('WORK_3');
       });
     });
     describe('onSelection', () => {

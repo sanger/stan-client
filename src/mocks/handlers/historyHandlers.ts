@@ -17,7 +17,7 @@ import labwareFactory from '../../lib/factories/labwareFactory';
 import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 import { sampleFactory } from '../../lib/factories/sampleFactory';
 
-function buildHistory(): HistoryFieldsFragment {
+export function buildHistory(workNumber?: string): HistoryFieldsFragment {
   const sourceLabware = labwareFactory.build();
   const destinationLabware = labwareFactory.build();
   const sample = sampleFactory.build();
@@ -33,7 +33,7 @@ function buildHistory(): HistoryFieldsFragment {
       type: 'Eat',
       username: 'user1',
       details: ['Taste: Great', 'Monkey: Foo'],
-      workNumber: 'SGP123'
+      workNumber: workNumber ?? 'SGP123'
     }
   ];
 

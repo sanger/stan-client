@@ -18,7 +18,8 @@ import {
   UpdateWorkStatusMutationVariables,
   WorkStatus,
   FindWorkInfoQuery,
-  FindWorkInfoQueryVariables
+  FindWorkInfoQueryVariables,
+  GetAllWorkInfoQuery
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -269,6 +270,13 @@ const workHandlers = [
   }),
 
   graphql.query<GetWorkNumbersQuery, GetWorkNumbersQueryVariables>('GetWorkNumbers', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        works: workRepository.findAll()
+      })
+    );
+  }),
+  graphql.query<GetAllWorkInfoQuery, GetAllWorkInfoQuery>('GetAllWorkInfo', (req, res, ctx) => {
     return res(
       ctx.data({
         works: workRepository.findAll()

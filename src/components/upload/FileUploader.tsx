@@ -93,15 +93,17 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
           <Input
             type="file"
             id="file"
-            disabled={!url}
+            disabled={!url || !enableUpload}
             onChange={onFileChange}
             data-testid="file-input"
-            className="hidden"
+            className="hidden disabled:bg-gray-100"
           />
           <label
             htmlFor="file"
             className={`${
-              url ? 'bg-gray-200 text-black hover:bg-gray-300 border-2 border-gray-200' : 'bg-white text-gray-400'
+              url && enableUpload
+                ? 'bg-gray-200 text-black hover:bg-gray-300 border-2 border-gray-200'
+                : 'bg-white text-gray-400 disabled:cursor-not-allowed'
             }  whitespace-nowrap  py-2 px-4 rounded`}
           >
             Select file...
@@ -147,7 +149,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
           data-testid={'upload-btn'}
         >
           Upload
-          <UploadIcon className={!file || !enableUpload ? 'ml-2 text-gray-300' : 'ml-4 text-white'} />
+          <UploadIcon
+            className={!file || !enableUpload ? 'ml-2 text-gray-300 disabled:cursor-not-allowed' : 'ml-4 text-white'}
+          />
         </BlueButton>
       </div>
       <ConfirmationModal
