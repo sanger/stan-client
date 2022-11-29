@@ -94,7 +94,7 @@ describe('FileManager', () => {
       it('should display the url with selected work number', () => {
         cy.url().should('include', 'file_manager?workNumber=SGP1002');
       });
-      it('initializes page for active work number', () => {
+      it('initializes page for inactive work number', () => {
         cy.findByText('Upload file').should('be.visible');
         cy.findByTestId('file-input').should('be.disabled');
       });

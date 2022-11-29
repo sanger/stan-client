@@ -27,8 +27,8 @@ type WorkSelectProps = {
    */
   onWorkNumberChange?: (workNumber: string) => void;
 
-  /**This determines worknumbers to list based on status. If not given, default will be Active.
-   * 'ALL' value will display all worknumbers both active and inactive**/
+  /**Criteria to filter orknumbers based on status. If not given, default will be 'Active'.
+   * 'ALL' value will display all work numbers (with all statuses)**/
   workNumberType?: WorkStatus | 'ALL';
 };
 
@@ -113,8 +113,7 @@ export default function WorkNumberSelect({
    */
   const handleWorkNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const work = works.find((work) => work.workNumber === e.currentTarget.value);
-      setSelectedWork(work);
+      setSelectedWork(works.find((work) => work.workNumber === e.currentTarget.value));
       onWorkNumberChange?.(e.target.value);
     },
     [onWorkNumberChange, setSelectedWork, works]

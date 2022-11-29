@@ -53,8 +53,8 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo 
   }, [location.search]);
 
   /**State to handle worknumber changes (either using url or through worknumber selection)
-   * Whenever work number is changed ,the selected workInfo will changed
-   * Also,if selected work is non- active  or active, set the flag accordingly
+   * Whenever work number is changed,set the selected workInfo
+   * Also,set  'isOnlyActiveWorkNumbers' state based on selected work number status ,
    */
   React.useEffect(() => {
     const workInfo = worksInfo.find((workInfo) => workInfo.workNumber === memoWorkNumber);
@@ -79,7 +79,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo 
     findUploadedFiles(workInfo.workNumber).then((files) => setUploadedFilesForWorkNumber(files));
   }, [setUploadedFilesForWorkNumber, workInfo]);
 
-  /**Callback notification send fron child after finishing upload**/
+  /**Callback notification send from child after finishing upload**/
   const onFileUploadFinished = React.useCallback(
     (file: File, isSuccess: boolean) => {
       //Upload failed, return
