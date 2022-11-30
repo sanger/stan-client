@@ -186,16 +186,17 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo 
                     </Label>
                   </div>
                 </motion.div>
-
-                <motion.div variants={variants.fadeInWithLift} className={'space-y-4'}>
-                  <Heading level={3}>Upload file</Heading>
-                  <FileUploader
-                    url={memoURL}
-                    enableUpload={workInfo && workInfo.status === WorkStatus.Active && workInfo.workNumber.length > 0}
-                    confirmUpload={onConfirmUpload}
-                    notifyUploadOutcome={onFileUploadFinished}
-                  />
-                </motion.div>
+                {workInfo?.status === WorkStatus.Active && (
+                  <motion.div variants={variants.fadeInWithLift} className={'space-y-4'}>
+                    <Heading level={3}>Upload file</Heading>
+                    <FileUploader
+                      url={memoURL}
+                      enableUpload={workInfo && workInfo.status === WorkStatus.Active && workInfo.workNumber.length > 0}
+                      confirmUpload={onConfirmUpload}
+                      notifyUploadOutcome={onFileUploadFinished}
+                    />
+                  </motion.div>
+                )}
               </div>
             )}
             {workInfo?.workNumber && (
