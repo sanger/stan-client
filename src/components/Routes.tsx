@@ -383,6 +383,27 @@ export function Routes() {
           );
         }}
       />
+      <Route
+        path="/file_view"
+        render={(routeProps) => {
+          return (
+            <DataFetcher
+              key={routeProps.location.key}
+              dataFetcher={() => {
+                return stanCore.FindWorkInfo({
+                  status: WorkStatus.Active
+                });
+              }}
+            >
+              {(dataFetcher) => {
+                return (
+                  <FileManager workNumbers={dataFetcher.works.map((work) => work.workNumber)} showUpload={false} />
+                );
+              }}
+            </DataFetcher>
+          );
+        }}
+      />
       <AuthenticatedRoute
         path="/file_manager"
         render={(routeProps) => {
@@ -396,7 +417,7 @@ export function Routes() {
               }}
             >
               {(dataFetcher) => {
-                return <FileManager workNumbers={dataFetcher.works.map((work) => work.workNumber)} />;
+                return <FileManager workNumbers={dataFetcher.works.map((work) => work.workNumber)} showUpload={true} />;
               }}
             </DataFetcher>
           );
