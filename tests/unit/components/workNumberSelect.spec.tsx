@@ -117,8 +117,8 @@ describe('WorkNumberSelect.tsx', () => {
 
         //Expect the select option to have the correct work numbers
         expect(workNumberSelect.options[0].value).toEqual('');
-        expect(workNumberSelect.options[1].value).toEqual('WORK_1');
-        expect(workNumberSelect.options[2].value).toEqual('WORK_2');
+        expect(workNumberSelect.options[1].value).toEqual('WORK_2');
+        expect(workNumberSelect.options[2].value).toEqual('WORK_1');
       });
       it('displays select component with all work numbers', async () => {
         act(() => {
@@ -135,9 +135,9 @@ describe('WorkNumberSelect.tsx', () => {
 
         //Expect the select option to have the correct work numbers
         expect(workNumberSelect.options[0].value).toEqual('');
-        expect(workNumberSelect.options[1].value).toEqual('WORK_1');
+        expect(workNumberSelect.options[1].value).toEqual('WORK_3');
         expect(workNumberSelect.options[2].value).toEqual('WORK_2');
-        expect(workNumberSelect.options[3].value).toEqual('WORK_3');
+        expect(workNumberSelect.options[3].value).toEqual('WORK_1');
       });
       it('displays select component with all work numbers', async () => {
         act(() => {
@@ -165,7 +165,7 @@ describe('WorkNumberSelect.tsx', () => {
 
           workNumberSelect.options[1].selected = true;
           //Expect to display the selected Work Number
-          expect(workNumberSelect.value).toBe('WORK_1');
+          expect(workNumberSelect.value).toBe('WORK_2');
         });
         it('displays error message when no work number selected on blur', async () => {
           act(() => {
@@ -208,8 +208,8 @@ describe('WorkNumberSelect.tsx', () => {
 
         //Expect the select option to have the correct work numbers
         expect(workNumberSelect.options[0].value).toEqual('');
-        expect(workNumberSelect.options[1].value).toEqual('WORK_1');
-        expect(workNumberSelect.options[2].value).toEqual('WORK_2');
+        expect(workNumberSelect.options[1].value).toEqual('WORK_2');
+        expect(workNumberSelect.options[2].value).toEqual('WORK_1');
       });
     });
     describe('onSelection', () => {
@@ -222,19 +222,19 @@ describe('WorkNumberSelect.tsx', () => {
           );
         });
         const workNumberSelect = (await screen.findByTestId('workNumber')) as HTMLSelectElement;
-        await userEvent.selectOptions(workNumberSelect, ['WORK_1']);
+        await userEvent.selectOptions(workNumberSelect, ['WORK_2']);
         workNumberSelect.options[1].selected = true;
 
         //Expect to display the selected Work Number
-        expect(workNumberSelect.value).toBe('WORK_1');
+        expect(workNumberSelect.value).toBe('WORK_2');
 
         //Expect to display the work Requestor for the selected Work Number
-        const userText = await screen.findByText('User 1');
+        const userText = await screen.findByText('User 2');
         expect(userText).toBeInTheDocument();
         expect(userText).toHaveClass('px-2 rounded-full font-semibold text-sm bg-sp text-gray-100');
 
         //Expect to display the project for the selected Work Number
-        const projectText = await screen.findByText('Project 1');
+        const projectText = await screen.findByText('Project 2');
         expect(projectText).toBeInTheDocument();
         expect(projectText).toHaveClass('px-2 rounded-full font-semibold text-sm bg-sp text-gray-100');
       });
