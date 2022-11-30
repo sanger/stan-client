@@ -4,6 +4,7 @@ import FormikSelect, { Select } from './forms/Select';
 import { WorkStatus } from '../types/sdk';
 import { stanCore } from '../lib/sdk';
 import Pill from './Pill';
+import { alphaNumericSortDefault } from '../types/stan';
 
 type WorkSelectProps = {
   /**
@@ -71,8 +72,8 @@ export default function WorkNumberSelect({
   useEffect(() => {
     async function fetchAllWorkNumbers() {
       const response = await stanCore.GetAllWorkInfo();
-      setAllWorks(
-        response.works.map((workInfo) => {
+      const works = response.works
+        .map((workInfo) => {
           return {
             workNumber: workInfo.workNumber,
             workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
@@ -80,7 +81,11 @@ export default function WorkNumberSelect({
             status: workInfo.status
           };
         })
-      );
+        .sort((work1, work2) => {
+          return alphaNumericSortDefault(work1.workNumber, work2.workNumber);
+        })
+        .reverse();
+      setAllWorks(works);
     }
     fetchAllWorkNumbers();
   }, []);
