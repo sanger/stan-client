@@ -18,6 +18,7 @@ import Success from '../components/notifications/Success';
 import { findUploadedFiles } from '../lib/services/fileService';
 import Label from '../components/forms/Label';
 import { Input } from '../components/forms/Input';
+import Warning from '../components/notifications/Warning';
 
 type FileManagerProps = {
   /**Display upload option?**/
@@ -160,7 +161,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo 
       <AppShell.Main>
         <div className="mx-auto mb-8">
           <div className={'flex flex-col w-full p-4 gap-y-4 text-lg'}>
-            {showUpload && (
+            {showUpload ? (
               <div className={'flex flex-col p-4 gap-y-4 text-lg'}>
                 <motion.div variants={variants.fadeInWithLift}>
                   <Heading level={3}>SGP Number</Heading>
@@ -198,6 +199,10 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo 
                   </motion.div>
                 )}
               </div>
+            ) : workInfo === undefined ? (
+              <Warning message={`SGP Number '${memoWorkNumber}' does not exist.`} />
+            ) : (
+              <></>
             )}
             {workInfo?.workNumber && (
               <motion.div variants={variants.fadeInWithLift} className={'flex flex-col space-y-4'}>
@@ -205,7 +210,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo 
                 {uploadedFilesForWorkNumber.length > 0 ? (
                   <DataTable columns={columns} data={uploadedFilesForWorkNumber} />
                 ) : (
-                  <span className={'mt-8'}>{`No files uploaded for ${workInfo.workNumber}`}</span>
+                  <span className={'mt-8'}>{`No files uploaded for ${workInfo?.workNumber}`}</span>
                 )}
               </motion.div>
             )}

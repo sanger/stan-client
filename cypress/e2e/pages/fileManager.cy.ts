@@ -280,13 +280,22 @@ describe('FileManager', () => {
     });
   });
   describe('File viewer', () => {
-    context('On load ', () => {
+    context('On load', () => {
       before(() => {
         cy.visitAsAdmin('file_viewer/?workNumber=SGP1001');
       });
       it('initialises the page', () => {
         cy.findByText('Upload file').should('not.exist');
         cy.findByText('Files').should('exist');
+      });
+    });
+    context('On load for a non-existing SGP', () => {
+      before(() => {
+        cy.visitAsAdmin('file_viewer/?workNumber=SGP9999');
+      });
+      it('should display warning', () => {
+        cy.findByText("SGP Number 'SGP9999' does not exist.").should('be.visible');
+        cy.findByText('Files').should('not.exist');
       });
     });
   });
