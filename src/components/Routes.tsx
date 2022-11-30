@@ -18,7 +18,7 @@ import { plateFactory } from '../lib/factories/labwareFactory';
 import DataFetcher from './DataFetcher';
 import { safeParseQueryString } from '../lib/helpers';
 import { isLocationSearch, LocationSearchParams } from '../types/stan';
-import { Maybe, UserRole, WorkStatus } from '../types/sdk';
+import { Maybe, UserRole } from '../types/sdk';
 import Configuration from '../pages/Configuration';
 import { StanCoreContext } from '../lib/sdk';
 import LabwareDetails from '../pages/LabwareDetails';
@@ -384,20 +384,28 @@ export function Routes() {
         }}
       />
       <Route
-        path="/file_view"
+        path="/file_viewer"
         render={(routeProps) => {
           return (
             <DataFetcher
               key={routeProps.location.key}
               dataFetcher={() => {
-                return stanCore.FindWorkInfo({
-                  status: WorkStatus.Active
-                });
+                return stanCore.GetAllWorkInfo();
               }}
             >
               {(dataFetcher) => {
                 return (
-                  <FileManager workNumbers={dataFetcher.works.map((work) => work.workNumber)} showUpload={false} />
+                  <FileManager
+                    worksInfo={dataFetcher.works.map((workInfo) => {
+                      return {
+                        workNumber: workInfo.workNumber,
+                        workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
+                        project: workInfo.project.name,
+                        status: workInfo.status
+                      };
+                    })}
+                    showUpload={false}
+                  />
                 );
               }}
             </DataFetcher>
@@ -411,13 +419,23 @@ export function Routes() {
             <DataFetcher
               key={routeProps.location.key}
               dataFetcher={() => {
-                return stanCore.FindWorkInfo({
-                  status: WorkStatus.Active
-                });
+                return stanCore.GetAllWorkInfo();
               }}
             >
               {(dataFetcher) => {
-                return <FileManager workNumbers={dataFetcher.works.map((work) => work.workNumber)} showUpload={true} />;
+                return (
+                  <FileManager
+                    worksInfo={dataFetcher.works.map((workInfo) => {
+                      return {
+                        workNumber: workInfo.workNumber,
+                        workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
+                        project: workInfo.project.name,
+                        status: workInfo.status
+                      };
+                    })}
+                    showUpload={true}
+                  />
+                );
               }}
             </DataFetcher>
           );

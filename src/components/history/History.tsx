@@ -157,7 +157,7 @@ export default function History(props: HistoryProps) {
     const queryParamsStr = stringify({
       workNumber: workNumber
     });
-    return isAuthenticated() ? `/file_manager?${queryParamsStr}` : `/file_view?${queryParamsStr}`;
+    return isAuthenticated() ? `/file_manager?${queryParamsStr}` : `/file_viewer?${queryParamsStr}`;
   };
   return (
     <div data-testid="history">

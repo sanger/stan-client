@@ -1,4 +1,4 @@
-import { FindWorkInfoQuery, FindWorkInfoQueryVariables } from '../../../src/types/sdk';
+import { GetAllWorkInfoQuery, GetAllWorkInfoQueryVariables, WorkStatus } from '../../../src/types/sdk';
 
 export function shouldDisplyProjectAndUserNameForWorkNumber(url: string, testId: string) {
   describe('Check work number selection displays work requester and project names', () => {
@@ -6,7 +6,7 @@ export function shouldDisplyProjectAndUserNameForWorkNumber(url: string, testId:
       cy.visit(url);
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.query<FindWorkInfoQuery, FindWorkInfoQueryVariables>('FindWorkInfo', (req, res, ctx) => {
+          graphql.query<GetAllWorkInfoQuery, GetAllWorkInfoQueryVariables>('GetAllWorkInfo', (req, res, ctx) => {
             return res.once(
               ctx.data({
                 __typename: 'Query',
@@ -21,7 +21,8 @@ export function shouldDisplyProjectAndUserNameForWorkNumber(url: string, testId:
                     workRequester: {
                       __typename: 'ReleaseRecipient',
                       username: 'Test user'
-                    }
+                    },
+                    status: WorkStatus.Active
                   }
                 ]
               })
