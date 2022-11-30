@@ -44,7 +44,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   /**State to store preBarcode validation errors**/
   const [preBarcodeValidationError, setPreBarcodeValidationError] = React.useState('');
   return (
-    <div className={'w-full flex flex-row space-x-6'}>
+    <div className={'w-full flex flex-col space-y-2'}>
       <div data-testid="external-barcode">
         <Label name={'External barcode'} />
         <ScanInput
@@ -74,46 +74,49 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
           ''
         )}
       </div>
-      <div>
-        <Label name={'Labware Type'} />
-        <Select
-          onChange={(e) => {
-            onChangeLabwareType(e.currentTarget.value);
-          }}
-          emptyOption={false}
-          data-testid="output-labware-type"
-        >
-          {objectKeys(LabwareTypeName)
-            .filter(
-              (key) =>
-                LabwareTypeName[key] === LabwareTypeName.VISIUM_LP_CYTASSIST ||
-                LabwareTypeName[key] === LabwareTypeName.VISIUM_LP_CYTASSIST_XL
-            )
-            .map((key) => (
-              <option key={key} value={LabwareTypeName[key]}>
-                {LabwareTypeName[key]}
+      <div className={'grid grid-cols-3 space-x-3'}>
+        <div>
+          <Label name={'Labware Type'} />
+          <Select
+            onChange={(e) => {
+              onChangeLabwareType(e.currentTarget.value);
+            }}
+            emptyOption={false}
+            data-testid="output-labware-type"
+          >
+            {objectKeys(LabwareTypeName)
+              .filter(
+                (key) =>
+                  LabwareTypeName[key] === LabwareTypeName.VISIUM_LP_CYTASSIST ||
+                  LabwareTypeName[key] === LabwareTypeName.VISIUM_LP_CYTASSIST_XL
+              )
+              .map((key) => (
+                <option key={key} value={LabwareTypeName[key]}>
+                  {LabwareTypeName[key]}
+                </option>
+              ))}
+          </Select>
+        </div>
+        <div>
+          <Label name={'Slide costings'} />
+          <Select
+            onChange={(e) => {
+              onChangeCosting(e.currentTarget.value);
+            }}
+            emptyOption={true}
+            data-testid="output-labware-costing"
+          >
+            {objectKeys(SlideCosting).map((key) => (
+              <option key={key} value={SlideCosting[key]}>
+                {SlideCosting[key]}
               </option>
             ))}
-        </Select>
-      </div>
-      <div>
-        <Label name={'Slide costings'} />
-        <Select
-          onChange={(e) => {
-            onChangeCosting(e.currentTarget.value);
-          }}
-          emptyOption={true}
-          data-testid="output-labware-costing"
-        >
-          {objectKeys(SlideCosting).map((key) => (
-            <option key={key} value={SlideCosting[key]}>
-              {SlideCosting[key]}
-            </option>
-          ))}
-        </Select>
-      </div>
-      <div>
-        <ScanInput onScan={(value) => {}} />
+          </Select>
+        </div>
+        <div>
+          <Label name={'Slide LOT number'} />
+          <ScanInput onScan={(value) => {}} />
+        </div>
       </div>
     </div>
   );
