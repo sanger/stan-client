@@ -20,7 +20,7 @@ type WorkSelectProps = {
   /**
    * Optional. If set, this value will be selected if that exist in work list
    */
-  workNumber?: string;
+  workNumber?: string | string[];
 
   /**
    * Optional. Callback for when the work number changes in the select
@@ -28,9 +28,18 @@ type WorkSelectProps = {
    */
   onWorkNumberChange?: (workNumber: string) => void;
 
+  /**
+   * Optional. Callback for the work number changes in the select  when there are multiple selections possible
+   * @param workNumber the new work number (or undefined if none are selected)
+   */
+  onWorkNumberChangeInMulti?: (workNumber: string[]) => void;
+
   /**Criteria to filter orknumbers based on status. If not given, default will be 'Active'.
    * 'ALL' value will display all work numbers (with all statuses)**/
   workNumberType?: WorkStatus | 'ALL';
+
+  /**Multiple valu selection allowed*/
+  multiple?: boolean;
 };
 
 export type WorkInfo = {
@@ -48,7 +57,9 @@ export default function WorkNumberSelect({
   label,
   workNumber,
   onWorkNumberChange,
-  workNumberType
+  onWorkNumberChangeInMulti,
+  workNumberType,
+  multiple = false
 }: WorkSelectProps) {
   /**
    * State for holding all  work
@@ -59,7 +70,7 @@ export default function WorkNumberSelect({
    */
   const [works, setWorks] = useState<Array<WorkInfo>>([]);
 
-  const [selectedWork, setSelectedWork] = useState<WorkInfo | undefined>(
+  const [selectedWork, setSelectedWork] = useState<WorkInfo | WorkInfo[] | undefined>(
     workNumber ? works.find((work) => work.workNumber === workNumber) : undefined
   );
   /**
@@ -107,9 +118,12 @@ export default function WorkNumberSelect({
 
   useEffect(() => {
     if (!workNumber) setSelectedWork(undefined);
-    const work = works.find((work) => work.workNumber === workNumber);
-    if (work) {
-      setSelectedWork(work);
+    if (multiple) {
+    } else {
+      const work = works.find((work) => work.workNumber === workNumber);
+      if (work) {
+        setSelectedWork(work);
+      }
     }
   }, [workNumber, works, setSelectedWork]);
 
@@ -118,10 +132,18 @@ export default function WorkNumberSelect({
    */
   const handleWorkNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedWork(works.find((work) => work.workNumber === e.currentTarget.value));
-      onWorkNumberChange?.(e.target.value);
+      if (multiple) {
+        const selectedWorkNumbers = Array.from(e.target.selectedOptions, (option) => option.value);
+        setSelectedWork(
+          works.filter((work) => selectedWorkNumbers.some((workNumber) => workNumber === work.workNumber))
+        );
+        onWorkNumberChangeInMulti?.(selectedWorkNumbers);
+      } else {
+        setSelectedWork(works.find((work) => work.workNumber === e.currentTarget.value));
+        onWorkNumberChange?.(e.target.value);
+      }
     },
-    [onWorkNumberChange, setSelectedWork, works]
+    [onWorkNumberChange, setSelectedWork, works, onWorkNumberChangeInMulti]
   );
 
   const validateWorkNumber = () => {
@@ -131,6 +153,7 @@ export default function WorkNumberSelect({
       setError('');
     }
   };
+
   return name ? (
     <div className={'flex flex-col'}>
       <FormikSelect
@@ -145,8 +168,10 @@ export default function WorkNumberSelect({
         {optionValues(works, 'workNumber', 'workNumber')}
       </FormikSelect>
       <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
-        {selectedWork && selectedWork.project.length > 0 && <Pill color={'pink'}>{selectedWork.project}</Pill>}
-        {selectedWork && selectedWork.workRequester.length > 0 && (
+        {selectedWork && !Array.isArray(selectedWork) && selectedWork.project.length > 0 && (
+          <Pill color={'pink'}>{selectedWork.project}</Pill>
+        )}
+        {selectedWork && !Array.isArray(selectedWork) && selectedWork.workRequester.length > 0 && (
           <Pill color={'pink'}>{selectedWork.workRequester}</Pill>
         )}
       </div>
@@ -155,17 +180,20 @@ export default function WorkNumberSelect({
     <>
       <div className={'flex flex-col'}>
         <Select
-          value={selectedWork?.workNumber}
+          value={Array.isArray(selectedWork) ? selectedWork.map((work) => work.workNumber) : selectedWork?.workNumber}
           onChange={handleWorkNumberChange}
           emptyOption={true}
           onBlur={validateWorkNumber}
           data-testid={'select_workNumber'}
+          multiple={multiple}
         >
           {optionValues(works, 'workNumber', 'workNumber')}
         </Select>
         <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
-          {selectedWork && selectedWork.project.length > 0 && <Pill color={'pink'}>{selectedWork.project}</Pill>}
-          {selectedWork && selectedWork.workRequester.length > 0 && (
+          {!Array.isArray(selectedWork) && selectedWork && selectedWork.project.length > 0 && (
+            <Pill color={'pink'}>{selectedWork.project}</Pill>
+          )}
+          {!Array.isArray(selectedWork) && selectedWork && selectedWork.workRequester.length > 0 && (
             <Pill color={'pink'}>{selectedWork.workRequester}</Pill>
           )}
         </div>

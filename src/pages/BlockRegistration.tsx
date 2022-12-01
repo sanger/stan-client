@@ -139,7 +139,7 @@ export function buildRegisterTissuesMutationVariables(
       ];
     }, []);
 
-    resolve({ request: { blocks } });
+    resolve({ request: { blocks, workNumbers: [] } });
   });
 }
 
