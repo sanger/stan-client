@@ -24,9 +24,9 @@ describe('FileUploader.tsx', () => {
     expect(screen.queryByTestId('file-description')).not.toBeInTheDocument();
   });
 
-  it('selects input file', () => {
+  it('selects input file', async () => {
     render(<FileUploader url={''} />);
-    simulateFileSelection();
+    await simulateFileSelection();
     //Check the file is in list for input
     const fileInput = screen.getByTestId('file-input') as HTMLInputElement;
     if (fileInput.files) {
@@ -35,9 +35,9 @@ describe('FileUploader.tsx', () => {
     }
   });
 
-  it('renders file name on file selection', () => {
+  it('renders file name on file selection', async () => {
     render(<FileUploader url={''} />);
-    simulateFileSelection();
+    await simulateFileSelection();
     //Displays File description section
     expect(screen.queryByTestId('file-description')).toBeInTheDocument();
     //Displays the file icon and name
@@ -46,16 +46,16 @@ describe('FileUploader.tsx', () => {
     //Displays remove icon
     expect(screen.getByTestId('failIcon')).toBeVisible();
   });
-  it('enables Upload button  on file selection', () => {
+  it('enables Upload button  on file selection', async () => {
     render(<FileUploader url={''} enableUpload={true} />);
-    simulateFileSelection();
+    await simulateFileSelection();
     //Enables Upload button
     expect(screen.getByRole('button', { name: /Upload/i })).not.toBeDisabled();
   });
   it('removes file on remove button click', async () => {
     render(<FileUploader url={''} />);
 
-    simulateFileSelection();
+    await simulateFileSelection();
     const elem = screen.getByTestId('failIcon');
     //Simulate input change event and wait until finish
     await waitFor(() => {

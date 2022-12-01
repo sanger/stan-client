@@ -1,5 +1,10 @@
-import { FindHistoryForLabwareBarcodeQuery, FindHistoryForLabwareBarcodeQueryVariables } from '../../../src/types/sdk';
-
+import {
+  FindHistoryForLabwareBarcodeQuery,
+  FindHistoryForLabwareBarcodeQueryVariables,
+  FindHistoryForWorkNumberQuery,
+  FindHistoryForWorkNumberQueryVariables
+} from '../../../src/types/sdk';
+import { buildHistory } from '../../../src/mocks/handlers/historyHandlers';
 describe('History Page', () => {
   context('when I visit the page with no URL params', () => {
     before(() => cy.visit('/history'));
@@ -129,21 +134,86 @@ describe('History Page', () => {
       });
     });
 
-    context(' when clicking on uploaded files link for authenticated users', () => {
+    context('When an active SGP number is searched', () => {
       before(() => {
-        cy.contains('Files for SGP123').click();
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<FindHistoryForWorkNumberQuery, FindHistoryForWorkNumberQueryVariables>(
+              'FindHistoryForWorkNumber',
+              (req, res, ctx) => {
+                return res(
+                  ctx.data({
+                    __typename: 'Query',
+                    historyForWorkNumber: buildHistory('SGP1008')
+                  })
+                );
+              }
+            )
+          );
+        });
       });
-      it('goes to file manager page for SGP123', () => {
-        cy.url().should('be.equal', 'http://localhost:3000/file_manager?workNumber=SGP123');
+      context(' when clicking on uploaded files link for authenticated users', () => {
+        before(() => {
+          cy.visit('/history?kind=workNumber&value=SGP1008');
+          cy.contains('Files for SGP1008').click();
+        });
+        it('goes to file manager page for SGP123', () => {
+          cy.url().should('be.equal', 'http://localhost:3000/file_manager?workNumber=SGP1008');
+          cy.findByText('Upload file').should('exist');
+          cy.findByText('Files').should('exist');
+        });
+      });
+      context('for non-authenticated users', () => {
+        before(() => {
+          cy.visitAsGuest('/history?kind=workNumber&value=SGP1008');
+          cy.contains('Files for SGP1008').click();
+        });
+        it('goes to file viewer page for SGP123', () => {
+          cy.url().should('be.equal', 'http://localhost:3000/file_viewer?workNumber=SGP1008');
+          cy.findByText('Upload file').should('not.exist');
+          cy.findByText('Files').should('exist');
+        });
       });
     });
-    context('for non-authenticated users', () => {
+    context('When an inactive SGP number is searched', () => {
       before(() => {
-        cy.visitAsGuest('/history?kind=workNumber&value=SGP1');
-        cy.contains('Files for SGP123').click();
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<FindHistoryForWorkNumberQuery, FindHistoryForWorkNumberQueryVariables>(
+              'FindHistoryForWorkNumber',
+              (req, res, ctx) => {
+                return res(
+                  ctx.data({
+                    __typename: 'Query',
+                    historyForWorkNumber: buildHistory('SGP1001')
+                  })
+                );
+              }
+            )
+          );
+        });
+        cy.visit('/history?kind=workNumber&value=SGP1001');
       });
-      it('goes to file viewer page for SGP123', () => {
-        cy.url().should('be.equal', 'http://localhost:3000/file_view?workNumber=SGP123');
+      context(' when clicking on uploaded files link for authenticated users', () => {
+        before(() => {
+          cy.contains('Files for SGP1001').click();
+        });
+        it('goes to file manager page for SGP1001', () => {
+          cy.url().should('be.equal', 'http://localhost:3000/file_manager?workNumber=SGP1001');
+          cy.findByText('Upload file').should('not.exist');
+          cy.findByText('Files').should('exist');
+        });
+      });
+      context('for non-authenticated users', () => {
+        before(() => {
+          cy.visitAsGuest('/history?kind=workNumber&value=SGP1001');
+          cy.contains('Files for SGP1001').click();
+        });
+        it('goes to file viewer page for SGP1001', () => {
+          cy.url().should('be.equal', 'http://localhost:3000/file_viewer?workNumber=SGP1001');
+          cy.findByText('Upload file').should('not.exist');
+          cy.findByText('Files').should('exist');
+        });
       });
     });
   });

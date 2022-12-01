@@ -4,6 +4,8 @@ import FormikSelect, { Select } from './forms/Select';
 import { WorkStatus } from '../types/sdk';
 import { stanCore } from '../lib/sdk';
 import Pill from './Pill';
+import { alphaNumericSortDefault } from '../types/stan';
+
 type WorkSelectProps = {
   /**
    * Optional. If set, the name that will be used for the formik select
@@ -25,23 +27,38 @@ type WorkSelectProps = {
    * @param workNumber the new work number (or undefined if none are selected)
    */
   onWorkNumberChange?: (workNumber: string) => void;
+
+  /**Criteria to filter orknumbers based on status. If not given, default will be 'Active'.
+   * 'ALL' value will display all work numbers (with all statuses)**/
+  workNumberType?: WorkStatus | 'ALL';
 };
 
-type WorkInfo = {
+export type WorkInfo = {
   workNumber: string;
   workRequester: string;
   project: string;
+  status: WorkStatus;
 };
 
 /**
- * Component for displaying a list of active work numbers
+ * Component for displaying a list of active or all work numbers
  */
-export default function WorkNumberSelect({ name, label, workNumber, onWorkNumberChange }: WorkSelectProps) {
+export default function WorkNumberSelect({
+  name,
+  label,
+  workNumber,
+  onWorkNumberChange,
+  workNumberType
+}: WorkSelectProps) {
   /**
-   * State for holding active work
+   * State for holding all  work
    */
-
+  const [allWorks, setAllWorks] = useState<Array<WorkInfo>>([]);
+  /**
+   * State for holding work based on the list criteria -'workNumberType'
+   */
   const [works, setWorks] = useState<Array<WorkInfo>>([]);
+
   const [selectedWork, setSelectedWork] = useState<WorkInfo | undefined>(
     workNumber ? works.find((work) => work.workNumber === workNumber) : undefined
   );
@@ -50,28 +67,43 @@ export default function WorkNumberSelect({ name, label, workNumber, onWorkNumber
    */
   const [error, setError] = useState<string>('');
   /**
-   * Fetch active work and set them to state
+   * Fetch all works and set them to state
    */
   useEffect(() => {
-    async function fetchActiveWorkNumbers() {
-      const response = await stanCore.FindWorkInfo({
-        status: WorkStatus.Active
-      });
-      setWorks(
-        response.works.map((workInfo) => {
+    async function fetchAllWorkNumbers() {
+      const response = await stanCore.GetAllWorkInfo();
+      const works = response.works
+        .map((workInfo) => {
           return {
             workNumber: workInfo.workNumber,
             workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
-            project: workInfo.project.name
+            project: workInfo.project.name,
+            status: workInfo.status
           };
         })
-      );
+        .sort((work1, work2) => {
+          return alphaNumericSortDefault(work1.workNumber, work2.workNumber);
+        })
+        .reverse();
+      setAllWorks(works);
     }
-    fetchActiveWorkNumbers();
+    fetchAllWorkNumbers();
+  }, []);
+
+  /**
+   * Fetch  works based on workNumberType criteria
+   */
+  useEffect(() => {
+    if (workNumberType && workNumberType === 'ALL') {
+      setWorks(allWorks);
+    } else {
+      const status = workNumberType ?? WorkStatus.Active;
+      setWorks(allWorks.filter((work) => work.status === status));
+    }
     return () => {
       setWorks([]);
     };
-  }, [setWorks]);
+  }, [setWorks, workNumberType, allWorks]);
 
   useEffect(() => {
     if (!workNumber) setSelectedWork(undefined);

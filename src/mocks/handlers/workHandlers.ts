@@ -2,12 +2,15 @@ import { graphql } from 'msw';
 import {
   CreateWorkMutation,
   CreateWorkMutationVariables,
+  FindWorkInfoQuery,
+  FindWorkInfoQueryVariables,
   FindWorkNumbersQuery,
   FindWorkNumbersQueryVariables,
-  GetWorkNumbersQuery,
-  GetWorkNumbersQueryVariables,
+  GetAllWorkInfoQuery,
   GetWorkAllocationInfoQuery,
   GetWorkAllocationInfoQueryVariables,
+  GetWorkNumbersQuery,
+  GetWorkNumbersQueryVariables,
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumBlocksMutationVariables,
   UpdateWorkNumSlidesMutation,
@@ -16,9 +19,7 @@ import {
   UpdateWorkPriorityMutationVariables,
   UpdateWorkStatusMutation,
   UpdateWorkStatusMutationVariables,
-  WorkStatus,
-  FindWorkInfoQuery,
-  FindWorkInfoQueryVariables
+  WorkStatus
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -272,6 +273,21 @@ const workHandlers = [
     return res(
       ctx.data({
         works: workRepository.findAll()
+      })
+    );
+  }),
+  graphql.query<GetAllWorkInfoQuery, GetAllWorkInfoQuery>('GetAllWorkInfo', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        works: [
+          ...workRepository.findAll(),
+          {
+            workNumber: 'SGP1001',
+            workRequester: { username: 'Requestor 1' },
+            status: WorkStatus.Withdrawn,
+            project: { name: 'Project 1' }
+          }
+        ]
       })
     );
   })
