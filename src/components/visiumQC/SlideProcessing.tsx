@@ -38,7 +38,8 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
         address: slot.address,
         result: PassFail.Pass
       })),
-      costing: values.costing
+      costing: values.costing,
+      lotNumber: values.lotNumber
     });
   }, [setFieldValue, labware, values.costing]);
 
@@ -48,6 +49,11 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
     }
   }, [labwareResult, setFieldValue, values.costing]);
 
+  React.useEffect(() => {
+    if (values.lotNumber) {
+      setFieldValue('labwareResult', { ...labwareResult, lotNumber: values.lotNumber });
+    }
+  }, [labwareResult, setFieldValue, values.lotNumber]);
   return (
     <>
       {labwareResultProps && labware && (

@@ -43,6 +43,7 @@ export interface VisiumQCFormData {
   slotMeasurements?: Array<SlotMeasurementRequest>;
   labwareResult?: CoreLabwareResult;
   costing?: SlideCosting;
+  lotNumber?: string;
 }
 
 const validationSchema = Yup.object().shape({
@@ -74,7 +75,9 @@ const validationSchema = Yup.object().shape({
   }),
   lotNumber: Yup.string().when('qcType', {
     is: (value: string) => value == QCType.SLIDE_PROCESSING,
-    then: Yup.string().test({ name: 'numberFormat', test: function (value) {} })
+    then: Yup.string()
+      .required('Slide lot number is  a required field')
+      .matches(/^(\d{6}|\d{7})$/, 'Slide lot number should be a 6-7 digits number')
   })
 });
 
