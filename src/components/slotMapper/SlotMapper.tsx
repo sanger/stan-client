@@ -157,7 +157,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
     if (initialOutputLabware.some((lw) => !outputSlotCopies.map((osc) => osc.labware.id).includes(lw.labware.id))) {
       send({ type: 'UPDATE_OUTPUT_LABWARE', outputSlotCopyContent: initialOutputLabware });
     }
-  }, [initialOutputLabware, outputSlotCopies, send]);
+  }, [initialOutputLabware, outputSlotCopies, send, currentOutput?.labware]);
 
   const getSourceSlotColor = useCallback(
     (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
