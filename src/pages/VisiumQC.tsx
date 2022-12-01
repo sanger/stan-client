@@ -71,6 +71,10 @@ const validationSchema = Yup.object().shape({
     is: (value: string) => value === QCType.SLIDE_PROCESSING,
     then: Yup.string().oneOf(Object.values(SlideCosting)).required('Slide costing is a required field'),
     otherwise: Yup.string().optional()
+  }),
+  lotNumber: Yup.string().when('qcType', {
+    is: (value: string) => value == QCType.SLIDE_PROCESSING,
+    then: Yup.string().test({ name: 'numberFormat', test: function (value) {} })
   })
 });
 
