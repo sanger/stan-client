@@ -92,7 +92,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
       setCostingValidationError(error);
       onChangeCosting(costing);
     },
-    [setSlideLOTNumberValidationError, onChangeSlideLOTNumber, onChangeCosting]
+    [setCostingValidationError, onChangeCosting]
   );
   return (
     <div className={'w-full grid grid-cols-2 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
