@@ -74,10 +74,10 @@ const validationSchema = Yup.object().shape({
     otherwise: Yup.string().optional()
   }),
   lotNumber: Yup.string().when('qcType', {
-    is: (value: string) => value == QCType.SLIDE_PROCESSING,
+    is: (value: string) => value === QCType.SLIDE_PROCESSING,
     then: Yup.string()
-      .required('Slide lot number is  a required field')
-      .matches(/^(\d{6}|\d{7})$/, 'Slide lot number should be a 6-7 digits number')
+      .required('Slide LOT number is  a required field')
+      .matches(/^(\d{6}|\d{7})$/, 'Slide LOT number should be a 6-7 digits number')
   })
 });
 
@@ -189,7 +189,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
             onSubmit={onSubmit}
             validationSchema={validationSchema}
           >
-            {({ setFieldValue, values }) => (
+            {({ setFieldValue, values, isValid }) => (
               <Form>
                 <div className="space-y-2 mb-8 ">
                   <Heading level={2}>SGP Number</Heading>
@@ -256,7 +256,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                   <Warning className={'mt-4'} message={'Failed to record Visium QC'} error={getServerError(values)} />
                 )}
                 <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
-                  <BlueButton disabled={!isEnableSubmit(values)} type="submit">
+                  <BlueButton disabled={!isEnableSubmit(values) || !isValid} type="submit">
                     Save
                   </BlueButton>
                 </div>
