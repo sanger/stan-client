@@ -40,6 +40,9 @@ type WorkSelectProps = {
 
   /**Multiple valu selection allowed*/
   multiple?: boolean;
+
+  /**Empty option required?*/
+  emptyOption?: boolean;
 };
 
 export type WorkInfo = {
@@ -59,7 +62,8 @@ export default function WorkNumberSelect({
   onWorkNumberChange,
   onWorkNumberChangeInMulti,
   workNumberType,
-  multiple = false
+  multiple = false,
+  emptyOption = true
 }: WorkSelectProps) {
   /**
    * State for holding all  work
@@ -159,7 +163,7 @@ export default function WorkNumberSelect({
       <FormikSelect
         label={label ?? ''}
         name={name}
-        emptyOption={true}
+        emptyOption={emptyOption}
         onBlur={validateWorkNumber}
         onChange={handleWorkNumberChange}
         className={'flex-grow w-full'}
@@ -182,7 +186,7 @@ export default function WorkNumberSelect({
         <Select
           value={Array.isArray(selectedWork) ? selectedWork.map((work) => work.workNumber) : selectedWork?.workNumber}
           onChange={handleWorkNumberChange}
-          emptyOption={true}
+          emptyOption={emptyOption}
           onBlur={validateWorkNumber}
           data-testid={'select_workNumber'}
           multiple={multiple}

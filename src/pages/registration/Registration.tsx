@@ -179,6 +179,7 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
                           setFieldValue('workNumber', workNumber);
                         }}
                         multiple={true}
+                        emptyOption={false}
                       />
                     </motion.div>
                   </motion.div>
