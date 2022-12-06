@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { optionValues } from './forms';
 import FormikSelect, { Select } from './forms/Select';
 import { WorkStatus } from '../types/sdk';
@@ -130,7 +130,7 @@ export default function WorkNumberSelect({
         setSelectedWork(work);
       }
     }
-  }, [workNumber, works, setSelectedWork]);
+  }, [workNumber, works, setSelectedWork, multiple]);
 
   /**
    * Callback for when the select changes
@@ -143,12 +143,15 @@ export default function WorkNumberSelect({
         );
         onWorkNumberChangeInMulti?.(selectedWorkNumbers);
       } else {
-        if (selectedWorkNumbers.length < 0) return;
-        setSelectedWork(works.find((work) => work.workNumber === selectedWorkNumbers[0]));
-        onWorkNumberChange?.(selectedWorkNumbers[0]);
+        if (selectedWorkNumbers.length <= 0) return;
+        const work = works.find((work) => work.workNumber === selectedWorkNumbers[0]);
+        if (work) {
+          setSelectedWork(work);
+          onWorkNumberChange?.(work.workNumber);
+        }
       }
     },
-    [onWorkNumberChange, setSelectedWork, works, onWorkNumberChangeInMulti]
+    [onWorkNumberChange, setSelectedWork, works, onWorkNumberChangeInMulti, multiple]
   );
 
   const validateWorkNumber = () => {
@@ -166,17 +169,17 @@ export default function WorkNumberSelect({
         name={name}
         emptyOption={emptyOption}
         onBlur={validateWorkNumber}
-        onChange={handleWorkNumberChange}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) => handleWorkNumberChange([e.currentTarget.value])}
         className={'flex-grow w-full'}
         data-testid={'workNumber'}
       >
         {optionValues(works, 'workNumber', 'workNumber')}
       </FormikSelect>
       <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
-        {selectedWork && !Array.isArray(selectedWork) && selectedWork.project.length > 0 && (
+        {!Array.isArray(selectedWork) && selectedWork && selectedWork.project.length > 0 && (
           <Pill color={'pink'}>{selectedWork.project}</Pill>
         )}
-        {selectedWork && !Array.isArray(selectedWork) && selectedWork.workRequester.length > 0 && (
+        {!Array.isArray(selectedWork) && selectedWork && selectedWork.workRequester.length > 0 && (
           <Pill color={'pink'}>{selectedWork.workRequester}</Pill>
         )}
       </div>
@@ -204,18 +207,28 @@ export default function WorkNumberSelect({
           </div>
         </div>
       ) : (
-        <MultiSelect
-          options={works.map((work) => {
-            return {
-              value: work.workNumber,
-              key: work.workNumber,
-              label: work.workNumber
-            };
-          })}
-          onBlur={validateWorkNumber}
-          data-testid={'select_workNumber'}
-          notifySelection={handleWorkNumberChange}
-        />
+        <div className={'flex flex-col'}>
+          <MultiSelect
+            options={works.map((work) => {
+              return {
+                value: work.workNumber,
+                key: work.workNumber,
+                label: work.workNumber
+              };
+            })}
+            onBlur={validateWorkNumber}
+            data-testid={'select_workNumber'}
+            notifySelection={handleWorkNumberChange}
+          />
+          <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
+            {Array.isArray(selectedWork) && selectedWork.length === 1 && selectedWork[0].project.length > 0 && (
+              <Pill color={'pink'}>{selectedWork[0].project}</Pill>
+            )}
+            {Array.isArray(selectedWork) && selectedWork.length === 1 && selectedWork[0].workRequester.length > 0 && (
+              <Pill color={'pink'}>{selectedWork[0].workRequester}</Pill>
+            )}
+          </div>
+        </div>
       )}
       {error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
     </>

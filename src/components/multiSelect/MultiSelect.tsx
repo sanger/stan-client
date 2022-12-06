@@ -36,7 +36,7 @@ export const MultiSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
     React.useEffect(() => {
       if (!notifySelection) return;
       notifySelection(multiple ? selected : [selected[0]]);
-    }, [selected]);
+    }, [selected, notifySelection, multiple]);
 
     return (
       <div className={'flex flex-col'}>
