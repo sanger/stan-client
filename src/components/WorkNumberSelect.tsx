@@ -137,7 +137,6 @@ export default function WorkNumberSelect({
    */
   const handleWorkNumberChange = useCallback(
     (selectedWorkNumbers: string[]) => {
-      debugger;
       if (multiple) {
         setSelectedWork(
           works.filter((work) => selectedWorkNumbers.some((workNumber) => workNumber === work.workNumber))
