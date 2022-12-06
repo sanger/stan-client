@@ -137,18 +137,17 @@ export default function WorkNumberSelect({
    */
   const handleWorkNumberChange = useCallback(
     (selectedWorkNumbers: string[]) => {
+      debugger;
       if (multiple) {
         setSelectedWork(
           works.filter((work) => selectedWorkNumbers.some((workNumber) => workNumber === work.workNumber))
         );
         onWorkNumberChangeInMulti?.(selectedWorkNumbers);
       } else {
-        if (selectedWorkNumbers.length <= 0) return;
-        const work = works.find((work) => work.workNumber === selectedWorkNumbers[0]);
-        if (work) {
-          setSelectedWork(work);
-          onWorkNumberChange?.(work.workNumber);
-        }
+        let selectedVal = selectedWorkNumbers.length > 0 ? selectedWorkNumbers[0] : '';
+        const work = works.find((work) => work.workNumber === selectedVal);
+        setSelectedWork(work);
+        onWorkNumberChange?.(selectedVal);
       }
     },
     [onWorkNumberChange, setSelectedWork, works, onWorkNumberChangeInMulti, multiple]
