@@ -372,7 +372,7 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
   ) {
     formShape.lotNumber = Yup.string()
       .required()
-      .matches(/^(\d{6}|\d{7})$/, 'Slide lot number should be a 6-7 digits number');
+      .matches(/^\d{6,7}$/, 'Slide lot number should be a 6-7 digits number');
     formShape.costing = Yup.string().oneOf(Object.values(SlideCosting)).required('Slide costing is a required field');
   }
   return Yup.object().shape(formShape).defined();
