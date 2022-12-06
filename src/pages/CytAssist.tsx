@@ -71,7 +71,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
       if (slideLotNumber.length === 0) {
         error = 'Required field';
       } else {
-        const valid = /^(\d{6}|\d{7})$/.test(slideLotNumber);
+        const valid = /^\d{6,7}$/.test(slideLotNumber);
         if (!valid) {
           error = 'Invalid format: Required 6-7 digit number';
         } else {

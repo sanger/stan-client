@@ -109,7 +109,7 @@ describe('CytAssist Page', () => {
       before(() => {
         enterLOTNumber();
       });
-      it('should display Invalid format error message', () => {
+      it('should not display invalid format error message', () => {
         cy.findByText('Invalid format: Required 6-7 digit number').should('not.exist');
       });
     });
