@@ -77,7 +77,7 @@ const validationSchema = Yup.object().shape({
     is: (value: string) => value === QCType.SLIDE_PROCESSING,
     then: Yup.string()
       .required('Slide LOT number is  a required field')
-      .matches(/^(\d{6}|\d{7})$/, 'Slide LOT number should be a 6-7 digits number')
+      .matches(/^\d{6,7}$/, 'Slide LOT number should be a 6-7 digits number')
   })
 });
 
