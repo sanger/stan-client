@@ -5,6 +5,7 @@ import { WorkStatus } from '../types/sdk';
 import { stanCore } from '../lib/sdk';
 import Pill from './Pill';
 import { alphaNumericSortDefault } from '../types/stan';
+import { MultiSelect } from './multiSelect/MultiSelect';
 
 type WorkSelectProps = {
   /**
@@ -135,16 +136,16 @@ export default function WorkNumberSelect({
    * Callback for when the select changes
    */
   const handleWorkNumberChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
+    (selectedWorkNumbers: string[]) => {
       if (multiple) {
-        const selectedWorkNumbers = Array.from(e.target.selectedOptions, (option) => option.value);
         setSelectedWork(
           works.filter((work) => selectedWorkNumbers.some((workNumber) => workNumber === work.workNumber))
         );
         onWorkNumberChangeInMulti?.(selectedWorkNumbers);
       } else {
-        setSelectedWork(works.find((work) => work.workNumber === e.currentTarget.value));
-        onWorkNumberChange?.(e.target.value);
+        if (selectedWorkNumbers.length < 0) return;
+        setSelectedWork(works.find((work) => work.workNumber === selectedWorkNumbers[0]));
+        onWorkNumberChange?.(selectedWorkNumbers[0]);
       }
     },
     [onWorkNumberChange, setSelectedWork, works, onWorkNumberChangeInMulti]
@@ -182,27 +183,40 @@ export default function WorkNumberSelect({
     </div>
   ) : (
     <>
-      <div className={'flex flex-col'}>
-        <Select
-          value={Array.isArray(selectedWork) ? selectedWork.map((work) => work.workNumber) : selectedWork?.workNumber}
-          onChange={handleWorkNumberChange}
-          emptyOption={emptyOption}
+      {!multiple ? (
+        <div className={'flex flex-col'}>
+          <Select
+            value={!Array.isArray(selectedWork) ? selectedWork?.workNumber : ''}
+            onChange={(e) => handleWorkNumberChange([e.currentTarget.value])}
+            emptyOption={true}
+            onBlur={validateWorkNumber}
+            data-testid={'select_workNumber'}
+          >
+            {optionValues(works, 'workNumber', 'workNumber')}
+          </Select>
+          <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
+            {!Array.isArray(selectedWork) && selectedWork && selectedWork.project.length > 0 && (
+              <Pill color={'pink'}>{selectedWork.project}</Pill>
+            )}
+            {!Array.isArray(selectedWork) && selectedWork && selectedWork.workRequester.length > 0 && (
+              <Pill color={'pink'}>{selectedWork.workRequester}</Pill>
+            )}
+          </div>
+        </div>
+      ) : (
+        <MultiSelect
+          options={works.map((work) => {
+            return {
+              value: work.workNumber,
+              key: work.workNumber,
+              label: work.workNumber
+            };
+          })}
           onBlur={validateWorkNumber}
           data-testid={'select_workNumber'}
-          multiple={multiple}
-        >
-          {optionValues(works, 'workNumber', 'workNumber')}
-        </Select>
-        <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
-          {!Array.isArray(selectedWork) && selectedWork && selectedWork.project.length > 0 && (
-            <Pill color={'pink'}>{selectedWork.project}</Pill>
-          )}
-          {!Array.isArray(selectedWork) && selectedWork && selectedWork.workRequester.length > 0 && (
-            <Pill color={'pink'}>{selectedWork.workRequester}</Pill>
-          )}
-        </div>
-      </div>
-
+          notifySelection={handleWorkNumberChange}
+        />
+      )}
       {error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
     </>
   );

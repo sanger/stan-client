@@ -27,6 +27,7 @@ import WorkNumberSelect from '../../components/WorkNumberSelect';
  */
 interface FormInput<T> {
   tissues: T[];
+  workNumbers: string[];
 }
 
 /**
@@ -82,6 +83,7 @@ interface RegistrationParams<M, T, R extends Object> {
    * Change in default keywords to display
    */
   keywordsMap?: Map<TextType, string>;
+  isBlock?: boolean;
 }
 
 /**
@@ -101,7 +103,8 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
   successDisplayTableColumns,
   formatSuccessData,
   defaultFormTissueValues,
-  keywordsMap
+  keywordsMap,
+  isBlock = false
 }: RegistrationParams<M, T, R>) {
   const registrationMachine = React.useMemo(() => {
     return createRegistrationMachine<FormInput<T>, M>(buildRegistrationInput, registrationService);
@@ -124,7 +127,8 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
   });
 
   const initialValues = {
-    tissues: [defaultFormTissueValues]
+    tissues: [defaultFormTissueValues],
+    workNumbers: []
   };
   const { registrationResult, registrationErrors } = current.context;
   const formIsReady = ['ready', 'submitting', 'clashed', 'submissionError'].some((val) => current.matches(val));
@@ -168,21 +172,23 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
             >
               {({ values, setFieldValue }) => (
                 <>
-                  <motion.div variants={variants.fadeInWithLift}>
-                    <Heading level={3}>SGP Number</Heading>
-                    <p className="mt-2">
-                      Please select an SGP number to associate with all block registering operations.
-                    </p>
-                    <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
-                      <WorkNumberSelect
-                        onWorkNumberChange={(workNumber) => {
-                          setFieldValue('workNumber', workNumber);
-                        }}
-                        multiple={true}
-                        emptyOption={false}
-                      />
+                  {isBlock && (
+                    <motion.div variants={variants.fadeInWithLift}>
+                      <Heading level={3}>SGP Number</Heading>
+                      <p className="mt-2">
+                        Please select SGP numbers to associate with all block registering operations
+                      </p>
+                      <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
+                        <WorkNumberSelect
+                          onWorkNumberChangeInMulti={(workNumbers) => {
+                            setFieldValue('workNumbers', workNumbers);
+                          }}
+                          multiple={true}
+                          emptyOption={false}
+                        />
+                      </motion.div>
                     </motion.div>
-                  </motion.div>
+                  )}
                   <RegistrationForm
                     registrationInfo={registrationInfo}
                     availableLabwareTypes={availableLabwareTypes}

@@ -37,6 +37,7 @@ export interface RegistrationFormTissue {
 
 export interface RegistrationFormValues {
   tissues: Array<RegistrationFormTissue>;
+  workNumbers: Array<string>;
 }
 function getRegistrationFormBlock(): RegistrationFormBlock {
   return {
@@ -67,6 +68,7 @@ function getRegistrationFormTissue(): RegistrationFormTissue {
 function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
   const validation = new RegistrationValidation(registrationInfo);
   return Yup.object().shape({
+    workNumbers: Yup.array().min(1),
     tissues: Yup.array()
       .min(1)
       .of(
@@ -139,7 +141,7 @@ export function buildRegisterTissuesMutationVariables(
       ];
     }, []);
 
-    resolve({ request: { blocks, workNumbers: [] } });
+    resolve({ request: { blocks, workNumbers: formValues.workNumbers } });
   });
 }
 
@@ -175,6 +177,7 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
       registrationValidationSchema={validationSchema}
       successDisplayTableColumns={resultColumns}
       formatSuccessData={(registrationResult) => registrationResult.labware}
+      isBlock={true}
     />
   );
 }

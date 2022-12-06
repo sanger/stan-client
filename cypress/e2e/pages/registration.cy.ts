@@ -12,6 +12,15 @@ describe('Registration', () => {
   describe('Validation', () => {
     shouldBehaveLikeARegistrationForm(RegistrationType.BLOCK);
 
+    it('should display Work numbers section', () => {
+      cy.findByText('SGP Number').should('be.visible');
+      cy.findByTestId('select_workNumber').should('be.visible');
+    });
+    it('requires Work numbers', () => {
+      cy.findByTestId('select_workNumber').focus().blur();
+      cy.findByText('SGP number is required').should('be.visible');
+    });
+
     it('requires External Identifier', () => {
       cy.findByLabelText('External Identifier').focus().blur();
       cy.findByText('External Identifier is a required field').should('be.visible');
@@ -120,6 +129,7 @@ describe('Registration', () => {
     context('when the submission is successful', () => {
       before(() => {
         cy.reload();
+        cy.findByTestId('select_workNumber').select('SGP1008');
         fillInForm();
         cy.findByText('Register').click();
       });
@@ -168,7 +178,7 @@ describe('Registration', () => {
             )
           );
         });
-
+        cy.findByTestId('select_workNumber').select('SGP1008');
         fillInForm();
         cy.findByText('Register').click();
       });
@@ -211,6 +221,7 @@ describe('Registration', () => {
       });
 
       fillInForm();
+
       cy.findByText('Register').click();
     });
 
