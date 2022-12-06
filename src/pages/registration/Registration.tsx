@@ -21,6 +21,7 @@ import { motion } from 'framer-motion';
 import variants from '../../lib/motionVariants';
 import Heading from '../../components/Heading';
 import WorkNumberSelect from '../../components/WorkNumberSelect';
+import { FormikErrorMessage } from '../../components/forms';
 
 /**
  * Expect form input interface
@@ -181,11 +182,12 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
                       <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
                         <WorkNumberSelect
                           onWorkNumberChangeInMulti={(workNumbers) => {
-                            setFieldValue('workNumbers', workNumbers);
+                            setFieldValue('workNumbers', [...workNumbers]);
                           }}
                           multiple={true}
                           emptyOption={false}
                         />
+                        {values.workNumbers.length <= 0 && <FormikErrorMessage name={'workNumbers'} />}
                       </motion.div>
                     </motion.div>
                   )}

@@ -22,21 +22,24 @@ export const MultiSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
 
     const handleChange = React.useCallback(
       (selectedValue: string) => {
-        if (multiple) {
-          setSelected((prev) => {
-            return [...prev, selectedValue];
-          });
-        } else {
-          setSelected([selectedValue]);
+        let newSelection = [...selected, selectedValue];
+        if (!multiple) {
+          newSelection = [selectedValue];
         }
+        setSelected(newSelection);
+        notifySelection?.(newSelection);
       },
-      [multiple, setSelected]
+      [multiple, setSelected, notifySelection, selected]
     );
 
-    React.useEffect(() => {
-      if (!notifySelection) return;
-      notifySelection(multiple ? selected : [selected[0]]);
-    }, [selected, notifySelection, multiple]);
+    const handleRemove = React.useCallback(
+      (removedValue: string) => {
+        let newSelection = selected.filter((val) => val !== removedValue);
+        setSelected(newSelection);
+        notifySelection?.(newSelection);
+      },
+      [setSelected, notifySelection, selected]
+    );
 
     return (
       <div className={'flex flex-col'}>
@@ -52,9 +55,7 @@ export const MultiSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
                         data-testid="removeButton"
                         className=" hover:bg-red-100 rounded-md focus:outline-none bg-white focus:bg-red-100 text-sdb-400 hover:text-red-600 disabled:text-gray-200"
                         onClick={() => {
-                          setSelected((prev) => {
-                            return prev.filter((val) => val !== selected);
-                          });
+                          handleRemove(selected);
                         }}
                       >
                         <RemoveIcon className="block h-4 w-4" />

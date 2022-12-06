@@ -221,7 +221,7 @@ describe('Registration', () => {
       });
 
       fillInForm();
-
+      cy.findByTestId('select_workNumber').select('SGP1008');
       cy.findByText('Register').click();
     });
 
