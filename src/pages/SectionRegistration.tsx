@@ -147,7 +147,7 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
           })
         })
       ),
-    workNumber: Yup.string().required('SGP Number is a required field')
+    workNumber: Yup.string().required()
   });
 }
 
