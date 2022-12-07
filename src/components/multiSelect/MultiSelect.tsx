@@ -44,12 +44,12 @@ export const MultiSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className={'flex flex-col'}>
         {multiple && selected.length > 0 && (
-          <div className={'flex flex-row space-x-1 mb-2'}>
+          <div className={'flex flex-row flex-wrap mb-2 border-gray-100 border-2 p-2 shadow-sm'}>
             {selected.map((selected) => {
               return (
-                <div className={'flex flex-row whitespace-nowrap'}>
+                <div className={'flex flex-row whitespace-nowrap mr-2 mb-1'}>
                   <Pill color={'blue'}>
-                    <div className={'flex flex-row space-x-2 p-1 items-center'}>
+                    <div className={'flex flex-row gap-x-2 p-1 items-center'}>
                       <div data-testid={'caption'}>{selected}</div>
                       <button
                         data-testid="removeButton"
