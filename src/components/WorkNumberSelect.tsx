@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { optionValues } from './forms';
-import FormikSelect, { Select } from './forms/Select';
+import FormikSelect from './forms/Select';
 import { WorkStatus } from '../types/sdk';
 import { stanCore } from '../lib/sdk';
 import Pill from './Pill';
@@ -78,6 +78,7 @@ export default function WorkNumberSelect({
   const [selectedWork, setSelectedWork] = useState<WorkInfo | WorkInfo[] | undefined>(
     workNumber ? works.find((work) => work.workNumber === workNumber) : undefined
   );
+  const [selectedIndex, setSelectedIndex] = useState(0);
   /**
    * State for validating select field
    */
@@ -123,12 +124,9 @@ export default function WorkNumberSelect({
 
   useEffect(() => {
     if (!workNumber) setSelectedWork(undefined);
-    if (multiple) {
-    } else {
-      const work = works.find((work) => work.workNumber === workNumber);
-      if (work) {
-        setSelectedWork(work);
-      }
+    const work = works.find((work) => work.workNumber === workNumber);
+    if (work) {
+      setSelectedWork(work);
     }
   }, [workNumber, works, setSelectedWork, multiple]);
 
@@ -136,7 +134,7 @@ export default function WorkNumberSelect({
    * Callback for when the select changes
    */
   const handleWorkNumberChange = useCallback(
-    (selectedWorkNumbers: string[]) => {
+    (selectedWorkNumbers: string[], selectedIndex?: number) => {
       if (multiple) {
         setSelectedWork(
           works.filter((work) => selectedWorkNumbers.some((workNumber) => workNumber === work.workNumber))
@@ -148,62 +146,45 @@ export default function WorkNumberSelect({
         setSelectedWork(work);
         onWorkNumberChange?.(selectedVal);
       }
+      setSelectedIndex(selectedIndex ?? 0);
     },
-    [onWorkNumberChange, setSelectedWork, works, onWorkNumberChangeInMulti, multiple]
+    [onWorkNumberChange, setSelectedWork, works, onWorkNumberChangeInMulti, multiple, setSelectedIndex]
   );
 
+  const currentSelectedWork = Array.isArray(selectedWork)
+    ? selectedWork.length > 0
+      ? selectedWork[selectedIndex >= 0 ? selectedIndex : selectedWork.length - 1]
+      : undefined
+    : selectedWork;
+
   const validateWorkNumber = () => {
-    if (!selectedWork) {
-      setError('SGP number is required');
+    if (multiple) {
+      if (!currentSelectedWork) {
+        setError('Atleast one work number must be selected');
+      }
     } else {
-      setError('');
+      if (!currentSelectedWork) {
+        setError('SGP number is required');
+      } else {
+        setError('');
+      }
     }
   };
 
-  return name ? (
+  return (
     <div className={'flex flex-col'}>
-      <FormikSelect
-        label={label ?? ''}
-        name={name}
-        emptyOption={emptyOption}
-        onBlur={validateWorkNumber}
-        onChange={(e: ChangeEvent<HTMLSelectElement>) => handleWorkNumberChange([e.currentTarget.value])}
-        className={'flex-grow w-full'}
-        data-testid={'workNumber'}
-      >
-        {optionValues(works, 'workNumber', 'workNumber')}
-      </FormikSelect>
-      <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
-        {!Array.isArray(selectedWork) && selectedWork && selectedWork.project.length > 0 && (
-          <Pill color={'pink'}>{selectedWork.project}</Pill>
-        )}
-        {!Array.isArray(selectedWork) && selectedWork && selectedWork.workRequester.length > 0 && (
-          <Pill color={'pink'}>{selectedWork.workRequester}</Pill>
-        )}
-      </div>
-    </div>
-  ) : (
-    <>
-      {!multiple ? (
-        <div className={'flex flex-col'}>
-          <Select
-            value={!Array.isArray(selectedWork) ? selectedWork?.workNumber : ''}
-            onChange={(e) => handleWorkNumberChange([e.currentTarget.value])}
-            emptyOption={true}
-            onBlur={validateWorkNumber}
-            data-testid={'select_workNumber'}
-          >
-            {optionValues(works, 'workNumber', 'workNumber')}
-          </Select>
-          <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
-            {!Array.isArray(selectedWork) && selectedWork && selectedWork.project.length > 0 && (
-              <Pill color={'pink'}>{selectedWork.project}</Pill>
-            )}
-            {!Array.isArray(selectedWork) && selectedWork && selectedWork.workRequester.length > 0 && (
-              <Pill color={'pink'}>{selectedWork.workRequester}</Pill>
-            )}
-          </div>
-        </div>
+      {name ? (
+        <FormikSelect
+          label={label ?? ''}
+          name={name}
+          emptyOption={emptyOption}
+          onBlur={validateWorkNumber}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleWorkNumberChange([e.currentTarget.value])}
+          className={'flex-grow w-full'}
+          data-testid={'workNumber'}
+        >
+          {optionValues(works, 'workNumber', 'workNumber')}
+        </FormikSelect>
       ) : (
         <div className={'flex flex-col'}>
           <MultiSelect
@@ -214,21 +195,23 @@ export default function WorkNumberSelect({
                 label: work.workNumber
               };
             })}
+            initialSelectedValue={Array.isArray(workNumber) ? workNumber : workNumber ? [workNumber] : []}
             onBlur={validateWorkNumber}
             data-testid={'select_workNumber'}
             notifySelection={handleWorkNumberChange}
+            multiple={multiple}
           />
-          <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
-            {Array.isArray(selectedWork) && selectedWork.length === 1 && selectedWork[0].project.length > 0 && (
-              <Pill color={'pink'}>{selectedWork[0].project}</Pill>
-            )}
-            {Array.isArray(selectedWork) && selectedWork.length === 1 && selectedWork[0].workRequester.length > 0 && (
-              <Pill color={'pink'}>{selectedWork[0].workRequester}</Pill>
-            )}
-          </div>
+          {error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
         </div>
       )}
-      {error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
-    </>
+      <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
+        {currentSelectedWork && currentSelectedWork.project.length > 0 && (
+          <Pill color={'pink'}>{currentSelectedWork.project}</Pill>
+        )}
+        {currentSelectedWork && currentSelectedWork.workRequester.length > 0 && (
+          <Pill color={'pink'}>{currentSelectedWork.workRequester}</Pill>
+        )}
+      </div>
+    </div>
   );
 }
