@@ -20,6 +20,7 @@ import MutedText from '../../components/MutedText';
 import SectionForm from './SectionForm';
 import { GetRegistrationInfoQuery } from '../../types/sdk';
 import { SectionRegistrationContext, SectionRegistrationFormValues } from '../SectionRegistration';
+import WorkNumberSelect from '../../components/WorkNumberSelect';
 
 type SectionRegistrationFormParams = {
   registrationInfo: GetRegistrationInfoQuery;
@@ -72,6 +73,17 @@ function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormPa
 
   return (
     <Form>
+      <motion.div variants={variants.fadeInWithLift} className="mb-10">
+        <Heading level={3}>SGP Number</Heading>
+        <p className="mt-2">Please select SGP numbers to associate with all block registering operations</p>
+        <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
+          <WorkNumberSelect
+            onWorkNumberChange={(workNumber) => {
+              setFieldValue('workNumber', workNumber);
+            }}
+          />
+        </motion.div>
+      </motion.div>
       <div className="grid grid-cols-9 gap-2">
         <div className="col-span-2 relative">
           <motion.div

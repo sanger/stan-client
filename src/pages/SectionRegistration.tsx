@@ -49,6 +49,7 @@ type SectionRegistrationFormLabware = {
 
 export type SectionRegistrationFormValues = {
   labwares: Array<SectionRegistrationFormLabware>;
+  workNumber: string;
 };
 
 function buildSectionRegisterRequest(values: SectionRegistrationFormValues): SectionRegisterRequest {
@@ -75,13 +76,15 @@ function buildSectionRegisterRequest(values: SectionRegistrationFormValues): Sec
           }));
         })
       };
-    })
+    }),
+    workNumber: values.workNumber
   };
 }
 
 function buildInitialFormValues(initialLabwareType: LabwareTypeName) {
   return {
-    labwares: [buildLabware(initialLabwareType)]
+    labwares: [buildLabware(initialLabwareType)],
+    workNumber: ''
   };
 }
 
@@ -143,7 +146,8 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
             );
           })
         })
-      )
+      ),
+    workNumber: Yup.string().required('SGP Number is a required field')
   });
 }
 
