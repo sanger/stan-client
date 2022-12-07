@@ -75,7 +75,7 @@ function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormPa
     <Form>
       <motion.div variants={variants.fadeInWithLift} className="mb-10">
         <Heading level={3}>SGP Number</Heading>
-        <p className="mt-2">Please select SGP numbers to associate with all section registering operations</p>
+        <p className="mt-2">Please select an SGP number to associate with all section registering operations</p>
         <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
           <WorkNumberSelect
             onWorkNumberChange={(workNumber) => {
