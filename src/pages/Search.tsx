@@ -83,7 +83,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   const memoSearchMachine = React.useMemo(() => {
     return search.withContext({
       findRequest,
-      maxRecords: config.maxSearchRecords
+      maxRecords: -1 //config.maxSearchRecords
     });
   }, [findRequest, search, config]);
   const [current, send] = useMachine(() => memoSearchMachine);
