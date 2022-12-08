@@ -103,8 +103,14 @@ type UpdateDestinationBioState = {
   bioState: string;
 };
 
-type UpdateDestinationLOTNumber = {
-  type: 'UPDATE_DESTINATION_LOT_NUMBER';
+type UpdateDestinationSlideLOTNumber = {
+  type: 'UPDATE_DESTINATION_SLIDE_LOT_NUMBER';
+  labware: NewLabwareLayout;
+  lotNumber: string;
+};
+
+type UpdateDestinationProbeLOTNumber = {
+  type: 'UPDATE_DESTINATION_PROBE_LOT_NUMBER';
   labware: NewLabwareLayout;
   lotNumber: string;
 };
@@ -147,7 +153,8 @@ export type SlotCopyEvent =
   | UpdateDestinationPreBarcode
   | UpdateDestinationCosting
   | UpdateDestinationBioState
-  | UpdateDestinationLOTNumber
+  | UpdateDestinationSlideLOTNumber
+  | UpdateDestinationProbeLOTNumber
   | SaveEvent
   | FindPermDataEvent
   | MachineServiceDone<'copySlots', SlotCopyMutation>
@@ -200,8 +207,11 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           UPDATE_DESTINATION_BIO_STATE: {
             actions: 'assignDestinationBioState'
           },
-          UPDATE_DESTINATION_LOT_NUMBER: {
+          UPDATE_DESTINATION_SLIDE_LOT_NUMBER: {
             actions: 'assignDestinationLOTNumber'
+          },
+          UPDATE_DESTINATION_PROBE_LOT_NUMBER: {
+            actions: 'assignDestinationProbeLOTNumber'
           }
         }
       },
@@ -244,8 +254,11 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           UPDATE_DESTINATION_BIO_STATE: {
             actions: 'assignDestinationBioState'
           },
-          UPDATE_DESTINATION_LOT_NUMBER: {
+          UPDATE_DESTINATION_SLIDE_LOT_NUMBER: {
             actions: 'assignDestinationLOTNumber'
+          },
+          UPDATE_DESTINATION_PROBE_LOT_NUMBER: {
+            actions: 'assignDestinationProbeLOTNumber'
           },
           SAVE: 'copying'
         }
@@ -414,8 +427,16 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         }
         destination.slotCopyDetails.costing = e.labwareCosting;
       }),
-      assignDestinationLOTNumber: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_DESTINATION_LOT_NUMBER') return;
+      assignDestinationSlideLOTNumber: assign((ctx, e) => {
+        if (e.type !== 'UPDATE_DESTINATION_SLIDE_LOT_NUMBER') return;
+        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
+        if (!destination) {
+          return;
+        }
+        destination.slotCopyDetails.lotNumber = e.lotNumber;
+      }),
+      assignDestinationProbeLOTNumber: assign((ctx, e) => {
+        if (e.type !== 'UPDATE_DESTINATION_PROBE_LOT_NUMBER') return;
         const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
         if (!destination) {
           return;
