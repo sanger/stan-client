@@ -11,37 +11,69 @@ export type Option = {
 };
 interface SelectProps
   extends React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement> {
+  /**
+   * Options to display in select
+   */
   options: Option[];
+  /**
+   * Callback whenever selection changes
+   * @param val All selected values
+   * @param selectedIndex Index of the selection in display
+   */
   notifySelection?: (val: string[], selectedIndex: number) => void;
-  initialSelectedValue?: string[];
+  /**
+   * Optional. If set, this value will be selected if that exist in option value
+   */
+  selectedValueProp?: string[];
+  /**
+   * Is Multiple selection or not, by default it is true
+   */
   multiple?: boolean;
 }
 const defaultClassNames =
   'block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 disabled:opacity-75 disabled:bg-gray-200 disabled:cursor-not-allowed';
 
 export const MultiSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ children, options, multiple = true, initialSelectedValue, notifySelection, ...props }, ref) => {
-    const selectedValues = options
-      .filter((option) => initialSelectedValue?.some((value) => value === option.value))
-      .map((option) => option.value);
+  ({ children, options, multiple = true, selectedValueProp, notifySelection, ...props }, ref) => {
+    const [selected, setSelected] = useState<Array<string>>([]);
+    const [selectionIndex, setSelectionIndex] = useState(-1);
 
-    const [selected, setSelected] = useState<Array<string>>(selectedValues);
-    const [selectionIndex, setSelectionIndex] = useState(selectedValues.length > 0 ? selectedValues.length - 1 : -1);
+    React.useEffect(() => {
+      //Update selection, only if the given selection is different from what already exists
+      if (options.length < 0) return;
+      if (!selectedValueProp) return;
+      const givenSelectedValues = options
+        .filter((option) => selectedValueProp?.includes(option.value))
+        .map((option) => option.value);
+      if (
+        givenSelectedValues.length === selected.length &&
+        givenSelectedValues.sort().toString() === selected.sort().toString()
+      )
+        return;
+      setSelected(givenSelectedValues);
+      setSelectionIndex(givenSelectedValues.length - 1);
+    }, [selectedValueProp, setSelected, setSelectionIndex, options, selected]);
 
     /**Callback to handle selection changes**/
     const handleChange = React.useCallback(
       (selectedValue: string) => {
+        /**Empty option selected, if this is multiple-select , keep all other selection, but only reset the display of selected value
+         * otherwise for single-select, remove all selections
+         ***/
         if (selectedValue === '') {
           setSelectionIndex(-1);
-          notifySelection?.(selected, -1);
+          notifySelection?.(multiple ? selected : [], -1);
         } else {
-          let newSelection = [...selected, selectedValue];
-          if (!multiple) {
-            newSelection = [selectedValue];
+          //A new value is selected
+          let newSelection = [selectedValue];
+          let newSelectedIndex = 0;
+          if (multiple) {
+            newSelection = [...selected, selectedValue];
+            newSelectedIndex = newSelection.length - 1;
           }
           setSelected(newSelection);
-          notifySelection?.(newSelection, newSelection.length - 1);
-          setSelectionIndex(newSelection.length - 1);
+          setSelectionIndex(newSelectedIndex);
+          notifySelection?.(newSelection, newSelectedIndex);
         }
       },
       [multiple, setSelected, notifySelection, selected, setSelectionIndex]
@@ -105,9 +137,9 @@ export const MultiSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           className={defaultClassNames}
-          {...props}
           onChange={(e) => handleChange(e.currentTarget.value)}
           value={selectionIndex >= 0 ? selected[selectionIndex] : ''}
+          {...props}
         >
           {<option value="" />}
           {options.map((option, index) => (

@@ -105,25 +105,27 @@ export default function WorkNumberSelect({
       setAllWorks(works);
     }
     fetchAllWorkNumbers();
-  }, []);
+  }, [setAllWorks]);
 
   /**
    * Fetch  works based on workNumberType criteria
    */
   useEffect(() => {
+    debugger;
     if (workNumberType && workNumberType === 'ALL') {
       setWorks(allWorks);
     } else {
       const status = workNumberType ?? WorkStatus.Active;
       setWorks(allWorks.filter((work) => work.status === status));
     }
-    return () => {
-      setWorks([]);
-    };
   }, [setWorks, workNumberType, allWorks]);
 
   useEffect(() => {
-    if (!workNumber) setSelectedWork(undefined);
+    debugger;
+    if (!workNumber) {
+      setSelectedWork(undefined);
+      return;
+    }
     const work = works.find((work) => work.workNumber === workNumber);
     if (work) {
       setSelectedWork(work);
@@ -135,6 +137,7 @@ export default function WorkNumberSelect({
    */
   const handleWorkNumberChange = useCallback(
     (selectedWorkNumbers: string[], selectedIndex?: number) => {
+      debugger;
       if (multiple) {
         setSelectedWork(
           works.filter((work) => selectedWorkNumbers.some((workNumber) => workNumber === work.workNumber))
@@ -170,7 +173,6 @@ export default function WorkNumberSelect({
       }
     }
   };
-
   return (
     <div className={'flex flex-col'}>
       {name ? (
@@ -195,7 +197,9 @@ export default function WorkNumberSelect({
                 label: work.workNumber
               };
             })}
-            initialSelectedValue={Array.isArray(workNumber) ? workNumber : workNumber ? [workNumber] : []}
+            selectedValueProp={
+              workNumber ? (Array.isArray(workNumber) ? workNumber : workNumber ? [workNumber] : []) : undefined
+            }
             onBlur={validateWorkNumber}
             data-testid={'select_workNumber'}
             notifySelection={handleWorkNumberChange}
