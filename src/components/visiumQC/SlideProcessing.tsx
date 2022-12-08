@@ -13,6 +13,8 @@ import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
 import { objectKeys } from '../../lib/helpers';
 import FormikSelect from '../forms/Select';
+import ScanInput from '../scanInput/ScanInput';
+import { FormikErrorMessage } from '../forms';
 
 type SlideProcessingProps = {
   comments: CommentFieldsFragment[];
@@ -38,9 +40,10 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
         address: slot.address,
         result: PassFail.Pass
       })),
-      costing: values.costing
+      costing: values.costing,
+      lotNumber: values.lotNumber
     });
-  }, [setFieldValue, labware, values.costing]);
+  }, [setFieldValue, labware, values.costing, values.lotNumber]);
 
   React.useEffect(() => {
     if (values.costing) {
@@ -48,40 +51,51 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
     }
   }, [labwareResult, setFieldValue, values.costing]);
 
+  React.useEffect(() => {
+    if (values.lotNumber) {
+      setFieldValue('labwareResult', { ...labwareResult, lotNumber: values.lotNumber });
+    }
+  }, [labwareResult, setFieldValue, values.lotNumber]);
   return (
     <>
       {labwareResultProps && labware && (
         <Panel key={labware.barcode}>
-          <div className={'w-1/2'}>
-            <FormikSelect
-              label={'Slide costings'}
-              name={'costing'}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                const slideCosting =
-                  e.currentTarget.value.length === 0 ? undefined : (e.currentTarget.value as unknown as SlideCosting);
-                setFieldValue('costing', e.currentTarget.value);
-                setLabwareResult(
-                  labwareResult
-                    ? {
-                        ...labwareResult,
-                        costing: slideCosting
-                      }
-                    : {
-                        barcode: labware.barcode,
-                        sampleResults: labwareResultProps.sampleResults,
-                        costing: slideCosting
-                      }
-                );
-              }}
-              emptyOption={true}
-              data-testid="slide-costing"
-            >
-              {objectKeys(SlideCosting).map((key) => (
-                <option key={key} value={SlideCosting[key]}>
-                  {SlideCosting[key]}
-                </option>
-              ))}
-            </FormikSelect>
+          <div className={'grid grid-cols-2 bg-gray-100 p-4 gap-x-20'}>
+            <div className={'flex flex-col'}>
+              <FormikSelect
+                label={'Slide costings'}
+                name={'costing'}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  const slideCosting =
+                    e.currentTarget.value.length === 0 ? undefined : (e.currentTarget.value as unknown as SlideCosting);
+                  setFieldValue('costing', e.currentTarget.value);
+                  setLabwareResult(
+                    labwareResult
+                      ? {
+                          ...labwareResult,
+                          costing: slideCosting
+                        }
+                      : {
+                          barcode: labware.barcode,
+                          sampleResults: labwareResultProps.sampleResults,
+                          costing: slideCosting
+                        }
+                  );
+                }}
+                emptyOption={true}
+                data-testid="slide-costing"
+              >
+                {objectKeys(SlideCosting).map((key) => (
+                  <option key={key} value={SlideCosting[key]}>
+                    {SlideCosting[key]}
+                  </option>
+                ))}
+              </FormikSelect>
+            </div>
+            <div className={'flex flex-col'}>
+              <ScanInput label={'Slide LOT number'} name={'lotNumber'} />
+              <FormikErrorMessage name={'lotNumber'} />
+            </div>
           </div>
           <LabwareResult
             initialLabwareResult={labwareResultProps}
