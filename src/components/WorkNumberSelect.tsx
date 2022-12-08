@@ -111,7 +111,6 @@ export default function WorkNumberSelect({
    * Fetch  works based on workNumberType criteria
    */
   useEffect(() => {
-    debugger;
     if (workNumberType && workNumberType === 'ALL') {
       setWorks(allWorks);
     } else {
@@ -121,7 +120,6 @@ export default function WorkNumberSelect({
   }, [setWorks, workNumberType, allWorks]);
 
   useEffect(() => {
-    debugger;
     if (!workNumber) {
       setSelectedWork(undefined);
       return;
@@ -137,7 +135,6 @@ export default function WorkNumberSelect({
    */
   const handleWorkNumberChange = useCallback(
     (selectedWorkNumbers: string[], selectedIndex?: number) => {
-      debugger;
       if (multiple) {
         setSelectedWork(
           works.filter((work) => selectedWorkNumbers.some((workNumber) => workNumber === work.workNumber))
