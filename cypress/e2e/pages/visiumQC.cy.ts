@@ -34,6 +34,9 @@ describe('Visium QC Page', () => {
       it('shows Slide costing drop down', () => {
         cy.findByText('Slide costings').should('be.visible');
       });
+      it('shows Slide costing drop down', () => {
+        cy.findByText('Slide LOT number').should('be.visible');
+      });
       it('has all slots as passed', () => {
         cy.findAllByTestId('passIcon').then(($passIcons) => {
           $passIcons.each((i, icon) => {
@@ -93,18 +96,48 @@ describe('Visium QC Page', () => {
     });
     describe('On Save', () => {
       context('When there is no server error', () => {
-        context('When slide costing field is empty, but work number selected', () => {
+        context('When slide costing field is empty, all other fields are valid', () => {
           before(() => {
             cy.get('select[name="costing"]').select('');
             cy.get('select[name="workNumber"]').select('SGP1008');
+            cy.findByTestId('formInput').type('123456');
           });
           it('should display error message for Slide costing', () => {
             cy.findByText('Slide costing is a required field').should('be.visible');
           });
         });
-        context('When work number is empty and slide costing field selected', () => {
+        context('When all other fields are valid except LOT number', () => {
+          context('when LOT number is empty', () => {
+            before(() => {
+              cy.get('select[name="workNumber"]').select('SGP1008');
+              cy.get('select[name="costing"]').select('Faculty');
+              cy.findByTestId('formInput').clear();
+            });
+            it('should not enable Save button', () => {
+              cy.findByRole('button', { name: /Save/i }).should('be.disabled');
+            });
+            it('should display error message for Slide LOT number', () => {
+              cy.findByText('Slide LOT number is a required field').should('be.visible');
+            });
+          });
+          context('when LOT number has invalid format', () => {
+            before(() => {
+              cy.get('select[name="workNumber"]').select('SGP1008');
+              cy.get('select[name="costing"]').select('Faculty');
+              cy.findByTestId('formInput').type('123').blur();
+            });
+            it('should not enable Save button', () => {
+              cy.findByRole('button', { name: /Save/i }).should('be.disabled');
+            });
+            it('should display error message for Slide LOT number', () => {
+              cy.findByText('Slide LOT number should be a 6-7 digits number').should('be.visible');
+            });
+          });
+        });
+        context('When work number is empty and all other fields are valid', () => {
           before(() => {
             cy.get('select[name="workNumber"]').select('');
+            cy.findByTestId('formInput').clear().type('123456');
             cy.get('select[name="costing"]').select('Faculty');
           });
           it('should not enable Save button', () => {
@@ -114,6 +147,7 @@ describe('Visium QC Page', () => {
         context('When both work number and slide costing fields are selected', () => {
           before(() => {
             cy.get('select[name="workNumber"]').select('SGP1008');
+            cy.findByTestId('formInput').clear().type('123456');
             cy.get('select[name="costing"]').select('Faculty');
           });
           it('should  enable Save button', () => {
@@ -156,6 +190,7 @@ describe('Visium QC Page', () => {
           });
           cy.get('#labwareScanInput').type('STAN-2100{enter}');
           cy.get('select[name="workNumber"]').select('SGP1008');
+          cy.findByTestId('formInput').clear().type('123456');
           cy.get('select[name="costing"]').select('Faculty');
           cy.findByRole('button', { name: /Save/i }).click();
         });

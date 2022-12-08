@@ -1,0 +1,12 @@
+query GetAllWorkInfo {
+  works {
+    workNumber
+    workRequester {
+      username
+    }
+    project {
+      name
+    }
+    status
+  }
+}
