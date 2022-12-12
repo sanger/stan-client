@@ -112,7 +112,7 @@ type UpdateDestinationSlideLOTNumber = {
 type UpdateDestinationProbeLOTNumber = {
   type: 'UPDATE_DESTINATION_PROBE_LOT_NUMBER';
   labware: NewLabwareLayout;
-  lotNumber: string;
+  probeLotNumber: string;
 };
 
 type UpdateSourceLabwareState = {
@@ -441,7 +441,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         if (!destination) {
           return;
         }
-        destination.slotCopyDetails.lotNumber = e.lotNumber;
+        destination.slotCopyDetails.probeLotNumber = e.probeLotNumber;
       }),
       assignSourceLabwareState: assign((ctx, e) => {
         if (e.type !== 'UPDATE_SOURCE_LABWARE_STATE') return;

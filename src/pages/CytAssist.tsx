@@ -102,7 +102,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
       setProbeLOTNumberValidationError(error);
       onChangeProbeLOTNumber(probeLotNumber);
     },
-    [setSlideLOTNumberValidationError, onChangeSlideLOTNumber]
+    [setSlideLOTNumberValidationError, onChangeProbeLOTNumber]
   );
   const validateCosting = React.useCallback(
     (costing: string) => {
@@ -304,12 +304,12 @@ const CytAssist = () => {
   );
 
   const handleChangeProbeLOTNumber = React.useCallback(
-    (lotNumber: string) => {
+    (probeLotNumber: string) => {
       if (!selectedDestination) return;
       send({
         type: 'UPDATE_DESTINATION_PROBE_LOT_NUMBER',
         labware: selectedDestination.labware,
-        lotNumber: lotNumber
+        probeLotNumber: probeLotNumber
       });
     },
     [send, selectedDestination]

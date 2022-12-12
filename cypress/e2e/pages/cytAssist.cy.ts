@@ -113,11 +113,30 @@ describe('CytAssist Page', () => {
         cy.findByText('Invalid format: Required 6-7 digit number').should('not.exist');
       });
     });
+    context('When Probe LOT number is entered in wrong format', () => {
+      before(() => {
+        cy.findByTestId('probe-lot-number').within(() => {
+          cy.findByRole('textbox').type('asddg{enter}');
+        });
+      });
+      it('should display Invalid format error message', () => {
+        cy.findByText('Invalid format: Required 6-7 digit number').should('be.visible');
+      });
+    });
+    context('When LOT number  is entered in correct format', () => {
+      before(() => {
+        enterLOTNumber();
+      });
+      it('should not display invalid format error message', () => {
+        cy.findByText('Invalid format: Required 6-7 digit number').should('not.exist');
+      });
+    });
     describe('Checking for mandatory fields for Save', () => {
       describe('Check for SGP Number', () => {
         before(() => {
           enterOutputLabwareExternalID();
           enterLOTNumber();
+          enterProbeLOTNumber();
           selectSlideCostings('SGP');
         });
         context('When mapping is done  and all field selected except SGP number', () => {
@@ -167,9 +186,30 @@ describe('CytAssist Page', () => {
             saveButton().should('not.be.enabled');
           });
         });
-        context('When External barcode number is entered', () => {
+        context('When Lot number is entered', () => {
           before(() => {
             enterLOTNumber();
+          });
+          it('should enable Save button', () => {
+            saveButton().should('be.enabled');
+          });
+        });
+      });
+      describe('Check for Probe LOT number', () => {
+        before(() => {
+          cy.findByTestId('probe-lot-number').clear().type('{enter}');
+        });
+        context('When mapping is done  and all field selected except Probe LOT number', () => {
+          it('should display Required field error for external id', () => {
+            cy.findByText('Required field').should('be.visible');
+          });
+          it('keeps the Save button disabled', () => {
+            saveButton().should('not.be.enabled');
+          });
+        });
+        context('When Probe Lot number is entered', () => {
+          before(() => {
+            enterProbeLOTNumber();
           });
           it('should enable Save button', () => {
             saveButton().should('be.enabled');
@@ -252,6 +292,11 @@ function enterOutputLabwareExternalID() {
 
 function enterLOTNumber() {
   cy.findByTestId('lot-number').within(() => {
+    cy.findByRole('textbox').clear().type('1234567{enter}');
+  });
+}
+function enterProbeLOTNumber() {
+  cy.findByTestId(' probe-lot-number').within(() => {
     cy.findByRole('textbox').clear().type('1234567{enter}');
   });
 }
