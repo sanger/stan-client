@@ -48,7 +48,7 @@ describe('Dual Index Plate', () => {
             return res.once(
               ctx.data({
                 reagentPlate: {
-                  plateType: 'Fresh Frozen - Dual Index TT Set A',
+                  plateType: 'Fresh frozen - Dual Index TT Set A',
                   barcode: '123456789123456789012345',
                   slots: []
                 }
@@ -61,7 +61,7 @@ describe('Dual Index Plate', () => {
     });
     it('should display plate type that is alreAdy assigned to dual index plate', () => {
       cy.get('#plateType').within(() => {
-        cy.findByRole('combobox').should('have.value', 'Fresh Frozen - Dual Index TT Set A');
+        cy.findByRole('combobox').should('have.value', 'Fresh frozen - Dual Index TT Set A');
       });
     });
     it('should disable plate type selection combo', () => {
@@ -181,7 +181,7 @@ describe('Dual Index Plate', () => {
     context('When user selects a work number,plateType and have a mapping', () => {
       before(() => {
         cy.get('#plateType').within(() => {
-          cy.findByRole('combobox').select('Fresh Frozen - Dual Index TT Set A');
+          cy.findByRole('combobox').select('Fresh frozen - Dual Index TT Set A');
         });
         cy.findByTestId('select_workNumber').select('SGP1008');
       });
