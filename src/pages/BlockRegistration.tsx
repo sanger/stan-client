@@ -68,7 +68,7 @@ function getRegistrationFormTissue(): RegistrationFormTissue {
 function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
   const validation = new RegistrationValidation(registrationInfo);
   return Yup.object().shape({
-    workNumbers: Yup.array().min(1, 'Atleast one work number must be selected'),
+    workNumbers: Yup.array().min(1, 'At least one work number must be selected'),
     tissues: Yup.array()
       .min(1)
       .of(

@@ -40,7 +40,7 @@ export const MultiSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
 
     React.useEffect(() => {
       //Update selection, only if the given selection is different from what already exists
-      if (options.length < 0) return;
+      if (options.length === 0) return;
       if (!selectedValueProp) return;
       const givenSelectedValues = options
         .filter((option) => selectedValueProp?.includes(option.value))

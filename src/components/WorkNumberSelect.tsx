@@ -160,7 +160,7 @@ export default function WorkNumberSelect({
   const validateWorkNumber = () => {
     if (multiple) {
       if (!currentSelectedWork) {
-        setError('Atleast one work number must be selected');
+        setError('At least one work number must be selected');
       }
     } else {
       if (!currentSelectedWork) {

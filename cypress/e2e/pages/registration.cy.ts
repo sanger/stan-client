@@ -18,7 +18,7 @@ describe('Registration', () => {
     });
     it('requires Work numbers', () => {
       cy.findByTestId('select_workNumber').focus().blur();
-      cy.findByText('Atleast one work number must be selected').should('be.visible');
+      cy.findByText('At least one work number must be selected').should('be.visible');
     });
 
     it('requires External Identifier', () => {
