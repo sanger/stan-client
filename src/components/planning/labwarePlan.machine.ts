@@ -1,5 +1,5 @@
 import { createMachine } from 'xstate';
-import { Maybe, PlanMutation, PlanRequestLabware } from '../../types/sdk';
+import { Maybe, PlanMutation, PlanRequestLabware, SlideCosting } from '../../types/sdk';
 import { LabwareTypeName } from '../../types/stan';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
 import { assign } from '@xstate/immer';
@@ -14,6 +14,8 @@ type CreateLabwareEvent = {
   sectionThickness?: number;
   barcode?: string;
   quantity: number;
+  lotNumber?: string;
+  costing?: SlideCosting;
   operationType: string;
 };
 
@@ -200,6 +202,8 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
 
           const planRequestLabware = buildPlanRequestLabware({
             sampleThickness: e.sectionThickness,
+            lotNumber: e.lotNumber,
+            costing: e.costing,
             layoutPlan: ctx.layoutPlan,
             destinationLabwareTypeName: ctx.layoutPlan.destinationLabware.labwareType.name,
             barcode: e.barcode
@@ -218,17 +222,23 @@ type BuildPlanRequestLabwareParams = {
   layoutPlan: LayoutPlan;
   barcode?: string;
   sampleThickness?: number;
+  lotNumber?: string;
+  costing?: SlideCosting;
 };
 
 function buildPlanRequestLabware({
   barcode,
   destinationLabwareTypeName,
   layoutPlan,
-  sampleThickness
+  sampleThickness,
+  lotNumber,
+  costing
 }: BuildPlanRequestLabwareParams): PlanRequestLabware {
   return {
     labwareType: destinationLabwareTypeName,
     barcode,
+    lotNumber,
+    costing,
     actions: Array.from(layoutPlan.plannedActions.keys()).flatMap((address) => {
       const sources = layoutPlan.plannedActions.get(address)!;
       return sources.map((source) => ({
