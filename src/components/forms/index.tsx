@@ -1,5 +1,6 @@
 import React from 'react';
 import { getIn, useFormikContext } from 'formik';
+import { alphaNumericSortDefault } from '../../types/stan';
 
 /**
  * Will display an error message if <code>name</code> has been touched and has an error
@@ -35,14 +36,22 @@ type OptionTemplate<L extends string, V extends string, LV = string | number, VV
  * @param entities list of models to generate options for
  * @param label name of the property on each entity to use for the label
  * @param value name of the property on each entity to use for the value
+ * @param sort sorting required for options displayed? Default value is true
  */
 export function optionValues<L extends string, V extends string, T extends OptionTemplate<L, V>>(
   entities: T[],
   label: L,
-  value: V
+  value: V,
+  sort?: boolean
 ) {
   if (!entities || entities.length === 0) return <option />;
-  return entities.map((e, index) => {
+  let isSort = sort ?? true;
+  let mapEntities = isSort
+    ? [...entities].sort((a, b) =>
+        alphaNumericSortDefault(String(a[label]).toUpperCase(), String(b[label]).toUpperCase())
+      )
+    : entities;
+  return mapEntities.map((e, index) => {
     return (
       <option key={index} value={e[value]}>
         {e[label]}

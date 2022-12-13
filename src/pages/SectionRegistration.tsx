@@ -17,11 +17,11 @@ import { history, StanCoreContext } from '../lib/sdk';
 import { useLocation } from 'react-router-dom';
 
 const availableLabware: Array<LabwareTypeName> = [
-  LabwareTypeName.SLIDE,
-  LabwareTypeName.VISIUM_LP,
-  LabwareTypeName.VISIUM_TO,
   LabwareTypeName.FOUR_SLOT_SLIDE,
-  LabwareTypeName.TUBE
+  LabwareTypeName.SLIDE,
+  LabwareTypeName.TUBE,
+  LabwareTypeName.VISIUM_LP,
+  LabwareTypeName.VISIUM_TO
 ];
 
 type SectionRegistrationFormSection = {
