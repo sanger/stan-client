@@ -103,16 +103,11 @@ type UpdateDestinationBioState = {
   bioState: string;
 };
 
-type UpdateDestinationSlideLOTNumber = {
-  type: 'UPDATE_DESTINATION_SLIDE_LOT_NUMBER';
+type UpdateDestinationLOTNumber = {
+  type: 'UPDATE_DESTINATION_LOT_NUMBER';
   labware: NewLabwareLayout;
   lotNumber: string;
-};
-
-type UpdateDestinationProbeLOTNumber = {
-  type: 'UPDATE_DESTINATION_PROBE_LOT_NUMBER';
-  labware: NewLabwareLayout;
-  probeLotNumber: string;
+  isProbe: boolean;
 };
 
 type UpdateSourceLabwareState = {
@@ -153,8 +148,7 @@ export type SlotCopyEvent =
   | UpdateDestinationPreBarcode
   | UpdateDestinationCosting
   | UpdateDestinationBioState
-  | UpdateDestinationSlideLOTNumber
-  | UpdateDestinationProbeLOTNumber
+  | UpdateDestinationLOTNumber
   | SaveEvent
   | FindPermDataEvent
   | MachineServiceDone<'copySlots', SlotCopyMutation>
@@ -207,11 +201,8 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           UPDATE_DESTINATION_BIO_STATE: {
             actions: 'assignDestinationBioState'
           },
-          UPDATE_DESTINATION_SLIDE_LOT_NUMBER: {
+          UPDATE_DESTINATION_LOT_NUMBER: {
             actions: 'assignDestinationLOTNumber'
-          },
-          UPDATE_DESTINATION_PROBE_LOT_NUMBER: {
-            actions: 'assignDestinationProbeLOTNumber'
           }
         }
       },
@@ -254,11 +245,8 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           UPDATE_DESTINATION_BIO_STATE: {
             actions: 'assignDestinationBioState'
           },
-          UPDATE_DESTINATION_SLIDE_LOT_NUMBER: {
+          UPDATE_DESTINATION_LOT_NUMBER: {
             actions: 'assignDestinationLOTNumber'
-          },
-          UPDATE_DESTINATION_PROBE_LOT_NUMBER: {
-            actions: 'assignDestinationProbeLOTNumber'
           },
           SAVE: 'copying'
         }
@@ -427,21 +415,17 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         }
         destination.slotCopyDetails.costing = e.labwareCosting;
       }),
-      assignDestinationSlideLOTNumber: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_DESTINATION_SLIDE_LOT_NUMBER') return;
+      assignDestinationLOTNumber: assign((ctx, e) => {
+        if (e.type !== 'UPDATE_DESTINATION_LOT_NUMBER') return;
         const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
         if (!destination) {
           return;
         }
-        destination.slotCopyDetails.lotNumber = e.lotNumber;
-      }),
-      assignDestinationProbeLOTNumber: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_DESTINATION_PROBE_LOT_NUMBER') return;
-        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
-        if (!destination) {
-          return;
+        if (e.isProbe) {
+          destination.slotCopyDetails.probeLotNumber = e.lotNumber;
+        } else {
+          destination.slotCopyDetails.lotNumber = e.lotNumber;
         }
-        destination.slotCopyDetails.probeLotNumber = e.probeLotNumber;
       }),
       assignSourceLabwareState: assign((ctx, e) => {
         if (e.type !== 'UPDATE_SOURCE_LABWARE_STATE') return;

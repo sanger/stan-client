@@ -32,8 +32,7 @@ interface OutputLabwareScanPanelProps {
   onChangeBarcode: (barcode: string) => void;
   onChangeLabwareType: (labwareType: string) => void;
   onChangeCosting: (costing: string) => void;
-  onChangeSlideLOTNumber: (slideLotNumber: string) => void;
-  onChangeProbeLOTNumber: (probeLotNumber: string) => void;
+  onChangeLOTNumber: (lotNumber: string, isProbe: boolean) => void;
 }
 
 /**Component to configure the output CytAssist labware**/
@@ -41,8 +40,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeBarcode,
   onChangeLabwareType,
   onChangeCosting,
-  onChangeSlideLOTNumber,
-  onChangeProbeLOTNumber
+  onChangeLOTNumber
 }) => {
   /**State to store preBarcode validation errors**/
   const [preBarcodeValidationError, setPreBarcodeValidationError] = React.useState('');
@@ -69,7 +67,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
     [setPreBarcodeValidationError, onChangeBarcode]
   );
   const validateLotNumber = React.useCallback(
-    (slideLotNumber: string) => {
+    (slideLotNumber: string, isProbe: boolean) => {
       let error;
       if (slideLotNumber.length === 0) {
         error = 'Required field';
@@ -81,29 +79,16 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
           error = '';
         }
       }
-      setSlideLOTNumberValidationError(error);
-      onChangeSlideLOTNumber(slideLotNumber);
-    },
-    [setSlideLOTNumberValidationError, onChangeSlideLOTNumber]
-  );
-  const validateProbeLotNumber = React.useCallback(
-    (probeLotNumber: string) => {
-      let error;
-      if (probeLotNumber.length === 0) {
-        error = 'Required field';
+      if (isProbe) {
+        setProbeLOTNumberValidationError(error);
       } else {
-        const valid = /^\d{6,7}$/.test(probeLotNumber);
-        if (!valid) {
-          error = 'Invalid format: Required 6-7 digit number';
-        } else {
-          error = '';
-        }
+        setSlideLOTNumberValidationError(error);
       }
-      setProbeLOTNumberValidationError(error);
-      onChangeProbeLOTNumber(probeLotNumber);
+      onChangeLOTNumber(slideLotNumber, isProbe);
     },
-    [setSlideLOTNumberValidationError, onChangeProbeLOTNumber]
+    [setSlideLOTNumberValidationError, onChangeLOTNumber]
   );
+
   const validateCosting = React.useCallback(
     (costing: string) => {
       let error = '';
@@ -149,7 +134,6 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
             ))}
         </Select>
       </div>
-      <div />
       <div>
         <Label name={'Slide costings'} />
         <Select
@@ -173,9 +157,9 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
       <div data-testid={'lot-number'}>
         <Label name={'Slide LOT number'} />
         <ScanInput
-          onScan={validateLotNumber}
+          onScan={(val) => validateLotNumber(val, false)}
           onBlur={(e) => {
-            validateLotNumber(e.currentTarget.value);
+            validateLotNumber(e.currentTarget.value, false);
           }}
           allowEmptyValue={true}
         />
@@ -186,11 +170,10 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
       <div data-testid={'probe-lot-number'}>
         <Label name={'Transcriptome Probe LOT number'} />
         <ScanInput
-          onScan={validateProbeLotNumber}
+          onScan={(val) => validateLotNumber(val, true)}
           onBlur={(e) => {
-            validateProbeLotNumber(e.currentTarget.value);
+            validateLotNumber(e.currentTarget.value, true);
           }}
-          allowEmptyValue={true}
         />
         {probLOTNumberValidationError && (
           <MutedText className={'text-red-400'}>{probLOTNumberValidationError}</MutedText>
@@ -291,25 +274,14 @@ const CytAssist = () => {
     [send, selectedDestination]
   );
 
-  const handleChangeSlideLOTNumber = React.useCallback(
-    (lotNumber: string) => {
+  const handleChangeLOTNumber = React.useCallback(
+    (lotNumber: string, isProbe: boolean) => {
       if (!selectedDestination) return;
       send({
-        type: 'UPDATE_DESTINATION_SLIDE_LOT_NUMBER',
+        type: 'UPDATE_DESTINATION_LOT_NUMBER',
         labware: selectedDestination.labware,
-        lotNumber: lotNumber
-      });
-    },
-    [send, selectedDestination]
-  );
-
-  const handleChangeProbeLOTNumber = React.useCallback(
-    (probeLotNumber: string) => {
-      if (!selectedDestination) return;
-      send({
-        type: 'UPDATE_DESTINATION_PROBE_LOT_NUMBER',
-        labware: selectedDestination.labware,
-        probeLotNumber: probeLotNumber
+        lotNumber: lotNumber,
+        isProbe: isProbe
       });
     },
     [send, selectedDestination]
@@ -408,8 +380,7 @@ const CytAssist = () => {
                 onChangeBarcode={handleChangeOutputLabwareBarcode}
                 onChangeLabwareType={handleChangeOutputLabwareType}
                 onChangeCosting={handleChangeCosting}
-                onChangeSlideLOTNumber={handleChangeSlideLOTNumber}
-                onChangeProbeLOTNumber={handleChangeProbeLOTNumber}
+                onChangeLOTNumber={handleChangeLOTNumber}
               />
             }
           />
@@ -433,7 +404,8 @@ const CytAssist = () => {
                 !selectedDestination ||
                 !selectedDestination.slotCopyDetails.preBarcode ||
                 !selectedDestination.slotCopyDetails.costing ||
-                !selectedDestination.slotCopyDetails.lotNumber
+                !selectedDestination.slotCopyDetails.lotNumber ||
+                !selectedDestination.slotCopyDetails.probeLotNumber
               }
               onClick={onSaveAction}
             >

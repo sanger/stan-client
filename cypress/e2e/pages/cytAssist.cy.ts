@@ -123,11 +123,11 @@ describe('CytAssist Page', () => {
         cy.findByText('Invalid format: Required 6-7 digit number').should('be.visible');
       });
     });
-    context('When LOT number  is entered in correct format', () => {
+    context('When Probe LOT number  is entered in correct format', () => {
       before(() => {
-        enterLOTNumber();
+        enterProbeLOTNumber();
       });
-      it('should not display invalid format error message', () => {
+      it('should not display invalid format error message for Probe LOT number', () => {
         cy.findByText('Invalid format: Required 6-7 digit number').should('not.exist');
       });
     });
@@ -155,7 +155,9 @@ describe('CytAssist Page', () => {
       });
       describe('Check for External barcode', () => {
         before(() => {
-          cy.findByTestId('external-barcode').clear().type('{enter}');
+          cy.findByTestId('external-barcode').within(() => {
+            cy.findByRole('textbox').clear().blur();
+          });
         });
         context('When mapping is done  and all field selected except External barcode', () => {
           it('should display Required field error for external id', () => {
@@ -176,7 +178,9 @@ describe('CytAssist Page', () => {
       });
       describe('Check for LOT number', () => {
         before(() => {
-          cy.findByTestId('lot-number').clear().type('{enter}');
+          cy.findByTestId('lot-number').within(() => {
+            cy.findByRole('textbox').clear().blur();
+          });
         });
         context('When mapping is done  and all field selected except LOT number', () => {
           it('should display Required field error for external id', () => {
@@ -197,7 +201,9 @@ describe('CytAssist Page', () => {
       });
       describe('Check for Probe LOT number', () => {
         before(() => {
-          cy.findByTestId('probe-lot-number').clear().type('{enter}');
+          cy.findByTestId('probe-lot-number').within(() => {
+            cy.findByRole('textbox').clear().blur();
+          });
         });
         context('When mapping is done  and all field selected except Probe LOT number', () => {
           it('should display Required field error for external id', () => {
@@ -296,7 +302,7 @@ function enterLOTNumber() {
   });
 }
 function enterProbeLOTNumber() {
-  cy.findByTestId(' probe-lot-number').within(() => {
+  cy.findByTestId('probe-lot-number').within(() => {
     cy.findByRole('textbox').clear().type('1234567{enter}');
   });
 }
