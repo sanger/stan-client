@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import AppShell from '../components/AppShell';
 import { Form, Formik } from 'formik';
 import FormikInput from '../components/forms/Input';
@@ -21,6 +21,7 @@ import { history } from '../lib/sdk';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { ParsedQuery } from 'query-string';
 import { merge } from 'lodash';
+import { configContext } from '../context/ConfigContext';
 import searchMachine from '../lib/machines/search/searchMachine';
 import SearchService from '../lib/services/searchService';
 
@@ -76,15 +77,15 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   const params: ParsedQuery = parseQueryString(urlParamsString);
   const findRequest: FindRequest = merge({}, emptyFindRequest, cleanParams(params, emptyFindRequestKeys));
 
-  //const config = useContext(configContext)!;
+  const config = useContext(configContext)!;
   const search = searchMachine<FindRequest, SearchResultTableEntry>(new SearchService());
 
   const memoSearchMachine = React.useMemo(() => {
     return search.withContext({
       findRequest,
-      maxRecords: -1
+      maxRecords: config.maxSearchRecords
     });
-  }, [findRequest, search]);
+  }, [findRequest, search, config]);
   const [current, send] = useMachine(() => memoSearchMachine);
 
   const { serverError, searchResult } = current.context;

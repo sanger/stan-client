@@ -4,5 +4,5 @@ window.STAN_CONFIG = {
   footerColor: "border-sdb-100 bg-sdb-400",
   deploymentDate: "TBD",
   supportEmail: "beaglebugs@sanger.ac.uk",
-  maxSearchRecords: 150,
+  maxSearchRecords: -1,
 };
