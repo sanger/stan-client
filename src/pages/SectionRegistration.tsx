@@ -204,6 +204,7 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
   });
 
   const { serverError, submissionResult } = current.context;
+
   const submitForm = async (values: SectionRegistrationFormValues) =>
     send({ type: 'SUBMIT_FORM', values: buildSectionRegisterRequest(values) });
   const isSubmitting = !current.matches('fillingOutForm');
