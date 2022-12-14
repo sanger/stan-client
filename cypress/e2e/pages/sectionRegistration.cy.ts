@@ -30,6 +30,11 @@ describe('Section Registration Page', () => {
   describe('Validation', () => {
     shouldBehaveLikeARegistrationForm(RegistrationType.SLIDE);
 
+    it('requires SGP Number', () => {
+      cy.findByTestId('select_workNumber').focus().blur();
+      cy.findByText('SGP number is required').should('be.visible');
+    });
+
     it('requires External Slide Barcode', () => {
       cy.findByLabelText('External Labware Barcode').focus().blur();
       cy.findByText('External Labware Barcode is a required field').should('be.visible');
@@ -49,6 +54,9 @@ describe('Section Registration Page', () => {
   });
 
   describe('Initialisation', () => {
+    it('should display SGP Number field', () => {
+      cy.findByTestId('select_workNumber').should('exist');
+    });
     it('should not be showing a Remove Slide button', () => {
       cy.findByRole('button', { name: /- Remove Slide/i }).should('not.exist');
     });
@@ -158,6 +166,7 @@ describe('Section Registration Page', () => {
         });
 
         fillInForm();
+        cy.findByTestId('select_workNumber').select('SGP1008');
         cy.findByText('Register').click();
       });
 
@@ -174,6 +183,7 @@ describe('Section Registration Page', () => {
         });
 
         fillInForm();
+        cy.findByTestId('select_workNumber').select('SGP1008');
         cy.findByText('Register').click();
       });
 

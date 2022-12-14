@@ -24,7 +24,7 @@ export const ErrorMessage: React.FC = ({ children }) => {
  * Means both the property <code>L</code> and <code>V</code> must be strings,
  * and must return a string or number when used as a key.
  */
-type OptionTemplate<L extends string, V extends string, LV = string | number, VV = string | number> = {
+export type OptionTemplate<L extends string, V extends string, LV = string | number, VV = string | number> = {
   [key in L]: LV;
 } & {
   [key in V]: VV;
@@ -35,16 +35,18 @@ type OptionTemplate<L extends string, V extends string, LV = string | number, VV
  * @param entities list of models to generate options for
  * @param label name of the property on each entity to use for the label
  * @param value name of the property on each entity to use for the value
+ * @param keyAsValue if enables value field will be used as keys
  */
 export function optionValues<L extends string, V extends string, T extends OptionTemplate<L, V>>(
   entities: T[],
   label: L,
-  value: V
+  value: V,
+  keyAsValue?: boolean
 ) {
   if (!entities || entities.length === 0) return <option />;
   return entities.map((e, index) => {
     return (
-      <option key={index} value={e[value]}>
+      <option key={keyAsValue ? e[value] : index} value={e[value]}>
         {e[label]}
       </option>
     );

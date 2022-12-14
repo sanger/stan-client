@@ -17,12 +17,18 @@ import { useConfirmLeave } from '../../lib/hooks';
 import { Column } from 'react-table';
 import { createRegistrationMachine } from '../../lib/machines/registration/registrationMachine';
 import { Prompt } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import variants from '../../lib/motionVariants';
+import Heading from '../../components/Heading';
+import WorkNumberSelect from '../../components/WorkNumberSelect';
+import { FormikErrorMessage } from '../../components/forms';
 
 /**
  * Expect form input interface
  */
 interface FormInput<T> {
   tissues: T[];
+  workNumbers: string[];
 }
 
 /**
@@ -78,6 +84,7 @@ interface RegistrationParams<M, T, R extends Object> {
    * Change in default keywords to display
    */
   keywordsMap?: Map<TextType, string>;
+  isBlock?: boolean;
 }
 
 /**
@@ -97,7 +104,8 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
   successDisplayTableColumns,
   formatSuccessData,
   defaultFormTissueValues,
-  keywordsMap
+  keywordsMap,
+  isBlock = false
 }: RegistrationParams<M, T, R>) {
   const registrationMachine = React.useMemo(() => {
     return createRegistrationMachine<FormInput<T>, M>(buildRegistrationInput, registrationService);
@@ -120,7 +128,8 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
   });
 
   const initialValues = {
-    tissues: [defaultFormTissueValues]
+    tissues: [defaultFormTissueValues],
+    workNumbers: []
   };
   const { registrationResult, registrationErrors } = current.context;
   const formIsReady = ['ready', 'submitting', 'clashed', 'submissionError'].some((val) => current.matches(val));
@@ -162,8 +171,26 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
               validateOnBlur={true}
               onSubmit={async (values) => send({ type: 'SUBMIT_FORM', values })}
             >
-              {({ values }) => (
+              {({ values, setFieldValue }) => (
                 <>
+                  {isBlock && (
+                    <motion.div variants={variants.fadeInWithLift}>
+                      <Heading level={3}>SGP Number</Heading>
+                      <p className="mt-2">
+                        Please select SGP numbers to associate with all block registering operations
+                      </p>
+                      <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
+                        <WorkNumberSelect
+                          onWorkNumberChangeInMulti={(workNumbers) => {
+                            setFieldValue('workNumbers', [...workNumbers]);
+                          }}
+                          multiple={true}
+                          emptyOption={false}
+                        />
+                        {values.workNumbers.length <= 0 && <FormikErrorMessage name={'workNumbers'} />}
+                      </motion.div>
+                    </motion.div>
+                  )}
                   <RegistrationForm
                     registrationInfo={registrationInfo}
                     availableLabwareTypes={availableLabwareTypes}

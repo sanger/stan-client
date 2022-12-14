@@ -16,6 +16,7 @@ import { CellProps, Column } from 'react-table';
 import FormikInput from '../components/forms/Input';
 import { FieldArray } from 'formik';
 import { identity } from 'lodash';
+import WorkNumberSelect from '../components/WorkNumberSelect';
 
 const validationSchema = Yup.object().shape({
   labware: Yup.array()
@@ -24,12 +25,14 @@ const validationSchema = Yup.object().shape({
     .of(
       Yup.object().shape({
         barcode: Yup.string().required(),
-        highestSection: Yup.number().min(0, 'Section number must be greater than or equal to 0').notRequired()
+        highestSection: Yup.number().min(0, 'Section number must be greater than or equal to 0').notRequired(),
+        workNumber: Yup.string().required('SGP Number is a required field')
       })
     )
 });
 
 export default function Unrelease() {
+  const [workNumber, setWorkNumber] = React.useState('');
   return (
     <StanForm<UnreleaseRequest, UnreleaseMutation>
       title={'Unrelease'}
@@ -45,28 +48,42 @@ export default function Unrelease() {
       )}
     >
       {(formikProps) => (
-        <motion.div variants={variants.fadeInWithLift} className="space-y-4">
-          <Heading level={3}>Labware</Heading>
-          <MutedText>Please scan in the labware you wish to unrelease.</MutedText>
-
-          <FieldArray name={'labware'}>
-            {(helpers) => (
-              <LabwareScanner
-                onAdd={(lw) =>
-                  helpers.push({
-                    barcode: lw.barcode,
-                    highestSection: hasBlock(lw) ? lw.slots[0].blockHighestSection : undefined
-                  })
-                }
-                onRemove={(labware, index) => helpers.remove(index)}
-              >
-                <LabwareScanPanel
-                  columns={[columns.barcode(), columns.externalName(), sectionNumberInputIfBlock(formikProps.values)]}
-                />
-              </LabwareScanner>
-            )}
-          </FieldArray>
-          <FormikErrorMessage name={'barcodes'} />
+        <motion.div variants={variants.fadeInWithLift}>
+          <motion.div variants={variants.fadeInWithLift} className={'mb-8'}>
+            <Heading level={3}>SGP Number</Heading>
+            <p className="mt-2">Please select an SGP number to associate with all labware</p>
+            <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
+              <WorkNumberSelect
+                onWorkNumberChange={(workNumber) => {
+                  setWorkNumber(workNumber);
+                  formikProps.values.labware.forEach((lw) => (lw.workNumber = workNumber));
+                }}
+              />
+            </motion.div>
+          </motion.div>
+          <motion.div variants={variants.fadeInWithLift} className="space-y-4">
+            <Heading level={3}>Labware</Heading>
+            <MutedText>Please scan in the labware you wish to unrelease.</MutedText>
+            <FieldArray name={'labware'}>
+              {(helpers) => (
+                <LabwareScanner
+                  onAdd={(lw) =>
+                    helpers.push({
+                      barcode: lw.barcode,
+                      highestSection: hasBlock(lw) ? lw.slots[0].blockHighestSection : undefined,
+                      workNumber: workNumber
+                    })
+                  }
+                  onRemove={(labware, index) => helpers.remove(index)}
+                >
+                  <LabwareScanPanel
+                    columns={[columns.barcode(), columns.externalName(), sectionNumberInputIfBlock(formikProps.values)]}
+                  />
+                </LabwareScanner>
+              )}
+            </FieldArray>
+            <FormikErrorMessage name={'barcodes'} />
+          </motion.div>
         </motion.div>
       )}
     </StanForm>
