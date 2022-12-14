@@ -25,10 +25,10 @@ const validationSchema = Yup.object().shape({
     .of(
       Yup.object().shape({
         barcode: Yup.string().required(),
-        highestSection: Yup.number().min(0, 'Section number must be greater than or equal to 0').notRequired()
+        highestSection: Yup.number().min(0, 'Section number must be greater than or equal to 0').notRequired(),
+        workNumber: Yup.string().required('SGP Number is a required field')
       })
-    ),
-  workNumber: Yup.string().required('SGP Number is a required field')
+    )
 });
 
 export default function Unrelease() {
@@ -38,8 +38,7 @@ export default function Unrelease() {
       onSubmit={(request) => stanCore.Unrelease({ request })}
       validationSchema={validationSchema}
       initialValues={{
-        labware: [],
-        workNumber: ''
+        labware: []
       }}
       summary={(props) => (
         <p>
@@ -56,7 +55,7 @@ export default function Unrelease() {
               <WorkNumberSelect
                 name={'workNumber'}
                 onWorkNumberChange={(workNumber) => {
-                  formikProps.setFieldValue('workNumber', workNumber);
+                  formikProps.values.labware.forEach((lw) => (lw.workNumber = workNumber));
                 }}
               />
             </motion.div>
@@ -64,7 +63,6 @@ export default function Unrelease() {
           <motion.div variants={variants.fadeInWithLift} className="space-y-4">
             <Heading level={3}>Labware</Heading>
             <MutedText>Please scan in the labware you wish to unrelease.</MutedText>
-
             <FieldArray name={'labware'}>
               {(helpers) => (
                 <LabwareScanner
