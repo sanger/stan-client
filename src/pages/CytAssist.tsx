@@ -32,7 +32,7 @@ interface OutputLabwareScanPanelProps {
   onChangeBarcode: (barcode: string) => void;
   onChangeLabwareType: (labwareType: string) => void;
   onChangeCosting: (costing: string) => void;
-  onChangeSlideLOTNumber: (slideLotNumber: string) => void;
+  onChangeLOTNumber: (lotNumber: string, isProbe: boolean) => void;
 }
 
 /**Component to configure the output CytAssist labware**/
@@ -40,12 +40,13 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeBarcode,
   onChangeLabwareType,
   onChangeCosting,
-  onChangeSlideLOTNumber
+  onChangeLOTNumber
 }) => {
   /**State to store preBarcode validation errors**/
   const [preBarcodeValidationError, setPreBarcodeValidationError] = React.useState('');
   const [slideLOTNumberValidationError, setSlideLOTNumberValidationError] = React.useState('');
   const [costingValidationError, setCostingValidationError] = React.useState('');
+  const [probLOTNumberValidationError, setProbeLOTNumberValidationError] = React.useState('');
 
   const validatePreBarcode = React.useCallback(
     (preBarcode: string) => {
@@ -66,7 +67,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
     [setPreBarcodeValidationError, onChangeBarcode]
   );
   const validateLotNumber = React.useCallback(
-    (slideLotNumber: string) => {
+    (slideLotNumber: string, isProbe: boolean) => {
       let error;
       if (slideLotNumber.length === 0) {
         error = 'Required field';
@@ -78,11 +79,16 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
           error = '';
         }
       }
-      setSlideLOTNumberValidationError(error);
-      onChangeSlideLOTNumber(slideLotNumber);
+      if (isProbe) {
+        setProbeLOTNumberValidationError(error);
+      } else {
+        setSlideLOTNumberValidationError(error);
+      }
+      onChangeLOTNumber(slideLotNumber, isProbe);
     },
-    [setSlideLOTNumberValidationError, onChangeSlideLOTNumber]
+    [setSlideLOTNumberValidationError, onChangeLOTNumber]
   );
+
   const validateCosting = React.useCallback(
     (costing: string) => {
       let error = '';
@@ -95,7 +101,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
     [setCostingValidationError, onChangeCosting]
   );
   return (
-    <div className={'w-full grid grid-cols-2 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
+    <div className={'w-full grid grid-cols-3 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
       <div data-testid="external-barcode">
         <Label name={'External barcode'} />
         <ScanInput
@@ -151,14 +157,26 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
       <div data-testid={'lot-number'}>
         <Label name={'Slide LOT number'} />
         <ScanInput
-          onScan={validateLotNumber}
+          onScan={(val) => validateLotNumber(val, false)}
           onBlur={(e) => {
-            validateLotNumber(e.currentTarget.value);
+            validateLotNumber(e.currentTarget.value, false);
           }}
           allowEmptyValue={true}
         />
         {slideLOTNumberValidationError && (
           <MutedText className={'text-red-400'}>{slideLOTNumberValidationError}</MutedText>
+        )}
+      </div>
+      <div data-testid={'probe-lot-number'}>
+        <Label name={'Transcriptome Probe LOT number'} />
+        <ScanInput
+          onScan={(val) => validateLotNumber(val, true)}
+          onBlur={(e) => {
+            validateLotNumber(e.currentTarget.value, true);
+          }}
+        />
+        {probLOTNumberValidationError && (
+          <MutedText className={'text-red-400'}>{probLOTNumberValidationError}</MutedText>
         )}
       </div>
     </div>
@@ -256,13 +274,14 @@ const CytAssist = () => {
     [send, selectedDestination]
   );
 
-  const handleChangeSlideLOTNumber = React.useCallback(
-    (lotNumber: string) => {
+  const handleChangeLOTNumber = React.useCallback(
+    (lotNumber: string, isProbe: boolean) => {
       if (!selectedDestination) return;
       send({
         type: 'UPDATE_DESTINATION_LOT_NUMBER',
         labware: selectedDestination.labware,
-        lotNumber: lotNumber
+        lotNumber: lotNumber,
+        isProbe: isProbe
       });
     },
     [send, selectedDestination]
@@ -361,7 +380,7 @@ const CytAssist = () => {
                 onChangeBarcode={handleChangeOutputLabwareBarcode}
                 onChangeLabwareType={handleChangeOutputLabwareType}
                 onChangeCosting={handleChangeCosting}
-                onChangeSlideLOTNumber={handleChangeSlideLOTNumber}
+                onChangeLOTNumber={handleChangeLOTNumber}
               />
             }
           />
@@ -385,7 +404,8 @@ const CytAssist = () => {
                 !selectedDestination ||
                 !selectedDestination.slotCopyDetails.preBarcode ||
                 !selectedDestination.slotCopyDetails.costing ||
-                !selectedDestination.slotCopyDetails.lotNumber
+                !selectedDestination.slotCopyDetails.lotNumber ||
+                !selectedDestination.slotCopyDetails.probeLotNumber
               }
               onClick={onSaveAction}
             >
