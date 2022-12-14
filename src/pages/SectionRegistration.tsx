@@ -49,6 +49,7 @@ type SectionRegistrationFormLabware = {
 
 export type SectionRegistrationFormValues = {
   labwares: Array<SectionRegistrationFormLabware>;
+  workNumber: string;
 };
 
 function buildSectionRegisterRequest(values: SectionRegistrationFormValues): SectionRegisterRequest {
@@ -75,13 +76,15 @@ function buildSectionRegisterRequest(values: SectionRegistrationFormValues): Sec
           }));
         })
       };
-    })
+    }),
+    workNumber: values.workNumber
   };
 }
 
 function buildInitialFormValues(initialLabwareType: LabwareTypeName) {
   return {
-    labwares: [buildLabware(initialLabwareType)]
+    labwares: [buildLabware(initialLabwareType)],
+    workNumber: ''
   };
 }
 
@@ -143,7 +146,8 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
             );
           })
         })
-      )
+      ),
+    workNumber: Yup.string().required()
   });
 }
 
@@ -200,6 +204,7 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
   });
 
   const { serverError, submissionResult } = current.context;
+
   const submitForm = async (values: SectionRegistrationFormValues) =>
     send({ type: 'SUBMIT_FORM', values: buildSectionRegisterRequest(values) });
   const isSubmitting = !current.matches('fillingOutForm');

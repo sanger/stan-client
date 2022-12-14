@@ -215,6 +215,9 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
               plateType: e.data.reagentPlate.plateType
             }
           : { barcode: ctx.sourceBarcode, slots: [] };
+        if (e.data.reagentPlate && e.data.reagentPlate.plateType) {
+          ctx.plateType = e.data.reagentPlate.plateType;
+        }
       }),
       assignTransfers: assign((ctx, e) => {
         e.type === 'UPDATE_TRANSFER_CONTENT' && (ctx.reagentTransfers = e.reagentTransfers);

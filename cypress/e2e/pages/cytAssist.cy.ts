@@ -95,10 +95,29 @@ describe('CytAssist Page', () => {
         cy.findByText('Invalid format').should('not.exist');
       });
     });
+    context('When LOT number is entered in wrong format', () => {
+      before(() => {
+        cy.findByTestId('lot-number').within(() => {
+          cy.findByRole('textbox').type('asddg{enter}');
+        });
+      });
+      it('should display Invalid format error message', () => {
+        cy.findByText('Invalid format: Required 6-7 digit number').should('be.visible');
+      });
+    });
+    context('When LOT number  is entered in correct format', () => {
+      before(() => {
+        enterLOTNumber();
+      });
+      it('should not display invalid format error message', () => {
+        cy.findByText('Invalid format: Required 6-7 digit number').should('not.exist');
+      });
+    });
     describe('Checking for mandatory fields for Save', () => {
       describe('Check for SGP Number', () => {
         before(() => {
           enterOutputLabwareExternalID();
+          enterLOTNumber();
           selectSlideCostings('SGP');
         });
         context('When mapping is done  and all field selected except SGP number', () => {
@@ -130,6 +149,27 @@ describe('CytAssist Page', () => {
         context('When External barcode number is entered', () => {
           before(() => {
             enterOutputLabwareExternalID();
+          });
+          it('should enable Save button', () => {
+            saveButton().should('be.enabled');
+          });
+        });
+      });
+      describe('Check for LOT number', () => {
+        before(() => {
+          cy.findByTestId('lot-number').clear().type('{enter}');
+        });
+        context('When mapping is done  and all field selected except LOT number', () => {
+          it('should display Required field error for external id', () => {
+            cy.findByText('Required field').should('be.visible');
+          });
+          it('keeps the Save button disabled', () => {
+            saveButton().should('not.be.enabled');
+          });
+        });
+        context('When External barcode number is entered', () => {
+          before(() => {
+            enterLOTNumber();
           });
           it('should enable Save button', () => {
             saveButton().should('be.enabled');
@@ -207,6 +247,12 @@ function saveButton() {
 function enterOutputLabwareExternalID() {
   cy.findByTestId('external-barcode').within(() => {
     cy.findByRole('textbox').clear().type('V42A20-3752023-10-20{enter}');
+  });
+}
+
+function enterLOTNumber() {
+  cy.findByTestId('lot-number').within(() => {
+    cy.findByRole('textbox').clear().type('1234567{enter}');
   });
 }
 function selectLabwareType(type: string) {
