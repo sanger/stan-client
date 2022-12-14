@@ -139,10 +139,25 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
    * This check is very important because it can result in recursive calls between parent and this component.
    */
   useEffect(() => {
+    const matchingLabware = initialOutputLabware?.find((outputLw) => outputLw.labware.id === currentOutput?.labware.id);
+    //Update changes in barcode , if any
+    if (matchingLabware && matchingLabware.labware.barcode !== currentOutput?.labware.barcode) {
+      setCurrentOutput((prev) => {
+        if (prev && prev.labware.barcode !== matchingLabware.labware.barcode) {
+          return {
+            ...prev,
+            labware: {
+              ...prev.labware,
+              barcode: matchingLabware.labware.barcode
+            }
+          };
+        } else return prev;
+      });
+    }
     if (initialOutputLabware.some((lw) => !outputSlotCopies.map((osc) => osc.labware.id).includes(lw.labware.id))) {
       send({ type: 'UPDATE_OUTPUT_LABWARE', outputSlotCopyContent: initialOutputLabware });
     }
-  }, [initialOutputLabware, outputSlotCopies, send]);
+  }, [initialOutputLabware, outputSlotCopies, send, currentOutput?.labware]);
 
   const getSourceSlotColor = useCallback(
     (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {

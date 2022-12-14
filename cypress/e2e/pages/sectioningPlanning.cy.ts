@@ -172,6 +172,33 @@ describe('Sectioning Planning', () => {
         cy.findByLabelText('Number of Labware').should('be.visible');
         cy.findByLabelText('Barcode').should('not.exist');
         cy.findByLabelText('Section Thickness').should('not.exist');
+        cy.findByText('Slide LOT number').should('not.exist');
+        cy.findByText('Slide costings').should('not.exist');
+        cy.findByText('Create Labware').should('be.disabled');
+      });
+      after(() => {
+        cy.findByText('Delete Layout').click();
+      });
+    });
+
+    context('when adding a Visium LP layout', () => {
+      before(() => {
+        cy.findByRole('combobox').select('Visium LP');
+        cy.findByText('+ Add Labware').click();
+        cy.findByText('Edit Layout').click();
+        cy.findByRole('dialog').within(() => {
+          cy.findByText('STAN-113').click();
+          cy.findByText('A1').click();
+          cy.findByText('Done').click();
+        });
+      });
+
+      it('shows Barcode, Sectioning Thickness,Slide LOT number, Slide costings', () => {
+        cy.findByLabelText('Number of Labware').should('not.exist');
+        cy.findByLabelText('Barcode').should('be.visible');
+        cy.findByLabelText('Section Thickness').should('be.visible');
+        cy.findByText('Slide LOT number').should('be.visible');
+        cy.findByText('Slide costings').should('be.visible');
         cy.findByText('Create Labware').should('be.disabled');
       });
       after(() => {
@@ -181,15 +208,71 @@ describe('Sectioning Planning', () => {
 
     context('when adding a Visium TO layout', () => {
       before(() => {
-        cy.findByRole('combobox').select('Visium LP');
+        cy.findByRole('combobox').select('Visium TO');
         cy.findByText('+ Add Labware').click();
+        cy.findByText('Edit Layout').click();
+        cy.findByRole('dialog').within(() => {
+          cy.findByText('STAN-113').click();
+          cy.findByText('A1').click();
+          cy.findByText('Done').click();
+        });
       });
 
-      it('shows Barcode and Sectioning Thickness', () => {
-        cy.findByLabelText('Number of Labware').should('not.exist');
-        cy.findByLabelText('Barcode').should('be.visible');
+      it('shows Barcode, Sectioning Thickness,Slide LOT number, Slide costings', () => {
+        cy.findByLabelText('Number of Labware').should('exist');
+        cy.findByLabelText('Barcode').should('not.exist');
+        cy.findByLabelText('Section Thickness').should('be.visible');
+        cy.findByText('Slide LOT number').should('be.visible');
+        cy.findByText('Slide costings').should('be.visible');
+      });
+
+      context('enabling Create Labware button', () => {
+        it('disables Create Labware button if not all fields entered', () => {
+          cy.findByLabelText('Section Thickness').type('2');
+          cy.findByText('Create Labware').should('be.disabled');
+        });
+        it('should validate Slide LOT number', () => {
+          cy.findByTestId('formInput').type('1').blur();
+          cy.findByText('Slide lot number should be a 6-7 digits number').should('be.visible');
+        });
+        it('disables Create Labware button if not all fields entered', () => {
+          cy.findByTestId('formInput').clear().type('123456');
+          cy.findByText('Create Labware').should('be.disabled');
+        });
+        it('should not allow empty value in Slide costings', () => {
+          cy.get('select[name="costing"]').select('SGP');
+          cy.get('select[name="costing"]').select('').blur();
+          cy.findByText('Slide costing is a required field').should('be.visible');
+        });
+        it('enables Create Labware button when all field values are entered', () => {
+          cy.get('select[name="costing"]').select('SGP');
+          cy.findByText('Create Labware').should('be.enabled');
+        });
+      });
+      after(() => {
+        cy.findByText('Delete Layout').click();
+      });
+    });
+
+    context('when adding a Visium ADH layout', () => {
+      before(() => {
+        cy.findByRole('combobox').select('Visium ADH');
+        cy.findByText('+ Add Labware').click();
+        cy.findByText('Edit Layout').click();
+        cy.findByRole('dialog').within(() => {
+          cy.findByText('STAN-113').click();
+          cy.findByText('A1').click();
+          cy.findByText('Done').click();
+        });
+      });
+
+      it('shows Barcode, Sectioning Thickness,Slide LOT number, Slide costings', () => {
+        cy.findByLabelText('Number of Labware').should('exist');
+        cy.findByLabelText('Barcode').should('not.exist');
         cy.findByLabelText('Section Thickness').should('be.visible');
         cy.findByText('Create Labware').should('be.disabled');
+        cy.findByText('Slide LOT number').should('be.visible');
+        cy.findByText('Slide costings').should('be.visible');
       });
     });
   });
@@ -318,7 +401,6 @@ describe('Sectioning Planning', () => {
 
 function createLabware() {
   cy.get('#labwareScanInput').type('STAN-113{enter}');
-
   cy.findByRole('combobox').select('Tube');
   cy.findByText('+ Add Labware').click();
   cy.findByText('Edit Layout').click();
@@ -327,7 +409,7 @@ function createLabware() {
     cy.findByText('A1').click();
     cy.findByText('Done').click();
   });
-  cy.findByLabelText('Section Thickness').type('5');
+  cy.findByLabelText('Section Thickness').clear().type('5');
   cy.findByText('Create Labware').click();
 }
 

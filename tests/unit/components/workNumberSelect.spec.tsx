@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import WorkNumberSelect from '../../../src/components/WorkNumberSelect';
 import { FindWorkInfoQuery, GetAllWorkInfoQuery, WorkStatus } from '../../../src/types/sdk';
@@ -159,7 +159,7 @@ describe('WorkNumberSelect.tsx', () => {
       describe('onSelection', () => {
         it('displays selected work number', async () => {
           act(() => {
-            render(<WorkNumberSelect label={'Work Number'} />);
+            render(<WorkNumberSelect label={'Work Number'} multiple={false} />);
           });
           const workNumberSelect = (await screen.findByTestId('select_workNumber')) as HTMLSelectElement;
 
@@ -222,11 +222,10 @@ describe('WorkNumberSelect.tsx', () => {
           );
         });
         const workNumberSelect = (await screen.findByTestId('workNumber')) as HTMLSelectElement;
-        await userEvent.selectOptions(workNumberSelect, ['WORK_2']);
-        workNumberSelect.options[1].selected = true;
+        fireEvent.change(workNumberSelect, { target: { value: 'WORK_2' } });
 
-        //Expect to display the selected Work Number
-        expect(workNumberSelect.value).toBe('WORK_2');
+        //Shows selected value
+        expect(workNumberSelect).toHaveValue('WORK_2');
 
         //Expect to display the work Requestor for the selected Work Number
         const userText = await screen.findByText('User 2');

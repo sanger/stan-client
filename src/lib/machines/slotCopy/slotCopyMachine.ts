@@ -103,6 +103,12 @@ type UpdateDestinationBioState = {
   bioState: string;
 };
 
+type UpdateDestinationLOTNumber = {
+  type: 'UPDATE_DESTINATION_LOT_NUMBER';
+  labware: NewLabwareLayout;
+  lotNumber: string;
+};
+
 type UpdateSourceLabwareState = {
   type: 'UPDATE_SOURCE_LABWARE_STATE';
   labware: LabwareFieldsFragment;
@@ -141,6 +147,7 @@ export type SlotCopyEvent =
   | UpdateDestinationPreBarcode
   | UpdateDestinationCosting
   | UpdateDestinationBioState
+  | UpdateDestinationLOTNumber
   | SaveEvent
   | FindPermDataEvent
   | MachineServiceDone<'copySlots', SlotCopyMutation>
@@ -192,6 +199,9 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           },
           UPDATE_DESTINATION_BIO_STATE: {
             actions: 'assignDestinationBioState'
+          },
+          UPDATE_DESTINATION_LOT_NUMBER: {
+            actions: 'assignDestinationLOTNumber'
           }
         }
       },
@@ -233,6 +243,9 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           },
           UPDATE_DESTINATION_BIO_STATE: {
             actions: 'assignDestinationBioState'
+          },
+          UPDATE_DESTINATION_LOT_NUMBER: {
+            actions: 'assignDestinationLOTNumber'
           },
           SAVE: 'copying'
         }
@@ -401,6 +414,14 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         }
         destination.slotCopyDetails.costing = e.labwareCosting;
       }),
+      assignDestinationLOTNumber: assign((ctx, e) => {
+        if (e.type !== 'UPDATE_DESTINATION_LOT_NUMBER') return;
+        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
+        if (!destination) {
+          return;
+        }
+        destination.slotCopyDetails.lotNumber = e.lotNumber;
+      }),
       assignSourceLabwareState: assign((ctx, e) => {
         if (e.type !== 'UPDATE_SOURCE_LABWARE_STATE') return;
         const src = ctx.sources.find((src) => src.labware.barcode === e.labware.barcode);
@@ -410,7 +431,6 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           ctx.sources.push({ labware: e.labware, labwareState: e.labwareState });
         }
       }),
-
       emptyServerError: assign((ctx) => {
         ctx.serverErrors = null;
       })

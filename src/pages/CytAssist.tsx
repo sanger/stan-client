@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
 import { Maybe, SlideCosting, SlotCopyContent } from '../types/sdk';
-import slotCopyMachine from '../lib/machines/slotCopy/slotCopyMachine';
+import slotCopyMachine, { Destination } from '../lib/machines/slotCopy/slotCopyMachine';
 import { Link } from 'react-router-dom';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -32,47 +32,79 @@ interface OutputLabwareScanPanelProps {
   onChangeBarcode: (barcode: string) => void;
   onChangeLabwareType: (labwareType: string) => void;
   onChangeCosting: (costing: string) => void;
+  onChangeSlideLOTNumber: (slideLotNumber: string) => void;
 }
 
 /**Component to configure the output CytAssist labware**/
 const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = ({
-  preBarcode,
   onChangeBarcode,
   onChangeLabwareType,
-  onChangeCosting
+  onChangeCosting,
+  onChangeSlideLOTNumber
 }) => {
   /**State to store preBarcode validation errors**/
   const [preBarcodeValidationError, setPreBarcodeValidationError] = React.useState('');
+  const [slideLOTNumberValidationError, setSlideLOTNumberValidationError] = React.useState('');
+  const [costingValidationError, setCostingValidationError] = React.useState('');
+
+  const validatePreBarcode = React.useCallback(
+    (preBarcode: string) => {
+      let error;
+      if (preBarcode.length === 0) {
+        error = 'Required field';
+      } else {
+        const valid = /[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/.test(preBarcode);
+        if (!valid) {
+          error = 'Invalid format';
+        } else {
+          error = '';
+        }
+      }
+      setPreBarcodeValidationError(error);
+      onChangeBarcode(preBarcode);
+    },
+    [setPreBarcodeValidationError, onChangeBarcode]
+  );
+  const validateLotNumber = React.useCallback(
+    (slideLotNumber: string) => {
+      let error;
+      if (slideLotNumber.length === 0) {
+        error = 'Required field';
+      } else {
+        const valid = /^\d{6,7}$/.test(slideLotNumber);
+        if (!valid) {
+          error = 'Invalid format: Required 6-7 digit number';
+        } else {
+          error = '';
+        }
+      }
+      setSlideLOTNumberValidationError(error);
+      onChangeSlideLOTNumber(slideLotNumber);
+    },
+    [setSlideLOTNumberValidationError, onChangeSlideLOTNumber]
+  );
+  const validateCosting = React.useCallback(
+    (costing: string) => {
+      let error = '';
+      if (costing.length === 0) {
+        error = 'Required field';
+      }
+      setCostingValidationError(error);
+      onChangeCosting(costing);
+    },
+    [setCostingValidationError, onChangeCosting]
+  );
   return (
-    <div className={'w-full flex flex-row space-x-6'}>
+    <div className={'w-full grid grid-cols-2 gap-x-4 gap-y-4 bg-gray-200 p-4'}>
       <div data-testid="external-barcode">
         <Label name={'External barcode'} />
         <ScanInput
-          onScan={(value) => {
-            if (value.length === 0) {
-              setPreBarcodeValidationError('Required field');
-              onChangeBarcode('');
-            } else {
-              const valid = /[A-Z]\d{2}[A-Z]\d{2}-\d{7}-\d{2}-\d{2}/.test(value);
-              if (!valid) {
-                setPreBarcodeValidationError('Invalid format');
-                onChangeBarcode('');
-              } else {
-                setPreBarcodeValidationError('');
-                onChangeBarcode(value);
-              }
-            }
-          }}
+          onScan={validatePreBarcode}
+          onBlur={(e) => validatePreBarcode(e.currentTarget.value)}
           allowEmptyValue={true}
           placeholder={'e.g V42A20-3752023-10-20'}
         />
-        {preBarcodeValidationError.length > 0 ? (
-          <MutedText className={'text-red-400'}>{preBarcodeValidationError}</MutedText>
-        ) : !preBarcode?.length ? (
-          <MutedText>Input barcode and press 'Enter' key</MutedText>
-        ) : (
-          ''
-        )}
+        {preBarcodeValidationError && <MutedText className={'text-red-400'}>{preBarcodeValidationError}</MutedText>}
       </div>
       <div>
         <Label name={'Labware Type'} />
@@ -100,7 +132,10 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
         <Label name={'Slide costings'} />
         <Select
           onChange={(e) => {
-            onChangeCosting(e.currentTarget.value);
+            validateCosting(e.currentTarget.value);
+          }}
+          onBlur={(e) => {
+            validateCosting(e.currentTarget.value);
           }}
           emptyOption={true}
           data-testid="output-labware-costing"
@@ -111,6 +146,20 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
             </option>
           ))}
         </Select>
+        {costingValidationError && <MutedText className={'text-red-400'}>{costingValidationError}</MutedText>}
+      </div>
+      <div data-testid={'lot-number'}>
+        <Label name={'Slide LOT number'} />
+        <ScanInput
+          onScan={validateLotNumber}
+          onBlur={(e) => {
+            validateLotNumber(e.currentTarget.value);
+          }}
+          allowEmptyValue={true}
+        />
+        {slideLOTNumberValidationError && (
+          <MutedText className={'text-red-400'}>{slideLOTNumberValidationError}</MutedText>
+        )}
       </div>
     </div>
   );
@@ -142,9 +191,12 @@ const SlotMappingContentTable = ({ slotCopyContent }: { slotCopyContent: SlotCop
 };
 
 const CytAssist = () => {
-  const initialOutputLabware = {
+  const initialOutputLabware: Destination = {
     labware: visiumLPCytAssistFactory.build(),
-    slotCopyDetails: { labwareType: LabwareTypeName.VISIUM_LP_CYTASSIST, contents: [] }
+    slotCopyDetails: {
+      labwareType: LabwareTypeName.VISIUM_LP_CYTASSIST,
+      contents: []
+    }
   };
 
   const [current, send] = useMachine(() =>
@@ -199,6 +251,18 @@ const CytAssist = () => {
         type: 'UPDATE_DESTINATION_COSTING',
         labware: selectedDestination.labware,
         labwareCosting: costing.length === 0 ? undefined : (costing as unknown as SlideCosting)
+      });
+    },
+    [send, selectedDestination]
+  );
+
+  const handleChangeSlideLOTNumber = React.useCallback(
+    (lotNumber: string) => {
+      if (!selectedDestination) return;
+      send({
+        type: 'UPDATE_DESTINATION_LOT_NUMBER',
+        labware: selectedDestination.labware,
+        lotNumber: lotNumber
       });
     },
     [send, selectedDestination]
@@ -297,6 +361,7 @@ const CytAssist = () => {
                 onChangeBarcode={handleChangeOutputLabwareBarcode}
                 onChangeLabwareType={handleChangeOutputLabwareType}
                 onChangeCosting={handleChangeCosting}
+                onChangeSlideLOTNumber={handleChangeSlideLOTNumber}
               />
             }
           />
@@ -319,7 +384,8 @@ const CytAssist = () => {
                 current.context.workNumber === '' ||
                 !selectedDestination ||
                 !selectedDestination.slotCopyDetails.preBarcode ||
-                !selectedDestination.slotCopyDetails.costing
+                !selectedDestination.slotCopyDetails.costing ||
+                !selectedDestination.slotCopyDetails.lotNumber
               }
               onClick={onSaveAction}
             >
