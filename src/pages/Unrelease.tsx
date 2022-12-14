@@ -32,6 +32,7 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function Unrelease() {
+  const [workNumber, setWorkNumber] = React.useState('');
   return (
     <StanForm<UnreleaseRequest, UnreleaseMutation>
       title={'Unrelease'}
@@ -50,11 +51,11 @@ export default function Unrelease() {
         <motion.div variants={variants.fadeInWithLift}>
           <motion.div variants={variants.fadeInWithLift} className={'mb-8'}>
             <Heading level={3}>SGP Number</Heading>
-            <p className="mt-2">Please select an SGP number to associate with the unrelease operation</p>
+            <p className="mt-2">Please select an SGP number to associate with all labware</p>
             <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
               <WorkNumberSelect
-                name={'workNumber'}
                 onWorkNumberChange={(workNumber) => {
+                  setWorkNumber(workNumber);
                   formikProps.values.labware.forEach((lw) => (lw.workNumber = workNumber));
                 }}
               />
@@ -69,7 +70,8 @@ export default function Unrelease() {
                   onAdd={(lw) =>
                     helpers.push({
                       barcode: lw.barcode,
-                      highestSection: hasBlock(lw) ? lw.slots[0].blockHighestSection : undefined
+                      highestSection: hasBlock(lw) ? lw.slots[0].blockHighestSection : undefined,
+                      workNumber: workNumber
                     })
                   }
                   onRemove={(labware, index) => helpers.remove(index)}
