@@ -316,8 +316,8 @@ export const statusSort = (rowAStatus: WorkStatus, rowBStatus: WorkStatus) => {
 /**
  * Sorts alphanumeric strings with alphabetical order  followed by number sort
  */
-export const alphaNumericSortDefault = (a: string, b: string): number => {
+export const alphaNumericSortDefault = (a: string, b: string,alphaFirst: boolean = true): number => {
   const regAlpha = /[^a-zA-Z]*/g;
   const regNumeric = /[^0-9]*/g;
-  return regexSort(a, b, { alpha: regAlpha, numeric: regNumeric });
+  return regexSort(a, b, { alpha: regAlpha, numeric: regNumeric },alphaFirst);
 };

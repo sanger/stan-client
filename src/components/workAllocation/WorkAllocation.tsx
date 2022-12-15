@@ -228,13 +228,13 @@ export default function WorkAllocation() {
 
               <div className="md:flex-grow">
                 <FormikSelect label="Work Requester" name="workRequester" emptyOption={true}>
-                  {optionValues(workRequesters, 'username', 'username')}
+                  {optionValues(workRequesters, 'username', 'username', true, { sort: true, alphaFirst: true })}
                 </FormikSelect>
               </div>
 
               <div className="md:flex-grow">
                 <FormikSelect label="Project" name="project" emptyOption={true}>
-                  {optionValues(projects, 'name', 'name')}
+                  {optionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
                 </FormikSelect>
               </div>
 

@@ -27,8 +27,8 @@ import CDNAMeasurementQC from '../components/visiumQC/CDNAMeasurementQC';
 import SlideProcessing from '../components/visiumQC/SlideProcessing';
 
 export enum QCType {
-  SLIDE_PROCESSING = 'Slide Processing',
   CDNA_AMPLIFICATION = 'cDNA amplification',
+  SLIDE_PROCESSING = 'Slide Processing',
   VISIUM_CONCENTRATION = 'Visium concentration'
 }
 

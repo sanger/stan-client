@@ -68,18 +68,7 @@ jest.mock('../../../src/lib/sdk', () => ({
               },
               status: WorkStatus.Active
             },
-            {
-              workNumber: 'WORK_2',
-              project: {
-                __typename: 'Project',
-                name: 'Project 2'
-              },
-              workRequester: {
-                __typename: 'ReleaseRecipient',
-                username: 'User 2'
-              },
-              status: WorkStatus.Active
-            },
+
             {
               workNumber: 'WORK_3',
               project: {
@@ -91,6 +80,18 @@ jest.mock('../../../src/lib/sdk', () => ({
                 username: 'User 3'
               },
               status: WorkStatus.Failed
+            },
+            {
+              workNumber: 'WORK_2',
+              project: {
+                __typename: 'Project',
+                name: 'Project 2'
+              },
+              workRequester: {
+                __typename: 'ReleaseRecipient',
+                username: 'User 2'
+              },
+              status: WorkStatus.Active
             }
           ]
         });
@@ -115,7 +116,7 @@ describe('WorkNumberSelect.tsx', () => {
         //Expect the select has got all options including empty string
         expect(workNumberSelect.options.length).toEqual(3);
 
-        //Expect the select option to have the correct work numbers
+        //Expect the select option to have the correct work numbers in descending order
         expect(workNumberSelect.options[0].value).toEqual('');
         expect(workNumberSelect.options[1].value).toEqual('WORK_2');
         expect(workNumberSelect.options[2].value).toEqual('WORK_1');
@@ -133,7 +134,7 @@ describe('WorkNumberSelect.tsx', () => {
         //Expect the select has got all options including empty string
         expect(workNumberSelect.options.length).toEqual(4);
 
-        //Expect the select option to have the correct work numbers
+        //Expect the select option to have the correct work numbers in descending order
         expect(workNumberSelect.options[0].value).toEqual('');
         expect(workNumberSelect.options[1].value).toEqual('WORK_3');
         expect(workNumberSelect.options[2].value).toEqual('WORK_2');

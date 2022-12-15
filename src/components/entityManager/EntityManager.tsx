@@ -12,6 +12,7 @@ import LoadingSpinner from '../icons/LoadingSpinner';
 import { SelectEntityRow } from './SelectEntityRow';
 import { BooleanEntityRow } from './BooleanEntityRow';
 import { createEntityManagerMachine } from './entityManager.machine';
+import { alphaNumericSortDefault } from '../../types/stan';
 
 export type EntityValueType = boolean | string | number;
 
@@ -142,6 +143,12 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
   const isCreatingEntity = current.matches({ loading: 'creatingEntity' });
   const showDraft = isDrafting || isCreatingEntity;
 
+  const orderedEntities = React.useMemo(() => {
+    return [...entities].sort((a: E, b: E) =>
+      alphaNumericSortDefault(String(a[displayKeyColumnName]), String(b[displayKeyColumnName]))
+    );
+  }, [entities, displayKeyColumnName]);
+
   const getValueFieldComponent = (
     valueFieldComponentInfo: ValueFieldComponentInfo,
     entity: E,
@@ -185,7 +192,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
           </tr>
         </TableHead>
         <TableBody>
-          {entities.map((entity, indx) => (
+          {orderedEntities.map((entity, indx) => (
             <tr key={indx}>
               <TableCell>{entity[displayKeyColumnName]}</TableCell>
               {getValueFieldComponent(

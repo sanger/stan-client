@@ -1,5 +1,6 @@
 import React from 'react';
 import { getIn, useFormikContext } from 'formik';
+import { alphaNumericSortDefault } from '../../types/stan';
 
 /**
  * Will display an error message if <code>name</code> has been touched and has an error
@@ -36,15 +37,35 @@ export type OptionTemplate<L extends string, V extends string, LV = string | num
  * @param label name of the property on each entity to use for the label
  * @param value name of the property on each entity to use for the value
  * @param keyAsValue if enables value field will be used as keys
+ * @param sortProps sorting props required for options displayed
+ *        sort: Is sorting required? Default value is true
+ *        sortType:'Ascending' or 'Descending' order. Default value is 'Ascending'
+ *        alphaFirst: In alphanumeric strings, need to sort alpha part first or numeric part. Default value will sort numeric part first
+ *        excludeWords: Any words need to be excluded from sorting, default will have "None"
  */
 export function optionValues<L extends string, V extends string, T extends OptionTemplate<L, V>>(
   entities: T[],
   label: L,
   value: V,
-  keyAsValue?: boolean
+  keyAsValue?: boolean,
+  sortProps: { sort: boolean; sortType?: 'Ascending' | 'Descending'; alphaFirst?: boolean; excludeWords?: string[] } = {
+    sort: true,
+    sortType: 'Ascending',
+    alphaFirst: false,
+    excludeWords: ['None']
+  }
 ) {
   if (!entities || entities.length === 0) return <option />;
-  return entities.map((e, index) => {
+  let mapEntities = sortProps.sort
+    ? [...entities].sort((a, b) => {
+        const sortType = sortProps.sortType ?? 'Ascending';
+        const aVal = sortType === 'Ascending' ? a[label] : b[label];
+        const bVal = sortType === 'Ascending' ? b[label] : a[label];
+        if (sortProps.excludeWords?.includes(String(aVal)) || String(bVal) === 'None') return 0;
+        return alphaNumericSortDefault(String(aVal).toUpperCase(), String(bVal).toUpperCase(), sortProps.alphaFirst);
+      })
+    : entities;
+  return mapEntities.map((e, index) => {
     return (
       <option key={keyAsValue ? e[value] : index} value={e[value]}>
         {e[label]}
