@@ -9,6 +9,7 @@ import { WorkProgressUrlParams } from '../../pages/WorkProgress';
 import { history } from '../../lib/sdk';
 import { stringify } from '../../lib/helpers';
 import { useLocation } from 'react-router-dom';
+import { statusSort } from '../../types/stan';
 
 /**
  * Enum to fill the Search Type field
@@ -74,11 +75,11 @@ export default function WorkProgressInput({ urlParams, workTypes, searchTypes, p
         case WorkProgressSearchType.WorkNumber:
           return [];
         case WorkProgressSearchType.WorkType:
-          return workTypes ?? [];
+          return workTypes ? workTypes.sort() : [];
         case WorkProgressSearchType.Status:
-          return Object.values(WorkStatus);
+          return Object.values(WorkStatus).sort((a, b) => statusSort(a, b));
         case WorkProgressSearchType.Program:
-          return programs ?? [];
+          return programs ? programs.sort() : [];
         default:
           return [];
       }

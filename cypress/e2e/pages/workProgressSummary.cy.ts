@@ -16,7 +16,7 @@ describe('Work Progress Summary', () => {
             .children('option')
             .then(($options) => {
               const optionValues = $options.toArray().map((elem) => elem.label);
-              expect(optionValues).to.deep.eq(['unstarted', 'active', 'paused', 'completed', 'failed', 'withdrawn']);
+              expect(optionValues).to.deep.eq(['active', 'paused', 'unstarted', 'completed', 'failed', 'withdrawn']);
             });
         });
       });
@@ -28,10 +28,10 @@ describe('Work Progress Summary', () => {
             .then(($options) => {
               const optionValues = $options.toArray().map((elem) => elem.label);
               expect(optionValues).to.deep.eq([
+                'TEST_WT_1',
                 'Work Type 1',
                 'Work Type 2',
                 'Work Type 3',
-                'TEST_WT_1',
                 'Work Type 5'
               ]);
             });

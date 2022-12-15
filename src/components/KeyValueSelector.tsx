@@ -137,13 +137,11 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
             }}
             multiple={multiSelectValues}
           >
-            {getValues(selected.key)
-              .sort()
-              .map((val: string) => (
-                <option key={val} value={val}>
-                  {val}
-                </option>
-              ))}
+            {getValues(selected.key).map((val: string) => (
+              <option key={val} value={val}>
+                {val}
+              </option>
+            ))}
           </FormikSelect>
         )}
       </div>
