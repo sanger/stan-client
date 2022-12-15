@@ -123,7 +123,6 @@ export default function VisiumQC({ info }: VisiumQCProps) {
 
   const onSubmit = (values: VisiumQCFormData) => {
     if (values.qcType === QCType.SLIDE_PROCESSING && values.labwareResult) {
-      debugger;
       sendSlideProcessing({
         type: 'SUBMIT_FORM',
         values: {
