@@ -34,8 +34,8 @@ describe('Visium QC Page', () => {
       it('shows Slide costing drop down', () => {
         cy.findByText('Slide costings').should('be.visible');
       });
-      it('shows Slide costing drop down', () => {
-        cy.findByText('Slide LOT number').should('be.visible');
+      it('shows Reagent LOT number drop down', () => {
+        cy.findByText('Reagent LOT number').should('be.visible');
       });
       it('has all slots as passed', () => {
         cy.findAllByTestId('passIcon').then(($passIcons) => {
@@ -107,7 +107,7 @@ describe('Visium QC Page', () => {
           });
         });
         context('When all other fields are valid except LOT number', () => {
-          context('when LOT number is empty', () => {
+          context('when Reagent LOT number is empty', () => {
             before(() => {
               cy.get('select[name="workNumber"]').select('SGP1008');
               cy.get('select[name="costing"]').select('Faculty');
@@ -117,10 +117,10 @@ describe('Visium QC Page', () => {
               cy.findByRole('button', { name: /Save/i }).should('be.disabled');
             });
             it('should display error message for Slide LOT number', () => {
-              cy.findByText('Slide LOT number is a required field').should('be.visible');
+              cy.findByText('Reagent LOT number is a required field').should('be.visible');
             });
           });
-          context('when LOT number has invalid format', () => {
+          context('when Reagent LOT number has invalid format', () => {
             before(() => {
               cy.get('select[name="workNumber"]').select('SGP1008');
               cy.get('select[name="costing"]').select('Faculty');
@@ -130,7 +130,7 @@ describe('Visium QC Page', () => {
               cy.findByRole('button', { name: /Save/i }).should('be.disabled');
             });
             it('should display error message for Slide LOT number', () => {
-              cy.findByText('Slide LOT number should be a 6-7 digits number').should('be.visible');
+              cy.findByText('Reagent LOT number should be a 6-7 digits number').should('be.visible');
             });
           });
         });

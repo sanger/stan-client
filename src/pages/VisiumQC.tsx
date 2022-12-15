@@ -43,7 +43,7 @@ export interface VisiumQCFormData {
   slotMeasurements?: Array<SlotMeasurementRequest>;
   labwareResult?: CoreLabwareResult;
   costing?: SlideCosting;
-  lotNumber?: string;
+  reagentLot?: string;
 }
 
 const validationSchema = Yup.object().shape({
@@ -73,11 +73,11 @@ const validationSchema = Yup.object().shape({
     then: Yup.string().oneOf(Object.values(SlideCosting)).required('Slide costing is a required field'),
     otherwise: Yup.string().optional()
   }),
-  lotNumber: Yup.string().when('qcType', {
+  reagentLot: Yup.string().when('qcType', {
     is: (value: string) => value === QCType.SLIDE_PROCESSING,
     then: Yup.string()
-      .required('Slide LOT number is  a required field')
-      .matches(/^\d{6,7}$/, 'Slide LOT number should be a 6-7 digits number')
+      .required('Reagent LOT number is  a required field')
+      .matches(/^\d{6,7}$/, 'Reagent LOT number should be a 6-7 digits number')
   })
 });
 
@@ -123,6 +123,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
 
   const onSubmit = (values: VisiumQCFormData) => {
     if (values.qcType === QCType.SLIDE_PROCESSING && values.labwareResult) {
+      debugger;
       sendSlideProcessing({
         type: 'SUBMIT_FORM',
         values: {
