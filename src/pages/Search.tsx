@@ -155,7 +155,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                     </div>
                     <div>
                       <FormikSelect label="SGP Number" name="workNumber" emptyOption={true}>
-                        {optionValues(sortedWorks(), 'workNumber', 'workNumber', true, { sort: false })}
+                        {optionValues(sortedWorks(), 'workNumber', 'workNumber', true)}
                       </FormikSelect>
                     </div>
                     <div>
