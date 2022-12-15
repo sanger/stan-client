@@ -98,11 +98,13 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
             handleSelectKey(e.currentTarget.value);
           }}
         >
-          {Array.from(keyValueMap.keys()).map((key: string) => (
-            <option key={key} value={key}>
-              {key}
-            </option>
-          ))}
+          {Array.from(keyValueMap.keys())
+            .sort()
+            .map((key: string) => (
+              <option key={key} value={key}>
+                {key}
+              </option>
+            ))}
         </FormikSelect>
       </div>
       <div className="md:flex-grow">
@@ -135,11 +137,13 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
             }}
             multiple={multiSelectValues}
           >
-            {getValues(selected.key).map((val: string) => (
-              <option key={val} value={val}>
-                {val}
-              </option>
-            ))}
+            {getValues(selected.key)
+              .sort()
+              .map((val: string) => (
+                <option key={val} value={val}>
+                  {val}
+                </option>
+              ))}
           </FormikSelect>
         )}
       </div>

@@ -37,21 +37,32 @@ export type OptionTemplate<L extends string, V extends string, LV = string | num
  * @param label name of the property on each entity to use for the label
  * @param value name of the property on each entity to use for the value
  * @param keyAsValue if enables value field will be used as keys
- * @param sort sorting required for options displayed? Default value is true
+ * @param sortProps sorting props required for options displayed
+ *        sort: Is sorting required? Default value is true
+ *        sortType:'Ascending' or 'Descending' order. Default value is 'Ascending'
+ *        alphaFirst: In alphanumeric strings, need to sort alpha part first or numeric part. Default value will sort numeric part first
+ *        excludeWords: Any words need to be excluded from sorting, default will have "None"
  */
 export function optionValues<L extends string, V extends string, T extends OptionTemplate<L, V>>(
   entities: T[],
   label: L,
   value: V,
   keyAsValue?: boolean,
-  sort?: boolean
+  sortProps: { sort: boolean; sortType?: 'Ascending' | 'Descending'; alphaFirst?: boolean; excludeWords?: string[] } = {
+    sort: true,
+    sortType: 'Ascending',
+    alphaFirst: false,
+    excludeWords: ['None']
+  }
 ) {
   if (!entities || entities.length === 0) return <option />;
-  let isSort = sort ?? true;
-  let mapEntities = isSort
-    ? [...entities].sort((a, b) =>
-        alphaNumericSortDefault(String(a[label]).toUpperCase(), String(b[label]).toUpperCase())
-      )
+  let mapEntities = sortProps.sort
+    ? [...entities].sort((a, b) => {
+        const aVal = sortProps.sortType === 'Ascending' ? a[label] : b[label];
+        const bVal = sortProps.sortType === 'Ascending' ? b[label] : a[label];
+        if (sortProps.excludeWords?.includes(String(aVal)) || String(bVal) === 'None') return 0;
+        return alphaNumericSortDefault(String(aVal).toUpperCase(), String(bVal).toUpperCase(), sortProps.alphaFirst);
+      })
     : entities;
   return mapEntities.map((e, index) => {
     return (

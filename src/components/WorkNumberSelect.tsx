@@ -182,7 +182,11 @@ export default function WorkNumberSelect({
           className={'flex-grow w-full'}
           data-testid={'workNumber'}
         >
-          {optionValues(works, 'workNumber', 'workNumber')}
+          {optionValues(works, 'workNumber', 'workNumber', true, {
+            sort: true,
+            sortType: 'Descending',
+            alphaFirst: true
+          })}
         </FormikSelect>
       ) : (
         <div className={'flex flex-col'}>

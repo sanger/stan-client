@@ -47,6 +47,7 @@ export default function History() {
                     <FormikSelect label="" name="kind">
                       {objectKeys(historyDisplayValues)
                         .filter((selectValue) => selectValue !== 'sampleId')
+                        .sort()
                         .map((selectValue) => (
                           <option value={selectValue} key={selectValue}>
                             {historyDisplayValues[selectValue]}
