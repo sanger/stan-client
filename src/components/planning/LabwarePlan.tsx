@@ -105,6 +105,10 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
     const columns = [labwareScanTableColumns.barcode(), printColumn];
 
+    const isVisiumLabware =
+      outputLabware.labwareType.name === LabwareTypeName.VISIUM_TO ||
+      outputLabware.labwareType.name === LabwareTypeName.VISIUM_ADH ||
+      outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP;
     return (
       <motion.div
         ref={ref}
@@ -119,7 +123,11 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
           onSubmit={async (values) => {
             const newValues = {
               ...values,
-              costing: values.costing === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
+              costing: isVisiumLabware
+                ? values.costing === 'SGP'
+                  ? SlideCosting.Sgp
+                  : SlideCosting.Faculty
+                : undefined
             };
             send({ type: 'CREATE_LABWARE', ...newValues });
           }}
