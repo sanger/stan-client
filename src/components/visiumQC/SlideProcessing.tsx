@@ -41,9 +41,9 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
         result: PassFail.Pass
       })),
       costing: values.costing,
-      lotNumber: values.lotNumber
+      reagentLot: values.reagentLot
     });
-  }, [setFieldValue, labware, values.costing, values.lotNumber]);
+  }, [setFieldValue, labware, values.costing, values.reagentLot]);
 
   React.useEffect(() => {
     if (values.costing) {
@@ -52,10 +52,10 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
   }, [labwareResult, setFieldValue, values.costing]);
 
   React.useEffect(() => {
-    if (values.lotNumber) {
-      setFieldValue('labwareResult', { ...labwareResult, lotNumber: values.lotNumber });
+    if (values.reagentLot) {
+      setFieldValue('labwareResult', { ...labwareResult, reagentLot: values.reagentLot });
     }
-  }, [labwareResult, setFieldValue, values.lotNumber]);
+  }, [labwareResult, setFieldValue, values.reagentLot]);
   return (
     <>
       {labwareResultProps && labware && (
@@ -93,8 +93,8 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
               </FormikSelect>
             </div>
             <div className={'flex flex-col'}>
-              <ScanInput label={'Slide LOT number'} name={'lotNumber'} />
-              <FormikErrorMessage name={'lotNumber'} />
+              <ScanInput label={'Reagent LOT number'} name={'reagentLot'} />
+              <FormikErrorMessage name={'reagentLot'} />
             </div>
           </div>
           <LabwareResult
