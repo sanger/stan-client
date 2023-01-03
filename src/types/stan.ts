@@ -321,3 +321,19 @@ export const alphaNumericSortDefault = (a: string, b: string,alphaFirst: boolean
   const regNumeric = /[^0-9]*/g;
   return regexSort(a, b, { alpha: regAlpha, numeric: regNumeric },alphaFirst);
 };
+
+
+export function createSessionStorageForLabwareAwaiting( labware:LabwareFieldsFragment[]) {
+
+  sessionStorage.setItem(
+      'awaitingLabwares',
+      labware
+          .map(
+              (lw: LabwareFieldsFragment) => {
+                const sample = lw.slots.length && lw.slots[0].samples.length ? lw.slots[0].samples[0]:undefined;
+                return `${lw.barcode},${lw.labwareType.name},${sample?sample.tissue.externalName:""},${sample?sample.tissue.donor.donorName:""},${sample?sample.tissue.spatialLocation.tissueType.name:""},${sample?sample.tissue.spatialLocation.code:""},${sample?sample.tissue.replicate:""}`
+              }
+              )
+          .join(',')
+  );
+}

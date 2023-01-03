@@ -153,7 +153,12 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
           //Update sessionStorage if any awaitingLabwares
           sessionStorage.setItem(
             'awaitingLabwares',
-            currAwaitingLabwares.map((labware) => `${labware.barcode},${labware.labwareType}`).join(',')
+            currAwaitingLabwares
+              .map(
+                (labware) =>
+                  `${labware.barcode},${labware.labwareType},${labware.externalIdentifier},${labware.donor},${labware.tissueType},${labware.spatialLocation},${labware.replicate}`
+              )
+              .join(',')
           );
           //Otherwise remove it from sessionStorage
         } else sessionStorage.removeItem('awaitingLabwares');

@@ -24,6 +24,11 @@ import PromptOnLeave from '../components/notifications/PromptOnLeave';
 export type LabwareAwaitingStorageInfo = {
   barcode: string;
   labwareType: string;
+  externalIdentifier: string;
+  donor: string;
+  tissueType: string;
+  spatialLocation: string;
+  replicate: string;
 };
 
 /**
@@ -54,20 +59,33 @@ export function awaitingStorageCheckOnExit(location: H.Location, action: H.Actio
 export function getAwaitingLabwaresFromSession() {
   const awaitingLabwareValue = sessionStorage.getItem('awaitingLabwares');
   if (!awaitingLabwareValue || awaitingLabwareValue.length <= 0) return [];
-  const awaitingLabwareInfo = awaitingLabwareValue.split(',');
-  if (awaitingLabwareInfo.length % 2 !== 0) {
+  const awaitingLabwareInfoStr = awaitingLabwareValue.split(',');
+  const defaultLabwareInfo: LabwareAwaitingStorageInfo = {
+    barcode: '',
+    labwareType: '',
+    externalIdentifier: '',
+    donor: '',
+    tissueType: '',
+    spatialLocation: '',
+    replicate: ''
+  };
+  const labwareInfoFields = Object.keys(defaultLabwareInfo);
+  //if data in session storage doesn't match with the expected labware information
+  if (awaitingLabwareInfoStr.length % labwareInfoFields.length !== 0) {
     return [];
   }
-  return awaitingLabwareInfo.reduce((previousValue: LabwareAwaitingStorageInfo[], currentValue, index) => {
-    if (index % 2 === 0) {
-      return [...previousValue, { barcode: currentValue, labwareType: '' }];
-    } else {
-      previousValue[previousValue.length - 1] = {
-        barcode: previousValue[previousValue.length - 1].barcode,
-        labwareType: currentValue
-      };
-      return [...previousValue];
-    }
+  const awaitingLabwareInfo: string[][] = [];
+  //pack each individual labware info into an array of string
+  for (let indx = 0; indx < awaitingLabwareInfoStr.length; indx += labwareInfoFields.length) {
+    awaitingLabwareInfo.push(awaitingLabwareInfoStr.slice(indx, indx + labwareInfoFields.length));
+  }
+  //create awaitingLabwareInfo object from string values in an array
+  return awaitingLabwareInfo.reduce((previousValue: LabwareAwaitingStorageInfo[], currentValue) => {
+    const labwareInfo = { ...defaultLabwareInfo };
+    currentValue.forEach((value, index) => {
+      labwareInfo[labwareInfoFields[index] as keyof LabwareAwaitingStorageInfo] = value;
+    });
+    return [...previousValue, labwareInfo];
   }, []);
 }
 

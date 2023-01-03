@@ -13,6 +13,7 @@ import { ModalBody } from '../../components/Modal';
 import Success from '../../components/notifications/Success';
 import variants from '../../lib/motionVariants';
 import { ConfirmPrintLabware } from '../../components/sectioningConfirm/ConfirmPrintLabware';
+import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 
 type SectioningConfirmProps = {
   readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
@@ -91,12 +92,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
                         className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
                         onClick={() => {
                           if (confirmedLabwares.length > 0) {
-                            sessionStorage.setItem(
-                              'awaitingLabwares',
-                              confirmedLabwares
-                                .map((labware) => `${labware.barcode}, ${labware.labwareType.name}`)
-                                .join(',')
-                            );
+                            createSessionStorageForLabwareAwaiting(confirmedLabwares);
                           }
                           history.push('/store');
                         }}
