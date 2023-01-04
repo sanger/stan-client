@@ -10,16 +10,23 @@ import { alphaNumericSortDefault } from '../types/stan';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
 import { getTimestampStr, safeParseQueryString } from '../lib/helpers';
-import WorkProgressInput, {
-  workProgressSearchSchema,
-  WorkProgressSearchType
-} from '../components/workProgress/WorkProgressInput';
 import { useLocation } from 'react-router-dom';
 import { WorkProgressUrlParams } from './WorkProgress';
 import BlueButton from '../components/buttons/BlueButton';
 import { history } from '../lib/sdk';
+import WorkProgressSummaryInput, {
+  WorkProgressSearchType,
+  workProgressSummarySearchSchema
+} from '../components/workProgress/WorkProgressSummaryInput';
 
-const defaultInitialValues: WorkProgressUrlParams = {
+/**
+ * Data structure to keep the data associated with this component
+ */
+export type WorkProgressSummaryUrlParams = {
+  searchType: string;
+  searchValues: string[] | undefined;
+};
+const defaultInitialValues: WorkProgressSummaryUrlParams = {
   searchType: WorkProgressSearchType.WorkType,
   searchValues: undefined
 };
@@ -75,7 +82,7 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
      */
     const params = safeParseQueryString<WorkProgressUrlParams>({
       query: location.search,
-      schema: workProgressSearchSchema(workTypes)
+      schema: workProgressSummarySearchSchema(workTypes)
     });
     if (params) {
       return {
@@ -124,11 +131,11 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
     switch (memoUrlParams.searchType) {
       case 'Work Type':
         return (workSummaryGroups = workSummaryGroups.filter((group) => {
-          return memoUrlParams.searchValues?.includes(group.workType) ? true : false;
+          return !!memoUrlParams.searchValues?.includes(group.workType);
         }));
       case 'Status':
         return (workSummaryGroups = workSummaryGroups.filter((group) => {
-          return memoUrlParams.searchValues?.includes(group.status) ? true : false;
+          return !!memoUrlParams.searchValues?.includes(group.status);
         }));
       default:
         return workSummaryGroups;
@@ -156,7 +163,7 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
       </AppShell.Header>
       <AppShell.Main>
         <div className="mx-auto max-w-screen-lg bg-gray-100 border border-gray-200 bg-gray-100 rounded-md">
-          <WorkProgressInput
+          <WorkProgressSummaryInput
             urlParams={memoUrlParams ?? defaultInitialValues}
             workTypes={workTypes}
             searchTypes={[WorkProgressSearchType.WorkType, WorkProgressSearchType.Status]}
