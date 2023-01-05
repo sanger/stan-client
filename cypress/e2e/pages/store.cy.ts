@@ -1,4 +1,5 @@
 import { FindLabwareLocationQuery, FindLabwareLocationQueryVariables } from '../../../src/types/sdk';
+import { setAwaitingLabwareInSessionStorage } from '../shared/awaitingStorage.cy';
 
 describe('Store', () => {
   describe('Location search', () => {
@@ -79,12 +80,22 @@ describe('Store', () => {
 
   describe('when awaiting labwares are in session storage', () => {
     before(() => {
-      sessionStorage.setItem('awaitingLabwares', 'STAN-2111,tube,STAN-3111,Slide,STAN-4111,Slide,STAN-5111,Slide');
+      setAwaitingLabwareInSessionStorage();
       cy.visit('/store');
     });
 
     it('store all button should be disabled', () => {
       cy.findByRole('button', { name: /Store All/i }).should('be.disabled');
+    });
+    it('should display a table with labware information', () => {
+      cy.findByRole('table').get('th').should('have.length', 8);
+      cy.findByRole('table').get('th').eq(0).should('have.text', 'Barcode');
+      cy.findByRole('table').get('th').eq(1).should('have.text', 'Labware Type');
+      cy.findByRole('table').get('th').eq(2).should('have.text', 'External Identifier');
+      cy.findByRole('table').get('th').eq(3).should('have.text', 'Donor');
+      cy.findByRole('table').get('th').eq(4).should('have.text', 'Tissue Type');
+      cy.findByRole('table').get('th').eq(5).should('have.text', 'Spatial Location');
+      cy.findByRole('table').get('th').eq(6).should('have.text', 'Replicate');
     });
     after(() => {
       sessionStorage.removeItem('awaitingLabwares');

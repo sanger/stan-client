@@ -16,7 +16,6 @@ export function createLabware(barcode: string) {
   const labwareType = labwareTypeInstances[magicNumber % labwareTypeInstances.length];
   // The number after that determines how many samples to put in each slot
   const samplesPerSlot = parseInt(barcode.substr(6, 1));
-
   const id = generateLabwareIdFromBarcode(barcode);
   const params =
     id < 0

@@ -12,6 +12,7 @@ import ButtonBar from '../../components/ButtonBar';
 import AppShell from '../../components/AppShell';
 import { Column } from 'react-table';
 import { history } from '../../lib/sdk';
+import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 
 /**Represent an object containing LabwareFieldsFragment member**/
 export interface LabwareContainType extends Object {
@@ -81,10 +82,7 @@ const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFie
             action="secondary"
             onClick={() => {
               if (labware.length > 0) {
-                sessionStorage.setItem(
-                  'awaitingLabwares',
-                  labware.map((lw) => `${lw.barcode}, ${lw.labwareType.name}`).join(',')
-                );
+                createSessionStorageForLabwareAwaiting(labware);
               }
               history.push('/store');
             }}

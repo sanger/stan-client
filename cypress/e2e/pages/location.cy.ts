@@ -1,3 +1,5 @@
+import { setAwaitingLabwareInSessionStorage } from '../shared/awaitingStorage.cy';
+
 describe('Location', () => {
   before(() => {
     cy.visit('/locations/STO-024');
@@ -90,7 +92,7 @@ describe('Location', () => {
 
   describe('when awaiting labwares are in session storage', () => {
     before(() => {
-      sessionStorage.setItem('awaitingLabwares', 'STAN-2111,tube,STAN-3111,Slide,STAN-4111,Slide,STAN-5111,Slide');
+      setAwaitingLabwareInSessionStorage();
       cy.visit('/locations/STO-024');
     });
     context('when location opened with awaiting labware', () => {
@@ -115,7 +117,7 @@ describe('Location', () => {
     });
     context('when storing one awaiting labware to location', () => {
       before(() => {
-        sessionStorage.setItem('awaitingLabwares', 'STAN-2111,tube,STAN-3111,Slide,STAN-4111,Slide,STAN-5111,Slide');
+        setAwaitingLabwareInSessionStorage();
         cy.visit('/locations/STO-024');
         cy.findByTestId('addIcon-STAN-3111').click();
       });
@@ -129,7 +131,7 @@ describe('Location', () => {
   });
   describe('when performing browser operations', () => {
     before(() => {
-      sessionStorage.setItem('awaitingLabwares', 'STAN-2111,tube,STAN-3111,Slide,STAN-4111,Slide,STAN-5111,Slide');
+      setAwaitingLabwareInSessionStorage();
       cy.visit('/locations/STO-002');
       cy.findByText('Rack 1 in Freezer 1 in Room 1234').click();
       cy.findByText('Box 1 in Rack 1 in Freezer 1 in Room 1234').click();
