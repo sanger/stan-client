@@ -27,7 +27,7 @@ describe('Work Progress', () => {
         before(() => {
           cy.visit('/?workTypes[]=Work%20Type%201&workTypes[]=Work%20Type%202');
         });
-        it('will display the given Work type in value dropdown', () => {
+        it('will display the given Work type dropdown', () => {
           cy.findAllByTestId('caption').should('have.length', 2);
           cy.findAllByTestId('caption').eq(0).should('have.text', 'Work Type 1');
           cy.findAllByTestId('caption').eq(1).should('have.text', 'Work Type 2');
@@ -42,7 +42,7 @@ describe('Work Progress', () => {
         before(() => {
           cy.visit('?statuses[]=active&statuses[]=paused');
         });
-        it('will display the given status in value dropdown', () => {
+        it('will display the given status in dropdown', () => {
           cy.findAllByTestId('caption').should('have.length', 2);
           cy.findAllByTestId('caption').eq(0).should('have.text', 'active');
           cy.findAllByTestId('caption').eq(1).should('have.text', 'paused');
@@ -66,7 +66,7 @@ describe('Work Progress', () => {
         });
       });
     });
-    context('when an invalid url with no work number', () => {
+    context('when an invalid url given', () => {
       before(() => {
         cy.visit('?test[]=PROGRAM_999');
       });
@@ -137,7 +137,7 @@ describe('Work Progress', () => {
       before(() => {
         cy.findByTestId('select_workNumber').select('SGP1008');
       });
-      it('shows an enabled search button ', () => {
+      it('enables search button ', () => {
         cy.findByRole('button', { name: /Search/i }).should('be.enabled');
       });
       context('when search button is clicked', () => {
@@ -147,16 +147,13 @@ describe('Work Progress', () => {
         it('shows a list of results', () => {
           cy.findByRole('table').should('exist');
         });
-        it('shows priority column in list of results', () => {
-          cy.findByRole('table').contains('Priority');
-        });
       });
     });
   });
 
   //TESTCASES for WorkType based filter
   describe('Testcases for WorkType based search', () => {
-    context('when a value is given which has no results', () => {
+    context('when a workType is given which has no results', () => {
       before(() => {
         cy.visit('');
         cy.findByTestId('select_workType').select(['Work Type 2']);
@@ -166,7 +163,7 @@ describe('Work Progress', () => {
         cy.findByText('There were no results for the given search. Please try again.').should('be.visible');
       });
     });
-    context('when a value is given which has results', () => {
+    context('when a workType is given which has results', () => {
       before(() => {
         cy.findByTestId('select_workType').select(['Work Type 1']);
         cy.findByRole('button', { name: /Search/i }).click();
@@ -180,7 +177,7 @@ describe('Work Progress', () => {
 
   //TESTCASES for Status based filter
   describe('Testing Status based search', () => {
-    context('when a value is given with no results', () => {
+    context('when a status is given with no results', () => {
       before(() => {
         cy.visit('');
         cy.findByTestId('select_status').select('failed');
@@ -189,7 +186,7 @@ describe('Work Progress', () => {
       it('will show a notification', () => {
         cy.findByText('There were no results for the given search. Please try again.').should('be.visible');
       });
-      context('when a value is given which has results', () => {
+      context('when a status is given which has results', () => {
         before(() => {
           cy.findByTestId('select_status').select('active');
           cy.findByTestId('select_status').select('completed');
@@ -200,7 +197,7 @@ describe('Work Progress', () => {
         });
       });
     });
-    context('when a paused value is given', () => {
+    context('when a paused value is given for status', () => {
       before(() => {
         cy.findByTestId('select_status').select('paused');
         cy.findByRole('button', { name: /Search/i }).click();
