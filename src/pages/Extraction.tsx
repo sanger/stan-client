@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import ButtonBar from '../components/ButtonBar';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
+import LabelCopyButton from '../components/LabelCopyButton';
 
 function buildExtractionTableData(ctx: ExtractionContext) {
   if (!ctx.extraction) return [];
@@ -30,10 +31,12 @@ function buildExtractionTableData(ctx: ExtractionContext) {
   const destinationLabwares = ctx.extraction.extract.labware;
   const sampleColors = buildSampleColors(destinationLabwares);
 
+  debugger;
   /**
    * The result will contain one operation per labware, and each operation will contain one action per sample in the labware.
    * Here it is refined to show  one result per operation.
    */
+
   return ctx.extraction.extract.operations
     .map((operation) => {
       return {
@@ -122,6 +125,7 @@ function Extraction() {
                     <TableHeader>Source Labware</TableHeader>
                     <TableHeader>Destination Labware</TableHeader>
                     <TableHeader />
+                    <TableHeader />
                   </tr>
                 </TableHead>
                 <TableBody>
@@ -141,13 +145,16 @@ function Extraction() {
                           />
                         )}
                       </TableCell>
+                      <TableCell>
+                        {data.destinationLabware && <LabelCopyButton labware={[data.destinationLabware]} />}
+                      </TableCell>
                     </tr>
                   ))}
                 </TableBody>
               </Table>
 
-              <div className="flex flex-row items-center sm:justify-end">
-                <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
+              <div className="flex flex-col items-end sm:justify-end space-y-2">
+                <div className="sm:max-w-xl w-full p-4 rounded-md border-gray-200 bg-gray-100 shadow space-y-2">
                   {printResult && <PrintResult result={printResult} />}
                   <LabelPrinter
                     labelsPerBarcode={2}
@@ -160,6 +167,23 @@ function Extraction() {
                   <MutedText className="text-right">
                     Note: 2 labels for each destination labware will be printed.
                   </MutedText>
+                </div>
+                <div
+                  className={
+                    'flex flex-col sm:max-w-xl w-full p-4 rounded-md border-gray-200 bg-gray-100 shadow items-end sm:justify-end space-y-2'
+                  }
+                >
+                  <div className={'flex items-center space-x-2'}>
+                    <div className={'font-bold'}>Labels:</div>
+                    <div>{extraction?.extract?.labware.map((lw) => lw.barcode).join(',')}</div>
+                  </div>
+                  <LabelCopyButton
+                    labware={extraction?.extract?.labware ?? []}
+                    copyButtonText={'Copy Labels'}
+                    buttonClass={
+                      'text-white bg-sdb-400 shadow-sm hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'
+                    }
+                  />
                 </div>
               </div>
             </motion.div>
