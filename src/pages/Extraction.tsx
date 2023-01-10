@@ -30,8 +30,6 @@ function buildExtractionTableData(ctx: ExtractionContext) {
   const sourceLabwares = ctx.labwares;
   const destinationLabwares = ctx.extraction.extract.labware;
   const sampleColors = buildSampleColors(destinationLabwares);
-
-  debugger;
   /**
    * The result will contain one operation per labware, and each operation will contain one action per sample in the labware.
    * Here it is refined to show  one result per operation.
