@@ -1,5 +1,4 @@
 import React from 'react';
-import { LabwareFieldsFragment } from '../types/sdk';
 import CopyIcon from './icons/CopyIcon';
 import warningToast from './notifications/WarningToast';
 import { toast } from 'react-toastify';
@@ -12,14 +11,14 @@ import classNames from 'classnames';
  */
 const ToastSuccess = (barcodes: string) => <Success message={`${barcodes} copied to clipboard.`} />;
 interface LabelCopyButtonProps extends ButtonProps {
-  labware: Array<LabwareFieldsFragment>;
+  labels: Array<string>;
   copyButtonText?: string;
   buttonClass?: string;
   onCopyAction?: (success: boolean, barcodesCopied: string) => void;
 }
 
 const LabelCopyButton: React.FC<LabelCopyButtonProps> = ({
-  labware,
+  labels,
   copyButtonText,
   buttonClass,
   onCopyAction,
@@ -29,31 +28,28 @@ const LabelCopyButton: React.FC<LabelCopyButtonProps> = ({
   const onError = (barcodes: string, notifyOnCopy?: (success: boolean, barcodesCopied: string) => void) => {
     notifyOnCopy?.(false, barcodes);
     warningToast({
-      message: 'Cannot copy to clipboard empty slot.',
+      message: 'Cannot copy to clipboard.',
       position: toast.POSITION.TOP_RIGHT,
       autoClose: 5000
     });
   };
 
-  const handleCopy = async (
-    labware: LabwareFieldsFragment[],
-    notifyOnCopy?: (success: boolean, barcodesCopied: string) => void
-  ) => {
-    const barcodesToCopy = labware.map((lw) => lw.barcode).join(',');
+  const handleCopy = async (labels: string[], notifyOnCopy?: (success: boolean, barcodesCopied: string) => void) => {
+    const copyStr = labels.join(',');
     try {
       await navigator.clipboard
-        .writeText(barcodesToCopy)
+        .writeText(copyStr)
         .then(() => {
-          notifyOnCopy?.(false, barcodesToCopy);
-          toast(ToastSuccess(barcodesToCopy), {
+          notifyOnCopy?.(true, copyStr);
+          toast(ToastSuccess(copyStr), {
             position: toast.POSITION.TOP_RIGHT,
             autoClose: 4000,
             hideProgressBar: true
           });
         })
-        .catch(() => onError(barcodesToCopy, onCopyAction));
+        .catch(() => onError(copyStr, onCopyAction));
     } catch (error) {
-      onError(barcodesToCopy, onCopyAction);
+      onError(copyStr, onCopyAction);
     }
   };
 
@@ -63,9 +59,9 @@ const LabelCopyButton: React.FC<LabelCopyButtonProps> = ({
   );
   return (
     <button
-      id={'copyButton'}
-      disabled={labware.length <= 0}
-      onClick={() => handleCopy(labware, onCopyAction)}
+      data-testid={'copyButton'}
+      disabled={labels.length <= 0}
+      onClick={() => handleCopy(labels, onCopyAction)}
       type="button"
       className={buttonClassName}
       {...rest}

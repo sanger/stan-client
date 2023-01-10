@@ -7,6 +7,7 @@ import React from 'react';
 const CopyIcon = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg
+      data-testid="copy-icon"
       id="copy-icon"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"

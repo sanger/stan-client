@@ -62,5 +62,8 @@ describe('RNA Extraction', () => {
     it('shows a success message', () => {
       cy.findByText('Extraction Complete').should('be.visible');
     });
+    it('shows a copy label button', () => {
+      cy.findByRole('button', { name: /Copy Labels/i }).should('be.visible');
+    });
   });
 });

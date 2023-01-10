@@ -338,7 +338,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
                 </div>
                 <div className={'flex items-end sm:justify-end'}>
                   <LabelCopyButton
-                    labware={slotCopyResults}
+                    labels={slotCopyResults.map((scr) => scr.barcode)}
                     copyButtonText={'Copy Labels'}
                     buttonClass={
                       'text-white bg-sdb-400 shadow-sm hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'

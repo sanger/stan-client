@@ -146,7 +146,7 @@ function Extraction() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {data.destinationLabware && <LabelCopyButton labware={[data.destinationLabware]} />}
+                        {data.destinationLabware && <LabelCopyButton labels={[data.destinationLabware.barcode]} />}
                       </TableCell>
                     </tr>
                   ))}
@@ -170,7 +170,7 @@ function Extraction() {
                 </div>
                 <div
                   className={
-                    'flex flex-col sm:max-w-xl w-full p-4 rounded-md border-gray-200 bg-gray-100 shadow items-end sm:justify-end space-y-2'
+                    'flex flex-col sm:max-w-xl w-full p-4 rounded-md border-gray-200 bg-gray-100 shadow items-end sm:justify-end '
                   }
                 >
                   <div className={'flex items-center space-x-2'}>
@@ -178,7 +178,7 @@ function Extraction() {
                     <div>{extraction?.extract?.labware.map((lw) => lw.barcode).join(',')}</div>
                   </div>
                   <LabelCopyButton
-                    labware={extraction?.extract?.labware ?? []}
+                    labels={extraction?.extract?.labware.map((lw) => lw.barcode) ?? []}
                     copyButtonText={'Copy Labels'}
                     buttonClass={
                       'text-white bg-sdb-400 shadow-sm hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'

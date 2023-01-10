@@ -249,6 +249,9 @@ describe('Transfer Page', () => {
         it('shows the label printer component', () => {
           cy.findByRole('button', { name: 'Print Labels' }).should('be.visible');
         });
+        it('shows a copy label button', () => {
+          cy.findByRole('button', { name: /Copy Labels/i }).should('be.visible');
+        });
       });
     });
   });
