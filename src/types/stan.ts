@@ -246,6 +246,7 @@ export type StanConfig = {
  * Describes the columns of the History component table
  */
 export type HistoryTableEntry = {
+  eventId: number;
   date: string;
   sourceBarcode: string;
   destinationBarcode: string;

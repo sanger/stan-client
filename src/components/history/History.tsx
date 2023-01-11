@@ -110,6 +110,13 @@ export default function History(props: HistoryProps) {
           const details = props.row.original.details.map((detail) => {
             return <li key={detail}>{detail}</li>;
           });
+          if (props.row.original.eventType.toLowerCase()==='release') {
+              const releaseId = props.row.original.eventId;
+              const releaseUrl = `/release?id=${releaseId}`
+              details.push(<li key={releaseUrl}><a href={releaseUrl} download={'release.tsv'}>
+                  <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />Release file</a>
+              </li>)
+          }
           return <ul>{details}</ul>;
         }
       }
