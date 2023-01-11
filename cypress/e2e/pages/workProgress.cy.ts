@@ -3,61 +3,91 @@ describe('Work Progress', () => {
     cy.visit('./');
   });
 
-  // TEST CASES for WorkProgressInput Component fields
-  describe('Testing component fields', () => {
-    context('when the type field is selected', () => {
-      context('when Work Number is selected in dropdown for type', () => {
+  //URL TEST CASES
+  describe('Testing URL params', () => {
+    context('when url is given for searching WorkNumber', () => {
+      before(() => {
+        cy.visit('?workNumber=SGP1008');
+      });
+      it('shows a list of results', () => {
+        cy.findByRole('table').contains('SGP/R&D Number');
+      });
+      it("will show the 'SGP/R&D Number' in  type dropdown ", () => {
+        cy.findByTestId('select_workNumber').should('have.value', 'SGP1008');
+      });
+      it('enables Search button', () => {
+        cy.findByRole('button', { name: /Search/i }).should('be.enabled');
+      });
+      it('shows a list of results', () => {
+        cy.findByRole('table').contains('SGP/R&D Number');
+      });
+    });
+    context('when url is given for searching WorkType', () => {
+      context('when a valid url', () => {
         before(() => {
-          cy.findByTestId('type').select('SGP/R&D Number');
+          cy.visit('/?workTypes[]=Work%20Type%201&workTypes[]=Work%20Type%202');
         });
-        it('shows an input text field', () => {
-          cy.get('[data-testid=valueInput]').should('have.value', '');
+        it('will display the given Work type dropdown', () => {
+          cy.findAllByTestId('caption').should('have.length', 2);
+          cy.findAllByTestId('caption').eq(0).should('have.text', 'Work Type 1');
+          cy.findAllByTestId('caption').eq(1).should('have.text', 'Work Type 2');
+        });
+        it('shows a list of results', () => {
+          cy.findByRole('table').should('exist');
         });
       });
-      context('when Status is selected in dropdown for type', () => {
+    });
+    context('when url is given for searching status', () => {
+      context('when a valid url given ', () => {
         before(() => {
-          cy.findByTestId('type').select('Status');
+          cy.visit('?statuses[]=active&statuses[]=paused');
         });
-        it('shows a drop down box with value unstarted ', () => {
-          cy.get('[data-testid = valueSelect]')
-            .children('option')
-            .then(($options) => {
-              const optionValues = $options.toArray().map((elem) => elem.label);
-              expect(optionValues).to.deep.eq(['active', 'paused', 'unstarted', 'completed', 'failed', 'withdrawn']);
-            });
+        it('will display the given status in dropdown', () => {
+          cy.findAllByTestId('caption').should('have.length', 2);
+          cy.findAllByTestId('caption').eq(0).should('have.text', 'active');
+          cy.findAllByTestId('caption').eq(1).should('have.text', 'paused');
+        });
+        it('shows a list of results', () => {
+          cy.findByRole('table').should('exist');
         });
       });
-      context(' when WorkType is selected in dropdown for type', () => {
+    });
+    context('when url is given for searching program', () => {
+      context('when a valid url ', () => {
         before(() => {
-          cy.findByTestId('type').select('Work Type');
+          cy.visit('?programs[]=PROGRAM_999');
         });
-        it('shows a drop down box with value', () => {
-          cy.get('[data-testid = valueSelect]')
-            .children('option')
-            .then(($options) => {
-              const optionValues = $options.toArray().map((elem) => elem.label);
-              expect(optionValues).to.deep.eq([
-                'TEST_WT_1',
-                'Work Type 1',
-                'Work Type 2',
-                'Work Type 3',
-                'Work Type 5'
-              ]);
-            });
+        it('will display the given Work type in value dropdown', () => {
+          cy.findAllByTestId('caption').should('have.length', 1);
+          cy.findAllByTestId('caption').eq(0).should('have.text', 'PROGRAM_999');
+        });
+        it('shows a list of results', () => {
+          cy.findByRole('table').should('exist');
         });
       });
-      context(' when Program is selected in dropdown for program', () => {
-        before(() => {
-          cy.findByTestId('type').select('Program');
-        });
-        it('shows a drop down box with value', () => {
-          cy.get('[data-testid = valueSelect]')
-            .children('option')
-            .then(($options) => {
-              const optionValues = $options.toArray().map((elem) => elem.label);
-              expect(optionValues).to.have.length(7);
-            });
-        });
+    });
+    context('when an invalid url given', () => {
+      before(() => {
+        cy.visit('?test[]=PROGRAM_999');
+      });
+      it('disables Search button', () => {
+        cy.findByRole('button', { name: /Search/i }).should('be.disabled');
+      });
+    });
+    context('When a url with multiple search params is provided', () => {
+      before(() => {
+        cy.visit('?statuses[]=active&statuses[]=paused&workNumber=SGP1008');
+      });
+      it('should select the given work number in ui ', () => {
+        cy.findByTestId('select_workNumber').should('have.value', 'SGP1008');
+      });
+      it('should select all given statuses in ui ', () => {
+        cy.findAllByTestId('caption').should('have.length', 2);
+        cy.findAllByTestId('caption').eq(0).should('have.text', 'active');
+        cy.findAllByTestId('caption').eq(1).should('have.text', 'paused');
+      });
+      it('shows a list of results', () => {
+        cy.findByRole('table').should('exist');
       });
     });
   });
@@ -66,9 +96,8 @@ describe('Work Progress', () => {
   describe('Testing work progress table', () => {
     context('Table headers', () => {
       before(() => {
-        cy.visit('?searchType=SGP%2FR%26D%20Number&searchValues[]=SGP1001');
+        cy.visit('?statuses[]=active&statuses[]=paused&workNumber=SGP1008');
       });
-
       it('has the correct table headers in the correct order', () => {
         cy.get('th').eq(0).contains('Priority');
         cy.get('th').eq(1).contains('SGP/R&D Number');
@@ -98,76 +127,79 @@ describe('Work Progress', () => {
   describe('Testcases for  Work Number based search action', () => {
     before(() => {
       cy.visit('');
-      cy.findByTestId('type').select('SGP/R&D Number');
     });
     context('no value is entered', () => {
       it('shows a disabled search button ', () => {
         cy.findByRole('button', { name: /Search/i }).should('be.disabled');
       });
     });
-    context('when a search value is given', () => {
+    context('when a worknumber is given', () => {
       before(() => {
-        cy.findByTestId('valueInput').type('SGP1001');
-        cy.findByRole('button', { name: /Search/i }).click();
+        cy.findByTestId('select_workNumber').select('SGP1008');
       });
-      it('shows a list of results', () => {
-        cy.findByRole('table').should('exist');
+      it('enables search button ', () => {
+        cy.findByRole('button', { name: /Search/i }).should('be.enabled');
       });
-      it('shows priority column in list of results', () => {
-        cy.findByRole('table').contains('Priority');
+      context('when search button is clicked', () => {
+        before(() => {
+          cy.findByRole('button', { name: /Search/i }).click();
+        });
+        it('shows a list of results', () => {
+          cy.findByRole('table').should('exist');
+        });
       });
     });
   });
 
-  //TESTCASES for WorkType based search
+  //TESTCASES for WorkType based filter
   describe('Testcases for WorkType based search', () => {
-    before(() => {
-      cy.findByTestId('type').select('Work Type');
-    });
-    context('when a value is given ', () => {
+    context('when a workType is given which has no results', () => {
       before(() => {
-        cy.findByTestId('valueSelect').select(['Work Type 1', 'Work Type 2']);
+        cy.visit('');
+        cy.findByTestId('select_workType').select(['Work Type 2']);
         cy.findByRole('button', { name: /Search/i }).click();
       });
+      it('will show a notification', () => {
+        cy.findByText('There were no results for the given search. Please try again.').should('be.visible');
+      });
+    });
+    context('when a workType is given which has results', () => {
+      before(() => {
+        cy.findByTestId('select_workType').select(['Work Type 1']);
+        cy.findByRole('button', { name: /Search/i }).click();
+      });
+
       it('will show table with result', () => {
         cy.findByRole('table').contains('Work Type 1');
       });
     });
-    context('when a value is given which has no results', () => {
-      before(() => {
-        cy.findByTestId('valueSelect').select('Work Type 2');
-        cy.findByRole('button', { name: /Search/i }).click();
-      });
-      it('will show a notification', () => {
-        cy.findByText('There were no results for the given search. Please try again.').should('be.visible');
-      });
-    });
   });
 
-  //TESTCASES for Status based search
+  //TESTCASES for Status based filter
   describe('Testing Status based search', () => {
-    context('when a value is given', () => {
+    context('when a status is given with no results', () => {
       before(() => {
-        cy.findByTestId('type').select('Status');
-        cy.findByTestId('valueSelect').select(['active', 'completed']);
-        cy.findByRole('button', { name: /Search/i }).click();
-      });
-      it('will show a table with results', () => {
-        cy.findByRole('table').contains('active');
-      });
-    });
-    context('when a value is given with no results', () => {
-      before(() => {
-        cy.findByTestId('valueSelect').select('failed');
+        cy.visit('');
+        cy.findByTestId('select_status').select('failed');
         cy.findByRole('button', { name: /Search/i }).click();
       });
       it('will show a notification', () => {
         cy.findByText('There were no results for the given search. Please try again.').should('be.visible');
       });
+      context('when a status is given which has results', () => {
+        before(() => {
+          cy.findByTestId('select_status').select('active');
+          cy.findByTestId('select_status').select('completed');
+          cy.findByRole('button', { name: /Search/i }).click();
+        });
+        it('will show a table with results', () => {
+          cy.findByRole('table').contains('active');
+        });
+      });
     });
-    context('when a paused value is given', () => {
+    context('when a paused value is given for status', () => {
       before(() => {
-        cy.findByTestId('valueSelect').select('paused');
+        cy.findByTestId('select_status').select('paused');
         cy.findByRole('button', { name: /Search/i }).click();
       });
       it('will show a table with results', () => {
@@ -181,78 +213,29 @@ describe('Work Progress', () => {
   describe('Testing WorkNumber link', () => {
     context('when a search is performed using work number', () => {
       before(() => {
-        cy.findByTestId('type').select('SGP/R&D Number');
-        cy.findByTestId('valueInput').type('SGP1001');
+        cy.visit('');
+        cy.findByTestId('select_workNumber').select('SGP1008');
         cy.findByRole('button', { name: /Search/i }).click();
       });
       it('shows a link for work type in the results table', () => {
         cy.findByRole('table').within(() => {
-          cy.findByRole('link', { name: 'SGP1001' }).should('exist');
+          cy.findAllByRole('link', { name: 'SGP1008' }).should('have.length.above', 1);
         });
       });
     });
     context('when clicking WorkNumber link', () => {
       before(() => {
-        cy.findByRole('link', { name: 'SGP1001' }).click();
+        cy.findAllByRole('link', { name: 'SGP1008' }).eq(0).click();
       });
-      it('displays the history page for SGP1001', () => {
-        cy.url().should('include', '/history/?kind=workNumber&value=SGP1001');
+      it('displays the history page for SGP1008', () => {
+        cy.url().should('include', '/history/?kind=workNumber&value=SGP1008');
         cy.findAllByText('History').should('have.length.above', 1);
       });
     });
   });
 
   //URL Test cases
-  describe('Testing search based on query parameters in URL', () => {
-    context('when url is given for searching WorkNumber', () => {
-      before(() => {
-        cy.visit('?searchType=SGP%2FR%26D%20Number&searchValues[]=SGP1001');
-      });
-      it('shows a list of results', () => {
-        cy.findByRole('table').contains('SGP/R&D Number');
-      });
-      it("will show the 'SGP/R&D Number' in  type dropdown ", () => {
-        cy.findByTestId('type').should('have.value', 'SGP/R&D Number');
-      });
-      it('will show the given work number in text box ', () => {
-        cy.findByTestId('valueInput').should('have.value', 'SGP1001');
-      });
-    });
-    context('when valid url is given for searching WorkType', () => {
-      before(() => {
-        cy.visit('/?searchType=Work%20Type&searchValues[]=Work%20Type%201');
-      });
-      it('shows a list of results', () => {
-        cy.findByRole('table').contains('SGP/R&D Number');
-      });
-      it('will display the given Work type in value dropdown', () => {
-        cy.findByTestId('valueSelect').invoke('val').should('deep.equal', ['Work Type 1']);
-      });
-    });
 
-    context('when valid url is given for searching Status', () => {
-      before(() => {
-        cy.visit('?searchType=Status&searchValues[]=active');
-      });
-      it('shows a list of results', () => {
-        cy.findByRole('table').contains('active');
-      });
-      it('will display the given Status in value dropdown', () => {
-        cy.findByTestId('valueSelect').invoke('val').should('deep.equal', ['active']);
-      });
-    });
-    context('when valid url is given for searching Program', () => {
-      before(() => {
-        cy.visit('?searchType=Program&searchValues[]=PROGRAM_999');
-      });
-      it('shows a list of results', () => {
-        cy.findByRole('table').contains('PROGRAM_999');
-      });
-      it('will display the given PROGRAM in value dropdown', () => {
-        cy.findByTestId('valueSelect').invoke('val').should('deep.equal', ['PROGRAM_999']);
-      });
-    });
-  });
   describe('Summary dashboard', () => {
     before(() => {
       cy.visit('./');

@@ -1,11 +1,11 @@
 import { render, screen, cleanup } from '@testing-library/react';
 import { describe } from '@jest/globals';
-import WorkProgressInput, {
-  workProgressSearchSchema,
-  WorkProgressSearchType
-} from '../../../src/components/workProgress/WorkProgressInput';
 import { ValidationError } from 'yup';
-import { WorkStatus } from '../../../src/types/sdk';
+import { WorkStatus } from '../../../../src/types/sdk';
+import WorkProgressSummaryInput, {
+  WorkProgressSearchType,
+  workProgressSummarySearchSchema
+} from '../../../../src/components/workProgress/WorkProgressSummaryInput';
 
 afterEach(() => {
   cleanup();
@@ -21,10 +21,10 @@ jest.mock('react-router-dom', () => ({
   })
 }));
 
-describe('WorkProgressInput.tsx', () => {
+describe('WorkProgressSummaryInput.tsx', () => {
   describe('workProgressSearchSchema', () => {
     describe('searchType', () => {
-      const schema = workProgressSearchSchema(['Work Type 1']);
+      const schema = workProgressSummarySearchSchema(['Work Type 1']);
 
       it('returns a validation error if search type is not provided', async () => {
         /* 
@@ -61,7 +61,7 @@ describe('WorkProgressInput.tsx', () => {
     });
 
     describe('searchValues', () => {
-      const schema = workProgressSearchSchema(['Work Type 1']);
+      const schema = workProgressSummarySearchSchema(['Work Type 1']);
       describe('workType', () => {
         it('returns a validation error if given workType is not declared in schema', async () => {
           expect.assertions(1);
@@ -130,7 +130,7 @@ describe('WorkProgressInput.tsx', () => {
         workTypes: [],
         searchTypes: []
       };
-      render(<WorkProgressInput {...workProgressInputProps} />);
+      render(<WorkProgressSummaryInput {...workProgressInputProps} />);
 
       // Component header title
       expect(screen.getByTestId('heading')).toHaveTextContent('Search');
@@ -157,7 +157,7 @@ describe('WorkProgressInput.tsx', () => {
         workTypes: ['Work Type 1'],
         searchTypes: [WorkProgressSearchType.Status, WorkProgressSearchType.WorkNumber, WorkProgressSearchType.WorkType]
       };
-      render(<WorkProgressInput {...workProgressInputProps} />);
+      render(<WorkProgressSummaryInput {...workProgressInputProps} />);
 
       const searchTypeSelector = screen.getByTestId('type') as HTMLInputElement;
       expect(searchTypeSelector.value).toEqual('Work Type');
@@ -178,7 +178,7 @@ describe('WorkProgressInput.tsx', () => {
         workTypes: ['Work Type 1'],
         searchTypes: [WorkProgressSearchType.Status, WorkProgressSearchType.WorkNumber, WorkProgressSearchType.WorkType]
       };
-      render(<WorkProgressInput {...workProgressInputProps} />);
+      render(<WorkProgressSummaryInput {...workProgressInputProps} />);
 
       const searchTypeSelector = screen.getByTestId('type') as HTMLInputElement;
       expect(searchTypeSelector.value).toEqual('SGP/R&D Number');
@@ -197,7 +197,7 @@ describe('WorkProgressInput.tsx', () => {
         workTypes: ['Work Type 1'],
         searchTypes: [WorkProgressSearchType.Status, WorkProgressSearchType.WorkNumber, WorkProgressSearchType.WorkType]
       };
-      render(<WorkProgressInput {...workProgressInputProps} />);
+      render(<WorkProgressSummaryInput {...workProgressInputProps} />);
 
       const searchTypeSelector = screen.getByTestId('type') as HTMLInputElement;
       expect(searchTypeSelector.value).toEqual('Status');

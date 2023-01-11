@@ -58,12 +58,22 @@ export class WorkProgressService
   search = async (
     workProgressRequest: FindWorkProgressQueryVariables
   ): Promise<SearchResultsType<WorkProgressResultTableEntry>> => {
+    if (
+      !workProgressRequest.workNumber &&
+      !workProgressRequest.programs &&
+      !workProgressRequest.workTypes &&
+      !workProgressRequest.statuses
+    ) {
+      return {
+        numDisplayed: 0,
+        entries: []
+      };
+    }
     // Tidy up the search parameters e.g. removing undefined and null values
     const request: FindWorkProgressQueryVariables = _(workProgressRequest)
       .omitBy((val) => (typeof val === 'number' ? val === 0 : _.isEmpty(val)))
       .mapValues((value: any) => (typeof value === 'string' ? value.trim() : value))
       .value();
-
     const response = await stanCore.FindWorkProgress(request);
     return {
       numDisplayed: response.workProgress.entries.length,

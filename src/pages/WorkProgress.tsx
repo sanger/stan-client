@@ -18,10 +18,7 @@ import { Cell, Column } from 'react-table';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
 import { alphaNumericSortDefault, SearchResultsType, statusSort } from '../types/stan';
 import { useLocation } from 'react-router-dom';
-import WorkProgressInput, {
-  workProgressSearchSchema,
-  WorkProgressSearchType
-} from '../components/workProgress/WorkProgressInput';
+import WorkProgressInput, { workProgressSearchSchema } from '../components/workProgress/WorkProgressInput';
 import StyledLink from '../components/StyledLink';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
@@ -31,20 +28,22 @@ import Heading from '../components/Heading';
  * Data structure to keep the data associated with this component
  */
 export type WorkProgressUrlParams = {
-  searchType: string;
-  searchValues: string[] | undefined;
+  workNumber?: string;
+  programs?: string[];
+  statuses?: string[];
+  workTypes?: string[];
 };
 const defaultInitialValues: WorkProgressUrlParams = {
-  searchType: WorkProgressSearchType.WorkNumber,
-  searchValues: undefined
+  workNumber: undefined,
+  programs: undefined,
+  statuses: undefined,
+  workTypes: undefined
 };
 
 /**
- * Possible URL search params for the page e.g.?searchType=SGP%2FR%26D%20Number&searchValues[]=sgp2
- * or
- * ?searchType=Status&searchValues[]=completed&searchValues[]=active
- * or
- * ?searchType=Work%20Type&searchValues[]=WorkType1&searchValues[]=Worktype2
+ *
+ * Example URL search params for the page e.g.
+ * http://localhost:3000/?programs[]=program_1&programs[]=program_2&workNumber=SGP1008
  * */
 const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: string[] }) => {
   const location = useLocation();
@@ -122,10 +121,14 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
    * When the URL search params change, send an event to the machine
    */
   React.useEffect(() => {
-    if (!memoUrlParams || !memoUrlParams.searchValues || memoUrlParams.searchValues.length <= 0) {
+    if (
+      !memoUrlParams ||
+      (!memoUrlParams.workNumber && !memoUrlParams.workTypes && !memoUrlParams.programs && !memoUrlParams.statuses)
+    ) {
       return;
     }
-    send({ type: 'FIND', request: formatInputData(memoUrlParams) });
+    const value = formatInputData(memoUrlParams);
+    send({ type: 'FIND', request: value });
   }, [memoUrlParams, send]);
 
   /**
@@ -133,34 +136,12 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
    * @param workProgressUrl
    */
   function formatInputData(workProgressUrl: WorkProgressUrlParams): WorkProgressQueryInput {
-    const queryInput: WorkProgressQueryInput = {
-      workNumber: undefined,
-      workTypes: undefined,
-      statuses: undefined,
-      programs: undefined
+    return {
+      workNumber: workProgressUrl.workNumber ?? undefined,
+      workTypes: workProgressUrl.workTypes ?? undefined,
+      statuses: workProgressUrl.statuses ? (workProgressUrl.statuses as WorkStatus[]) : undefined,
+      programs: workProgressUrl.programs ?? undefined
     };
-    switch (workProgressUrl.searchType) {
-      case WorkProgressSearchType.WorkNumber: {
-        queryInput.workNumber =
-          workProgressUrl.searchValues && workProgressUrl.searchValues.length > 0
-            ? workProgressUrl.searchValues[0]
-            : '';
-        break;
-      }
-      case WorkProgressSearchType.WorkType: {
-        queryInput.workTypes = workProgressUrl.searchValues;
-        break;
-      }
-      case WorkProgressSearchType.Program: {
-        queryInput.programs = workProgressUrl.searchValues;
-        break;
-      }
-      case WorkProgressSearchType.Status: {
-        queryInput.statuses = workProgressUrl.searchValues as WorkStatus[];
-        break;
-      }
-    }
-    return queryInput;
   }
 
   return (
@@ -186,12 +167,6 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
             urlParams={memoUrlParams ?? defaultInitialValues}
             workTypes={workTypes}
             programs={programs}
-            searchTypes={[
-              WorkProgressSearchType.WorkType,
-              WorkProgressSearchType.Status,
-              WorkProgressSearchType.WorkNumber,
-              WorkProgressSearchType.Program
-            ]}
           />
           <div className={'my-10 mx-auto max-w-screen-xl'}>
             {serverError && <Warning message="Search Error" error={serverError} />}
@@ -206,22 +181,10 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
               searchResult && searchResult.entries.length > 0 ? (
                 <>
                   <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
-                    <p className="text-sm text-gray-700">
-                      Records for {memoUrlParams?.searchType}
-                      <span className="font-medium">
-                        {': '}
-                        {memoUrlParams?.searchValues && memoUrlParams?.searchValues.length < 4
-                          ? memoUrlParams?.searchValues?.join(',')
-                          : memoUrlParams?.searchValues?.slice(0, 3).join(',') + ',...'}
-                      </span>
-                    </p>
+                    <p className="text-sm text-gray-700">Search records</p>
                     <a
                       href={downloadFileURL}
-                      download={`${getTimestampStr()}_${memoUrlParams?.searchType}_${
-                        memoUrlParams?.searchValues && memoUrlParams?.searchValues.length < 4
-                          ? memoUrlParams?.searchValues.join('&')
-                          : memoUrlParams?.searchValues?.slice(0, 3).join('&') + '&etc'
-                      }${extension}`}
+                      download={`${getTimestampStr()}_dashboard_search_${extension}`}
                       onClick={handleDownload}
                     >
                       <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />

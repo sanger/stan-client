@@ -61,87 +61,40 @@ const workProgressHandlers = [
       return { ...work, status: status };
     });
 
-    if (workNumber) {
-      return res(
-        ctx.data({
-          __typename: 'Query',
-          workProgress: works.map((work) => {
-            return {
-              __typename: 'WorkProgress',
-              work: work,
-              timestamps: buildWorkProgressTimeStamps(),
-              workComment: buildWorkComment(work)
-            };
-          })
-        })
-      );
-    }
-
+    let filteredWorks = [...works];
     if (workTypes) {
-      const filteredWorks = Array.isArray(workTypes)
+      filteredWorks = Array.isArray(workTypes)
         ? works.filter((work) => workTypes.findIndex((workType) => workType === work.workType.name) !== -1)
         : works.filter((work) => work.workType.name === workTypes);
-      return res(
-        ctx.data({
-          __typename: 'Query',
-          workProgress: filteredWorks.map((work) => {
-            return {
-              __typename: 'WorkProgress',
-              work: work,
-              timestamps: buildWorkProgressTimeStamps(),
-              workComment: buildWorkComment(work)
-            };
-          })
-        })
-      );
-    }
-    if (programs) {
-      return res(
-        ctx.data({
-          __typename: 'Query',
-          workProgress: works.map((work) => {
-            return {
-              __typename: 'WorkProgress',
-              work: {
-                ...work,
-                program: {
-                  name:
-                    programs.length > 1 ? programs[generateRandomIntegerInRange(0, programs.length - 1)] : programs[0],
-                  enabled: true
-                }
-              },
-              timestamps: buildWorkProgressTimeStamps(),
-              workComment: buildWorkComment(work)
-            };
-          })
-        })
-      );
     }
     if (statuses) {
-      const filteredStatus = Array.isArray(statuses)
-        ? works.filter((work) => statuses.findIndex((status) => status === work.status) !== -1)
-        : works.filter((work) => work.status === statuses);
-      return res(
-        ctx.data({
-          __typename: 'Query',
-          workProgress: filteredStatus.map((work) => {
-            return {
-              __typename: 'WorkProgress',
-              work: work,
-              timestamps: buildWorkProgressTimeStamps(),
-              workComment: buildWorkComment(work)
-            };
-          })
-        })
-      );
+      filteredWorks = Array.isArray(statuses)
+        ? filteredWorks.filter((work) => statuses.findIndex((status) => status === work.status) !== -1)
+        : filteredWorks.filter((work) => work.status === statuses);
     }
-
     return res(
-      ctx.errors([
-        {
-          message: `Could not find Work progress}"`
-        }
-      ])
+      ctx.data({
+        __typename: 'Query',
+        workProgress: filteredWorks.map((work) => {
+          return {
+            __typename: 'WorkProgress',
+            work: {
+              ...work,
+              workNumber: workNumber ?? work.workNumber,
+              program: {
+                name: programs
+                  ? programs.length > 1
+                    ? programs[generateRandomIntegerInRange(0, programs.length - 1)]
+                    : programs[0]
+                  : '',
+                enabled: true
+              }
+            },
+            timestamps: buildWorkProgressTimeStamps(),
+            workComment: buildWorkComment(work)
+          };
+        })
+      })
     );
   })
 ];
