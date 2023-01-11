@@ -2131,6 +2131,13 @@ svg.logo.loading rect:nth-child(3n+1) {
   -webkit-column-gap: 5rem;
           column-gap: 5rem;
 }
+.gap-x-10 {
+  -webkit-column-gap: 2.5rem;
+          column-gap: 2.5rem;
+}
+.gap-y-6 {
+  row-gap: 1.5rem;
+}
 .gap-y-20 {
   row-gap: 5rem;
 }
@@ -4190,4 +4197,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.2690c250.css.map*/
+/*# sourceMappingURL=main.69d7cf51.css.map*/
