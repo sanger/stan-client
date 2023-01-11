@@ -111,6 +111,22 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({
     category: 'FFPE processing program',
     text: 'Hard tissue'
+  }),
+  commentFactory.build({
+    category: 'clean up',
+    text: 'Difficult/very slow to separate'
+  }),
+  commentFactory.build({
+    category: 'clean up',
+    text: 'Bead loss during clean up'
+  }),
+  commentFactory.build({
+    category: 'clean up',
+    text: 'Carryover beads in final eluate transferred to new tube'
+  }),
+  commentFactory.build({
+    category: 'clean up',
+    text: 'Beads cracked during drying step'
   })
 ];
 

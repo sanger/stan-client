@@ -1,5 +1,7 @@
 import { graphql } from 'msw';
 import {
+  RecordOpWithSlotCommentsMutation,
+  RecordOpWithSlotCommentsMutationVariables,
   RecordOpWithSlotMeasurementsMutation,
   RecordOpWithSlotMeasurementsMutationVariables,
   RecordVisiumQcMutation,
@@ -20,13 +22,28 @@ const visiumQCHandllers = [
       })
     );
   }),
-
   graphql.mutation<RecordOpWithSlotMeasurementsMutation, RecordOpWithSlotMeasurementsMutationVariables>(
     'RecordOpWithSlotMeasurements',
     (req, res, ctx) => {
       return res(
         ctx.data({
           recordOpWithSlotMeasurements: {
+            operations: [
+              {
+                id: 1
+              }
+            ]
+          }
+        })
+      );
+    }
+  ),
+  graphql.mutation<RecordOpWithSlotCommentsMutation, RecordOpWithSlotCommentsMutationVariables>(
+    'RecordOpWithSlotComments',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          recordOpWithSlotComments: {
             operations: [
               {
                 id: 1
