@@ -9,6 +9,7 @@ import { StanCoreContext } from '../lib/sdk';
 import { TabList } from '../components/TabbedPane';
 import { Item } from '@react-stately/collections';
 import MutedText from '../components/MutedText';
+import { alphaNumericSortDefault } from '../types/stan';
 
 type ConfigurationParams = {
   configuration: GetConfigurationQuery;
@@ -19,6 +20,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
   const groupedComments = groupBy(configuration.comments, 'category');
   const groupedEquipments = groupBy(configuration.equipments, 'category');
 
+  debugger;
   //Listed in alphabetical order
   const configElements = [
     'Comments',
@@ -42,26 +44,28 @@ export default function Configuration({ configuration }: ConfigurationParams) {
     return [
       /**Comments**/
       <div className="space-y-8">
-        {Object.keys(groupedComments).map((category) => (
-          <div key={category} data-testid="config" className="space-y-3">
-            <Heading level={2}>Comments - {category}</Heading>
-            <EntityManager
-              initialEntities={groupedComments[category]}
-              displayKeyColumnName={'text'}
-              valueColumnName={'enabled'}
-              onChangeValue={(entity, value) => {
-                const enabled = typeof value === 'boolean' ? value : false;
-                return stanCore
-                  .SetCommentEnabled({ commentId: entity.id, enabled })
-                  .then((res) => res.setCommentEnabled);
-              }}
-              onCreate={(text) => stanCore.AddComment({ category, text }).then((res) => res.addComment)}
-              valueFieldComponentInfo={{
-                type: 'CHECKBOX'
-              }}
-            />
-          </div>
-        ))}
+        {Object.keys(groupedComments)
+          .sort((a, b) => alphaNumericSortDefault(a.toLowerCase(), b.toLowerCase()))
+          .map((category) => (
+            <div key={category} data-testid="config" className="space-y-3">
+              <Heading level={2}>Comments - {category}</Heading>
+              <EntityManager
+                initialEntities={groupedComments[category]}
+                displayKeyColumnName={'text'}
+                valueColumnName={'enabled'}
+                onChangeValue={(entity, value) => {
+                  const enabled = typeof value === 'boolean' ? value : false;
+                  return stanCore
+                    .SetCommentEnabled({ commentId: entity.id, enabled })
+                    .then((res) => res.setCommentEnabled);
+                }}
+                onCreate={(text) => stanCore.AddComment({ category, text }).then((res) => res.addComment)}
+                valueFieldComponentInfo={{
+                  type: 'CHECKBOX'
+                }}
+              />
+            </div>
+          ))}
       </div>,
 
       /**Cost Codes**/

@@ -265,13 +265,15 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                     label={''}
                     name={'qcType'}
                   >
-                    {objectKeys(QCType).map((qcType) => {
-                      return (
-                        <option key={qcType} value={QCType[qcType]}>
-                          {QCType[qcType]}
-                        </option>
-                      );
-                    })}
+                    {objectKeys(QCType)
+                      .sort()
+                      .map((qcType) => {
+                        return (
+                          <option key={qcType} value={QCType[qcType]}>
+                            {QCType[qcType]}
+                          </option>
+                        );
+                      })}
                   </FormikSelect>
                 </div>
 
