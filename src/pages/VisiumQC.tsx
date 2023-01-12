@@ -204,7 +204,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
       return !!value.labwareResult;
     }
     if (value.qcType === QCType.SPRI_CLEANUP) {
-      return value.slotComments && value.slotComments.filter((sc) => sc.commentId >= 0).length > 0;
+      return value.slotComments && value.slotComments.some((sc) => sc.commentId >= 0);
     }
     return false;
   };
