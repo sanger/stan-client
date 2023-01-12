@@ -37,10 +37,10 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
       const response = await stanCore.GetLabwareCosting(labware);
       const costing = response.labwareCosting ?? undefined;
       setInitialCosting(costing);
-      setFieldValue('costing', costing);
+      setFieldValue('costing', costing ?? '');
     }
     fetchLabwareCosting();
-  }, [labware, setInitialCosting]);
+  }, [labware, setInitialCosting, setFieldValue]);
 
   React.useEffect(() => {
     if (!labware) {
