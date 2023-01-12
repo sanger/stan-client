@@ -98,7 +98,7 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
               <Labware labware={labware} slotBuilder={slotBuilder} />
             </div>
 
-            {/* Display the list of pass/fail comments */}
+            {/* Display the dropdown to set/reset all comments */}
             <div className="mt-8 flex flex-col justify-between gap-x-4">
               <label className={'whitespace-nowrap font-semibold'}>Comment all</label>
               <Select

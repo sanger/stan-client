@@ -20,7 +20,6 @@ export default function Configuration({ configuration }: ConfigurationParams) {
   const groupedComments = groupBy(configuration.comments, 'category');
   const groupedEquipments = groupBy(configuration.equipments, 'category');
 
-  debugger;
   //Listed in alphabetical order
   const configElements = [
     'Comments',
