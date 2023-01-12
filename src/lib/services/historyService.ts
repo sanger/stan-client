@@ -54,6 +54,7 @@ export async function findHistory(historyProps: HistoryProps): Promise<Array<His
     const sample = entry.sampleId ? sampleMap.get(entry.sampleId) : undefined;
 
     return {
+      eventId: entry.eventId,
       date: new Date(entry.time).toLocaleDateString(),
       sourceBarcode: sourceLabware.barcode,
       destinationBarcode: destinationLabware.barcode,
