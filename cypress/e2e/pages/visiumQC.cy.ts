@@ -53,6 +53,44 @@ describe('Visium QC Page', () => {
       it('displays scan field as disabled', () => {
         cy.get('#labwareScanInput').should('be.disabled');
       });
+      after(() => {
+        cy.findByTestId('remove').click();
+      });
+    });
+    context('costing field check', () => {
+      context('when user enters a labware which has already assigned a costing', () => {
+        before(() => {
+          cy.get('#labwareScanInput').type('STAN-2101{enter}');
+        });
+        it('disables Slide costing drop down', () => {
+          cy.get('select[name=costing]').should('be.disabled');
+        });
+        it('should show the assigned costing', () => {
+          cy.get('select[name=costing]').should('have.value', SlideCosting.Sgp);
+        });
+        after(() => {
+          cy.findByTestId('remove').click();
+        });
+      });
+      context('when user enters a labware with invalid barcode', () => {
+        before(() => {
+          cy.get('#labwareScanInput').type('aaa{enter}');
+        });
+        it('shows barcode not found message', () => {
+          cy.findByText('No labware found with barcode: aaa').should('be.visible');
+        });
+      });
+      context('when user enters a labware which has not assigned a costing', () => {
+        before(() => {
+          cy.get('#labwareScanInput').clear().type('STAN-2100{enter}');
+        });
+        it('enables Slide costing drop down', () => {
+          cy.get('select[name=costing]').should('be.enabled');
+        });
+        it('should show the assigned costing', () => {
+          cy.get('select[name=costing]').should('have.value', '');
+        });
+      });
     });
     context('When user clicks Pass All button', () => {
       before(() => {

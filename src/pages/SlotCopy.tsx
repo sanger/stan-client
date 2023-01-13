@@ -20,6 +20,7 @@ import { ConfirmationModal } from '../components/modal/ConfirmationModal';
 import Label from '../components/forms/Label';
 import { Select } from '../components/forms/Select';
 import { plateFactory } from '../lib/factories/labwareFactory';
+import LabelCopyButton from '../components/LabelCopyButton';
 
 type PageParams = {
   title: string;
@@ -326,9 +327,24 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
           />
 
           {slotCopyResults.length > 0 && (
-            <div className="mt-8 flex flex-row items-center sm:justify-end">
+            <div className="mt-8 flex flex-col items-end sm:justify-end space-y-2">
               <div className="sm:max-w-xl w-full border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2">
                 <LabelPrinter labwares={slotCopyResults} />
+              </div>
+              <div className="sm:max-w-xl w-full  border-gray-200 p-4 rounded-md bg-gray-100 shadow space-y-2 ">
+                <div className={'flex items-center space-x-2'}>
+                  <div className={'font-bold'}>Labels:</div>
+                  <div>{slotCopyResults.map((res) => res.barcode).join(',')}</div>
+                </div>
+                <div className={'flex items-end sm:justify-end'}>
+                  <LabelCopyButton
+                    labels={slotCopyResults.map((scr) => scr.barcode)}
+                    copyButtonText={'Copy Labels'}
+                    buttonClass={
+                      'text-white bg-sdb-400 shadow-sm hover:bg-sdb focus:border-sdb focus:shadow-outline-sdb active:bg-sdb-600'
+                    }
+                  />
+                </div>
               </div>
             </div>
           )}
