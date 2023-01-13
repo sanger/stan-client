@@ -1,8 +1,11 @@
 import React, { ChangeEvent, useContext } from 'react';
 import {
+  AddressCommentInput,
   GetCommentsQuery,
   LabwareResult as CoreLabwareResult,
+  OpWithSlotCommentsRequest,
   OpWithSlotMeasurementsRequest,
+  RecordOpWithSlotCommentsMutation,
   RecordOpWithSlotMeasurementsMutation,
   RecordVisiumQcMutation,
   ResultRequest,
@@ -25,11 +28,13 @@ import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
 import CDNAMeasurementQC from '../components/visiumQC/CDNAMeasurementQC';
 import SlideProcessing from '../components/visiumQC/SlideProcessing';
+import Cleanup from '../components/visiumQC/Cleanup';
 
 export enum QCType {
   CDNA_AMPLIFICATION = 'cDNA amplification',
   SLIDE_PROCESSING = 'Slide Processing',
-  VISIUM_CONCENTRATION = 'Visium concentration'
+  VISIUM_CONCENTRATION = 'Visium concentration',
+  SPRI_CLEANUP = 'SPRI clean up'
 }
 
 type VisiumQCProps = {
@@ -44,6 +49,7 @@ export interface VisiumQCFormData {
   labwareResult?: CoreLabwareResult;
   costing?: SlideCosting;
   reagentLot?: string;
+  slotComments?: Array<AddressCommentInput>;
 }
 
 const validationSchema = Yup.object().shape({
@@ -78,7 +84,15 @@ const validationSchema = Yup.object().shape({
     then: Yup.string()
       .required('Reagent LOT number is  a required field')
       .matches(/^\d{6,7}$/, 'Reagent LOT number should be a 6-7 digits number')
-  })
+  }),
+  slotComments: Yup.array()
+    .of(
+      Yup.object().shape({
+        address: Yup.string().required(),
+        commentId: Yup.number().required()
+      })
+    )
+    .when('qcType', { is: (value: string) => value === QCType.SPRI_CLEANUP, then: Yup.array().required() })
 });
 
 export default function VisiumQC({ info }: VisiumQCProps) {
@@ -105,6 +119,10 @@ export default function VisiumQC({ info }: VisiumQCProps) {
     return info.comments.filter((comment) => comment.category === 'Concentration');
   }, [info]);
 
+  const cleanupComments = React.useMemo(() => {
+    return info.comments.filter((comment) => comment.category === 'clean up');
+  }, [info]);
+
   const [currentCDNA, sendCDNA] = useMachine(
     createFormMachine<OpWithSlotMeasurementsRequest, RecordOpWithSlotMeasurementsMutation>().withConfig({
       services: {
@@ -118,8 +136,22 @@ export default function VisiumQC({ info }: VisiumQCProps) {
     })
   );
 
+  const [currentRecordOpWithSlotComments, sendRecordOpWithSlotComments] = useMachine(
+    createFormMachine<OpWithSlotCommentsRequest, RecordOpWithSlotCommentsMutation>().withConfig({
+      services: {
+        submitForm: (ctx, e) => {
+          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.RecordOpWithSlotComments({
+            request: e.values
+          });
+        }
+      }
+    })
+  );
+
   const { serverError: serverErrorSlideProcessing } = currentSlideProcessing.context;
   const { serverError: serverErrorCDNA } = currentCDNA.context;
+  const { serverError: serverErrorRecordOpWithSlotComments } = currentRecordOpWithSlotComments.context;
 
   const onSubmit = (values: VisiumQCFormData) => {
     if (values.qcType === QCType.SLIDE_PROCESSING && values.labwareResult) {
@@ -146,6 +178,16 @@ export default function VisiumQC({ info }: VisiumQCProps) {
         }
       });
     }
+    if (values.qcType === QCType.SPRI_CLEANUP && values.slotComments) {
+      sendRecordOpWithSlotComments({
+        type: 'SUBMIT_FORM',
+        values: {
+          workNumber: values.workNumber,
+          labware: [{ barcode: values.barcode, addressComments: values.slotComments }],
+          operationType: QCType.SPRI_CLEANUP
+        }
+      });
+    }
   };
 
   const isEnableSubmit = (value: VisiumQCFormData) => {
@@ -157,16 +199,25 @@ export default function VisiumQC({ info }: VisiumQCProps) {
         const val = value.slotMeasurements.filter((measurement) => measurement.value === '');
         return val.length <= 0;
       } else return false;
-    } else {
+    }
+    if (value.qcType === QCType.SLIDE_PROCESSING) {
       return !!value.labwareResult;
     }
+    if (value.qcType === QCType.SPRI_CLEANUP) {
+      return value.slotComments && value.slotComments.some((sc) => sc.commentId >= 0);
+    }
+    return false;
   };
 
   const getServerError = (value: VisiumQCFormData) => {
     if (value.qcType === QCType.CDNA_AMPLIFICATION || value.qcType === QCType.VISIUM_CONCENTRATION) {
       return value.slotMeasurements && value.slotMeasurements.length > 0 ? serverErrorCDNA : undefined;
-    } else if (value.qcType === QCType.SLIDE_PROCESSING) {
+    }
+    if (value.qcType === QCType.SLIDE_PROCESSING) {
       return value.labwareResult ? serverErrorSlideProcessing : undefined;
+    }
+    if (value.qcType === QCType.SPRI_CLEANUP) {
+      return value.slotComments && value.slotComments.length > 0 ? serverErrorRecordOpWithSlotComments : undefined;
     }
     return undefined;
   };
@@ -184,7 +235,8 @@ export default function VisiumQC({ info }: VisiumQCProps) {
               workNumber: '',
               qcType: QCType.SLIDE_PROCESSING,
               slotMeasurements: [],
-              labwareResult: undefined
+              labwareResult: undefined,
+              slotComments: []
             }}
             onSubmit={onSubmit}
             validationSchema={validationSchema}
@@ -213,13 +265,15 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                     label={''}
                     name={'qcType'}
                   >
-                    {objectKeys(QCType).map((qcType) => {
-                      return (
-                        <option key={qcType} value={QCType[qcType]}>
-                          {QCType[qcType]}
-                        </option>
-                      );
-                    })}
+                    {objectKeys(QCType)
+                      .sort()
+                      .map((qcType) => {
+                        return (
+                          <option key={qcType} value={QCType[qcType]}>
+                            {QCType[qcType]}
+                          </option>
+                        );
+                      })}
                   </FormikSelect>
                 </div>
 
@@ -238,43 +292,56 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                           />
                         );
                       } else {
-                        return (
-                          <CDNAMeasurementQC
-                            qcType={values.qcType}
-                            slotMeasurements={values.slotMeasurements}
-                            labware={labwares[0]}
-                            removeLabware={removeLabware}
-                            concentrationComments={concentrationComments}
-                          />
-                        );
+                        if (values.qcType === QCType.SPRI_CLEANUP) {
+                          return (
+                            <Cleanup labware={labwares[0]} comments={cleanupComments} removeLabware={removeLabware} />
+                          );
+                        } else {
+                          return (
+                            <CDNAMeasurementQC
+                              qcType={values.qcType}
+                              slotMeasurements={values.slotMeasurements}
+                              labware={labwares[0]}
+                              removeLabware={removeLabware}
+                              concentrationComments={concentrationComments}
+                            />
+                          );
+                        }
                       }
                     }}
                   </LabwareScanner>
                 </div>
 
                 {getServerError(values) && (
-                  <Warning className={'mt-4'} message={'Failed to record Visium QC'} error={getServerError(values)} />
+                  <Warning
+                    className={'mt-4'}
+                    message={`Failed to record ${values.qcType}`}
+                    error={getServerError(values)}
+                  />
                 )}
                 <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
                   <BlueButton disabled={!isEnableSubmit(values) || !isValid} type="submit">
                     Save
                   </BlueButton>
                 </div>
+                <OperationCompleteModal
+                  show={
+                    currentSlideProcessing.matches('submitted') ||
+                    currentCDNA.matches('submitted') ||
+                    currentRecordOpWithSlotComments.matches('submitted')
+                  }
+                  message={`${values.qcType} complete`}
+                  onReset={reload}
+                >
+                  <p>
+                    If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
+                    the Home screen.
+                  </p>
+                </OperationCompleteModal>
               </Form>
             )}
           </Formik>
         </div>
-
-        <OperationCompleteModal
-          show={currentSlideProcessing.matches('submitted') || currentCDNA.matches('submitted')}
-          message={'Visium QC complete'}
-          onReset={reload}
-        >
-          <p>
-            If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the Home
-            screen.
-          </p>
-        </OperationCompleteModal>
       </AppShell.Main>
     </AppShell>
   );

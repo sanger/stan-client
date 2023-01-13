@@ -1,0 +1,7 @@
+mutation RecordOpWithSlotComments($request: OpWithSlotCommentsRequest) {
+  recordOpWithSlotComments(request: $request) {
+    operations {
+      id
+    }
+  }
+}

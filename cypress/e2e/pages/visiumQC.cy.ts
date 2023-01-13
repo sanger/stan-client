@@ -1,4 +1,10 @@
-import { RecordVisiumQcMutation, RecordVisiumQcMutationVariables, SlideCosting } from '../../../src/types/sdk';
+import {
+  RecordOpWithSlotCommentsMutation,
+  RecordOpWithSlotCommentsMutationVariables,
+  RecordVisiumQcMutation,
+  RecordVisiumQcMutationVariables,
+  SlideCosting
+} from '../../../src/types/sdk';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 
 describe('Visium QC Page', () => {
@@ -197,7 +203,7 @@ describe('Visium QC Page', () => {
             cy.findByRole('button', { name: /Save/i }).click();
           });
           it('shows a success message', () => {
-            cy.findByText('Visium QC complete').should('be.visible');
+            cy.findByText('Slide Processing complete').should('be.visible');
           });
         });
 
@@ -234,7 +240,7 @@ describe('Visium QC Page', () => {
         });
 
         it('shows an error', () => {
-          cy.findByText('Failed to record Visium QC').should('be.visible');
+          cy.findByText('Failed to record Slide Processing').should('be.visible');
         });
       });
     });
@@ -294,7 +300,7 @@ describe('Visium QC Page', () => {
         });
 
         it('shows a success message', () => {
-          cy.findByText('Visium QC complete').should('be.visible');
+          cy.findByText('cDNA amplification complete').should('be.visible');
         });
         after(() => {
           cy.findByRole('button', { name: /Reset/i }).click();
@@ -341,12 +347,122 @@ describe('Visium QC Page', () => {
         });
 
         it('shows a success message', () => {
-          cy.findByText('Visium QC complete').should('be.visible');
+          cy.findByText('Visium concentration complete').should('be.visible');
         });
 
         after(() => {
           cy.findByRole('button', { name: /Reset/i }).click();
         });
+      });
+    });
+  });
+
+  describe('On SPRI clean up', () => {
+    before(() => {
+      cy.get('select[name="workNumber"]').select('SGP1008');
+      cy.findByTestId('qcType').select('SPRI clean up');
+    });
+    context('When user scans in a slide ', () => {
+      before(() => {
+        cy.get('#labwareScanInput').type('STAN-2100{enter}');
+      });
+      it('shows it on the page', () => {
+        cy.findByText('STAN-2100').should('be.visible');
+      });
+
+      it('shows comment field for all slots with samples', () => {
+        cy.findAllByTestId('comment').should('have.length.above', 1);
+      });
+      it('lists cleanup category comments in all dropdown', () => {
+        cy.findAllByTestId('comment').eq(0).contains('option', 'Difficult/very slow to separate');
+        cy.findAllByTestId('comment').eq(0).contains('option', 'Bead loss during clean up');
+      });
+      it('shows comment all select box', () => {
+        cy.findByTestId('commentAll').should('exist');
+      });
+      it('displays scan field as disabled', () => {
+        cy.get('#labwareScanInput').should('be.disabled');
+      });
+    });
+    context('when comment is selected in commentAll', () => {
+      before(() => {
+        cy.findByTestId('commentAll').select('Bead loss during clean up');
+      });
+      it('should select the commentAll selected option in all comment dropdowns', () => {
+        cy.findAllByTestId('comment').then((comments) => {
+          comments.each((i, comment) => {
+            cy.wrap(comment).find(':selected').should('have.text', 'Bead loss during clean up');
+          });
+        });
+      });
+    });
+    context('when no comment is selected', () => {
+      before(() => {
+        cy.findByTestId('commentAll').select('');
+      });
+      it('should remove selection from all comment dropdowns', () => {
+        cy.findAllByTestId('comment').then((comments) => {
+          comments.each((i, comment) => {
+            cy.wrap(comment).find(':selected').should('have.text', '');
+          });
+        });
+      });
+      it('Save button should be disabled', () => {
+        saveButton().should('be.disabled');
+      });
+    });
+    context('when a comment is selected', () => {
+      before(() => {
+        cy.findAllByTestId('comment').eq(0).select('Beads cracked during drying step');
+      });
+      it('Save button should be enabled', () => {
+        saveButton().should('be.enabled');
+      });
+    });
+
+    describe('On Save', () => {
+      context('When atleast one comment is selected and there is no server error', () => {
+        before(() => {
+          saveButton().click();
+        });
+        it('shows a success message', () => {
+          cy.findByText('SPRI clean up').should('be.visible');
+        });
+
+        after(() => {
+          cy.findByRole('button', { name: /Reset/i }).click();
+        });
+      });
+    });
+    describe('When there is a server error', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.mutation<RecordOpWithSlotCommentsMutation, RecordOpWithSlotCommentsMutationVariables>(
+              'RecordOpWithSlotComments',
+              (req, res, ctx) => {
+                return res.once(
+                  ctx.errors([
+                    {
+                      message: 'Exception while fetching data : The operation could not be validated.',
+                      extensions: {
+                        problems: ['Labware is discarded: [STAN-2100]']
+                      }
+                    }
+                  ])
+                );
+              }
+            )
+          );
+        });
+        cy.get('select[name="workNumber"]').select('SGP1008');
+        cy.findByTestId('qcType').select('SPRI clean up');
+        cy.get('#labwareScanInput').type('STAN-2100{enter}');
+        cy.findAllByTestId('comment').eq(0).select('Beads cracked during drying step');
+        saveButton().click();
+      });
+      it('shows an error', () => {
+        cy.findByText('Failed to record SPRI clean up').should('be.visible');
       });
     });
   });
