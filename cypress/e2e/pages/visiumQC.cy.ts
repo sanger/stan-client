@@ -2,7 +2,8 @@ import {
   RecordOpWithSlotCommentsMutation,
   RecordOpWithSlotCommentsMutationVariables,
   RecordVisiumQcMutation,
-  RecordVisiumQcMutationVariables
+  RecordVisiumQcMutationVariables,
+  SlideCosting
 } from '../../../src/types/sdk';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 
