@@ -15,6 +15,7 @@ import { objectKeys } from '../../lib/helpers';
 import FormikSelect from '../forms/Select';
 import ScanInput from '../scanInput/ScanInput';
 import { FormikErrorMessage } from '../forms';
+import { stanCore } from '../../lib/sdk';
 
 type SlideProcessingProps = {
   comments: CommentFieldsFragment[];
@@ -28,6 +29,18 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
    * When labwares changes, the labwareResults has to be initialized accordingly
    */
   const [labwareResult, setLabwareResult] = React.useState<CoreLabwareResult | undefined>(labwareResultProps);
+  const [initialCosting, setInitialCosting] = React.useState<SlideCosting | undefined>(undefined);
+
+  React.useEffect(() => {
+    if (!labware) return;
+    async function fetchLabwareCosting() {
+      const response = await stanCore.GetLabwareCosting(labware);
+      const costing = response.labwareCosting ?? undefined;
+      setInitialCosting(costing);
+      setFieldValue('costing', costing ?? '');
+    }
+    fetchLabwareCosting();
+  }, [labware, setInitialCosting, setFieldValue]);
 
   React.useEffect(() => {
     if (!labware) {
@@ -83,6 +96,7 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
                   );
                 }}
                 emptyOption={true}
+                disabled={initialCosting !== undefined}
                 data-testid="slide-costing"
               >
                 {objectKeys(SlideCosting).map((key) => (
