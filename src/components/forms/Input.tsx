@@ -3,7 +3,6 @@ import Label from './Label';
 import { Field } from 'formik';
 import { FormikErrorMessage } from './index';
 import classNames from 'classnames';
-import Information from '../notifications/Information';
 
 const defaultInputClassNames =
   'focus:ring-sdb-100 focus:border-sdb-100 block border-gray-300 rounded-md disabled:opacity-75 disabled:cursor-not-allowed';
@@ -26,10 +25,12 @@ const FormikInput = ({ label, name, type = 'text', displayTag, info, ...rest }: 
   );
   return (
     <>
-      <div className={'inline-flex'}>
-        <Label name={label} displayTag={displayTag} /> {info && <Information className={'block'}>{info}</Information>}
+      <div>
+        <Label name={label} displayTag={displayTag} info={info}>
+          <Field type={type} data-testid={label} className={inputClassNames} name={name} {...rest} />
+        </Label>
       </div>
-      <Field type={type} data-testid={label} className={inputClassNames} name={name} {...rest} />
+
       <FormikErrorMessage name={name} />
     </>
   );

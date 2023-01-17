@@ -3,7 +3,6 @@ import InfoIcon from '../icons/InfoIcon';
 import variants from '../../lib/motionVariants';
 import { motion } from 'framer-motion';
 import classNames from 'classnames';
-import Modal, { ModalBody } from '../Modal';
 import FailIcon from '../icons/FailIcon';
 
 interface InformationProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> {}
@@ -22,8 +21,8 @@ const Information = ({ children, className }: InformationProps): JSX.Element => 
       <InfoIcon className={`bg-white inline-block ${hover ? 'text-pink-600' : 'text-pink-400'}`} />
       {hover && (
         <motion.div variants={variants.fadeInWithLift} initial={'hidden'} animate={'visible'} className="relative">
-          <Modal show={true}>
-            <ModalBody>
+          <div>
+            <div>
               <div className="flex flex-col p-1 items-end justify-end space-y-2" onMouseLeave={() => setHover(false)}>
                 <FailIcon
                   onClick={() => setHover(false)}
@@ -40,8 +39,8 @@ const Information = ({ children, className }: InformationProps): JSX.Element => 
                   {children}
                 </motion.div>
               </div>
-            </ModalBody>
-          </Modal>
+            </div>
+          </div>
         </motion.div>
       )}
     </div>
