@@ -24,6 +24,7 @@ import { merge } from 'lodash';
 import { configContext } from '../context/ConfigContext';
 import searchMachine from '../lib/machines/search/searchMachine';
 import SearchService from '../lib/services/searchService';
+import ExternalFieldSearchInfo from '../components/info/ExternalFieldInfo';
 
 const validationSchema = Yup.object()
   .shape({
@@ -147,8 +148,13 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                     <div>
                       <FormikInput name="labwareBarcode" label="STAN Barcode" />
                     </div>
-                    <div className="">
-                      <FormikInput name="tissueExternalName" label="External Identifier" />
+                    <div className="inline-block">
+                      <FormikInput
+                        name="tissueExternalName"
+                        label="External Identifier"
+                        info={<ExternalFieldSearchInfo />}
+                        className={'w-full'}
+                      />
                     </div>
                     <div>
                       <FormikInput name="donorName" label="Donor ID" />
@@ -170,6 +176,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                       </FormikSelect>
                     </div>
                   </div>
+
                   <div className="sm:flex sm:flex-row sm:mt-8 mt-4 items-center justify-end">
                     <WhiteButton className="mr-4" type="button" onClick={() => resetForm({ values: emptyFindRequest })}>
                       Reset
