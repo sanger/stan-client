@@ -1,6 +1,7 @@
 import { interpret } from 'xstate';
 import createLabwareMachine from '../../../../src/components/labware/labware.machine';
 import { createSlots } from './slotColumnInfo.spec';
+import { enableMapSet } from 'immer';
 
 describe('labwareMachine', () => {
   describe('Initial states', () => {
@@ -76,6 +77,20 @@ describe('labwareMachine', () => {
       machine.start();
     });
   });
+  describe('CHANGE_SELECTION_MODE', () => {
+    it('updates the slots', (done) => {
+      const machine = interpret(
+        createLabwareMachine({ slots: createSlots(4), selectable: 'empty', selectionMode: 'multi' })
+      ).onTransition((state) => {
+        enableMapSet();
+        if (state.matches('selectable.any.single')) {
+          done();
+        }
+      });
+      machine.start();
+      machine.send({ type: 'CHANGE_SELECTION_MODE', selectionMode: 'single', selectable: 'any' });
+    });
+  });
   describe('UPDATE_SLOTS', () => {
     it('updates the slots', (done) => {
       const machine = interpret(
@@ -89,11 +104,12 @@ describe('labwareMachine', () => {
       machine.send({ type: 'UPDATE_SLOTS', slots: createSlots(10) });
     });
   });
-  /*describe('SELECT_SLOT', () => {
+  describe('SELECT_SLOT', () => {
     it('select slot', (done) => {
       const machine = interpret(
         createLabwareMachine({ slots: createSlots(4), selectable: 'any', selectionMode: 'single' })
       ).onTransition((state) => {
+        enableMapSet();
         if (state.matches('selectable.any.single') && state.context.selectedAddresses.has('A1')) {
           done();
         }
@@ -101,5 +117,24 @@ describe('labwareMachine', () => {
       machine.start();
       machine.send({ type: 'SELECT_SLOT', address: 'A1' });
     });
-  });*/
+  });
+  describe('RESET_SELECTED', () => {
+    it('reset selected', (done) => {
+      const machine = interpret(
+        createLabwareMachine({ slots: createSlots(4), selectable: 'any', selectionMode: 'single' })
+      ).onTransition((state, event) => {
+        enableMapSet();
+        if (
+          state.matches('selectable.any.single') &&
+          state.context.selectedAddresses.size === 0 &&
+          event.type === 'RESET_SELECTED'
+        ) {
+          done();
+        }
+      });
+      machine.start();
+      machine.send({ type: 'SELECT_SLOT', address: 'A1' });
+      machine.send({ type: 'RESET_SELECTED' });
+    });
+  });
 });
