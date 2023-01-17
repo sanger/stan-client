@@ -13,7 +13,12 @@ const Information = ({ children, className }: InformationProps): JSX.Element => 
   const [hover, setHover] = React.useState<boolean>(false);
 
   return (
-    <div className={infoClassName} onMouseOver={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+    <div
+      data-testid={'info-div'}
+      className={infoClassName}
+      onMouseOver={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
       <InfoIcon className={`bg-white inline-block ${hover ? 'text-pink-600' : 'text-pink-400'}`} />
       {hover && (
         <motion.div variants={variants.fadeInWithLift} initial={'hidden'} animate={'visible'} className="relative">
@@ -30,6 +35,7 @@ const Information = ({ children, className }: InformationProps): JSX.Element => 
                   initial={'hidden'}
                   animate={'visible'}
                   className="relative p-4 border-2 border-gray-200"
+                  data-testid={'info-content-div'}
                 >
                   {children}
                 </motion.div>
