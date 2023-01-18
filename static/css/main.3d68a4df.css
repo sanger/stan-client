@@ -2952,6 +2952,14 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-text-opacity: 1;
   color: rgb(246 165 193 / var(--tw-text-opacity));
 }
+.text-pink-600 {
+  --tw-text-opacity: 1;
+  color: rgb(213 63 140 / var(--tw-text-opacity));
+}
+.text-pink-400 {
+  --tw-text-opacity: 1;
+  color: rgb(246 135 179 / var(--tw-text-opacity));
+}
 .text-green-800 {
   --tw-text-opacity: 1;
   color: rgb(39 103 73 / var(--tw-text-opacity));
@@ -3257,6 +3265,10 @@ svg.logo.loading rect:nth-child(3n+1) {
 .hover\:text-red-300:hover {
   --tw-text-opacity: 1;
   color: rgb(254 178 178 / var(--tw-text-opacity));
+}
+.hover\:text-red-500:hover {
+  --tw-text-opacity: 1;
+  color: rgb(245 101 101 / var(--tw-text-opacity));
 }
 .hover\:text-gray-800:hover {
   --tw-text-opacity: 1;
@@ -4197,4 +4209,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.a7a98ed9.css.map*/
+/*# sourceMappingURL=main.3d68a4df.css.map*/
