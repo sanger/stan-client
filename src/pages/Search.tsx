@@ -201,7 +201,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
             <div>
               {serverError && <Warning message="Search Error" error={serverError} />}
               {current.matches('searched') && searchResult?.numRecords === 0 && (
-                <Warning message={'There are no stored labware matching your search. Please try again.'} />
+                <Warning message={'There is no stored labware matching your search. Please try again.'} />
               )}
               {showWarning && <Warning message={'Not all results can be displayed. Please refine your search.'} />}
               {showSearchResult && searchResult && (
