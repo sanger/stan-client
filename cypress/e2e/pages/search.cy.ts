@@ -49,6 +49,9 @@ describe('Search', () => {
     it('will not perform a search immediately', () => {
       cy.findByRole('table').should('not.exist');
     });
+    it('will show an info icon', () => {
+      cy.findByTestId('info-icon').should('exist');
+    });
 
     context(
       'when trying to search without a STAN Barcode, External Identifier, Donor ID, Tissue Type set or SGP Number',
