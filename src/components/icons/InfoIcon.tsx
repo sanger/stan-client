@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Remove SVG icon
+ * Info SVG icon
  * @param props SVG props passed on to the icon
  */
 const InfoIcon = (props: React.SVGProps<SVGSVGElement>) => {
