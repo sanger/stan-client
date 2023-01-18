@@ -13,9 +13,10 @@ interface FormikInputProps {
   type?: string;
   [key: string]: any;
   displayTag?: string;
+  info?: React.ReactNode;
 }
 
-const FormikInput = ({ label, name, type = 'text', displayTag, ...rest }: FormikInputProps) => {
+const FormikInput = ({ label, name, type = 'text', displayTag, info, ...rest }: FormikInputProps) => {
   const inputClassNames = classNames(
     {
       'w-full disabled:bg-gray-200': type !== 'checkbox'
@@ -24,9 +25,12 @@ const FormikInput = ({ label, name, type = 'text', displayTag, ...rest }: Formik
   );
   return (
     <>
-      <Label name={label} displayTag={displayTag}>
-        <Field type={type} data-testid={label} className={inputClassNames} name={name} {...rest} />
-      </Label>
+      <div>
+        <Label name={label} displayTag={displayTag} info={info}>
+          <Field type={type} data-testid={label} className={inputClassNames} name={name} {...rest} />
+        </Label>
+      </div>
+
       <FormikErrorMessage name={name} />
     </>
   );
