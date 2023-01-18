@@ -79,6 +79,7 @@ export function Slot({
       onMouseEnter={onMouseEnterHandler}
       onMouseLeave={onMouseLeaveHandler}
       className={slotClassNames}
+      data-testid={'slot'}
     >
       <p className="truncate">{slotText}</p>
       {secondaryText && <p className="truncate">{slotSecondaryText}</p>}
