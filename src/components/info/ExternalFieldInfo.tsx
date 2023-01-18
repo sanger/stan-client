@@ -4,13 +4,25 @@ const ExternalIDFieldSearchInfo = () => {
   return (
     <>
       <p className={'font-medium'}>
-        External identifier field supports wildcard search using * which can be used anywhere in the search string, or
-        in multiple places.
+        The external identifier field supports wildcard search using <code>*</code> anywhere in the search string.
       </p>
       <p className={'italic text-gray-600'}>
-        E.g To search for multiple blocks from same donor{' '}
-        <span className={'text-blue-600'}> A16-UTR-0-FO-1, A16-UTR-0-FO-2, and A16-UTR-0-FO-3 ,</span> use a wildcard
-        search: <span className={'text-blue-600'}> A16-UTR-0-FO-* or *-ADR-*-FFPE*</span>
+        E.g. to search for blocks with similar names{' '}
+        <span className={'text-blue-600'}>
+          <code>A16-UTR-0-FO-1</code>
+        </span>{' '}
+        and{' '}
+        <span className={'text-blue-600'}>
+          <code>A16-UTR-0-FO-2</code>
+        </span>
+        , you can use{' '}
+        <span className={'text-blue-600'}>
+          <code>A16-UTR-0-FO-*</code>
+        </span>
+        , or{' '}
+        <span className={'text-blue-600'}>
+          <code>A16*FO*</code>
+        </span>
       </p>
     </>
   );
