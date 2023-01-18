@@ -101,7 +101,7 @@ describe('Search', () => {
       });
 
       it('will show a notification', () => {
-        cy.findByText('There were no results for the given search. Please try again.').should('be.visible');
+        cy.findByText('There are no stored labware matching your search. Please try again.').should('be.visible');
       });
     });
 

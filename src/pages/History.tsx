@@ -10,7 +10,8 @@ import HistoryComponent, { historyDisplayValues } from '../components/history/Hi
 import { history } from '../lib/sdk';
 import { HistoryProps, historySchema } from '../types/stan';
 import Heading from '../components/Heading';
-import ExternalFieldSearchInfo from '../components/info/ExternalFieldInfo';
+import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
+import Information from '../components/notifications/Information';
 
 export default function History() {
   const location = useLocation();
@@ -29,45 +30,43 @@ export default function History() {
       <AppShell.Main>
         <div className="mx-auto">
           <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
-            <Heading level={3} showBorder={false}>
-              Search
-            </Heading>
+            <div className={'flex flex-row space-x-2'}>
+              <Heading level={3} showBorder={false}>
+                Search
+              </Heading>
+              <Information title={'External ID'}>
+                <ExternalIDFieldSearchInfo />
+              </Information>
+            </div>
             <Formik<HistoryProps>
               initialValues={initialValues}
               onSubmit={async (values) => {
                 history.replace(`/history?${stringify(values)}`);
               }}
             >
-              {({ values }) => (
-                <Form>
-                  {}
-                  <div className="md:flex md:flex-row md:justify-center md:items-center md:gap-4">
-                    <div className="md:flex-grow">
-                      <FormikInput
-                        name="value"
-                        label=""
-                        info={values.kind === 'externalName' && <ExternalFieldSearchInfo />}
-                      />
-                    </div>
-                    <div className="md:flex-grow">
-                      <FormikSelect label="" name="kind">
-                        {objectKeys(historyDisplayValues)
-                          .filter((selectValue) => selectValue !== 'sampleId')
-                          .sort()
-                          .map((selectValue) => (
-                            <option value={selectValue} key={selectValue}>
-                              {historyDisplayValues[selectValue]}
-                            </option>
-                          ))}
-                      </FormikSelect>
-                    </div>
-
-                    <div className="flex flex-row items-center justify-end space-x-4 mt-6">
-                      <BlueButton type="submit">Search</BlueButton>
-                    </div>
+              <Form>
+                <div className="md:flex md:flex-row md:justify-center md:items-center md:gap-4">
+                  <div className="md:flex-grow">
+                    <FormikInput name="value" label="" />
                   </div>
-                </Form>
-              )}
+                  <div className="md:flex-grow">
+                    <FormikSelect label="" name="kind">
+                      {objectKeys(historyDisplayValues)
+                        .filter((selectValue) => selectValue !== 'sampleId')
+                        .sort()
+                        .map((selectValue) => (
+                          <option value={selectValue} key={selectValue}>
+                            {historyDisplayValues[selectValue]}
+                          </option>
+                        ))}
+                    </FormikSelect>
+                  </div>
+
+                  <div className="flex flex-row items-center justify-end space-x-4 mt-6">
+                    <BlueButton type="submit">Search</BlueButton>
+                  </div>
+                </div>
+              </Form>
             </Formik>
           </div>
 

@@ -16,7 +16,7 @@ const Label = ({ name, displayTag, info, children, className, ...rest }: LabelPr
     <label {...rest} className={labelClassName}>
       <span className="text-gray-800 mr-3 flex flex-row gap-x-1">
         {name}
-        {info && <Information>{info}</Information>}
+        {info && <Information title={name}>{info}</Information>}
       </span>
       {displayTag && <Pill color={'pink'}>{displayTag}</Pill>}
       {children}

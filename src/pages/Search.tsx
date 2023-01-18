@@ -24,7 +24,7 @@ import { merge } from 'lodash';
 import { configContext } from '../context/ConfigContext';
 import searchMachine from '../lib/machines/search/searchMachine';
 import SearchService from '../lib/services/searchService';
-import ExternalFieldSearchInfo from '../components/info/ExternalFieldInfo';
+import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 
 const validationSchema = Yup.object()
   .shape({
@@ -152,7 +152,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                       <FormikInput
                         name="tissueExternalName"
                         label="External Identifier"
-                        info={<ExternalFieldSearchInfo />}
+                        info={<ExternalIDFieldSearchInfo />}
                         className={'w-full'}
                       />
                     </div>
@@ -201,7 +201,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
             <div>
               {serverError && <Warning message="Search Error" error={serverError} />}
               {current.matches('searched') && searchResult?.numRecords === 0 && (
-                <Warning message={'There were no results for the given search. Please try again.'} />
+                <Warning message={'There are no stored labware matching your search. Please try again.'} />
               )}
               {showWarning && <Warning message={'Not all results can be displayed. Please refine your search.'} />}
               {showSearchResult && searchResult && (

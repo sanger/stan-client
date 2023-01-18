@@ -1,10 +1,10 @@
 import React from 'react';
 
-const ExternalFieldSearchInfo = () => {
+const ExternalIDFieldSearchInfo = () => {
   return (
     <>
       <p className={'font-medium'}>
-        External identifier' field supports wildcard search using * which can be used anywhere in the search string, or
+        External identifier field supports wildcard search using * which can be used anywhere in the search string, or
         in multiple places.
       </p>
       <p className={'italic text-gray-600'}>
@@ -16,4 +16,4 @@ const ExternalFieldSearchInfo = () => {
   );
 };
 
-export default ExternalFieldSearchInfo;
+export default ExternalIDFieldSearchInfo;

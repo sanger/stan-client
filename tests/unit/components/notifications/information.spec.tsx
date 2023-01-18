@@ -20,7 +20,7 @@ describe('Information', () => {
 
   it('displays information on hover and hides on leave', async () => {
     render(
-      <Information>
+      <Information title={'Test'}>
         <div data-testid={'text'}>Displaying Text</div>{' '}
       </Information>
     );
@@ -29,6 +29,7 @@ describe('Information', () => {
 
     await waitFor(() => screen.getByTestId('text'));
     expect(screen.getByTestId('text')).toBeInTheDocument();
+    expect(screen.getByText('Test')).toBeInTheDocument();
 
     const text = screen.getByTestId('text');
     fireEvent.mouseLeave(text);
