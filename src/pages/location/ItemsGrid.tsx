@@ -7,6 +7,10 @@ import { addressToLocationAddress } from '../../lib/helpers/locationHelper';
 import classNames from 'classnames';
 import BarcodeIcon from '../../components/icons/BarcodeIcon';
 import { Authenticated } from '../../components/Authenticated';
+import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
+import { getLabwareInLocation } from '../../lib/services/locationService';
+import { LabwareFieldsFragment } from '../../types/sdk';
+import { tissue } from '../../lib/helpers/labwareHelper';
 
 /**
  * Component for showing the stored items for a location in a grid
@@ -17,6 +21,7 @@ export const ItemsGrid: React.FC = () => {
 
   const [modalOpen, setModalOpen] = useState(false);
   const scanInputRef = useRef<HTMLInputElement>(null);
+  const [labwareInLocation, setLabwareInLocation] = useState<LabwareFieldsFragment[]>([]);
 
   useEffect(() => {
     if (scanInputRef.current) {
@@ -29,6 +34,20 @@ export const ItemsGrid: React.FC = () => {
       storeBarcode(barcode, selectedAddress);
     }
   };
+  React.useEffect(() => {
+    async function fetchLabwareInLocation() {
+      const labware = await getLabwareInLocation(location.barcode);
+      setLabwareInLocation(labware ?? []);
+    }
+    fetchLabwareInLocation();
+  }, [location]);
+
+  const selectedLabware = React.useMemo(() => {
+    if (!selectedAddress) return undefined;
+    const barcodeInSelectedAddress = addressToItemMap.get(selectedAddress)?.barcode;
+    if (!barcodeInSelectedAddress) return undefined;
+    return labwareInLocation.find((lw) => lw.barcode === barcodeInSelectedAddress);
+  }, [selectedAddress, labwareInLocation]);
 
   return (
     <div>
@@ -40,7 +59,6 @@ export const ItemsGrid: React.FC = () => {
                 Selected Address: {addressToLocationAddress(selectedAddress, location.size!, location.direction!)}
               </span>
             )}
-
             <ScanInput
               disabled={!selectedAddress || addressToItemMap.has(selectedAddress)}
               placeholder="Labware barcode..."
@@ -48,6 +66,33 @@ export const ItemsGrid: React.FC = () => {
               onScan={handleOnScan}
             />
           </div>
+          {selectedLabware && (
+            <div className={'mt-4'}>
+              <Table>
+                <TableHead>
+                  <tr>
+                    <TableHeader>Address</TableHeader>
+                    <TableHeader>Barcode</TableHeader>
+                    <TableHeader>External Identifier</TableHeader>
+                    <TableHeader>Donor</TableHeader>
+                    <TableHeader>Spatial Location</TableHeader>
+                    <TableHeader>Replicate</TableHeader>
+                    <TableHeader />
+                  </tr>
+                </TableHead>
+                <TableBody>
+                  <tr>
+                    <TableCell>{selectedAddress}</TableCell>
+                    <TableCell>{selectedLabware?.barcode}</TableCell>
+                    <TableCell>{selectedLabware && tissue(selectedLabware)?.externalName}</TableCell>
+                    <TableCell>{selectedLabware && tissue(selectedLabware)?.donor.donorName}</TableCell>
+                    <TableCell>{selectedLabware && tissue(selectedLabware)?.spatialLocation.code}</TableCell>
+                    <TableCell>{selectedLabware && tissue(selectedLabware)?.replicate}</TableCell>
+                  </tr>
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </div>
       </Authenticated>
       <div className="flex flex-col">

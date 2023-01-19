@@ -4,11 +4,13 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../compo
 import RemoveButton from '../../components/buttons/RemoveButton';
 import { LocationParentContext } from '../Location';
 import UnstoreBarcodeModal from './UnstoreBarcodeModal';
-import { Maybe } from '../../types/sdk';
 import { StoredItemFragment } from '../../lib/machines/locations/locationMachineTypes';
 import MutedText from '../../components/MutedText';
 import { addressToLocationAddress } from '../../lib/helpers/locationHelper';
 import { Authenticated } from '../../components/Authenticated';
+import { getLabwareInLocation } from '../../lib/services/locationService';
+import { LabwareFieldsFragment, Maybe } from '../../types/sdk';
+import { tissue } from '../../lib/helpers/labwareHelper';
 
 interface ItemsListParams {
   freeformAddress?: boolean;
@@ -21,6 +23,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
   const { location, storeBarcode, unstoreBarcode } = useContext(LocationParentContext)!;
 
   const [selectedItem, setSelectedItem] = useState<Maybe<StoredItemFragment>>(null);
+  const [labwareInLocation, setLabwareInLocation] = useState<LabwareFieldsFragment[]>([]);
 
   const scanInputRef = useRef<HTMLInputElement>(null);
 
@@ -30,6 +33,13 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
       scanInputRef.current.value = '';
     }
   };
+  React.useEffect(() => {
+    async function fetchLabwareInLocation() {
+      const labware = await getLabwareInLocation(location.barcode);
+      setLabwareInLocation(labware ?? []);
+    }
+    fetchLabwareInLocation();
+  }, [location]);
 
   return (
     <div>
@@ -50,6 +60,10 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
           <tr>
             <TableHeader>Address</TableHeader>
             <TableHeader>Barcode</TableHeader>
+            <TableHeader>External Identifier</TableHeader>
+            <TableHeader>Donor</TableHeader>
+            <TableHeader>Spatial Location</TableHeader>
+            <TableHeader>Replicate</TableHeader>
             <TableHeader />
           </tr>
         </TableHead>
@@ -66,31 +80,38 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
               </td>
             </tr>
           )}
-          {location.stored.map((item, index) => (
-            <tr key={index}>
-              <TableCell>
-                {item.address ? (
-                  <span className="font-bold">
-                    {location.size && location.direction
-                      ? addressToLocationAddress(item.address, location.size!, location.direction!)
-                      : item.address}
-                  </span>
-                ) : (
-                  <span className="italic text-sm">None</span>
-                )}
-              </TableCell>
-              <TableCell>{item.barcode}</TableCell>
-              <TableCell>
-                <Authenticated>
-                  <RemoveButton
-                    onClick={() => {
-                      setSelectedItem(item);
-                    }}
-                  />
-                </Authenticated>
-              </TableCell>
-            </tr>
-          ))}
+          {location.stored.map((item, index) => {
+            const labware = labwareInLocation.find((lw) => lw.barcode === item.barcode);
+            return (
+              <tr key={index}>
+                <TableCell>
+                  {item.address ? (
+                    <span className="font-bold">
+                      {location.size && location.direction
+                        ? addressToLocationAddress(item.address, location.size!, location.direction!)
+                        : item.address}
+                    </span>
+                  ) : (
+                    <span className="italic text-sm">None</span>
+                  )}
+                </TableCell>
+                <TableCell>{item.barcode}</TableCell>
+                <TableCell>{tissue(labware)?.externalName}</TableCell>
+                <TableCell>{tissue(labware)?.donor.donorName}</TableCell>
+                <TableCell>{tissue(labware)?.spatialLocation.code}</TableCell>
+                <TableCell>{tissue(labware)?.replicate}</TableCell>
+                <TableCell>
+                  <Authenticated>
+                    <RemoveButton
+                      onClick={() => {
+                        setSelectedItem(item);
+                      }}
+                    />
+                  </Authenticated>
+                </TableCell>
+              </tr>
+            );
+          })}
         </TableBody>
       </Table>
 
