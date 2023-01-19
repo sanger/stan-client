@@ -141,8 +141,11 @@ export default function VisiumQC({ info }: VisiumQCProps) {
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+          const labware = e.values.labware.map((lw) => {
+            return { ...lw, addressComments: lw.addressComments.filter((ac) => ac.commentId !== -1) };
+          });
           return stanCore.RecordOpWithSlotComments({
-            request: e.values
+            request: { ...e.values, labware: labware }
           });
         }
       }
