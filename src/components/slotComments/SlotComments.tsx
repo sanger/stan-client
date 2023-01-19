@@ -50,7 +50,7 @@ const SlotComments = ({ slotComments, comments, onChangeComment }: SlotCommentPr
         }
       }
     ];
-  }, [comments, slotComments]);
+  }, [comments, slotComments, onChangeComment]);
 
   return (
     <>
