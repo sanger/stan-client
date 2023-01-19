@@ -20,6 +20,7 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
   /**Initialise all comments for slots when labware changes**/
   React.useEffect(() => {
     if (!labware) return;
+    setFieldValue('barcode', labware.barcode);
     setSlotComments([]);
   }, [labware, setFieldValue]);
 
