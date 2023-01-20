@@ -19,18 +19,22 @@ type CleanupProps = {
 const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
   const { setFieldValue } = useFormikContext<VisiumQCFormData>();
   const [slotComments, setSlotComments] = React.useState<AddressCommentInput[]>([]);
-  const initialSlotComments = labware?.slots
-    .filter((slot) => isSlotFilled(slot))
-    .map((slot) => {
-      return { address: slot.address, commentId: -1 };
-    });
+  const initialSlotComments = React.useMemo(
+    () =>
+      labware?.slots
+        .filter((slot) => isSlotFilled(slot))
+        .map((slot) => {
+          return { address: slot.address, commentId: -1 };
+        }),
+    [labware]
+  );
 
   /**Initialise all comments for slots when labware changes**/
   React.useEffect(() => {
     if (!labware) return;
     setFieldValue('barcode', labware.barcode);
     setSlotComments(initialSlotComments);
-  }, [labware, setFieldValue, initialSlotComments]);
+  }, [labware, setFieldValue]);
 
   /**Update form values when ever comments associated with slots change**/
   React.useEffect(() => {
