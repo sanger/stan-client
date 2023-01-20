@@ -362,7 +362,7 @@ describe('Visium QC Page', () => {
       cy.get('select[name="workNumber"]').select('SGP1008');
       cy.findByTestId('qcType').select('SPRI clean up');
     });
-    describe('When user scans in a slide ', () => {
+    context('When user scans in a slide ', () => {
       before(() => {
         cy.get('#labwareScanInput').type('STAN-2100{enter}');
       });
@@ -419,7 +419,7 @@ describe('Visium QC Page', () => {
         });
       });
 
-      describe('On Save', () => {
+      context('On Save', () => {
         context('When atleast one comment is selected and there is no server error', () => {
           before(() => {
             saveButton().click();
@@ -433,7 +433,7 @@ describe('Visium QC Page', () => {
           });
         });
       });
-      describe('When there is a server error', () => {
+      context('When there is a server error', () => {
         before(() => {
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
@@ -465,7 +465,7 @@ describe('Visium QC Page', () => {
         });
       });
     });
-    describe('When user scans in a 96 well plate ', () => {
+    context('When user scans in a 96 well plate ', () => {
       before(() => {
         cy.findByTestId('removeButton').click();
         cy.get('#labwareScanInput').type('STAN-5100{enter}');
@@ -523,7 +523,7 @@ describe('Visium QC Page', () => {
         });
       });
 
-      describe('On Save', () => {
+      context('On Save', () => {
         context('When atleast one comment is selected and there is no server error', () => {
           before(() => {
             saveButton().click();
@@ -537,7 +537,7 @@ describe('Visium QC Page', () => {
           });
         });
       });
-      describe('When there is a server error', () => {
+      context('When there is a server error', () => {
         before(() => {
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
