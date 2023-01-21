@@ -34,7 +34,7 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
     if (!labware) return;
     setFieldValue('barcode', labware.barcode);
     setSlotComments(initialSlotComments);
-  }, [labware, setFieldValue]);
+  }, [labware, setFieldValue, initialSlotComments]);
 
   /**Update form values when ever comments associated with slots change**/
   React.useEffect(() => {
