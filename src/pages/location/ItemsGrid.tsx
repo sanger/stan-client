@@ -47,7 +47,7 @@ export const ItemsGrid: React.FC = () => {
     const barcodeInSelectedAddress = addressToItemMap.get(selectedAddress)?.barcode;
     if (!barcodeInSelectedAddress) return undefined;
     return labwareInLocation.find((lw) => lw.barcode === barcodeInSelectedAddress);
-  }, [selectedAddress, labwareInLocation]);
+  }, [selectedAddress, labwareInLocation, addressToItemMap]);
 
   return (
     <div>
@@ -68,7 +68,7 @@ export const ItemsGrid: React.FC = () => {
           </div>
           {selectedLabware && (
             <div className={'mt-4'}>
-              <Table>
+              <Table data-testid={'labware-table'}>
                 <TableHead>
                   <tr>
                     <TableHeader>Address</TableHeader>

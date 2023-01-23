@@ -55,7 +55,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
         </div>
       </Authenticated>
 
-      <Table>
+      <Table data-testid={'labware-table'}>
         <TableHead>
           <tr>
             <TableHeader>Address</TableHeader>
