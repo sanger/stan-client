@@ -4,7 +4,7 @@ import { Form, Formik } from 'formik';
 import FormikInput from '../components/forms/Input';
 import FormikSelect from '../components/forms/Select';
 import BlueButton from '../components/buttons/BlueButton';
-import { optionValues } from '../components/forms';
+import { optionValues, selectOptionValues } from '../components/forms';
 import DataTable from '../components/DataTable';
 import { Cell, Column } from 'react-table';
 import StyledLink from '../components/StyledLink';
@@ -25,6 +25,7 @@ import { configContext } from '../context/ConfigContext';
 import searchMachine from '../lib/machines/search/searchMachine';
 import SearchService from '../lib/services/searchService';
 import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
+import CustomFormikReactSelect from '../components/forms/CustomReactSelect';
 
 const validationSchema = Yup.object()
   .shape({
@@ -160,9 +161,12 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                       <FormikInput name="donorName" label="Donor ID" />
                     </div>
                     <div>
-                      <FormikSelect label="SGP Number" name="workNumber" emptyOption={true}>
-                        {optionValues(sortedWorks(), 'workNumber', 'workNumber', true)}
-                      </FormikSelect>
+                      <CustomFormikReactSelect
+                        label="SGP Number"
+                        name="workNumber"
+                        emptyOption={true}
+                        options={selectOptionValues(sortedWorks(), 'workNumber', 'workNumber', true)}
+                      />
                     </div>
                     <div>
                       <FormikInput type="date" name="createdMin" label="Created After" />
