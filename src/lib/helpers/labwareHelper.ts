@@ -160,3 +160,20 @@ export function isLabwareUsable(labware: Pick<Labware, 'state'>): boolean {
 export function hasBlock(labware: Pick<LabwareFieldsFragment, 'slots'>): boolean {
   return labware.slots.length === 1 && labware.slots[0].block;
 }
+
+/**
+ *
+ * @param labware the labware to check
+ * @return tissue in first sample in first slot if exists otherwise undefined
+ */
+export const tissue = (labware: LabwareFieldsFragment | undefined) => {
+  if (
+    labware &&
+    labware.slots &&
+    labware.slots.length > 0 &&
+    labware.slots[0].samples.length > 0 &&
+    labware.slots[0].samples[0].tissue
+  )
+    return labware.slots[0].samples[0].tissue;
+  else return undefined;
+};
