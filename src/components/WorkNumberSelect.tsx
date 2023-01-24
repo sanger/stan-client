@@ -1,11 +1,10 @@
-import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
-import { optionValues } from './forms';
-import FormikSelect from './forms/Select';
+import React, { useCallback, useEffect, useState } from 'react';
 import { WorkStatus } from '../types/sdk';
 import { stanCore } from '../lib/sdk';
 import Pill from './Pill';
 import { alphaNumericSortDefault } from '../types/stan';
-import { MultiSelect } from './multiSelect/MultiSelect';
+import CustomReactSelect from './forms/CustomReactSelect';
+import { selectOptionValues } from './forms';
 
 type WorkSelectProps = {
   /**
@@ -172,43 +171,24 @@ export default function WorkNumberSelect({
   };
   return (
     <div className={'flex flex-col'}>
-      {name ? (
-        <FormikSelect
-          label={label ?? ''}
-          name={name}
-          emptyOption={emptyOption}
-          onBlur={validateWorkNumber}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleWorkNumberChange([e.currentTarget.value])}
-          className={'flex-grow w-full'}
-          data-testid={'workNumber'}
-        >
-          {optionValues(works, 'workNumber', 'workNumber', true, {
-            sort: true,
-            sortType: 'Descending',
-            alphaFirst: true
-          })}
-        </FormikSelect>
-      ) : (
-        <div className={'flex flex-col'}>
-          <MultiSelect
-            options={works.map((work) => {
-              return {
-                value: work.workNumber,
-                key: work.workNumber,
-                label: work.workNumber
-              };
-            })}
-            selectedValueProp={
-              workNumber ? (Array.isArray(workNumber) ? workNumber : workNumber ? [workNumber] : []) : undefined
-            }
-            onBlur={validateWorkNumber}
-            data-testid={'select_workNumber'}
-            notifySelection={handleWorkNumberChange}
-            multiple={multiple}
-          />
-          {error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
-        </div>
-      )}
+      <CustomReactSelect
+        label={label ?? ''}
+        name={name ?? undefined}
+        emptyOption={emptyOption}
+        onBlur={validateWorkNumber}
+        handleChange={(val) =>
+          handleWorkNumberChange(val ? (Array.isArray(val) ? val.map((val) => val.value) : [val?.value]) : [])
+        }
+        className={'flex-grow w-full'}
+        data-testid={'workNumber'}
+        options={selectOptionValues(works, 'workNumber', 'workNumber', true, {
+          sort: true,
+          sortType: 'Descending',
+          alphaFirst: true
+        })}
+        isMulti={multiple}
+      />
+      {!name && error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
       <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
         {currentSelectedWork && currentSelectedWork.project.length > 0 && (
           <Pill color={'pink'}>{currentSelectedWork.project}</Pill>

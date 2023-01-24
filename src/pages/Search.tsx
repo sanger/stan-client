@@ -25,7 +25,7 @@ import { configContext } from '../context/ConfigContext';
 import searchMachine from '../lib/machines/search/searchMachine';
 import SearchService from '../lib/services/searchService';
 import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
-import CustomFormikReactSelect from '../components/forms/CustomReactSelect';
+import CustomReactSelect from '../components/forms/CustomReactSelect';
 
 const validationSchema = Yup.object()
   .shape({
@@ -161,7 +161,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                       <FormikInput name="donorName" label="Donor ID" />
                     </div>
                     <div>
-                      <CustomFormikReactSelect
+                      <CustomReactSelect
                         label="SGP Number"
                         name="workNumber"
                         emptyOption={true}

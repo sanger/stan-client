@@ -143,7 +143,6 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
       programs: workProgressUrl.programs ?? undefined
     };
   }
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -168,6 +167,7 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
             workTypes={workTypes}
             programs={programs}
           />
+
           <div className={'my-10 mx-auto max-w-screen-xl'}>
             {serverError && <Warning message="Search Error" error={serverError} />}
             <div className="my-10">
