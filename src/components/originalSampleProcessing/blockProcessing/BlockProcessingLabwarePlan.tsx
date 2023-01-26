@@ -8,8 +8,7 @@ import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../../
 import PinkButton from '../../buttons/PinkButton';
 import Heading from '../../Heading';
 import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
-import FormikSelect from '../../forms/Select';
-import { optionValues } from '../../forms';
+import { selectOptionValues } from '../../forms';
 import Modal, { ModalBody, ModalFooter } from '../../Modal';
 import LayoutPlanner from '../../LayoutPlanner';
 import BlueButton from '../../buttons/BlueButton';
@@ -20,6 +19,7 @@ import FormikInput from '../../forms/Input';
 import { createLabwarePlanMachine } from '../../planning/labwarePlan.machine';
 import { BlockFormData } from './BlockProcessing';
 import { Source } from '../../../lib/machines/layout/layoutContext';
+import CustomReactSelect from '../../forms/CustomReactSelect';
 
 type BlockProcessingLabwarePlanProps = {
   /**
@@ -193,12 +193,20 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                   disabled={true}
                 />
 
-                <FormikSelect label={'Medium'} name={`plans.${rowIndex}.medium`} emptyOption={true}>
-                  {optionValues(blockProcessInfo.mediums, 'name', 'name')}
-                </FormikSelect>
-                <FormikSelect label={'Processing comments'} name={`plans.${rowIndex}.commentId`} emptyOption={true}>
-                  {optionValues(blockProcessInfo.comments, 'text', 'id')}
-                </FormikSelect>
+                <CustomReactSelect
+                  label={'Medium'}
+                  dataTestId={'medium'}
+                  name={`plans.${rowIndex}.medium`}
+                  emptyOption={true}
+                  options={selectOptionValues(blockProcessInfo.mediums, 'name', 'name')}
+                />
+                <CustomReactSelect
+                  label={'Processing comments'}
+                  dataTestId={'comments'}
+                  name={`plans.${rowIndex}.commentId`}
+                  emptyOption={true}
+                  options={selectOptionValues(blockProcessInfo.comments, 'text', 'id')}
+                />
               </div>
 
               {current.matches('prep') && (

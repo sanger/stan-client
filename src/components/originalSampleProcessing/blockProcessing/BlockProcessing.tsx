@@ -23,12 +23,13 @@ import WorkNumberSelect from '../../WorkNumberSelect';
 import Warning from '../../notifications/Warning';
 import variants from '../../../lib/motionVariants';
 import { motion } from 'framer-motion';
-import { optionValues } from '../../forms';
+import { selectOptionValues } from '../../forms';
 import ProcessingSuccess from '../ProcessingSuccess';
 import { useConfirmLeave } from '../../../lib/hooks';
 import { Prompt } from 'react-router-dom';
 import { Row } from 'react-table';
 import FormikInput from '../../forms/Input';
+import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 
 /**
  * Used as Formik's values
@@ -210,17 +211,16 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
       <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-center text-sm">
         <div className="text-gray-500">Labware type</div>
         <div className="text-gray-500">Number of labware</div>
-        <select
-          className="mt-1 block  py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
-          onChange={(e) => setSelectedLabwareType(e.currentTarget.value)}
-          data-testid={'labwareType'}
+        <CustomReactSelect
+          className="block text-left"
+          handleChange={(val) => setSelectedLabwareType((val as OptionType).value)}
+          dataTestId={'labwareType'}
           value={selectedLabwareType}
-        >
-          {optionValues(allowedLabwareTypes, 'name', 'name')}
-        </select>
+          options={selectOptionValues(allowedLabwareTypes, 'name', 'name')}
+        />
         <input
           type="number"
-          className="mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
+          className="block h-10 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
           onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
           value={numLabware}
           data-testid={'numLabware'}

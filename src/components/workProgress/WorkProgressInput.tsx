@@ -89,11 +89,10 @@ export default function WorkProgressInput({ urlParams, workTypes, programs }: Wo
                     };
                   })}
                   label={'Program'}
-                  emptyOption={true}
                   name={'programs'}
                   value={values.programs}
                   isMulti={true}
-                  data-testid={'select_program'}
+                  dataTestId={'select_program'}
                 />
               )}
               {workTypes && (
@@ -107,7 +106,8 @@ export default function WorkProgressInput({ urlParams, workTypes, programs }: Wo
                   })}
                   name={'workTypes'}
                   value={values.workTypes}
-                  data-testid={'select_workType'}
+                  dataTestId={'select_workType'}
+                  isMulti={true}
                 />
               )}
               {sortedStatues && (
@@ -120,9 +120,10 @@ export default function WorkProgressInput({ urlParams, workTypes, programs }: Wo
                       label: status
                     };
                   })}
+                  isMulti={true}
                   name={'statuses'}
                   value={values.statuses}
-                  data-testid={'select_status'}
+                  dataTestId={'select_status'}
                 />
               )}
             </div>

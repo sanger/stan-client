@@ -97,7 +97,7 @@ export function selectOptionValues<L extends string, V extends string, T extends
       })
     : entities;
   return mapEntities.map((e) => {
-    return { value: e[value], label: e[label] };
+    return { value: String(e[value]), label: e[label] };
   });
 }
 

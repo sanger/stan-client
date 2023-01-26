@@ -2,9 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import AppShell from '../components/AppShell';
 import { Form, Formik } from 'formik';
 import FormikInput from '../components/forms/Input';
-import FormikSelect from '../components/forms/Select';
 import BlueButton from '../components/buttons/BlueButton';
-import { optionValues, selectOptionValues } from '../components/forms';
+import { selectOptionValues } from '../components/forms';
 import DataTable from '../components/DataTable';
 import { Cell, Column } from 'react-table';
 import StyledLink from '../components/StyledLink';
@@ -175,9 +174,12 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                       <FormikInput type="date" name="createdMax" label="Created Before" />
                     </div>
                     <div>
-                      <FormikSelect label="Tissue Type" name="tissueTypeName" emptyOption={true}>
-                        {optionValues(searchInfo.tissueTypes, 'name', 'name')}
-                      </FormikSelect>
+                      <CustomReactSelect
+                        label="Tissue Type"
+                        name="tissueTypeName"
+                        emptyOption={true}
+                        options={selectOptionValues(searchInfo.tissueTypes, 'name', 'name')}
+                      />
                     </div>
                   </div>
 

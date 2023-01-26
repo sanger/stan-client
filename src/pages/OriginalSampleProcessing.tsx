@@ -8,6 +8,7 @@ import { history, stanCore } from '../lib/sdk';
 import PotProcessing from '../components/originalSampleProcessing/potProcessing/PotProcessing';
 import { GetBlockProcessingInfoQuery, GetPotProcessingInfoQuery } from '../types/sdk';
 import { useLocation } from 'react-router-dom';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 enum OriginalSampleProcessingType {
   BLOCK = 'Block Processing',
   POT = 'Pot Processing'
@@ -70,23 +71,23 @@ export const OriginalSampleProcessing: React.FC = () => {
               <p className="my-3 text-gray-800 text-sm leading-normal">Choose a processing type to get started:</p>
 
               <div className="flex flex-row items-center justify-center gap-4">
-                <select
-                  onChange={(e) =>
+                <CustomReactSelect
+                  handleChange={(value) =>
                     history.replace({
-                      search: `?type=${e.target.value === OriginalSampleProcessingType.BLOCK ? 'block' : 'pot'}`
+                      search: `?type=${
+                        (value as OptionType).label === OriginalSampleProcessingType.BLOCK ? 'block' : 'pot'
+                      }`
                     })
                   }
-                  className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
-                >
-                  <option value="" />
-                  {objectKeys(OriginalSampleProcessingType).map((type) => (
-                    <option
-                      key={type}
-                      label={OriginalSampleProcessingType[type]}
-                      value={OriginalSampleProcessingType[type]}
-                    />
-                  ))}
-                </select>
+                  options={objectKeys(OriginalSampleProcessingType).map((type) => {
+                    return {
+                      label: OriginalSampleProcessingType[type],
+                      value: OriginalSampleProcessingType[type]
+                    };
+                  })}
+                  dataTestId={'processing-type'}
+                  className="mt-1 block w-full md:w-1/2"
+                />
               </div>
             </div>
           )}

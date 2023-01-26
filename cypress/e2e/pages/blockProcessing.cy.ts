@@ -3,9 +3,10 @@ import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFact
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
+import { selectOption } from '../shared/utils.cy';
 
 describe('Block Processing', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=block', 'select_workNumber');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=block');
   before(() => {
     cy.visit('/lab/original_sample_processing?type=block');
   });
@@ -50,7 +51,7 @@ describe('Block Processing', () => {
   });
   describe('Adding multiple labware', () => {
     before(() => {
-      cy.findByTestId('labwareType').select('Tube');
+      selectOption('labwareType', 'Tube');
       cy.findByTestId('numLabware').type('{selectall}').type('2');
       cy.findByText('+ Add Labware').click();
     });
@@ -103,7 +104,7 @@ describe('Block Processing', () => {
   describe('Prebarcoded tube', () => {
     context('when adding a Prebarcoded tube', () => {
       before(() => {
-        cy.findAllByRole('combobox').last().select('Prebarcoded tube');
+        selectOption('labwareType', 'Prebarcoded tube');
         cy.findByTestId('numLabware').type('{selectall}').type('1');
         cy.findByText('+ Add Labware').click();
       });
@@ -126,6 +127,7 @@ describe('Block Processing', () => {
         cy.findByText('Delete Layout').click();
       });
     });
+
     context('when adding labware other than Prebarcoded tube', () => {
       before(() => {
         addLabware('Tube');
@@ -203,7 +205,7 @@ describe('Block Processing', () => {
         cy.visit('/lab/original_sample_processing?type=block');
         scanInput('STAN-113');
         addLabware('Tube');
-        cy.findByLabelText('Medium').select('');
+        selectOption('medium', 'None');
         cy.findAllByRole('combobox').first().select('');
         cy.findByRole('button', { name: /Save/i }).click();
       });
@@ -338,11 +340,11 @@ function scanInput(barcode: string) {
   cy.get('#labwareScanInput').type(`${barcode}{enter}`);
 }
 function addLabware(labwareType: string) {
-  cy.findAllByRole('combobox').last().select(labwareType);
+  selectOption('labwareType', labwareType);
   cy.findByText('+ Add Labware').click();
 }
 function fillSGPNumber() {
-  cy.findAllByRole('combobox').first().select('SGP1008');
+  selectOption('workNumber', 'SGP1008');
 }
 function fillMedium() {
   cy.findByLabelText('Medium').select('None');

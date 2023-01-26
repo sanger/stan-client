@@ -1,6 +1,6 @@
 import React from 'react';
-import FormikSelect from './forms/Select';
 import FormikInput from './forms/Input';
+import CustomReactSelect, { OptionType } from './forms/CustomReactSelect';
 
 type KeyValueViewerProps = {
   /**
@@ -89,23 +89,20 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
   return (
     <div className="space-y-2 md:px-10 md:space-y-0 md:flex md:flex-row md:flex-grow  md:justify-center md:items-center md:gap-4">
       <div className="md:flex-grow">
-        <FormikSelect
+        <CustomReactSelect
           label={keyLabel ?? ''}
           name={schemaNameKey ?? ''}
-          data-testid={'type'}
+          dataTestId={'type'}
           value={selected.key}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            handleSelectKey(e.currentTarget.value);
+          handleChange={(val) => {
+            handleSelectKey((val as OptionType).label);
           }}
-        >
-          {Array.from(keyValueMap.keys())
+          options={Array.from(keyValueMap.keys())
             .sort()
-            .map((key: string) => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-        </FormikSelect>
+            .map((key: string) => {
+              return { label: key, value: key };
+            })}
+        />
       </div>
       <div className="md:flex-grow">
         {selected.key && getValues(selected.key).length <= 0 ? (
@@ -119,10 +116,10 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
             }}
           />
         ) : (
-          <FormikSelect
+          <CustomReactSelect
             label={valueLabel ?? ''}
             name={schemaNameValue ?? ''}
-            data-testid={'valueSelect'}
+            dataTestId={'valueSelect'}
             value={
               selected.value
                 ? multiSelectValues
@@ -132,17 +129,18 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
                   : ''
                 : ''
             }
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              handleSelectValue(Array.from(e.target.selectedOptions, (option) => option.value));
+            handleChange={(val) => {
+              if (Array.isArray(val)) {
+                handleSelectValue(Array.from(val, (option) => option.value));
+              } else {
+                handleSelectValue([]);
+              }
             }}
-            multiple={multiSelectValues}
-          >
-            {getValues(selected.key).map((val: string) => (
-              <option key={val} value={val}>
-                {val}
-              </option>
-            ))}
-          </FormikSelect>
+            isMulti={multiSelectValues}
+            options={getValues(selected.key).map((val: string) => {
+              return { value: val, label: val };
+            })}
+          />
         )}
       </div>
     </div>

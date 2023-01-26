@@ -1,4 +1,5 @@
 import { CreateWorkMutation, CreateWorkMutationVariables } from '../../../src/types/sdk';
+import { selectOption } from '../shared/utils.cy';
 
 describe('Work Allocation', () => {
   before(() => {
@@ -44,11 +45,11 @@ describe('Work Allocation', () => {
       () => {
         before(() => {
           cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
-          cy.findByLabelText('Work Type').select('TEST_WT_1');
-          cy.findByLabelText('Work Requester').select('et2');
-          cy.findByLabelText('Project').select('TEST999');
-          cy.findByLabelText('Program').select('PROGRAM_999');
-          cy.findByLabelText('Cost Code').select('S999');
+          selectOption('workType', 'TEST_WT_1');
+          selectOption('workRequester', 'et2');
+          selectOption('project', 'TEST999');
+          selectOption('program', 'PROGRAM_999');
+          selectOption('costCode', 'S999');
           cy.findByLabelText('Number of blocks').type('5');
           cy.findByLabelText('Number of slides').type('15');
           cy.findByLabelText('Number of original samples').type('1');

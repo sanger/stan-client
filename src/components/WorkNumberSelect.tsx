@@ -180,13 +180,15 @@ export default function WorkNumberSelect({
           handleWorkNumberChange(val ? (Array.isArray(val) ? val.map((val) => val.value) : [val?.value]) : [])
         }
         className={'flex-grow w-full'}
-        data-testid={'workNumber'}
+        dataTestId={'workNumber'}
         options={selectOptionValues(works, 'workNumber', 'workNumber', true, {
           sort: true,
           sortType: 'Descending',
           alphaFirst: true
         })}
         isMulti={multiple}
+        value={workNumber}
+        aria-label="work-number"
       />
       {!name && error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
       <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>

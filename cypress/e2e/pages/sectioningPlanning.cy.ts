@@ -7,6 +7,7 @@ import {
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { labwareTypes } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
+import { selectOption } from '../shared/utils.cy';
 
 describe('Sectioning Planning', () => {
   before(() => {
@@ -401,7 +402,7 @@ describe('Sectioning Planning', () => {
 
 function createLabware() {
   cy.get('#labwareScanInput').type('STAN-113{enter}');
-  cy.findByRole('combobox').select('Tube');
+  selectOption('labware-type', 'Tube');
   cy.findByText('+ Add Labware').click();
   cy.findByText('Edit Layout').click();
   cy.findByRole('dialog').within(() => {

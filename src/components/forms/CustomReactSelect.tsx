@@ -6,7 +6,7 @@ import ReactSelect, { Props } from 'react-select';
 const defaultClassNames =
   'block w-full rounded-md focus:outline-0  disabled:opacity-75 disabled:bg-gray-200 disabled:cursor-not-allowed';
 
-type OptionType = {
+export type OptionType = {
   value: string;
   label: string;
 };
@@ -22,84 +22,109 @@ interface CustomReactSelectProps extends Props {
   handleChange?: (value: OptionType | OptionType[]) => void;
   onBlur?: () => void;
   placeholder?: string;
+  dataTestId?: string;
+  isMulti?: boolean;
 }
 
-const defaultValue = (options: OptionType[], value: any) => {
-  return options ? options.find((option) => option.value === value) : '';
+const defaultValue = (options: OptionType[], value: any, isMulti: boolean) => {
+  if (!value) {
+    return isMulti ? [] : undefined;
+  }
+  if (isMulti && Array.isArray(value)) {
+    return options ? options.filter((option) => value.some((val) => val === option.label || val === option.value)) : [];
+  } else {
+    return options.find((option) => option.label === value || option.value === value);
+  }
 };
 
 const hasValueType = (obj: ValueType): obj is OptionType | OptionType[] => {
   return obj !== undefined && obj !== null && (Array.isArray(obj) || (typeof obj === 'object' && 'value' in obj));
 };
 
-export const NormalReactSelect = React.forwardRef<ReactSelect, CustomReactSelectProps>(
-  ({ label, name, className, emptyOption = false, options, value, placeholder, handleChange, onBlur, ...props }) => {
-    const onChangeValue = React.useCallback(
-      (value) => {
-        if (!hasValueType(value)) return;
-        handleChange?.(value);
-      },
-      [handleChange]
-    );
-
-    const memoOptions = React.useMemo(() => {
-      debugger;
-      return emptyOption ? [{ value: '', label: '' }, ...options] : [...options];
-    }, [emptyOption, options]);
-
-    const sdbColor = '#7980B9';
-    return (
-      <>
-        <Label name={label ?? ''} className={className}>
-          <ReactSelect
-            styles={{
-              control: (baseStyles, state) => ({
-                ...baseStyles,
-                borderColor: `1px solid ${sdbColor}`,
-                boxShadow: state.isFocused ? `0px 0px 2px ${sdbColor}` : 'none',
-                '&:hover': {
-                  border: `1px solid ${sdbColor}`,
-                  boxShadow: `0px 0px 6px ${sdbColor}`
-                },
-                'input:focus': {
-                  boxShadow: 'none'
-                }
-              }),
-              option: (styles, { isDisabled }) => {
-                return {
-                  ...styles,
-                  backgroundColor: isDisabled ? 'gray' : '#626167',
-                  color: 'white',
-                  cursor: isDisabled ? 'not-allowed' : 'default',
-                  '&:hover': {
-                    backgroundColor: isDisabled ? 'gray' : '#4792E4'
-                  },
-                  height: '30px',
-                  padding: '0px 0px 8px 8px'
-                };
-              }
-            }}
-            name={name}
-            onChange={(val) => onChangeValue(val)}
-            onBlur={onBlur}
-            options={memoOptions}
-            value={defaultValue(options, value)}
-            placeholder={placeholder ?? ''}
-            {...props}
-          />
-        </Label>
-      </>
-    );
-  }
-);
-
-const FormikReactSelect = ({
+export const NormalReactSelect = ({
   label,
   name,
   className,
   emptyOption = false,
   options,
   value,
+  placeholder,
+  handleChange,
+  onBlur,
+  dataTestId,
+  isMulti = false,
+  ...props
+}: CustomReactSelectProps) => {
+  const onChangeValue = React.useCallback(
+    (value) => {
+      if (!hasValueType(value)) return;
+      handleChange?.(value);
+    },
+    [handleChange]
+  );
+
+  const memoOptions = React.useMemo(() => {
+    return emptyOption ? [{ value: '', label: '' }, ...options] : [...options];
+  }, [emptyOption, options]);
+
+  const sdbColor = '#7980B9';
+  return (
+    <div data-testid={dataTestId ?? 'select-div'} className={className}>
+      <Label name={label ?? ''}>
+        <ReactSelect
+          styles={{
+            control: (baseStyles, state) => ({
+              ...baseStyles,
+              borderColor: `1px solid ${sdbColor}`,
+              boxShadow: state.isFocused ? `0px 0px 2px ${sdbColor}` : 'none',
+              '&:hover': {
+                border: `1px solid ${sdbColor}`,
+                boxShadow: `0px 0px 6px ${sdbColor}`
+              },
+              'input:focus': {
+                boxShadow: 'none'
+              }
+            }),
+            option: (styles, { isDisabled, label }) => {
+              return {
+                ...styles,
+                backgroundColor: isDisabled ? 'gray' : '#626167',
+                color: 'white',
+                cursor: isDisabled ? 'not-allowed' : 'default',
+                '&:hover': {
+                  backgroundColor: isDisabled ? 'gray' : '#4792E4'
+                },
+                height: label.length === 0 ? '35px' : styles.height,
+                padding: '2px 2px 8px 8px'
+              };
+            }
+          }}
+          name={name}
+          onChange={(val) => onChangeValue(val)}
+          onBlur={onBlur}
+          options={memoOptions}
+          value={defaultValue(options, value, isMulti)}
+          isMulti={isMulti}
+          placeholder={placeholder ?? ''}
+          components={{
+            IndicatorSeparator: () => null
+          }}
+          {...props}
+        />
+      </Label>
+    </div>
+  );
+};
+
+const FormikReactSelect = ({
+  label,
+  name,
+  className,
+  emptyOption,
+  isMulti,
+  options,
+  value,
+  dataTestId,
   placeholder,
   handleChange,
   onBlur,
@@ -130,7 +155,10 @@ const FormikReactSelect = ({
         options={options}
         onBlur={handleBlur}
         emptyOption={emptyOption}
+        dataTestId={dataTestId}
         placeholder={placeholder}
+        isMulti={isMulti}
+        value={value}
         {...props}
       />
 
@@ -143,9 +171,11 @@ const CustomReactSelect = ({
   label,
   name,
   className,
-  emptyOption = false,
+  emptyOption,
   options,
   value,
+  dataTestId,
+  isMulti,
   ...props
 }: CustomReactSelectProps) => {
   return name ? (
@@ -156,6 +186,8 @@ const CustomReactSelect = ({
       options={options}
       value={value}
       emptyOption={emptyOption}
+      isMulti={isMulti}
+      dataTestId={dataTestId}
       {...props}
     />
   ) : (
@@ -165,6 +197,8 @@ const CustomReactSelect = ({
       options={options}
       value={value}
       emptyOption={emptyOption}
+      dataTestId={dataTestId}
+      isMulti={isMulti}
       {...props}
     />
   );
