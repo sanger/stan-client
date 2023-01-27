@@ -6,15 +6,14 @@ export const getSelect = (dataTestId?: string) => {
   });
   return select;
 };
-
 export const selectOption = (dataTestId: string, optionText: string) => {
-  const wrapperDiv = cy.findByTestId(dataTestId ?? 'select-div');
+  const wrapperDiv = cy.findByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
   if (!wrapperDiv) return;
   if (optionText.length <= 0) {
     wrapperDiv.within(() => {
-      cy.findByRole('combobox').first().click();
+      cy.findByRole('combobox').click();
+      cy.get('[id$=-option-0]').click({ multiple: true, force: true });
     });
-    cy.get('[id=react-select-9-option-0]').click();
     return;
   }
   wrapperDiv.within(() => {

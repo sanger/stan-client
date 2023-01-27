@@ -200,13 +200,13 @@ describe('Block Processing', () => {
     });
   });
   describe('Save button', () => {
-    context('When all other fields filled in but not source selected', () => {
+    context('When fields not filled in', () => {
       before(() => {
         cy.visit('/lab/original_sample_processing?type=block');
         scanInput('STAN-113');
         addLabware('Tube');
-        selectOption('medium', 'None');
-        cy.findAllByRole('combobox').first().select('');
+        selectOption('medium', '');
+        selectOption('workNumber', '');
         cy.findByRole('button', { name: /Save/i }).click();
       });
       it('Shows error for replicate number', () => {
@@ -347,7 +347,7 @@ function fillSGPNumber() {
   selectOption('workNumber', 'SGP1008');
 }
 function fillMedium() {
-  cy.findByLabelText('Medium').select('None');
+  selectOption('medium', 'None');
 }
 function selectSource() {
   cy.findByText('Edit Layout').click();
