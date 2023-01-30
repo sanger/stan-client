@@ -6,13 +6,13 @@ import variants from '../../../lib/motionVariants';
 import Labware from '../../labware/Labware';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../../pages/sectioning';
 import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
-import FormikSelect from '../../forms/Select';
-import { optionValues } from '../../forms';
+import { selectOptionValues } from '../../forms';
 import BlueButton from '../../buttons/BlueButton';
 import { useFormikContext } from 'formik';
 import Warning from '../../notifications/Warning';
 import { createLabwarePlanMachine } from '../../planning/labwarePlan.machine';
 import { PotFormData } from './PotProcessing';
+import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 
 type PotProcessingLabwarePlanProps = {
   /**
@@ -142,14 +142,26 @@ const PotProcessingLabwarePlan = React.forwardRef<HTMLDivElement, PotProcessingL
                   <Warning message={'There was an error creating the Labware'} error={requestError} />
                 )}
                 {outputLabware.labwareType.name === LabwareTypeName.POT && (
-                  <FormikSelect label={'Fixative'} name={`plans.${rowIndex}.fixative`} emptyOption={true}>
-                    {optionValues(potProcessInfo.fixatives, 'name', 'name')}
-                  </FormikSelect>
+                  <CustomReactSelect
+                    dataTestId={'pot-fixative'}
+                    label={'Fixative'}
+                    name={`plans.${rowIndex}.fixative`}
+                    emptyOption={true}
+                    value={values.plans[rowIndex]?.fixative}
+                    options={selectOptionValues(potProcessInfo.fixatives, 'name', 'name')}
+                    handleChange={(val) => {
+                      setFieldValue(`plans.${rowIndex}.fixative`, (val as OptionType).label);
+                    }}
+                  />
                 )}
 
-                <FormikSelect label={'Processing comments'} name={`plans.${rowIndex}.commentId`} emptyOption={true}>
-                  {optionValues(potProcessInfo.comments, 'text', 'id')}
-                </FormikSelect>
+                <CustomReactSelect
+                  dataTestId={'pot-comments'}
+                  label={'Processing comments'}
+                  name={`plans.${rowIndex}.commentId`}
+                  emptyOption={true}
+                  options={selectOptionValues(potProcessInfo.comments, 'text', 'id')}
+                />
               </div>
 
               {current.matches('prep') && (

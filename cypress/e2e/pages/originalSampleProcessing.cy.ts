@@ -1,4 +1,4 @@
-import { selectOption } from '../shared/utils.cy';
+import { selectOption } from '../shared/customReactSelect.cy';
 
 describe('Original Sample Processing', () => {
   before(() => {

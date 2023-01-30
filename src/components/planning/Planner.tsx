@@ -324,12 +324,12 @@ export default function Planner<M>({
           Once <span className="font-bold text-gray-900">all source labware</span> has been scanned, select a type of
           labware to plan layouts:
         </p>
-        <div className="flex flex-row items-end gap-x-4 justify-center">
+        <div className="flex flex-row items-center gap-x-4 justify-center">
           {
             /**Render plan creation settings panel using the callback method (passed as props) so that it will be done by the parent component **/
             buildPlanCreationSettings()
           }
-          <div className={'flex-shrink-0 align-bottom justify-end content-end'}>
+          <div className={'flex-shrink-0 mt-10 '}>
             <BlueButton
               id="#addLabware"
               onClick={onAddLabwareClick}

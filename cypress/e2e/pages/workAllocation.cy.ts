@@ -1,5 +1,5 @@
 import { CreateWorkMutation, CreateWorkMutationVariables } from '../../../src/types/sdk';
-import { selectOption } from '../shared/utils.cy';
+import { selectOption } from '../shared/customReactSelect.cy';
 
 describe('Work Allocation', () => {
   before(() => {

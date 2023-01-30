@@ -1,4 +1,4 @@
-import { selectOption } from '../shared/utils.cy';
+import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Work Progress', () => {
   before(() => {
@@ -134,7 +134,7 @@ describe('Work Progress', () => {
     });
     context('when a worknumber is given', () => {
       before(() => {
-        selectOption('workNumber', 'SGP1008');
+        selectSGPNumber('SGP1008');
       });
       it('enables search button ', () => {
         cy.findByRole('button', { name: /Search/i }).should('be.enabled');

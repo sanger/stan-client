@@ -7,7 +7,7 @@ import {
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { labwareTypes } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
-import { selectOption } from '../shared/utils.cy';
+import { selectOption } from '../shared/customReactSelect.cy';
 
 describe('Sectioning Planning', () => {
   before(() => {

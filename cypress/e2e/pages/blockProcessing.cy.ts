@@ -3,7 +3,7 @@ import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFact
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
-import { selectOption } from '../shared/utils.cy';
+import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Block Processing', () => {
   shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=block');
@@ -259,7 +259,8 @@ describe('Block Processing', () => {
             cy.findByText('A1').click();
             cy.findByText('Done').click();
           });
-          fillSGPNumber();
+
+          selectSGPNumber('SGP1008');
           cy.findByRole('button', { name: /Save/i }).click();
         });
         it('displays Block processing complete page', () => {
@@ -300,7 +301,7 @@ describe('Block Processing', () => {
         scanInput('STAN-113');
         addLabware('Tube');
         selectSource();
-        fillSGPNumber();
+        selectSGPNumber('SGP1008');
         fillMedium();
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
@@ -342,9 +343,6 @@ function scanInput(barcode: string) {
 function addLabware(labwareType: string) {
   selectOption('labwareType', labwareType);
   cy.findByText('+ Add Labware').click();
-}
-function fillSGPNumber() {
-  selectOption('workNumber', 'SGP1008');
 }
 function fillMedium() {
   selectOption('medium', 'None');

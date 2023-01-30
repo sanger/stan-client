@@ -1,5 +1,5 @@
 import { GetAllWorkInfoQuery, GetAllWorkInfoQueryVariables, WorkStatus } from '../../../src/types/sdk';
-import { selectOption } from './utils.cy';
+import { selectOption } from './customReactSelect.cy';
 
 export function shouldDisplyProjectAndUserNameForWorkNumber(url: string) {
   describe('Check work number selection displays work requester and project names', () => {
