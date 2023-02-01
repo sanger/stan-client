@@ -3,10 +3,10 @@ import { AddressCommentInput, CommentFieldsFragment, LabwareFieldsFragment, Slot
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
-import { Select } from '../forms/Select';
-import { optionValues } from '../forms';
+import { selectOptionValues } from '../forms';
 import RemoveButton from '../buttons/RemoveButton';
 import Labware from '../labware/Labware';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type CleanupProps = {
   comments: CommentFieldsFragment[];
@@ -31,7 +31,7 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
 
   const getComment = (address: string) => {
     const slotComment = slotComments.find((sc) => address === sc.address);
-    return slotComment ? slotComment.commentId : '';
+    return slotComment ? slotComment.commentId + '' : '';
   };
 
   const handleCommentChange = React.useCallback(
@@ -73,14 +73,13 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
       isSlotFilled(slot) && (
         <div className={`flex flex-col border-b border-gray-300`}>
           <div className="w-full">
-            <Select
+            <CustomReactSelect
               value={getComment(slot.address)}
               emptyOption={true}
-              data-testid={'comment'}
-              onChange={(e) => handleCommentChange(slot.address, e.currentTarget.value)}
-            >
-              {optionValues(comments, 'text', 'id')}
-            </Select>
+              dataTestId={'comment'}
+              handleChange={(val) => handleCommentChange(slot.address, (val as OptionType).value)}
+              options={selectOptionValues(comments, 'text', 'id')}
+            />
           </div>
         </div>
       )
@@ -102,13 +101,12 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
             {/* Display the dropdown to set/reset all comments */}
             <div className="mt-8 flex flex-col justify-between gap-x-4">
               <label className={'whitespace-nowrap font-semibold'}>Comment all</label>
-              <Select
-                data-testid={'commentAll'}
+              <CustomReactSelect
+                dataTestId={'commentAll'}
                 emptyOption
-                onChange={(e) => handleAllCommentChange(e.currentTarget.value)}
-              >
-                {optionValues(comments, 'text', 'id')}
-              </Select>
+                handleChange={(val) => handleAllCommentChange((val as OptionType).value)}
+                options={selectOptionValues(comments, 'text', 'id')}
+              />
             </div>
           </div>
         </>

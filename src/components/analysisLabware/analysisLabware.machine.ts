@@ -1,7 +1,6 @@
 import { RnaAnalysisLabware, StringMeasurement } from '../../types/sdk';
 import { createMachine } from 'xstate';
 import { AnalysisMeasurementType, MeasurementValueCategory } from './measurementColumn';
-import { OperationType } from './analysisLabware';
 
 export type AnalysisLabwareContext = {
   analysisLabwares: RnaAnalysisLabware[];
@@ -175,12 +174,13 @@ const buildMeasurementFields = (valueCategory: string, operationType: string) =>
   if (valueCategory === MeasurementValueCategory.SINGLE_VALUE_TYPE) {
     measurements = [
       {
-        name: operationType === OperationType.RIN ? AnalysisMeasurementType.RIN : AnalysisMeasurementType.DV200,
+        name:
+          operationType === AnalysisMeasurementType.RIN ? AnalysisMeasurementType.RIN : AnalysisMeasurementType.DV200,
         value: ''
       }
     ];
     measurements =
-      operationType === OperationType.RIN
+      operationType === AnalysisMeasurementType.RIN
         ? [
             {
               name: AnalysisMeasurementType.RIN,

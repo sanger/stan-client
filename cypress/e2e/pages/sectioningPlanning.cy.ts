@@ -165,7 +165,7 @@ describe('Sectioning Planning', () => {
 
     context('when adding a Fetal waste container', () => {
       before(() => {
-        cy.findByRole('combobox').select('Fetal waste container');
+        selectOption('labware-type', 'Fetal waste container');
         cy.findByText('+ Add Labware').click();
       });
 
@@ -184,7 +184,7 @@ describe('Sectioning Planning', () => {
 
     context('when adding a Visium LP layout', () => {
       before(() => {
-        cy.findByRole('combobox').select('Visium LP');
+        selectOption('labware-type', 'Visium LP');
         cy.findByText('+ Add Labware').click();
         cy.findByText('Edit Layout').click();
         cy.findByRole('dialog').within(() => {
@@ -209,7 +209,7 @@ describe('Sectioning Planning', () => {
 
     context('when adding a Visium TO layout', () => {
       before(() => {
-        cy.findByRole('combobox').select('Visium TO');
+        selectOption('labware-type', 'Visium TO');
         cy.findByText('+ Add Labware').click();
         cy.findByText('Edit Layout').click();
         cy.findByRole('dialog').within(() => {
@@ -257,7 +257,7 @@ describe('Sectioning Planning', () => {
 
     context('when adding a Visium ADH layout', () => {
       before(() => {
-        cy.findByRole('combobox').select('Visium ADH');
+        selectOption('labware-type', 'Visium ADH');
         cy.findByText('+ Add Labware').click();
         cy.findByText('Edit Layout').click();
         cy.findByRole('dialog').within(() => {

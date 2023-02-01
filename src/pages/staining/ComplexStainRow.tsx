@@ -3,8 +3,8 @@ import { ComplexStainLabware, ComplexStainRequest, StainPanel } from '../../type
 import { TableCell } from '../../components/Table';
 import FormikInput from '../../components/forms/Input';
 import WorkNumberSelect from '../../components/WorkNumberSelect';
-import FormikSelect from '../../components/forms/Select';
 import { objectKeys } from '../../lib/helpers';
+import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
 
 /**Properties for the setting the values for all rows**/
 type ComplexStainValueSetterProps = {
@@ -94,21 +94,29 @@ const ComplexStainRow = ({
               value: workNumber ?? ''
             });
           }}
+          workNumber={rowID !== undefined ? stainFormValues.labware[rowID].workNumber ?? '' : ''}
         />
       </TableCell>
       <TableCell className={cellClassNames}>
-        <FormikSelect
+        <CustomReactSelect
+          className={cellClassNames}
           label={''}
           name={rowID !== undefined ? `labware.${rowID}.panel` : `panel`}
-          onChange={handleChange}
-          data-testid={stainRowApplyAllSettings ? 'all-panel' : `${barcode}-panel`}
-        >
-          {objectKeys(StainPanel).map((stainPanel) => (
-            <option key={stainPanel} value={StainPanel[stainPanel]}>
-              {stainPanel}
-            </option>
-          ))}
-        </FormikSelect>
+          handleChange={(val) =>
+            handleChange({
+              fieldName: rowID !== undefined ? `labware.${rowID}.panel` : `panel`,
+              value: (val as OptionType).value
+            })
+          }
+          dataTestId={stainRowApplyAllSettings ? 'all-panel' : `${barcode}-panel`}
+          options={objectKeys(StainPanel).map((stainPanel) => {
+            return {
+              label: stainPanel,
+              value: StainPanel[stainPanel]
+            };
+          })}
+          value={rowID !== undefined ? stainFormValues.labware[rowID].panel ?? '' : ''}
+        />
       </TableCell>
       <TableCell className={cellClassNames}>
         <FormikInput

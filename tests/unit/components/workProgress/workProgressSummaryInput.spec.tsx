@@ -135,13 +135,10 @@ describe('WorkProgressSummaryInput.tsx', () => {
       // Component header title
       expect(screen.getByTestId('heading')).toHaveTextContent('Search');
       // Search type selector
-      const searchTypeSelector = screen.getByTestId('type') as HTMLInputElement;
-      expect(searchTypeSelector).toBeInTheDocument();
-      expect(searchTypeSelector.value).toEqual('');
+      expect(screen.getByTestId('type')).toHaveTextContent('');
       // Search type values
-      const searchValues = screen.getByTestId('valueSelect') as HTMLSelectElement;
-      expect(searchValues).toBeInTheDocument();
-      expect(searchValues.value).toEqual('');
+      expect(screen.getByTestId('valueSelect')).toHaveTextContent('');
+
       // Search button
       expect(screen.getByRole('button')).toBeInTheDocument();
       // Search button should be disabled when there are no searchValues
@@ -159,14 +156,8 @@ describe('WorkProgressSummaryInput.tsx', () => {
       };
       render(<WorkProgressSummaryInput {...workProgressInputProps} />);
 
-      const searchTypeSelector = screen.getByTestId('type') as HTMLInputElement;
-      expect(searchTypeSelector.value).toEqual('Work Type');
-      const searchValues = screen.getByTestId('valueSelect') as HTMLSelectElement;
-      expect(searchValues.value).toEqual('Work Type 1');
-      expect(searchValues.options.length).toEqual(1);
-      expect(searchValues.options[0].value).toEqual('Work Type 1');
-
-      expect(screen.getByRole('button')).toBeEnabled();
+      expect(screen.getByTestId('type')).toHaveTextContent('Work Type');
+      expect(screen.getByTestId('valueSelect')).toHaveTextContent('Work Type 1');
     });
 
     it('renders the correct information given work number props', async () => {
@@ -180,12 +171,11 @@ describe('WorkProgressSummaryInput.tsx', () => {
       };
       render(<WorkProgressSummaryInput {...workProgressInputProps} />);
 
-      const searchTypeSelector = screen.getByTestId('type') as HTMLInputElement;
-      expect(searchTypeSelector.value).toEqual('SGP/R&D Number');
+      expect(screen.getByTestId('type')).toHaveTextContent('SGP/R&D Number');
       const searchValues = screen.getByTestId('valueInput') as HTMLInputElement;
       expect(searchValues.value).toEqual('SGP-1');
 
-      expect(screen.getByRole('button')).toBeEnabled();
+      expect(screen.getByRole('button', { name: /Search/i })).toBeEnabled();
     });
 
     it('renders the correct information given status props', async () => {
@@ -199,12 +189,9 @@ describe('WorkProgressSummaryInput.tsx', () => {
       };
       render(<WorkProgressSummaryInput {...workProgressInputProps} />);
 
-      const searchTypeSelector = screen.getByTestId('type') as HTMLInputElement;
-      expect(searchTypeSelector.value).toEqual('Status');
-      const searchValues = screen.getByTestId('valueSelect') as HTMLInputElement;
-      expect(searchValues.value).toEqual('unstarted');
-
-      expect(screen.getByRole('button')).toBeEnabled();
+      expect(screen.getByTestId('type')).toHaveTextContent('Status');
+      expect(screen.getByTestId('valueSelect')).toHaveTextContent('unstarted');
+      expect(screen.getByRole('button', { name: /Search/i })).toBeEnabled();
     });
   });
 });

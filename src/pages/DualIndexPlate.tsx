@@ -23,7 +23,7 @@ import { buildLabwareFragment } from '../lib/helpers/labwareHelper';
 
 import { ErrorMessage } from '../components/forms';
 import Label from '../components/forms/Label';
-import { Select } from '../components/forms/Select';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 
 /**
  * Success notification when slots have been copied
@@ -178,18 +178,18 @@ function DualIndexPlate() {
           {sourceReagentPlate && (
             <div className="w-1/4 mt-4 mb-4" id="plateType">
               <Label name={'Plate Type'}>
-                <Select
+                <CustomReactSelect
                   emptyOption
-                  onChange={(e) => handlePlateTypeChange(e.currentTarget.value)}
+                  handleChange={(val) => handlePlateTypeChange((val as OptionType).label)}
                   value={sourceReagentPlate ? sourceReagentPlate.plateType ?? plateType : plateType}
-                  disabled={sourceReagentPlate && PLATE_TYPES.includes(sourceReagentPlate.plateType ?? '')}
-                >
-                  {PLATE_TYPES.map((plateType) => (
-                    <option key={plateType} value={plateType}>
-                      {plateType}
-                    </option>
-                  ))}
-                </Select>
+                  isDisabled={sourceReagentPlate && PLATE_TYPES.includes(sourceReagentPlate.plateType ?? '')}
+                  options={PLATE_TYPES.map((plateType) => {
+                    return {
+                      label: plateType,
+                      value: plateType
+                    };
+                  })}
+                />
               </Label>
               <MutedText>Select a dual index plate type</MutedText>
             </div>

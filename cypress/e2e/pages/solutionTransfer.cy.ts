@@ -3,9 +3,10 @@ import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFact
 import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
+import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Solution Transfer', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/solution_transfer', 'workNumber');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/solution_transfer');
 
   describe('Validation', () => {
     context('when the form with nothing filled in', () => {
@@ -41,7 +42,7 @@ describe('Solution Transfer', () => {
 
   describe('when solution is selected to apply to all', () => {
     before(() => {
-      cy.get('select[name="applyAllSolution"]').select('Ethanol');
+      selectOption('applyAllSolution', 'Ethanol');
     });
     it('all solution dropdowns in table must select the selected solution', () => {
       cy.findByRole('table').contains('td', 'Ethanol');
@@ -51,7 +52,7 @@ describe('Solution Transfer', () => {
   describe('API Requests', () => {
     context('when request is successful', () => {
       before(() => {
-        cy.get('select[name="workNumber"]').select('SGP1008');
+        selectSGPNumber('SGP1008');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<PerformSolutionTransferMutation, PerformSolutionTransferMutationVariables>(
@@ -83,9 +84,9 @@ describe('Solution Transfer', () => {
     context('when request is unsuccessful', () => {
       before(() => {
         cy.visit('/lab/solution_transfer');
-        cy.get('select[name="workNumber"]').select('SGP1008');
+        selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').type('STAN-3111{enter}');
-        cy.get('select[name="applyAllSolution"]').select('Ethanol');
+        selectOption('applyAllSolution', 'Ethanol');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<PerformSolutionTransferMutation, PerformSolutionTransferMutationVariables>(

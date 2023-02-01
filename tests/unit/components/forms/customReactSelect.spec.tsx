@@ -26,14 +26,14 @@ const mockedOptions = [
   { label: 'Option 3', value: 'option-3' },
   { label: 'Option 4', value: 'option-4' }
 ];
-const testDisplayProps = (nameStr?: string) => {
+const testDisplayProps = async (nameStr?: string) => {
   const customSelectProps = {
     options: mockedOptions,
     label: 'Test label',
     placeholder: 'Select options...',
     name: nameStr ?? undefined
   };
-  act(() => {
+  await act(async () => {
     if (nameStr) {
       renderFormikSelect(customSelectProps);
     } else {
@@ -46,7 +46,7 @@ const testDisplayProps = (nameStr?: string) => {
   //Displays placeholder
   expect(screen.getByText('Select options...')).toBeInTheDocument();
 };
-const testSelectOptions = (nameStr?: string) => {
+const testSelectOptions = async (nameStr?: string) => {
   const onChange = jest.fn();
 
   const customSelectProps = {
@@ -58,7 +58,7 @@ const testSelectOptions = (nameStr?: string) => {
       onChange();
     }
   };
-  act(() => {
+  await act(async () => {
     if (nameStr) {
       renderFormikSelect(customSelectProps);
     } else {

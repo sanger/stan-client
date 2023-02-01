@@ -1,3 +1,5 @@
+import { selectOption } from '../shared/customReactSelect.cy';
+
 describe('Staining Page', () => {
   before(() => {
     cy.visit('/lab/staining');
@@ -6,7 +8,7 @@ describe('Staining Page', () => {
   describe('Showing measurements', () => {
     context('when a Stain Type with measurements is selected', () => {
       before(() => {
-        cy.findByLabelText('Stain Type').select('H&E');
+        selectOption('stainType', 'H&E');
       });
 
       it('shows measurements fields', () => {
@@ -16,7 +18,7 @@ describe('Staining Page', () => {
 
     context('when a Stain Type without measurements is selected', () => {
       before(() => {
-        cy.findByLabelText('Stain Type').select("Masson's Trichrome");
+        selectOption('stainType', "Masson's Trichrome");
       });
 
       it("doesn't show measurements fields", () => {
@@ -26,7 +28,7 @@ describe('Staining Page', () => {
 
     context('when no Stain Type is selected', () => {
       before(() => {
-        cy.findByLabelText('Stain Type').select('');
+        selectOption('stainType', '');
       });
 
       it("doesn't show measurements fields", () => {
@@ -38,7 +40,7 @@ describe('Staining Page', () => {
   describe('Validation', () => {
     context('when submitting the form with nothing filled in', () => {
       before(() => {
-        cy.findByLabelText('Stain Type').select("Masson's Trichrome");
+        selectOption('stainType', "Masson's Trichrome");
         cy.findByRole('button', { name: 'Submit' }).click();
       });
 
@@ -53,7 +55,7 @@ describe('Staining Page', () => {
 
     context('when a Stain Type with measurements is selected', () => {
       before(() => {
-        cy.findByLabelText('Stain Type').select('H&E');
+        selectOption('stainType', 'H&E');
         cy.findByRole('button', { name: 'Submit' }).click();
       });
 
@@ -66,7 +68,7 @@ describe('Staining Page', () => {
   describe('On RNSAcope and IHC Stain type selection', () => {
     context('when RNAscope Stain Type is selected', () => {
       before(() => {
-        cy.findByLabelText('Stain Type').select('RNAscope');
+        selectOption('stainType', 'RNAscope');
         cy.get('#labwareScanInput').type('STAN-3111{enter}');
       });
       it('displays a table to enter stain information', () => {
@@ -81,7 +83,7 @@ describe('Staining Page', () => {
     });
     context('when IHC Stain Type is selected', () => {
       before(() => {
-        cy.findByLabelText('Stain Type').select('IHC');
+        selectOption('stainType', 'IHC');
       });
       it('shows a table with IHC Plex Number column enabled', () => {
         cy.findByTestId('STAN-3111-plexIHC').should('be.enabled');
@@ -92,7 +94,7 @@ describe('Staining Page', () => {
     });
     context('when RNAscope & IHC Stain Type is selected', () => {
       before(() => {
-        cy.findByLabelText('Stain Type').select('RNAscope & IHC');
+        selectOption('stainType', 'RNAscope & IHC');
       });
       it('shows a table with RNAScope Plex Number column enabled', () => {
         cy.findByTestId('STAN-3111-plexRNAscope').should('be.enabled');
@@ -104,7 +106,7 @@ describe('Staining Page', () => {
     context("when 'Positive' is selected for experimental panel column in 'Apply all' row", () => {
       before(() => {
         cy.get('#labwareScanInput').type('STAN-4111{enter}');
-        cy.findByTestId('all-panel').select('Positive');
+        selectOption('all-panel', 'Positive');
       });
       it("selects 'Positive' value for all experimental panel columns", () => {
         cy.findAllByText('Positive').should('have.length', 3);
