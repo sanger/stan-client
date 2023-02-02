@@ -180,6 +180,7 @@ function DualIndexPlate() {
               <Label name={'Plate Type'}>
                 <CustomReactSelect
                   emptyOption
+                  dataTestId={'plateType'}
                   handleChange={(val) => handlePlateTypeChange((val as OptionType).label)}
                   value={sourceReagentPlate ? sourceReagentPlate.plateType ?? plateType : plateType}
                   isDisabled={sourceReagentPlate && PLATE_TYPES.includes(sourceReagentPlate.plateType ?? '')}

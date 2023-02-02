@@ -61,7 +61,7 @@ describe('Aliquoting', () => {
       });
 
       scanInLabware();
-      selectSGPNumber('SGP108');
+      selectSGPNumber('SGP1008');
       enterNumberOfDestinationTubes('4');
       cy.findByText('Aliquot').click();
     });
@@ -79,7 +79,7 @@ describe('Aliquoting', () => {
     before(() => {
       cy.visit('/lab/aliquoting');
       scanInLabware();
-      selectSGPNumber('SGP108');
+      selectSGPNumber('SGP1008');
       enterNumberOfDestinationTubes('4');
       cy.findByRole('button', { name: 'Aliquot' }).click();
     });
