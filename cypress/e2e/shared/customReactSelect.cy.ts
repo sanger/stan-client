@@ -7,6 +7,7 @@ export const getSelect = (dataTestId?: string) => {
   });
   return select;
 };
+
 //Choose the given option in select box list
 const chooseOptionFromSelectList = (optionText: string) => {
   //If given option is empty
@@ -76,5 +77,14 @@ export const shouldOptionsHaveLengthAbove = (dataTestId: string, length: number)
   wrapperDiv.within(() => {
     cy.findByRole('combobox').click();
     cy.get('[id*=-option]').should('have.length.above', length);
+  });
+};
+
+//Get the dropdown with the given test id
+export const selectFocusBlur = (dataTestId?: string) => {
+  const wrapperDiv = cy.findByTestId(dataTestId ?? 'select-div');
+  if (!wrapperDiv) return;
+  wrapperDiv.within(() => {
+    cy.findByRole('combobox').focus().blur();
   });
 };
