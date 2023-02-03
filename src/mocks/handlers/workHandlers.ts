@@ -11,10 +11,13 @@ import {
   GetWorkAllocationInfoQueryVariables,
   GetWorkNumbersQuery,
   GetWorkNumbersQueryVariables,
+  OmeroProject,
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumBlocksMutationVariables,
   UpdateWorkNumSlidesMutation,
   UpdateWorkNumSlidesMutationVariables,
+  UpdateWorkOmeroProjectMutation,
+  UpdateWorkOmeroProjectMutationVariables,
   UpdateWorkPriorityMutation,
   UpdateWorkPriorityMutationVariables,
   UpdateWorkStatusMutation,
@@ -31,6 +34,7 @@ import workTypeRepository from '../repositories/workTypeRepository';
 import { sample } from 'lodash';
 import releaseRecipientRepository from '../repositories/releaseRecipientRepository';
 import programRepository from '../repositories/programRepository';
+import omeroProjectRepository from '../repositories/omeroProjectRepository';
 
 const workHandlers = [
   graphql.query<GetWorkAllocationInfoQuery, GetWorkAllocationInfoQueryVariables>(
@@ -92,6 +96,10 @@ const workHandlers = [
               workRequester: {
                 __typename: 'ReleaseRecipient',
                 username: work.workRequester ? work.workRequester.username : ''
+              },
+              omeroProject: {
+                __typename: 'OmeroProject',
+                name: work.omeroProject?.name
               }
             };
           })
@@ -104,6 +112,9 @@ const workHandlers = [
     const costCode = costCodeRepository.find('code', req.variables.costCode);
     const project = projectRepository.find('name', req.variables.project);
     const program = programRepository.find('name', req.variables.program) ?? undefined;
+    const omeroProject = req.variables.omeroProject
+      ? omeroProjectRepository.find('name', req.variables.omeroProject)
+      : undefined;
     const workRequester = releaseRecipientRepository.find('username', req.variables.workRequester);
 
     if (!workType) {
@@ -147,7 +158,7 @@ const workHandlers = [
         numOriginalSamples: req.variables.numOriginalSamples
       },
       {
-        associations: { workType, costCode, project, program, workRequester },
+        associations: { workType, costCode, project, program, workRequester, omeroProject },
         transient: { isRnD: req.variables.prefix === 'R&D' }
       }
     );
@@ -261,6 +272,41 @@ const workHandlers = [
     }
   ),
 
+  graphql.mutation<UpdateWorkOmeroProjectMutation, UpdateWorkOmeroProjectMutationVariables>(
+    'UpdateWorkOmeroProject',
+    (req, res, ctx) => {
+      const work = workRepository.find('workNumber', req.variables.workNumber);
+      if (!work) {
+        return res(
+          ctx.errors([
+            {
+              message: `Work ${req.variables.workNumber} not found`
+            }
+          ])
+        );
+      }
+      let omeroProject: OmeroProject | null = null;
+      if (req.variables.omeroProject) {
+        omeroProject = omeroProjectRepository.find('name', req.variables.omeroProject);
+      }
+      if (!omeroProject) {
+        return res(
+          ctx.errors([
+            {
+              message: `Omero project ${req.variables.omeroProject} not found`
+            }
+          ])
+        );
+      }
+      work.omeroProject = omeroProject;
+      workRepository.save(work);
+      return res(
+        ctx.data({
+          updateWorkOmeroProject: omeroProject
+        })
+      );
+    }
+  ),
   graphql.query<FindWorkNumbersQuery, FindWorkNumbersQueryVariables>('FindWorkNumbers', (req, res, ctx) => {
     return res(
       ctx.data({

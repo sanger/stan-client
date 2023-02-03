@@ -47,6 +47,7 @@ const tableColumnFieldInfo = [
   { key: 'Work Type', path: ['work', 'workType', 'name'] },
   { key: 'Work Requester', path: ['work', 'workRequester', 'username'] },
   { key: 'Project', path: ['work', 'project', 'name'] },
+  { key: 'Omero Project', path: ['work', 'omeroProject', 'name'] },
   { key: 'Cost Code', path: ['work', 'costCode', 'code'] },
   { key: 'Number of Blocks', path: ['work', 'numBlocks'] },
   { key: 'Number of Slides', path: ['work', 'numSlides'] },
@@ -86,6 +87,7 @@ export default function WorkAllocation() {
   const {
     projects,
     programs,
+    omeroProjects,
     costCodes,
     workWithComments,
     workTypes,
@@ -188,6 +190,10 @@ export default function WorkAllocation() {
       .oneOf(costCodes.map((cc) => cc.code))
       .required()
       .label('Cost Code'),
+    omeroProject: Yup.string()
+      .oneOf(omeroProjects.map((cc) => cc.name))
+      .optional()
+      .label('Omero Project'),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
     numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
@@ -250,6 +256,16 @@ export default function WorkAllocation() {
                   dataTestId="project"
                   emptyOption={true}
                   options={selectOptionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
+                />
+              </div>
+
+              <div className="md:flex-grow">
+                <CustomReactSelect
+                  label="Omero Project"
+                  name="omeroProject"
+                  dataTestId="omeroProject"
+                  emptyOption={true}
+                  options={selectOptionValues(omeroProjects, 'name', 'name', true, { sort: true, alphaFirst: true })}
                 />
               </div>
 
@@ -376,6 +392,7 @@ export default function WorkAllocation() {
                   <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
                   <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
                   <TableHeader sortProps={getTableSortProps('Project')}>Project</TableHeader>
+                  <TableHeader sortProps={getTableSortProps('Omero Project')}>Omero Project</TableHeader>
                   <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
                   <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
                   <TableHeader sortProps={getTableSortProps('Number of Blocks')}>Number of Blocks</TableHeader>
@@ -392,6 +409,7 @@ export default function WorkAllocation() {
                   <WorkRow
                     initialWork={workWithComment}
                     availableComments={availableComments}
+                    availableOmeroProjects={omeroProjects}
                     key={workWithComment.work.workNumber}
                     rowIndex={index}
                     onWorkFieldUpdate={onWorkUpdate}

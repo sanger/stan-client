@@ -1,0 +1,4 @@
+fragment OmeroProjectFields on OmeroProject {
+  name
+  enabled
+}

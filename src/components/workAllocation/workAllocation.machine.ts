@@ -5,6 +5,7 @@ import {
   CostCodeFieldsFragment,
   CreateWorkMutation,
   GetWorkAllocationInfoQuery,
+  OmeroProjectFieldsFragment,
   ProgramFieldsFragment,
   ProjectFieldsFragment,
   ReleaseRecipientFieldsFragment,
@@ -41,6 +42,11 @@ export type WorkAllocationFormValues = {
    * The name of the program
    */
   program: string;
+
+  /**
+   * The name of the Omero project, if allocated
+   */
+  omeroProject?: string;
 
   /**
    * Cost code
@@ -109,6 +115,11 @@ type WorkAllocationContext = {
   projects: Array<ProjectFieldsFragment>;
 
   /**
+   * List of possible Omero projects to allocate a Work to
+   */
+  omeroProjects: Array<OmeroProjectFieldsFragment>;
+
+  /**
    * List of possible programs to allocate a Work to
    */
   programs: Array<ProgramFieldsFragment>;
@@ -155,6 +166,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
         projects: [],
         programs: [],
         costCodes: [],
+        omeroProjects: [],
         availableComments: [],
         urlParams
       },
@@ -204,13 +216,23 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
 
         assignWorkAllocationInfo: assign((ctx, e) => {
           if (e.type !== 'done.invoke.loadWorkAllocationInfo') return;
-          const { comments, projects, programs, worksWithComments, workTypes, costCodes, releaseRecipients } = e.data;
+          const {
+            comments,
+            projects,
+            programs,
+            omeroProjects,
+            worksWithComments,
+            workTypes,
+            costCodes,
+            releaseRecipients
+          } = e.data;
           ctx.availableComments = comments;
           ctx.projects = projects;
           ctx.programs = programs;
           ctx.workWithComments = worksWithComments;
           ctx.workTypes = workTypes;
           ctx.costCodes = costCodes;
+          ctx.omeroProjects = omeroProjects;
           ctx.workRequesters = releaseRecipients;
         }),
 
@@ -232,7 +254,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             costCode,
             numBlocks,
             numSlides,
-            numOriginalSamples
+            numOriginalSamples,
+            omeroProject
           } = e.data.createWork;
           const blockSlideSampleMsg = [
             numBlocks ? `${numBlocks} blocks` : undefined,
@@ -241,8 +264,12 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           ]
             .filter((msg) => msg)
             .join(' and ');
-          ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideSampleMsg}) to project ${project.name} 
-                                and program ${program.name} using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
+          ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideSampleMsg}) to project ${
+            project.name
+          } ${omeroProject ? `,to Omero project ${omeroProject.name}` : ''}
+                                and program ${program.name} using cost code ${costCode.code} with the work requester ${
+            workRequester?.username
+          }`;
         }),
 
         updateWork: assign((ctx, e) => {
@@ -269,6 +296,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             workRequester,
             project,
             program,
+            omeroProject,
             costCode,
             isRnD,
             numBlocks,
@@ -285,7 +313,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             prefix: isRnD ? 'R&D' : 'SGP',
             numBlocks,
             numSlides,
-            numOriginalSamples
+            numOriginalSamples,
+            omeroProject
           });
         },
 

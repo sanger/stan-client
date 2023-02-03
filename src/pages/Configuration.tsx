@@ -28,6 +28,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
     'Equipments',
     'Fixatives',
     'HuMFre Numbers',
+    'Omero Projects',
     'Projects',
     'Programs',
     'Release Destinations',

@@ -1,9 +1,14 @@
 import React, { useCallback } from 'react';
 import { TableCell } from '../Table';
-import { CommentFieldsFragment, WorkStatus, WorkWithCommentFieldsFragment } from '../../types/sdk';
+import {
+  CommentFieldsFragment,
+  OmeroProjectFieldsFragment,
+  WorkStatus,
+  WorkWithCommentFieldsFragment
+} from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import createWorkRowMachine, { WorkRowEvent } from './workRow.machine';
-import { optionValues } from '../forms';
+import { optionValues, selectOptionValues } from '../forms';
 import WhiteButton from '../buttons/WhiteButton';
 import BlueButton from '../buttons/BlueButton';
 import { capitalize } from 'lodash';
@@ -12,6 +17,7 @@ import { Form, Formik } from 'formik';
 import PinkButton from '../buttons/PinkButton';
 import { MAX_NUM_BLOCKANDSLIDES } from './WorkAllocation';
 import FormikInput from '../forms/Input';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 /**
  * The type of values for the edit form
@@ -38,6 +44,10 @@ type WorkRowProps = {
    * The comments available for the user to select when updating Work status
    */
   availableComments: Array<CommentFieldsFragment>;
+  /**
+   * The comments available for the user to select when updating Work status
+   */
+  availableOmeroProjects: Array<OmeroProjectFieldsFragment>;
 
   rowIndex: number;
   onWorkFieldUpdate: (index: number, work: WorkWithCommentFieldsFragment) => void;
@@ -47,7 +57,13 @@ type WorkRowProps = {
  * Component for displaying information about Work in a table row, as well as the ability
  * to edit its status
  */
-export default function WorkRow({ initialWork, availableComments, rowIndex, onWorkFieldUpdate }: WorkRowProps) {
+export default function WorkRow({
+  initialWork,
+  availableComments,
+  availableOmeroProjects,
+  rowIndex,
+  onWorkFieldUpdate
+}: WorkRowProps) {
   const workRowMachine = React.useMemo(() => {
     return createWorkRowMachine({ workWithComment: initialWork });
   }, [initialWork]);
@@ -64,7 +80,8 @@ export default function WorkRow({ initialWork, availableComments, rowIndex, onWo
       current.event.type === 'done.invoke.updateWorkPriority' ||
       current.event.type === 'done.invoke.updateWorkNumSlides' ||
       current.event.type === 'done.invoke.updateWorkNumBlocks' ||
-      current.event.type === 'done.invoke.updateWorkStatus'
+      current.event.type === 'done.invoke.updateWorkStatus' ||
+      current.event.type === 'done.invoke.updateWorkOmeroProject'
     ) {
       onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
     }
@@ -137,6 +154,21 @@ export default function WorkRow({ initialWork, availableComments, rowIndex, onWo
       />
     );
   };
+  const rendeWorkOmeroProjectField = (workNumber: string, omeroProjectName: string | undefined) => {
+    return (
+      <CustomReactSelect
+        dataTestId={workNumber + '-' + omeroProjectName}
+        handleChange={(val) => {
+          send({
+            type: 'UPDATE_OMERO_PROJECT',
+            omeroProject: (val as OptionType).label
+          });
+        }}
+        value={omeroProjectName}
+        options={selectOptionValues(availableOmeroProjects, 'name', 'name')}
+      />
+    );
+  };
 
   const validateWorkPriority = (priority: string) => {
     let errorMessage = '';
@@ -195,6 +227,7 @@ export default function WorkRow({ initialWork, availableComments, rowIndex, onWo
       <TableCell>{work.workType.name}</TableCell>
       <TableCell>{work.workRequester?.username}</TableCell>
       <TableCell>{work.project.name}</TableCell>
+      <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
       <TableCell>{work.program.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>

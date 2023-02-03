@@ -16,6 +16,9 @@ fragment WorkFields on Work {
   workType {
     ...WorkTypeFields
   }
+  omeroProject {
+    ...OmeroProjectFields
+  }
   numBlocks
   numSlides
   numOriginalSamples

@@ -1,0 +1,5 @@
+mutation UpdateWorkOmeroProject($workNumber: String!, $omeroProject: String) {
+  updateWorkOmeroProject(workNumber: $workNumber, omeroProject: $omeroProject) {
+    ...OmeroProjectFields
+  }
+}

@@ -5,6 +5,7 @@ import projectFactory from './projectFactory';
 import workTypeFactory from './workTypeFactory';
 import releaseRecipientFactory from './releaseRecipientFactory';
 import programFactory from './programFactory';
+import omeroProjectFactory from './omeroProjectFactory';
 
 export default Factory.define<WorkFieldsFragment, { isRnD: boolean }>(
   ({ params, sequence, associations, transientParams }) => {
@@ -26,7 +27,8 @@ export default Factory.define<WorkFieldsFragment, { isRnD: boolean }>(
       numBlocks: params.numBlocks,
       numSlides: params.numSlides,
       numOriginalSamples: params.numOriginalSamples,
-      workNumber: workNumber
+      workNumber: workNumber,
+      omeroProject: associations.omeroProject ?? omeroProjectFactory.build()
     };
   }
 );
