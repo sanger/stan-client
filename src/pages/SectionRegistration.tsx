@@ -15,6 +15,7 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import { parseQueryString } from '../lib/helpers';
 import { history, StanCoreContext } from '../lib/sdk';
 import { useLocation } from 'react-router-dom';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 
 const availableLabware: Array<LabwareTypeName> = [
   LabwareTypeName.FOUR_SLOT_SLIDE,
@@ -230,21 +231,21 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
               <p className="my-3 text-gray-800 text-sm leading-normal">Pick a type of labware to begin:</p>
 
               <div className="flex flex-row items-center justify-center gap-4">
-                <select
-                  onChange={(e) =>
+                <CustomReactSelect
+                  dataTestId="initialLabwareType"
+                  handleChange={(value) =>
                     history.replace({
-                      search: `?initialLabware=${e.target.value}`
+                      search: `?initialLabware=${(value as OptionType).value}`
                     })
                   }
+                  options={availableLabware.map((labwareTypeName) => {
+                    return {
+                      value: labwareTypeName,
+                      label: labwareTypeName
+                    };
+                  })}
                   className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
-                >
-                  <option value="" />
-                  {availableLabware.map((labwareTypeName) => (
-                    <option key={labwareTypeName} value={labwareTypeName}>
-                      {labwareTypeName}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
           )}
