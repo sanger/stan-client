@@ -165,6 +165,7 @@ function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormPa
                 dataTestId="Fixative"
                 className="block mt-2"
                 name={`labwares.${currentIndex}.fixative`}
+                value={values.labwares[currentIndex].fixative}
                 options={selectOptionValues(registrationInfo.fixatives, 'name', 'name')}
               />
 
@@ -174,6 +175,7 @@ function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormPa
                 dataTestId="Medium"
                 className="block mt-2"
                 name={`labwares.${currentIndex}.medium`}
+                value={values.labwares[currentIndex].medium}
                 options={selectOptionValues(registrationInfo.mediums, 'name', 'name')}
               />
             </motion.div>

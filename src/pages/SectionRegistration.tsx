@@ -244,7 +244,7 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
                       label: labwareTypeName
                     };
                   })}
-                  className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
+                  className=" rounded-md md:w-1/2"
                 />
               </div>
             </div>

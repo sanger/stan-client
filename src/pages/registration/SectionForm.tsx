@@ -9,8 +9,7 @@ import Heading from '../../components/Heading';
 import FormikInput from '../../components/forms/Input';
 import RadioGroup, { RadioButton } from '../../components/forms/RadioGroup';
 import { objectKeys } from '../../lib/helpers';
-import FormikSelect from '../../components/forms/Select';
-import { optionValues, selectOptionValues } from '../../components/forms';
+import { selectOptionValues } from '../../components/forms';
 import PinkButton from '../../components/buttons/PinkButton';
 import { SectionRegistrationContext, SectionRegistrationFormValues } from '../SectionRegistration';
 import CustomReactSelect from '../../components/forms/CustomReactSelect';
@@ -125,6 +124,7 @@ export default function SectionForm({
         emptyOption
         className="mt-2"
         options={selectOptionValues(registrationInfo.species, 'name', 'name')}
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].species}
       />
 
       <Heading level={4}>Tissue Information</Heading>
@@ -134,6 +134,7 @@ export default function SectionForm({
         dataTestId="HumFre"
         isDisabled={!isHMDMCEnabled}
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.hmdmc`}
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].hmdmc}
         emptyOption
         className="mt-2"
         options={selectOptionValues(registrationInfo.hmdmcs, 'hmdmc', 'hmdmc')}
@@ -144,6 +145,7 @@ export default function SectionForm({
         dataTestId="Tissue Type"
         emptyOption
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.tissueType`}
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].tissueType}
         className="mt-2"
         options={selectOptionValues(registrationInfo.tissueTypes, 'name', 'name')}
       />
@@ -152,6 +154,7 @@ export default function SectionForm({
         label="Spatial Location"
         dataTestId="Spatial Location"
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.spatialLocation`}
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].spatialLocation}
         options={availableSpatialLocations.map((spatialLocation) => {
           return {
             label: spatialLocation.code + ' - ' + spatialLocation.name,
