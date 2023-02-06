@@ -158,7 +158,7 @@ export default function WorkRow({
   const rendeWorkOmeroProjectField = (workNumber: string, omeroProjectName: string | undefined) => {
     return (
       <CustomReactSelect
-        dataTestId={workNumber + '-' + omeroProjectName}
+        dataTestId={`${workNumber}-OmeroProject`}
         handleChange={(val) => {
           send({
             type: 'UPDATE_OMERO_PROJECT',
@@ -263,6 +263,7 @@ export default function WorkRow({
                   <CustomReactSelect
                     isDisabled={current.matches('updating')}
                     name={'type'}
+                    dataTestId={'status'}
                     label={'New Status'}
                     options={nextStatuses.map((nextStatus) => {
                       return { label: capitalize(nextStatus), value: nextStatus };
@@ -272,6 +273,7 @@ export default function WorkRow({
                   {requiresComment(values.type) && (
                     <CustomReactSelect
                       isDisabled={current.matches('updating')}
+                      dataTestId={'comment'}
                       name={'commentId'}
                       label={'Comment'}
                       options={selectOptionValues(availableComments, 'text', 'id')}

@@ -140,15 +140,6 @@ export const shouldOptionsHaveLength = (dataTestId: string, length: number) => {
   });
 };
 
-export const shouldOptionsHaveLengthAbove = (dataTestId: string, length: number) => {
-  const wrapperDiv = cy.findAllByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
-  if (!wrapperDiv) return;
-  wrapperDiv.within(() => {
-    cy.findByRole('combobox').click();
-    cy.get('[id*=-option]').should('have.length.above', length);
-  });
-};
-
 //Get the dropdown with the given test id
 export const selectFocusBlur = (dataTestId?: string) => {
   const wrapperDiv = cy.findByTestId(dataTestId ?? 'select-div');

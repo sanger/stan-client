@@ -264,9 +264,11 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           ]
             .filter((msg) => msg)
             .join(' and ');
-          ctx.successMessage = `Assigned ${workNumber} (${workType.name} - ${blockSlideSampleMsg}) to project ${
-            project.name
-          } ${omeroProject ? `,to Omero project ${omeroProject.name}` : ''}
+          ctx.successMessage = `Assigned ${workNumber} (${
+            workType.name
+          } - ${blockSlideSampleMsg}) to project ${project.name.trim()} ${
+            omeroProject ? `, to Omero project ${omeroProject.name}` : ''
+          }
                                 and program ${program.name} using cost code ${costCode.code} with the work requester ${
             workRequester?.username
           }`;

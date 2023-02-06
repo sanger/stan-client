@@ -185,6 +185,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
             value={entity ? String(entity[valueColumn]) : ''}
             valueFieldOptions={valueFieldComponentInfo.valueOptions ?? []}
             onChange={(val) => handleOnRowChange(entity, val)}
+            dataTestId={entity ? `${entity[keyColumn]}-select` : ''}
           />
         );
       }
