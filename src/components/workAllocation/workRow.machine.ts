@@ -78,7 +78,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_SLIDES: 'editNumberSlides',
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
-            UPDATE_OMERO_PROJECT: 'selectOmeroProject'
+            UPDATE_OMERO_PROJECT: 'updateOmeroProject'
           }
         },
         active: {
@@ -92,7 +92,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_SLIDES: 'editNumberSlides',
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
-            UPDATE_OMERO_PROJECT: 'selectOmeroProject'
+            UPDATE_OMERO_PROJECT: 'updateOmeroProject'
           }
         },
         paused: {
@@ -106,7 +106,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_SLIDES: 'editNumberSlides',
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
-            UPDATE_OMERO_PROJECT: 'selectOmeroProject'
+            UPDATE_OMERO_PROJECT: 'updateOmeroProject'
           }
         },
         completed: {},
@@ -166,10 +166,10 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             onError: { target: 'deciding' }
           }
         },
-        selectOmeroProject: {
+        updateOmeroProject: {
           invoke: {
-            src: 'selectWorkOmeroProject',
-            id: 'selectWorkOmeroProject',
+            src: 'updateWorkOmeroProject',
+            id: 'updateWorkOmeroProject',
             onDone: {
               actions: 'assignWorkOmeroProject',
               target: 'deciding'
@@ -202,8 +202,9 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
           ctx.workWithComment.work = e.data.updateWorkPriority;
         }),
         assignWorkOmeroProject: assign((ctx, e) => {
+          debugger;
           if (e.type !== 'done.invoke.updateWorkOmeroProject') return;
-          ctx.workWithComment.work.omeroProject = e.data.updateWorkOmeroProject;
+          ctx.workWithComment.work = { ...ctx.workWithComment.work, omeroProject: e.data.updateWorkOmeroProject };
         }),
         toggleEditMode: assign((ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled))
       },
@@ -247,12 +248,15 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
           if ('priority' in e && e.priority) params['priority'] = e.priority;
           return stanCore.UpdateWorkPriority(params);
         },
-        updateWorkOmeroProject: (ctx, e) => {
+        updateWorkOmeroProject: async (ctx, e) => {
+          debugger;
           let params: { workNumber: string; omeroProject?: string } = {
             workNumber: ctx.workWithComment.work.workNumber
           };
           if ('omeroProject' in e && e.omeroProject) params['omeroProject'] = e.omeroProject;
-          return stanCore.UpdateWorkOmeroProject(params);
+          const ret = await stanCore.UpdateWorkOmeroProject(params);
+          debugger;
+          return ret;
         }
       }
     }

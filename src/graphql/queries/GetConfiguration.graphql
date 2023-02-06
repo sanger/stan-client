@@ -41,4 +41,7 @@ query GetConfiguration {
   programs(includeDisabled: true) {
     ...ProgramFields
   }
+  omeroProjects(includeDisabled: true) {
+    ...OmeroProjectFields
+  }
 }

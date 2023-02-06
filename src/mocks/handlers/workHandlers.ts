@@ -58,6 +58,7 @@ const workHandlers = [
       return res(
         ctx.data({
           costCodes: costCodeRepository.findAll().filter(isEnabled),
+          omeroProjects: omeroProjectRepository.findAll().filter(isEnabled),
           projects: projectRepository.findAll().filter(isEnabled),
           programs: programRepository.findAll().filter(isEnabled),
           comments,

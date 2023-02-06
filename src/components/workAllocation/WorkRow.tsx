@@ -8,11 +8,10 @@ import {
 } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import createWorkRowMachine, { WorkRowEvent } from './workRow.machine';
-import { optionValues, selectOptionValues } from '../forms';
+import { selectOptionValues } from '../forms';
 import WhiteButton from '../buttons/WhiteButton';
 import BlueButton from '../buttons/BlueButton';
 import { capitalize } from 'lodash';
-import FormikSelect from '../forms/Select';
 import { Form, Formik } from 'formik';
 import PinkButton from '../buttons/PinkButton';
 import { MAX_NUM_BLOCKANDSLIDES } from './WorkAllocation';
@@ -76,6 +75,7 @@ export default function WorkRow({
 
   /**Notify the changes in work fields*/
   React.useEffect(() => {
+    debugger;
     if (
       current.event.type === 'done.invoke.updateWorkPriority' ||
       current.event.type === 'done.invoke.updateWorkNumSlides' ||
@@ -106,6 +106,8 @@ export default function WorkRow({
     type: nextStatuses[0] as WorkRowEvent['type'],
     commentId: availableComments[0].id
   };
+
+  React.useEffect(() => {});
 
   /**
    * Event handler for the form submission. Sends an event to the machine.
@@ -259,17 +261,22 @@ export default function WorkRow({
             {({ values }) => (
               <Form>
                 <div className="space-y-4">
-                  <FormikSelect disabled={current.matches('updating')} name={'type'} label={'New Status'}>
-                    {nextStatuses.map((nextStatus) => (
-                      <option key={nextStatus} value={nextStatus}>
-                        {capitalize(nextStatus)}
-                      </option>
-                    ))}
-                  </FormikSelect>
+                  <CustomReactSelect
+                    isDisabled={current.matches('updating')}
+                    name={'type'}
+                    label={'New Status'}
+                    options={nextStatuses.map((nextStatus) => {
+                      return { label: capitalize(nextStatus), value: nextStatus };
+                    })}
+                  />
+
                   {requiresComment(values.type) && (
-                    <FormikSelect disabled={current.matches('updating')} name={'commentId'} label={'Comment'}>
-                      {optionValues(availableComments, 'text', 'id')}
-                    </FormikSelect>
+                    <CustomReactSelect
+                      isDisabled={current.matches('updating')}
+                      name={'commentId'}
+                      label={'Comment'}
+                      options={selectOptionValues(availableComments, 'text', 'id')}
+                    />
                   )}
                   <div className="flex flex-row items-center justify-end space-x-2">
                     <WhiteButton
