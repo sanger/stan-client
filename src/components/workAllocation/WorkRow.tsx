@@ -75,7 +75,6 @@ export default function WorkRow({
 
   /**Notify the changes in work fields*/
   React.useEffect(() => {
-    debugger;
     if (
       current.event.type === 'done.invoke.updateWorkPriority' ||
       current.event.type === 'done.invoke.updateWorkNumSlides' ||

@@ -254,6 +254,7 @@ export default function WorkAllocation() {
                   label="Project"
                   name="project"
                   dataTestId="project"
+                  fixedWidth={true}
                   emptyOption={true}
                   options={selectOptionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
                 />

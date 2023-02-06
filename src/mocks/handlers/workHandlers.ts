@@ -303,7 +303,7 @@ const workHandlers = [
       workRepository.save(work);
       return res(
         ctx.data({
-          updateWorkOmeroProject: omeroProject
+          updateWorkOmeroProject: work
         })
       );
     }
