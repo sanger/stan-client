@@ -7,6 +7,7 @@ import {
 import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
+import { selectOption, shouldHaveOption } from '../shared/customReactSelect.cy';
 function scanLabware(barcode: string) {
   cy.get('#labwareScanInput').should('not.be.disabled').clear().type(`${barcode}{enter}`);
 }
@@ -109,10 +110,10 @@ describe('RNA Analysis', () => {
 
   context('when DV200 type is selected', () => {
     before(() => {
-      cy.findByTestId('analysisType').select('DV200');
+      selectOption('analysisType', 'DV200');
     });
     it('should contain range in measurement dropdown', () => {
-      cy.findByTestId('measurementType').contains('Range');
+      shouldHaveOption('measurementType', 'Range');
     });
     it('should dispaly only one text field for measurement value', () => {
       cy.findByTestId('measurementValue').should('have.length', 1);
@@ -120,7 +121,7 @@ describe('RNA Analysis', () => {
   });
   context("when 'Range' is selected in mesaurement type", () => {
     before(() => {
-      cy.findByTestId('measurementType').select('Range');
+      selectOption('measurementType', 'Range');
     });
     it('should display two text fields for maesurement value', () => {
       cy.findByText('Upper bound:').should('be.visible');
@@ -129,7 +130,7 @@ describe('RNA Analysis', () => {
   });
   context("when 'N/A' is selected in mesaurement type", () => {
     before(() => {
-      cy.findByTestId('measurementType').select('N/A');
+      selectOption('measurementType', 'N/A');
     });
     it('should disable the text field in table', () => {
       cy.findByTestId('measurementValue').should('be.disabled');
@@ -137,7 +138,7 @@ describe('RNA Analysis', () => {
   });
   context('when a comment is selected for all labwares', () => {
     before(() => {
-      cy.findByTestId('comment').select('Potential to work');
+      selectOption('comment', 'Potential to work');
     });
     it('should display the selected comment in comment column of table', () => {
       cy.findAllByRole('table').should('have.length', 2).eq(1).contains('Potential to work');

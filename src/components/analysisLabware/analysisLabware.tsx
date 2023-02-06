@@ -1,7 +1,6 @@
 import { Form, Formik } from 'formik';
 import React, { useCallback } from 'react';
 import Heading from '../Heading';
-import FormikSelect from '../forms/Select';
 import { CommentFieldsFragment, RnaAnalysisLabware } from '../../types/sdk';
 import { Row } from 'react-table';
 import { motion } from 'framer-motion';
@@ -11,6 +10,8 @@ import { analysisLabwareMachine } from './analysisLabware.machine';
 import { AnalysisMeasurementType, measurementColumn } from './measurementColumn';
 import { objectKeys } from '../../lib/helpers';
 import WorkNumberSelect from '../WorkNumberSelect';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { selectOptionValues } from '../forms';
 
 type RecordAnalysisProps = {
   barcodes: string[];
@@ -101,20 +102,13 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
         id: 'comment',
         Cell: ({ row }: { row: Row<RnaAnalysisLabware> }) => {
           return (
-            <select
+            <CustomReactSelect
               className={'rounded-md'}
-              value={row.original.commentId || ''}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                handleOnChange(row.original.barcode, 'comment', e.currentTarget.value)
-              }
-            >
-              <option value="" />
-              {comments.map((comment) => (
-                <option value={comment.id} key={comment.id}>
-                  {comment.text}
-                </option>
-              ))}
-            </select>
+              value={row.original.commentId && row.original.commentId > 0 ? String(row.original.commentId) : ''}
+              emptyOption
+              handleChange={(value) => handleOnChange(row.original.barcode, 'comment', (value as OptionType).value)}
+              options={selectOptionValues(comments, 'text', 'id')}
+            />
           );
         }
       }
@@ -128,24 +122,24 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
         <Form>
           <div className="md:grid mt-4 md:grid-cols-3 md:space-y-0 md:gap-4 space-y-2 mb-8">
             <div className="">
-              <FormikSelect
+              <CustomReactSelect
                 label={'Type'}
-                data-testid={'analysisType'}
+                dataTestId={'analysisType'}
                 name={'type'}
                 emptyOption={false}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                handleChange={(value) => {
                   send({
                     type: 'UPDATE_ANALYSIS_TYPE',
-                    value: e.currentTarget.value
-                  })
-                }
-              >
-                {objectKeys(OperationType).map((type) => (
-                  <option value={OperationType[type]} key={type}>
-                    {type}
-                  </option>
-                ))}
-              </FormikSelect>
+                    value: (value as OptionType).label
+                  });
+                }}
+                options={objectKeys(OperationType).map((type) => {
+                  return {
+                    value: type,
+                    label: type
+                  };
+                })}
+              />
             </div>
             <div className="mt-4">
               <div>SGP Number</div>
@@ -161,24 +155,20 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
               />
             </div>
             <div className="">
-              <FormikSelect
+              <CustomReactSelect
                 label={'Comment'}
                 name={'comment'}
-                data-testid={'comment'}
-                emptyOption={true}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                dataTestId={'comment'}
+                emptyOption
+                valueAsNumber
+                handleChange={(val) => {
                   send({
                     type: 'UPDATE_ALL_COMMENTS_TYPE',
-                    commentId: e.currentTarget.value
+                    commentId: (val as OptionType).value
                   });
                 }}
-              >
-                {comments.map((comment) => (
-                  <option value={comment.id} key={comment.id}>
-                    {comment.text}
-                  </option>
-                ))}
-              </FormikSelect>
+                options={selectOptionValues(comments, 'text', 'id')}
+              />
             </div>
           </div>
         </Form>

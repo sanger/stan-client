@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import Labware from '../labware/Labware';
-import { Select } from '../forms/Select';
 import BlueButton from '../buttons/BlueButton';
 import PinkButton from '../buttons/PinkButton';
 import createLabwareResultMachine from './labwareResult.machine';
@@ -19,7 +18,7 @@ import { mapify } from '../../lib/helpers';
 import PassIcon from '../icons/PassIcon';
 import FailIcon from '../icons/FailIcon';
 import { Input } from '../forms/Input';
-import { optionValues } from '../forms';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type LabwareResultComponentProps = {
   labware: LabwareFieldsFragment;
@@ -82,7 +81,10 @@ export default function LabwareResult({
     }
     return false;
   };
-
+  const getComment = (address: string) => {
+    const commentId = sampleResults.get(address)!.commentId;
+    return commentId ? commentId + '' : '';
+  };
   const slotBuilder = (slot: SlotFieldsFragment): React.ReactNode => {
     return (
       isSlotFilled(slot) && (
@@ -112,20 +114,21 @@ export default function LabwareResult({
               </div>
             </div>
             <div className="w-full">
-              <Select
-                value={sampleResults.get(slot.address)!.commentId ?? ''}
-                emptyOption={true}
-                data-testid={'comment'}
-                onChange={(e) =>
+              <CustomReactSelect
+                value={getComment(slot.address) ?? ''}
+                dataTestId={'comment'}
+                handleChange={(val) =>
                   send({
                     type: 'SET_COMMENT',
                     address: slot.address,
-                    commentId: e.currentTarget.value !== '' ? Number(e.currentTarget.value) : undefined
+                    commentId: (val as OptionType).value !== '' ? Number((val as OptionType).value) : undefined
                   })
                 }
-              >
-                {optionValues(availableComments, 'text', 'id')}
-              </Select>
+                emptyOption
+                options={availableComments.map((comment) => {
+                  return { label: comment.text, value: comment.id + '' };
+                })}
+              />
             </div>
           </div>
           {isMeasurementExist && (
@@ -184,18 +187,19 @@ export default function LabwareResult({
           >
             Fail All
           </PinkButton>
-          <Select
-            data-testid={'commentAll'}
+          <CustomReactSelect
+            dataTestId={'commentAll'}
             emptyOption
-            onChange={(e) =>
+            handleChange={(val) =>
               send({
                 type: 'SET_ALL_COMMENTS',
-                commentId: e.currentTarget.value !== '' ? Number(e.currentTarget.value) : undefined
+                commentId: (val as OptionType).value !== '' ? Number((val as OptionType).value) : undefined
               })
             }
-          >
-            {optionValues(availableComments, 'text', 'id')}
-          </Select>
+            options={availableComments.map((comment) => {
+              return { label: comment.text, value: comment.id + '' };
+            })}
+          />
         </div>
       </div>
     </div>

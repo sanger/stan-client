@@ -8,6 +8,7 @@ import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { labwareTypes } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { findPlanData } from '../../../src/mocks/handlers/planHandlers';
+import { selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Sectioning Confirmation', () => {
   before(() => {
@@ -41,7 +42,7 @@ describe('Sectioning Confirmation', () => {
 
   context('when I scan in a labware with a plan', () => {
     before(() => {
-      cy.get('select').select('SGP1008');
+      selectSGPNumber('SGP1008');
       findPlanByBarcode('STAN-0001F');
     });
 

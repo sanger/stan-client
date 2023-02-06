@@ -101,17 +101,15 @@ export default function createLabwareResultMachine({ availableComments, labwareR
           if (e.type !== 'SET_COMMENT') return;
 
           const sampleResult = ctx.labwareResult.sampleResults.find((sr) => sr.address === e.address);
-
           if (!sampleResult?.result) {
             return;
           }
-
           sampleResult.commentId = e.commentId;
         }),
 
         assignAllComments: assign((ctx, e) => {
           if (e.type !== 'SET_ALL_COMMENTS') return;
-
+          ctx.labwareResult.sampleResults = [...ctx.labwareResult.sampleResults];
           ctx.labwareResult.sampleResults.forEach((sr) => {
             if (sr.result) {
               sr.commentId = e.commentId;

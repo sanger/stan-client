@@ -2,7 +2,6 @@ import React, { useEffect, useMemo } from 'react';
 import Heading from '../Heading';
 import { Form, Formik } from 'formik';
 import FormikInput from '../forms/Input';
-import FormikSelect from '../forms/Select';
 import BlueButton from '../buttons/BlueButton';
 import createWorkAllocationMachine, { WorkAllocationFormValues } from './workAllocation.machine';
 import { useMachine } from '@xstate/react';
@@ -327,24 +326,32 @@ export default function WorkAllocation() {
             });
           }}
         >
-          <Form>
-            <div className="space-y-2 md:grid md:grid-cols-3 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
-              <div className="md:flex-grow">
-                <FormikSelect label="Status" name="status" multiple={true}>
-                  {objectKeys(WorkStatus).map((workStatus) => (
-                    <option key={workStatus} value={WorkStatus[workStatus]}>
-                      {workStatus}
-                    </option>
-                  ))}
-                </FormikSelect>
+          {({ values }) => (
+            <Form>
+              <div className="space-y-2 md:grid md:grid-cols-3 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
+                <div className="md:flex-grow">
+                  <CustomReactSelect
+                    label="Status"
+                    name="status"
+                    isMulti={true}
+                    dataTestId={'status'}
+                    options={objectKeys(WorkStatus).map((workStatus) => {
+                      return {
+                        label: workStatus,
+                        value: WorkStatus[workStatus]
+                      };
+                    })}
+                    value={values.status}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
-              <BlueButton disabled={current.matches('loading')} type="submit">
-                Search
-              </BlueButton>
-            </div>
-          </Form>
+              <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
+                <BlueButton disabled={current.matches('loading')} type="submit">
+                  Search
+                </BlueButton>
+              </div>
+            </Form>
+          )}
         </Formik>
       </div>
 

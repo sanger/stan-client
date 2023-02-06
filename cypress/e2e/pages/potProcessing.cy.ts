@@ -47,6 +47,7 @@ describe('Pot Processing', () => {
     context('when Fetal waste container is selected', () => {
       before(() => {
         selectOption('labwareType', 'Fetal waste container');
+        cy.wait(1000);
       });
       it('should only display Labware type and Number of labware columns for adding labware', () => {
         cy.findByText('Labware type').should('be.visible');

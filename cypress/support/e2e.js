@@ -25,5 +25,16 @@ after(() => {
   worker.stop();
 });
 
+/**
+ * ResizeObserver error is described by Cypress community as an error that can be ignored
+ If Cypress fails your test because of ResizeObserver error, you can swallow it by
+ adding this code to the top of the test or as a global catch for ResizeObserver here
+ */
+Cypress.on('uncaught:exception', (err) => {
+  if (err.message.includes('ResizeObserver loop limit exceeded')) {
+    return false;
+  }
+});
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

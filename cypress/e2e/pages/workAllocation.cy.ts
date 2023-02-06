@@ -1,5 +1,5 @@
 import { CreateWorkMutation, CreateWorkMutationVariables } from '../../../src/types/sdk';
-import { selectOption } from '../shared/customReactSelect.cy';
+import { removeSelections, selectOption } from '../shared/customReactSelect.cy';
 
 describe('Work Allocation', () => {
   before(() => {
@@ -207,11 +207,12 @@ describe('Work Allocation', () => {
   describe('Sorting the SGP management table', () => {
     context('Filter SGP Numbers', () => {
       it('should show the correct work when a filter is applied', () => {
-        cy.get("select[name='status']").select('Unstarted');
+        removeSelections('status');
+        selectOption('status', 'Unstarted');
         cy.findByRole('button', { name: /Search/i })
           .should('be.visible')
           .click();
-        cy.get("table[data-testid='work-allocation-table']").find('tr').should('have.length', 11);
+        cy.get("table[data-testid='work-allocation-table']").find('tr').should('have.length', 7);
       });
     });
 

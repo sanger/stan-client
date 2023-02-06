@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useContext } from 'react';
+import React, { useContext } from 'react';
 import {
   AddressCommentInput,
   GetCommentsQuery,
@@ -17,7 +17,6 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import Heading from '../components/Heading';
 import { objectKeys } from '../lib/helpers';
-import FormikSelect from '../components/forms/Select';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
 import { reload, StanCoreContext } from '../lib/sdk';
@@ -29,6 +28,7 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import CDNAMeasurementQC from '../components/visiumQC/CDNAMeasurementQC';
 import SlideProcessing from '../components/visiumQC/SlideProcessing';
 import Cleanup from '../components/visiumQC/Cleanup';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 
 export enum QCType {
   CDNA_AMPLIFICATION = 'cDNA amplification',
@@ -256,25 +256,21 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                 </div>
                 <Heading level={2}>QC Type</Heading>
                 <div className="mt-4 md:w-1/2">
-                  <FormikSelect
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                      setFieldValue('qcType', e.currentTarget.value);
+                  <CustomReactSelect
+                    handleChange={(val) => {
+                      setFieldValue('qcType', (val as OptionType).label);
                     }}
-                    data-testid={'qcType'}
+                    dataTestId={'qcType'}
                     emptyOption={true}
                     label={''}
+                    value={values.qcType}
                     name={'qcType'}
-                  >
-                    {objectKeys(QCType)
+                    options={objectKeys(QCType)
                       .sort()
                       .map((qcType) => {
-                        return (
-                          <option key={qcType} value={QCType[qcType]}>
-                            {QCType[qcType]}
-                          </option>
-                        );
+                        return { label: QCType[qcType], value: QCType[qcType] };
                       })}
-                  </FormikSelect>
+                  />
                 </div>
 
                 <div className="mt-8 space-y-2">

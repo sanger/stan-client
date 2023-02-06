@@ -1,4 +1,5 @@
 import { AliquotMutation, AliquotMutationVariables } from '../../../src/types/sdk';
+import { selectSGPNumber } from '../shared/customReactSelect.cy';
 
 function scanInLabware() {
   cy.get('#labwareScanInput').type('STAN-011{enter}');
@@ -8,16 +9,12 @@ function enterNumberOfDestinationTubes(numTubes: string) {
   cy.findByTestId('numLabware').focus().invoke('val', '').type(numTubes);
 }
 
-function selectWorkNumber() {
-  cy.get('select').select('SGP1008');
-}
-
 describe('Aliquoting', () => {
   context('when source labware is not scanned', () => {
     before(() => {
       cy.visit('/lab/aliquoting');
       enterNumberOfDestinationTubes('1');
-      selectWorkNumber();
+      selectSGPNumber('SGP1008');
     });
     it('disables the Aliquot button', () => {
       cy.findByRole('button', { name: 'Aliquot' }).should('be.disabled');
@@ -28,7 +25,7 @@ describe('Aliquoting', () => {
       cy.visit('/lab/aliquoting');
       enterNumberOfDestinationTubes('0');
       scanInLabware();
-      selectWorkNumber();
+      selectSGPNumber('SGP1008');
     });
     it('disables the Aliquot button', () => {
       cy.findByRole('button', { name: 'Aliquot' }).should('be.disabled');
@@ -64,7 +61,7 @@ describe('Aliquoting', () => {
       });
 
       scanInLabware();
-      selectWorkNumber();
+      selectSGPNumber('SGP1008');
       enterNumberOfDestinationTubes('4');
       cy.findByText('Aliquot').click();
     });
@@ -82,7 +79,7 @@ describe('Aliquoting', () => {
     before(() => {
       cy.visit('/lab/aliquoting');
       scanInLabware();
-      selectWorkNumber();
+      selectSGPNumber('SGP1008');
       enterNumberOfDestinationTubes('4');
       cy.findByRole('button', { name: 'Aliquot' }).click();
     });

@@ -2,7 +2,7 @@ import React from 'react';
 import Label from './Label';
 import { useFormikContext } from 'formik';
 import { FormikErrorMessage } from './index';
-import ReactSelect, { Props } from 'react-select';
+import ReactSelect, { components, Props } from 'react-select';
 const defaultClassNames =
   'block w-full rounded-md focus:outline-0  disabled:opacity-75 disabled:bg-gray-200 disabled:cursor-not-allowed';
 
@@ -20,14 +20,15 @@ interface CustomReactSelectProps extends Props {
   options: OptionType[];
   emptyOption?: boolean;
   handleChange?: (value: OptionType | OptionType[]) => void;
-  onBlur?: () => void;
+  handleBlur?: (value?: OptionType | OptionType[]) => void;
   placeholder?: string;
   dataTestId?: string;
   isMulti?: boolean;
+  valueAsNumber?: boolean;
 }
 
 const defaultValue = (options: OptionType[], value: any, isMulti: boolean) => {
-  if (!value) {
+  if (value === undefined) {
     return isMulti ? [] : undefined;
   }
   if (isMulti && Array.isArray(value)) {
@@ -50,7 +51,7 @@ export const NormalReactSelect = ({
   value,
   placeholder,
   handleChange,
-  onBlur,
+  handleBlur,
   dataTestId,
   isMulti = false,
   ...props
@@ -62,14 +63,31 @@ export const NormalReactSelect = ({
     },
     [handleChange]
   );
+  const onBlur = React.useCallback(
+    (value) => {
+      if (!hasValueType(value)) return;
+      handleBlur?.(value);
+    },
+    [handleBlur]
+  );
 
   const memoOptions = React.useMemo(() => {
     return emptyOption ? [{ value: '', label: '' }, ...options] : [...options];
   }, [emptyOption, options]);
 
+  const Option = (props: any) => {
+    return (
+      <div>
+        <components.Option {...props} className={'space-x-2'}>
+          {props.isSelected && <input type="checkbox" checked={props.isSelected} onChange={() => null} />}
+          <label className={`${props.isSelected ? 'mr-2' : 'ml-6 mr-2'}`}>{props.label}</label>
+        </components.Option>
+      </div>
+    );
+  };
   const sdbColor = '#7980B9';
   return (
-    <div data-testid={dataTestId ?? 'select-div'} className={className}>
+    <div data-testid={dataTestId ?? 'select-div'} className={`md:w-full ${className}`}>
       <Label name={label ?? ''}>
         <ReactSelect
           styles={{
@@ -83,7 +101,14 @@ export const NormalReactSelect = ({
               },
               'input:focus': {
                 boxShadow: 'none'
-              }
+              },
+              width: 'max-content',
+              minWidth: '100%'
+            }),
+            menu: (base) => ({
+              ...base,
+              width: 'max-content',
+              minWidth: '100%'
             }),
             option: (styles, { isDisabled, label }) => {
               return {
@@ -99,16 +124,15 @@ export const NormalReactSelect = ({
               };
             }
           }}
+          menuPosition={'fixed'}
           name={name}
           onChange={(val) => onChangeValue(val)}
-          onBlur={onBlur}
+          onBlur={(val) => onBlur(val)}
           options={memoOptions}
-          value={defaultValue(options, value, isMulti)}
+          value={defaultValue(memoOptions, value, isMulti)}
           isMulti={isMulti}
           placeholder={placeholder ?? ''}
-          components={{
-            IndicatorSeparator: () => null
-          }}
+          components={{ Option, IndicatorSeparator: () => null }}
           {...props}
         />
       </Label>
@@ -127,33 +151,39 @@ const FormikReactSelect = ({
   dataTestId,
   placeholder,
   handleChange,
-  onBlur,
+  handleBlur,
+  valueAsNumber,
   ...props
 }: CustomReactSelectProps) => {
   const { setFieldValue, setFieldTouched } = useFormikContext() ?? {};
   const onChangeValue = React.useCallback(
     (value: ValueType) => {
       if (!hasValueType(value)) return;
-      const val = value ? (Array.isArray(value) ? value.map((val) => val.value) : value.value) : [];
+      if (!value) return;
+      let val = Array.isArray(value)
+        ? value.map((val) => (valueAsNumber ? Number(val.value) : val.value))
+        : valueAsNumber
+        ? Number(value.value)
+        : value.value;
       name && setFieldValue?.(name, val);
       handleChange?.(value);
     },
-    [setFieldValue, name, handleChange]
+    [setFieldValue, name, handleChange, valueAsNumber]
   );
 
-  const handleBlur = React.useCallback(() => {
+  const onBlur = React.useCallback(() => {
     name && setFieldTouched(name);
-    onBlur?.();
-  }, [setFieldTouched, name, onBlur]);
+    handleBlur?.();
+  }, [setFieldTouched, name, handleBlur]);
 
   return (
-    <div className={`${defaultClassNames} ${className}`}>
+    <div className={`${defaultClassNames} ${className}`} data-testid="form_select-div">
       <NormalReactSelect
         name={name}
         label={label}
         onChange={(val: ValueType) => onChangeValue(val)}
         options={options}
-        onBlur={handleBlur}
+        onBlur={onBlur}
         emptyOption={emptyOption}
         dataTestId={dataTestId}
         placeholder={placeholder}

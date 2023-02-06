@@ -7,6 +7,7 @@ import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
 import SlotMeasurements from '../slotMeasurement/SlotMeasurements';
 import { useFormikContext } from 'formik';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type CDNAMeasurementQCProps = {
   qcType: string;
@@ -154,19 +155,18 @@ const CDNAMeasurementQC = ({
             {measurementConfigMemo.isSelectMeasurementName && (
               <div className={'flex flex-col w-1/4 ml-2'}>
                 <label className={'my-3'}>Measurement type</label>
-                <select
+                <CustomReactSelect
                   className={'rounded-md'}
                   value={measurementName}
-                  data-testid={'measurementType'}
-                  onChange={(e) => setMeasurementName(e.currentTarget.value)}
-                >
-                  <option value={'cDNA concentration'} key={'cDNAconcentrationOpt'}>
-                    cDNA concentration
-                  </option>
-                  <option value={'Library concentration'} key={'LibraryconcentrationOpt'}>
-                    Library concentration
-                  </option>
-                </select>
+                  dataTestId={'measurementType'}
+                  handleChange={(val) => setMeasurementName((val as OptionType).label)}
+                  options={['cDNA concentration', 'Library concentration'].map((conc) => {
+                    return {
+                      label: conc,
+                      value: conc
+                    };
+                  })}
+                />
               </div>
             )}
             <div className={'flex flex-row mt-8 justify-between'}>

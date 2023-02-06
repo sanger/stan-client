@@ -3,6 +3,7 @@ import { objectKeys } from '../../lib/helpers';
 import React from 'react';
 import { RnaAnalysisLabware, StringMeasurement } from '../../types/sdk';
 import { Row } from 'react-table';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 export enum AnalysisMeasurementType {
   RIN = 'RIN',
@@ -40,22 +41,22 @@ export const measurementColumn = (
     onChangeMeasurementCategory: (eventType: string, value: string) => void;
   }) => {
     return (
-      <select
+      <CustomReactSelect
         className={'rounded-md'}
-        onChange={(e) =>
+        handleChange={(val) =>
           onChangeMeasurementCategory(
             barcode,
-            e.currentTarget.value === MeasurementValueCategory.NA_TYPE ? '' : e.currentTarget.value
+            (val as OptionType).label === MeasurementValueCategory.NA_TYPE ? '' : (val as OptionType).label
           )
         }
-        data-testid={'measurementType'}
-      >
-        {getValueCategoryKeys(operationType).map((key) => (
-          <option value={MeasurementValueCategory[key]} key={key}>
-            {MeasurementValueCategory[key]}
-          </option>
-        ))}
-      </select>
+        dataTestId={'measurementType'}
+        options={getValueCategoryKeys(operationType).map((key) => {
+          return {
+            label: MeasurementValueCategory[key],
+            value: MeasurementValueCategory[key]
+          };
+        })}
+      />
     );
   };
 
