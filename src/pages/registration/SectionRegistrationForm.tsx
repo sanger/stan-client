@@ -5,8 +5,7 @@ import { FieldArray, Form, FormikErrors, FormikTouched, getIn, useFormikContext 
 import PinkButton from '../../components/buttons/PinkButton';
 import FormikInput from '../../components/forms/Input';
 import Heading from '../../components/Heading';
-import FormikSelect, { Select } from '../../components/forms/Select';
-import { optionValues } from '../../components/forms';
+import { selectOptionValues } from '../../components/forms';
 import Pill from '../../components/Pill';
 import { motion } from 'framer-motion';
 import BarcodeIcon from '../../components/icons/BarcodeIcon';
@@ -21,6 +20,7 @@ import SectionForm from './SectionForm';
 import { GetRegistrationInfoQuery } from '../../types/sdk';
 import { SectionRegistrationContext, SectionRegistrationFormValues } from '../SectionRegistration';
 import WorkNumberSelect from '../../components/WorkNumberSelect';
+import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
 
 type SectionRegistrationFormParams = {
   registrationInfo: GetRegistrationInfoQuery;
@@ -159,18 +159,25 @@ function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormPa
             <motion.div variants={variants.fadeInWithLift}>
               <Heading level={4}>Embedding Information</Heading>
 
-              <FormikSelect
+              <CustomReactSelect
                 emptyOption
                 label="Fixative"
+                dataTestId="Fixative"
                 className="block mt-2"
                 name={`labwares.${currentIndex}.fixative`}
-              >
-                {optionValues(registrationInfo.fixatives, 'name', 'name')}
-              </FormikSelect>
+                value={values.labwares[currentIndex].fixative}
+                options={selectOptionValues(registrationInfo.fixatives, 'name', 'name')}
+              />
 
-              <FormikSelect emptyOption label="Medium" className="block mt-2" name={`labwares.${currentIndex}.medium`}>
-                {optionValues(registrationInfo.mediums, 'name', 'name')}
-              </FormikSelect>
+              <CustomReactSelect
+                emptyOption
+                label="Medium"
+                dataTestId="Medium"
+                className="block mt-2"
+                name={`labwares.${currentIndex}.medium`}
+                value={values.labwares[currentIndex].medium}
+                options={selectOptionValues(registrationInfo.mediums, 'name', 'name')}
+              />
             </motion.div>
 
             {Object.keys(values.labwares[currentIndex].slots).flatMap((slotAddress) =>
@@ -251,17 +258,18 @@ function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormPa
             </div>
 
             <div className="my-2 w-full py-4 px-2 bg-sdb-500 rounded-md flex flex-col space-y-2">
-              <Select
+              <CustomReactSelect
                 id="labwareTypesSelect"
-                onChange={(e) => setLabwareTypeSelect(e.currentTarget.value)}
+                dataTestId="labwareTypesSelect"
+                handleChange={(value) => setLabwareTypeSelect((value as OptionType).value)}
                 value={labwareTypeSelect}
-              >
-                {availableLabware.map((labwareTypeName) => (
-                  <option key={labwareTypeName} value={labwareTypeName}>
-                    {labwareTypeName}
-                  </option>
-                ))}
-              </Select>
+                options={availableLabware.map((labwareTypeName) => {
+                  return {
+                    value: labwareTypeName.toString(),
+                    label: labwareTypeName.toString()
+                  };
+                })}
+              />
 
               <FieldArray name={'labwares'}>
                 {(labwareHelpers) => (

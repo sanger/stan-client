@@ -1,5 +1,11 @@
 import { FindFilesQuery, FindFilesQueryVariables } from '../../../src/types/sdk';
 import { rest } from 'msw';
+import {
+  selectSGPNumber,
+  shouldDisplaySelectedValue,
+  shouldOptionsHaveLength,
+  shouldOptionsHaveLengthAbove
+} from '../shared/customReactSelect.cy';
 
 describe('FileManager', () => {
   describe('On load', () => {
@@ -16,7 +22,8 @@ describe('FileManager', () => {
         cy.visit('/file_manager?workNumber=SGP1008');
       });
       it('should select SGP1008 in select box', () => {
-        workNumber().should('have.value', 'SGP1008');
+        workNumberShouldBe('SGP1008');
+        // workNumber().should('have.value', 'SGP1008');
       });
       it('initialises page', () => {
         cy.findByText('Upload file').should('exist');
@@ -42,7 +49,8 @@ describe('FileManager', () => {
         cy.findByText('Files').should('exist');
       });
       it('should select SGP1001 in select box', () => {
-        workNumber().should('have.value', 'SGP1001');
+        workNumberShouldBe('SGP1001');
+        // workNumber().should('have.value', 'SGP1001');
       });
     });
   });
@@ -53,15 +61,15 @@ describe('FileManager', () => {
     });
     context('when active checkbox is selected', () => {
       it('should display a single option', () => {
-        workNumber().findAllByRole('option').should('have.length', 2);
+        workNumberNumOptionsShouldBe(2);
       });
     });
     context('when active checkbox is not selected', () => {
       before(() => {
         cy.findByTestId('active').uncheck();
       });
-      it('should display a single option', () => {
-        workNumber().findAllByRole('option').should('have.length.above', 2);
+      it('should display more options', () => {
+        workNumberNumOptionsShouldBeMoreThan(2);
       });
     });
   });
@@ -73,7 +81,7 @@ describe('FileManager', () => {
 
     context('on selecting active SGP Number with files uploaded', () => {
       before(() => {
-        selectWorkNumber('SGP1008');
+        selectSGPNumber('SGP1008');
       });
       it('should display the url with selected work number', () => {
         cy.url().should('include', 'file_manager?workNumber=SGP1008');
@@ -91,7 +99,7 @@ describe('FileManager', () => {
     context('on selecting inactive SGP Number with files uploaded', () => {
       before(() => {
         cy.findByTestId('active').uncheck();
-        selectWorkNumber('SGP1002');
+        selectSGPNumber('SGP1002');
       });
       it('should display the url with selected work number', () => {
         cy.url().should('include', 'file_manager?workNumber=SGP1002');
@@ -114,7 +122,7 @@ describe('FileManager', () => {
             })
           );
         });
-        selectWorkNumber('SGP1008');
+        selectSGPNumber('SGP1008');
       });
       it('initializes page for active work number', () => {
         cy.findByText('Upload file').should('exist');
@@ -135,7 +143,7 @@ describe('FileManager', () => {
           );
         });
         cy.findByTestId('active').uncheck();
-        selectWorkNumber('SGP1002');
+        selectSGPNumber('SGP1002');
       });
       it('initializes page for inactive work number', () => {
         cy.findByText('Upload file').should('not.exist');
@@ -160,7 +168,7 @@ describe('FileManager', () => {
   describe('Upload button', () => {
     context('when work number is selected with no file selection', () => {
       before(() => {
-        selectWorkNumber('SGP1008');
+        selectSGPNumber('SGP1008');
       });
       it('should display upload button as disabled', () => {
         uploadButton().should('be.disabled');
@@ -168,7 +176,8 @@ describe('FileManager', () => {
     });
     context('when no work number is selected', () => {
       before(() => {
-        workNumber().select('');
+        selectSGPNumber('');
+        // workNumber().select('');
       });
       it('should not display upload or files section', () => {
         cy.findByText('Upload file').should('not.exist');
@@ -177,7 +186,7 @@ describe('FileManager', () => {
     });
     context('when both file and sgp number is selected', () => {
       before(() => {
-        selectWorkNumber('SGP1008');
+        selectSGPNumber('SGP1008');
         selectFile();
       });
       it('should display upload button as enabled', () => {
@@ -224,7 +233,7 @@ describe('FileManager', () => {
             })
           );
         });
-        selectWorkNumber('SGP1008');
+        selectSGPNumber('SGP1008');
         selectFile();
         cy.wait(500);
         cy.findByTestId('upload-btn').click();
@@ -270,7 +279,7 @@ describe('FileManager', () => {
             })
           );
         });
-        selectWorkNumber('SGP1008');
+        selectSGPNumber('SGP1008');
         selectFile();
         uploadButton().click();
       });
@@ -301,12 +310,18 @@ describe('FileManager', () => {
   });
 });
 
-function workNumber() {
-  return cy.findByTestId('select_workNumber');
+function workNumberShouldBe(workNumberStr: string) {
+  shouldDisplaySelectedValue('workNumber', workNumberStr);
 }
-function selectWorkNumber(workNumberStr: string) {
-  workNumber().select(workNumberStr);
+
+function workNumberNumOptionsShouldBe(length: number) {
+  shouldOptionsHaveLength('workNumber', length);
 }
+
+function workNumberNumOptionsShouldBeMoreThan(length: number) {
+  shouldOptionsHaveLengthAbove('workNumber', length);
+}
+
 function selectFile() {
   cy.get('input[type=file]').selectFile(
     {
