@@ -2,19 +2,25 @@ import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import { describe } from '@jest/globals';
 import CustomReactSelect from '../../../../src/components/forms/CustomReactSelect';
 import { getById } from '../../generic/utilities';
-import { Form, Formik } from 'formik';
+import * as Formik from 'formik';
 afterEach(() => {
   cleanup();
 });
 
 const renderFormikSelect = (props: any) => {
-  return render(
-    <Formik initialValues={{}} onSubmit={() => {}}>
-      <Form>
-        <CustomReactSelect {...props} id={'custom-react-select'} />
-      </Form>
-    </Formik>
-  );
+  const useFormikContextMock = jest.spyOn(Formik, 'useFormikContext');
+  const getFieldMetaMock = () => {
+    return {
+      value: 'testValue',
+      initialTouched: true,
+      touched: false
+    };
+  };
+  useFormikContextMock.mockReturnValue({
+    getFieldMeta: getFieldMetaMock
+  } as unknown as any);
+
+  return render(<CustomReactSelect {...props} id={'custom-react-select'} />);
 };
 
 const renderNormalSelect = (props: any) => {
@@ -46,6 +52,7 @@ const testDisplayProps = async (nameStr?: string) => {
   //Displays placeholder
   expect(screen.getByText('Select options...')).toBeInTheDocument();
 };
+
 const testSelectOptions = async (nameStr?: string) => {
   const onChange = jest.fn();
 
