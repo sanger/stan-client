@@ -29,7 +29,7 @@ export const labwareLocationHandlers = [
     'GetLabwareInLocation',
     (req, res, ctx) => {
       // The number after STAN- determines what kind of labware will be returned
-      const labwaresBarcodes: string[] = ['STAN-3111', 'STAN-3112', 'STAN-3113'];
+      const labwaresBarcodes: string[] = ['STAN-3111', 'STAN-3112', 'STAN-3113', 'STAN-1001', 'STAN-1002'];
       const labwares = labwaresBarcodes.map((barcode) => {
         const labware = createLabware(barcode);
         sessionStorage.setItem(`labware-${labware.barcode}`, JSON.stringify(labware));

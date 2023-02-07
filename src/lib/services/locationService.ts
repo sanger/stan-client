@@ -1,4 +1,4 @@
-import { LocationFieldsFragment, Maybe, StoreInput } from '../../types/sdk';
+import { LabwareFieldsFragment, LocationFieldsFragment, Maybe, StoreInput } from '../../types/sdk';
 import { stanCore } from '../sdk';
 /**
  * Send a query to core to store a barcode in a location (possibly at a particular address)
@@ -87,6 +87,21 @@ export async function findLabwareLocation(barcode: string): Promise<Maybe<string
   return response.stored.length === 1 ? response.stored[0].location.barcode : null;
 }
 
+/**
+ * Find all labware stored in location specified by location barcode
+ * @param locationBarcode the labware barcode to find the location of
+ * @return all labware details stored in the given location
+ */
+export async function getLabwareInLocation(locationBarcode: string): Promise<Maybe<LabwareFieldsFragment[]>> {
+  let response;
+  try {
+    response = await stanCore.GetLabwareInLocation({ locationBarcode: locationBarcode });
+  } catch (e) {
+    console.error('Error in findLabwareInLocation');
+    return null;
+  }
+  return response.labwareInLocation;
+}
 /**
  * Update the custom name of a location
  * @param locationBarcode the barcode of the location to update

@@ -1,3 +1,7 @@
+import { GetLabwareInLocationQuery, GetLabwareInLocationQueryVariables } from '../../../../src/types/sdk';
+import { createLabware } from '../../../../src/mocks/handlers/labwareHandlers';
+import { buildLabwareFragment } from '../../../../src/lib/helpers/labwareHelper';
+
 describe('Location Grid View', () => {
   before(() => {
     cy.visit('/locations/STO-021');
@@ -9,6 +13,26 @@ describe('Location Grid View', () => {
 
   context('when scanning in a barcode', () => {
     before(() => {
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.query<GetLabwareInLocationQuery, GetLabwareInLocationQueryVariables>(
+            'GetLabwareInLocation',
+            (req, res, ctx) => {
+              // The number after STAN- determines what kind of labware will be returned
+              const labwares = ['STAN-2001'].map((barcode) => {
+                const labware = createLabware(barcode);
+                sessionStorage.setItem(`labware-${labware.barcode}`, JSON.stringify(labware));
+                return buildLabwareFragment(labware);
+              });
+
+              const payload: GetLabwareInLocationQuery = {
+                labwareInLocation: labwares
+              };
+              return res.once(ctx.data(payload));
+            }
+          )
+        );
+      });
       cy.findByPlaceholderText('Labware barcode...').type('STAN-2001{enter}');
     });
 
@@ -32,6 +56,16 @@ describe('Location Grid View', () => {
   context('when selecting an occupied address', () => {
     before(() => {
       cy.findByText('STAN-2001').click();
+    });
+
+    it('shows a table with details of labware in the selected address', () => {
+      cy.findByTestId('labware-table').should('exist');
+      cy.findByTestId('labware-table').within((elem) => {
+        ['Address', 'Barcode', 'External Identifier', 'Donor', 'Spatial Location', 'Replicate'].forEach((colName) => {
+          cy.get(`th:contains('${colName}')`).should('exist');
+        });
+        cy.wrap(elem).find('tr').get(`td:contains(STAN-2001)`).should('exist');
+      });
     });
 
     it('locks the ScanInput', () => {
