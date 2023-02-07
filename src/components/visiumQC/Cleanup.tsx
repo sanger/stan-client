@@ -7,6 +7,9 @@ import { selectOptionValues } from '../forms';
 import RemoveButton from '../buttons/RemoveButton';
 import Labware from '../labware/Labware';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { LabwareTypeName } from '../../types/stan';
+import SlotComments from '../slotComments/SlotComments';
+import Panel from '../Panel';
 
 type CleanupProps = {
   comments: CommentFieldsFragment[];
@@ -16,13 +19,22 @@ type CleanupProps = {
 const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
   const { setFieldValue } = useFormikContext<VisiumQCFormData>();
   const [slotComments, setSlotComments] = React.useState<AddressCommentInput[]>([]);
+  const initialSlotComments = React.useMemo(
+    () =>
+      labware?.slots
+        .filter((slot) => isSlotFilled(slot))
+        .map((slot) => {
+          return { address: slot.address, commentId: -1 };
+        }),
+    [labware]
+  );
 
   /**Initialise all comments for slots when labware changes**/
   React.useEffect(() => {
     if (!labware) return;
     setFieldValue('barcode', labware.barcode);
-    setSlotComments([]);
-  }, [labware, setFieldValue]);
+    setSlotComments(initialSlotComments);
+  }, [labware, setFieldValue, initialSlotComments]);
 
   /**Update form values when ever comments associated with slots change**/
   React.useEffect(() => {
@@ -36,16 +48,14 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
 
   const handleCommentChange = React.useCallback(
     (address: string, commentIdVal: string) => {
-      const commentId = commentIdVal !== '' ? Number(commentIdVal) : undefined;
+      const commentId = commentIdVal !== '' ? Number(commentIdVal) : -1;
       setSlotComments((prevSlotComments: AddressCommentInput[]) => {
         const slotComments = [...prevSlotComments];
         const findIndex = slotComments.findIndex((sc) => sc.address === address);
         if (findIndex >= 0) {
           slotComments.splice(findIndex, 1);
         }
-        if (!commentId) {
-          return [...slotComments];
-        } else return [...slotComments, { address, commentId }];
+        return [...slotComments, { address, commentId }];
       });
     },
     [setSlotComments]
@@ -54,7 +64,7 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
     (commentIdVal: string) => {
       const commentId = commentIdVal !== '' ? Number(commentIdVal) : undefined;
       if (!commentId) {
-        setSlotComments([]);
+        setSlotComments(initialSlotComments);
         return;
       }
       const allSlotComments: AddressCommentInput[] = [];
@@ -65,7 +75,7 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
       });
       setSlotComments(allSlotComments);
     },
-    [setSlotComments, labware]
+    [setSlotComments, labware, initialSlotComments]
   );
 
   const slotBuilder = (slot: SlotFieldsFragment): React.ReactNode => {
@@ -90,13 +100,30 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
       {labware && (
         <>
           <div className="flex flex-row items-center justify-end">
-            {<RemoveButton data-testid={'remove'} type="button" onClick={() => removeLabware(labware.barcode)} />}
+            {<RemoveButton type="button" onClick={() => removeLabware(labware.barcode)} />}
           </div>
           <div className="flex flex-col items-center justify-around">
             {/* Display the layout of the labware */}
-            <div className="bg-blue-100" data-testid={'labware'}>
-              <Labware labware={labware} slotBuilder={slotBuilder} />
-            </div>
+            {labware.labwareType.name === LabwareTypeName.PLATE ? (
+              <Panel>
+                <div className={'flex flex-row mt-8 space-x-6 '}>
+                  {slotComments.length > 0 && (
+                    <SlotComments
+                      slotComments={slotComments}
+                      comments={comments}
+                      onChangeComment={handleCommentChange}
+                    />
+                  )}
+                  <div className="flex flex-col mt-2" data-testid={'labware'}>
+                    <Labware labware={labware} name={labware.labwareType.name} />
+                  </div>
+                </div>
+              </Panel>
+            ) : (
+              <div className="bg-blue-100" data-testid={'labware'}>
+                <Labware labware={labware} slotBuilder={slotBuilder} />
+              </div>
+            )}
 
             {/* Display the dropdown to set/reset all comments */}
             <div className="mt-8 flex flex-col justify-between gap-x-4">
