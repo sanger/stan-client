@@ -131,7 +131,7 @@ export default function SectionForm({
 
       <CustomReactSelect
         label="HuMFre"
-        dataTestId="HumFre"
+        dataTestId="HuMFre"
         isDisabled={!isHMDMCEnabled}
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.hmdmc`}
         value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].hmdmc}
