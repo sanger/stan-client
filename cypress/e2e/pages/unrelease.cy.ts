@@ -1,4 +1,5 @@
 import { UnreleaseMutation, UnreleaseMutationVariables } from '../../../src/types/sdk';
+import { selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Unrelease Page', () => {
   before(() => {
@@ -59,7 +60,7 @@ describe('Unrelease Page', () => {
             })
           );
         });
-        cy.findByTestId('select_workNumber').select('SGP1008');
+        selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').should('not.be.disabled').wait(1000).type('STAN-3112{enter}');
         cy.findByRole('button', { name: /Submit/i }).click();
       });
@@ -73,7 +74,7 @@ describe('Unrelease Page', () => {
     context('when the submission is successful', () => {
       before(() => {
         cy.visit('admin/unrelease');
-        cy.findByTestId('select_workNumber').select('SGP1008');
+        selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').should('not.be.disabled').wait(1000).type('STAN-3111{enter}');
         cy.findByRole('button', { name: /Submit/i }).click();
       });
