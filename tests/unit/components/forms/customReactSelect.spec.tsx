@@ -19,7 +19,6 @@ const renderFormikSelect = (props: any) => {
   useFormikContextMock.mockReturnValue({
     getFieldMeta: getFieldMetaMock
   } as unknown as any);
-
   return render(<CustomReactSelect {...props} id={'custom-react-select'} />);
 };
 
