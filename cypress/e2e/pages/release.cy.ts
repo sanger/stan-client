@@ -7,6 +7,7 @@ import {
 import { buildLabwareFragment } from '../../../src/lib/helpers/labwareHelper';
 import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
+import { selectOption } from '../shared/customReactSelect.cy';
 
 describe('Release Page', () => {
   before(() => {
@@ -144,7 +145,7 @@ describe('Release Page', () => {
 function fillInForm() {
   cy.get('#labwareScanInput').type('STAN-123{enter}');
   cy.get('#labwareScanInput').type('STAN-456{enter}');
-  cy.findByLabelText('Group/Team').select('Vento lab');
-  cy.findByLabelText('Contact').select('cs41');
+  selectOption('Group/Team', 'Vento lab');
+  selectOption('Contact', 'cs41');
   cy.findByRole('button', { name: /Release Labware/i }).click();
 }
