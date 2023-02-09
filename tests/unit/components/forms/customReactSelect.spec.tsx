@@ -31,26 +31,6 @@ const mockedOptions = [
   { label: 'Option 3', value: 'option-3' },
   { label: 'Option 4', value: 'option-4' }
 ];
-const testDisplayProps = async (nameStr?: string) => {
-  const customSelectProps = {
-    options: mockedOptions,
-    label: 'Test label',
-    placeholder: 'Select options...',
-    name: nameStr ?? undefined
-  };
-  await act(async () => {
-    if (nameStr) {
-      renderFormikSelect(customSelectProps);
-    } else {
-      renderNormalSelect(customSelectProps);
-    }
-  });
-
-  // Displays the label
-  //expect(screen.getByText('Test label')).toBeInTheDocument();
-  //Displays placeholder
-  //expect(screen.getByText('Select options...')).toBeInTheDocument();
-};
 
 const testSelectOptions = async (nameStr?: string) => {
   const onChange = jest.fn();
@@ -161,9 +141,6 @@ describe('CustomReactSelect.tsx', () => {
       const selectComp = getById(dom.container, 'custom-react-select');
       expect(selectComp).toBeInTheDocument();
     });
-    it('should display props', () => {
-      testDisplayProps();
-    });
 
     it('should select options', () => {
       testSelectOptions();
@@ -189,9 +166,6 @@ describe('CustomReactSelect.tsx', () => {
       //Renders select
       const selectComp = getById(dom.container, 'custom-react-select');
       expect(selectComp).toBeInTheDocument();
-    });
-    it('should display props', () => {
-      testDisplayProps('form');
     });
     it('should select options', () => {
       testSelectOptions('form');
