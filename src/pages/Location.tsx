@@ -12,7 +12,7 @@ import ItemsList from './location/ItemsList';
 import ItemsGrid from './location/ItemsGrid';
 import Success from '../components/notifications/Success';
 import EditableText from '../components/EditableText';
-import { setLocationCustomName } from '../lib/services/locationService';
+import { getLocation, setLocationCustomName, transferItems } from '../lib/services/locationService';
 import Warning from '../components/notifications/Warning';
 import { toast } from 'react-toastify';
 import {
@@ -22,7 +22,7 @@ import {
 } from '../lib/helpers/locationHelper';
 import { Authenticated, Unauthenticated } from '../components/Authenticated';
 import { RouteComponentProps } from 'react-router-dom';
-import { LocationMatchParams, LocationSearchParams } from '../types/stan';
+import { extractServerErrors, LocationMatchParams, LocationSearchParams } from '../types/stan';
 import { LocationFieldsFragment, Maybe, StoreInput } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import { StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
@@ -31,6 +31,13 @@ import { awaitingStorageCheckOnExit, getAwaitingLabwaresFromSession, LabwareAwai
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
 import warningToast from '../components/notifications/WarningToast';
 import PromptOnLeave from '../components/notifications/PromptOnLeave';
+import LabelCopyButton from '../components/LabelCopyButton';
+import { Input } from '../components/forms/Input';
+import Label from '../components/forms/Label';
+import MutedText from '../components/MutedText';
+import PasteIcon from '../components/icons/PasteIcon';
+import BlueButton from '../components/buttons/BlueButton';
+import { ClientError } from 'graphql-request';
 
 /**
  * The different ways of displaying stored items
@@ -119,6 +126,20 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
    * Labwares selected for store operation implicitly indicating a store action in progress
    */
   const labwaresAddInProgress = React.useRef<LabwareAwaitingStorageInfo[]>([]);
+
+  /**
+   * Location barcode of source from which items to be transferred from
+   */
+  const [transferSourceLocation, setTransferSourceLocation] = React.useState<LocationFieldsFragment | undefined>(
+    undefined
+  );
+  const [transferSourceInputText, setTransferSourceInputText] = React.useState<string>('');
+  /**
+   * Location barcode of source from which items to be transferred from
+   */
+  const [sourceLocationError, setSourceLocationError] = React.useState<string>('');
+
+  const transferInputRef = React.useRef<HTMLInputElement>(null);
 
   /***When component loads, fill awaitingLabwares from sessionStorage, if any**/
   React.useEffect(() => {
@@ -285,6 +306,75 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
 
   const showLocation = ['ready', 'updating'].some((activeState) => current.matches(activeState)) && !!location;
 
+  const handleSourceBarcodeEnter = React.useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement> | string) => {
+      let locationBarcode = '';
+      if (typeof e === 'string') {
+        locationBarcode = e;
+      } else {
+        if (e.key !== 'Enter') return;
+        locationBarcode = e.currentTarget.value;
+      }
+      if (!locationBarcode) return;
+      async function fetchLabwareInLocation(locationBarcode: string) {
+        try {
+          const labware = await getLocation(locationBarcode);
+          setTransferSourceLocation(labware);
+        } catch (e) {
+          setSourceLocationError(`No location with barcode ${locationBarcode} exists`);
+          setTransferSourceLocation(undefined);
+        }
+      }
+      fetchLabwareInLocation(locationBarcode);
+    },
+    [setSourceLocationError, setTransferSourceLocation]
+  );
+
+  const handlePaste = React.useCallback(() => {
+    const pasteText = async () => {
+      await navigator.clipboard.readText().then((text) => {
+        // Strip out hidden chars \r \n
+        text = text.replace(/[\r\n]/g, '');
+        setTransferSourceInputText(text);
+      });
+    };
+    pasteText();
+    transferInputRef.current?.focus();
+  }, [setTransferSourceInputText]);
+
+  const handleTransfer = React.useCallback(() => {
+    if (!transferSourceLocation) return;
+    async function performTransferAction(
+      sourceLocation: LocationFieldsFragment,
+      destinationLocation: LocationFieldsFragment
+    ) {
+      try {
+        const updatedLocation = await transferItems(sourceLocation.barcode, destinationLocation.barcode);
+        if (updatedLocation) {
+          send({ type: 'UPDATE_LOCATION', location: updatedLocation });
+          toast(<Success message={`All items transferred from ${sourceLocation.barcode}.`} />, {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 4000,
+            hideProgressBar: true
+          });
+        } else {
+          warningToast({
+            message: `Cannot transfer items from ${sourceLocation.barcode}.`,
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 5000
+          });
+        }
+      } catch (e) {
+        warningToast({
+          message: extractServerErrors(e as ClientError).message ?? 'Error in Transferring items.',
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 5000
+        });
+      }
+    }
+    performTransferAction(transferSourceLocation, location);
+  }, [transferSourceLocation, location, send]);
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -329,7 +419,12 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
                     }
                   </Heading>
                 }
-                description={location.barcode}
+                description={
+                  <>
+                    {location.barcode}
+                    <LabelCopyButton labels={[location.barcode]} />
+                  </>
+                }
               >
                 <StripyCardDetail term={'Name'}>
                   {location.fixedName ?? <span className="italic">None</span>}
@@ -387,6 +482,63 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
                 {location.direction && (
                   <StripyCardDetail term={'Layout'}>
                     <span className="font-semibold">{location.direction}</span>
+                  </StripyCardDetail>
+                )}
+                {location.children.length === 0 && (
+                  <StripyCardDetail term={'Transfer'}>
+                    <Heading className=" mb-5" level={3}>
+                      Transfer items from location
+                    </Heading>
+                    <div className="grid grid-cols-2 gap-x-8">
+                      <div className="flex flex-col">
+                        <div className="flex flex-col gap-y-4">
+                          <Label className="font-semibold" htmlFor={'source_barcode'} name={'Source Barcode:'} />
+                          <div className="flex flex-row">
+                            <Input
+                              ref={transferInputRef}
+                              className={' h-9 p-2 w-full border-2 border-gray-200'}
+                              id={'source_barcode'}
+                              onInput={(e) => {
+                                setTransferSourceInputText(e.currentTarget.value);
+                              }}
+                              onKeyDown={(e) => {
+                                setSourceLocationError('');
+                                setTransferSourceInputText(e.currentTarget.value);
+                                handleSourceBarcodeEnter(e);
+                              }}
+                              value={transferSourceInputText}
+                            />
+                            <button
+                              id="pasteButton"
+                              className="px-2 py-2 flex items-center rounded-r-md border-l-0 border text-white bg-sdb-400 focus:outline-none"
+                              onClick={() => {
+                                handlePaste();
+                              }}
+                              type={'button'}
+                            >
+                              <PasteIcon className="block h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <MutedText>Type barcode and press 'Enter' or Paste</MutedText>
+                      </div>
+                      {transferSourceLocation && (
+                        <div className="flex flex-col gap-y-4 content-center items-center ">
+                          <div className="font-semibold"> Description </div>
+                          <div data-testid={'transfer-source-description'}> {transferSourceLocation.customName} </div>
+                        </div>
+                      )}
+                      {sourceLocationError && (
+                        <div className="flex content-center items-center justify-center">
+                          <Warning className="font-semibold"> {sourceLocationError} </Warning>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-row justify-end space-x-2">
+                      <BlueButton disabled={transferSourceLocation === undefined} onClick={handleTransfer}>
+                        Transfer
+                      </BlueButton>
+                    </div>
                   </StripyCardDetail>
                 )}
               </StripyCard>

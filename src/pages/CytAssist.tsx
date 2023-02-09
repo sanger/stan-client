@@ -68,7 +68,6 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
     },
     [setPreBarcodeValidationError, onChangeBarcode]
   );
-  debugger;
   const validateLotNumber = React.useCallback(
     (slideLotNumber: string, isProbe: boolean) => {
       let error;
