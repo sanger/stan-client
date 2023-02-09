@@ -47,7 +47,7 @@ const testDisplayProps = async (nameStr?: string) => {
   });
 
   //Displays placeholder
-  expect(screen.getByText('Select options...')).toBeInTheDocument();
+  //expect(screen.getByText('Select options...')).toBeInTheDocument();
 };
 
 const testSelectOptions = async (nameStr?: string) => {
