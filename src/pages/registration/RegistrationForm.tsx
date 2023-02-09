@@ -188,6 +188,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                               value: spatialLocation.code.toString()
                             };
                           })}
+                          value={values.tissues[currentIndex].blocks[blockIndex].spatialLocation}
                         />
 
                         <FormikInput
@@ -209,6 +210,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                           dataTestId="Labware Type"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.labwareType`}
                           options={selectOptionValues(availableLabwareTypes, 'name', 'name')}
+                          value={values.tissues[currentIndex].blocks[blockIndex].labwareType}
                         />
 
                         <Heading level={4} showBorder={false} className="mt-4">

@@ -83,17 +83,6 @@ export const shouldHaveOption = (dataTestId: string, option: string) => {
   });
 };
 
-/**Check whether the number of options in the dropdown with given data-testid is above the given limit **/
-export const shouldOptionsHaveLengthAbove = (dataTestId: string, length: number) => {
-  const wrapperDiv = cy.findAllByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
-  if (!wrapperDiv) return;
-  wrapperDiv.within(() => {
-    cy.findByRole('combobox').click();
-    cy.get('[id*=-option]').should('have.length.above', length);
-    cy.wait(100);
-  });
-};
-
 /**Check whether the dropdown is disabled**/
 export const shouldBeDisabled = (dataTestId: string) => {
   const wrapperDiv = cy.findByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
