@@ -2,9 +2,9 @@ import React from 'react';
 import { AddressCommentInput, CommentFieldsFragment } from '../../types/sdk';
 import { Row } from 'react-table';
 import DataTable from '../DataTable';
-import { optionValues } from '../forms';
-import { Select } from '../forms/Select';
+import { selectOptionValues } from '../forms';
 import { alphaNumericSortDefault } from '../../types/stan';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type SlotCommentProps = {
   slotComments: AddressCommentInput[];
@@ -24,7 +24,7 @@ type SlotCommentProps = {
 const SlotComments = ({ slotComments, comments, onChangeComment }: SlotCommentProps) => {
   const getComment = (address: string, slotComments: AddressCommentInput[]) => {
     const slotComment = slotComments.find((sc) => address === sc.address);
-    return slotComment ? slotComment.commentId : '';
+    return slotComment ? slotComment.commentId + '' : '';
   };
   const columns = React.useMemo(() => {
     return [
@@ -38,14 +38,13 @@ const SlotComments = ({ slotComments, comments, onChangeComment }: SlotCommentPr
         id: 'Comments',
         Cell: ({ row }: { row: Row<AddressCommentInput> }) => {
           return (
-            <Select
+            <CustomReactSelect
               value={getComment(row.original.address, slotComments)}
               emptyOption={true}
-              data-testid={'comment'}
-              onChange={(e) => onChangeComment(row.original.address, e.currentTarget.value)}
-            >
-              {optionValues(comments, 'text', 'id')}
-            </Select>
+              dataTestId={'comment'}
+              handleChange={(e) => onChangeComment(row.original.address, (e as OptionType).value)}
+              options={selectOptionValues(comments, 'text', 'id')}
+            />
           );
         }
       }

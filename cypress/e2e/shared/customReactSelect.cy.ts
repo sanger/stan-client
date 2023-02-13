@@ -93,15 +93,21 @@ export const shouldBeDisabled = (dataTestId: string) => {
 };
 
 /**Check whether the dropdown displays the given value**/
-export const shouldDisplaySelectedValue = (dataTestId: string, value: string) => {
+export const shouldDisplaySelectedValue = (dataTestId: string, value: string, index?: number) => {
   if (!value) return;
   const wrapperDiv = cy.findAllByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
   if (!wrapperDiv) return;
-  wrapperDiv.each(($elem) => {
-    cy.wrap($elem).within(() => {
+  if (index) {
+    wrapperDiv.eq(index).within(() => {
       cy.contains(value).should('be.visible');
     });
-  });
+  } else {
+    wrapperDiv.each(($elem) => {
+      cy.wrap($elem).within(() => {
+        cy.contains(value).should('be.visible');
+      });
+    });
+  }
 };
 
 /**Check whether the drodown displays an empty value**/

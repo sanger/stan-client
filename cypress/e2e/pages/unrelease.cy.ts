@@ -1,5 +1,5 @@
 import { UnreleaseMutation, UnreleaseMutationVariables } from '../../../src/types/sdk';
-import { selectSGPNumber } from '../shared/customReactSelect.cy';
+import { selectFocusBlur, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Unrelease Page', () => {
   before(() => {
@@ -9,7 +9,7 @@ describe('Unrelease Page', () => {
   describe('Display', () => {
     context('on intialisation', () => {
       it('should display a SGP number field', () => {
-        cy.findByTestId('select_workNumber').should('be.visible');
+        cy.findByText('SGP Number').should('be.visible');
       });
       it('should display an enabled labware scan input', () => {
         cy.get('#labwareScanInput').should('not.be.disabled');
@@ -33,7 +33,8 @@ describe('Unrelease Page', () => {
     context('when SGP Number not given', () => {
       before(() => {
         cy.get('#labwareScanInput').should('not.be.disabled').wait(1000).type('STAN-3111{enter}');
-        cy.findByTestId('select_workNumber').select('').blur();
+        selectSGPNumber('');
+        selectFocusBlur('workNumber');
       });
       it('shows an error', () => {
         cy.findByText('SGP number is required').should('be.visible');
