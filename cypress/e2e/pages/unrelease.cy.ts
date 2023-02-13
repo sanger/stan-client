@@ -19,10 +19,9 @@ describe('Unrelease Page', () => {
   describe('Validation', () => {
     context('when the section number is below 0', () => {
       before(() => {
-        cy.get('#labwareScanInput').should('not.be.disabled').wait(1000).type('STAN-611{enter}');
-
+        selectSGPNumber('SGP1008');
+        cy.get('#labwareScanInput').should('not.be.disabled').type('STAN-611{enter}');
         cy.get("input[name='labware.0.highestSection']").type('{selectall}-1');
-
         cy.findByRole('button', { name: /Submit/i }).click();
       });
 
@@ -32,7 +31,7 @@ describe('Unrelease Page', () => {
     });
     context('when SGP Number not given', () => {
       before(() => {
-        cy.get('#labwareScanInput').should('not.be.disabled').wait(1000).type('STAN-3111{enter}');
+        cy.get('#labwareScanInput').clear().type('STAN-3111{enter}');
         selectSGPNumber('');
         selectFocusBlur('workNumber');
       });
@@ -62,7 +61,7 @@ describe('Unrelease Page', () => {
           );
         });
         selectSGPNumber('SGP1008');
-        cy.get('#labwareScanInput').should('not.be.disabled').wait(1000).type('STAN-3112{enter}');
+        cy.get('#labwareScanInput').should('not.be.disabled').type('STAN-3112{enter}');
         cy.findByRole('button', { name: /Submit/i }).click();
       });
 
@@ -76,7 +75,7 @@ describe('Unrelease Page', () => {
       before(() => {
         cy.visit('admin/unrelease');
         selectSGPNumber('SGP1008');
-        cy.get('#labwareScanInput').should('not.be.disabled').wait(1000).type('STAN-3111{enter}');
+        cy.get('#labwareScanInput').should('not.be.disabled').type('STAN-3111{enter}');
         cy.findByRole('button', { name: /Submit/i }).click();
       });
 
