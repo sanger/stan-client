@@ -65,7 +65,7 @@ describe('Work Allocation', () => {
         it('allocates new Work', () => {
           cy.findByRole('button', { name: /Submit/i }).click();
           cy.findByText(
-            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999 , to Omero project OMERO_TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
+            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999, Omero project OMERO_TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
           ).should('exist');
         });
 
