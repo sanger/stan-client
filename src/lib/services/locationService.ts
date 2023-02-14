@@ -142,10 +142,6 @@ export async function transferItems(
   sourceBarcode: string,
   destinationBarcode: string
 ): Promise<LocationFieldsFragment | undefined> {
-  try {
-    const { transfer } = await stanCore.TransferLocationItems({ sourceBarcode, destinationBarcode });
-    return transfer;
-  } catch (e) {
-    throw e;
-  }
+  const { transfer } = await stanCore.TransferLocationItems({ sourceBarcode, destinationBarcode });
+  return transfer;
 }
