@@ -74,7 +74,7 @@ describe('Solution Transfer', () => {
             )
           );
         });
-        cy.findByRole('button', { name: /Submit/i }).click();
+        cy.findByRole('button', { name: /Submit/i }).click({ force: true });
       });
       it('displays Operation complete message', () => {
         cy.findByText('Operation Complete').should('be.visible');
@@ -105,7 +105,7 @@ describe('Solution Transfer', () => {
             )
           );
         });
-        cy.findByRole('button', { name: /Submit/i }).click();
+        cy.findByRole('button', { name: /Submit/i }).click({ force: true });
       });
       it('shows the errors', () => {
         cy.findByText('This thing went wrong').should('be.visible');

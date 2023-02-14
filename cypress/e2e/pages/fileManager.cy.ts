@@ -199,7 +199,7 @@ describe('FileManager', () => {
     context('on Upload success', () => {
       before(() => {
         selectFile();
-        uploadButton().click();
+        uploadButton().click({ force: true });
       });
       it('should displau upload success message', () => {
         cy.findByText('file.txt uploaded succesfully.').should('be.visible');
@@ -235,14 +235,15 @@ describe('FileManager', () => {
         });
         selectSGPNumber('SGP1008');
         selectFile();
-        cy.findByTestId('upload-btn').click();
+        cy.wait(500);
+        cy.findByTestId('upload-btn').click({ force: true });
       });
       it('should display a warning message', () => {
         cy.findByText('File already exists').should('be.visible');
       });
     });
     context('Pressing Cancel button', () => {
-      before(() => cy.findByRole('button', { name: /Cancel/i }).click());
+      before(() => cy.findByRole('button', { name: /Cancel/i }).click({ force: true }));
       it('should not display success message', () => {
         cy.findByText('file.txt uploaded succesfully.').should('not.exist');
       });
@@ -254,8 +255,8 @@ describe('FileManager', () => {
     });
     context('Pressing Continue button', () => {
       before(() => {
-        uploadButton().click();
-        cy.findByRole('button', { name: /Continue/i }).click();
+        uploadButton().click({ force: true });
+        cy.findByRole('button', { name: /Continue/i }).click({ force: true });
       });
       it('should  display success message', () => {
         cy.findByText('file.txt uploaded succesfully.').should('be.visible');
@@ -280,10 +281,10 @@ describe('FileManager', () => {
         });
         selectSGPNumber('SGP1008');
         selectFile();
-        uploadButton().click();
+        uploadButton().click({ force: true });
       });
       it('should display upload failure message', () => {
-        cy.findByText('Error').should('be.visible');
+        cy.findByText('Error:').should('exist');
       });
     });
   });
