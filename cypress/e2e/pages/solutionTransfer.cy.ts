@@ -85,7 +85,7 @@ describe('Solution Transfer', () => {
       before(() => {
         cy.visit('/lab/solution_transfer');
         selectSGPNumber('SGP1008');
-        cy.get('#labwareScanInput').type('STAN-3111{enter}');
+        cy.get('#labwareScanInput').type('STAN-3111{enter}', { force: true });
         selectOption('applyAllSolution', 'Ethanol');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(

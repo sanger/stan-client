@@ -30,7 +30,7 @@ const chooseOptionFromSelectList = (optionText: string) => {
     return;
   }
   cy.findByRole('combobox').first().type(`${optionText}`);
-  cy.findByText(optionText).click();
+  cy.findByText(optionText).click({ force: true });
 };
 
 /**Select the option in dropdown with given test id**/
@@ -67,7 +67,7 @@ export const removeSelections = (dataTestId: string) => {
     if (!wrapperDiv) return;
     wrapperDiv.within(() => {
       cy.get('[aria-label^=Remove]').each(($elem) => {
-        cy.wrap($elem).click();
+        cy.wrap($elem).click({ force: true });
       });
     });
   });
@@ -78,7 +78,7 @@ export const shouldHaveOption = (dataTestId: string, option: string) => {
   const wrapperDiv = cy.findAllByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
   if (!wrapperDiv) return;
   wrapperDiv.within(() => {
-    cy.findByRole('combobox').click();
+    cy.findByRole('combobox').click({ force: true });
     cy.contains(option).should('be.visible');
   });
 };
@@ -130,7 +130,7 @@ export const shouldOptionsHaveLength = (dataTestId: string, length: number) => {
   const wrapperDiv = cy.findAllByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
   if (!wrapperDiv) return;
   wrapperDiv.within(() => {
-    cy.findByRole('combobox').click();
+    cy.findByRole('combobox').click({ force: true });
     cy.get('[id*=-option]').should('have.length', length);
   });
 };
@@ -139,7 +139,7 @@ export const shouldOptionsHaveLengthAbove = (dataTestId: string, length: number)
   const wrapperDiv = cy.findAllByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
   if (!wrapperDiv) return;
   wrapperDiv.within(() => {
-    cy.findByRole('combobox').click();
+    cy.findByRole('combobox').click({ force: true });
     cy.get('[id*=-option]').should('have.length.above', length);
   });
 };
