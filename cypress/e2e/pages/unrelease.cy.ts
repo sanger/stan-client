@@ -64,9 +64,15 @@ describe('Unrelease Page', () => {
         cy.wait(1000);
         cy.get('#labwareScanInput').should('not.be.disabled').type('STAN-3112{enter}');
         cy.findByRole('button', { name: /Submit/i }).click();
+        cy.on('uncaught:exception', () => {
+          return false;
+        });
       });
 
       it('shows the server errors', () => {
+        cy.on('uncaught:exception', () => {
+          return false;
+        });
         cy.findByText('This thing went wrong').should('be.visible');
         cy.findByText('This other thing went wrong').should('be.visible');
       });

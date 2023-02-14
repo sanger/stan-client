@@ -280,6 +280,7 @@ describe('FileManager', () => {
           );
         });
         selectSGPNumber('SGP1008');
+        cy.wait(1000);
         selectFile();
         uploadButton().click();
       });

@@ -17,7 +17,9 @@ describe('Section Registration Page', () => {
     context('when updating the tissue type and spatial location for one slide, then adding another slide', () => {
       before(() => {
         selectOption('Tissue Type', 'Liver');
+        cy.wait(1000);
         selectOption('Spatial Location', '3 - Surface central region');
+        cy.wait(1000);
         selectOption('labwareTypesSelect', 'Visium LP');
         //        cy.get('#labwareTypesSelect').select('Visium LP');
         cy.findByText('+ Add Visium LP').click();
