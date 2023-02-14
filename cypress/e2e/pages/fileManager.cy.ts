@@ -281,7 +281,7 @@ describe('FileManager', () => {
         });
         selectSGPNumber('SGP1008');
         selectFile();
-        uploadButton().click({ force: true });
+        uploadButton().should('be.visible').click({ force: true });
       });
       it('should display upload failure message', () => {
         cy.findByText('Error:').should('exist');

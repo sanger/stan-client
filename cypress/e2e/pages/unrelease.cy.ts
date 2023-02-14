@@ -22,7 +22,7 @@ describe('Unrelease Page', () => {
         selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').should('not.be.disabled').type('STAN-611{enter}');
         cy.get("input[name='labware.0.highestSection']").type('{selectall}-1');
-        cy.findByRole('button', { name: /Submit/i }).click();
+        cy.findByRole('button', { name: /Submit/i }).click({ force: true });
       });
 
       it('shows an error', () => {
@@ -62,7 +62,9 @@ describe('Unrelease Page', () => {
         });
         selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').should('not.be.disabled').type('STAN-3112{enter}', { force: true });
-        cy.findByRole('button', { name: /Submit/i }).click({ force: true });
+        cy.findByRole('button', { name: /Submit/i })
+          .should('be.visible')
+          .click({ force: true });
       });
 
       it('shows the server errors', () => {
@@ -76,7 +78,9 @@ describe('Unrelease Page', () => {
         cy.visit('admin/unrelease');
         selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').should('not.be.disabled').type('STAN-3111{enter}', { force: true });
-        cy.findByRole('button', { name: /Submit/i }).click({ force: true });
+        cy.findByRole('button', { name: /Submit/i })
+          .should('be.visible')
+          .click({ force: true });
       });
 
       it('shows the Operation Complete', () => {

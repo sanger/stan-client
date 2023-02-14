@@ -25,12 +25,12 @@ export const getAllSelect = (dataTestId?: string) => {
 const chooseOptionFromSelectList = (optionText: string) => {
   //If given option is empty
   if (optionText.length <= 0) {
-    cy.findByRole('combobox').click();
+    cy.findByRole('combobox').click({ force: true });
     cy.get('[id$=-option-0]').click({ multiple: true, force: true });
     return;
   }
   cy.findByRole('combobox').first().type(`${optionText}`);
-  cy.findByText(optionText).click({ force: true });
+  cy.findByText(optionText).should('be.visible').click({ force: true });
 };
 
 /**Select the option in dropdown with given test id**/
