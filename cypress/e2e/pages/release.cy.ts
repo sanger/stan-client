@@ -18,7 +18,7 @@ describe('Release Page', () => {
     before(() => {
       cy.findByRole('button', { name: /Release Labware/i })
         .should('be.visible')
-        .click();
+        .click({ force: true });
     });
 
     it('shows an error about labwares', () => {
@@ -147,5 +147,5 @@ function fillInForm() {
   cy.get('#labwareScanInput').type('STAN-456{enter}');
   selectOption('Group/Team', 'Vento lab');
   selectOption('Contact', 'cs41');
-  cy.findByRole('button', { name: /Release Labware/i }).click();
+  cy.findByRole('button', { name: /Release Labware/i }).click({ force: true });
 }
