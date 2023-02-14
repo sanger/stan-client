@@ -28,7 +28,7 @@ jobs:
         run: >-
           yarn install
       - name: Cypress run
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v5
         with:
           install-command: yarn --frozen-lockfile --silent
           build: yarn build
@@ -37,6 +37,7 @@ jobs:
           config: baseUrl=http://localhost:3000
           timeout-minutes: 5
           browser: chrome
+          headed: true
 
   jest:
     name: Run unit tests
