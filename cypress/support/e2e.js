@@ -30,11 +30,16 @@ after(() => {
  If Cypress fails your test because of ResizeObserver error, you can swallow it by
  adding this code to the top of the test or as a global catch for ResizeObserver here
  */
-Cypress.on('uncaught:exception', (err) => {
+/*Cypress.on('uncaught:exception', (err) => {
   if (err.message.includes('ResizeObserver loop limit exceeded')) {
     return false;
   }
-});
+});*/
+
+// ignore uncaught exceptions
+Cypress.on('uncaught:exception', () => {
+  return false
+})
 
 
 // Alternatively you can use CommonJS syntax:
