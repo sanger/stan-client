@@ -40,6 +40,7 @@ export const selectOption = (dataTestId: string, optionText: string) => {
   wrapperDiv.within(() => {
     chooseOptionFromSelectList(optionText);
   });
+  cy.wait(1000);
 };
 
 /**Select option if there are multiple dropdowns with same testid. If index is given ,
