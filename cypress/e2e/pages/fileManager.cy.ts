@@ -235,7 +235,6 @@ describe('FileManager', () => {
         });
         selectSGPNumber('SGP1008');
         selectFile();
-        cy.wait(500);
         cy.findByTestId('upload-btn').click();
       });
       it('should display a warning message', () => {
@@ -280,12 +279,11 @@ describe('FileManager', () => {
           );
         });
         selectSGPNumber('SGP1008');
-        cy.wait(1000);
         selectFile();
         uploadButton().click();
       });
       it('should display upload failure message', () => {
-        cy.findByTestId('error-div').should('exist');
+        cy.findByText('Error').should('be.visible');
       });
     });
   });
