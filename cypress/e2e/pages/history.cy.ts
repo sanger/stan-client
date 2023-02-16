@@ -200,7 +200,7 @@ describe('History Page', () => {
         });
         it('goes to file manager page for SGP1001', () => {
           cy.url().should('be.equal', 'http://localhost:3000/file_manager?workNumber=SGP1001');
-          cy.findByText('Upload file').should('not.exist');
+          cy.findByText('Upload file').should('exist');
           cy.findByText('Files').should('exist');
         });
       });
