@@ -99,9 +99,7 @@ describe('Visium QC Page', () => {
         });
         it('enables Slide costing drop down', () => {
           const select = getSelect('slide-costing');
-          if (select) {
-            cy.wrap(select).should('be.disabled');
-          }
+          cy.wrap(select).should('be.disabled');
         });
         it('should show the assigned costing', () => {
           shouldDisplaySelectedValue('slide-costing', '');
