@@ -22,15 +22,25 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
 import { reload, StanCoreContext } from '../lib/sdk';
+import { Row } from 'react-table';
+import WorkNumberSelect from '../components/WorkNumberSelect';
 
 const initialValues: ReleaseRequest = {
-  barcodes: [],
+  releaseLabware: [],
   destination: '',
   recipient: ''
 };
 
 const validationSchema = Yup.object().shape({
-  barcodes: Yup.array().label('Labware').min(1, 'Please scan in at least 1 labware').of(Yup.string().required()),
+  releaseLabware: Yup.array()
+    .min(1, 'Please scan in at least 1 labware')
+    .of(
+      Yup.object().shape({
+        barcode: Yup.string().required(),
+        workNumber: Yup.string().optional()
+      })
+    )
+    .required(),
   destination: Yup.string().required().label('Group/Team'),
   recipient: Yup.string().required().label('Contact')
 });
@@ -91,6 +101,7 @@ function Release({ releaseInfo }: PageParams) {
     return createFormMachine<ReleaseRequest, ReleaseLabwareMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
+          debugger;
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.ReleaseLabware({ releaseRequest: e.values });
         }
@@ -120,6 +131,23 @@ function Release({ releaseInfo }: PageParams) {
     }
   }, [current]);
 
+  const releaseColumns = React.useMemo(() => {
+    return [
+      columns.barcode(),
+      {
+        Header: 'SGP Number',
+        id: 'workNumber',
+        Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
+          return <WorkNumberSelect name={`values.releaseLabware.${row.index}.workNumber`} />;
+        }
+      },
+      columns.donorId(),
+      columns.labwareType(),
+      columns.externalName(),
+      columns.bioState()
+    ];
+  }, []);
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -144,25 +172,15 @@ function Release({ releaseInfo }: PageParams) {
                       <MutedText>Please scan either the location or a piece of labware you wish to release.</MutedText>
 
                       <LabwareScanner
-                        onChange={(labwares) =>
-                          setFieldValue(
-                            'barcodes',
-                            labwares.map((lw) => lw.barcode)
-                          )
-                        }
+                        onChange={(labware) => {
+                          debugger;
+                          labware.map((lw, indx) => setFieldValue(`releaseLabware.${indx}.barcode`, lw.barcode));
+                        }}
                         locked={formLocked}
                         labwareCheckFunction={labwareBioStateCheck}
                         enableLocationScanner={true}
                       >
-                        <LabwareScanPanel
-                          columns={[
-                            columns.barcode(),
-                            columns.donorId(),
-                            columns.labwareType(),
-                            columns.externalName(),
-                            columns.bioState()
-                          ]}
-                        />
+                        <LabwareScanPanel columns={releaseColumns} />
                       </LabwareScanner>
 
                       <FormikErrorMessage name={'barcodes'} />
@@ -186,10 +204,10 @@ function Release({ releaseInfo }: PageParams) {
                       Summary
                     </Heading>
 
-                    {values.barcodes.length > 0 && values.destination ? (
+                    {values.releaseLabware.length > 0 && values.destination ? (
                       <p>
-                        <span className="font-semibold">{values.barcodes.length}</span> piece(s) of labware will be
-                        released to <span className="font-semibold">{values.destination}</span>.
+                        <span className="font-semibold">{values.releaseLabware.length}</span> piece(s) of labware will
+                        be released to <span className="font-semibold">{values.destination}</span>.
                       </p>
                     ) : (
                       <p className="italic text-sm">Please scan labwares and select a group/team.</p>

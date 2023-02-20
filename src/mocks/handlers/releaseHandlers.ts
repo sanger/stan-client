@@ -19,14 +19,14 @@ const releaseHandlers = [
   }),
 
   graphql.mutation<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>('ReleaseLabware', (req, res, ctx) => {
-    const { barcodes, recipient, destination } = req.variables.releaseRequest;
+    const { releaseLabware, recipient, destination } = req.variables.releaseRequest;
 
     return res(
       ctx.data({
         release: {
-          releases: barcodes.map((barcode, index) => ({
+          releases: releaseLabware.map((releaseLw, index) => ({
             id: index + 1001,
-            labware: { barcode },
+            labware: { barcode: releaseLw.barcode },
             recipient: {
               username: recipient
             },
