@@ -174,7 +174,7 @@ function Release({ releaseInfo }: PageParams) {
                       <LabwareScanner
                         onChange={(labware) => {
                           debugger;
-                          labware.map((lw, indx) => setFieldValue(`releaseLabware.${indx}.barcode`, lw.barcode));
+                          labware.map((lw, indx) => setFieldValue(`values.${indx}.releaseLabware.barcode`, lw.barcode));
                         }}
                         locked={formLocked}
                         labwareCheckFunction={labwareBioStateCheck}
