@@ -8,10 +8,10 @@ import {
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 import {
   getAllSelect,
-  getSelect,
   selectOption,
   selectOptionForMultiple,
   selectSGPNumber,
+  shouldBeDisabled,
   shouldDisplaySelectedValue,
   shouldHaveOption
 } from '../shared/customReactSelect.cy';
@@ -73,10 +73,7 @@ describe('Visium QC Page', () => {
           cy.get('#labwareScanInput').type('STAN-2101{enter}');
         });
         it('disables Slide costing drop down', () => {
-          const select = getSelect('slide-costing');
-          if (select) {
-            cy.wrap(select).should('be.disabled');
-          }
+          shouldBeDisabled('slide-costing');
         });
         it('should show the assigned costing', () => {
           shouldDisplaySelectedValue('slide-costing', SlideCosting.Sgp);
@@ -98,8 +95,7 @@ describe('Visium QC Page', () => {
           cy.get('#labwareScanInput').clear().type('STAN-2100{enter}');
         });
         it('enables Slide costing drop down', () => {
-          const select = getSelect('slide-costing');
-          cy.wrap(select).should('be.disabled');
+          shouldBeDisabled('slide-costing');
         });
         it('should show the assigned costing', () => {
           shouldDisplaySelectedValue('slide-costing', '');
