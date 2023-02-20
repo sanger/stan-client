@@ -138,7 +138,7 @@ function Release({ releaseInfo }: PageParams) {
         Header: 'SGP Number',
         id: 'workNumber',
         Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
-          return <WorkNumberSelect name={`values.releaseLabware.${row.index}.workNumber`} />;
+          return <WorkNumberSelect name={`releaseLabware.${row.index}.workNumber`} />;
         }
       },
       columns.donorId(),
