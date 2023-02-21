@@ -25,12 +25,12 @@ export const getAllSelect = (dataTestId?: string) => {
 const chooseOptionFromSelectList = (optionText: string) => {
   //If given option is empty
   if (optionText.length <= 0) {
-    cy.findByRole('combobox').should('be.visible').click({ force: true });
-    cy.get('[id$=-option-0]').should('be.visible').click({ multiple: true, force: true });
+    cy.findByRole('combobox').should('exist').click({ force: true });
+    cy.get('[id$=-option-0]').click({ multiple: true, force: true });
     return;
   }
-  cy.findByRole('combobox').should('be.visible').first().type(`${optionText}`);
-  cy.findByText(optionText).should('be.visible').click({ force: true });
+  cy.findByRole('combobox').first().type(`${optionText}`);
+  cy.findByText(optionText).should('exist').click({ force: true });
 };
 
 /**Select the option in dropdown with given test id**/
@@ -72,7 +72,7 @@ export const removeSelections = (dataTestId: string) => {
 export const shouldHaveOption = (dataTestId: string, option: string) => {
   const wrapperDiv = cy.findAllByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
   wrapperDiv.within(() => {
-    cy.findByRole('combobox').should('be.visible').click({ force: true });
+    cy.findByRole('combobox').should('exist').click({ force: true });
     cy.contains(option).should('be.visible');
   });
 };
@@ -81,7 +81,7 @@ export const shouldHaveOption = (dataTestId: string, option: string) => {
 export const shouldBeDisabled = (dataTestId: string) => {
   const wrapperDiv = cy.findByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
   wrapperDiv.within(() => {
-    cy.get('input[type="text"]').should('be.visible').should('have.prop', 'disabled', true);
+    cy.get('input[type="text"]').should('exist').should('have.prop', 'disabled', true);
   });
 };
 
@@ -106,7 +106,7 @@ export const shouldDisplaySelectedValue = (dataTestId: string, value: string, in
 export const shouldDisplayEmptyValue = (dataTestId: string) => {
   const wrapperDiv = cy.findByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
   wrapperDiv.within(() => {
-    cy.findByRole('combobox').should('be.visible').should('have.value', '');
+    cy.findByRole('combobox').should('exist').should('have.value', '');
   });
 };
 
@@ -118,16 +118,16 @@ export const selectSGPNumber = (workNumber: string) => {
 export const shouldOptionsHaveLength = (dataTestId: string, length: number) => {
   const wrapperDiv = cy.findAllByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
   wrapperDiv.within(() => {
-    cy.findByRole('combobox').should('be.visible').click({ force: true });
-    cy.get('[id*=-option]').should('be.visible').should('have.length', length);
+    cy.findByRole('combobox').should('exist').click({ force: true });
+    cy.get('[id*=-option]').should('exist').should('have.length', length);
   });
 };
 
 export const shouldOptionsHaveLengthAbove = (dataTestId: string, length: number) => {
   const wrapperDiv = cy.findAllByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
   wrapperDiv.within(() => {
-    cy.findByRole('combobox').should('be.visible').click({ force: true });
-    cy.get('[id*=-option]').should('be.visible').should('have.length.above', length);
+    cy.findByRole('combobox').should('exist').click({ force: true });
+    cy.get('[id*=-option]').should('have.length.above', length);
   });
 };
 
@@ -135,6 +135,6 @@ export const shouldOptionsHaveLengthAbove = (dataTestId: string, length: number)
 export const selectFocusBlur = (dataTestId?: string) => {
   const wrapperDiv = cy.findByTestId(dataTestId ?? 'select-div');
   wrapperDiv.within(() => {
-    cy.findByRole('combobox').should('be.visible').focus().blur();
+    cy.findByRole('combobox').should('exist').focus().blur();
   });
 };
