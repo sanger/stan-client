@@ -131,23 +131,6 @@ function Release({ releaseInfo }: PageParams) {
     }
   }, [current]);
 
-  const releaseColumns = React.useMemo(() => {
-    return [
-      columns.barcode(),
-      {
-        Header: 'SGP Number',
-        id: 'workNumber',
-        Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
-          return <WorkNumberSelect name={`releaseLabware.${row.index}.workNumber`} />;
-        }
-      },
-      columns.donorId(),
-      columns.labwareType(),
-      columns.externalName(),
-      columns.bioState()
-    ];
-  }, []);
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -172,15 +155,36 @@ function Release({ releaseInfo }: PageParams) {
                       <MutedText>Please scan either the location or a piece of labware you wish to release.</MutedText>
 
                       <LabwareScanner
-                        onChange={(labware) => {
-                          debugger;
-                          labware.map((lw, indx) => setFieldValue(`values.${indx}.releaseLabware.barcode`, lw.barcode));
-                        }}
+                        onChange={(labware) =>
+                          labware.map((lw, indx) => setFieldValue(`releaseLabware.${indx}.barcode`, lw.barcode))
+                        }
                         locked={formLocked}
                         labwareCheckFunction={labwareBioStateCheck}
                         enableLocationScanner={true}
                       >
-                        <LabwareScanPanel columns={releaseColumns} />
+                        <LabwareScanPanel
+                          columns={[
+                            columns.barcode(),
+                            {
+                              Header: 'SGP Number',
+                              id: 'workNumber',
+                              Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
+                                return (
+                                  <WorkNumberSelect
+                                    name={`releaseLabware.${row.index}.workNumber`}
+                                    onWorkNumberChange={(workNumber) => {
+                                      setFieldValue(`releaseLabware.${row.index}.workNumber`, workNumber);
+                                    }}
+                                  />
+                                );
+                              }
+                            },
+                            columns.donorId(),
+                            columns.labwareType(),
+                            columns.externalName(),
+                            columns.bioState()
+                          ]}
+                        />
                       </LabwareScanner>
 
                       <FormikErrorMessage name={'barcodes'} />
