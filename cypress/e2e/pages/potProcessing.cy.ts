@@ -107,7 +107,7 @@ describe('Pot Processing', () => {
         selectSGPNumber('');
       });
       it('should disable save button', () => {
-        cy.findByRole('button', { name: /Save/i }).should('be.disabled');
+        cy.findByRole('button', { name: /Save/i }).should('be.visible').should('be.disabled');
       });
     });
   });
