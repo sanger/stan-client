@@ -3,8 +3,8 @@ import { CommentFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import { Row } from 'react-table';
 import DataTable from '../DataTable';
 import FormikInput from '../forms/Input';
-import FormikSelect from '../forms/Select';
-import { optionValues } from '../forms';
+import { selectOptionValues } from '../forms';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type SlotMeasurementProps = {
   slotMeasurements: SlotMeasurementRequest[];
@@ -70,22 +70,21 @@ const SlotMeasurements = ({
               id: 'Comments',
               Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
                 return (
-                  <FormikSelect
+                  <CustomReactSelect
                     label={''}
-                    data-testid={`comments${row.index}`}
+                    dataTestId={`comments${row.index}`}
                     name={`slotMeasurements.${row.index}.commentId`}
                     className={'flex'}
                     emptyOption={true}
-                    onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                    handleChange={(val) => {
                       onChangeMeasurement(
                         row.original.address,
                         `slotMeasurements.${row.index}.commentId`,
-                        e.currentTarget.value
+                        (val as OptionType).value
                       );
                     }}
-                  >
-                    {optionValues(comments, 'text', 'id')}
-                  </FormikSelect>
+                    options={selectOptionValues(comments, 'text', 'id')}
+                  />
                 );
               }
             }

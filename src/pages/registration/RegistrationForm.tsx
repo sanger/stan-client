@@ -6,8 +6,7 @@ import Heading from '../../components/Heading';
 import FormikInput from '../../components/forms/Input';
 import RadioGroup, { RadioButton } from '../../components/forms/RadioGroup';
 import { objectKeys } from '../../lib/helpers';
-import FormikSelect from '../../components/forms/Select';
-import { optionValues } from '../../components/forms';
+import { selectOptionValues } from '../../components/forms';
 import PinkButton from '../../components/buttons/PinkButton';
 import BlueButton from '../../components/buttons/BlueButton';
 import SummaryBox from './SummaryBox';
@@ -16,6 +15,8 @@ import GrayBox, { Sidebar } from '../../components/layouts/GrayBox';
 import { useScrollToRef } from '../../lib/hooks';
 import { RegistrationFormValues } from '../BlockRegistration';
 import { TissueValues } from './Registration';
+import CustomReactSelect from '../../components/forms/CustomReactSelect';
+
 export type TextType = 'Block' | 'Embedding';
 
 interface RegistrationFormParams<T> {
@@ -114,32 +115,37 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 />
               )}
 
-              <FormikSelect label={'Species'} name={`tissues.${currentIndex}.species`} emptyOption className="mt-2">
-                {optionValues(registrationInfo.species, 'name', 'name')}
-              </FormikSelect>
+              <CustomReactSelect
+                label={'Species'}
+                name={`tissues.${currentIndex}.species`}
+                emptyOption
+                className="mt-2"
+                dataTestId="Species"
+                options={selectOptionValues(registrationInfo.species, 'name', 'name')}
+              />
             </motion.div>
 
             <motion.div variants={variants.fadeInWithLift} className="space-y-4">
               <Heading level={3}>Tissue Information</Heading>
 
-              <FormikSelect
+              <CustomReactSelect
                 label="HuMFre"
                 name={`tissues.${currentIndex}.hmdmc`}
-                disabled={!isHMDMCEnabled}
+                isDisabled={!isHMDMCEnabled}
                 emptyOption
                 className="mt-2"
-              >
-                {optionValues(registrationInfo.hmdmcs, 'hmdmc', 'hmdmc')}
-              </FormikSelect>
+                dataTestId="HuMFre"
+                options={selectOptionValues(registrationInfo.hmdmcs, 'hmdmc', 'hmdmc')}
+              />
 
-              <FormikSelect
+              <CustomReactSelect
                 label="Tissue Type"
                 emptyOption
                 name={`tissues.${currentIndex}.tissueType`}
                 className="mt-2"
-              >
-                {optionValues(registrationInfo.tissueTypes, 'name', 'name')}
-              </FormikSelect>
+                dataTestId="Tissue Type"
+                options={selectOptionValues(registrationInfo.tissueTypes, 'name', 'name')}
+              />
             </motion.div>
 
             <motion.div variants={variants.fadeInWithLift} className="space-y-4">
@@ -170,18 +176,20 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                           displayTag={getOptionalTag('External Identifier')}
                         />
 
-                        <FormikSelect
-                          disabled={availableSpatialLocations.length === 0}
+                        <CustomReactSelect
+                          isDisabled={availableSpatialLocations.length === 0}
                           emptyOption={availableSpatialLocations.length > 0}
                           label="Spatial Location"
+                          dataTestId="Spatial Location"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.spatialLocation`}
-                        >
-                          {availableSpatialLocations.map((spatialLocation) => (
-                            <option value={spatialLocation.code} key={spatialLocation.code}>
-                              {spatialLocation.code + ' - ' + spatialLocation.name}
-                            </option>
-                          ))}
-                        </FormikSelect>
+                          options={availableSpatialLocations.map((spatialLocation) => {
+                            return {
+                              label: spatialLocation.code + ' - ' + spatialLocation.name,
+                              value: spatialLocation.code.toString()
+                            };
+                          })}
+                          value={values.tissues[currentIndex].blocks[blockIndex].spatialLocation}
+                        />
 
                         <FormikInput
                           label="Replicate Number"
@@ -196,45 +204,46 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                           />
                         )}
 
-                        <FormikSelect
+                        <CustomReactSelect
                           emptyOption
                           label="Labware Type"
+                          dataTestId="Labware Type"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.labwareType`}
-                        >
-                          {optionValues(availableLabwareTypes, 'name', 'name')}
-                        </FormikSelect>
+                          options={selectOptionValues(availableLabwareTypes, 'name', 'name')}
+                          value={values.tissues[currentIndex].blocks[blockIndex].labwareType}
+                        />
 
                         <Heading level={4} showBorder={false} className="mt-4">
                           {`${keywords.get('Embedding') ?? 'Embedding'} Information`}
                         </Heading>
 
-                        <FormikSelect
+                        <CustomReactSelect
                           emptyOption
                           label="Fixative"
+                          dataTestId="Fixative"
                           className="block mt-2"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.fixative`}
-                        >
-                          {optionValues(registrationInfo.fixatives, 'name', 'name')}
-                        </FormikSelect>
+                          options={selectOptionValues(registrationInfo.fixatives, 'name', 'name')}
+                        />
                         {'medium' in block && (
-                          <FormikSelect
+                          <CustomReactSelect
                             emptyOption
                             label="Medium"
+                            dataTestId="Medium"
                             className="block mt-2"
                             name={`tissues.${currentIndex}.blocks.${blockIndex}.medium`}
-                          >
-                            {optionValues(registrationInfo.mediums, 'name', 'name')}
-                          </FormikSelect>
+                            options={selectOptionValues(registrationInfo.mediums, 'name', 'name')}
+                          />
                         )}
                         {'solution' in block && (
-                          <FormikSelect
+                          <CustomReactSelect
                             emptyOption
                             label="Solution"
+                            dataTestId="Solution"
                             className="block mt-2"
                             name={`tissues.${currentIndex}.blocks.${blockIndex}.solution`}
-                          >
-                            {optionValues(registrationInfo.solutions, 'name', 'name')}
-                          </FormikSelect>
+                            options={selectOptionValues(registrationInfo.solutions, 'name', 'name')}
+                          />
                         )}
                         <div className={'flex flex-row justify-end'}>
                           {'solution' in block && (

@@ -103,7 +103,7 @@ export default function WorkProgressSummaryInput({
 
   return (
     <div
-      className="mx-auto max-w-screen-lg mb-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4"
+      className="mx-auto max-w-screen-lg mb-6 border border-gray-200 bg-gray-100 p-2 rounded-md space-y-2"
       data-testid={'search'}
     >
       <Heading level={3} showBorder={false}>
@@ -145,7 +145,7 @@ export default function WorkProgressSummaryInput({
                   value: values.searchValues ?? []
                 }}
               />
-              <div className="flex flex-row items-center justify-end space-x-4 mt-6">
+              <div className="flex flex-row items-center justify-end space-x-2 ">
                 <BlueButton type="submit" disabled={!values.searchValues || values.searchValues.length <= 0}>
                   Search
                 </BlueButton>

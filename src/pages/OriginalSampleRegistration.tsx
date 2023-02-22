@@ -234,6 +234,7 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
     .set('Block', 'Sample')
     .set('Embedding', 'Solution')
     .set('Optional', ['Replicate Number', 'External Identifier']);
+
   return (
     <Registration<
       RegisterOriginalSamplesMutationVariables,

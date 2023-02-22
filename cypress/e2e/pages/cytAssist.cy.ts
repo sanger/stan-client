@@ -1,5 +1,6 @@
 import { SlotCopyMutation, SlotCopyMutationVariables } from '../../../src/types/sdk';
 import { LabwareTypeName } from '../../../src/types/stan';
+import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('CytAssist Page', () => {
   before(() => {
@@ -146,7 +147,7 @@ describe('CytAssist Page', () => {
         });
         context('When SGP number is entered', () => {
           before(() => {
-            cy.findByTestId('select_workNumber').select('SGP1008');
+            selectSGPNumber('SGP1008');
           });
           it('should enable Save button', () => {
             saveButton().should('be.enabled');
@@ -228,7 +229,7 @@ describe('CytAssist Page', () => {
         });
         context('When mapping is done  and all field selected except Slide costings', () => {
           it('keeps the Save button disabled', () => {
-            saveButton().should('not.be.enabled');
+            saveButton().should('be.visible').should('not.be.enabled');
           });
         });
         context('When Slide costing is selected', () => {
@@ -236,7 +237,7 @@ describe('CytAssist Page', () => {
             selectSlideCostings('Faculty');
           });
           it('should enable Save button', () => {
-            saveButton().should('be.enabled');
+            saveButton().should('be.visible').should('be.enabled');
           });
         });
       });
@@ -307,8 +308,8 @@ function enterProbeLOTNumber() {
   });
 }
 function selectLabwareType(type: string) {
-  cy.findByTestId('output-labware-type').select(type);
+  selectOption('output-labware-type', type);
 }
 function selectSlideCostings(costing: string) {
-  cy.findByTestId('output-labware-costing').select(costing);
+  selectOption('output-labware-costing', costing);
 }

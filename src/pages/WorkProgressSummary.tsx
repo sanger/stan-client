@@ -168,7 +168,7 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
             workTypes={workTypes}
             searchTypes={[WorkProgressSearchType.WorkType, WorkProgressSearchType.Status]}
           />
-          <div className="flex justify-end px-6 pb-6">
+          <div className="flex justify-end px-4 pb-6 ">
             <BlueButton type="reset" disabled={!memoUrlParams} onClick={() => history.push(location.pathname)}>
               Clear filter
             </BlueButton>

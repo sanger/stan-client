@@ -1,5 +1,6 @@
 import { GetLabwareOperationsQuery, GetLabwareOperationsQueryVariables } from '../../../src/types/sdk';
 import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
+import { selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Visium Perm', () => {
   before(() => cy.visit('/lab/visium_perm'));
@@ -20,7 +21,7 @@ describe('Visium Perm', () => {
       });
 
       it('submits the form when SGP number is selected', () => {
-        cy.get('select').select('SGP1008');
+        selectSGPNumber('SGP1008');
         cy.findByRole('button', { name: 'Submit' }).click();
         cy.findByText('Visium Permeabilisation complete').should('be.visible');
       });
@@ -30,7 +31,7 @@ describe('Visium Perm', () => {
   describe('scanning labware with empty slots', () => {
     before(() => {
       cy.visit('/lab/visium_perm');
-      cy.get('select').select('SGP1008');
+      selectSGPNumber('SGP1008');
       cy.get('#labwareScanInput').type('STAN-4011{enter}');
     });
 
@@ -124,7 +125,7 @@ describe('Visium Perm', () => {
 
   function saveLabwareWithNoStain() {
     cy.visit('/lab/visium_perm');
-    cy.get('select').select('SGP1008');
+    selectSGPNumber('SGP1008');
     cy.msw().then(({ worker, graphql }) => {
       createLabware('STAN-3200');
       worker.use(

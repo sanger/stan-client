@@ -5,6 +5,7 @@ import {
 import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
+import { selectOption } from '../shared/customReactSelect.cy';
 
 describe('Sample Processing Comments', () => {
   before(() => {
@@ -41,10 +42,10 @@ describe('Sample Processing Comments', () => {
 
   describe('when comment is selected to apply to all', () => {
     before(() => {
-      cy.get('select[name="applyAllComment"]').select('Issue while fixing');
+      selectOption('applyAllComment', 'Issue while fixing');
     });
     it('all comment dropdowns in table must select the selected comment', () => {
-      cy.findByRole('table').contains('td', 'Labware damaged');
+      cy.findByRole('table').contains('td', 'Issue while fixing');
     });
   });
 
@@ -83,7 +84,7 @@ describe('Sample Processing Comments', () => {
       before(() => {
         cy.visit('/lab/sample_processing_comments');
         cy.get('#labwareScanInput').type('STAN-3111{enter}');
-        cy.get('select[name="applyAllComment"]').select('Issue while fixing');
+        selectOption('applyAllComment', 'Issue while fixing');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<RecordSampleProcessingCommentsMutation, RecordSampleProcessingCommentsMutationVariables>(

@@ -1,4 +1,5 @@
 import { ExtractMutation, ExtractMutationVariables } from '../../../src/types/sdk';
+import { selectSGPNumber } from '../shared/customReactSelect.cy';
 
 function scanInLabware() {
   cy.get('#labwareScanInput').type('STAN-011{enter}');
@@ -7,7 +8,7 @@ function scanInLabware() {
 }
 
 function selectWorkNumber() {
-  cy.get('select').select('SGP1008');
+  selectSGPNumber('SGP1008');
 }
 
 describe('RNA Extraction', () => {

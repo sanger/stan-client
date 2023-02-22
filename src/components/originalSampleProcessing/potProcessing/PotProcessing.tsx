@@ -20,13 +20,14 @@ import WorkNumberSelect from '../../WorkNumberSelect';
 import Warning from '../../notifications/Warning';
 import variants from '../../../lib/motionVariants';
 import { motion } from 'framer-motion';
-import { optionValues } from '../../forms';
+import { selectOptionValues } from '../../forms';
 import FormikInput from '../../forms/Input';
 import PotProcessingLabwarePlan from './PotProcessingLabwarePlan';
 import ProcessingSuccess from '../ProcessingSuccess';
 import columns from '../../dataTableColumns/labwareColumns';
 import { Prompt } from 'react-router-dom';
 import { useConfirmLeave } from '../../../lib/hooks';
+import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 
 /**
  * Used as Formik's values
@@ -176,32 +177,30 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
       <div
         className={`mt-4 grid ${
           selectedLabwareType === LabwareTypeName.POT ? 'grid-cols-3' : 'grid-cols-2'
-        } gap-x-4 gap-y-1 text-center text-sm`}
+        } gap-x-4 gap-y-1  text-sm`}
       >
-        <div className="text-gray-500">Labware type</div>
-        {selectedLabwareType === LabwareTypeName.POT && <div className="text-gray-500">Fixative</div>}
-        <div className="text-gray-500">Number of labware</div>
-        <select
-          className="mt-1 block  py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
-          onChange={(e) => setSelectedLabwareType(e.currentTarget.value)}
-          data-testid={'labwareType'}
+        <div className="text-gray-500 text-center">Labware type</div>
+        {selectedLabwareType === LabwareTypeName.POT && <div className="text-gray-500 text-center">Fixative</div>}
+        <div className="text-gray-500 text-center">Number of labware</div>
+        <CustomReactSelect
+          className="mt-1 block py-2 px-3 rounded-md"
+          handleChange={(value) => setSelectedLabwareType((value as OptionType).label)}
+          dataTestId={'labwareType'}
           value={selectedLabwareType}
-        >
-          {optionValues(allowedLabwareTypes, 'name', 'name')}
-        </select>
+          options={selectOptionValues(allowedLabwareTypes, 'name', 'name')}
+        />
         {selectedLabwareType === LabwareTypeName.POT && (
-          <select
-            className="mt-1 block  py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
-            onChange={(e) => setSelectedFixative(e.currentTarget.value)}
-            data-testid={'fixative'}
+          <CustomReactSelect
+            className="mt-1 block py-2 px-3 rounded-md "
+            handleChange={(value) => setSelectedFixative((value as OptionType).label)}
+            dataTestId={'fixative'}
             value={selectedFixative}
-          >
-            {optionValues(processingInfo.fixatives, 'name', 'name')}
-          </select>
+            options={selectOptionValues(processingInfo.fixatives, 'name', 'name')}
+          />
         )}
         <input
           type="number"
-          className="mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
+          className="mt-3 h-10 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100"
           onChange={(e) => setNumLabware(Number(e.currentTarget.value))}
           value={numLabware}
           data-testid={'numLabware'}

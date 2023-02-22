@@ -12,8 +12,7 @@ import MutedText from '../components/MutedText';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import columns from '../components/dataTableColumns/labwareColumns';
-import { FormikErrorMessage, optionValues } from '../components/forms';
-import FormikSelect from '../components/forms/Select';
+import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import PinkButton from '../components/buttons/PinkButton';
 import WhiteButton from '../components/buttons/WhiteButton';
 import DownloadIcon from '../components/icons/DownloadIcon';
@@ -22,6 +21,7 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
 import { reload, StanCoreContext } from '../lib/sdk';
+import CustomReactSelect from '../components/forms/CustomReactSelect';
 
 const initialValues: ReleaseRequest = {
   barcodes: [],
@@ -171,13 +171,23 @@ function Release({ releaseInfo }: PageParams) {
                     <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                       <Heading level={3}>Destination</Heading>
 
-                      <FormikSelect disabled={formLocked} label={'Group/Team'} name={'destination'} emptyOption>
-                        {optionValues(releaseInfo.releaseDestinations, 'name', 'name')}
-                      </FormikSelect>
+                      <CustomReactSelect
+                        isDisabled={formLocked}
+                        label={'Group/Team'}
+                        dataTestId="Group/Team"
+                        name={'destination'}
+                        emptyOption
+                        options={selectOptionValues(releaseInfo.releaseDestinations, 'name', 'name')}
+                      />
 
-                      <FormikSelect disabled={formLocked} label={'Contact'} name={'recipient'} emptyOption>
-                        {optionValues(releaseInfo.releaseRecipients, 'username', 'username')}
-                      </FormikSelect>
+                      <CustomReactSelect
+                        isDisabled={formLocked}
+                        label={'Contact'}
+                        dataTestId="Contact"
+                        name={'recipient'}
+                        emptyOption
+                        options={selectOptionValues(releaseInfo.releaseRecipients, 'username', 'username')}
+                      />
                     </motion.div>
                   </motion.div>
 

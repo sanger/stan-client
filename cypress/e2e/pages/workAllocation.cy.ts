@@ -1,4 +1,5 @@
 import { CreateWorkMutation, CreateWorkMutationVariables } from '../../../src/types/sdk';
+import { removeSelections, selectOption } from '../shared/customReactSelect.cy';
 
 describe('Work Allocation', () => {
   before(() => {
@@ -44,11 +45,11 @@ describe('Work Allocation', () => {
       () => {
         before(() => {
           cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
-          cy.findByLabelText('Work Type').select('TEST_WT_1');
-          cy.findByLabelText('Work Requester').select('et2');
-          cy.findByLabelText('Project').select('TEST999');
-          cy.findByLabelText('Program').select('PROGRAM_999');
-          cy.findByLabelText('Cost Code').select('S999');
+          selectOption('workType', 'TEST_WT_1');
+          selectOption('workRequester', 'et2');
+          selectOption('project', 'TEST999');
+          selectOption('program', 'PROGRAM_999');
+          selectOption('costCode', 'S999');
           cy.findByLabelText('Number of blocks').type('5');
           cy.findByLabelText('Number of slides').type('15');
           cy.findByLabelText('Number of original samples').type('1');
@@ -206,11 +207,12 @@ describe('Work Allocation', () => {
   describe('Sorting the SGP management table', () => {
     context('Filter SGP Numbers', () => {
       it('should show the correct work when a filter is applied', () => {
-        cy.get("select[name='status']").select('Unstarted');
+        removeSelections('status');
+        selectOption('status', 'Unstarted');
         cy.findByRole('button', { name: /Search/i })
           .should('be.visible')
           .click();
-        cy.get("table[data-testid='work-allocation-table']").find('tr').should('have.length', 11);
+        cy.get("table[data-testid='work-allocation-table']").find('tr').should('have.length', 7);
       });
     });
 

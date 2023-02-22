@@ -10,7 +10,8 @@ import { useConfirmLeave } from '../../lib/hooks';
 import LabwarePlan from '../../components/planning/LabwarePlan';
 import labwareScanTableColumns from '../../components/dataTableColumns/labwareColumns';
 import Planner, { PlanChangedProps } from '../../components/planning/Planner';
-import { optionValues } from '../../components/forms';
+import { selectOptionValues } from '../../components/forms';
+import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
 
 /**
  * Types of labware the user is allowed to section onto
@@ -92,13 +93,13 @@ function Plan({ sectioningInfo }: SectioningParams) {
   );
   const buildPlanCreationSettings = React.useCallback(() => {
     return (
-      <select
-        className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sdb-100 focus:border-sdb-100 md:w-1/2"
-        onChange={(e) => setSelectedLabwareType(e.currentTarget.value)}
+      <CustomReactSelect
+        className="mt-1 block w-full md:w-1/2"
+        dataTestId={'labware-type'}
+        handleChange={(val) => setSelectedLabwareType((val as OptionType).label)}
         value={selectedLabwareType}
-      >
-        {optionValues(allowedLabwareTypes, 'name', 'name')}
-      </select>
+        options={selectOptionValues(allowedLabwareTypes, 'name', 'name')}
+      />
     );
   }, [allowedLabwareTypes, setSelectedLabwareType, selectedLabwareType]);
 

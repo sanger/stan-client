@@ -1,3 +1,5 @@
+import { selectOption } from '../shared/customReactSelect.cy';
+
 describe('Original Sample Processing', () => {
   before(() => {
     cy.visit('/lab/original_sample_processing');
@@ -11,7 +13,7 @@ describe('Original Sample Processing', () => {
 
   context('when Block Processing is selected', () => {
     before(() => {
-      cy.findByRole('combobox').select('Block Processing');
+      selectOption('processing-type', 'Block Processing');
     });
 
     it('should display Block Processing page ', () => {
@@ -21,7 +23,7 @@ describe('Original Sample Processing', () => {
   context('when Pot Processing is selected', () => {
     before(() => {
       cy.visit('/lab/original_sample_processing');
-      cy.findByRole('combobox').select('Pot Processing');
+      selectOption('processing-type', 'Pot Processing');
     });
 
     it('should display Pot Processing page ', () => {

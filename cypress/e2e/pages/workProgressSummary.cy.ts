@@ -1,59 +1,28 @@
+import { selectOption } from '../shared/customReactSelect.cy';
+
 describe('Work Progress Summary', () => {
   it('should display Spatial Genomics Platform Status', () => {
     cy.visit('./work_progress_summary');
     cy.findByText('Spatial Genomics Platform Status').should('be.visible');
   });
 
-  describe('Work progress input', () => {
-    context('when the type field is selected', () => {
-      before(() => {
-        cy.visit('./work_progress_summary');
+  describe('Clear filter feature', () => {
+    context('clear filter', () => {
+      it('is disabled when there are no url params', () => {
+        cy.findByRole('button', { name: /Clear filter/i }).should('be.disabled');
       });
-      context('when Status is selected in dropdown for type', () => {
-        it('shows a drop down box with the correct values', () => {
-          cy.findByTestId('type').select('Status');
-          cy.get('[data-testid = valueSelect]')
-            .children('option')
-            .then(($options) => {
-              const optionValues = $options.toArray().map((elem) => elem.label);
-              expect(optionValues).to.deep.eq(['active', 'paused', 'unstarted', 'completed', 'failed', 'withdrawn']);
-            });
-        });
+      it('is enabled when there are url params', () => {
+        cy.visit('./work_progress_summary?searchType=Work%20Type&searchValues[]=Work%20Type%201');
+        cy.findByRole('button', { name: /Clear filter/i }).should('be.enabled');
       });
-      context('when WorkType is selected in dropdown for type', () => {
-        it('shows a drop down box with value', () => {
-          cy.findByTestId('type').select('Work Type');
-          cy.get('[data-testid = valueSelect]')
-            .children('option')
-            .then(($options) => {
-              const optionValues = $options.toArray().map((elem) => elem.label);
-              expect(optionValues).to.deep.eq([
-                'TEST_WT_1',
-                'Work Type 1',
-                'Work Type 2',
-                'Work Type 3',
-                'Work Type 5'
-              ]);
-            });
-        });
-      });
-      context('clear filter', () => {
-        it('is disabled when there are no url params', () => {
-          cy.findByRole('button', { name: /Clear filter/i }).should('be.disabled');
-        });
-        it('is enabled when there are url params', () => {
-          cy.visit('./work_progress_summary?searchType=Work%20Type&searchValues[]=Work%20Type%201');
-          cy.findByRole('button', { name: /Clear filter/i }).should('be.enabled');
-        });
-        it('it clears the url params and resets the table when clicked', () => {
-          cy.visit('./work_progress_summary?searchType=Work%20Type&searchValues[]=Work%20Type%201');
-          cy.findByRole('button', { name: /Clear filter/i }).click();
-          // Check url has removed params
-          cy.url().should('equal', 'http://localhost:3000/work_progress_summary');
-          // Check table has data (bit crude but difficult to check fully)
-          cy.findByRole('table').contains('unstarted');
-          cy.findByRole('table').contains('active');
-        });
+      it('it clears the url params and resets the table when clicked', () => {
+        cy.visit('./work_progress_summary?searchType=Work%20Type&searchValues[]=Work%20Type%201');
+        cy.findByRole('button', { name: /Clear filter/i }).click();
+        // Check url has removed params
+        cy.url().should('equal', 'http://localhost:3000/work_progress_summary');
+        // Check table has data (bit crude but difficult to check fully)
+        cy.findByRole('table').contains('unstarted');
+        cy.findByRole('table').contains('active');
       });
     });
   });
@@ -80,8 +49,8 @@ describe('Work Progress Summary', () => {
     context('Filtered table', () => {
       it('correctly applies the filters on the table data', () => {
         cy.visit('./work_progress_summary');
-        cy.findByTestId('type').select('Status');
-        cy.get('[data-testid = valueSelect]').select('active');
+        selectOption('type', 'Status');
+        selectOption('valueSelect', 'active');
         cy.findByRole('button', { name: /Search/i }).click();
         cy.findByRole('table').contains('active');
       });

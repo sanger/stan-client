@@ -5,6 +5,7 @@ import {
   RecordReagentTransferMutationVariables
 } from '../../../src/types/sdk';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
+import { selectOption, selectSGPNumber, shouldBeDisabled } from '../shared/customReactSelect.cy';
 
 function scanInDestinationLabware() {
   cy.get('#labwareScanInput').type('STAN-5111{enter}');
@@ -21,11 +22,11 @@ function saveButton() {
 }
 
 describe('Dual Index Plate', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/dual_index_plate', 'select_workNumber');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/dual_index_plate');
 
   context('when source and destination labware are not scanned', () => {
     before(() => {
-      cy.get('select').select('SGP1008');
+      selectSGPNumber('SGP1008');
     });
     it('disables the Save button', () => {
       saveButton().should('be.disabled');
@@ -60,14 +61,10 @@ describe('Dual Index Plate', () => {
       scanInSourceLabware('123456789123456789012345');
     });
     it('should display plate type that is alreAdy assigned to dual index plate', () => {
-      cy.get('#plateType').within(() => {
-        cy.findByRole('combobox').should('have.value', 'Fresh frozen - Dual Index TT Set A');
-      });
+      cy.contains('Fresh frozen - Dual Index TT Set A').should('be.visible');
     });
     it('should disable plate type selection combo', () => {
-      cy.get('#plateType').within(() => {
-        cy.findByRole('combobox').should('be.disabled');
-      });
+      shouldBeDisabled('plateType');
     });
   });
   context('when a valid source labware (dual index plate) barcode is entered', () => {
@@ -172,7 +169,7 @@ describe('Dual Index Plate', () => {
   describe('On Save', () => {
     context('When user selects a work number and have a mapping, but no plateType', () => {
       before(() => {
-        cy.findByTestId('select_workNumber').select('SGP1008');
+        selectSGPNumber('SGP1008');
       });
       it('should disable save', () => {
         saveButton().should('be.disabled');
@@ -180,10 +177,8 @@ describe('Dual Index Plate', () => {
     });
     context('When user selects a work number,plateType and have a mapping', () => {
       before(() => {
-        cy.get('#plateType').within(() => {
-          cy.findByRole('combobox').select('Fresh frozen - Dual Index TT Set A');
-        });
-        cy.findByTestId('select_workNumber').select('SGP1008');
+        selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
+        selectSGPNumber('SGP1008');
       });
       it('should enable save', () => {
         saveButton().should('be.enabled');

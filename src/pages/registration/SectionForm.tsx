@@ -9,10 +9,10 @@ import Heading from '../../components/Heading';
 import FormikInput from '../../components/forms/Input';
 import RadioGroup, { RadioButton } from '../../components/forms/RadioGroup';
 import { objectKeys } from '../../lib/helpers';
-import FormikSelect from '../../components/forms/Select';
-import { optionValues } from '../../components/forms';
+import { selectOptionValues } from '../../components/forms';
 import PinkButton from '../../components/buttons/PinkButton';
 import { SectionRegistrationContext, SectionRegistrationFormValues } from '../SectionRegistration';
+import CustomReactSelect from '../../components/forms/CustomReactSelect';
 
 type SectionFormParams = {
   registrationInfo: GetRegistrationInfoQuery;
@@ -117,46 +117,51 @@ export default function SectionForm({
         })}
       </RadioGroup>
 
-      <FormikSelect
-        label={'Species'}
+      <CustomReactSelect
+        label="Species"
+        dataTestId="Species"
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.species`}
         emptyOption
         className="mt-2"
-      >
-        {optionValues(registrationInfo.species, 'name', 'name')}
-      </FormikSelect>
+        options={selectOptionValues(registrationInfo.species, 'name', 'name')}
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].species}
+      />
 
       <Heading level={4}>Tissue Information</Heading>
 
-      <FormikSelect
+      <CustomReactSelect
         label="HuMFre"
-        disabled={!isHMDMCEnabled}
+        dataTestId="HuMFre"
+        isDisabled={!isHMDMCEnabled}
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.hmdmc`}
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].hmdmc}
         emptyOption
         className="mt-2"
-      >
-        {optionValues(registrationInfo.hmdmcs, 'hmdmc', 'hmdmc')}
-      </FormikSelect>
+        options={selectOptionValues(registrationInfo.hmdmcs, 'hmdmc', 'hmdmc')}
+      />
 
-      <FormikSelect
+      <CustomReactSelect
         label="Tissue Type"
+        dataTestId="Tissue Type"
         emptyOption
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.tissueType`}
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].tissueType}
         className="mt-2"
-      >
-        {optionValues(registrationInfo.tissueTypes, 'name', 'name')}
-      </FormikSelect>
+        options={selectOptionValues(registrationInfo.tissueTypes, 'name', 'name')}
+      />
 
-      <FormikSelect
+      <CustomReactSelect
         label="Spatial Location"
+        dataTestId="Spatial Location"
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.spatialLocation`}
-      >
-        {availableSpatialLocations.map((spatialLocation) => (
-          <option value={spatialLocation.code} key={spatialLocation.code}>
-            {spatialLocation.code + ' - ' + spatialLocation.name}
-          </option>
-        ))}
-      </FormikSelect>
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].spatialLocation}
+        options={availableSpatialLocations.map((spatialLocation) => {
+          return {
+            label: spatialLocation.code + ' - ' + spatialLocation.name,
+            value: spatialLocation.code.toString()
+          };
+        })}
+      />
 
       <FormikInput
         label="Replicate Number"

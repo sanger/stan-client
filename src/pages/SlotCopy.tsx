@@ -18,9 +18,9 @@ import Heading from '../components/Heading';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import { ConfirmationModal } from '../components/modal/ConfirmationModal';
 import Label from '../components/forms/Label';
-import { Select } from '../components/forms/Select';
 import { plateFactory } from '../lib/factories/labwareFactory';
 import LabelCopyButton from '../components/LabelCopyButton';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 
 type PageParams = {
   title: string;
@@ -55,18 +55,18 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
     <div className={'w-full flex flex-row space-x-4 mb-8'} data-testid="input-labware">
       <div className={'w-1/2 flex flex-col'}>
         <Label className={'flex items-center whitespace-nowrap'} name={'Bio State'} />
-        <Select
-          onChange={(e) => onChangeBioState(e.currentTarget.value)}
+        <CustomReactSelect
+          handleChange={(val) => onChangeBioState((val as OptionType).label)}
           value={labware && labware.slotCopyDetails.bioState ? labware.slotCopyDetails.bioState : ''}
           emptyOption={true}
-          data-testid="transfer-type"
-        >
-          {transferTypes.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </Select>
+          dataTestId="transfer-type"
+          options={transferTypes.map((type) => {
+            return {
+              label: type,
+              value: type
+            };
+          })}
+        />
       </div>
       <div className={'w-1/2 flex justify-end items-center'}>
         <BlueButton onClick={onAddLabware} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
@@ -82,20 +82,20 @@ const SlotCopySourceConfigPanel: React.FC<SourceLabwareScanPanelProps> = ({ sele
   return (
     <div className={'w-1/2 mt-4 flex flex-col'} data-testid="input-labware">
       <Label name={'Labware state'} className={'whitespace-nowrap'} />
-      <Select
-        onChange={(e) => {
-          onChangeState(e.currentTarget.value);
+      <CustomReactSelect
+        handleChange={(val) => {
+          onChangeState((val as OptionType).label);
         }}
         value={selectedSource && selectedSource.labwareState ? selectedSource.labwareState : ''}
         emptyOption={true}
-        data-testid="input-labware-state"
-      >
-        {[LabwareState.Active, LabwareState.Used, LabwareState.Discarded].map((state) => (
-          <option key={state} value={state}>
-            {state}
-          </option>
-        ))}
-      </Select>
+        dataTestId="input-labware-state"
+        options={[LabwareState.Active, LabwareState.Used, LabwareState.Discarded].map((state) => {
+          return {
+            label: state,
+            value: state
+          };
+        })}
+      />
     </div>
   );
 };

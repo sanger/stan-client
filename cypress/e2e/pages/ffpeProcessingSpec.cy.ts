@@ -3,9 +3,10 @@ import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFact
 import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
+import { selectOption, selectSGPNumber, shouldOptionsHaveLengthAbove } from '../shared/customReactSelect.cy';
 
 describe('FFPE Processing', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/ffpe_processing', 'workNumber');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/ffpe_processing');
 
   describe('Validation', () => {
     context('when all form fields are empty', () => {
@@ -22,6 +23,9 @@ describe('FFPE Processing', () => {
       });
       it('shows a validation error for the program type', () => {
         cy.findByText('Program Type is a required field').should('be.visible');
+      });
+      it('should display comments', () => {
+        shouldOptionsHaveLengthAbove('commentId', 1);
       });
     });
   });
@@ -89,8 +93,8 @@ describe('FFPE Processing', () => {
     });
   });
   function fillForm() {
-    cy.get('#labwareScanInput').type('STAN-3111{enter}');
-    cy.get('select[name="workNumber"]').select('SGP1008');
-    cy.get('select[name="commentId"]').select('Soft tissue');
+    cy.get('#labwareScanInput').wait(1000).type('STAN-3111{enter}');
+    selectSGPNumber('SGP1008');
+    selectOption('commentId', 'Soft tissue');
   }
 });
