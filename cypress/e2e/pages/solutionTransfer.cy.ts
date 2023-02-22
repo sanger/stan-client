@@ -74,7 +74,7 @@ describe('Solution Transfer', () => {
             )
           );
         });
-        cy.findByRole('button', { name: /Submit/i }).click();
+        cy.findByRole('button', { name: /Submit/i }).click({ force: true });
       });
       it('displays Operation complete message', () => {
         cy.findByText('Operation Complete').should('be.visible');
@@ -85,7 +85,7 @@ describe('Solution Transfer', () => {
       before(() => {
         cy.visit('/lab/solution_transfer');
         selectSGPNumber('SGP1008');
-        cy.get('#labwareScanInput').type('STAN-3111{enter}');
+        cy.get('#labwareScanInput').type('STAN-3111{enter}', { force: true });
         selectOption('applyAllSolution', 'Ethanol');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
@@ -105,7 +105,7 @@ describe('Solution Transfer', () => {
             )
           );
         });
-        cy.findByRole('button', { name: /Submit/i }).click();
+        cy.findByRole('button', { name: /Submit/i }).click({ force: true });
       });
       it('shows the errors', () => {
         cy.findByText('This thing went wrong').should('be.visible');

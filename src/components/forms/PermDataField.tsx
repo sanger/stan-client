@@ -42,7 +42,13 @@ export default function PermDataField<T>({ name }: PermDataFieldProps) {
     <div className="space-y-2">
       <div className="flex flex-row items-center gap-x-2">
         <Label htmlFor={`${name}checkbox`} name={'Control?'} />
-        <Input type="checkbox" id={`${name}checkbox`} checked={isControl} onChange={onIsControlChange} />
+        <Input
+          type="checkbox"
+          className={'w-5 rounded'}
+          id={`${name}checkbox`}
+          checked={isControl}
+          onChange={onIsControlChange}
+        />
       </div>
 
       {permData.controlType && (
@@ -55,7 +61,7 @@ export default function PermDataField<T>({ name }: PermDataFieldProps) {
         </FormikSelect>
       )}
 
-      {!!permData.seconds && (
+      {!isControl && (
         <>
           <Label name={'Perm Time (minutes)'}>
             <Field name={formikName(name, 'seconds')}>
@@ -65,7 +71,10 @@ export default function PermDataField<T>({ name }: PermDataFieldProps) {
                   min={1}
                   step={1}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setFieldValue(formikName(name, 'seconds'), Number(e.currentTarget.value))
+                    setFieldValue(
+                      formikName(name, 'seconds'),
+                      e.currentTarget.value === '' ? undefined : Number(e.currentTarget.value)
+                    )
                   }
                   value={field.value ?? ''} // Stops react complaining about "controlled/uncontrolled" inputs
                 />

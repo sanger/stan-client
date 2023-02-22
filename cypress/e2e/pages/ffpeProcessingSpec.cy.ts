@@ -93,7 +93,7 @@ describe('FFPE Processing', () => {
     });
   });
   function fillForm() {
-    cy.get('#labwareScanInput').type('STAN-3111{enter}');
+    cy.get('#labwareScanInput').wait(1000).type('STAN-3111{enter}');
     selectSGPNumber('SGP1008');
     selectOption('commentId', 'Soft tissue');
   }

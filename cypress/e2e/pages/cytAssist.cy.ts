@@ -229,7 +229,7 @@ describe('CytAssist Page', () => {
         });
         context('When mapping is done  and all field selected except Slide costings', () => {
           it('keeps the Save button disabled', () => {
-            saveButton().should('not.be.enabled');
+            saveButton().should('be.visible').should('not.be.enabled');
           });
         });
         context('When Slide costing is selected', () => {
@@ -237,7 +237,7 @@ describe('CytAssist Page', () => {
             selectSlideCostings('Faculty');
           });
           it('should enable Save button', () => {
-            saveButton().should('be.enabled');
+            saveButton().should('be.visible').should('be.enabled');
           });
         });
       });

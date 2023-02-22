@@ -47,7 +47,6 @@ describe('Pot Processing', () => {
     context('when Fetal waste container is selected', () => {
       before(() => {
         selectOption('labwareType', 'Fetal waste container');
-        cy.wait(1000);
       });
       it('should only display Labware type and Number of labware columns for adding labware', () => {
         cy.findByText('Labware type').should('be.visible');
@@ -108,7 +107,7 @@ describe('Pot Processing', () => {
         selectSGPNumber('');
       });
       it('should disable save button', () => {
-        cy.findByRole('button', { name: /Save/i }).should('be.disabled');
+        cy.findByRole('button', { name: /Save/i }).should('be.visible').should('be.disabled');
       });
     });
   });

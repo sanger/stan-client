@@ -126,7 +126,7 @@ describe('Section Registration Page', () => {
   describe('Adding/Removing slides', () => {
     context('when selecting a slide type and clicking Add Visium TO', () => {
       before(() => {
-        cy.get('#labwareTypesSelect').select('Visium TO');
+        selectOption('labwareTypesSelect', 'Visium TO');
         cy.findByText('+ Add Visium TO').click();
       });
 

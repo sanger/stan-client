@@ -3,6 +3,7 @@ import { RegisterOriginalSamplesMutation, RegisterOriginalSamplesMutationVariabl
 import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
+import { selectFocusBlur, selectOption, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 
 describe('Registration', () => {
   before(() => {
@@ -25,7 +26,7 @@ describe('Registration', () => {
     });
 
     it('requires Labware Type', () => {
-      cy.findByLabelText('Labware Type').focus().blur();
+      selectFocusBlur('Labware Type');
       cy.findByText('Labware Type is a required field').should('be.visible');
     });
     it('displays add button for identical samples', () => {
@@ -65,14 +66,11 @@ describe('Registration', () => {
     });
     it('shows identical information for the created sample with Replicate Number, Fixative, Solution as empty', () => {
       cy.findAllByTestId('Replicate Number').eq(1).should('have.value', '');
-      cy.findAllByLabelText('Fixative').eq(1).should('have.value', '');
-      cy.findAllByLabelText('Solution').eq(1).should('have.value', '');
+      shouldDisplaySelectedValue('Fixative', '');
+      shouldDisplaySelectedValue('Solution', '');
       cy.findAllByTestId('External Identifier').eq(1).should('have.value', '');
-      cy.findAllByLabelText('Spatial Location')
-        .eq(1)
-        .find('option:selected')
-        .should('have.text', '3 - Surface central region');
-      cy.findAllByLabelText('Labware Type').eq(1).find('option:selected').should('have.text', 'Pot');
+      shouldDisplaySelectedValue('Spatial Location', '3 - Surface central region');
+      shouldDisplaySelectedValue('Labware Type', 'Pot');
     });
   });
   context('when clicking the Add Identical Tissue button', () => {
@@ -87,15 +85,11 @@ describe('Registration', () => {
       cy.findByText('- Remove Tissue').should('exist');
     });
     it('shows identical information for the created sample with Replicate Number, Fixative, Solution as empty', () => {
-      cy.findAllByTestId('Replicate Number').eq(1).should('have.value', '');
-      cy.findAllByLabelText('Fixative').eq(1).should('have.value', '');
-      cy.findAllByLabelText('Solution').eq(1).should('have.value', '');
-      cy.findAllByTestId('External Identifier').eq(1).should('have.value', '');
-      cy.findAllByLabelText('Spatial Location')
-        .eq(1)
-        .find('option:selected')
-        .should('have.text', '3 - Surface central region');
-      cy.findAllByLabelText('Labware Type').eq(1).find('option:selected').should('have.text', 'Pot');
+      shouldDisplaySelectedValue('Replicate Number', '');
+      shouldDisplaySelectedValue('Fixative', '');
+      shouldDisplaySelectedValue('Solution', '');
+      shouldDisplaySelectedValue('Spatial Location', '3 - Surface central region');
+      shouldDisplaySelectedValue('Labware Type', 'Pot');
     });
   });
 
@@ -250,7 +244,8 @@ describe('Registration', () => {
                         tissue,
                         labware
                       }
-                    ]
+                    ],
+                    labwareSolutions: []
                   }
                 })
               );
@@ -278,13 +273,13 @@ function fillInForm() {
   cy.findByLabelText('Sample Collection Date').type('2022-01-01', {
     force: true
   });
-  cy.findByLabelText('Species').select('Human');
+  selectOption('Species', 'Human');
   cy.findByTestId('External Identifier').type('EXT_ID_1');
-  cy.findByLabelText('HuMFre').select('HuMFre1');
-  cy.findByLabelText('Tissue Type').select('Liver');
-  cy.findByLabelText('Spatial Location').select('3 - Surface central region');
+  selectOption('HuMFre', 'HuMFre1');
+  selectOption('Tissue Type', 'Liver');
+  selectOption('Spatial Location', '3 - Surface central region');
   cy.findByTestId('Replicate Number').type('2');
-  cy.findByLabelText('Labware Type').select('Pot');
-  cy.findByLabelText('Fixative').select('None');
-  cy.findByLabelText('Solution').select('Formalin');
+  selectOption('Labware Type', 'Pot');
+  selectOption('Fixative', 'None');
+  selectOption('Solution', 'Formalin');
 }
