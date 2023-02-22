@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { GetStainInfoQuery, LabwareFieldsFragment } from '../types/sdk';
 import AppShell from '../components/AppShell';
 import StainForm from './staining/StainForm';
-import { Select } from '../components/forms/Select';
-import { optionValues } from '../components/forms';
+import { selectOptionValues } from '../components/forms';
 import Label from '../components/forms/Label';
 import MutedText from '../components/MutedText';
 import ComplexStainForm from './staining/ComplexStainForm';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 
 /**
  * By default, any new stain types will use the "simple" form. Any that need to use the
@@ -32,8 +32,11 @@ export default function Staining({ stainingInfo }: StainingProps) {
         <div className="mx-auto max-w-screen-xl">
           <div className="md:w-1/2">
             <Label name={'Stain Type'}>
-              <Select emptyOption onChange={(e) => setStainType(e.currentTarget.value)}>
-                {optionValues(
+              <CustomReactSelect
+                emptyOption
+                dataTestId={'stainType'}
+                handleChange={(e) => setStainType((e as OptionType).label)}
+                options={selectOptionValues(
                   [
                     ...stainingInfo.stainTypes,
                     {
@@ -45,7 +48,7 @@ export default function Staining({ stainingInfo }: StainingProps) {
                   'name',
                   'name'
                 )}
-              </Select>
+              />
             </Label>
           </div>
 

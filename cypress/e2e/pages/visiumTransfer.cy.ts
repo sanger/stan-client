@@ -5,11 +5,12 @@ import {
   SlotCopyMutationVariables
 } from '../../../src/types/sdk';
 import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
+import { selectOption, selectSGPNumber, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 
 describe('Transfer Page', () => {
   before(() => {
     cy.visit('/lab/transfer');
-    cy.findByTestId('select_workNumber').select('SGP1008');
+    selectSGPNumber('SGP1008');
   });
 
   describe('On load', () => {
@@ -86,11 +87,7 @@ describe('Transfer Page', () => {
   });
   context('when entering labware state values', () => {
     before(() => {
-      cy.findByTestId('input-labware-state').select('used');
-    });
-
-    it('shows the selected state', () => {
-      cy.findByText('used').should('be.visible');
+      selectOption('input-labware-state', 'used');
     });
     context('when navigating away and coming to the labware with state selected', () => {
       before(() => {
@@ -144,10 +141,10 @@ describe('Transfer Page', () => {
     context('when user selects a bio-state for a destination well plate', () => {
       before(() => {
         cy.findByRole('button', { name: '+ Add Plate' }).click();
-        cy.findByTestId('transfer-type').select('Probes');
+        selectOption('transfer-type', 'Probes');
       });
       it('should display selected labware state', () => {
-        cy.findByText('Probes').should('be.visible');
+        shouldDisplaySelectedValue('transfer-type', 'Probes');
       });
       context('when user navigates away and the come back to destination plate with bio-state', () => {
         before(() => {
@@ -155,7 +152,7 @@ describe('Transfer Page', () => {
           cy.findAllByTestId('right-button').eq(1).click();
         });
         it('should display previous selected labware state', () => {
-          cy.findByText('Probes').should('be.visible');
+          shouldDisplaySelectedValue('transfer-type', 'Probes');
         });
       });
       after(() => {
@@ -180,8 +177,8 @@ describe('Transfer Page', () => {
 
       context('when all required field are entered', () => {
         before(() => {
-          cy.findByTestId('transfer-type').select('Probes');
-          cy.findByTestId('input-labware-state').select('used');
+          selectOption('transfer-type', 'Probes');
+          selectOption('input-labware-state', 'used');
         });
         it('enables Save Button', () => {
           saveButton().should('be.enabled');
@@ -300,8 +297,7 @@ function saveButton() {
 
 function saveSlotForLabwareWithNoPerm() {
   cy.visit('/lab/transfer');
-
-  cy.findByTestId('select_workNumber').select('SGP1008');
+  selectSGPNumber('SGP1008');
   cy.msw().then(({ worker, graphql }) => {
     const labware = createLabware('STAN-3200');
     worker.use(
@@ -325,8 +321,7 @@ function saveSlotForLabwareWithNoPerm() {
   cy.get('#outputLabwares').within(() => {
     cy.findByText('A1').click();
   });
-
-  cy.findByTestId('transfer-type').select('Probes');
-  cy.findByTestId('input-labware-state').select('used');
+  selectOption('transfer-type', 'Probes');
+  selectOption('input-labware-state', 'used');
   saveButton().click();
 }

@@ -9,7 +9,7 @@ describe('Visium Analysis', () => {
 
   context('when a scanned in plate has a previously selected perm time', () => {
     before(() => {
-      cy.get("input[type='text']").type('STAN-411{enter}');
+      cy.get("input[type='text']").eq(1).type('STAN-411{enter}');
     });
 
     it('should already be selected', () => {

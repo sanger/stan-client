@@ -1,3 +1,10 @@
+import {
+  getAllSelect,
+  selectOption,
+  selectSGPNumber,
+  shouldDisplaySelectedValue
+} from '../shared/customReactSelect.cy';
+
 describe('Staining QC', () => {
   before(() => {
     cy.visit('/lab/staining_qc');
@@ -6,14 +13,14 @@ describe('Staining QC', () => {
   describe('Save button', () => {
     context('when no labwares have been scanned', () => {
       it('is disabled', () => {
-        cy.get('select').select('SGP1008');
+        selectSGPNumber('SGP1008');
         cy.findByRole('button', { name: 'Save' }).should('be.disabled');
       });
     });
 
     context('when there is at least 1 labware', () => {
       before(() => {
-        cy.get('select').select('SGP1008');
+        selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').type('STAN-411{enter}');
       });
 
@@ -35,7 +42,9 @@ describe('Staining QC', () => {
       });
 
       it('has comment dropdowns enabled', () => {
-        cy.findByTestId('passFailComments').get('select').should('be.enabled');
+        getAllSelect('comment').forEach((elem: any) => {
+          cy.wrap(elem).should('be.enabled');
+        });
       });
 
       it('has coverage field displayed', () => {
@@ -58,18 +67,18 @@ describe('Staining QC', () => {
       });
 
       it('enables all the comment dropdowns', () => {
-        cy.findByTestId('passFailComments').get('select').should('be.enabled');
+        getAllSelect('comment').forEach((elem: any) => {
+          cy.wrap(elem).should('be.enabled');
+        });
       });
 
       context('when changing the comment all dropdown', () => {
         before(() => {
-          cy.findByTestId('commentAll').select('Wrong morphology');
+          selectOption('commentAll', 'Wrong morphology');
         });
         it('changes all the comments', () => {
           cy.findByTestId('passFailComments').within(() => {
-            cy.get('select option:selected').each((elem) => {
-              cy.wrap(elem).should('have.text', 'Wrong morphology');
-            });
+            shouldDisplaySelectedValue('comment', 'Wrong morphology');
           });
         });
       });

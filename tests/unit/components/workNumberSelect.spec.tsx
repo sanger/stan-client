@@ -3,7 +3,6 @@ import { describe } from '@jest/globals';
 import WorkNumberSelect from '../../../src/components/WorkNumberSelect';
 import { FindWorkInfoQuery, GetAllWorkInfoQuery, WorkStatus } from '../../../src/types/sdk';
 import { Formik } from 'formik';
-import userEvent from '@testing-library/user-event';
 
 afterEach(() => {
   cleanup();
@@ -100,83 +99,65 @@ jest.mock('../../../src/lib/sdk', () => ({
   }
 }));
 
+const invokeSelect = () => {
+  const input = screen.getByRole('combobox');
+  expect(input).toBeInTheDocument();
+  fireEvent.keyDown(input, { keyCode: 40 });
+};
+
+const selectOption = (optionText: string) => {
+  invokeSelect();
+  const option = screen.getByText(optionText);
+  expect(option).toBeInTheDocument();
+  fireEvent.click(option);
+};
 describe('WorkNumberSelect.tsx', () => {
   describe('Normal Select component', () => {
     describe('OnMount', () => {
       it('displays select component with work numbers', async () => {
-        act(() => {
+        await act(async () => {
           render(<WorkNumberSelect label={'Work Number'} />);
         });
-        const workNumberSelect = (await screen.findByTestId('select_workNumber')) as HTMLSelectElement;
+
+        const workNumberSelect = screen.getByTestId('workNumber');
         // Shows the select component
         expect(workNumberSelect).toBeInTheDocument();
-        //Shows an empty value
-        expect(workNumberSelect).toHaveValue('');
 
-        //Expect the select has got all options including empty string
-        expect(workNumberSelect.options.length).toEqual(3);
-
-        //Expect the select option to have the correct work numbers in descending order
-        expect(workNumberSelect.options[0].value).toEqual('');
-        expect(workNumberSelect.options[1].value).toEqual('WORK_2');
-        expect(workNumberSelect.options[2].value).toEqual('WORK_1');
+        invokeSelect();
+        //Expect the select has got all options
+        expect(screen.getByTestId('workNumber')).toHaveTextContent('WORK_2');
+        expect(screen.getByTestId('workNumber')).toHaveTextContent('WORK_1');
       });
       it('displays select component with all work numbers', async () => {
-        act(() => {
+        await act(async () => {
           render(<WorkNumberSelect label={'Work Number'} workNumberType={'ALL'} />);
         });
-        const workNumberSelect = (await screen.findByTestId('select_workNumber')) as HTMLSelectElement;
+        const workNumberSelect = screen.getByTestId('workNumber');
         // Shows the select component
         expect(workNumberSelect).toBeInTheDocument();
-        //Shows an empty value
-        expect(workNumberSelect).toHaveValue('');
 
-        //Expect the select has got all options including empty string
-        expect(workNumberSelect.options.length).toEqual(4);
-
-        //Expect the select option to have the correct work numbers in descending order
-        expect(workNumberSelect.options[0].value).toEqual('');
-        expect(workNumberSelect.options[1].value).toEqual('WORK_3');
-        expect(workNumberSelect.options[2].value).toEqual('WORK_2');
-        expect(workNumberSelect.options[3].value).toEqual('WORK_1');
+        invokeSelect();
+        //Expect the select has got all options
+        expect(screen.getByTestId('workNumber')).toHaveTextContent('WORK_2');
+        expect(screen.getByTestId('workNumber')).toHaveTextContent('WORK_3');
+        expect(screen.getByTestId('workNumber')).toHaveTextContent('WORK_1');
       });
-      it('displays select component with all work numbers', async () => {
-        act(() => {
+      it('displays select component with only failed work numbers', async () => {
+        await act(async () => {
           render(<WorkNumberSelect label={'Work Number'} workNumberType={WorkStatus.Failed} />);
         });
-        const workNumberSelect = (await screen.findByTestId('select_workNumber')) as HTMLSelectElement;
-        // Shows the select component
-        expect(workNumberSelect).toBeInTheDocument();
-        //Shows an empty value
-        expect(workNumberSelect).toHaveValue('');
-
-        //Expect the select has got all options including empty string
-        expect(workNumberSelect.options.length).toEqual(2);
-
-        //Expect the select option to have the correct work numbers
-        expect(workNumberSelect.options[0].value).toEqual('');
-        expect(workNumberSelect.options[1].value).toEqual('WORK_3');
+        invokeSelect();
+        //Expect the select has got only failed work number
+        expect(screen.getByTestId('workNumber')).toHaveTextContent('WORK_3');
+        expect(screen.getByTestId('workNumber')).not.toHaveTextContent('WORK_1');
       });
       describe('onSelection', () => {
-        it('displays selected work number', async () => {
-          act(() => {
-            render(<WorkNumberSelect label={'Work Number'} multiple={false} />);
-          });
-          const workNumberSelect = (await screen.findByTestId('select_workNumber')) as HTMLSelectElement;
-
-          workNumberSelect.options[1].selected = true;
-          //Expect to display the selected Work Number
-          expect(workNumberSelect.value).toBe('WORK_2');
-        });
         it('displays error message when no work number selected on blur', async () => {
-          act(() => {
+          await act(async () => {
             render(<WorkNumberSelect label={'Work Number'} />);
           });
-          //Expect to display the error message
-          const workNumberSelect = (await screen.findByTestId('select_workNumber')) as HTMLSelectElement;
-
-          await userEvent.selectOptions(workNumberSelect, ['']);
-          workNumberSelect.blur();
+          const input = screen.getByRole('combobox');
+          fireEvent.blur(input);
           expect(screen.getByText('SGP number is required')).toBeInTheDocument();
         });
       });
@@ -189,45 +170,32 @@ describe('WorkNumberSelect.tsx', () => {
     };
     describe('On Mount', () => {
       it('displays formik select component with work numbers', async () => {
-        act(() => {
+        await act(async () => {
           render(
             <Formik {...FormikProps}>
               <WorkNumberSelect name={'name'} label={'Work Number'} />
             </Formik>
           );
         });
-        const workNumberSelect = (await screen.findByTestId('workNumber')) as HTMLSelectElement;
-
+        const workNumberSelect = screen.getByTestId('workNumber');
         // Shows the select component
         expect(workNumberSelect).toBeInTheDocument();
-
-        //Shows an empty value
-        expect(workNumberSelect).toHaveValue('');
-
-        //Expect the select has got all options including empty string
-        expect(workNumberSelect.options.length).toEqual(3);
-
-        //Expect the select option to have the correct work numbers
-        expect(workNumberSelect.options[0].value).toEqual('');
-        expect(workNumberSelect.options[1].value).toEqual('WORK_2');
-        expect(workNumberSelect.options[2].value).toEqual('WORK_1');
+        invokeSelect();
+        //Expect the select has got all options
+        expect(screen.getByTestId('workNumber')).toHaveTextContent('WORK_2');
+        expect(screen.getByTestId('workNumber')).toHaveTextContent('WORK_1');
       });
     });
     describe('onSelection', () => {
       it('displays selected work number', async () => {
-        act(() => {
+        await act(async () => {
           render(
             <Formik {...FormikProps}>
               <WorkNumberSelect name={'name'} label={'Work Number'} />
             </Formik>
           );
         });
-        const workNumberSelect = (await screen.findByTestId('workNumber')) as HTMLSelectElement;
-        fireEvent.change(workNumberSelect, { target: { value: 'WORK_2' } });
-
-        //Shows selected value
-        expect(workNumberSelect).toHaveValue('WORK_2');
-
+        selectOption('WORK_2');
         //Expect to display the work Requestor for the selected Work Number
         const userText = await screen.findByText('User 2');
         expect(userText).toBeInTheDocument();

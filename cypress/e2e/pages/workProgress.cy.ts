@@ -1,3 +1,5 @@
+import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
+
 describe('Work Progress', () => {
   before(() => {
     cy.visit('./');
@@ -12,8 +14,9 @@ describe('Work Progress', () => {
       it('shows a list of results', () => {
         cy.findByRole('table').contains('SGP/R&D Number');
       });
+
       it("will show the 'SGP/R&D Number' in  type dropdown ", () => {
-        cy.findByTestId('select_workNumber').should('have.value', 'SGP1008');
+        cy.contains('SGP1008').should('be.visible');
       });
       it('enables Search button', () => {
         cy.findByRole('button', { name: /Search/i }).should('be.enabled');
@@ -28,9 +31,8 @@ describe('Work Progress', () => {
           cy.visit('/?workTypes[]=Work%20Type%201&workTypes[]=Work%20Type%202');
         });
         it('will display the given Work type dropdown', () => {
-          cy.findAllByTestId('caption').should('have.length', 2);
-          cy.findAllByTestId('caption').eq(0).should('have.text', 'Work Type 1');
-          cy.findAllByTestId('caption').eq(1).should('have.text', 'Work Type 2');
+          cy.contains('Work Type 1').should('be.visible');
+          cy.contains('Work Type 2').should('be.visible');
         });
         it('shows a list of results', () => {
           cy.findByRole('table').should('exist');
@@ -43,9 +45,8 @@ describe('Work Progress', () => {
           cy.visit('?statuses[]=active&statuses[]=paused');
         });
         it('will display the given status in dropdown', () => {
-          cy.findAllByTestId('caption').should('have.length', 2);
-          cy.findAllByTestId('caption').eq(0).should('have.text', 'active');
-          cy.findAllByTestId('caption').eq(1).should('have.text', 'paused');
+          cy.contains('active').should('be.visible');
+          cy.contains('paused').should('be.visible');
         });
         it('shows a list of results', () => {
           cy.findByRole('table').should('exist');
@@ -58,8 +59,7 @@ describe('Work Progress', () => {
           cy.visit('?programs[]=PROGRAM_999');
         });
         it('will display the given Work type in value dropdown', () => {
-          cy.findAllByTestId('caption').should('have.length', 1);
-          cy.findAllByTestId('caption').eq(0).should('have.text', 'PROGRAM_999');
+          cy.contains('PROGRAM_999').should('be.visible');
         });
         it('shows a list of results', () => {
           cy.findByRole('table').should('exist');
@@ -79,12 +79,11 @@ describe('Work Progress', () => {
         cy.visit('?statuses[]=active&statuses[]=paused&workNumber=SGP1008');
       });
       it('should select the given work number in ui ', () => {
-        cy.findByTestId('select_workNumber').should('have.value', 'SGP1008');
+        cy.contains('SGP1008').should('be.visible');
       });
       it('should select all given statuses in ui ', () => {
-        cy.findAllByTestId('caption').should('have.length', 2);
-        cy.findAllByTestId('caption').eq(0).should('have.text', 'active');
-        cy.findAllByTestId('caption').eq(1).should('have.text', 'paused');
+        cy.contains('active').should('be.visible');
+        cy.contains('paused').should('be.visible');
       });
       it('shows a list of results', () => {
         cy.findByRole('table').should('exist');
@@ -126,7 +125,7 @@ describe('Work Progress', () => {
   // TESTCASES for  Work Number Search action
   describe('Testcases for  Work Number based search action', () => {
     before(() => {
-      cy.visit('');
+      cy.visit('/');
     });
     context('no value is entered', () => {
       it('shows a disabled search button ', () => {
@@ -135,7 +134,7 @@ describe('Work Progress', () => {
     });
     context('when a worknumber is given', () => {
       before(() => {
-        cy.findByTestId('select_workNumber').select('SGP1008');
+        selectSGPNumber('SGP1008');
       });
       it('enables search button ', () => {
         cy.findByRole('button', { name: /Search/i }).should('be.enabled');
@@ -156,7 +155,7 @@ describe('Work Progress', () => {
     context('when a workType is given which has no results', () => {
       before(() => {
         cy.visit('');
-        cy.findByTestId('select_workType').select(['Work Type 2']);
+        selectOption('select_workType', 'Work Type 2');
         cy.findByRole('button', { name: /Search/i }).click();
       });
       it('will show a notification', () => {
@@ -165,7 +164,7 @@ describe('Work Progress', () => {
     });
     context('when a workType is given which has results', () => {
       before(() => {
-        cy.findByTestId('select_workType').select(['Work Type 1']);
+        selectOption('select_workType', 'Work Type 1');
         cy.findByRole('button', { name: /Search/i }).click();
       });
 
@@ -180,7 +179,7 @@ describe('Work Progress', () => {
     context('when a status is given with no results', () => {
       before(() => {
         cy.visit('');
-        cy.findByTestId('select_status').select('failed');
+        selectOption('select_status', 'failed');
         cy.findByRole('button', { name: /Search/i }).click();
       });
       it('will show a notification', () => {
@@ -188,8 +187,8 @@ describe('Work Progress', () => {
       });
       context('when a status is given which has results', () => {
         before(() => {
-          cy.findByTestId('select_status').select('active');
-          cy.findByTestId('select_status').select('completed');
+          selectOption('select_status', 'active');
+          selectOption('select_status', 'completed');
           cy.findByRole('button', { name: /Search/i }).click();
         });
         it('will show a table with results', () => {
@@ -199,7 +198,7 @@ describe('Work Progress', () => {
     });
     context('when a paused value is given for status', () => {
       before(() => {
-        cy.findByTestId('select_status').select('paused');
+        selectOption('select_status', 'paused');
         cy.findByRole('button', { name: /Search/i }).click();
       });
       it('will show a table with results', () => {
@@ -213,8 +212,8 @@ describe('Work Progress', () => {
   describe('Testing WorkNumber link', () => {
     context('when a search is performed using work number', () => {
       before(() => {
-        cy.visit('');
-        cy.findByTestId('select_workNumber').select('SGP1008');
+        cy.visit('/');
+        selectOption('workNumber', 'SGP1008');
         cy.findByRole('button', { name: /Search/i }).click();
       });
       it('shows a link for work type in the results table', () => {

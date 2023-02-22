@@ -17,10 +17,10 @@ import Heading from '../components/Heading';
 import { visiumLPCytAssistFactory, visiumLPCytAssistXLFactory } from '../lib/factories/labwareFactory';
 import MutedText from '../components/MutedText';
 import ScanInput from '../components/scanInput/ScanInput';
-import { Select } from '../components/forms/Select';
 import { objectKeys } from '../lib/helpers';
 import Label from '../components/forms/Label';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 
 /**
  * Success notification when slots have been copied
@@ -29,6 +29,7 @@ const ToastSuccess = () => <Success message={'Slots copied'} />;
 
 interface OutputLabwareScanPanelProps {
   preBarcode: Maybe<string> | undefined;
+  labwareType: string;
   onChangeBarcode: (barcode: string) => void;
   onChangeLabwareType: (labwareType: string) => void;
   onChangeCosting: (costing: string) => void;
@@ -40,7 +41,8 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
   onChangeBarcode,
   onChangeLabwareType,
   onChangeCosting,
-  onChangeLOTNumber
+  onChangeLOTNumber,
+  labwareType
 }) => {
   /**State to store preBarcode validation errors**/
   const [preBarcodeValidationError, setPreBarcodeValidationError] = React.useState('');
@@ -114,44 +116,39 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
       </div>
       <div>
         <Label name={'Labware Type'} />
-        <Select
-          onChange={(e) => {
-            onChangeLabwareType(e.currentTarget.value);
+        <CustomReactSelect
+          handleChange={(val) => {
+            onChangeLabwareType((val as OptionType).label);
           }}
+          value={labwareType}
           emptyOption={false}
-          data-testid="output-labware-type"
-        >
-          {objectKeys(LabwareTypeName)
-            .filter(
-              (key) =>
-                LabwareTypeName[key] === LabwareTypeName.VISIUM_LP_CYTASSIST ||
-                LabwareTypeName[key] === LabwareTypeName.VISIUM_LP_CYTASSIST_XL
-            )
-            .map((key) => (
-              <option key={key} value={LabwareTypeName[key]}>
-                {LabwareTypeName[key]}
-              </option>
-            ))}
-        </Select>
+          dataTestId="output-labware-type"
+          options={[LabwareTypeName.VISIUM_LP_CYTASSIST, LabwareTypeName.VISIUM_LP_CYTASSIST_XL].map((key) => {
+            return {
+              label: key,
+              value: key
+            };
+          })}
+        />
       </div>
       <div>
         <Label name={'Slide costings'} />
-        <Select
-          onChange={(e) => {
-            validateCosting(e.currentTarget.value);
+        <CustomReactSelect
+          handleChange={(val) => {
+            validateCosting((val as OptionType).label);
           }}
-          onBlur={(e) => {
-            validateCosting(e.currentTarget.value);
+          handleBlur={(val) => {
+            val && validateCosting((val as OptionType).label);
           }}
           emptyOption={true}
-          data-testid="output-labware-costing"
-        >
-          {objectKeys(SlideCosting).map((key) => (
-            <option key={key} value={SlideCosting[key]}>
-              {SlideCosting[key]}
-            </option>
-          ))}
-        </Select>
+          dataTestId="output-labware-costing"
+          options={objectKeys(SlideCosting).map((key) => {
+            return {
+              label: SlideCosting[key],
+              value: SlideCosting[key]
+            };
+          })}
+        />
         {costingValidationError && <MutedText className={'text-red-400'}>{costingValidationError}</MutedText>}
       </div>
       <div data-testid={'lot-number'}>
@@ -168,7 +165,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
         )}
       </div>
       <div data-testid={'probe-lot-number'}>
-        <Label name={'Transcriptome Probe LOT number'} />
+        <Label name={'Transcriptome Probe LOT number'} className={'whitespace-nowrap'} />
         <ScanInput
           onScan={(val) => validateLotNumber(val, true)}
           onBlur={(e) => {
@@ -377,6 +374,11 @@ const CytAssist = () => {
             outputLabwareConfigPanel={
               <CytAssistOutputlabwareScanPanel
                 preBarcode={selectedDestination && selectedDestination.slotCopyDetails.preBarcode}
+                labwareType={
+                  selectedDestination
+                    ? selectedDestination.slotCopyDetails.labwareType
+                    : LabwareTypeName.VISIUM_LP_CYTASSIST
+                }
                 onChangeBarcode={handleChangeOutputLabwareBarcode}
                 onChangeLabwareType={handleChangeOutputLabwareType}
                 onChangeCosting={handleChangeCosting}

@@ -13,12 +13,12 @@ import MutedText from '../components/MutedText';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import columns from '../components/dataTableColumns/labwareColumns';
-import { FormikErrorMessage, optionValues } from '../components/forms';
-import FormikSelect from '../components/forms/Select';
+import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import PinkButton from '../components/buttons/PinkButton';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { reload, StanCoreContext } from '../lib/sdk';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
+import CustomReactSelect from '../components/forms/CustomReactSelect';
 
 const initialValues: DestroyRequest = {
   barcodes: [],
@@ -107,9 +107,14 @@ const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
                       <Heading level={3}>Reason</Heading>
                       <MutedText>Please select the reason for destruction.</MutedText>
 
-                      <FormikSelect disabled={formLocked} label={'Reason'} name={'reasonId'} emptyOption>
-                        {optionValues(destroyInfo.destructionReasons, 'text', 'id')}
-                      </FormikSelect>
+                      <CustomReactSelect
+                        isDisabled={formLocked}
+                        label={'Reason'}
+                        name={'reasonId'}
+                        dataTestId="Reason"
+                        emptyOption
+                        options={selectOptionValues(destroyInfo.destructionReasons, 'text', 'id')}
+                      />
                     </motion.div>
                   </motion.div>
 

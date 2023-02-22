@@ -123,3 +123,25 @@ export async function setLocationCustomName(
 
   return setLocationCustomName;
 }
+
+/**
+ * Get details of specified location
+ */
+export async function getLocation(barcode: string): Promise<LocationFieldsFragment | undefined> {
+  const { location } = await stanCore.FindLocationByBarcode({ barcode });
+  if (!location) {
+    return undefined;
+  }
+  return location;
+}
+
+/**
+ * Get details of specified location
+ */
+export async function transferItems(
+  sourceBarcode: string,
+  destinationBarcode: string
+): Promise<LocationFieldsFragment | undefined> {
+  const { transfer } = await stanCore.TransferLocationItems({ sourceBarcode, destinationBarcode });
+  return transfer;
+}

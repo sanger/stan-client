@@ -8,10 +8,9 @@ import variants from '../lib/motionVariants';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';
 import WorkNumberSelect from '../components/WorkNumberSelect';
-import { FormikErrorMessage, optionValues } from '../components/forms';
+import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
-import FormikSelect from '../components/forms/Select';
 import PinkButton from '../components/buttons/PinkButton';
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
@@ -19,6 +18,7 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import { reload, stanCore } from '../lib/sdk';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { Column } from 'react-table';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 
 type RecordInPlaceProps = {
   /**
@@ -144,20 +144,17 @@ export default function RecordInPlace({ title, operationType, equipment, columns
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                         <Heading level={3}>Equipment</Heading>
 
-                        <FormikSelect
-                          disabled={current.matches('submitted')}
+                        <CustomReactSelect
+                          isDisabled={current.matches('submitted')}
                           label={'Equipment'}
                           name={'equipmentId'}
                           emptyOption
-                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                            setFieldValue(
-                              'equipmentId',
-                              e.target.value === '' ? undefined : parseInt(e.target.value, 10)
-                            );
+                          handleChange={(val) => {
+                            const value = (val as OptionType).label;
+                            setFieldValue('equipmentId', value === '' ? undefined : parseInt(value, 10));
                           }}
-                        >
-                          {optionValues(equipment, 'name', 'id')}
-                        </FormikSelect>
+                          options={selectOptionValues(equipment, 'name', 'id')}
+                        />
                       </motion.div>
                     )}
                   </motion.div>

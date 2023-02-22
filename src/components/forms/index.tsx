@@ -74,6 +74,33 @@ export function optionValues<L extends string, V extends string, T extends Optio
   });
 }
 
+export function selectOptionValues<L extends string, V extends string, T extends OptionTemplate<L, V>>(
+  entities: T[],
+  label: L,
+  value: V,
+  keyAsValue?: boolean,
+  sortProps: { sort: boolean; sortType?: 'Ascending' | 'Descending'; alphaFirst?: boolean; excludeWords?: string[] } = {
+    sort: true,
+    sortType: 'Ascending',
+    alphaFirst: false,
+    excludeWords: ['None']
+  }
+) {
+  if (!entities || entities.length === 0) return [];
+  let mapEntities = sortProps.sort
+    ? [...entities].sort((a, b) => {
+        const sortType = sortProps.sortType ?? 'Ascending';
+        const aVal = sortType === 'Ascending' ? a[label] : b[label];
+        const bVal = sortType === 'Ascending' ? b[label] : a[label];
+        if (sortProps.excludeWords?.includes(String(aVal)) || String(bVal) === 'None') return 0;
+        return alphaNumericSortDefault(String(aVal).toUpperCase(), String(bVal).toUpperCase(), sortProps.alphaFirst);
+      })
+    : entities;
+  return mapEntities.map((e) => {
+    return { value: String(e[value]), label: e[label] };
+  });
+}
+
 export function formikName(prefix: string, name: string): string {
   if (prefix === '') return name;
   return [prefix, name].join('.');

@@ -12,13 +12,13 @@ import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import { FormikErrorMessage } from '../components/forms';
-import FormikSelect from '../components/forms/Select';
 import LabwareScanTable from '../components/labwareScanPanel/LabwareScanPanel';
 import labwareScanTableColumns from '../components/dataTableColumns/labwareColumns';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
 import PinkButton from '../components/buttons/PinkButton';
+import CustomReactSelect from '../components/forms/CustomReactSelect';
 
 interface FFPEProcessingParams {
   ffPeInfo: GetFfpeProcessingInfoQuery;
@@ -130,13 +130,19 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProces
                       </motion.div>
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                         <Heading level={3}>Program Type</Heading>
-                        <FormikSelect name={'commentId'} label={''} emptyOption className={'w-1/2'}>
-                          {ffPeInfo.comments.map((comment) => (
-                            <option value={comment.id} key={comment.id}>
-                              {comment.text}
-                            </option>
-                          ))}
-                        </FormikSelect>
+                        <CustomReactSelect
+                          name={'commentId'}
+                          dataTestId={'commentId'}
+                          label={''}
+                          emptyOption
+                          className={'w-1/2'}
+                          options={ffPeInfo.comments.map((comment) => {
+                            return {
+                              label: comment.text,
+                              value: comment.id + ''
+                            };
+                          })}
+                        />
                       </motion.div>
                     </motion.div>
                     <Sidebar>

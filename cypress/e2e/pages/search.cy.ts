@@ -14,8 +14,8 @@ describe('Search', () => {
       cy.findByLabelText('STAN Barcode').should('have.value', 'STAN-0001F');
       cy.findByLabelText('External Identifier').should('have.value', 'EXT987');
       cy.findByLabelText('Donor ID').should('have.value', 'DNR123');
-      cy.findByLabelText('Tissue Type').should('have.value', 'Tissue Type 1');
-      cy.findByLabelText('SGP Number').should('have.value', 'SGP1008');
+      cy.contains('Tissue Type 1').should('be.visible');
+      cy.contains('SGP Number').should('be.visible');
       cy.findByLabelText('Created After').should('have.value', '2021-07-01');
       cy.findByLabelText('Created Before').should('have.value', '2021-07-31');
     });

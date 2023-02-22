@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 
 import AppShell from '../components/AppShell';
 import { useMachine } from '@xstate/react';
@@ -11,7 +11,6 @@ import * as Yup from 'yup';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
-import FormikSelect from '../components/forms/Select';
 import LabwareScanTable from '../components/labwareScanPanel/LabwareScanPanel';
 import labwareScanTableColumns from '../components/dataTableColumns/labwareColumns';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
@@ -19,14 +18,15 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
 import PinkButton from '../components/buttons/PinkButton';
 import { Row } from 'react-table';
-import MutedText from '../components/MutedText';
 import {
   GetSolutionTransferInfoQuery,
   LabwareFieldsFragment,
   PerformSolutionTransferMutation,
   SolutionTransferRequest
 } from '../types/sdk';
-import { FormikErrorMessage } from '../components/forms';
+import { FormikErrorMessage, selectOptionValues } from '../components/forms';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import MutedText from '../components/MutedText';
 
 interface SolutionTransferParams {
   solutionTransferInfo: GetSolutionTransferInfoQuery;
@@ -73,23 +73,22 @@ const SolutionTransfer: React.FC<SolutionTransferParams> = ({ solutionTransferIn
   }
 
   // Column with actions (such as delete) to add to the end of the labwareScanTableColumns passed in
-  const solutionsColumn = React.useMemo(() => {
+  const solutionsColumn = (values: SolutionTransferFormData) => {
     return {
       Header: 'Solution',
       id: 'solutions',
       Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
         return (
-          <FormikSelect name={`labware.${row.index}.solution`} label={''} emptyOption>
-            {solutionTransferInfo.solutions.map((solution) => (
-              <option value={solution.name} key={`${row.values.barcode}-${solution.name}`}>
-                {solution.name}
-              </option>
-            ))}
-          </FormikSelect>
+          <CustomReactSelect
+            name={`labware.${row.index}.solution`}
+            emptyOption
+            options={selectOptionValues(solutionTransferInfo.solutions, 'name', 'name')}
+            value={values.labware[row.index]?.solution}
+          />
         );
       }
     };
-  }, [solutionTransferInfo]);
+  };
 
   return (
     <AppShell>
@@ -158,31 +157,28 @@ const SolutionTransfer: React.FC<SolutionTransferParams> = ({ solutionTransferIn
                           <motion.div variants={variants.fadeInWithLift}>
                             {values.labware.length > 0 && (
                               <motion.div variants={variants.fadeInWithLift} className={'pt-10 pb-5'}>
-                                <FormikSelect
+                                <CustomReactSelect
                                   name={'applyAllSolution'}
+                                  dataTestId={'applyAllSolution'}
                                   label={'Solution'}
                                   emptyOption
                                   className={'w-1/2'}
-                                  onChange={(evt: ChangeEvent<HTMLSelectElement>) => {
-                                    setFieldValue('applyAllSolution', evt.currentTarget.value);
+                                  handleChange={(val) => {
+                                    const solution = (val as OptionType).label;
+                                    setFieldValue('applyAllSolution', solution);
                                     values.labware.forEach((lw, indx) =>
-                                      setFieldValue(`labware.${indx}.solution`, evt.currentTarget.value)
+                                      setFieldValue(`labware.${indx}.solution`, solution)
                                     );
                                   }}
-                                >
-                                  {solutionTransferInfo.solutions.map((solution) => (
-                                    <option value={solution.name} key={solution.name}>
-                                      {solution.name}
-                                    </option>
-                                  ))}
-                                </FormikSelect>
+                                  options={selectOptionValues(solutionTransferInfo.solutions, 'name', 'name')}
+                                />
                                 <MutedText>Solution selected will be applied to all labware</MutedText>{' '}
                               </motion.div>
                             )}
                             <LabwareScanTable
                               columns={[
                                 labwareScanTableColumns.barcode(),
-                                solutionsColumn,
+                                solutionsColumn(values),
                                 labwareScanTableColumns.donorId(),
                                 labwareScanTableColumns.tissueType(),
                                 labwareScanTableColumns.labwareType(),

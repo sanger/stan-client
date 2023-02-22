@@ -10,7 +10,7 @@ import { stringify } from '../../lib/helpers';
 import { useLocation } from 'react-router-dom';
 import { statusSort } from '../../types/stan';
 import WorkNumberSelect from '../WorkNumberSelect';
-import { MultiSelect } from '../multiSelect/MultiSelect';
+import CustomReactSelect from '../forms/CustomReactSelect';
 
 /**
  * Form validation schema
@@ -73,7 +73,6 @@ export default function WorkProgressInput({ urlParams, workTypes, programs }: Wo
           <Form>
             <div className={'grid grid-cols-2 gap-x-10 gap-y-6 border border-gray-200 bg-gray-100 p-6 rounded-md'}>
               <div className={'flex flex-col '}>
-                SGP Number
                 <WorkNumberSelect
                   label={'SGP/R&D Number'}
                   emptyOption={true}
@@ -82,58 +81,50 @@ export default function WorkProgressInput({ urlParams, workTypes, programs }: Wo
                 />
               </div>
               {programs && (
-                <div className={'flex flex-col'}>
-                  Program
-                  <MultiSelect
-                    selectedOptionDisplayPosition={'BOTTOM'}
-                    options={programs.map((program) => {
-                      return {
-                        value: program,
-                        key: program,
-                        label: program
-                      };
-                    })}
-                    notifySelection={(val) => setFieldValue('programs', val)}
-                    selectedValueProp={values.programs}
-                    data-testid={'select_program'}
-                  />
-                </div>
+                <CustomReactSelect
+                  options={programs.map((program) => {
+                    return {
+                      value: program,
+                      label: program
+                    };
+                  })}
+                  label={'Program'}
+                  name={'programs'}
+                  value={values.programs}
+                  isMulti={true}
+                  dataTestId={'select_program'}
+                />
               )}
               {workTypes && (
-                <div className={'flex flex-col'}>
-                  Work type
-                  <MultiSelect
-                    selectedOptionDisplayPosition={'BOTTOM'}
-                    options={workTypes.sort().map((workType) => {
-                      return {
-                        value: workType,
-                        key: workType,
-                        label: workType
-                      };
-                    })}
-                    notifySelection={(val) => setFieldValue('workTypes', val)}
-                    selectedValueProp={values.workTypes}
-                    data-testid={'select_workType'}
-                  />
-                </div>
+                <CustomReactSelect
+                  label={'Work type'}
+                  options={workTypes.sort().map((workType) => {
+                    return {
+                      value: workType,
+                      label: workType
+                    };
+                  })}
+                  name={'workTypes'}
+                  value={values.workTypes}
+                  dataTestId={'select_workType'}
+                  isMulti={true}
+                />
               )}
               {sortedStatues && (
-                <div className={'flex flex-col'}>
-                  Status
-                  <MultiSelect
-                    selectedOptionDisplayPosition={'BOTTOM'}
-                    options={sortedStatues.map((status) => {
-                      return {
-                        value: status,
-                        key: status,
-                        label: status
-                      };
-                    })}
-                    notifySelection={(val) => setFieldValue('statuses', val)}
-                    selectedValueProp={values.statuses}
-                    data-testid={'select_status'}
-                  />
-                </div>
+                <CustomReactSelect
+                  label={'Status'}
+                  options={sortedStatues.map((status) => {
+                    return {
+                      value: status,
+                      key: status,
+                      label: status
+                    };
+                  })}
+                  isMulti={true}
+                  name={'statuses'}
+                  value={values.statuses}
+                  dataTestId={'select_status'}
+                />
               )}
             </div>
             <div className={'flex flex-row md:flex-grow items-center justify-end space-x-4 mt-6'}>

@@ -3,6 +3,7 @@ import { RegisterTissuesMutation, RegisterTissuesMutationVariables } from '../..
 import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
+import { getSelect, selectFocusBlur, selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Registration', () => {
   before(() => {
@@ -14,10 +15,10 @@ describe('Registration', () => {
 
     it('should display Work numbers section', () => {
       cy.findByText('SGP Number').should('be.visible');
-      cy.findByTestId('select_workNumber').should('be.visible');
+      cy.findByTestId('workNumber').should('be.visible');
     });
     it('requires Work numbers', () => {
-      cy.findByTestId('select_workNumber').focus().blur();
+      selectFocusBlur('workNumber');
       cy.findByText('At least one work number must be selected').should('be.visible');
     });
 
@@ -129,7 +130,7 @@ describe('Registration', () => {
     context('when the submission is successful', () => {
       before(() => {
         cy.reload();
-        cy.findByTestId('select_workNumber').select('SGP1008');
+        selectSGPNumber('SGP1008');
         fillInForm();
         cy.findByText('Register').click();
       });
@@ -178,7 +179,7 @@ describe('Registration', () => {
             )
           );
         });
-        cy.findByTestId('select_workNumber').select('SGP1008');
+        selectSGPNumber('SGP1008');
         fillInForm();
         cy.findByText('Register').click();
       });
@@ -211,7 +212,8 @@ describe('Registration', () => {
                         tissue,
                         labware
                       }
-                    ]
+                    ],
+                    labwareSolutions: []
                   }
                 })
               );
@@ -221,7 +223,7 @@ describe('Registration', () => {
       });
 
       fillInForm();
-      cy.findByTestId('select_workNumber').select('SGP1008');
+      selectSGPNumber('SGP1008');
       cy.findByText('Register').click();
     });
 
@@ -240,14 +242,14 @@ function fillInForm() {
   cy.findByLabelText('Sample Collection Date').type('2022-01-01', {
     force: true
   });
-  cy.findByLabelText('Species').select('Human');
+  selectOption('Species', 'Human');
   cy.findByLabelText('External Identifier').type('EXT_ID_1');
-  cy.findByLabelText('HuMFre').select('HuMFre1');
-  cy.findByLabelText('Tissue Type').select('Liver');
-  cy.findByLabelText('Spatial Location').select('3 - Surface central region');
+  selectOption('HuMFre', 'HuMFre1');
+  selectOption('Tissue Type', 'Liver');
+  selectOption('Spatial Location', '3 - Surface central region');
   cy.findByLabelText('Replicate Number').type('2');
   cy.findByLabelText('Last Known Section Number').type('5');
-  cy.findByLabelText('Labware Type').select('Proviasette');
-  cy.findByLabelText('Fixative').select('None');
-  cy.findByLabelText('Medium').select('Paraffin');
+  selectOption('Labware Type', 'Proviasette');
+  selectOption('Fixative', 'None');
+  selectOption('Medium', 'Paraffin');
 }

@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 
 import AppShell from '../components/AppShell';
 import { useMachine } from '@xstate/react';
@@ -11,7 +11,6 @@ import * as Yup from 'yup';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
-import FormikSelect from '../components/forms/Select';
 import LabwareScanTable from '../components/labwareScanPanel/LabwareScanPanel';
 import labwareScanTableColumns from '../components/dataTableColumns/labwareColumns';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
@@ -20,13 +19,15 @@ import PinkButton from '../components/buttons/PinkButton';
 import { Row } from 'react-table';
 import MutedText from '../components/MutedText';
 
-import { FormikErrorMessage } from '../components/forms';
+import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import {
+  CommentFieldsFragment,
   GetSampleProcessingCommentsInfoQuery,
   LabwareFieldsFragment,
   RecordSampleProcessingCommentsMutation,
   SampleProcessingCommentRequest
 } from '../types/sdk';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 
 interface SampleProcessingCommentsParams {
   sampleCommentsInfo: GetSampleProcessingCommentsInfoQuery;
@@ -72,26 +73,35 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
     });
   }
 
+  const getCommentID = (comments: CommentFieldsFragment[], labwareComment: { barcode: string; commentId: number }) => {
+    if (!labwareComment) return '';
+    const comment = comments.find((comment) => comment.id === labwareComment.commentId);
+    if (comment) {
+      return comment.id + '';
+    } else return '';
+  };
+
   // Column with actions (such as delete) to add to the end of the labwareScanTableColumns passed in
-  const commentsColumn = React.useMemo(() => {
+  const commentsColumn = (values: SampleCommentsFormData) => {
     return {
       Header: 'Comments',
       id: 'comments',
       Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
         return (
-          <div className={'min-w-25'}>
-            <FormikSelect name={`labware.${row.index}.commentId`} label={''} emptyOption>
-              {sampleCommentsInfo.comments.map((comment) => (
-                <option value={comment.id} key={comment.id}>
-                  {comment.text}
-                </option>
-              ))}
-            </FormikSelect>
+          <div>
+            <CustomReactSelect
+              name={`labware.${row.index}.commentId`}
+              label={''}
+              emptyOption
+              valueAsNumber={true}
+              options={selectOptionValues(sampleCommentsInfo.comments, 'text', 'id')}
+              value={getCommentID(sampleCommentsInfo.comments, values.labware[row.index])}
+            />
           </div>
         );
       }
     };
-  }, [sampleCommentsInfo]);
+  };
 
   return (
     <AppShell>
@@ -147,31 +157,28 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
                           <motion.div variants={variants.fadeInWithLift}>
                             {values.labware.length > 0 && (
                               <motion.div variants={variants.fadeInWithLift} className={'pt-10 pb-5'}>
-                                <FormikSelect
+                                <CustomReactSelect
                                   name={'applyAllComment'}
+                                  dataTestId={'applyAllComment'}
                                   label={'Comment'}
                                   emptyOption
                                   className={'w-1/2'}
-                                  onChange={(evt: ChangeEvent<HTMLSelectElement>) => {
-                                    setFieldValue('applyAllComment', evt.currentTarget.value);
+                                  handleChange={(val) => {
+                                    const value = (val as OptionType).label;
+                                    setFieldValue('applyAllComment', value);
                                     values.labware.forEach((lw, indx) =>
-                                      setFieldValue(`labware.${indx}.commentId`, evt.currentTarget.value)
+                                      setFieldValue(`labware.${indx}.commentId`, Number((val as OptionType).value))
                                     );
                                   }}
-                                >
-                                  {sampleCommentsInfo.comments.map((comment) => (
-                                    <option value={comment.id} key={comment.id}>
-                                      {comment.text}
-                                    </option>
-                                  ))}
-                                </FormikSelect>
+                                  options={selectOptionValues(sampleCommentsInfo.comments, 'text', 'id')}
+                                />
                                 <MutedText>Comment selected will be applied to all labware</MutedText>{' '}
                               </motion.div>
                             )}
                             <LabwareScanTable
                               columns={[
                                 labwareScanTableColumns.barcode(),
-                                commentsColumn,
+                                commentsColumn(values),
                                 labwareScanTableColumns.donorId(),
                                 labwareScanTableColumns.tissueType(),
                                 labwareScanTableColumns.labwareType(),

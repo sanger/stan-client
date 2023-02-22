@@ -16,6 +16,8 @@ import {
   StoredItem,
   StoreMutation,
   StoreMutationVariables,
+  TransferLocationItemsMutation,
+  TransferLocationItemsMutationVariables,
   UnstoreBarcodeMutation,
   UnstoreBarcodeMutationVariables
 } from '../../types/sdk';
@@ -179,12 +181,46 @@ const locationHandlers = [
         })
       );
     }
+  ),
+
+  graphql.mutation<TransferLocationItemsMutation, TransferLocationItemsMutationVariables>(
+    'TransferLocationItems',
+    (req, res, ctx) => {
+      const sourceLocation = locationRepository.findByBarcode(req.variables.sourceBarcode);
+      const destLocation = locationRepository.findByBarcode(req.variables.destinationBarcode);
+      if (!sourceLocation) {
+        return res(
+          ctx.errors([
+            {
+              message: `Location ${req.variables.sourceBarcode} could not be found`
+            }
+          ])
+        );
+      }
+      if (!destLocation) {
+        return res(
+          ctx.errors([
+            {
+              message: `Location ${req.variables.destinationBarcode} could not be found`
+            }
+          ])
+        );
+      }
+      destLocation.stored = [...sourceLocation.stored];
+      sourceLocation.stored = [];
+
+      return res(
+        ctx.data({
+          transfer: destLocation
+        })
+      );
+    }
   )
 ];
 
 export default locationHandlers;
 
-function locationResponse(location: Location): LocationFieldsFragment {
+export function locationResponse(location: Location): LocationFieldsFragment {
   return {
     __typename: 'Location',
     barcode: location.barcode,

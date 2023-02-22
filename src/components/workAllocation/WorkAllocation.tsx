@@ -2,11 +2,10 @@ import React, { useEffect, useMemo } from 'react';
 import Heading from '../Heading';
 import { Form, Formik } from 'formik';
 import FormikInput from '../forms/Input';
-import FormikSelect from '../forms/Select';
 import BlueButton from '../buttons/BlueButton';
 import createWorkAllocationMachine, { WorkAllocationFormValues } from './workAllocation.machine';
 import { useMachine } from '@xstate/react';
-import { optionValues } from '../forms';
+import { selectOptionValues } from '../forms';
 import LoadingSpinner from '../icons/LoadingSpinner';
 import Table, { SortProps, TableBody, TableHead, TableHeader } from '../Table';
 import Success from '../notifications/Success';
@@ -21,6 +20,7 @@ import { useTableSort } from '../../lib/hooks/useTableSort';
 import { statusSort } from '../../types/stan';
 import DownloadIcon from '../icons/DownloadIcon';
 import { useDownload } from '../../lib/hooks/useDownload';
+import CustomReactSelect from '../forms/CustomReactSelect';
 const initialValues: WorkAllocationFormValues = {
   workType: '',
   workRequester: '',
@@ -221,33 +221,56 @@ export default function WorkAllocation() {
           <Form>
             <div className="space-y-2 md:grid md:grid-cols-4 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
               <div className="md:flex-grow">
-                <FormikSelect label="Work Type" name="workType" emptyOption={true}>
-                  {optionValues(workTypes, 'name', 'name')}
-                </FormikSelect>
+                <CustomReactSelect
+                  label="Work Type"
+                  name="workType"
+                  emptyOption={true}
+                  dataTestId={'workType'}
+                  options={selectOptionValues(workTypes, 'name', 'name')}
+                />
               </div>
 
               <div className="md:flex-grow">
-                <FormikSelect label="Work Requester" name="workRequester" emptyOption={true}>
-                  {optionValues(workRequesters, 'username', 'username', true, { sort: true, alphaFirst: true })}
-                </FormikSelect>
+                <CustomReactSelect
+                  label="Work Requester"
+                  name="workRequester"
+                  dataTestId="workRequester"
+                  emptyOption={true}
+                  options={selectOptionValues(workRequesters, 'username', 'username', true, {
+                    sort: true,
+                    alphaFirst: true
+                  })}
+                />
               </div>
 
               <div className="md:flex-grow">
-                <FormikSelect label="Project" name="project" emptyOption={true}>
-                  {optionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
-                </FormikSelect>
+                <CustomReactSelect
+                  label="Project"
+                  name="project"
+                  dataTestId="project"
+                  emptyOption={true}
+                  options={selectOptionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
+                />
               </div>
 
               <div className="md:flex-grow">
-                <FormikSelect label="Program" name="program" emptyOption={true}>
-                  {optionValues(programs, 'name', 'name')}
-                </FormikSelect>
+                <CustomReactSelect
+                  label="Program"
+                  name="program"
+                  dataTestId="program"
+                  emptyOption={true}
+                  options={selectOptionValues(programs, 'name', 'name')}
+                />
               </div>
 
               <div className="md:flex-grow">
-                <FormikSelect label="Cost Code" name="costCode" emptyOption={true}>
-                  {optionValues(costCodes, 'code', 'code')}
-                </FormikSelect>
+                <CustomReactSelect
+                  label="Cost Code"
+                  name="costCode"
+                  dataTestId="costCode"
+                  emptyOption={true}
+                  options={selectOptionValues(costCodes, 'code', 'code')}
+                />
               </div>
 
               <div className="md:flex-grow">
@@ -303,24 +326,32 @@ export default function WorkAllocation() {
             });
           }}
         >
-          <Form>
-            <div className="space-y-2 md:grid md:grid-cols-3 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
-              <div className="md:flex-grow">
-                <FormikSelect label="Status" name="status" multiple={true}>
-                  {objectKeys(WorkStatus).map((workStatus) => (
-                    <option key={workStatus} value={WorkStatus[workStatus]}>
-                      {workStatus}
-                    </option>
-                  ))}
-                </FormikSelect>
+          {({ values }) => (
+            <Form>
+              <div className="space-y-2 md:grid md:grid-cols-3 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
+                <div className="md:flex-grow">
+                  <CustomReactSelect
+                    label="Status"
+                    name="status"
+                    isMulti={true}
+                    dataTestId={'status'}
+                    options={objectKeys(WorkStatus).map((workStatus) => {
+                      return {
+                        label: workStatus,
+                        value: WorkStatus[workStatus]
+                      };
+                    })}
+                    value={values.status}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
-              <BlueButton disabled={current.matches('loading')} type="submit">
-                Search
-              </BlueButton>
-            </div>
-          </Form>
+              <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
+                <BlueButton disabled={current.matches('loading')} type="submit">
+                  Search
+                </BlueButton>
+              </div>
+            </Form>
+          )}
         </Formik>
       </div>
 

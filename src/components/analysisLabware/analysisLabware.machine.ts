@@ -78,7 +78,7 @@ export const analysisLabwareMachine = createMachine<AnalysisLabwareContext, Anal
     actions: {
       assignAnalysisType: (ctx, e) => {
         if (e.type !== 'UPDATE_ANALYSIS_TYPE') return;
-        ctx.operationType = e.value;
+        ctx.operationType = e.value === AnalysisMeasurementType.RIN ? OperationType.RIN : OperationType.DV200;
         const measurements = buildMeasurementFields(MeasurementValueCategory.SINGLE_VALUE_TYPE, ctx.operationType);
         //Change measurement data in all labwares
         ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
@@ -180,7 +180,7 @@ const buildMeasurementFields = (valueCategory: string, operationType: string) =>
       }
     ];
     measurements =
-      operationType === OperationType.RIN
+      operationType === AnalysisMeasurementType.RIN
         ? [
             {
               name: AnalysisMeasurementType.RIN,

@@ -3,9 +3,15 @@ import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFact
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
+import {
+  selectOption,
+  selectOptionForMultiple,
+  selectSGPNumber,
+  shouldDisplaySelectedValue
+} from '../shared/customReactSelect.cy';
 
 describe('Pot Processing', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=pot', 'select_workNumber');
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=pot');
   describe('Add Labware button', () => {
     context('when there is no source labware loaded', () => {
       it('is disabled', () => {
@@ -30,7 +36,7 @@ describe('Pot Processing', () => {
   describe('Labware type selection', () => {
     context('when Pot is selected', () => {
       before(() => {
-        cy.findByTestId('labwareType').select('Pot');
+        selectOption('labwareType', 'Pot');
       });
       it('should display Labware type, Fixative, Number of labware columns for adding labware', () => {
         cy.findByText('Labware type').should('be.visible');
@@ -40,7 +46,7 @@ describe('Pot Processing', () => {
     });
     context('when Fetal waste container is selected', () => {
       before(() => {
-        cy.findByTestId('labwareType').select('Fetal waste container');
+        selectOption('labwareType', 'Fetal waste container');
       });
       it('should only display Labware type and Number of labware columns for adding labware', () => {
         cy.findByText('Labware type').should('be.visible');
@@ -67,10 +73,10 @@ describe('Pot Processing', () => {
   describe('Pot labware', () => {
     context('when adding Pot labware', () => {
       before(() => {
-        fillSGPNumber();
-        cy.findByTestId('labwareType').select('Pot');
+        selectSGPNumber('SGP1008');
+        selectOption('labwareType', 'Pot');
         cy.findByTestId('numLabware').type('{selectall}').type('2');
-        cy.findByTestId('fixative').select('Formalin');
+        selectOption('fixative', 'Formalin');
         cy.findByText('+ Add Labware').click();
       });
       it('should display two Pots', () => {
@@ -79,9 +85,7 @@ describe('Pot Processing', () => {
         });
       });
       it('should autofill all fixatives', () => {
-        cy.findAllByLabelText('Fixative').each((elem) => {
-          cy.wrap(elem).should('have.value', 'Formalin');
-        });
+        shouldDisplaySelectedValue('pot-fixative', 'Formalin');
       });
 
       it('should enable save button', () => {
@@ -90,7 +94,7 @@ describe('Pot Processing', () => {
     });
     context('when Fixative field is cleared', () => {
       before(() => {
-        cy.findAllByLabelText('Fixative').first().select('');
+        selectOptionForMultiple('pot-fixative', '', 0);
       });
       it('should disable save button', () => {
         cy.findByRole('button', { name: /Save/i }).should('be.disabled');
@@ -100,10 +104,10 @@ describe('Pot Processing', () => {
   describe('Work Number', () => {
     context('when work number is empty', () => {
       before(() => {
-        cy.findAllByRole('combobox').first().select('');
+        selectSGPNumber('');
       });
       it('should disable save button', () => {
-        cy.findByRole('button', { name: /Save/i }).should('be.disabled');
+        cy.findByRole('button', { name: /Save/i }).should('be.visible').should('be.disabled');
       });
     });
   });
@@ -130,11 +134,10 @@ describe('Pot Processing', () => {
     before(() => {
       cy.visit('/lab/original_sample_processing?type=pot');
       scanInput();
-      cy.findByTestId('labwareType').select('Fetal waste container');
+      selectOption('labwareType', 'Fetal waste container');
       cy.findByTestId('numLabware').type('{selectall}').type('2');
       cy.findByText('+ Add Labware').click();
-
-      fillSGPNumber();
+      selectSGPNumber('SGP1008');
     });
     it('should display two Fetal waste containers', () => {
       cy.findByTestId(`divSection-Fetalwastecontainer`).within(() => {
@@ -214,11 +217,11 @@ describe('Pot Processing', () => {
     before(() => {
       cy.visit('/lab/original_sample_processing?type=pot');
       scanInput();
-      cy.findByTestId('labwareType').select('Pot');
+      selectOption('labwareType', 'Pot');
       cy.findByTestId('numLabware').type('{selectall}').type('1');
-      cy.findByTestId('fixative').select('Formalin');
+      selectOption('fixative', 'Formalin');
       cy.findByText('+ Add Labware').click();
-      fillSGPNumber();
+      selectSGPNumber('SGP1008');
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
           graphql.mutation<PerformTissuePotMutation, PerformTissuePotMutationVariables>(
@@ -254,7 +257,4 @@ function scanInput() {
 function printLabels() {
   cy.findByLabelText('printers').select('Pot Printer');
   cy.findByText('Print Labels').click();
-}
-function fillSGPNumber() {
-  cy.findAllByRole('combobox').first().select('SGP1008');
 }

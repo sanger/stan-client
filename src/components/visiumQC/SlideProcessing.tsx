@@ -12,10 +12,10 @@ import LabwareResult from '../labwareResult/LabwareResult';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
 import { objectKeys } from '../../lib/helpers';
-import FormikSelect from '../forms/Select';
 import ScanInput from '../scanInput/ScanInput';
 import { FormikErrorMessage } from '../forms';
 import { stanCore } from '../../lib/sdk';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type SlideProcessingProps = {
   comments: CommentFieldsFragment[];
@@ -75,13 +75,16 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
         <Panel key={labware.barcode}>
           <div className={'grid grid-cols-2 bg-gray-100 p-4 gap-x-20'}>
             <div className={'flex flex-col'}>
-              <FormikSelect
+              <CustomReactSelect
                 label={'Slide costings'}
                 name={'costing'}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                value={labwareResultProps.costing}
+                handleChange={(val) => {
                   const slideCosting =
-                    e.currentTarget.value.length === 0 ? undefined : (e.currentTarget.value as unknown as SlideCosting);
-                  setFieldValue('costing', e.currentTarget.value);
+                    (val as OptionType).label.length === 0
+                      ? undefined
+                      : ((val as OptionType).label as unknown as SlideCosting);
+                  setFieldValue('costing', (val as OptionType).label);
                   setLabwareResult(
                     labwareResult
                       ? {
@@ -96,15 +99,15 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
                   );
                 }}
                 emptyOption={true}
-                disabled={initialCosting !== undefined}
-                data-testid="slide-costing"
-              >
-                {objectKeys(SlideCosting).map((key) => (
-                  <option key={key} value={SlideCosting[key]}>
-                    {SlideCosting[key]}
-                  </option>
-                ))}
-              </FormikSelect>
+                isDisabled={initialCosting !== undefined}
+                dataTestId="slide-costing"
+                options={objectKeys(SlideCosting).map((key) => {
+                  return {
+                    label: SlideCosting[key],
+                    value: SlideCosting[key]
+                  };
+                })}
+              />
             </div>
             <div className={'flex flex-col'}>
               <ScanInput label={'Reagent LOT number'} name={'reagentLot'} />

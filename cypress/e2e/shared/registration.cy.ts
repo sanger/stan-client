@@ -1,3 +1,5 @@
+import { selectOption } from './customReactSelect.cy';
+
 export enum RegistrationType {
   BLOCK,
   SLIDE,
@@ -82,7 +84,7 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
 
     context('when selecting a non-Human Species', () => {
       before(() => {
-        cy.findByLabelText('Species').select('Pig');
+        selectOption('Species', 'Pig');
       });
 
       it('keeps HuMFre disabled', () => {
@@ -92,7 +94,7 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
 
     context('when selecting Human for Species', () => {
       before(() => {
-        cy.findByLabelText('Species').select('Human');
+        selectOption('Species', 'Human');
       });
 
       it('enables the HuMFre field', () => {
