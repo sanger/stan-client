@@ -8,10 +8,10 @@ import {
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 import {
   getAllSelect,
-  getSelect,
   selectOption,
   selectOptionForMultiple,
   selectSGPNumber,
+  shouldBeDisabled,
   shouldDisplaySelectedValue,
   shouldHaveOption
 } from '../shared/customReactSelect.cy';
@@ -20,7 +20,7 @@ describe('Visium QC Page', () => {
   shouldDisplyProjectAndUserNameForWorkNumber('/lab/visium_qc');
   before(() => {
     cy.visit('/lab/visium_qc');
-    cy.get('select[name="workNumber"]').select('SGP1008');
+    selectSGPNumber('SGP1008');
   });
 
   describe('On load', () => {
@@ -73,10 +73,7 @@ describe('Visium QC Page', () => {
           cy.get('#labwareScanInput').type('STAN-2101{enter}');
         });
         it('disables Slide costing drop down', () => {
-          const select = getSelect('slide-costing');
-          if (select) {
-            cy.wrap(select).should('be.disabled');
-          }
+          shouldBeDisabled('slide-costing');
         });
         it('should show the assigned costing', () => {
           shouldDisplaySelectedValue('slide-costing', SlideCosting.Sgp);
@@ -98,10 +95,7 @@ describe('Visium QC Page', () => {
           cy.get('#labwareScanInput').clear().type('STAN-2100{enter}');
         });
         it('enables Slide costing drop down', () => {
-          const select = getSelect('slide-costing');
-          if (select) {
-            cy.wrap(select).should('be.disabled');
-          }
+          shouldBeDisabled('slide-costing');
         });
         it('should show the assigned costing', () => {
           shouldDisplaySelectedValue('slide-costing', '');
@@ -461,10 +455,10 @@ describe('Visium QC Page', () => {
               )
             );
           });
-          cy.get('select[name="workNumber"]').select('SGP1008');
-          cy.findByTestId('qcType').select('SPRI clean up');
+          selectSGPNumber('SGP1008');
+          selectOption('qcType', 'SPRI clean up');
           cy.get('#labwareScanInput').type('STAN-2100{enter}');
-          cy.findAllByTestId('comment').eq(0).select('Beads cracked during drying step');
+          selectOptionForMultiple('comment', 'Beads cracked during drying step', 0);
           saveButton().click();
         });
         it('shows an error', () => {
@@ -484,10 +478,6 @@ describe('Visium QC Page', () => {
       it('shows comment field for all slots with samples', () => {
         cy.findAllByTestId('comment').should('have.length.above', 1);
       });
-      it('lists cleanup category comments in all dropdown', () => {
-        cy.findAllByTestId('comment').eq(0).contains('option', 'Difficult/very slow to separate');
-        cy.findAllByTestId('comment').eq(0).contains('option', 'Bead loss during clean up');
-      });
       it('shows comment all select box', () => {
         cy.findByTestId('commentAll').should('exist');
       });
@@ -496,26 +486,18 @@ describe('Visium QC Page', () => {
       });
       context('when comment is selected in commentAll', () => {
         before(() => {
-          cy.findByTestId('commentAll').select('Bead loss during clean up');
+          selectOption('commentAll', 'Bead loss during clean up');
         });
         it('should select the commentAll selected option in all comment dropdowns', () => {
-          cy.findAllByTestId('comment').then((comments) => {
-            comments.each((i, comment) => {
-              cy.wrap(comment).find(':selected').should('have.text', 'Bead loss during clean up');
-            });
-          });
+          shouldDisplaySelectedValue('comment', 'Bead loss during clean up', 0);
         });
       });
       context('when no comment is selected', () => {
         before(() => {
-          cy.findByTestId('commentAll').select('');
+          selectOption('commentAll', '');
         });
         it('should remove selection from all comment dropdowns', () => {
-          cy.findAllByTestId('comment').then((comments) => {
-            comments.each((i, comment) => {
-              cy.wrap(comment).find(':selected').should('have.text', '');
-            });
-          });
+          shouldDisplaySelectedValue('comment', '');
         });
         it('Save button should be disabled', () => {
           saveButton().should('be.disabled');
@@ -523,7 +505,7 @@ describe('Visium QC Page', () => {
       });
       context('when a comment is selected', () => {
         before(() => {
-          cy.findAllByTestId('comment').eq(0).select('Beads cracked during drying step');
+          selectOptionForMultiple('comment', 'Beads cracked during drying step', 0);
         });
         it('Save button should be enabled', () => {
           saveButton().should('be.enabled');

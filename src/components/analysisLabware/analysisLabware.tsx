@@ -8,7 +8,6 @@ import DataTable from '../DataTable';
 import { useMachine } from '@xstate/react';
 import { analysisLabwareMachine } from './analysisLabware.machine';
 import { AnalysisMeasurementType, measurementColumn } from './measurementColumn';
-import { objectKeys } from '../../lib/helpers';
 import WorkNumberSelect from '../WorkNumberSelect';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { selectOptionValues } from '../forms';
@@ -133,7 +132,7 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
                     value: (value as OptionType).label
                   });
                 }}
-                options={objectKeys(OperationType).map((type) => {
+                options={[AnalysisMeasurementType.RIN, AnalysisMeasurementType.DV200].map((type) => {
                   return {
                     value: type,
                     label: type

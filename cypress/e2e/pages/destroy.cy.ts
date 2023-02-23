@@ -1,4 +1,5 @@
 import { DestroyMutation, DestroyMutationVariables } from '../../../src/types/sdk';
+import { selectOption } from '../shared/customReactSelect.cy';
 
 describe('Destroy Page', () => {
   before(() => {
@@ -59,6 +60,6 @@ describe('Destroy Page', () => {
 function fillInForm() {
   cy.get('#labwareScanInput').type('STAN-123{enter}');
   cy.get('#labwareScanInput').type('STAN-456{enter}');
-  cy.findByLabelText('Reason').select('Operator error.');
+  selectOption('Reason', 'Operator error.');
   cy.findByRole('button', { name: /Destroy Labware/i }).click();
 }

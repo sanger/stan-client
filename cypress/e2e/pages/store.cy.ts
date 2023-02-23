@@ -1,5 +1,14 @@
-import { FindLabwareLocationQuery, FindLabwareLocationQueryVariables } from '../../../src/types/sdk';
+import {
+  FindLabwareLocationQuery,
+  FindLabwareLocationQueryVariables,
+  FindLocationByBarcodeQuery,
+  FindLocationByBarcodeQueryVariables,
+  TransferLocationItemsMutation,
+  TransferLocationItemsMutationVariables
+} from '../../../src/types/sdk';
 import { setAwaitingLabwareInSessionStorage } from '../shared/awaitingStorage.cy';
+import { locationResponse } from '../../../src/mocks/handlers/locationHandlers';
+import { locationRepository } from '../../../src/mocks/repositories/locationRepository';
 
 describe('Store', () => {
   describe('Location search', () => {
@@ -99,6 +108,119 @@ describe('Store', () => {
     });
     after(() => {
       sessionStorage.removeItem('awaitingLabwares');
+    });
+  });
+
+  describe('transferring items in storage', () => {
+    before(() => {
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.query<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>(
+            'FindLocationByBarcode',
+            (req, res, ctx) => {
+              const location = locationRepository.findByBarcode(req.variables.barcode);
+              return res.once(
+                ctx.data({
+                  location: { ...locationResponse(location!), children: [] }
+                })
+              );
+            }
+          )
+        );
+      });
+      cy.visit('/locations/STO-001');
+    });
+    it('should display transfer items option', () => {
+      cy.findByText('Transfer items from location').should('be.visible');
+    });
+    it('should disable transfer button', () => {
+      cy.findByRole('button', { name: 'Transfer' }).should('be.disabled');
+    });
+
+    context('while entering source location barcode for transfer', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>(
+              'FindLocationByBarcode',
+              (req, res, ctx) => {
+                const location = locationRepository.findByBarcode(req.variables.barcode);
+                return res.once(
+                  ctx.data({
+                    location: { ...locationResponse(location!), customName: 'STO-002 location' }
+                  })
+                );
+              }
+            )
+          );
+        });
+        cy.get('[id=source_barcode]').type('STO-002{enter}');
+      });
+
+      it('should display description', () => {
+        cy.findByTestId('transfer-source-description').should('contain.text', 'STO-002 location');
+      });
+      context('Error on transfer', () => {
+        before(() => {
+          cy.msw().then(({ worker, graphql }) => {
+            worker.use(
+              graphql.mutation<TransferLocationItemsMutation, TransferLocationItemsMutationVariables>(
+                'TransferLocationItems',
+                (req, res, ctx) => {
+                  return res.once(
+                    ctx.errors([
+                      {
+                        message: 'Exception while fetching data : The operation could not be validated.',
+                        extensions: {
+                          problems: []
+                        }
+                      }
+                    ])
+                  );
+                }
+              )
+            );
+          });
+          cy.findByRole('button', { name: 'Transfer' }).click();
+        });
+        it('should display error message', () => {
+          cy.contains('The operation could not be validated.').should('be.visible');
+        });
+      });
+      context('On successful transfer', () => {
+        before(() => {
+          cy.msw().then(({ worker, graphql }) => {
+            const location = locationRepository.findByBarcode('STO-002');
+            worker.use(
+              graphql.mutation<TransferLocationItemsMutation, TransferLocationItemsMutationVariables>(
+                'TransferLocationItems',
+                (req, res, ctx) => {
+                  return res.once(
+                    ctx.data({
+                      transfer: {
+                        ...locationResponse(location!),
+                        children: [],
+                        stored: [
+                          { barcode: 'STAN-1011', address: 'A1' },
+                          { barcode: 'STAN-1022', address: 'A2' }
+                        ]
+                      }
+                    })
+                  );
+                }
+              )
+            );
+          });
+          cy.findByRole('button', { name: 'Transfer' }).click();
+        });
+        it('should display success message', () => {
+          cy.contains('All items transferred from STO-002').should('be.visible');
+        });
+        it('should display transferred items', () => {
+          cy.findByText('STAN-1011').should('be.visible');
+          cy.findByText('STAN-1022').should('be.visible');
+        });
+      });
     });
   });
 });
