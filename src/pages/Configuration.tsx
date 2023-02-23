@@ -28,6 +28,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
     'Equipments',
     'Fixatives',
     'HuMFre Numbers',
+    'Omero Projects',
     'Projects',
     'Programs',
     'Release Destinations',
@@ -188,6 +189,30 @@ export default function Configuration({ configuration }: ConfigurationParams) {
           valueFieldComponentInfo={{
             type: 'CHECKBOX'
           }}
+        />
+      </div>,
+      /**Omero Projects**/
+      <div data-testid="config">
+        <Heading level={2}>Omero Projects</Heading>
+        <p className="mt-3 mb-6 text-lg" />
+        <EntityManager
+          initialEntities={configuration.omeroProjects}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
+          onChangeValue={(entity, value) => {
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore
+              .SetOmeroProjectEnabled({
+                enabled,
+                name: entity.name
+              })
+              .then((res) => res.setOmeroProjectEnabled);
+          }}
+          onCreate={(name) => stanCore.AddOmeroProject({ name }).then((res) => res.addOmeroProject)}
+          valueFieldComponentInfo={{
+            type: 'CHECKBOX'
+          }}
+          displayKeyFieldAsDropDown={false}
         />
       </div>,
 

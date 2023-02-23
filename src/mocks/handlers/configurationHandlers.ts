@@ -14,6 +14,7 @@ import equipmentRepository from '../repositories/equipmentRepository';
 import solutionRepository from '../repositories/solutionRepository';
 import userRepository from '../repositories/userRepository';
 import programRepository from '../repositories/programRepository';
+import omeroProjectRepository from '../repositories/omeroProjectRepository';
 
 const configurationHandlers = [
   graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>('GetConfiguration', (req, res, ctx) => {
@@ -32,7 +33,8 @@ const configurationHandlers = [
         equipments: equipmentRepository.findAll(),
         solutions: solutionRepository.findAll(),
         users: userRepository.findAll(),
-        programs: programRepository.findAll()
+        programs: programRepository.findAll(),
+        omeroProjects: omeroProjectRepository.findAll()
       })
     );
   })

@@ -1,17 +1,22 @@
 import React, { useCallback } from 'react';
 import { TableCell } from '../Table';
-import { CommentFieldsFragment, WorkStatus, WorkWithCommentFieldsFragment } from '../../types/sdk';
+import {
+  CommentFieldsFragment,
+  OmeroProjectFieldsFragment,
+  WorkStatus,
+  WorkWithCommentFieldsFragment
+} from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import createWorkRowMachine, { WorkRowEvent } from './workRow.machine';
-import { optionValues } from '../forms';
+import { selectOptionValues } from '../forms';
 import WhiteButton from '../buttons/WhiteButton';
 import BlueButton from '../buttons/BlueButton';
 import { capitalize } from 'lodash';
-import FormikSelect from '../forms/Select';
 import { Form, Formik } from 'formik';
 import PinkButton from '../buttons/PinkButton';
 import { MAX_NUM_BLOCKANDSLIDES } from './WorkAllocation';
 import FormikInput from '../forms/Input';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 /**
  * The type of values for the edit form
@@ -38,6 +43,10 @@ type WorkRowProps = {
    * The comments available for the user to select when updating Work status
    */
   availableComments: Array<CommentFieldsFragment>;
+  /**
+   * The comments available for the user to select when updating Work status
+   */
+  availableOmeroProjects: Array<OmeroProjectFieldsFragment>;
 
   rowIndex: number;
   onWorkFieldUpdate: (index: number, work: WorkWithCommentFieldsFragment) => void;
@@ -47,7 +56,13 @@ type WorkRowProps = {
  * Component for displaying information about Work in a table row, as well as the ability
  * to edit its status
  */
-export default function WorkRow({ initialWork, availableComments, rowIndex, onWorkFieldUpdate }: WorkRowProps) {
+export default function WorkRow({
+  initialWork,
+  availableComments,
+  availableOmeroProjects,
+  rowIndex,
+  onWorkFieldUpdate
+}: WorkRowProps) {
   const workRowMachine = React.useMemo(() => {
     return createWorkRowMachine({ workWithComment: initialWork });
   }, [initialWork]);
@@ -64,7 +79,8 @@ export default function WorkRow({ initialWork, availableComments, rowIndex, onWo
       current.event.type === 'done.invoke.updateWorkPriority' ||
       current.event.type === 'done.invoke.updateWorkNumSlides' ||
       current.event.type === 'done.invoke.updateWorkNumBlocks' ||
-      current.event.type === 'done.invoke.updateWorkStatus'
+      current.event.type === 'done.invoke.updateWorkStatus' ||
+      current.event.type === 'done.invoke.updateWorkOmeroProject'
     ) {
       onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
     }
@@ -89,6 +105,8 @@ export default function WorkRow({ initialWork, availableComments, rowIndex, onWo
     type: nextStatuses[0] as WorkRowEvent['type'],
     commentId: availableComments[0].id
   };
+
+  React.useEffect(() => {});
 
   /**
    * Event handler for the form submission. Sends an event to the machine.
@@ -134,6 +152,21 @@ export default function WorkRow({ initialWork, availableComments, rowIndex, onWo
           handleWorkNumValueChange(e.currentTarget.value, workNumValueType);
         }}
         defaultValue={workNumValue ?? ''}
+      />
+    );
+  };
+  const rendeWorkOmeroProjectField = (workNumber: string, omeroProjectName: string | undefined) => {
+    return (
+      <CustomReactSelect
+        dataTestId={`${workNumber}-OmeroProject`}
+        handleChange={(val) => {
+          send({
+            type: 'UPDATE_OMERO_PROJECT',
+            omeroProject: (val as OptionType).label
+          });
+        }}
+        value={omeroProjectName}
+        options={selectOptionValues(availableOmeroProjects, 'name', 'name')}
       />
     );
   };
@@ -195,6 +228,7 @@ export default function WorkRow({ initialWork, availableComments, rowIndex, onWo
       <TableCell>{work.workType.name}</TableCell>
       <TableCell>{work.workRequester?.username}</TableCell>
       <TableCell>{work.project.name}</TableCell>
+      <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
       <TableCell>{work.program.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
@@ -226,17 +260,24 @@ export default function WorkRow({ initialWork, availableComments, rowIndex, onWo
             {({ values }) => (
               <Form>
                 <div className="space-y-4">
-                  <FormikSelect disabled={current.matches('updating')} name={'type'} label={'New Status'}>
-                    {nextStatuses.map((nextStatus) => (
-                      <option key={nextStatus} value={nextStatus}>
-                        {capitalize(nextStatus)}
-                      </option>
-                    ))}
-                  </FormikSelect>
+                  <CustomReactSelect
+                    isDisabled={current.matches('updating')}
+                    name={'type'}
+                    dataTestId={'status'}
+                    label={'New Status'}
+                    options={nextStatuses.map((nextStatus) => {
+                      return { label: capitalize(nextStatus), value: nextStatus };
+                    })}
+                  />
+
                   {requiresComment(values.type) && (
-                    <FormikSelect disabled={current.matches('updating')} name={'commentId'} label={'Comment'}>
-                      {optionValues(availableComments, 'text', 'id')}
-                    </FormikSelect>
+                    <CustomReactSelect
+                      isDisabled={current.matches('updating')}
+                      dataTestId={'comment'}
+                      name={'commentId'}
+                      label={'Comment'}
+                      options={selectOptionValues(availableComments, 'text', 'id')}
+                    />
                   )}
                   <div className="flex flex-row items-center justify-end space-x-2">
                     <WhiteButton

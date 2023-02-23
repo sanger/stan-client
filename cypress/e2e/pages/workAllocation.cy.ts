@@ -1,5 +1,10 @@
 import { CreateWorkMutation, CreateWorkMutationVariables } from '../../../src/types/sdk';
-import { removeSelections, selectOption } from '../shared/customReactSelect.cy';
+import {
+  removeSelections,
+  selectOption,
+  selectOptionForMultiple,
+  shouldDisplaySelectedValue
+} from '../shared/customReactSelect.cy';
 
 describe('Work Allocation', () => {
   before(() => {
@@ -34,6 +39,7 @@ describe('Work Allocation', () => {
         it('says cost code is required', () => {
           cy.findByText('Cost Code is a required field').should('exist');
         });
+
         it('says number of blocks, slides or original samples are required', () => {
           cy.findByText('Number of blocks, slides or original samples required').should('exist');
         });
@@ -48,6 +54,7 @@ describe('Work Allocation', () => {
           selectOption('workType', 'TEST_WT_1');
           selectOption('workRequester', 'et2');
           selectOption('project', 'TEST999');
+          selectOption('omeroProject', 'OMERO_TEST999');
           selectOption('program', 'PROGRAM_999');
           selectOption('costCode', 'S999');
           cy.findByLabelText('Number of blocks').type('5');
@@ -58,7 +65,7 @@ describe('Work Allocation', () => {
         it('allocates new Work', () => {
           cy.findByRole('button', { name: /Submit/i }).click();
           cy.findByText(
-            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
+            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999, Omero project OMERO_TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
           ).should('exist');
         });
 
@@ -193,13 +200,40 @@ describe('Work Allocation', () => {
 
     context('when saving active status', () => {
       before(() => {
-        cy.findByLabelText('New Status').select('Active');
+        selectOptionForMultiple('status', 'Active', 0);
         cy.findByRole('button', { name: /Save/i }).click();
       });
       it('updates the Work status', () => {
         cy.findByTestId('work-allocation-table').within(() => {
           cy.findAllByText(/ACTIVE/i).should('have.length.above', 0);
         });
+      });
+    });
+  });
+
+  describe('Editing the Omero project column for Work ', () => {
+    context('Selecting a value in Omero project cell in table', () => {
+      before(() => {
+        cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
+        selectOption('SGP1008-OmeroProject', 'OMERO_TEST999');
+      });
+
+      it('updates priority', () => {
+        shouldDisplaySelectedValue('SGP1008-OmeroProject', 'OMERO_TEST999');
+      });
+    });
+
+    context("Entering an invalid value in 'Priority' cell in table", () => {
+      before(() => {
+        cy.get('td').eq(0).clear().type('15');
+        //change the focus
+        cy.findAllByRole('button', { name: /Edit Status/i }).then((editButtons) => {
+          editButtons[0].focus();
+        });
+      });
+
+      it('displays a validation error message', () => {
+        cy.findByText('Invalid format').scrollIntoView().should('be.visible');
       });
     });
   });

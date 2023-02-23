@@ -1,6 +1,6 @@
 import React from 'react';
 import { TableCell } from '../Table';
-import { Select } from '../forms/Select';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type SelectEntityRowParams = {
   /**
@@ -19,22 +19,28 @@ type SelectEntityRowParams = {
    * @param selected value in dropbox
    */
   onChange: (value: string) => void;
+  dataTestId: string;
 };
 
-export function SelectEntityRow({ value, valueFieldOptions, onChange }: SelectEntityRowParams) {
-  const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onChange(e.currentTarget.value);
+export function SelectEntityRow({ value, valueFieldOptions, onChange, dataTestId }: SelectEntityRowParams) {
+  const handleOnChange = (value: OptionType | OptionType[]) => {
+    onChange((value as OptionType).value);
   };
 
   return (
     <TableCell colSpan={2}>
-      <Select onChange={handleOnChange} value={value}>
-        {valueFieldOptions.map((option, indx) => (
-          <option key={indx} value={option}>
-            {option}
-          </option>
-        ))}
-      </Select>
+      <CustomReactSelect
+        handleChange={handleOnChange}
+        value={value}
+        dataTestId={dataTestId}
+        emptyOption
+        options={valueFieldOptions.map((option) => {
+          return {
+            value: option,
+            label: option
+          };
+        })}
+      />
     </TableCell>
   );
 }

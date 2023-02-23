@@ -13,6 +13,7 @@ import { SelectEntityRow } from './SelectEntityRow';
 import { BooleanEntityRow } from './BooleanEntityRow';
 import { createEntityManagerMachine } from './entityManager.machine';
 import { alphaNumericSortDefault } from '../../types/stan';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 export type EntityValueType = boolean | string | number;
 
@@ -60,6 +61,11 @@ type EntityManagerProps<E> = {
    * Callback when value changes
    */
   onChangeValue(entity: E, value: EntityValueType): Promise<E>;
+
+  /**
+   * Display key field as a dropdown
+   */
+  displayKeyFieldAsDropDown?: boolean;
 };
 
 export default function EntityManager<E extends Record<string, EntityValueType>>({
@@ -69,7 +75,8 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
   valueColumnName,
   valueFieldComponentInfo,
   onCreate,
-  onChangeValue
+  onChangeValue,
+  displayKeyFieldAsDropDown = false
 }: EntityManagerProps<E>) {
   const entityManagerMachine = React.useMemo(() => {
     return createEntityManagerMachine<E>(initialEntities, displayKeyColumnName, valueColumnName).withConfig({
@@ -92,6 +99,19 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
    * The value of the input used for creating new entities
    */
   const [draftValue, setDraftValue] = useState('');
+
+  const { entities, successMessage, error, selectedEntity } = current.context;
+
+  const isLoading = current.matches('loading');
+  const isDrafting = current.matches('draftCreation');
+  const isCreatingEntity = current.matches({ loading: 'creatingEntity' });
+  const showDraft = isDrafting || isCreatingEntity;
+
+  const orderedEntities = React.useMemo(() => {
+    return [...entities].sort((a: E, b: E) =>
+      alphaNumericSortDefault(String(a[displayKeyColumnName]), String(b[displayKeyColumnName]))
+    );
+  }, [entities, displayKeyColumnName]);
 
   /**
    * The ref to the input element used for creating new entities.
@@ -120,10 +140,25 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
    * Callback handler for when an EntityRow changes (i.e. enabled property is toggled)
    */
   const handleOnRowChange = useCallback(
-    (entity: E, value: EntityValueType) => {
+    (entity: E | undefined, value: EntityValueType) => {
+      if (!entity) return;
       send({ type: 'VALUE_CHANGE', entity, value });
     },
     [send]
+  );
+
+  const handleEntitySelection = useCallback(
+    (value: OptionType | OptionType[]) => {
+      const selectedValue = value as OptionType;
+      send({
+        type: 'SELECT_ENTITY',
+        entity:
+          selectedValue.value.length > 0
+            ? orderedEntities.find((entity) => entity[displayKeyColumnName] === selectedValue.value)
+            : undefined
+      });
+    },
+    [send, displayKeyColumnName, orderedEntities]
   );
 
   /**
@@ -136,22 +171,9 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
    */
   const handleOnCancel = () => send({ type: 'DISCARD_DRAFT' });
 
-  const { entities, successMessage, error } = current.context;
-
-  const isLoading = current.matches('loading');
-  const isDrafting = current.matches('draftCreation');
-  const isCreatingEntity = current.matches({ loading: 'creatingEntity' });
-  const showDraft = isDrafting || isCreatingEntity;
-
-  const orderedEntities = React.useMemo(() => {
-    return [...entities].sort((a: E, b: E) =>
-      alphaNumericSortDefault(String(a[displayKeyColumnName]), String(b[displayKeyColumnName]))
-    );
-  }, [entities, displayKeyColumnName]);
-
   const getValueFieldComponent = (
     valueFieldComponentInfo: ValueFieldComponentInfo,
-    entity: E,
+    entity: E | undefined,
     keyColumn: string,
     valueColumn: string
   ) => {
@@ -160,19 +182,22 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
         return (
           <SelectEntityRow
             key={keyColumn}
-            value={String(entity[valueColumn])}
+            value={entity ? String(entity[valueColumn]) : ''}
             valueFieldOptions={valueFieldComponentInfo.valueOptions ?? []}
             onChange={(val) => handleOnRowChange(entity, val)}
+            dataTestId={entity ? `${entity[keyColumn]}-select` : ''}
           />
         );
       }
       case 'CHECKBOX': {
-        return (
+        return entity ? (
           <BooleanEntityRow
             disable={isLoading || isDrafting}
             value={Boolean(entity[valueColumn])}
             onChange={(enabled) => handleOnRowChange(entity, enabled)}
           />
+        ) : (
+          <></>
         );
       }
       default:
@@ -192,17 +217,40 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
           </tr>
         </TableHead>
         <TableBody>
-          {orderedEntities.map((entity, indx) => (
-            <tr key={indx}>
-              <TableCell>{entity[displayKeyColumnName]}</TableCell>
+          {displayKeyFieldAsDropDown ? (
+            <tr>
+              <CustomReactSelect
+                dataTestId={'keyFieldSelect'}
+                options={orderedEntities.map((entity) => {
+                  return {
+                    value: String(entity[displayKeyColumnName]),
+                    label: String(entity[displayKeyColumnName])
+                  };
+                })}
+                value={selectedEntity ? String(selectedEntity[displayKeyColumnName]) : ''}
+                handleChange={handleEntitySelection}
+                className={'p-4'}
+              />
               {getValueFieldComponent(
                 valueFieldComponentInfo,
-                entity,
+                selectedEntity,
                 String(displayKeyColumnName),
                 String(valueColumnName)
               )}
             </tr>
-          ))}
+          ) : (
+            orderedEntities.map((entity, indx) => (
+              <tr key={indx}>
+                <TableCell>{entity[displayKeyColumnName]}</TableCell>
+                {getValueFieldComponent(
+                  valueFieldComponentInfo,
+                  entity,
+                  String(displayKeyColumnName),
+                  String(valueColumnName)
+                )}
+              </tr>
+            ))
+          )}
           {showDraft && (
             <tr>
               <TableCell colSpan={2}>

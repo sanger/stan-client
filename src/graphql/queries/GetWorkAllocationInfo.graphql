@@ -20,4 +20,7 @@ query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatu
   releaseRecipients(includeDisabled: false) {
     ...ReleaseRecipientFields
   }
+  omeroProjects(includeDisabled: false) {
+    ...OmeroProjectFields
+  }
 }
