@@ -1,5 +1,5 @@
-mutation TransferLocationItems($sourceBarcode: String!, $destinationBarcode: String!){
-    transfer(sourceBarcode: $sourceBarcode,destinationBarcode: $destinationBarcode){
-        ...LocationFields
-    }
+mutation TransferLocationItems($sourceBarcode: String!, $destinationBarcode: String!) {
+  transfer(sourceBarcode: $sourceBarcode, destinationBarcode: $destinationBarcode) {
+    ...LocationFields
+  }
 }

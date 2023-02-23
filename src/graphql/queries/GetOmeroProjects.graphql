@@ -1,6 +1,6 @@
 query GetOmeroProjects {
-    omeroProjects{
-        name
-        enabled
-    }
+  omeroProjects {
+    name
+    enabled
+  }
 }
