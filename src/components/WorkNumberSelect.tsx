@@ -46,6 +46,9 @@ type WorkSelectProps = {
 
   /**Is this SGP a required field**/
   requiredField?: boolean;
+
+  /**Test ID**/
+  dataTestId?: string;
 };
 
 export type WorkInfo = {
@@ -65,6 +68,7 @@ export default function WorkNumberSelect({
   onWorkNumberChange,
   onWorkNumberChangeInMulti,
   workNumberType,
+  dataTestId,
   multiple = false,
   emptyOption = true,
   requiredField = true
@@ -199,7 +203,7 @@ export default function WorkNumberSelect({
           handleWorkNumberChange(val ? (Array.isArray(val) ? val.map((val) => val.value) : [val?.value]) : [])
         }
         className={'flex-grow w-full'}
-        dataTestId={'workNumber'}
+        dataTestId={dataTestId ?? 'workNumber'}
         options={selectOptionValues(works, 'workNumber', 'workNumber', true, {
           sort: true,
           sortType: 'Descending',

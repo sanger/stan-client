@@ -171,6 +171,7 @@ function Release({ releaseInfo }: PageParams) {
                               <WorkNumberSelect
                                 label={'Select SGP for all'}
                                 requiredField={false}
+                                dataTestId={'select-all'}
                                 onWorkNumberChange={(workNumber) => {
                                   values.releaseLabware.forEach((_, index) =>
                                     setFieldValue(`releaseLabware.${index}.workNumber`, workNumber)
@@ -212,7 +213,7 @@ function Release({ releaseInfo }: PageParams) {
                         )}
                       </LabwareScanner>
 
-                      <FormikErrorMessage name={'barcodes'} />
+                      <FormikErrorMessage name={'releaseLabware'} />
                     </motion.div>
 
                     <motion.div variants={variants.fadeInWithLift} className="space-y-4">
@@ -221,7 +222,7 @@ function Release({ releaseInfo }: PageParams) {
                       <CustomReactSelect
                         isDisabled={formLocked}
                         label={'Group/Team'}
-                        dataTestId="Group/Team"
+                        dataTestId="group"
                         name={'destination'}
                         emptyOption
                         options={selectOptionValues(releaseInfo.releaseDestinations, 'name', 'name')}
@@ -230,7 +231,7 @@ function Release({ releaseInfo }: PageParams) {
                       <CustomReactSelect
                         isDisabled={formLocked}
                         label={'Contact'}
-                        dataTestId="Contact"
+                        dataTestId="contact"
                         name={'recipient'}
                         emptyOption
                         options={selectOptionValues(releaseInfo.releaseRecipients, 'username', 'username')}
@@ -238,7 +239,7 @@ function Release({ releaseInfo }: PageParams) {
                     </motion.div>
                   </motion.div>
 
-                  <Sidebar>
+                  <Sidebar data-testid={'summary'}>
                     <Heading level={3} showBorder={false}>
                       Summary
                     </Heading>
