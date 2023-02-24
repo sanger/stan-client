@@ -59,9 +59,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo 
    */
   React.useEffect(() => {
     const workInfo = worksInfo.find((workInfo) => workInfo.workNumber === memoWorkNumber);
-    debugger;
     setWorkInfo(workInfo);
-    console.log(workInfo?.status);
     if (workInfo) {
       setIsOnlyActiveWorkNumbers(workInfo.status === WorkStatus.Active);
     }
