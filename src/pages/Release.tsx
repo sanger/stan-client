@@ -130,6 +130,20 @@ function Release({ releaseInfo }: PageParams) {
     }
   }, [current]);
 
+  const setSuggestedWorkForLabwareAsDefault = React.useCallback(
+    async (
+      labware: LabwareFieldsFragment,
+      fieldName: string,
+      setFieldValue: (fieldName: string, value: string) => void
+    ) => {
+      const work = await stanCore.GetSuggestedWorkForLabware({ barcode: labware.barcode });
+      if (work && work.suggestedWorkForLabware) {
+        setFieldValue(fieldName, work.suggestedWorkForLabware.workNumber);
+      }
+    },
+    []
+  );
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -154,9 +168,16 @@ function Release({ releaseInfo }: PageParams) {
                       <MutedText>Please scan either the location or a piece of labware you wish to release.</MutedText>
 
                       <LabwareScanner
-                        onChange={(labware) => {
-                          labware.map((lw, indx) => setFieldValue(`releaseLabware.${indx}.barcode`, lw.barcode));
-                          setReleaseLabware(labware);
+                        onAdd={(labware) => {
+                          setSuggestedWorkForLabwareAsDefault(
+                            labware,
+                            `releaseLabware.${releaseLabware.length}.barcode`,
+                            setFieldValue
+                          );
+                          setReleaseLabware((prev) => [...prev, labware]);
+                        }}
+                        onRemove={(labware) => {
+                          setReleaseLabware(releaseLabware.filter((rlw) => rlw.barcode !== labware.barcode));
                         }}
                         locked={formLocked}
                         labwareCheckFunction={labwareBioStateCheck}

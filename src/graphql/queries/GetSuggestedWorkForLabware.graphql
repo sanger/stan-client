@@ -1,0 +1,5 @@
+query GetSuggestedWorkForLabware($barcode:String!) {
+    suggestedWorkForLabware(barcode: $barcode) {
+        ...WorkFields
+    }
+}
