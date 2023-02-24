@@ -45,7 +45,7 @@ describe('FileManager', () => {
         cy.visit('/file_manager?workNumber=SGP1001');
       });
       it('initialises page', () => {
-        cy.findByText('Upload file').should('not.exist');
+        cy.findByText('Upload file').should('exist');
         cy.findByText('Files').should('exist');
       });
       it('should select SGP1001 in select box', () => {
@@ -105,7 +105,7 @@ describe('FileManager', () => {
         cy.url().should('include', 'file_manager?workNumber=SGP1002');
       });
       it('initializes page for inactive work number', () => {
-        cy.findByText('Upload file').should('not.exist');
+        cy.findByText('Upload file').should('exist');
         cy.findByText('Files').should('exist');
       });
       it('should display a table with files uploaded for the selected SGP Numbers', () => {
@@ -146,7 +146,7 @@ describe('FileManager', () => {
         selectSGPNumber('SGP1002');
       });
       it('initializes page for inactive work number', () => {
-        cy.findByText('Upload file').should('not.exist');
+        cy.findByText('Upload file').should('exist');
         cy.findByText('Files').should('exist');
       });
       it('should not display a table', () => {
