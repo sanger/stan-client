@@ -44,6 +44,10 @@ describe('Release Page', () => {
       cy.findByRole('table').should('be.visible').contains('td', 'STAN-123');
       cy.findByRole('table').contains('td', 'STAN-456');
     });
+    it('should display a default workNumber on scan if there is worknumber assigned to labware', () => {
+      shouldDisplaySelectedValue('workNumber', 'SGP1008', 0);
+      shouldDisplaySelectedValue('workNumber', 'SGP1008', 1);
+    });
     it('shows scanned labware info in summary', () => {
       cy.contains('2 piece(s) of labware will be released.');
       cy.contains('Please select a group/team').should('be.visible');
