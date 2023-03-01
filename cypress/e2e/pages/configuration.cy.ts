@@ -1,4 +1,5 @@
 import { AddReleaseRecipientMutation, AddReleaseRecipientMutationVariables } from '../../../src/types/sdk';
+import { selectOption } from '../shared/customReactSelect.cy';
 
 describe('Configuration Spec', () => {
   before(() => {
@@ -99,7 +100,7 @@ describe('Configuration Spec', () => {
         });
         it('sets the value field', () => {
           cy.get(`div[data-testid="config"]:contains('${config.name}')`).within(() => {
-            cy.get(`tr:contains('${config.field}') select`).select('normal');
+            selectOption(`${config.field}-select`, 'normal');
             cy.findByText(`"${config.field}" - role changed to normal`).should('be.visible');
           });
         });

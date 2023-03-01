@@ -10,6 +10,7 @@ interface EntityManagerContext<E> {
   valueField: keyof E;
   successMessage: Maybe<string>;
   error: Maybe<ClientError>;
+  selectedEntity?: E;
 }
 
 type EntityManagerEvent<E> =
@@ -24,6 +25,10 @@ type EntityManagerEvent<E> =
   | {
       type: 'CREATE_NEW_ENTITY';
       value: string;
+    }
+  | {
+      type: 'SELECT_ENTITY';
+      entity: E | undefined;
     }
   | { type: 'DISCARD_DRAFT' }
   | MachineServiceDone<'valueChanged', E>
@@ -47,13 +52,15 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
         ready: {
           on: {
             VALUE_CHANGE: 'loading.valueChanged',
-            DRAFT_NEW_ENTITY: 'draftCreation'
+            DRAFT_NEW_ENTITY: 'draftCreation',
+            SELECT_ENTITY: { actions: 'assignSelectedEntity' }
           }
         },
         draftCreation: {
           on: {
             DISCARD_DRAFT: 'ready',
-            CREATE_NEW_ENTITY: 'loading.creatingEntity'
+            CREATE_NEW_ENTITY: 'loading.creatingEntity',
+            SELECT_ENTITY: { actions: 'assignSelectedEntity' }
           }
         },
         loading: {
@@ -111,7 +118,10 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
             error: e.data
           };
         }),
-
+        assignSelectedEntity: assign((ctx, e) => {
+          if (e.type !== 'SELECT_ENTITY') return {};
+          return { selectedEntity: e.entity };
+        }),
         clearMessages: assign((_ctx) => {
           return {
             successMessage: null,

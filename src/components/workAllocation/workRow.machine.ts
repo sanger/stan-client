@@ -3,6 +3,7 @@ import {
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumOriginalSamplesMutation,
   UpdateWorkNumSlidesMutation,
+  UpdateWorkOmeroProjectMutation,
   UpdateWorkPriorityMutation,
   UpdateWorkStatusMutation,
   WorkStatus,
@@ -39,10 +40,12 @@ export type WorkRowEvent =
       numOriginalSamples: number | undefined;
     }
   | { type: 'UPDATE_PRIORITY'; priority: string | undefined }
+  | { type: 'UPDATE_OMERO_PROJECT'; omeroProject: string | undefined }
   | MachineServiceDone<'updateWorkStatus', UpdateWorkStatusMutation>
   | MachineServiceDone<'updateWorkNumBlocks', UpdateWorkNumBlocksMutation>
   | MachineServiceDone<'updateWorkNumSlides', UpdateWorkNumSlidesMutation>
   | MachineServiceDone<'updateWorkPriority', UpdateWorkPriorityMutation>
+  | MachineServiceDone<'updateWorkOmeroProject', UpdateWorkOmeroProjectMutation>
   | MachineServiceDone<'updateWorkNumOriginalSamples', UpdateWorkNumOriginalSamplesMutation>;
 
 type CreateWorkRowMachineParams = Pick<WorkRowMachineContext, 'workWithComment'>;
@@ -74,7 +77,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_BLOCKS: 'editNumberBlocks',
             UPDATE_NUM_SLIDES: 'editNumberSlides',
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
-            UPDATE_PRIORITY: 'editPriority'
+            UPDATE_PRIORITY: 'editPriority',
+            UPDATE_OMERO_PROJECT: 'updateOmeroProject'
           }
         },
         active: {
@@ -87,7 +91,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_BLOCKS: 'editNumberBlocks',
             UPDATE_NUM_SLIDES: 'editNumberSlides',
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
-            UPDATE_PRIORITY: 'editPriority'
+            UPDATE_PRIORITY: 'editPriority',
+            UPDATE_OMERO_PROJECT: 'updateOmeroProject'
           }
         },
         paused: {
@@ -100,7 +105,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_BLOCKS: 'editNumberBlocks',
             UPDATE_NUM_SLIDES: 'editNumberSlides',
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
-            UPDATE_PRIORITY: 'editPriority'
+            UPDATE_PRIORITY: 'editPriority',
+            UPDATE_OMERO_PROJECT: 'updateOmeroProject'
           }
         },
         completed: {},
@@ -159,6 +165,17 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             },
             onError: { target: 'deciding' }
           }
+        },
+        updateOmeroProject: {
+          invoke: {
+            src: 'updateWorkOmeroProject',
+            id: 'updateWorkOmeroProject',
+            onDone: {
+              actions: 'assignWorkOmeroProject',
+              target: 'deciding'
+            },
+            onError: { target: 'deciding' }
+          }
         }
       }
     },
@@ -183,6 +200,10 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         assignWorkPriority: assign((ctx, e) => {
           if (e.type !== 'done.invoke.updateWorkPriority') return;
           ctx.workWithComment.work = e.data.updateWorkPriority;
+        }),
+        assignWorkOmeroProject: assign((ctx, e) => {
+          if (e.type !== 'done.invoke.updateWorkOmeroProject') return;
+          ctx.workWithComment.work = e.data.updateWorkOmeroProject;
         }),
         toggleEditMode: assign((ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled))
       },
@@ -225,6 +246,13 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
           };
           if ('priority' in e && e.priority) params['priority'] = e.priority;
           return stanCore.UpdateWorkPriority(params);
+        },
+        updateWorkOmeroProject: (ctx, e) => {
+          let params: { workNumber: string; omeroProject?: string } = {
+            workNumber: ctx.workWithComment.work.workNumber
+          };
+          if ('omeroProject' in e && e.omeroProject) params['omeroProject'] = e.omeroProject;
+          return stanCore.UpdateWorkOmeroProject(params);
         }
       }
     }

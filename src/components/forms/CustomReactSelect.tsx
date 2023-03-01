@@ -25,6 +25,7 @@ interface CustomReactSelectProps extends Props {
   dataTestId?: string;
   isMulti?: boolean;
   valueAsNumber?: boolean;
+  fixedWidth?: boolean;
 }
 
 const defaultValue = (options: OptionType[], value: any, isMulti: boolean) => {
@@ -54,6 +55,7 @@ export const NormalReactSelect = ({
   handleBlur,
   dataTestId,
   isMulti = false,
+  fixedWidth = false,
   ...props
 }: CustomReactSelectProps) => {
   const onChangeValue = React.useCallback(
@@ -102,7 +104,7 @@ export const NormalReactSelect = ({
               'input:focus': {
                 boxShadow: 'none'
               },
-              width: 'max-content',
+              width: fixedWidth ? '30px' : 'max-content',
               minWidth: '100%'
             }),
             menu: (base) => ({
@@ -153,6 +155,7 @@ const FormikReactSelect = ({
   handleChange,
   handleBlur,
   valueAsNumber,
+  fixedWidth,
   ...props
 }: CustomReactSelectProps) => {
   const { setFieldValue, setFieldTouched } = useFormikContext() ?? {};
@@ -189,6 +192,7 @@ const FormikReactSelect = ({
         placeholder={placeholder}
         isMulti={isMulti}
         value={value}
+        fixedWidth={fixedWidth}
         {...props}
       />
 
@@ -206,6 +210,7 @@ const CustomReactSelect = ({
   value,
   dataTestId,
   isMulti,
+  fixedWidth,
   ...props
 }: CustomReactSelectProps) => {
   return name ? (
@@ -218,6 +223,7 @@ const CustomReactSelect = ({
       emptyOption={emptyOption}
       isMulti={isMulti}
       dataTestId={dataTestId}
+      fixedWidth={fixedWidth}
       {...props}
     />
   ) : (
@@ -229,6 +235,7 @@ const CustomReactSelect = ({
       emptyOption={emptyOption}
       dataTestId={dataTestId}
       isMulti={isMulti}
+      fixedWidth={fixedWidth}
       {...props}
     />
   );
