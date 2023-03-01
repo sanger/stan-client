@@ -108,8 +108,7 @@ const labwareHandlers = [
             suggestedWorks: [...req.variables.barcodes].map((barcode) => ({
               workNumber: work.workNumber,
               barcode: barcode
-            })),
-            works: [work]
+            }))
           }
         })
       );
