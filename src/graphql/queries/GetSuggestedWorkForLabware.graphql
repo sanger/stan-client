@@ -3,8 +3,5 @@ query GetSuggestedWorkForLabware($barcodes: [String!]!) {
     suggestedWorks {
       ...SuggestedWorkFields
     }
-    works {
-      ...WorkFields
-    }
   }
 }
