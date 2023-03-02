@@ -7,7 +7,7 @@ import {
 import { buildLabwareFragment } from '../../../src/lib/helpers/labwareHelper';
 import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
-import { selectOption } from '../shared/customReactSelect.cy';
+import { selectOption, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 
 describe('Release Page', () => {
   before(() => {
@@ -34,6 +34,66 @@ describe('Release Page', () => {
     });
   });
 
+  context('when labware is scanned for release', () => {
+    before(() => {
+      cy.get('#labwareScanInput').type('STAN-123{enter}');
+      cy.get('#labwareScanInput').type('STAN-456{enter}');
+    });
+    it('shows labware to release', () => {
+      cy.findByText('Labware to release').should('be.visible');
+      cy.findByRole('table').should('be.visible').contains('td', 'STAN-123');
+      cy.findByRole('table').contains('td', 'STAN-456');
+    });
+    it('should display a default workNumber on scan if there is worknumber assigned to labware', () => {
+      shouldDisplaySelectedValue('workNumber', 'SGP1008', 0);
+      shouldDisplaySelectedValue('workNumber', 'SGP1008', 1);
+    });
+    it('shows scanned labware info in summary', () => {
+      cy.contains('2 piece(s) of labware will be released.');
+      cy.contains('Please select a group/team').should('be.visible');
+      cy.contains('Please select a contact').should('be.visible');
+    });
+    it('displays a Select all dropdown for SGP numbers', () => {
+      cy.findByTestId('select-all').should('be.visible');
+    });
+    it('should display a table with labware info', () => {
+      cy.findByRole('table').should('be.visible');
+      cy.findByRole('table').within((elem) => {
+        cy.wrap(elem).contains('td', 'STAN-123');
+        cy.wrap(elem).contains('td', 'STAN-456');
+        cy.wrap(elem).findAllByTestId('workNumber').should('have.length', 2);
+      });
+    });
+  });
+
+  context('Selecting SGP numbers for all scanned labware', () => {
+    before(() => {
+      selectOption('select-all', 'SGP1008');
+    });
+    it('should select the selected worknumber for all scanned labware in table', () => {
+      shouldDisplaySelectedValue('workNumber', 'SGP1008', 0);
+      shouldDisplaySelectedValue('workNumber', 'SGP1008', 1);
+    });
+  });
+
+  context('when group/team is selected', () => {
+    before(() => {
+      selectOption('group', 'Vento lab');
+    });
+    it('shows updated information in summary', () => {
+      cy.contains('2 piece(s) of labware will be released to Vento lab.').should('be.visible');
+      cy.contains('Please select a contact').should('be.visible');
+    });
+  });
+  context('when destination is selected', () => {
+    before(() => {
+      selectOption('contact', 'cs41');
+    });
+    it('shows updated information in summary', () => {
+      cy.contains('The primary contact is cs41').should('be.visible');
+    });
+  });
+
   context('when all is valid', () => {
     before(() => {
       fillInForm();
@@ -57,13 +117,13 @@ describe('Release Page', () => {
           graphql.mutation<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>(
             'ReleaseLabware',
             (req, res, ctx) => {
-              const { barcodes } = req.variables.releaseRequest;
+              const { releaseLabware } = req.variables.releaseRequest;
               return res.once(
                 ctx.errors([
                   {
-                    message: `Exception while fetching data (/release) : Labware has already been released: [${barcodes.join(
-                      ','
-                    )}]`
+                    message: `Exception while fetching data (/release) : Labware has already been released: [${releaseLabware
+                      .map((rlw) => rlw.barcode)
+                      .join(',')}]`
                   }
                 ])
               );
@@ -145,7 +205,7 @@ describe('Release Page', () => {
 function fillInForm() {
   cy.get('#labwareScanInput').type('STAN-123{enter}');
   cy.get('#labwareScanInput').type('STAN-456{enter}');
-  selectOption('Group/Team', 'Vento lab');
-  selectOption('Contact', 'cs41');
+  selectOption('group', 'Vento lab');
+  selectOption('contact', 'cs41');
   cy.findByRole('button', { name: /Release Labware/i }).click({ force: true });
 }

@@ -4,11 +4,14 @@ import {
   FindLabwareQueryVariables,
   GetLabwareOperationsQuery,
   GetLabwareOperationsQueryVariables,
+  GetSuggestedWorkForLabwareQuery,
+  GetSuggestedWorkForLabwareQueryVariables,
   UserRole
 } from '../../types/sdk';
 import labwareFactory from '../../lib/factories/labwareFactory';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
+import workFactory from '../../lib/factories/workFactory';
 
 export function createLabware(barcode: string) {
   // The number after STAN- determines what kind of labware will be returned
@@ -90,6 +93,23 @@ const labwareHandlers = [
               performed: ''
             }
           ]
+        })
+      );
+    }
+  ),
+
+  graphql.query<GetSuggestedWorkForLabwareQuery, GetSuggestedWorkForLabwareQueryVariables>(
+    'GetSuggestedWorkForLabware',
+    (req, res, ctx) => {
+      const work = workFactory.build({ workNumber: 'SGP1008' });
+      return res(
+        ctx.data({
+          suggestedWorkForLabware: {
+            suggestedWorks: [...req.variables.barcodes].map((barcode) => ({
+              workNumber: work.workNumber,
+              barcode: barcode
+            }))
+          }
         })
       );
     }

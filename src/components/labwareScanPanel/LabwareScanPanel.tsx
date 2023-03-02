@@ -16,8 +16,9 @@ interface LabwareScanPanelProps {
    * The list of columns to display in the table
    */
   columns: Column<LabwareFieldsFragment>[];
+  onRemove?: (labware: LabwareFieldsFragment) => void;
 }
-const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns }) => {
+const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns, onRemove }) => {
   const { labwares, removeLabware, locked } = useLabwareContext();
 
   // Memoize the data for the table
@@ -37,13 +38,16 @@ const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns }) => {
           <RemoveButton
             type={'button'}
             onClick={() => {
-              row.original.barcode && removeLabware(row.original.barcode);
+              if (row.original.barcode) {
+                removeLabware(row.original.barcode);
+                onRemove?.(row.original);
+              }
             }}
           />
         );
       }
     };
-  }, [locked, removeLabware]);
+  }, [locked, removeLabware, onRemove]);
 
   /**
    * Merge the columns passed in with the actionsColumn, memoizing the result.

@@ -43,6 +43,12 @@ type WorkSelectProps = {
 
   /**Empty option required?*/
   emptyOption?: boolean;
+
+  /**Is this SGP a required field**/
+  requiredField?: boolean;
+
+  /**Test ID**/
+  dataTestId?: string;
 };
 
 export type WorkInfo = {
@@ -62,8 +68,10 @@ export default function WorkNumberSelect({
   onWorkNumberChange,
   onWorkNumberChangeInMulti,
   workNumberType,
+  dataTestId,
   multiple = false,
-  emptyOption = true
+  emptyOption = true,
+  requiredField = true
 }: WorkSelectProps) {
   /**
    * State for holding all  work
@@ -86,6 +94,14 @@ export default function WorkNumberSelect({
    * Fetch all works and set them to state
    */
   useEffect(() => {
+    /**
+     * isMounted is used to avoid “Can’t perform a React state update on an unmounted component” warning
+     * This happens when you make an async call inside a component and the component which made call gets
+     * unmounted due to some user action. The async call responds after the unmount and setState function will
+     * be called in an unmounted component in this case.
+     */
+    let isMounted = true;
+
     async function fetchAllWorkNumbers() {
       const response = await stanCore.GetAllWorkInfo();
       const works = response.works
@@ -101,9 +117,16 @@ export default function WorkNumberSelect({
           return alphaNumericSortDefault(work1.workNumber, work2.workNumber);
         })
         .reverse();
-      setAllWorks(works);
+      /**Only update state if it is mounted **/
+      if (isMounted) {
+        setAllWorks(works);
+      }
     }
     fetchAllWorkNumbers();
+    /**Unmount call, cleanup by setting mount status to false**/
+    return () => {
+      isMounted = false;
+    };
   }, [setAllWorks]);
 
   /**
@@ -158,11 +181,11 @@ export default function WorkNumberSelect({
 
   const validateWorkNumber = () => {
     if (multiple) {
-      if (!currentSelectedWork) {
+      if (!currentSelectedWork && requiredField) {
         setError('At least one work number must be selected');
       }
     } else {
-      if (!currentSelectedWork) {
+      if (!currentSelectedWork && requiredField) {
         setError('SGP number is required');
       } else {
         setError('');
@@ -180,7 +203,7 @@ export default function WorkNumberSelect({
           handleWorkNumberChange(val ? (Array.isArray(val) ? val.map((val) => val.value) : [val?.value]) : [])
         }
         className={'flex-grow w-full'}
-        dataTestId={'workNumber'}
+        dataTestId={dataTestId ?? 'workNumber'}
         options={selectOptionValues(works, 'workNumber', 'workNumber', true, {
           sort: true,
           sortType: 'Descending',

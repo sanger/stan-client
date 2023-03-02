@@ -1,7 +1,13 @@
 import React, { useContext, useEffect, useMemo } from 'react';
 import AppShell from '../components/AppShell';
 import { Form, Formik } from 'formik';
-import { GetReleaseInfoQuery, LabwareFieldsFragment, ReleaseLabwareMutation, ReleaseRequest } from '../types/sdk';
+import {
+  GetReleaseInfoQuery,
+  LabwareFieldsFragment,
+  ReleaseLabware,
+  ReleaseLabwareMutation,
+  ReleaseRequest
+} from '../types/sdk';
 import * as Yup from 'yup';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
 import { motion } from 'framer-motion';
@@ -21,16 +27,20 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
 import { reload, StanCoreContext } from '../lib/sdk';
+import { Row } from 'react-table';
+import WorkNumberSelect from '../components/WorkNumberSelect';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 
-const initialValues: ReleaseRequest = {
-  barcodes: [],
-  destination: '',
-  recipient: ''
-};
-
 const validationSchema = Yup.object().shape({
-  barcodes: Yup.array().label('Labware').min(1, 'Please scan in at least 1 labware').of(Yup.string().required()),
+  releaseLabware: Yup.array()
+    .min(1, 'Please scan in at least 1 labware')
+    .of(
+      Yup.object().shape({
+        barcode: Yup.string().required(),
+        workNumber: Yup.string().optional()
+      })
+    )
+    .required(),
   destination: Yup.string().required().label('Group/Team'),
   recipient: Yup.string().required().label('Contact')
 });
@@ -86,13 +96,30 @@ interface PageParams {
 
 function Release({ releaseInfo }: PageParams) {
   const stanCore = useContext(StanCoreContext);
+  const [releaseLabware, setReleaseLabware] = React.useState<ReleaseLabware[]>([]);
 
+  const initialValues: ReleaseRequest = {
+    releaseLabware: releaseLabware,
+    destination: '',
+    recipient: ''
+  };
   const formMachine = React.useMemo(() => {
     return createFormMachine<ReleaseRequest, ReleaseLabwareMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.ReleaseLabware({ releaseRequest: e.values });
+          const newValues: ReleaseRequest = {
+            ...e.values,
+            releaseLabware: e.values.releaseLabware.map((suggestedWork) => {
+              if (suggestedWork.workNumber) {
+                return {
+                  barcode: suggestedWork.barcode,
+                  workNumber: suggestedWork.workNumber
+                };
+              } else return { barcode: suggestedWork.barcode };
+            })
+          };
+          return stanCore.ReleaseLabware({ releaseRequest: newValues });
         }
       }
     });
@@ -120,6 +147,39 @@ function Release({ releaseInfo }: PageParams) {
     }
   }, [current]);
 
+  const updateFieldValues = React.useCallback(
+    (
+      releaseLabware: ReleaseLabware[],
+      setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void
+    ) => {
+      releaseLabware.forEach((releaseLw, index) => {
+        setFieldValue(`releaseLabware.${index}`, releaseLw);
+      });
+    },
+    []
+  );
+
+  const onAddLabware = React.useCallback(
+    async (
+      labware: LabwareFieldsFragment[],
+      setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void
+    ) => {
+      if (labware.length <= releaseLabware.length) return;
+      const addLabware = labware.filter((lw) => !releaseLabware.some((rlw) => rlw.barcode === lw.barcode));
+      if (addLabware.length > 0) {
+        const res = await stanCore.GetSuggestedWorkForLabware({ barcodes: addLabware.map((lw) => lw.barcode) });
+        const suggestedLabware: ReleaseLabware[] = res.suggestedWorkForLabware.suggestedWorks.map((suggestedWork) => ({
+          barcode: suggestedWork.barcode,
+          workNumber: suggestedWork.workNumber ?? ''
+        }));
+        const newLabware = [...releaseLabware, ...suggestedLabware];
+        setReleaseLabware(newLabware);
+        updateFieldValues(newLabware, setFieldValue);
+      }
+    },
+    [releaseLabware, setReleaseLabware, stanCore, updateFieldValues]
+  );
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -144,28 +204,71 @@ function Release({ releaseInfo }: PageParams) {
                       <MutedText>Please scan either the location or a piece of labware you wish to release.</MutedText>
 
                       <LabwareScanner
-                        onChange={(labwares) =>
-                          setFieldValue(
-                            'barcodes',
-                            labwares.map((lw) => lw.barcode)
-                          )
-                        }
+                        onChange={(labware) => {
+                          onAddLabware(labware, setFieldValue);
+                        }}
+                        onRemove={(labware) => {
+                          const updatedReleasedLabware = releaseLabware.filter(
+                            (rlw) => rlw.barcode !== labware.barcode
+                          );
+                          setReleaseLabware(updatedReleasedLabware);
+                          updateFieldValues(updatedReleasedLabware, setFieldValue);
+                        }}
                         locked={formLocked}
                         labwareCheckFunction={labwareBioStateCheck}
                         enableLocationScanner={true}
                       >
-                        <LabwareScanPanel
-                          columns={[
-                            columns.barcode(),
-                            columns.donorId(),
-                            columns.labwareType(),
-                            columns.externalName(),
-                            columns.bioState()
-                          ]}
-                        />
+                        {releaseLabware.length > 0 && (
+                          <div className={'flex flex-col'}>
+                            <Heading className={'mt-4'} level={4}>
+                              Labware to release
+                            </Heading>
+                            <div className={'flex flex-col mt-4 w-1/2'}>
+                              <WorkNumberSelect
+                                label={'Select SGP for all'}
+                                requiredField={false}
+                                dataTestId={'select-all'}
+                                onWorkNumberChange={(workNumber) => {
+                                  const updatedReleasedLabware = releaseLabware.map((rl) => ({
+                                    ...rl,
+                                    workNumber: workNumber
+                                  }));
+                                  setReleaseLabware(updatedReleasedLabware);
+                                  updateFieldValues(updatedReleasedLabware, setFieldValue);
+                                }}
+                              />
+                            </div>
+                            <LabwareScanPanel
+                              columns={[
+                                columns.barcode(),
+                                {
+                                  Header: 'SGP Number',
+                                  id: 'workNumber',
+                                  Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
+                                    return (
+                                      <WorkNumberSelect
+                                        name={`releaseLabware.${row.index}.workNumber`}
+                                        onWorkNumberChange={(workNumber) => {
+                                          const updatedReleaseLabware = [...releaseLabware];
+                                          updatedReleaseLabware[row.index].workNumber = workNumber;
+                                          setReleaseLabware(updatedReleaseLabware);
+                                        }}
+                                        workNumber={releaseLabware[row.index]?.workNumber ?? undefined}
+                                      />
+                                    );
+                                  }
+                                },
+                                columns.donorId(),
+                                columns.labwareType(),
+                                columns.externalName(),
+                                columns.bioState()
+                              ]}
+                            />
+                          </div>
+                        )}
                       </LabwareScanner>
 
-                      <FormikErrorMessage name={'barcodes'} />
+                      <FormikErrorMessage name={'releaseLabware'} />
                     </motion.div>
 
                     <motion.div variants={variants.fadeInWithLift} className="space-y-4">
@@ -174,7 +277,7 @@ function Release({ releaseInfo }: PageParams) {
                       <CustomReactSelect
                         isDisabled={formLocked}
                         label={'Group/Team'}
-                        dataTestId="Group/Team"
+                        dataTestId="group"
                         name={'destination'}
                         emptyOption
                         options={selectOptionValues(releaseInfo.releaseDestinations, 'name', 'name')}
@@ -183,7 +286,7 @@ function Release({ releaseInfo }: PageParams) {
                       <CustomReactSelect
                         isDisabled={formLocked}
                         label={'Contact'}
-                        dataTestId="Contact"
+                        dataTestId="contact"
                         name={'recipient'}
                         emptyOption
                         options={selectOptionValues(releaseInfo.releaseRecipients, 'username', 'username')}
@@ -191,19 +294,21 @@ function Release({ releaseInfo }: PageParams) {
                     </motion.div>
                   </motion.div>
 
-                  <Sidebar>
+                  <Sidebar data-testid={'summary'}>
                     <Heading level={3} showBorder={false}>
                       Summary
                     </Heading>
 
-                    {values.barcodes.length > 0 && values.destination ? (
+                    {releaseLabware.length > 0 ? (
                       <p>
-                        <span className="font-semibold">{values.barcodes.length}</span> piece(s) of labware will be
-                        released to <span className="font-semibold">{values.destination}</span>.
+                        <span className="font-semibold">{releaseLabware.length}</span> piece(s) of labware will be
+                        released
+                        {values.destination && <span className="font-semibold"> to {values.destination}</span>}.
                       </p>
                     ) : (
-                      <p className="italic text-sm">Please scan labwares and select a group/team.</p>
+                      <p className="italic text-sm">Please scan labwares.</p>
                     )}
+                    {!values.destination && <p className="italic text-sm">Please select a group/team.</p>}
 
                     {values.recipient ? (
                       <p>

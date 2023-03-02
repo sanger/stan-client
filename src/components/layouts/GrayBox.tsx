@@ -13,9 +13,12 @@ const GrayBox: React.FC = ({ children }) => {
 
 export default GrayBox;
 
-export const Sidebar: React.FC = ({ children }) => {
+export const Sidebar: React.FC = ({ children, ...rest }) => {
   return (
-    <div className="md:w-1/3 mt-4 p-3 border-t-4 border-sp rounded-md lg:transform lg:translate-x-1/2 space-y-4 bg-sdb-400 text-gray-100">
+    <div
+      className="md:w-1/3 mt-4 p-3 border-t-4 border-sp rounded-md lg:transform lg:translate-x-1/2 space-y-4 bg-sdb-400 text-gray-100"
+      {...rest}
+    >
       {children}
     </div>
   );
