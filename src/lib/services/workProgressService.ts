@@ -13,6 +13,7 @@ export type WorkProgressResultTableEntry = {
   workNumber: string;
   workType: string;
   project: string;
+  omeroProject: string;
   program: string;
   status: WorkStatus;
   lastSectionDate: Date | undefined;
@@ -112,6 +113,7 @@ export class WorkProgressService
         workNumber: entry.work.workNumber,
         workType: entry.work.workType.name,
         project: entry.work.project.name,
+        omeroProject: entry.work.omeroProject ? entry.work.omeroProject.name : '',
         program: entry.work.program.name,
         status: entry.work.status,
         lastSectionDate: lastSectionDate && new Date(lastSectionDate.toString()),

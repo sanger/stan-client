@@ -304,6 +304,10 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     accessor: 'project'
   },
   {
+    Header: 'Omero Project',
+    accessor: 'omeroProject'
+  },
+  {
     Header: 'Program',
     accessor: 'program'
   },
