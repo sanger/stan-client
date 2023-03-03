@@ -162,7 +162,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
         type: 'SUBMIT_FORM',
         values: {
           workNumber: values.workNumber,
-          labwareResults: [values.labwareResult],
+          labwareResults: [{ ...values.labwareResult, costing: values.costing, reagentLot: values.reagentLot }],
           operationType: QCType.SLIDE_PROCESSING
         }
       });

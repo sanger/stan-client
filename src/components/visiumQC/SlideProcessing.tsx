@@ -60,13 +60,13 @@ const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware 
 
   React.useEffect(() => {
     if (values.costing) {
-      setFieldValue('labwareResult', { ...labwareResult, costing: values.costing });
+      setFieldValue('labwareResult', { ...labwareResult, costing: values.costing, reagentLot: values.reagentLot });
     }
   }, [labwareResult, setFieldValue, values.costing]);
 
   React.useEffect(() => {
     if (values.reagentLot) {
-      setFieldValue('labwareResult', { ...labwareResult, reagentLot: values.reagentLot });
+      setFieldValue('labwareResult', { ...labwareResult, reagentLot: values.reagentLot, costing: values.costing });
     }
   }, [labwareResult, setFieldValue, values.reagentLot]);
   return (
