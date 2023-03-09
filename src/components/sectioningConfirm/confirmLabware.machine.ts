@@ -46,6 +46,20 @@ type SetCommentForAddressEvent = {
   commentId: string;
 };
 
+type SetCommentsForSectionEvent = {
+  type: 'SET_COMMENTS_FOR_SECTION';
+  address: string;
+  sectionIndex: number;
+  commentIds: string[];
+};
+
+type SetRegionForSectionEvent = {
+  type: 'SET_REGION_FOR_SECTION';
+  address: string;
+  sectionIndex: number;
+  region: string;
+};
+
 type SetCommentForAllEvent = {
   type: 'SET_COMMENT_FOR_ALL';
   commentId: string;
@@ -85,7 +99,9 @@ export type SectioningConfirmationCompleteEvent = {
 
 export type ConfirmLabwareEvent =
   | SetCommentForAddressEvent
+  | SetCommentsForSectionEvent
   | SetCommentForAllEvent
+  | SetRegionForSectionEvent
   | EditLayoutEvent
   | CancelEditLayoutEvent
   | DoneEditLayoutEvent
@@ -100,7 +116,9 @@ function buildConfirmSection(destinationAddress: string, plannedAction: Source):
   return {
     destinationAddress,
     newSection: plannedAction.newSection,
-    sampleId: plannedAction.sampleId
+    sampleId: plannedAction.sampleId,
+    region: plannedAction.region,
+    commentIds: plannedAction.commentIds
   };
 }
 
@@ -142,6 +160,9 @@ export const createConfirmLabwareMachine = (
             SET_COMMENT_FOR_ADDRESS: {
               actions: ['assignAddressComment', 'commitConfirmation']
             },
+            SET_COMMENTS_FOR_SECTION: {
+              actions: ['assignSectionAddressComment', 'commitConfirmation']
+            },
             SET_COMMENT_FOR_ALL: {
               actions: ['assignAllComment', 'commitConfirmation']
             },
@@ -153,6 +174,9 @@ export const createConfirmLabwareMachine = (
             },
             UPDATE_ALL_SOURCES: {
               actions: ['updateAllSources', 'commitConfirmation']
+            },
+            SET_REGION_FOR_SECTION: {
+              actions: ['assignRegionInSection', 'commitConfirmation']
             }
           }
         },
@@ -180,14 +204,22 @@ export const createConfirmLabwareMachine = (
           if (e.type !== 'SET_COMMENT_FOR_ADDRESS') {
             return;
           }
-
           if (e.commentId === '') {
             ctx.addressToCommentMap.delete(e.address);
           } else {
             ctx.addressToCommentMap.set(e.address, Number(e.commentId));
           }
         }),
+        assignSectionAddressComment: assign((ctx, e) => {
+          if (e.type !== 'SET_COMMENTS_FOR_SECTION') {
+            return;
+          }
+          const plannedAction = ctx.layoutPlan.plannedActions.get(e.address);
 
+          if (plannedAction && plannedAction[e.sectionIndex]) {
+            plannedAction[e.sectionIndex].commentIds = e.commentIds.map((commentID) => Number(commentID));
+          }
+        }),
         /**
          * Assign all the addresses with planned actions in the same comment
          */
@@ -201,6 +233,23 @@ export const createConfirmLabwareMachine = (
             ctx.layoutPlan.plannedActions.forEach((value, key) => {
               ctx.addressToCommentMap.set(key, Number(e.commentId));
             });
+          }
+          /*ctx.layoutPlan.plannedActions.forEach((action)=> {
+             action.forEach((action)=> {
+               action.commentIds = []
+             })
+          })*/
+        }),
+        /**
+         * Assign all the addresses with planned actions in the same comment
+         */
+        assignRegionInSection: assign((ctx, e) => {
+          if (e.type !== 'SET_REGION_FOR_SECTION') {
+            return;
+          }
+          const plannedAction = ctx.layoutPlan.plannedActions.get(e.address);
+          if (plannedAction && plannedAction[e.sectionIndex]) {
+            plannedAction[e.sectionIndex].region = e.region;
           }
         }),
 

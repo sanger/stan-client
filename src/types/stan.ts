@@ -10,7 +10,6 @@ import { Location } from "history";
 import { ClientError } from "graphql-request";
 import * as Yup from "yup";
 import { regexSort } from "../lib/helpers";
-
 /**
  * Union of STAN's {@link OperationType} names
  */
@@ -338,3 +337,22 @@ export function createSessionStorageForLabwareAwaiting( labware:LabwareFieldsFra
           .join(',')
   );
 }
+
+declare module "yup" {
+  interface ArraySchema<T> {
+    unique(
+        message: string,
+        mapper?: (value: T, index?: number, list?: T[]) => T[]
+    ): ArraySchema<T>;
+  }
+}
+Yup.addMethod(Yup.array, "unique", function (
+    message,
+    mapper = (val: unknown) => val
+) {
+  return this.test(
+      "unique",
+      message,
+      (list = []) => list.length === new Set(list.map(mapper)).size
+  );
+});

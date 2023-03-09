@@ -1,0 +1,4 @@
+fragment SlotRegionFields on SlotRegion {
+  enabled
+  name
+}

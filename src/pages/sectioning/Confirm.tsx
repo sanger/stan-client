@@ -52,6 +52,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
             <SectioningConfirm
               initialPlans={plans}
               comments={sectioningConfirmInfo.comments}
+              slotRegions={sectioningConfirmInfo.slotRegions}
               onConfirmed={(labwares) => {
                 if (labwares) {
                   setConfirmedLabwares(labwares ?? []);

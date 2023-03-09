@@ -1,0 +1,5 @@
+mutation AddSlotRegion($name: String!) {
+  addSlotRegion(name: $name) {
+    ...SlotRegionFields
+  }
+}

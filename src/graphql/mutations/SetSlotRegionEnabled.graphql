@@ -1,0 +1,5 @@
+mutation SetSlotRegionEnabled($name: String!, $enabled: Boolean!) {
+  setSlotRegionEnabled(name: $name, enabled: $enabled) {
+    ...SlotRegionFields
+  }
+}

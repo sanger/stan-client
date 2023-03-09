@@ -1,0 +1,6 @@
+query GetSlotRegions($includeDisabled:Boolean) {
+    slotRegions(includeDisabled: $includeDisabled) {
+        name
+        enabled
+    }
+}
