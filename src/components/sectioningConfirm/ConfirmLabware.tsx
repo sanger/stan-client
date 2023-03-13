@@ -98,7 +98,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   const [current, send, service] = useMachine(confirmLabwareMachine);
   const confirmOperationLabware = useSelector(service, selectConfirmOperationLabware);
 
-  const { addressToCommentMap, labware, layoutPlan } = current.context;
+  const { addressToCommentMap, labware, layoutPlan, commentsForAllSections } = current.context;
   const { layoutMachine } = current.children;
   const [notifyDelete, setNotifyDelete] = React.useState(false);
   const notifySectionChange = React.useRef(false);
@@ -225,12 +225,15 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             <Label name={'Set comments in all sections:'}>
               <CustomReactSelect
                 isDisabled={current.matches('done')}
-                handleChange={(comments) =>
+                handleChange={(comments) => {
+                  const commentIds = (comments as OptionType[]).map((val) => val.value);
                   send({
                     type: 'SET_COMMENT_FOR_ALL',
-                    commentId: (comments as OptionType).value
-                  })
-                }
+                    commentIds
+                  });
+                }}
+                value={commentsForAllSections}
+                isMulti
                 options={selectOptionValues(comments, 'text', 'id')}
               />
             </Label>

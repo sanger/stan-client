@@ -29,7 +29,6 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
   slotRegions,
   layoutPlan,
   comments,
-  value,
   onCommentChange,
   onSlotRegionChange,
   disabledComment = false,
@@ -37,7 +36,6 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
   onSectionNumberChange
 }) => {
   const sections = layoutPlan.plannedActions.get(slot.address);
-
   const isRegionExists = (region: string) => {
     const regions = sections?.filter((section) => section.region === region);
     return regions && regions.length > 1;
@@ -79,7 +77,9 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
                 </div>
                 {layoutPlan.plannedActions.has(slot.address) && (
                   <CustomReactSelect
-                    value={value}
+                    value={layoutPlan.plannedActions
+                      .get(slot.address)!
+                      [index].commentIds?.map((comment) => comment + '')}
                     isDisabled={disabledComment}
                     handleChange={(options) => {
                       const optionsValues = Array.isArray(options)
@@ -92,13 +92,6 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
                     options={selectOptionValues(comments, 'text', 'id')}
                   />
                 )}
-                {/*source.region && isRegionExists(source.region, index) && (
-                  <>
-                    <div />
-                    <MutedText className={'text-red-400'}>{'Unique value required.'}</MutedText>
-                    <div />
-                  </>
-                )*/}
               </>
             )}
           </div>

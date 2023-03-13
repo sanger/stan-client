@@ -28,6 +28,11 @@ export interface ConfirmLabwareContext {
   comments: Array<Comment>;
 
   /**
+   * All comments available for the outcome confirmation
+   */
+  commentsForAllSections: string[];
+
+  /**
    * Map of labware address to comment ID
    */
   addressToCommentMap: Map<Address, number>;
@@ -62,7 +67,7 @@ type SetRegionForSectionEvent = {
 
 type SetCommentForAllEvent = {
   type: 'SET_COMMENT_FOR_ALL';
-  commentId: string;
+  commentIds: string[];
 };
 
 type EditLayoutEvent = { type: 'EDIT_LAYOUT' };
@@ -145,7 +150,8 @@ export const createConfirmLabwareMachine = (
         layoutPlan: cloneDeep(layoutPlan),
         addressToCommentMap: new Map(),
         cancelled: false,
-        confirmSectionLabware: null
+        confirmSectionLabware: null,
+        commentsForAllSections: []
       },
       on: {
         SECTIONING_CONFIRMATION_COMPLETE: 'done'
@@ -227,18 +233,19 @@ export const createConfirmLabwareMachine = (
           if (e.type !== 'SET_COMMENT_FOR_ALL') {
             return;
           }
-          if (e.commentId === '') {
+          if (e.commentIds.length === 0) {
             ctx.addressToCommentMap.clear();
           } else {
             ctx.layoutPlan.plannedActions.forEach((value, key) => {
-              ctx.addressToCommentMap.set(key, Number(e.commentId));
+              ctx.addressToCommentMap.set(key, Number(e.commentIds[0]));
             });
           }
-          /*ctx.layoutPlan.plannedActions.forEach((action)=> {
-             action.forEach((action)=> {
-               action.commentIds = []
-             })
-          })*/
+          ctx.commentsForAllSections = e.commentIds;
+          ctx.layoutPlan.plannedActions.forEach((action) => {
+            action.forEach((action) => {
+              action.commentIds = e.commentIds.map((commentID) => Number(commentID));
+            });
+          });
         }),
         /**
          * Assign all the addresses with planned actions in the same comment
