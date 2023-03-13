@@ -54,6 +54,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
               <>
                 <Input
                   type="number"
+                  data-testid={'section-number'}
                   value={source.newSection === 0 ? '' : String(source.newSection)}
                   min={1}
                   disabled={sectionNumberDisplay === SectionNumberSetting.DISABLE}
@@ -70,6 +71,7 @@ const LabwareComments: React.FC<LabwareCommentsProps> = ({
                       const region = (option as OptionType).value;
                       onSlotRegionChange(slot.address, index, region);
                     }}
+                    dataTestId={'region-select'}
                   />
                   {source.region && isRegionExists(source.region) && (
                     <MutedText className={'text-red-400'}>{'Unique value required.'}</MutedText>
