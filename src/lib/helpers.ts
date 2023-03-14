@@ -246,7 +246,6 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
       return entry;
     } else {
       return columns.map((column) => {
-        debugger;
         if (typeof column.accessor === 'string') {
           const value = entry[column.accessor];
           if (Array.isArray(value)) {

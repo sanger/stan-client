@@ -310,7 +310,7 @@ export const createConfirmLabwareMachine = (
             updateSources &&
               updateSources.forEach((source, indx) => {
                 if (currentSources && currentSources.length > indx) {
-                  currentSources[indx] = { ...source };
+                  currentSources[indx] = { ...currentSources[indx], ...source };
                 }
               });
           }
