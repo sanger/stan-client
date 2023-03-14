@@ -15,7 +15,7 @@ import { FindRequest, GetSearchInfoQuery, Work } from '../types/sdk';
 import { stanCore } from '../lib/sdk';
 import { useMachine } from '@xstate/react';
 import * as Yup from 'yup';
-import { cleanParams, objectKeys, parseQueryString, stringify } from '../lib/helpers';
+import { cleanParams, getTimestampStr, objectKeys, parseQueryString, stringify } from '../lib/helpers';
 import { history } from '../lib/sdk';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { ParsedQuery } from 'query-string';
@@ -25,6 +25,8 @@ import searchMachine from '../lib/machines/search/searchMachine';
 import SearchService from '../lib/services/searchService';
 import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
+import DownloadIcon from '../components/icons/DownloadIcon';
+import { useDownload } from '../lib/hooks/useDownload';
 
 const validationSchema = Yup.object()
   .shape({
@@ -93,6 +95,8 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
 
   const showWarning = searchResult && searchResult.numRecords! > searchResult.numDisplayed!;
   const showSearchResult = current.matches('searched') && searchResult && searchResult?.numRecords! > 0;
+  const [downloadFileURL, setFileDownloadURL] = React.useState<string>('');
+  const sortedTableDataRef = React.useRef<SearchResultTableEntry[]>([]);
 
   const onFormSubmit = (values: FindRequest) => {
     send({ type: 'FIND', request: values });
@@ -117,6 +121,37 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
     }
     fetchActiveWorkNumbers();
   }, [setWorks]);
+
+  /**
+   * Rebuild the file object whenever the searchResult changes
+   */
+  const downloadData = React.useMemo(() => {
+    return {
+      columnData: {
+        columns: columns
+      },
+      entries: searchResult ? searchResult.entries : []
+    };
+  }, [searchResult]);
+
+  const { downloadURL, requestDownload, extension } = useDownload(downloadData);
+  React.useEffect(() => {
+    setFileDownloadURL(downloadURL);
+  }, [downloadURL, setFileDownloadURL]);
+
+  /**
+   * Rebuild the blob object on download action
+   */
+  const handleDownload = React.useCallback(() => {
+    let data = sortedTableDataRef.current ? sortedTableDataRef.current : searchResult ? searchResult.entries : [];
+    const fileurl = requestDownload({
+      columnData: {
+        columns: columns
+      },
+      entries: data
+    });
+    setFileDownloadURL(fileurl);
+  }, [searchResult, requestDownload]);
 
   return (
     <AppShell>
@@ -211,17 +246,36 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
               )}
               {showWarning && <Warning message={'Not all results can be displayed. Please refine your search.'} />}
               {showSearchResult && searchResult && (
-                <div>
-                  <div className="mt-6 mb-2 flex flex-row items-center justify-end">
-                    <p className="text-sm text-gray-700">
-                      Displaying <span className="font-medium"> {searchResult.numDisplayed} </span>
-                      of
-                      <span className="font-medium"> {searchResult.numRecords} </span>
-                      results
-                    </p>
+                <>
+                  <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
+                    <p className="text-sm text-gray-700">Search records</p>
+                    <a
+                      href={downloadFileURL}
+                      download={`${getTimestampStr()}_dashboard_search_${extension}`}
+                      onClick={handleDownload}
+                      data-testid="download"
+                    >
+                      <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
+                    </a>
                   </div>
-                  <DataTable sortable defaultSort={[{ id: 'donorId' }]} columns={columns} data={searchResult.entries} />
-                </div>
+                  <div>
+                    <div className="mt-6 mb-2 flex flex-row items-center justify-end">
+                      <p className="text-sm text-gray-700">
+                        Displaying <span className="font-medium"> {searchResult.numDisplayed} </span>
+                        of
+                        <span className="font-medium"> {searchResult.numRecords} </span>
+                        results
+                      </p>
+                    </div>
+                    <DataTable
+                      sortable
+                      defaultSort={[{ id: 'donorId' }]}
+                      columns={columns}
+                      data={searchResult.entries}
+                      ref={sortedTableDataRef}
+                    />
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -236,6 +290,7 @@ export default Search;
 const columns: Column<SearchResultTableEntry>[] = [
   {
     Header: 'Barcode',
+    accessor: 'barcode',
     Cell: (props: Cell<SearchResultTableEntry>) => {
       const barcode = props.row.original.barcode;
       return <StyledLink to={`/labware/${barcode}`}>{barcode}</StyledLink>;
@@ -285,7 +340,7 @@ const columns: Column<SearchResultTableEntry>[] = [
   },
   {
     Header: 'Location',
-    accessor: 'location',
+    accessor: (originalRow) => originalRow.location?.displayName,
     sortType: (rowA, rowB) => {
       const displayNameA = rowA.original.location?.displayName;
       const displayNameB = rowB.original.location?.displayName;

@@ -246,11 +246,13 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
       return entry;
     } else {
       return columns.map((column) => {
+        debugger;
         if (typeof column.accessor === 'string') {
           const value = entry[column.accessor];
           if (Array.isArray(value)) {
             return value.join(',');
           }
+
           if (typeof value === 'object' && (value as Object) instanceof Date) {
             const date = value as Date;
             return date.toLocaleDateString();
@@ -260,7 +262,10 @@ export function createDownloadFileContent<T extends StringKeyedProps>(
           }
           return value;
         }
-        throw new Error('createDownloadFileContent requires all column accessors to be strings');
+        if (typeof column.accessor === 'function') {
+          return column.accessor(entry, 0, { subRows: entries as T[], data: entries as T[], depth: 0 });
+        }
+        throw new Error('createDownloadFileContent requires all column accessors to be strings or functions');
       });
     }
   });
