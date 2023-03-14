@@ -112,7 +112,7 @@ describe('Search', () => {
       });
 
       it('will not show the download button', () => {
-        cy.findByTestId('download').should('not.be.visible');
+        cy.findByTestId('download').should('not.exist');
       });
     });
 
