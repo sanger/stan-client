@@ -163,7 +163,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             <Heading level={3} showBorder={false}>
               Comments
             </Heading>
-            <div className={'grid grid-cols-3 text-center'}>
+            <div className={'grid grid-cols-3 py-2 text-gray-500 text-center'}>
               <div>Section number</div>
               <div>Region</div>
               <div>Comment</div>
@@ -222,7 +222,8 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                 ))}
               </div>
             </div>
-            <Label name={'Set comments in all sections:'}>
+            <div className={'border-2 border-gray-300'} />
+            <Label name={'Set comments in all sections:'} className={'flex whitespace-nowrap py-4'}>
               <CustomReactSelect
                 isDisabled={current.matches('done')}
                 handleChange={(comments) => {
