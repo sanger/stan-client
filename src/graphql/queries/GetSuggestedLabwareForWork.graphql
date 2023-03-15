@@ -1,0 +1,5 @@
+query GetSuggestedLabwareForWork($workNumber: String!) {
+  suggestedLabwareForWork(workNumber: $workNumber) {
+    ...LabwareFields
+  }
+}

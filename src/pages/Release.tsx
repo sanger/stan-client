@@ -30,6 +30,9 @@ import { reload, StanCoreContext } from '../lib/sdk';
 import { Row } from 'react-table';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
+import Label from '../components/forms/Label';
+import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
+import DataTable from '../components/DataTable';
 
 const validationSchema = Yup.object().shape({
   releaseLabware: Yup.array()
@@ -94,9 +97,16 @@ interface PageParams {
   releaseInfo: GetReleaseInfoQuery;
 }
 
+enum ReleaseType {
+  WORK_NUMBER = 'SGP Number',
+  LABWARE_LOCATION = 'Labware/Location'
+}
+
 function Release({ releaseInfo }: PageParams) {
   const stanCore = useContext(StanCoreContext);
   const [releaseLabware, setReleaseLabware] = React.useState<ReleaseLabware[]>([]);
+  const [labwareFromSGP, setLabwareFromSGP] = React.useState<LabwareFieldsFragment[]>([]);
+  const [releaseType, setReleaseType] = React.useState<ReleaseType>(ReleaseType.LABWARE_LOCATION);
 
   const initialValues: ReleaseRequest = {
     releaseLabware: releaseLabware,
@@ -179,6 +189,25 @@ function Release({ releaseInfo }: PageParams) {
     },
     [releaseLabware, setReleaseLabware, stanCore, updateFieldValues]
   );
+  const handleSelectWorkNumberForRelease = React.useCallback(
+    (workNumber: string, setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void) => {
+      async function updateLabwareFromSGP(workNumber: string) {
+        const res = await stanCore.GetSuggestedLabwareForWork({ workNumber });
+        const suggestedLabware = res.suggestedLabwareForWork.map((labware) => ({
+          barcode: labware.barcode,
+          workNumber
+        }));
+        const newLabware = [...releaseLabware, ...suggestedLabware];
+        setReleaseLabware(newLabware);
+        setLabwareFromSGP((prev) => {
+          return [...prev, ...res.suggestedLabwareForWork];
+        });
+        updateFieldValues(newLabware, setFieldValue);
+      }
+      updateLabwareFromSGP(workNumber);
+    },
+    [stanCore, setReleaseLabware, setLabwareFromSGP, releaseLabware, updateFieldValues]
+  );
 
   return (
     <AppShell>
@@ -200,73 +229,130 @@ function Release({ releaseInfo }: PageParams) {
                   >
                     {serverError && <Warning error={serverError} />}
                     <motion.div variants={variants.fadeInWithLift} className="space-y-4 ">
-                      <Heading level={3}>Labware</Heading>
-                      <MutedText>Please scan either the location or a piece of labware you wish to release.</MutedText>
-
-                      <LabwareScanner
-                        onChange={(labware) => {
-                          onAddLabware(labware, setFieldValue);
-                        }}
-                        onRemove={(labware) => {
-                          const updatedReleasedLabware = releaseLabware.filter(
-                            (rlw) => rlw.barcode !== labware.barcode
-                          );
-                          setReleaseLabware(updatedReleasedLabware);
-                          updateFieldValues(updatedReleasedLabware, setFieldValue);
-                        }}
-                        locked={formLocked}
-                        labwareCheckFunction={labwareBioStateCheck}
-                        enableLocationScanner={true}
-                      >
-                        {releaseLabware.length > 0 && (
-                          <div className={'flex flex-col'}>
-                            <Heading className={'mt-4'} level={4}>
-                              Labware to release
-                            </Heading>
-                            <div className={'flex flex-col mt-4 w-1/2'}>
-                              <WorkNumberSelect
-                                label={'Select SGP for all'}
-                                requiredField={false}
-                                dataTestId={'select-all'}
-                                onWorkNumberChange={(workNumber) => {
-                                  const updatedReleasedLabware = releaseLabware.map((rl) => ({
-                                    ...rl,
-                                    workNumber: workNumber
-                                  }));
-                                  setReleaseLabware(updatedReleasedLabware);
-                                  updateFieldValues(updatedReleasedLabware, setFieldValue);
+                      <Heading level={3}>Release Type</Heading>
+                      <div className={'flex flex-row'}>
+                        <RadioGroup label="Release by" name={'release_type'}>
+                          {[ReleaseType.LABWARE_LOCATION, ReleaseType.WORK_NUMBER].map((key) => {
+                            return (
+                              <RadioButtonInput
+                                key={key}
+                                name={'releaseType'}
+                                value={key}
+                                checked={releaseType === key}
+                                onChange={(e) => {
+                                  setReleaseType(e.currentTarget.value as ReleaseType);
+                                  setReleaseLabware([]);
+                                  setLabwareFromSGP([]);
                                 }}
+                                label={key}
+                              />
+                            );
+                          })}
+                        </RadioGroup>
+                      </div>
+                      {releaseType === ReleaseType.WORK_NUMBER ? (
+                        <div className={'flex flex-col w-full'}>
+                          <MutedText>Please choose the SGP number to release all associated labware.</MutedText>
+                          <Label
+                            name={'SGP Number:'}
+                            className={'w-full ml-2 mt-2 font-sans font-medium text-gray-700'}
+                          >
+                            <WorkNumberSelect
+                              onWorkNumberChange={(workNumber) =>
+                                handleSelectWorkNumberForRelease(workNumber, setFieldValue)
+                              }
+                              dataTestId={'worknumber_release'}
+                            />
+                          </Label>
+                          {releaseLabware.length > 0 && (
+                            <div className={'flex flex-col w-full'}>
+                              <Heading className={'mt-4'} level={4}>
+                                Labware to release
+                              </Heading>
+                              <DataTable
+                                data={labwareFromSGP}
+                                columns={[
+                                  columns.barcode(),
+                                  columns.donorId(),
+                                  columns.labwareType(),
+                                  columns.externalName(),
+                                  columns.bioState()
+                                ]}
                               />
                             </div>
-                            <LabwareScanPanel
-                              columns={[
-                                columns.barcode(),
-                                {
-                                  Header: 'SGP Number',
-                                  id: 'workNumber',
-                                  Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
-                                    return (
-                                      <WorkNumberSelect
-                                        name={`releaseLabware.${row.index}.workNumber`}
-                                        onWorkNumberChange={(workNumber) => {
-                                          const updatedReleaseLabware = [...releaseLabware];
-                                          updatedReleaseLabware[row.index].workNumber = workNumber;
-                                          setReleaseLabware(updatedReleaseLabware);
-                                        }}
-                                        workNumber={releaseLabware[row.index]?.workNumber ?? undefined}
-                                      />
-                                    );
-                                  }
-                                },
-                                columns.donorId(),
-                                columns.labwareType(),
-                                columns.externalName(),
-                                columns.bioState()
-                              ]}
-                            />
-                          </div>
-                        )}
-                      </LabwareScanner>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <MutedText>
+                            Please scan either the location or a piece of labware you wish to release.
+                          </MutedText>
+                          <LabwareScanner
+                            onChange={(labware) => {
+                              onAddLabware(labware, setFieldValue);
+                            }}
+                            onRemove={(labware) => {
+                              const updatedReleasedLabware = releaseLabware.filter(
+                                (rlw) => rlw.barcode !== labware.barcode
+                              );
+                              setReleaseLabware(updatedReleasedLabware);
+                              updateFieldValues(updatedReleasedLabware, setFieldValue);
+                            }}
+                            locked={formLocked}
+                            labwareCheckFunction={labwareBioStateCheck}
+                            enableLocationScanner={true}
+                          >
+                            {releaseLabware.length > 0 && (
+                              <div className={'flex flex-col'}>
+                                <Heading className={'mt-4'} level={4}>
+                                  Labware to release
+                                </Heading>
+                                <div className={'flex flex-col mt-4 w-1/2'}>
+                                  <WorkNumberSelect
+                                    label={'Select SGP for all'}
+                                    requiredField={false}
+                                    dataTestId={'select-all'}
+                                    onWorkNumberChange={(workNumber) => {
+                                      const updatedReleasedLabware = releaseLabware.map((rl) => ({
+                                        ...rl,
+                                        workNumber: workNumber
+                                      }));
+                                      setReleaseLabware(updatedReleasedLabware);
+                                      updateFieldValues(updatedReleasedLabware, setFieldValue);
+                                    }}
+                                  />
+                                </div>
+                                <LabwareScanPanel
+                                  columns={[
+                                    columns.barcode(),
+                                    {
+                                      Header: 'SGP Number',
+                                      id: 'workNumber',
+                                      Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
+                                        return (
+                                          <WorkNumberSelect
+                                            name={`releaseLabware.${row.index}.workNumber`}
+                                            onWorkNumberChange={(workNumber) => {
+                                              const updatedReleaseLabware = [...releaseLabware];
+                                              updatedReleaseLabware[row.index].workNumber = workNumber;
+                                              setReleaseLabware(updatedReleaseLabware);
+                                            }}
+                                            workNumber={releaseLabware[row.index]?.workNumber ?? undefined}
+                                          />
+                                        );
+                                      }
+                                    },
+                                    columns.donorId(),
+                                    columns.labwareType(),
+                                    columns.externalName(),
+                                    columns.bioState()
+                                  ]}
+                                />
+                              </div>
+                            )}
+                          </LabwareScanner>
+                        </>
+                      )}
 
                       <FormikErrorMessage name={'releaseLabware'} />
                     </motion.div>
