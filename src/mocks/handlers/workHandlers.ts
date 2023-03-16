@@ -7,6 +7,8 @@ import {
   FindWorkNumbersQuery,
   FindWorkNumbersQueryVariables,
   GetAllWorkInfoQuery,
+  GetSuggestedLabwareForWorkQuery,
+  GetSuggestedLabwareForWorkQueryVariables,
   GetWorkAllocationInfoQuery,
   GetWorkAllocationInfoQueryVariables,
   GetWorkNumbersQuery,
@@ -35,6 +37,7 @@ import { sample } from 'lodash';
 import releaseRecipientRepository from '../repositories/releaseRecipientRepository';
 import programRepository from '../repositories/programRepository';
 import omeroProjectRepository from '../repositories/omeroProjectRepository';
+import labwareFactory from '../../lib/factories/labwareFactory';
 
 const workHandlers = [
   graphql.query<GetWorkAllocationInfoQuery, GetWorkAllocationInfoQueryVariables>(
@@ -337,7 +340,17 @@ const workHandlers = [
         ]
       })
     );
-  })
+  }),
+  graphql.query<GetSuggestedLabwareForWorkQuery, GetSuggestedLabwareForWorkQueryVariables>(
+    'GetSuggestedLabwareForWork',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          suggestedLabwareForWork: labwareFactory.buildList(2)
+        })
+      );
+    }
+  )
 ];
 
 export default workHandlers;
