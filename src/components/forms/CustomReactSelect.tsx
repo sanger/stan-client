@@ -92,6 +92,16 @@ export const NormalReactSelect = ({
     <div data-testid={dataTestId ?? 'select-div'} className={`md:w-full ${className}`}>
       <Label name={label ?? ''}>
         <ReactSelect
+          menuPosition={'fixed'}
+          name={name}
+          onChange={(val) => onChangeValue(val)}
+          onBlur={(val) => onBlur(val)}
+          options={memoOptions}
+          value={defaultValue(memoOptions, value, isMulti)}
+          isMulti={isMulti}
+          placeholder={placeholder ?? ''}
+          components={{ Option, IndicatorSeparator: () => null }}
+          {...props}
           styles={{
             control: (baseStyles, state) => ({
               ...baseStyles,
@@ -103,9 +113,7 @@ export const NormalReactSelect = ({
               },
               'input:focus': {
                 boxShadow: 'none'
-              },
-              width: fixedWidth ? '30px' : 'max-content',
-              minWidth: '100%'
+              }
             }),
             menu: (base) => ({
               ...base,
@@ -126,16 +134,6 @@ export const NormalReactSelect = ({
               };
             }
           }}
-          menuPosition={'fixed'}
-          name={name}
-          onChange={(val) => onChangeValue(val)}
-          onBlur={(val) => onBlur(val)}
-          options={memoOptions}
-          value={defaultValue(memoOptions, value, isMulti)}
-          isMulti={isMulti}
-          placeholder={placeholder ?? ''}
-          components={{ Option, IndicatorSeparator: () => null }}
-          {...props}
         />
       </Label>
     </div>

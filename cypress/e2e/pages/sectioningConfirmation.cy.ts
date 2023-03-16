@@ -8,7 +8,7 @@ import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { labwareTypes } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { findPlanData } from '../../../src/mocks/handlers/planHandlers';
-import { selectSGPNumber } from '../shared/customReactSelect.cy';
+import { getAllSelect, selectOptionForMultiple, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Sectioning Confirmation', () => {
   before(() => {
@@ -190,6 +190,11 @@ describe('Sectioning Confirmation', () => {
             .should('have.value', highestSectionNumber + '');
         });
       });
+      it('should display region fields for all sections', () => {
+        getAllSelect('region-select').forEach((elem: any) => {
+          cy.wrap(elem).should('be.enabled');
+        });
+      });
       after(() => {
         findPlanByBarcode('STAN-0001E');
       });
@@ -288,16 +293,33 @@ describe('Sectioning Confirmation', () => {
         saveButton().should('be.disabled');
       });
     });
-
     context('when I add the section number in manual mode', () => {
       before(() => {
-        cy.findAllByTestId('labware-comments').each((elem) => {
-          cy.wrap(elem)
-            .find('input')
-            .each((input) => {
-              cy.wrap(input).type('10');
-            });
+        cy.findAllByTestId('section-number').each((elem, index) => {
+          cy.wrap(elem).type(String(index + 10));
         });
+      });
+
+      it('displays save button as disabled', () => {
+        saveButton().should('be.disabled');
+      });
+    });
+    context('when duplicate regions are selected', () => {
+      before(() => {
+        selectOptionForMultiple('region-select', 'Top', 0);
+        selectOptionForMultiple('region-select', 'Top', 1);
+      });
+      it('displays error', () => {
+        cy.findAllByText('Unique value required.').should('have.length', 2);
+      });
+      it('disables the Save button', () => {
+        saveButton().should('be.disabled');
+      });
+    });
+    context('when unique regions are selected', () => {
+      before(() => {
+        selectOptionForMultiple('region-select', 'Top', 0);
+        selectOptionForMultiple('region-select', 'Middle', 1);
       });
       it('enables the Save button', () => {
         saveButton().should('be.enabled');

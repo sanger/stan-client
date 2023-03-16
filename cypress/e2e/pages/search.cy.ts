@@ -86,6 +86,10 @@ describe('Search', () => {
       it('will show a warning', () => {
         cy.findByText('Not all results can be displayed. Please refine your search.').should('be.visible');
       });
+
+      it('shows the download button', () => {
+        cy.findByTestId('download').should('be.visible');
+      });
     });
 
     context('when a search returns no results', () => {
@@ -105,6 +109,10 @@ describe('Search', () => {
 
       it('will show a notification', () => {
         cy.findByText('There is no stored labware matching your search. Please try again.').should('be.visible');
+      });
+
+      it('will not show the download button', () => {
+        cy.findByTestId('download').should('not.exist');
       });
     });
 

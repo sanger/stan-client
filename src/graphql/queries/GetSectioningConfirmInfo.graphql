@@ -2,4 +2,7 @@ query GetSectioningConfirmInfo {
   comments(category: "section") {
     ...CommentFields
   }
+  slotRegions(includeDisabled: false) {
+    ...SlotRegionFields
+  }
 }

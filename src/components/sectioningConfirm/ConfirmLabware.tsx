@@ -7,43 +7,84 @@ import Modal, { ModalBody, ModalFooter } from '../Modal';
 import Heading from '../Heading';
 import BlueButton from '../buttons/BlueButton';
 import { motion } from 'framer-motion';
-import { optionValues } from '../forms';
+import { selectOptionValues } from '../forms';
 import LayoutPlanner from '../LayoutPlanner';
 import Label from '../forms/Label';
 import WhiteButton from '../buttons/WhiteButton';
 import { sortRightDown } from '../../lib/helpers/labwareHelper';
-import { Select } from '../forms/Select';
 import LabwareComments, { SectionNumberSetting } from './LabwareComments';
-import classNames from 'classnames';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../pages/sectioning';
 import { createConfirmLabwareMachine } from './confirmLabware.machine';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
-import { CommentFieldsFragment, ConfirmSectionLabware } from '../../types/sdk';
+import { CommentFieldsFragment, ConfirmSectionLabware, SlotRegionFieldsFragment } from '../../types/sdk';
 import { selectConfirmOperationLabware } from './index';
 import RemoveButton from '../buttons/RemoveButton';
 import { ConfirmationModal } from '../modal/ConfirmationModal';
 import { SectionNumberMode } from './SectioningConfirm';
 import { LabwareTypeName } from '../../types/stan';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 interface ConfirmLabwareProps {
+  /**
+   * The layout plan created originally
+   */
   originalLayoutPlan: LayoutPlan;
+
+  /**
+   * The list of comments that will be available for the user to choose for each section
+   */
   comments: Array<CommentFieldsFragment>;
-  onChange: (labware: ConfirmSectionLabware) => void;
+
+  /**
+   * The list of regions in slot that will be available for the user to choose for each section.
+   * Region is to specify where the user is keeping the section of a sample in a slot, if there are multiple samples(/sections)
+   */
+  slotRegions: Array<SlotRegionFieldsFragment>;
+
+  /**
+   * Is section number enabled?
+   */
   sectionNumberEnabled?: boolean;
+
+  /**
+   * The numbering mode for section numbers - Auto or Manual
+   */
+  mode: SectionNumberMode;
+
+  /**Callback on change in labware**/
+  onChange: (labware: ConfirmSectionLabware) => void;
+
+  /**
+   * Callback on removing plan
+   * @param barcode - Barcode of labware plan removed
+   */
+  removePlan: (barcode: string) => void;
+
+  /**
+   * Callback on section updates
+   * @param layoutPlan : Plan in which section chnaged
+   */
   onSectionUpdate?: (layoutPlan: LayoutPlan) => void;
+
+  /**
+   * Callback on section number changes
+   * @param layoutPlan - Plan changed
+   * @param slotAddress - Address of the slot in which the section belongs
+   * @param sectionIndex - Index of section in slot
+   * @param sectionNumber - New section number
+   */
   onSectionNumberChange?: (
     layoutPlan: LayoutPlan,
     slotAddress: string,
     sectionIndex: number,
     sectionNumber: number
   ) => void;
-  removePlan: (barcode: string) => void;
-  mode: SectionNumberMode;
 }
 
 const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   originalLayoutPlan,
   comments,
+  slotRegions,
   onChange,
   sectionNumberEnabled = true,
   onSectionUpdate,
@@ -57,18 +98,10 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   const [current, send, service] = useMachine(confirmLabwareMachine);
   const confirmOperationLabware = useSelector(service, selectConfirmOperationLabware);
 
-  const { addressToCommentMap, labware, layoutPlan } = current.context;
+  const { addressToCommentMap, labware, layoutPlan, commentsForAllSections } = current.context;
   const { layoutMachine } = current.children;
   const [notifyDelete, setNotifyDelete] = React.useState(false);
   const notifySectionChange = React.useRef(false);
-
-  const gridClassNames = classNames(
-    {
-      'sm:grid-cols-1': labware.labwareType.numColumns === 1,
-      'sm:grid-cols-2': labware.labwareType.numColumns === 2
-    },
-    'grid grid-cols-1 gap-x-8 gap-y-2'
-  );
 
   useEffect(() => {
     if (confirmOperationLabware) {
@@ -80,7 +113,6 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
     //Notify parent only for layout changes
     if (layoutPlan && current.event.type === 'done.invoke.layoutMachine' && notifySectionChange.current) {
       notifySectionChange.current = false;
-
       onSectionUpdate && onSectionUpdate(layoutPlan);
     }
   }, [layoutPlan, current.event, onSectionUpdate]);
@@ -127,17 +159,22 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
           )}
         </div>
         {sectionNumberEnabled && (
-          <div className="p-4 space-y-8 space-x-2 bg-gray-100">
+          <div className="p-4 space-y-2 space-x-2 bg-gray-100">
             <Heading level={3} showBorder={false}>
               Comments
             </Heading>
-
+            <div className={'grid grid-cols-3 py-2 text-gray-500 text-center'}>
+              <div>Section number</div>
+              <div>Region</div>
+              <div>Comment</div>
+            </div>
             <div className="w-full space-y-4">
-              <div data-testid="labware-comments" className={gridClassNames}>
+              <div data-testid="labware-comments" className={'flex flex-col space-y-4'}>
                 {sortRightDown(labware.slots).map((slot) => (
                   <LabwareComments
                     key={slot.address}
                     slot={slot}
+                    slotRegions={slotRegions}
                     value={addressToCommentMap.get(slot.address) ?? ''}
                     disabledComment={current.matches('done')}
                     sectionNumberDisplay={
@@ -149,11 +186,25 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                     }
                     comments={comments}
                     layoutPlan={layoutPlan}
-                    onCommentChange={(e) => {
+                    onSlotRegionChange={(slotAddress, sectionIndex, region) =>
+                      send({
+                        type: 'SET_REGION_FOR_SECTION',
+                        address: slot.address,
+                        sectionIndex,
+                        region
+                      })
+                    }
+                    onCommentChange={(slotAddress, sectionIndex, commentIds) => {
                       send({
                         type: 'SET_COMMENT_FOR_ADDRESS',
                         address: slot.address,
-                        commentId: e.currentTarget.value
+                        commentId: commentIds.length > 0 ? commentIds[0] : ''
+                      });
+                      send({
+                        type: 'SET_COMMENTS_FOR_SECTION',
+                        address: slot.address,
+                        sectionIndex,
+                        commentIds
                       });
                     }}
                     onSectionNumberChange={(slotAddress, sectionIndex, sectionNumber) => {
@@ -171,19 +222,21 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                 ))}
               </div>
             </div>
-            <Label name={'All slots:'}>
-              <Select
-                disabled={current.matches('done')}
-                onChange={(e) =>
+            <div className={'border-2 border-gray-300'} />
+            <Label name={'Set comments in all sections:'} className={'flex whitespace-nowrap py-4'}>
+              <CustomReactSelect
+                isDisabled={current.matches('done')}
+                handleChange={(comments) => {
+                  const commentIds = (comments as OptionType[]).map((val) => val.value);
                   send({
                     type: 'SET_COMMENT_FOR_ALL',
-                    commentId: e.currentTarget.value
-                  })
-                }
-              >
-                <option />
-                {optionValues(comments, 'text', 'id')}
-              </Select>
+                    commentIds
+                  });
+                }}
+                value={commentsForAllSections}
+                isMulti
+                options={selectOptionValues(comments, 'text', 'id')}
+              />
             </Label>
           </div>
         )}
