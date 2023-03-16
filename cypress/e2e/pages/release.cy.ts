@@ -207,7 +207,7 @@ describe('Release Page', () => {
   });
   context('when work number release type is selected', () => {
     before(() => {
-      cy.get('[type="radio"]').check('Work number');
+      cy.get('[type="radio"]').check('SGP Number');
     });
     it('should display SGP selection dropdown', () => {
       cy.findByTestId('worknumber_release').should('exist');
