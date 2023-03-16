@@ -7,7 +7,12 @@ import { LabwareTypeName } from '../../types/stan';
 import ConfirmTubes from './ConfirmTubes';
 import ConfirmLabware from './ConfirmLabware';
 import PinkButton from '../buttons/PinkButton';
-import { CommentFieldsFragment, FindPlanDataQuery, LabwareFieldsFragment } from '../../types/sdk';
+import {
+  CommentFieldsFragment,
+  FindPlanDataQuery,
+  LabwareFieldsFragment,
+  SlotRegionFieldsFragment
+} from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import { createSectioningConfirmMachine } from './sectioningConfirm.machine';
 import Warning from '../notifications/Warning';
@@ -21,6 +26,12 @@ type SectioningConfirmProps = {
    * The list of comments that will be available for the user to choose for each section
    */
   comments: Array<CommentFieldsFragment>;
+
+  /**
+   * The list of regions in slot taht will be available for the user to choose for each section.
+   * Region is to specify where the user is keeping the section of a sample in a slot, if there are multiple samples(/sections)
+   */
+  slotRegions: Array<SlotRegionFieldsFragment>;
 
   /**
    * The initial list of plans
@@ -42,7 +53,12 @@ export enum SectionNumberMode {
  * Component for managing the confirmation of a list of Sectioning Plans.
  * Responsible for calling core with the {@code confirmSection} request.
  */
-export default function SectioningConfirm({ comments, initialPlans, onConfirmed }: SectioningConfirmProps) {
+export default function SectioningConfirm({
+  comments,
+  slotRegions,
+  initialPlans,
+  onConfirmed
+}: SectioningConfirmProps) {
   const sectioningMachine = React.useMemo(() => {
     return createSectioningConfirmMachine();
   }, []);
@@ -198,6 +214,7 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
                           key={layoutPlan.destinationLabware.barcode}
                           originalLayoutPlan={layoutPlan}
                           comments={comments}
+                          slotRegions={slotRegions}
                           mode={sectionNumberMode}
                           sectionNumberEnabled={false}
                         />
@@ -240,6 +257,7 @@ export default function SectioningConfirm({ comments, initialPlans, onConfirmed 
                               key={layoutPlan.destinationLabware.barcode}
                               originalLayoutPlan={layoutPlan}
                               comments={comments}
+                              slotRegions={slotRegions}
                               mode={sectionNumberMode}
                               onSectionNumberChange={handleSectionNumberChange}
                             />

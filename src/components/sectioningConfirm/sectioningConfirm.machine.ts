@@ -363,7 +363,15 @@ export function createSectioningConfirmMachine() {
               ) {
                 return true;
               }
-              return csl.confirmSections?.every((cs) => (cs.newSection ? cs.newSection > 0 : false)) ?? false;
+              const validSectionNumber =
+                csl.confirmSections?.every((cs) => (cs.newSection ? cs.newSection > 0 : false)) ?? false;
+              let validRegion = true;
+              if (csl.confirmSections && csl.confirmSections.length > 1) {
+                validRegion = csl.confirmSections.every((cs) => (cs.region ? cs.region.length > 0 : false)) ?? false;
+                const regions = csl.confirmSections ? csl.confirmSections.map((cs) => cs.region) : [];
+                validRegion &&= regions.length === new Set(regions).size;
+              }
+              return validSectionNumber && validRegion;
             }) && ctx.workNumber !== '';
           send(isValid ? 'IS_VALID' : 'IS_INVALID');
         }

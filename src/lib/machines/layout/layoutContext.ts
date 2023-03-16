@@ -28,6 +28,8 @@ export interface Source {
   labware: LabwareFieldsFragment;
   newSection: number;
   address?: Maybe<Address>;
+  region?: string;
+  commentIds?: number[];
 }
 
 export interface LayoutContext {

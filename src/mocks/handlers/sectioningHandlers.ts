@@ -11,6 +11,7 @@ import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import commentRepository from '../repositories/commentRepository';
 import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 import { createLabware } from './labwareHandlers';
+import slotRegionRepository from '../repositories/slotRegionRepository';
 
 const sectioningHandlers = [
   graphql.query<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>('GetSectioningInfo', (req, res, ctx) => {
@@ -26,7 +27,8 @@ const sectioningHandlers = [
     (req, res, ctx) => {
       return res(
         ctx.data({
-          comments: commentRepository.findAll().filter((c) => c.category === 'section')
+          comments: commentRepository.findAll().filter((c) => c.category === 'section'),
+          slotRegions: slotRegionRepository.findAll().filter((slotRegion) => slotRegion.enabled)
         })
       );
     }

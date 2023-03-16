@@ -47,6 +47,7 @@ import workProgressSummaryHandlers from './handlers/summaryWorkProgressHandlers'
 import fileHandlers from './handlers/fileHandlers';
 import programHandlers from './handlers/programHandlers';
 import { labwareCostingHandlers } from './handlers/labwareCostingHandlers';
+import slotRegionHandlers from './handlers/slotRegionHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -94,5 +95,6 @@ export const handlers = [
   ...workProgressSummaryHandlers,
   ...fileHandlers,
   ...programHandlers,
-  ...labwareCostingHandlers
+  ...labwareCostingHandlers,
+  ...slotRegionHandlers
 ];
