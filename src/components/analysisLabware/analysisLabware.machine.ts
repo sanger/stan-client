@@ -179,20 +179,6 @@ const buildMeasurementFields = (valueCategory: string, operationType: string) =>
         value: ''
       }
     ];
-    measurements =
-      operationType === AnalysisMeasurementType.RIN
-        ? [
-            {
-              name: AnalysisMeasurementType.RIN,
-              value: ''
-            }
-          ]
-        : [
-            {
-              name: AnalysisMeasurementType.DV200,
-              value: ''
-            }
-          ];
   } else if (valueCategory === MeasurementValueCategory.RANGE_VALUE_TYPE) {
     measurements = [
       {
