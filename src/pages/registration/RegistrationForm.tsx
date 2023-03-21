@@ -192,6 +192,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                               value: spatialLocation.code.toString()
                             };
                           })}
+                          valueAsNumber
                           value={values.tissues[currentIndex].blocks[blockIndex].spatialLocation}
                         />
 
@@ -329,12 +330,6 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                     className="mt-4 inline-flex"
                     onClick={() => {
                       blockHelpers.push(defaultFormTissueValues.blocks[0]);
-                      /**This is to make sure that spatial Location is not initialised to a numeric value but to an empty string
-                     so as to display the correct value in associated drop-down
-                      **/
-                      values.tissues[currentIndex].blocks.forEach((block, indx) => {
-                        setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].spatialLocation`, '');
-                      });
                       scrollToLatestBlock();
                     }}
                   >
@@ -379,12 +374,6 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 setCurrentFormIndex={setCurrentIndex}
                 onNewTissueButton={() => {
                   tissueHelpers.push(defaultFormTissueValues);
-                  /**This is to make sure that spatial Location is not initialised to a numeric value but to an empty string
-                     so as to display the correct value in associated drop-down
-                   **/
-                  values.tissues[currentIndex].blocks.forEach((block, indx) => {
-                    setFieldValue(`tissues[${currentIndex + 1}].blocks[${indx}].spatialLocation`, '');
-                  });
                   setCurrentIndex(currentIndex + 1);
                   tissueRef.current?.scrollIntoView({
                     behavior: 'smooth'
