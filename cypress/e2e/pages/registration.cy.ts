@@ -3,7 +3,7 @@ import { RegisterTissuesMutation, RegisterTissuesMutationVariables } from '../..
 import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
-import { getSelect, selectFocusBlur, selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
+import { selectFocusBlur, selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Registration', () => {
   before(() => {
@@ -74,12 +74,12 @@ describe('Registration', () => {
   context('when clicking the Add Another Tissue button', () => {
     before(() => {
       cy.findByText('- Delete Tissue').should('not.exist');
-      cy.get('#tissue-summaries').children().should('have.length', 1);
+      cy.get('#tissue-summaries').children().should('have.length', 2);
       cy.findByText('+ Add Another Tissue').click();
     });
 
     it('adds another tissue', () => {
-      cy.get('#tissue-summaries').children().should('have.length', 2);
+      cy.get('#tissue-summaries').children().should('have.length', 3);
     });
   });
 
