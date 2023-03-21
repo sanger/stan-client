@@ -16,6 +16,7 @@ import { useScrollToRef } from '../../lib/hooks';
 import { RegistrationFormValues } from '../BlockRegistration';
 import { TissueValues } from './Registration';
 import CustomReactSelect from '../../components/forms/CustomReactSelect';
+import { RegistrationFormBlockSample } from '../OriginalSampleRegistration';
 
 export type TextType = 'Block' | 'Embedding';
 
@@ -122,6 +123,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 className="mt-2"
                 dataTestId="Species"
                 options={selectOptionValues(registrationInfo.species, 'name', 'name')}
+                value={values.tissues[currentIndex].species}
               />
             </motion.div>
 
@@ -136,6 +138,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 className="mt-2"
                 dataTestId="HuMFre"
                 options={selectOptionValues(registrationInfo.hmdmcs, 'hmdmc', 'hmdmc')}
+                value={values.tissues[currentIndex].hmdmc}
               />
 
               <CustomReactSelect
@@ -145,6 +148,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                 className="mt-2"
                 dataTestId="Tissue Type"
                 options={selectOptionValues(registrationInfo.tissueTypes, 'name', 'name')}
+                value={values.tissues[currentIndex].tissueType}
               />
             </motion.div>
 
@@ -223,6 +227,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                           dataTestId="Fixative"
                           className="block mt-2"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.fixative`}
+                          value={values.tissues[currentIndex].blocks[blockIndex].fixative}
                           options={selectOptionValues(registrationInfo.fixatives, 'name', 'name')}
                         />
                         {'medium' in block && (
@@ -232,6 +237,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                             dataTestId="Medium"
                             className="block mt-2"
                             name={`tissues.${currentIndex}.blocks.${blockIndex}.medium`}
+                            value={values.tissues[currentIndex].blocks[blockIndex].medium}
                             options={selectOptionValues(registrationInfo.mediums, 'name', 'name')}
                           />
                         )}
@@ -242,6 +248,13 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                             dataTestId="Solution"
                             className="block mt-2"
                             name={`tissues.${currentIndex}.blocks.${blockIndex}.solution`}
+                            value={
+                              (
+                                values.tissues[currentIndex].blocks[
+                                  blockIndex
+                                ] as unknown as RegistrationFormBlockSample
+                              ).solution
+                            }
                             options={selectOptionValues(registrationInfo.solutions, 'name', 'name')}
                           />
                         )}

@@ -1,4 +1,7 @@
-describe('Staining Page', () => {
+import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
+import { RecordInPlaceMutation, RecordInPlaceMutationVariables } from '../../../src/types/sdk';
+
+describe('Imaging Page', () => {
   before(() => {
     cy.visit('/lab/imaging');
   });
@@ -16,4 +19,45 @@ describe('Staining Page', () => {
       });
     });
   });
+  context('On succesful submisstion', () => {
+    before(() => {
+      submitForm();
+    });
+    it('should display a success messgae', () => {
+      cy.findAllByText('Operation Complete').should('have.length.above', 1);
+    });
+  });
+
+  context('when there is a server error', () => {
+    before(() => {
+      cy.visit('/lab/imaging');
+
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.mutation<RecordInPlaceMutation, RecordInPlaceMutationVariables>('RecordInPlace', (req, res, ctx) => {
+            return res.once(
+              ctx.errors([
+                {
+                  message: `Exception while fetching data (/destroy) : Something went wrong`
+                }
+              ])
+            );
+          })
+        );
+      });
+      submitForm();
+    });
+
+    it('shows an error', () => {
+      cy.findByText('Something went wrong').should('be.visible');
+    });
+  });
 });
+
+function submitForm() {
+  selectSGPNumber('SGP1008');
+  cy.get('#labwareScanInput').type('STAN-123{enter}');
+  cy.get('#labwareScanInput').type('STAN-456{enter}');
+  selectOption('equipment', 'Operetta');
+  cy.findByRole('button', { name: /Submit/i }).click();
+}
