@@ -224,7 +224,7 @@ export default function History(props: HistoryProps) {
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
-            <DataTable data-testid={'history-table'} columns={historyColumns} data={history} />
+            <DataTable data-testid={'history-table'} columns={historyColumns} data={history} fixedHeader={true} />
           </>
         ) : (
           <Warning message={'No results found.'} />

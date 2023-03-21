@@ -35,14 +35,12 @@ interface TableHeaderProps {
  */
 const Table: React.FC<TableProps> = ({ children, ...rest }) => {
   return (
-    <div className="flex flex-col overflow-y-auto overflow-x-auto max-h-screen">
-      <div>
-        <div className="py-2 align-middle inline-block min-w-full">
-          <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-            <table className="min-w-full divide-y divide-gray-200" {...rest}>
-              {children}
-            </table>
-          </div>
+    <div className="flex flex-col overflow-auto max-h-screen">
+      <div className="py-2 align-middle inline-block min-w-full">
+        <div className="shadow border-b border-gray-200 sm:rounded-lg">
+          <table className="min-w-full divide-y divide-gray-200" {...rest}>
+            {children}
+          </table>
         </div>
       </div>
     </div>
@@ -53,9 +51,10 @@ export default Table;
 
 type TableHeadProps = {
   children: ReactNode | ReactNode[];
+  fixed?: boolean;
 };
-export const TableHead = ({ children }: TableHeadProps) => {
-  return <thead>{children}</thead>;
+export const TableHead = ({ children, fixed = false }: TableHeadProps) => {
+  return <thead className={`${fixed ? 'sticky top-0' : ''}`}>{children}</thead>;
 };
 
 export const TableHeader = ({ children, sortProps, ...rest }: TableHeaderProps) => {

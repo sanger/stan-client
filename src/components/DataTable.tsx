@@ -17,10 +17,15 @@ interface DataTableProps<T extends object> {
    * @example { id: "donorName" }
    */
   defaultSort?: SortingRule<T>[];
+
+  /**
+   * Is table column header fixed?
+   */
+  fixedHeader?: boolean;
 }
 
 const DataTableComponent = <T extends Object>(
-  { columns, data, defaultSort, sortable = false }: React.PropsWithChildren<DataTableProps<T>>,
+  { columns, data, defaultSort, sortable = false, fixedHeader = false }: React.PropsWithChildren<DataTableProps<T>>,
   ref?: React.Ref<T[]>
 ): React.ReactElement<DataTableProps<T>> => {
   /**
@@ -78,7 +83,7 @@ const DataTableComponent = <T extends Object>(
 
   return (
     <Table {...getTableProps()}>
-      <TableHead>
+      <TableHead fixed={fixedHeader}>
         {headerGroups.map((headerGroup) => (
           <tr {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
