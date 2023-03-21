@@ -22,7 +22,7 @@ import { Column } from 'react-table';
  - "medium" and "lastknownSectionNumber" fields are omitted
  - changed "externalIdentifier" and "replicateNumber" fields to optional
  **/
-type RegistrationFormBlockSample = PartialBy<
+export type RegistrationFormBlockSample = PartialBy<
   Omit<RegistrationFormBlock, 'medium' | 'lastKnownSectionNumber'>,
   'externalIdentifier' | 'replicateNumber'
 > & {
