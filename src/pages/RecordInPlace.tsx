@@ -116,10 +116,7 @@ export default function RecordInPlace({ title, operationType, equipment, columns
                     <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                       <Heading level={3}>SGP Number</Heading>
 
-                      <WorkNumberSelect
-                        onWorkNumberChange={(workNumber) => setFieldValue('workNumber', workNumber)}
-                        name="WorkNumber"
-                      />
+                      <WorkNumberSelect onWorkNumberChange={(workNumber) => setFieldValue('workNumber', workNumber)} />
                       <FormikErrorMessage name={'workNumber'} />
                     </motion.div>
 
@@ -148,9 +145,10 @@ export default function RecordInPlace({ title, operationType, equipment, columns
                           isDisabled={current.matches('submitted')}
                           label={'Equipment'}
                           name={'equipmentId'}
+                          dataTestId={'equipment'}
                           emptyOption
                           handleChange={(val) => {
-                            const value = (val as OptionType).label;
+                            const value = (val as OptionType).value;
                             setFieldValue('equipmentId', value === '' ? undefined : parseInt(value, 10));
                           }}
                           options={selectOptionValues(equipment, 'name', 'id')}
