@@ -157,6 +157,20 @@ const FormikReactSelect = ({
   ...props
 }: CustomReactSelectProps) => {
   const { setFieldValue, setFieldTouched } = useFormikContext() ?? {};
+
+  /**Reformat value field in case of number type value
+   * If value is a number type, check whether one of the option 'value' field
+   * contains that. If so, convert 'value' to string (as the option.value is always a string type)
+   * and return , otherwise return an empty string
+   */
+  const memoNewValue = React.useMemo(() => {
+    if (valueAsNumber) {
+      if (options.find((option) => option.value === String(value))) {
+        return value + '';
+      } else return '';
+    } else return value;
+  }, [value, valueAsNumber, options]);
+
   const onChangeValue = React.useCallback(
     (value: ValueType) => {
       if (!hasValueType(value)) return;
@@ -189,7 +203,7 @@ const FormikReactSelect = ({
         dataTestId={dataTestId}
         placeholder={placeholder}
         isMulti={isMulti}
-        value={value}
+        value={memoNewValue}
         fixedWidth={fixedWidth}
         {...props}
       />
