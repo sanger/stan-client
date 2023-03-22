@@ -184,6 +184,7 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
                           onWorkNumberChangeInMulti={(workNumbers) => {
                             setFieldValue('workNumbers', [...workNumbers]);
                           }}
+                          workNumber={values.workNumbers}
                           multiple={true}
                           emptyOption={false}
                         />

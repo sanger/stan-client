@@ -192,6 +192,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                               value: spatialLocation.code.toString()
                             };
                           })}
+                          valueAsNumber
                           value={values.tissues[currentIndex].blocks[blockIndex].spatialLocation}
                         />
 

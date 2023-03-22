@@ -3,7 +3,7 @@ import { RegisterTissuesMutation, RegisterTissuesMutationVariables } from '../..
 import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
-import { getSelect, selectFocusBlur, selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
+import { selectFocusBlur, selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Registration', () => {
   before(() => {
