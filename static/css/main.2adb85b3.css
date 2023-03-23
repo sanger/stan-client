@@ -1587,11 +1587,11 @@ svg.logo.loading rect:nth-child(3n+1) {
 .right-0 {
   right: 0;
 }
-.left-0 {
-  left: 0;
-}
 .top-0 {
   top: 0;
+}
+.left-0 {
+  left: 0;
 }
 .z-20 {
   z-index: 20;
@@ -2251,6 +2251,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .self-end {
   align-self: flex-end;
+}
+.overflow-auto {
+  overflow: auto;
 }
 .overflow-hidden {
   overflow: hidden;
@@ -4219,4 +4222,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.c4d5fdba.css.map*/
+/*# sourceMappingURL=main.2adb85b3.css.map*/
