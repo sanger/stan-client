@@ -172,6 +172,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                         variants={variants.fadeIn}
                         animate={'visible'}
                         exit={'hidden'}
+                        data-testid={'sample-info-div'}
                         className="relative p-4 shadow-lg bg-white space-y-4"
                       >
                         <FormikInput

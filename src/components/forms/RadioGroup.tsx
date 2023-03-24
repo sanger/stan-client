@@ -36,7 +36,7 @@ export const RadioButton = ({ name, value }: RadioButtonParameters) => {
   const ctx = useContext(RadioGroupContext);
   return (
     <label className="inline-flex items-center">
-      <Field type="radio" className="form-radio text-sp" name={ctx.name} value={value} />
+      <Field type="radio" className="form-radio text-sp" name={ctx.name} value={value} data-testid={value} />
       <span className="ml-2">{name}</span>
     </label>
   );
