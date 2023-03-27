@@ -98,6 +98,7 @@ describe('RegistrationForm', () => {
           //Tissue Information
           expect(screen.getByText('Tissue Information')).toBeInTheDocument();
           expect(screen.getByText('HuMFre')).toBeInTheDocument();
+          expect(screen.getByRole('combobox', { name: 'HuMFre' })).toBeDisabled();
           expect(screen.getByRole('combobox', { name: 'Tissue Type' })).toBeInTheDocument();
           expect(screen.getByText('Sample Information')).toBeInTheDocument();
 
@@ -106,6 +107,7 @@ describe('RegistrationForm', () => {
           expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
           expect(screen.getByTestId('External Identifier')).toBeInTheDocument();
           expect(screen.getByTestId('Spatial Location')).toBeInTheDocument();
+          expect(screen.getByRole('combobox', { name: 'Spatial Location' })).toBeDisabled();
           expect(screen.getByTestId('Replicate Number')).toBeInTheDocument();
           expect(screen.getByRole('combobox', { name: 'Labware Type' })).toBeInTheDocument();
 
@@ -148,6 +150,13 @@ describe('RegistrationForm', () => {
           fireEvent.click(screen.getByTestId('fetal'));
           expect(screen.queryByText('Sample Collection Date')).toBeInTheDocument();
         });
+      });
+      it('enables HuMFre field on entering Species value', async () => {
+        /* await waitFor(() => {
+          const speciesCombo = screen.getByRole('combobox', { name: 'Species' });
+          selectOption(speciesCombo, 'Human');
+          expect(screen.getByRole('combobox', { name: 'HuMFre' })).toBeEnabled();
+        });*/
       });
       it('fills correct information', () => {
         //fillInForm();
