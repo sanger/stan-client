@@ -1,4 +1,5 @@
 import {
+  ConfirmSection,
   ConfirmSectionLabware,
   ConfirmSectionMutation,
   FindPlanDataQuery,
@@ -352,8 +353,9 @@ export function createSectioningConfirmMachine() {
         },
 
         validateConfirmSectionLabware: (ctx: SectioningConfirmContext) => (send) => {
-          var isValid =
+          const isValid =
             ctx.confirmSectionLabware.every((csl) => {
+              /**Check if plan has any Fetal waste labware and it has barcode information**/
               if (
                 csl.cancelled ||
                 (ctx.layoutPlansByLabwareType[LabwareTypeName.FETAL_WASTE_CONTAINER] &&
@@ -363,15 +365,33 @@ export function createSectioningConfirmMachine() {
               ) {
                 return true;
               }
+              /** Has every section got a section number? **/
               const validSectionNumber =
                 csl.confirmSections?.every((cs) => (cs.newSection ? cs.newSection > 0 : false)) ?? false;
-              let validRegion = true;
-              if (csl.confirmSections && csl.confirmSections.length > 1) {
-                validRegion = csl.confirmSections.every((cs) => (cs.region ? cs.region.length > 0 : false)) ?? false;
-                const regions = csl.confirmSections ? csl.confirmSections.map((cs) => cs.region) : [];
-                validRegion &&= regions.length === new Set(regions).size;
+              if (!validSectionNumber) return false;
+
+              /**Create a dictionary of slot addresses
+               * key is the address
+               * value is array of all sections in thet address
+               * **/
+              let slotDictionary: Dictionary<Array<ConfirmSection>> = groupBy(
+                csl.confirmSections,
+                (cs) => cs.destinationAddress
+              );
+              let slotAddresses = Object.keys(slotDictionary);
+              for (let indx = 0; indx < slotAddresses.length; indx++) {
+                const sections = slotDictionary[slotAddresses[indx]];
+                /**If there are multiple sections in this slot address, it should have distinct regions assigned for each section**/
+                if (sections.length > 1) {
+                  /** Every section in slot has a region?**/
+                  let isValidRegion = sections.every((cs) => (cs.region ? cs.region.length > 0 : false)) ?? false;
+                  if (!isValidRegion) return false;
+                  /** Are regions defined in a slot unique? **/
+                  const regionsInSection = sections.map((section) => section.region);
+                  if (regionsInSection.length !== new Set(regionsInSection).size) return false;
+                }
               }
-              return validSectionNumber && validRegion;
+              return true;
             }) && ctx.workNumber !== '';
           send(isValid ? 'IS_VALID' : 'IS_INVALID');
         }
