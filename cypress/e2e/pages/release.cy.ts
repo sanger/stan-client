@@ -220,6 +220,26 @@ describe('Release Page', () => {
       it('should display release labware table', () => {
         cy.findByText('Labware to release').should('be.visible');
         cy.findByRole('table').should('exist');
+        cy.findByRole('table')
+          .find('tr')
+          .then((row) => {
+            //row.length will give you the row count
+            expect(row.length - 1).equal(2);
+          });
+        cy.findAllByTestId('removeButton').should('have.length', 2);
+      });
+      context('when remove button is clicked', () => {
+        before(() => {
+          cy.findAllByTestId('removeButton').eq(0).click();
+        });
+        it('removes rows on remove button click', () => {
+          cy.findByRole('table')
+            .find('tr')
+            .then((row) => {
+              //row.length will give you the row count
+              expect(row.length - 1).equal(1);
+            });
+        });
       });
     });
     context('when all fields are not filled', () => {});
