@@ -208,6 +208,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                         {'lastKnownSectionNumber' in values.tissues[currentIndex].blocks[blockIndex] && (
                           <FormikInput
                             label="Last Known Section Number"
+                            dataTestId="Section Number"
                             type="number"
                             name={`tissues.${currentIndex}.blocks.${blockIndex}.lastKnownSectionNumber`}
                             value={values.tissues[currentIndex].blocks[blockIndex].lastKnownSectionNumber}

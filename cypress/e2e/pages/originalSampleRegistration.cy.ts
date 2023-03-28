@@ -3,7 +3,7 @@ import { RegisterOriginalSamplesMutation, RegisterOriginalSamplesMutationVariabl
 import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
-import { selectFocusBlur, selectOption, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
+import { selectFocusBlur, selectOption } from '../shared/customReactSelect.cy';
 
 describe('Registration', () => {
   before(() => {
@@ -29,70 +29,7 @@ describe('Registration', () => {
       selectFocusBlur('Labware Type');
       cy.findByText('Labware Type is a required field').should('be.visible');
     });
-    it('displays add button for identical samples', () => {
-      cy.findByText('+ Add Identical Tissue Sample').should('be.visible');
-    });
   });
-
-  context('when clicking the Add Another Tissue Sample button', () => {
-    before(() => {
-      cy.findByText('Delete Sample').should('not.exist');
-      cy.findByText('Sample Information').siblings().should('have.length', 1);
-      cy.findByText('+ Add Another Tissue Sample').click();
-    });
-
-    it('adds another tissue sample', () => {
-      cy.findByText('Sample Information').siblings().should('have.length', 2);
-    });
-
-    it('shows the Delete Sample button for each sample', () => {
-      cy.findAllByText('Delete Sample').should('be.visible');
-    });
-  });
-
-  context('when clicking the Add Identical Tissue Sample button', () => {
-    before(() => {
-      cy.visit('/admin/tissue_registration');
-      fillInForm();
-      cy.findByText('+ Add Identical Tissue Sample').focus().click();
-    });
-
-    it('adds another tissue sample', () => {
-      cy.findByText('Sample Information').siblings().should('have.length', 2);
-    });
-
-    it('shows the Delete Sample button for each sample', () => {
-      cy.findAllByText('Delete Sample').should('be.visible');
-    });
-    it('shows identical information for the created sample with Replicate Number, Fixative, Solution as empty', () => {
-      cy.findAllByTestId('Replicate Number').eq(1).should('have.value', '');
-      shouldDisplaySelectedValue('Fixative', '');
-      shouldDisplaySelectedValue('Solution', '');
-      cy.findAllByTestId('External Identifier').eq(1).should('have.value', '');
-      shouldDisplaySelectedValue('Spatial Location', '3 - Surface central region');
-      shouldDisplaySelectedValue('Labware Type', 'Pot');
-    });
-  });
-  context('when clicking the Add Identical Tissue button', () => {
-    before(() => {
-      cy.get('#tissue-summaries').children().should('have.length', 1);
-      cy.findByText('- Remove Tissue').should('not.exist');
-      cy.findByText('+ Add Identical Tissue').click();
-    });
-
-    it('adds another tissue', () => {
-      cy.get('#tissue-summaries').children().should('have.length', 2);
-      cy.findByText('- Remove Tissue').should('exist');
-    });
-    it('shows identical information for the created sample with Replicate Number, Fixative, Solution as empty', () => {
-      shouldDisplaySelectedValue('Replicate Number', '');
-      shouldDisplaySelectedValue('Fixative', '');
-      shouldDisplaySelectedValue('Solution', '');
-      shouldDisplaySelectedValue('Spatial Location', '3 - Surface central region');
-      shouldDisplaySelectedValue('Labware Type', 'Pot');
-    });
-  });
-
   context('when clicking the Add Another Tissue button', () => {
     before(() => {
       cy.get('#tissue-summaries').children().should('have.length', 2);

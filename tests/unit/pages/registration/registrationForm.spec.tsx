@@ -4,7 +4,6 @@ import solutionRepository from '../../../../src/mocks/repositories/solutionRepos
 import hmdmcRepository from '../../../../src/mocks/repositories/hmdmcRepository';
 import fixativeRepository from '../../../../src/mocks/repositories/fixativeRepository';
 import speciesRepository from '../../../../src/mocks/repositories/speciesRepository';
-import tissueTypeRepository from '../../../../src/mocks/repositories/tissueTypeRepository';
 import { labwareTypes } from '../../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../../src/types/stan';
 import { getRegistrationFormTissueSample } from '../../../../src/pages/OriginalSampleRegistration';
@@ -20,7 +19,15 @@ const registrationInfo: GetRegistrationInfoQuery = {
   fixatives: fixativeRepository.findAll(),
   mediums: [{ name: 'Medium1' }, { name: 'Medium2' }],
   species: speciesRepository.findAll(),
-  tissueTypes: tissueTypeRepository.findAll(),
+  tissueTypes: [
+    {
+      name: 'Kidney',
+      spatialLocations: [
+        { name: 'Cortex', code: 1 },
+        { name: 'Medulla', code: 2 }
+      ]
+    }
+  ],
   labwareTypes: [labwareTypes[LabwareTypeName.CASSETTE].build(), labwareTypes[LabwareTypeName.PROVIASETTE].build()]
 };
 const availableLabwareTypes: LabwareType[] = registrationInfo.labwareTypes;
@@ -72,18 +79,6 @@ const renderBlockRegistrationForm = () => {
   );
 };
 
-async function fillInOriginalRegistrationForm() {
-  //fireEvent.change(screen.getByLabelText('Donor ID'), { target: { value: 'Donor1' } });
-  //fireEvent.click(screen.getByTestId('adult'));
-  //userEvent.type(getSelect('Species'), 'Human{enter}');
-  //userEvent.type(getSelect('HuMFre'), 'HuMFre1{enter}');
-  //userEvent.type(getSelect('Tissue Type'), 'Liver{enter}');
-  //fireEvent.change(screen.getByTestId('External Identifier'), { target: { value: 'EXT-1' } });
-  await userEvent.type(getSelect('Spatial Location'), '2 - Surface cranial region{enter}');
-  userEvent.type(getSelect('Labware Type'), 'Pot{enter}');
-  userEvent.type(getSelect('Fixative'), 'None{enter}');
-  userEvent.type(getSelect('Solution'), 'Ethanol{enter}');
-}
 function getSelect(dataTestId: string) {
   const selectDiv = screen.getByTestId(dataTestId);
   return within(selectDiv).getByRole('combobox', { hidden: true });
@@ -192,7 +187,7 @@ describe('RegistrationForm', () => {
       });
     });
 
-    describe('Button clicks', () => {
+    describe('Add Identical Tissue button click', () => {
       beforeEach(async () => {
         window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
@@ -206,27 +201,50 @@ describe('RegistrationForm', () => {
         }));
         await act(async () => {
           renderOriginalRegistrationForm();
-          await userEvent.type(getSelect('Tissue Type'), 'Liver{enter}');
-          //await userEvent.type(getSelect('Spatial Location'), '1 - Cortex{enter}');
-          fireEvent.keyDown(getSelect('Spatial Location'), { keyCode: 40 });
-
-          //Selects the dropdown option and close the dropdown options list
-          const option = screen.getByText('1 - Cortex');
-          expect(option).toBeInTheDocument();
-          fireEvent.click(option);
+          //Fill the form before adding identical tissue
+          await userEvent.click(screen.getByTestId('adult'));
+          await userEvent.type(getSelect('Species'), 'Human{enter}');
+          await userEvent.type(getSelect('HuMFre'), 'HuMFre1{enter}');
+          await userEvent.type(screen.getByTestId('External Identifier'), 'EXT-1{enter}');
+          await userEvent.type(getSelect('Tissue Type'), 'Kidney{enter}');
+          await userEvent.type(getSelect('Spatial Location'), 'Cortex{enter}');
+          await userEvent.type(getSelect('Labware Type'), 'Cassette{enter}');
+          await userEvent.type(screen.getByTestId('Replicate Number'), '1');
+          await userEvent.type(getSelect('Fixative'), 'Formalin{enter}');
+          await userEvent.type(getSelect('Solution'), 'Ethanol{enter}');
           await screen.getByRole('button', { name: '+ Add Identical Tissue Sample' }).click();
         });
       });
-      it('On "Add Identical Tissue Sample" button click', async () => {
-        await waitFor(async () => {
-          //Two sample pages
-          expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
-          const sampleDiv = screen.getAllByTestId('sample-info-div')[0];
-          const spatialLocationDiv = within(sampleDiv).getByTestId('Spatial Location');
-          const saptialDropDown = within(spatialLocationDiv).getByRole('combobox', { hidden: true });
-          expect(saptialDropDown).toHaveTextContent('1 - Cortex');
-          expect(screen.getAllByRole('button', { name: 'Delete Sample' })).toHaveLength(2);
-        });
+      it('creates another identical  sample', () => {
+        //Two sample pages
+        expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
+      });
+      it('displays Delete sample button', async () => {
+        expect(screen.getAllByRole('button', { name: 'Delete Sample' })).toHaveLength(2);
+      });
+      it('populates the value of Spatial location from the tissue sample created', () => {
+        const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
+        const slDiv = within(sampleDiv).getAllByTestId('Spatial Location');
+        expect(slDiv[0]).toHaveTextContent('1 - Cortex');
+      });
+      it('populates the value of LabwareType from the tissue sample created', () => {
+        const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
+        const slDiv = within(sampleDiv).getAllByTestId('Labware Type');
+        expect(slDiv[0]).toHaveTextContent('Cassette');
+      });
+      it('should display all other fields as empty', () => {
+        const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
+        const extId = within(sampleDiv).getByTestId('External Identifier');
+        expect(extId).toHaveTextContent('');
+
+        const replicateDiv = within(sampleDiv).getByTestId('Replicate Number');
+        expect(replicateDiv).toHaveTextContent('');
+
+        const fixativeDiv = within(sampleDiv).getAllByTestId('Fixative');
+        expect(fixativeDiv[0]).not.toHaveTextContent('Formalin');
+
+        const solutionDiv = within(sampleDiv).getAllByTestId('Solution');
+        expect(solutionDiv[0]).not.toHaveTextContent('Ethanol');
       });
       it('On "Delete Sample" button click', async () => {
         await screen.getAllByRole('button', { name: 'Delete Sample' })[0].click();
@@ -238,7 +256,7 @@ describe('RegistrationForm', () => {
       });
     });
   });
-  /*describe('Block registration', () => {
+  describe('Block registration', () => {
     beforeEach(() => {
       jest.mock('formik', () => ({
         useFormikContext: jest.fn().mockImplementation(() => {
@@ -289,6 +307,7 @@ describe('RegistrationForm', () => {
           expect(spatialLocation).toBeDisabled();
 
           expect(screen.getByTestId('Replicate Number')).toBeInTheDocument();
+          expect(screen.getByTestId('Last Known Section Number')).toBeInTheDocument();
           expect(screen.getByRole('combobox', { name: 'Labware Type' })).toBeInTheDocument();
 
           //Embedding Information
@@ -352,15 +371,47 @@ describe('RegistrationForm', () => {
         }));
         await act(async () => {
           renderBlockRegistrationForm();
+          //Fill the form before adding tissue
+          await userEvent.click(screen.getByTestId('adult'));
+          await userEvent.type(getSelect('Species'), 'Human{enter}');
+          await userEvent.type(getSelect('HuMFre'), 'HuMFre1{enter}');
+          await userEvent.type(screen.getByTestId('External Identifier'), 'EXT-1{enter}');
+          await userEvent.type(getSelect('Tissue Type'), 'Kidney{enter}');
+          await userEvent.type(getSelect('Spatial Location'), 'Cortex{enter}');
+          await userEvent.type(getSelect('Labware Type'), 'Cassette{enter}');
+          await userEvent.type(screen.getByTestId('Replicate Number'), '1');
+          await userEvent.type(getSelect('Fixative'), 'Formalin{enter}');
+          await userEvent.type(getSelect('Medium'), 'OCT{enter}');
           await screen.getByRole('button', { name: '+ Add Another Tissue Block' }).click();
         });
       });
-      it('On "Add Identical Tissue Block" button click', async () => {
-        await waitFor(async () => {
-          //Two sample pages
-          expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
-          expect(screen.getAllByRole('button', { name: 'Delete Block' })).toHaveLength(2);
-        });
+      it('creates another block', () => {
+        //Two sample pages
+        expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
+      });
+      it('displays Delete block button', async () => {
+        expect(screen.getAllByRole('button', { name: 'Delete Block' })).toHaveLength(2);
+      });
+      it('should display all fields in new block as empty', () => {
+        const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
+
+        const slDiv = within(sampleDiv).getAllByTestId('Spatial Location');
+        expect(slDiv[0]).not.toHaveTextContent('Cortex');
+
+        const extId = within(sampleDiv).getByTestId('External Identifier');
+        expect(extId).toHaveTextContent('');
+
+        const lwTypeDiv = within(sampleDiv).getAllByTestId('Labware Type');
+        expect(lwTypeDiv[0]).not.toHaveTextContent('Cassette');
+
+        const replicateDiv = within(sampleDiv).getByTestId('Replicate Number');
+        expect(replicateDiv).toHaveTextContent('');
+
+        const fixativeDiv = within(sampleDiv).getAllByTestId('Fixative');
+        expect(fixativeDiv[0]).not.toHaveTextContent('Formalin');
+
+        const mediumDiv = within(sampleDiv).getAllByTestId('Medium');
+        expect(mediumDiv[0]).not.toHaveTextContent('OCT');
       });
       it('On "Delete Block" button click', async () => {
         await screen.getAllByRole('button', { name: 'Delete Block' })[0].click();
@@ -371,5 +422,5 @@ describe('RegistrationForm', () => {
         });
       });
     });
-  });*/
+  });
 });
