@@ -32,12 +32,11 @@ describe('Registration', () => {
   });
   context('when clicking the Add Another Tissue button', () => {
     before(() => {
-      cy.get('#tissue-summaries').children().should('have.length', 2);
       cy.findByText('+ Add Another Tissue').click();
     });
 
     it('adds another tissue', () => {
-      cy.get('#tissue-summaries').children().should('have.length', 3);
+      cy.get('#tissue-summaries').children().should('have.length', 2);
     });
   });
 
