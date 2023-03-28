@@ -33,6 +33,7 @@ import CustomReactSelect from '../components/forms/CustomReactSelect';
 import Label from '../components/forms/Label';
 import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
 import DataTable from '../components/DataTable';
+import RemoveButton from '../components/buttons/RemoveButton';
 
 const validationSchema = Yup.object().shape({
   releaseLabware: Yup.array()
@@ -209,6 +210,14 @@ function Release({ releaseInfo }: PageParams) {
     [stanCore, setReleaseLabware, setLabwareFromSGP, releaseLabware, updateFieldValues]
   );
 
+  const onRemoveLabwareForWorkNumberRelease = React.useCallback(
+    (barcode: string) => {
+      setLabwareFromSGP((prev) => prev.filter((lw) => lw.barcode !== barcode));
+      setReleaseLabware((prev) => prev.filter((lw) => lw.barcode !== barcode));
+    },
+    [setReleaseLabware, setLabwareFromSGP]
+  );
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -276,7 +285,23 @@ function Release({ releaseInfo }: PageParams) {
                                   columns.donorId(),
                                   columns.labwareType(),
                                   columns.externalName(),
-                                  columns.bioState()
+                                  columns.bioState(),
+                                  {
+                                    Header: '',
+                                    id: 'actions',
+                                    Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
+                                      return (
+                                        <RemoveButton
+                                          type={'button'}
+                                          onClick={() => {
+                                            if (row.original.barcode) {
+                                              onRemoveLabwareForWorkNumberRelease(row.original.barcode);
+                                            }
+                                          }}
+                                        />
+                                      );
+                                    }
+                                  }
                                 ]}
                               />
                             </div>
