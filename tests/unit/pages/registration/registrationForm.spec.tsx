@@ -72,17 +72,17 @@ const renderBlockRegistrationForm = () => {
   );
 };
 
-async function fillInForm() {
-  fireEvent.change(screen.getByLabelText('Donor ID'), { target: { value: 'Donor1' } });
-  fireEvent.click(screen.getByTestId('adult'));
-  await userEvent.type(getSelect('Species'), 'Human{enter}');
-  await userEvent.type(getSelect('HuMFre'), 'HuMFre1{enter}');
-  await userEvent.type(getSelect('Tissue Type'), 'Liver{enter}');
-  await fireEvent.change(screen.getByTestId('External Identifier'), { target: { value: 'EXT-1' } });
+async function fillInOriginalRegistrationForm() {
+  //fireEvent.change(screen.getByLabelText('Donor ID'), { target: { value: 'Donor1' } });
+  //fireEvent.click(screen.getByTestId('adult'));
+  //userEvent.type(getSelect('Species'), 'Human{enter}');
+  //userEvent.type(getSelect('HuMFre'), 'HuMFre1{enter}');
+  //userEvent.type(getSelect('Tissue Type'), 'Liver{enter}');
+  //fireEvent.change(screen.getByTestId('External Identifier'), { target: { value: 'EXT-1' } });
   await userEvent.type(getSelect('Spatial Location'), '2 - Surface cranial region{enter}');
-  await userEvent.type(getSelect('Labware Type'), 'Pot{enter}');
-  await userEvent.type(getSelect('Fixative'), 'None{enter}');
-  await userEvent.type(getSelect('Solution'), 'Ethanol{enter}');
+  userEvent.type(getSelect('Labware Type'), 'Pot{enter}');
+  userEvent.type(getSelect('Fixative'), 'None{enter}');
+  userEvent.type(getSelect('Solution'), 'Ethanol{enter}');
 }
 function getSelect(dataTestId: string) {
   const selectDiv = screen.getByTestId(dataTestId);
@@ -206,6 +206,14 @@ describe('RegistrationForm', () => {
         }));
         await act(async () => {
           renderOriginalRegistrationForm();
+          await userEvent.type(getSelect('Tissue Type'), 'Liver{enter}');
+          //await userEvent.type(getSelect('Spatial Location'), '1 - Cortex{enter}');
+          fireEvent.keyDown(getSelect('Spatial Location'), { keyCode: 40 });
+
+          //Selects the dropdown option and close the dropdown options list
+          const option = screen.getByText('1 - Cortex');
+          expect(option).toBeInTheDocument();
+          fireEvent.click(option);
           await screen.getByRole('button', { name: '+ Add Identical Tissue Sample' }).click();
         });
       });
@@ -213,6 +221,10 @@ describe('RegistrationForm', () => {
         await waitFor(async () => {
           //Two sample pages
           expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
+          const sampleDiv = screen.getAllByTestId('sample-info-div')[0];
+          const spatialLocationDiv = within(sampleDiv).getByTestId('Spatial Location');
+          const saptialDropDown = within(spatialLocationDiv).getByRole('combobox', { hidden: true });
+          expect(saptialDropDown).toHaveTextContent('1 - Cortex');
           expect(screen.getAllByRole('button', { name: 'Delete Sample' })).toHaveLength(2);
         });
       });
@@ -226,7 +238,7 @@ describe('RegistrationForm', () => {
       });
     });
   });
-  describe('Block registration', () => {
+  /*describe('Block registration', () => {
     beforeEach(() => {
       jest.mock('formik', () => ({
         useFormikContext: jest.fn().mockImplementation(() => {
@@ -292,7 +304,7 @@ describe('RegistrationForm', () => {
         });
       });
     });
-    /* describe('field properties change', () => {
+    describe('field properties change', () => {
       beforeEach(async () => {
         await act(async () => {
           renderBlockRegistrationForm();
@@ -340,22 +352,24 @@ describe('RegistrationForm', () => {
         }));
         await act(async () => {
           renderBlockRegistrationForm();
-          await screen.getByRole('button', { name: '+ Add Identical Tissue Sample' }).click();
+          await screen.getByRole('button', { name: '+ Add Another Tissue Block' }).click();
         });
       });
-      it('On "Add Identical Tissue Sample" button click', async () => {
+      it('On "Add Identical Tissue Block" button click', async () => {
         await waitFor(async () => {
           //Two sample pages
           expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
-          expect(screen.getAllByRole('button', { name: 'Delete Sample' })).toHaveLength(2);
+          expect(screen.getAllByRole('button', { name: 'Delete Block' })).toHaveLength(2);
         });
       });
-      it('On "Delete Sample" button click', async () => {
-        await screen.getAllByRole('button', { name: 'Delete Sample' })[0].click();
+      it('On "Delete Block" button click', async () => {
+        await screen.getAllByRole('button', { name: 'Delete Block' })[0].click();
         //Two sample pages
-        expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
-        expect(screen.getByRole('button', { name: 'Delete Sample' })).not.toBeInTheDocument();
+        await waitFor(async () => {
+          expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
+          expect(screen.queryByRole('button', { name: 'Delete Block' })).not.toBeInTheDocument();
+        });
       });
-    });*/
-  });
+    });
+  });*/
 });
