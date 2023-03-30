@@ -98,6 +98,7 @@ describe('FileManager', () => {
     });
     context('on selecting inactive SGP Number with files uploaded', () => {
       before(() => {
+        cy.visit('/file_manager');
         cy.findByTestId('active').uncheck();
         selectSGPNumber('SGP1002');
       });
@@ -122,6 +123,7 @@ describe('FileManager', () => {
             })
           );
         });
+        cy.visit('/file_manager');
         selectSGPNumber('SGP1008');
       });
       it('initializes page for active work number', () => {
@@ -135,6 +137,7 @@ describe('FileManager', () => {
     });
     context('on selecting inactive SGP Number with no files uploaded', () => {
       before(() => {
+        cy.visit('/file_manager');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', (req, res, ctx) => {
@@ -176,8 +179,8 @@ describe('FileManager', () => {
     });
     context('when no work number is selected', () => {
       before(() => {
+        cy.visit('/file_manager');
         selectSGPNumber('');
-        // workNumber().select('');
       });
       it('should not display upload or files section', () => {
         cy.findByText('Upload file').should('not.exist');
@@ -199,9 +202,9 @@ describe('FileManager', () => {
     context('on Upload success', () => {
       before(() => {
         selectFile();
-        uploadButton().click({ force: true });
+        uploadButton().click();
       });
-      it('should displau upload success message', () => {
+      it('should display upload success message', () => {
         cy.findByText('file.txt uploaded succesfully.').should('be.visible');
       });
       it('should remove the selected file for upload', () => {
