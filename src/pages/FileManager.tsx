@@ -45,33 +45,41 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
    */
   const ToastSuccess = (fileName: string) => <Success message={`${fileName} uploaded succesfully.`} />;
 
-  /**Update work number when ever query string in location changes **/
+  /**Update work numbers when ever query string in location changes **/
   const memoWorkNumbers = React.useMemo(() => {
     const queryString = parseQueryString(location.search);
+    //There are muktiple work numbers
     if (Array.isArray(queryString['workNumber'])) {
       const workNumbers: string[] = [];
       queryString['workNumber'].forEach((workNumber) => {
         if (workNumber) {
-          workNumbers.push(workNumber);
+          workNumbers.push(decodeURIComponent(workNumber));
         }
       });
       return workNumbers;
     }
+    //Single work number
     if (typeof queryString['workNumber'] === 'string') {
-      return [queryString['workNumber']] ?? [];
+      return [decodeURIComponent(queryString['workNumber'])] ?? [];
     }
     return [];
   }, [location.search]);
 
   /**State to handle worknumber changes (either using url or through worknumber selection)
    * Whenever work numbers changed,set the selected workInfo
-   * Also,set  'isOnlyActiveWorkNumbers' state based on selected work number status ,
+   * Also,set isOnlyActiveWorkNumbers to false if any non-active sgs selected
    */
   React.useEffect(() => {
     let worksInfoArray = workInfoProps.filter((workInfo) => memoWorkNumbers?.includes(workInfo.workNumber));
     setWorkInfoArray(worksInfoArray);
     if (workInfoProps) {
-      setIsOnlyActiveWorkNumbers(worksInfoArray.every((work) => work.status === WorkStatus.Active));
+      const allActive = worksInfoArray.every((work) => work.status === WorkStatus.Active);
+      /**The 'active' checkbox need to ne unchecked if there are any non-active sgp selected.
+       * The 'active' checkbox is checked only by user action to avoid ambiguity in UI interaction
+       * **/
+      if (!allActive) {
+        setIsOnlyActiveWorkNumbers(allActive);
+      }
     }
   }, [memoWorkNumbers, setIsOnlyActiveWorkNumbers, workInfoProps]);
 
@@ -86,7 +94,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
   }, [workInfoArray]);
 
   /**
-   * State to handle workInfo array changes
+   * Handler hook to monitor workInfo array changes
    * Fetch all files uploaded for all workInfo numbers
    */
   React.useEffect(() => {
@@ -141,7 +149,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
     [uploadedFilesForWorkNumber, workInfoArray]
   );
 
-  /**Colums to display in 'Files' section table**/
+  /**Columns to display in 'Files' section table**/
   const columns: Column<FileFieldsFragment>[] = [
     {
       Header: 'Name',

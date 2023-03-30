@@ -23,7 +23,6 @@ describe('FileManager', () => {
       });
       it('should select SGP1008 in select box', () => {
         workNumberShouldBe('SGP1008');
-        // workNumber().should('have.value', 'SGP1008');
       });
       it('initialises page', () => {
         cy.findByText('Upload file').should('exist');
@@ -222,8 +221,8 @@ describe('FileManager', () => {
     });
     context('when both file and multiple sgp numbers are selected', () => {
       before(() => {
-        selectSGPNumber('SGP1006');
         cy.findByTestId('active').uncheck();
+        selectSGPNumber('SGP1006');
         selectSGPNumber('SGP1008');
         selectFile();
       });
