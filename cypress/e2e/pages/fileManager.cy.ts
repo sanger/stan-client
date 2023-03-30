@@ -50,7 +50,19 @@ describe('FileManager', () => {
       });
       it('should select SGP1001 in select box', () => {
         workNumberShouldBe('SGP1001');
-        // workNumber().should('have.value', 'SGP1001');
+      });
+    });
+    context('on visiting page with multiple work numbers as a query parameter', () => {
+      before(() => {
+        cy.visit('/file_manager?workNumber=SGP1002&workNumber=SGP1008');
+      });
+      it('initialises page', () => {
+        cy.findByText('Upload file').should('exist');
+        cy.findByText('Files').should('exist');
+      });
+      it('should select SGP1001 in select box', () => {
+        workNumberShouldBe('SGP1002');
+        workNumberShouldBe('SGP1008');
       });
     });
   });
@@ -94,6 +106,27 @@ describe('FileManager', () => {
       it('should display a table with files uploaded for the selected SGP Numbers', () => {
         cy.findByRole('table').should('exist');
         cy.findByRole('table').find('tr').should('have.length.above', 0);
+      });
+    });
+    context('on selecting multiple SGP Number with files uploaded', () => {
+      before(() => {
+        cy.findByTestId('active').uncheck();
+        selectSGPNumber('SGP1008');
+        selectSGPNumber('SGP1006');
+      });
+      it('should display the url with selected work number', () => {
+        cy.url().should('include', 'file_manager?workNumber=SGP1008&workNumber=SGP1006');
+      });
+      it('initializes page for active work number', () => {
+        cy.findByText('Upload file').should('be.visible');
+        cy.findByTestId('active').should('be.visible').should('not.be.checked');
+        cy.findByTestId('file-input').should('be.enabled');
+      });
+      it('should display a table with files uploaded for all selected SGP Numbers', () => {
+        cy.findByRole('table').should('exist');
+        cy.findByRole('table').find('tr').should('have.length.above', 0);
+        cy.findByRole('table').contains('td', 'SGP1008');
+        cy.findByRole('table').contains('td', 'SGP1006');
       });
     });
     context('on selecting inactive SGP Number with files uploaded', () => {
@@ -187,8 +220,10 @@ describe('FileManager', () => {
         cy.findByText('Files').should('not.exist');
       });
     });
-    context('when both file and sgp number is selected', () => {
+    context('when both file and multiple sgp numbers are selected', () => {
       before(() => {
+        selectSGPNumber('SGP1006');
+        cy.findByTestId('active').uncheck();
         selectSGPNumber('SGP1008');
         selectFile();
       });
