@@ -385,7 +385,6 @@ function Release({ releaseInfo }: PageParams) {
 
                     <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                       <Heading level={3}>Destination</Heading>
-
                       <CustomReactSelect
                         isDisabled={formLocked}
                         label={'Group/Team'}
@@ -397,7 +396,6 @@ function Release({ releaseInfo }: PageParams) {
                           alphaFirst: true
                         })}
                       />
-
                       <CustomReactSelect
                         isDisabled={formLocked}
                         label={'Primary Contact'}
