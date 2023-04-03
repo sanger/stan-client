@@ -29,7 +29,7 @@ import { toast } from 'react-toastify';
 import { reload, StanCoreContext } from '../lib/sdk';
 import { Row } from 'react-table';
 import WorkNumberSelect from '../components/WorkNumberSelect';
-import CustomReactSelect from '../components/forms/CustomReactSelect';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import Label from '../components/forms/Label';
 import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
 import DataTable from '../components/DataTable';
@@ -46,7 +46,8 @@ const validationSchema = Yup.object().shape({
     )
     .required(),
   destination: Yup.string().required().label('Group/Team'),
-  recipient: Yup.string().required().label('Contact')
+  recipient: Yup.string().required().label('Primary Contact'),
+  ccRecipients: Yup.array().optional().label('CC contacts')
 });
 
 const labwareBsContent = (labware: LabwareFieldsFragment) => {
@@ -391,16 +392,38 @@ function Release({ releaseInfo }: PageParams) {
                         dataTestId="group"
                         name={'destination'}
                         emptyOption
-                        options={selectOptionValues(releaseInfo.releaseDestinations, 'name', 'name')}
+                        options={selectOptionValues(releaseInfo.releaseDestinations, 'name', 'name', true, {
+                          sort: true,
+                          alphaFirst: true
+                        })}
                       />
 
                       <CustomReactSelect
                         isDisabled={formLocked}
-                        label={'Contact'}
+                        label={'Primary Contact'}
                         dataTestId="contact"
                         name={'recipient'}
                         emptyOption
+                        options={selectOptionValues(releaseInfo.releaseRecipients, 'username', 'username', true, {
+                          sort: true,
+                          alphaFirst: true
+                        })}
+                      />
+                      <CustomReactSelect
+                        isDisabled={formLocked}
+                        label={'CC contacts'}
+                        dataTestId="cc"
+                        name={'ccRecipients'}
+                        emptyOption
+                        isMulti
                         options={selectOptionValues(releaseInfo.releaseRecipients, 'username', 'username')}
+                        value={values.ccRecipients}
+                        handleChange={(values) => {
+                          setFieldValue(
+                            'ccRecipients',
+                            (values as OptionType[]).map((option) => option.label)
+                          );
+                        }}
                       />
                     </motion.div>
                   </motion.div>
@@ -428,7 +451,11 @@ function Release({ releaseInfo }: PageParams) {
                     ) : (
                       <p className="italic text-sm">Please select a contact.</p>
                     )}
-
+                    {values.ccRecipients && values.ccRecipients.length > 0 && (
+                      <p>
+                        The cc contact(s) are <span className="font-semibold">{values.ccRecipients.join(',')}</span>.
+                      </p>
+                    )}
                     <PinkButton
                       disabled={formLocked}
                       loading={current.matches('submitting')}
