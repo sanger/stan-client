@@ -9,8 +9,9 @@ import BarcodeIcon from '../../components/icons/BarcodeIcon';
 import { Authenticated } from '../../components/Authenticated';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
 import { getLabwareInLocation } from '../../lib/services/locationService';
-import { LabwareFieldsFragment } from '../../types/sdk';
+import { LabwareFieldsFragment, SuggestedWorkFieldsFragment } from '../../types/sdk';
 import { tissue } from '../../lib/helpers/labwareHelper';
+import { stanCore } from '../../lib/sdk';
 
 /**
  * Component for showing the stored items for a location in a grid
@@ -22,6 +23,7 @@ export const ItemsGrid: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const scanInputRef = useRef<HTMLInputElement>(null);
   const [labwareInLocation, setLabwareInLocation] = useState<LabwareFieldsFragment[]>([]);
+  const [workNumbersForLabware, setWorkNumbersForLabware] = useState<SuggestedWorkFieldsFragment[]>([]);
 
   useEffect(() => {
     if (scanInputRef.current) {
@@ -37,18 +39,28 @@ export const ItemsGrid: React.FC = () => {
   React.useEffect(() => {
     async function fetchLabwareInLocation() {
       const labware = await getLabwareInLocation(location.barcode);
+      debugger;
       setLabwareInLocation(labware ?? []);
+      if (labware && labware.length > 0) {
+        const response = await stanCore.GetSuggestedWorkForLabware({ barcodes: labware.map((lw) => lw.barcode) });
+        setWorkNumbersForLabware(response.suggestedWorkForLabware.suggestedWorks);
+      }
     }
     fetchLabwareInLocation();
   }, [location]);
 
   const selectedLabware = React.useMemo(() => {
+    debugger;
     if (!selectedAddress) return undefined;
     const barcodeInSelectedAddress = addressToItemMap.get(selectedAddress)?.barcode;
     if (!barcodeInSelectedAddress) return undefined;
     return labwareInLocation.find((lw) => lw.barcode === barcodeInSelectedAddress);
   }, [selectedAddress, labwareInLocation, addressToItemMap]);
 
+  const workNumberForLabware = (workNumbers: SuggestedWorkFieldsFragment[], barcode: string) => {
+    const workNumberForLabware = workNumbers.find((wrkLabware) => wrkLabware.barcode === barcode);
+    return workNumberForLabware ? workNumberForLabware.workNumber : '';
+  };
   return (
     <div>
       <Authenticated>
@@ -73,6 +85,7 @@ export const ItemsGrid: React.FC = () => {
                   <tr>
                     <TableHeader>Address</TableHeader>
                     <TableHeader>Barcode</TableHeader>
+                    <TableHeader>WorkNumber</TableHeader>
                     <TableHeader>External Identifier</TableHeader>
                     <TableHeader>Donor</TableHeader>
                     <TableHeader>Spatial Location</TableHeader>
@@ -84,6 +97,9 @@ export const ItemsGrid: React.FC = () => {
                   <tr>
                     <TableCell>{selectedAddress}</TableCell>
                     <TableCell>{selectedLabware?.barcode}</TableCell>
+                    <TableCell>
+                      {selectedLabware ? workNumberForLabware(workNumbersForLabware, selectedLabware.barcode) : ''}
+                    </TableCell>
                     <TableCell>{selectedLabware && tissue(selectedLabware)?.externalName}</TableCell>
                     <TableCell>{selectedLabware && tissue(selectedLabware)?.donor.donorName}</TableCell>
                     <TableCell>{selectedLabware && tissue(selectedLabware)?.spatialLocation.code}</TableCell>
