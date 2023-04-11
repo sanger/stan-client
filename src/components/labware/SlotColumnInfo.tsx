@@ -7,7 +7,6 @@ import React from 'react';
 const SlotColumnInfo = ({
   slotColumn,
   slotBuilder,
-  numRows,
   alignRight = false,
   dataTestid
 }: {
@@ -17,7 +16,7 @@ const SlotColumnInfo = ({
   alignRight?: boolean;
   dataTestid?: string;
 }) => {
-  const gridClasses = `px-10 pt-4 gap-4 content-center grid grid-rows-${numRows} grid-cols-1 py-4 select-none`;
+  const gridClasses = 'flex flex-col px-8 py-2 select-none';
   return (
     <div data-testid={dataTestid ?? ''} className={gridClasses}>
       {slotColumn.map((slot) => (

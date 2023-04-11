@@ -48,6 +48,7 @@ import fileHandlers from './handlers/fileHandlers';
 import programHandlers from './handlers/programHandlers';
 import { labwareCostingHandlers } from './handlers/labwareCostingHandlers';
 import slotRegionHandlers from './handlers/slotRegionHandlers';
+import samplePositionHandlers from './handlers/samplePositionHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -96,5 +97,6 @@ export const handlers = [
   ...fileHandlers,
   ...programHandlers,
   ...labwareCostingHandlers,
-  ...slotRegionHandlers
+  ...slotRegionHandlers,
+  ...samplePositionHandlers
 ];

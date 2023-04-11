@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Labware from '../labware/Labware';
 import BlueButton from '../buttons/BlueButton';
 import PinkButton from '../buttons/PinkButton';
@@ -9,6 +9,7 @@ import {
   LabwareFieldsFragment,
   LabwareResult as CoreLabwareResult,
   PassFail,
+  SamplePositionFieldsFragment,
   SlotFieldsFragment,
   SlotMeasurementRequest
 } from '../../types/sdk';
@@ -19,6 +20,7 @@ import PassIcon from '../icons/PassIcon';
 import FailIcon from '../icons/FailIcon';
 import { Input } from '../forms/Input';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { stanCore } from '../../lib/sdk';
 
 type LabwareResultComponentProps = {
   labware: LabwareFieldsFragment;
@@ -37,6 +39,11 @@ type LabwareResultComponentProps = {
    * @param labwareResult a {@code LabwareResult}
    */
   onChange: (labwareResult: CoreLabwareResult) => void;
+
+  /**
+   * Is it required to select comments for each section in slot?
+   */
+  commentsForSlotSections?: boolean;
 };
 
 /**
@@ -47,7 +54,8 @@ export default function LabwareResult({
   initialLabwareResult,
   availableComments,
   onRemoveClick,
-  onChange
+  onChange,
+  commentsForSlotSections = false
 }: LabwareResultComponentProps) {
   const labwareResultMachine = React.useMemo(() => {
     return createLabwareResultMachine({
@@ -56,9 +64,9 @@ export default function LabwareResult({
     });
   }, [initialLabwareResult, availableComments]);
   const [current, send] = useMachine(labwareResultMachine);
-
+  const [samplePositions, setSamplePositions] = useState<SamplePositionFieldsFragment[]>([]);
   const { labwareResult } = current.context;
-
+  const [allComments, setAllComments] = React.useState<Array<string>>([]);
   const sampleResults = mapify(labwareResult.sampleResults, 'address');
   const slotMeasurements = labwareResult.slotMeasurements
     ? mapify(labwareResult.slotMeasurements, 'address')
@@ -67,6 +75,15 @@ export default function LabwareResult({
   useEffect(() => {
     onChange(labwareResult);
   }, [labwareResult, onChange]);
+
+  useEffect(() => {
+    if (!labware) return;
+    async function setSamplePositionData() {
+      const response = await stanCore.FindSamplePositions({ labwareBarcode: labware.barcode });
+      setSamplePositions(response.samplePositions);
+    }
+    setSamplePositionData();
+  }, [labware, setSamplePositions]);
 
   const isMeasurementExist = 'slotMeasurements' in labwareResult;
 
@@ -85,15 +102,59 @@ export default function LabwareResult({
     const commentId = sampleResults.get(address)!.commentId;
     return commentId ? commentId + '' : '';
   };
+  const getSampleRegion = (address: string, sampleId: number) => {
+    const samplePosition = samplePositions.find(
+      (position) => position.address === address && position.sampleId === sampleId
+    );
+    return samplePosition ? samplePosition.region : '';
+  };
+  const getCommentsForSample = (address: string, sampleId: number) => {
+    /**Get all comments belonging to the sample result for the given address**/
+    const sampleComments = sampleResults.get(address)!.sampleComments;
+
+    /**If sample comments exist, get all sample comments belonging to the given sample id
+     * Multiple comments can be saved for a sample and each one is saved as a {@link SampleIdCommentId} object
+     */
+    if (sampleComments) {
+      return sampleComments.filter((sc) => sc.sampleId === sampleId).map((sc) => sc.commentId + '');
+    } else return [];
+  };
   const slotBuilder = (slot: SlotFieldsFragment): React.ReactNode => {
     return (
       isSlotFilled(slot) && (
         <div
-          className={`flex flex-col ${isMeasurementExist && labware.slots.length > 1 && 'border-b border-gray-300'}`}
+          className={`flex flex-col w-full mx-auto space-y-4 py-2 ${
+            isMeasurementExist && labware.slots.length > 1 && 'border-b border-gray-300'
+          }`}
         >
-          <div className="flex flex-row items-center justify-between gap-x-2">
-            <div>
-              <div className="flex flex-row items-center justify-between">
+          <div className={'flex flex-row w-full'}>
+            {isMeasurementExist && (
+              <div className={'flex flex-row space-x-2 w-1/2'}>
+                <div className="flex mb-4">Coverage</div>
+                <div className="flex flex-row items-center h-8">
+                  <Input
+                    type="number"
+                    data-testid="coverage"
+                    min={0}
+                    max={100}
+                    value={slotMeasurements.get(slot.address)!.value}
+                    onChange={(e) => {
+                      if (validateMeasurementField(e.currentTarget.value)) {
+                        send({
+                          type: 'SET_TISSUE_COVERAGE',
+                          address: slot.address,
+                          value: e.currentTarget.value
+                        });
+                      }
+                    }}
+                  />
+                  <div className="text-xs font-normal ml-1">%</div>
+                </div>
+              </div>
+            )}
+            <div className={'flex flex-row w-1/2'}>
+              <div className="flex justify-center ml-8 mb-4">Pass/Fail</div>
+              <div className="flex flex-row justify-center ">
                 <PassIcon
                   data-testid={'passIcon'}
                   className={`h-6 w-6 cursor-pointer ${
@@ -103,7 +164,6 @@ export default function LabwareResult({
                     send({ type: 'PASS', address: slot.address });
                   }}
                 />
-
                 <FailIcon
                   data-testid={'failIcon'}
                   className={`h-6 w-6 cursor-pointer ${
@@ -113,46 +173,60 @@ export default function LabwareResult({
                 />
               </div>
             </div>
-            <div className="w-full">
-              <CustomReactSelect
-                value={getComment(slot.address) ?? ''}
-                dataTestId={'comment'}
-                handleChange={(val) =>
-                  send({
-                    type: 'SET_COMMENT',
-                    address: slot.address,
-                    commentId: (val as OptionType).value !== '' ? Number((val as OptionType).value) : undefined
-                  })
-                }
-                emptyOption
-                options={availableComments.map((comment) => {
-                  return { label: comment.text, value: comment.id + '' };
-                })}
-              />
+          </div>
+          <div className={`flex ${slot.samples.length > 1 ? 'flex-col' : 'flex-row'}`}>
+            <div className="flex mb-4 justify-start">Comments</div>
+            <div className={'flex flex-col space-y-2'}>
+              {
+                /** Is it required to display comments for every section in sample **/
+                commentsForSlotSections ? (
+                  slot.samples.map((sample) => (
+                    <div key={sample.section} className={'flex flex-row justify-end'}>
+                      {slot.samples.length > 1 && (
+                        <label className={'justify-start'}>{getSampleRegion(slot.address, sample.id)}</label>
+                      )}
+                      <div className={`flex ml-2 `}>
+                        <CustomReactSelect
+                          dataTestId={'comment'}
+                          value={getCommentsForSample(slot.address, sample.id)}
+                          handleChange={(val) => {
+                            send({
+                              type: 'SET_SAMPLE_COMMENTS',
+                              address: slot.address,
+                              sampleId: sample.id,
+                              commentIds: (val as OptionType[]).map((option) => Number(option.value))
+                            });
+                          }}
+                          emptyOption
+                          isMulti
+                          options={availableComments.map((comment) => {
+                            return { label: comment.text, value: comment.id + '' };
+                          })}
+                          fixedWidth={400}
+                        />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <CustomReactSelect
+                    value={getComment(slot.address) ?? ''}
+                    dataTestId={'comment'}
+                    handleChange={(val) =>
+                      send({
+                        type: 'SET_COMMENT',
+                        address: slot.address,
+                        commentId: (val as OptionType).value !== '' ? Number((val as OptionType).value) : undefined
+                      })
+                    }
+                    emptyOption
+                    options={availableComments.map((comment) => {
+                      return { label: comment.text, value: comment.id + '' };
+                    })}
+                  />
+                )
+              }
             </div>
           </div>
-          {isMeasurementExist && (
-            <div className="flex flex-row items-center  mt-3 pb-3">
-              <div className="w-full font-normal">Coverage</div>
-              <Input
-                type="number"
-                data-testid="coverage"
-                min={0}
-                max={100}
-                value={slotMeasurements.get(slot.address)!.value}
-                onChange={(e) => {
-                  if (validateMeasurementField(e.currentTarget.value)) {
-                    send({
-                      type: 'SET_TISSUE_COVERAGE',
-                      address: slot.address,
-                      value: e.currentTarget.value
-                    });
-                  }
-                }}
-              />
-              <div className="text-xs font-normal ml-1">%</div>
-            </div>
-          )}
         </div>
       )
     );
@@ -165,7 +239,7 @@ export default function LabwareResult({
       </div>
       <div className="flex flex-col items-center justify-around">
         {/* Display the layout of the labware */}
-        <div className="bg-blue-100" data-testid={'passFailComments'}>
+        <div className="flex bg-blue-100" data-testid={'passFailComments'}>
           <Labware labware={labware} slotBuilder={slotBuilder} />
         </div>
 
@@ -190,15 +264,20 @@ export default function LabwareResult({
           <CustomReactSelect
             dataTestId={'commentAll'}
             emptyOption
-            handleChange={(val) =>
+            value={allComments}
+            handleChange={(val) => {
+              setAllComments((val as OptionType[]).map((option) => option.value));
               send({
                 type: 'SET_ALL_COMMENTS',
-                commentId: (val as OptionType).value !== '' ? Number((val as OptionType).value) : undefined
-              })
-            }
+                commentId: (val as OptionType[]).map((val) => Number(val.value)),
+                slots: labware.slots
+              });
+            }}
             options={availableComments.map((comment) => {
               return { label: comment.text, value: comment.id + '' };
             })}
+            isMulti={commentsForSlotSections}
+            fixedWidth={400}
           />
         </div>
       </div>
