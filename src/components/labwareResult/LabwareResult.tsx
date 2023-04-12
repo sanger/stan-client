@@ -110,6 +110,7 @@ export default function LabwareResult({
   };
   const getCommentsForSample = (address: string, sampleId: number) => {
     /**Get all comments belonging to the sample result for the given address**/
+    debugger;
     const sampleComments = sampleResults.get(address)!.sampleComments;
 
     /**If sample comments exist, get all sample comments belonging to the given sample id
@@ -122,11 +123,7 @@ export default function LabwareResult({
   const slotBuilder = (slot: SlotFieldsFragment): React.ReactNode => {
     return (
       isSlotFilled(slot) && (
-        <div
-          className={`flex flex-col w-full mx-auto space-y-4 py-2 ${
-            isMeasurementExist && labware.slots.length > 1 && 'border-b border-gray-300'
-          }`}
-        >
+        <div className={'flex flex-col w-full mx-auto space-y-4 py-2 border-b-2 border-gray-300 mb-2'}>
           <div className={'flex flex-row w-full'}>
             {isMeasurementExist && (
               <div className={'flex flex-row space-x-2 w-1/2'}>
@@ -174,7 +171,7 @@ export default function LabwareResult({
               </div>
             </div>
           </div>
-          <div className={`flex ${slot.samples.length > 1 ? 'flex-col' : 'flex-row'}`}>
+          <div className={`flex ${slot.samples.length > 1 ? 'flex-col' : 'flex-row space-x-2'}`}>
             <div className="flex mb-4 justify-start">Comments</div>
             <div className={'flex flex-col space-y-2'}>
               {
@@ -202,7 +199,7 @@ export default function LabwareResult({
                           options={availableComments.map((comment) => {
                             return { label: comment.text, value: comment.id + '' };
                           })}
-                          fixedWidth={400}
+                          fixedWidth={200}
                         />
                       </div>
                     </div>
@@ -266,12 +263,21 @@ export default function LabwareResult({
             emptyOption
             value={allComments}
             handleChange={(val) => {
-              setAllComments((val as OptionType[]).map((option) => option.value));
-              send({
-                type: 'SET_ALL_COMMENTS',
-                commentId: (val as OptionType[]).map((val) => Number(val.value)),
-                slots: labware.slots
-              });
+              if (Array.isArray(val)) {
+                setAllComments((val as OptionType[]).map((option) => option.value));
+                send({
+                  type: 'SET_ALL_COMMENTS',
+                  commentId: (val as OptionType[]).map((val) => Number(val.value)),
+                  slots: labware.slots
+                });
+              } else {
+                setAllComments([(val as OptionType).value]);
+                send({
+                  type: 'SET_ALL_COMMENTS',
+                  commentId: Number((val as OptionType).value),
+                  slots: labware.slots
+                });
+              }
             }}
             options={availableComments.map((comment) => {
               return { label: comment.text, value: comment.id + '' };

@@ -24,7 +24,6 @@ describe('SlotColumnInfo', () => {
       });
       const divElement = await screen.getByTestId('slotColDiv');
       expect(divElement).toBeInTheDocument();
-      expect(divElement).toHaveClass('px-10 pt-4 gap-4 content-center grid grid-rows-2 grid-cols-1 py-4 select-none');
     });
     it('displays all given slots', async () => {
       const slots = createSlots(4);

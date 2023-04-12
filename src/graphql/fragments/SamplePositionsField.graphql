@@ -1,6 +1,6 @@
 fragment SamplePositionFields on SamplePosition {
-    address
-    region
-    sampleId
-    slotId
+  address
+  region
+  sampleId
+  slotId
 }

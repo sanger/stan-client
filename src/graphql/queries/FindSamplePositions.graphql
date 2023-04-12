@@ -1,5 +1,5 @@
-query FindSamplePositions($labwareBarcode:String!) {
-     samplePositions(labwareBarcode: $labwareBarcode) {
-         ...SamplePositionFields
-     }
+query FindSamplePositions($labwareBarcode: String!) {
+  samplePositions(labwareBarcode: $labwareBarcode) {
+    ...SamplePositionFields
+  }
 }
