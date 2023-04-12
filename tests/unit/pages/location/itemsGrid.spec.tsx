@@ -3,9 +3,11 @@ import ItemsGrid from '../../../../src/pages/location/ItemsGrid';
 import { LocationParentContext, LocationParentContextType } from '../../../../src/pages/Location';
 import React from 'react';
 import { createLabware } from '../../../../src/mocks/handlers/labwareHandlers';
+
 afterEach(() => {
   cleanup();
 });
+
 const mocklocationParentContextValue: LocationParentContextType = {
   location: {
     barcode: 'STO-001',
