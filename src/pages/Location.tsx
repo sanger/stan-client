@@ -47,7 +47,7 @@ enum ViewType {
   LIST
 }
 
-type LocationParentContextType = {
+export type LocationParentContextType = {
   location: LocationFieldsFragment;
   locationAddresses: Map<string, number>;
   addressToItemMap: Map<string, StoredItemFragment>;

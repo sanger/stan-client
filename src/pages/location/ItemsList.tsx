@@ -40,7 +40,10 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
       const labware = await getLabwareInLocation(location.barcode);
       setLabwareInLocation(labware ?? []);
       if (labware && labware.length > 0) {
-        const response = await stanCore.GetSuggestedWorkForLabware({ barcodes: labware.map((lw) => lw.barcode) });
+        const response = await stanCore.GetSuggestedWorkForLabware({
+          barcodes: labware.map((lw) => lw.barcode),
+          includeInactive: true
+        });
         setWorkNumbersForLabware(response.suggestedWorkForLabware.suggestedWorks);
       }
     }
@@ -71,7 +74,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
           <tr>
             <TableHeader>Address</TableHeader>
             <TableHeader>Barcode</TableHeader>
-            <TableHeader>WorkNumber</TableHeader>
+            <TableHeader>Work Number</TableHeader>
             <TableHeader>External Identifier</TableHeader>
             <TableHeader>Donor</TableHeader>
             <TableHeader>Spatial Location</TableHeader>

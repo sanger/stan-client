@@ -39,10 +39,12 @@ export const ItemsGrid: React.FC = () => {
   React.useEffect(() => {
     async function fetchLabwareInLocation() {
       const labware = await getLabwareInLocation(location.barcode);
-      debugger;
       setLabwareInLocation(labware ?? []);
       if (labware && labware.length > 0) {
-        const response = await stanCore.GetSuggestedWorkForLabware({ barcodes: labware.map((lw) => lw.barcode) });
+        const response = await stanCore.GetSuggestedWorkForLabware({
+          barcodes: labware.map((lw) => lw.barcode),
+          includeInactive: true
+        });
         setWorkNumbersForLabware(response.suggestedWorkForLabware.suggestedWorks);
       }
     }
@@ -50,7 +52,6 @@ export const ItemsGrid: React.FC = () => {
   }, [location]);
 
   const selectedLabware = React.useMemo(() => {
-    debugger;
     if (!selectedAddress) return undefined;
     const barcodeInSelectedAddress = addressToItemMap.get(selectedAddress)?.barcode;
     if (!barcodeInSelectedAddress) return undefined;
@@ -85,7 +86,7 @@ export const ItemsGrid: React.FC = () => {
                   <tr>
                     <TableHeader>Address</TableHeader>
                     <TableHeader>Barcode</TableHeader>
-                    <TableHeader>WorkNumber</TableHeader>
+                    <TableHeader>Work Number</TableHeader>
                     <TableHeader>External Identifier</TableHeader>
                     <TableHeader>Donor</TableHeader>
                     <TableHeader>Spatial Location</TableHeader>
