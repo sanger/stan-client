@@ -54,7 +54,22 @@ jest.mock('.../../../../src/lib/helpers/locationHelper.ts', () => ({
   })
 }));
 jest.mock('"../../../../src/lib/services/locationService', () => ({
-  setLocationCustomName: jest.fn()
+  setLocationCustomName: jest.fn(),
+  getLabwareInLocation: jest.fn()
+}));
+
+jest.mock('../../../../src/lib/sdk', () => ({
+  ...jest.requireActual('../../../../src/lib/sdk'),
+  GetSuggestedWorkForLabware: jest.fn().mockImplementation(() => {
+    return {
+      suggestedWorkForLabware: {
+        suggestedWorks: {
+          barcode: 'STAN-3111',
+          workNumber: 'SGP8'
+        }
+      }
+    };
+  })
 }));
 jest.mock('.../../../../src/context/AuthContext', () => ({
   ...jest.requireActual('.../../../../src/context/AuthContext'),
@@ -69,6 +84,21 @@ jest.mock('.../../../../src/context/AuthContext', () => ({
     };
   })
 }));
+
+jest.mock('.../../../../src/context/AuthContext', () => ({
+  ...jest.requireActual('.../../../../src/context/AuthContext'),
+  useAuth: jest.fn().mockImplementation(() => {
+    return {
+      isAuthenticated: jest.fn().mockImplementation(() => {
+        return true;
+      }),
+      userRoleIncludes: jest.fn().mockImplementation(() => {
+        return true;
+      })
+    };
+  })
+}));
+
 describe('ItemsGrid', () => {
   beforeEach(() => {
     React.useMemo = jest.fn().mockReturnValue(createLabware('STAN-3111'));
