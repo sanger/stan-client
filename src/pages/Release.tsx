@@ -47,7 +47,7 @@ const validationSchema = Yup.object().shape({
     .required(),
   destination: Yup.string().required().label('Group/Team'),
   recipient: Yup.string().required().label('Primary Contact'),
-  ccRecipients: Yup.array().optional().label('CC contacts')
+  otherRecipients: Yup.array().optional().label('CC contacts')
 });
 
 const labwareBsContent = (labware: LabwareFieldsFragment) => {
@@ -131,6 +131,7 @@ function Release({ releaseInfo }: PageParams) {
               } else return { barcode: suggestedWork.barcode };
             })
           };
+          debugger;
           return stanCore.ReleaseLabware({ releaseRequest: newValues });
         }
       }
@@ -139,6 +140,7 @@ function Release({ releaseInfo }: PageParams) {
   const [current, send] = useMachine(() => formMachine);
 
   const { serverError, submissionResult } = current.context;
+  debugger;
   const formLocked = !current.matches('fillingOutForm');
   const submitForm = async (values: ReleaseRequest) => send({ type: 'SUBMIT_FORM', values });
   const releaseFilePath = useMemo(() => {
@@ -409,16 +411,16 @@ function Release({ releaseInfo }: PageParams) {
                       />
                       <CustomReactSelect
                         isDisabled={formLocked}
-                        label={'CC contacts'}
+                        label={'Other contacts'}
                         dataTestId="cc"
-                        name={'ccRecipients'}
+                        name={'otherRecipients'}
                         emptyOption
                         isMulti
                         options={selectOptionValues(releaseInfo.releaseRecipients, 'username', 'username')}
-                        value={values.ccRecipients}
+                        value={values.otherRecipients}
                         handleChange={(values) => {
                           setFieldValue(
-                            'ccRecipients',
+                            'otherRecipients',
                             (values as OptionType[]).map((option) => option.label)
                           );
                         }}
@@ -449,9 +451,9 @@ function Release({ releaseInfo }: PageParams) {
                     ) : (
                       <p className="italic text-sm">Please select a contact.</p>
                     )}
-                    {values.ccRecipients && values.ccRecipients.length > 0 && (
+                    {values.otherRecipients && values.otherRecipients.length > 0 && (
                       <p>
-                        The cc contact(s) are <span className="font-semibold">{values.ccRecipients.join(',')}</span>.
+                        The cc contact(s) are <span className="font-semibold">{values.otherRecipients.join(',')}</span>.
                       </p>
                     )}
                     <PinkButton
