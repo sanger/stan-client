@@ -1,5 +1,5 @@
-query GetSuggestedWorkForLabware($barcodes: [String!]!,$includeInactive:Boolean) {
-  suggestedWorkForLabware(barcodes: $barcodes,includeInactive: $includeInactive) {
+query GetSuggestedWorkForLabware($barcodes: [String!]!, $includeInactive: Boolean) {
+  suggestedWorkForLabware(barcodes: $barcodes, includeInactive: $includeInactive) {
     suggestedWorks {
       ...SuggestedWorkFields
     }
