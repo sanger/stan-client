@@ -59,7 +59,7 @@ describe('FileManager', () => {
         cy.findByText('Upload file').should('exist');
         cy.findByText('Files').should('exist');
       });
-      it('should select SGP1001 in select box', () => {
+      it('should select SGP1001 and SGP1008 in select box', () => {
         workNumberShouldBe('SGP1002');
         workNumberShouldBe('SGP1008');
       });
