@@ -1,5 +1,3 @@
-import { selectOption } from './customReactSelect.cy';
-
 export enum RegistrationType {
   BLOCK,
   SLIDE,
@@ -48,63 +46,9 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
       });
     });
 
-    context('Life stage selection', () => {
-      context('when Fetal is selected', () => {
-        before(() => {
-          cy.findByLabelText('Fetal').click();
-        });
-        it(
-          registrationType === RegistrationType.SLIDE
-            ? 'does not show sample collection date'
-            : 'shows sample collection date',
-          () => {
-            cy.findByLabelText('Sample Collection Date').should(
-              registrationType === RegistrationType.SLIDE ? 'not.exist' : 'be.visible'
-            );
-          }
-        );
-      });
-      context('when Adult is selected', () => {
-        before(() => {
-          cy.findByLabelText('Adult').click();
-        });
-        it('does not show sample collection date', () => {
-          cy.findByLabelText('Sample Collection Date').should('not.exist');
-        });
-      });
-    });
     it('requires Species', () => {
       cy.findByLabelText('Species').focus().blur();
       cy.findByText('Species is a required field').should('be.visible');
-    });
-
-    it('has HuMFre initially disabled', () => {
-      cy.findByLabelText('HuMFre').should('be.disabled');
-    });
-
-    context('when selecting a non-Human Species', () => {
-      before(() => {
-        selectOption('Species', 'Pig');
-      });
-
-      it('keeps HuMFre disabled', () => {
-        cy.findByLabelText('HuMFre').should('be.disabled');
-      });
-    });
-
-    context('when selecting Human for Species', () => {
-      before(() => {
-        selectOption('Species', 'Human');
-      });
-
-      it('enables the HuMFre field', () => {
-        cy.findByLabelText('HuMFre').should('not.be.disabled');
-      });
-
-      it('requires HuMFre to be set', () => {
-        cy.findByLabelText('HuMFre').focus().blur();
-        cy.findByText('HuMFre is a required field').should('be.visible');
-      });
     });
 
     it('requires Tissue Type', () => {

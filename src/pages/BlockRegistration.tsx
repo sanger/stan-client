@@ -52,7 +52,7 @@ function getRegistrationFormBlock(): RegistrationFormBlock {
   };
 }
 
-function getRegistrationFormTissue(): RegistrationFormTissue {
+export function getRegistrationFormTissue(): RegistrationFormTissue {
   return {
     clientId: Date.now(),
     donorId: '',

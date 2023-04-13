@@ -113,6 +113,7 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                   name={`tissues.${currentIndex}.sampleCollectionDate`}
                   label={'Sample Collection Date'}
                   max={new Date()}
+                  value={values.tissues[currentIndex].sampleCollectionDate}
                 />
               )}
 
@@ -172,12 +173,14 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                         variants={variants.fadeIn}
                         animate={'visible'}
                         exit={'hidden'}
+                        data-testid={'sample-info-div'}
                         className="relative p-4 shadow-lg bg-white space-y-4"
                       >
                         <FormikInput
                           label="External Identifier"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.externalIdentifier`}
                           displayTag={getOptionalTag('External Identifier')}
+                          value={values.tissues[currentIndex].blocks[blockIndex].externalIdentifier}
                         />
 
                         <CustomReactSelect
@@ -200,12 +203,15 @@ const RegistrationForm = <T extends TissueValues<B>, B>({
                           label="Replicate Number"
                           name={`tissues.${currentIndex}.blocks.${blockIndex}.replicateNumber`}
                           displayTag={getOptionalTag('Replicate Number')}
+                          value={values.tissues[currentIndex].blocks[blockIndex].replicateNumber}
                         />
                         {'lastKnownSectionNumber' in values.tissues[currentIndex].blocks[blockIndex] && (
                           <FormikInput
                             label="Last Known Section Number"
+                            dataTestId="Section Number"
                             type="number"
                             name={`tissues.${currentIndex}.blocks.${blockIndex}.lastKnownSectionNumber`}
+                            value={values.tissues[currentIndex].blocks[blockIndex].lastKnownSectionNumber}
                           />
                         )}
 

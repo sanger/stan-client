@@ -55,34 +55,6 @@ describe('Registration', () => {
     });
   });
 
-  context('when clicking the Add Another Tissue Block button', () => {
-    before(() => {
-      cy.findByText('Delete Block').should('not.exist');
-      cy.findByText('Block Information').siblings().should('have.length', 1);
-      cy.findByText('+ Add Another Tissue Block').click();
-    });
-
-    it('adds another tissue block', () => {
-      cy.findByText('Block Information').siblings().should('have.length', 2);
-    });
-
-    it('shows the Delete Block button for each block', () => {
-      cy.findAllByText('Delete Block').should('be.visible');
-    });
-  });
-
-  context('when clicking the Add Another Tissue button', () => {
-    before(() => {
-      cy.findByText('- Delete Tissue').should('not.exist');
-      cy.get('#tissue-summaries').children().should('have.length', 1);
-      cy.findByText('+ Add Another Tissue').click();
-    });
-
-    it('adds another tissue', () => {
-      cy.get('#tissue-summaries').children().should('have.length', 2);
-    });
-  });
-
   describe('submission', () => {
     context('when the fields are invalid', () => {
       before(() => {
