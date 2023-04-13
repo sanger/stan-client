@@ -1,0 +1,5 @@
+query FindStoragePath($locationBarcode:String!) {
+     storagePath(locationBarcode: $locationBarcode) {
+         ...LinkedLocationFields
+     }
+}

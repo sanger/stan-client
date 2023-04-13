@@ -38,6 +38,7 @@ import MutedText from '../components/MutedText';
 import PasteIcon from '../components/icons/PasteIcon';
 import BlueButton from '../components/buttons/BlueButton';
 import { ClientError } from 'graphql-request';
+import { stanCore } from '../lib/sdk';
 
 /**
  * The different ways of displaying stored items
@@ -139,12 +140,50 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
    */
   const [sourceLocationError, setSourceLocationError] = React.useState<string>('');
 
+  /**
+   * Full path for the given storage location
+   * The root is the first element, and the current storage location is the last element
+     For example, if there is a box in a drawer in a freezer, the freezer will be first and the box will be last
+   */
+  const [storagePath, setStoragePath] = React.useState<string>('');
+
   const transferInputRef = React.useRef<HTMLInputElement>(null);
 
   /***When component loads, fill awaitingLabwares from sessionStorage, if any**/
   React.useEffect(() => {
     setAwaitingLabwares(getAwaitingLabwaresFromSession());
   }, []);
+
+  React.useEffect(() => {
+    async function setPathForLocation() {
+      const response = await stanCore.FindStoragePath({ locationBarcode: storageLocation.barcode });
+      /**Generate path only if the parent hierarchy is more than one level, as the immediate parent information will
+       * always be displayed
+       */
+      if (response.storagePath.length <= 1) {
+        setStoragePath('');
+      }
+      /**The path name will be searched in the following order depending on which is available
+       fixedName -> customName -> address -> barcode
+       */
+      const path =
+        response.storagePath.length > 1
+          ? response.storagePath
+              .map((elem) =>
+                elem.fixedName
+                  ? elem.fixedName
+                  : elem.customName
+                  ? elem.customName
+                  : elem.address
+                  ? elem.address
+                  : elem.barcode
+              )
+              .join(' -> ')
+          : '';
+      setStoragePath(path);
+    }
+    setPathForLocation();
+  }, [storageLocation]);
 
   /**Leaving to another page from a prompt dialog, so clear the sessionStorage before leaving this page**/
   const onLeave = React.useCallback(() => {
@@ -430,6 +469,11 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
                   {location.fixedName ?? <span className="italic">None</span>}
                 </StripyCardDetail>
 
+                {storagePath.length > 0 && (
+                  <StripyCardDetail term={'Path'}>
+                    <span>{storagePath}</span>
+                  </StripyCardDetail>
+                )}
                 {location.parent && (
                   <StripyCardDetail term={'Parent'}>
                     <StyledLink
