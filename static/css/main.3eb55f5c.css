@@ -717,6 +717,38 @@ svg.logo.loading rect:nth-child(3n+1) {
     }
 }
 
+.container {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+
+  .container {
+    max-width: 1280px;
+  }
+}
+
 .form-checkbox,.form-radio {
   -webkit-appearance: none;
           appearance: none;
@@ -1740,6 +1772,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 .ml-1 {
   margin-left: 0.25rem;
 }
+.ml-8 {
+  margin-left: 2rem;
+}
 .mb-1 {
   margin-bottom: 0.25rem;
 }
@@ -2736,10 +2771,6 @@ svg.logo.loading rect:nth-child(3n+1) {
   padding-left: 3rem;
   padding-right: 3rem;
 }
-.px-10 {
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
-}
 .py-10 {
   padding-top: 2.5rem;
   padding-bottom: 2.5rem;
@@ -3645,10 +3676,6 @@ svg.logo.loading rect:nth-child(3n+1) {
     width: 75%;
   }
 
-  .md\:w-full {
-    width: 100%;
-  }
-
   .md\:w-1\/3 {
     width: 33.333333%;
   }
@@ -4222,4 +4249,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.2adb85b3.css.map*/
+/*# sourceMappingURL=main.3eb55f5c.css.map*/
