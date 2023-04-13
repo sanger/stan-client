@@ -30,7 +30,7 @@ describe('Release Page', () => {
     });
 
     it('shows an error about Contact', () => {
-      cy.findByText('Contact is a required field').should('be.visible');
+      cy.findByText('Primary Contact is a required field').should('be.visible');
     });
   });
   context('when labware/location release type is selected', () => {
@@ -94,6 +94,15 @@ describe('Release Page', () => {
       });
       it('shows updated information in summary', () => {
         cy.contains('The primary contact is cs41').should('be.visible');
+      });
+    });
+    context('when cc contacts  are selected', () => {
+      before(() => {
+        selectOption('cc', 'cs41');
+        selectOption('cc', 're5');
+      });
+      it('shows updated information in summary', () => {
+        cy.contains('The cc contact(s) are cs41,re5.').should('be.visible');
       });
     });
 
