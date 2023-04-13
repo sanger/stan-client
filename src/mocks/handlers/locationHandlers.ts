@@ -6,6 +6,9 @@ import {
   FindLabwareLocationQueryVariables,
   FindLocationByBarcodeQuery,
   FindLocationByBarcodeQueryVariables,
+  FindStoragePathQuery,
+  FindStoragePathQueryVariables,
+  LinkedLocationFieldsFragment,
   Location,
   LocationFieldsFragment,
   Maybe,
@@ -215,10 +218,39 @@ const locationHandlers = [
         })
       );
     }
-  )
+  ),
+
+  /*** The root is the first element, and the location  requested is the last element
+        For example, if there is a box in a drawer in a freezer, the freezer will be first and the box will be last
+   ***/
+  graphql.query<FindStoragePathQuery, FindStoragePathQueryVariables>('FindStoragePath', (req, res, ctx) => {
+    const linkedLocationArray: LinkedLocationFieldsFragment[] = [];
+    addLocationHierarchy(req.variables.locationBarcode, linkedLocationArray);
+    return res(
+      ctx.data({
+        storagePath: linkedLocationArray
+      })
+    );
+  })
 ];
 
 export default locationHandlers;
+
+function addLocationHierarchy(barcode: string, linkedLocation: LinkedLocationFieldsFragment[]) {
+  const location = locationRepository.findByBarcode(barcode);
+  if (!location) {
+    return;
+  }
+  linkedLocation.unshift({
+    barcode: location.barcode,
+    address: location.address,
+    customName: location.customName,
+    fixedName: location.fixedName
+  });
+  if (location.parent) {
+    addLocationHierarchy(location.parent.barcode, linkedLocation);
+  } else return;
+}
 
 export function locationResponse(location: Location): LocationFieldsFragment {
   return {

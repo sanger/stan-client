@@ -1,0 +1,6 @@
+fragment LinkedLocationFields on LinkedLocation {
+  barcode
+  fixedName
+  customName
+  address
+}

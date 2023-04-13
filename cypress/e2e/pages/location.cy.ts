@@ -26,6 +26,9 @@ describe('Location', () => {
     it('displays the name', () => {
       cy.findByText('Location 24').should('exist');
     });
+    it('displays the path', () => {
+      cy.findByText('Location 1 -> Location 2 -> Location 7 -> Location 24').should('exist');
+    });
 
     it('displays the barcode', () => {
       cy.findByText('STO-024').should('exist');
