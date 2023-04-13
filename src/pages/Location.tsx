@@ -169,15 +169,7 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
       const path =
         response.storagePath.length > 1
           ? response.storagePath
-              .map((elem) =>
-                elem.fixedName
-                  ? elem.fixedName
-                  : elem.customName
-                  ? elem.customName
-                  : elem.address
-                  ? elem.address
-                  : elem.barcode
-              )
+              .map((elem) => elem.fixedName ?? elem.customName ?? elem.address ?? elem.barcode)
               .join(' -> ')
           : '';
       setStoragePath(path);
