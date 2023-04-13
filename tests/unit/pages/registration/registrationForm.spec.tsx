@@ -35,6 +35,7 @@ const availableLabwareTypes: LabwareType[] = registrationInfo.labwareTypes;
 afterEach(() => {
   cleanup();
 });
+
 const renderOriginalRegistrationForm = () => {
   const keywords = new Map()
     .set('Block', 'Sample')
