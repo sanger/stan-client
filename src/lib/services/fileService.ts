@@ -3,7 +3,7 @@ import { stanCore } from '../sdk';
 
 /**
  * Find all uploaded files for a workNumber
- * @param workNumbers list od workNumbers to find all the uploaded files of
+ * @param workNumbers list of workNumbers to find all the uploaded files of
  * @return  uploaded files if any, otherwise an empty array
  */
 export async function findUploadedFiles(workNumbers: string[]): Promise<FileFieldsFragment[]> {
