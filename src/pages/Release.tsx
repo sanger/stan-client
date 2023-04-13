@@ -131,7 +131,6 @@ function Release({ releaseInfo }: PageParams) {
               } else return { barcode: suggestedWork.barcode };
             })
           };
-          debugger;
           return stanCore.ReleaseLabware({ releaseRequest: newValues });
         }
       }
@@ -140,7 +139,6 @@ function Release({ releaseInfo }: PageParams) {
   const [current, send] = useMachine(() => formMachine);
 
   const { serverError, submissionResult } = current.context;
-  debugger;
   const formLocked = !current.matches('fillingOutForm');
   const submitForm = async (values: ReleaseRequest) => send({ type: 'SUBMIT_FORM', values });
   const releaseFilePath = useMemo(() => {
