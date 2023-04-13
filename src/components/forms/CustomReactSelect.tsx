@@ -25,7 +25,7 @@ interface CustomReactSelectProps extends Props {
   dataTestId?: string;
   isMulti?: boolean;
   valueAsNumber?: boolean;
-  fixedWidth?: boolean;
+  fixedWidth?: number;
 }
 
 const defaultValue = (options: OptionType[], value: any, isMulti: boolean) => {
@@ -55,7 +55,7 @@ export const NormalReactSelect = ({
   handleBlur,
   dataTestId,
   isMulti = false,
-  fixedWidth = false,
+  fixedWidth,
   ...props
 }: CustomReactSelectProps) => {
   const onChangeValue = React.useCallback(
@@ -89,7 +89,7 @@ export const NormalReactSelect = ({
   };
   const sdbColor = '#7980B9';
   return (
-    <div data-testid={dataTestId ?? 'select-div'} className={`md:w-full ${className}`}>
+    <div data-testid={dataTestId ?? 'select-div'} className={`${className}`}>
       <Label name={label ?? ''}>
         <ReactSelect
           menuPosition={'fixed'}
@@ -103,6 +103,7 @@ export const NormalReactSelect = ({
           components={{ Option, IndicatorSeparator: () => null }}
           {...props}
           styles={{
+            container: (css) => (fixedWidth ? { ...css, width: fixedWidth + 'px' } : { ...css }),
             control: (baseStyles, state) => ({
               ...baseStyles,
               borderColor: `1px solid ${sdbColor}`,
@@ -118,7 +119,8 @@ export const NormalReactSelect = ({
             menu: (base) => ({
               ...base,
               width: 'max-content',
-              minWidth: '100%'
+              minWidth: '100%',
+              zIndex: 999
             }),
             option: (styles, { isDisabled, label }) => {
               return {

@@ -41,7 +41,6 @@ export default function StainingQC({ info }: StainingQCProps) {
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-
           /**Omit all measurements for which the tissue coverage is not specified**/
           const newLabwareResults = e.values.labwareResults.map((labwareResult) => {
             const slotMeasurements = labwareResult.slotMeasurements?.filter(
@@ -117,6 +116,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                           labware={labware}
                           availableComments={info.comments}
                           onRemoveClick={removeLabware}
+                          commentsForSlotSections
                           onChange={(labwareResult) => labwareResults.update(labwareResult)}
                         />
                       </Panel>
