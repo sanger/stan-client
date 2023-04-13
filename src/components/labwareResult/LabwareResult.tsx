@@ -110,7 +110,6 @@ export default function LabwareResult({
   };
   const getCommentsForSample = (address: string, sampleId: number) => {
     /**Get all comments belonging to the sample result for the given address**/
-    debugger;
     const sampleComments = sampleResults.get(address)!.sampleComments;
 
     /**If sample comments exist, get all sample comments belonging to the given sample id

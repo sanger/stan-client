@@ -154,7 +154,6 @@ export default function createLabwareResultMachine({ availableComments, labwareR
            *sr.result.sampleComments is supported in places where there are multiple comments and multiple sections in a slot**/
           ctx.labwareResult.sampleResults.forEach((sr) => {
             if (sr.result) {
-              debugger;
               const sampleComments: SampleIdCommentId[] = [];
               /**No comments given, so reset all comments**/
               if (!e.commentId) {
