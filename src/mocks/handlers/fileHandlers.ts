@@ -15,9 +15,18 @@ const fileHandlers = [
 
   //Query files
   graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', (req, res, ctx) => {
+    const files = fileRepository.findAll().map((file) => {
+      return {
+        ...file,
+        work: {
+          workNumber: req.variables.workNumbers[Math.floor(Math.random() * req.variables.workNumbers.length)]
+        }
+      };
+    });
+
     return res(
       ctx.data({
-        listFiles: fileRepository.findAll()
+        listFiles: files
       })
     );
   })

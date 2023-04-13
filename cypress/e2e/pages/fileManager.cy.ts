@@ -23,7 +23,6 @@ describe('FileManager', () => {
       });
       it('should select SGP1008 in select box', () => {
         workNumberShouldBe('SGP1008');
-        // workNumber().should('have.value', 'SGP1008');
       });
       it('initialises page', () => {
         cy.findByText('Upload file').should('exist');
@@ -50,7 +49,19 @@ describe('FileManager', () => {
       });
       it('should select SGP1001 in select box', () => {
         workNumberShouldBe('SGP1001');
-        // workNumber().should('have.value', 'SGP1001');
+      });
+    });
+    context('on visiting page with multiple work numbers as a query parameter', () => {
+      before(() => {
+        cy.visit('/file_manager?workNumber=SGP1002&workNumber=SGP1008');
+      });
+      it('initialises page', () => {
+        cy.findByText('Upload file').should('exist');
+        cy.findByText('Files').should('exist');
+      });
+      it('should select SGP1001 and SGP1008 in select box', () => {
+        workNumberShouldBe('SGP1002');
+        workNumberShouldBe('SGP1008');
       });
     });
   });
@@ -96,8 +107,30 @@ describe('FileManager', () => {
         cy.findByRole('table').find('tr').should('have.length.above', 0);
       });
     });
+    context('on selecting multiple SGP Number with files uploaded', () => {
+      before(() => {
+        cy.findByTestId('active').uncheck();
+        selectSGPNumber('SGP1008');
+        selectSGPNumber('SGP1006');
+      });
+      it('should display the url with selected work number', () => {
+        cy.url().should('include', 'file_manager?workNumber=SGP1008&workNumber=SGP1006');
+      });
+      it('initializes page for active work number', () => {
+        cy.findByText('Upload file').should('be.visible');
+        cy.findByTestId('active').should('be.visible').should('not.be.checked');
+        cy.findByTestId('file-input').should('be.enabled');
+      });
+      it('should display a table with files uploaded for all selected SGP Numbers', () => {
+        cy.findByRole('table').should('exist');
+        cy.findByRole('table').find('tr').should('have.length.above', 0);
+        cy.findByRole('table').contains('td', 'SGP1008');
+        cy.findByRole('table').contains('td', 'SGP1006');
+      });
+    });
     context('on selecting inactive SGP Number with files uploaded', () => {
       before(() => {
+        cy.visit('/file_manager');
         cy.findByTestId('active').uncheck();
         selectSGPNumber('SGP1002');
       });
@@ -122,6 +155,7 @@ describe('FileManager', () => {
             })
           );
         });
+        cy.visit('/file_manager');
         selectSGPNumber('SGP1008');
       });
       it('initializes page for active work number', () => {
@@ -135,6 +169,7 @@ describe('FileManager', () => {
     });
     context('on selecting inactive SGP Number with no files uploaded', () => {
       before(() => {
+        cy.visit('/file_manager');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', (req, res, ctx) => {
@@ -176,16 +211,18 @@ describe('FileManager', () => {
     });
     context('when no work number is selected', () => {
       before(() => {
+        cy.visit('/file_manager');
         selectSGPNumber('');
-        // workNumber().select('');
       });
       it('should not display upload or files section', () => {
         cy.findByText('Upload file').should('not.exist');
         cy.findByText('Files').should('not.exist');
       });
     });
-    context('when both file and sgp number is selected', () => {
+    context('when both file and multiple sgp numbers are selected', () => {
       before(() => {
+        cy.findByTestId('active').uncheck();
+        selectSGPNumber('SGP1006');
         selectSGPNumber('SGP1008');
         selectFile();
       });
@@ -199,9 +236,9 @@ describe('FileManager', () => {
     context('on Upload success', () => {
       before(() => {
         selectFile();
-        uploadButton().click({ force: true });
+        uploadButton().click();
       });
-      it('should displau upload success message', () => {
+      it('should display upload success message', () => {
         cy.findByText('file.txt uploaded succesfully.').should('be.visible');
       });
       it('should remove the selected file for upload', () => {

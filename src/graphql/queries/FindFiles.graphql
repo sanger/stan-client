@@ -1,5 +1,5 @@
-query FindFiles($workNumber: String!) {
-  listFiles(workNumber: $workNumber) {
+query FindFiles($workNumbers: [String!]!) {
+  listFiles(workNumbers: $workNumbers) {
     ...FileFields
   }
 }
