@@ -9,8 +9,9 @@ import MutedText from '../../components/MutedText';
 import { addressToLocationAddress } from '../../lib/helpers/locationHelper';
 import { Authenticated } from '../../components/Authenticated';
 import { getLabwareInLocation } from '../../lib/services/locationService';
-import { LabwareFieldsFragment, Maybe } from '../../types/sdk';
+import { LabwareFieldsFragment, Maybe, SuggestedWorkFieldsFragment } from '../../types/sdk';
 import { tissue } from '../../lib/helpers/labwareHelper';
+import { stanCore } from '../../lib/sdk';
 
 interface ItemsListParams {
   freeformAddress?: boolean;
@@ -24,6 +25,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
 
   const [selectedItem, setSelectedItem] = useState<Maybe<StoredItemFragment>>(null);
   const [labwareInLocation, setLabwareInLocation] = useState<LabwareFieldsFragment[]>([]);
+  const [workNumbersForLabware, setWorkNumbersForLabware] = useState<SuggestedWorkFieldsFragment[]>([]);
 
   const scanInputRef = useRef<HTMLInputElement>(null);
 
@@ -37,9 +39,21 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
     async function fetchLabwareInLocation() {
       const labware = await getLabwareInLocation(location.barcode);
       setLabwareInLocation(labware ?? []);
+      if (labware && labware.length > 0) {
+        const response = await stanCore.GetSuggestedWorkForLabware({
+          barcodes: labware.map((lw) => lw.barcode),
+          includeInactive: true
+        });
+        setWorkNumbersForLabware(response.suggestedWorkForLabware.suggestedWorks);
+      }
     }
     fetchLabwareInLocation();
   }, [location]);
+
+  const workNumberForLabware = (workNumbers: SuggestedWorkFieldsFragment[], barcode: string) => {
+    const workNumberForLabware = workNumbers.find((wrkLabware) => wrkLabware.barcode === barcode);
+    return workNumberForLabware ? workNumberForLabware.workNumber : '';
+  };
 
   return (
     <div>
@@ -60,6 +74,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
           <tr>
             <TableHeader>Address</TableHeader>
             <TableHeader>Barcode</TableHeader>
+            <TableHeader>Work Number</TableHeader>
             <TableHeader>External Identifier</TableHeader>
             <TableHeader>Donor</TableHeader>
             <TableHeader>Spatial Location</TableHeader>
@@ -96,6 +111,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
                   )}
                 </TableCell>
                 <TableCell>{item.barcode}</TableCell>
+                <TableCell>{labware ? workNumberForLabware(workNumbersForLabware, labware.barcode) : ''}</TableCell>
                 <TableCell>{tissue(labware)?.externalName}</TableCell>
                 <TableCell>{tissue(labware)?.donor.donorName}</TableCell>
                 <TableCell>{tissue(labware)?.spatialLocation.code}</TableCell>
