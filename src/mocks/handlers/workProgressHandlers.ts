@@ -12,6 +12,7 @@ import workRepository from '../repositories/workRepository';
 import programRepository from '../repositories/programRepository';
 import workTypeRepository from '../repositories/workTypeRepository';
 import { generateRandomIntegerInRange } from '../../lib/helpers';
+import releaseRecipientRepository from '../repositories/releaseRecipientRepository';
 
 function buildWorkProgressTimeStamps(): Array<WorkProgressTimestamp> {
   return [
@@ -49,13 +50,14 @@ const workProgressHandlers = [
       return res(
         ctx.data({
           workTypes: workTypeRepository.findAll(),
-          programs: programRepository.findAll()
+          programs: programRepository.findAll(),
+          releaseRecipients: releaseRecipientRepository.findAll()
         })
       );
     }
   ),
   graphql.query<FindWorkProgressQuery, FindWorkProgressQueryVariables>('FindWorkProgress', (req, res, ctx) => {
-    const { workNumber, workTypes, statuses, programs } = req.variables;
+    const { workNumber, workTypes, statuses, programs, recipients } = req.variables;
     const works = workRepository.findAll().map((work, indx) => {
       const status = indx % 2 === 0 ? WorkStatus.Active : indx % 3 === 1 ? WorkStatus.Completed : WorkStatus.Paused;
       return { ...work, status: status };
@@ -71,6 +73,13 @@ const workProgressHandlers = [
       filteredWorks = Array.isArray(statuses)
         ? filteredWorks.filter((work) => statuses.findIndex((status) => status === work.status) !== -1)
         : filteredWorks.filter((work) => work.status === statuses);
+    }
+    if (recipients) {
+      filteredWorks = Array.isArray(recipients)
+        ? filteredWorks.filter(
+            (work) => recipients.findIndex((recipient) => recipient === work.workRequester?.username) !== -1
+          )
+        : filteredWorks.filter((work) => work.workRequester?.username === recipients);
     }
     return res(
       ctx.data({

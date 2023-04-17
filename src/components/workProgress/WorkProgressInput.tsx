@@ -15,12 +15,13 @@ import CustomReactSelect from '../forms/CustomReactSelect';
 /**
  * Form validation schema
  */
-export const workProgressSearchSchema = (workTypes: string[], programs?: string[]) => {
+export const workProgressSearchSchema = (workTypes: string[], programs?: string[], workRequestors?: string[]) => {
   return Yup.object().shape({
     workNumber: Yup.string(),
     workTypes: Yup.array().of(Yup.string().oneOf(workTypes)),
     programs: Yup.array().of(Yup.string().oneOf(programs ?? [])),
-    statuses: Yup.array().of(Yup.string().oneOf(Object.values(WorkStatus)))
+    statuses: Yup.array().of(Yup.string().oneOf(Object.values(WorkStatus))),
+    workRequestors: Yup.array().of(Yup.string().oneOf(workRequestors ?? []))
   });
 };
 
@@ -37,9 +38,13 @@ type WorkProgressInputParams = {
    * All programs available
    */
   programs?: string[];
+  /**
+   * All work requestors available
+   */
+  workRequestors?: string[];
 };
 
-export default function WorkProgressInput({ urlParams, workTypes, programs }: WorkProgressInputParams) {
+export default function WorkProgressInput({ urlParams, workTypes, programs, workRequestors }: WorkProgressInputParams) {
   const location = useLocation();
   const sortedStatues = Object.values(WorkStatus).sort((a, b) => statusSort(a, b));
 
@@ -63,11 +68,12 @@ export default function WorkProgressInput({ urlParams, workTypes, programs }: Wo
               workNumber: values.workNumber,
               statuses: values.statuses,
               programs: values.programs,
-              workTypes: values.workTypes
+              workTypes: values.workTypes,
+              workRequestors: values.workRequestors
             })
           });
         }}
-        validationSchema={workProgressSearchSchema(workTypes, programs)}
+        validationSchema={workProgressSearchSchema(workTypes, programs, workRequestors)}
       >
         {({ values, setFieldValue }) => (
           <Form>
@@ -126,6 +132,21 @@ export default function WorkProgressInput({ urlParams, workTypes, programs }: Wo
                   dataTestId={'select_status'}
                 />
               )}
+              {workRequestors && (
+                <CustomReactSelect
+                  label={'Work requester'}
+                  options={workRequestors.sort().map((requestor) => {
+                    return {
+                      value: requestor,
+                      label: requestor
+                    };
+                  })}
+                  name={'workRequestors'}
+                  value={values.workRequestors}
+                  dataTestId={'select_workRequester'}
+                  isMulti={true}
+                />
+              )}
             </div>
             <div className={'flex flex-row md:flex-grow items-center justify-end space-x-4 mt-6'}>
               <BlueButton
@@ -134,7 +155,8 @@ export default function WorkProgressInput({ urlParams, workTypes, programs }: Wo
                   !values.workNumber &&
                   (!values.workTypes || values.workTypes.length === 0) &&
                   (!values.programs || values.programs.length === 0) &&
-                  (!values.statuses || values.statuses.length === 0)
+                  (!values.statuses || values.statuses.length === 0) &&
+                  (!values.workRequestors || values.workRequestors.length === 0)
                 }
               >
                 Search
