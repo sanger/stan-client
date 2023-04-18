@@ -15,13 +15,13 @@ import CustomReactSelect from '../forms/CustomReactSelect';
 /**
  * Form validation schema
  */
-export const workProgressSearchSchema = (workTypes: string[], programs?: string[], workRequestors?: string[]) => {
+export const workProgressSearchSchema = (workTypes: string[], programs?: string[], requesters?: string[]) => {
   return Yup.object().shape({
     workNumber: Yup.string(),
     workTypes: Yup.array().of(Yup.string().oneOf(workTypes)),
     programs: Yup.array().of(Yup.string().oneOf(programs ?? [])),
     statuses: Yup.array().of(Yup.string().oneOf(Object.values(WorkStatus))),
-    workRequestors: Yup.array().of(Yup.string().oneOf(workRequestors ?? []))
+    requesters: Yup.array().of(Yup.string().oneOf(requesters ?? []))
   });
 };
 
@@ -69,7 +69,7 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, requ
               statuses: values.statuses,
               programs: values.programs,
               workTypes: values.workTypes,
-              workRequestors: values.requesters
+              requesters: values.requesters
             })
           });
         }}
@@ -135,13 +135,13 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, requ
               {requesters && (
                 <CustomReactSelect
                   label={'Work requester'}
-                  options={requesters.sort().map((requestor) => {
+                  options={requesters.sort().map((requester) => {
                     return {
-                      value: requestor,
-                      label: requestor
+                      value: requester,
+                      label: requester
                     };
                   })}
-                  name={'workRequestors'}
+                  name={'requesters'}
                   value={values.requesters}
                   dataTestId={'select_workRequester'}
                   isMulti={true}

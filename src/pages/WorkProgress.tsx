@@ -111,7 +111,7 @@ const WorkProgress = ({
         ...params
       };
     } else return params;
-  }, [location.search, workTypes, programs]);
+  }, [location.search, workTypes, programs, requesters]);
 
   /**
    * Rebuild the blob object on download action
@@ -133,7 +133,11 @@ const WorkProgress = ({
   React.useEffect(() => {
     if (
       !memoUrlParams ||
-      (!memoUrlParams.workNumber && !memoUrlParams.workTypes && !memoUrlParams.programs && !memoUrlParams.statuses)
+      (!memoUrlParams.workNumber &&
+        !memoUrlParams.workTypes &&
+        !memoUrlParams.programs &&
+        !memoUrlParams.statuses &&
+        !memoUrlParams.requesters)
     ) {
       return;
     }
@@ -177,7 +181,7 @@ const WorkProgress = ({
             urlParams={memoUrlParams ?? defaultInitialValues}
             workTypes={workTypes}
             programs={programs}
-            workRequestors={requesters}
+            requesters={requesters}
           />
 
           <div className={'my-10 mx-auto max-w-screen-xl'}>
