@@ -39,12 +39,12 @@ type WorkProgressInputParams = {
    */
   programs?: string[];
   /**
-   * All work requestors available
+   * All work requesters available
    */
-  workRequestors?: string[];
+  requesters?: string[];
 };
 
-export default function WorkProgressInput({ urlParams, workTypes, programs, workRequestors }: WorkProgressInputParams) {
+export default function WorkProgressInput({ urlParams, workTypes, programs, requesters }: WorkProgressInputParams) {
   const location = useLocation();
   const sortedStatues = Object.values(WorkStatus).sort((a, b) => statusSort(a, b));
 
@@ -69,11 +69,11 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, work
               statuses: values.statuses,
               programs: values.programs,
               workTypes: values.workTypes,
-              workRequestors: values.workRequestors
+              workRequestors: values.requesters
             })
           });
         }}
-        validationSchema={workProgressSearchSchema(workTypes, programs, workRequestors)}
+        validationSchema={workProgressSearchSchema(workTypes, programs, requesters)}
       >
         {({ values, setFieldValue }) => (
           <Form>
@@ -132,17 +132,17 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, work
                   dataTestId={'select_status'}
                 />
               )}
-              {workRequestors && (
+              {requesters && (
                 <CustomReactSelect
                   label={'Work requester'}
-                  options={workRequestors.sort().map((requestor) => {
+                  options={requesters.sort().map((requestor) => {
                     return {
                       value: requestor,
                       label: requestor
                     };
                   })}
                   name={'workRequestors'}
-                  value={values.workRequestors}
+                  value={values.requesters}
                   dataTestId={'select_workRequester'}
                   isMulti={true}
                 />
@@ -156,7 +156,7 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, work
                   (!values.workTypes || values.workTypes.length === 0) &&
                   (!values.programs || values.programs.length === 0) &&
                   (!values.statuses || values.statuses.length === 0) &&
-                  (!values.workRequestors || values.workRequestors.length === 0)
+                  (!values.requesters || values.requesters.length === 0)
                 }
               >
                 Search

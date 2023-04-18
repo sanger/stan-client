@@ -32,14 +32,14 @@ export type WorkProgressUrlParams = {
   programs?: string[];
   statuses?: string[];
   workTypes?: string[];
-  workRequestors?: string[];
+  requesters?: string[];
 };
 const defaultInitialValues: WorkProgressUrlParams = {
   workNumber: undefined,
   programs: undefined,
   statuses: undefined,
   workTypes: undefined,
-  workRequestors: undefined
+  requesters: undefined
 };
 
 /**
@@ -50,11 +50,11 @@ const defaultInitialValues: WorkProgressUrlParams = {
 const WorkProgress = ({
   workTypes,
   programs,
-  workRequestors
+  requesters
 }: {
   workTypes: string[];
   programs: string[];
-  workRequestors: string[];
+  requesters: string[];
 }) => {
   const location = useLocation();
 
@@ -103,7 +103,7 @@ const WorkProgress = ({
      */
     const params = safeParseQueryString<WorkProgressUrlParams>({
       query: location.search,
-      schema: workProgressSearchSchema(workTypes, programs, workRequestors)
+      schema: workProgressSearchSchema(workTypes, programs, requesters)
     });
     if (params) {
       return {
@@ -150,7 +150,8 @@ const WorkProgress = ({
       workNumber: workProgressUrl.workNumber ?? undefined,
       workTypes: workProgressUrl.workTypes ?? undefined,
       statuses: workProgressUrl.statuses ? (workProgressUrl.statuses as WorkStatus[]) : undefined,
-      programs: workProgressUrl.programs ?? undefined
+      programs: workProgressUrl.programs ?? undefined,
+      requesters: workProgressUrl.requesters ?? undefined
     };
   }
   return (
@@ -176,7 +177,7 @@ const WorkProgress = ({
             urlParams={memoUrlParams ?? defaultInitialValues}
             workTypes={workTypes}
             programs={programs}
-            workRequestors={workRequestors}
+            workRequestors={requesters}
           />
 
           <div className={'my-10 mx-auto max-w-screen-xl'}>
