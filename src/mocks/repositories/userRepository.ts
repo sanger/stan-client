@@ -8,6 +8,7 @@ const seeds: Array<UserFieldsFragment> = [
   userFactory.build({ username: faker.random.word(), role: UserRole.Normal }),
   userFactory.build({ username: faker.random.word(), role: UserRole.Admin }),
   userFactory.build({ username: faker.random.word(), role: UserRole.Admin }),
+  userFactory.build({ username: faker.random.word(), role: UserRole.Enduser }),
   userFactory.build({ username: faker.random.word(), role: UserRole.Disabled }),
   userFactory.build({ username: 'Test user', role: UserRole.Admin })
 ];
