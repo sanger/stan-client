@@ -100,7 +100,7 @@ describe('RegistrationForm', () => {
     });
     describe('on Mount', () => {
       it('displays all required fields', async () => {
-        act(() => {
+        await act(async () => {
           renderOriginalRegistrationForm();
         });
         await waitFor(() => {
@@ -154,6 +154,7 @@ describe('RegistrationForm', () => {
         });
       });
     });
+
     describe('field properties change', () => {
       beforeEach(async () => {
         await act(async () => {
@@ -202,6 +203,8 @@ describe('RegistrationForm', () => {
         }));
         await act(async () => {
           renderOriginalRegistrationForm();
+        });
+        await act(async () => {
           //Fill the form before adding identical tissue
           await userEvent.click(screen.getByTestId('adult'));
           await userEvent.type(getSelect('Species'), 'Human{enter}');
@@ -257,6 +260,7 @@ describe('RegistrationForm', () => {
       });
     });
   });
+
   describe('Block registration', () => {
     beforeEach(() => {
       jest.mock('formik', () => ({
@@ -271,7 +275,7 @@ describe('RegistrationForm', () => {
     });
     describe('on Mount', () => {
       it('displays all required fields', async () => {
-        act(() => {
+        await act(async () => {
           renderBlockRegistrationForm();
         });
         await waitFor(() => {
@@ -324,6 +328,7 @@ describe('RegistrationForm', () => {
         });
       });
     });
+
     describe('field properties change', () => {
       beforeEach(async () => {
         await act(async () => {
@@ -372,6 +377,8 @@ describe('RegistrationForm', () => {
         }));
         await act(async () => {
           renderBlockRegistrationForm();
+        });
+        await act(async () => {
           //Fill the form before adding tissue
           await userEvent.click(screen.getByTestId('adult'));
           await userEvent.type(getSelect('Species'), 'Human{enter}');
