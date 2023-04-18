@@ -190,18 +190,17 @@ describe('RegistrationForm', () => {
     });
 
     describe('Add Identical Tissue button click', () => {
-      beforeEach(async () => {
-        window.HTMLElement.prototype.scrollIntoView = jest.fn();
-
-        jest.mock('../../../../src/lib/hooks', () => ({
-          useScrollToRef: jest.fn().mockImplementation(() => {
-            return {
-              scrollToRef: jest.fn(),
-              ref: null
-            };
-          })
-        }));
+      it('creates another identical  sample', async () => {
         await act(async () => {
+          window.HTMLElement.prototype.scrollIntoView = jest.fn();
+          jest.mock('../../../../src/lib/hooks', () => ({
+            useScrollToRef: jest.fn().mockImplementation(() => {
+              return {
+                scrollToRef: jest.fn(),
+                ref: null
+              };
+            })
+          }));
           renderOriginalRegistrationForm();
         });
         await act(async () => {
@@ -220,39 +219,37 @@ describe('RegistrationForm', () => {
           await userEvent.type(getSelect('Solution'), 'Ethanol{enter}');
           await screen.getByRole('button', { name: '+ Add Identical Tissue Sample' }).click();
         });
-      });
-      it('creates another identical  sample', () => {
-        //Two sample pages
-        expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
-      });
-      it('displays Delete sample button', async () => {
-        expect(screen.getAllByRole('button', { name: 'Delete Sample' })).toHaveLength(2);
-      });
-      it('populates the value of Spatial location from the tissue sample created', () => {
-        const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
-        const slDiv = within(sampleDiv).getAllByTestId('Spatial Location');
-        expect(slDiv[0]).toHaveTextContent('1 - Cortex');
-      });
-      it('populates the value of LabwareType from the tissue sample created', () => {
-        const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
-        const slDiv = within(sampleDiv).getAllByTestId('Labware Type');
-        expect(slDiv[0]).toHaveTextContent('Cassette');
-      });
-      it('should display all other fields as empty', () => {
-        const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
-        const extId = within(sampleDiv).getByTestId('External Identifier');
-        expect(extId).toHaveTextContent('');
 
-        const replicateDiv = within(sampleDiv).getByTestId('Replicate Number');
-        expect(replicateDiv).toHaveTextContent('');
+        await waitFor(() => {
+          //Two sample pages
+          expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
 
-        const fixativeDiv = within(sampleDiv).getAllByTestId('Fixative');
-        expect(fixativeDiv[0]).not.toHaveTextContent('Formalin');
+          //Displays Delete sample button'
+          expect(screen.getAllByRole('button', { name: 'Delete Sample' })).toHaveLength(2);
 
-        const solutionDiv = within(sampleDiv).getAllByTestId('Solution');
-        expect(solutionDiv[0]).not.toHaveTextContent('Ethanol');
-      });
-      it('On "Delete Sample" button click', async () => {
+          //Populates the value of Spatial location from the tissue sample created'
+          const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
+          const slDiv = within(sampleDiv).getAllByTestId('Spatial Location');
+          expect(slDiv[0]).toHaveTextContent('1 - Cortex');
+
+          //Populates the value of LabwareType from the tissue sample created
+          const lwDiv = within(sampleDiv).getAllByTestId('Labware Type');
+          expect(lwDiv[0]).toHaveTextContent('Cassette');
+
+          //Should display all other fields as empty'
+          const extId = within(sampleDiv).getByTestId('External Identifier');
+          expect(extId).toHaveTextContent('');
+
+          const replicateDiv = within(sampleDiv).getByTestId('Replicate Number');
+          expect(replicateDiv).toHaveTextContent('');
+
+          const fixativeDiv = within(sampleDiv).getAllByTestId('Fixative');
+          expect(fixativeDiv[0]).not.toHaveTextContent('Formalin');
+
+          const solutionDiv = within(sampleDiv).getAllByTestId('Solution');
+          expect(solutionDiv[0]).not.toHaveTextContent('Ethanol');
+        });
+        //On "Delete Sample" button click'
         await screen.getAllByRole('button', { name: 'Delete Sample' })[0].click();
         //One sample pages
         await waitFor(async () => {
@@ -366,18 +363,18 @@ describe('RegistrationForm', () => {
     });
 
     describe('Button clicks', () => {
-      beforeEach(async () => {
-        window.HTMLElement.prototype.scrollIntoView = jest.fn();
-
-        jest.mock('../../../../src/lib/hooks', () => ({
-          useScrollToRef: jest.fn().mockImplementation(() => {
-            return {
-              scrollToRef: jest.fn(),
-              ref: null
-            };
-          })
-        }));
+      it('creates another block', async () => {
         await act(async () => {
+          window.HTMLElement.prototype.scrollIntoView = jest.fn();
+
+          jest.mock('../../../../src/lib/hooks', () => ({
+            useScrollToRef: jest.fn().mockImplementation(() => {
+              return {
+                scrollToRef: jest.fn(),
+                ref: null
+              };
+            })
+          }));
           renderBlockRegistrationForm();
         });
         await act(async () => {
@@ -394,36 +391,33 @@ describe('RegistrationForm', () => {
           await userEvent.type(getSelect('Medium'), 'OCT{enter}');
           await screen.getByRole('button', { name: '+ Add Another Tissue Block' }).click();
         });
-      });
-      it('creates another block', () => {
-        //Two sample pages
-        expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
-      });
-      it('displays Delete block button', async () => {
-        expect(screen.getAllByRole('button', { name: 'Delete Block' })).toHaveLength(2);
-      });
-      it('should display all fields in new block as empty', () => {
-        const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
 
-        const slDiv = within(sampleDiv).getAllByTestId('Spatial Location');
-        expect(slDiv[0]).not.toHaveTextContent('Cortex');
+        await waitFor(() => {
+          //Two sample pages
+          expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
+          expect(screen.getAllByRole('button', { name: 'Delete Block' })).toHaveLength(2);
+          const sampleDiv = screen.getAllByTestId('sample-info-div')[1];
 
-        const extId = within(sampleDiv).getByTestId('External Identifier');
-        expect(extId).toHaveTextContent('');
+          const slDiv = within(sampleDiv).getAllByTestId('Spatial Location');
+          expect(slDiv[0]).not.toHaveTextContent('Cortex');
 
-        const lwTypeDiv = within(sampleDiv).getAllByTestId('Labware Type');
-        expect(lwTypeDiv[0]).not.toHaveTextContent('Cassette');
+          const extId = within(sampleDiv).getByTestId('External Identifier');
+          expect(extId).toHaveTextContent('');
 
-        const replicateDiv = within(sampleDiv).getByTestId('Replicate Number');
-        expect(replicateDiv).toHaveTextContent('');
+          const lwTypeDiv = within(sampleDiv).getAllByTestId('Labware Type');
+          expect(lwTypeDiv[0]).not.toHaveTextContent('Cassette');
 
-        const fixativeDiv = within(sampleDiv).getAllByTestId('Fixative');
-        expect(fixativeDiv[0]).not.toHaveTextContent('Formalin');
+          const replicateDiv = within(sampleDiv).getByTestId('Replicate Number');
+          expect(replicateDiv).toHaveTextContent('');
 
-        const mediumDiv = within(sampleDiv).getAllByTestId('Medium');
-        expect(mediumDiv[0]).not.toHaveTextContent('OCT');
-      });
-      it('On "Delete Block" button click', async () => {
+          const fixativeDiv = within(sampleDiv).getAllByTestId('Fixative');
+          expect(fixativeDiv[0]).not.toHaveTextContent('Formalin');
+
+          const mediumDiv = within(sampleDiv).getAllByTestId('Medium');
+          expect(mediumDiv[0]).not.toHaveTextContent('OCT');
+        });
+
+        //'On "Delete Block" button click'
         await screen.getAllByRole('button', { name: 'Delete Block' })[0].click();
         //Two sample pages
         await waitFor(async () => {
