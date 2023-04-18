@@ -100,7 +100,7 @@ describe('RegistrationForm', () => {
     });
     describe('on Mount', () => {
       it('displays all required fields', async () => {
-        act(() => {
+        await act(async () => {
           renderOriginalRegistrationForm();
         });
         await waitFor(() => {
@@ -154,6 +154,7 @@ describe('RegistrationForm', () => {
         });
       });
     });
+
     describe('field properties change', () => {
       beforeEach(async () => {
         await act(async () => {
@@ -202,11 +203,15 @@ describe('RegistrationForm', () => {
         }));
         await act(async () => {
           renderOriginalRegistrationForm();
+        });
+        await act(async () => {
           //Fill the form before adding identical tissue
           await userEvent.click(screen.getByTestId('adult'));
           await userEvent.type(getSelect('Species'), 'Human{enter}');
           await userEvent.type(getSelect('HuMFre'), 'HuMFre1{enter}');
-          await userEvent.type(screen.getByTestId('External Identifier'), 'EXT-1{enter}');
+          const sampleDiv = screen.getAllByTestId('sample-info-div')[0];
+          const extId = within(sampleDiv).getByTestId('External Identifier');
+          await userEvent.type(extId, 'EXT-1{enter}');
           await userEvent.type(getSelect('Tissue Type'), 'Kidney{enter}');
           await userEvent.type(getSelect('Spatial Location'), 'Cortex{enter}');
           await userEvent.type(getSelect('Labware Type'), 'Cassette{enter}');
@@ -257,6 +262,7 @@ describe('RegistrationForm', () => {
       });
     });
   });
+
   describe('Block registration', () => {
     beforeEach(() => {
       jest.mock('formik', () => ({
@@ -271,7 +277,7 @@ describe('RegistrationForm', () => {
     });
     describe('on Mount', () => {
       it('displays all required fields', async () => {
-        act(() => {
+        await act(async () => {
           renderBlockRegistrationForm();
         });
         await waitFor(() => {
@@ -324,6 +330,7 @@ describe('RegistrationForm', () => {
         });
       });
     });
+
     describe('field properties change', () => {
       beforeEach(async () => {
         await act(async () => {
@@ -372,6 +379,8 @@ describe('RegistrationForm', () => {
         }));
         await act(async () => {
           renderBlockRegistrationForm();
+        });
+        await act(async () => {
           //Fill the form before adding tissue
           await userEvent.click(screen.getByTestId('adult'));
           await userEvent.type(getSelect('Species'), 'Human{enter}');
