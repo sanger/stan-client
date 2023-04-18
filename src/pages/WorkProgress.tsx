@@ -177,6 +177,7 @@ const WorkProgress = ({
               </div>
             </div>
           </div>
+
           <WorkProgressInput
             urlParams={memoUrlParams ?? defaultInitialValues}
             workTypes={workTypes}
