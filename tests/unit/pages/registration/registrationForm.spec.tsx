@@ -30,7 +30,6 @@ const registrationInfo: GetRegistrationInfoQuery = {
   ],
   labwareTypes: [labwareTypes[LabwareTypeName.CASSETTE].build(), labwareTypes[LabwareTypeName.PROVIASETTE].build()]
 };
-
 const availableLabwareTypes: LabwareType[] = registrationInfo.labwareTypes;
 
 afterEach(() => {
