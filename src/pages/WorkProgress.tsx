@@ -32,12 +32,14 @@ export type WorkProgressUrlParams = {
   programs?: string[];
   statuses?: string[];
   workTypes?: string[];
+  requesters?: string[];
 };
 const defaultInitialValues: WorkProgressUrlParams = {
   workNumber: undefined,
   programs: undefined,
   statuses: undefined,
-  workTypes: undefined
+  workTypes: undefined,
+  requesters: undefined
 };
 
 /**
@@ -45,7 +47,15 @@ const defaultInitialValues: WorkProgressUrlParams = {
  * Example URL search params for the page e.g.
  * http://localhost:3000/?programs[]=program_1&programs[]=program_2&workNumber=SGP1008
  * */
-const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: string[] }) => {
+const WorkProgress = ({
+  workTypes,
+  programs,
+  requesters
+}: {
+  workTypes: string[];
+  programs: string[];
+  requesters: string[];
+}) => {
   const location = useLocation();
 
   const workProgressMachine = searchMachine<FindWorkProgressQueryVariables, WorkProgressResultTableEntry>(
@@ -93,7 +103,7 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
      */
     const params = safeParseQueryString<WorkProgressUrlParams>({
       query: location.search,
-      schema: workProgressSearchSchema(workTypes, programs)
+      schema: workProgressSearchSchema(workTypes, programs, requesters)
     });
     if (params) {
       return {
@@ -101,7 +111,7 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
         ...params
       };
     } else return params;
-  }, [location.search, workTypes, programs]);
+  }, [location.search, workTypes, programs, requesters]);
 
   /**
    * Rebuild the blob object on download action
@@ -123,7 +133,11 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
   React.useEffect(() => {
     if (
       !memoUrlParams ||
-      (!memoUrlParams.workNumber && !memoUrlParams.workTypes && !memoUrlParams.programs && !memoUrlParams.statuses)
+      (!memoUrlParams.workNumber &&
+        !memoUrlParams.workTypes &&
+        !memoUrlParams.programs &&
+        !memoUrlParams.statuses &&
+        !memoUrlParams.requesters)
     ) {
       return;
     }
@@ -140,7 +154,8 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
       workNumber: workProgressUrl.workNumber ?? undefined,
       workTypes: workProgressUrl.workTypes ?? undefined,
       statuses: workProgressUrl.statuses ? (workProgressUrl.statuses as WorkStatus[]) : undefined,
-      programs: workProgressUrl.programs ?? undefined
+      programs: workProgressUrl.programs ?? undefined,
+      requesters: workProgressUrl.requesters ?? undefined
     };
   }
   return (
@@ -162,10 +177,12 @@ const WorkProgress = ({ workTypes, programs }: { workTypes: string[]; programs: 
               </div>
             </div>
           </div>
+
           <WorkProgressInput
             urlParams={memoUrlParams ?? defaultInitialValues}
             workTypes={workTypes}
             programs={programs}
+            requesters={requesters}
           />
 
           <div className={'my-10 mx-auto max-w-screen-xl'}>

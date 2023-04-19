@@ -63,7 +63,8 @@ export class WorkProgressService
       !workProgressRequest.workNumber &&
       !workProgressRequest.programs &&
       !workProgressRequest.workTypes &&
-      !workProgressRequest.statuses
+      !workProgressRequest.statuses &&
+      !workProgressRequest.requesters
     ) {
       return {
         numDisplayed: 0,

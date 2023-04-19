@@ -12,6 +12,8 @@ import workRepository from '../repositories/workRepository';
 import programRepository from '../repositories/programRepository';
 import workTypeRepository from '../repositories/workTypeRepository';
 import { generateRandomIntegerInRange } from '../../lib/helpers';
+import releaseRecipientRepository from '../repositories/releaseRecipientRepository';
+import { alphaNumericSortDefault } from '../../types/stan';
 
 function buildWorkProgressTimeStamps(): Array<WorkProgressTimestamp> {
   return [
@@ -49,28 +51,42 @@ const workProgressHandlers = [
       return res(
         ctx.data({
           workTypes: workTypeRepository.findAll(),
-          programs: programRepository.findAll()
+          programs: programRepository.findAll(),
+          releaseRecipients: releaseRecipientRepository.findAll()
         })
       );
     }
   ),
   graphql.query<FindWorkProgressQuery, FindWorkProgressQueryVariables>('FindWorkProgress', (req, res, ctx) => {
-    const { workNumber, workTypes, statuses, programs } = req.variables;
+    const { workNumber, workTypes, statuses, programs, requesters } = req.variables;
     const works = workRepository.findAll().map((work, indx) => {
       const status = indx % 2 === 0 ? WorkStatus.Active : indx % 3 === 1 ? WorkStatus.Completed : WorkStatus.Paused;
-      return { ...work, status: status };
+      /**Assign a work requester to first few  work entries to enable mock testing**/
+      const requestorList = releaseRecipientRepository
+        .findAll()
+        .sort((a, b) => alphaNumericSortDefault(a.username, b.username));
+      const workRequestor = indx < requestorList.length && indx < 5 ? requestorList[indx] : work.workRequester;
+      return {
+        ...work,
+        status: status,
+        workRequester: workRequestor
+      };
     });
-
     let filteredWorks = [...works];
     if (workTypes) {
       filteredWorks = Array.isArray(workTypes)
-        ? works.filter((work) => workTypes.findIndex((workType) => workType === work.workType.name) !== -1)
+        ? works.filter((work) => workTypes.some((workType) => workType === work.workType.name))
         : works.filter((work) => work.workType.name === workTypes);
     }
     if (statuses) {
       filteredWorks = Array.isArray(statuses)
-        ? filteredWorks.filter((work) => statuses.findIndex((status) => status === work.status) !== -1)
+        ? filteredWorks.filter((work) => statuses.some((status) => status === work.status))
         : filteredWorks.filter((work) => work.status === statuses);
+    }
+    if (requesters) {
+      filteredWorks = Array.isArray(requesters)
+        ? filteredWorks.filter((work) => requesters.some((requester) => requester === work.workRequester?.username))
+        : filteredWorks.filter((work) => work.workRequester?.username === requesters);
     }
     return res(
       ctx.data({
