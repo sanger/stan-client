@@ -79,7 +79,10 @@ export default function History(props: HistoryProps) {
           );
         }
       },
-
+      {
+        Header: 'Labware Type',
+        accessor: 'labwareType'
+      },
       {
         Header: 'Donor ID',
         accessor: 'donorName'
