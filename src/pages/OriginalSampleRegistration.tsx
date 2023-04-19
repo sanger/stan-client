@@ -33,7 +33,7 @@ export type RegistrationFormBlockSample = PartialBy<
  * Keeping 'blocks' field name as such so that components like "Registration' & 'RegistrationForm'
  * can be reused for Original sample registration as well
  */
-type RegistrationFormOriginalSample = Omit<RegistrationFormTissue, 'blocks'> & {
+export type RegistrationFormOriginalSample = Omit<RegistrationFormTissue, 'blocks'> & {
   blocks: RegistrationFormBlockSample[];
 };
 
