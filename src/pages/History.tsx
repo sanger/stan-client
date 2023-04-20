@@ -69,7 +69,6 @@ export default function History() {
               </Form>
             </Formik>
           </div>
-
           {historyProps && <HistoryComponent {...historyProps} />}
         </div>
       </AppShell.Main>

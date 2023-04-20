@@ -249,6 +249,7 @@ export type HistoryTableEntry = {
   date: string;
   sourceBarcode: string;
   destinationBarcode: string;
+  labwareType:string;
   donorName?: string;
   sampleID?: Maybe<number>;
   externalName?: string;

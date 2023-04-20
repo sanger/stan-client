@@ -451,6 +451,7 @@ export function Routes() {
                   <WorkProgress
                     workTypes={dataFetcher.workTypes.map((val) => val.name)}
                     programs={dataFetcher.programs.map((val) => val.name)}
+                    requesters={dataFetcher.releaseRecipients.map((val) => val.username)}
                   />
                 );
               }}

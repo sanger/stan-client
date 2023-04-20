@@ -66,6 +66,19 @@ describe('Work Progress', () => {
         });
       });
     });
+    context('when url is given for searching work requester', () => {
+      context('when a valid url ', () => {
+        before(() => {
+          cy.visit('?requesters[]=aw24');
+        });
+        it('will display the given Work type in value dropdown', () => {
+          cy.contains('aw24').should('be.visible');
+        });
+        it('shows a list of results', () => {
+          cy.findByRole('table').should('exist');
+        });
+      });
+    });
     context('when an invalid url given', () => {
       before(() => {
         cy.visit('?test[]=PROGRAM_999');
@@ -209,6 +222,30 @@ describe('Work Progress', () => {
       it('will show a table with results', () => {
         cy.findByRole('table').contains('paused');
         cy.findByRole('table').contains('This work is paused');
+      });
+    });
+  });
+
+  //TESTCASES for Work requester based filter
+  describe('Testcases for Work requester based search', () => {
+    context('when a requester is given which has no results', () => {
+      before(() => {
+        cy.visit('');
+        selectOption('select_workRequester', 're5');
+        cy.findByRole('button', { name: /Search/i }).click();
+      });
+      it('will show a notification', () => {
+        cy.findByText('There were no results for the given search. Please try again.').should('be.visible');
+      });
+    });
+    context('when a requester is given which has results', () => {
+      before(() => {
+        selectOption('select_workRequester', 'aw24');
+        cy.findByRole('button', { name: /Search/i }).click();
+      });
+
+      it('will show table with result', () => {
+        cy.findByRole('table').contains('aw24');
       });
     });
   });

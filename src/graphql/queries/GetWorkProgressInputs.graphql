@@ -5,4 +5,7 @@ query GetWorkProgressInputs {
   programs(includeDisabled: true) {
     name
   }
+  releaseRecipients(includeDisabled: true) {
+    username
+  }
 }

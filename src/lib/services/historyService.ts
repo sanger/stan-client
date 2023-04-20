@@ -58,6 +58,7 @@ export async function findHistory(historyProps: HistoryProps): Promise<Array<His
       date: new Date(entry.time).toLocaleDateString(),
       sourceBarcode: sourceLabware.barcode,
       destinationBarcode: destinationLabware.barcode,
+      labwareType: destinationLabware.labwareType.name,
       sampleID: entry.sampleId,
       donorName: sample?.tissue?.donor?.donorName ?? undefined,
       externalName: sample?.tissue?.externalName ?? undefined,
