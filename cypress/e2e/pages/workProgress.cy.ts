@@ -293,4 +293,14 @@ describe('Work Progress', () => {
       });
     });
   });
+  describe('Work Request', () => {
+    context('When user is not not logged in', () => {
+      before(() => {
+        cy.visitAsGuest('./');
+      });
+      it('shows Allocate SGP Number link', () => {
+        cy.findByText('Allocate SGP Number link').should('be.visible');
+      });
+    });
+  });
 });

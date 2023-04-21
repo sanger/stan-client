@@ -362,7 +362,7 @@ export function Routes() {
         }}
       />
       <Route path={'/history'} component={History} />
-      <AuthenticatedRoute path={'/sgp'} component={SGP} />
+      <AuthenticatedRoute role={UserRole.Enduser} path={'/sgp'} component={SGP} />
       <Route
         path={'/search'}
         render={(routeProps) => {
@@ -414,6 +414,7 @@ export function Routes() {
       />
       <AuthenticatedRoute
         path="/file_manager"
+        role={UserRole.Enduser}
         render={(routeProps) => {
           return (
             <DataFetcher

@@ -10,8 +10,9 @@ interface AuthProps {
 /**
  * Renders children if user is authenticated
  * @param children
+ * @param role
  */
-function Authenticated({ children, role }: AuthProps) {
+function Authenticated({ children, role = UserRole.Normal }: AuthProps) {
   const auth = useAuth();
   if (role) {
     return <>{auth.userRoleIncludes(role) && children}</>;

@@ -250,7 +250,7 @@ function AppShell({ children }: AppShellParams) {
                   />
                 </Menu>
               </Authenticated>
-              <Authenticated>
+              <Authenticated role={UserRole.Enduser}>
                 <StanNavLink to="/file_manager">File Manager</StanNavLink>
               </Authenticated>
               <Authenticated>
@@ -307,7 +307,7 @@ function AppShell({ children }: AppShellParams) {
                   <Unauthenticated>
                     <GuestIcon className="h-10 w-10 p-1 rounded-full text-sdb bg-white" />
                   </Unauthenticated>
-                  <Authenticated>
+                  <Authenticated role={UserRole.Enduser}>
                     <span className="inline-flex items-center justify-center h-10 w-10 p-1 rounded-full text-white bg-sp text-xs">
                       {auth.authState?.user.username}
                     </span>
@@ -339,7 +339,7 @@ function AppShell({ children }: AppShellParams) {
                             STAN Configuration
                           </Link>
                         </Authenticated>
-                        <Authenticated>
+                        <Authenticated role={UserRole.Enduser}>
                           <Link
                             to="/logout"
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -429,7 +429,9 @@ function AppShell({ children }: AppShellParams) {
                     </div>
                   </div>
                   <Authenticated>
-                    <StanMobileNavLink to="/file_manager">File Manager</StanMobileNavLink>
+                    <StanMobileNavLink to="/file_manager" role={UserRole.Enduser}>
+                      File Manager
+                    </StanMobileNavLink>
                   </Authenticated>
 
                   <div className="pt-4 border-t border-gray-700">
@@ -450,7 +452,7 @@ function AppShell({ children }: AppShellParams) {
                 </motion.div>
               </Authenticated>
               <motion.div variants={variants.menuItemVariants} className="pt-4 pb-3 border-t border-gray-700">
-                <Authenticated>
+                <Authenticated role={UserRole.Enduser}>
                   <div className="flex items-center px-5 space-x-3 mb-3">
                     <div className="flex-shrink-0">
                       <span className="inline-flex items-center justify-center h-10 w-10 p-1 rounded-full text-white bg-sp text-xs">
@@ -478,7 +480,7 @@ function AppShell({ children }: AppShellParams) {
                     </Link>
                   </Authenticated>
 
-                  <Authenticated>
+                  <Authenticated role={UserRole.Enduser}>
                     <Link
                       to="/logout"
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700"

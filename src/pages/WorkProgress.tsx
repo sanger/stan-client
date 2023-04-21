@@ -23,6 +23,7 @@ import StyledLink from '../components/StyledLink';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
 import Heading from '../components/Heading';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Data structure to keep the data associated with this component
@@ -77,6 +78,7 @@ const WorkProgress = ({
   const sortedTableDataRef = React.useRef<WorkProgressResultTableEntry[]>([]);
   const [downloadFileURL, setFileDownloadURL] = React.useState<string>('');
 
+  const auth = useAuth();
   /**
    * Rebuild the file object whenever the searchResult changes
    */
@@ -165,14 +167,32 @@ const WorkProgress = ({
       </AppShell.Header>
       <AppShell.Main>
         <div className="mx-auto">
-          <div className="mx-auto max-w-screen-lg mt-2 my-6 rounded-md space-y-4">
-            <div className={'flex flex-col w-full border border-gray-200 bg-gray-100 p-4 gap-y-4 text-lg'}>
+          <div className="mx-auto flex flex-row max-w-screen-lg mt-2 my-6 rounded-md space-x-4">
+            <div
+              className={
+                'flex flex-col w-full border border-gray-200 bg-gray-100 p-4 gap-y-4 text-lg shadow-lg hover:shadow-2xl'
+              }
+            >
               <Heading level={3} showBorder={false}>
                 Summary Dashboard
               </Heading>
-              <div className={'mx-auto flex w-full p-4 rounded-md justify-center bg-gray-200'}>
-                <StyledLink to={`work_progress_summary`} className={'text-lg'}>
+              <div className={'mx-auto flex w-full p-4 rounded-md justify-center bg-gray-400 shadow-sm'}>
+                <StyledLink to={`work_progress_summary`} className={'text-md'}>
                   Spatial Genomics Platform Status
+                </StyledLink>
+              </div>
+            </div>
+            <div
+              className={
+                'flex flex-col w-full border border-gray-200 bg-gray-100 p-4 gap-y-4 text-lg shadow-lg hover:shadow-2xl'
+              }
+            >
+              <Heading level={3} showBorder={false}>
+                Work request
+              </Heading>
+              <div className={'mx-auto flex w-full p-4 rounded-md justify-center bg-gray-400'}>
+                <StyledLink to={`${auth.isAuthenticated() ? 'sgp' : 'login'}`} className={'text-md'}>
+                  Allocate SGP Number
                 </StyledLink>
               </div>
             </div>

@@ -12,7 +12,7 @@ import Success from '../notifications/Success';
 import Warning from '../notifications/Warning';
 import * as Yup from 'yup';
 import WorkRow from './WorkRow';
-import { WorkStatus, WorkWithCommentFieldsFragment } from '../../types/sdk';
+import { UserRole, WorkStatus, WorkWithCommentFieldsFragment } from '../../types/sdk';
 import { getPropertyValue, getTimestampStr, objectKeys, safeParseQueryString, stringify } from '../../lib/helpers';
 import { useLocation } from 'react-router-dom';
 import { history } from '../../lib/sdk';
@@ -21,6 +21,8 @@ import { statusSort } from '../../types/stan';
 import DownloadIcon from '../icons/DownloadIcon';
 import { useDownload } from '../../lib/hooks/useDownload';
 import CustomReactSelect from '../forms/CustomReactSelect';
+import { Authenticated } from '../Authenticated';
+
 const initialValues: WorkAllocationFormValues = {
   workType: '',
   workRequester: '',
@@ -328,99 +330,100 @@ export default function WorkAllocation() {
           </Form>
         </Formik>
       </div>
+      <Authenticated role={UserRole.Normal}>
+        <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
+          <Heading level={3} showBorder={false}>
+            Filter SGP Numbers
+          </Heading>
 
-      <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
-        <Heading level={3} showBorder={false}>
-          Filter SGP Numbers
-        </Heading>
-
-        <Formik<WorkAllocationUrlParams>
-          initialValues={urlParams}
-          onSubmit={async (values) => {
-            history.push({
-              pathname: '/sgp',
-              search: stringify(values)
-            });
-          }}
-        >
-          {({ values }) => (
-            <Form>
-              <div className="space-y-2 md:grid md:grid-cols-3 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
-                <div className="md:flex-grow">
-                  <CustomReactSelect
-                    label="Status"
-                    name="status"
-                    isMulti={true}
-                    dataTestId={'status'}
-                    options={objectKeys(WorkStatus).map((workStatus) => {
-                      return {
-                        label: workStatus,
-                        value: WorkStatus[workStatus]
-                      };
-                    })}
-                    value={values.status}
-                  />
+          <Formik<WorkAllocationUrlParams>
+            initialValues={urlParams}
+            onSubmit={async (values) => {
+              history.push({
+                pathname: '/sgp',
+                search: stringify(values)
+              });
+            }}
+          >
+            {({ values }) => (
+              <Form>
+                <div className="space-y-2 md:grid md:grid-cols-3 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
+                  <div className="md:flex-grow">
+                    <CustomReactSelect
+                      label="Status"
+                      name="status"
+                      isMulti={true}
+                      dataTestId={'status'}
+                      options={objectKeys(WorkStatus).map((workStatus) => {
+                        return {
+                          label: workStatus,
+                          value: WorkStatus[workStatus]
+                        };
+                      })}
+                      value={values.status}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
-                <BlueButton disabled={current.matches('loading')} type="submit">
-                  Search
-                </BlueButton>
-              </div>
-            </Form>
-          )}
-        </Formik>
-      </div>
+                <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
+                  <BlueButton disabled={current.matches('loading')} type="submit">
+                    Search
+                  </BlueButton>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
 
-      <div className="mx-auto max-w-screen-xl">
-        {current.matches('loading') ? (
-          <div className="flex flex-row items-center justify-around">
-            <LoadingSpinner />
-          </div>
-        ) : (
-          <>
-            <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
-              <p className="text-sm text-gray-700">Records for SGP management</p>
-              <a href={downloadURL} download={`${getTimestampStr()}_sgp_management${extension}`}>
-                <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
-              </a>
+        <div className="mx-auto max-w-screen-xl">
+          {current.matches('loading') ? (
+            <div className="flex flex-row items-center justify-around">
+              <LoadingSpinner />
             </div>
-            <Table data-testid="work-allocation-table">
-              <TableHead>
-                <tr>
-                  <TableHeader sortProps={getTableSortProps('Priority')}>Priority</TableHeader>
-                  <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
-                  <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
-                  <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
-                  <TableHeader sortProps={getTableSortProps('Project')}>Project</TableHeader>
-                  <TableHeader sortProps={getTableSortProps('Omero Project')}>Omero Project</TableHeader>
-                  <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
-                  <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
-                  <TableHeader sortProps={getTableSortProps('Number of Blocks')}>Number of Blocks</TableHeader>
-                  <TableHeader sortProps={getTableSortProps('Number of Slides')}>Number of Slides</TableHeader>
-                  <TableHeader sortProps={getTableSortProps('Number of Original Samples')}>
-                    Number of Original Samples
-                  </TableHeader>
-                  <TableHeader sortProps={getTableSortProps('Status')}>Status</TableHeader>
-                  <TableHeader />
-                </tr>
-              </TableHead>
-              <TableBody>
-                {sortedTableData.map((workWithComment, index) => (
-                  <WorkRow
-                    initialWork={workWithComment}
-                    availableComments={availableComments}
-                    availableOmeroProjects={omeroProjects}
-                    key={workWithComment.work.workNumber}
-                    rowIndex={index}
-                    onWorkFieldUpdate={onWorkUpdate}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </>
-        )}
-      </div>
+          ) : (
+            <>
+              <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
+                <p className="text-sm text-gray-700">Records for SGP management</p>
+                <a href={downloadURL} download={`${getTimestampStr()}_sgp_management${extension}`}>
+                  <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
+                </a>
+              </div>
+              <Table data-testid="work-allocation-table">
+                <TableHead>
+                  <tr>
+                    <TableHeader sortProps={getTableSortProps('Priority')}>Priority</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Project')}>Project</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Omero Project')}>Omero Project</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Number of Blocks')}>Number of Blocks</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Number of Slides')}>Number of Slides</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Number of Original Samples')}>
+                      Number of Original Samples
+                    </TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Status')}>Status</TableHeader>
+                    <TableHeader />
+                  </tr>
+                </TableHead>
+                <TableBody>
+                  {sortedTableData.map((workWithComment, index) => (
+                    <WorkRow
+                      initialWork={workWithComment}
+                      availableComments={availableComments}
+                      availableOmeroProjects={omeroProjects}
+                      key={workWithComment.work.workNumber}
+                      rowIndex={index}
+                      onWorkFieldUpdate={onWorkUpdate}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </>
+          )}
+        </div>
+      </Authenticated>
     </div>
   );
 }
