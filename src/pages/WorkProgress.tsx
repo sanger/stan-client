@@ -24,7 +24,6 @@ import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
 import Heading from '../components/Heading';
 import { useAuth } from '../context/AuthContext';
-
 /**
  * Data structure to keep the data associated with this component
  */
@@ -191,7 +190,10 @@ const WorkProgress = ({
                 Work request
               </Heading>
               <div className={'mx-auto flex w-full p-4 rounded-md justify-center bg-gray-400'}>
-                <StyledLink to={`${auth.isAuthenticated() ? 'sgp' : 'login'}`} className={'text-md'}>
+                <StyledLink
+                  to={{ pathname: `${auth.isAuthenticated() ? 'sgp' : 'login'}`, state: { referrer: '/sgp' } }}
+                  className={'text-md'}
+                >
                   Allocate SGP Number
                 </StyledLink>
               </div>

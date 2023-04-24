@@ -2,6 +2,8 @@ import { graphql } from 'msw';
 import {
   CreateWorkMutation,
   CreateWorkMutationVariables,
+  FindWorkCreateByQuery,
+  FindWorkCreateByQueryVariables,
   FindWorkInfoQuery,
   FindWorkInfoQueryVariables,
   FindWorkNumbersQuery,
@@ -107,6 +109,14 @@ const workHandlers = [
               }
             };
           })
+      })
+    );
+  }),
+
+  graphql.query<FindWorkCreateByQuery, FindWorkCreateByQueryVariables>('FindWorkCreateBy', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        worksCreatedBy: workRepository.findAll()
       })
     );
   }),

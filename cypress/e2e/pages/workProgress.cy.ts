@@ -293,13 +293,48 @@ describe('Work Progress', () => {
       });
     });
   });
-  describe('Work Request', () => {
+
+  describe('Allocate SGP Number', () => {
     context('When user is not not logged in', () => {
       before(() => {
         cy.visitAsGuest('./');
       });
       it('shows Allocate SGP Number link', () => {
-        cy.findByText('Allocate SGP Number link').should('be.visible');
+        cy.findByText('Allocate SGP Number').should('be.visible');
+      });
+      context('when Allocate SGP Number link is clicked', () => {
+        before(() => {
+          cy.contains('Allocate SGP Number').click();
+        });
+        it('goes to Login page', () => {
+          cy.url().should('be.equal', 'http://localhost:3000/login');
+        });
+      });
+      context('On succesful login, it redirects to SGP page', () => {
+        before(() => {
+          cy.get("input[name='username']").type('jb1');
+          cy.get("input[name='password']").type('supersecret');
+          cy.get("button[type='submit']").click();
+        });
+        it('goes to Login page', () => {
+          cy.url().should('be.equal', 'http://localhost:3000/sgp');
+        });
+      });
+    });
+    context('When user is logged in as end user', () => {
+      before(() => {
+        cy.visitAsEndUser('./');
+      });
+      it('shows Allocate SGP Number link', () => {
+        cy.findByText('Allocate SGP Number').should('be.visible');
+      });
+      context('when Allocate SGP Number link is clicked', () => {
+        before(() => {
+          cy.contains('Allocate SGP Number').click();
+        });
+        it('goes to SGP page', () => {
+          cy.url().should('be.equal', 'http://localhost:3000/sgp');
+        });
       });
     });
   });

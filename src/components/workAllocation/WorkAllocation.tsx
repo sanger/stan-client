@@ -1,28 +1,29 @@
 import React, { useEffect, useMemo } from 'react';
-import Heading from '../Heading';
-import { Form, Formik } from 'formik';
-import FormikInput from '../forms/Input';
-import BlueButton from '../buttons/BlueButton';
 import createWorkAllocationMachine, { WorkAllocationFormValues } from './workAllocation.machine';
 import { useMachine } from '@xstate/react';
-import { selectOptionValues } from '../forms';
-import LoadingSpinner from '../icons/LoadingSpinner';
 import Table, { SortProps, TableBody, TableHead, TableHeader } from '../Table';
 import Success from '../notifications/Success';
-import Warning from '../notifications/Warning';
 import * as Yup from 'yup';
-import WorkRow from './WorkRow';
 import { UserRole, WorkStatus, WorkWithCommentFieldsFragment } from '../../types/sdk';
 import { getPropertyValue, getTimestampStr, objectKeys, safeParseQueryString, stringify } from '../../lib/helpers';
 import { useLocation } from 'react-router-dom';
-import { history } from '../../lib/sdk';
 import { useTableSort } from '../../lib/hooks/useTableSort';
 import { statusSort } from '../../types/stan';
-import DownloadIcon from '../icons/DownloadIcon';
 import { useDownload } from '../../lib/hooks/useDownload';
+import { useAuth } from '../../context/AuthContext';
+import Warning from '../notifications/Warning';
+import Heading from '../Heading';
 import CustomReactSelect from '../forms/CustomReactSelect';
+import FormikInput from '../forms/Input';
+import DownloadIcon from '../icons/DownloadIcon';
 import { Authenticated } from '../Authenticated';
-
+import { Form, Formik } from 'formik';
+import WorkRow from './WorkRow';
+import { selectOptionValues } from '../forms';
+import LoadingSpinner from '../icons/LoadingSpinner';
+import BlueButton from '../buttons/BlueButton';
+import { history } from '../../lib/sdk';
+import InfoIcon from '../icons/InfoIcon';
 const initialValues: WorkAllocationFormValues = {
   workType: '',
   workRequester: '',
@@ -105,6 +106,8 @@ export default function WorkAllocation() {
     direction: 'descending',
     accessPath: ['work', 'workNumber']
   });
+
+  const { userRoleIncludes } = useAuth();
 
   /**
    * Rebuild the download data  whenever the worWithComments changes
@@ -208,7 +211,24 @@ export default function WorkAllocation() {
   return (
     <div>
       <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
-        {successMessage && <Success message={successMessage} />}
+        {successMessage && (
+          <>
+            <Success message={successMessage} />
+            {userRoleIncludes(UserRole.Enduser) && (
+              <div className={'flex flex-row text-pink-600 mt-4'}>
+                <InfoIcon className={`bg-white inline-block '}`} />
+                <a
+                  href={
+                    'https://fred.wellcomegenomecampus.org/Interact/Pages/Content/Document.aspx?id=6817&utm_source=interact&utm_medium=side_menu_category'
+                  }
+                  className="text-sp-600 hover:text-sp-700 font-semibold hover:underline text-base tracking-wide"
+                >
+                  Please complete RNAscope/IHC template for probes/antibody and fluorophore
+                </a>
+              </div>
+            )}
+          </>
+        )}
         {requestError && <Warning message={'SGP Request Error'} error={requestError} />}
 
         <Heading level={3} showBorder={false}>

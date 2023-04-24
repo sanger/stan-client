@@ -48,6 +48,7 @@ import AddExternalID from '../pages/AddExternalID';
 import WorkProgressSummary from '../pages/WorkProgressSummary';
 import CytAssist from '../pages/CytAssist';
 import FileManager from '../pages/FileManager';
+import { useAuth } from '../context/AuthContext';
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -58,6 +59,7 @@ export function Routes() {
     window.history.replaceState(null, '');
   }, []);
 
+  const { userRoleIncludes, authState } = useAuth();
   return (
     <Switch>
       <Route path="/logout">
@@ -416,30 +418,58 @@ export function Routes() {
         path="/file_manager"
         role={UserRole.Enduser}
         render={(routeProps) => {
-          return (
-            <DataFetcher
-              key={routeProps.location.key}
-              dataFetcher={() => {
-                return stanCore.GetAllWorkInfo();
-              }}
-            >
-              {(dataFetcher) => {
-                return (
-                  <FileManager
-                    worksInfo={dataFetcher.works.map((workInfo) => {
-                      return {
-                        workNumber: workInfo.workNumber,
-                        workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
-                        project: workInfo.project.name,
-                        status: workInfo.status
-                      };
-                    })}
-                    showUpload={true}
-                  />
-                );
-              }}
-            </DataFetcher>
-          );
+          if (userRoleIncludes(UserRole.Enduser) && authState?.user) {
+            debugger;
+            return (
+              <DataFetcher
+                key={routeProps.location.key}
+                dataFetcher={() => {
+                  return stanCore.FindWorkCreateBy({ username: authState?.user.username });
+                }}
+              >
+                {(dataFetcher) => {
+                  return (
+                    <FileManager
+                      worksInfo={dataFetcher.worksCreatedBy.map((workInfo) => {
+                        return {
+                          workNumber: workInfo.workNumber,
+                          workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
+                          project: workInfo.project.name,
+                          status: workInfo.status
+                        };
+                      })}
+                      showUpload={true}
+                    />
+                  );
+                }}
+              </DataFetcher>
+            );
+          } else {
+            return (
+              <DataFetcher
+                key={routeProps.location.key}
+                dataFetcher={() => {
+                  return stanCore.GetAllWorkInfo();
+                }}
+              >
+                {(dataFetcher) => {
+                  return (
+                    <FileManager
+                      worksInfo={dataFetcher.works.map((workInfo) => {
+                        return {
+                          workNumber: workInfo.workNumber,
+                          workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
+                          project: workInfo.project.name,
+                          status: workInfo.status
+                        };
+                      })}
+                      showUpload={true}
+                    />
+                  );
+                }}
+              </DataFetcher>
+            );
+          }
         }}
       />
       <Route

@@ -55,7 +55,7 @@ const userHandlers = [
           user: {
             __typename: 'User',
             username: 'jb1',
-            role: UserRole.Enduser
+            role: UserRole.Normal
           }
         })
       );
@@ -65,7 +65,7 @@ const userHandlers = [
           user: {
             __typename: 'User',
             username: currentUser,
-            role: UserRole.Enduser
+            role: UserRole.Normal
           }
         })
       );
