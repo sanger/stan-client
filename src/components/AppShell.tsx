@@ -79,10 +79,10 @@ function AppShell({ children }: AppShellParams) {
               </StanNavLink>
               <StanNavLink to="/store">Store</StanNavLink>
               <StanNavLink to="/history">History</StanNavLink>
-              <Authenticated>
+              <Authenticated role={UserRole.Normal}>
                 <StanNavLink to="/sgp">SGP Management</StanNavLink>
               </Authenticated>
-              <Authenticated>
+              <Authenticated role={UserRole.Normal}>
                 <Menu caption={'Lab Work'} topMostMenu={true}>
                   <Menu
                     caption={'Sectioning'}
@@ -253,7 +253,7 @@ function AppShell({ children }: AppShellParams) {
               <Authenticated role={UserRole.Enduser}>
                 <StanNavLink to="/file_manager">File Manager</StanNavLink>
               </Authenticated>
-              <Authenticated>
+              <Authenticated role={UserRole.Normal}>
                 <Menu caption={'Admin'} topMostMenu={true}>
                   <NavLinkMenuItem
                     caption={'Block Registration'}
@@ -380,11 +380,11 @@ function AppShell({ children }: AppShellParams) {
                 <StanMobileNavLink to="/search">Search</StanMobileNavLink>
                 <StanMobileNavLink to="/store">Store</StanMobileNavLink>
                 <StanMobileNavLink to="/history">History</StanMobileNavLink>
-                <Authenticated>
+                <Authenticated role={UserRole.Normal}>
                   <StanMobileNavLink to="/sgp">SGP Management</StanMobileNavLink>
                 </Authenticated>
               </motion.div>
-              <Authenticated>
+              <Authenticated role={UserRole.Normal}>
                 <motion.div variants={variants.menuItemVariants} className="py-6 px-2 space-y-6">
                   <div className="pt-4 border-t border-gray-700">
                     <h3 className="px-3 text-sm font-bold text-sp-600">Lab Work</h3>
@@ -428,27 +428,26 @@ function AppShell({ children }: AppShellParams) {
                       <StanMobileNavLink to="/lab/imaging">Imaging</StanMobileNavLink>
                     </div>
                   </div>
-                  <Authenticated>
-                    <StanMobileNavLink to="/file_manager" role={UserRole.Enduser}>
-                      File Manager
-                    </StanMobileNavLink>
+                  <Authenticated role={UserRole.Enduser}>
+                    <StanMobileNavLink to="/file_manager">File Manager</StanMobileNavLink>
                   </Authenticated>
+                  <Authenticated role={UserRole.Normal}>
+                    <div className="pt-4 border-t border-gray-700">
+                      <h3 className="px-3 text-sm font-bold text-sp-600">Admin</h3>
+                      <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                        <StanMobileNavLink to="/admin/registration">Registration</StanMobileNavLink>
 
-                  <div className="pt-4 border-t border-gray-700">
-                    <h3 className="px-3 text-sm font-bold text-sp-600">Admin</h3>
-                    <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/admin/registration">Registration</StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/slide_registration">Slide Registration</StanMobileNavLink>
+                        <StanMobileNavLink to={'/admin/tissue_registration'}>Tissue Registration</StanMobileNavLink>
 
-                      <StanMobileNavLink to="/admin/slide_registration">Slide Registration</StanMobileNavLink>
-                      <StanMobileNavLink to={'/admin/tissue_registration'}>Tissue Registration</StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/destroy">Destroy</StanMobileNavLink>
 
-                      <StanMobileNavLink to="/admin/destroy">Destroy</StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/release">Release</StanMobileNavLink>
 
-                      <StanMobileNavLink to="/admin/release">Release</StanMobileNavLink>
-
-                      <StanMobileNavLink to="/admin/unrelease">Unrelease</StanMobileNavLink>
+                        <StanMobileNavLink to="/admin/unrelease">Unrelease</StanMobileNavLink>
+                      </div>
                     </div>
-                  </div>
+                  </Authenticated>
                 </motion.div>
               </Authenticated>
               <motion.div variants={variants.menuItemVariants} className="pt-4 pb-3 border-t border-gray-700">

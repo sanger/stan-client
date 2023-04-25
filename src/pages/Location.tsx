@@ -23,7 +23,7 @@ import {
 import { Authenticated, Unauthenticated } from '../components/Authenticated';
 import { RouteComponentProps } from 'react-router-dom';
 import { extractServerErrors, LocationMatchParams, LocationSearchParams } from '../types/stan';
-import { LocationFieldsFragment, Maybe, StoreInput } from '../types/sdk';
+import { LocationFieldsFragment, Maybe, StoreInput, UserRole } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import { StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
 import createLocationMachine from '../lib/machines/locations/locationMachine';
@@ -439,7 +439,7 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
                   <Heading level={3} showBorder={false}>
                     {
                       <>
-                        <Authenticated>
+                        <Authenticated role={UserRole.Normal}>
                           <EditableText onChange={onCustomNameChange} defaultValue={location.customName || ''}>
                             {location.customName || location.barcode}
                           </EditableText>
@@ -600,7 +600,7 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
                     {locationHasGrid && currentViewType === ViewType.GRID && <ItemsGrid />}
                   </LocationParentContext.Provider>
 
-                  <Authenticated>
+                  <Authenticated role={UserRole.Normal}>
                     <div className="my-5 flex flex-row items-center justify-end">
                       <PinkButton onClick={() => setEmptyLocationModalOpen(true)}>
                         <BinIcon className="inline-block h-5 w-5 -ml-1 mr-2" />

@@ -12,7 +12,7 @@ interface AuthProps {
  * @param children
  * @param role
  */
-function Authenticated({ children, role = UserRole.Normal }: AuthProps) {
+function Authenticated({ children, role }: AuthProps) {
   const auth = useAuth();
   if (role) {
     return <>{auth.userRoleIncludes(role) && children}</>;

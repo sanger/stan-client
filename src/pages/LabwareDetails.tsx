@@ -1,7 +1,7 @@
 import React from 'react';
 import AppShell from '../components/AppShell';
 import LabwareView from '../components/labware/Labware';
-import { AddressPermDataFieldsFragment, LabwareFieldsFragment, SlotFieldsFragment } from '../types/sdk';
+import { AddressPermDataFieldsFragment, LabwareFieldsFragment, SlotFieldsFragment, UserRole } from '../types/sdk';
 import StripyCard, { StripyCardDetail } from '../components/StripyCard';
 import Heading from '../components/Heading';
 import LabelPrinter from '../components/LabelPrinter';
@@ -88,7 +88,7 @@ export default function LabwareDetails({ labware, permData }: LabwareDetailsProp
                 </div>
 
                 {isLabwareUsable(labware) && (
-                  <Authenticated>
+                  <Authenticated role={UserRole.Normal}>
                     <div className="space-y-4">
                       <Heading level={4}>Re-Print Labels</Heading>
                       <LabelPrinter labwares={[labware]} />
