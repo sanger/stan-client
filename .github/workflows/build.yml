@@ -1,6 +1,5 @@
 name: Build
 
-
 on:
   push:
     tags:
@@ -45,7 +44,7 @@ jobs:
       - name: Rename the build
         run: mv build client
 
-      - name: zip the build
+      - name: Zip the build
         run: zip -r client.zip client/
 
       - name: Create a release
