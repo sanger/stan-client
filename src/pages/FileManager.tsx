@@ -48,7 +48,6 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
   /**Update work numbers when ever query string in location changes **/
   const memoAllSelectedWork = React.useMemo(() => {
     const queryString = parseQueryString(location.search);
-    debugger;
     //There are multiple work numbers
     if (Array.isArray(queryString['workNumber'])) {
       const workNumbers: string[] = [];
@@ -83,7 +82,6 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
    * Update available works info when user selects/deselects 'Active' checkbox
    */
   React.useEffect(() => {
-    debugger;
     let availableWorksInfoArray = isOnlyActiveWorkNumbers
       ? workInfoProps.filter((work) => work.status === WorkStatus.Active)
       : workInfoProps;

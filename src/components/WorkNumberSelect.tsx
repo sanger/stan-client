@@ -126,7 +126,6 @@ export default function WorkNumberSelect({
         setAllWorks(works);
       }
     }
-    debugger;
     if (worksInfoOptions) {
       setAllWorks(worksInfoOptions);
     } else {
@@ -142,7 +141,6 @@ export default function WorkNumberSelect({
    * Fetch  works based on workNumberType criteria
    */
   useEffect(() => {
-    debugger;
     if (workNumberType && workNumberType === 'ALL') {
       setWorks(allWorks);
     } else {
