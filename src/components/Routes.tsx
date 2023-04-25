@@ -59,7 +59,7 @@ export function Routes() {
     window.history.replaceState(null, '');
   }, []);
 
-  const { userRoleIncludes, authState } = useAuth();
+  const { authState } = useAuth();
   return (
     <Switch>
       <Route path="/logout">
@@ -418,12 +418,12 @@ export function Routes() {
         path="/file_manager"
         role={UserRole.Enduser}
         render={(routeProps) => {
-          if (userRoleIncludes(UserRole.Enduser) && authState) {
+          if (authState?.user && authState?.user.role === UserRole.Enduser) {
             return (
               <DataFetcher
                 key={routeProps.location.key}
                 dataFetcher={() => {
-                  return stanCore.FindWorkCreateBy({ username: authState.user.username });
+                  return stanCore.FindWorksCreatedBy({ username: authState.user.username });
                 }}
               >
                 {(dataFetcher) => {
@@ -452,7 +452,6 @@ export function Routes() {
                 }}
               >
                 {(dataFetcher) => {
-                  debugger;
                   return (
                     <FileManager
                       worksInfo={dataFetcher.works.map((workInfo) => {

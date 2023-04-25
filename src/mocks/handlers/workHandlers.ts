@@ -2,8 +2,6 @@ import { graphql } from 'msw';
 import {
   CreateWorkMutation,
   CreateWorkMutationVariables,
-  FindWorkCreateByQuery,
-  FindWorkCreateByQueryVariables,
   FindWorkInfoQuery,
   FindWorkInfoQueryVariables,
   FindWorkNumbersQuery,
@@ -26,7 +24,9 @@ import {
   UpdateWorkPriorityMutationVariables,
   UpdateWorkStatusMutation,
   UpdateWorkStatusMutationVariables,
-  WorkStatus
+  WorkStatus,
+  FindWorksCreatedByQuery,
+  FindWorksCreatedByQueryVariables
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -113,7 +113,7 @@ const workHandlers = [
     );
   }),
 
-  graphql.query<FindWorkCreateByQuery, FindWorkCreateByQueryVariables>('FindWorkCreateBy', (req, res, ctx) => {
+  graphql.query<FindWorksCreatedByQuery, FindWorksCreatedByQueryVariables>('FindWorksCreatedBy', (req, res, ctx) => {
     return res(
       ctx.data({
         worksCreatedBy: workRepository.findAll()

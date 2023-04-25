@@ -49,6 +49,9 @@ type WorkSelectProps = {
 
   /**Test ID**/
   dataTestId?: string;
+
+  /**Work numbers to display as options, if not given it will be fetched using GetAllWorkInfo query**/
+  worksInfoOptions?: Array<WorkInfo>;
 };
 
 export type WorkInfo = {
@@ -71,7 +74,8 @@ export default function WorkNumberSelect({
   dataTestId,
   multiple = false,
   emptyOption = true,
-  requiredField = true
+  requiredField = true,
+  worksInfoOptions
 }: WorkSelectProps) {
   /**
    * State for holding all  work
@@ -122,17 +126,23 @@ export default function WorkNumberSelect({
         setAllWorks(works);
       }
     }
-    fetchAllWorkNumbers();
+    debugger;
+    if (worksInfoOptions) {
+      setAllWorks(worksInfoOptions);
+    } else {
+      fetchAllWorkNumbers();
+    }
     /**Unmount call, cleanup by setting mount status to false**/
     return () => {
       isMounted = false;
     };
-  }, [setAllWorks]);
+  }, [setAllWorks, worksInfoOptions]);
 
   /**
    * Fetch  works based on workNumberType criteria
    */
   useEffect(() => {
+    debugger;
     if (workNumberType && workNumberType === 'ALL') {
       setWorks(allWorks);
     } else {
