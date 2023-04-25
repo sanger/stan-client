@@ -45,8 +45,11 @@ jobs:
       - name: Rename the build
         run: mv build client
 
+      - name: zip the build
+        run: zip -r client.zip client/
+
       - name: Create a release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "client"
+          artifacts: client.zip
           token: ${{ secrets.GITHUB_TOKEN }}
