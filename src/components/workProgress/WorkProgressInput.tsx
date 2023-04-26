@@ -50,7 +50,7 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, requ
 
   return (
     <div
-      className="mx-auto max-w-screen-lg mb-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4"
+      className="mx-auto max-w-screen-lg mb-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4 shadow-lg hover:shadow-2xl"
       data-testid={'search'}
     >
       <Heading level={3} showBorder={false}>

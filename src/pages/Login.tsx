@@ -23,7 +23,6 @@ const LoginSchema = Yup.object().shape({
 
 const Login = (props: RouteComponentProps<{}, StaticContext, LocationState>): JSX.Element => {
   const auth = useAuth();
-
   // If the user was redirected here because they were logged in, and then their session expired, clear the AuthState
   useEffect(() => {
     if (props.location?.state?.loggedOut) {

@@ -10,6 +10,7 @@ interface AuthProps {
 /**
  * Renders children if user is authenticated
  * @param children
+ * @param role
  */
 function Authenticated({ children, role }: AuthProps) {
   const auth = useAuth();

@@ -1,0 +1,5 @@
+query FindWorksCreatedBy($username: String!) {
+  worksCreatedBy(username: $username) {
+    ...WorkFields
+  }
+}

@@ -1,4 +1,9 @@
-import { FindFilesQuery, FindFilesQueryVariables } from '../../../src/types/sdk';
+import {
+  FindFilesQuery,
+  FindFilesQueryVariables,
+  FindWorksCreatedByQuery,
+  FindWorksCreatedByQueryVariables
+} from '../../../src/types/sdk';
 import { rest } from 'msw';
 import {
   selectSGPNumber,
@@ -6,6 +11,7 @@ import {
   shouldOptionsHaveLength,
   shouldOptionsHaveLengthAbove
 } from '../shared/customReactSelect.cy';
+import workRepository from '../../../src/mocks/repositories/workRepository';
 
 describe('FileManager', () => {
   describe('On load', () => {
@@ -62,6 +68,32 @@ describe('FileManager', () => {
       it('should select SGP1001 and SGP1008 in select box', () => {
         workNumberShouldBe('SGP1002');
         workNumberShouldBe('SGP1008');
+      });
+    });
+    context('when visting the page as an end user', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<FindWorksCreatedByQuery, FindWorksCreatedByQueryVariables>(
+              'FindWorksCreatedByQuery',
+              (req, res, ctx) => {
+                const work = workRepository.findAll()[0];
+                return res(
+                  ctx.data({
+                    worksCreatedBy: [
+                      { ...work, workNumber: 'SGP_123' },
+                      { ...work, workNumber: 'SGP_456' }
+                    ]
+                  })
+                );
+              }
+            )
+          );
+        });
+        cy.visitAsEndUser('/file_manager');
+      });
+      it('should display two option', () => {
+        workNumberNumOptionsShouldBe(2);
       });
     });
   });
@@ -164,7 +196,7 @@ describe('FileManager', () => {
       });
       it('should not display a table', () => {
         cy.findByRole('table').should('not.exist');
-        cy.findByText('No files uploaded for SGP1008').should('be.visible');
+        cy.findByText('No files uploaded for selected SGP numbers').should('be.visible');
       });
     });
     context('on selecting inactive SGP Number with no files uploaded', () => {
@@ -186,7 +218,7 @@ describe('FileManager', () => {
       });
       it('should not display a table', () => {
         cy.findByRole('table').should('not.exist');
-        cy.findByText('No files uploaded for SGP1002').should('be.visible');
+        cy.findByText('No files uploaded for selected SGP numbers').should('be.visible');
       });
     });
     context('on removing SGP Number selection', () => {
@@ -340,7 +372,7 @@ describe('FileManager', () => {
         cy.visitAsAdmin('file_viewer/?workNumber=SGP9999');
       });
       it('should display warning', () => {
-        cy.findByText("SGP Number 'SGP9999' does not exist.").should('be.visible');
+        cy.findByText('SGP Number(s) does not exist.').should('be.visible');
         cy.findByText('Files').should('not.exist');
       });
     });

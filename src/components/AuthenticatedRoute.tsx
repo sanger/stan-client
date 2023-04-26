@@ -15,12 +15,25 @@ interface AuthenticatedRouteProps extends RouteProps {
  * If the user is authenticated, acts like a route.
  * If the user is not authenticated, redirects them to the login page.
  */
-function AuthenticatedRoute({ render, role, ...rest }: AuthenticatedRouteProps) {
+function AuthenticatedRoute({ render, role = UserRole.Normal, ...rest }: AuthenticatedRouteProps) {
   const auth = useAuth();
-
-  if (role) {
-    if (auth.userRoleIncludes(role)) {
-      return <Route render={render} {...rest} />;
+  if (auth.isAuthenticated() && auth.userRoleIncludes(role)) {
+    return <Route render={render} {...rest} />;
+  } else {
+    if (!auth.isAuthenticated()) {
+      return (
+        <Route {...rest}>
+          <Redirect
+            to={{
+              pathname: '/login',
+              state: {
+                referrer: rest.location,
+                warning: `Please sign in to access ${rest.path}`
+              }
+            }}
+          />
+        </Route>
+      );
     } else {
       return (
         <Route {...rest}>
@@ -36,22 +49,6 @@ function AuthenticatedRoute({ render, role, ...rest }: AuthenticatedRouteProps) 
         </Route>
       );
     }
-  } else if (auth.isAuthenticated()) {
-    return <Route render={render} {...rest} />;
-  } else {
-    return (
-      <Route {...rest}>
-        <Redirect
-          to={{
-            pathname: '/login',
-            state: {
-              referrer: rest.location,
-              warning: `Please sign in to access ${rest.path}`
-            }
-          }}
-        />
-      </Route>
-    );
   }
 }
 

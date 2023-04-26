@@ -47,6 +47,7 @@ declare global {
       msw(): Chainable<MSW>;
       visitAsGuest(url: string): Chainable<ReturnType<typeof cy.visit>>;
       visitAsAdmin(url: string): Chainable<ReturnType<typeof cy.visit>>;
+      visitAsEndUser(url: string): Chainable<ReturnType<typeof cy.visit>>;
       findByTextContent(
         textContent: string
       ): Chainable<ReturnType<typeof cy.findByText>>;
@@ -143,6 +144,31 @@ Cypress.Commands.add("visitAsAdmin", (url: string) => {
 
   return cy.visit(url);
 });
+
+Cypress.Commands.add("visitAsEndUser", (url: string) => {
+  cy.msw().then(({ worker, graphql }) => {
+    worker.use(
+        graphql.query<CurrentUserQuery, CurrentUserQueryVariables>(
+            "CurrentUser",
+            (req, res, ctx) => {
+              return res.once(
+                  ctx.data({
+                    user: {
+                      __typename: "User",
+                      username: "user1",
+                      role: UserRole.Enduser,
+                    },
+                  })
+              );
+            }
+        )
+    );
+  });
+
+  return cy.visit(url);
+});
+
+
 
 /**
  * Command to find a piece of text on a page that could be broken up within

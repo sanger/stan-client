@@ -33,10 +33,10 @@ type FileManagerProps = {
  * If the work number selected in active, upload option will be active. Otherwise,upload will be disabled
  ***/
 const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo: workInfoProps }: FileManagerProps) => {
-  /**All selected work number information**/
-  const [workInfoArray, setWorkInfoArray] = React.useState<WorkInfo[]>([]);
+  /**All work number information**/
+  const [currentWorkInfoOptions, setCurrentWorkInfoOptions] = React.useState<WorkInfo[]>([]);
   /**Only active work numbers required?**/
-  const [isOnlyActiveWorkNumbers, setIsOnlyActiveWorkNumbers] = React.useState(showUpload);
+  const [isOnlyActiveWorkNumbers, setIsOnlyActiveWorkNumbers] = React.useState(false);
   /**Uploaded files for the selected work**/
   const [uploadedFilesForWorkNumber, setUploadedFilesForWorkNumber] = React.useState<FileFieldsFragment[]>([]);
   const location = useLocation();
@@ -46,9 +46,9 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
   const ToastSuccess = (fileName: string) => <Success message={`${fileName} uploaded succesfully.`} />;
 
   /**Update work numbers when ever query string in location changes **/
-  const memoWorkNumbers = React.useMemo(() => {
+  const memoAllSelectedWork = React.useMemo(() => {
     const queryString = parseQueryString(location.search);
-    //There are muktiple work numbers
+    //There are multiple work numbers
     if (Array.isArray(queryString['workNumber'])) {
       const workNumbers: string[] = [];
       queryString['workNumber'].forEach((workNumber) => {
@@ -56,53 +56,58 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
           workNumbers.push(decodeURIComponent(workNumber));
         }
       });
-      return workNumbers;
+      return workInfoProps.filter((work) => workNumbers.some((workNumber) => work.workNumber === workNumber));
     }
     //Single work number
     if (typeof queryString['workNumber'] === 'string') {
-      return [decodeURIComponent(queryString['workNumber'])] ?? [];
+      const workNumber = decodeURIComponent(queryString['workNumber']);
+      return workInfoProps.filter((workInfo) => workInfo.workNumber === workNumber);
     }
     return [];
-  }, [location.search]);
+  }, [location.search, workInfoProps]);
 
-  /**State to handle worknumber changes (either using url or through worknumber selection)
-   * Whenever work numbers changed,set the selected workInfo
-   * Also,set isOnlyActiveWorkNumbers to false if any non-active sgs selected
-   */
+  /**The 'active' checkbox need to be unchecked if there are any non-active sgp selected.
+   *
+   * **/
   React.useEffect(() => {
-    let worksInfoArray = workInfoProps.filter((workInfo) => memoWorkNumbers?.includes(workInfo.workNumber));
-    setWorkInfoArray(worksInfoArray);
-    if (workInfoProps) {
-      const allActive = worksInfoArray.every((work) => work.status === WorkStatus.Active);
-      /**The 'active' checkbox need to ne unchecked if there are any non-active sgp selected.
-       * The 'active' checkbox is checked only by user action to avoid ambiguity in UI interaction
-       * **/
-      if (!allActive) {
+    if (memoAllSelectedWork) {
+      const allActive = memoAllSelectedWork.every((work) => work.status === WorkStatus.Active);
+      if (allActive) {
         setIsOnlyActiveWorkNumbers(allActive);
       }
     }
-  }, [memoWorkNumbers, setIsOnlyActiveWorkNumbers, workInfoProps]);
+  }, [setIsOnlyActiveWorkNumbers, memoAllSelectedWork]);
+
+  /**
+   * Update available works info when user selects/deselects 'Active' checkbox
+   */
+  React.useEffect(() => {
+    let availableWorksInfoArray = isOnlyActiveWorkNumbers
+      ? workInfoProps.filter((work) => work.status === WorkStatus.Active)
+      : workInfoProps;
+    setCurrentWorkInfoOptions(availableWorksInfoArray);
+  }, [workInfoProps, isOnlyActiveWorkNumbers, setCurrentWorkInfoOptions]);
 
   /**Upload URL**/
   const memoURL = React.useMemo(() => {
-    if (workInfoArray.length === 0) return '';
+    if (memoAllSelectedWork.length === 0) return '';
     const params = new URLSearchParams();
-    workInfoArray.forEach(
+    memoAllSelectedWork.forEach(
       (workInfo) => workInfo && params.append('workNumber', encodeURIComponent(workInfo.workNumber))
     );
     return `/files?${params}`;
-  }, [workInfoArray]);
+  }, [memoAllSelectedWork]);
 
   /**
    * Handler hook to monitor workInfo array changes
    * Fetch all files uploaded for all workInfo numbers
    */
   React.useEffect(() => {
-    if (workInfoArray.length === 0) return;
-    findUploadedFiles(workInfoArray.map((workInfo) => workInfo.workNumber)).then((files) =>
+    if (memoAllSelectedWork.length === 0) return;
+    findUploadedFiles(memoAllSelectedWork.map((workInfo) => workInfo.workNumber)).then((files) =>
       setUploadedFilesForWorkNumber(files)
     );
-  }, [setUploadedFilesForWorkNumber, workInfoArray]);
+  }, [setUploadedFilesForWorkNumber, memoAllSelectedWork]);
 
   /**Callback notification send from child after finishing upload**/
   const onFileUploadFinished = React.useCallback(
@@ -116,13 +121,13 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
         autoClose: 4000,
         hideProgressBar: true
       });
-      if (!workInfoArray) return;
+      if (!memoAllSelectedWork) return;
       //Update the display of listed files with the newly uploaded file
-      findUploadedFiles(workInfoArray.map((workInfo) => workInfo.workNumber)).then((files) =>
+      findUploadedFiles(memoAllSelectedWork.map((workInfo) => workInfo.workNumber)).then((files) =>
         setUploadedFilesForWorkNumber(files)
       );
     },
-    [setUploadedFilesForWorkNumber, workInfoArray]
+    [setUploadedFilesForWorkNumber, memoAllSelectedWork]
   );
 
   /**Callback function to confirm the upload which is called before upload action**/
@@ -131,7 +136,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
       /**
        * If a file already exists in the same name, give a warning to user about file getting overwritten
        */
-      if (uploadedFilesForWorkNumber.length > 0 && workInfoArray.length) {
+      if (uploadedFilesForWorkNumber.length > 0 && memoAllSelectedWork.length) {
         const filesWithSameName = uploadedFilesForWorkNumber.filter((fileExist) => fileExist.name === file.name);
         if (filesWithSameName.length > 0) {
           return {
@@ -146,7 +151,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
       }
       return undefined;
     },
-    [uploadedFilesForWorkNumber, workInfoArray]
+    [uploadedFilesForWorkNumber, memoAllSelectedWork]
   );
 
   /**Columns to display in 'Files' section table**/
@@ -185,9 +190,6 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
     }
   ];
 
-  const nonValidWorkNumbers = memoWorkNumbers.filter(
-    (work: string) => !workInfoArray.some((workInfo) => workInfo.workNumber === work)
-  );
   return (
     <AppShell>
       <AppShell.Header>
@@ -204,7 +206,8 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
                   <div className={'flex flex-row items-start gap-x-6'}>
                     <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
                       <WorkNumberSelect
-                        workNumber={memoWorkNumbers}
+                        workNumber={memoAllSelectedWork.map((work) => work.workNumber)}
+                        worksInfoOptions={currentWorkInfoOptions}
                         onWorkNumberChangeInMulti={(workNumbers) => {
                           const params = new URLSearchParams();
                           workNumbers.forEach(
@@ -212,7 +215,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
                           );
                           history.replace(`/file_manager?${params}`);
                         }}
-                        workNumberType={isOnlyActiveWorkNumbers ? WorkStatus.Active : 'ALL'}
+                        workNumberType={'ALL'}
                         multiple
                       />
                     </motion.div>
@@ -226,32 +229,30 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
                     </Label>
                   </div>
                 </motion.div>
-                {workInfoArray.length > 0 && (
+                {memoAllSelectedWork.length > 0 && (
                   <motion.div variants={variants.fadeInWithLift} className={'space-y-4'}>
                     <Heading level={3}>Upload file</Heading>
                     <FileUploader
                       url={memoURL}
-                      enableUpload={workInfoArray.length > 0}
+                      enableUpload={memoAllSelectedWork.length > 0}
                       confirmUpload={onConfirmUpload}
                       notifyUploadOutcome={onFileUploadFinished}
                     />
                   </motion.div>
                 )}
               </div>
-            ) : nonValidWorkNumbers.length > 0 ? (
-              <Warning message={`SGP Number '${nonValidWorkNumbers.join(',')}' does not exist.`} />
+            ) : memoAllSelectedWork.length === 0 ? (
+              <Warning message={'SGP Number(s) does not exist.'} />
             ) : (
               <></>
             )}
-            {workInfoArray.length > 0 && (
+            {memoAllSelectedWork.length > 0 && (
               <motion.div variants={variants.fadeInWithLift} className={'flex flex-col space-y-4'}>
                 <Heading level={3}>Files</Heading>
                 {uploadedFilesForWorkNumber.length > 0 ? (
                   <DataTable columns={columns} data={uploadedFilesForWorkNumber} sortable />
                 ) : (
-                  <span className={'mt-8'}>{`No files uploaded for ${workInfoArray
-                    .map((workInfo) => workInfo.workNumber)
-                    .join(',')}`}</span>
+                  <span className={'mt-8'}>No files uploaded for selected SGP numbers</span>
                 )}
               </motion.div>
             )}

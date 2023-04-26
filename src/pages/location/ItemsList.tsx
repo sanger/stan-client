@@ -9,7 +9,7 @@ import MutedText from '../../components/MutedText';
 import { addressToLocationAddress } from '../../lib/helpers/locationHelper';
 import { Authenticated } from '../../components/Authenticated';
 import { getLabwareInLocation } from '../../lib/services/locationService';
-import { LabwareFieldsFragment, Maybe, SuggestedWorkFieldsFragment } from '../../types/sdk';
+import { LabwareFieldsFragment, Maybe, SuggestedWorkFieldsFragment, UserRole } from '../../types/sdk';
 import { tissue } from '../../lib/helpers/labwareHelper';
 import { stanCore } from '../../lib/sdk';
 
@@ -57,7 +57,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
 
   return (
     <div>
-      <Authenticated>
+      <Authenticated role={UserRole.Normal}>
         <MutedText>
           To store an item, first select the destination address (if required), then scan the piece of labware.
         </MutedText>
@@ -117,7 +117,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
                 <TableCell>{tissue(labware)?.spatialLocation.code}</TableCell>
                 <TableCell>{tissue(labware)?.replicate}</TableCell>
                 <TableCell>
-                  <Authenticated>
+                  <Authenticated role={UserRole.Normal}>
                     <RemoveButton
                       onClick={() => {
                         setSelectedItem(item);
@@ -131,7 +131,7 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
         </TableBody>
       </Table>
 
-      <Authenticated>
+      <Authenticated role={UserRole.Normal}>
         <UnstoreBarcodeModal
           isOpen={!!selectedItem}
           barcode={selectedItem?.barcode}
