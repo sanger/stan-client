@@ -2580,6 +2580,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity));
 }
+.bg-gray-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(203 213 224 / var(--tw-bg-opacity));
+}
 .bg-sdb-600 {
   --tw-bg-opacity: 1;
   background-color: rgb(18 19 33 / var(--tw-bg-opacity));
@@ -2618,10 +2622,6 @@ svg.logo.loading rect:nth-child(3n+1) {
 .bg-orange-200 {
   --tw-bg-opacity: 1;
   background-color: rgb(254 235 200 / var(--tw-bg-opacity));
-}
-.bg-gray-400 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(203 213 224 / var(--tw-bg-opacity));
 }
 .bg-sdb-100 {
   --tw-bg-opacity: 1;
@@ -3315,6 +3315,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-text-opacity: 1;
   color: rgb(245 101 101 / var(--tw-text-opacity));
 }
+.hover\:text-blue-800:hover {
+  --tw-text-opacity: 1;
+  color: rgb(44 82 130 / var(--tw-text-opacity));
+}
 .hover\:text-gray-800:hover {
   --tw-text-opacity: 1;
   color: rgb(45 55 72 / var(--tw-text-opacity));
@@ -3329,6 +3333,12 @@ svg.logo.loading rect:nth-child(3n+1) {
 .hover\:shadow:hover {
   --tw-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: 0 0 #0000, 0 0 #0000, var(--tw-shadow);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.hover\:shadow-2xl:hover {
+  --tw-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --tw-shadow-colored: 0 25px 50px -12px var(--tw-shadow-color);
   box-shadow: 0 0 #0000, 0 0 #0000, var(--tw-shadow);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
@@ -4249,4 +4259,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.3eb55f5c.css.map*/
+/*# sourceMappingURL=main.0b106096.css.map*/
