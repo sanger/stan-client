@@ -1,9 +1,9 @@
 name: Build
 
-# Controls when the action will run. Triggers the workflow on pushes to rc branch.
 on:
   push:
-    branches: "rc"
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -44,8 +44,11 @@ jobs:
       - name: Rename the build
         run: mv build client
 
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v2.1.4
+      - name: Zip the build
+        run: zip -r client.zip client/
+
+      - name: Create a release
+        uses: ncipollo/release-action@v1
         with:
-          name: stan-prod
-          path: client
+          artifacts: client.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
