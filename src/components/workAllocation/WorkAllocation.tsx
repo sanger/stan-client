@@ -215,15 +215,20 @@ export default function WorkAllocation() {
           <>
             <Success message={successMessage} />
             {userRoleIncludes(UserRole.Enduser) && (
-              <div className={'flex flex-row text-pink-600 mt-4'}>
-                <InfoIcon className={`bg-white inline-block '}`} />
+              <div
+                className={
+                  'flex flex-row items-start border-l-4 border-green-600 p-2 bg-green-100 text-green-800 font-medium'
+                }
+              >
+                <InfoIcon className={`bg-white inline-block text-green-800 h-6 w-6'}`} />
+                Please complete RNAscope/IHC template for probes/antibody and fluorophore
                 <a
                   href={
                     'https://fred.wellcomegenomecampus.org/Interact/Pages/Content/Document.aspx?id=6817&utm_source=interact&utm_medium=side_menu_category'
                   }
-                  className="text-sp-600 hover:text-sp-700 font-semibold hover:underline text-base tracking-wide"
+                  className="underline text-blue-600 hover:text-blue-800 font-semibold ml-1"
                 >
-                  Please complete RNAscope/IHC template for probes/antibody and fluorophore
+                  here
                 </a>
               </div>
             )}

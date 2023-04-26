@@ -76,9 +76,9 @@ describe('Authorized routes', () => {
           cy.findByText('Store').should('be.visible');
           cy.findByText('History').should('be.visible');
           cy.findByText('File Manager').should('be.visible');
+          cy.findByText('SGP Management').should('be.visible');
         });
         it('should not display non-permitted menu options', () => {
-          cy.findByText('SGP Management').should('not.exist');
           cy.findByText('Lab Work').should('not.exist');
           cy.findByText('Admin').should('not.exist');
         });

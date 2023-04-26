@@ -36,7 +36,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
   /**All work number information**/
   const [currentWorkInfoOptions, setCurrentWorkInfoOptions] = React.useState<WorkInfo[]>([]);
   /**Only active work numbers required?**/
-  const [isOnlyActiveWorkNumbers, setIsOnlyActiveWorkNumbers] = React.useState(showUpload);
+  const [isOnlyActiveWorkNumbers, setIsOnlyActiveWorkNumbers] = React.useState(false);
   /**Uploaded files for the selected work**/
   const [uploadedFilesForWorkNumber, setUploadedFilesForWorkNumber] = React.useState<FileFieldsFragment[]>([]);
   const location = useLocation();
@@ -72,7 +72,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
   React.useEffect(() => {
     if (memoAllSelectedWork) {
       const allActive = memoAllSelectedWork.every((work) => work.status === WorkStatus.Active);
-      if (!allActive) {
+      if (allActive) {
         setIsOnlyActiveWorkNumbers(allActive);
       }
     }

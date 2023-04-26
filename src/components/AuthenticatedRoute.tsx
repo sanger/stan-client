@@ -17,7 +17,6 @@ interface AuthenticatedRouteProps extends RouteProps {
  */
 function AuthenticatedRoute({ render, role = UserRole.Normal, ...rest }: AuthenticatedRouteProps) {
   const auth = useAuth();
-  debugger;
   if (auth.isAuthenticated() && auth.userRoleIncludes(role)) {
     return <Route render={render} {...rest} />;
   } else {

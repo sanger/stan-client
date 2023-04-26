@@ -79,7 +79,7 @@ function AppShell({ children }: AppShellParams) {
               </StanNavLink>
               <StanNavLink to="/store">Store</StanNavLink>
               <StanNavLink to="/history">History</StanNavLink>
-              <Authenticated role={UserRole.Normal}>
+              <Authenticated role={UserRole.Enduser}>
                 <StanNavLink to="/sgp">SGP Management</StanNavLink>
               </Authenticated>
               <Authenticated role={UserRole.Normal}>
