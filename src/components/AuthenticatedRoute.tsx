@@ -17,9 +17,24 @@ interface AuthenticatedRouteProps extends RouteProps {
  */
 function AuthenticatedRoute({ render, role = UserRole.Normal, ...rest }: AuthenticatedRouteProps) {
   const auth = useAuth();
-  if (role) {
-    if (auth.userRoleIncludes(role)) {
-      return <Route render={render} {...rest} />;
+  debugger;
+  if (auth.isAuthenticated() && auth.userRoleIncludes(role)) {
+    return <Route render={render} {...rest} />;
+  } else {
+    if (!auth.isAuthenticated()) {
+      return (
+        <Route {...rest}>
+          <Redirect
+            to={{
+              pathname: '/login',
+              state: {
+                referrer: rest.location,
+                warning: `Please sign in to access ${rest.path}`
+              }
+            }}
+          />
+        </Route>
+      );
     } else {
       return (
         <Route {...rest}>
@@ -35,22 +50,6 @@ function AuthenticatedRoute({ render, role = UserRole.Normal, ...rest }: Authent
         </Route>
       );
     }
-  } else if (auth.isAuthenticated()) {
-    return <Route render={render} {...rest} />;
-  } else {
-    return (
-      <Route {...rest}>
-        <Redirect
-          to={{
-            pathname: '/login',
-            state: {
-              referrer: rest.location,
-              warning: `Please sign in to access ${rest.path}`
-            }
-          }}
-        />
-      </Route>
-    );
   }
 }
 

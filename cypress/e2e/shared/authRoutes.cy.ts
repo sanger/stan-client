@@ -65,5 +65,57 @@ describe('Authorized routes', () => {
         cy.findByText('STAN Configuration').should('be.visible');
       });
     });
+    context('when visiting as a end user', () => {
+      before(() => {
+        cy.visitAsEndUser('/');
+      });
+      it('should display only allowed menu options for end user', () => {
+        it('should display all permitted menu options', () => {
+          cy.findByText('Home').should('be.visible');
+          cy.findByText('Search').should('be.visible');
+          cy.findByText('Store').should('be.visible');
+          cy.findByText('History').should('be.visible');
+          cy.findByText('File Manager').should('be.visible');
+        });
+        it('should not display non-permitted menu options', () => {
+          cy.findByText('SGP Management').should('not.exist');
+          cy.findByText('Lab Work').should('not.exist');
+          cy.findByText('Admin').should('not.exist');
+        });
+      });
+      context('when visiting sgp page', () => {
+        before(() => {
+          cy.visitAsEndUser('/sgp');
+        });
+        it('navigates to the page', () => {
+          cy.findAllByTestId('heading')
+            .eq(0)
+            .within(() => cy.findByText('SGP Management').should('be.visible'));
+        });
+      });
+      context('when visiting file manager page', () => {
+        before(() => {
+          cy.visitAsEndUser('/file_manager');
+        });
+        it('navigates to the page', () => {
+          cy.findByText('File Manager').should('be.visible');
+        });
+      });
+      context('when visiting config page', () => {
+        before(() => {
+          cy.visitAsEndUser('/config');
+        });
+
+        it('redirects to the homepage', () => {
+          cy.location().should((location) => {
+            expect(location.pathname).to.eq('/');
+          });
+        });
+
+        it('shows an error', () => {
+          cy.findByText('You are not authorised to access /config').should('be.visible');
+        });
+      });
+    });
   });
 });
