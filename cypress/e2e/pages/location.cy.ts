@@ -142,8 +142,10 @@ describe('Location', () => {
     });
 
     context('when back button is pressed in browser', () => {
+      before(() => {
+        cy.visit('/locations/STO-002');
+      });
       it('should display the updated list of awaiting labwares', () => {
-        cy.go('back');
         cy.findByText('STAN-2111').should('exist');
         cy.findByText('STAN-4111').should('exist');
         cy.findByText('STAN-3111').should('not.exist');
@@ -151,6 +153,9 @@ describe('Location', () => {
     });
 
     context('when refreshing the page', () => {
+      before(() => {
+        cy.reload();
+      });
       it('should display the updated list of awaiting labwares', () => {
         cy.reload();
         cy.findByText('STAN-2111').should('exist');
