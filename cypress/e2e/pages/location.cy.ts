@@ -141,7 +141,7 @@ describe('Location', () => {
       cy.findByTestId('addIcon-STAN-3111').click();
     });
 
-    context('when back button is pressed in browser', () => {
+    context('when navigating to a previous location or another page', () => {
       before(() => {
         cy.visit('/locations/STO-002');
       });
