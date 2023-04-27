@@ -141,9 +141,11 @@ describe('Location', () => {
       cy.findByTestId('addIcon-STAN-3111').click();
     });
 
-    context('when back button is pressed in browser', () => {
+    context('when navigating to a previous location or another page', () => {
+      before(() => {
+        cy.visit('/locations/STO-002');
+      });
       it('should display the updated list of awaiting labwares', () => {
-        cy.go('back');
         cy.findByText('STAN-2111').should('exist');
         cy.findByText('STAN-4111').should('exist');
         cy.findByText('STAN-3111').should('not.exist');
@@ -151,8 +153,10 @@ describe('Location', () => {
     });
 
     context('when refreshing the page', () => {
-      it('should display the updated list of awaiting labwares', () => {
+      before(() => {
         cy.reload();
+      });
+      it('should display the updated list of awaiting labwares', () => {
         cy.findByText('STAN-2111').should('exist');
         cy.findByText('STAN-4111').should('exist');
         cy.findByText('STAN-3111').should('not.exist');
