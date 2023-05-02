@@ -216,20 +216,27 @@ export default function WorkAllocation() {
             <Success message={successMessage} />
             {userRoleIncludes(UserRole.Enduser) && (
               <div
-                className={
-                  'flex flex-row items-start border-l-4 border-green-600 p-2 bg-green-100 text-green-800 font-medium'
-                }
+                data-testid={'reminder-div'}
+                className={'flex flex-row border-l-4 border-green-600 p-2 bg-green-100 text-green-800 font-medium'}
               >
-                <InfoIcon className={`bg-white inline-block text-green-800 h-6 w-6'}`} />
-                Please complete RNAscope/IHC template for probes/antibody and fluorophore
-                <a
-                  href={
-                    'https://fred.wellcomegenomecampus.org/Interact/Pages/Content/Document.aspx?id=6817&utm_source=interact&utm_medium=side_menu_category'
-                  }
-                  className="underline text-blue-600 hover:text-blue-800 font-semibold ml-1"
-                >
-                  here
-                </a>
+                <InfoIcon className={'bg-white inline-block bg-green-100 text-green-800 h-12 w-12'} />
+                <div>
+                  If you have submitted an RNAScope/IHC request, please complete the template for probes/antibody and
+                  fluorophore
+                  <span>
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                      href={
+                        'https://fred.wellcomegenomecampus.org/Interact/Pages/Content/Document.aspx?id=6817&utm_source=interact&utm_medium=side_menu_category'
+                      }
+                      className="underline text-blue-600 hover:text-blue-800 font-semibold ml-1"
+                    >
+                      here
+                    </a>
+                  </span>
+                  , and upload it to STAN on the file management page linked to your request number.
+                </div>
               </div>
             )}
           </>
