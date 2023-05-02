@@ -288,7 +288,13 @@ describe('Work Allocation', () => {
         cy.findByText(
           /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999, Omero project OMERO_TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
         ).should('exist');
-        cy.findByText('Please complete RNAscope/IHC template for probes/antibody and fluorophore').should('exist');
+      });
+
+      it('should display a reminder dialog to complete the RNAScope/IHC template', () => {
+        cy.findByRole('dialog').should('be.visible');
+        cy.findByRole('dialog').within(() => {
+          cy.findByText('Please complete RNAscope/IHC template for probes/antibody and fluorophore').should('exist');
+        });
       });
     });
   });

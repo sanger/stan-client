@@ -24,6 +24,7 @@ import LoadingSpinner from '../icons/LoadingSpinner';
 import BlueButton from '../buttons/BlueButton';
 import { history } from '../../lib/sdk';
 import InfoIcon from '../icons/InfoIcon';
+import Modal, { ModalBody, ModalFooter, ModalHeader } from '../Modal';
 const initialValues: WorkAllocationFormValues = {
   workType: '',
   workRequester: '',
@@ -80,9 +81,12 @@ export default function WorkAllocation() {
       }) ?? { status: [WorkStatus.Active] }
     );
   }, [location.search]);
+
   const workAllocationMachine = React.useMemo(() => {
     return createWorkAllocationMachine({ urlParams });
   }, [urlParams]);
+  const [showRNAScopeReminderDialog, setShowRNAScopeReminderDialog] = React.useState(false);
+
   const [current, send] = useMachine(workAllocationMachine);
 
   /**This prevents duplicate submissions on double click**/
@@ -107,7 +111,7 @@ export default function WorkAllocation() {
     accessPath: ['work', 'workNumber']
   });
 
-  const { userRoleIncludes } = useAuth();
+  const { authState } = useAuth();
 
   /**
    * Rebuild the download data  whenever the worWithComments changes
@@ -139,6 +143,15 @@ export default function WorkAllocation() {
   useEffect(() => {
     send({ type: 'SORT_WORKS', workWithComments: sortedTableData });
   }, [sortedTableData, send]);
+
+  /**After successful creation of work, if the logged in user is End-user then set state to display
+   * dialog to remind the user to complete RNSscope/IHC
+   */
+  useEffect(() => {
+    if (authState?.user.role === UserRole.Enduser && successMessage) {
+      setShowRNAScopeReminderDialog(true);
+    }
+  }, [successMessage, authState]);
 
   /**Handler to update works with changes - Update work allocation data whenever any field is edited**/
   const onWorkUpdate = React.useCallback(
@@ -211,29 +224,35 @@ export default function WorkAllocation() {
   return (
     <div>
       <div className="mx-auto max-w-screen-lg mt-2 my-6 border border-gray-200 bg-gray-100 p-6 rounded-md space-y-4">
-        {successMessage && (
-          <>
-            <Success message={successMessage} />
-            {userRoleIncludes(UserRole.Enduser) && (
-              <div
-                className={
-                  'flex flex-row items-start border-l-4 border-green-600 p-2 bg-green-100 text-green-800 font-medium'
+        {successMessage && <Success message={successMessage} />}
+        <Modal show={showRNAScopeReminderDialog}>
+          <ModalHeader>Complete RNAscope/IHC template</ModalHeader>
+          <ModalBody>
+            <div className={'flex flex-row items-start  p-2 bg-green-100 text-green-800 font-medium py-6'}>
+              <InfoIcon className={`bg-white inline-block text-green-800 h-6 w-6'}`} />
+              Please complete RNAscope/IHC template for probes/antibody and fluorophore
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href={
+                  'https://fred.wellcomegenomecampus.org/Interact/Pages/Content/Document.aspx?id=6817&utm_source=interact&utm_medium=side_menu_category'
                 }
+                onClick={() => {
+                  setShowRNAScopeReminderDialog(false);
+                }}
+                className="underline text-blue-600 hover:text-blue-800 font-semibold ml-1"
               >
-                <InfoIcon className={`bg-white inline-block text-green-800 h-6 w-6'}`} />
-                Please complete RNAscope/IHC template for probes/antibody and fluorophore
-                <a
-                  href={
-                    'https://fred.wellcomegenomecampus.org/Interact/Pages/Content/Document.aspx?id=6817&utm_source=interact&utm_medium=side_menu_category'
-                  }
-                  className="underline text-blue-600 hover:text-blue-800 font-semibold ml-1"
-                >
-                  here
-                </a>
-              </div>
-            )}
-          </>
-        )}
+                here
+              </a>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <BlueButton className="sm:ml-3 mt-1" onClick={() => setShowRNAScopeReminderDialog(false)}>
+              Ok
+            </BlueButton>
+          </ModalFooter>
+        </Modal>
+
         {requestError && <Warning message={'SGP Request Error'} error={requestError} />}
 
         <Heading level={3} showBorder={false}>
