@@ -20,8 +20,41 @@ describe('Search', () => {
       cy.findByLabelText('Created Before').should('have.value', '2021-07-31');
     });
 
+    it('should display view panel ', () => {
+      cy.findByTestId('view').should('exist');
+      cy.get('[type="radio"]').first().should('be.checked');
+    });
     it('will perform a search immediately', () => {
       cy.findByRole('table').should('be.visible');
+      it('should display all records table', () => {
+        cy.findByRole('table').get('th').should('have.length', 11);
+        [
+          'Barcode',
+          'Created',
+          'Labware Type',
+          'SGP Numbers',
+          'External ID',
+          'Donor ID',
+          'Tissue Type',
+          'Section Number',
+          'Replicate',
+          'Embedding Medium',
+          'Location'
+        ].forEach((text, index) => {
+          cy.findByRole('table').get('th').eq(index).should('have.text', text);
+        });
+      });
+    });
+    context('when unique barcode view option is selected', () => {
+      before(() => {
+        cy.get('[type="radio"]').eq(1).check();
+      });
+      it('should display  unique barcode table', () => {
+        cy.findByRole('table').get('th').should('have.length', 3);
+        ['Barcode', 'Labware Type', 'Location'].forEach((text, index) => {
+          cy.findByRole('table').get('th').eq(index).should('have.text', text);
+        });
+      });
     });
 
     context('when the Reset button is pressed', () => {
