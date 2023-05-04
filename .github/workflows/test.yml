@@ -38,6 +38,18 @@ jobs:
           timeout-minutes: 5
           browser: chrome
 
+          name: Example workflow for Node using Snyk
+          on: push
+  security:
+    name: Run snyk test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/setup-node@v3
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
   jest:
     name: Run unit tests
     runs-on: ubuntu-latest
