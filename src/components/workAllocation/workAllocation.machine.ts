@@ -140,6 +140,11 @@ type WorkAllocationContext = {
   successMessage?: string;
 
   /**
+   * New work number allocated
+   */
+  allocatedWorkNumber?: string;
+
+  /**
    * URL params to filter the SGP numbers on
    */
   urlParams: WorkAllocationUrlParams;
@@ -264,6 +269,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           ]
             .filter((msg) => msg)
             .join(' and ');
+          ctx.allocatedWorkNumber = workNumber;
+          debugger;
           ctx.successMessage = `Assigned ${workNumber} (${
             workType.name
           } - ${blockSlideSampleMsg}) to project ${project.name.trim()}${

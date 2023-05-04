@@ -97,7 +97,8 @@ export default function WorkAllocation() {
     workRequesters,
     availableComments,
     requestError,
-    successMessage
+    successMessage,
+    allocatedWorkNumber
   } = current.context;
 
   /**Hook to sort table*/
@@ -214,6 +215,18 @@ export default function WorkAllocation() {
         {successMessage && (
           <>
             <Success message={successMessage} />
+            <div
+              data-testid={'reminder-div'}
+              className={'flex flex-row border-l-4 border-green-600 p-2 bg-green-100 text-green-800 font-medium'}
+            >
+              <InfoIcon className={'bg-white inline-block bg-green-100 text-green-800 h-12 w-12'} />
+              <div>
+                <span> Please record your work request number </span>
+                <span className={'text-pink-600 font-bold'}> {` ${allocatedWorkNumber} `} </span>
+                for future reference. If you mislay this information you can find your request number on the home page
+                by searching using requester,program,worktype or status fields.
+              </div>
+            </div>
             {userRoleIncludes(UserRole.Enduser) && (
               <div
                 data-testid={'reminder-div'}
