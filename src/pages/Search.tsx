@@ -143,6 +143,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
     setFileDownloadURL(downloadURL);
   }, [downloadURL, setFileDownloadURL]);
 
+  /**Memoised unique bar cide data to display**/
   const memoUniqueBarcodeData = React.useMemo(() => {
     if (!searchResult) return [];
     return uniqBy(searchResult.entries, 'barcode');
@@ -167,9 +168,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
     setFileDownloadURL(fileurl);
   }, [searchResult, requestDownload, viewAllRecords, memoUniqueBarcodeData]);
 
-  const numDisplayed = viewAllRecords
-    ? searchResult?.numDisplayed
-    : Math.min(searchResult?.numDisplayed!, memoUniqueBarcodeData.length);
+  const numDisplayed = viewAllRecords ? searchResult?.numDisplayed : memoUniqueBarcodeData.length;
   const numRecords = viewAllRecords ? searchResult?.numRecords : memoUniqueBarcodeData.length;
 
   return (

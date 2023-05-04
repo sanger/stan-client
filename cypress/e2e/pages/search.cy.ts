@@ -123,6 +123,15 @@ describe('Search', () => {
       it('shows the download button', () => {
         cy.findByTestId('download').should('be.visible');
       });
+
+      context('when unique barcode option is selected', () => {
+        before(() => {
+          cy.get('[type="radio"]').eq(1).check();
+        });
+        it('will show a warning', () => {
+          cy.findByText('Not all results can be displayed. Please refine your search.').should('be.visible');
+        });
+      });
     });
 
     context('when a search returns no results', () => {
