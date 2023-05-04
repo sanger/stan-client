@@ -42,7 +42,7 @@ jobs:
           on: push
 
   security:
-    name: Run snyk test
+    name: Run snyk tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
