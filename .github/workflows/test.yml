@@ -40,6 +40,7 @@ jobs:
 
           name: Example workflow for Node using Snyk
           on: push
+
   security:
     name: Run snyk test
     runs-on: ubuntu-latest
