@@ -224,7 +224,7 @@ export default function WorkAllocation() {
                 <span> Please record your work request number </span>
                 <span className={'text-pink-600 font-bold'}> {` ${allocatedWorkNumber} `} </span>
                 for future reference. If you mislay this information you can find your request number on the home page
-                by searching using requester,program,worktype or status fields.
+                by searching using requester, program, worktype or status fields.
               </div>
             </div>
             {userRoleIncludes(UserRole.Enduser) && (
