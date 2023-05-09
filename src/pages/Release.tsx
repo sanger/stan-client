@@ -194,7 +194,7 @@ function Release({ releaseInfo }: PageParams) {
   const handleSelectWorkNumberForRelease = React.useCallback(
     (workNumber: string, setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void) => {
       async function updateLabwareFromSGP(workNumber: string) {
-        const res = await stanCore.GetSuggestedLabwareForWork({ workNumber });
+        const res = await stanCore.GetSuggestedLabwareForWork({ workNumber: workNumber, forRelease: true });
         const suggestedLabware = res.suggestedLabwareForWork.map((labware) => ({
           barcode: labware.barcode,
           workNumber

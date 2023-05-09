@@ -1,5 +1,5 @@
-query GetSuggestedLabwareForWork($workNumber: String!) {
-  suggestedLabwareForWork(workNumber: $workNumber) {
+query GetSuggestedLabwareForWork($workNumber: String!, $forRelease: Boolean) {
+  suggestedLabwareForWork(workNumber: $workNumber, forRelease: $forRelease) {
     ...LabwareFields
   }
 }
