@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/node@master #Pre-created container
-        continue-on-error: true #To make sure that SARIF upload gets called and not to block CI run on snyk test failure
+        continue-on-error: true #To make sure that SARIF upload gets called and also not to block CI run on snyk test failure
         with:
           command: code test
           args: --severity-threshold=high --sarif-file-output=snyk-sarif.json
