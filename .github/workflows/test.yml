@@ -38,27 +38,37 @@ jobs:
           timeout-minutes: 5
           browser: chrome
 
-          name: Example workflow for Node using Snyk
-          on: push
-
-  security:
+  snyk_test:
     name: Run snyk tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        continue-on-error: true #To make sure that SARIF upload gets called
+        uses: snyk/actions/node@master #Pre-created container
+        continue-on-error: true #To avoid blocking CI run on snyk test failure
         with:
           command: code test
-          args: --sarif-file-output=snyk.sarif --severity-threshold=high
+          args: --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  snyk_monitor:
+    name: Run snyk monitor
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master #Pre-created container
+        continue-on-error: true #To make sure that SARIF upload gets called and not to block CI run on snyk test failure
+        with:
+          command: monitor
+          args: --sarif-file-output=snyk.sarif
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk.sarif
-
   jest:
     name: Run unit tests
     runs-on: ubuntu-latest
