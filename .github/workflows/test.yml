@@ -51,7 +51,8 @@ jobs:
         continue-on-error: true # To make sure that SARIF upload gets called
         with:
           command: code test
-          args: --sarif-file-output=snyk.sarif
+          args: --sarif-file-output=snyk.sarif --severity-threshold=high
+
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Upload result to GitHub Code Scanning
