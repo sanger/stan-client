@@ -143,7 +143,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
     setFileDownloadURL(downloadURL);
   }, [downloadURL, setFileDownloadURL]);
 
-  /**Memoised unique bar cide data to display**/
+  /**Memoised unique barcode data to display**/
   const memoUniqueBarcodeData = React.useMemo(() => {
     if (!searchResult) return [];
     return uniqBy(searchResult.entries, 'barcode');
