@@ -48,13 +48,13 @@ jobs:
         continue-on-error: true #To make sure that SARIF upload gets called and not to block CI run on snyk test failure
         with:
           command: code test
-          args: --severity-threshold=high --sarif-file-output=snyk.sarif
+          args: --severity-threshold=high --sarif-file-output=snyk-sarif.json
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: snyk.sarif
+          sarif_file: snyk-sarif.json
 
   snyk_monitor:
     name: Run snyk monitor
