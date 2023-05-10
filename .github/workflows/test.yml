@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/node@master
-        continue-on-error: true # To make sure that SARIF upload gets called
+        continue-on-error: true #To make sure that SARIF upload gets called
         with:
           args: --sarif-file-output=snyk.sarif --severity-threshold=high
         env:
