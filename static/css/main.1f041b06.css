@@ -3569,6 +3569,10 @@ svg.logo.loading rect:nth-child(3n+1) {
     flex-direction: row-reverse;
   }
 
+  .sm\:flex-col {
+    flex-direction: column;
+  }
+
   .sm\:justify-end {
     justify-content: flex-end;
   }
@@ -4259,4 +4263,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.0b106096.css.map*/
+/*# sourceMappingURL=main.1f041b06.css.map*/
