@@ -68,30 +68,18 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
       }
     );
 
-    it('requires Replicate Number to have number part as an an integer', () => {
+    it('requires Replicate Number to be an alphanumeric string of maximum length 7 ', () => {
       cy.findByTestId('Replicate Number').type('1.1').blur();
       checkReplicateWarningIsVisible();
-    });
 
-    it('requires Replicate Number to have number part greater than 0', () => {
-      cy.findByTestId('Replicate Number').clear().type('-1').blur();
-      checkReplicateWarningIsVisible();
-    });
-
-    it('requires Replicate Number to have number part  greater than or equal to 1', () => {
-      cy.findByTestId('Replicate Number').type('0').blur();
-      checkReplicateWarningIsVisible();
-    });
-    it('requires Replicate Number to be number or number followed by a lowercase letter', () => {
-      cy.findByTestId('Replicate Number').type('0ab').blur();
-      checkReplicateWarningIsVisible();
-    });
-    it('requires Replicate Number to be number or number followed by a lowercase letter', () => {
-      cy.findByTestId('Replicate Number').type('5ab').blur();
+      cy.findByTestId('Replicate Number').clear().type('1ab-').blur();
       checkReplicateWarningIsVisible();
 
-      cy.findByTestId('Replicate Number').clear().type('5A').blur();
+      cy.findByTestId('Replicate Number').clear().type('1ab6789').blur();
       checkReplicateWarningIsVisible();
+
+      cy.findByTestId('Replicate Number').clear().type('1ab678A').blur();
+      cy.findByText('Replicate number must be a string of up to 7 letters and numbers.').should('not.exist');
     });
 
     it('requires Fixative', () => {
@@ -112,8 +100,6 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
     }
   });
   const checkReplicateWarningIsVisible = () => {
-    cy.findByText('Replicate Number must be a positive integer, optionally followed by a lower case letter.').should(
-      'be.visible'
-    );
+    cy.findByText('Replicate number must be a string of up to 7 letters and numbers.').should('be.visible');
   };
 }

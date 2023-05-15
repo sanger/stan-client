@@ -111,14 +111,14 @@ export default class RegistrationValidation {
     if (this.tissueSampleRegistration) {
       return validation.optionalString({
         label: 'Replicate Number',
-        restrictChars: /^[1-9]\d*[a-z]?$/,
-        errorMessage: 'Replicate Number must be a positive integer, optionally followed by a lower case letter.'
+        restrictChars: /^([a-zA-Z0-9]){1,7}$/,
+        errorMessage: 'Replicate number must be a string of up to 7 letters and numbers.'
       });
     } else {
       return validation.requiredString({
         label: 'Replicate Number',
-        restrictChars: /^[1-9]\d*[a-z]?$/,
-        errorMessage: 'Replicate Number must be a positive integer, optionally followed by a lower case letter.'
+        restrictChars: /^([a-zA-Z0-9]){1,7}$/,
+        errorMessage: 'Replicate number must be a string of up to 7 letters and numbers.'
       });
     }
   }
