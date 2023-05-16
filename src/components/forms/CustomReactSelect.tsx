@@ -90,7 +90,7 @@ export const NormalReactSelect = ({
   const sdbColor = '#7980B9';
   return (
     <div data-testid={dataTestId ?? 'select-div'} className={`${className}`}>
-      <Label name={label ?? ''}>
+      <Label name={label ?? ''} className={'whitespace-nowrap'}>
         <ReactSelect
           menuPosition={'fixed'}
           name={name}

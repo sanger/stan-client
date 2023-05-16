@@ -40,6 +40,7 @@ import releaseRecipientRepository from '../repositories/releaseRecipientReposito
 import programRepository from '../repositories/programRepository';
 import omeroProjectRepository from '../repositories/omeroProjectRepository';
 import labwareFactory from '../../lib/factories/labwareFactory';
+import dnapStudyRepository from '../repositories/dnapStudyRepository';
 
 const workHandlers = [
   graphql.query<GetWorkAllocationInfoQuery, GetWorkAllocationInfoQueryVariables>(
@@ -76,7 +77,8 @@ const workHandlers = [
             };
           }),
           workTypes: workTypeRepository.findAll().filter(isEnabled),
-          releaseRecipients: releaseRecipientRepository.findAll().filter(isEnabled)
+          releaseRecipients: releaseRecipientRepository.findAll().filter(isEnabled),
+          dnapStudies: dnapStudyRepository.findAll().filter(isEnabled)
         })
       );
     }
@@ -129,6 +131,7 @@ const workHandlers = [
     const omeroProject = req.variables.omeroProject
       ? omeroProjectRepository.find('name', req.variables.omeroProject)
       : undefined;
+    const dnapStudy = req.variables.dnapStudy ? dnapStudyRepository.find('name', req.variables.dnapStudy) : undefined;
     const workRequester = releaseRecipientRepository.find('username', req.variables.workRequester);
 
     if (!workType) {
@@ -172,7 +175,7 @@ const workHandlers = [
         numOriginalSamples: req.variables.numOriginalSamples
       },
       {
-        associations: { workType, costCode, project, program, workRequester, omeroProject },
+        associations: { workType, costCode, project, program, workRequester, omeroProject, dnapStudy },
         transient: { isRnD: req.variables.prefix === 'R&D' }
       }
     );

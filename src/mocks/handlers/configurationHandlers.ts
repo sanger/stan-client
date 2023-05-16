@@ -15,6 +15,7 @@ import solutionRepository from '../repositories/solutionRepository';
 import userRepository from '../repositories/userRepository';
 import programRepository from '../repositories/programRepository';
 import omeroProjectRepository from '../repositories/omeroProjectRepository';
+import dnapStudyRepository from '../repositories/dnapStudyRepository';
 
 const configurationHandlers = [
   graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>('GetConfiguration', (req, res, ctx) => {
@@ -34,7 +35,8 @@ const configurationHandlers = [
         solutions: solutionRepository.findAll(),
         users: userRepository.findAll(),
         programs: programRepository.findAll(),
-        omeroProjects: omeroProjectRepository.findAll()
+        omeroProjects: omeroProjectRepository.findAll(),
+        dnapStudies: dnapStudyRepository.findAll()
       })
     );
   })

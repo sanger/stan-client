@@ -1,0 +1,5 @@
+mutation AddDnapStudy($name: String!) {
+    addDnapStudy(name: $name) {
+        ...DnapStudyFields
+    }
+}
