@@ -71,7 +71,7 @@ export type WorkAllocationFormValues = {
   /**
    * Dnap Study Id and description
    */
-  dnapStudy: string;
+  dnapStudy?: string;
 
   /**
    * Whether or not an R&D number is being created. Will use a different prefix on call to core.
@@ -289,9 +289,9 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             workType.name
           } - ${blockSlideSampleMsg}) to project ${project.name.trim()}${
             omeroProject ? `, Omero project ${omeroProject.name}` : ''
-          }${dnapStudy ? `, DNAP study ${dnapStudy.name}` : ''} and program ${program.name} using cost code ${
-            costCode.code
-          } with the work requester ${workRequester?.username}`;
+          }${dnapStudy ? `, DNAP study ID and description ${dnapStudy.name}` : ''} and program ${
+            program.name
+          } using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
         }),
 
         updateWork: assign((ctx, e) => {

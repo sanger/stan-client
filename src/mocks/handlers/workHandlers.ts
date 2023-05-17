@@ -26,7 +26,10 @@ import {
   UpdateWorkStatusMutationVariables,
   WorkStatus,
   FindWorksCreatedByQuery,
-  FindWorksCreatedByQueryVariables
+  FindWorksCreatedByQueryVariables,
+  DnapStudy,
+  UpdateWorkDnapProjectMutation,
+  UpdateWorkDnapProjectMutationVariables
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -320,6 +323,41 @@ const workHandlers = [
       return res(
         ctx.data({
           updateWorkOmeroProject: work
+        })
+      );
+    }
+  ),
+  graphql.mutation<UpdateWorkDnapProjectMutation, UpdateWorkDnapProjectMutationVariables>(
+    'UpdateWorkDnapProject',
+    (req, res, ctx) => {
+      const work = workRepository.find('workNumber', req.variables.workNumber);
+      if (!work) {
+        return res(
+          ctx.errors([
+            {
+              message: `Work ${req.variables.workNumber} not found`
+            }
+          ])
+        );
+      }
+      let dnapStudy: DnapStudy | null = null;
+      if (req.variables.dnapStudy) {
+        dnapStudy = dnapStudyRepository.find('name', req.variables.dnapStudy);
+      }
+      if (!dnapStudy) {
+        return res(
+          ctx.errors([
+            {
+              message: `DNAP Study ID and description ${req.variables.dnapStudy} not found`
+            }
+          ])
+        );
+      }
+      work.dnapStudy = dnapStudy;
+      workRepository.save(work);
+      return res(
+        ctx.data({
+          updateWorkDnapProject: work
         })
       );
     }

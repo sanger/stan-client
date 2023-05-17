@@ -33,7 +33,8 @@ const initialValues: WorkAllocationFormValues = {
   isRnD: false,
   numSlides: undefined,
   numBlocks: undefined,
-  numOriginalSamples: undefined
+  numOriginalSamples: undefined,
+  dnapStudy: undefined
 };
 export const MAX_NUM_BLOCKANDSLIDES = 200;
 
@@ -51,6 +52,7 @@ const tableColumnFieldInfo = [
   { key: 'Work Requester', path: ['work', 'workRequester', 'username'] },
   { key: 'Project', path: ['work', 'project', 'name'] },
   { key: 'Omero Project', path: ['work', 'omeroProject', 'name'] },
+  { key: 'DNAP Study', path: ['work', 'dnapStudy', 'name'] },
   { key: 'Cost Code', path: ['work', 'costCode', 'code'] },
   { key: 'Number of Blocks', path: ['work', 'numBlocks'] },
   { key: 'Number of Slides', path: ['work', 'numSlides'] },
@@ -201,6 +203,10 @@ export default function WorkAllocation() {
       .oneOf(omeroProjects.map((cc) => cc.name))
       .optional()
       .label('Omero Project'),
+    dnapStudy: Yup.string()
+      .oneOf(dnapStudies.map((cc) => cc.name))
+      .optional()
+      .label('DNAP study ID and description'),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
     numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
@@ -273,7 +279,7 @@ export default function WorkAllocation() {
           validationSchema={validationSchema}
         >
           <Form>
-            <div className="space-y-2 md:grid md:grid-cols-4 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
+            <div className=" md:grid md:grid-cols-3 md:px-10 sm:flex sm:flex-row md:justify-center md:items-start md:gap-y-4 md:gap-x-8">
               <div className="md:flex-grow">
                 <CustomReactSelect
                   label="Work Type"
@@ -365,14 +371,13 @@ export default function WorkAllocation() {
                   min={0}
                 />
               </div>
-
               <div className="md:flex-grow">
                 <CustomReactSelect
                   label="DNAP study ID and description"
-                  name="dnap_study"
+                  name="dnapStudy"
                   dataTestId="dnapStudy"
                   emptyOption={true}
-                  options={selectOptionValues(dnapStudies, 'name', 'name')}
+                  options={selectOptionValues(dnapStudies, 'name', 'name', true, { sort: true, alphaFirst: true })}
                 />
               </div>
             </div>
@@ -452,6 +457,9 @@ export default function WorkAllocation() {
                     <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Project')}>Project</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Omero Project')}>Omero Project</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('DNAP Study ID and description')}>
+                      DNAP Study ID and description
+                    </TableHeader>
                     <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Number of Blocks')}>Number of Blocks</TableHeader>
@@ -469,6 +477,7 @@ export default function WorkAllocation() {
                       initialWork={workWithComment}
                       availableComments={availableComments}
                       availableOmeroProjects={omeroProjects}
+                      availableDnapStudies={dnapStudies}
                       key={workWithComment.work.workNumber}
                       rowIndex={index}
                       onWorkFieldUpdate={onWorkUpdate}

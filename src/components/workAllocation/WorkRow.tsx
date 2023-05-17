@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { TableCell } from '../Table';
 import {
   CommentFieldsFragment,
+  DnapStudyFieldsFragment,
   OmeroProjectFieldsFragment,
   WorkStatus,
   WorkWithCommentFieldsFragment
@@ -44,9 +45,13 @@ type WorkRowProps = {
    */
   availableComments: Array<CommentFieldsFragment>;
   /**
-   * The comments available for the user to select when updating Work status
+   * The Omero projects available for the user to select when updating Work status
    */
   availableOmeroProjects: Array<OmeroProjectFieldsFragment>;
+  /**
+   * The DNAP study id and description fields available for the user to select when updating Work status
+   */
+  availableDnapStudies: Array<DnapStudyFieldsFragment>;
 
   rowIndex: number;
   onWorkFieldUpdate: (index: number, work: WorkWithCommentFieldsFragment) => void;
@@ -60,6 +65,7 @@ export default function WorkRow({
   initialWork,
   availableComments,
   availableOmeroProjects,
+  availableDnapStudies,
   rowIndex,
   onWorkFieldUpdate
 }: WorkRowProps) {
@@ -171,6 +177,22 @@ export default function WorkRow({
     );
   };
 
+  const rendeWorkDnapProjectField = (workNumber: string, dnapStudy: string | undefined) => {
+    return (
+      <CustomReactSelect
+        dataTestId={`${workNumber}-DnapStudy`}
+        handleChange={(val) => {
+          send({
+            type: 'UPDATE_DNAP_PROJECT',
+            dnapStudy: (val as OptionType).label
+          });
+        }}
+        value={dnapStudy}
+        options={selectOptionValues(availableDnapStudies, 'name', 'name')}
+      />
+    );
+  };
+
   const validateWorkPriority = (priority: string) => {
     let errorMessage = '';
     if (priority.length === 0) return errorMessage;
@@ -229,6 +251,7 @@ export default function WorkRow({
       <TableCell>{work.workRequester?.username}</TableCell>
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
+      <TableCell>{rendeWorkDnapProjectField(work.workNumber, work.dnapStudy?.name)}</TableCell>
       <TableCell>{work.program.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>

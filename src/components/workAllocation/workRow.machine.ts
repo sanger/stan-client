@@ -1,5 +1,6 @@
 import { createMachine } from 'xstate';
 import {
+  UpdateWorkDnapProjectMutation,
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumOriginalSamplesMutation,
   UpdateWorkNumSlidesMutation,
@@ -41,11 +42,13 @@ export type WorkRowEvent =
     }
   | { type: 'UPDATE_PRIORITY'; priority: string | undefined }
   | { type: 'UPDATE_OMERO_PROJECT'; omeroProject: string | undefined }
+  | { type: 'UPDATE_DNAP_PROJECT'; dnapStudy: string | undefined }
   | MachineServiceDone<'updateWorkStatus', UpdateWorkStatusMutation>
   | MachineServiceDone<'updateWorkNumBlocks', UpdateWorkNumBlocksMutation>
   | MachineServiceDone<'updateWorkNumSlides', UpdateWorkNumSlidesMutation>
   | MachineServiceDone<'updateWorkPriority', UpdateWorkPriorityMutation>
   | MachineServiceDone<'updateWorkOmeroProject', UpdateWorkOmeroProjectMutation>
+  | MachineServiceDone<' updateWorkDnapProject', UpdateWorkDnapProjectMutation>
   | MachineServiceDone<'updateWorkNumOriginalSamples', UpdateWorkNumOriginalSamplesMutation>;
 
 type CreateWorkRowMachineParams = Pick<WorkRowMachineContext, 'workWithComment'>;
@@ -78,7 +81,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_SLIDES: 'editNumberSlides',
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
-            UPDATE_OMERO_PROJECT: 'updateOmeroProject'
+            UPDATE_OMERO_PROJECT: 'updateOmeroProject',
+            UPDATE_DNAP_PROJECT: 'updateDnapProject'
           }
         },
         active: {
@@ -92,7 +96,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_SLIDES: 'editNumberSlides',
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
-            UPDATE_OMERO_PROJECT: 'updateOmeroProject'
+            UPDATE_OMERO_PROJECT: 'updateOmeroProject',
+            UPDATE_DNAP_PROJECT: 'updateDnapProject'
           }
         },
         paused: {
@@ -106,7 +111,8 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_NUM_SLIDES: 'editNumberSlides',
             UPDATE_NUM_ORIGINAL_SAMPLES: 'editNumberOriginalSamples',
             UPDATE_PRIORITY: 'editPriority',
-            UPDATE_OMERO_PROJECT: 'updateOmeroProject'
+            UPDATE_OMERO_PROJECT: 'updateOmeroProject',
+            UPDATE_DNAP_PROJECT: 'updateDnapProject'
           }
         },
         completed: {},
@@ -176,6 +182,17 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             },
             onError: { target: 'deciding' }
           }
+        },
+        updateDnapProject: {
+          invoke: {
+            src: 'updateWorkDnapProject',
+            id: 'updateWorkDnapProject',
+            onDone: {
+              actions: 'assignWorkDnapProject',
+              target: 'deciding'
+            },
+            onError: { target: 'deciding' }
+          }
         }
       }
     },
@@ -204,6 +221,10 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         assignWorkOmeroProject: assign((ctx, e) => {
           if (e.type !== 'done.invoke.updateWorkOmeroProject') return;
           ctx.workWithComment.work = e.data.updateWorkOmeroProject;
+        }),
+        assignWorkDnapProject: assign((ctx, e) => {
+          if (e.type !== 'done.invoke. updateWorkDnapProject') return;
+          ctx.workWithComment.work = e.data.updateWorkDnapProject;
         }),
         toggleEditMode: assign((ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled))
       },
@@ -253,6 +274,13 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
           };
           if ('omeroProject' in e && e.omeroProject) params['omeroProject'] = e.omeroProject;
           return stanCore.UpdateWorkOmeroProject(params);
+        },
+        updateWorkDnapProject: (ctx, e) => {
+          let params: { workNumber: string; dnapStudy?: string } = {
+            workNumber: ctx.workWithComment.work.workNumber
+          };
+          if ('dnapStudy' in e && e.dnapStudy) params['dnapStudy'] = e.dnapStudy;
+          return stanCore.UpdateWorkDnapProject(params);
         }
       }
     }

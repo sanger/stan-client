@@ -26,7 +26,7 @@ const FormikInput = ({ label, name, type = 'text', displayTag, info, ...rest }: 
   return (
     <>
       <div>
-        <Label name={label} displayTag={displayTag} info={info}>
+        <Label name={label} displayTag={displayTag} info={info} className={'whitespace-nowrap'}>
           <Field type={type} data-testid={label} className={inputClassNames} name={name} {...rest} />
         </Label>
       </div>
