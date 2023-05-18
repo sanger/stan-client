@@ -42,10 +42,10 @@ const transferTypes = [
   'cDNA',
   'Probes',
   'Library',
-  'Library Post-clean',
-  'Library Pre-clean',
-  'Probes Pre-clean',
-  'Probes Post-clean'
+  'Library pre-clean',
+  'Library post-clean',
+  'Probes pre-clean',
+  'Probes post-clean'
 ];
 
 interface SourceLabwareScanPanelProps {
