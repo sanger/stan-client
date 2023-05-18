@@ -287,9 +287,9 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           debugger;
           ctx.successMessage = `Assigned ${workNumber} (${
             workType.name
-          } - ${blockSlideSampleMsg}) to project ${project.name.trim()}${
+          } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
             omeroProject ? `, Omero project ${omeroProject.name}` : ''
-          }${dnapStudy ? `, DNAP study ID and description ${dnapStudy.name}` : ''} and program ${
+          }${dnapStudy ? `, DNAP study ID and description '${dnapStudy.name}'` : ''} and program ${
             program.name
           } using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
         }),

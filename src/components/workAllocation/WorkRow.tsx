@@ -177,7 +177,7 @@ export default function WorkRow({
     );
   };
 
-  const rendeWorkDnapProjectField = (workNumber: string, dnapStudy: string | undefined) => {
+  const renderWorkDnapProjectField = (workNumber: string, dnapStudy: string | undefined) => {
     return (
       <CustomReactSelect
         dataTestId={`${workNumber}-DnapStudy`}
@@ -251,7 +251,7 @@ export default function WorkRow({
       <TableCell>{work.workRequester?.username}</TableCell>
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
-      <TableCell>{rendeWorkDnapProjectField(work.workNumber, work.dnapStudy?.name)}</TableCell>
+      <TableCell>{renderWorkDnapProjectField(work.workNumber, work.dnapStudy?.name)}</TableCell>
       <TableCell>{work.program.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>

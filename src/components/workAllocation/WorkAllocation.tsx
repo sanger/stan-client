@@ -190,7 +190,7 @@ export default function WorkAllocation() {
     project: Yup.string()
       .oneOf(projects.map((p) => p.name))
       .required()
-      .label('Project'),
+      .label('Project (cost code description)'),
     program: Yup.string()
       .oneOf(programs.map((p) => p.name))
       .required()
@@ -305,7 +305,7 @@ export default function WorkAllocation() {
 
               <div className="md:flex-grow">
                 <CustomReactSelect
-                  label="Project"
+                  label="Project (cost code description)"
                   name="project"
                   dataTestId="project"
                   fixedWidth={210}
@@ -455,7 +455,7 @@ export default function WorkAllocation() {
                     <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Project')}>Project</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Project')}>Project (cost code description)</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Omero Project')}>Omero Project</TableHeader>
                     <TableHeader sortProps={getTableSortProps('DNAP Study ID and description')}>
                       DNAP Study ID and description

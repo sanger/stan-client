@@ -30,7 +30,7 @@ describe('Work Allocation', () => {
         });
 
         it('says project is required', () => {
-          cy.findByText('Project is a required field').should('exist');
+          cy.findByText('Project (cost code description) is a required field').should('exist');
         });
         it('says program is required', () => {
           cy.findByText('Program is a required field').should('exist');
@@ -66,7 +66,7 @@ describe('Work Allocation', () => {
         it('allocates new Work', () => {
           cy.findByRole('button', { name: /Submit/i }).click();
           cy.findByText(
-            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999, Omero project OMERO_TEST999, DNAP study ID and description S40315 - Heart Study_NB and program PROGRAM_999 using cost code S999 with the work requester et2/
+            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project \(cost code description\) TEST999, Omero project OMERO_TEST999, DNAP study ID and description 'S40315 - Heart Study_NB' and program PROGRAM_999 using cost code S999 with the work requester et2/
           ).should('exist');
         });
 
@@ -298,7 +298,7 @@ describe('Work Allocation', () => {
 
       it('displays succes message and notification to complete RNAscope/IHC template', () => {
         cy.findByText(
-          /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999, Omero project OMERO_TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
+          /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project \(cost code description\) TEST999, Omero project OMERO_TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
         ).should('exist');
         cy.findAllByTestId('reminder-div').should('have.length', 2);
       });
