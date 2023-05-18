@@ -6,6 +6,7 @@ import workTypeFactory from './workTypeFactory';
 import releaseRecipientFactory from './releaseRecipientFactory';
 import programFactory from './programFactory';
 import omeroProjectFactory from './omeroProjectFactory';
+import dnapStudyFactory from './dnapStudyFactory';
 
 export default Factory.define<WorkFieldsFragment, { isRnD: boolean }>(
   ({ params, sequence, associations, transientParams }) => {
@@ -28,7 +29,8 @@ export default Factory.define<WorkFieldsFragment, { isRnD: boolean }>(
       numSlides: params.numSlides,
       numOriginalSamples: params.numOriginalSamples,
       workNumber: workNumber,
-      omeroProject: associations.omeroProject ?? omeroProjectFactory.build()
+      omeroProject: associations.omeroProject ?? omeroProjectFactory.build(),
+      dnapStudy: associations.dnapStudy ?? dnapStudyFactory.build()
     };
   }
 );

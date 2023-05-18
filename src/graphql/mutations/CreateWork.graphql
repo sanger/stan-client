@@ -9,6 +9,7 @@ mutation CreateWork(
   $numSlides: Int
   $numOriginalSamples: Int
   $omeroProject: String
+  $dnapStudy: String
 ) {
   createWork(
     prefix: $prefix
@@ -21,6 +22,7 @@ mutation CreateWork(
     numSlides: $numSlides
     numOriginalSamples: $numOriginalSamples
     omeroProject: $omeroProject
+    dnapStudy: $dnapStudy
   ) {
     ...WorkFields
   }

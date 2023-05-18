@@ -23,4 +23,7 @@ query GetWorkAllocationInfo($commentCategory: String!, $workStatuses: [WorkStatu
   omeroProjects(includeDisabled: false) {
     ...OmeroProjectFields
   }
+  dnapStudies(includeDisabled: false) {
+    ...DnapStudyFields
+  }
 }

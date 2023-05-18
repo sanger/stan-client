@@ -44,4 +44,7 @@ query GetConfiguration {
   omeroProjects(includeDisabled: true) {
     ...OmeroProjectFields
   }
+  dnapStudies(includeDisabled: true) {
+    ...DnapStudyFields
+  }
 }
