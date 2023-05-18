@@ -111,13 +111,13 @@ export default class RegistrationValidation {
     if (this.tissueSampleRegistration) {
       return validation.optionalString({
         label: 'Replicate Number',
-        restrictChars: /^([a-zA-Z0-9]){1,7}$/,
+        restrictChars: /^[a-zA-Z0-9]{1,7}$/,
         errorMessage: 'Replicate number must be a string of up to 7 letters and numbers.'
       });
     } else {
       return validation.requiredString({
         label: 'Replicate Number',
-        restrictChars: /^([a-zA-Z0-9]){1,7}$/,
+        restrictChars: /^[a-zA-Z0-9]{1,7}$/,
         errorMessage: 'Replicate number must be a string of up to 7 letters and numbers.'
       });
     }

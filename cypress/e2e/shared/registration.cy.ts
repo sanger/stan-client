@@ -75,7 +75,7 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
       cy.findByTestId('Replicate Number').clear().type('1ab-').blur();
       checkReplicateWarningIsVisible();
 
-      cy.findByTestId('Replicate Number').clear().type('1ab6789').blur();
+      cy.findByTestId('Replicate Number').clear().type('1ab67896').blur();
       checkReplicateWarningIsVisible();
 
       cy.findByTestId('Replicate Number').clear().type('1ab678A').blur();
