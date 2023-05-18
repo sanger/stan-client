@@ -23,7 +23,6 @@ mutation CreateWork(
     numOriginalSamples: $numOriginalSamples
     omeroProject: $omeroProject
     dnapStudy: $dnapStudy
-
   ) {
     ...WorkFields
   }

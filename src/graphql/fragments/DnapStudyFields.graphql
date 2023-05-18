@@ -1,4 +1,4 @@
 fragment DnapStudyFields on DnapStudy {
-    name
-    enabled
+  name
+  enabled
 }
