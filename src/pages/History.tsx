@@ -80,6 +80,6 @@ export default function History() {
  * Initial values for the form if they're not provided from the URL
  */
 const defaultInitialValues: HistoryProps = {
-  kind: 'labwareBarcode',
+  kind: 'workNumber',
   value: ''
 };
