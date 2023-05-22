@@ -33,7 +33,8 @@ const initialValues: WorkAllocationFormValues = {
   isRnD: false,
   numSlides: undefined,
   numBlocks: undefined,
-  numOriginalSamples: undefined
+  numOriginalSamples: undefined,
+  dnapStudy: undefined
 };
 export const MAX_NUM_BLOCKANDSLIDES = 200;
 
@@ -51,6 +52,7 @@ const tableColumnFieldInfo = [
   { key: 'Work Requester', path: ['work', 'workRequester', 'username'] },
   { key: 'Project', path: ['work', 'project', 'name'] },
   { key: 'Omero Project', path: ['work', 'omeroProject', 'name'] },
+  { key: 'DNAP Study', path: ['work', 'dnapStudy', 'name'] },
   { key: 'Cost Code', path: ['work', 'costCode', 'code'] },
   { key: 'Number of Blocks', path: ['work', 'numBlocks'] },
   { key: 'Number of Slides', path: ['work', 'numSlides'] },
@@ -95,9 +97,11 @@ export default function WorkAllocation() {
     workWithComments,
     workTypes,
     workRequesters,
+    dnapStudies,
     availableComments,
     requestError,
-    successMessage
+    successMessage,
+    allocatedWorkNumber
   } = current.context;
 
   /**Hook to sort table*/
@@ -186,7 +190,7 @@ export default function WorkAllocation() {
     project: Yup.string()
       .oneOf(projects.map((p) => p.name))
       .required()
-      .label('Project'),
+      .label('Project (cost code description)'),
     program: Yup.string()
       .oneOf(programs.map((p) => p.name))
       .required()
@@ -199,6 +203,10 @@ export default function WorkAllocation() {
       .oneOf(omeroProjects.map((cc) => cc.name))
       .optional()
       .label('Omero Project'),
+    dnapStudy: Yup.string()
+      .oneOf(dnapStudies.map((cc) => cc.name))
+      .optional()
+      .label('DNAP study ID and description'),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
     numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
@@ -214,6 +222,18 @@ export default function WorkAllocation() {
         {successMessage && (
           <>
             <Success message={successMessage} />
+            <div
+              data-testid={'reminder-div'}
+              className={'flex flex-row border-l-4 border-green-600 p-2 bg-green-100 text-green-800 font-medium'}
+            >
+              <InfoIcon className={'bg-white inline-block bg-green-100 text-green-800 h-12 w-12'} />
+              <div>
+                <span> Please record your work request number </span>
+                <span className={'text-pink-600 font-bold'}> {` ${allocatedWorkNumber} `} </span>
+                for future reference. If you mislay this information you can find your request number on the home page
+                by searching using requester, program, worktype or status fields.
+              </div>
+            </div>
             {userRoleIncludes(UserRole.Enduser) && (
               <div
                 data-testid={'reminder-div'}
@@ -259,7 +279,7 @@ export default function WorkAllocation() {
           validationSchema={validationSchema}
         >
           <Form>
-            <div className="space-y-2 md:grid md:grid-cols-4 md:px-10 md:space-y-0 md:flex md:flex-row md:justify-center md:items-start md:gap-4">
+            <div className=" md:grid md:grid-cols-3 md:px-10 sm:flex sm:flex-row md:justify-center md:items-start md:gap-y-4 md:gap-x-8">
               <div className="md:flex-grow">
                 <CustomReactSelect
                   label="Work Type"
@@ -285,7 +305,7 @@ export default function WorkAllocation() {
 
               <div className="md:flex-grow">
                 <CustomReactSelect
-                  label="Project"
+                  label="Project (cost code description)"
                   name="project"
                   dataTestId="project"
                   fixedWidth={210}
@@ -349,6 +369,15 @@ export default function WorkAllocation() {
                   type={'number'}
                   maxLength={MAX_NUM_BLOCKANDSLIDES}
                   min={0}
+                />
+              </div>
+              <div className="md:flex-grow">
+                <CustomReactSelect
+                  label="DNAP study ID and description"
+                  name="dnapStudy"
+                  dataTestId="dnapStudy"
+                  emptyOption={true}
+                  options={selectOptionValues(dnapStudies, 'name', 'name', true, { sort: true, alphaFirst: true })}
                 />
               </div>
             </div>
@@ -426,8 +455,11 @@ export default function WorkAllocation() {
                     <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Project')}>Project</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('Project')}>Project (cost code description)</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Omero Project')}>Omero Project</TableHeader>
+                    <TableHeader sortProps={getTableSortProps('DNAP Study ID and description')}>
+                      DNAP Study ID and description
+                    </TableHeader>
                     <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
                     <TableHeader sortProps={getTableSortProps('Number of Blocks')}>Number of Blocks</TableHeader>
@@ -445,6 +477,7 @@ export default function WorkAllocation() {
                       initialWork={workWithComment}
                       availableComments={availableComments}
                       availableOmeroProjects={omeroProjects}
+                      availableDnapStudies={dnapStudies}
                       key={workWithComment.work.workNumber}
                       rowIndex={index}
                       onWorkFieldUpdate={onWorkUpdate}

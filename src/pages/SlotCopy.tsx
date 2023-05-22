@@ -38,7 +38,15 @@ interface DestinationLabwareScanPanelProps {
   onChangeBioState: (bioState: string) => void;
 }
 
-const transferTypes = ['cDNA', 'Probes', 'Library'];
+const transferTypes = [
+  'cDNA',
+  'Probes',
+  'Library',
+  'Library pre-clean',
+  'Library post-clean',
+  'Probes pre-clean',
+  'Probes post-clean'
+];
 
 interface SourceLabwareScanPanelProps {
   selectedSource: Source | undefined;

@@ -4,6 +4,7 @@ import {
   CommentFieldsFragment,
   CostCodeFieldsFragment,
   CreateWorkMutation,
+  DnapStudyFieldsFragment,
   GetWorkAllocationInfoQuery,
   OmeroProjectFieldsFragment,
   ProgramFieldsFragment,
@@ -68,6 +69,11 @@ export type WorkAllocationFormValues = {
   numOriginalSamples: number | undefined;
 
   /**
+   * Dnap Study Id and description
+   */
+  dnapStudy?: string;
+
+  /**
    * Whether or not an R&D number is being created. Will use a different prefix on call to core.
    */
   isRnD: boolean;
@@ -128,6 +134,10 @@ type WorkAllocationContext = {
    * List of cost codes to to allocate Work to
    */
   costCodes: Array<CostCodeFieldsFragment>;
+  /**
+   * List of Dnap studies to to allocate Work to
+   */
+  dnapStudies: Array<DnapStudyFieldsFragment>;
 
   /**
    * List of possible reasons Work state changed
@@ -138,6 +148,11 @@ type WorkAllocationContext = {
    * Notification to show to the user when something good happens
    */
   successMessage?: string;
+
+  /**
+   * New work number allocated
+   */
+  allocatedWorkNumber?: string;
 
   /**
    * URL params to filter the SGP numbers on
@@ -168,6 +183,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
         costCodes: [],
         omeroProjects: [],
         availableComments: [],
+        dnapStudies: [],
         urlParams
       },
       initial: 'loading',
@@ -224,7 +240,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             worksWithComments,
             workTypes,
             costCodes,
-            releaseRecipients
+            releaseRecipients,
+            dnapStudies
           } = e.data;
           ctx.availableComments = comments;
           ctx.projects = projects;
@@ -234,6 +251,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           ctx.costCodes = costCodes;
           ctx.omeroProjects = omeroProjects;
           ctx.workRequesters = releaseRecipients;
+          ctx.dnapStudies = dnapStudies;
         }),
 
         assignServerError: assign((ctx, e) => {
@@ -255,7 +273,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numBlocks,
             numSlides,
             numOriginalSamples,
-            omeroProject
+            omeroProject,
+            dnapStudy
           } = e.data.createWork;
           const blockSlideSampleMsg = [
             numBlocks ? `${numBlocks} blocks` : undefined,
@@ -264,13 +283,15 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           ]
             .filter((msg) => msg)
             .join(' and ');
+          ctx.allocatedWorkNumber = workNumber;
+          debugger;
           ctx.successMessage = `Assigned ${workNumber} (${
             workType.name
-          } - ${blockSlideSampleMsg}) to project ${project.name.trim()}${
+          } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
             omeroProject ? `, Omero project ${omeroProject.name}` : ''
-          } and program ${program.name} using cost code ${costCode.code} with the work requester ${
-            workRequester?.username
-          }`;
+          }${dnapStudy ? `, DNAP study ID and description '${dnapStudy.name}'` : ''} and program ${
+            program.name
+          } using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
         }),
 
         updateWork: assign((ctx, e) => {
@@ -302,7 +323,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             isRnD,
             numBlocks,
             numSlides,
-            numOriginalSamples
+            numOriginalSamples,
+            dnapStudy
           } = e.values;
 
           return stanCore.CreateWork({
@@ -315,7 +337,8 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numBlocks,
             numSlides,
             numOriginalSamples,
-            omeroProject
+            omeroProject,
+            dnapStudy
           });
         },
 

@@ -26,7 +26,10 @@ import {
   UpdateWorkStatusMutationVariables,
   WorkStatus,
   FindWorksCreatedByQuery,
-  FindWorksCreatedByQueryVariables
+  FindWorksCreatedByQueryVariables,
+  DnapStudy,
+  UpdateWorkDnapProjectMutation,
+  UpdateWorkDnapProjectMutationVariables
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -40,6 +43,7 @@ import releaseRecipientRepository from '../repositories/releaseRecipientReposito
 import programRepository from '../repositories/programRepository';
 import omeroProjectRepository from '../repositories/omeroProjectRepository';
 import labwareFactory from '../../lib/factories/labwareFactory';
+import dnapStudyRepository from '../repositories/dnapStudyRepository';
 
 const workHandlers = [
   graphql.query<GetWorkAllocationInfoQuery, GetWorkAllocationInfoQueryVariables>(
@@ -76,7 +80,8 @@ const workHandlers = [
             };
           }),
           workTypes: workTypeRepository.findAll().filter(isEnabled),
-          releaseRecipients: releaseRecipientRepository.findAll().filter(isEnabled)
+          releaseRecipients: releaseRecipientRepository.findAll().filter(isEnabled),
+          dnapStudies: dnapStudyRepository.findAll().filter(isEnabled)
         })
       );
     }
@@ -129,6 +134,7 @@ const workHandlers = [
     const omeroProject = req.variables.omeroProject
       ? omeroProjectRepository.find('name', req.variables.omeroProject)
       : undefined;
+    const dnapStudy = req.variables.dnapStudy ? dnapStudyRepository.find('name', req.variables.dnapStudy) : undefined;
     const workRequester = releaseRecipientRepository.find('username', req.variables.workRequester);
 
     if (!workType) {
@@ -172,7 +178,7 @@ const workHandlers = [
         numOriginalSamples: req.variables.numOriginalSamples
       },
       {
-        associations: { workType, costCode, project, program, workRequester, omeroProject },
+        associations: { workType, costCode, project, program, workRequester, omeroProject, dnapStudy },
         transient: { isRnD: req.variables.prefix === 'R&D' }
       }
     );
@@ -317,6 +323,41 @@ const workHandlers = [
       return res(
         ctx.data({
           updateWorkOmeroProject: work
+        })
+      );
+    }
+  ),
+  graphql.mutation<UpdateWorkDnapProjectMutation, UpdateWorkDnapProjectMutationVariables>(
+    'UpdateWorkDnapProject',
+    (req, res, ctx) => {
+      const work = workRepository.find('workNumber', req.variables.workNumber);
+      if (!work) {
+        return res(
+          ctx.errors([
+            {
+              message: `Work ${req.variables.workNumber} not found`
+            }
+          ])
+        );
+      }
+      let dnapStudy: DnapStudy | null = null;
+      if (req.variables.dnapStudy) {
+        dnapStudy = dnapStudyRepository.find('name', req.variables.dnapStudy);
+      }
+      if (!dnapStudy) {
+        return res(
+          ctx.errors([
+            {
+              message: `DNAP Study ID and description ${req.variables.dnapStudy} not found`
+            }
+          ])
+        );
+      }
+      work.dnapStudy = dnapStudy;
+      workRepository.save(work);
+      return res(
+        ctx.data({
+          updateWorkDnapProject: work
         })
       );
     }

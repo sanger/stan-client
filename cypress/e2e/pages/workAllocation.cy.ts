@@ -30,7 +30,7 @@ describe('Work Allocation', () => {
         });
 
         it('says project is required', () => {
-          cy.findByText('Project is a required field').should('exist');
+          cy.findByText('Project (cost code description) is a required field').should('exist');
         });
         it('says program is required', () => {
           cy.findByText('Program is a required field').should('exist');
@@ -55,6 +55,7 @@ describe('Work Allocation', () => {
           selectOption('workRequester', 'et2');
           selectOption('project', 'TEST999');
           selectOption('omeroProject', 'OMERO_TEST999');
+          selectOption('dnapStudy', 'S40315 - Heart Study_NB');
           selectOption('program', 'PROGRAM_999');
           selectOption('costCode', 'S999');
           cy.findByLabelText('Number of blocks').type('5');
@@ -65,7 +66,7 @@ describe('Work Allocation', () => {
         it('allocates new Work', () => {
           cy.findByRole('button', { name: /Submit/i }).click();
           cy.findByText(
-            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999, Omero project OMERO_TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
+            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project \(cost code description\) TEST999, Omero project OMERO_TEST999, DNAP study ID and description 'S40315 - Heart Study_NB' and program PROGRAM_999 using cost code S999 with the work requester et2/
           ).should('exist');
         });
 
@@ -211,15 +212,26 @@ describe('Work Allocation', () => {
     });
   });
 
-  describe('Editing the Omero project column for Work ', () => {
+  describe('Editing the  table column for Work ', () => {
     context('Selecting a value in Omero project cell in table', () => {
       before(() => {
         cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
         selectOption('SGP1008-OmeroProject', 'OMERO_TEST999');
       });
 
-      it('updates priority', () => {
+      it('updates omero project column', () => {
         shouldDisplaySelectedValue('SGP1008-OmeroProject', 'OMERO_TEST999');
+      });
+    });
+
+    context('Selecting a value in DNAP Study Id and description cell in table', () => {
+      before(() => {
+        cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
+        selectOption('SGP1008-DnapStudy', 'S40315 - Heart Study_NB');
+      });
+
+      it('updates dnap study column', () => {
+        shouldDisplaySelectedValue('SGP1008-DnapStudy', 'S40315 - Heart Study_NB');
       });
     });
 
@@ -286,9 +298,9 @@ describe('Work Allocation', () => {
 
       it('displays succes message and notification to complete RNAscope/IHC template', () => {
         cy.findByText(
-          /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project TEST999, Omero project OMERO_TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
+          /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project \(cost code description\) TEST999, Omero project OMERO_TEST999 and program PROGRAM_999 using cost code S999 with the work requester et2/
         ).should('exist');
-        cy.findByTestId('reminder-div').should('exist');
+        cy.findAllByTestId('reminder-div').should('have.length', 2);
       });
     });
   });
