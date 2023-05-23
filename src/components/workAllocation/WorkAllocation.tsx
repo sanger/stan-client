@@ -343,6 +343,15 @@ export default function WorkAllocation() {
                   options={selectOptionValues(costCodes, 'code', 'code')}
                 />
               </div>
+              <div className="md:flex-grow">
+                <CustomReactSelect
+                  label="DNAP study ID and description"
+                  name="dnapStudy"
+                  dataTestId="dnapStudy"
+                  emptyOption={true}
+                  options={selectOptionValues(dnapStudies, 'name', 'name', true, { sort: true, alphaFirst: true })}
+                />
+              </div>
 
               <div className="md:flex-grow">
                 <FormikInput
@@ -369,15 +378,6 @@ export default function WorkAllocation() {
                   type={'number'}
                   maxLength={MAX_NUM_BLOCKANDSLIDES}
                   min={0}
-                />
-              </div>
-              <div className="md:flex-grow">
-                <CustomReactSelect
-                  label="DNAP study ID and description"
-                  name="dnapStudy"
-                  dataTestId="dnapStudy"
-                  emptyOption={true}
-                  options={selectOptionValues(dnapStudies, 'name', 'name', true, { sort: true, alphaFirst: true })}
                 />
               </div>
             </div>
