@@ -15,24 +15,30 @@ import {
 } from '../../types/sdk';
 import { faker } from '@faker-js/faker';
 
-export const sampleFactory = Factory.define<Sample>(({ sequence, params, associations }) => ({
-  __typename: 'Sample',
-  id: params.id ?? sequence,
-  section: params.section ?? _.random(10),
-  tissue: associations.tissue ?? tissueFactory.build(),
-  bioState: associations.bioState ?? bioStateFactory.build()
-}));
+export const sampleFactory = Factory.define<Sample>(
+  ({ sequence, params, associations }) =>
+    ({
+      __typename: 'Sample',
+      id: params.id ?? sequence,
+      section: params.section ?? _.random(10),
+      tissue: associations.tissue ?? tissueFactory.build(),
+      bioState: associations.bioState ?? bioStateFactory.build()
+    } as Sample)
+);
 
-export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(({ params, associations }) => ({
-  __typename: 'Tissue',
-  externalName: params.externalName ?? `${faker.name.lastName()}${faker.random.numeric()}`,
-  replicate: params.replicate ?? String(_.random(10)),
-  spatialLocation: associations.spatialLocation ?? spatialLocationFactory.build(),
-  donor: associations.donor ?? donorFactory.build(),
-  hmdmc: associations.hmdmc ?? hmdmcFactory.build(),
-  medium: associations.medium ?? mediumFactory.build(),
-  fixative: associations.fixative ?? fixativeFactory.build()
-}));
+export const tissueFactory: Factory<Tissue> = Factory.define<Tissue>(
+  ({ params, associations }) =>
+    ({
+      __typename: 'Tissue',
+      externalName: params.externalName ?? `${faker.person.lastName()}${faker.number.int()}`,
+      replicate: params.replicate ?? String(_.random(10)),
+      spatialLocation: associations.spatialLocation ?? spatialLocationFactory.build(),
+      donor: associations.donor ?? donorFactory.build(),
+      hmdmc: associations.hmdmc ?? hmdmcFactory.build(),
+      medium: associations.medium ?? mediumFactory.build(),
+      fixative: associations.fixative ?? fixativeFactory.build()
+    } as Tissue)
+);
 
 export const bioStateFactory: Factory<BioState> = Factory.define<BioState>(({ params, sequence }) => ({
   __typename: 'BioState',
@@ -56,12 +62,15 @@ export const hmdmcFactory: Factory<Hmdmc> = Factory.define<Hmdmc>(({ params }) =
   enabled: params.enabled ?? true
 }));
 
-export const donorFactory: Factory<Donor> = Factory.define<Donor>(({ params, associations }) => ({
-  __typename: 'Donor',
-  donorName: params.donorName ?? `${_.capitalize(faker.random.word())}${faker.random.numeric()}`,
-  lifeStage: params.lifeStage ?? _.shuffle([LifeStage.Fetal, LifeStage.Paediatric, LifeStage.Adult])[0],
-  species: associations.species ?? speciesFactory.build()
-}));
+export const donorFactory: Factory<Donor> = Factory.define<Donor>(
+  ({ params, associations }) =>
+    ({
+      __typename: 'Donor',
+      donorName: params.donorName ?? `${_.capitalize(faker.lorem.word())}${faker.number.int()}`,
+      lifeStage: params.lifeStage ?? _.shuffle([LifeStage.Fetal, LifeStage.Paediatric, LifeStage.Adult])[0],
+      species: associations.species ?? speciesFactory.build()
+    } as Donor)
+);
 
 export const speciesFactory: Factory<Species> = Factory.define<Species>(({ params, sequence }) => ({
   __typename: 'Species',
@@ -69,15 +78,21 @@ export const speciesFactory: Factory<Species> = Factory.define<Species>(({ param
   enabled: params.enabled ?? true
 }));
 
-export const spatialLocationFactory = Factory.define<SpatialLocation>(({ params, associations }) => ({
-  __typename: 'SpatialLocation',
-  name: params.name ?? 'MONKEY',
-  code: params.code ?? _.random(33),
-  tissueType: associations.tissueType ?? tissueTypeFactory.build()
-}));
+export const spatialLocationFactory = Factory.define<SpatialLocation>(
+  ({ params, associations }) =>
+    ({
+      __typename: 'SpatialLocation',
+      name: params.name ?? 'MONKEY',
+      code: params.code ?? _.random(33),
+      tissueType: associations.tissueType ?? tissueTypeFactory.build()
+    } as SpatialLocation)
+);
 
-export const tissueTypeFactory = Factory.define<TissueType>(({ sequence, params }) => ({
-  __typename: 'TissueType',
-  name: params.name ?? `Tissue Type ${sequence}`,
-  spatialLocations: []
-}));
+export const tissueTypeFactory = Factory.define<TissueType>(
+  ({ sequence, params }) =>
+    ({
+      __typename: 'TissueType',
+      name: params.name ?? `Tissue Type ${sequence}`,
+      spatialLocations: []
+    } as TissueType)
+);
