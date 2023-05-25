@@ -127,7 +127,8 @@
     "ts-jest": "28.0.8"
   },
   "resolutions": {
-    "babel-loader": "8.1.0"
+    "babel-loader": "8.1.0",
+    "yaml": "2.2.2"
   },
   "msw": {
     "workerDirectory": "public"
