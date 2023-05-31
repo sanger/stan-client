@@ -1,5 +1,6 @@
 import { FindQuery, FindQueryVariables } from '../../../src/types/sdk';
 import { buildFindResult } from '../../../src/mocks/handlers/findHandlers';
+import { getSelect, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 
 describe('Search', () => {
   context('when URL query params are set', () => {
@@ -14,7 +15,8 @@ describe('Search', () => {
       cy.findByLabelText('STAN Barcode').should('have.value', 'STAN-0001F');
       cy.findByLabelText('External Identifier').should('have.value', 'EXT987');
       cy.findByLabelText('Donor ID').should('have.value', 'DNR123');
-      cy.contains('Tissue Type 1').should('be.visible');
+      shouldDisplaySelectedValue('workNumber', 'SGP1008');
+      shouldDisplaySelectedValue('tissueType', 'Tissue Type 1');
       cy.contains('SGP Number').should('be.visible');
       cy.findByLabelText('Created After').should('have.value', '2021-07-01');
       cy.findByLabelText('Created Before').should('have.value', '2021-07-31');
