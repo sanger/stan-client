@@ -136,7 +136,38 @@ export default class RegistrationValidation {
       min: 0
     });
   }
-
+  get region() {
+    return Yup.string()
+      .oneOf(this.registrationInfo.slotRegions.map((sr) => sr.name))
+      .label('Section Position')
+      .test('Test', (value) => {
+        return true;
+        /* debugger;
+        const pathKey = ctx.path;
+        const [, values] = ctx.from;
+        const slotKey = Object.keys(values.value).find((key) => pathKey.includes(key));
+        if (slotKey && values.value[slotKey].length > 1) {
+          return !!value;
+        } else return true;*/
+      });
+    /*.test('Test', 'Sample position is a required field for multi-section slot.', (value, context) => {
+      const pathKey = context.path;
+     /* const, values] = context.from;
+      const slotKey = Object.keys(values.value).find((key) => pathKey.includes(key));
+      if (slotKey && values.value[slotKey].length > 1) {
+        return !!value;
+      } else return true;
+        })*/
+    /*.test('Test', 'Unique value required for sample position', (value, context) => {
+          if (!value) return;
+          const pathKey = context.path;
+          const [, values] = context.from;
+          const slotKey = Object.keys(values.value).find((key) => pathKey.includes(key));
+          if (slotKey && values.value[slotKey].length > 1) {
+            return values.value[slotKey].filter((item) => item.sectionPosition === value).length === 1;
+          } else return true;
+        });*/
+  }
   get sectionThickness() {
     return Yup.number().integer().min(0).label('Section Thickness');
   }

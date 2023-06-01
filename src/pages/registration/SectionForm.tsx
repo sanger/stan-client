@@ -181,6 +181,19 @@ export default function SectionForm({
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.sectionNumber`}
       />
 
+      <CustomReactSelect
+        label="Region"
+        dataTestId="region"
+        name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.region`}
+        value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].region}
+        options={registrationInfo.slotRegions.map((region) => {
+          return {
+            label: region.name,
+            value: region.name
+          };
+        })}
+      />
+
       <FormikInput
         label="Section Thickness"
         type="number"

@@ -24,4 +24,7 @@ query GetRegistrationInfo {
   solutions {
     name
   }
+  slotRegions {
+    name
+  }
 }
