@@ -190,7 +190,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
               validateOnMount={false}
               onSubmit={onFormSubmit}
             >
-              {({ errors, isValid, resetForm }) => (
+              {({ errors, isValid, resetForm, values }) => (
                 <Form>
                   {!isValid && (
                     <Warning className={'mb-5'} message={'Validation Error'}>
@@ -214,8 +214,10 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                     </div>
                     <div>
                       <CustomReactSelect
+                        dataTestId={'workNumber'}
                         label="SGP Number"
                         name="workNumber"
+                        value={values.workNumber}
                         emptyOption={true}
                         options={selectOptionValues(sortedWorks(), 'workNumber', 'workNumber', true)}
                       />
@@ -228,9 +230,11 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                     </div>
                     <div>
                       <CustomReactSelect
+                        dataTestId={'tissueType'}
                         label="Tissue Type"
                         name="tissueTypeName"
                         emptyOption={true}
+                        value={values.tissueTypeName}
                         options={selectOptionValues(searchInfo.tissueTypes, 'name', 'name')}
                       />
                     </div>
