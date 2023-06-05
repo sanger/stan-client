@@ -56,7 +56,7 @@ const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
   barcode: Yup.string().optional(),
   qcType: Yup.string().required().label('QC Type'),
-  labwareResult: Yup.object().when('qcType', (qcType, schema) => {
+  labwareResult: Yup.object().when('qcType', (qcType) => {
     const val = qcType as unknown as string;
     if (val === QCType.SLIDE_PROCESSING) {
       return Yup.object().required();
@@ -64,24 +64,24 @@ const validationSchema = Yup.object().shape({
       return Yup.object().notRequired();
     }
   }),
-  slotMeasurements: Yup.array().of(
-    Yup.object()
-      .shape({
+  slotMeasurements: Yup.array()
+    .of(
+      Yup.object().shape({
         address: Yup.string().required(),
         name: Yup.string().required(),
         value: Yup.string().required('Positive value required')
       })
-      .when('qcType', (qcType, schema) => {
-        const val = qcType[0] as unknown as string;
-        if (val === QCType.SLIDE_PROCESSING) {
-          return Yup.array().notRequired();
-        } else {
-          return Yup.array().required();
-        }
-      })
-  ),
+    )
+    .when('qcType', (qcType) => {
+      const val = qcType[0] as unknown as string;
+      if (val === QCType.SLIDE_PROCESSING) {
+        return Yup.array().notRequired();
+      } else {
+        return Yup.array().notRequired();
+      }
+    }),
 
-  costing: Yup.string().when('qcType', (qcType, schema) => {
+  costing: Yup.string().when('qcType', (qcType) => {
     const val = qcType[0] as unknown as string;
     if (val === QCType.SLIDE_PROCESSING) {
       return Yup.string().oneOf(Object.values(SlideCosting)).required('Slide costing is a required field');
@@ -209,6 +209,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
   };
 
   const isEnableSubmit = (value: VisiumQCFormData) => {
+    debugger;
     if (value.workNumber === '') {
       return false;
     }
