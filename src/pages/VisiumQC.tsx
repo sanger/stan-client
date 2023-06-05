@@ -209,7 +209,6 @@ export default function VisiumQC({ info }: VisiumQCProps) {
   };
 
   const isEnableSubmit = (value: VisiumQCFormData) => {
-    debugger;
     if (value.workNumber === '') {
       return false;
     }
