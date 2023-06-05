@@ -184,6 +184,7 @@ export default function SectionForm({
       <CustomReactSelect
         label="Region"
         dataTestId="region"
+        emptyOption
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.region`}
         value={values.labwares[currentIndex].slots[slotAddress][sectionIndex].region}
         options={registrationInfo.slotRegions.map((region) => {

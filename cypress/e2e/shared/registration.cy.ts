@@ -98,6 +98,11 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
         cy.findByText('Solution is a required field').should('be.visible');
       });
     }
+    if (registrationType !== RegistrationType.TISSUE_SAMPLE) {
+      it('should display Region field', () => {
+        cy.findByLabelText('Region').should('be.visible');
+      });
+    }
   });
   const checkReplicateWarningIsVisible = () => {
     cy.findByText('Replicate number must be a string of up to 7 letters and numbers.').should('be.visible');
