@@ -98,7 +98,7 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
         cy.findByText('Solution is a required field').should('be.visible');
       });
     }
-    if (registrationType !== RegistrationType.TISSUE_SAMPLE) {
+    if (registrationType === RegistrationType.SLIDE) {
       it('should display Region field', () => {
         cy.findByLabelText('Region').should('be.visible');
       });
