@@ -99,7 +99,6 @@ export default function WorkProgressSummaryInput({
     Object.values(searchTypes).forEach((key) => {
       map.set(key, generateValuesForType(key));
     });
-    debugger;
     return map;
   };
 
