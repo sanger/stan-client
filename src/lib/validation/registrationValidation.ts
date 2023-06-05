@@ -154,7 +154,6 @@ export default class RegistrationValidation {
       .test('Test', 'Unique value required for region', (value, context) => {
         if (!value) return true;
         const pathKey = context.path;
-        debugger;
         if (context.from && context.from.length > 1) {
           const values = context.from[1];
           const slotKey = Object.keys(values.value).find((key) => pathKey.includes(key));

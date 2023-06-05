@@ -284,7 +284,6 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             .filter((msg) => msg)
             .join(' and ');
           ctx.allocatedWorkNumber = workNumber;
-          debugger;
           ctx.successMessage = `Assigned ${workNumber} (${
             workType.name
           } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${

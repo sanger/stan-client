@@ -24,7 +24,6 @@ import LoadingSpinner from '../icons/LoadingSpinner';
 import BlueButton from '../buttons/BlueButton';
 import { history } from '../../lib/sdk';
 import InfoIcon from '../icons/InfoIcon';
-import { u } from 'msw/lib/glossary-297d38ba';
 const initialValues: WorkAllocationFormValues = {
   workType: '',
   workRequester: '',

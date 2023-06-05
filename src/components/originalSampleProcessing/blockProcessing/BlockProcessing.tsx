@@ -252,7 +252,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
               .required()
               .oneOf(allowedLabwareTypes.map((type) => type.name)),
             preBarcode: Yup.string().when('labwareType', (labwareType, schema) => {
-              debugger;
               const val = labwareType[0] as unknown as string;
               return val === LabwareTypeName.PRE_BARCODED_TUBE
                 ? Yup.string()
