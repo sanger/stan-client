@@ -251,11 +251,17 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
             labwareType: Yup.string()
               .required()
               .oneOf(allowedLabwareTypes.map((type) => type.name)),
-            preBarcode: Yup.string().when('labwareType', {
-              is: (value: string) => value === LabwareTypeName.PRE_BARCODED_TUBE,
-              then: Yup.string()
-                .required('Barcode is required')
-                .matches(/[a-zA-Z]{2}\d{8}/, 'Barcode should be in the format with two letters followed by 8 numbers')
+            preBarcode: Yup.string().when('labwareType', (labwareType, schema) => {
+              debugger;
+              const val = labwareType[0] as unknown as string;
+              return val === LabwareTypeName.PRE_BARCODED_TUBE
+                ? Yup.string()
+                    .required('Barcode is required')
+                    .matches(
+                      /[a-zA-Z]{2}\d{8}/,
+                      'Barcode should be in the format with two letters followed by 8 numbers'
+                    )
+                : schema;
             })
           })
         )

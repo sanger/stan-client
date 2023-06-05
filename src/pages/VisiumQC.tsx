@@ -56,34 +56,46 @@ const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
   barcode: Yup.string().optional(),
   qcType: Yup.string().required().label('QC Type'),
-  labwareResult: Yup.object().when('qcType', {
-    is: (value: string) => value === QCType.SLIDE_PROCESSING,
-    then: Yup.object().required(),
-    otherwise: Yup.object().notRequired()
+  labwareResult: Yup.object().when('qcType', (qcType, schema) => {
+    const val = qcType as unknown as string;
+    if (val === QCType.SLIDE_PROCESSING) {
+      return Yup.object().required();
+    } else {
+      return Yup.object().notRequired();
+    }
   }),
-  slotMeasurements: Yup.array()
-    .of(
-      Yup.object().shape({
+  slotMeasurements: Yup.array().of(
+    Yup.object()
+      .shape({
         address: Yup.string().required(),
         name: Yup.string().required(),
         value: Yup.string().required('Positive value required')
       })
-    )
-    .when('qcType', {
-      is: (value: string) => value === QCType.SLIDE_PROCESSING,
-      then: Yup.array().notRequired(),
-      otherwise: Yup.array().required()
-    }),
-  costing: Yup.string().when('qcType', {
-    is: (value: string) => value === QCType.SLIDE_PROCESSING,
-    then: Yup.string().oneOf(Object.values(SlideCosting)).required('Slide costing is a required field'),
-    otherwise: Yup.string().optional()
+      .when('qcType', (qcType, schema) => {
+        const val = qcType[0] as unknown as string;
+        if (val === QCType.SLIDE_PROCESSING) {
+          return Yup.array().notRequired();
+        } else {
+          return Yup.array().required();
+        }
+      })
+  ),
+
+  costing: Yup.string().when('qcType', (qcType, schema) => {
+    const val = qcType[0] as unknown as string;
+    if (val === QCType.SLIDE_PROCESSING) {
+      return Yup.string().oneOf(Object.values(SlideCosting)).required('Slide costing is a required field');
+    } else {
+      return Yup.string().optional();
+    }
   }),
-  reagentLot: Yup.string().when('qcType', {
-    is: (value: string) => value === QCType.SLIDE_PROCESSING,
-    then: Yup.string()
-      .required('Reagent LOT number is  a required field')
-      .matches(/^\d{6,7}$/, 'Reagent LOT number should be a 6-7 digits number')
+  reagentLot: Yup.string().when('qcType', (qcType, schema) => {
+    const val = qcType[0] as unknown as string;
+    return val === QCType.SLIDE_PROCESSING
+      ? Yup.string()
+          .required('Reagent LOT number is  a required field')
+          .matches(/^\d{6,7}$/, 'Reagent LOT number should be a 6-7 digits number')
+      : schema;
   }),
   slotComments: Yup.array()
     .of(
@@ -92,7 +104,10 @@ const validationSchema = Yup.object().shape({
         commentId: Yup.number().required()
       })
     )
-    .when('qcType', { is: (value: string) => value === QCType.SPRI_CLEANUP, then: Yup.array().required() })
+    .when('qcType', (qcType, schema) => {
+      const val = qcType[0] as unknown as string;
+      return val === QCType.SPRI_CLEANUP ? Yup.array().required() : schema;
+    })
 });
 
 export default function VisiumQC({ info }: VisiumQCProps) {

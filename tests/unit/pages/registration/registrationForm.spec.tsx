@@ -15,6 +15,7 @@ import RegistrationForm from '../../../../src/pages/registration/RegistrationFor
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { getRegistrationFormTissue, RegistrationFormTissue } from '../../../../src/pages/BlockRegistration';
+import slotRegionRepository from '../../../../src/mocks/repositories/slotRegionRepository';
 
 const registrationInfo: GetRegistrationInfoQuery = {
   solutions: solutionRepository.findAll(),
@@ -31,7 +32,8 @@ const registrationInfo: GetRegistrationInfoQuery = {
       ]
     }
   ],
-  labwareTypes: [labwareTypes[LabwareTypeName.CASSETTE].build(), labwareTypes[LabwareTypeName.PROVIASETTE].build()]
+  labwareTypes: [labwareTypes[LabwareTypeName.CASSETTE].build(), labwareTypes[LabwareTypeName.PROVIASETTE].build()],
+  slotRegions: slotRegionRepository.findAll()
 };
 const availableLabwareTypes: LabwareType[] = registrationInfo.labwareTypes;
 

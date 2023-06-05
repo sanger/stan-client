@@ -62,13 +62,14 @@ export default class RegistrationValidation {
   }
 
   get hmdmc() {
-    return Yup.string().when('species', {
-      is: 'Human',
-      then: Yup.string()
-        .oneOf(this.registrationInfo.hmdmcs.map((h) => h.hmdmc))
-        .required()
-        .label('HuMFre'),
-      otherwise: Yup.string().length(0)
+    return Yup.string().when('species', (species, schema) => {
+      const val = species[0] as unknown as string;
+      return val === 'Human'
+        ? schema
+            .oneOf(this.registrationInfo.hmdmcs.map((h) => h.hmdmc))
+            .required()
+            .label('HuMFre')
+        : schema.length(0);
     });
   }
 
@@ -140,33 +141,28 @@ export default class RegistrationValidation {
     return Yup.string()
       .oneOf(this.registrationInfo.slotRegions.map((sr) => sr.name))
       .label('Section Position')
-      .test('Test', (value) => {
-        return true;
-        /* debugger;
-        const pathKey = ctx.path;
-        const [, values] = ctx.from;
-        const slotKey = Object.keys(values.value).find((key) => pathKey.includes(key));
-        if (slotKey && values.value[slotKey].length > 1) {
-          return !!value;
-        } else return true;*/
-      });
-    /*.test('Test', 'Sample position is a required field for multi-section slot.', (value, context) => {
-      const pathKey = context.path;
-     /* const, values] = context.from;
-      const slotKey = Object.keys(values.value).find((key) => pathKey.includes(key));
-      if (slotKey && values.value[slotKey].length > 1) {
-        return !!value;
-      } else return true;
-        })*/
-    /*.test('Test', 'Unique value required for sample position', (value, context) => {
-          if (!value) return;
-          const pathKey = context.path;
-          const [, values] = context.from;
+      .test('Test', 'Sample position is a required field for multi-section slot.', (value, context) => {
+        const pathKey = context.path;
+        if (context.from && context.from.length > 1) {
+          const values = context.from[1];
           const slotKey = Object.keys(values.value).find((key) => pathKey.includes(key));
-          if (slotKey && values.value[slotKey].length > 1) {
-            return values.value[slotKey].filter((item) => item.sectionPosition === value).length === 1;
+          if (slotKey && values.value[slotKey as keyof typeof value].length > 1) {
+            return !!value;
           } else return true;
-        });*/
+        }
+      })
+      .test('Test', 'Unique value required for sample position', (value, context) => {
+        if (!value) return true;
+        const pathKey = context.path;
+        debugger;
+        if (context.from && context.from.length > 1) {
+          const values = context.from[1];
+          const slotKey = Object.keys(values.value).find((key) => pathKey.includes(key));
+          if (slotKey && values.value[slotKey as keyof typeof value].length > 1) {
+            return values.value[slotKey as keyof typeof value].filter((item: any) => item.region === value).length <= 1;
+          } else return true;
+        } else return true;
+      });
   }
   get sectionThickness() {
     return Yup.number().integer().min(0).label('Section Thickness');
@@ -180,15 +176,16 @@ export default class RegistrationValidation {
   }
 
   get sampleCollectionDate() {
-    return Yup.date().when('lifeStage', {
-      is: LifeStage.Fetal,
-      then: Yup.date()
-        .max(new Date(), `Please select a date on or before ${new Date().toLocaleDateString()}`)
-        .nullable()
-        .transform((curr, orig) => (orig === '' ? null : curr))
-        .required('Sample Collection Date is a required field for fetal samples')
-        .label('Sample Collection Date'),
-      otherwise: Yup.date().notRequired()
+    return Yup.date().when('lifeStage', (lifeStage, schema) => {
+      const val = lifeStage[0] as unknown as string;
+      return val === LifeStage.Fetal
+        ? schema
+            .max(new Date(), `Please select a date on or before ${new Date().toLocaleDateString()}`)
+            .nullable()
+            .transform((curr, orig) => (orig === '' ? null : curr))
+            .required('Sample Collection Date is a required field for fetal samples')
+            .label('Sample Collection Date')
+        : schema.notRequired();
     });
   }
 }
