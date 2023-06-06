@@ -1,6 +1,6 @@
 import { FindQuery, FindQueryVariables } from '../../../src/types/sdk';
 import { buildFindResult } from '../../../src/mocks/handlers/findHandlers';
-import { getSelect, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
+import { shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 
 describe('Search', () => {
   context('when URL query params are set', () => {
