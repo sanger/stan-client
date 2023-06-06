@@ -253,7 +253,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     } else {
       handleSave();
     }
-  }, [handleSave, sourceLabwarePermData, destinations]);
+  }, [handleSave, sourceLabwarePermData]);
 
   /**
    * When we get into the "copied" state, show a success message
