@@ -12,12 +12,18 @@
       },
       {
         "barcode": "STO-1351"
+      },
+      {
+        "barcode": "STO-148B"
       }
     ],
 
     "Fridges": [
       {
         "barcode": "STO-002E"
+      },
+      {
+        "barcode": "STO-14E5"
       }
     ],
 
@@ -33,6 +39,9 @@
       },
       {
         "barcode": "STO-1333"
+      },
+      {
+        "barcode": "STO-1807"
       }
     ]
   }
