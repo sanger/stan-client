@@ -16,6 +16,7 @@ import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import speciesRepository from '../repositories/speciesRepository';
 import hmdmcRepository from '../repositories/hmdmcRepository';
 import solutionRepository from '../repositories/solutionRepository';
+import slotRegionRepository from '../repositories/slotRegionRepository';
 
 const registrationHandlers = [
   graphql.query<GetRegistrationInfoQuery, GetRegistrationInfoQueryVariables>('GetRegistrationInfo', (req, res, ctx) => {
@@ -105,7 +106,8 @@ const registrationHandlers = [
         ],
         fixatives: [{ name: 'None' }, { name: 'Formalin' }],
         mediums: [{ name: 'OCT' }, { name: 'Paraffin' }, { name: 'None' }],
-        solutions: solutionRepository.findAll().filter((sample) => sample.enabled)
+        solutions: solutionRepository.findAll().filter((sample) => sample.enabled),
+        slotRegions: slotRegionRepository.findAll().filter((region) => region.enabled)
       })
     );
   }),

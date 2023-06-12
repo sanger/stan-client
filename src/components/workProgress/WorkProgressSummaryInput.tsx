@@ -29,21 +29,22 @@ export const workProgressSummarySearchSchema = (workTypes: string[], programs?: 
     searchType: Yup.string().oneOf(Object.values(WorkProgressSearchType)).required(),
     searchValues: Yup.array()
       .of(Yup.string().required())
-      .when('searchType', {
-        is: (value: string) => value === WorkProgressSearchType.WorkType,
-        then: Yup.array().of(Yup.string().oneOf(workTypes).required())
-      })
-      .when('searchType', {
-        is: (value: string) => value === WorkProgressSearchType.Status,
-        then: Yup.array().of(Yup.string().oneOf(Object.values(WorkStatus)).required())
-      })
-      .when('searchType', {
-        is: (value: string) => value === WorkProgressSearchType.Program,
-        then: Yup.array().of(
-          Yup.string()
-            .oneOf(programs ?? [])
-            .required()
-        )
+      .when('searchType', (searchType, schema) => {
+        const val = searchType[0] as unknown as string;
+        if (val === WorkProgressSearchType.WorkType) {
+          return Yup.array().of(Yup.string().oneOf(workTypes).required());
+        }
+        if (val === WorkProgressSearchType.Status) {
+          return Yup.array().of(Yup.string().oneOf(Object.values(WorkStatus)).required());
+        }
+        if (val === WorkProgressSearchType.Program) {
+          return Yup.array().of(
+            Yup.string()
+              .oneOf(programs ?? [])
+              .required()
+          );
+        }
+        return schema;
       })
   });
 };

@@ -60,19 +60,21 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
     bondRun: Yup.number().integer().positive().label('Bond Run'),
     workNumber: Yup.string().required().label('SGP Number'),
     panel: Yup.string().oneOf(Object.values(StainPanel)).required().label('Experimental Panel'),
-    plexRNAscope: Yup.number().when('stainTypes', {
-      is: () => {
-        return stainType !== 'IHC';
-      },
-      then: Yup.number().integer().min(plexMin).max(plexMax).required().label('RNAScope Plex Number'),
-      otherwise: Yup.number().notRequired()
+    plexRNAscope: Yup.number().when('stainTypes', (stainTypes, schema) => {
+      const value = stainTypes[0] as unknown as string;
+      if (value !== 'IHC') {
+        return Yup.number().integer().min(plexMin).max(plexMax).required().label('RNAScope Plex Number');
+      } else {
+        return Yup.number().notRequired();
+      }
     }),
-    plexIHC: Yup.number().when('stainTypes', {
-      is: () => {
-        return stainType !== 'RNAscope';
-      },
-      then: Yup.number().required().integer().min(plexMin).max(plexMax).label('IHC Plex Number'),
-      otherwise: Yup.number().notRequired()
+    plexIHC: Yup.number().when('stainTypes', (stainTypes, schema) => {
+      const value = stainTypes[0] as unknown as string;
+      if (value !== 'RNAscope') {
+        return Yup.number().required().integer().min(plexMin).max(plexMax).label('IHC Plex Number');
+      } else {
+        return Yup.number().notRequired();
+      }
     })
   });
   const validationSchema = Yup.object().shape({

@@ -284,10 +284,9 @@ export const historySchema = Yup.object({
     .oneOf([...historyStrKeys, ...historyNumKeys])
     .required(),
   value: Yup.mixed()
-    .when("kind", {
-      is: (val: string) => val === "sampleId",
-      then: Yup.number().integer().positive().required(),
-      otherwise: Yup.string().required(),
+    .when("kind", (kind)=> {
+      const val = kind as unknown as string
+      return val ==='sampleId'?Yup.number().integer().positive().required():Yup.string().required()
     })
     .required(),
 }).required();
@@ -339,7 +338,7 @@ export function createSessionStorageForLabwareAwaiting( labware:LabwareFieldsFra
   );
 }
 
-declare module "yup" {
+/*declare module "yup" {
   interface ArraySchema<T> {
     unique(
         message: string,
@@ -356,4 +355,4 @@ Yup.addMethod(Yup.array, "unique", function (
       message,
       (list = []) => list.length === new Set(list.map(mapper)).size
   );
-});
+});*/

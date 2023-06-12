@@ -1,8 +1,10 @@
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
 import { RegisterSectionsMutation, RegisterSectionsMutationVariables } from '../../../src/types/sdk';
 import {
+  getSelect,
   selectFocusBlur,
   selectOption,
+  selectOptionForMultiple,
   selectSGPNumber,
   shouldDisplaySelectedValue
 } from '../shared/customReactSelect.cy';
@@ -119,6 +121,16 @@ describe('Section Registration Page', () => {
 
       it('should add a new section', () => {
         cy.findByText('2 Section(s)').should('be.visible');
+      });
+      it('should have Region as a required field when there are multiple sections', () => {
+        selectFocusBlur('region');
+        cy.findByText('Region is a required field for slot with multiple sections').should('be.visible');
+      });
+      it('should display region to have unique values', () => {
+        selectOptionForMultiple('region', 'Top', 0);
+        selectOptionForMultiple('region', 'Top', 1);
+        selectFocusBlur('region');
+        cy.findAllByText('Unique value required for region').should('have.length', 2);
       });
     });
   });
