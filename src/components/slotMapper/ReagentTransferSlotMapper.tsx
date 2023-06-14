@@ -160,7 +160,7 @@ function ReagentTransferSlotMapper({
       const address = destinationAddress ? destinationAddress : givenDestinationAddress;
       if (initialSourceLabware.barcode && initialDestLabware.barcode && address) {
         send({
-          type: 'COPY_SLOTS',
+          type: 'COPY_ONE_TO_ONE_SLOTS',
           inputLabwareId: initialSourceLabware.id,
           inputAddresses: selectedInputAddresses,
           outputLabwareId: initialDestLabware.id,

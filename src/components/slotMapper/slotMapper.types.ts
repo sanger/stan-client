@@ -62,6 +62,9 @@ export interface SlotMapperProps {
   /**Panel to display on top of output labware, if any**/
   outputLabwareConfigPanel?: React.ReactNode;
 
+  /**Slot copy modes**/
+  slotCopyModes?: SlotCopyMode[];
+
   /**Callback to notify when an output labware is selected (through pagination)**/
   onSelectOutputLabware?: (labware: NewLabwareLayout) => void;
 
@@ -104,8 +107,29 @@ type UpdateOutputLabwareEvent = {
   outputSlotCopyContent: Array<OutputSlotCopyData>;
 };
 
-type CopySlotsEvent = {
-  type: 'COPY_SLOTS';
+export enum SlotCopyMode {
+  ONE_TO_ONE = 'One to one',
+  ONE_TO_MANY = 'One to many',
+  MANY_TO_ONE = 'Many to one'
+}
+
+type CopyOneToOneSlotsEvent = {
+  type: 'COPY_ONE_TO_ONE_SLOTS';
+  inputLabwareId: number;
+  inputAddresses: Array<string>;
+  outputLabwareId: number;
+  outputAddress: string;
+};
+
+type CopyOneToManySlotsEvent = {
+  type: 'COPY_ONE_TO_MANY_SLOTS';
+  inputLabwareId: number;
+  inputAddress: string;
+  outputLabwareId: number;
+  outputAddress: string;
+};
+type CopyManyToOneSlotsEvent = {
+  type: 'COPY_MANY_TO_ONE_SLOTS';
   inputLabwareId: number;
   inputAddresses: Array<string>;
   outputLabwareId: number;
@@ -145,7 +169,9 @@ type UnlockEvent = { type: 'UNLOCK' };
 export type SlotMapperEvent =
   | UpdateInputLabwareEvent
   | UpdateOutputLabwareEvent
-  | CopySlotsEvent
+  | CopyOneToOneSlotsEvent
+  | CopyOneToManySlotsEvent
+  | CopyManyToOneSlotsEvent
   | ClearSlotsEvent
   | ClearAllSlotMappingsBetweenEvent
   | LockEvent

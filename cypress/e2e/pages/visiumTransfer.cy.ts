@@ -18,6 +18,13 @@ describe('Transfer Page', () => {
       cy.findByText(/96 WELL PLATE/i).should('be.visible');
     });
 
+    it('displays the mode selection', () => {
+      cy.findByText(/Select transfer mode/i).should('be.visible');
+    });
+    it('should select the first option by default', () => {
+      cy.findByTestId('copyMode-One to one').should('be.checked');
+    });
+
     it('disables the Save button', () => {
       saveButton().should('be.disabled');
     });
@@ -160,31 +167,6 @@ describe('Transfer Page', () => {
       });
     });
 
-    context('When user maps some source slots', () => {
-      before(() => {
-        cy.get('#inputLabwares').within(() => {
-          cy.findByText('A1').click();
-          cy.findByText('D1').click({ shiftKey: true });
-        });
-
-        cy.get('#outputLabwares').within(() => {
-          cy.findByText('G1').click();
-        });
-        it('does not enable Save Button', () => {
-          saveButton().should('not.be.enabled');
-        });
-      });
-
-      context('when all required field are entered', () => {
-        before(() => {
-          selectOption('transfer-type', 'Probes');
-          selectOption('input-labware-state', 'used');
-        });
-        it('enables Save Button', () => {
-          saveButton().should('be.enabled');
-        });
-      });
-    });
     context('When user maps slots that failed in Visium QC- Slide processing', () => {
       before(() => {
         cy.get('#inputLabwares').within(() => {
@@ -202,8 +184,83 @@ describe('Transfer Page', () => {
         cy.findByRole('button', { name: /Cancel/i }).click();
       });
     });
+    context('when user maps slots in one to many mode', () => {
+      before(() => {
+        cy.findByTestId('copyMode-One to many').click();
+        cy.get('#inputLabwares').within(() => {
+          cy.findByText('A1').click();
+        });
+        cy.get('#outputLabwares').within(() => {
+          cy.findByText('G1').click();
+          cy.findByText('G5').click();
+        });
+      });
+      it('should display the one to many mode', () => {
+        cy.findByTestId('copyMode-One to many').should('be.checked');
+      });
+      it('should display finish transfer button', () => {
+        cy.findByRole('button', { name: 'Finish mapping for A1' }).should('be.visible');
+      });
+      it('displays the table with A1 slot', () => {
+        cy.findByRole('table').contains('td', 'A1');
+      });
+      it('displays the table with D1 slot', () => {
+        cy.findByRole('table').contains('td', 'G1');
+        cy.findByRole('table').contains('td', 'G5');
+      });
+
+      context('when user click on finish transfer button', () => {
+        before(() => {
+          cy.findByRole('button', { name: 'Finish mapping for A1' }).click();
+        });
+        it('should remove the finish transfer button', () => {
+          cy.findByRole('button', { name: 'Finish mapping for A1' }).should('not.exist');
+        });
+      });
+    });
+    context('when user maps slots in many to one mode', () => {
+      before(() => {
+        cy.findByTestId('copyMode-Many to one').click();
+        cy.get('#inputLabwares').within(() => {
+          cy.findByText('A2').click();
+          cy.findByText('B2').click({ cmdKey: true });
+        });
+        cy.get('#outputLabwares').within(() => {
+          cy.findByText('D1').click();
+        });
+      });
+      it('should display the one to many mode', () => {
+        cy.findByTestId('copyMode-Many to one').should('be.checked');
+      });
+      it('displays the table with A2, B2 slots mapped to D1', () => {
+        cy.findByText('Slot mapping for STAN-3100').should('be.visible');
+        cy.findByRole('table').contains('td', 'A2');
+        cy.findByRole('table').contains('td', 'B2');
+        cy.findByRole('table').contains('td', 'D1');
+      });
+    });
+
+    context('when user selects a mapped slot', () => {
+      before(() => {
+        cy.get('#inputLabwares').within(() => {
+          cy.findByText('A1').click();
+        });
+      });
+      it('should display the mappings for selected slot in table', () => {
+        cy.findByText('Slot mapping for slot(s) A1').should('be.visible');
+        it('displays the table with A1 slot', () => {
+          cy.findByRole('table').contains('td', 'A1');
+          cy.findByRole('table').contains('td', 'G1');
+          cy.findByRole('table').contains('td', 'G5');
+        });
+      });
+    });
 
     describe('On save', () => {
+      before(() => {
+        selectOption('transfer-type', 'Probes');
+        selectOption('input-labware-state', 'used');
+      });
       context('When there is a server error', () => {
         before(() => {
           cy.msw().then(({ worker, graphql }) => {
