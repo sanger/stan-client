@@ -1,4 +1,15 @@
-import { act, cleanup, fireEvent, getAllByTestId, getByTestId, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  getAllByTestId,
+  getByTestId,
+  getByText,
+  render,
+  screen,
+  waitFor
+} from '@testing-library/react';
+import { within } from '@testing-library/dom';
 import SlotMapper from '../../../../src/components/slotMapper/SlotMapper';
 import { SlotCopyMode } from '../../../../src/components/slotMapper/slotMapper.types';
 import { objectKeys } from '../../../../src/lib/helpers';
@@ -114,18 +125,24 @@ describe('slotMapper.spec.tsx', () => {
 
     expect(pagerTexts[0]).toHaveTextContent('1 of 2');
   });
-  it('displays the table with A1 slot highlighted', () => {
+  it('displays slot information in table when user selects source slots', () => {
     const inputLabware = plateFactory.build();
     //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const labware: LabwareFieldsFragment[] = [
-      { ...inputLabware, barcode: 'STAN-5111' },
-      { ...inputLabware, barcode: 'STAN-5112' }
-    ];
-    const { container } = render(
+    const labware: LabwareFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
+    const wrapper = render(
       <SlotMapper
         slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
         initialInputLabware={labware}
       />
     );
+    //Select the first slot A1 in input labware
+    const inputLabwareElement = getById(wrapper.container, 'inputLabwares');
+    expect(inputLabwareElement).toBeInTheDocument();
+    if (inputLabwareElement) {
+      getByText(inputLabwareElement, 'A1').click();
+    }
+    //It should display a table with column A1
+    const table = wrapper.getByTestId('mapping-table');
+    expect(within(table).getByText('A1')).toBeInTheDocument();
   });
 });
