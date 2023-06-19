@@ -210,9 +210,10 @@ export default function WorkAllocation() {
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
     numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
-    numOriginalSamples: Yup.number().when(['numBlocks', 'numSlides'], {
-      is: (numBlocks: any, numSlides: any) => !numBlocks && !numSlides,
-      then: Yup.number().required('Number of blocks, slides or original samples required')
+    numOriginalSamples: Yup.number().when(['numBlocks', 'numSlides'], (fields, schema) => {
+      if (!fields[0] && !fields[1])
+        return Yup.number().required('Number of blocks, slides or original samples required');
+      else return schema;
     })
   });
 

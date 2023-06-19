@@ -238,16 +238,13 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
   );
 
   /**
-   * Save action invoked, so check whether a warning to be given to user if any labware with no perm done is copied
+   * Save action invoked, so check whether a warning to be given to user if any labware and it's ancestral labware
+   * with no perm done is copied
    ***/
   const onSaveAction = React.useCallback(() => {
-    /**Get all input lawares that didn't perform perm operation and are mapped/copied to 96 well plate*/
-    const slotCopyContents = destinations.flatMap((dest) => dest.slotCopyDetails.contents);
-
+    /**Get all input laware and it's ancestors that didn't perform a perm operation and are mapped/copied to 96 well plate*/
     const labwareWithoutPermData = sourceLabwarePermData?.filter(
-      (permData) =>
-        permData.visiumPermData.addressPermData.length === 0 &&
-        slotCopyContents.some((scc) => scc.sourceBarcode === permData.visiumPermData.labware.barcode)
+      (permData) => permData.visiumPermData.addressPermData.length === 0
     );
 
     if (labwareWithoutPermData && labwareWithoutPermData.length > 0) {
@@ -256,7 +253,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     } else {
       handleSave();
     }
-  }, [handleSave, sourceLabwarePermData, destinations]);
+  }, [handleSave, sourceLabwarePermData]);
 
   /**
    * When we get into the "copied" state, show a success message

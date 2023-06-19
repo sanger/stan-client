@@ -230,11 +230,13 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
       plans: Yup.array()
         .of(
           Yup.object().shape({
-            fixative: Yup.string().when('labwareType', {
-              is: (value: string) => value === LabwareTypeName.POT,
-              then: Yup.string()
-                .required('Fixative is a required field')
-                .oneOf(processingInfo!.fixatives.map((fixative) => fixative.name))
+            fixative: Yup.string().when('labwareType', (labwareType, schema) => {
+              const val = labwareType[0] as unknown as string;
+              return val === LabwareTypeName.POT
+                ? Yup.string()
+                    .required('Fixative is a required field')
+                    .oneOf(processingInfo!.fixatives.map((fixative) => fixative.name))
+                : schema;
             }),
             commentId: Yup.number().optional(),
             labwareType: Yup.string()

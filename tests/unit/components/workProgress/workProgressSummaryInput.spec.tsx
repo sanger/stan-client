@@ -25,7 +25,6 @@ describe('WorkProgressSummaryInput.tsx', () => {
   describe('workProgressSearchSchema', () => {
     describe('searchType', () => {
       const schema = workProgressSummarySearchSchema(['Work Type 1']);
-
       it('returns a validation error if search type is not provided', async () => {
         /* 
                     In this case we want to make sure schema.validate({}) throws an error

@@ -132,9 +132,10 @@ export const shouldOptionsHaveLengthAbove = (dataTestId: string, length: number)
 };
 
 //Get the dropdown with the given test id
-export const selectFocusBlur = (dataTestId?: string) => {
-  const wrapperDiv = cy.findByTestId(dataTestId ?? 'select-div');
-  wrapperDiv.within(() => {
+export const selectFocusBlur = (dataTestId?: string, index?: number) => {
+  const wrapperDiv = cy.findAllByTestId(dataTestId ?? 'select-div');
+  const indxVal = index ?? 0;
+  wrapperDiv.eq(indxVal).within(() => {
     cy.findByRole('combobox').should('exist').focus().blur();
   });
 };

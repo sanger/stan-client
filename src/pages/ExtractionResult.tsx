@@ -63,17 +63,20 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
           result: Yup.string().oneOf([PassFail.Pass, PassFail.Fail]).required(),
           concentration: Yup.string()
             .nullable()
-            .when('result', {
-              is: PassFail.Pass,
-              then: Yup.string().min(1).required().label('Concentration')
+            .when('result', (result, schema) => {
+              const val = result[0] as unknown as string;
+              return val === PassFail.Pass ? Yup.string().min(1).required().label('Concentration') : schema;
             }),
+
           commentId: Yup.number()
             .nullable()
-            .when('result', {
-              is: PassFail.Fail,
-              then: Yup.number()
-                .required()
-                .oneOf(info.comments.map((c) => c.id))
+            .when('result', (result, schema) => {
+              const val = result[0] as unknown as string;
+              return val === PassFail.Fail
+                ? Yup.number()
+                    .required()
+                    .oneOf(info.comments.map((c) => c.id))
+                : schema;
             })
         })
       )
