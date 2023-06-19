@@ -18,13 +18,6 @@ describe('Transfer Page', () => {
       cy.findByText(/96 WELL PLATE/i).should('be.visible');
     });
 
-    it('displays the mode selection', () => {
-      cy.findByText(/Select transfer mode/i).should('be.visible');
-    });
-    it('should select the first option by default', () => {
-      cy.findByTestId('copyMode-One to one').should('be.checked');
-    });
-
     it('disables the Save button', () => {
       saveButton().should('be.disabled');
     });

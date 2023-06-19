@@ -38,11 +38,11 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine({
-      inputLabware: [],
+      inputLabware: initialInputLabware ?? [],
       outputSlotCopies: initialOutputLabware,
       failedSlotsCheck
     });
-  }, [initialOutputLabware, failedSlotsCheck]);
+  }, [initialOutputLabware, failedSlotsCheck, initialInputLabware]);
 
   const [current, send] = useMachine(() => memoSlotMapperMachine);
 

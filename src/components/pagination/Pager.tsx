@@ -63,7 +63,7 @@ function Pager({
           />
         </svg>
       </IconButton>
-      <div>
+      <div data-testid={'pager-text-div'}>
         <span className="font-medium">{currentPage}</span> of <span className="font-medium">{numberOfPages}</span>
       </div>
       <IconButton disabled={pageUpDisabled} onClick={onPageUpClick} dataTestId={'right-button'}>
