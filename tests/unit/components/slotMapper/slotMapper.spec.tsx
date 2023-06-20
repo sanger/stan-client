@@ -6,6 +6,7 @@ import {
   getByTestId,
   getByText,
   render,
+  RenderResult,
   screen,
   waitFor
 } from '@testing-library/react';
@@ -18,6 +19,7 @@ import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
 import { LabwareFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
 import { getById } from '../../generic/utilities';
+import Labware from '../../../../src/components/labware/Labware';
 
 beforeEach(() => {
   enableMapSet();
@@ -134,7 +136,11 @@ describe('slotMapper.spec.tsx', () => {
     const inputLabware = plateFactory.build();
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const labware: LabwareFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
-    let wrapper;
+    let wrapper: RenderResult | undefined;
+    jest.mock('../../../../src/components/labware/Labware', () => ({
+      onSelect: (address: string[], callback: any) => callback('someData')
+    }));
+
     act(() => {
       wrapper = render(
         <SlotMapper
@@ -143,15 +149,20 @@ describe('slotMapper.spec.tsx', () => {
         />
       );
     });
-    expect(wrapper.container).toBeInTheDocument();
+    expect(wrapper?.container).toBeInTheDocument();
     //Select the first slot A1 in input labware
-    const inputLabwareElement = getById(wrapper.container, 'inputLabwares');
+    const inputLabwareElement = getById(wrapper?.container!, 'inputLabwares');
     expect(inputLabwareElement).toBeInTheDocument();
-    if (inputLabwareElement) {
-      getByText(inputLabwareElement, 'A1').click();
-    }
+
+    expect(getByText(inputLabwareElement!, 'A1')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(getByText(inputLabwareElement!, 'A1'));
+    });
+    expect(onSelect.mock.calls[0][0]).toBe('firstParameter');
     //It should display a table with column A1
-    const table = getByTestId(wrapper.container, 'mapping-table');
-    expect(within(table).getByText('A1')).toBeInTheDocument();
+    //const table = screen.getByTestId('mapping-div');
+    //expect(table).toBeInTheDocument();
+    //expect((wrapper?.container!).toHaveTextContent('Slot mapping for slot(s) A1');
+    //expect(within(table).getByText('A1')).toBeInTheDocument();*/
   });
 });

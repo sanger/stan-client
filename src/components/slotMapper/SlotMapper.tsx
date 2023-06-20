@@ -707,7 +707,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
       </div>
 
       {currentInputLabware && (selectedInputSlots.length > 0 || (currentOutput && slotsMappedForCurrentInput)) && (
-        <div className="space-y-4">
+        <div className="space-y-4" data-testid={'mapping-div'}>
           <Heading level={4}>
             {selectedInputSlots.length > 0
               ? `Slot mapping for slot(s) ${selectedInputAddresses.join(',')}`
