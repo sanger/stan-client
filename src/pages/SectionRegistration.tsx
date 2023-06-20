@@ -282,7 +282,7 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
               <div className=" flex my-4 mx-4 max-w-screen-sm sm:mx-auto justify-center text-gray-800">OR</div>
               <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
                 <Heading level={4}>Register from file</Heading>
-                <p className="my-3 text-gray-800 text-sm leading-normal">Select a file to export: </p>
+                <p className="my-3 text-gray-800 text-sm leading-normal">Select a file to upload: </p>
                 <FileUploader
                   url={'/api/sections/register'}
                   enableUpload={true}
