@@ -155,24 +155,20 @@ export type LabwareEvents =
  *   Object.assign({}, labwareMachine.context, { validator: Yup.string().min(3).required("Barcode is required") })
  * )
  */
-export const createLabwareMachine = (
-  labwares: LabwareFieldsFragment[] = [],
-  foundLabwareCheck?: (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment) => string[],
-  limit?: number
-) =>
+export const createLabwareMachine = () =>
   createMachine<LabwareContext, LabwareEvents>(
     {
       context: {
         currentBarcode: '',
         foundLabware: null,
-        labwares: labwares ?? [],
+        labwares: [],
         removedLabware: null,
-        foundLabwareCheck: foundLabwareCheck ?? undefined,
+        foundLabwareCheck: undefined,
         validator: Yup.string().trim().required('Barcode is required'),
         successMessage: null,
         errorMessage: null,
         locationScan: false,
-        limit
+        limit: undefined
       },
       id: 'labwareScanner',
       initial: 'checking_full',

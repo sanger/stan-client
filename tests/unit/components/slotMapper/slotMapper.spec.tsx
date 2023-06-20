@@ -81,60 +81,69 @@ describe('slotMapper.spec.tsx', () => {
     });
   });
 
-  it('removes input labware on remove button click', () => {
+  it('removes input labware on remove button click', async () => {
     const inputLabware = plateFactory.build();
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const labware: LabwareFieldsFragment[] = [
       { ...inputLabware, barcode: 'STAN-5111' },
       { ...inputLabware, barcode: 'STAN-5112' }
     ];
-    const { container } = render(
-      <SlotMapper
-        slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
-        initialInputLabware={labware}
-      />
-    );
-    const removeButtons = getAllByTestId(container, 'removeButton');
-    fireEvent.click(removeButtons[0]);
-    const pagerTexts = getAllByTestId(container, 'pager-text-div');
+    act(() => {
+      render(
+        <SlotMapper
+          slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
+          initialInputLabware={labware}
+        />
+      );
+    });
+    await act(async () => {
+      fireEvent.click(screen.getAllByTestId('removeButton')[0]);
+    });
+    const pagerTexts = screen.getAllByTestId('pager-text-div');
     expect(pagerTexts[0]).toHaveTextContent('1 of 1');
   });
-  it('displays previous and next input labware on previous and next button clicks', () => {
+  it('displays previous and next input labware on previous and next button clicks', async () => {
     const inputLabware = plateFactory.build();
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const labware: LabwareFieldsFragment[] = [
       { ...inputLabware, barcode: 'STAN-5111' },
       { ...inputLabware, barcode: 'STAN-5112' }
     ];
-    const { container } = render(
-      <SlotMapper
-        slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
-        initialInputLabware={labware}
-      />
-    );
-    const pagerTexts = getAllByTestId(container, 'pager-text-div');
+    act(() => {
+      render(
+        <SlotMapper
+          slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
+          initialInputLabware={labware}
+        />
+      );
+    });
+    const pagerTexts = screen.getAllByTestId('pager-text-div');
     expect(pagerTexts[0]).toHaveTextContent('1 of 2');
 
-    const rightButton = getByTestId(container, 'right-button');
-    fireEvent.click(rightButton);
-
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('right-button'));
+    });
     expect(pagerTexts[0]).toHaveTextContent('2 of 2');
 
-    const leftButton = getByTestId(container, 'left-button');
-    fireEvent.click(leftButton);
-
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('left-button'));
+    });
     expect(pagerTexts[0]).toHaveTextContent('1 of 2');
   });
-  it('displays slot information in table when user selects source slots', () => {
+  it('displays slot information in table when user selects source slots', async () => {
     const inputLabware = plateFactory.build();
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const labware: LabwareFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
-    const wrapper = render(
-      <SlotMapper
-        slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
-        initialInputLabware={labware}
-      />
-    );
+    let wrapper;
+    act(() => {
+      wrapper = render(
+        <SlotMapper
+          slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
+          initialInputLabware={labware}
+        />
+      );
+    });
+    expect(wrapper.container).toBeInTheDocument();
     //Select the first slot A1 in input labware
     const inputLabwareElement = getById(wrapper.container, 'inputLabwares');
     expect(inputLabwareElement).toBeInTheDocument();
@@ -142,7 +151,7 @@ describe('slotMapper.spec.tsx', () => {
       getByText(inputLabwareElement, 'A1').click();
     }
     //It should display a table with column A1
-    const table = wrapper.getByTestId('mapping-table');
+    const table = getByTestId(wrapper.container, 'mapping-table');
     expect(within(table).getByText('A1')).toBeInTheDocument();
   });
 });
