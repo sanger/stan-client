@@ -170,7 +170,6 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
 
   const numDisplayed = viewAllRecords ? searchResult?.numDisplayed : memoUniqueBarcodeData.length;
   const numRecords = viewAllRecords ? searchResult?.numRecords : memoUniqueBarcodeData.length;
-  debugger;
   return (
     <AppShell>
       <AppShell.Header>
