@@ -3,14 +3,12 @@ import {
   cleanup,
   fireEvent,
   getAllByTestId,
-  getByTestId,
   getByText,
   render,
   RenderResult,
   screen,
   waitFor
 } from '@testing-library/react';
-import { within } from '@testing-library/dom';
 import SlotMapper from '../../../../src/components/slotMapper/SlotMapper';
 import { SlotCopyMode } from '../../../../src/components/slotMapper/slotMapper.types';
 import { objectKeys } from '../../../../src/lib/helpers';
@@ -19,7 +17,6 @@ import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
 import { LabwareFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
 import { getById } from '../../generic/utilities';
-import Labware from '../../../../src/components/labware/Labware';
 
 beforeEach(() => {
   enableMapSet();
@@ -31,7 +28,6 @@ afterEach(() => {
 
 describe('slotMapper.spec.tsx', () => {
   it('should render the component properly', () => {
-    const wrapper = render(<SlotMapper slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])} />);
     //It should display the given slot copy modes
     expect(screen.queryByTestId('copyMode-Many to one')).toBeInTheDocument();
     expect(screen.queryByTestId('copyMode-One to many')).toBeInTheDocument();
@@ -137,9 +133,6 @@ describe('slotMapper.spec.tsx', () => {
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const labware: LabwareFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
     let wrapper: RenderResult | undefined;
-    jest.mock('../../../../src/components/labware/Labware', () => ({
-      onSelect: (address: string[], callback: any) => callback('someData')
-    }));
 
     act(() => {
       wrapper = render(
@@ -150,19 +143,14 @@ describe('slotMapper.spec.tsx', () => {
       );
     });
     expect(wrapper?.container).toBeInTheDocument();
-    //Select the first slot A1 in input labware
     const inputLabwareElement = getById(wrapper?.container!, 'inputLabwares');
-    expect(inputLabwareElement).toBeInTheDocument();
-
-    expect(getByText(inputLabwareElement!, 'A1')).toBeInTheDocument();
-    await act(async () => {
+    await waitFor(() => {
       fireEvent.click(getByText(inputLabwareElement!, 'A1'));
     });
-    expect(onSelect.mock.calls[0][0]).toBe('firstParameter');
-    //It should display a table with column A1
-    //const table = screen.getByTestId('mapping-div');
-    //expect(table).toBeInTheDocument();
-    //expect((wrapper?.container!).toHaveTextContent('Slot mapping for slot(s) A1');
-    //expect(within(table).getByText('A1')).toBeInTheDocument();*/
+    // Use waitFor with a callback that checks for the element
+    await waitFor(() => {
+      const div = screen.getByTestId('mapping-div');
+      expect(div).toBeInTheDocument();
+    });
   });
 });
