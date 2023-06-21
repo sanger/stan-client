@@ -106,80 +106,51 @@ describe('RegistrationForm', () => {
           }));
           renderOriginalRegistrationForm();
         });
-        await waitFor(() => screen.getByText('Donor Information'));
         expect(screen.getByText('Donor Information')).toBeInTheDocument();
-
-        await waitFor(() => screen.getByLabelText('Donor ID'));
         expect(screen.getByLabelText('Donor ID')).toBeInTheDocument();
 
         //Fetal should be selected by default in life stage
-        await waitFor(() => screen.getByText('Life Stage'));
         expect(screen.getByText('Life Stage')).toBeInTheDocument();
 
-        await waitFor(() => screen.getByTestId('fetal'));
         expect(screen.getByTestId('fetal')).toBeChecked();
-
-        await waitFor(() => screen.getByText('Sample Collection Date'));
         expect(screen.getByText('Sample Collection Date')).toBeInTheDocument();
-
-        await waitFor(() => screen.getByRole('combobox', { name: 'Species' }));
         expect(screen.getByRole('combobox', { name: 'Species' })).toBeInTheDocument();
 
         //Tissue Information
-        await waitFor(() => screen.getByText('Tissue Information'));
         expect(screen.getByText('Tissue Information')).toBeInTheDocument();
 
-        await waitFor(() => screen.getByText('HuMFre'));
         expect(screen.getByText('HuMFre')).toBeInTheDocument();
 
         //humfre is disabled
         const humfre = getSelect('HuMFre');
         expect(humfre).toBeDisabled();
-
-        await waitFor(() => screen.getByRole('combobox', { name: 'Tissue Type' }));
         expect(screen.getByRole('combobox', { name: 'Tissue Type' })).toBeInTheDocument();
 
         //Sample information
-        await waitFor(() => screen.getByText('Sample Information'));
         expect(screen.getByText('Sample Information')).toBeInTheDocument();
-
         //only one sample page
         expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
 
-        await waitFor(() => screen.getByTestId('External Identifier'));
         expect(screen.getByTestId('External Identifier')).toBeInTheDocument();
-
-        await waitFor(() => screen.getByTestId('Spatial Location'));
         expect(screen.getByTestId('Spatial Location')).toBeInTheDocument();
 
         //spatial location is disabled
         const spatialLocation = getSelect('Spatial Location');
         expect(spatialLocation).toBeDisabled();
 
-        await waitFor(() => screen.getByTestId('Replicate Number'));
         expect(screen.getByTestId('Replicate Number')).toBeInTheDocument();
-
-        await waitFor(() => screen.getByRole('combobox', { name: 'Labware Type' }));
         expect(screen.getByRole('combobox', { name: 'Labware Type' })).toBeInTheDocument();
 
         //Solution Information
-        await waitFor(() => screen.getByText('Solution Information'));
         expect(screen.getByText('Solution Information')).toBeInTheDocument();
-        await waitFor(() => screen.getByRole('combobox', { name: 'Fixative' }));
         expect(screen.getByRole('combobox', { name: 'Fixative' })).toBeInTheDocument();
-        await waitFor(() => screen.getByRole('combobox', { name: 'Solution' }));
         expect(screen.getByRole('combobox', { name: 'Solution' })).toBeInTheDocument();
 
         //buttons
-        await waitFor(() => screen.getByRole('button', { name: '+ Add Identical Tissue Sample' }));
         expect(screen.getByRole('button', { name: '+ Add Identical Tissue Sample' })).toBeInTheDocument();
-        await waitFor(() => screen.getByRole('button', { name: '+ Add Another Tissue Sample' }));
         expect(screen.getByRole('button', { name: '+ Add Another Tissue Sample' })).toBeInTheDocument();
-        await waitFor(() => screen.getByRole('button', { name: '+ Add Another Tissue' }));
         expect(screen.getByRole('button', { name: '+ Add Another Tissue' })).toBeInTheDocument();
-        await waitFor(() => screen.getByRole('button', { name: '+ Add Identical Tissue' }));
         expect(screen.getByRole('button', { name: '+ Add Identical Tissue' })).toBeInTheDocument();
-        await waitFor(() => screen.getByRole('button', { name: 'Register' }));
         expect(screen.getByRole('button', { name: 'Register' })).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Delete Sample' })).not.toBeInTheDocument();
       });
@@ -211,7 +182,6 @@ describe('RegistrationForm', () => {
       it('enables HumFre field on entering Species', async () => {
         const speciesCombo = getSelect('Species');
         await waitFor(() => userEvent.type(speciesCombo, 'Human{enter}'));
-        await waitFor(() => getSelect('HuMFre'));
         expect(getSelect('HuMFre')).toBeEnabled();
       });
     });
@@ -393,7 +363,7 @@ describe('RegistrationForm', () => {
       });
 
       describe('Button clicks', () => {
-        it('creates another block', async () => {
+        beforeEach(async () => {
           await act(async () => {
             window.HTMLElement.prototype.scrollIntoView = jest.fn();
             jest.mock('../../../../src/lib/hooks', () => ({
@@ -428,9 +398,9 @@ describe('RegistrationForm', () => {
 
             renderBlockRegistrationForm(tissues);
           });
-
+        });
+        it('creates another block', async () => {
           await waitFor(() => screen.getByRole('button', { name: '+ Add Another Tissue Block' }).click());
-
           //Two sample pages
           expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
           expect(screen.getAllByRole('button', { name: 'Delete Block' })).toHaveLength(2);
