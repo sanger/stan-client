@@ -5,7 +5,7 @@ import { faker } from '@faker-js/faker';
 export default Factory.define<CommentFieldsFragment>(({ params, sequence }) => ({
   __typename: 'Comment',
   id: params.id ?? sequence,
-  category: params.category ?? faker.lorem.word(),
-  text: params.text ?? faker.lorem.words(5),
+  category: params.category ?? faker.random.word(),
+  text: params.text ?? faker.random.words(5),
   enabled: params.enabled ?? true
 }));

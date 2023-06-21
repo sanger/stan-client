@@ -12,10 +12,7 @@ import { Column } from 'react-table';
  * As TypeScript enums are really just objects, this can be used for them also.
  * @param o object to retrieve keys from
  */
-export function objectKeys<E extends object>(o: E): (keyof E)[] {
-  if (typeof o !== 'object') {
-    return [];
-  }
+export function objectKeys<E>(o: E): (keyof E)[] {
   return Object.keys(o) as (keyof E)[];
 }
 

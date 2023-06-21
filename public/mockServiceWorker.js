@@ -2,13 +2,13 @@
 /* tslint:disable */
 
 /**
- * Mock Service Worker (1.2.1).
+ * Mock Service Worker (0.44.2).
  * @see https://github.com/mswjs/msw
  * - Please do NOT modify this file.
  * - Please do NOT serve this file on production.
  */
 
-const INTEGRITY_CHECKSUM = '3d6b9f06410d179a7f7404d4bf4c3c70'
+const INTEGRITY_CHECKSUM = 'b3066ef78c2f9090b4ce87e874965995'
 const activeClientIds = new Set()
 
 self.addEventListener('install', function () {
@@ -21,7 +21,8 @@ self.addEventListener('activate', function (event) {
 
 self.addEventListener('message', async function (event) {
   const clientId = event.source.id
-
+  if (event.origin !== "http://localhost:3000") // SAFE: origin checked
+    return;
   if (!clientId || !self.clients) {
     return
   }
@@ -174,7 +175,7 @@ async function handleRequest(event, requestId) {
 async function resolveMainClient(event) {
   const client = await self.clients.get(event.clientId)
 
-  if (client?.frameType === 'top-level') {
+  if (client.frameType === 'top-level') {
     return client
   }
 
@@ -200,7 +201,7 @@ async function getResponse(event, client, requestId) {
 
   function passthrough() {
     // Clone the request because it might've been already used
-    // (i.e. its body has been read and sent to the client).
+    // (i.e. its body has been read and sent to the cilent).
     const headers = Object.fromEntries(clonedRequest.headers.entries())
 
     // Remove MSW-specific request headers so the bypassed requests

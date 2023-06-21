@@ -4,13 +4,13 @@ import { faker } from '@faker-js/faker';
 import { createSessionStorageRepository } from './index';
 
 const seeds: Array<UserFieldsFragment> = [
-  userFactory.build({ username: faker.lorem.word(), role: UserRole.Normal }) as UserFieldsFragment,
-  userFactory.build({ username: faker.lorem.word(), role: UserRole.Normal }) as UserFieldsFragment,
-  userFactory.build({ username: faker.lorem.word(), role: UserRole.Admin }) as UserFieldsFragment,
-  userFactory.build({ username: faker.lorem.word(), role: UserRole.Admin }) as UserFieldsFragment,
-  userFactory.build({ username: faker.lorem.word(), role: UserRole.Enduser }) as UserFieldsFragment,
-  userFactory.build({ username: faker.lorem.word(), role: UserRole.Disabled }) as UserFieldsFragment,
-  userFactory.build({ username: 'Test user', role: UserRole.Admin }) as UserFieldsFragment
+  userFactory.build({ username: faker.random.word(), role: UserRole.Normal }),
+  userFactory.build({ username: faker.random.word(), role: UserRole.Normal }),
+  userFactory.build({ username: faker.random.word(), role: UserRole.Admin }),
+  userFactory.build({ username: faker.random.word(), role: UserRole.Admin }),
+  userFactory.build({ username: faker.random.word(), role: UserRole.Enduser }),
+  userFactory.build({ username: faker.random.word(), role: UserRole.Disabled }),
+  userFactory.build({ username: 'Test user', role: UserRole.Admin })
 ];
 
 const userRepository = createSessionStorageRepository('USER', 'username', seeds);
