@@ -17,7 +17,7 @@ import { history, StanCoreContext } from '../lib/sdk';
 import { useLocation } from 'react-router-dom';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import Heading from '../components/Heading';
-import FileUploader, { ConfirmUploadProps } from '../components/upload/FileUploader';
+import FileUploader from '../components/upload/FileUploader';
 import { toast } from 'react-toastify';
 import Success from '../components/notifications/Success';
 
@@ -223,16 +223,11 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
     send({ type: 'SUBMIT_FORM', values: buildSectionRegisterRequest(values) });
   const isSubmitting = !current.matches('fillingOutForm');
 
-  /**Callback function to confirm the upload which is called before upload action**/
-  const handleFileUpload = React.useCallback((file: File): ConfirmUploadProps | undefined => {
-    return undefined;
-  }, []);
-
   /**Callback notification send from child after finishing upload**/
   const onFileUploadFinished = React.useCallback((file: File, isSuccess: boolean) => {
     //Upload failed, return
     if (!isSuccess) return;
-    /** Notify user with success message and also update the files section with this new uploaded file**/
+    /** Notify user with success message*/
     toast(ToastSuccess(file.name), {
       position: toast.POSITION.TOP_RIGHT,
       autoClose: 4000,
@@ -284,10 +279,10 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
                 <Heading level={4}>Register from file</Heading>
                 <p className="my-3 text-gray-800 text-sm leading-normal">Select a file to upload: </p>
                 <FileUploader
-                  url={'/api/sections/register'}
+                  url={'/register/section'}
                   enableUpload={true}
-                  confirmUpload={handleFileUpload}
                   notifyUploadOutcome={onFileUploadFinished}
+                  errorField={'problems'}
                 />
               </div>
             </>

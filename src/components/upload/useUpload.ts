@@ -3,8 +3,9 @@ import React from 'react';
 /**
  * React hook for uploading a file
  * @param url - Upload url
+ * @param errorField - Field in response to use as error message
  */
-export function useUpload(url: string) {
+export function useUpload(url: string, errorField?: string) {
   const [error, setError] = React.useState<Error | undefined>(undefined);
   const [uploadSuccess, setUploadSuccess] = React.useState<boolean>(false);
 
@@ -37,20 +38,22 @@ export function useUpload(url: string) {
             setUploadSuccess(true);
           }
           response.json().then((response) => {
+            debugger;
             if (!success) {
               // get error message from body
-              setError(new Error(response.message));
+              setError(new Error(errorField ? response[errorField] : response.message));
             } else {
               setUploadSuccess(true);
             }
           });
         })
         .catch((error) => {
+          debugger;
           // get error message from body or default to response status
           setError(new Error(error));
         });
     },
-    [url]
+    [url, errorField, setError, setUploadSuccess]
   );
 
   return { error, uploadSuccess, requestUpload, initializeUpload };
