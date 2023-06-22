@@ -16,6 +16,10 @@ import { parseQueryString } from '../lib/helpers';
 import { history, StanCoreContext } from '../lib/sdk';
 import { useLocation } from 'react-router-dom';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import Heading from '../components/Heading';
+import FileUploader from '../components/upload/FileUploader';
+import { toast } from 'react-toastify';
+import Success from '../components/notifications/Success';
 
 const availableLabware: Array<LabwareTypeName> = [
   LabwareTypeName.FOUR_SLOT_SLIDE,
@@ -210,9 +214,26 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
 
   const { serverError, submissionResult } = current.context;
 
+  /**
+   * Success notification when file is uploaded
+   */
+  const ToastSuccess = (fileName: string) => <Success message={`${fileName} uploaded succesfully.`} />;
+
   const submitForm = async (values: SectionRegistrationFormValues) =>
     send({ type: 'SUBMIT_FORM', values: buildSectionRegisterRequest(values) });
   const isSubmitting = !current.matches('fillingOutForm');
+
+  /**Callback notification send from child after finishing upload**/
+  const onFileUploadFinished = React.useCallback((file: File, isSuccess: boolean) => {
+    //Upload failed, return
+    if (!isSuccess) return;
+    /** Notify user with success message*/
+    toast(ToastSuccess(file.name), {
+      position: toast.POSITION.TOP_RIGHT,
+      autoClose: 4000,
+      hideProgressBar: true
+    });
+  }, []);
 
   if (current.matches('submitted') && submissionResult) {
     return (
@@ -231,27 +252,40 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           {!initialLabware && (
-            <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
-              <p className="my-3 text-gray-800 text-sm leading-normal">Pick a type of labware to begin:</p>
-
-              <div className="flex flex-row items-center justify-center gap-4">
-                <CustomReactSelect
-                  dataTestId="initialLabwareType"
-                  handleChange={(value) =>
-                    history.replace({
-                      search: `?initialLabware=${(value as OptionType).value}`
-                    })
-                  }
-                  options={availableLabware.map((labwareTypeName) => {
-                    return {
-                      value: labwareTypeName,
-                      label: labwareTypeName
-                    };
-                  })}
-                  className=" rounded-md md:w-1/2"
+            <>
+              <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
+                <Heading level={4}>Register manually</Heading>
+                <p className="my-3 mt-4 text-gray-800 text-sm leading-normal">Pick a type of labware to begin:</p>
+                <div className="flex flex-row items-center justify-center gap-4">
+                  <CustomReactSelect
+                    dataTestId="initialLabwareType"
+                    handleChange={(value) =>
+                      history.replace({
+                        search: `?initialLabware=${(value as OptionType).value}`
+                      })
+                    }
+                    options={availableLabware.map((labwareTypeName) => {
+                      return {
+                        value: labwareTypeName,
+                        label: labwareTypeName
+                      };
+                    })}
+                    className=" rounded-md md:w-1/2"
+                  />
+                </div>
+              </div>
+              <div className=" flex my-4 mx-4 max-w-screen-sm sm:mx-auto justify-center text-gray-800">OR</div>
+              <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
+                <Heading level={4}>Register from file</Heading>
+                <p className="my-3 text-gray-800 text-sm leading-normal">Select a file to upload: </p>
+                <FileUploader
+                  url={'/register/section'}
+                  enableUpload={true}
+                  notifyUploadOutcome={onFileUploadFinished}
+                  errorField={'problems'}
                 />
               </div>
-            </div>
+            </>
           )}
 
           {serverError && (
