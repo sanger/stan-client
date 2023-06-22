@@ -3112,6 +3112,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(0 0 0 / var(--tw-ring-opacity));
 }
+.ring-blue-600 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(49 130 206 / var(--tw-ring-opacity));
+}
 .ring-offset-2 {
   --tw-ring-offset-width: 2px;
 }
@@ -4263,4 +4267,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.236d5d63.css.map*/
+/*# sourceMappingURL=main.af533dcf.css.map*/
