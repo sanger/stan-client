@@ -21,6 +21,8 @@ import Label from '../components/forms/Label';
 import { plateFactory } from '../lib/factories/labwareFactory';
 import LabelCopyButton from '../components/LabelCopyButton';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import { SlotCopyMode } from '../components/slotMapper/slotMapper.types';
+import { objectKeys } from '../lib/helpers';
 
 type PageParams = {
   title: string;
@@ -329,6 +331,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             }
             onSelectInputLabware={setSelectedSource}
             onSelectOutputLabware={setSelectedDestination}
+            slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
           />
 
           {slotCopyResults.length > 0 && (
