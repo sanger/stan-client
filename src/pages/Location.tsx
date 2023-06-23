@@ -23,7 +23,7 @@ import {
 import { Authenticated, Unauthenticated } from '../components/Authenticated';
 import { RouteComponentProps } from 'react-router-dom';
 import { extractServerErrors, LocationMatchParams, LocationSearchParams } from '../types/stan';
-import { LocationFieldsFragment, Maybe, StoreInput, UserRole } from '../types/sdk';
+import { GridDirection, LocationFieldsFragment, Maybe, StoreInput, UserRole } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import { StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
 import createLocationMachine from '../lib/machines/locations/locationMachine';
@@ -70,10 +70,9 @@ interface LocationProps extends RouteComponentProps<LocationMatchParams> {
 const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchParams, match }) => {
   const locationMachine = React.useMemo(() => {
     // Create all the possible addresses for this location if it has a size.
-    const locationAddresses: Map<string, number> =
-      storageLocation.size && storageLocation.direction
-        ? buildOrderedAddresses(storageLocation.size, storageLocation.direction)
-        : new Map<string, number>();
+    const locationAddresses: Map<string, number> = storageLocation.size
+      ? buildOrderedAddresses(storageLocation.size, storageLocation.direction ?? GridDirection.DownRight)
+      : new Map<string, number>();
 
     // Create a map of location address to item
     const addressToItemMap = new Map<string, StoredItemFragment>();
@@ -418,11 +417,11 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
               <Success className="mb-5" key={labwareBarcode} message={`Labware found`}>
                 Labware <span className="font-bold">{labwareBarcode}</span> is in address{' '}
                 <span className="font-bold">
-                  {location.size && location.direction
+                  {location.size
                     ? addressToLocationAddress(
                         labwareBarcodeToAddressMap.get(labwareBarcode) ?? '',
                         location.size,
-                        location.direction
+                        location.direction ?? GridDirection.DownRight
                       )
                     : labwareBarcodeToAddressMap.get(labwareBarcode)}
                 </span>
