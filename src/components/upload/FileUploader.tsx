@@ -53,7 +53,7 @@ const FileUploader: React.FC<FileUploaderProps<any>> = ({
       }
       setFile(undefined);
     }
-  }, [uploadSuccess, error, file, notifyUploadOutcome, setUploadInProgress, uploadInProgress]);
+  }, [uploadSuccess, error, file, notifyUploadOutcome, setUploadInProgress, uploadInProgress, uploadResponse]);
 
   /**Callback function to perform upload**/
   const uploadFile = React.useCallback(() => {
