@@ -201,15 +201,15 @@ describe('Section Registration Page', () => {
         it('should add a new section', () => {
           cy.findByText('2 Section(s)').should('be.visible');
         });
-        it('should have Region as a required field when there are multiple sections', () => {
+        it('should have Section position as a required field when there are multiple sections', () => {
           selectFocusBlur('region');
-          cy.findByText('Region is a required field for slot with multiple sections').should('be.visible');
+          cy.findByText('Section position is a required field for slot with multiple sections').should('be.visible');
         });
         it('should display region to have unique values', () => {
           selectOptionForMultiple('region', 'Top', 0);
           selectOptionForMultiple('region', 'Top', 1);
           selectFocusBlur('region');
-          cy.findAllByText('Unique value required for region').should('have.length', 2);
+          cy.findAllByText('Unique value required for section position').should('have.length', 2);
         });
       });
     });

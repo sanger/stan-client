@@ -75,10 +75,11 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
         );
       }
     }),
-    copySlots: assign((ctx, e) => {
-      if (e.type !== 'COPY_SLOTS') {
+    copyOneToOneSlots: assign((ctx, e) => {
+      if (e.type !== 'COPY_ONE_TO_ONE_SLOTS') {
         return;
       }
+
       const inputLabware = find(ctx.inputLabware, { id: e.inputLabwareId });
       const outputScc = ctx.outputSlotCopies.find((outputScc) => outputScc.labware.id === e.outputLabwareId);
 
@@ -137,6 +138,71 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
         // Then add on the newly created slot copy content
         .concat(newSlotCopyContent);
     }),
+    copyManyToOneSlots: assign((ctx, e) => {
+      if (e.type !== 'COPY_MANY_TO_ONE_SLOTS') {
+        return;
+      }
+
+      const inputLabware = find(ctx.inputLabware, { id: e.inputLabwareId });
+      const outputScc = ctx.outputSlotCopies.find((outputScc) => outputScc.labware.id === e.outputLabwareId);
+
+      if (!inputLabware || !outputScc) {
+        return;
+      }
+      // Get all the addresses of the output labware
+      const outputAddresses = buildAddresses(outputScc.labware.labwareType, GridDirection.DownRight);
+
+      // Get the index of the clicked destination address
+      const destinationAddressIndex = indexOf(outputAddresses, e.outputAddress);
+
+      if (destinationAddressIndex === -1) {
+        return;
+      }
+      // Don't map if the destination addresses are already filled.
+      if (outputScc.slotCopyContent.find((scc) => scc.destinationAddress === e.outputAddress)) {
+        return;
+      }
+      //Create mapping between all selected input addresses and output address
+      e.inputAddresses.forEach((inputAddress) =>
+        outputScc.slotCopyContent.push({
+          destinationAddress: e.outputAddress,
+          sourceBarcode: inputLabware.barcode,
+          sourceAddress: inputAddress
+        })
+      );
+    }),
+    copyOneToManySlots: assign((ctx, e) => {
+      if (e.type !== 'COPY_ONE_TO_MANY_SLOTS') {
+        return;
+      }
+      const inputLabware = find(ctx.inputLabware, { id: e.inputLabwareId });
+      const outputScc = ctx.outputSlotCopies.find((outputScc) => outputScc.labware.id === e.outputLabwareId);
+
+      if (!inputLabware || !outputScc) {
+        return;
+      }
+
+      // Get all the addresses of the output labware
+      const outputAddresses = buildAddresses(outputScc.labware.labwareType, GridDirection.DownRight);
+
+      // Get the index of the clicked destination address
+      const destinationAddressIndex = indexOf(outputAddresses, e.outputAddress);
+
+      if (destinationAddressIndex === -1) {
+        return;
+      }
+      // Don't map if the destination addresses are already filled.
+      if (outputScc.slotCopyContent.find((scc) => scc.destinationAddress === e.outputAddress)) {
+        return;
+      }
+      //Update Slot content with the mapping
+      outputScc.slotCopyContent.push({
+        destinationAddress: e.outputAddress,
+        sourceBarcode: inputLabware.barcode,
+        sourceAddress: e.inputAddress
+      });
+    }),
+
     assignFailedSlots: assign((ctx, e) => {
       if (e.type !== 'done.invoke.passFailsSlots') return;
 
@@ -201,8 +267,14 @@ function createSlotMapperMachine({ inputLabware, outputSlotCopies, failedSlotsCh
           entry: 'assignLabwareColors',
 
           on: {
-            COPY_SLOTS: {
-              actions: 'copySlots'
+            COPY_ONE_TO_ONE_SLOTS: {
+              actions: 'copyOneToOneSlots'
+            },
+            COPY_ONE_TO_MANY_SLOTS: {
+              actions: 'copyOneToManySlots'
+            },
+            COPY_MANY_TO_ONE_SLOTS: {
+              actions: 'copyManyToOneSlots'
             },
             CLEAR_SLOTS: {
               actions: 'clearSlots'

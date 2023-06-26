@@ -21,8 +21,7 @@ self.addEventListener('activate', function (event) {
 
 self.addEventListener('message', async function (event) {
   const clientId = event.source.id
-  if (event.origin !== "http://localhost:3000") // SAFE: origin checked
-    return;
+
   if (!clientId || !self.clients) {
     return
   }

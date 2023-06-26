@@ -182,7 +182,7 @@ export default function SectionForm({
       />
 
       <CustomReactSelect
-        label="Region"
+        label="Section position in slot - for multiple sections in a slot"
         dataTestId="region"
         emptyOption
         name={`labwares.${currentIndex}.slots.${slotAddress}.${sectionIndex}.region`}

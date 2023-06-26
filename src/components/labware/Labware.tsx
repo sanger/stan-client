@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useImperativeHandle } from 'react';
 import classNames from 'classnames';
 import BarcodeIcon from '../icons/BarcodeIcon';
 import { Slot } from './Slot';
-import { buildAddresses } from '../../lib/helpers';
+import { buildAddresses, isSameArray } from '../../lib/helpers';
 import _ from 'lodash';
 import { LabwareFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
 import createLabwareMachine from './labware.machine';
@@ -151,9 +151,8 @@ const Labware = ({
     });
   }, [selectionMode, selectable, labware]);
   const [current, send] = useMachine(labwareMachine);
-
   const { selectedAddresses } = current.context;
-
+  const selectedAddressesRef = React.useRef<Set<string>>();
   const {
     labwareType: { numRows, numColumns },
     slots,
@@ -176,7 +175,16 @@ const Labware = ({
     send({ type: 'UPDATE_SLOTS', slots: slots ?? [] });
   }, [send, slots]);
 
+  /**When ever selected address changes, a callback is invoked**/
   useEffect(() => {
+    //Make sure that there is a change in selected addresses, if not don't call the callback function
+    if (
+      selectedAddressesRef.current &&
+      isSameArray(Array.from(selectedAddresses), Array.from(selectedAddressesRef.current))
+    ) {
+      return;
+    }
+    selectedAddressesRef.current = selectedAddresses;
     onSelect?.(Array.from(selectedAddresses));
   }, [onSelect, selectedAddresses]);
 

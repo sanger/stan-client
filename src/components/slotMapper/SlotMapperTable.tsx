@@ -9,6 +9,36 @@ type SlotMapperTableProps = {
 };
 
 export default function SlotMapperTable({ labware, slots, slotCopyContent }: SlotMapperTableProps) {
+  const mappingForSlots = React.useMemo(() => {
+    // useMemo is a hook that returns a memoized value
+    const mappingsForInputSlots: { slot: SlotFieldsFragment; destinationAddress: string }[] = [];
+    //There are some input slots given, so generate mappings for them
+    if (slots.length > 0) {
+      slots.forEach((slot) => {
+        const mappings = slotCopyContent.filter(
+          (scc) => scc.sourceBarcode === labware.barcode && scc.sourceAddress === slot.address
+        );
+        if (mappings.length > 0) {
+          mappings.forEach((scc) => {
+            mappingsForInputSlots.push({ slot, destinationAddress: scc.destinationAddress });
+          });
+        } else {
+          mappingsForInputSlots.push({ slot, destinationAddress: '-' });
+        }
+      });
+    } else {
+      //Generate mappings for all slots that are mapped to this labware
+      const lwSlotCopyContent = slotCopyContent.filter((scc) => scc.sourceBarcode === labware.barcode);
+      lwSlotCopyContent.forEach((scc) => {
+        const slot = labware.slots.find((slot) => slot.address === scc.sourceAddress);
+        if (slot) {
+          mappingsForInputSlots.push({ slot, destinationAddress: scc.destinationAddress });
+        }
+      });
+    }
+    return mappingsForInputSlots;
+  }, [labware, slots, slotCopyContent]);
+
   return (
     <Table data-testid="mapping_table">
       <TableHead>
@@ -25,8 +55,8 @@ export default function SlotMapperTable({ labware, slots, slotCopyContent }: Slo
       </TableHead>
 
       <TableBody>
-        {slots.map((slot) => (
-          <tr key={`${slot.address}-${slot.labwareId}`}>
+        {mappingForSlots.map(({ slot, destinationAddress }) => (
+          <tr key={`${slot.address}-${slot.labwareId}-${destinationAddress}`}>
             <TableCell>{labware.barcode}</TableCell>
             <TableCell>{slot.address}</TableCell>
             <TableCell>{slot.samples.length > 0 ? slot.samples[0].tissue.externalName : ''}</TableCell>
@@ -36,22 +66,10 @@ export default function SlotMapperTable({ labware, slots, slotCopyContent }: Slo
             </TableCell>
             <TableCell>{slot.samples.length > 0 ? slot.samples[0].tissue.replicate : ''}</TableCell>
             <TableCell>{slot.samples.map((sample) => sample.section).join(',')}</TableCell>
-            <TableCell>{getDestinationAddress(labware, slot, slotCopyContent) ?? '-'}</TableCell>
+            <TableCell>{destinationAddress}</TableCell>
           </tr>
         ))}
       </TableBody>
     </Table>
   );
-}
-
-/**
- * Returns the mapped address for a particular labware and slot (or "-" if not mapped)
- */
-function getDestinationAddress(
-  labware: LabwareFieldsFragment,
-  slot: LabwareFieldsFragment['slots'][number],
-  slotCopyContent: Array<SlotCopyContent>
-): string | undefined {
-  return slotCopyContent.find((scc) => scc.sourceBarcode === labware.barcode && scc.sourceAddress === slot.address)
-    ?.destinationAddress;
 }
