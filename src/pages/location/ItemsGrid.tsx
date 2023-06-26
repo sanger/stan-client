@@ -9,7 +9,7 @@ import BarcodeIcon from '../../components/icons/BarcodeIcon';
 import { Authenticated } from '../../components/Authenticated';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
 import { getLabwareInLocation } from '../../lib/services/locationService';
-import { LabwareFieldsFragment, SuggestedWorkFieldsFragment, UserRole } from '../../types/sdk';
+import { GridDirection, LabwareFieldsFragment, SuggestedWorkFieldsFragment, UserRole } from '../../types/sdk';
 import { tissue } from '../../lib/helpers/labwareHelper';
 import { stanCore } from '../../lib/sdk';
 
@@ -69,7 +69,12 @@ export const ItemsGrid: React.FC = () => {
           <div className="ml-2 md:w-2/3 lg:w-1/2 ">
             {selectedAddress && (
               <span>
-                Selected Address: {addressToLocationAddress(selectedAddress, location.size!, location.direction!)}
+                Selected Address:{' '}
+                {addressToLocationAddress(
+                  selectedAddress,
+                  location.size!,
+                  location.direction ?? GridDirection.DownRight
+                )}
               </span>
             )}
             <ScanInput
