@@ -13,11 +13,11 @@ export type ConfirmUploadProps = {
   confirmMessage: string;
   title: string;
 };
-interface FileUploaderProps {
+interface FileUploaderProps<T extends object> {
   url: string;
   enableUpload?: boolean;
   confirmUpload?: (file: File) => ConfirmUploadProps | undefined;
-  notifyUploadOutcome?: (file: File, isSuccess: boolean) => void;
+  notifyUploadOutcome?: (file: File, isSuccess: boolean, result?: T) => void;
   errorField?: string;
 }
 
@@ -31,7 +31,7 @@ interface FileUploaderProps {
  * @param errorField - Field name in server response to display error message
  * @constructor
  */
-const FileUploader: React.FC<FileUploaderProps> = ({
+const FileUploader: React.FC<FileUploaderProps<any>> = ({
   url,
   enableUpload,
   confirmUpload,
@@ -41,8 +41,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
   const [file, setFile] = React.useState<File | undefined>(undefined);
   const [uploadInProgress, setUploadInProgress] = React.useState<boolean>(false);
   const [confirmUploadResult, setConfirmUploadResult] = React.useState<ConfirmUploadProps | undefined>();
-
-  const { initializeUpload, requestUpload, uploadSuccess, error } = useUpload(url, errorField);
+  const { initializeUpload, requestUpload, uploadSuccess, uploadResponse, error } = useUpload(url, errorField);
 
   /**Handle actions when we get to 'error' or 'uploadSuccess' state after upload**/
   React.useEffect(() => {
@@ -50,7 +49,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
     setUploadInProgress(false);
     if (uploadSuccess && file) {
       if (file) {
-        notifyUploadOutcome?.(file, uploadSuccess);
+        notifyUploadOutcome?.(file, uploadSuccess, uploadResponse);
       }
       setFile(undefined);
     }

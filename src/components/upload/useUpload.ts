@@ -8,11 +8,13 @@ import React from 'react';
 export function useUpload(url: string, errorField?: string) {
   const [error, setError] = React.useState<Error | undefined>(undefined);
   const [uploadSuccess, setUploadSuccess] = React.useState<boolean>(false);
+  const [uploadResponse, setUploadResponse] = React.useState(undefined);
 
   /**Initialize hook state**/
   const initializeUpload = React.useCallback(() => {
     setError(undefined);
     setUploadSuccess(false);
+    setUploadResponse(undefined);
   }, [setError, setUploadSuccess]);
 
   /**External request for upload**/
@@ -38,17 +40,16 @@ export function useUpload(url: string, errorField?: string) {
             setUploadSuccess(true);
           }
           response.json().then((response) => {
-            debugger;
             if (!success) {
               // get error message from body
               setError(new Error(errorField ? response[errorField] : response.message));
             } else {
               setUploadSuccess(true);
+              setUploadResponse(response);
             }
           });
         })
         .catch((error) => {
-          debugger;
           // get error message from body or default to response status
           setError(new Error(error));
         });
@@ -56,5 +57,5 @@ export function useUpload(url: string, errorField?: string) {
     [url, errorField, setError, setUploadSuccess]
   );
 
-  return { error, uploadSuccess, requestUpload, initializeUpload };
+  return { error, uploadSuccess, uploadResponse, requestUpload, initializeUpload };
 }

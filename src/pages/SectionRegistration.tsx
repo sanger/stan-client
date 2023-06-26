@@ -5,7 +5,13 @@ import SectionRegistrationForm from './registration/SectionRegistrationForm';
 import columns from '../components/dataTableColumns/labwareColumns';
 import RegistrationSuccess from './registration/RegistrationSuccess';
 import Warning from '../components/notifications/Warning';
-import { GetRegistrationInfoQuery, LifeStage, RegisterSectionsMutation, SectionRegisterRequest } from '../types/sdk';
+import {
+  GetRegistrationInfoQuery,
+  LabwareFieldsFragment,
+  LifeStage,
+  RegisterSectionsMutation,
+  SectionRegisterRequest
+} from '../types/sdk';
 import { LabwareTypeName } from '../types/stan';
 import _, { uniqueId } from 'lodash';
 import RegistrationValidation from '../lib/validation/registrationValidation';
@@ -188,6 +194,7 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
     });
   }, [stanCore]);
   const [current, send] = useMachine(() => formMachine);
+  const [fileRegisterResult, setFileRegisterResult] = React.useState<LabwareFieldsFragment[] | undefined>(undefined);
 
   const initialLabware = useMemo(() => {
     const queryString = parseQueryString(location.search);
@@ -224,7 +231,7 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
   const isSubmitting = !current.matches('fillingOutForm');
 
   /**Callback notification send from child after finishing upload**/
-  const onFileUploadFinished = React.useCallback((file: File, isSuccess: boolean) => {
+  const onFileUploadFinished = React.useCallback((file: File, isSuccess: boolean, result?: { barcodes: [] }) => {
     //Upload failed, return
     if (!isSuccess) return;
     /** Notify user with success message*/
@@ -233,6 +240,9 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
       autoClose: 4000,
       hideProgressBar: true
     });
+    if (result && 'barcodes' in result) {
+      setFileRegisterResult(result['barcodes']);
+    }
   }, []);
 
   if (current.matches('submitted') && submissionResult) {
@@ -306,6 +316,12 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
                 <SectionRegistrationForm registrationInfo={registrationInfo} />
               </Formik>
             </SectionRegistrationContext.Provider>
+          )}
+          {fileRegisterResult && (
+            <RegistrationSuccess
+              successData={submissionResult.registerSections.labware}
+              columns={[columns.barcode(), columns.labwareType()]}
+            />
           )}
         </div>
       </AppShell.Main>
