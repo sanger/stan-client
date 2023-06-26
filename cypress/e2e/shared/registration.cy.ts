@@ -100,7 +100,7 @@ export function shouldBehaveLikeARegistrationForm(registrationType: Registration
     }
     if (registrationType === RegistrationType.SLIDE) {
       it('should display Region field', () => {
-        cy.findByLabelText('Region').should('be.visible');
+        cy.findByLabelText('Section position in slot - for multiple sections in a slot').should('be.visible');
       });
     }
   });

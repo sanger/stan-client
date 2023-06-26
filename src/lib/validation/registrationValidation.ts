@@ -141,7 +141,7 @@ export default class RegistrationValidation {
     return Yup.string()
       .oneOf(this.registrationInfo.slotRegions.map((sr) => sr.name))
       .label('Region')
-      .test('Test', 'Region is a required field for slot with multiple sections', (value, context) => {
+      .test('Test', 'Section position is a required field for slot with multiple sections', (value, context) => {
         const pathKey = context.path;
         if (context.from && context.from.length > 1) {
           const values = context.from[1];
@@ -151,7 +151,7 @@ export default class RegistrationValidation {
           } else return true;
         }
       })
-      .test('Test', 'Unique value required for region', (value, context) => {
+      .test('Test', 'Unique value required for section position', (value, context) => {
         if (!value) return true;
         const pathKey = context.path;
         if (context.from && context.from.length > 1) {
