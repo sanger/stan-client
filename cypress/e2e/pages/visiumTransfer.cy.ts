@@ -197,7 +197,7 @@ describe('Transfer Page', () => {
       it('displays the table with A1 slot', () => {
         cy.findByRole('table').contains('td', 'A1');
       });
-      it('displays the table with D1 slot', () => {
+      it('displays the table with G1 and G5 slots', () => {
         cy.findByRole('table').contains('td', 'G1');
         cy.findByRole('table').contains('td', 'G5');
       });

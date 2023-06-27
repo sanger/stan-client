@@ -1,4 +1,4 @@
-import { FindQuery, FindRequest } from '../../types/sdk';
+import { FindQuery, FindRequest, GridDirection } from '../../types/sdk';
 import { SearchResultsType, SearchResultTableEntry } from '../../types/stan';
 import _ from 'lodash';
 import { addressToLocationAddress } from '../helpers/locationHelper';
@@ -68,8 +68,12 @@ export class SearchService implements SearchServiceInterface<FindRequest, Search
                 barcode: location.barcode,
                 displayName: location.qualifiedNameWithFirstBarcode ?? location.barcode,
                 address:
-                  labwareLocation?.address && location?.direction && location?.size
-                    ? addressToLocationAddress(labwareLocation?.address, location.size, location.direction)
+                  labwareLocation?.address && location?.size
+                    ? addressToLocationAddress(
+                        labwareLocation?.address,
+                        location.size,
+                        location.direction ?? GridDirection.DownRight
+                      )
                     : null
               },
         sectionNumber: sample.section,

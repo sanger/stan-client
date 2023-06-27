@@ -13,11 +13,12 @@ export type ConfirmUploadProps = {
   confirmMessage: string;
   title: string;
 };
-interface FileUploaderProps {
+interface FileUploaderProps<T extends object> {
   url: string;
   enableUpload?: boolean;
   confirmUpload?: (file: File) => ConfirmUploadProps | undefined;
-  notifyUploadOutcome?: (file: File, isSuccess: boolean) => void;
+  notifyUploadOutcome?: (file: File, isSuccess: boolean, result?: T) => void;
+  errorField?: string;
 }
 
 /**
@@ -27,14 +28,20 @@ interface FileUploaderProps {
  *                       as an additional external condition to enable/disable Upload
  * @param confirmUpload - Callback function to confirm upload
  * @param notifyUploadOutcome - Callback function to notify upload outcome
+ * @param errorField - Field name in server response to display error message
  * @constructor
  */
-const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmUpload, notifyUploadOutcome }) => {
+const FileUploader: React.FC<FileUploaderProps<any>> = ({
+  url,
+  enableUpload,
+  confirmUpload,
+  notifyUploadOutcome,
+  errorField
+}) => {
   const [file, setFile] = React.useState<File | undefined>(undefined);
   const [uploadInProgress, setUploadInProgress] = React.useState<boolean>(false);
   const [confirmUploadResult, setConfirmUploadResult] = React.useState<ConfirmUploadProps | undefined>();
-
-  const { initializeUpload, requestUpload, uploadSuccess, error } = useUpload(url);
+  const { initializeUpload, requestUpload, uploadSuccess, uploadResponse, error } = useUpload(url, errorField);
 
   /**Handle actions when we get to 'error' or 'uploadSuccess' state after upload**/
   React.useEffect(() => {
@@ -42,11 +49,11 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
     setUploadInProgress(false);
     if (uploadSuccess && file) {
       if (file) {
-        notifyUploadOutcome?.(file, uploadSuccess);
+        notifyUploadOutcome?.(file, uploadSuccess, uploadResponse);
       }
       setFile(undefined);
     }
-  }, [uploadSuccess, error, file, notifyUploadOutcome, setUploadInProgress, uploadInProgress]);
+  }, [uploadSuccess, error, file, notifyUploadOutcome, setUploadInProgress, uploadInProgress, uploadResponse]);
 
   /**Callback function to perform upload**/
   const uploadFile = React.useCallback(() => {
@@ -134,10 +141,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({ url, enableUpload, confirmU
             </div>
           </div>
           {error && (
-            <div
-              data-testid={'error-div'}
-              className={'text-red-600 text-sm whitespace-nowrap'}
-            >{`Error: ${error?.message}`}</div>
+            <div data-testid={'error-div'} className={'text-red-600 text-sm whitespace-nowrap'}>
+              Error:
+              {error?.message.split(',').map((err, index) => (
+                <div key={index}>{`${err}`}</div>
+              ))}
+            </div>
           )}
         </div>
       )}
