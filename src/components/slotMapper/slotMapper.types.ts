@@ -65,6 +65,9 @@ export interface SlotMapperProps {
   /**Slot copy modes**/
   slotCopyModes?: SlotCopyMode[];
 
+  /**Display mapping table**/
+  displayMappedTable?: boolean;
+
   /**Callback to notify when an output labware is selected (through pagination)**/
   onSelectOutputLabware?: (labware: NewLabwareLayout) => void;
 
