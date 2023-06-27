@@ -134,7 +134,7 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
                   <Heading level={3}>Stain Information</Heading>
 
                   <Table data-testid={'stain-info-table'}>
-                    <TableHead>
+                    <TableHead fixed={true}>
                       <tr>
                         <TableHeader>Slide Barcode</TableHeader>
                         <TableHeader>Bond Barcode</TableHeader>
