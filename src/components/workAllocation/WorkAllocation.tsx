@@ -450,7 +450,7 @@ export default function WorkAllocation() {
                 </a>
               </div>
               <Table data-testid="work-allocation-table">
-                <TableHead>
+                <TableHead fixed={true}>
                   <tr>
                     <TableHeader sortProps={getTableSortProps('Priority')}>Priority</TableHeader>
                     <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
