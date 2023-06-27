@@ -31,9 +31,7 @@ describe('Section Registration Page', () => {
               return res(
                 ctx.status(200),
                 ctx.json({
-                  response: {
-                    ok: true
-                  }
+                  barcodes: ['STAN-3111', 'STAN-3112']
                 })
               );
             })
@@ -50,8 +48,9 @@ describe('Section Registration Page', () => {
         );
         cy.findByTestId('upload-btn').click();
       });
-      it('should display upload success message', () => {
-        cy.findByText('file.xlsx uploaded succesfully.').should('be.visible');
+      it('shows the created labware', () => {
+        cy.findByText('STAN-3111').should('be.visible');
+        cy.findByText('STAN-3112').should('be.visible');
       });
     });
     context('On file upload failure', () => {
@@ -201,11 +200,11 @@ describe('Section Registration Page', () => {
         it('should add a new section', () => {
           cy.findByText('2 Section(s)').should('be.visible');
         });
-        it('should have Section position as a required field when there are multiple sections', () => {
+        it('should have section position as a required field when there are multiple sections', () => {
           selectFocusBlur('region');
           cy.findByText('Section position is a required field for slot with multiple sections').should('be.visible');
         });
-        it('should display region to have unique values', () => {
+        it('should display section position to have unique values', () => {
           selectOptionForMultiple('region', 'Top', 0);
           selectOptionForMultiple('region', 'Top', 1);
           selectFocusBlur('region');

@@ -5,7 +5,13 @@ import SectionRegistrationForm from './registration/SectionRegistrationForm';
 import columns from '../components/dataTableColumns/labwareColumns';
 import RegistrationSuccess from './registration/RegistrationSuccess';
 import Warning from '../components/notifications/Warning';
-import { GetRegistrationInfoQuery, LifeStage, RegisterSectionsMutation, SectionRegisterRequest } from '../types/sdk';
+import {
+  GetRegistrationInfoQuery,
+  LabwareFieldsFragment,
+  LifeStage,
+  RegisterSectionsMutation,
+  SectionRegisterRequest
+} from '../types/sdk';
 import { LabwareTypeName } from '../types/stan';
 import _, { uniqueId } from 'lodash';
 import RegistrationValidation from '../lib/validation/registrationValidation';
@@ -19,7 +25,7 @@ import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSe
 import Heading from '../components/Heading';
 import FileUploader from '../components/upload/FileUploader';
 import { toast } from 'react-toastify';
-import Success from '../components/notifications/Success';
+import warningToast from '../components/notifications/WarningToast';
 
 const availableLabware: Array<LabwareTypeName> = [
   LabwareTypeName.FOUR_SLOT_SLIDE,
@@ -188,6 +194,7 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
     });
   }, [stanCore]);
   const [current, send] = useMachine(() => formMachine);
+  const [fileRegisterResult, setFileRegisterResult] = React.useState<LabwareFieldsFragment[] | undefined>(undefined);
 
   const initialLabware = useMemo(() => {
     const queryString = parseQueryString(location.search);
@@ -214,33 +221,45 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
 
   const { serverError, submissionResult } = current.context;
 
-  /**
-   * Success notification when file is uploaded
-   */
-  const ToastSuccess = (fileName: string) => <Success message={`${fileName} uploaded succesfully.`} />;
-
   const submitForm = async (values: SectionRegistrationFormValues) =>
     send({ type: 'SUBMIT_FORM', values: buildSectionRegisterRequest(values) });
   const isSubmitting = !current.matches('fillingOutForm');
 
   /**Callback notification send from child after finishing upload**/
-  const onFileUploadFinished = React.useCallback((file: File, isSuccess: boolean) => {
-    //Upload failed, return
-    if (!isSuccess) return;
-    /** Notify user with success message*/
-    toast(ToastSuccess(file.name), {
-      position: toast.POSITION.TOP_RIGHT,
-      autoClose: 4000,
-      hideProgressBar: true
-    });
-  }, []);
+  const onFileUploadFinished = React.useCallback(
+    (file: File, isSuccess: boolean, result?: { barcodes: [] }) => {
+      //Upload failed, return
+      if (!isSuccess) return;
+      //Upload success, but no result, return
+      if (result && 'barcodes' in result) {
+        const barcodes = result['barcodes'];
+        const labwarePromises = barcodes.map((barcode: string) => stanCore.FindLabware({ barcode }));
+        //Retrieve details of newly registered labware
+        Promise.all(labwarePromises)
+          .then((labwares) => {
+            setFileRegisterResult(labwares.map((labware) => labware.labware!) as LabwareFieldsFragment[]);
+          })
+          .catch(() => {
+            warningToast({
+              message: `Cannot retrieve details of newly registered labware ${barcodes.join(',')}.`,
+              position: toast.POSITION.TOP_RIGHT,
+              autoClose: 5000
+            });
+          });
+      }
+    },
+    [setFileRegisterResult, stanCore]
+  );
 
-  if (current.matches('submitted') && submissionResult) {
+  const registrationResult =
+    current.matches('submitted') && submissionResult ? submissionResult.registerSections.labware : fileRegisterResult;
+  if (registrationResult) {
     return (
-      <RegistrationSuccess
-        successData={submissionResult.registerSections.labware}
-        columns={[columns.barcode(), columns.labwareType()]}
-      />
+      <RegistrationSuccess successData={registrationResult} columns={[columns.barcode(), columns.labwareType()]} />
+    );
+  } else if (fileRegisterResult) {
+    return (
+      <RegistrationSuccess successData={fileRegisterResult} columns={[columns.barcode(), columns.labwareType()]} />
     );
   }
 
