@@ -15,6 +15,12 @@ describe('CytAssist Page', () => {
     it('disables the Save button', () => {
       saveButton().should('be.disabled');
     });
+    it('displays the mode selection', () => {
+      cy.findByText(/Select transfer mode/i).should('be.visible');
+    });
+    it('should select the first option by default', () => {
+      cy.findByTestId('copyMode-One to one').should('be.checked');
+    });
   });
 
   context('When user selects Visium LP CytAssist XL labwareType', () => {
@@ -40,8 +46,33 @@ describe('CytAssist Page', () => {
       saveButton().should('be.disabled');
     });
 
+    context('when user maps slots in many to one mode', () => {
+      before(() => {
+        cy.findByTestId('copyMode-Many to one').click();
+        cy.get('#inputLabwares').within(() => {
+          cy.findByText('A1').click();
+          cy.findByText('B1').click({ shiftKey: true });
+        });
+        cy.get('#outputLabwares').within(() => {
+          cy.findByText('D1').click();
+        });
+      });
+      it('should display the one to many mode', () => {
+        cy.findByTestId('copyMode-Many to one').should('be.checked');
+      });
+      it('displays the table with A1, B1 slots mapped to D1', () => {
+        cy.findByTestId('mapped_table').contains('td', 'A1');
+        cy.findByTestId('mapped_table').contains('td', 'B1');
+        cy.findByTestId('mapped_table').contains('td', 'D1');
+      });
+      after(() => {
+        cy.findByTestId('clearAll').click();
+      });
+    });
+
     context('When user selects some source slots', () => {
       before(() => {
+        cy.findByTestId('copyMode-One to one').click();
         cy.get('#inputLabwares').within(() => {
           cy.findByText('A1').click();
           cy.findByText('B1').click({ shiftKey: true });
