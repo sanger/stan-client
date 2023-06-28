@@ -245,6 +245,7 @@ const WorkProgress = ({
                     columns={columns}
                     data={searchResult.entries}
                     ref={sortedTableDataRef}
+                    fixedHeader={true}
                   />
                 </>
               ) : (

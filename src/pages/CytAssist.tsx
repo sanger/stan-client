@@ -21,6 +21,7 @@ import { objectKeys } from '../lib/helpers';
 import Label from '../components/forms/Label';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import { SlotCopyMode } from '../components/slotMapper/slotMapper.types';
 
 /**
  * Success notification when slots have been copied
@@ -362,8 +363,10 @@ const CytAssist = () => {
                   ]
                 : []
             }
+            slotCopyModes={[SlotCopyMode.ONE_TO_ONE, SlotCopyMode.MANY_TO_ONE]}
             onChange={handleOnSlotMapperChange}
             inputLabwareLimit={2}
+            displayMappedTable={false}
             failedSlotsCheck={false}
             disabledOutputSlotAddresses={
               destinations.length > 0 &&

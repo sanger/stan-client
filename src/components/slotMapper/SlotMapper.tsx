@@ -34,7 +34,8 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
   inputLabwareConfigPanel,
   outputLabwareConfigPanel,
   onSelectInputLabware,
-  onSelectOutputLabware
+  onSelectOutputLabware,
+  displayMappedTable = true
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine({
@@ -699,27 +700,30 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
             {!locked && (
               <div className={'flex flex-row space-x-4 justify-end'}>
                 <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>
-                <WhiteButton onClick={handleOnClickClearAll}>Clear all</WhiteButton>
+                <WhiteButton data-testid={'clearAll'} onClick={handleOnClickClearAll}>
+                  Clear all
+                </WhiteButton>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {currentInputLabware && (selectedInputSlots.length > 0 || (currentOutput && slotsMappedForCurrentInput)) && (
-        <div className="space-y-4">
-          <Heading level={4}>
-            {selectedInputSlots.length > 0
-              ? `Slot mapping for slot(s) ${selectedInputAddresses.join(',')}`
-              : `Slot mapping for ${currentInputLabware.barcode}`}
-          </Heading>
-          <SlotMapperTable
-            labware={currentInputLabware}
-            slots={selectedInputSlots}
-            slotCopyContent={currentOutput?.slotCopyContent ?? []}
-          />
-        </div>
-      )}
+      {currentInputLabware &&
+        (selectedInputSlots.length > 0 || (currentOutput && slotsMappedForCurrentInput && displayMappedTable)) && (
+          <div className="space-y-4">
+            <Heading level={4}>
+              {selectedInputSlots.length > 0
+                ? `Slot mapping for slot(s) ${selectedInputAddresses.join(',')}`
+                : `Slot mapping for ${currentInputLabware.barcode}`}
+            </Heading>
+            <SlotMapperTable
+              labware={currentInputLabware}
+              slots={selectedInputSlots}
+              slotCopyContent={currentOutput?.slotCopyContent ?? []}
+            />
+          </div>
+        )}
       <ConfirmationModal
         show={failedSelectSlots.length > 0}
         header={'Slot transfer'}
