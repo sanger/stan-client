@@ -82,6 +82,7 @@ export default function WorkAllocation() {
       }) ?? { status: [WorkStatus.Active] }
     );
   }, [location.search]);
+
   const workAllocationMachine = React.useMemo(() => {
     return createWorkAllocationMachine({ urlParams });
   }, [urlParams]);
