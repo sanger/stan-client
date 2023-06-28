@@ -441,6 +441,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
    */
   const handleOnInputLabwareSlotClick = React.useCallback(
     (inputAddress: string[]) => {
+      console.log('INSIDE*****' + 'Addresses are -' + inputAddress.join(''));
       if (selectedCopyMode === SlotCopyMode.ONE_TO_MANY) {
         if (oneToManyCopyInProgress) {
           return;
