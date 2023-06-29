@@ -601,7 +601,12 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
                 ))}
               </RadioGroup>
             </div>
-            <div />
+            <div>
+              <MutedText>
+                For selection of multiple slots : <p>Hold 'Shift' key to select consecutive items </p>{' '}
+                <p>Hold 'Ctrl' (Cmd for Mac) key to select non-consecutive items </p>
+              </MutedText>{' '}
+            </div>
           </>
         )}
 
