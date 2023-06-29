@@ -3,6 +3,7 @@ import {
   cleanup,
   fireEvent,
   getAllByTestId,
+  getByTestId,
   getByText,
   render,
   RenderResult,
@@ -10,13 +11,15 @@ import {
   waitFor
 } from '@testing-library/react';
 import SlotMapper from '../../../../src/components/slotMapper/SlotMapper';
-import { SlotCopyMode } from '../../../../src/components/slotMapper/slotMapper.types';
+import { OutputSlotCopyData, SlotCopyMode } from '../../../../src/components/slotMapper/slotMapper.types';
 import { objectKeys } from '../../../../src/lib/helpers';
 import React from 'react';
 import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
 import { LabwareFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
 import { getById } from '../../generic/utilities';
+import Labware from '../../../../src/components/labware/Labware';
+import { NewLabwareLayout } from '../../../../src/types/stan';
 
 beforeEach(() => {
   enableMapSet();
@@ -26,8 +29,23 @@ afterEach(() => {
   cleanup();
 });
 
+jest.mock('../../../../src/components/labware/Labware', () => {
+  return {
+    __esModule: true,
+    default: jest.fn(({ onSelect, onSlotClick }) => {
+      // Invoke the callback immediately
+      return (
+        <div data-testid="mock-labware">
+          Labware <button data-testid="mock-input-select-button" onClick={() => onSelect?.(['A1', 'A2'])} />
+          <button data-testid="mock-output-select-button" onClick={() => onSlotClick?.('A1')} />
+        </div>
+      );
+    })
+  };
+});
+
 describe('slotMapper.spec.tsx', () => {
-  /*it('should render the component properly', () => {
+  /*  it('should render the component properly', () => {
     render(<SlotMapper slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])} />);
     //It should display the given slot copy modes
     expect(screen.queryByTestId('copyMode-Many to one')).toBeInTheDocument();
@@ -49,8 +67,8 @@ describe('slotMapper.spec.tsx', () => {
       />
     );
     expect(getById(wrapper.container, 'inputLabwares')).toBeInTheDocument();
-    //It should display the default output labware by id
     expect(getById(wrapper.container, 'outputLabwares')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-labware')).toBeInTheDocument();
   });
 
   it('displays multiple input  labware from props', () => {
@@ -128,30 +146,56 @@ describe('slotMapper.spec.tsx', () => {
       fireEvent.click(screen.getByTestId('left-button'));
     });
     expect(pagerTexts[0]).toHaveTextContent('1 of 2');
-  });*/
+  });
   it('displays slot information in table when user selects source slots', async () => {
     const inputLabware = plateFactory.build();
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const labware: LabwareFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
-    let wrapper: RenderResult | undefined;
-
     act(() => {
-      wrapper = render(
+      render(
         <SlotMapper
           slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
           initialInputLabware={labware}
         />
       );
     });
-    expect(wrapper?.container).toBeInTheDocument();
-    const inputLabwareElement = getById(wrapper?.container!, 'inputLabwares');
     await waitFor(() => {
-      fireEvent.click(getByText(inputLabwareElement!, 'A1'));
+      fireEvent.click(screen.getByTestId('mock-input-select-button'));
     });
-    // Use waitFor with a callback that checks for the element
-    /* await waitFor(() => {
-      const div = screen.getByTestId('mapping-div');
-      expect(div).toBeInTheDocument();
-    });*/
+    expect(screen.getByTestId('mapping-div')).toBeInTheDocument();
+    expect(screen.getByText('Slot mapping for slot(s) A1,A2')).toBeInTheDocument();
+  });*/
+
+  it('on one to many mapping', async () => {
+    //Convert  NewLabwareLayout to LabwareFieldsFragment
+    const inputLabware: LabwareFieldsFragment[] = [{ ...plateFactory.build(), barcode: 'STAN-5111' }];
+    const outputLabware: OutputSlotCopyData[] = [{ labware: plateFactory.build(), slotCopyContent: [] }];
+    act(() => {
+      render(
+        <SlotMapper
+          slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
+          initialInputLabware={inputLabware}
+          initialOutputLabware={outputLabware}
+        />
+      );
+    });
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('copyMode-One to many'));
+    });
+    expect(screen.getByTestId('copyMode-One to many')).toBeChecked();
+    await waitFor(() => {
+      fireEvent.click(screen.getAllByTestId('mock-input-select-button')[0]);
+    });
+    expect(screen.getByText('Finish mapping for A1')).toBeInTheDocument();
+
+    await waitFor(() => {
+      fireEvent.click(screen.getAllByTestId('mock-input-select-button')[1]);
+    });
+    //On finish Mapping click
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Finish mapping for A1'));
+    });
+    expect(screen.getByText('Finish mapping for A1')).not.toBeInTheDocument();
+    // expect(screen.getByText('Slot mapping for STAN-5111')).toBeInTheDocument();
   });
 });

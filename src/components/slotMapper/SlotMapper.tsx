@@ -441,7 +441,6 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
    */
   const handleOnInputLabwareSlotClick = React.useCallback(
     (inputAddress: string[]) => {
-      console.log('INSIDE*****' + 'Addresses are -' + inputAddress.join(''));
       if (selectedCopyMode === SlotCopyMode.ONE_TO_MANY) {
         if (oneToManyCopyInProgress) {
           return;
@@ -457,8 +456,9 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
             sourceBarcode: currentInputLabware?.barcode,
             sourceAddress: inputAddress[0]
           })
-        )
+        ) {
           setOneToManyCopyInProgress(true);
+        }
       }
       setSelectedInputAddresses(inputAddress.filter((address) => !memoInputAddressesDisabled.includes(address)));
     },
@@ -663,6 +663,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
                   {oneToManyCopyInProgress && (
                     <div className={'flex flex-col items-end'}>
                       <PinkButton
+                        data-testid={'finish-mapping-button'}
                         onClick={onFinishTransferButtonClick}
                       >{`Finish mapping for ${selectedInputAddresses[0]}`}</PinkButton>
                       <MutedText>Press when you finish</MutedText>
