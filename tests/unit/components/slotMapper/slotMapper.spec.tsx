@@ -147,7 +147,7 @@ describe('slotMapper.spec.tsx', () => {
     });
     expect(pagerTexts[0]).toHaveTextContent('1 of 2');
   });
-  it('displays slot information in table when user selects source slots', async () => {
+  it('displays slot information in table when user selects input slots', async () => {
     const inputLabware = plateFactory.build();
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const labware: LabwareFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
@@ -166,7 +166,7 @@ describe('slotMapper.spec.tsx', () => {
     expect(screen.getByText('Slot mapping for slot(s) A1,A2')).toBeInTheDocument();
   });*/
 
-  it('on one to many mapping', async () => {
+  it('on One to Many mapping', async () => {
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const inputLabware: LabwareFieldsFragment[] = [{ ...plateFactory.build(), barcode: 'STAN-5111' }];
     const outputLabware: OutputSlotCopyData[] = [{ labware: plateFactory.build(), slotCopyContent: [] }];
@@ -179,23 +179,27 @@ describe('slotMapper.spec.tsx', () => {
         />
       );
     });
+    //Click one to many mapping
     await waitFor(() => {
       fireEvent.click(screen.getByTestId('copyMode-One to many'));
     });
     expect(screen.getByTestId('copyMode-One to many')).toBeChecked();
+
+    //Invoke input selection
     await waitFor(() => {
       fireEvent.click(screen.getAllByTestId('mock-input-select-button')[0]);
     });
     expect(screen.getByText('Finish mapping for A1')).toBeInTheDocument();
-
+    //Invoke output selection
     await waitFor(() => {
-      fireEvent.click(screen.getAllByTestId('mock-input-select-button')[1]);
+      fireEvent.click(screen.getAllByTestId('mock-output-select-button')[1]);
     });
-    //On finish Mapping click
+    //Click on finish Mapping button
     await waitFor(() => {
       fireEvent.click(screen.getByText('Finish mapping for A1'));
     });
-    expect(screen.getByText('Finish mapping for A1')).not.toBeInTheDocument();
-    // expect(screen.getByText('Slot mapping for STAN-5111')).toBeInTheDocument();
+    expect(screen).not.toContain('Finish mapping for A1');
+
+    expect(screen.getByText('Slot mapping for STAN-5111')).toBeInTheDocument();
   });
 });
