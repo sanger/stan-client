@@ -605,7 +605,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
           </>
         )}
 
-        <div id="inputLabwares" className="bg-gray-100 p-4">
+        <div id="inputLabwares" data-testid={'input-labware-div'} className="bg-gray-100 p-4">
           <LabwareScanner initialLabwares={inputLabware} onChange={onLabwareScannerChange} limit={inputLabwareLimit}>
             {(props) => {
               if (!currentInputLabware) {
@@ -700,7 +700,9 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
           <div className="border-gray-300 flex-row items-center justify-end bg-gray-200">
             {!locked && (
               <div className={'flex flex-row space-x-4 justify-end'}>
-                <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>
+                <WhiteButton data-testid={'clear-all-button'} onClick={handleOnClickClear}>
+                  Clear
+                </WhiteButton>
                 <WhiteButton onClick={handleOnClickClearAll}>Clear all</WhiteButton>
               </div>
             )}

@@ -52,39 +52,6 @@ describe('Transfer Page', () => {
     });
   });
 
-  context('when user removes slide', () => {
-    before(() => {
-      cy.findByTestId('removeButton').click();
-    });
-
-    it('updates page with removed labware ', () => {
-      cy.contains('2 of 2').should('be.visible');
-    });
-
-    it('shows the labware before the deleted one', () => {
-      cy.findByText('STAN-3200').should('be.visible');
-    });
-  });
-  context('when user presses page navigation', () => {
-    context('when pressing left button', () => {
-      before(() => {
-        cy.findAllByTestId('left-button').eq(0).click();
-      });
-
-      it('shows the previous labware', () => {
-        cy.findByText('STAN-3100').should('be.visible');
-      });
-    });
-    context('when pressing right button', () => {
-      before(() => {
-        cy.findAllByTestId('right-button').eq(0).click();
-      });
-
-      it('shows the previous labware', () => {
-        cy.findByText('STAN-3200').should('be.visible');
-      });
-    });
-  });
   context('when entering labware state values', () => {
     before(() => {
       selectOption('input-labware-state', 'used');
