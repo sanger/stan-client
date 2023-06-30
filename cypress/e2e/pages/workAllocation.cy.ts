@@ -10,7 +10,6 @@ describe('Work Allocation', () => {
   before(() => {
     cy.visitAsAdmin('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
   });
-
   describe('Allocating Work', () => {
     context(
       'when I submit the form without selecting a work type, work requester, project, cost code or num blocks/slides/originalsamples',
@@ -151,7 +150,6 @@ describe('Work Allocation', () => {
       }
     );
   });
-
   describe('Editing the priority column for Work ', () => {
     context("Entering a value in 'Priority' cell in table", () => {
       before(() => {
@@ -186,10 +184,10 @@ describe('Work Allocation', () => {
   describe('Editing the status of Work', () => {
     context('when I click the Edit Status button', () => {
       before(() => {
+        cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
         cy.findAllByRole('button', { name: /Edit Status/i }).then((editButtons) => {
           editButtons[0].click();
         });
-        cy.window().scrollTo('right');
       });
 
       it('shows a form to edit the status', () => {
@@ -202,16 +200,15 @@ describe('Work Allocation', () => {
     context('when saving active status', () => {
       before(() => {
         selectOptionForMultiple('status', 'Active', 0);
-        cy.findByRole('button', { name: /Save/i }).click();
+        cy.findByRole('button', { name: /Save/i }).click({ force: true });
       });
       it('updates the Work status', () => {
-        cy.findByTestId('work-allocation-table').within(() => {
-          cy.findAllByText(/ACTIVE/i).should('have.length.above', 0);
+        cy.findByRole('table').within(() => {
+          cy.findAllByText(/ACTIVE/i).should('have.length.above', 1);
         });
       });
     });
   });
-
   describe('Editing the  table column for Work ', () => {
     context('Selecting a value in Omero project cell in table', () => {
       before(() => {
@@ -237,7 +234,7 @@ describe('Work Allocation', () => {
 
     context("Entering an invalid value in 'Priority' cell in table", () => {
       before(() => {
-        cy.get('td').eq(0).clear().type('15');
+        cy.get('td').eq(0).click().type('15');
         //change the focus
         cy.findAllByRole('button', { name: /Edit Status/i }).then((editButtons) => {
           editButtons[0].focus();

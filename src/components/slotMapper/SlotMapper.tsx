@@ -34,15 +34,16 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
   inputLabwareConfigPanel,
   outputLabwareConfigPanel,
   onSelectInputLabware,
-  onSelectOutputLabware
+  onSelectOutputLabware,
+  displayMappedTable = true
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine({
-      inputLabware: initialInputLabware ?? [],
+      inputLabware: [],
       outputSlotCopies: initialOutputLabware,
       failedSlotsCheck
     });
-  }, [initialOutputLabware, failedSlotsCheck, initialInputLabware]);
+  }, [initialOutputLabware, failedSlotsCheck]);
 
   const [current, send] = useMachine(() => memoSlotMapperMachine);
 
@@ -456,9 +457,8 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
             sourceBarcode: currentInputLabware?.barcode,
             sourceAddress: inputAddress[0]
           })
-        ) {
+        )
           setOneToManyCopyInProgress(true);
-        }
       }
       setSelectedInputAddresses(inputAddress.filter((address) => !memoInputAddressesDisabled.includes(address)));
     },
@@ -601,11 +601,16 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
                 ))}
               </RadioGroup>
             </div>
-            <div />
+            <div>
+              <MutedText>
+                For selection of multiple slots : <p>Hold 'Shift' key to select consecutive items </p>{' '}
+                <p>Hold 'Ctrl' (Cmd for Mac) key to select non-consecutive items </p>
+              </MutedText>{' '}
+            </div>
           </>
         )}
 
-        <div id="inputLabwares" data-testid={'input-labware-div'} className="bg-gray-100 p-4">
+        <div id="inputLabwares" className="bg-gray-100 p-4">
           <LabwareScanner initialLabwares={inputLabware} onChange={onLabwareScannerChange} limit={inputLabwareLimit}>
             {(props) => {
               if (!currentInputLabware) {
@@ -663,7 +668,6 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
                   {oneToManyCopyInProgress && (
                     <div className={'flex flex-col items-end'}>
                       <PinkButton
-                        data-testid={'finish-mapping-button'}
                         onClick={onFinishTransferButtonClick}
                       >{`Finish mapping for ${selectedInputAddresses[0]}`}</PinkButton>
                       <MutedText>Press when you finish</MutedText>
@@ -700,30 +704,31 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
           <div className="border-gray-300 flex-row items-center justify-end bg-gray-200">
             {!locked && (
               <div className={'flex flex-row space-x-4 justify-end'}>
-                <WhiteButton data-testid={'clear-all-button'} onClick={handleOnClickClear}>
-                  Clear
+                <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>
+                <WhiteButton data-testid={'clearAll'} onClick={handleOnClickClearAll}>
+                  Clear all
                 </WhiteButton>
-                <WhiteButton onClick={handleOnClickClearAll}>Clear all</WhiteButton>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {currentInputLabware && (selectedInputSlots.length > 0 || (currentOutput && slotsMappedForCurrentInput)) && (
-        <div className="space-y-4" data-testid={'mapping-div'}>
-          <Heading level={4}>
-            {selectedInputSlots.length > 0
-              ? `Slot mapping for slot(s) ${selectedInputAddresses.join(',')}`
-              : `Slot mapping for ${currentInputLabware.barcode}`}
-          </Heading>
-          <SlotMapperTable
-            labware={currentInputLabware}
-            slots={selectedInputSlots}
-            slotCopyContent={currentOutput?.slotCopyContent ?? []}
-          />
-        </div>
-      )}
+      {currentInputLabware &&
+        (selectedInputSlots.length > 0 || (currentOutput && slotsMappedForCurrentInput && displayMappedTable)) && (
+          <div className="space-y-4">
+            <Heading level={4}>
+              {selectedInputSlots.length > 0
+                ? `Slot mapping for slot(s) ${selectedInputAddresses.join(',')}`
+                : `Slot mapping for ${currentInputLabware.barcode}`}
+            </Heading>
+            <SlotMapperTable
+              labware={currentInputLabware}
+              slots={selectedInputSlots}
+              slotCopyContent={currentOutput?.slotCopyContent ?? []}
+            />
+          </div>
+        )}
       <ConfirmationModal
         show={failedSelectSlots.length > 0}
         header={'Slot transfer'}

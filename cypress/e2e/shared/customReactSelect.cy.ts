@@ -29,7 +29,7 @@ const chooseOptionFromSelectList = (optionText: string) => {
     cy.get('[id$=-option-0]').click({ multiple: true, force: true });
     return;
   }
-  cy.findByRole('combobox').first().type(`${optionText}`);
+  cy.findByRole('combobox').first().type(`${optionText}`, { force: true });
   cy.findByText(optionText).should('exist').click({ force: true });
 };
 
