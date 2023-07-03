@@ -39,11 +39,11 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine({
-      inputLabware: [],
+      inputLabware: initialInputLabware,
       outputSlotCopies: initialOutputLabware,
       failedSlotsCheck
     });
-  }, [initialOutputLabware, failedSlotsCheck]);
+  }, [initialOutputLabware, failedSlotsCheck, initialInputLabware]);
 
   const [current, send] = useMachine(() => memoSlotMapperMachine);
 
@@ -601,11 +601,10 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
                 ))}
               </RadioGroup>
             </div>
-            <div>
-              <MutedText>
-                For selection of multiple slots : <p>Hold 'Shift' key to select consecutive items </p>{' '}
-                <p>Hold 'Ctrl' (Cmd for Mac) key to select non-consecutive items </p>
-              </MutedText>{' '}
+            <div className={'flex flex-col my-2 text-gray-700 text-xs italic'}>
+              <p>For selection of multiple slots :</p>
+              <p>Hold 'Shift' key to select consecutive items</p>
+              <p>Hold 'Ctrl' (Cmd for Mac) key to select non-consecutive items</p>
             </div>
           </>
         )}
@@ -630,7 +629,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
                     </div>
                   )}
                   {inputLabware.length > 0 && (
-                    <div className="flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center justify-center" data-testid={'input-labware-div'}>
                       <Labware
                         labware={currentInputLabware}
                         selectable={oneToManyCopyInProgress ? 'none' : 'non_empty'}
@@ -716,7 +715,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
 
       {currentInputLabware &&
         (selectedInputSlots.length > 0 || (currentOutput && slotsMappedForCurrentInput && displayMappedTable)) && (
-          <div className="space-y-4">
+          <div className="space-y-4" data-testid={'mapping-div'}>
             <Heading level={4}>
               {selectedInputSlots.length > 0
                 ? `Slot mapping for slot(s) ${selectedInputAddresses.join(',')}`

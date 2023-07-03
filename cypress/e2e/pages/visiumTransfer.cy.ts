@@ -142,6 +142,8 @@ describe('Transfer Page', () => {
       });
       after(() => {
         cy.findByRole('button', { name: /Cancel/i }).click();
+        //Removes the current labware to  start fresh
+        cy.findAllByTestId('removeButton').eq(0).click();
       });
     });
     context('when user maps slots in one to many mode', () => {

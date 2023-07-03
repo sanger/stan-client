@@ -225,7 +225,7 @@ describe('slotMapper.spec.tsx', () => {
     expect(screen.getByTestId('mapping-div')).toBeInTheDocument();
     //Click on clear all button
     await waitFor(() => {
-      fireEvent.click(screen.getByTestId('clear-all-button'));
+      fireEvent.click(screen.getByTestId('clearAll'));
     });
     expect(screen).not.toContain(screen.getByTestId('mapping-div'));
   });
