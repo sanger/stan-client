@@ -2,27 +2,14 @@ import "../src/styles/index.css";
 import { enableAllPlugins } from "immer";
 enableAllPlugins();
 
-// Start the mocking when each story is loaded.
-if (typeof global.process === "undefined") {
-  const { worker } = require("../src/mocks/mswSetup");
+/**
+Starting from Storybook 7, the behavior for Service Workers has changed.
+Instead of using a dedicated file like mockServiceWorker.js, Storybook now uses a built-in mechanism called storybook-preset-create-react-app.
+This preset automatically registers a Service Worker for you when running Storybook.
 
-  let startOptions;
-
-  if (window.location.origin.indexOf("github") !== -1) {
-    startOptions = {
-      serviceWorker: {
-        url: "/stan-client/mockServiceWorker.js",
-        options: {
-          scope: "/stan-client/",
-        },
-      },
-    };
-  }
-
-  // Repetitive calls to the `.start()` method do not register a new worker,
-  // but check whether there's an existing once, reusing it, if so.
-  worker.start(startOptions);
-}
+Remove the previous Service Worker setup: If you have any custom Service Worker registration code or references to mockServiceWorker.js
+ in your Storybook configuration or code, remove them. You no longer need to explicitly register a Service Worker with Storybook 7+.
+ **/
 
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
