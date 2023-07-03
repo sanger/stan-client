@@ -5,7 +5,7 @@ import { createLabwareMachine, LabwareContext } from '../../../src/lib/machines/
 
 describe('labwareMachine', () => {
   it('has an initial state of idle.normal', (done) => {
-    const machine = interpret(createLabwareMachine([])).onTransition((state) => {
+    const machine = interpret(createLabwareMachine()).onTransition((state) => {
       if (state.matches('idle.normal')) {
         done();
       }
