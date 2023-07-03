@@ -6,9 +6,14 @@ import { enableMapSet } from 'immer';
 describe('labwareMachine', () => {
   describe('Initial states', () => {
     it('has an initial state of non_selectable for machine params  none and single', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'none', selectionMode: 'single' })
-      ).onTransition((state) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'none',
+          selectionMode: 'single'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         if (state.matches('non_selectable')) {
           done();
         }
@@ -16,9 +21,14 @@ describe('labwareMachine', () => {
       machine.start();
     });
     it('has an initial state of selectable.any.single for machine params  any and single', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'any', selectionMode: 'single' })
-      ).onTransition((state) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'any',
+          selectionMode: 'single'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         if (state.matches('selectable.any.single')) {
           done();
         }
@@ -26,9 +36,14 @@ describe('labwareMachine', () => {
       machine.start();
     });
     it('has an initial state of selectable.any.multi for machine params  any and multi', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'any', selectionMode: 'multi' })
-      ).onTransition((state) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'any',
+          selectionMode: 'multi'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         if (state.matches('selectable.any.multi')) {
           done();
         }
@@ -36,9 +51,14 @@ describe('labwareMachine', () => {
       machine.start();
     });
     it('has an initial state of selectable.any.single for machine params  any and single', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'non_empty', selectionMode: 'single' })
-      ).onTransition((state) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'non_empty',
+          selectionMode: 'single'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         if (state.matches('selectable.non_empty.single')) {
           done();
         }
@@ -46,9 +66,14 @@ describe('labwareMachine', () => {
       machine.start();
     });
     it('has an initial state of selectable.non_empty.multi for machine params non_empty and multi', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'non_empty', selectionMode: 'multi' })
-      ).onTransition((state) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'non_empty',
+          selectionMode: 'multi'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         if (state.matches('selectable.non_empty.multi')) {
           done();
         }
@@ -56,9 +81,14 @@ describe('labwareMachine', () => {
       machine.start();
     });
     it('has an initial state of selectable.empty.single for machine params empty and single', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'empty', selectionMode: 'single' })
-      ).onTransition((state) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'empty',
+          selectionMode: 'single'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         if (state.matches('selectable.empty.single')) {
           done();
         }
@@ -67,9 +97,14 @@ describe('labwareMachine', () => {
     });
 
     it('has an initial state of selectable.empty.multi for machine params empty and multi', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'empty', selectionMode: 'multi' })
-      ).onTransition((state) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'empty',
+          selectionMode: 'multi'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         if (state.matches('selectable.empty.multi')) {
           done();
         }
@@ -79,9 +114,14 @@ describe('labwareMachine', () => {
   });
   describe('CHANGE_SELECTION_MODE', () => {
     it('updates the slots', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'empty', selectionMode: 'multi' })
-      ).onTransition((state) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'empty',
+          selectionMode: 'multi'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         enableMapSet();
         if (state.matches('selectable.any.single')) {
           done();
@@ -93,9 +133,14 @@ describe('labwareMachine', () => {
   });
   describe('UPDATE_SLOTS', () => {
     it('updates the slots', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'empty', selectionMode: 'multi' })
-      ).onTransition((state) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'empty',
+          selectionMode: 'multi'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         if (state.matches('selectable.empty.multi') && state.context.slots.length === 10) {
           done();
         }
@@ -106,9 +151,14 @@ describe('labwareMachine', () => {
   });
   describe('SELECT_SLOT', () => {
     it('select slot', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'any', selectionMode: 'single' })
-      ).onTransition((state) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'any',
+          selectionMode: 'single'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state) => {
         enableMapSet();
         if (state.matches('selectable.any.single') && state.context.selectedAddresses.has('A1')) {
           done();
@@ -120,9 +170,14 @@ describe('labwareMachine', () => {
   });
   describe('RESET_SELECTED', () => {
     it('reset selected', (done) => {
-      const machine = interpret(
-        createLabwareMachine({ slots: createSlots(4), selectable: 'any', selectionMode: 'single' })
-      ).onTransition((state, event) => {
+      const mockLabwareTableMachine = createLabwareMachine().withContext(
+        Object.assign({}, createLabwareMachine().context, {
+          slots: createSlots(4),
+          selectable: 'any',
+          selectionMode: 'single'
+        })
+      );
+      const machine = interpret(mockLabwareTableMachine).onTransition((state, event) => {
         enableMapSet();
         if (
           state.matches('selectable.any.single') &&
