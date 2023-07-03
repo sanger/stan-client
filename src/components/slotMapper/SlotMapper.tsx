@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Labware, { LabwareImperativeRef } from '../labware/Labware';
 import Pager from '../pagination/Pager';
-import { OutputSlotCopyData, SlotMapperProps } from './slotMapper.types';
+import { OutputSlotCopyData, SlotCopyMode, SlotMapperProps } from './slotMapper.types';
 import { usePrevious } from '../../lib/hooks';
 import WhiteButton from '../buttons/WhiteButton';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
@@ -17,6 +17,8 @@ import { ConfirmationModal } from '../modal/ConfirmationModal';
 import Warning from '../notifications/Warning';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import createSlotMapperMachine from './slotMapper.machine';
+import PinkButton from '../buttons/PinkButton';
+import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
 
 const SlotMapper: React.FC<SlotMapperProps> = ({
   onChange,
@@ -28,10 +30,12 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
   inputLabwareLimit,
   failedSlotsCheck = true,
   disabledOutputSlotAddresses = [],
+  slotCopyModes,
   inputLabwareConfigPanel,
   outputLabwareConfigPanel,
   onSelectInputLabware,
-  onSelectOutputLabware
+  onSelectOutputLabware,
+  displayMappedTable = true
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine({
@@ -74,6 +78,9 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
    * State to keep the output address clicked to transfer from input
    */
   const [destinationAddress, setDestinationAddress] = useState<string | undefined>();
+
+  const [selectedCopyMode, setSelectedCopyMode] = useState<SlotCopyMode>(SlotCopyMode.ONE_TO_ONE);
+  const [oneToManyCopyInProgress, setOneToManyCopyInProgress] = useState(false);
 
   /**
    * Hook for tracking state for Pager component for input
@@ -121,7 +128,6 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
    */
   const memoInputAddressesDisabled = React.useMemo(() => {
     if (!currentOutput || !currentInputLabware) return [];
-
     const outputSlotCopiesFromNotSelected = outputSlotCopies.filter(
       (osc) => osc.labware.id !== currentOutput.labware.id
     );
@@ -164,6 +170,11 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
       if (!currentOutput) {
         return 'bg-white';
       }
+      if (selectedCopyMode === SlotCopyMode.ONE_TO_MANY) {
+        if (oneToManyCopyInProgress && selectedInputAddresses[0] === address) {
+          return `bg-${colorByBarcode.get(labware.barcode)}-500 ring ring-pink-600 ring-offset-2`;
+        }
+      }
       //Slots copied between current selected source and destination labware
       if (
         find(currentOutput.slotCopyContent, {
@@ -171,19 +182,27 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
           sourceAddress: address
         })
       ) {
-        return `bg-${colorByBarcode.get(labware.barcode)}-200`;
+        return `bg-${colorByBarcode.get(labware.barcode)}-200 ${
+          selectedInputAddresses.includes(address) ? 'ring ring-blue-600 ring-offset-2' : ''
+        }`;
       }
 
       //This input slot address has got mapping to a different output labware
       if (memoInputAddressesDisabled.includes(address)) {
         return `bg-gray-300 ring-0 ring-offset-0 text-white border-0 border-gray-300`;
       }
-
       if (slot?.samples?.length) {
         return `bg-${colorByBarcode.get(labware.barcode)}-500`;
       }
     },
-    [currentOutput, colorByBarcode, memoInputAddressesDisabled]
+    [
+      currentOutput,
+      colorByBarcode,
+      memoInputAddressesDisabled,
+      selectedCopyMode,
+      selectedInputAddresses,
+      oneToManyCopyInProgress
+    ]
   );
 
   const getDestinationSlotColor = useCallback(
@@ -197,10 +216,18 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
       });
 
       if (scc) {
+        if (
+          currentInputLabware &&
+          currentInputLabware.barcode === scc.sourceBarcode &&
+          selectedInputAddresses.includes(scc.sourceAddress) &&
+          !oneToManyCopyInProgress
+        ) {
+          return `bg-${colorByBarcode.get(scc.sourceBarcode)}-500 ring ring-blue-600 ring-offset-2`;
+        }
         return `bg-${colorByBarcode.get(scc.sourceBarcode)}-500`;
       }
     },
-    [colorByBarcode, disabledOutputSlotAddresses]
+    [colorByBarcode, disabledOutputSlotAddresses, oneToManyCopyInProgress, selectedInputAddresses, currentInputLabware]
   );
 
   /**
@@ -291,7 +318,7 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
       const address = destinationAddress ? destinationAddress : givenDestinationAddress;
       if (currentInputLabware?.id && currentOutput?.labware?.id && address) {
         send({
-          type: 'COPY_SLOTS',
+          type: 'COPY_ONE_TO_ONE_SLOTS',
           inputLabwareId: currentInputLabware?.id,
           inputAddresses: selectedInputAddresses,
           outputLabwareId: currentOutput?.labware?.id,
@@ -302,21 +329,12 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
     },
     [currentInputLabware, currentOutput, destinationAddress, selectedInputAddresses, send]
   );
-
-  const handleOnInputLabwareSlotClick = React.useCallback(
-    (inputAddress: string[]) => {
-      setSelectedInputAddresses(inputAddress.filter((address) => !memoInputAddressesDisabled.includes(address)));
-    },
-    [setSelectedInputAddresses, memoInputAddressesDisabled]
-  );
-
   /**
-   * Callback to handle click on destination address for tranferring slots
+   * Handle one to one copy action
    */
-  const handleOnOutputLabwareSlotClick = React.useCallback(
+  const handleOneToOneCopy = React.useCallback(
     (outputAddress: string) => {
       if (disabledOutputSlotAddresses?.includes(outputAddress)) return;
-
       setDestinationAddress(outputAddress);
       //Check whether any selected input slots are failed in QC
       if (currentInputLabware) {
@@ -337,6 +355,122 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
       }
     },
     [currentInputLabware, handleCopySlots, failedSlots, selectedInputAddresses, disabledOutputSlotAddresses]
+  );
+
+  const handleOneToManyCopy = React.useCallback(
+    (outputAddress: string) => {
+      if (disabledOutputSlotAddresses?.includes(outputAddress)) return;
+      if (!oneToManyCopyInProgress) return;
+      setDestinationAddress(outputAddress);
+      setFailedSelectSlots([]);
+      const address = destinationAddress ? destinationAddress : outputAddress;
+      if (currentInputLabware?.id && currentOutput?.labware?.id && address) {
+        send({
+          type: 'COPY_ONE_TO_MANY_SLOTS',
+          inputLabwareId: currentInputLabware?.id,
+          inputAddress: selectedInputAddresses[0],
+          outputLabwareId: currentOutput?.labware?.id,
+          outputAddress: address
+        });
+      }
+      setDestinationAddress(undefined);
+      return;
+    },
+    [
+      setDestinationAddress,
+      destinationAddress,
+      oneToManyCopyInProgress,
+      send,
+      currentInputLabware,
+      currentOutput,
+      disabledOutputSlotAddresses,
+      selectedInputAddresses
+    ]
+  );
+
+  const handleManyToOneCopy = React.useCallback(
+    (outputAddress: string) => {
+      if (disabledOutputSlotAddresses?.includes(outputAddress)) return;
+      setDestinationAddress(outputAddress);
+      setFailedSelectSlots([]);
+      const address = destinationAddress ? destinationAddress : outputAddress;
+      if (currentInputLabware?.id && currentOutput?.labware?.id && address) {
+        send({
+          type: 'COPY_MANY_TO_ONE_SLOTS',
+          inputLabwareId: currentInputLabware?.id,
+          inputAddresses: selectedInputAddresses,
+          outputLabwareId: currentOutput?.labware?.id,
+          outputAddress: address
+        });
+      }
+      setDestinationAddress(undefined);
+      return;
+    },
+    [
+      setDestinationAddress,
+      destinationAddress,
+      send,
+      currentInputLabware,
+      currentOutput,
+      disabledOutputSlotAddresses,
+      selectedInputAddresses
+    ]
+  );
+
+  /**
+   * Callback to handle click on destination address for tranferring slots
+   */
+  const handleOnOutputLabwareSlotClick = React.useCallback(
+    (outputAddress: string) => {
+      switch (selectedCopyMode) {
+        case SlotCopyMode.ONE_TO_ONE:
+          handleOneToOneCopy(outputAddress);
+          break;
+        case SlotCopyMode.ONE_TO_MANY:
+          handleOneToManyCopy(outputAddress);
+          break;
+        case SlotCopyMode.MANY_TO_ONE:
+          handleManyToOneCopy(outputAddress);
+          break;
+      }
+    },
+    [handleOneToOneCopy, handleManyToOneCopy, handleOneToManyCopy, selectedCopyMode]
+  );
+
+  /**
+   * Callback to handle click on source address for tranferring slots
+   */
+  const handleOnInputLabwareSlotClick = React.useCallback(
+    (inputAddress: string[]) => {
+      if (selectedCopyMode === SlotCopyMode.ONE_TO_MANY) {
+        if (oneToManyCopyInProgress) {
+          return;
+        }
+        if (inputAddress.length === 0) {
+          setSelectedInputAddresses([]);
+          return;
+        }
+        /**If the selected slot address is not already mapped, signal the start of that multiple transfers
+         *in one to many mapping process by setting oneToManyCopyInProgress to true**/
+        if (
+          !find(currentOutput?.slotCopyContent, {
+            sourceBarcode: currentInputLabware?.barcode,
+            sourceAddress: inputAddress[0]
+          })
+        )
+          setOneToManyCopyInProgress(true);
+      }
+      setSelectedInputAddresses(inputAddress.filter((address) => !memoInputAddressesDisabled.includes(address)));
+    },
+    [
+      setSelectedInputAddresses,
+      memoInputAddressesDisabled,
+      setOneToManyCopyInProgress,
+      selectedCopyMode,
+      currentInputLabware?.barcode,
+      currentOutput?.slotCopyContent,
+      oneToManyCopyInProgress
+    ]
   );
 
   /**
@@ -420,12 +554,61 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
       )
     : [];
 
+  const slotsMappedForCurrentInput = currentOutput?.slotCopyContent.some((slotCopy) => {
+    return slotCopy.sourceBarcode === currentInputLabware?.barcode;
+  });
+  /**
+   * Callback when the copy mode changes
+   */
+  const handleCopyModeChange = React.useCallback(
+    (mode: SlotCopyMode) => {
+      setSelectedCopyMode(mode);
+      setOneToManyCopyInProgress(false);
+    },
+    [setSelectedCopyMode, setOneToManyCopyInProgress]
+  );
+
+  /**
+   * Callback function when finish transfer is called
+   */
+
+  const onFinishTransferButtonClick = React.useCallback(() => {
+    setOneToManyCopyInProgress(false);
+    setSelectedInputAddresses([]);
+    setSelectedOutputAddresses([]);
+  }, [setOneToManyCopyInProgress, setSelectedOutputAddresses, setSelectedInputAddresses]);
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-2 auto-rows-auto">
         <Heading level={4}>Input Labwares</Heading>
 
         <Heading level={4}>Output Labwares</Heading>
+        {slotCopyModes && (
+          <>
+            <div className="flex flex-row p-4 space-x-4">
+              <RadioGroup label="Select transfer mode" name={'sectionNumber'} withFormik={false}>
+                {slotCopyModes.map((mode) => (
+                  <RadioButtonInput
+                    key={mode}
+                    data-testid={`copyMode-${mode}`}
+                    name={'copyMode'}
+                    value={mode}
+                    checked={selectedCopyMode === mode}
+                    onChange={() => handleCopyModeChange(mode)}
+                    label={mode}
+                  />
+                ))}
+              </RadioGroup>
+            </div>
+            <div>
+              <MutedText>
+                For selection of multiple slots : <p>Hold 'Shift' key to select consecutive items </p>{' '}
+                <p>Hold 'Ctrl' (Cmd for Mac) key to select non-consecutive items </p>
+              </MutedText>{' '}
+            </div>
+          </>
+        )}
 
         <div id="inputLabwares" className="bg-gray-100 p-4">
           <LabwareScanner initialLabwares={inputLabware} onChange={onLabwareScannerChange} limit={inputLabwareLimit}>
@@ -450,8 +633,8 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
                     <div className="flex flex-col items-center justify-center">
                       <Labware
                         labware={currentInputLabware}
-                        selectable="non_empty"
-                        selectionMode="multi"
+                        selectable={oneToManyCopyInProgress ? 'none' : 'non_empty'}
+                        selectionMode={selectedCopyMode !== SlotCopyMode.ONE_TO_MANY ? 'multi' : 'single'}
                         labwareRef={inputLabwareRef}
                         slotColor={(address, slot) => {
                           return getSourceSlotColor(currentInputLabware, address, slot);
@@ -480,16 +663,28 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
           )}
           <div className={'flex items-center justify-center'}>
             {currentOutput?.labware && (
-              <Labware
-                labware={currentOutput.labware}
-                selectable="any"
-                selectionMode="multi"
-                labwareRef={outputLabwareRef}
-                name={currentOutput?.labware.labwareType.name}
-                onSlotClick={handleOnOutputLabwareSlotClick}
-                onSelect={setSelectedOutputAddresses}
-                slotColor={(address) => getDestinationSlotColor(currentOutput, address)}
-              />
+              <div className="flex flex-col space-y-2">
+                <div className="flex justify-end">
+                  {oneToManyCopyInProgress && (
+                    <div className={'flex flex-col items-end'}>
+                      <PinkButton
+                        onClick={onFinishTransferButtonClick}
+                      >{`Finish mapping for ${selectedInputAddresses[0]}`}</PinkButton>
+                      <MutedText>Press when you finish</MutedText>
+                    </div>
+                  )}
+                </div>
+                <Labware
+                  labware={currentOutput.labware}
+                  selectable="any"
+                  selectionMode="multi"
+                  labwareRef={outputLabwareRef}
+                  name={currentOutput?.labware.labwareType.name}
+                  onSlotClick={handleOnOutputLabwareSlotClick}
+                  onSelect={setSelectedOutputAddresses}
+                  slotColor={(address) => getDestinationSlotColor(currentOutput, address)}
+                />
+              </div>
             )}
           </div>
         </div>
@@ -510,23 +705,30 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
             {!locked && (
               <div className={'flex flex-row space-x-4 justify-end'}>
                 <WhiteButton onClick={handleOnClickClear}>Clear</WhiteButton>
-                <WhiteButton onClick={handleOnClickClearAll}>Clear all</WhiteButton>
+                <WhiteButton data-testid={'clearAll'} onClick={handleOnClickClearAll}>
+                  Clear all
+                </WhiteButton>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {currentInputLabware && selectedInputSlots.length > 0 && (
-        <div className="space-y-4">
-          <Heading level={4}>Slot Mapping</Heading>
-          <SlotMapperTable
-            labware={currentInputLabware}
-            slots={selectedInputSlots}
-            slotCopyContent={currentOutput?.slotCopyContent ?? []}
-          />
-        </div>
-      )}
+      {currentInputLabware &&
+        (selectedInputSlots.length > 0 || (currentOutput && slotsMappedForCurrentInput && displayMappedTable)) && (
+          <div className="space-y-4">
+            <Heading level={4}>
+              {selectedInputSlots.length > 0
+                ? `Slot mapping for slot(s) ${selectedInputAddresses.join(',')}`
+                : `Slot mapping for ${currentInputLabware.barcode}`}
+            </Heading>
+            <SlotMapperTable
+              labware={currentInputLabware}
+              slots={selectedInputSlots}
+              slotCopyContent={currentOutput?.slotCopyContent ?? []}
+            />
+          </div>
+        )}
       <ConfirmationModal
         show={failedSelectSlots.length > 0}
         header={'Slot transfer'}

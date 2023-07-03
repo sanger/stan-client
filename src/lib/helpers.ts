@@ -12,10 +12,7 @@ import { Column } from 'react-table';
  * As TypeScript enums are really just objects, this can be used for them also.
  * @param o object to retrieve keys from
  */
-export function objectKeys<E extends object>(o: E): (keyof E)[] {
-  if (typeof o !== 'object') {
-    return [];
-  }
+export function objectKeys<E>(o: E): (keyof E)[] {
   return Object.keys(o) as (keyof E)[];
 }
 
@@ -385,4 +382,13 @@ export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 /**Generate a random integer number between min and max**/
 export function generateRandomIntegerInRange(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Checks whether the given arrays have got same elements
+ * @param array1
+ * @param array2
+ */
+export function isSameArray(array1: string[], array2: string[]) {
+  return array1.length === array2.length && array1.every((element) => array2.includes(element));
 }

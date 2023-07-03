@@ -5,7 +5,13 @@ import SectionRegistrationForm from './registration/SectionRegistrationForm';
 import columns from '../components/dataTableColumns/labwareColumns';
 import RegistrationSuccess from './registration/RegistrationSuccess';
 import Warning from '../components/notifications/Warning';
-import { GetRegistrationInfoQuery, LifeStage, RegisterSectionsMutation, SectionRegisterRequest } from '../types/sdk';
+import {
+  GetRegistrationInfoQuery,
+  LabwareFieldsFragment,
+  LifeStage,
+  RegisterSectionsMutation,
+  SectionRegisterRequest
+} from '../types/sdk';
 import { LabwareTypeName } from '../types/stan';
 import _, { uniqueId } from 'lodash';
 import RegistrationValidation from '../lib/validation/registrationValidation';
@@ -16,6 +22,10 @@ import { parseQueryString } from '../lib/helpers';
 import { history, StanCoreContext } from '../lib/sdk';
 import { useLocation } from 'react-router-dom';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import Heading from '../components/Heading';
+import FileUploader from '../components/upload/FileUploader';
+import { toast } from 'react-toastify';
+import warningToast from '../components/notifications/WarningToast';
 
 const availableLabware: Array<LabwareTypeName> = [
   LabwareTypeName.FOUR_SLOT_SLIDE,
@@ -184,6 +194,7 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
     });
   }, [stanCore]);
   const [current, send] = useMachine(() => formMachine);
+  const [fileRegisterResult, setFileRegisterResult] = React.useState<LabwareFieldsFragment[] | undefined>(undefined);
 
   const initialLabware = useMemo(() => {
     const queryString = parseQueryString(location.search);
@@ -214,12 +225,41 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
     send({ type: 'SUBMIT_FORM', values: buildSectionRegisterRequest(values) });
   const isSubmitting = !current.matches('fillingOutForm');
 
-  if (current.matches('submitted') && submissionResult) {
+  /**Callback notification send from child after finishing upload**/
+  const onFileUploadFinished = React.useCallback(
+    (file: File, isSuccess: boolean, result?: { barcodes: [] }) => {
+      //Upload failed, return
+      if (!isSuccess) return;
+      //Upload success, but no result, return
+      if (result && 'barcodes' in result) {
+        const barcodes = result['barcodes'];
+        const labwarePromises = barcodes.map((barcode: string) => stanCore.FindLabware({ barcode }));
+        //Retrieve details of newly registered labware
+        Promise.all(labwarePromises)
+          .then((labwares) => {
+            setFileRegisterResult(labwares.map((labware) => labware.labware!) as LabwareFieldsFragment[]);
+          })
+          .catch(() => {
+            warningToast({
+              message: `Cannot retrieve details of newly registered labware ${barcodes.join(',')}.`,
+              position: toast.POSITION.TOP_RIGHT,
+              autoClose: 5000
+            });
+          });
+      }
+    },
+    [setFileRegisterResult, stanCore]
+  );
+
+  const registrationResult =
+    current.matches('submitted') && submissionResult ? submissionResult.registerSections.labware : fileRegisterResult;
+  if (registrationResult) {
     return (
-      <RegistrationSuccess
-        successData={submissionResult.registerSections.labware}
-        columns={[columns.barcode(), columns.labwareType()]}
-      />
+      <RegistrationSuccess successData={registrationResult} columns={[columns.barcode(), columns.labwareType()]} />
+    );
+  } else if (fileRegisterResult) {
+    return (
+      <RegistrationSuccess successData={fileRegisterResult} columns={[columns.barcode(), columns.labwareType()]} />
     );
   }
 
@@ -231,27 +271,40 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           {!initialLabware && (
-            <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
-              <p className="my-3 text-gray-800 text-sm leading-normal">Pick a type of labware to begin:</p>
-
-              <div className="flex flex-row items-center justify-center gap-4">
-                <CustomReactSelect
-                  dataTestId="initialLabwareType"
-                  handleChange={(value) =>
-                    history.replace({
-                      search: `?initialLabware=${(value as OptionType).value}`
-                    })
-                  }
-                  options={availableLabware.map((labwareTypeName) => {
-                    return {
-                      value: labwareTypeName,
-                      label: labwareTypeName
-                    };
-                  })}
-                  className=" rounded-md md:w-1/2"
+            <>
+              <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
+                <Heading level={4}>Register manually</Heading>
+                <p className="my-3 mt-4 text-gray-800 text-sm leading-normal">Pick a type of labware to begin:</p>
+                <div className="flex flex-row items-center justify-center gap-4">
+                  <CustomReactSelect
+                    dataTestId="initialLabwareType"
+                    handleChange={(value) =>
+                      history.replace({
+                        search: `?initialLabware=${(value as OptionType).value}`
+                      })
+                    }
+                    options={availableLabware.map((labwareTypeName) => {
+                      return {
+                        value: labwareTypeName,
+                        label: labwareTypeName
+                      };
+                    })}
+                    className=" rounded-md md:w-1/2"
+                  />
+                </div>
+              </div>
+              <div className=" flex my-4 mx-4 max-w-screen-sm sm:mx-auto justify-center text-gray-800">OR</div>
+              <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
+                <Heading level={4}>Register from file</Heading>
+                <p className="my-3 text-gray-800 text-sm leading-normal">Select a file to upload: </p>
+                <FileUploader
+                  url={'/register/section'}
+                  enableUpload={true}
+                  notifyUploadOutcome={onFileUploadFinished}
+                  errorField={'problems'}
                 />
               </div>
-            </div>
+            </>
           )}
 
           {serverError && (

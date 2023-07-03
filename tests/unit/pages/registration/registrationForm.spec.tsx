@@ -111,27 +111,31 @@ describe('RegistrationForm', () => {
 
         //Fetal should be selected by default in life stage
         expect(screen.getByText('Life Stage')).toBeInTheDocument();
-
         expect(screen.getByTestId('fetal')).toBeChecked();
+
         expect(screen.getByText('Sample Collection Date')).toBeInTheDocument();
         expect(screen.getByRole('combobox', { name: 'Species' })).toBeInTheDocument();
 
         //Tissue Information
         expect(screen.getByText('Tissue Information')).toBeInTheDocument();
 
+        await waitFor(() => screen.getByText('HuMFre'));
         expect(screen.getByText('HuMFre')).toBeInTheDocument();
 
         //humfre is disabled
         const humfre = getSelect('HuMFre');
         expect(humfre).toBeDisabled();
+
         expect(screen.getByRole('combobox', { name: 'Tissue Type' })).toBeInTheDocument();
 
         //Sample information
         expect(screen.getByText('Sample Information')).toBeInTheDocument();
+
         //only one sample page
         expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
 
         expect(screen.getByTestId('External Identifier')).toBeInTheDocument();
+
         expect(screen.getByTestId('Spatial Location')).toBeInTheDocument();
 
         //spatial location is disabled
@@ -139,6 +143,7 @@ describe('RegistrationForm', () => {
         expect(spatialLocation).toBeDisabled();
 
         expect(screen.getByTestId('Replicate Number')).toBeInTheDocument();
+
         expect(screen.getByRole('combobox', { name: 'Labware Type' })).toBeInTheDocument();
 
         //Solution Information
@@ -182,6 +187,7 @@ describe('RegistrationForm', () => {
       it('enables HumFre field on entering Species', async () => {
         const speciesCombo = getSelect('Species');
         await waitFor(() => userEvent.type(speciesCombo, 'Human{enter}'));
+        await waitFor(() => getSelect('HuMFre'));
         expect(getSelect('HuMFre')).toBeEnabled();
       });
     });
@@ -363,7 +369,7 @@ describe('RegistrationForm', () => {
       });
 
       describe('Button clicks', () => {
-        beforeEach(async () => {
+        it('creates another block', async () => {
           await act(async () => {
             window.HTMLElement.prototype.scrollIntoView = jest.fn();
             jest.mock('../../../../src/lib/hooks', () => ({
@@ -398,9 +404,9 @@ describe('RegistrationForm', () => {
 
             renderBlockRegistrationForm(tissues);
           });
-        });
-        it('creates another block', async () => {
+
           await waitFor(() => screen.getByRole('button', { name: '+ Add Another Tissue Block' }).click());
+
           //Two sample pages
           expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
           expect(screen.getAllByRole('button', { name: 'Delete Block' })).toHaveLength(2);

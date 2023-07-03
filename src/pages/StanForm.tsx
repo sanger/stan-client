@@ -1,6 +1,6 @@
 import React from 'react';
 import AppShell from '../components/AppShell';
-import { Form, Formik, FormikProps, FormikValues } from 'formik';
+import { Form, Formik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
@@ -13,7 +13,7 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import { reload } from '../lib/sdk';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 
-type StanFormParams<V extends FormikValues, R> = {
+type StanFormParams<V, R> = {
   /**
    * The title of the page
    */
@@ -49,7 +49,7 @@ type StanFormParams<V extends FormikValues, R> = {
 /**
  * A component to act as a generic parent for a page that requires a simple form
  */
-export default function StanForm<V extends FormikValues, R>({
+export default function StanForm<V, R>({
   title,
   onSubmit,
   validationSchema,

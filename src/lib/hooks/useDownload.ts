@@ -13,7 +13,7 @@ type ColumnTextData = {
 type TextData = {
   columnNames: Array<string>;
 };
-type ColumnDataType<T extends StringKeyedProps> = ColumnData<T> | ColumnTextData | TextData;
+type ColumnDataType<T> = ColumnData<T> | ColumnTextData | TextData;
 
 const isColumnData = (x: any): x is ColumnData<any> => Object.keys(x).includes('columns');
 const isColumnTextData = (x: any): x is ColumnTextData => Object.keys(x).includes('columnAccessPath');
@@ -24,7 +24,7 @@ type DownloadProps<T extends StringKeyedProps> = {
   entries: Array<T> | Array<Array<string>>;
 };
 
-export function useDownload<T extends StringKeyedProps>(downloadPropsInput: DownloadProps<T>) {
+export function useDownload<T>(downloadPropsInput: DownloadProps<T>) {
   const [downloadURL, setDownloadURL] = useState<string>(URL.createObjectURL(new Blob()));
 
   /**External request for download**/

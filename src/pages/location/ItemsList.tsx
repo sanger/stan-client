@@ -9,7 +9,7 @@ import MutedText from '../../components/MutedText';
 import { addressToLocationAddress } from '../../lib/helpers/locationHelper';
 import { Authenticated } from '../../components/Authenticated';
 import { getLabwareInLocation } from '../../lib/services/locationService';
-import { LabwareFieldsFragment, Maybe, SuggestedWorkFieldsFragment, UserRole } from '../../types/sdk';
+import { GridDirection, LabwareFieldsFragment, Maybe, SuggestedWorkFieldsFragment, UserRole } from '../../types/sdk';
 import { tissue } from '../../lib/helpers/labwareHelper';
 import { stanCore } from '../../lib/sdk';
 
@@ -102,8 +102,12 @@ export const ItemsList: React.FC<ItemsListParams> = () => {
                 <TableCell>
                   {item.address ? (
                     <span className="font-bold">
-                      {location.size && location.direction
-                        ? addressToLocationAddress(item.address, location.size!, location.direction!)
+                      {location.size
+                        ? addressToLocationAddress(
+                            item.address,
+                            location.size!,
+                            location.direction ?? GridDirection.DownRight
+                          )
                         : item.address}
                     </span>
                   ) : (
