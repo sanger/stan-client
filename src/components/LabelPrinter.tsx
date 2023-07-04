@@ -75,16 +75,17 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({
 
   return (
     <div className="space-y-4">
-      {showNotifications && (current.matches({ ready: 'printSuccess' }) || current.matches({ ready: 'printError' })) && (
-        <PrintResult
-          result={{
-            successful: current.matches({ ready: 'printSuccess' }),
-            labelsPerBarcode,
-            printer: context.selectedPrinter!,
-            labwares: context.labwares
-          }}
-        />
-      )}
+      {showNotifications &&
+        (current.matches({ ready: 'printSuccess' }) || current.matches({ ready: 'printError' })) && (
+          <PrintResult
+            result={{
+              successful: current.matches({ ready: 'printSuccess' }),
+              labelsPerBarcode,
+              printer: context.selectedPrinter!,
+              labwares: context.labwares
+            }}
+          />
+        )}
       <div className="sm:flex sm:flex-row space-y-2 items-center justify-end sm:space-x-2 sm:space-y-0">
         <select
           aria-label="printers"

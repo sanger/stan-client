@@ -68,11 +68,13 @@ function PermTimeSelectFieldInner({ data }: PermSelectFieldInnerProps) {
         />
 
         {/* Display a warning if a slide already has a selected perm time, and a new one has been chosen */}
-        {values.selectedAddress !== '' && initialSelectedAddress && values.selectedAddress !== initialSelectedAddress && (
-          <div className="mt-2">
-            <Warning message={'Warning'}>The selected perm time is being changed for this slide</Warning>
-          </div>
-        )}
+        {values.selectedAddress !== '' &&
+          initialSelectedAddress &&
+          values.selectedAddress !== initialSelectedAddress && (
+            <div className="mt-2">
+              <Warning message={'Warning'}>The selected perm time is being changed for this slide</Warning>
+            </div>
+          )}
       </RadioGroup>
     </>
   );
