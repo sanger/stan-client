@@ -1,34 +1,21 @@
 import { Machine, MachineOptions, send } from 'xstate';
-import {
-  LabwareMachineContext,
-  LabwareMachineEvent,
-  LabwareMachineSchema,
-  Selectable,
-  SelectionMode
-} from './labware.types';
+import { LabwareMachineContext, LabwareMachineEvent, LabwareMachineSchema } from './labware.types';
 import { assign } from '@xstate/immer';
 import { pure } from 'xstate/lib/actions';
-import { SlotFieldsFragment } from '../../types/sdk';
 import { emptySlots, filledSlots, findSlotByAddress, isSlotEmpty, isSlotFilled } from '../../lib/helpers/slotHelper';
 import { sortDownRight } from '../../lib/helpers/labwareHelper';
 
-interface CreateLabwareMachineParams {
-  slots: Array<SlotFieldsFragment>;
-  selectionMode: SelectionMode;
-  selectable: Selectable;
-}
-
-function createLabwareMachine({ slots, selectionMode, selectable }: CreateLabwareMachineParams) {
+function createLabwareMachine() {
   return Machine<LabwareMachineContext, LabwareMachineSchema, LabwareMachineEvent>(
     {
       id: 'labwareMachine',
       initial: 'unknown',
       context: {
-        slots,
+        slots: [],
         selectedAddresses: new Set<string>(),
         lastSelectedAddress: null,
-        selectionMode,
-        selectable
+        selectionMode: 'single',
+        selectable: 'none'
       },
       on: {
         RESET_SELECTED: {

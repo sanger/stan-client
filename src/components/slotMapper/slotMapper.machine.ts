@@ -249,6 +249,7 @@ interface SlotMapperMachineParams {
   outputSlotCopies: Array<OutputSlotCopyData>;
   failedSlotsCheck?: boolean;
 }
+
 function createSlotMapperMachine({ inputLabware, outputSlotCopies, failedSlotsCheck = true }: SlotMapperMachineParams) {
   return Machine<SlotMapperContext, SlotMapperSchema, SlotMapperEvent>(
     {

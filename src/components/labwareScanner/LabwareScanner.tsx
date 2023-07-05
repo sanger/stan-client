@@ -76,10 +76,16 @@ export default function LabwareScanner({
   }, [initialLabwares, limit]);
 
   const labwareMachine = React.useMemo(() => {
-    return createLabwareMachine(slicedInitialLabware, labwareCheckFunction, limit);
-  }, [limit, labwareCheckFunction, slicedInitialLabware]);
+    return createLabwareMachine();
+  }, []);
 
-  const [current, send, service] = useMachine(labwareMachine);
+  const [current, send, service] = useMachine(labwareMachine, {
+    context: {
+      labwares: slicedInitialLabware,
+      foundLabwareCheck: labwareCheckFunction,
+      limit
+    }
+  });
 
   const { labwares, removedLabware, successMessage, errorMessage, currentBarcode, locationScan } = current.context;
 

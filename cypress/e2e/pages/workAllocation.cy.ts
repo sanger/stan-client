@@ -1,7 +1,5 @@
 import { CreateWorkMutation, CreateWorkMutationVariables } from '../../../src/types/sdk';
 import {
-  getAllSelect,
-  getSelect,
   removeSelections,
   selectOption,
   selectOptionForMultiple,
