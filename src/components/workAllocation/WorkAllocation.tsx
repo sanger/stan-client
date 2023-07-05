@@ -276,7 +276,11 @@ export default function WorkAllocation() {
             setTimeout(() => {
               setSubmitted(false);
             }, 500);
-            send({ type: 'ALLOCATE_WORK', values });
+            const valuesToSubmit = {
+              ...values,
+              dnapStudy: values.dnapStudy?.length === 0 ? undefined : values.dnapStudy
+            };
+            send({ type: 'ALLOCATE_WORK', values: valuesToSubmit });
           }}
           validationSchema={validationSchema}
         >
