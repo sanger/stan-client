@@ -7,5 +7,8 @@ module.exports = {
   core: {
     builder: "webpack5"
   },
-  framework: "@storybook/react"
+  framework: {
+    name: '@storybook/react-webpack5',
+    options: { fastRefresh: true }
+  }
 };

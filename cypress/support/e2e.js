@@ -22,8 +22,10 @@ before(async () => {
 });
 
 after(() => {
+  worker.resetHandlers()
   worker.stop();
 });
+
 
 // ignore uncaught exceptions
 Cypress.on('uncaught:exception', () => {
