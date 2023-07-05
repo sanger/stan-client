@@ -340,20 +340,20 @@ describe('FileManager', () => {
               return res(
                 ctx.status(500),
                 ctx.json({
-                  response: {
-                    message: 'Error'
-                  }
+                  message: 'java.io.IOException: Error message here.'
                 })
               );
             })
           );
         });
+
         selectSGPNumber('SGP1008');
         selectFile();
         uploadButton().should('be.visible').click({ force: true });
       });
       it('should display upload failure message', () => {
         cy.findByText('Error:').should('exist');
+        cy.findByText('java.io.IOException: Error message here.').should('exist');
       });
     });
   });

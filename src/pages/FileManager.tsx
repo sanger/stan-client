@@ -237,6 +237,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
                       enableUpload={memoAllSelectedWork.length > 0}
                       confirmUpload={onConfirmUpload}
                       notifyUploadOutcome={onFileUploadFinished}
+                      errorField={'message'}
                     />
                   </motion.div>
                 )}
