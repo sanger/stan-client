@@ -354,6 +354,7 @@ export function Routes() {
               {(dataFetcher) => {
                 return (
                   <LabwareDetails
+                    samplePositionResults={dataFetcher.visiumPermData.samplePositionResults}
                     labware={dataFetcher.visiumPermData.labware}
                     permData={dataFetcher.visiumPermData.addressPermData}
                   />
