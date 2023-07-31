@@ -9,5 +9,8 @@ query FindPermData($barcode: String!) {
       seconds
       selected
     }
+    samplePositionResults {
+     ...SamplePositionFields
+    }
   }
 }
