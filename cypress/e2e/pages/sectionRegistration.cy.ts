@@ -87,7 +87,7 @@ describe('Section Registration Page', () => {
     });
   });
 
-  describe('Manual Registration', () => {
+  describe('Manual Registration ', () => {
     before(() => {
       cy.visit('/admin/section_registration');
       selectOption('initialLabwareType', 'Slide');
@@ -99,7 +99,6 @@ describe('Section Registration Page', () => {
           selectOption('Tissue Type', 'Liver');
           selectOption('Spatial Location', '3 - Surface central region');
           selectOption('labwareTypesSelect', 'Visium LP');
-          //        cy.get('#labwareTypesSelect').select('Visium LP');
           cy.findByText('+ Add Visium LP').click();
         });
         it('should still be set when going back to the first slide', () => {
@@ -120,6 +119,10 @@ describe('Section Registration Page', () => {
       it('requires SGP Number', () => {
         selectFocusBlur('workNumber');
         cy.findByText('SGP number is required').should('be.visible');
+      });
+
+      it('shouldnt display Xenium barcode field', () => {
+        cy.findByLabelText('Xenium Slide Barcode').should('not.exist');
       });
 
       it('requires External Slide Barcode', () => {
@@ -243,6 +246,9 @@ describe('Section Registration Page', () => {
     describe('Submission', () => {
       context('when the submission fails server side', () => {
         before(() => {
+          cy.msw().then(({ worker }) => {
+            worker.resetHandlers();
+          });
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
               graphql.mutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>(
@@ -286,6 +292,48 @@ describe('Section Registration Page', () => {
 
         it('shows the created labware', () => {
           cy.findByText('ExtBC1').should('be.visible');
+        });
+      });
+    });
+
+    describe('Xenium slide registration', () => {
+      before(() => {
+        cy.visit('/admin/section_registration');
+        selectOption('initialLabwareType', 'Xenium Slide');
+      });
+      describe('Validation', () => {
+        shouldBehaveLikeARegistrationForm(RegistrationType.SLIDE);
+
+        it('requires SGP Number', () => {
+          selectFocusBlur('workNumber');
+          cy.findByText('SGP number is required').should('be.visible');
+        });
+
+        it('should display Xenium barcode field', () => {
+          cy.findByLabelText('Xenium Slide Barcode').should('be.visible');
+        });
+
+        it('requires Xenium barcode field to only permit 7 digit number', () => {
+          cy.findByLabelText('Xenium Slide Barcode').type('Eabc1').blur();
+          cy.findByText('Xenium Barcode must be a 7 digit number.').should('be.visible');
+        });
+        it('requires Xenium barcode field to only permit 7 digit number', () => {
+          cy.findByLabelText('Xenium Slide Barcode').clear().type('1234').blur();
+          cy.findByText('Xenium Barcode must be a 7 digit number.').should('be.visible');
+        });
+        it('requires Xenium barcode field to only permit 7 digit number', () => {
+          cy.findByLabelText('Xenium Slide Barcode').clear().type('1234567').blur();
+          cy.findByText('Xenium Barcode must be a 7 digit number.').should('not.exist');
+        });
+
+        it('requires External Slide Barcode', () => {
+          cy.findByLabelText('External Labware Barcode').focus().blur();
+          cy.findByText('External Labware Barcode is a required field').should('be.visible');
+        });
+
+        it('requires Section External Identifier', () => {
+          cy.findByLabelText('Section External Identifier').focus().blur();
+          cy.findByText('Section External Identifier is a required field').should('be.visible');
         });
       });
     });

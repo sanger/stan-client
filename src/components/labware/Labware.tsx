@@ -155,6 +155,7 @@ const Labware = ({
   });
   const { selectedAddresses } = current.context;
   const selectedAddressesRef = React.useRef<Set<string>>();
+  debugger;
   const {
     labwareType: { numRows, numColumns },
     slots,
@@ -195,7 +196,8 @@ const Labware = ({
 
   const gridClasses = classNames(
     {
-      'px-12 gap-4': numColumns <= 6,
+      'px-12 gap-4': numColumns <= 3,
+      'px-10 gap-3': numColumns <= 5,
       'px-6 gap-2': numColumns > 6
     },
     `grid grid-rows-${numRows} grid-cols-${numColumns} py-4 select-none`
@@ -263,7 +265,7 @@ const Labware = ({
               key={i}
               address={address}
               slot={slotByAddress[address]}
-              size={numColumns > 6 || numRows > 6 ? 'small' : 'large'}
+              size={numColumns > 2 ? 'medium' : numColumns > 6 || numRows > 6 ? 'small' : 'large'}
               onClick={internalOnClick}
               onCtrlClick={onCtrlClick}
               onShiftClick={onShiftClick}

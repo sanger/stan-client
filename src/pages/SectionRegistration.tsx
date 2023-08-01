@@ -32,7 +32,8 @@ const availableLabware: Array<LabwareTypeName> = [
   LabwareTypeName.SLIDE,
   LabwareTypeName.TUBE,
   LabwareTypeName.VISIUM_LP,
-  LabwareTypeName.VISIUM_TO
+  LabwareTypeName.VISIUM_TO,
+  LabwareTypeName.XENIUM
 ];
 
 type SectionRegistrationFormSection = {
@@ -54,6 +55,7 @@ type SectionRegistrationFormLabware = {
   clientId: string;
   labwareTypeName: LabwareTypeName;
   externalLabwareBarcode: string;
+  xeniumBarcode: string;
   fixative: string;
   medium: string;
   slots: { [key: string]: Array<SectionRegistrationFormSection> };
@@ -69,6 +71,7 @@ function buildSectionRegisterRequest(values: SectionRegistrationFormValues): Sec
     labware: values.labwares.map((labware) => {
       return {
         externalBarcode: labware.externalLabwareBarcode.trim(),
+        preBarcode: labware.xeniumBarcode,
         labwareType: labware.labwareTypeName.trim(),
         contents: Object.keys(labware.slots).flatMap((address) => {
           return labware.slots[address].map((sample) => ({
@@ -106,6 +109,7 @@ function buildLabware(labwareTypeName: LabwareTypeName): SectionRegistrationForm
     clientId: uniqueId('labware_id'),
     labwareTypeName,
     externalLabwareBarcode: '',
+    xeniumBarcode: '',
     fixative: '',
     medium: '',
     slots: { A1: [buildSample()] }
@@ -137,6 +141,7 @@ function buildValidationSchema(registrationInfo: GetRegistrationInfoQuery) {
       .of(
         Yup.object().shape({
           externalLabwareBarcode: validation.externalLabwareBarcode,
+          xeniumBarcode: validation.xeniumBarcode,
           fixative: validation.fixative,
           medium: validation.medium,
           slots: Yup.lazy((obj: any) => {

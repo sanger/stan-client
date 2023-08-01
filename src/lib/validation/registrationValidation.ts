@@ -15,6 +15,13 @@ export default class RegistrationValidation {
       label: 'External Labware Barcode'
     });
   }
+  get xeniumBarcode() {
+    return validation.requiredString({
+      label: 'Xenium Barcode',
+      restrictChars: /^[0-9]{7}$/,
+      errorMessage: 'Xenium Barcode must be a 7 digit number.'
+    });
+  }
 
   get fixative() {
     return validation.requiredString({
