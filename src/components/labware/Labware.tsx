@@ -155,7 +155,6 @@ const Labware = ({
   });
   const { selectedAddresses } = current.context;
   const selectedAddressesRef = React.useRef<Set<string>>();
-  debugger;
   const {
     labwareType: { numRows, numColumns },
     slots,

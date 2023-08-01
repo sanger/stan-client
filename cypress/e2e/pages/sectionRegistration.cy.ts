@@ -246,9 +246,6 @@ describe('Section Registration Page', () => {
     describe('Submission', () => {
       context('when the submission fails server side', () => {
         before(() => {
-          cy.msw().then(({ worker }) => {
-            worker.resetHandlers();
-          });
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
               graphql.mutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>(
@@ -267,7 +264,6 @@ describe('Section Registration Page', () => {
               )
             );
           });
-
           fillInForm();
           selectSGPNumber('SGP1008');
           cy.findByText('Register').click();
@@ -299,7 +295,7 @@ describe('Section Registration Page', () => {
     describe('Xenium slide registration', () => {
       before(() => {
         cy.visit('/admin/section_registration');
-        selectOption('initialLabwareType', 'Xenium Slide');
+        selectOption('initialLabwareType', 'Xenium');
       });
       describe('Validation', () => {
         shouldBehaveLikeARegistrationForm(RegistrationType.SLIDE);
