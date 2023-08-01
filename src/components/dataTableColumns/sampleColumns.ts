@@ -11,6 +11,16 @@ type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string } & { slo
 
 type ColumnFactory<E = any> = (meta?: E) => Column<SampleDataTableRow>;
 
+const samplePositionMapBySampleIdSlotId = (
+  samplePositionResults: SamplePositionFieldsFragment[]
+): Record<string, SamplePositionFieldsFragment> => {
+  const spMap: Record<string, SamplePositionFieldsFragment> = {};
+  for (const samplePosition of samplePositionResults) {
+    spMap[`${samplePosition.sampleId}-${samplePosition.slotId}`] = samplePosition;
+  }
+  return spMap;
+};
+
 /**
  * Creates a list of all samples along with their slot address in a labware.
  * Most likely for use in a {@link DataTable}.
@@ -20,10 +30,7 @@ export function buildSampleDataTableRows(
   labware: LabwareFieldsFragment,
   samplePositionResults: SamplePositionFieldsFragment[]
 ): Array<SampleDataTableRow> {
-  const samplePositionMap: Record<string, SamplePositionFieldsFragment> = {};
-  for (const samplePosition of samplePositionResults) {
-    samplePositionMap[`${samplePosition.sampleId}-${samplePosition.slotId}`] = samplePosition;
-  }
+  const samplePositionResultsMap = samplePositionMapBySampleIdSlotId(samplePositionResults);
 
   return labware.slots.flatMap((slot) => {
     return slot.samples.map((sample) => {
@@ -31,7 +38,7 @@ export function buildSampleDataTableRows(
         ...sample,
         slotAddress: slot.address,
         slotId: slot.id,
-        sectionPosition: samplePositionMap[`${sample.id}-${slot.id}`]?.region
+        sectionPosition: samplePositionResultsMap[`${sample.id}-${slot.id}`]?.region
       };
     });
   });
@@ -83,6 +90,6 @@ export const slotId: ColumnFactory = () => ({
 });
 
 export const sectionPosition: ColumnFactory = () => ({
-  Header: 'section position',
+  Header: 'Section Position',
   accessor: (sample) => sample.sectionPosition
 });
