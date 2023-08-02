@@ -1719,6 +1719,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 .h-12 {
   height: 3rem;
 }
+.h-16 {
+  height: 4rem;
+}
 .h-24 {
   height: 6rem;
 }
@@ -1766,6 +1769,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .w-20 {
   width: 5rem;
+}
+.w-16 {
+  width: 4rem;
 }
 .min-w-full {
   min-width: 100%;
@@ -2023,6 +2029,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .gap-4 {
   gap: 1rem;
+}
+.gap-3 {
+  gap: 0.75rem;
 }
 .gap-6 {
   gap: 1.5rem;
@@ -2654,6 +2663,10 @@ svg.logo.loading rect:nth-child(3n+1) {
 .px-12 {
   padding-left: 3rem;
   padding-right: 3rem;
+}
+.px-10 {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
 }
 .py-10 {
   padding-top: 2.5rem;
@@ -4151,4 +4164,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.392a1b6c.css.map*/
+/*# sourceMappingURL=main.3600b19b.css.map*/
