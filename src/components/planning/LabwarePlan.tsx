@@ -164,7 +164,8 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
                     <FormikInput label={''} type={'hidden'} name={'operationType'} value={operationType} />
 
-                    {outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP && (
+                    {(outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP ||
+                      outputLabware.labwareType.name === LabwareTypeName.XENIUM) && (
                       <FormikInput
                         name={'barcode'}
                         label={'Barcode'}
@@ -173,16 +174,17 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                       />
                     )}
 
-                    {outputLabware.labwareType.name !== LabwareTypeName.VISIUM_LP && (
-                      <FormikInput
-                        label={'Number of Labware'}
-                        name={'quantity'}
-                        type={'number'}
-                        min={1}
-                        step={1}
-                        disabled={current.matches('printing') || current.matches('done')}
-                      />
-                    )}
+                    {outputLabware.labwareType.name !== LabwareTypeName.VISIUM_LP &&
+                      outputLabware.labwareType.name !== LabwareTypeName.XENIUM && (
+                        <FormikInput
+                          label={'Number of Labware'}
+                          name={'quantity'}
+                          type={'number'}
+                          min={1}
+                          step={1}
+                          disabled={current.matches('printing') || current.matches('done')}
+                        />
+                      )}
 
                     {outputLabware.labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER && (
                       <FormikInput
@@ -196,7 +198,8 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                     )}
                     {(outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP ||
                       outputLabware.labwareType.name === LabwareTypeName.VISIUM_TO ||
-                      outputLabware.labwareType.name === LabwareTypeName.VISIUM_ADH) && (
+                      outputLabware.labwareType.name === LabwareTypeName.VISIUM_ADH ||
+                      outputLabware.labwareType.name === LabwareTypeName.XENIUM) && (
                       <>
                         <ScanInput
                           label={'Slide LOT number'}
@@ -369,6 +372,10 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
 
   if (labwareType.name === LabwareTypeName.VISIUM_LP) {
     formShape.barcode = Yup.string().required().min(14);
+  } else if (labwareType.name === LabwareTypeName.XENIUM) {
+    formShape.barcode = Yup.string()
+      .required()
+      .matches(/^\d{7}$/, 'Xenium barcode should be a 7 digits number');
   }
   if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
     formShape.sectionThickness = Yup.number().required().integer().min(1);
@@ -376,7 +383,8 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
   if (
     labwareType.name === LabwareTypeName.VISIUM_LP ||
     labwareType.name === LabwareTypeName.VISIUM_TO ||
-    labwareType.name === LabwareTypeName.VISIUM_ADH
+    labwareType.name === LabwareTypeName.VISIUM_ADH ||
+    labwareType.name === LabwareTypeName.XENIUM
   ) {
     formShape.lotNumber = Yup.string()
       .required()
