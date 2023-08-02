@@ -216,7 +216,7 @@ describe('Sectioning Planning', () => {
         });
         it('should validate Barcode', () => {
           cy.findByLabelText('Barcode').type('1').blur();
-          cy.findByText('Xenium barcode should be a 7 digits number').should('be.visible');
+          cy.findByText('Xenium barcode should be a 7-digit number').should('be.visible');
         });
         it('disables Create Labware button if not all fields entered', () => {
           cy.findByLabelText('Barcode').clear().type('1234567');

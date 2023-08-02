@@ -375,7 +375,7 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
   } else if (labwareType.name === LabwareTypeName.XENIUM) {
     formShape.barcode = Yup.string()
       .required()
-      .matches(/^\d{7}$/, 'Xenium barcode should be a 7 digits number');
+      .matches(/^\d{7}$/, 'Xenium barcode should be a 7-digit number');
   }
   if (labwareType.name !== LabwareTypeName.FETAL_WASTE_CONTAINER) {
     formShape.sectionThickness = Yup.number().required().integer().min(1);
