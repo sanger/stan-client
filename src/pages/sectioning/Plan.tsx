@@ -23,7 +23,8 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
   LabwareTypeName.VISIUM_LP,
   LabwareTypeName.VISIUM_ADH,
   LabwareTypeName.FOUR_SLOT_SLIDE,
-  LabwareTypeName.FETAL_WASTE_CONTAINER
+  LabwareTypeName.FETAL_WASTE_CONTAINER,
+  LabwareTypeName.XENIUM
 ];
 
 type SectioningParams = {
