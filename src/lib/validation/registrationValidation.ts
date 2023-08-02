@@ -15,6 +15,18 @@ export default class RegistrationValidation {
       label: 'External Labware Barcode'
     });
   }
+  get xeniumBarcode() {
+    return Yup.string().when('labwareTypeName', (labwareTypeName) => {
+      const val = labwareTypeName[0] as unknown as string;
+      return val === 'Xenium'
+        ? validation.requiredString({
+            label: 'Xenium Barcode',
+            restrictChars: /^[0-9]{7}$/,
+            errorMessage: 'Xenium Barcode must be a 7 digit number.'
+          })
+        : Yup.string().notRequired();
+    });
+  }
 
   get fixative() {
     return validation.requiredString({

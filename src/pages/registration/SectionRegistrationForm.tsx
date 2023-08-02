@@ -155,6 +155,11 @@ function SectionRegistrationForm({ registrationInfo }: SectionRegistrationFormPa
                 name={`labwares.${currentIndex}.externalLabwareBarcode`}
               />
             </motion.div>
+            {currentLabware.labwareTypeName === LabwareTypeName.XENIUM && (
+              <motion.div variants={variants.fadeInWithLift}>
+                <FormikInput label={'Xenium Slide Barcode'} name={`labwares.${currentIndex}.xeniumBarcode`} />
+              </motion.div>
+            )}
 
             <motion.div variants={variants.fadeInWithLift}>
               <Heading level={4}>Embedding Information</Heading>
