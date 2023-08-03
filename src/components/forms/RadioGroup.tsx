@@ -50,7 +50,7 @@ export const RadioButtonInput = React.forwardRef<HTMLInputElement, RadioButtonPr
   const ctx = useContext(RadioGroupContext);
   return (
     <label className="inline-flex items-center">
-      <input ref={ref} {...props} type={'radio'} name={ctx.name ?? props.name} />
+      <input ref={ref} {...props} type={'radio'} name={props.name ?? ctx.name} />
       <span className={`ml-2 ${props.disabled && 'text-gray-400'}`}>{props.label}</span>
     </label>
   );
