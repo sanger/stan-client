@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import {
   BlockRegisterRequest,
   GetRegistrationInfoQuery,
@@ -12,6 +12,14 @@ import columns from '../components/dataTableColumns/labwareColumns';
 import { LabwareTypeName } from '../types/stan';
 import * as registrationService from '../lib/services/registrationService';
 import Registration from './registration/Registration';
+import AppShell from '../components/AppShell';
+import Heading from '../components/Heading';
+import { RadioButtonInput } from '../components/forms/RadioGroup';
+import FileUploader from '../components/upload/FileUploader';
+import { StanCoreContext } from '../lib/sdk';
+import warningToast from '../components/notifications/WarningToast';
+import { toast } from 'react-toastify';
+import RegistrationSuccess from './registration/RegistrationSuccess';
 
 export interface RegistrationFormBlock {
   clientId: number;
@@ -39,6 +47,13 @@ export interface RegistrationFormValues {
   tissues: Array<RegistrationFormTissue>;
   workNumbers: Array<string>;
 }
+
+enum RegistrationMethod {
+  MANUAL,
+  UPLOAD_FILE,
+  NONE
+}
+
 function getRegistrationFormBlock(): RegistrationFormBlock {
   return {
     clientId: Date.now(),
@@ -149,6 +164,14 @@ interface RegistrationParams {
   registrationInfo: GetRegistrationInfoQuery;
 }
 
+const displayWarningMsg = (msg: string) => {
+  warningToast({
+    message: msg,
+    position: toast.POSITION.TOP_RIGHT,
+    autoClose: 5000
+  });
+};
+
 function BlockRegistration({ registrationInfo }: RegistrationParams) {
   const resultColumns = [columns.barcode(), columns.labwareType(), columns.externalName()];
   const validationSchema = useMemo(() => {
@@ -161,7 +184,38 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
     );
   }, [registrationInfo]);
 
-  return (
+  const [selectedRegistrationMethod, setSelectedRegistrationMethod] = useState(RegistrationMethod.NONE);
+  const stanCore = useContext(StanCoreContext);
+  const handleSelectedRegistrationMethod = (value: RegistrationMethod) => {
+    setSelectedRegistrationMethod(value);
+  };
+  const [fileRegisterResult, setFileRegisterResult] = React.useState<LabwareFieldsFragment[] | undefined>(undefined);
+  const onFileUploadFinished = React.useCallback(
+    (file: File, isSuccess: boolean, result?: { barcode: [] }) => {
+      if (!isSuccess) return;
+      if (result && 'barcodes' in result) {
+        const barcodes: string[] = result['barcodes'];
+        const labwarePromises = barcodes.map((barcode: string) => stanCore.FindLabware({ barcode }));
+        Promise.all(labwarePromises)
+          .then((labwares) => {
+            if (labwares.length > 0) {
+              setFileRegisterResult(labwares.map((labware) => labware.labware!) as LabwareFieldsFragment[]);
+            } else {
+              displayWarningMsg(`No record has been registered. Please check your file.`);
+            }
+          })
+          .catch(() => {
+            displayWarningMsg('Cannot retrieve details of newly registered block.');
+          });
+      }
+    },
+    [setFileRegisterResult, stanCore]
+  );
+  if (fileRegisterResult && fileRegisterResult.length > 0) {
+    return <RegistrationSuccess successData={fileRegisterResult} columns={resultColumns} />;
+  }
+
+  const ManuallRegistrationForm = (
     <Registration<
       RegisterTissuesMutationVariables,
       RegistrationFormTissue,
@@ -180,6 +234,50 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
       isBlock={true}
     />
   );
+
+  const BlockRegistrationLandinPage = (
+    <AppShell>
+      <AppShell.Header>
+        <AppShell.Title>Block Registration</AppShell.Title>
+      </AppShell.Header>
+      <AppShell.Main>
+        <div className="max-w-screen-xl mx-auto">
+          <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
+            <Heading level={4}>Register</Heading>
+
+            <div className="my-4 p-4 rounded-md bg-white">
+              <RadioButtonInput
+                name="manual-registration-btn"
+                checked={selectedRegistrationMethod === RegistrationMethod.MANUAL}
+                onChange={() => handleSelectedRegistrationMethod(RegistrationMethod.MANUAL)}
+                label="Register manually"
+              />
+            </div>
+            <div className="my-4 p-4 rounded-md bg-white">
+              <RadioButtonInput
+                name="file-registration-btn"
+                checked={selectedRegistrationMethod === RegistrationMethod.UPLOAD_FILE}
+                onChange={() => handleSelectedRegistrationMethod(RegistrationMethod.UPLOAD_FILE)}
+                label="Register from file"
+              />
+              {selectedRegistrationMethod === RegistrationMethod.UPLOAD_FILE && (
+                <FileUploader
+                  url={'/register/block'}
+                  enableUpload={true}
+                  notifyUploadOutcome={onFileUploadFinished}
+                  errorField={'problems'}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </AppShell.Main>
+    </AppShell>
+  );
+
+  return selectedRegistrationMethod === RegistrationMethod.MANUAL
+    ? ManuallRegistrationForm
+    : BlockRegistrationLandinPage;
 }
 
 export default BlockRegistration;
