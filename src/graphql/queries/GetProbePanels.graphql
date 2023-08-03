@@ -1,0 +1,6 @@
+query GetProbePanels {
+  probePanels {
+    name
+    enabled
+  }
+}

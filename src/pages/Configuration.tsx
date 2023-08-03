@@ -30,6 +30,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
     'Fixatives',
     'HuMFre Numbers',
     'Omero Projects',
+    'Probe Panrels',
     'Projects',
     'Programs',
     'Release Destinations',
@@ -238,6 +239,30 @@ export default function Configuration({ configuration }: ConfigurationParams) {
             type: 'CHECKBOX'
           }}
           displayKeyFieldAsDropDown={false}
+        />
+      </div>,
+
+      /**Probe Panels**/
+      <div data-testid="config">
+        <Heading level={2}>Probe Panels</Heading>
+        <p className="mt-3 mb-6 text-lg" />
+        <EntityManager
+          initialEntities={configuration.probePanels}
+          displayKeyColumnName={'name'}
+          valueColumnName={'enabled'}
+          onChangeValue={(entity, value) => {
+            const enabled = typeof value === 'boolean' ? value : false;
+            return stanCore
+              .SetProbePanelEnabled({
+                enabled,
+                name: entity.name
+              })
+              .then((res) => res.setProbePanelEnabled);
+          }}
+          onCreate={(name) => stanCore.AddProbePanel({ name }).then((res) => res.addProbePanel)}
+          valueFieldComponentInfo={{
+            type: 'CHECKBOX'
+          }}
         />
       </div>,
 
