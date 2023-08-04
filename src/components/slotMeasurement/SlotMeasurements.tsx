@@ -15,6 +15,12 @@ type SlotMeasurementProps = {
   validateValue?: (value: string) => void;
 };
 
+const setMeasurementNameTableTitle = (measurementName: string): string => {
+  return measurementName === 'cDNA concentration' || measurementName === 'Library concentration'
+    ? `${measurementName} (pl/ul)`
+    : measurementName;
+};
+
 /**
  * Component to display SlotMeasurements as a table with two columns - slot address & measurement value
  *
@@ -43,7 +49,7 @@ const SlotMeasurements = ({
         accessor: (measurement: SlotMeasurementRequest) => measurement.address
       },
       {
-        Header: measurementName,
+        Header: setMeasurementNameTableTitle(measurementName),
         id: measurementName,
         Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
           return (
