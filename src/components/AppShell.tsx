@@ -242,6 +242,18 @@ function AppShell({ children }: AppShellParams) {
                       description={'Record the transfer of sections to a CytAssist slide.'}
                     />
                   </Menu>
+                  <Menu
+                    caption={'Probe Hybridisation'}
+                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Recording Probe hybridisation'}
+                  >
+                    <NavLinkMenuItem
+                      caption={'Xenium'}
+                      path={'/lab/probe_hybridisation_xenium'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording Probe hybridisation for Xenium slides.'}
+                    />
+                  </Menu>
                   <NavLinkMenuItem
                     caption={'Imaging'}
                     path={'/lab/imaging'}
@@ -423,6 +435,10 @@ function AppShell({ children }: AppShellParams) {
                     </div>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/visium_qc">Visium QC</StanMobileNavLink>
+                    </div>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Probe Hybridisation</h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/probe_hybridisation_xenium">Xenium</StanMobileNavLink>
                     </div>
                     <div className="grid grid-cols-2 mt-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/imaging">Imaging</StanMobileNavLink>

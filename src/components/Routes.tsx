@@ -49,6 +49,7 @@ import WorkProgressSummary from '../pages/WorkProgressSummary';
 import CytAssist from '../pages/CytAssist';
 import FileManager from '../pages/FileManager';
 import { useAuth } from '../context/AuthContext';
+import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -190,6 +191,14 @@ export function Routes() {
       <AuthenticatedRoute
         path="/lab/dual_index_plate"
         render={(routeProps) => <DualIndexPlate key={routeProps.location.key} />}
+      />
+      <AuthenticatedRoute
+        path="lab/probe_hybridisation_xenium"
+        render={(routeProps) => (
+          <DataFetcher key={routeProps.location.key} dataFetcher={stanCore.GetProbePanels}>
+            {(probePanelInfo) => <ProbeHybridisationXenium probePanelInfo={probePanelInfo} />}
+          </DataFetcher>
+        )}
       />
       <AuthenticatedRoute path="/lab/cytassist" render={(routeProps) => <CytAssist key={routeProps.location.key} />} />
       <AuthenticatedRoute
