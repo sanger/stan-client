@@ -9,6 +9,16 @@ import SlotMeasurements from '../slotMeasurement/SlotMeasurements';
 import { useFormikContext } from 'formik';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
+const showSlotMeasurementTable = (
+  qcType: string,
+  measurementName: string,
+  slotMeasurements: SlotMeasurementRequest[]
+): boolean => {
+  return qcType === QCType.VISIUM_CONCENTRATION
+    ? slotMeasurements.length > 0 && measurementName.length > 0
+    : slotMeasurements.length > 0;
+};
+
 type CDNAMeasurementQCProps = {
   qcType: string;
   labware: LabwareFieldsFragment;
@@ -25,12 +35,10 @@ const CDNAMeasurementQC = ({
   concentrationComments
 }: CDNAMeasurementQCProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext();
-  const [measurementName, setMeasurementName] = useState(
-    qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration'
-  );
+  const [measurementName, setMeasurementName] = useState(qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : '');
 
   const measurementConfigMemo = React.useMemo(() => {
-    setMeasurementName(qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : 'cDNA concentration');
+    setMeasurementName(qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : '');
     return {
       stepIncrement: qcType === QCType.CDNA_AMPLIFICATION ? '1' : '.01',
       initialMeasurementVal: qcType === QCType.CDNA_AMPLIFICATION ? '' : '0',
@@ -156,8 +164,8 @@ const CDNAMeasurementQC = ({
               <div className={'flex flex-col w-1/4 ml-2'}>
                 <label className={'my-3'}>Measurement type</label>
                 <CustomReactSelect
+                  emptyOption={true}
                   className={'rounded-md'}
-                  value={measurementName}
                   dataTestId={'measurementType'}
                   handleChange={(val) => setMeasurementName((val as OptionType).label)}
                   options={['cDNA concentration', 'Library concentration'].map((conc) => {
@@ -170,7 +178,7 @@ const CDNAMeasurementQC = ({
               </div>
             )}
             <div className={'flex flex-row mt-8 justify-between'}>
-              {slotMeasurements && slotMeasurements.length > 0 && (
+              {slotMeasurements && showSlotMeasurementTable(qcType, measurementName, slotMeasurements) && (
                 <SlotMeasurements
                   slotMeasurements={slotMeasurements}
                   measurementName={measurementName}
