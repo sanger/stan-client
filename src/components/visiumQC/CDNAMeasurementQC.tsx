@@ -188,7 +188,7 @@ const CDNAMeasurementQC = ({
                   comments={measurementConfigMemo.concentrationComments}
                 />
               )}
-              <div className="flex flex-col" data-testid={'labware'}>
+              <div className="flex flex-col w-full items-end justify-center p-4" data-testid={'labware'}>
                 <Labware labware={labware} name={labware.labwareType.name} />
               </div>
             </div>
