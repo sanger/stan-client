@@ -11,8 +11,10 @@ import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import columns from '../components/dataTableColumns/labwareColumns';
 import WorkNumberSelect from '../components/WorkNumberSelect';
-import Panel from '../components/Panel';
 import ProbeTable from '../components/probeHybridisation/ProbeTable';
+import PinkButton from '../components/buttons/PinkButton';
+import Table, { TableBody, TableHead, TableHeader } from '../components/Table';
+import FormikInput from '../components/forms/Input';
 type ProbeHybridisationXeniumProps = {
   probePanelInfo: GetProbePanelsQuery;
 };
@@ -57,7 +59,10 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
         })
       )
       .min(1)
-      .required()
+      .required(),
+    performed: Yup.date()
+      .required('Start time is  a required field.')
+      .max(new Date(), `Please select a date on or before ${new Date().toLocaleDateString()}`)
   });
 
   return (
@@ -102,12 +107,50 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                   </motion.div>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                     <Heading level={3}>Probe Settings</Heading>
-                    <div className={'grid grid-cols-2 gap-x-6'}>
-                      <WorkNumberSelect label={'SGP Number'} onWorkNumberChange={(workNumber) => {}} />
-                      <Panel>
-                        <ProbeTable probePanels={probePanelInfo.probePanels} enableAddRows={true} probeLotData={[]} />
-                      </Panel>
+                    <div className={'w-1/2'}>
+                      <FormikInput type="date" name={'performed'} max={new Date()} label={'Start Time'} value={''} />
                     </div>
+                    <div className={'flex flex-col mt-4'}>
+                      <label className={'mb-2 mt-2'}>Apply to all:</label>
+                      <div className={'w-full border-2 border-gray-200 mb-4'} />
+                      <div className={'grid grid-cols-2 gap-x-6§'}>
+                        <div>
+                          <WorkNumberSelect
+                            label={'SGP Number'}
+                            onWorkNumberChange={(workNumber) => {}}
+                            requiredField={false}
+                          />
+                        </div>
+                        <div>
+                          <label>Probe</label>
+                          <div className={'flex flex-col bg-gray-100 p-3 shadow justify-end'}>
+                            <ProbeTable
+                              probePanels={probePanelInfo.probePanels}
+                              enableAddRows={false}
+                              probeLotData={[{ name: '', lot: '', plex: -1 }]}
+                            />
+                            <div className="sm:flex sm:flex-row mt-2 items-center justify-end">
+                              <PinkButton>Add to all</PinkButton>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div variants={variants.fadeInWithLift} className="space-y-4">
+                    <Table>
+                      <TableHead>
+                        <tr>
+                          <TableHeader>Barcode</TableHeader>
+                          <TableHeader>SGP Number</TableHeader>
+                          <TableHeader>Probe</TableHeader>
+                          <TableHeader />
+                        </tr>
+                      </TableHead>
+
+                      <TableBody>{}</TableBody>
+                    </Table>
                   </motion.div>
                 </div>
               </Form>

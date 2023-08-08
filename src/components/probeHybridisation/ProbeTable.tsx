@@ -82,7 +82,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels, probeLotData, enab
         Cell: ({ row }: { row: Row<ProbeLot> }) => {
           return (
             <div className={'flex flex-col'}>
-              <ScanInput label={'LOT number'} name={`probes.${row.index}.lotNumber`} />
+              <ScanInput name={`probes.${row.index}.lotNumber`} />
               <FormikErrorMessage name={'lotNumber'} />
             </div>
           );
