@@ -193,7 +193,7 @@ export function Routes() {
         render={(routeProps) => <DualIndexPlate key={routeProps.location.key} />}
       />
       <AuthenticatedRoute
-        path="lab/probe_hybridisation_xenium"
+        path="/lab/probe_hybridisation_xenium"
         render={(routeProps) => (
           <DataFetcher key={routeProps.location.key} dataFetcher={stanCore.GetProbePanels}>
             {(probePanelInfo) => <ProbeHybridisationXenium probePanelInfo={probePanelInfo} />}
