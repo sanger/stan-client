@@ -1,12 +1,7 @@
 import { rest } from 'msw';
 import { selectFocusBlur, selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
-import {
-  RegisterSectionsMutation,
-  RegisterSectionsMutationVariables,
-  RegisterTissuesMutation,
-  RegisterTissuesMutationVariables
-} from '../../../src/types/sdk';
+import { RegisterTissuesMutation, RegisterTissuesMutationVariables } from '../../../src/types/sdk';
 describe('Block Registration Page', () => {
   describe('Initial display', () => {
     before(() => {
@@ -91,14 +86,10 @@ describe('Block Registration Page', () => {
   });
 
   describe('Manual Registration', () => {
-    describe('Validatdation', () => {
+    describe('Validation', () => {
       before(() => {
         cy.visit('/admin/registration');
         cy.get('[type="radio"][name="manual-registration-btn"]').check();
-      });
-      it('should behave like registration block forms', () => {
-        selectOption('Species', '');
-        shouldBehaveLikeARegistrationForm(RegistrationType.BLOCK);
       });
       it('requires SGP Number', () => {
         selectFocusBlur('workNumber');
@@ -138,6 +129,13 @@ describe('Block Registration Page', () => {
         selectFocusBlur('Labware Type');
         cy.findByText('Labware Type is a required field').should('be.visible');
       });
+      context('should behave like registration block forms', () => {
+        before(() => {
+          selectOption('Species', '');
+          selectOption('Tissue Type', '');
+        });
+        shouldBehaveLikeARegistrationForm(RegistrationType.BLOCK);
+      });
     });
 
     describe('Submission', () => {
@@ -161,7 +159,7 @@ describe('Block Registration Page', () => {
               )
             );
           });
-          fillInRegistertionForm();
+          fillInRegistrationForm();
           cy.findByText('Register').click();
         });
         it('shows the server errors', () => {
@@ -169,12 +167,12 @@ describe('Block Registration Page', () => {
         });
       });
 
-      context('when the submission is successful', () => {
+      describe('when the submission is successful', () => {
         before(() => {
           cy.msw().then(({ worker }) => {
             worker.resetHandlers();
           });
-          fillInRegistertionForm();
+          fillInRegistrationForm();
           cy.findByText('Register').click();
         });
         it('shows a success message', () => {
@@ -194,7 +192,7 @@ describe('Block Registration Page', () => {
     });
   });
 });
-function fillInRegistertionForm() {
+function fillInRegistrationForm() {
   selectSGPNumber('SGP1008');
   cy.get('[type="radio"][data-testid="adult"]').check();
   cy.findByLabelText('Donor ID').clear().type('DONOR_1');
