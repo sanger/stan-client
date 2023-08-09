@@ -3,7 +3,7 @@ import FormikSelect from '../forms/Select';
 import { ProbeLot, ProbePanelFieldsFragment } from '../../types/sdk';
 import { Row } from 'react-table';
 import FormikInput from '../forms/Input';
-import { FormikErrorMessage, optionValues } from '../forms';
+import { optionValues } from '../forms';
 import DataTable from '../../components/DataTable';
 import RemoveButton from '../buttons/RemoveButton';
 import IconButton from '../buttons/IconButton';
@@ -13,7 +13,7 @@ import { useFormikContext } from 'formik';
 type ProbeTableProps = {
   probePanels: ProbePanelFieldsFragment[];
   barcode?: string;
-  probeLotData: ProbeLot[];
+  probeLot: ProbeLot[];
   multiRowEdit?: {
     onRemove?: (barcode: string, rowIndx: number) => void;
     onAdd?: (barcode: string) => void;
@@ -24,20 +24,11 @@ type ProbeTableProps = {
 const ProbeTable: React.FC<ProbeTableProps> = ({
   probePanels,
   barcode,
-  probeLotData,
+  probeLot,
   multiRowEdit,
   onProbLotDataChange
 }) => {
   const { setFieldValue, values } = useFormikContext();
-  const [probeLot, setProbeLot] = React.useState<ProbeLot[]>([]);
-  React.useEffect(() => {
-    if (probeLotData.length === probeLot.length) return;
-    setProbeLot(
-      probeLotData.map((probe) => {
-        return { ...probe };
-      })
-    );
-  }, [setProbeLot, probeLot, probeLotData]);
 
   // Column with delete and add action to remove and add to the end of the probe data columns passed in
   const actionColumns = React.useMemo(() => {
@@ -96,11 +87,6 @@ const ProbeTable: React.FC<ProbeTableProps> = ({
                   const val = e.currentTarget.value;
                   setFieldValue(panelFieldName(row.index), e.currentTarget.value);
                   onProbLotDataChange(barcode ?? '', row.index, { ...row.original, name: val });
-                  setProbeLot((prevProbeLot) => {
-                    const probLot = [...prevProbeLot];
-                    probLot[row.index].name = val;
-                    return probLot;
-                  });
                 }}
               >
                 {optionValues(probePanels, 'name', 'name')}
@@ -121,11 +107,6 @@ const ProbeTable: React.FC<ProbeTableProps> = ({
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   setFieldValue(lotFieldName(row.index), e.target.value);
                   onProbLotDataChange(barcode ?? '', row.index, { ...row.original, lot: e.target.value });
-                  setProbeLot((prevProbeLot) => {
-                    const probLot = [...prevProbeLot];
-                    probLot[row.index].lot = e.target.value;
-                    return probLot;
-                  });
                 }}
                 value={probeLot[row.index]?.lot}
               />
@@ -149,11 +130,6 @@ const ProbeTable: React.FC<ProbeTableProps> = ({
                   ...row.original,
                   plex: Number.parseInt(e.target.value)
                 });
-                setProbeLot((prevProbeLot) => {
-                  const probLot = [...prevProbeLot];
-                  probLot[row.index].plex = Number.parseInt(e.target.value);
-                  return probLot;
-                });
               }}
               value={probeLot[row.index]?.plex >= 0 ? probeLot[row.index]?.plex : ''}
             />
@@ -161,9 +137,9 @@ const ProbeTable: React.FC<ProbeTableProps> = ({
         }
       }
     ];
-  }, [probeLot, probePanels, setProbeLot, setFieldValue, multiRowEdit]);
+  }, [probeLot, probePanels, setFieldValue, multiRowEdit, onProbLotDataChange, barcode]);
 
-  return <DataTable columns={multiRowEdit ? [...columns, actionColumns] : columns} data={probeLotData} />;
+  return <DataTable columns={multiRowEdit ? [...columns, actionColumns] : columns} data={probeLot} />;
 };
 
 export default ProbeTable;

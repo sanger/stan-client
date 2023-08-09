@@ -201,7 +201,7 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                               <Form>
                                 <ProbeTable
                                   probePanels={probePanelInfo.probePanels}
-                                  probeLotData={[probeLotAll]}
+                                  probeLot={[probeLotAll]}
                                   onProbLotDataChange={(barcode, rowIndx, probLot) =>
                                     handleUpdateProbeLotForAllAction(probLot)
                                   }
@@ -256,7 +256,7 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                                   <ProbeTable
                                     probePanels={probePanelInfo.probePanels}
                                     barcode={probeLw.barcode}
-                                    probeLotData={probeLw.probes}
+                                    probeLot={probeLw.probes}
                                     multiRowEdit={{
                                       formSuffixName: `labware.${indx}.probes`,
                                       onRemove: handleRemoveProbeLotAction,
