@@ -160,7 +160,10 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                               helpers.push({
                                 barcode: lw.barcode,
                                 workNumber: '',
-                                probes: [{ panel: '', lot: '', plex: -1 }]
+                                probes: [
+                                  { panel: '', lot: '', plex: -1 },
+                                  { panel: '', lot: '', plex: -1 }
+                                ]
                               })
                             );
                             //handleScannedLabwareChange(labware);
@@ -246,7 +249,7 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                             </tr>
                           </TableHead>
                           <TableBody>
-                            {probeLabware.map((probeLw, indx) => (
+                            {values.labware.map((probeLw, indx) => (
                               <tr key={probeLw.barcode}>
                                 <TableCell>{probeLw.barcode}</TableCell>
                                 <TableCell>
@@ -261,7 +264,7 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                                 <TableCell>
                                   <ProbeTable
                                     probePanels={probePanelInfo.probePanels}
-                                    probeLabware={{ barcode: '', workNumber: '', probes: [] }}
+                                    probeLabware={probeLw}
                                     labwareIndex={indx}
                                   />
                                 </TableCell>

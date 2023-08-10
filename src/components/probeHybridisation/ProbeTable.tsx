@@ -6,6 +6,7 @@ import RemoveButton from '../buttons/RemoveButton';
 import IconButton from '../buttons/IconButton';
 import AddIcon from '../icons/AddIcon';
 import probeLotColumns from './ProbeTableColumns';
+import { FieldArray } from 'formik';
 
 type ProbeTableProps = {
   probePanels: ProbePanelFieldsFragment[];
@@ -24,23 +25,32 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probeLabware, probePanels, labw
             {row.index === 0 && probeLabware.probes.length === 1 ? (
               <></>
             ) : (
-              <RemoveButton
-                type={'button'}
-                onClick={() => {
-                  probeLabware.probes.splice(row.index, 1);
-                }}
-              />
+              <FieldArray name={`labware.${labwareIndex}.probes`}>
+                {(helpers) => (
+                  <RemoveButton
+                    type={'button'}
+                    onClick={() => {
+                      //probeLabware.probes.splice(row.index, 1);
+                      helpers.remove(row.index);
+                    }}
+                  />
+                )}
+              </FieldArray>
             )}
             {row.index === probeLabware.probes.length - 1 && (
-              <IconButton
-                data-testid={`probesAdd`}
-                onClick={() => {
-                  // probeLabware.probes.push({ name: '', lot: '', plex: -1 });
-                }}
-                className={'focus:outline-none'}
-              >
-                <AddIcon className="inline-block text-green-500 h-5 w-5 -ml-1 mr-2" />
-              </IconButton>
+              <FieldArray name={`labware.${labwareIndex}.probes`}>
+                {(helpers) => (
+                  <IconButton
+                    data-testid={`probesAdd`}
+                    onClick={() => {
+                      helpers.push({ name: '', lot: '', plex: -1 });
+                    }}
+                    className={'focus:outline-none'}
+                  >
+                    <AddIcon className="inline-block text-green-500 h-5 w-5 -ml-1 mr-2" />
+                  </IconButton>
+                )}
+              </FieldArray>
             )}
           </div>
         );
@@ -49,7 +59,10 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probeLabware, probePanels, labw
   }, [probeLabware]);
 
   return (
-    <DataTable columns={probeLotColumns(probePanels, `labware.${labwareIndex}.probes`)} data={probeLabware.probes} />
+    <DataTable
+      columns={[...probeLotColumns(probePanels, `labware.${labwareIndex}.probes`), actionColumns]}
+      data={probeLabware.probes}
+    />
   );
 };
 
