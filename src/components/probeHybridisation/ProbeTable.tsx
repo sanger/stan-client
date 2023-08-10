@@ -7,10 +7,11 @@ import IconButton from '../buttons/IconButton';
 import AddIcon from '../icons/AddIcon';
 import probeLotColumns from './ProbeTableColumns';
 import { FieldArray } from 'formik';
+import { probeLotDefault } from '../../pages/ProbeHybridisationXenium';
 
 type ProbeTableProps = {
   probePanels: ProbePanelFieldsFragment[];
-  probeLabware: { barcode: string; workNumber: string; probes: Array<{ panel: string; lot: string; plex: number }> };
+  probeLabware: ProbeOperationLabware;
   labwareIndex: number;
 };
 const ProbeTable: React.FC<ProbeTableProps> = ({ probeLabware, probePanels, labwareIndex }) => {
@@ -43,7 +44,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probeLabware, probePanels, labw
                   <IconButton
                     data-testid={`probesAdd`}
                     onClick={() => {
-                      helpers.push({ name: '', lot: '', plex: -1 });
+                      helpers.push(probeLotDefault);
                     }}
                     className={'focus:outline-none'}
                   >
@@ -60,7 +61,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probeLabware, probePanels, labw
 
   return (
     <DataTable
-      columns={[...probeLotColumns(probePanels, `labware.${labwareIndex}.probes`), actionColumns]}
+      columns={[...probeLotColumns(probePanels, probeLabware.probes, `labware.${labwareIndex}.probes`), actionColumns]}
       data={probeLabware.probes}
     />
   );

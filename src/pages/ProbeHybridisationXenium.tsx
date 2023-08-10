@@ -1,7 +1,13 @@
-import React from 'react';
-import { GetProbePanelsQuery, LabwareFieldsFragment, ProbeLot, ProbeOperationLabware } from '../types/sdk';
+import React, { useContext } from 'react';
+import {
+  GetProbePanelsQuery,
+  ProbeLot,
+  ProbeOperationLabware,
+  ProbeOperationRequest,
+  RecordProbeOperationMutation
+} from '../types/sdk';
 import AppShell from '../components/AppShell';
-import { FieldArray, Form, Formik } from 'formik';
+import { FieldArray, Form, Formik, FormikErrors } from 'formik';
 import * as Yup from 'yup';
 import variants from '../lib/motionVariants';
 import { motion } from 'framer-motion';
@@ -11,126 +17,114 @@ import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import columns from '../components/dataTableColumns/labwareColumns';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import ProbeTable from '../components/probeHybridisation/ProbeTable';
-import PinkButton from '../components/buttons/PinkButton';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
-import { Input } from '../components/forms/Input';
+import FormikInput from '../components/forms/Input';
 import { useMachine } from '@xstate/react';
-import probeHybridisationMachine from '../lib/machines/probeHybridisation/probeHybridisationMachine';
-import MutedText from '../components/MutedText';
 import BlueButton from '../components/buttons/BlueButton';
 import WhiteButton from '../components/buttons/WhiteButton';
 import AddIcon from '../components/icons/AddIcon';
 import DataTable from '../components/DataTable';
 import probeLotColumns from '../components/probeHybridisation/ProbeTableColumns';
+import { reload, StanCoreContext } from '../lib/sdk';
+import createFormMachine from '../lib/machines/form/formMachine';
+import Warning from '../components/notifications/Warning';
+import OperationCompleteModal from '../components/modal/OperationCompleteModal';
+import { FormikErrorMessage } from '../components/forms';
 type ProbeHybridisationXeniumProps = {
   probePanelInfo: GetProbePanelsQuery;
 };
 
 type ProbeHybridisationXeniumFormValues = {
-  labware: { barcode: string; workNumber: string; probes: Array<{ panel: string; lot: string; plex: number }> }[];
-  probeLotAll: { panel: string; lot: string; plex: number }[];
+  labware: ProbeOperationLabware[];
+  probeLotAll: ProbeLot[];
+  performed: string;
+  workNumberAll: string;
 };
+export const probeLotDefault = { name: '', lot: '', plex: -1 };
 const formInitialValues: ProbeHybridisationXeniumFormValues = {
   labware: [],
-  probeLotAll: [{ panel: '', lot: '', plex: -1 }]
+  probeLotAll: [probeLotDefault],
+  performed: new Date().toISOString().split('T')[0],
+  workNumberAll: ''
 };
 const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
   probePanelInfo
 }: ProbeHybridisationXeniumProps) => {
-  const [current, send] = useMachine(() =>
-    probeHybridisationMachine.withContext({
-      operationType: 'Probe hybridisation Xenium',
-      probeLabware: [],
-      performed: new Date().toISOString().split('T')[0],
-      serverErrors: undefined,
-      labware: [],
-      recordProbeOperationResult: undefined,
-      workNumberAll: '',
-      probeLotAll: { lot: '', name: '', plex: -1 }
-    })
-  );
+  const stanCore = useContext(StanCoreContext);
+  const formMachine = React.useMemo(() => {
+    return createFormMachine<ProbeOperationRequest, RecordProbeOperationMutation>().withConfig({
+      services: {
+        submitForm: (ctx, e) => {
+          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.RecordProbeOperation({
+            request: e.values
+          });
+        }
+      }
+    });
+  }, [stanCore]);
 
-  const { serverErrors, labware, probeLabware, performed, probeLotAll, dateValidationError } = current.context;
+  const [current, send] = useMachine(formMachine);
+
+  const { serverError, submissionResult } = current.context;
   /**
    * Validation schema for the form
    */
-  const probeLotSchema = Yup.object().shape({
-    panel: Yup.string().required('Probe panel is a required field'),
-    lot: Yup.string()
-      .required('Lot number is a required field')
-      .max(20)
-      .matches(
-        /^[A-Z0-9_]{1,20}$/,
-        'LOT number should be a string of maximum length 20 of capital letters, numbers and undersores.'
-      ),
-    plex: Yup.number().required('Plex is a required field').min(0, 'Plex number should be a positive integer.')
-  });
   const validationSchema = Yup.object().shape({
+    performed: Yup.date()
+      .max(new Date(), `Please select a date on or before ${new Date().toLocaleDateString()}`)
+      .required('Start Time is a required field for fetal samples')
+      .label('Start Time'),
     labware: Yup.array()
       .of(
         Yup.object().shape({
           barcode: Yup.string().required().label('Barcode'),
           workNumber: Yup.string().required().label('SGP Number'),
-          probes: Yup.array().of(probeLotSchema).min(1).required()
+          probes: Yup.array()
+            .of(
+              Yup.object().shape({
+                name: Yup.string()
+                  .required('Probe panel is a required field')
+                  .test('Test', 'Unique value required for Probe Panel', (value, context) => {
+                    if (context.from && context.from.length > 1) {
+                      const values = context.from[1].value as ProbeOperationLabware;
+                      const uniqueValues = [...new Set(values.probes.map((val) => val.name))]; // Using Set to filter out duplicates
+                      return values.probes.length === uniqueValues.length;
+                    }
+                  }),
+                lot: Yup.string()
+                  .required('Lot number is a required field')
+                  .max(20)
+                  .matches(
+                    /^[A-Z0-9_]{1,20}$/,
+                    'LOT number should be a string of maximum length 20 of capital letters, numbers and undersores.'
+                  ),
+                plex: Yup.number()
+                  .required('Plex is a required field')
+                  .min(0, 'Plex number should be a positive integer.')
+              })
+            )
+            .min(1)
+            .required()
         })
       )
       .min(1)
       .required(),
-    probeLotAll: Yup.array().of(probeLotSchema).max(1).required()
+    probeLotAll: Yup.array().of(
+      Yup.object().shape({
+        name: Yup.string().optional(),
+        lot: Yup.string().optional(),
+        plex: Yup.number().optional()
+      })
+    )
   });
 
-  const handleScannedLabwareChange = React.useCallback(
-    (labware: LabwareFieldsFragment[]) => {
-      send({ type: 'UPDATE_LABWARE', labware });
-    },
-    [send]
-  );
-  const handleWorkNumberChangeForAll = React.useCallback(
-    (workNumber: string) => {
-      send({ type: 'SET_WORK_NUMBER_ALL', workNumber });
-    },
-    [send]
-  );
-  const handleAddProbeLotForAll = React.useCallback(
-    (probeLot: ProbeLot) => {
-      send({ type: 'ADD_PROBE_LOT_ALL', probe: probeLot });
-    },
-    [send]
-  );
-  const handleRemoveProbeLotAction = React.useCallback(
-    (barcode: string, probeLotIndex: number) => {
-      if (barcode.length === 0) return;
-      send({ type: 'REMOVE_PROBE_LOT', barcode, probeLotIndex });
-    },
-    [send]
-  );
-  const handleAddProbeLotAction = React.useCallback(
-    (barcode: string) => {
-      if (barcode.length === 0) return;
-      send({ type: 'ADD_PROBE_LOT', barcode });
-    },
-    [send]
-  );
-  const handleUpdateProbeLotAction = React.useCallback(
-    (barcode: string, index: number, probeLot: ProbeLot) => {
-      if (barcode.length === 0) return;
-      send({ type: 'UPDATE_PROBE_LOT', barcode, index, probeLot });
-    },
-    [send]
-  );
-  const handleUpdateProbeLotForAllAction = React.useCallback(
-    (probeLot: ProbeLot) => {
-      send({ type: 'UPDATE_PROBE_LOT_ALL', probeLot });
-    },
-    [send]
-  );
-  const handleStartDateChange = React.useCallback(
-    (date: string) => {
-      // Compare entered date with the current date
-      send({ type: 'SET_START_DATE', date });
-    },
-    [send]
-  );
+  const isProbeLotForAllFilledIn = (probeLot: ProbeLot) => {
+    return probeLot && probeLot.name.length > 0 && probeLot.lot.length > 0 && probeLot.plex > 0;
+  };
+  const printValues = (errors: FormikErrors<ProbeHybridisationXeniumFormValues>) => {
+    debugger;
+  };
 
   return (
     <AppShell>
@@ -139,20 +133,28 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          {/**serverError && <Warning error={serverError} />**/}
-
+          {serverError && <Warning error={serverError} />}
           <div className={'flex flex-col space-y-6'}>
             <Formik<ProbeHybridisationXeniumFormValues>
               initialValues={formInitialValues}
               validationSchema={validationSchema}
-              onSubmit={async (values) => {}}
+              onSubmit={async (values) => {
+                send({
+                  type: 'SUBMIT_FORM',
+                  values: {
+                    operationType: 'Probe hybridisation Xenium',
+                    performed: values.performed,
+                    labware: values.labware
+                  }
+                });
+              }}
             >
-              {({ values, setFieldValue }) => (
+              {({ values, setFieldValue, isValid }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-4">
                     <Heading level={3}>Labware</Heading>
 
-                    <FieldArray name={`labware`}>
+                    <FieldArray name={'labware'}>
                       {(helpers) => (
                         <LabwareScanner
                           onChange={(labware) => {
@@ -160,13 +162,9 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                               helpers.push({
                                 barcode: lw.barcode,
                                 workNumber: '',
-                                probes: [
-                                  { panel: '', lot: '', plex: -1 },
-                                  { panel: '', lot: '', plex: -1 }
-                                ]
+                                probes: [probeLotDefault]
                               })
                             );
-                            //handleScannedLabwareChange(labware);
                           }}
                         >
                           <LabwareScanPanel
@@ -187,19 +185,12 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                         <Heading level={3}>Probe Settings</Heading>
                         <div className={'flex flex-col w-1/2'}>
-                          <label>Start Time</label>
-                          <Input
+                          <FormikInput
+                            label={'Start Time'}
                             type="date"
                             name={'performed'}
                             max={new Date().toISOString().split('T')[0]}
-                            value={performed}
-                            onInput={(e) => handleStartDateChange(e.currentTarget.value)}
                           />
-                          {dateValidationError && (
-                            <MutedText className={'text-red-500'}>
-                              Please select today's date or a date from the past.
-                            </MutedText>
-                          )}
                         </div>
                         <div className={'flex flex-col mt-4'}>
                           <label className={'mb-2 mt-2'}>Apply to all:</label>
@@ -208,7 +199,13 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                             <div>
                               <WorkNumberSelect
                                 label={'SGP Number'}
-                                onWorkNumberChange={handleWorkNumberChangeForAll}
+                                name={'workNumberAll'}
+                                onWorkNumberChange={(workNumber) => {
+                                  setFieldValue(`workNumberAll`, workNumber);
+                                  values.labware.forEach((lw, index) =>
+                                    setFieldValue(`labware.${index}.workNumber`, workNumber)
+                                  );
+                                }}
                                 requiredField={false}
                               />
                             </div>
@@ -216,21 +213,35 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                               <label>Probe</label>
                               <div className={'flex flex-col bg-gray-100 p-3 shadow justify-end'}>
                                 <DataTable
-                                  columns={probeLotColumns(probePanelInfo.probePanels, 'probeLotAll')}
+                                  columns={probeLotColumns(
+                                    probePanelInfo.probePanels,
+                                    values.probeLotAll,
+                                    'probeLotAll'
+                                  )}
                                   data={values.probeLotAll}
                                 />
                                 <div className="sm:flex sm:flex-row mt-2 items-center justify-end">
-                                  <WhiteButton
-                                    disabled={labware.length <= 0}
-                                    onClick={() => {
-                                      values.labware.forEach((lw) => {
-                                        lw.probes.push(values.probeLotAll[0]);
-                                      });
-                                    }}
-                                  >
-                                    <AddIcon className="inline-block text-green-500 h-4 w-4 mt-1 mr-2" />
-                                    Add to all
-                                  </WhiteButton>
+                                  <FieldArray name={'labware'}>
+                                    {(helpers) => (
+                                      <WhiteButton
+                                        disabled={
+                                          values.labware.length <= 0 || !isProbeLotForAllFilledIn(values.probeLotAll[0])
+                                        }
+                                        onClick={() => {
+                                          values.labware.forEach((lw, index) => {
+                                            const updatedLabware: ProbeOperationLabware = {
+                                              ...lw,
+                                              probes: [...lw.probes, { ...values.probeLotAll[0] }]
+                                            };
+                                            helpers.replace(index, { ...updatedLabware });
+                                          });
+                                        }}
+                                      >
+                                        <AddIcon className="inline-block text-green-500 h-4 w-4 mt-1 mr-2" />
+                                        Add to all
+                                      </WhiteButton>
+                                    )}
+                                  </FieldArray>
                                 </div>
                               </div>
                             </div>
@@ -254,12 +265,13 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                                 <TableCell>{probeLw.barcode}</TableCell>
                                 <TableCell>
                                   <WorkNumberSelect
-                                    name={`labware.${indx}workNumber`}
+                                    name={`labware.${indx}.workNumber`}
                                     onWorkNumberChange={(workNumber) => {
-                                      setFieldValue(`labware.${indx}workNumber`, workNumber);
+                                      setFieldValue(`labware.${indx}.workNumber`, workNumber);
                                     }}
-                                    workNumber={probeLw.workNumber}
+                                    workNumber={values.labware[indx].workNumber}
                                   />
+                                  <FormikErrorMessage name={`labware.${indx}.workNumber`} />
                                 </TableCell>
                                 <TableCell>
                                   <ProbeTable
@@ -274,10 +286,22 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                         </Table>
                       </motion.div>
                       <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
-                        <BlueButton type="submit">Save</BlueButton>
+                        <BlueButton type="submit" disabled={!isValid}>
+                          Save
+                        </BlueButton>
                       </div>
                     </>
                   )}
+                  <OperationCompleteModal
+                    show={submissionResult !== undefined}
+                    message={'Xenium probe hubridisation recorded on all labware'}
+                    onReset={reload}
+                  >
+                    <p>
+                      If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
+                      the Home screen.
+                    </p>
+                  </OperationCompleteModal>
                 </Form>
               )}
             </Formik>
