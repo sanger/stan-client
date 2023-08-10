@@ -1,58 +1,41 @@
 import React from 'react';
-import FormikSelect from '../forms/Select';
-import { ProbeLot, ProbePanelFieldsFragment } from '../../types/sdk';
+import { ProbeLot, ProbeOperationLabware, ProbePanelFieldsFragment } from '../../types/sdk';
 import { Row } from 'react-table';
-import FormikInput from '../forms/Input';
-import { optionValues } from '../forms';
 import DataTable from '../../components/DataTable';
 import RemoveButton from '../buttons/RemoveButton';
 import IconButton from '../buttons/IconButton';
 import AddIcon from '../icons/AddIcon';
-import { useFormikContext } from 'formik';
+import probeLotColumns from './ProbeTableColumns';
 
 type ProbeTableProps = {
   probePanels: ProbePanelFieldsFragment[];
-  barcode?: string;
-  probeLot: ProbeLot[];
-  multiRowEdit?: {
-    onRemove?: (barcode: string, rowIndx: number) => void;
-    onAdd?: (barcode: string) => void;
-    formSuffixName?: string;
-  };
-  onProbLotDataChange: (barcode: string, rowIndx: number, probLot: ProbeLot) => void;
+  probeLabware: { barcode: string; workNumber: string; probes: Array<{ panel: string; lot: string; plex: number }> };
+  labwareIndex: number;
 };
-const ProbeTable: React.FC<ProbeTableProps> = ({
-  probePanels,
-  barcode,
-  probeLot,
-  multiRowEdit,
-  onProbLotDataChange
-}) => {
-  const { setFieldValue, values } = useFormikContext();
-
+const ProbeTable: React.FC<ProbeTableProps> = ({ probeLabware, probePanels, labwareIndex }) => {
   // Column with delete and add action to remove and add to the end of the probe data columns passed in
   const actionColumns = React.useMemo(() => {
     return {
       Header: '',
       id: 'remove',
-      Cell: ({ row }: { row: Row<ProbeLot> }) => {
+      Cell: ({ row }: { row: Row<{ panel: string; lot: string; plex: number }> }) => {
         return (
           <div className={'flex flex-row space-x-2'}>
-            {row.index === 0 && probeLot.length === 1 ? (
+            {row.index === 0 && probeLabware.probes.length === 1 ? (
               <></>
             ) : (
               <RemoveButton
                 type={'button'}
                 onClick={() => {
-                  multiRowEdit?.onRemove?.(barcode ?? '', row.index);
+                  probeLabware.probes.splice(row.index, 1);
                 }}
               />
             )}
-            {row.index === probeLot.length - 1 && (
+            {row.index === probeLabware.probes.length - 1 && (
               <IconButton
-                data-tesrtid={`probesAdd`}
+                data-testid={`probesAdd`}
                 onClick={() => {
-                  multiRowEdit?.onAdd?.(barcode ?? '');
+                  // probeLabware.probes.push({ name: '', lot: '', plex: -1 });
                 }}
                 className={'focus:outline-none'}
               >
@@ -63,83 +46,11 @@ const ProbeTable: React.FC<ProbeTableProps> = ({
         );
       }
     };
-  }, [multiRowEdit, probeLot.length, barcode]);
+  }, [probeLabware]);
 
-  const columns = React.useMemo(() => {
-    const panelFieldName = (index: number) =>
-      multiRowEdit ? `${multiRowEdit.formSuffixName}.${index}.panel` : 'panel';
-    const lotFieldName = (index: number) => (multiRowEdit ? `${multiRowEdit.formSuffixName}.${index}.lot` : 'lot');
-    const plexFieldName = (index: number) => (multiRowEdit ? `${multiRowEdit.formSuffixName}.${index}.plex` : 'plex');
-    return [
-      {
-        Header: 'Probe Panel',
-        id: 'probePanel',
-        Cell: ({ row }: { row: Row<ProbeLot> }) => {
-          return (
-            <>
-              <FormikSelect
-                label={''}
-                data-testid={`probes-panel-${row.index}`}
-                name={panelFieldName(row.index)}
-                emptyOption={true}
-                value={probeLot[row.index]?.name}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  const val = e.currentTarget.value;
-                  setFieldValue(panelFieldName(row.index), e.currentTarget.value);
-                  onProbLotDataChange(barcode ?? '', row.index, { ...row.original, name: val });
-                }}
-              >
-                {optionValues(probePanels, 'name', 'name')}
-              </FormikSelect>
-            </>
-          );
-        }
-      },
-      {
-        Header: 'Lot Number',
-        id: 'lotNumber',
-        Cell: ({ row }: { row: Row<ProbeLot> }) => {
-          return (
-            <div className={'flex flex-col'}>
-              <FormikInput
-                label={''}
-                name={lotFieldName(row.index)}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  setFieldValue(lotFieldName(row.index), e.target.value);
-                  onProbLotDataChange(barcode ?? '', row.index, { ...row.original, lot: e.target.value });
-                }}
-                value={probeLot[row.index]?.lot}
-              />
-            </div>
-          );
-        }
-      },
-      {
-        Header: 'Plex',
-        id: 'plex',
-        Cell: ({ row }: { row: Row<ProbeLot> }) => {
-          return (
-            <FormikInput
-              label={''}
-              name={plexFieldName(row.index)}
-              type={'number'}
-              min={0}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                setFieldValue(plexFieldName(row.index), e.target.value);
-                onProbLotDataChange(barcode ?? '', row.index, {
-                  ...row.original,
-                  plex: Number.parseInt(e.target.value)
-                });
-              }}
-              value={probeLot[row.index]?.plex >= 0 ? probeLot[row.index]?.plex : ''}
-            />
-          );
-        }
-      }
-    ];
-  }, [probeLot, probePanels, setFieldValue, multiRowEdit, onProbLotDataChange, barcode]);
-
-  return <DataTable columns={multiRowEdit ? [...columns, actionColumns] : columns} data={probeLot} />;
+  return (
+    <DataTable columns={probeLotColumns(probePanels, `labware.${labwareIndex}.probes`)} data={probeLabware.probes} />
+  );
 };
 
 export default ProbeTable;

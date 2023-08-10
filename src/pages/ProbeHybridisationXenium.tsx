@@ -1,7 +1,7 @@
 import React from 'react';
 import { GetProbePanelsQuery, LabwareFieldsFragment, ProbeLot, ProbeOperationLabware } from '../types/sdk';
 import AppShell from '../components/AppShell';
-import { Form, Formik } from 'formik';
+import { FieldArray, Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import variants from '../lib/motionVariants';
 import { motion } from 'framer-motion';
@@ -20,17 +20,20 @@ import MutedText from '../components/MutedText';
 import BlueButton from '../components/buttons/BlueButton';
 import WhiteButton from '../components/buttons/WhiteButton';
 import AddIcon from '../components/icons/AddIcon';
+import DataTable from '../components/DataTable';
+import probeLotColumns from '../components/probeHybridisation/ProbeTableColumns';
 type ProbeHybridisationXeniumProps = {
   probePanelInfo: GetProbePanelsQuery;
 };
 
 type ProbeHybridisationXeniumFormValues = {
-  labware: ProbeOperationLabware[];
+  labware: { barcode: string; workNumber: string; probes: Array<{ panel: string; lot: string; plex: number }> }[];
+  probeLotAll: { panel: string; lot: string; plex: number }[];
 };
-const formInitialValues = {
-  labware: []
+const formInitialValues: ProbeHybridisationXeniumFormValues = {
+  labware: [],
+  probeLotAll: [{ panel: '', lot: '', plex: -1 }]
 };
-
 const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
   probePanelInfo
 }: ProbeHybridisationXeniumProps) => {
@@ -72,7 +75,8 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
         })
       )
       .min(1)
-      .required()
+      .required(),
+    probeLotAll: Yup.array().of(probeLotSchema).max(1).required()
   });
 
   const handleScannedLabwareChange = React.useCallback(
@@ -138,96 +142,99 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
           {/**serverError && <Warning error={serverError} />**/}
 
           <div className={'flex flex-col space-y-6'}>
-            <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-4">
-              <Heading level={3}>Labware</Heading>
+            <Formik<ProbeHybridisationXeniumFormValues>
+              initialValues={formInitialValues}
+              validationSchema={validationSchema}
+              onSubmit={async (values) => {}}
+            >
+              {({ values, setFieldValue }) => (
+                <Form>
+                  <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-4">
+                    <Heading level={3}>Labware</Heading>
 
-              <LabwareScanner onChange={(labware) => handleScannedLabwareChange(labware)}>
-                <LabwareScanPanel
-                  columns={[
-                    columns.barcode(),
-                    columns.donorId(),
-                    columns.labwareType(),
-                    columns.externalName(),
-                    columns.bioState()
-                  ]}
-                />
-              </LabwareScanner>
-            </motion.div>
-            {labware.length > 0 && (
-              <>
-                <motion.div variants={variants.fadeInWithLift} className="space-y-4">
-                  <Heading level={3}>Probe Settings</Heading>
-                  <div className={'flex flex-col w-1/2'}>
-                    <label>Start Time</label>
-                    <Input
-                      type="date"
-                      name={'performed'}
-                      max={new Date().toISOString().split('T')[0]}
-                      value={performed}
-                      onInput={(e) => handleStartDateChange(e.currentTarget.value)}
-                    />
-                    {dateValidationError && (
-                      <MutedText className={'text-red-500'}>
-                        Please select today's date or a date from the past.
-                      </MutedText>
-                    )}
-                  </div>
-                  <div className={'flex flex-col mt-4'}>
-                    <label className={'mb-2 mt-2'}>Apply to all:</label>
-                    <div className={'w-full border-2 border-gray-100 mb-4'} />
-                    <div className={'grid grid-cols-2 gap-x-6'}>
-                      <div>
-                        <WorkNumberSelect
-                          label={'SGP Number'}
-                          onWorkNumberChange={handleWorkNumberChangeForAll}
-                          requiredField={false}
-                        />
-                      </div>
-                      <div>
-                        <label>Probe</label>
-                        <div className={'flex flex-col bg-gray-100 p-3 shadow justify-end'}>
-                          <Formik
-                            initialValues={{ panel: '', lot: '', plex: -1 }}
-                            validationSchema={probeLotSchema}
-                            onSubmit={async (values) => {
-                              handleAddProbeLotForAll({
-                                name: values.panel,
-                                plex: values.plex,
-                                lot: values.lot
-                              });
-                            }}
-                          >
-                            {({ values, setFieldValue }) => (
-                              <Form>
-                                <ProbeTable
-                                  probePanels={probePanelInfo.probePanels}
-                                  probeLot={[probeLotAll]}
-                                  onProbLotDataChange={(barcode, rowIndx, probLot) =>
-                                    handleUpdateProbeLotForAllAction(probLot)
-                                  }
+                    <FieldArray name={`labware`}>
+                      {(helpers) => (
+                        <LabwareScanner
+                          onChange={(labware) => {
+                            labware.forEach((lw) =>
+                              helpers.push({
+                                barcode: lw.barcode,
+                                workNumber: '',
+                                probes: [{ panel: '', lot: '', plex: -1 }]
+                              })
+                            );
+                            //handleScannedLabwareChange(labware);
+                          }}
+                        >
+                          <LabwareScanPanel
+                            columns={[
+                              columns.barcode(),
+                              columns.donorId(),
+                              columns.labwareType(),
+                              columns.externalName(),
+                              columns.bioState()
+                            ]}
+                          />
+                        </LabwareScanner>
+                      )}
+                    </FieldArray>
+                  </motion.div>
+                  {values.labware.length > 0 && (
+                    <>
+                      <motion.div variants={variants.fadeInWithLift} className="space-y-4">
+                        <Heading level={3}>Probe Settings</Heading>
+                        <div className={'flex flex-col w-1/2'}>
+                          <label>Start Time</label>
+                          <Input
+                            type="date"
+                            name={'performed'}
+                            max={new Date().toISOString().split('T')[0]}
+                            value={performed}
+                            onInput={(e) => handleStartDateChange(e.currentTarget.value)}
+                          />
+                          {dateValidationError && (
+                            <MutedText className={'text-red-500'}>
+                              Please select today's date or a date from the past.
+                            </MutedText>
+                          )}
+                        </div>
+                        <div className={'flex flex-col mt-4'}>
+                          <label className={'mb-2 mt-2'}>Apply to all:</label>
+                          <div className={'w-full border-2 border-gray-100 mb-4'} />
+                          <div className={'grid grid-cols-2 gap-x-6'}>
+                            <div>
+                              <WorkNumberSelect
+                                label={'SGP Number'}
+                                onWorkNumberChange={handleWorkNumberChangeForAll}
+                                requiredField={false}
+                              />
+                            </div>
+                            <div>
+                              <label>Probe</label>
+                              <div className={'flex flex-col bg-gray-100 p-3 shadow justify-end'}>
+                                <DataTable
+                                  columns={probeLotColumns(probePanelInfo.probePanels, 'probeLotAll')}
+                                  data={values.probeLotAll}
                                 />
                                 <div className="sm:flex sm:flex-row mt-2 items-center justify-end">
-                                  <WhiteButton type={'submit'} disabled={labware.length <= 0}>
+                                  <WhiteButton
+                                    disabled={labware.length <= 0}
+                                    onClick={() => {
+                                      values.labware.forEach((lw) => {
+                                        lw.probes.push(values.probeLotAll[0]);
+                                      });
+                                    }}
+                                  >
                                     <AddIcon className="inline-block text-green-500 h-4 w-4 mt-1 mr-2" />
                                     Add to all
                                   </WhiteButton>
                                 </div>
-                              </Form>
-                            )}
-                          </Formik>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                      </motion.div>
 
-                <Formik<ProbeHybridisationXeniumFormValues>
-                  initialValues={formInitialValues}
-                  validationSchema={validationSchema}
-                  onSubmit={async (values) => {}}
-                >
-                  {({ values, setFieldValue }) => (
-                    <Form>
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4 w-full">
                         <Table>
                           <TableHead>
@@ -238,7 +245,6 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                               <TableHeader />
                             </tr>
                           </TableHead>
-
                           <TableBody>
                             {probeLabware.map((probeLw, indx) => (
                               <tr key={probeLw.barcode}>
@@ -255,14 +261,8 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                                 <TableCell>
                                   <ProbeTable
                                     probePanels={probePanelInfo.probePanels}
-                                    barcode={probeLw.barcode}
-                                    probeLot={probeLw.probes}
-                                    multiRowEdit={{
-                                      formSuffixName: `labware.${indx}.probes`,
-                                      onRemove: handleRemoveProbeLotAction,
-                                      onAdd: handleAddProbeLotAction
-                                    }}
-                                    onProbLotDataChange={handleUpdateProbeLotAction}
+                                    probeLabware={{ barcode: '', workNumber: '', probes: [] }}
+                                    labwareIndex={indx}
                                   />
                                 </TableCell>
                               </tr>
@@ -273,11 +273,11 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                       <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
                         <BlueButton type="submit">Save</BlueButton>
                       </div>
-                    </Form>
+                    </>
                   )}
-                </Formik>
-              </>
-            )}
+                </Form>
+              )}
+            </Formik>
           </div>
         </div>
       </AppShell.Main>
