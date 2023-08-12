@@ -52,7 +52,6 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          debugger;
           const performedValue = e.values.performed!.replace('T', ' ') + ':00';
           return stanCore.RecordProbeOperation({
             // Stan-core's graphql schema describes the format of a timestamp as yyyy-mm-dd HH:MM:SS

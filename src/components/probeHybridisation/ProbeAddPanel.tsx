@@ -24,7 +24,6 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
 
   const validateProbeName = React.useCallback(
     (probeName: string) => {
-      debugger;
       isTouched.current = true;
       if (!probeName) {
         setProbeLotError((prev) => ({ ...prev, name: 'Probe panel is required' }));
