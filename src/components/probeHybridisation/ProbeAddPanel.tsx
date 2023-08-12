@@ -1,5 +1,4 @@
-import FormikSelect from '../forms/Select';
-import { optionValues } from '../forms';
+import { selectOptionValues } from '../forms';
 import FormikInput from '../forms/Input';
 import { FieldArray, useFormikContext } from 'formik';
 import WhiteButton from '../buttons/WhiteButton';
@@ -8,6 +7,7 @@ import AddIcon from '../icons/AddIcon';
 import React from 'react';
 import { lotRegx, ProbeHybridisationXeniumFormValues } from '../../pages/ProbeHybridisationXenium';
 import MutedText from '../MutedText';
+import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type ProbeLotAddPanelProps = {
   probePanels: ProbePanelFieldsFragment[];
@@ -20,10 +20,12 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
   const [probeLotError, setProbeLotError] = React.useState({ name: '', lot: '', plex: '' });
   const isTouched = React.useRef(false);
 
-  const { values, setFieldValue } = useFormikContext<ProbeHybridisationXeniumFormValues>();
+  const { values } = useFormikContext<ProbeHybridisationXeniumFormValues>();
 
   const validateProbeName = React.useCallback(
     (probeName: string) => {
+      debugger;
+      isTouched.current = true;
       if (!probeName) {
         setProbeLotError((prev) => ({ ...prev, name: 'Probe panel is required' }));
         return;
@@ -42,7 +44,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
       if (!lotRegx.test(probeLot)) {
         setProbeLotError((prev) => ({
           ...prev,
-          lot: 'LOT number should be a string of maximum length 20 of capital letters, numbers and underscores.'
+          lot: 'Lot number should be a string of maximum length 20 of capital letters, numbers and underscores'
         }));
         return;
       }
@@ -54,7 +56,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
   const validateProbePlex = React.useCallback(
     (probePlex: string) => {
       if (Number(probePlex) <= 0) {
-        setProbeLotError((prev) => ({ ...prev, plex: 'Plex number required and should be a positive integer.' }));
+        setProbeLotError((prev) => ({ ...prev, plex: 'Plex is required and should be a positive integer.' }));
         return;
       }
       setProbeLotError((prev) => ({ ...prev, plex: '' }));
@@ -77,29 +79,38 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
     validateProbePlex(probePlex);
   }, [probePlex, validateProbePlex]);
 
+  const isAddToAllDisabled = () => {
+    return (
+      !isTouched.current ||
+      probeLotError.lot.length > 0 ||
+      probeLotError.name.length > 0 ||
+      probeLotError.plex.length > 0 ||
+      !(Number(probePlex) > 0 && probeName.length > 0 && probeLot.length > 0)
+    );
+  };
+
   return (
     <div className={'border-1 border-gray-300 shadow justify-end p-2'}>
       <div className={'grid grid-cols-3 gap-x-3 p-4'} data-testid={'probe-all-table'}>
         <label>Probe Panel</label>
         <label>Lot</label>
         <label>Plex</label>
-        <FormikSelect
-          data-testid={'probeAll-name'}
+        <CustomReactSelect
+          dataTestId={'probe-name'}
           emptyOption={true}
           value={probeName}
-          name={'panel'}
           label={''}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+          isMulti={false}
+          handleChange={(val) => {
             isTouched.current = true;
-            setProbeName(e.target.value);
+            setProbeName((val as OptionType).value);
           }}
-          onBlur={() => validateProbeLot(probeLot)}
-        >
-          {optionValues(probePanels, 'name', 'name')}
-        </FormikSelect>
+          options={selectOptionValues(probePanels, 'name', 'name')}
+          onBlur={() => validateProbeName(probeName)}
+        />
         <FormikInput
           label={''}
-          data-testid={'probeAll-lot'}
+          data-testid={'probe-lot'}
           name={'lot'}
           value={probeLot}
           onBlur={() => validateProbeLot(probeLot)}
@@ -110,7 +121,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
         />
         <FormikInput
           label={''}
-          data-testid={'probeAll-plex'}
+          data-testid={'probe-plex'}
           name={'plex'}
           type={'number'}
           onBlur={() => validateProbeLot(probeLot)}
@@ -118,7 +129,6 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
           value={Number(probePlex) > 0 ? probePlex : ''}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             isTouched.current = true;
-            debugger;
             setProbePlex(e.target.value);
           }}
         />
@@ -131,7 +141,7 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
         <FieldArray name={'labware'}>
           {(helpers) => (
             <WhiteButton
-              disabled={probeLotError.lot.length > 0 || probeLotError.name.length > 0 || probeLotError.plex.length > 0}
+              disabled={isAddToAllDisabled()}
               onClick={() => {
                 values.labware.forEach((lw, index) => {
                   const updatedLabware: ProbeOperationLabware = {

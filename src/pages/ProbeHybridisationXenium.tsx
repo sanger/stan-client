@@ -152,6 +152,12 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                                 });
                               }
                             });
+                            values.labware.forEach((valueLw, index) => {
+                              /**If Labware not scanned, remove from list**/
+                              if (!labware.some((lw) => lw.barcode === valueLw.barcode)) {
+                                helpers.remove(index);
+                              }
+                            });
                           }}
                         >
                           <LabwareScanPanel
@@ -192,76 +198,6 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                                   />
                                 </div>
                                 <ProbeAddPanel probePanels={probePanelInfo.probePanels} />
-                                {/* <div>
-                                  <label> Add Probe</label>
-                                  <div className={'flex flex-col border-gray-300 justify-end p-2'}>
-                                    <Table data-testid={'probe-all-table'}>
-                                      <TableHead>
-                                        <tr>
-                                          <TableHeader>Probe Panel</TableHeader>
-                                          <TableHeader>Lot Number</TableHeader>
-                                          <TableHeader>Plex</TableHeader>
-                                        </tr>
-                                      </TableHead>
-                                      <TableBody>
-                                        <TableCell>
-                                          <FormikSelect
-                                            label={''}
-                                            data-testid={'probeAll-name'}
-                                            name={'probeLotAll.name'}
-                                            emptyOption={true}
-                                          >
-                                            {optionValues(probePanelInfo.probePanels, 'name', 'name')}
-                                          </FormikSelect>
-                                        </TableCell>
-                                        <TableCell>
-                                          <FormikInput
-                                            label={''}
-                                            data-testid={'probeAll-lot'}
-                                            name={'probeLotAll.lot'}
-                                          />
-                                        </TableCell>
-                                        <TableCell>
-                                          <FormikInput
-                                            label={''}
-                                            data-testid={'probeAll-plex'}
-                                            name={'probeLotAll.plex'}
-                                            type={'number'}
-                                            min={0}
-                                            value={values.probeLotAll.plex > 0 ? values.probeLotAll.plex : ''}
-                                          />
-                                        </TableCell>
-                                      </TableBody>
-                                    </Table>
-                                    <div className="sm:flex sm:flex-row mt-2 items-center justify-end">
-                                      <FieldArray name={'labware'}>
-                                        {(helpers) => (
-                                          <WhiteButton
-                                            disabled={
-                                              values.labware.length <= 0 ||
-                                              !isProbeLotForAllFilledIn(values.probeLotAll)
-                                            }
-                                            onClick={() => {
-                                              values.labware.forEach((lw, index) => {
-                                                const updatedLabware: ProbeOperationLabware = {
-                                                  ...lw,
-                                                  probes: [...lw.probes, { ...values.probeLotAll }]
-                                                };
-                                                helpers.replace(index, { ...updatedLabware });
-                                              });
-                                              setFieldValue('probeLotAll.name', '');
-                                              setFieldValue('probeLotAll.lot', '');
-                                              setFieldValue('probeLotAll.plex', '');
-                                            }}
-                                          >
-                                            <AddIcon className="inline-block text-green-500 h-4 w-4 mt-1 mr-2" />
-                                            Add to all
-                                          </WhiteButton>
-                                        )}
-                                      </FieldArray>
-                                    </div>
-                                  </div>
-                                </div>*/}
                               </div>
                             </div>
                           </motion.div>

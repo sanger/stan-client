@@ -1,7 +1,6 @@
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import WorkNumberSelect from '../WorkNumberSelect';
-import { optionValues } from '../forms';
-import FormikSelect from '../forms/Select';
+import { selectOptionValues } from '../forms';
 import FormikInput from '../forms/Input';
 import React from 'react';
 import { FieldArray, useFormikContext } from 'formik';
@@ -10,6 +9,7 @@ import { ProbePanelFieldsFragment } from '../../types/sdk';
 import RemoveButton from '../buttons/RemoveButton';
 import IconButton from '../buttons/IconButton';
 import AddIcon from '../icons/AddIcon';
+import CustomReactSelect from '../forms/CustomReactSelect';
 
 type ProbeTableProps = {
   probePanels: ProbePanelFieldsFragment[];
@@ -53,24 +53,38 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                 {probeLw.probes.map((probe, probeIndex) => (
                   <tr key={`probeLw.barcode-${lwIndex}-${probeIndex}`}>
                     <TableCell>
-                      <FormikSelect label={''} name={`labware.${lwIndex}.probes.${probeIndex}.name`} emptyOption={true}>
-                        {optionValues(probePanels, 'name', 'name')}
-                      </FormikSelect>
+                      <CustomReactSelect
+                        label={''}
+                        dataTestId={`${probeLw.barcode}-${probeIndex}-name`}
+                        name={`labware.${lwIndex}.probes.${probeIndex}.name`}
+                        options={selectOptionValues(probePanels, 'name', 'name')}
+                        isMulti={false}
+                        value={probe.name}
+                        emptyOption={true}
+                      />
                     </TableCell>
                     <TableCell>
-                      <FormikInput label={''} name={`labware.${lwIndex}.probes.${probeIndex}.lot`} />
+                      <FormikInput
+                        label={''}
+                        data-testid={`${probeLw.barcode}-${probeIndex}-lot`}
+                        name={`labware.${lwIndex}.probes.${probeIndex}.lot`}
+                      />
                     </TableCell>
                     <TableCell>
                       <FormikInput
                         label={''}
                         name={`labware.${lwIndex}.probes.${probeIndex}.plex`}
                         type={'number'}
+                        data-testid={`${probeLw.barcode}-${probeIndex}-plex`}
                         min={0}
                         value={probe.plex > 0 ? probe.plex : ''}
                       />
                     </TableCell>
                     <TableCell>
-                      <div className={'flex flex-row space-x-2'}>
+                      <div
+                        className={'flex flex-row space-x-2'}
+                        data-testid={`${probeLw.barcode}-${probeIndex}-action`}
+                      >
                         {probeIndex === 0 && probeLw.probes.length === 1 ? (
                           <></>
                         ) : (
@@ -90,7 +104,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                           <FieldArray name={`labware.${lwIndex}.probes`}>
                             {(helpers) => (
                               <IconButton
-                                data-testid={`probesAdd`}
+                                dataTestId={'addButton'}
                                 onClick={() => {
                                   helpers.push(probeLotDefault);
                                 }}
