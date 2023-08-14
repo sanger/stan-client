@@ -30,7 +30,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
     'Fixatives',
     'HuMFre Numbers',
     'Omero Projects',
-    'Probe Panrels',
+    'Probe Panels',
     'Projects',
     'Programs',
     'Release Destinations',
