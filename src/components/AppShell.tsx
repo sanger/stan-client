@@ -251,7 +251,19 @@ function AppShell({ children }: AppShellParams) {
                       caption={'Xenium'}
                       path={'/lab/probe_hybridisation_xenium'}
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Recording Probe hybridisation for Xenium slides.'}
+                      description={'Recording Xenium process'}
+                    />
+                  </Menu>
+                  <Menu
+                    caption={'Xenium'}
+                    icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Recording Probe hybridisation'}
+                  >
+                    <NavLinkMenuItem
+                      caption={'Xenium Analysis'}
+                      path={'/lab/xenium_analysis'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Record analysis data for Xenium slides.'}
                     />
                   </Menu>
                   <NavLinkMenuItem
@@ -439,6 +451,10 @@ function AppShell({ children }: AppShellParams) {
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Probe Hybridisation</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/probe_hybridisation_xenium">Xenium</StanMobileNavLink>
+                    </div>
+                    <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Xenium</h4>
+                    <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
+                      <StanMobileNavLink to="/lab/xenium_analysis">Xenium Analysis</StanMobileNavLink>
                     </div>
                     <div className="grid grid-cols-2 mt-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/imaging">Imaging</StanMobileNavLink>
