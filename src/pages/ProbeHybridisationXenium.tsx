@@ -135,14 +135,14 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
             >
               {({ values, setFieldValue, isValid }) => (
                 <Form>
-                  <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-4">
+                  <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
                     <FieldArray name={'labware'}>
                       {(helpers) => (
                         <LabwareScanner
                           onChange={(labware) => {
                             labware.forEach((lw) => {
-                              /**If Labware scnned not already displayed, add to list**/
+                              /**If Labware scnned not already displayed, add to probe list**/
                               if (!values.labware.some((valueLw) => valueLw.barcode === lw.barcode)) {
                                 helpers.push({
                                   barcode: lw.barcode,
@@ -151,8 +151,8 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                                 });
                               }
                             });
+                            /**If Labware not scanned is displayed, remove from probe list**/
                             values.labware.forEach((valueLw, index) => {
-                              /**If Labware not scanned, remove from list**/
                               if (!labware.some((lw) => lw.barcode === valueLw.barcode)) {
                                 helpers.remove(index);
                               }
@@ -175,7 +175,7 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                   {values.labware.length > 0 && (
                     <>
                       <div className="mx-auto max-w-screen-lg py-2 mb-6">
-                        <GrayBox>
+                        <div className="flex flex-row mt-4 p-3 bg-gray-100 rounded-md">
                           <motion.div variants={variants.fadeInWithLift} className="space-y-4 p-2 pr-5">
                             <Heading level={3}>Apply to all</Heading>
 
@@ -200,10 +200,12 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                               </div>
                             </div>
                           </motion.div>
-                        </GrayBox>
+                        </div>
                       </div>
-                      <Heading level={3}>Probe Settings</Heading>
-                      <div className={'flex flex-col w-1/2 py-4'}>
+                      <Heading level={3} className="pt-2">
+                        Probe Settings
+                      </Heading>
+                      <div className={'flex flex-col w-1/2 py-4 mt-2'}>
                         <FormikInput
                           label={'Start Time'}
                           data-testid={'performed'}
