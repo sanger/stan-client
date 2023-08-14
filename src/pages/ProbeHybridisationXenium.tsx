@@ -24,7 +24,6 @@ import Warning from '../components/notifications/Warning';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import ProbeTable from '../components/probeHybridisation/ProbeTable';
 import { getCurrentDateTime } from '../types/stan';
-import GrayBox from '../components/layouts/GrayBox';
 import ProbeAddPanel from '../components/probeHybridisation/ProbeAddPanel';
 type ProbeHybridisationXeniumProps = {
   probePanelInfo: GetProbePanelsQuery;
