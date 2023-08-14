@@ -1,0 +1,7 @@
+mutation RecordAnalyser($request: AnalyserRequest!) {
+    recordAnalyser(request: $request) {
+        operations {
+            id
+        }
+    }
+}
