@@ -186,9 +186,6 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
 
   const [selectedRegistrationMethod, setSelectedRegistrationMethod] = useState(RegistrationMethod.NONE);
   const stanCore = useContext(StanCoreContext);
-  const handleSelectedRegistrationMethod = (value: RegistrationMethod) => {
-    setSelectedRegistrationMethod(value);
-  };
   const [fileRegisterResult, setFileRegisterResult] = React.useState<LabwareFieldsFragment[] | undefined>(undefined);
   const onFileUploadFinished = React.useCallback(
     (file: File, isSuccess: boolean, result?: { barcode: [] }) => {
@@ -201,11 +198,11 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
             if (labwares.length > 0) {
               setFileRegisterResult(labwares.map((labware) => labware.labware!) as LabwareFieldsFragment[]);
             } else {
-              displayWarningMsg(`No record has been registered. Please check your file.`);
+              displayWarningMsg(`No block has been registered. Please check your file.`);
             }
           })
           .catch(() => {
-            displayWarningMsg('Cannot retrieve details of newly registered block.');
+            displayWarningMsg('Cannot retrieve details of newly registered block(s).');
           });
       }
     },
@@ -215,7 +212,7 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
     return <RegistrationSuccess successData={fileRegisterResult} columns={resultColumns} />;
   }
 
-  const ManuallRegistrationForm = (
+  const ManualRegistrationForm = (
     <Registration<
       RegisterTissuesMutationVariables,
       RegistrationFormTissue,
@@ -249,7 +246,7 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
               <RadioButtonInput
                 name="manual-registration-btn"
                 checked={selectedRegistrationMethod === RegistrationMethod.MANUAL}
-                onChange={() => handleSelectedRegistrationMethod(RegistrationMethod.MANUAL)}
+                onChange={() => setSelectedRegistrationMethod(RegistrationMethod.MANUAL)}
                 label="Register manually"
               />
             </div>
@@ -257,7 +254,7 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
               <RadioButtonInput
                 name="file-registration-btn"
                 checked={selectedRegistrationMethod === RegistrationMethod.UPLOAD_FILE}
-                onChange={() => handleSelectedRegistrationMethod(RegistrationMethod.UPLOAD_FILE)}
+                onChange={() => setSelectedRegistrationMethod(RegistrationMethod.UPLOAD_FILE)}
                 label="Register from file"
               />
               {selectedRegistrationMethod === RegistrationMethod.UPLOAD_FILE && (
@@ -276,7 +273,7 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
   );
 
   return selectedRegistrationMethod === RegistrationMethod.MANUAL
-    ? ManuallRegistrationForm
+    ? ManualRegistrationForm
     : BlockRegistrationLandinPage;
 }
 
