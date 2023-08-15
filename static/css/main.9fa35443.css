@@ -2318,6 +2318,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-border-opacity: 1;
   border-color: rgb(226 232 240 / var(--tw-border-opacity));
 }
+.border-gray-100 {
+  --tw-border-opacity: 1;
+  border-color: rgb(247 250 252 / var(--tw-border-opacity));
+}
 .border-gray-50 {
   --tw-border-opacity: 1;
   border-color: rgb(249 250 251 / var(--tw-border-opacity));
@@ -2332,10 +2336,6 @@ svg.logo.loading rect:nth-child(3n+1) {
 .border-white {
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
-}
-.border-gray-100 {
-  --tw-border-opacity: 1;
-  border-color: rgb(247 250 252 / var(--tw-border-opacity));
 }
 .border-sdb {
   --tw-border-opacity: 1;
@@ -2690,6 +2690,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 .pb-4 {
   padding-bottom: 1rem;
 }
+.pr-5 {
+  padding-right: 1.25rem;
+}
 .pt-10 {
   padding-top: 2.5rem;
 }
@@ -2909,6 +2912,14 @@ svg.logo.loading rect:nth-child(3n+1) {
 .text-orange-800 {
   --tw-text-opacity: 1;
   color: rgb(156 66 33 / var(--tw-text-opacity));
+}
+.text-blue-400 {
+  --tw-text-opacity: 1;
+  color: rgb(99 179 237 / var(--tw-text-opacity));
+}
+.text-green-500 {
+  --tw-text-opacity: 1;
+  color: rgb(72 187 120 / var(--tw-text-opacity));
 }
 .text-black {
   --tw-text-opacity: 1;
@@ -4164,4 +4175,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.3600b19b.css.map*/
+/*# sourceMappingURL=main.9fa35443.css.map*/
