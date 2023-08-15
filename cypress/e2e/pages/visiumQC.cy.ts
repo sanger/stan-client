@@ -323,12 +323,16 @@ describe('Visium QC Page', () => {
       selectSGPNumber('SGP1008');
       selectOption('qcType', 'Visium concentration');
     });
-
-    context('When user scans in a 96 well plate ', () => {
+    context('On load', () => {
       before(() => {
         cy.get('#labwareScanInput').type('STAN-5100{enter}');
       });
-
+      it('shows measurementType dropdown with no option selected', () => {
+        shouldDisplaySelectedValue('measurementType', '');
+        cy.findByRole('table').should('not.exist');
+      });
+    });
+    context('When user scans in a 96 well plate ', () => {
       it('displays the labware layout  on the page', () => {
         cy.findByText('STAN-5100').should('be.visible');
       });
