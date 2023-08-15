@@ -26,4 +26,5 @@ fragment SampleFields on Sample {
   bioState {
     name
   }
+
 }

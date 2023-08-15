@@ -1,5 +1,0 @@
-query FindProbeHybridisation($barcode:String!) {
-    probeHybridisationLabware(barcode: $barcode) {
-        barcode
-    }
-}
