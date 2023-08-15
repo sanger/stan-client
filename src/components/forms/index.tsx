@@ -17,7 +17,7 @@ export const FormikErrorMessage = ({ name }: { name: string }) => {
  * Styled paragraph for an error message on a form input
  */
 export const ErrorMessage: React.FC = ({ children }) => {
-  return <p className="text-red-500 text-xs italic">{children}</p>;
+  return <p className="flex-wrap text-red-500 text-xs italic">{children}</p>;
 };
 
 /**

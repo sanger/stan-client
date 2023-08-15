@@ -1,0 +1,5 @@
+mutation AddProbePanel($name: String!) {
+  addProbePanel(name: $name) {
+    ...ProbePanelFields
+  }
+}

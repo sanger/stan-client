@@ -1,0 +1,7 @@
+mutation RecordProbeOperation($request: ProbeOperationRequest!) {
+  recordProbeOperation(request: $request) {
+    operations {
+      id
+    }
+  }
+}

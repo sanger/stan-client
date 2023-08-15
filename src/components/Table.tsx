@@ -87,7 +87,7 @@ export const TableHeader = ({ children, sortProps, ...rest }: TableHeaderProps) 
 
 export const TableBody = ({ children, ...rest }: TableHeadProps) => {
   return (
-    <tbody className="bg-white divide-y divide-gray-200" {...rest}>
+    <tbody className="bg-white divide-y divide-gray-200 overflow-x-hidden" {...rest}>
       {children}
     </tbody>
   );

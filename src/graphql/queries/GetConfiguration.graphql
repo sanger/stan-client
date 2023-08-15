@@ -38,6 +38,9 @@ query GetConfiguration {
   solutions(includeDisabled: true) {
     ...SolutionFields
   }
+  probePanels(includeDisabled: true) {
+    ...ProbePanelFields
+  }
   programs(includeDisabled: true) {
     ...ProgramFields
   }
