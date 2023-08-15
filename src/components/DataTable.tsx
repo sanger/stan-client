@@ -3,6 +3,9 @@ import { Column, PluginHook, SortingRule, TableState, useSortBy, useTable } from
 import Table, { TableBody, TableCell, TableHead, TableHeader } from './Table';
 import { motion } from 'framer-motion';
 
+type ColumnWithAllCapitalProp<T extends object = {}> = Column<T> & {
+  allCapital?: boolean;
+};
 interface DataTableProps<T extends object> {
   columns: Column<T>[];
   data: T[];
@@ -87,7 +90,10 @@ const DataTableComponent = <T extends Object>(
         {headerGroups.map((headerGroup) => (
           <tr {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
-              <TableHeader {...column.getHeaderProps(sortable ? column.getSortByToggleProps() : undefined)}>
+              <TableHeader
+                allCapital={(column as ColumnWithAllCapitalProp).allCapital}
+                {...column.getHeaderProps(sortable ? column.getSortByToggleProps() : undefined)}
+              >
                 {column.render('Header')}
                 {column.isSorted ? (
                   column.isSortedDesc ? (

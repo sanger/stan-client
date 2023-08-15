@@ -17,8 +17,8 @@ type SlotMeasurementProps = {
 
 const setMeasurementNameTableTitle = (measurementName: string): string => {
   return measurementName === 'cDNA concentration' || measurementName === 'Library concentration'
-    ? `${measurementName} (pl/ul)`
-    : measurementName;
+    ? `${measurementName.toUpperCase()} (pl/\u00B5l)`
+    : measurementName.toUpperCase();
 };
 
 /**
@@ -51,6 +51,7 @@ const SlotMeasurements = ({
       {
         Header: setMeasurementNameTableTitle(measurementName),
         id: measurementName,
+        allCapital: false,
         Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
           return (
             <FormikInput

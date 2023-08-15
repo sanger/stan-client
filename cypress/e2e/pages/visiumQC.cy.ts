@@ -337,14 +337,14 @@ describe('Visium QC Page', () => {
         cy.findByText('STAN-5100').should('be.visible');
       });
 
-      it('shows measurementType dropdown with fields when Library concentration option is selected', () => {
+      it('shows Library concentration table with unit name in lower case when Library concentration option is selected', () => {
         selectOption('measurementType', 'Library concentration');
-        cy.findByRole('table').get('th').eq(1).should('have.text', 'Library concentration (pl/ul)');
+        cy.findByRole('table').get('th').eq(1).should('have.text', 'LIBRARY CONCENTRATION (pl/\u00B5l)');
       });
 
-      it('shows measurementType dropdown with fields when cDNA concentration option is selected', () => {
+      it('shows cDNA concentration table with unit name in lower when cDNA concentration option is selected', () => {
         selectOption('measurementType', 'cDNA concentration');
-        cy.findByRole('table').get('th').eq(1).should('have.text', 'cDNA concentration (pl/ul)');
+        cy.findByRole('table').get('th').eq(1).should('have.text', 'CDNA CONCENTRATION (pl/\u00B5l)');
       });
 
       it('display text boxes to enter concentration value for all slots with samples', () => {
