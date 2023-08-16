@@ -50,7 +50,7 @@ import CytAssist from '../pages/CytAssist';
 import FileManager from '../pages/FileManager';
 import { useAuth } from '../context/AuthContext';
 import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
-import XeniumAnalysis from '../pages/XeniumAnalysis';
+import XeniumAnalyser from '../pages/XeniumAnalyser';
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -202,8 +202,8 @@ export function Routes() {
         )}
       />
       <AuthenticatedRoute
-        path="/lab/xenium_analysis"
-        render={(routeProps) => <XeniumAnalysis key={routeProps.location.key} />}
+        path="/lab/xenium_analyser"
+        render={(routeProps) => <XeniumAnalyser key={routeProps.location.key} />}
       />
       <AuthenticatedRoute path="/lab/cytassist" render={(routeProps) => <CytAssist key={routeProps.location.key} />} />
       <AuthenticatedRoute

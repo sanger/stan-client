@@ -260,10 +260,10 @@ function AppShell({ children }: AppShellParams) {
                     description={'Recording Probe hybridisation'}
                   >
                     <NavLinkMenuItem
-                      caption={'Xenium Analysis'}
-                      path={'/lab/xenium_analysis'}
+                      caption={'Xenium Analyser'}
+                      path={'/lab/xenium_analyser'}
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Record analysis data for Xenium slides.'}
+                      description={'Recording Xenium analyser information'}
                     />
                   </Menu>
                   <NavLinkMenuItem
@@ -454,7 +454,7 @@ function AppShell({ children }: AppShellParams) {
                     </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">Xenium</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/xenium_analysis">Xenium Analysis</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/xenium_analyser">Xenium Analyser</StanMobileNavLink>
                     </div>
                     <div className="grid grid-cols-2 mt-2 gap-y-4 gap-x-8">
                       <StanMobileNavLink to="/lab/imaging">Imaging</StanMobileNavLink>
