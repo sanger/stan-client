@@ -5,6 +5,7 @@ import { sampleFactory } from './sampleFactory';
 export const slotFactory = Factory.define<Slot>(({ params, associations, transientParams }) => {
   const slot: Slot = {
     __typename: 'Slot',
+    id: params.id ?? -1,
     address: params.address ?? 'A1',
     block: params.block ?? false,
     samples: associations.samples ?? sampleFactory.buildList(transientParams.numberOfSamples ?? 0),

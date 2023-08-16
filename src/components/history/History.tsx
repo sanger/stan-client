@@ -96,6 +96,14 @@ export default function History(props: HistoryProps) {
         accessor: 'sectionNumber'
       },
       {
+        Header: 'Slot Id',
+        accessor: 'slotId'
+      },
+      {
+        Header: 'Section Position',
+        accessor: 'sectionPosition'
+      },
+      {
         Header: 'Biological State',
         accessor: 'biologicalState'
       },
