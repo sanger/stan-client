@@ -181,6 +181,61 @@ describe('Sectioning Planning', () => {
         cy.findByText('Delete Layout').click();
       });
     });
+    context('when adding a Xenium slide ', () => {
+      before(() => {
+        selectOption('labware-type', 'Xenium');
+        cy.findByText('+ Add Labware').click();
+        cy.findByText('Edit Layout').click();
+        cy.findByRole('dialog').within(() => {
+          cy.findByText('STAN-113').click();
+          cy.findByText('A1').click();
+          cy.findByText('Done').click();
+        });
+      });
+
+      it('shows Barcode, Sectioning Thickness,Slide LOT number, Slide costings', () => {
+        cy.findByLabelText('Barcode').should('be.visible');
+        cy.findByLabelText('Section Thickness').should('be.visible');
+        cy.findByText('Slide LOT number').should('be.visible');
+        cy.findByText('Slide costings').should('be.visible');
+        cy.findByText('Create Labware').should('be.disabled');
+      });
+      context('enabling Create Labware button', () => {
+        it('disables Create Labware button if not all fields entered', () => {
+          cy.findByLabelText('Section Thickness').type('2');
+          cy.findByText('Create Labware').should('be.disabled');
+        });
+        it('should validate Slide LOT number', () => {
+          cy.findByTestId('formInput').type('1').blur();
+          cy.findByText('Slide lot number should be a 6-7 digits number').should('be.visible');
+        });
+
+        it('disables Create Labware button if not all fields entered', () => {
+          cy.findByTestId('formInput').clear().type('123456');
+          cy.findByText('Create Labware').should('be.disabled');
+        });
+        it('should validate Barcode', () => {
+          cy.findByLabelText('Barcode').type('1').blur();
+          cy.findByText('Xenium barcode should be a 7-digit number').should('be.visible');
+        });
+        it('disables Create Labware button if not all fields entered', () => {
+          cy.findByLabelText('Barcode').clear().type('1234567');
+          cy.findByText('Create Labware').should('be.disabled');
+        });
+        it('should not allow empty value in Slide costings', () => {
+          cy.get('select[name="costing"]').select('SGP');
+          cy.get('select[name="costing"]').select('').blur();
+          cy.findByText('Slide costing is a required field').should('be.visible');
+        });
+        it('enables Create Labware button when all field values are entered', () => {
+          cy.get('select[name="costing"]').select('SGP');
+          cy.findByText('Create Labware').should('be.enabled');
+        });
+      });
+      after(() => {
+        cy.findByText('Delete Layout').click();
+      });
+    });
 
     context('when adding a Visium LP layout', () => {
       before(() => {

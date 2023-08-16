@@ -101,6 +101,12 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     name: LabwareTypeName.VISIUM_LP_CYTASSIST_XL,
     numRows: 2,
     numColumns: 1
+  }),
+  [LabwareTypeName.XENIUM]: labwareTypeFactory.params({
+    __typename: 'LabwareType',
+    name: LabwareTypeName.XENIUM,
+    numRows: 5,
+    numColumns: 3
   })
 };
 

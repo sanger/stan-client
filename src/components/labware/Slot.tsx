@@ -7,7 +7,7 @@ import { SlotFieldsFragment } from '../../types/sdk';
 type SlotProps = {
   address: string;
   slot: SlotFieldsFragment;
-  size: 'small' | 'large';
+  size: 'small' | 'medium' | 'large';
   onClick?: (address: string, slot: SlotFieldsFragment) => void;
   onCtrlClick?: (address: string, slot: SlotFieldsFragment) => void;
   onShiftClick?: (address: string, slot: SlotFieldsFragment) => void;
@@ -47,6 +47,7 @@ export function Slot({
       'ring ring-pink-600 ring-offset-2': selected,
       'border border-gray-800': !selected,
       'h-20 w-20': size === 'large',
+      'h-16 w-16': size === 'medium',
       'h-12 w-12': size === 'small'
     },
     'inline-flex flex-col items-center justify-center mx-auto rounded-full text-xs font-semibold'

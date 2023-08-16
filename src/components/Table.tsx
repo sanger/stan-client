@@ -14,6 +14,7 @@ export type SortProps = {
 interface TableHeaderProps {
   sortProps?: SortProps;
   children?: ReactNode | ReactNode[];
+  allCapital?: boolean;
 }
 /**
  * @example
@@ -57,7 +58,7 @@ export const TableHead = ({ children, fixed = false }: TableHeadProps) => {
   return <thead className={`${fixed ? 'sticky top-0 z-20' : ''}`}>{children}</thead>;
 };
 
-export const TableHeader = ({ children, sortProps, ...rest }: TableHeaderProps) => {
+export const TableHeader = ({ children, sortProps, allCapital = true, ...rest }: TableHeaderProps) => {
   return (
     <th className="px-6 py-3 bg-gray-50 text-left select-none" {...rest}>
       <>
@@ -71,7 +72,9 @@ export const TableHeader = ({ children, sortProps, ...rest }: TableHeaderProps) 
           >
             {
               <span
-                className={'bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 tracking-wider uppercase'}
+                className={`bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 tracking-wide ${
+                  allCapital ? 'uppercase' : ''
+                }`}
               >
                 {children}
               </span>
@@ -87,7 +90,7 @@ export const TableHeader = ({ children, sortProps, ...rest }: TableHeaderProps) 
 
 export const TableBody = ({ children, ...rest }: TableHeadProps) => {
   return (
-    <tbody className="bg-white divide-y divide-gray-200" {...rest}>
+    <tbody className="bg-white divide-y divide-gray-200 overflow-x-hidden" {...rest}>
       {children}
     </tbody>
   );

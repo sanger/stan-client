@@ -15,6 +15,12 @@ type SlotMeasurementProps = {
   validateValue?: (value: string) => void;
 };
 
+const setMeasurementNameTableTitle = (measurementName: string): string => {
+  return measurementName === 'cDNA concentration' || measurementName === 'Library concentration'
+    ? `${measurementName.toUpperCase()} (pl/\u00B5l)`
+    : measurementName.toUpperCase();
+};
+
 /**
  * Component to display SlotMeasurements as a table with two columns - slot address & measurement value
  *
@@ -43,8 +49,9 @@ const SlotMeasurements = ({
         accessor: (measurement: SlotMeasurementRequest) => measurement.address
       },
       {
-        Header: measurementName,
+        Header: setMeasurementNameTableTitle(measurementName),
         id: measurementName,
+        allCapital: false,
         Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
           return (
             <FormikInput
