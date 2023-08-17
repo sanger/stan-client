@@ -5,7 +5,8 @@ import {
   CompletionRequest,
   LabwareFieldsFragment,
   LabwareSampleComments,
-  RecordCompletionMutation
+  RecordCompletionMutation,
+  SampleAddressComment
 } from '../types/sdk';
 import AppShell from '../components/AppShell';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -17,7 +18,6 @@ import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { reload, StanCoreContext } from '../lib/sdk';
 
-import { motion } from 'framer-motion';
 import Panel from '../components/Panel';
 import RemoveButton from '../components/buttons/RemoveButton';
 import Labware from '../components/labware/Labware';
@@ -38,7 +38,7 @@ type SectionComments = {
 };
 
 type SampleAddressFormRow = {
-  [key: string]: string[]; //key = barcode-address-sampleId, values = string[]
+  [key: string]: string[]; //key: address-sampleId, values: the selected comments
 };
 
 type LabwareCompletionDateForm = {
@@ -48,7 +48,7 @@ type LabwareCompletionDateForm = {
 };
 type ProbeHybridisationQCFormValues = {
   workNumber: string;
-  labwares: { [key: string]: LabwareCompletionDateForm };
+  labwares: { [key: string]: LabwareCompletionDateForm }; //key: barcode
 };
 
 const getCommentTextFromField = (
@@ -73,12 +73,22 @@ const getCommentTextFromField = (
 };
 
 const currentDateTime = getCurrentDateTime();
-const currentDate = () => {
-  return currentDateTime.split('T')[0];
+
+const mapSampleAddressCommentIds = (
+  address: string,
+  sampleId: number,
+  commentIds: string[]
+): SampleAddressComment[] => {
+  return commentIds.map((commentId) => ({
+    address: address,
+    sampleId: Number(sampleId),
+    commentId: Number(commentId)
+  }));
 };
 
 const convertProbeHybridisationQCFormValuesToCompletionRequest = (
-  probeHybridisationQCFormValues: ProbeHybridisationQCFormValues
+  probeHybridisationQCFormValues: ProbeHybridisationQCFormValues,
+  allScannedLabware: LabwareFieldsFragment[]
 ) => {
   const completionRequest: CompletionRequest = {
     operationType: 'Probe hybridisation QC',
@@ -86,36 +96,27 @@ const convertProbeHybridisationQCFormValuesToCompletionRequest = (
     labware: []
   };
 
-  for (const barcode in probeHybridisationQCFormValues.labwares) {
-    const labwareInfo = probeHybridisationQCFormValues.labwares[barcode];
-
-    if (barcode && labwareInfo.sampleAddressComments) {
-      const labware: LabwareSampleComments = {
-        barcode: barcode,
-        comments: []
-      };
-
-      if (labwareInfo.completionDateTime) {
-        labware.completion = formatDateTimeForCore(labwareInfo.completionDateTime);
+  allScannedLabware.forEach((labware) => {
+    const labwareSampleComments: LabwareSampleComments = {
+      barcode: labware.barcode,
+      comments: []
+    };
+    const labwareForm = probeHybridisationQCFormValues.labwares[labware.barcode];
+    if (labwareForm !== undefined) {
+      if (labwareForm.completionDateTime) {
+        labwareSampleComments.completion = formatDateTimeForCore(labwareForm.completionDateTime);
       }
-
-      for (const addressSampleId in labwareInfo.sampleAddressComments) {
-        const [address, sampleId] = addressSampleId.split('-');
-        const commentIds = labwareInfo.sampleAddressComments[addressSampleId];
-
-        const comments = commentIds.map((commentId) => ({
-          address: address,
-          sampleId: Number(sampleId),
-          commentId: Number(commentId)
-        }));
-
-        labware.comments.push(...comments);
+      if (labwareForm.sampleAddressComments) {
+        for (const addressSampleId in labwareForm.sampleAddressComments) {
+          const [address, sampleId] = addressSampleId.split('-');
+          labwareSampleComments.comments.push(
+            ...mapSampleAddressCommentIds(address, Number(sampleId), labwareForm.sampleAddressComments[addressSampleId])
+          );
+        }
       }
-
-      completionRequest.labware.push(labware);
     }
-  }
-
+    completionRequest.labware.push(labwareSampleComments);
+  });
   return completionRequest;
 };
 
@@ -151,6 +152,14 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
     [labwares]
   );
 
+  const removeLabwareFromForm = useCallback(
+    (removeLabware, barcode: string, values: ProbeHybridisationQCFormValues) => {
+      removeLabware(barcode);
+      delete values.labwares[barcode];
+    },
+    []
+  );
+
   const formSubmitMachine = React.useMemo(() => {
     return createFormMachine<CompletionRequest, RecordCompletionMutation>().withConfig({
       services: {
@@ -168,14 +177,43 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
   const { serverError, submissionResult } = currentForm.context;
 
   const validationWorkNumber = Yup.object().shape({
-    workNumber: Yup.string().required('SGP Number is required'),
-    labwares: Yup.object().shape({}).required('At least one labware is required')
+    workNumber: Yup.string().required('SGP Number is required')
   });
 
   const submitForm = async (values: CompletionRequest) => sendForm({ type: 'SUBMIT_FORM', values });
   const convertValuesAndSubmit = async (formValues: ProbeHybridisationQCFormValues) => {
-    const values: CompletionRequest = convertProbeHybridisationQCFormValuesToCompletionRequest(formValues);
+    const values: CompletionRequest = convertProbeHybridisationQCFormValuesToCompletionRequest(
+      formValues,
+      labwares.items
+    );
     await submitForm(values);
+  };
+
+  const mapCommentOptionsToValues = useCallback((options: OptionType[]) => {
+    return options.map((v) => v.value);
+  }, []);
+
+  const updateSectionCommentsFromGlobal = useCallback(
+    (options: OptionType[], labware: LabwareFieldsFragment, values, setFieldValue) => {
+      labware.slots.forEach((slot) => {
+        slot.samples.forEach((sample) => {
+          const sampleAddressId = `${slot.address}-${sample.id}`;
+          const oldSelected = values.labwares[labware.barcode]?.sampleAddressComments?.[sampleAddressId] || [];
+          const updatedSelected = [...oldSelected, ...mapCommentOptionsToValues(options)];
+          setFieldValue(`labwares[${labware.barcode}].sampleAddressComments[${sampleAddressId}]`, updatedSelected);
+        });
+      });
+    },
+    [mapCommentOptionsToValues]
+  );
+
+  const validateCompletionDateTime = (selectedTime: string) => {
+    const selectedDateTime = new Date(selectedTime);
+    const now = new Date();
+    if (selectedDateTime > now) {
+      return 'Please select a time on or before current time';
+    }
+    return undefined;
   };
 
   return (
@@ -211,152 +249,119 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
                   <LabwareScanner onAdd={onAddLabware} onRemove={onRemoveLabware}>
                     {({ labwares, removeLabware }) =>
                       labwares.map((labware) => (
-                        <motion.div
-                          key={labware.barcode}
-                          initial={{ opacity: 0, y: -50 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="mt-3"
-                        >
-                          <Panel>
-                            <div className="flex flex-row items-center justify-end">
-                              {<RemoveButton data-testid={'remove'} onClick={() => removeLabware(labware.barcode)} />}
+                        <Panel key={labware.barcode}>
+                          <div className="flex flex-row items-center justify-end">
+                            {
+                              <RemoveButton
+                                data-testid={'remove'}
+                                onClick={() => {
+                                  removeLabwareFromForm(removeLabware, labware.barcode, values);
+                                }}
+                              />
+                            }
+                          </div>
+                          <div className="flex flex-row">
+                            <div className="flex flex-col w-full" data-testid={'labware'}>
+                              <Labware labware={labware} name={labware.labwareType.name} />
                             </div>
-                            <div className="flex flex-row">
-                              <div className="flex flex-col w-full" data-testid={'labware'}>
-                                <Labware labware={labware} name={labware.labwareType.name} />
+                            <div className="flex flex-col w-full bg-gray-100">
+                              <div className="p-4">
+                                <FormikInput
+                                  label={'Completion Time'}
+                                  data-testid={'completionDateTime'}
+                                  type="datetime-local"
+                                  name={`labwares[${labware.barcode}].completionDateTime`}
+                                  max={currentDateTime}
+                                  min={currentDateTime + 'T00:00'}
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    setFieldValue(`labwares.${labware.barcode}.completionDateTime`, e.target.value);
+                                  }}
+                                  value={values.labwares[labware.barcode]?.completionDateTime || ''}
+                                  className="w-1/2"
+                                  validate={validateCompletionDateTime}
+                                />
+                                <MutedText className="pl-2">
+                                  If not manually selected, the current timestamp will be applied automatically
+                                </MutedText>
                               </div>
-                              <div className="flex flex-col w-full bg-gray-100">
-                                <div className="p-4">
-                                  <FormikInput
-                                    label={'Completion Time'}
-                                    data-testid={'completionDateTime'}
-                                    type="datetime-local"
-                                    name={`labwares[${labware.barcode}].completionDateTime`}
-                                    max={currentDateTime}
-                                    min={currentDate() + 'T00:00'}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                      setFieldValue(`labwares.${labware.barcode}.completionDateTime`, e.target.value);
-                                    }}
-                                    value={values.labwares[labware.barcode]?.completionDateTime || ''}
-                                    className="w-1/2"
-                                  />
-                                  <MutedText className="pl-2">
-                                    If not manually selected, the current timestamp will be applied automatically
-                                  </MutedText>
-                                </div>
-                                <div className="flex flex-row w-full p-4">
-                                  <CustomReactSelect
-                                    label={'Comment'}
-                                    name={`labwares[${labware.barcode}].globalComments`}
-                                    dataTestId="globalComment"
-                                    emptyOption={true}
-                                    options={selectOptionValues(comments, 'text', 'id')}
-                                    isMulti={true}
-                                    // handleChange={(options) => {
-                                    //   const selectedOptions = (options as OptionType[]).map((v) => v.value);
-                                    //   labware.slots.forEach((slot) => {
-                                    //     slot.samples.forEach((sample) => {
-                                    //       const oldSelected =
-                                    //         values.labwares[labware.barcode] &&
-                                    //         values.labwares[labware.barcode].sampleAddressComments
-                                    //           ? values.labwares[labware.barcode].sampleAddressComments[
-                                    //               `${slot.address}-${sample.id}`
-                                    //             ]
-                                    //           : [];
-                                    //       const updatedSelected = oldSelected
-                                    //         ? oldSelected.concat(selectedOptions)
-                                    //         : selectedOptions;
-                                    //       setFieldValue(
-                                    //         `labwares[${labware.barcode}].sampleAddressComments[${slot.address}-${sample.id}]`,
-                                    //         updatedSelected
-                                    //       );
-                                    //     });
-                                    //   });
-                                    // }}
-
-                                    handleChange={(options) => {
-                                      const selectedOptions = (options as OptionType[]).map((v) => v.value);
-
-                                      labware.slots.forEach((slot) => {
-                                        slot.samples.forEach((sample) => {
-                                          const sampleAddressId = `${slot.address}-${sample.id}`;
-                                          const oldSelected =
-                                            values.labwares[labware.barcode]?.sampleAddressComments?.[
-                                              sampleAddressId
-                                            ] || [];
-                                          const updatedSelected = [...oldSelected, ...selectedOptions];
-
-                                          setFieldValue(
-                                            `labwares[${labware.barcode}].sampleAddressComments[${sampleAddressId}]`,
-                                            updatedSelected
-                                          );
-                                        });
-                                      });
-                                    }}
-                                    value={() => {
-                                      const labwareData = values.labwares[labware.barcode];
-                                      return labwareData ? labwareData.globalComments : [];
-                                    }}
-                                  />
-                                </div>
+                              <div className="flex flex-row w-full p-4">
+                                <CustomReactSelect
+                                  label={'Comment'}
+                                  name={`labwares[${labware.barcode}].globalComments`}
+                                  dataTestId="globalComment"
+                                  emptyOption={true}
+                                  options={selectOptionValues(comments, 'text', 'id')}
+                                  isMulti={true}
+                                  handleChange={(options) => {
+                                    updateSectionCommentsFromGlobal(
+                                      options as OptionType[],
+                                      labware,
+                                      values,
+                                      setFieldValue
+                                    );
+                                  }}
+                                  value={() => {
+                                    const labwareData = values.labwares[labware.barcode];
+                                    return labwareData ? labwareData.globalComments : [];
+                                  }}
+                                />
                               </div>
                             </div>
-                            <div className="pt-4">
-                              <Table>
-                                <TableHead>
-                                  <tr>
-                                    <TableHeader>Address</TableHeader>
-                                    <TableHeader>Section Number</TableHeader>
-                                    <TableHeader>Donor Id </TableHeader>
-                                    <TableHeader>Tissue type</TableHeader>
-                                    <TableHeader>Spatial Location</TableHeader>
-                                    <TableHeader>Replicate</TableHeader>
-                                    <TableHeader>Comment</TableHeader>
-                                  </tr>
-                                </TableHead>
-                                <TableBody>
-                                  {labware.slots.flatMap((slot) => {
-                                    if (slot.samples.length <= 0) return <></>;
-                                    return slot.samples.flatMap((sample) => {
-                                      return (
-                                        <tr key={`${labware.barcode}-${slot.address}-${sample.id}`}>
-                                          <TableCell width={100}>{slot.address}</TableCell>
-                                          <TableCell width={120}>{sample.section}</TableCell>
-                                          <TableCell width={200}>{sample.tissue.donor.donorName}</TableCell>
-                                          <TableCell width={200}>
-                                            {sample.tissue.spatialLocation.tissueType.name}
-                                          </TableCell>
-                                          <TableCell width={100}>{sample.tissue.spatialLocation.code}</TableCell>
-                                          <TableCell>{sample.tissue.replicate!}</TableCell>
-                                          <TableCell className="w-full">
-                                            <CustomReactSelect
-                                              isMulti={true}
-                                              options={selectOptionValues(comments, 'text', 'id')}
-                                              name={`labwares[${labware.barcode}].sampleAddressComments[${slot.address}-${sample.id}]`}
-                                              value={getCommentTextFromField(
-                                                comments,
-                                                values,
-                                                labware.barcode,
-                                                slot.address,
-                                                sample.id
-                                              )}
-                                              handleChange={(values) => {
-                                                setFieldValue(
-                                                  `labwares.${labware.barcode}.sampleAddressComments.${slot.address}-${sample.id}`,
-                                                  (values as OptionType[]).map((v) => v.value)
-                                                );
-                                              }}
-                                            />
-                                          </TableCell>
-                                        </tr>
-                                      );
-                                    });
-                                  })}
-                                </TableBody>
-                              </Table>
-                            </div>
-                          </Panel>
-                        </motion.div>
+                          </div>
+                          <div className="pt-4">
+                            <Table>
+                              <TableHead>
+                                <tr>
+                                  <TableHeader>Address</TableHeader>
+                                  <TableHeader>Section Number</TableHeader>
+                                  <TableHeader>Donor Id </TableHeader>
+                                  <TableHeader>Tissue type</TableHeader>
+                                  <TableHeader>Spatial Location</TableHeader>
+                                  <TableHeader>Replicate</TableHeader>
+                                  <TableHeader>Comment</TableHeader>
+                                </tr>
+                              </TableHead>
+                              <TableBody>
+                                {labware.slots.flatMap((slot) => {
+                                  return slot.samples.flatMap((sample) => {
+                                    return (
+                                      <tr key={`${labware.barcode}-${slot.address}-${sample.id}`}>
+                                        <TableCell width={100}>{slot.address}</TableCell>
+                                        <TableCell width={120}>{sample.section}</TableCell>
+                                        <TableCell width={200}>{sample.tissue.donor.donorName}</TableCell>
+                                        <TableCell width={200}>
+                                          {sample.tissue.spatialLocation.tissueType.name}
+                                        </TableCell>
+                                        <TableCell width={100}>{sample.tissue.spatialLocation.code}</TableCell>
+                                        <TableCell>{sample.tissue.replicate!}</TableCell>
+                                        <TableCell className="w-full">
+                                          <CustomReactSelect
+                                            isMulti={true}
+                                            options={selectOptionValues(comments, 'text', 'id')}
+                                            name={`labwares[${labware.barcode}].sampleAddressComments[${slot.address}-${sample.id}]`}
+                                            value={getCommentTextFromField(
+                                              comments,
+                                              values,
+                                              labware.barcode,
+                                              slot.address,
+                                              sample.id
+                                            )}
+                                            handleChange={(values) => {
+                                              setFieldValue(
+                                                `labwares.${labware.barcode}.sampleAddressComments.${slot.address}-${sample.id}`,
+                                                mapCommentOptionsToValues(values as OptionType[])
+                                              );
+                                            }}
+                                          />
+                                        </TableCell>
+                                      </tr>
+                                    );
+                                  });
+                                })}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </Panel>
                       ))
                     }
                   </LabwareScanner>
@@ -369,7 +374,7 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
               </div>
               <OperationCompleteModal
                 show={submissionResult !== undefined}
-                message={'Probe Hybridisation QC recorded for all labware(s)'}
+                message="Probe Hybridisation QC recorded for all labware(s)"
                 onReset={reload}
               >
                 <p>
