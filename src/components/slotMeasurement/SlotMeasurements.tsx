@@ -17,7 +17,7 @@ type SlotMeasurementProps = {
 
 const setMeasurementNameTableTitle = (measurementName: string): string => {
   return measurementName === 'cDNA concentration' || measurementName === 'Library concentration'
-    ? `${measurementName.toUpperCase()} (pl/\u00B5l)`
+    ? `${measurementName.toUpperCase()} (pg/\u00B5l)`
     : measurementName.toUpperCase();
 };
 
