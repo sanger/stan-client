@@ -4,6 +4,7 @@ import {
   FindPermDataQueryVariables,
   RecordPermMutation,
   RecordPermMutationVariables,
+  SamplePositionFieldsFragment,
   VisiumAnalysisMutation,
   VisiumAnalysisMutationVariables
 } from '../../types/sdk';
@@ -53,9 +54,11 @@ const handlers = [
     }
 
     const labware = createLabware(barcode);
+    const samplePositionResults: SamplePositionFieldsFragment[] = [];
     return res(
       ctx.data({
         visiumPermData: {
+          samplePositionResults,
           labware,
           addressPermData: labware.slots
             .filter(isSlotFilled)

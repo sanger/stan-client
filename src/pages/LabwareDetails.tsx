@@ -1,7 +1,13 @@
 import React from 'react';
 import AppShell from '../components/AppShell';
 import LabwareView from '../components/labware/Labware';
-import { AddressPermDataFieldsFragment, LabwareFieldsFragment, SlotFieldsFragment, UserRole } from '../types/sdk';
+import {
+  AddressPermDataFieldsFragment,
+  LabwareFieldsFragment,
+  SamplePositionFieldsFragment,
+  SlotFieldsFragment,
+  UserRole
+} from '../types/sdk';
 import StripyCard, { StripyCardDetail } from '../components/StripyCard';
 import Heading from '../components/Heading';
 import LabelPrinter from '../components/LabelPrinter';
@@ -19,9 +25,10 @@ import { isSlotFilled } from '../lib/helpers/slotHelper';
 type LabwareDetailsProps = {
   labware: LabwareFieldsFragment;
   permData?: AddressPermDataFieldsFragment[];
+  samplePositionResults: SamplePositionFieldsFragment[];
 };
 
-export default function LabwareDetails({ labware, permData }: LabwareDetailsProps) {
+export default function LabwareDetails({ labware, permData, samplePositionResults }: LabwareDetailsProps) {
   const getPermDataForSlot = (
     slot: SlotFieldsFragment,
     permData: AddressPermDataFieldsFragment[]
@@ -106,13 +113,15 @@ export default function LabwareDetails({ labware, permData }: LabwareDetailsProp
                   sampleColumns.slotAddress(),
                   sampleColumns.tissueType(),
                   sampleColumns.sectionNumber(),
+                  sampleColumns.slotId(),
+                  sampleColumns.sectionPosition(),
                   sampleColumns.bioState(),
                   sampleColumns.replicateNumber(),
                   sampleColumns.spatialLocation(),
                   sampleColumns.lifeStage(),
                   sampleColumns.donorName()
                 ]}
-                data={sampleColumns.buildSampleDataTableRows(labware)}
+                data={sampleColumns.buildSampleDataTableRows(labware, samplePositionResults)}
               />
             </div>
           </div>

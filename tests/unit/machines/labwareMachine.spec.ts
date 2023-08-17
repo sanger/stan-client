@@ -116,6 +116,7 @@ describe('labwareMachine', () => {
                       externalBarcode: 'EXTERNAL-1',
                       slots: [
                         {
+                          id: 1,
                           address: 'A1',
                           labwareId: 1,
                           block: false,
@@ -242,6 +243,7 @@ describe('labwareMachine', () => {
                       barcode: `${barcode}`,
                       slots: [
                         {
+                          id: 1,
                           address: 'A1',
                           labwareId: 1,
                           block: false,

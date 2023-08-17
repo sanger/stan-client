@@ -1,6 +1,11 @@
 import { stanCore } from '../sdk';
 import { HistoryProps, HistoryTableEntry } from '../../types/stan';
-import { HistoryFieldsFragment, LabwareFieldsFragment, SampleFieldsFragment } from '../../types/sdk';
+import {
+  HistoryFieldsFragment,
+  LabwareFieldsFragment,
+  SampleFieldsFragment,
+  SamplePositionFieldsFragment
+} from '../../types/sdk';
 
 /**
  * Retrieves the history for the given History props.
@@ -44,9 +49,19 @@ export async function findHistory(historyProps: HistoryProps): Promise<Array<His
 
   const labwareMap: Map<number, LabwareFieldsFragment> = new Map();
   const sampleMap: Map<number, SampleFieldsFragment> = new Map();
+  const samplePositionMapByOpId: Map<number, Map<number, SamplePositionFieldsFragment>> = new Map();
 
   history.labware.forEach((lw) => labwareMap.set(lw.id, lw));
   history.samples.forEach((sample) => sampleMap.set(sample.id, sample));
+  history.samplePositionResults.forEach((samplePosition) => {
+    const operationId = samplePosition.operationId;
+    const sampleId = samplePosition.sampleId;
+
+    if (!samplePositionMapByOpId.has(operationId)) {
+      samplePositionMapByOpId.set(operationId, new Map());
+    }
+    samplePositionMapByOpId.get(operationId)?.set(sampleId, samplePosition);
+  });
 
   return history.entries.map((entry) => {
     const sourceLabware = labwareMap.get(entry.sourceLabwareId)!;
@@ -68,7 +83,9 @@ export async function findHistory(historyProps: HistoryProps): Promise<Array<His
       labwareState: destinationLabware.state,
       username: entry.username,
       workNumber: entry.workNumber ?? undefined,
-      details: entry.details
+      details: entry.details,
+      slotId: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.slotId,
+      sectionPosition: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.region
     };
   });
 }
