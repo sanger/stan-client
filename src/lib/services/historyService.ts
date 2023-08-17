@@ -84,7 +84,7 @@ export async function findHistory(historyProps: HistoryProps): Promise<Array<His
       username: entry.username,
       workNumber: entry.workNumber ?? undefined,
       details: entry.details,
-      slotId: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.slotId,
+      address: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.address,
       sectionPosition: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.region
     };
   });

@@ -5,7 +5,7 @@ import { capitalize } from 'lodash';
 /**
  * Type that can be used for displaying a Sample in a table row, along with its slot address
  */
-type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string } & { slotId: number | undefined } & {
+type SampleDataTableRow = SampleFieldsFragment & { slotAddress: string } & {
   sectionPosition: string | undefined;
 };
 
@@ -37,7 +37,6 @@ export function buildSampleDataTableRows(
       return {
         ...sample,
         slotAddress: slot.address,
-        slotId: slot.id,
         sectionPosition: samplePositionResultsMap[`${sample.id}-${slot.id}`]?.region
       };
     });
@@ -82,11 +81,6 @@ export const lifeStage: ColumnFactory = () => ({
 export const donorName: ColumnFactory = () => ({
   Header: 'Donor',
   accessor: (sample) => sample.tissue.donor.donorName
-});
-
-export const slotId: ColumnFactory = () => ({
-  Header: 'Slot Id',
-  accessor: (sample) => sample.slotId
 });
 
 export const sectionPosition: ColumnFactory = () => ({
