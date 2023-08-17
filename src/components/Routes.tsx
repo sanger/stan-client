@@ -50,6 +50,7 @@ import CytAssist from '../pages/CytAssist';
 import FileManager from '../pages/FileManager';
 import { useAuth } from '../context/AuthContext';
 import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
+import ProbeHybridisationQC from '../pages/ProbeHybridisationQC';
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -197,6 +198,22 @@ export function Routes() {
         render={(routeProps) => (
           <DataFetcher key={routeProps.location.key} dataFetcher={stanCore.GetProbePanels}>
             {(probePanelInfo) => <ProbeHybridisationXenium probePanelInfo={probePanelInfo} />}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/probe_hybridisation_qc"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() =>
+              stanCore.GetComments({
+                commentCategory: 'section',
+                includeDisabled: false
+              })
+            }
+          >
+            {(response) => <ProbeHybridisationQC comments={response.comments} />}
           </DataFetcher>
         )}
       />

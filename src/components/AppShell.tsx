@@ -253,6 +253,12 @@ function AppShell({ children }: AppShellParams) {
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Recording Probe hybridisation for Xenium slides.'}
                     />
+                    <NavLinkMenuItem
+                      caption={'Probe hybridisation QC'}
+                      path={'/lab/probe_hybridisation_qc'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording Probe hybridisation QC completion date and set sample sections comments.'}
+                    />
                   </Menu>
                   <NavLinkMenuItem
                     caption={'Imaging'}
