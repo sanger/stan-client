@@ -245,7 +245,6 @@ describe('Xenium Analyser', () => {
   describe('On save', () => {
     before(() => {
       cy.get('#labwareScanInput').type('STAN-3111{enter}');
-      fillInForm();
     });
     context('When there is a server error', () => {
       before(() => {

@@ -70,7 +70,6 @@ const XeniumAnalyser = () => {
     return createFormMachine<AnalyserRequest, RecordAnalyserMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
-          debugger;
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordAnalyser({
             request: { ...e.values }
@@ -225,7 +224,7 @@ const XeniumAnalyser = () => {
                 });
               }}
             >
-              {({ values, setFieldValue, isValid, errors }) => (
+              {({ values, setFieldValue, isValid }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
                     <Heading level={3}>Labware</Heading>
