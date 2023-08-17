@@ -3,16 +3,17 @@ import { RecordAnalyserMutation, RecordAnalyserMutationVariables } from '../../t
 
 const xeniumHandlers = [
   graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('recordAnalyser', (req, res, ctx) => {
+    debugger;
+
     return res(
-      ctx.data({
-        recordAnalyser: {
-          operations: [
-            {
-              id: 1
-            }
-          ]
+      ctx.errors([
+        {
+          message: 'Exception while fetching data (/CytAssist) : The operation could not be validated.',
+          extensions: {
+            problems: ['Labware is discarded: [STAN-3111]']
+          }
         }
-      })
+      ])
     );
   })
 ];

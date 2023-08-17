@@ -29,7 +29,9 @@ import CustomReactSelect from '../components/forms/CustomReactSelect';
 import { objectKeys } from '../lib/helpers';
 import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
+import { FormikErrorMessage } from '../components/forms';
 
+/**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
   address: string;
   sampleId: number;
@@ -59,11 +61,16 @@ const formInitialValues: XeniumAnalyserFormValues = {
 };
 
 const XeniumAnalyser = () => {
+  const [labwareSamples, setLabwareSamples] = React.useState<LabwareSamples[]>([]);
+  const [hybridisation, setHybridisation] = React.useState<{ barcode: string; performed: boolean } | undefined>(
+    undefined
+  );
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
     return createFormMachine<AnalyserRequest, RecordAnalyserMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
+          debugger;
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordAnalyser({
             request: { ...e.values }
@@ -73,23 +80,21 @@ const XeniumAnalyser = () => {
     });
   }, [stanCore]);
   const [current, send] = useMachine(formMachine);
-  const [labwareSamples, setLabwareSamples] = React.useState<LabwareSamples[]>([]);
-  const [hybridisation, setHybridisation] = React.useState<{ barcode: string; performed: boolean } | undefined>(
-    undefined
-  );
-
   const { serverError, submissionResult } = current.context;
 
   const validationSchema = Yup.object().shape({
     lotNumber: Yup.string()
-      .required()
+      .required('Decoding reagent lot number is a required field')
       .label('Lot Number')
-      .max(20)
+      .max(
+        20,
+        'Decoding reagent lot number should be a string of maximum length 20 of capital letters, numbers and underscores.'
+      )
       .matches(
         lotRegx,
-        'LOT number should be a string of maximum length 20 of capital letters, numbers and underscores.'
+        'Decoding reagent lot number should be a string of maximum length 20 of capital letters, numbers and underscores.'
       ),
-    runName: Yup.string().required().label('Run Name').max(255),
+    runName: Yup.string().required().label('Run Name').max(255, 'Run name should be a string of maximum length 255'),
     performed: Yup.date()
       .max(new Date(), 'Please select a date and time on or before current time')
       .required('Time is a required field')
@@ -102,7 +107,10 @@ const XeniumAnalyser = () => {
           samples: Yup.array()
             .of(
               Yup.object().shape({
-                roi: Yup.string().required().label('ROI').max(64, 'ROI should be string of 64 characters long maximum')
+                roi: Yup.string()
+                  .required('Region of interest is a required field')
+                  .label('ROI')
+                  .max(64, 'Region of interest field should be string of maximum length 64')
               })
             )
             .required()
@@ -125,10 +133,11 @@ const XeniumAnalyser = () => {
          */
         let samplePositions: SamplePositionFieldsFragment[] = [];
         try {
-          /**Validate that probe hybridisation has been recorded on this labware**/
+          /**Validate whether probe hybridisation has been recorded on this labware**/
           const latestOp = await stanCore
             .FindLatestOperation({ barcode: lw.barcode, operationType: 'Probe hybridisation Xenium' })
             .then((res) => res.findLatestOp);
+          /**If probe hybridisation has been recorded, get the sample positions,otherwise return**/
           if (latestOp) {
             samplePositions = await stanCore
               .FindSamplePositions({ labwareBarcode: lw.barcode })
@@ -146,7 +155,9 @@ const XeniumAnalyser = () => {
           }
         } catch (e) {
           samplePositions = [];
+          return;
         }
+        /**Create samples with region information */
         lw.slots.forEach((slot) => {
           slot.samples.forEach((sample) => {
             const samplePosition = samplePositions.find(
@@ -168,10 +179,14 @@ const XeniumAnalyser = () => {
     [setLabwareSamples, stanCore, setHybridisation]
   );
 
+  const isEmptyROI = (labware: LabwareSamples[]) => {
+    return labware.filter((lw) => lw.samples.some((sample) => sample.roi === '')).length > 0;
+  };
+
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Xeniuym Analyser</AppShell.Title>
+        <AppShell.Title>Xenium Analyser</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
@@ -200,14 +215,19 @@ const XeniumAnalyser = () => {
                 });
                 send({
                   type: 'SUBMIT_FORM',
-                  values: { ...values, labware: labwareROIData, operationType: 'Xenium analyser' }
+                  values: {
+                    performed: values.performed.replace('T', ' ') + ':00',
+                    runName: values.runName,
+                    lotNumber: values.lotNumber,
+                    labware: labwareROIData,
+                    operationType: 'Xenium analyser'
+                  }
                 });
               }}
             >
-              {({ values, setFieldValue, isValid }) => (
+              {({ values, setFieldValue, isValid, errors }) => (
                 <Form>
                   <motion.div variants={variants.fadeInWithLift} className="space-y-4 mb-6">
-                    {serverError && <Warning error={serverError} />}
                     <Heading level={3}>Labware</Heading>
                     {hybridisation && !hybridisation.performed && (
                       <Warning>No probe hybridisation recorded for {hybridisation?.barcode}</Warning>
@@ -315,7 +335,9 @@ const XeniumAnalyser = () => {
                                       setFieldValue(`labware.${lwIndex}.workNumber`, workNumber);
                                     }}
                                     workNumber={values.labware[lwIndex]?.workNumber}
+                                    requiredField={true}
                                   />
+                                  <FormikErrorMessage name={`labware.${lwIndex}.workNumber`} />
                                 </TableCell>
                                 <TableCell>
                                   <CustomReactSelect
@@ -323,23 +345,31 @@ const XeniumAnalyser = () => {
                                       return { value: val, label: val };
                                     })}
                                     name={`labware.${lwIndex}.position`}
+                                    dataTestId={`${lw.barcode}-position`}
+                                    emptyOption={true}
                                   />
                                 </TableCell>
 
                                 <TableCell>
-                                  <div className={'grid grid-cols-5 gap-y-4 gap-x-4'}>
-                                    <TabelSubHeader>Region of interest</TabelSubHeader>
-                                    <TabelSubHeader>Slot address</TabelSubHeader>
-                                    <TabelSubHeader>Section number</TabelSubHeader>
-                                    <TabelSubHeader>Position</TabelSubHeader>
-                                    <TabelSubHeader>External Id</TabelSubHeader>
+                                  <div className={'flex flex-col space-y-2'} data-testid={`${lw.barcode}-samples`}>
+                                    <div className={'grid grid-cols-5 gap-y-4 gap-x-4'}>
+                                      <TabelSubHeader>Region of interest</TabelSubHeader>
+                                      <TabelSubHeader>Slot address</TabelSubHeader>
+                                      <TabelSubHeader>Section number</TabelSubHeader>
+                                      <TabelSubHeader>Section position</TabelSubHeader>
+                                      <TabelSubHeader>External Id</TabelSubHeader>
+                                    </div>
                                     {lw.samples.map((sample, sampleIndex) => {
                                       return (
-                                        <>
+                                        <div
+                                          className={'grid grid-cols-5 gap-y-4 gap-x-4'}
+                                          key={`${lw.barcode}-${sample.sampleId}`}
+                                        >
                                           <div className={'flex flex-col'}>
                                             <FormikInput
                                               label={''}
                                               name={`labware.${lwIndex}.samples.${sampleIndex}.roi`}
+                                              data-testid={`${lw.barcode}-${sampleIndex}-roi`}
                                               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                                                 setFieldValue(
                                                   `labware.${lwIndex}.samples.${sampleIndex}.roi`,
@@ -351,6 +381,7 @@ const XeniumAnalyser = () => {
                                                   return updated;
                                                 });
                                               }}
+                                              value={labwareSamples[lwIndex].samples[sampleIndex].roi}
                                             />
                                           </div>
                                           <div className={'flex items-center px-6'}>
@@ -359,7 +390,7 @@ const XeniumAnalyser = () => {
                                           <label>{sample.sectionNumber}</label>
                                           <label>{sample.region}</label>
                                           <label>{sample.externalName}</label>
-                                        </>
+                                        </div>
                                       );
                                     })}
                                   </div>
@@ -370,7 +401,7 @@ const XeniumAnalyser = () => {
                         </Table>
                       </motion.div>
                       <div className={'sm:flex mt-4 sm:flex-row justify-end'}>
-                        <BlueButton type="submit" disabled={!isValid}>
+                        <BlueButton type="submit" disabled={!isValid || isEmptyROI(labwareSamples)}>
                           Save
                         </BlueButton>
                       </div>
@@ -378,7 +409,7 @@ const XeniumAnalyser = () => {
                   )}
                   <OperationCompleteModal
                     show={submissionResult !== undefined}
-                    message={'Xenium analyser information recorded on all labware'}
+                    message={'Xenium analyser recorded on all labware'}
                     onReset={reload}
                   >
                     <p>
