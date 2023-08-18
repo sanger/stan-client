@@ -225,7 +225,7 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                   )}
                   <OperationCompleteModal
                     show={submissionResult !== undefined}
-                    message={'Xenium probe hubridisation recorded on all labware'}
+                    message={'Xenium probe hybridisation recorded on all labware'}
                     onReset={reload}
                   >
                     <p>

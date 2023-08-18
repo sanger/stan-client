@@ -80,7 +80,6 @@ const XeniumAnalyser = () => {
   }, [stanCore]);
   const [current, send] = useMachine(formMachine);
   const { serverError, submissionResult } = current.context;
-
   const validationSchema = Yup.object().shape({
     lotNumber: Yup.string()
       .required('Decoding reagent lot number is a required field')
@@ -189,8 +188,8 @@ const XeniumAnalyser = () => {
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          {serverError && <Warning error={serverError} />}
           <div className={'flex flex-col space-y-6'}>
+            {serverError && <Warning error={serverError} />}
             <Formik<XeniumAnalyserFormValues>
               initialValues={formInitialValues}
               validationSchema={validationSchema}
@@ -200,7 +199,7 @@ const XeniumAnalyser = () => {
                   return {
                     barcode: lw.barcode,
                     workNumber: lw.workNumber,
-                    position: lw.position,
+                    position: lw.position === 'left' ? CassettePosition.Left : CassettePosition.Right,
                     samples: labwareSample
                       ? labwareSample.samples.map((sample) => {
                           return {
