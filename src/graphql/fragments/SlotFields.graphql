@@ -1,4 +1,5 @@
 fragment SlotFields on Slot {
+  id
   address
   labwareId
   samples {

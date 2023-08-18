@@ -41,7 +41,8 @@ export function buildHistory(workNumber?: string): HistoryFieldsFragment {
     __typename: 'History',
     samples: [sample],
     labware: [sourceLabware, destinationLabware].map(buildLabwareFragment),
-    entries
+    entries,
+    samplePositionResults: []
   };
 }
 

@@ -142,6 +142,7 @@ const registrationHandlers = [
               },
               slots: [
                 {
+                  id: 1,
                   address: 'A1',
                   labwareId: 1,
                   block: true,
@@ -202,6 +203,7 @@ const registrationHandlers = [
               },
               barcode: labware.externalBarcode,
               slots: labware.contents.map((content) => ({
+                id: -1,
                 labwareId,
                 block: false,
                 address: content.address,
@@ -271,6 +273,7 @@ const registrationHandlers = [
                 },
                 slots: [
                   {
+                    id: 1,
                     address: 'A1',
                     labwareId: 1,
                     block: true,
