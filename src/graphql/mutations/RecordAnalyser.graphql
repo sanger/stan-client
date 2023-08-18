@@ -1,7 +1,7 @@
 mutation RecordAnalyser($request: AnalyserRequest!) {
-    recordAnalyser(request: $request) {
-        operations {
-            id
-        }
+  recordAnalyser(request: $request) {
+    operations {
+      id
     }
+  }
 }
