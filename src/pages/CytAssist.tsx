@@ -122,7 +122,7 @@ const CytAssistOutputlabwareScanPanel: React.FC<OutputLabwareScanPanelProps> = (
             onChangeLabwareType((val as OptionType).label);
           }}
           value={labwareType}
-          emptyOption={false}
+          emptyOption={true}
           dataTestId="output-labware-type"
           options={[LabwareTypeName.VISIUM_LP_CYTASSIST, LabwareTypeName.VISIUM_LP_CYTASSIST_XL].map((key) => {
             return {
@@ -207,31 +207,19 @@ const SlotMappingContentTable = ({ slotCopyContent }: { slotCopyContent: SlotCop
 };
 
 const CytAssist = () => {
-  const initialOutputLabware: Destination = {
-    labware: visiumLPCytAssistFactory.build(),
-    slotCopyDetails: {
-      labwareType: LabwareTypeName.VISIUM_LP_CYTASSIST,
-      contents: []
-    }
-  };
-
   const [current, send] = useMachine(() =>
     slotCopyMachine.withContext({
       workNumber: '',
       operationType: 'CytAssist',
       slotCopyResults: [],
-      destinations: [initialOutputLabware],
+      destinations: [],
       sources: []
     })
   );
 
   const { serverErrors, destinations } = current.context;
 
-  const selectedDestination = React.useMemo(() => {
-    if (destinations.length > 0) {
-      return destinations[0];
-    } else return undefined;
-  }, [destinations]);
+  const [selectedDestination, setSelectedDestination] = React.useState<Destination | undefined>(undefined);
 
   /**Handler for changes in slot mappings**/
   const handleOnSlotMapperChange = useCallback(
@@ -287,17 +275,25 @@ const CytAssist = () => {
 
   const handleChangeOutputLabwareType = React.useCallback(
     (labwareType: string) => {
+      const destLabware =
+        labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST
+          ? visiumLPCytAssistFactory.build()
+          : visiumLPCytAssistXLFactory.build();
+      setSelectedDestination({
+        labware: destLabware,
+        slotCopyDetails: {
+          labwareType: labwareType,
+          contents: []
+        }
+      });
       if (!selectedDestination) return;
-      let destLabware;
-      if (labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST) destLabware = visiumLPCytAssistFactory.build();
-      else destLabware = visiumLPCytAssistXLFactory.build();
       send({
         type: 'UPDATE_DESTINATION_LABWARE_TYPE',
-        labwareToReplace: selectedDestination.labware!,
+        labwareToReplace: selectedDestination!.labware!,
         labware: destLabware
       });
     },
-    [send, selectedDestination]
+    [send, selectedDestination, setSelectedDestination]
   );
 
   /**
@@ -377,11 +373,7 @@ const CytAssist = () => {
             outputLabwareConfigPanel={
               <CytAssistOutputlabwareScanPanel
                 preBarcode={selectedDestination && selectedDestination.slotCopyDetails.preBarcode}
-                labwareType={
-                  selectedDestination
-                    ? selectedDestination.slotCopyDetails.labwareType
-                    : LabwareTypeName.VISIUM_LP_CYTASSIST
-                }
+                labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType : ''}
                 onChangeBarcode={handleChangeOutputLabwareBarcode}
                 onChangeLabwareType={handleChangeOutputLabwareType}
                 onChangeCosting={handleChangeCosting}

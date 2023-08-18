@@ -8,8 +8,8 @@ describe('CytAssist Page', () => {
   });
 
   describe('On load', () => {
-    it('shows a Visium LP CytAssist slide for the output', () => {
-      cy.findAllByText(/Visium LP CytAssist/i).should('have.length.above', 0);
+    it('output labware type should be empty', () => {
+      cy.findByTestId('output-labware-type').should('have.value', '');
     });
 
     it('disables the Save button', () => {
@@ -29,6 +29,15 @@ describe('CytAssist Page', () => {
     });
     it('shows a Visium LP CytAssist XL slide for the output', () => {
       cy.findAllByText(/Visium LP CytAssist XL/i).should('have.length.above', 0);
+    });
+  });
+
+  context('When user selects Visium LP CytAssist labwareType', () => {
+    before(() => {
+      selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST);
+    });
+    it('shows a Visium LP CytAssist slide for the output', () => {
+      cy.findAllByText(/Visium LP CytAssist/i).should('have.length.above', 0);
     });
   });
 
