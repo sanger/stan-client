@@ -11,7 +11,6 @@ import {
 } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import * as Yup from 'yup';
-import { lotRegx } from './ProbeHybridisationXenium';
 import AppShell from '../components/AppShell';
 import Warning from '../components/notifications/Warning';
 import { motion } from 'framer-motion';
@@ -84,13 +83,10 @@ const XeniumAnalyser = () => {
     lotNumber: Yup.string()
       .required('Decoding reagent lot number is a required field')
       .label('Lot Number')
-      .max(
-        20,
-        'Decoding reagent lot number should be a string of maximum length 20 of capital letters, numbers and underscores.'
-      )
+      .max(20, 'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.')
       .matches(
-        lotRegx,
-        'Decoding reagent lot number should be a string of maximum length 20 of capital letters, numbers and underscores.'
+        /^[A-Za-z0-9]{1,20}$/,
+        'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
       ),
     runName: Yup.string().required().label('Run Name').max(255, 'Run name should be a string of maximum length 255'),
     performed: Yup.date()

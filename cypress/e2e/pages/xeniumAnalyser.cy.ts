@@ -164,19 +164,19 @@ describe('Xenium Analyser', () => {
       const text = new Array(25).join('a');
       cy.findByTestId('lotNumber').clear().type(text).blur();
       cy.findByText(
-        'Decoding reagent lot number should be a string of maximum length 20 of capital letters, numbers and underscores.'
+        'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
       ).should('be.visible');
     });
     it('should display an error message when entered value contins any characters other than capital letters, numbers and underscores', () => {
       cy.findByTestId('lotNumber').clear().type('a*456bh').blur();
       cy.findByText(
-        'Decoding reagent lot number should be a string of maximum length 20 of capital letters, numbers and underscores.'
+        'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
       ).should('be.visible');
     });
     it('should not display error message when entered a valid value', () => {
-      cy.findByTestId('lotNumber').clear().type('LOT_123').blur();
+      cy.findByTestId('lotNumber').clear().type('Lot123').blur();
       cy.findByText(
-        'Decoding reagent lot number should be a string of maximum length 20 of capital letters, numbers and underscores.'
+        'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
       ).should('not.exist');
       cy.findByText('Decoding reagent lot number is a required field').should('not.exist');
     });
@@ -289,7 +289,7 @@ describe('Xenium Analyser', () => {
   function fillInForm() {
     cy.findByTestId('performed').clear().type('2020-01-01T10:00').blur();
     cy.findByTestId('runName').clear().type('Run 123').blur();
-    cy.findByTestId('lotNumber').clear().type('LOT_123').blur();
+    cy.findByTestId('lotNumber').clear().type('Lot123').blur();
     selectOption('STAN-3111-workNumber', 'SGP1008');
     selectOption('STAN-3111-position', 'Left');
     for (let indx = 0; indx < 8; indx++) {
