@@ -55,7 +55,7 @@ type TableHeadProps = {
   fixed?: boolean;
 };
 export const TableHead = ({ children, fixed = false }: TableHeadProps) => {
-  return <thead className={`${fixed ? 'sticky top-0 z-20' : ''}`}>{children}</thead>;
+  return <thead className={`${fixed ? 'sticky top-0' : ''}`}>{children}</thead>;
 };
 
 export const TableHeader = ({ children, sortProps, allCapital = true, ...rest }: TableHeaderProps) => {
