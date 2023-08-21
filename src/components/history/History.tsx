@@ -97,7 +97,7 @@ export default function History(props: HistoryProps) {
       },
       {
         Header: 'Address',
-        accessor: 'slotId'
+        accessor: 'address'
       },
       {
         Header: 'Section Position',
