@@ -108,6 +108,7 @@ export default function WorkNumberSelect({
 
     async function fetchAllWorkNumbers() {
       const response = await stanCore.GetAllWorkInfo();
+      console.log('Testing');
       const works = response.works
         .map((workInfo) => {
           return {

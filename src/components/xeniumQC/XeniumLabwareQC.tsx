@@ -17,9 +17,8 @@ type XeniumLabwareQCProps = {
 };
 export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: XeniumLabwareQCProps) => {
   const { values, setFieldValue } = useFormikContext<XeniumQCFormData>();
-  console.log('RENDERING XeniumLabwareQC' + index);
   return (
-    <div className="max-w-screen-xl mx-auto">
+    <div className="max-w-screen-xl mx-auto" data-testid={'xenium-labware-qc'}>
       {labware && (
         <FieldArray name={'labware'}>
           {({ remove }) => (
@@ -28,7 +27,6 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                 <div className="flex flex-row items-center justify-end">
                   {
                     <RemoveButton
-                      data-testid={'remove'}
                       onClick={() => {
                         remove(index);
                         removeLabware(labware.barcode);
@@ -41,7 +39,7 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                     <WorkNumberSelect
                       label={'SGP Number'}
                       name={`labware.${index}.workNumber`}
-                      dataTestId={'workNumber'}
+                      dataTestId={`${labware.barcode}-workNumber`}
                       onWorkNumberChange={(workNumber) => {
                         setFieldValue(`labware.${index}.workNumber`, workNumber);
                       }}
@@ -51,6 +49,7 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                     <div className={'flex w-full'}>
                       <CustomReactSelect
                         label={'Comments'}
+                        dataTestId={`${labware.barcode}-comments`}
                         name={`labware.${index}.comments`}
                         emptyOption={true}
                         options={selectOptionValues(comments, 'text', 'id')}

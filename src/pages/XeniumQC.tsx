@@ -88,11 +88,10 @@ const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
                   };
                 })
               };
-              debugger;
               send({ type: 'SUBMIT_FORM', values: request });
             }}
           >
-            {({ values, setFieldValue, isValid, errors }) => (
+            {({ values, setFieldValue, isValid }) => (
               <Form>
                 <div className="mt-8 space-y-2">
                   <Heading level={2}>Labware</Heading>
@@ -117,7 +116,7 @@ const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
                           <>
                             {labwares.length > 0 && (
                               <>
-                                <div className={'flex flex-row w-full border-b-2 py-6 space-x-4'}>
+                                <div className={'flex flex-row w-full py-6 space-x-4'} data-testid={'xenium-qc-div'}>
                                   <div className={'w-1/2'}>
                                     <FormikInput
                                       label={'Completion Time'}
@@ -138,7 +137,7 @@ const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
                                     <WorkNumberSelect
                                       label={'SGP Number'}
                                       name={'workNumberAll'}
-                                      dataTestId={'workNumber'}
+                                      dataTestId={'workNumberAll'}
                                       onWorkNumberChange={(workNumber) => {
                                         setFieldValue('workNumberAll', workNumber);
                                         labwares.forEach((lw, index) => {
