@@ -30,7 +30,6 @@ import { formatDateTimeForCore, getCurrentDateTime } from '../types/stan';
 import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
-import MutedText from '../components/MutedText';
 import * as Yup from 'yup';
 
 type SectionComments = {
@@ -125,7 +124,7 @@ const formInitialValues: ProbeHybridisationQCFormValues = {
   labwares: {
     '': {
       globalComments: [],
-      completionDateTime: '',
+      completionDateTime: currentDateTime,
       sampleAddressComments: { '': [] }
     }
   }
@@ -143,6 +142,25 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
       labwares.append(labware);
     },
     [labwares]
+  );
+
+  const validateProbeHybridisationQcLabware = useCallback(
+    async (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): Promise<string[]> => {
+      const errors: Promise<string[]> = stanCore
+        .FindLatestOperation({
+          barcode: foundLabware.barcode,
+          operationType: 'Probe hybridisation Xenium'
+        })
+        .then((response) => {
+          return response.findLatestOp !== null
+            ? []
+            : [
+                `No Probe Hybridisation Xenium operation has been recorded on the following labware: ${foundLabware.barcode}`
+              ];
+        });
+      return errors;
+    },
+    [stanCore]
   );
 
   const onRemoveLabware = useCallback(
@@ -194,13 +212,19 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
   }, []);
 
   const updateSectionCommentsFromGlobal = useCallback(
-    (options: OptionType[], labware: LabwareFieldsFragment, values, setFieldValue) => {
+    (
+      options: OptionType[],
+      labware: LabwareFieldsFragment,
+      values: ProbeHybridisationQCFormValues,
+      setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void
+    ) => {
       labware.slots.forEach((slot) => {
         slot.samples.forEach((sample) => {
           const sampleAddressId = `${slot.address}-${sample.id}`;
-          const oldSelected = values.labwares[labware.barcode]?.sampleAddressComments?.[sampleAddressId] || [];
-          const updatedSelected = [...oldSelected, ...mapCommentOptionsToValues(options)];
-          setFieldValue(`labwares[${labware.barcode}].sampleAddressComments[${sampleAddressId}]`, updatedSelected);
+          setFieldValue(
+            `labwares[${labware.barcode}].sampleAddressComments[${sampleAddressId}]`,
+            mapCommentOptionsToValues(options)
+          );
         });
       });
     },
@@ -208,12 +232,9 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
   );
 
   const validateCompletionDateTime = (selectedTime: string) => {
-    const selectedDateTime = new Date(selectedTime);
-    const now = new Date();
-    if (selectedDateTime > now) {
-      return 'Please select a time on or before current time';
-    }
-    return undefined;
+    return new Date(selectedTime) > new Date(currentDateTime)
+      ? 'Please select a time on or before current time'
+      : undefined;
   };
 
   return (
@@ -246,7 +267,11 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
                 <div className="mt-8 space-y-2">
                   <Heading level={2}>Slides</Heading>
                   <p>Please scan a slide</p>
-                  <LabwareScanner onAdd={onAddLabware} onRemove={onRemoveLabware}>
+                  <LabwareScanner
+                    onAdd={onAddLabware}
+                    onRemove={onRemoveLabware}
+                    labwareCheckFunction={validateProbeHybridisationQcLabware}
+                  >
                     {({ labwares, removeLabware }) =>
                       labwares.map((labware) => (
                         <Panel key={labware.barcode}>
@@ -272,17 +297,14 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
                                   type="datetime-local"
                                   name={`labwares[${labware.barcode}].completionDateTime`}
                                   max={currentDateTime}
-                                  min={currentDateTime + 'T00:00'}
+                                  min={currentDateTime.split('T')[0] + 'T00:00'}
                                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     setFieldValue(`labwares.${labware.barcode}.completionDateTime`, e.target.value);
                                   }}
-                                  value={values.labwares[labware.barcode]?.completionDateTime || ''}
+                                  value={values.labwares[labware.barcode]?.completionDateTime || currentDateTime}
                                   className="w-1/2"
                                   validate={validateCompletionDateTime}
                                 />
-                                <MutedText className="pl-2">
-                                  If not manually selected, the current timestamp will be applied automatically
-                                </MutedText>
                               </div>
                               <div className="flex flex-row w-full p-4">
                                 <CustomReactSelect

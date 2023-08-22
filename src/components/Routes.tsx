@@ -208,7 +208,7 @@ export function Routes() {
             key={routeProps.location.key}
             dataFetcher={() =>
               stanCore.GetComments({
-                commentCategory: 'section',
+                commentCategory: 'Probe QC',
                 includeDisabled: false
               })
             }
