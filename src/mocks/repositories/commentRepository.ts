@@ -127,6 +127,14 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({
     category: 'clean up',
     text: 'Beads cracked during drying step'
+  }),
+  commentFactory.build({
+    category: 'Probe QC',
+    text: 'Section detached'
+  }),
+  commentFactory.build({
+    category: 'Probe QC',
+    text: 'Issue with thermal cycler'
   })
 ];
 

@@ -1,5 +1,5 @@
 query FindLatestOperation($barcode: String!, $operationType: String!) {
-    findLatestOp(barcode: $barcode, operationType: $operationType) {
-        ...OperationFields
-    }
+  findLatestOp(barcode: $barcode, operationType: $operationType) {
+    ...OperationFields
+  }
 }
