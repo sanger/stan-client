@@ -3269,6 +3269,10 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-border-opacity: 1;
   border-color: rgb(144 205 244 / var(--tw-border-opacity));
 }
+.focus\:border-indigo-500:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(102 126 234 / var(--tw-border-opacity));
+}
 .focus\:border-sdb-400:focus {
   --tw-border-opacity: 1;
   border-color: rgb(53 58 100 / var(--tw-border-opacity));
@@ -4175,4 +4179,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.e8495772.css.map*/
+/*# sourceMappingURL=main.fc3c937f.css.map*/
