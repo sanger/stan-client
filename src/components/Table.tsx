@@ -105,3 +105,21 @@ export const TableCell: React.FC<
     </td>
   );
 };
+
+type Props = {
+  children: string | ReactNode | ReactNode[];
+};
+export const TabelSubHeader: React.FC<Props> = ({ children, ...rest }) => {
+  return (
+    <div className="flex text-xs font-medium text-gray-500 uppercase" {...rest}>
+      {children}
+    </div>
+  );
+};
+export const TabelCentredCell: React.FC<Props> = ({ children, ...rest }) => {
+  return (
+    <div className="flex items-center justify-center" {...rest}>
+      {children}
+    </div>
+  );
+};

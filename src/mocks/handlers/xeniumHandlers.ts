@@ -1,5 +1,6 @@
 import { graphql } from 'msw';
 import commentRepository from '../repositories/commentRepository';
+import { RecordAnalyserMutation, RecordAnalyserMutationVariables } from '../../types/sdk';
 
 const xeniumHandlers = [
   //Get Xenium QC Info
@@ -10,7 +11,20 @@ const xeniumHandlers = [
       })
     );
   }),
-
+  //Record Analyser mutatio
+  graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('RecordAnalyser', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        recordAnalyser: {
+          operations: [
+            {
+              id: 1
+            }
+          ]
+        }
+      })
+    );
+  }),
   //Record QC Labware mutation
   graphql.mutation('RecordQCLabware', (req, res, ctx) => {
     return res(

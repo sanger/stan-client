@@ -1,5 +1,5 @@
 import { selectOption, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
-import { RecordProbeOperationMutation, SlotCopyMutation, SlotCopyMutationVariables } from '../../../src/types/sdk';
+import { RecordProbeOperationMutation } from '../../../src/types/sdk';
 
 describe('Xenium Probe Hybridisation', () => {
   before(() => {
@@ -266,7 +266,7 @@ describe('Xenium Probe Hybridisation', () => {
       });
 
       it('shows a success message', () => {
-        cy.findByText('Xenium probe hubridisation recorded on all labware').should('be.visible');
+        cy.findByText('Xenium probe hybridisation recorded on all labware').should('be.visible');
       });
     });
   });

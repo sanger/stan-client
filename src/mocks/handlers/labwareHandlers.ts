@@ -2,6 +2,8 @@ import { graphql } from 'msw';
 import {
   FindLabwareQuery,
   FindLabwareQueryVariables,
+  FindLatestOperationQuery,
+  FindLatestOperationQueryVariables,
   GetLabwareOperationsQuery,
   GetLabwareOperationsQueryVariables,
   GetSuggestedWorkForLabwareQuery,
@@ -113,7 +115,17 @@ const labwareHandlers = [
         })
       );
     }
-  )
+  ),
+
+  graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        findLatestOp: {
+          id: 1
+        }
+      })
+    );
+  })
 ];
 
 export default labwareHandlers;
