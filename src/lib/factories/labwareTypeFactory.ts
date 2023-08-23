@@ -50,17 +50,17 @@ export const labwareTypes: Record<LabwareTypeName, Factory<LabwareType>> = {
     numRows: 8,
     numColumns: 12
   }),
-  [LabwareTypeName.XENIUM]: labwareTypeFactory.params({
-    __typename: 'LabwareType',
-    name: LabwareTypeName.XENIUM,
-    numRows: 5,
-    numColumns: 3
-  }),
   [LabwareTypeName.CASSETTE]: labwareTypeFactory.params({
     __typename: 'LabwareType',
     name: LabwareTypeName.CASSETTE,
     numRows: 1,
     numColumns: 1
+  }),
+  [LabwareTypeName.XENIUM]: labwareTypeFactory.params({
+    __typename: 'LabwareType',
+    name: LabwareTypeName.XENIUM,
+    numRows: 5,
+    numColumns: 3
   }),
   [LabwareTypeName.VISIUM_ADH]: labwareTypeFactory.params({
     __typename: 'LabwareType',
