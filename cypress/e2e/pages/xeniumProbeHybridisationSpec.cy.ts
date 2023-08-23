@@ -266,7 +266,7 @@ describe('Xenium Probe Hybridisation', () => {
       });
 
       it('shows a success message', () => {
-        cy.findByText('Xenium probe hubridisation recorded on all labware').should('be.visible');
+        cy.findByText('Xenium probe hybridisation recorded on all labware').should('be.visible');
       });
     });
   });
