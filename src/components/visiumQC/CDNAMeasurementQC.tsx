@@ -140,9 +140,9 @@ const CDNAMeasurementQC = ({
   const onRemoveLabware = React.useCallback(
     (barcode) => {
       removeLabware(barcode);
-      setMeasurementName('');
+      setMeasurementName(qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : '');
     },
-    [removeLabware, setMeasurementName]
+    [removeLabware, setMeasurementName, qcType]
   );
 
   return (
@@ -193,7 +193,7 @@ const CDNAMeasurementQC = ({
               </div>
             )}
             <div className={'flex flex-row mt-8 justify-between'}>
-              <div className="flex flex-col w-full " data-testid={'labware'}>
+              <div className="flex flex-col w-full">
                 {slotMeasurements && showSlotMeasurementTable(qcType, measurementName, slotMeasurements) && (
                   <SlotMeasurements
                     slotMeasurements={slotMeasurements}

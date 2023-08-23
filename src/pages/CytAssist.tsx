@@ -207,19 +207,31 @@ const SlotMappingContentTable = ({ slotCopyContent }: { slotCopyContent: SlotCop
 };
 
 const CytAssist = () => {
+  const initialOutputLabware: Destination = {
+    labware: visiumLPCytAssistFactory.build(),
+    slotCopyDetails: {
+      labwareType: '',
+      contents: []
+    }
+  };
+
   const [current, send] = useMachine(() =>
     slotCopyMachine.withContext({
       workNumber: '',
       operationType: 'CytAssist',
       slotCopyResults: [],
-      destinations: [],
+      destinations: [initialOutputLabware],
       sources: []
     })
   );
 
   const { serverErrors, destinations } = current.context;
 
-  const [selectedDestination, setSelectedDestination] = React.useState<Destination | undefined>(undefined);
+  const selectedDestination = React.useMemo(() => {
+    if (destinations.length > 0) {
+      return destinations[0];
+    } else return undefined;
+  }, [destinations]);
 
   /**Handler for changes in slot mappings**/
   const handleOnSlotMapperChange = useCallback(
@@ -275,25 +287,17 @@ const CytAssist = () => {
 
   const handleChangeOutputLabwareType = React.useCallback(
     (labwareType: string) => {
-      const destLabware =
-        labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST
-          ? visiumLPCytAssistFactory.build()
-          : visiumLPCytAssistXLFactory.build();
-      setSelectedDestination({
-        labware: destLabware,
-        slotCopyDetails: {
-          labwareType: labwareType,
-          contents: []
-        }
-      });
       if (!selectedDestination) return;
+      let destLabware;
+      if (labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST) destLabware = visiumLPCytAssistFactory.build();
+      else destLabware = visiumLPCytAssistXLFactory.build();
       send({
         type: 'UPDATE_DESTINATION_LABWARE_TYPE',
-        labwareToReplace: selectedDestination!.labware!,
+        labwareToReplace: selectedDestination.labware!,
         labware: destLabware
       });
     },
-    [send, selectedDestination, setSelectedDestination]
+    [send, selectedDestination]
   );
 
   /**
@@ -380,6 +384,7 @@ const CytAssist = () => {
                 onChangeLOTNumber={handleChangeLOTNumber}
               />
             }
+            labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType : ''}
           />
 
           {selectedDestination && selectedDestination.slotCopyDetails.contents.length > 0 && (
