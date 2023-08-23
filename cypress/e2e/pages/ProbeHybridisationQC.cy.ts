@@ -7,10 +7,10 @@ import {
 } from '../../../src/types/sdk';
 
 describe('Probe Hybridisation QC', () => {
-  before(() => {
-    cy.visit('/lab/probe_hybridisation_qc');
-  });
   describe('On load', () => {
+    before(() => {
+      cy.visit('/lab/probe_hybridisation_qc');
+    });
     it('displays the correct title', () => {
       cy.get('h1').should('have.text', 'Probe Hybridisation QC');
     });
@@ -63,8 +63,9 @@ describe('Probe Hybridisation QC', () => {
             )
           );
         });
-        cy.get('#labwareScanInput').type('STAN-3112{enter}');
+        cy.get('#labwareScanInput').type('STAN-3111{enter}');
       });
+
       it('shows the labware image', () => {
         cy.findByTestId('labware').should('be.visible');
       });
@@ -100,7 +101,6 @@ describe('Probe Hybridisation QC', () => {
       });
     });
     describe('When completion time is selected in the future', () => {
-      const currentDate = new Date().toLocaleString('en-GB', { hour12: false }).split(' ');
       before(() => {
         cy.findByLabelText('Completion Time').clear().type('2075-01-01T10:00');
         cy.findByText('Save').click();
@@ -112,7 +112,7 @@ describe('Probe Hybridisation QC', () => {
   });
 
   describe('Submission', () => {
-    context('when  repeated comment specified for the same section', () => {
+    context('should fail when  repeated comment specified for the same section', () => {
       before(() => {
         cy.visit('/lab/probe_hybridisation_qc');
         cy.msw().then(({ worker, graphql }) => {

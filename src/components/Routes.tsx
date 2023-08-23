@@ -50,6 +50,7 @@ import CytAssist from '../pages/CytAssist';
 import FileManager from '../pages/FileManager';
 import { useAuth } from '../context/AuthContext';
 import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
+import XeniumAnalyser from '../pages/XeniumAnalyser';
 import ProbeHybridisationQC from '../pages/ProbeHybridisationQC';
 
 export function Routes() {
@@ -200,6 +201,10 @@ export function Routes() {
             {(probePanelInfo) => <ProbeHybridisationXenium probePanelInfo={probePanelInfo} />}
           </DataFetcher>
         )}
+      />
+      <AuthenticatedRoute
+        path="/lab/xenium_analyser"
+        render={(routeProps) => <XeniumAnalyser key={routeProps.location.key} />}
       />
       <AuthenticatedRoute
         path="/lab/probe_hybridisation_qc"

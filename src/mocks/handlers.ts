@@ -51,6 +51,7 @@ import slotRegionHandlers from './handlers/slotRegionHandlers';
 import samplePositionHandlers from './handlers/samplePositionHandlers';
 import probePanelHandlers from './handlers/probePanelHandlers';
 import probeHybridisationHandlers from './handlers/probeHybridisationHandlers';
+import xeniumHandlers from './handlers/xeniumHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -102,5 +103,6 @@ export const handlers = [
   ...slotRegionHandlers,
   ...samplePositionHandlers,
   ...probePanelHandlers,
-  ...probeHybridisationHandlers
+  ...probeHybridisationHandlers,
+  ...xeniumHandlers
 ];
