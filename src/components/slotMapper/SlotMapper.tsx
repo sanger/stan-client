@@ -42,7 +42,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   onSelectInputLabware,
   onSelectOutputLabware,
   displayMappedTable = true,
-  labwareType
+  labwareType = undefined
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine({
@@ -680,7 +680,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
                     </div>
                   )}
                 </div>
-                {labwareType && labwareType.length > 0 && (
+                {(labwareType === undefined || labwareType.length > 0) && (
                   <Labware
                     labware={currentOutput.labware}
                     selectable="any"
