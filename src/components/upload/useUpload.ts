@@ -36,15 +36,22 @@ export function useUpload(url: string, errorField?: string) {
       postUpload(url, file)
         .then((response) => {
           const success = response.ok;
-          response.json().then((response) => {
+          if (response.bodyUsed === false) {
+            response.json().then((response) => {
+              if (!success) {
+                setError(new Error(errorField ? response[errorField] : response.message));
+              } else {
+                setUploadResponse(response);
+                setUploadSuccess(true);
+              }
+            });
+          } else {
             if (!success) {
-              // get error message from body
-              setError(new Error(errorField ? response[errorField] : response.message));
+              setError(new Error(response.statusText));
             } else {
-              setUploadResponse(response);
               setUploadSuccess(true);
             }
-          });
+          }
         })
         .catch((error) => {
           // get error message from body or default to response status
