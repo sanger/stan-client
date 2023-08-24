@@ -4,10 +4,10 @@ import { objectKeys, parseQueryString } from '../lib/helpers';
 import BlockProcessing from '../components/originalSampleProcessing/blockProcessing/BlockProcessing';
 import variants from '../lib/motionVariants';
 import { motion } from 'framer-motion';
-import { history, stanCore } from '../lib/sdk';
+import { stanCore } from '../lib/sdk';
 import PotProcessing from '../components/originalSampleProcessing/potProcessing/PotProcessing';
 import { GetBlockProcessingInfoQuery, GetPotProcessingInfoQuery } from '../types/sdk';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 enum OriginalSampleProcessingType {
   BLOCK = 'Block Processing',
@@ -21,6 +21,7 @@ export const OriginalSampleProcessing: React.FC = () => {
   >(undefined);
 
   const location = useLocation();
+  const navigate = useNavigate();
   /**Set processing Type with selected value**/
   useEffect(() => {
     const queryString = parseQueryString(location.search);
@@ -73,11 +74,14 @@ export const OriginalSampleProcessing: React.FC = () => {
               <div className="flex flex-row items-center justify-center gap-4">
                 <CustomReactSelect
                   handleChange={(value) =>
-                    history.replace({
-                      search: `?type=${
-                        (value as OptionType).label === OriginalSampleProcessingType.BLOCK ? 'block' : 'pot'
-                      }`
-                    })
+                    navigate(
+                      {
+                        search: `?type=${
+                          (value as OptionType).label === OriginalSampleProcessingType.BLOCK ? 'block' : 'pot'
+                        }`
+                      },
+                      { replace: true }
+                    )
                   }
                   options={objectKeys(OriginalSampleProcessingType).map((type) => {
                     return {

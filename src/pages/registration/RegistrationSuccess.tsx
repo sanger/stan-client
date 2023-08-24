@@ -1,7 +1,7 @@
 import React from 'react';
 import Success from '../../components/notifications/Success';
 import BlueButton from '../../components/buttons/BlueButton';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LabwareFieldsFragment } from '../../types/sdk';
 import variants from '../../lib/motionVariants';
@@ -11,7 +11,6 @@ import PinkButton from '../../components/buttons/PinkButton';
 import ButtonBar from '../../components/ButtonBar';
 import AppShell from '../../components/AppShell';
 import { Column } from 'react-table';
-import { history } from '../../lib/sdk';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 
 /**Represent an object containing LabwareFieldsFragment member**/
@@ -28,6 +27,8 @@ const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFie
   successData,
   columns
 }: RegistrationSuccessProps<T>) => {
+  const navigate = useNavigate();
+
   /**Memoised labware from successData**/
   const labware = React.useMemo(() => {
     /**Is Result of type LabwareFieldsFragment**/
@@ -84,7 +85,7 @@ const RegistrationSuccess = <T extends Required<LabwareContainType> | LabwareFie
               if (labware.length > 0) {
                 createSessionStorageForLabwareAwaiting(labware);
               }
-              history.push('/store');
+              navigate('/store');
             }}
           >
             Store

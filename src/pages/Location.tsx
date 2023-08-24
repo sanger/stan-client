@@ -21,7 +21,6 @@ import {
   findNextAvailableAddress
 } from '../lib/helpers/locationHelper';
 import { Authenticated, Unauthenticated } from '../components/Authenticated';
-import { RouteComponentProps } from 'react-router-dom';
 import { extractServerErrors, LocationMatchParams, LocationSearchParams } from '../types/stan';
 import { GridDirection, LocationFieldsFragment, Maybe, StoreInput, UserRole } from '../types/sdk';
 import { useMachine } from '@xstate/react';
@@ -39,6 +38,7 @@ import PasteIcon from '../components/icons/PasteIcon';
 import BlueButton from '../components/buttons/BlueButton';
 import { ClientError } from 'graphql-request';
 import { stanCore } from '../lib/sdk';
+import { useSearchParams } from 'react-router-dom';
 
 /**
  * The different ways of displaying stored items
@@ -62,12 +62,12 @@ export type LocationParentContextType = {
 
 export const LocationParentContext = React.createContext<Maybe<LocationParentContextType>>(null);
 
-interface LocationProps extends RouteComponentProps<LocationMatchParams> {
+interface LocationProps {
   storageLocation: LocationFieldsFragment;
   locationSearchParams: Maybe<LocationSearchParams>;
 }
 
-const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchParams, match }) => {
+const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchParams }) => {
   const locationMachine = React.useMemo(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> = storageLocation.size
@@ -147,6 +147,8 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
   const [storagePath, setStoragePath] = React.useState<string>('');
 
   const transferInputRef = React.useRef<HTMLInputElement>(null);
+
+  const [searchParams] = useSearchParams();
 
   /***When component loads, fill awaitingLabwares from sessionStorage, if any**/
   React.useEffect(() => {
@@ -428,7 +430,7 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
               </Success>
             ))}
           {current.matches('notFound') && (
-            <Warning message={`Location ${match.params.locationBarcode} could not be found`} />
+            <Warning message={`Location ${searchParams.get('locationBarcode')} could not be found`} />
           )}
           <LocationSearch />
           {showLocation && (
@@ -468,10 +470,8 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
                 {location.parent && (
                   <StripyCardDetail term={'Parent'}>
                     <StyledLink
-                      to={{
-                        pathname: `/locations/${location.parent.barcode}`,
-                        state: awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}
-                      }}
+                      to={`/locations/${location.parent.barcode}`}
+                      state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
                     >
                       {location.parent.customName ?? location.parent.barcode}
                     </StyledLink>
@@ -492,10 +492,8 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
                         return (
                           <li key={child.barcode}>
                             <StyledLink
-                              to={{
-                                pathname: `/locations/${child.barcode}`,
-                                state: awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}
-                              }}
+                              to={`/locations/${child.barcode}`}
+                              state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
                             >
                               {child.customName ?? child.fixedName ?? child.barcode}
                             </StyledLink>

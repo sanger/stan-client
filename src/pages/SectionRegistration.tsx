@@ -19,8 +19,8 @@ import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { parseQueryString } from '../lib/helpers';
-import { history, StanCoreContext } from '../lib/sdk';
-import { useLocation } from 'react-router-dom';
+import { StanCoreContext } from '../lib/sdk';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import Heading from '../components/Heading';
 import FileUploader from '../components/upload/FileUploader';
@@ -187,7 +187,7 @@ interface PageParams {
 export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) => {
   const location = useLocation();
   const stanCore = useContext(StanCoreContext);
-
+  const navigate = useNavigate();
   const formMachine = React.useMemo(() => {
     return createFormMachine<SectionRegisterRequest, RegisterSectionsMutation>().withConfig({
       services: {
@@ -284,9 +284,12 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
                   <CustomReactSelect
                     dataTestId="initialLabwareType"
                     handleChange={(value) =>
-                      history.replace({
-                        search: `?initialLabware=${(value as OptionType).value}`
-                      })
+                      navigate(
+                        {
+                          search: `?initialLabware=${(value as OptionType).value}`
+                        },
+                        { replace: true }
+                      )
                     }
                     options={availableLabware.map((labwareTypeName) => {
                       return {

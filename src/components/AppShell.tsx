@@ -28,7 +28,7 @@ interface AppShellParams {
 function AppShell({ children }: AppShellParams) {
   const config = useContext(configContext);
   const auth = useAuth();
-  const location = useLocation<LocationState>();
+  const location = useLocation();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -71,10 +71,10 @@ function AppShell({ children }: AppShellParams) {
               </button>
             </div>
             <nav className="hidden md:flex space-x-10">
-              <StanNavLink exact to="/">
+              <StanNavLink end to="/">
                 Home
               </StanNavLink>
-              <StanNavLink exact to="/search">
+              <StanNavLink end to="/search">
                 Search
               </StanNavLink>
               <StanNavLink to="/store">Store</StanNavLink>

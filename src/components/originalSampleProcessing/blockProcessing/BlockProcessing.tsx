@@ -26,10 +26,10 @@ import { motion } from 'framer-motion';
 import { selectOptionValues } from '../../forms';
 import ProcessingSuccess from '../ProcessingSuccess';
 import { useConfirmLeave } from '../../../lib/hooks';
-import { Prompt } from 'react-router-dom';
 import { Row } from 'react-table';
 import FormikInput from '../../forms/Input';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
+import Prompt from '../../notifications/Prompt';
 
 /**
  * Used as Formik's values

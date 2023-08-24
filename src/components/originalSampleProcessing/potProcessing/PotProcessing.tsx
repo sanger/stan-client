@@ -25,9 +25,9 @@ import FormikInput from '../../forms/Input';
 import PotProcessingLabwarePlan from './PotProcessingLabwarePlan';
 import ProcessingSuccess from '../ProcessingSuccess';
 import columns from '../../dataTableColumns/labwareColumns';
-import { Prompt } from 'react-router-dom';
 import { useConfirmLeave } from '../../../lib/hooks';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
+import Prompt from '../../notifications/Prompt';
 
 /**
  * Used as Formik's values

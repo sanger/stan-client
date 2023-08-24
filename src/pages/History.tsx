@@ -4,10 +4,9 @@ import { Form, Formik } from 'formik';
 import FormikInput from '../components/forms/Input';
 import FormikSelect from '../components/forms/Select';
 import BlueButton from '../components/buttons/BlueButton';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { objectKeys, safeParseQueryString, stringify } from '../lib/helpers';
 import HistoryComponent, { historyDisplayValues } from '../components/history/History';
-import { history } from '../lib/sdk';
 import { HistoryProps, historySchema } from '../types/stan';
 import Heading from '../components/Heading';
 import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
@@ -21,7 +20,7 @@ export default function History() {
   });
   // If the URL parameters don't parse to valid HistoryProps use the default values
   const initialValues = historyProps ?? defaultInitialValues;
-
+  const navigate = useNavigate();
   return (
     <AppShell>
       <AppShell.Header>
@@ -41,7 +40,7 @@ export default function History() {
             <Formik<HistoryProps>
               initialValues={initialValues}
               onSubmit={async (values) => {
-                history.replace(`/history?${stringify(values)}`);
+                navigate(`/history?${stringify(values)}`);
               }}
             >
               <Form>

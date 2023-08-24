@@ -1,6 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { Route, Switch } from 'react-router-dom';
-import AuthenticatedRoute from './AuthenticatedRoute';
+import { Route, Routes } from 'react-router-dom';
 import Login from '../pages/Login';
 import Logout from '../pages/Logout';
 import Location from '../pages/Location';
@@ -51,8 +50,9 @@ import FileManager from '../pages/FileManager';
 import { useAuth } from '../context/AuthContext';
 import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
 import XeniumAnalyser from '../pages/XeniumAnalyser';
+import AuthLayout from './AuthLayout';
 
-export function Routes() {
+export function RouteManager() {
   const stanCore = useContext(StanCoreContext);
 
   // Hook to remove any location state after it has been consumed for a component.
@@ -63,27 +63,31 @@ export function Routes() {
 
   const { authState } = useAuth();
   return (
-    <Switch>
+    <Routes>
       <Route path="/logout">
         <Logout />
       </Route>
-      <AuthenticatedRoute
-        path="/lab/sectioning/confirm"
-        render={(routeProps) => (
-          <DataFetcher key={routeProps.location.key} dataFetcher={stanCore.GetSectioningConfirmInfo}>
-            {(sectioningInfo) => <Confirm sectioningConfirmInfo={sectioningInfo} />}
-          </DataFetcher>
-        )}
-      />
-      <AuthenticatedRoute
-        path="/lab/sectioning"
-        render={(routeProps) => (
-          <DataFetcher key={routeProps.location.key} dataFetcher={stanCore.GetSectioningInfo}>
-            {(sectioningInfo) => <Plan sectioningInfo={sectioningInfo} />}
-          </DataFetcher>
-        )}
-      />
-      <AuthenticatedRoute
+      <Route element={<AuthLayout />}>
+        <Route
+          path="/lab/sectioning/confirm"
+          element={
+            <DataFetcher dataFetcher={stanCore.GetSectioningConfirmInfo}>
+              {(sectioningInfo) => <Confirm sectioningConfirmInfo={sectioningInfo} />}
+            </DataFetcher>
+          }
+        />
+      </Route>
+      <Route element={<AuthLayout />}>
+        <Route
+          path="/lab/sectioning"
+          element={
+            <DataFetcher dataFetcher={stanCore.GetSectioningInfo}>
+              {(sectioningInfo) => <Plan sectioningInfo={sectioningInfo} />}
+            </DataFetcher>
+          }
+        />
+      </Route>
+      {/**<AuthenticatedRoute
         path="/lab/original_sample_processing"
         render={(routeProps) => <OriginalSampleProcessing key={routeProps.location.key} {...routeProps} />}
       />
@@ -485,25 +489,23 @@ export function Routes() {
             );
           }
         }}
-      />
+      />*/}
       <Route
         path="/"
-        render={(routeProps) => {
-          return (
-            <DataFetcher dataFetcher={stanCore.GetWorkProgressInputs} key={routeProps.location.key}>
-              {(dataFetcher) => {
-                return (
-                  <WorkProgress
-                    workTypes={dataFetcher.workTypes.map((val) => val.name)}
-                    programs={dataFetcher.programs.map((val) => val.name)}
-                    requesters={dataFetcher.releaseRecipients.map((val) => val.username)}
-                  />
-                );
-              }}
-            </DataFetcher>
-          );
-        }}
+        element={
+          <DataFetcher dataFetcher={stanCore.GetWorkProgressInputs}>
+            {(dataFetcher) => {
+              return (
+                <WorkProgress
+                  workTypes={dataFetcher.workTypes.map((val) => val.name)}
+                  programs={dataFetcher.programs.map((val) => val.name)}
+                  requesters={dataFetcher.releaseRecipients.map((val) => val.username)}
+                />
+              );
+            }}
+          </DataFetcher>
+        }
       />
-    </Switch>
+    </Routes>
   );
 }

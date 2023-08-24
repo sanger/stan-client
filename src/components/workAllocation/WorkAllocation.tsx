@@ -6,7 +6,7 @@ import Success from '../notifications/Success';
 import * as Yup from 'yup';
 import { UserRole, WorkStatus, WorkWithCommentFieldsFragment } from '../../types/sdk';
 import { getPropertyValue, getTimestampStr, objectKeys, safeParseQueryString, stringify } from '../../lib/helpers';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTableSort } from '../../lib/hooks/useTableSort';
 import { statusSort } from '../../types/stan';
 import { useDownload } from '../../lib/hooks/useDownload';
@@ -22,7 +22,6 @@ import WorkRow from './WorkRow';
 import { selectOptionValues } from '../forms';
 import LoadingSpinner from '../icons/LoadingSpinner';
 import BlueButton from '../buttons/BlueButton';
-import { history } from '../../lib/sdk';
 import InfoIcon from '../icons/InfoIcon';
 const initialValues: WorkAllocationFormValues = {
   workType: '',
@@ -112,6 +111,7 @@ export default function WorkAllocation() {
     accessPath: ['work', 'workNumber']
   });
 
+  const navigate = useNavigate();
   const { userRoleIncludes } = useAuth();
 
   /**
@@ -406,7 +406,7 @@ export default function WorkAllocation() {
           <Formik<WorkAllocationUrlParams>
             initialValues={urlParams}
             onSubmit={async (values) => {
-              history.push({
+              navigate({
                 pathname: '/sgp',
                 search: stringify(values)
               });

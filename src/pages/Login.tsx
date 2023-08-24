@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
-import { StaticContext } from 'react-router';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { ErrorMessage, Field, Form, Formik, FormikHelpers, FormikValues } from 'formik';
 import * as Yup from 'yup';
 import LoginButton from '../components/buttons/LoginButton';
@@ -9,7 +8,7 @@ import Warning from '../components/notifications/Warning';
 import Success from '../components/notifications/Success';
 import Logo from '../components/Logo';
 import { motion } from 'framer-motion';
-import { extractServerErrors, LocationState } from '../types/stan';
+import { extractServerErrors } from '../types/stan';
 import { StanCoreContext } from '../lib/sdk';
 import { ClientError } from 'graphql-request';
 
@@ -21,14 +20,16 @@ const LoginSchema = Yup.object().shape({
   password: Yup.string().required('Password is required')
 });
 
-const Login = (props: RouteComponentProps<{}, StaticContext, LocationState>): JSX.Element => {
+const Login = (): JSX.Element => {
   const auth = useAuth();
+  let location = useLocation();
+
   // If the user was redirected here because they were logged in, and then their session expired, clear the AuthState
   useEffect(() => {
-    if (props.location?.state?.loggedOut) {
+    if (location?.state?.loggedOut) {
       auth.clearAuthState();
     }
-  }, [auth, props.location]);
+  }, [auth, location]);
 
   const stanCore = useContext(StanCoreContext);
   const [showLoginSuccess, setShowLoginSuccess] = useState(false);
@@ -75,7 +76,7 @@ const Login = (props: RouteComponentProps<{}, StaticContext, LocationState>): JS
 
   return (
     <>
-      {auth.isAuthenticated() && <Redirect to={props.location.state?.referrer ?? '/'} />}
+      {auth.isAuthenticated() && <Navigate to={location.state?.referrer ?? '/'} />}
 
       <div className="bg-gradient-to-bl from-sdb to-sdb-400">
         <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -96,12 +97,12 @@ const Login = (props: RouteComponentProps<{}, StaticContext, LocationState>): JS
 
             {showLoginSuccess && <Success message={'Login Successful!'} className="mt-8" />}
 
-            {props.location.state?.success && !showLoginSuccess && errorMessage == null && (
-              <Success message={props.location.state.success} className="mt-8" />
+            {location.state?.success && !showLoginSuccess && errorMessage == null && (
+              <Success message={location.state.success} className="mt-8" />
             )}
 
-            {props.location.state?.warning && !showLoginSuccess && errorMessage == null && (
-              <Warning className="mt-8" message={props.location.state.warning} />
+            {location.state?.warning && !showLoginSuccess && errorMessage == null && (
+              <Warning className="mt-8" message={location.state.warning} />
             )}
 
             {errorMessage && <Warning className="mt-8" message={errorMessage} />}

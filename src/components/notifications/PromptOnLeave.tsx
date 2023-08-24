@@ -1,7 +1,9 @@
 import React from 'react';
 import * as H from 'history';
-import { Prompt } from 'react-router-dom';
 import { useConfirmLeave } from '../../lib/hooks';
+import ReactRouterPrompt from 'react-router-prompt';
+import Modal from '../Modal';
+import { useLocation, useNavigationType } from 'react-router-dom';
 
 interface PromptOnLeaveProps {
   /**Should a prompt dialog be displayed?**/
@@ -27,34 +29,40 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({
 }) => {
   //User hook to prompt Refresh and Exit events as these are not handled by Prompt
   const [, setShouldConfirm] = useConfirmLeave(true);
+  const navigationType = useNavigationType();
+  const location = useLocation();
 
   React.useEffect(() => {
     setShouldConfirm(when);
   }, [when, setShouldConfirm]);
 
-  /**Ok/Cancel status for Prompt dialog*/
-  const promptReturnStatus = React.useRef(false);
-
-  /**Call appropriate callback before unmounting this component*/
-  React.useEffect(() => {
-    return () => {
-      if (promptReturnStatus.current && onPromptLeave) {
-        onPromptLeave();
-      } else if (onPromptCancel) {
-        onPromptCancel();
-      }
-    };
-  }, [onPromptLeave, onPromptCancel]);
-
   return (
-    <Prompt
-      when={when}
-      message={(location, action) => {
-        const ret = messageHandler ? messageHandler(location, action, message) : message;
-        promptReturnStatus.current = typeof ret === 'string';
-        return ret;
-      }}
-    />
+    <ReactRouterPrompt when={when}>
+      {({ isActive, onConfirm, onCancel }) => (
+        <Modal show={isActive}>
+          <div>
+            <p>{message}</p>
+            <button
+              onClick={() => {
+                onCancel();
+                onPromptCancel?.();
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                onConfirm();
+                onPromptLeave?.();
+                messageHandler?.(location, navigationType, message);
+              }}
+            >
+              Ok
+            </button>
+          </div>
+        </Modal>
+      )}
+    </ReactRouterPrompt>
   );
 };
 export default PromptOnLeave;

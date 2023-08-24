@@ -5,9 +5,8 @@ import variants from '../lib/motionVariants';
 import Heading from '../components/Heading';
 import WorkNumberSelect, { WorkInfo } from '../components/WorkNumberSelect';
 import { parseQueryString } from '../lib/helpers';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import FileUploader, { ConfirmUploadProps } from '../components/upload/FileUploader';
-import { history } from '../lib/sdk';
 import { FileFieldsFragment, WorkStatus } from '../types/sdk';
 import DataTable from '../components/DataTable';
 import { Cell, Column } from 'react-table';
@@ -44,6 +43,8 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
    * Success notification when file is uploaded
    */
   const ToastSuccess = (fileName: string) => <Success message={`${fileName} uploaded succesfully.`} />;
+
+  const navigate = useNavigate();
 
   /**Update work numbers when ever query string in location changes **/
   const memoAllSelectedWork = React.useMemo(() => {
@@ -213,7 +214,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
                           workNumbers.forEach(
                             (value) => value && params.append('workNumber', encodeURIComponent(value))
                           );
-                          history.replace(`/file_manager?${params}`);
+                          navigate(`/file_manager?${params}`);
                         }}
                         workNumberType={'ALL'}
                         multiple

@@ -9,7 +9,7 @@ import LocationIcon from '../components/icons/LocationIcon';
 import Heading from '../components/Heading';
 
 import storeConfig from '../static/store.json';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import BarcodeIcon from '../components/icons/BarcodeIcon';
 import { FindLocationByBarcodeQuery, Maybe } from '../types/sdk';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
@@ -18,7 +18,6 @@ import { StanCoreContext } from '../lib/sdk';
 import { ClientError } from 'graphql-request';
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
 import * as H from 'history';
-import { history } from '../lib/sdk';
 import PromptOnLeave from '../components/notifications/PromptOnLeave';
 
 export type LabwareAwaitingStorageInfo = {
@@ -98,6 +97,8 @@ const Store = () => {
     sessionStorage.removeItem('awaitingLabwares');
   }, []);
 
+  const navigate = useNavigate();
+
   /**
    * Runs this hook if there's a `labwareBarcode` URL parameter
    * Looks up the location for the labware, and redirects to that page
@@ -107,7 +108,7 @@ const Store = () => {
       const locationBarcode = await findLabwareLocation(labwareBarcode);
       if (locationBarcode) {
         // Redirect to the location if it's found
-        history.push({
+        navigate({
           pathname: `/locations/${locationBarcode}`,
           search: stringify({
             labwareBarcode: labwareBarcode

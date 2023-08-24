@@ -191,7 +191,8 @@ const WorkProgress = ({
               </Heading>
               <div className={'mx-auto flex w-full p-4 rounded-md justify-center bg-gray-400'}>
                 <StyledLink
-                  to={{ pathname: `${auth.isAuthenticated() ? 'sgp' : 'login'}`, state: { referrer: '/sgp' } }}
+                  to={`${auth.isAuthenticated() ? 'sgp' : 'login'}`}
+                  state={{ referrer: '/sgp' }}
                   className={'text-md'}
                 >
                   Allocate SGP Number

@@ -12,7 +12,7 @@ import LoadingSpinner from '../components/icons/LoadingSpinner';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';
 import { FindRequest, GetSearchInfoQuery, Work } from '../types/sdk';
-import { reload, stanCore, history } from '../lib/sdk';
+import { reload, stanCore } from '../lib/sdk';
 import { useMachine } from '@xstate/react';
 import * as Yup from 'yup';
 import { cleanParams, getTimestampStr, objectKeys, parseQueryString, stringify } from '../lib/helpers';
@@ -26,6 +26,7 @@ import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
+import { useNavigate } from 'react-router-dom';
 
 const validationSchema = Yup.object()
   .shape({
@@ -101,11 +102,12 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   const uniqueTableDataRef = React.useRef<SearchResultTableEntry[]>([]);
 
   const [viewAllRecords, setViewAllRecords] = React.useState(true);
+  const navigate = useNavigate();
 
   const onFormSubmit = (values: FindRequest) => {
     send({ type: 'FIND', request: values });
     // Replace instead of push so user doesn't have to go through a load of old searches when going back
-    history.replace(`/search?${stringify(values)}`);
+    navigate(`/search?${stringify(values)}`, { replace: true });
   };
 
   const [works, setWorks] = useState<Array<Pick<Work, 'workNumber'>>>([]);

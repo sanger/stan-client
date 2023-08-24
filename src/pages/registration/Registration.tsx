@@ -16,12 +16,12 @@ import RegistrationSuccess, { LabwareContainType } from './RegistrationSuccess';
 import { useConfirmLeave } from '../../lib/hooks';
 import { Column } from 'react-table';
 import { createRegistrationMachine } from '../../lib/machines/registration/registrationMachine';
-import { Prompt } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import variants from '../../lib/motionVariants';
 import Heading from '../../components/Heading';
 import WorkNumberSelect from '../../components/WorkNumberSelect';
 import { FormikErrorMessage } from '../../components/forms';
+import Prompt from '../../components/notifications/Prompt';
 
 /**
  * Expect form input interface
