@@ -1,6 +1,6 @@
 import { SlotCopyMutation, SlotCopyMutationVariables } from '../../../src/types/sdk';
 import { LabwareTypeName } from '../../../src/types/stan';
-import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
+import { selectOption, selectSGPNumber, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 
 describe('CytAssist Page', () => {
   before(() => {
@@ -9,7 +9,7 @@ describe('CytAssist Page', () => {
 
   describe('On load', () => {
     it('output labware type should be empty', () => {
-      cy.findByTestId('output-labware-type').should('have.value', '');
+      shouldDisplaySelectedValue('output-labware-type', '');
     });
 
     it('disables the Save button', () => {
@@ -23,21 +23,27 @@ describe('CytAssist Page', () => {
     });
   });
 
-  context('When user selects Visium LP CytAssist XL labwareType', () => {
-    before(() => {
-      selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_XL);
-    });
-    it('shows a Visium LP CytAssist XL slide for the output', () => {
-      cy.findAllByText(/Visium LP CytAssist XL/i).should('have.length.above', 0);
-    });
-  });
-
   context('When user selects Visium LP CytAssist labwareType', () => {
     before(() => {
       selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST);
     });
+    it('should set output labware type value to Visium LP CytAssist', () => {
+      shouldDisplaySelectedValue('output-labware-type', 'Visium LP CytAssist');
+    });
     it('shows a Visium LP CytAssist slide for the output', () => {
       cy.findAllByText(/Visium LP CytAssist/i).should('have.length.above', 0);
+    });
+  });
+
+  context('When user selects Visium LP CytAssist XL labwareType', () => {
+    before(() => {
+      selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST_XL);
+    });
+    it('should set output labware type value to Visium LP CytAssist XL', () => {
+      shouldDisplaySelectedValue('output-labware-type', 'Visium LP CytAssist XL');
+    });
+    it('shows a Visium LP CytAssist XL slide for the output', () => {
+      cy.findAllByText(/Visium LP CytAssist XL/i).should('have.length.above', 0);
     });
   });
 

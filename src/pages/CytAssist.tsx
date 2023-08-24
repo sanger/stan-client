@@ -207,8 +207,11 @@ const SlotMappingContentTable = ({ slotCopyContent }: { slotCopyContent: SlotCop
 };
 
 const CytAssist = () => {
+  const initialOutputLabwarePlaceHolder = visiumLPCytAssistFactory.build();
+  initialOutputLabwarePlaceHolder.labwareType.name = '';
+
   const initialOutputLabware: Destination = {
-    labware: visiumLPCytAssistFactory.build(),
+    labware: initialOutputLabwarePlaceHolder,
     slotCopyDetails: {
       labwareType: '',
       contents: []
@@ -288,9 +291,11 @@ const CytAssist = () => {
   const handleChangeOutputLabwareType = React.useCallback(
     (labwareType: string) => {
       if (!selectedDestination) return;
-      let destLabware;
-      if (labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST) destLabware = visiumLPCytAssistFactory.build();
-      else destLabware = visiumLPCytAssistXLFactory.build();
+      const destLabware =
+        labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST
+          ? visiumLPCytAssistFactory.build()
+          : visiumLPCytAssistXLFactory.build();
+
       send({
         type: 'UPDATE_DESTINATION_LABWARE_TYPE',
         labwareToReplace: selectedDestination.labware!,
