@@ -25,23 +25,6 @@ export type XeniumQCFormData = {
   labware: Array<QcLabware>;
   completion: string;
 };
-const validationSchema = Yup.object().shape({
-  workNumberAll: Yup.string().optional(),
-  completion: Yup.date()
-    .max(new Date(), 'Please select a date and time on or before current time')
-    .required('Completion time is a required field')
-    .label('Completion Time'),
-  labware: Yup.array()
-    .of(
-      Yup.object().shape({
-        barcode: Yup.string().required(),
-        workNumber: Yup.string().required().label('SGP Number'),
-        comments: Yup.array().min(0).optional()
-      })
-    )
-    .required()
-    .min(1)
-});
 
 const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
   const stanCore = useContext(StanCoreContext);
@@ -61,11 +44,30 @@ const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
   const [current, send] = useMachine(formMachine);
   const { serverError, submissionResult } = current.context;
 
+  const currentTime = getCurrentDateTime();
   const initialValues: XeniumQCFormData = {
     workNumberAll: '',
     labware: [],
-    completion: getCurrentDateTime()
+    completion: currentTime
   };
+
+  const validationSchema = Yup.object().shape({
+    workNumberAll: Yup.string().optional(),
+    completion: Yup.date()
+      .max(currentTime, 'Please select a date and time on or before current time')
+      .required('Completion time is a required field')
+      .label('Completion Time'),
+    labware: Yup.array()
+      .of(
+        Yup.object().shape({
+          barcode: Yup.string().required(),
+          workNumber: Yup.string().required().label('SGP Number'),
+          comments: Yup.array().min(0).optional()
+        })
+      )
+      .required()
+      .min(1)
+  });
 
   return (
     <AppShell>
@@ -80,7 +82,7 @@ const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
             validationSchema={validationSchema}
             onSubmit={async (values) => {
               const request: QcLabwareRequest = {
-                operationType: 'XENIUM_QC',
+                operationType: 'XENIUM QC',
                 labware: values.labware.map((lw) => {
                   return {
                     ...lw,
@@ -91,7 +93,7 @@ const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
               send({ type: 'SUBMIT_FORM', values: request });
             }}
           >
-            {({ values, setFieldValue, isValid }) => (
+            {({ values, setFieldValue, isValid, errors }) => (
               <Form>
                 <div className="mt-8 space-y-2">
                   <Heading level={2}>Labware</Heading>

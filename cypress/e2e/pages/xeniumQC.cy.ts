@@ -3,7 +3,9 @@ import { RecordQcLabwareMutation, RecordQcLabwareMutationVariables } from '../..
 import commentRepository from '../../../src/mocks/repositories/commentRepository';
 
 describe('Xenium QC', () => {
-  const comments = commentRepository.findAll().filter((comment) => comment.category === 'Xenium QC' && comment.enabled);
+  const comments = commentRepository
+    .findAll()
+    .filter((comment) => comment.category === 'QC labware' && comment.enabled);
 
   before(() => {
     cy.visit('/lab/xenium_qc');
