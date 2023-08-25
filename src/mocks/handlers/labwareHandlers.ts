@@ -66,7 +66,6 @@ const labwareHandlers = [
         ])
       );
     }
-
     const labware = createLabware(barcode);
     const payload: FindLabwareQuery = {
       labware: buildLabwareFragment(labware)
@@ -118,20 +117,10 @@ const labwareHandlers = [
   ),
 
   graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', (req, res, ctx) => {
-    const optype = req.variables.operationType;
     return res(
       ctx.data({
         findLatestOp: {
-          id: 1,
-          operationType: {
-            name: optype
-          },
-          actions: [],
-          user: {
-            username: 'test',
-            role: UserRole.Normal
-          },
-          performed: ''
+          id: 1
         }
       })
     );
