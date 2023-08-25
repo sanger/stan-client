@@ -64,8 +64,56 @@ export function RouteManager() {
   const { authState } = useAuth();
   return (
     <Routes>
-      <Route path="/logout">
-        <Logout />
+      <Route path="/logout" element={<Logout />} />
+      <Route path={'/history'} element={<History />} />
+      <Route path="/locations" element={<Store />} />
+      <Route path="/store" element={<Store />} />
+      <Route path="/login" element={<Login />} />
+      <Route
+        path={'/search'}
+        element={
+          <DataFetcher dataFetcher={stanCore.GetSearchInfo}>
+            {(searchInfo) => <Search searchInfo={searchInfo} />}
+          </DataFetcher>
+        }
+      />
+      <Route
+        path={'/work_progress_summary'}
+        element={
+          <DataFetcher dataFetcher={stanCore.GetWorkSummary}>
+            {(summaryData) => <WorkProgressSummary summaryData={summaryData} />}
+          </DataFetcher>
+        }
+      />
+      <Route
+        path="/file_viewer"
+        element={
+          <DataFetcher
+            dataFetcher={() => {
+              return stanCore.GetAllWorkInfo();
+            }}
+          >
+            {(dataFetcher) => {
+              return (
+                <FileManager
+                  worksInfo={dataFetcher.works.map((workInfo) => {
+                    return {
+                      workNumber: workInfo.workNumber,
+                      workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
+                      project: workInfo.project.name,
+                      status: workInfo.status
+                    };
+                  })}
+                  showUpload={false}
+                />
+              );
+            }}
+          </DataFetcher>
+        }
+      />
+
+      <Route element={<AuthLayout role={UserRole.Enduser} />}>
+        <Route path="sgp" element={<SGP />} />
       </Route>
       <Route element={<AuthLayout />}>
         <Route
@@ -337,9 +385,7 @@ export function RouteManager() {
           );
         }}
       />
-      <Route path="/locations" component={Store} />
-      <Route path="/store" component={Store} />
-      <Route path="/login" component={Login} />
+
       <AuthenticatedRoute
         path="/admin/destroy"
         render={(routeProps) => (
@@ -382,57 +428,7 @@ export function RouteManager() {
           );
         }}
       />
-      <Route path={'/history'} component={History} />
-      <AuthenticatedRoute role={UserRole.Enduser} path={'/sgp'} component={SGP} />
-      <Route
-        path={'/search'}
-        render={(routeProps) => {
-          return (
-            <DataFetcher dataFetcher={stanCore.GetSearchInfo} key={routeProps.location.key}>
-              {(searchInfo) => <Search searchInfo={searchInfo} urlParamsString={routeProps.location.search} />}
-            </DataFetcher>
-          );
-        }}
-      />
-      <Route
-        path={'/work_progress_summary'}
-        render={(routeProps) => {
-          return (
-            <DataFetcher dataFetcher={stanCore.GetWorkSummary} key={routeProps.location.key}>
-              {(summaryData) => <WorkProgressSummary summaryData={summaryData} />}
-            </DataFetcher>
-          );
-        }}
-      />
-      <Route
-        path="/file_viewer"
-        render={(routeProps) => {
-          return (
-            <DataFetcher
-              key={routeProps.location.key}
-              dataFetcher={() => {
-                return stanCore.GetAllWorkInfo();
-              }}
-            >
-              {(dataFetcher) => {
-                return (
-                  <FileManager
-                    worksInfo={dataFetcher.works.map((workInfo) => {
-                      return {
-                        workNumber: workInfo.workNumber,
-                        workRequester: workInfo.workRequester ? workInfo.workRequester.username : '',
-                        project: workInfo.project.name,
-                        status: workInfo.status
-                      };
-                    })}
-                    showUpload={false}
-                  />
-                );
-              }}
-            </DataFetcher>
-          );
-        }}
-      />
+
       <AuthenticatedRoute
         path="/file_manager"
         role={UserRole.Enduser}

@@ -228,7 +228,6 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
                 Stain Again
               </WhiteButton>
             }
-            onReset={reload}
           >
             <p>
               If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the

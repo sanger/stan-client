@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { reload, StanCoreContext } from '../lib/sdk';
+import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
 import {
   AnalyserLabware,
@@ -404,7 +404,6 @@ const XeniumAnalyser = () => {
                   <OperationCompleteModal
                     show={submissionResult !== undefined}
                     message={'Xenium analyser recorded on all labware'}
-                    onReset={reload}
                   >
                     <p>
                       If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to

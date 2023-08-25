@@ -100,7 +100,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
                       >
                         Store
                       </BlueButton>
-                      <BlueButton onClick={reload} action="tertiary">
+                      <BlueButton onClick={() => reload(navigate)} action="tertiary">
                         Reset Form
                       </BlueButton>
                       <Link to={'/'}>

@@ -182,7 +182,6 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProces
                     <OperationCompleteModal
                       show={submissionResult !== undefined}
                       message={'FFPE processing type recorded on all labware'}
-                      onReset={reload}
                     >
                       <p>
                         If you wish to start the process again, click the "Reset Form" button. Otherwise you can return

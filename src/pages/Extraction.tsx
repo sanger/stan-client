@@ -19,7 +19,7 @@ import { useMachine } from '@xstate/react';
 import { buildSampleColors } from '../lib/helpers/labwareHelper';
 import { LabwareFieldsFragment } from '../types/sdk';
 import extractionMachine, { ExtractionContext } from '../lib/machines/extraction/extractionMachine';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ButtonBar from '../components/ButtonBar';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -56,6 +56,8 @@ function Extraction() {
   const sampleColors: Map<number, string> = useMemo(() => {
     return buildSampleColors(labwares);
   }, [labwares]);
+
+  const navigate = useNavigate();
 
   const columns = useMemo(
     () => [
@@ -220,7 +222,7 @@ function Extraction() {
 
       {current.matches('extracted') && (
         <ButtonBar>
-          <BlueButton onClick={reload} action="tertiary">
+          <BlueButton onClick={() => reload(navigate)} action="tertiary">
             Reset Form
           </BlueButton>
           <Link to={'/'}>

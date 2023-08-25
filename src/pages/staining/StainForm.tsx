@@ -276,7 +276,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
               </PinkButton>
             </Sidebar>
           </GrayBox>
-          <OperationCompleteModal show={current.matches('submitted')} message={'Staining Successful'} onReset={reload}>
+          <OperationCompleteModal show={current.matches('submitted')} message={'Staining Successful'}>
             <p>
               If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the
               Home screen.

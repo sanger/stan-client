@@ -7,7 +7,7 @@ import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { VisiumAnalysisMutation, VisiumAnalysisRequest } from '../types/sdk';
 import BlueButton from '../components/buttons/BlueButton';
-import { reload, stanCore } from '../lib/sdk';
+import { stanCore } from '../lib/sdk';
 import * as Yup from 'yup';
 import { FormikErrorMessage } from '../components/forms';
 import Warning from '../components/notifications/Warning';
@@ -15,6 +15,7 @@ import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import ScanInput from '../components/scanInput/ScanInput';
 import PermTimeSelectField from '../components/forms/PermTimeSelectField';
 import RemoveButton from '../components/buttons/RemoveButton';
+import { useNavigate } from 'react-router-dom';
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
@@ -37,7 +38,6 @@ export default function VisiumAnalysis() {
   const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
-
   return (
     <AppShell>
       <AppShell.Header>
@@ -102,11 +102,7 @@ export default function VisiumAnalysis() {
             )}
           </Formik>
         </div>
-        <OperationCompleteModal
-          show={current.matches('submitted')}
-          message={'Visium Analysis complete'}
-          onReset={reload}
-        >
+        <OperationCompleteModal show={current.matches('submitted')} message={'Visium Analysis complete'}>
           <p>
             If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the Home
             screen.

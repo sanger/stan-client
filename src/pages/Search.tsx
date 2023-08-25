@@ -26,7 +26,7 @@ import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const validationSchema = Yup.object()
   .shape({
@@ -73,12 +73,11 @@ const emptyFindRequestKeys: Array<keyof FindRequest> = objectKeys(emptyFindReque
 
 type SearchProps = {
   searchInfo: GetSearchInfoQuery;
-  urlParamsString: string;
 };
 
-function Search({ searchInfo, urlParamsString }: SearchProps) {
-  const params: ParsedQuery = parseQueryString(urlParamsString);
-  const findRequest: FindRequest = merge({}, emptyFindRequest, cleanParams(params, emptyFindRequestKeys));
+function Search({ searchInfo }: SearchProps) {
+  const [searchParams] = useSearchParams();
+  const findRequest: FindRequest = merge({}, emptyFindRequest, cleanParams(searchParams, emptyFindRequestKeys));
 
   const config = useContext(configContext)!;
   const search = searchMachine<FindRequest, SearchResultTableEntry>(new SearchService());
@@ -248,7 +247,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                       type="button"
                       onClick={() => {
                         resetForm({ values: emptyFindRequest });
-                        reload();
+                        reload(navigate);
                       }}
                     >
                       Reset

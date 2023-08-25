@@ -138,11 +138,7 @@ const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
                   </Sidebar>
                 </GrayBox>
 
-                <OperationCompleteModal
-                  show={current.matches('submitted')}
-                  message={'Labware(s) Destroyed'}
-                  onReset={reload}
-                >
+                <OperationCompleteModal show={current.matches('submitted')} message={'Labware(s) Destroyed'}>
                   <p>
                     If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
                     the Home screen.

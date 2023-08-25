@@ -127,11 +127,7 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
                   </BlueButton>
                 </div>
 
-                <OperationCompleteModal
-                  show={current.matches('submitted')}
-                  message={'Operation Complete'}
-                  onReset={reload}
-                >
+                <OperationCompleteModal show={current.matches('submitted')} message={'Operation Complete'}>
                   <p>
                     If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
                     the Home screen.

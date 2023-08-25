@@ -10,7 +10,6 @@ import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';
 import PinkButton from '../components/buttons/PinkButton';
 import createFormMachine from '../lib/machines/form/formMachine';
-import { reload } from '../lib/sdk';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 
 type StanFormParams<V, R> = {
@@ -68,7 +67,6 @@ export default function StanForm<V, R>({
     });
   }, [onSubmit]);
   const [current, send] = useMachine(() => formMachine);
-
   const submitForm = async (values: V) => send({ type: 'SUBMIT_FORM', values });
   const serverError = current.context.serverError;
   const formLocked = !current.matches('fillingOutForm');
@@ -109,11 +107,7 @@ export default function StanForm<V, R>({
                   </Sidebar>
                 </GrayBox>
 
-                <OperationCompleteModal
-                  show={current.matches('submitted')}
-                  message={'Operation Complete'}
-                  onReset={reload}
-                >
+                <OperationCompleteModal show={current.matches('submitted')} message={'Operation Complete'}>
                   <p>
                     If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
                     the Home screen.

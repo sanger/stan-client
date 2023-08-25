@@ -11,7 +11,7 @@ import AppShell from '../components/AppShell';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareResult from '../components/labwareResult/LabwareResult';
-import { reload, StanCoreContext } from '../lib/sdk';
+import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { useMachine } from '@xstate/react';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
@@ -146,7 +146,7 @@ export default function StainingQC({ info }: StainingQCProps) {
           </div>
         </div>
 
-        <OperationCompleteModal show={current.matches('submitted')} message={'Stain QC complete'} onReset={reload}>
+        <OperationCompleteModal show={current.matches('submitted')} message={'Stain QC complete'}>
           <p>
             If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the Home
             screen.

@@ -61,6 +61,7 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
   onAddLabware,
   onChangeBioState
 }) => {
+  const navigate = useNavigate();
   return (
     <div className={'w-full flex flex-row space-x-4 mb-8'} data-testid="input-labware">
       <div className={'w-1/2 flex flex-col'}>
@@ -374,7 +375,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
           {current.matches('copied') && (
             <>
-              <BlueButton onClick={reload} action="tertiary">
+              <BlueButton onClick={() => reload(navigate)} action="tertiary">
                 Reset Form
               </BlueButton>
               <Link to={'/'}>

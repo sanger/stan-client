@@ -19,7 +19,7 @@ import { reload, stanCore } from '../lib/sdk';
 import ButtonBar from '../components/ButtonBar';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // TODO Add front-end validation to this page
 
@@ -36,6 +36,7 @@ function Analysis({ comments }: AnalysisProps) {
   const [operationType, setOperationType] = React.useState('');
   const [analysisMode, setAnalysisMode] = React.useState(false);
 
+  const navigate = useNavigate();
   const formMachine = React.useMemo(() => {
     return createFormMachine<RnaAnalysisRequest, RecordRnaAnalysisMutation>().withConfig({
       services: {
@@ -112,11 +113,7 @@ function Analysis({ comments }: AnalysisProps) {
           {serverError ? (
             <Warning message={'Failed to record RNA Analysis results'} error={serverError} />
           ) : (
-            <OperationCompleteModal
-              show={current.matches('submitted')}
-              message={'RNA Analysis data saved'}
-              onReset={reload}
-            >
+            <OperationCompleteModal show={current.matches('submitted')} message={'RNA Analysis data saved'}>
               <p>
                 If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the
                 Home screen.
@@ -124,7 +121,7 @@ function Analysis({ comments }: AnalysisProps) {
             </OperationCompleteModal>
           )}
           <ButtonBar>
-            <BlueButton onClick={reload} action="tertiary">
+            <BlueButton onClick={() => reload(navigate)} action="tertiary">
               Reset Form
             </BlueButton>
             <Link to={'/'}>
