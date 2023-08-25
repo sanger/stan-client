@@ -47,6 +47,18 @@ describe('CytAssist Page', () => {
     });
   });
 
+  context('When user selects an empty option for the output labwareType', () => {
+    before(() => {
+      selectLabwareType('');
+    });
+    it('should set output labware type value to empty', () => {
+      shouldDisplaySelectedValue('output-labware-type', '');
+    });
+    it('hides the output labware image', () => {
+      cy.get('#outputLabwares').should('not.contain', '[data-testid="slot"]');
+    });
+  });
+
   context('When a user scans in a TP Slide', () => {
     before(() => {
       selectLabwareType(LabwareTypeName.VISIUM_LP_CYTASSIST);

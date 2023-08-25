@@ -288,14 +288,15 @@ const CytAssist = () => {
     [send, selectedDestination]
   );
 
+  const labwareFactories: Record<string, NewLabwareLayout> = {
+    [LabwareTypeName.VISIUM_LP_CYTASSIST]: visiumLPCytAssistFactory.build(),
+    [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory.build()
+  };
+
   const handleChangeOutputLabwareType = React.useCallback(
     (labwareType: string) => {
       if (!selectedDestination) return;
-      const destLabware =
-        labwareType === LabwareTypeName.VISIUM_LP_CYTASSIST
-          ? visiumLPCytAssistFactory.build()
-          : visiumLPCytAssistXLFactory.build();
-
+      const destLabware = labwareFactories[labwareType] || initialOutputLabwarePlaceHolder;
       send({
         type: 'UPDATE_DESTINATION_LABWARE_TYPE',
         labwareToReplace: selectedDestination.labware!,
