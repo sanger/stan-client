@@ -288,13 +288,12 @@ const CytAssist = () => {
     [send, selectedDestination]
   );
 
-  const labwareFactories: Record<string, NewLabwareLayout> = {
-    [LabwareTypeName.VISIUM_LP_CYTASSIST]: visiumLPCytAssistFactory.build(),
-    [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory.build()
-  };
-
   const handleChangeOutputLabwareType = React.useCallback(
     (labwareType: string) => {
+      const labwareFactories: Record<string, NewLabwareLayout> = {
+        [LabwareTypeName.VISIUM_LP_CYTASSIST]: visiumLPCytAssistFactory.build(),
+        [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory.build()
+      };
       if (!selectedDestination) return;
       const destLabware = labwareFactories[labwareType] || initialOutputLabwarePlaceHolder;
       send({
@@ -303,7 +302,7 @@ const CytAssist = () => {
         labware: destLabware
       });
     },
-    [send, selectedDestination]
+    [send, selectedDestination, initialOutputLabwarePlaceHolder]
   );
 
   /**
