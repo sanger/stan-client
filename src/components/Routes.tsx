@@ -51,6 +51,7 @@ import FileManager from '../pages/FileManager';
 import { useAuth } from '../context/AuthContext';
 import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
 import XeniumAnalyser from '../pages/XeniumAnalyser';
+import XeniumQC from '../pages/XeniumQC';
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -198,6 +199,14 @@ export function Routes() {
         render={(routeProps) => (
           <DataFetcher key={routeProps.location.key} dataFetcher={stanCore.GetProbePanels}>
             {(probePanelInfo) => <ProbeHybridisationXenium probePanelInfo={probePanelInfo} />}
+          </DataFetcher>
+        )}
+      />
+      <AuthenticatedRoute
+        path="/lab/xenium_qc"
+        render={(routeProps) => (
+          <DataFetcher key={routeProps.location.key} dataFetcher={stanCore.GetXeniumQCInfo}>
+            {(xeniumQCInfo) => <XeniumQC info={xeniumQCInfo} />}
           </DataFetcher>
         )}
       />

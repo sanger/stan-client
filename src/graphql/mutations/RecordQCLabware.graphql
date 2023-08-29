@@ -1,0 +1,7 @@
+mutation RecordQCLabware($request: QCLabwareRequest!) {
+  recordQCLabware(request: $request) {
+    operations {
+      id
+    }
+  }
+}
