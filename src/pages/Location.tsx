@@ -21,15 +21,8 @@ import {
   findNextAvailableAddress
 } from '../lib/helpers/locationHelper';
 import { Authenticated, Unauthenticated } from '../components/Authenticated';
-import { extractServerErrors, LocationMatchParams, LocationSearchParams } from '../types/stan';
-import {
-  GridDirection,
-  LabwareFieldsFragment,
-  LocationFieldsFragment,
-  Maybe,
-  StoreInput,
-  UserRole
-} from '../types/sdk';
+import { extractServerErrors } from '../types/stan';
+import { GridDirection, LocationFieldsFragment, Maybe, StoreInput, UserRole } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import { StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
 import createLocationMachine from '../lib/machines/locations/locationMachine';
@@ -68,11 +61,6 @@ export type LocationParentContextType = {
 };
 
 export const LocationParentContext = React.createContext<Maybe<LocationParentContextType>>(null);
-
-interface LocationProps {
-  storageLocation: LocationFieldsFragment;
-  locationSearchParams: Maybe<LocationSearchParams>;
-}
 
 const Location = () => {
   const [search] = useSearchParams();
