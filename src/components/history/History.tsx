@@ -15,6 +15,7 @@ import { useDownload } from '../../lib/hooks/useDownload';
 import Heading from '../Heading';
 import Table, { TableBody, TableCell } from '../Table';
 import { useAuth } from '../../context/AuthContext';
+import TopScrollingBar from '../TopScrollingBar';
 
 /**
  * Component for looking up and displaying the history of labware and samples
@@ -235,7 +236,9 @@ export default function History(props: HistoryProps) {
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
-            <DataTable data-testid={'history-table'} columns={historyColumns} data={history} fixedHeader={true} />
+            <TopScrollingBar>
+              <DataTable data-testid={'history-table'} columns={historyColumns} data={history} fixedHeader={true} />
+            </TopScrollingBar>
           </>
         ) : (
           <Warning message={'No results found.'} />

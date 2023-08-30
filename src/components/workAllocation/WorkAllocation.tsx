@@ -24,6 +24,7 @@ import LoadingSpinner from '../icons/LoadingSpinner';
 import BlueButton from '../buttons/BlueButton';
 import { history } from '../../lib/sdk';
 import InfoIcon from '../icons/InfoIcon';
+import TopScrollingBar from '../TopScrollingBar';
 const initialValues: WorkAllocationFormValues = {
   workType: '',
   workRequester: '',
@@ -454,43 +455,47 @@ export default function WorkAllocation() {
                   <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
                 </a>
               </div>
-              <Table data-testid="work-allocation-table">
-                <TableHead fixed={true}>
-                  <tr>
-                    <TableHeader sortProps={getTableSortProps('Priority')}>Priority</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Project')}>Project (cost code description)</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Omero Project')}>Omero Project</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('DNAP Study ID and description')}>
-                      DNAP Study ID and description
-                    </TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Number of Blocks')}>Number of Blocks</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Number of Slides')}>Number of Slides</TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Number of Original Samples')}>
-                      Number of Original Samples
-                    </TableHeader>
-                    <TableHeader sortProps={getTableSortProps('Status')}>Status</TableHeader>
-                    <TableHeader />
-                  </tr>
-                </TableHead>
-                <TableBody>
-                  {sortedTableData.map((workWithComment, index) => (
-                    <WorkRow
-                      initialWork={workWithComment}
-                      availableComments={availableComments}
-                      availableOmeroProjects={omeroProjects}
-                      availableDnapStudies={dnapStudies}
-                      key={workWithComment.work.workNumber}
-                      rowIndex={index}
-                      onWorkFieldUpdate={onWorkUpdate}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
+              <TopScrollingBar>
+                <Table data-testid="work-allocation-table">
+                  <TableHead fixed={true}>
+                    <tr>
+                      <TableHeader sortProps={getTableSortProps('Priority')}>Priority</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('SGP Number')}>SGP Number</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Work Type')}>Work Type</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Work Requester')}>Work Requester</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Project')}>
+                        Project (cost code description)
+                      </TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Omero Project')}>Omero Project</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('DNAP Study ID and description')}>
+                        DNAP Study ID and description
+                      </TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Number of Blocks')}>Number of Blocks</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Number of Slides')}>Number of Slides</TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Number of Original Samples')}>
+                        Number of Original Samples
+                      </TableHeader>
+                      <TableHeader sortProps={getTableSortProps('Status')}>Status</TableHeader>
+                      <TableHeader />
+                    </tr>
+                  </TableHead>
+                  <TableBody>
+                    {sortedTableData.map((workWithComment, index) => (
+                      <WorkRow
+                        initialWork={workWithComment}
+                        availableComments={availableComments}
+                        availableOmeroProjects={omeroProjects}
+                        availableDnapStudies={dnapStudies}
+                        key={workWithComment.work.workNumber}
+                        rowIndex={index}
+                        onWorkFieldUpdate={onWorkUpdate}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </TopScrollingBar>
             </>
           )}
         </div>
