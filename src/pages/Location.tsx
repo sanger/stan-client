@@ -22,7 +22,14 @@ import {
 } from '../lib/helpers/locationHelper';
 import { Authenticated, Unauthenticated } from '../components/Authenticated';
 import { extractServerErrors, LocationMatchParams, LocationSearchParams } from '../types/stan';
-import { GridDirection, LocationFieldsFragment, Maybe, StoreInput, UserRole } from '../types/sdk';
+import {
+  GridDirection,
+  LabwareFieldsFragment,
+  LocationFieldsFragment,
+  Maybe,
+  StoreInput,
+  UserRole
+} from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import { StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
 import createLocationMachine from '../lib/machines/locations/locationMachine';
@@ -38,7 +45,7 @@ import PasteIcon from '../components/icons/PasteIcon';
 import BlueButton from '../components/buttons/BlueButton';
 import { ClientError } from 'graphql-request';
 import { stanCore } from '../lib/sdk';
-import { useSearchParams } from 'react-router-dom';
+import { useLoaderData, useSearchParams } from 'react-router-dom';
 
 /**
  * The different ways of displaying stored items
@@ -67,7 +74,16 @@ interface LocationProps {
   locationSearchParams: Maybe<LocationSearchParams>;
 }
 
-const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchParams }) => {
+const Location = () => {
+  const [search] = useSearchParams();
+  const locationSearchParams = React.useMemo(() => {
+    if (search.has('labwareBarcode') && search.get('labwareBarcode')) {
+      return { labwareBarcode: search.get('labwareBarcode')! };
+    }
+  }, [search]);
+
+  const storageLocation = useLoaderData() as LocationFieldsFragment;
+
   const locationMachine = React.useMemo(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> = storageLocation.size

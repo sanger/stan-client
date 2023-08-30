@@ -18,6 +18,7 @@ import { isLabwareUsable } from '../lib/helpers/labwareHelper';
 import History from '../components/history/History';
 import { LabwareStatePill } from '../components/LabwareStatePill';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
+import { useLoaderData } from 'react-router-dom';
 
 /**
  * Props passed in to the {@link LabwareDetails} page
@@ -28,7 +29,9 @@ type LabwareDetailsProps = {
   samplePositionResults: SamplePositionFieldsFragment[];
 };
 
-export default function LabwareDetails({ labware, permData, samplePositionResults }: LabwareDetailsProps) {
+export default function LabwareDetails() {
+  const { labware, permData, samplePositionResults } = useLoaderData() as LabwareDetailsProps;
+  debugger;
   const getPermDataForSlot = (
     slot: SlotFieldsFragment,
     permData: AddressPermDataFieldsFragment[]
