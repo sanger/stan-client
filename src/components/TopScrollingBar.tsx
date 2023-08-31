@@ -9,8 +9,7 @@ const TopScrollingBar: React.FC<DoubleScrollbarProps> = ({ children }) => {
   const childrenWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const getChildWrapperWidth = useCallback(() => {
-    const childrenWrapper = childrenWrapperRef.current;
-    const table = childrenWrapper?.getElementsByTagName('table')[0];
+    const table = childrenWrapperRef.current?.getElementsByTagName('table')[0];
     return table ? table.scrollWidth + 'px' : null;
   }, []);
 
@@ -45,14 +44,15 @@ const TopScrollingBar: React.FC<DoubleScrollbarProps> = ({ children }) => {
       topScrollBarDiv.removeEventListener('scroll', onTableWrapperScroll);
       window.removeEventListener('resize', setInnerDivWidth);
     };
-  }, [width, setWidth, children, getChildWrapperWidth, setInnerDivWidth]);
-
+  }, [width, setWidth, getChildWrapperWidth, setInnerDivWidth]);
   return (
     <div>
-      <div ref={outerDivRef} style={{ overflowX: 'auto', overflowY: 'hidden' }}>
-        <div style={{ paddingTop: '1px', width }}>&nbsp;</div>
+      <div ref={outerDivRef} className="overflow-x-auto overflow-y-hidden">
+        <div className="pt-0" style={{ width }}>
+          &nbsp;
+        </div>
       </div>
-      <div ref={childrenWrapperRef} style={{ overflow: 'auto', overflowY: 'hidden' }}>
+      <div className="overflow-x-auto overflow-y-hidden" ref={childrenWrapperRef}>
         {children}
       </div>
     </div>
