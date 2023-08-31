@@ -113,7 +113,6 @@ export default function LabwareDetails({ labware, permData, samplePositionResult
                   sampleColumns.slotAddress(),
                   sampleColumns.tissueType(),
                   sampleColumns.sectionNumber(),
-                  sampleColumns.slotId(),
                   sampleColumns.sectionPosition(),
                   sampleColumns.bioState(),
                   sampleColumns.replicateNumber(),

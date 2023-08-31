@@ -20,7 +20,13 @@ import createSlotMapperMachine from './slotMapper.machine';
 import PinkButton from '../buttons/PinkButton';
 import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
 
-const SlotMapper: React.FC<SlotMapperProps> = ({
+type LabwareType = {
+  labwareType?: string;
+};
+
+type ExtendedSlotMapperProps = SlotMapperProps & LabwareType;
+
+const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   onChange,
   onInputLabwareChange,
   onOutputLabwareChange,
@@ -35,7 +41,8 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
   outputLabwareConfigPanel,
   onSelectInputLabware,
   onSelectOutputLabware,
-  displayMappedTable = true
+  displayMappedTable = true,
+  labwareType = undefined
 }) => {
   const memoSlotMapperMachine = React.useMemo(() => {
     return createSlotMapperMachine({
@@ -673,16 +680,18 @@ const SlotMapper: React.FC<SlotMapperProps> = ({
                     </div>
                   )}
                 </div>
-                <Labware
-                  labware={currentOutput.labware}
-                  selectable="any"
-                  selectionMode="multi"
-                  labwareRef={outputLabwareRef}
-                  name={currentOutput?.labware.labwareType.name}
-                  onSlotClick={handleOnOutputLabwareSlotClick}
-                  onSelect={setSelectedOutputAddresses}
-                  slotColor={(address) => getDestinationSlotColor(currentOutput, address)}
-                />
+                {(labwareType === undefined || labwareType.length > 0) && (
+                  <Labware
+                    labware={currentOutput.labware}
+                    selectable="any"
+                    selectionMode="multi"
+                    labwareRef={outputLabwareRef}
+                    name={currentOutput?.labware.labwareType.name}
+                    onSlotClick={handleOnOutputLabwareSlotClick}
+                    onSelect={setSelectedOutputAddresses}
+                    slotColor={(address) => getDestinationSlotColor(currentOutput, address)}
+                  />
+                )}
               </div>
             )}
           </div>
