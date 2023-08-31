@@ -52,6 +52,7 @@ import { useAuth } from '../context/AuthContext';
 import ProbeHybridisationXenium from '../pages/ProbeHybridisationXenium';
 import XeniumAnalyser from '../pages/XeniumAnalyser';
 import XeniumQC from '../pages/XeniumQC';
+import ProbeHybridisationQC from '../pages/ProbeHybridisationQC';
 
 export function Routes() {
   const stanCore = useContext(StanCoreContext);
@@ -213,6 +214,22 @@ export function Routes() {
       <AuthenticatedRoute
         path="/lab/xenium_analyser"
         render={(routeProps) => <XeniumAnalyser key={routeProps.location.key} />}
+      />
+      <AuthenticatedRoute
+        path="/lab/probe_hybridisation_qc"
+        render={(routeProps) => (
+          <DataFetcher
+            key={routeProps.location.key}
+            dataFetcher={() =>
+              stanCore.GetComments({
+                commentCategory: 'Probe QC',
+                includeDisabled: false
+              })
+            }
+          >
+            {(response) => <ProbeHybridisationQC comments={response.comments} />}
+          </DataFetcher>
+        )}
       />
       <AuthenticatedRoute path="/lab/cytassist" render={(routeProps) => <CytAssist key={routeProps.location.key} />} />
       <AuthenticatedRoute
