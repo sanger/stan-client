@@ -45,13 +45,12 @@ const FileUploader: React.FC<FileUploaderProps<any>> = ({
 
   /**Handle actions when we get to 'error' or 'uploadSuccess' state after upload**/
   React.useEffect(() => {
-    if ((!error && !uploadSuccess) || !uploadInProgress) return;
-    setUploadInProgress(false);
-    if (uploadSuccess && file) {
-      if (file) {
+    if ((!error && !uploadSuccess) || uploadInProgress) return;
+    if (uploadSuccess && file && uploadResponse) {
+      if (file && uploadResponse) {
         notifyUploadOutcome?.(file, uploadSuccess, uploadResponse);
+        setFile(undefined);
       }
-      setFile(undefined);
     }
   }, [uploadSuccess, error, file, notifyUploadOutcome, setUploadInProgress, uploadInProgress, uploadResponse]);
 
@@ -60,7 +59,7 @@ const FileUploader: React.FC<FileUploaderProps<any>> = ({
     if (!file) return;
     setUploadInProgress(true);
     setConfirmUploadResult(undefined);
-    requestUpload(file);
+    requestUpload(file, setUploadInProgress);
   }, [setUploadInProgress, setConfirmUploadResult, file, requestUpload]);
 
   /**Callback function to handle file change**/

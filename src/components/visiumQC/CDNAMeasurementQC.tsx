@@ -137,13 +137,28 @@ const CDNAMeasurementQC = ({
     return error;
   }
 
+  const onRemoveLabware = React.useCallback(
+    (barcode) => {
+      removeLabware(barcode);
+      setMeasurementName(qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : '');
+    },
+    [removeLabware, setMeasurementName, qcType]
+  );
+
   return (
     <div className="max-w-screen-xl mx-auto">
       {labware && (
         <div className={'flex flex-col mt-2'}>
           <Panel>
             <div className="flex flex-row items-center justify-end">
-              {<RemoveButton data-testid={'remove'} onClick={() => removeLabware(labware.barcode)} />}
+              {
+                <RemoveButton
+                  data-testid={'remove'}
+                  onClick={() => {
+                    onRemoveLabware(labware.barcode);
+                  }}
+                />
+              }
             </div>
             {measurementConfigMemo.isApplySameValueForAllMeasurements && (
               <div className={'flex flex-row w-1/4 ml-2'}>
@@ -178,16 +193,18 @@ const CDNAMeasurementQC = ({
               </div>
             )}
             <div className={'flex flex-row mt-8 justify-between'}>
-              {slotMeasurements && showSlotMeasurementTable(qcType, measurementName, slotMeasurements) && (
-                <SlotMeasurements
-                  slotMeasurements={slotMeasurements}
-                  measurementName={measurementName}
-                  onChangeMeasurement={handleChangeMeasurement}
-                  validateValue={measurementConfigMemo.validateFunction}
-                  stepIncrement={measurementConfigMemo.stepIncrement}
-                  comments={measurementConfigMemo.concentrationComments}
-                />
-              )}
+              <div className="flex flex-col w-full">
+                {slotMeasurements && showSlotMeasurementTable(qcType, measurementName, slotMeasurements) && (
+                  <SlotMeasurements
+                    slotMeasurements={slotMeasurements}
+                    measurementName={measurementName}
+                    onChangeMeasurement={handleChangeMeasurement}
+                    validateValue={measurementConfigMemo.validateFunction}
+                    stepIncrement={measurementConfigMemo.stepIncrement}
+                    comments={measurementConfigMemo.concentrationComments}
+                  />
+                )}
+              </div>
               <div className="flex flex-col w-full items-end justify-center p-4" data-testid={'labware'}>
                 <Labware labware={labware} name={labware.labwareType.name} />
               </div>
