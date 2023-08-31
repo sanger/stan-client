@@ -1,5 +1,10 @@
 import { graphql } from 'msw';
-import { RecordProbeOperationMutation, RecordProbeOperationMutationVariables } from '../../types/sdk';
+import {
+  RecordCompletionMutation,
+  RecordCompletionMutationVariables,
+  RecordProbeOperationMutation,
+  RecordProbeOperationMutationVariables
+} from '../../types/sdk';
 
 const probeHybridisationHandlers = [
   graphql.mutation<RecordProbeOperationMutation, RecordProbeOperationMutationVariables>(
@@ -17,7 +22,21 @@ const probeHybridisationHandlers = [
         })
       );
     }
-  )
+  ),
+
+  graphql.mutation<RecordCompletionMutation, RecordCompletionMutationVariables>('RecordCompletion', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        recordCompletion: {
+          operations: [
+            {
+              id: 1
+            }
+          ]
+        }
+      })
+    );
+  })
 ];
 
 export default probeHybridisationHandlers;

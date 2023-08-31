@@ -339,6 +339,11 @@ export function createSessionStorageForLabwareAwaiting( labware:LabwareFieldsFra
   );
 }
 
+// convert yyyy-mm-ddTHH:MM to yyyy-mm-dd HH:MM:00
+export function formatDateTimeForCore(dateTime: Maybe<string>) {
+  return dateTime ? dateTime.replace('T', ' ') + ':00' : "";
+}
+
 export function getCurrentDateTime() {
   const now = new Date();
   const year = now.getFullYear();

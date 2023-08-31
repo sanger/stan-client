@@ -7,6 +7,18 @@ import { stanCore } from '../../sdk';
 import { ClientError } from 'graphql-request';
 import { findIndex } from 'lodash';
 
+const resolveStringArrayPromise = (data: string[] | Promise<string[]>): string[] => {
+  let resolvedData: string[] = [];
+  if (data instanceof Promise<string[]>) {
+    data.then((resolved) => {
+      resolvedData = resolved;
+    });
+  } else {
+    resolvedData = data;
+  }
+  return resolvedData;
+};
+
 export interface LabwareContext {
   /**
    * The current barcode we're working with
@@ -39,7 +51,10 @@ export interface LabwareContext {
    * @param foundLabware the new labware to be entered
    * @return a list of any problems identified
    */
-  foundLabwareCheck?: (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment) => string[];
+  foundLabwareCheck?: (
+    labwares: LabwareFieldsFragment[],
+    foundLabware: LabwareFieldsFragment
+  ) => string[] | Promise<string[]>;
 
   /**
    * The current success message
@@ -370,7 +385,9 @@ export const createLabwareMachine = () =>
               /*Validate all the labwares in the location using the validation function passed.
                If validation is success, add that labware to the list of labwares, otherwise add the error message
                for failure*/
-              problem = ctx.foundLabwareCheck ? ctx.foundLabwareCheck(e.data.labwareInLocation, labware) : [];
+              problem = resolveStringArrayPromise(
+                ctx.foundLabwareCheck ? ctx.foundLabwareCheck(e.data.labwareInLocation, labware) : []
+              );
             }
             if (problem.length !== 0) {
               problems.push(problem.join('\n'));
@@ -417,12 +434,14 @@ export const createLabwareMachine = () =>
         },
         validateBarcode: (ctx: LabwareContext) => ctx.validator.validate(ctx.currentBarcode),
         validateFoundLabware: (ctx: LabwareContext) => {
-          return new Promise((resolve, reject) => {
-            const problems = ctx.foundLabware
-              ? ctx.foundLabwareCheck
-                ? ctx.foundLabwareCheck(ctx.labwares, ctx.foundLabware)
-                : []
-              : ['Labware not loaded.'];
+          return new Promise(async (resolve, reject) => {
+            const problems = resolveStringArrayPromise(
+              ctx.foundLabware
+                ? ctx.foundLabwareCheck
+                  ? await ctx.foundLabwareCheck(ctx.labwares, ctx.foundLabware)
+                  : []
+                : ['Labware not loaded.']
+            );
             if (problems.length === 0) {
               resolve(ctx.foundLabware);
             } else {

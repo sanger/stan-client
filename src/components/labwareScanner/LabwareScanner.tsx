@@ -27,7 +27,10 @@ export type LabwareScannerProps = {
   /**
    * A function to check for problems with new labware because it is added
    */
-  labwareCheckFunction?: (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment) => string[];
+  labwareCheckFunction?: (
+    labwares: LabwareFieldsFragment[],
+    foundLabware: LabwareFieldsFragment
+  ) => string[] | Promise<string[]>;
 
   /**
    * Called when labware is added or removed
