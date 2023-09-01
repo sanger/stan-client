@@ -38,8 +38,7 @@ import PasteIcon from '../components/icons/PasteIcon';
 import BlueButton from '../components/buttons/BlueButton';
 import { ClientError } from 'graphql-request';
 import { stanCore } from '../lib/sdk';
-import { useLoaderData } from 'react-router-dom';
-import { setAwaitingLabwareInSessionStorage } from '../../cypress/e2e/shared/awaitingStorage.cy';
+import { useLoaderData, useLocation } from 'react-router-dom';
 
 /**
  * The different ways of displaying stored items
@@ -65,6 +64,12 @@ export const LocationParentContext = React.createContext<Maybe<LocationParentCon
 
 const Location = () => {
   const storageLocation = useLoaderData() as LocationFieldsFragment;
+
+  const locationVal = useLocation();
+
+  React.useEffect(() => {
+    console.log(locationVal.pathname);
+  }, [locationVal]);
 
   const memoLocationMachine = React.useMemo(() => {
     // Create all the possible addresses for this location if it has a size.
@@ -151,8 +156,6 @@ const Location = () => {
   const [storagePath, setStoragePath] = React.useState<string>('');
 
   const transferInputRef = React.useRef<HTMLInputElement>(null);
-
-  const [locationClick, setLocationClick] = React.useState<boolean>(false);
 
   /***When component loads, fill awaitingLabwares from sessionStorage, if any**/
   React.useEffect(() => {
@@ -476,7 +479,6 @@ const Location = () => {
                     <StyledLink
                       to={`/locations/${location.parent.barcode}`}
                       state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
-                      onClick={() => setLocationClick(true)}
                     >
                       {location.parent.customName ?? location.parent.barcode}
                     </StyledLink>
@@ -499,7 +501,6 @@ const Location = () => {
                             <StyledLink
                               to={`/locations/${child.barcode}`}
                               state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
-                              onClick={() => setLocationClick(true)}
                             >
                               {child.customName ?? child.fixedName ?? child.barcode}
                             </StyledLink>
@@ -654,12 +655,13 @@ const Location = () => {
           )}
         </div>
       </AppShell.Main>
-      <PromptOnLeave
-        when={awaitingLabwares.length > 0 && !locationClick}
-        messageHandler={awaitingStorageCheckOnExit}
-        message={'You have labwares that are not stored. Are you sure you want to leave?'}
-        onPromptLeave={onLeave}
-      />
+      {awaitingLabwares.length > 0 && (
+        <PromptOnLeave
+          when={awaitingStorageCheckOnExit}
+          message={'You have labwares that are not stored. Are you sure you want to leave?'}
+          onPromptLeave={onLeave}
+        />
+      )}
     </AppShell>
   );
 };

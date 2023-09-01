@@ -12,7 +12,7 @@ import labwareScanTableColumns from '../../components/dataTableColumns/labwareCo
 import Planner, { PlanChangedProps } from '../../components/planning/Planner';
 import { selectOptionValues } from '../../components/forms';
 import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
-import Prompt from '../../components/notifications/Prompt';
+import PromptOnLeave from '../../components/notifications/PromptOnLeave';
 
 /**
  * Types of labware the user is allowed to section onto
@@ -137,7 +137,7 @@ function Plan({ sectioningInfo }: SectioningParams) {
         </Link>
       </ButtonBar>
 
-      <Prompt when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
+      <PromptOnLeave when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
     </AppShell>
   );
 }

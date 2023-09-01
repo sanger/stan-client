@@ -29,7 +29,7 @@ import { useConfirmLeave } from '../../../lib/hooks';
 import { Row } from 'react-table';
 import FormikInput from '../../forms/Input';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
-import Prompt from '../../notifications/Prompt';
+import PromptOnLeave from '../../notifications/PromptOnLeave';
 
 /**
  * Used as Formik's values
@@ -431,7 +431,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
           </Formik>
         )}
       </motion.div>
-      <Prompt when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
+      <PromptOnLeave when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
     </>
   );
 }

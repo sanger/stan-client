@@ -27,7 +27,7 @@ import ProcessingSuccess from '../ProcessingSuccess';
 import columns from '../../dataTableColumns/labwareColumns';
 import { useConfirmLeave } from '../../../lib/hooks';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
-import Prompt from '../../notifications/Prompt';
+import PromptOnLeave from '../../notifications/PromptOnLeave';
 
 /**
  * Used as Formik's values
@@ -358,7 +358,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
           </Formik>
         )}
       </motion.div>
-      <Prompt when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
+      <PromptOnLeave when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
     </>
   );
 }

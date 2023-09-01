@@ -13,7 +13,7 @@ import Success from '../../components/notifications/Success';
 import variants from '../../lib/motionVariants';
 import { ConfirmPrintLabware } from '../../components/sectioningConfirm/ConfirmPrintLabware';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
-import Prompt from '../../components/notifications/Prompt';
+import PromptOnLeave from '../../components/notifications/PromptOnLeave';
 
 type SectioningConfirmProps = {
   readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
@@ -115,7 +115,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
         </div>
       </AppShell.Main>
 
-      <Prompt when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
+      <PromptOnLeave when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
     </AppShell>
   );
 }

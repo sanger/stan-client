@@ -17,8 +17,8 @@ import { isLocationSearch, LocationSearchParams } from '../types/stan';
 import { StanCoreContext } from '../lib/sdk';
 import { ClientError } from 'graphql-request';
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
-import * as H from 'history';
 import PromptOnLeave from '../components/notifications/PromptOnLeave';
+import { Action as HistoryAction, Location } from '@remix-run/router/dist/history';
 
 export type LabwareAwaitingStorageInfo = {
   barcode: string;
@@ -32,25 +32,31 @@ export type LabwareAwaitingStorageInfo = {
 
 /**
  *
- * @param location - location to navigate
- * @param action - action performed
- * @param message - message to display
+ * @param nextLocation - location to navigate
+ * @param currentLocation - current location
+ * @param historyAction - action performed
  * Clear session storage for awaiting labwares if it is navigating to a page other than /location or /store
  * Session storage will be used for following operations
  * a) Go back and Go forward operation to a Location/Store page
  * b) Going to a new location page by invoking a store location link or through a search
  */
-export function awaitingStorageCheckOnExit(location: H.Location, action: H.Action, message: string) {
+export function awaitingStorageCheckOnExit(args: {
+  currentLocation: Location;
+  nextLocation: Location;
+  historyAction: HistoryAction;
+}) {
   /**PUSH is the action for  invoking/visiting a link or for pushing a new entry onto the history stack
    * POP is the action send while you navigate using the browser's forward/back buttons.
    * **/
+  debugger;
   if (
-    (action === 'POP' && ['/locations', '/store'].some((path) => location.pathname.startsWith(path))) ||
-    (action === 'PUSH' && location.pathname.startsWith('/locations'))
+    (args.historyAction === 'POP' &&
+      ['/locations', '/store'].some((path) => args.nextLocation.pathname.startsWith(path))) ||
+    (args.historyAction === 'PUSH' && args.nextLocation.pathname.startsWith('/locations'))
   ) {
-    return true;
+    return false;
   } else {
-    return message;
+    return true;
   }
 }
 
@@ -162,12 +168,13 @@ const Store = () => {
           )}
         </div>
       </AppShell.Main>
-      <PromptOnLeave
-        when={awaitingLabwares.length > 0}
-        messageHandler={awaitingStorageCheckOnExit}
-        message={'You have labwares that are not stored. Are you sure you want to leave?'}
-        onPromptLeave={onLeave}
-      />
+      {awaitingLabwares.length > 0 && (
+        <PromptOnLeave
+          when={awaitingStorageCheckOnExit}
+          message={'You have labwares that are not stored. Are you sure you want to leave?'}
+          onPromptLeave={onLeave}
+        />
+      )}
     </AppShell>
   );
 };

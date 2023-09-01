@@ -21,7 +21,7 @@ import variants from '../../lib/motionVariants';
 import Heading from '../../components/Heading';
 import WorkNumberSelect from '../../components/WorkNumberSelect';
 import { FormikErrorMessage } from '../../components/forms';
-import Prompt from '../../components/notifications/Prompt';
+import PromptOnLeave from '../../components/notifications/PromptOnLeave';
 
 /**
  * Expect form input interface
@@ -150,7 +150,7 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          <Prompt when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
+          <PromptOnLeave when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
           {registrationErrors && (
             <div ref={warningRef}>
               <Warning message={'There was a problem registering your tissues'}>
