@@ -1,4 +1,4 @@
-import { MachineOptions, send } from 'xstate';
+import { createMachine, MachineOptions, send } from 'xstate';
 import { assign } from '@xstate/immer';
 import {
   LocationContext,
@@ -9,7 +9,6 @@ import {
 } from './locationMachineTypes';
 import * as locationService from '../../services/locationService';
 import { MachineConfig } from 'xstate/lib/types';
-import { createMachineBuilder } from '../index';
 import { castDraft } from 'immer';
 import { stanCore } from '../../sdk';
 import { findNextAvailableAddress } from '../../helpers/locationHelper';
@@ -41,7 +40,6 @@ export const machineOptions: Partial<MachineOptions<LocationContext, LocationEve
       if (e.type !== 'FETCH_LOCATION') {
         return;
       }
-
       ctx.locationSearchParams = e.locationSearchParams;
     }),
 
@@ -56,7 +54,6 @@ export const machineOptions: Partial<MachineOptions<LocationContext, LocationEve
       ) {
         return;
       }
-
       // Can be null if this is an unstore action
       if (e.type !== 'UPDATE_LOCATION' && e.data == null) {
         return;
@@ -252,6 +249,12 @@ export const machineConfig: MachineConfig<LocationContext, LocationSchema, Locat
 /**
  * Location Machine
  */
-const createLocationMachine = createMachineBuilder(machineConfig, machineOptions);
 
-export default createLocationMachine;
+export const locationMachine = createMachine<LocationContext, LocationEvent>(
+  {
+    ...machineConfig
+  },
+  {
+    ...machineOptions
+  }
+);

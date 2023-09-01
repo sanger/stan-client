@@ -31,7 +31,6 @@ type LabwareDetailsProps = {
 
 export default function LabwareDetails() {
   const { labware, permData, samplePositionResults } = useLoaderData() as LabwareDetailsProps;
-  debugger;
   const getPermDataForSlot = (
     slot: SlotFieldsFragment,
     permData: AddressPermDataFieldsFragment[]

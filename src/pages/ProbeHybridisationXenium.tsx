@@ -18,7 +18,7 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import FormikInput from '../components/forms/Input';
 import { useMachine } from '@xstate/react';
 import BlueButton from '../components/buttons/BlueButton';
-import { reload, StanCoreContext } from '../lib/sdk';
+import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
 import Warning from '../components/notifications/Warning';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';

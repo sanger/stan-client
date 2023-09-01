@@ -14,7 +14,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import LabwareIcon from './icons/LabwareIcon';
 import SupportIcon from './icons/SupportIcon';
 import Warning from './notifications/Warning';
-import { LocationState } from '../types/stan';
 import Success from './notifications/Success';
 import { UserRole } from '../types/sdk';
 import { configContext } from '../context/ConfigContext';
@@ -31,6 +30,11 @@ function AppShell({ children }: AppShellParams) {
   const location = useLocation();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
+
+  sessionStorage.setItem(
+    'awaitingLabwares',
+    'STAN-2111,tube,EXT_1,Donor_1,Lungs,Spatial_location 1,2a,STAN-3111,Slide,Ext_2,Donor_2,Kidney,Spatial_location 2,3,STAN-4111,Slide,EXT_3,Donor_3,Heart,Spatial_location 3,4,STAN-5111,Slide,Ext_4,Donor_4,Heart,Spatial_location 4,1'
+  );
 
   // Close the drop down if the user click's outside it, as well as not on the profile button
   useOnClickOutside(

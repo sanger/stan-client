@@ -15,7 +15,6 @@ import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import ScanInput from '../components/scanInput/ScanInput';
 import PermTimeSelectField from '../components/forms/PermTimeSelectField';
 import RemoveButton from '../components/buttons/RemoveButton';
-import { useNavigate } from 'react-router-dom';
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),

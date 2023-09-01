@@ -1,7 +1,7 @@
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
 import Store from '../pages/Store';
 import DataFetcher from './DataFetcher';
-import { reload, stanCore, StanCoreContext } from '../lib/sdk';
+import { StanCoreContext } from '../lib/sdk';
 import WorkProgress from '../pages/WorkProgress';
 import React, { useContext } from 'react';
 import Logout from '../pages/Logout';
@@ -49,8 +49,6 @@ import Destroy from '../pages/Destroy';
 import Configuration from '../pages/Configuration';
 import LabwareDetails from '../pages/LabwareDetails';
 import { useAuth } from '../context/AuthContext';
-import Warning from './notifications/Warning';
-import WhiteButton from './buttons/WhiteButton';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -395,6 +393,7 @@ const RouteLayout = () => {
             }
           }}
           element={<Location />}
+          index={true}
         />
         <Route
           path="/labware/:barcode"

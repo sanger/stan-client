@@ -2,8 +2,11 @@ import React from 'react';
 import * as H from 'history';
 import { useConfirmLeave } from '../../lib/hooks';
 import ReactRouterPrompt from 'react-router-prompt';
-import Modal from '../Modal';
+import Modal, { ModalBody, ModalFooter } from '../Modal';
 import { useLocation, useNavigationType } from 'react-router-dom';
+import BlueButton from '../buttons/BlueButton';
+import Heading from '../Heading';
+import WhiteButton from '../buttons/WhiteButton';
 
 interface PromptOnLeaveProps {
   /**Should a prompt dialog be displayed?**/
@@ -35,22 +38,18 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({
   React.useEffect(() => {
     setShouldConfirm(when);
   }, [when, setShouldConfirm]);
-
   return (
     <ReactRouterPrompt when={when}>
       {({ isActive, onConfirm, onCancel }) => (
         <Modal show={isActive}>
-          <div>
-            <p>{message}</p>
-            <button
-              onClick={() => {
-                onCancel();
-                onPromptCancel?.();
-              }}
-            >
-              Cancel
-            </button>
-            <button
+          <ModalBody>
+            <div className="my-2 py-2">
+              <p className="text-gray-900 leading-normal">{message}</p>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <WhiteButton
+              className="mt-3 w-full sm:mt-0 sm:ml-3"
               onClick={() => {
                 onConfirm();
                 onPromptLeave?.();
@@ -58,8 +57,17 @@ const PromptOnLeave: React.FC<PromptOnLeaveProps> = ({
               }}
             >
               Ok
-            </button>
-          </div>
+            </WhiteButton>
+            <BlueButton
+              className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={() => {
+                onCancel();
+                onPromptCancel?.();
+              }}
+            >
+              Cancel
+            </BlueButton>
+          </ModalFooter>
         </Modal>
       )}
     </ReactRouterPrompt>

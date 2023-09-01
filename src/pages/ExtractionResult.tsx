@@ -10,7 +10,7 @@ import {
 } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
-import { reload, stanCore } from '../lib/sdk';
+import { stanCore } from '../lib/sdk';
 import { Form, Formik } from 'formik';
 import Heading from '../components/Heading';
 import WorkNumberSelect from '../components/WorkNumberSelect';

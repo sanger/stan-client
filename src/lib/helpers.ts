@@ -1,6 +1,5 @@
 import * as queryString from 'query-string';
 import * as Yup from 'yup';
-import { ParsedQuery } from 'query-string';
 import { GridDirection, Maybe } from '../types/sdk';
 import { HasEnabled, SizeInput } from '../types/stan';
 import _, { isNaN } from 'lodash';

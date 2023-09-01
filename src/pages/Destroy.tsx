@@ -16,7 +16,7 @@ import columns from '../components/dataTableColumns/labwareColumns';
 import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import PinkButton from '../components/buttons/PinkButton';
 import createFormMachine from '../lib/machines/form/formMachine';
-import { reload, StanCoreContext } from '../lib/sdk';
+import { StanCoreContext } from '../lib/sdk';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 

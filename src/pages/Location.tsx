@@ -25,7 +25,7 @@ import { extractServerErrors } from '../types/stan';
 import { GridDirection, LocationFieldsFragment, Maybe, StoreInput, UserRole } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import { StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
-import createLocationMachine from '../lib/machines/locations/locationMachine';
+import { locationMachine } from '../lib/machines/locations/locationMachine';
 import { awaitingStorageCheckOnExit, getAwaitingLabwaresFromSession, LabwareAwaitingStorageInfo } from './Store';
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
 import warningToast from '../components/notifications/WarningToast';
@@ -38,7 +38,8 @@ import PasteIcon from '../components/icons/PasteIcon';
 import BlueButton from '../components/buttons/BlueButton';
 import { ClientError } from 'graphql-request';
 import { stanCore } from '../lib/sdk';
-import { useLoaderData, useSearchParams } from 'react-router-dom';
+import { useLoaderData } from 'react-router-dom';
+import { setAwaitingLabwareInSessionStorage } from '../../cypress/e2e/shared/awaitingStorage.cy';
 
 /**
  * The different ways of displaying stored items
@@ -63,16 +64,9 @@ export type LocationParentContextType = {
 export const LocationParentContext = React.createContext<Maybe<LocationParentContextType>>(null);
 
 const Location = () => {
-  const [search] = useSearchParams();
-  const locationSearchParams = React.useMemo(() => {
-    if (search.has('labwareBarcode') && search.get('labwareBarcode')) {
-      return { labwareBarcode: search.get('labwareBarcode')! };
-    }
-  }, [search]);
-
   const storageLocation = useLoaderData() as LocationFieldsFragment;
 
-  const locationMachine = React.useMemo(() => {
+  const memoLocationMachine = React.useMemo(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> = storageLocation.size
       ? buildOrderedAddresses(storageLocation.size, storageLocation.direction ?? GridDirection.DownRight)
@@ -92,24 +86,30 @@ const Location = () => {
       addressToItemMap: addressToItemMap
     });
 
-    const selectedAddress = selectedAddresses.length > 0 ? selectedAddresses[0] : undefined;
-    return createLocationMachine({
-      context: {
-        location: storageLocation,
-        locationSearchParams,
-        locationAddresses,
-        addressToItemMap,
-        selectedAddress
-      }
+    const selectedAddress = selectedAddresses.length > 0 ? selectedAddresses[0] : null;
+    return locationMachine.withContext({
+      location: storageLocation,
+      locationSearchParams: { labwareBarcode: storageLocation.barcode },
+      locationAddresses,
+      addressToItemMap,
+      selectedAddress,
+      successMessage: '',
+      errorMessage: '',
+      serverError: null
     });
-  }, [storageLocation, locationSearchParams]);
-  //Custom hook to retain the updated labware state
-  const [current, send] = useMachine(locationMachine);
+  }, [storageLocation]);
 
+  //Custom hook to retain the updated labware state
+  const [current, send] = useMachine(() => memoLocationMachine);
   const { location, locationAddresses, successMessage, errorMessage, serverError, addressToItemMap, selectedAddress } =
     current.context;
 
   const locationHasGrid = !!location.size;
+
+  React.useEffect(() => {
+    if (location.barcode === storageLocation.barcode) return;
+    send('UPDATE_LOCATION', { location: storageLocation });
+  }, [send, storageLocation, location.barcode]);
 
   /**
    * Should the page be displaying the grid or list view of the items
@@ -152,7 +152,7 @@ const Location = () => {
 
   const transferInputRef = React.useRef<HTMLInputElement>(null);
 
-  const [searchParams] = useSearchParams();
+  const [locationClick, setLocationClick] = React.useState<boolean>(false);
 
   /***When component loads, fill awaitingLabwares from sessionStorage, if any**/
   React.useEffect(() => {
@@ -267,12 +267,12 @@ const Location = () => {
   const labwareBarcodeToAddressMap: Map<string, string> = useMemo(() => {
     const map = new Map<string, string>();
     for (const item of location.stored) {
-      if (item.address && item.barcode === locationSearchParams?.labwareBarcode) {
+      if (item.address && item.barcode === storageLocation.barcode) {
         map.set(item.barcode, item.address);
       }
     }
     return map;
-  }, [location, locationSearchParams?.labwareBarcode]);
+  }, [location, storageLocation.barcode]);
 
   const locationParentContext: LocationParentContextType = useMemo(
     () => ({
@@ -434,7 +434,7 @@ const Location = () => {
               </Success>
             ))}
           {current.matches('notFound') && (
-            <Warning message={`Location ${searchParams.get('locationBarcode')} could not be found`} />
+            <Warning message={`Location ${storageLocation.barcode} could not be found`} />
           )}
           <LocationSearch />
           {showLocation && (
@@ -476,6 +476,7 @@ const Location = () => {
                     <StyledLink
                       to={`/locations/${location.parent.barcode}`}
                       state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
+                      onClick={() => setLocationClick(true)}
                     >
                       {location.parent.customName ?? location.parent.barcode}
                     </StyledLink>
@@ -498,6 +499,7 @@ const Location = () => {
                             <StyledLink
                               to={`/locations/${child.barcode}`}
                               state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
+                              onClick={() => setLocationClick(true)}
                             >
                               {child.customName ?? child.fixedName ?? child.barcode}
                             </StyledLink>
@@ -653,7 +655,7 @@ const Location = () => {
         </div>
       </AppShell.Main>
       <PromptOnLeave
-        when={awaitingLabwares.length > 0}
+        when={awaitingLabwares.length > 0 && !locationClick}
         messageHandler={awaitingStorageCheckOnExit}
         message={'You have labwares that are not stored. Are you sure you want to leave?'}
         onPromptLeave={onLeave}

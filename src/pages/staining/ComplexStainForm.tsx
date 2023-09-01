@@ -18,7 +18,7 @@ import PinkButton from '../../components/buttons/PinkButton';
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../../lib/machines/form/formMachine';
-import { reload, stanCore } from '../../lib/sdk';
+import { stanCore } from '../../lib/sdk';
 import { FormikLabwareScanner } from '../../components/labwareScanner/FormikLabwareScanner';
 import Table, { TableBody, TableHead, TableHeader } from '../../components/Table';
 import OperationCompleteModal from '../../components/modal/OperationCompleteModal';

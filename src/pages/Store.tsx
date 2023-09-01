@@ -127,7 +127,7 @@ const Store = () => {
         invokeFindLabwareLocation(locationSearchParams.labwareBarcode.trim());
       }
     }
-  }, [location.search, location.state]);
+  }, [location.search, location.state, navigate]);
 
   const awaitingLabwares = getAwaitingLabwaresFromSession();
 
