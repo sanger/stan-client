@@ -35,7 +35,7 @@ type SampleWithRegion = {
   address: string;
   sampleId: number;
   region: string;
-  sectionNumber?: number;
+  sectionNumber?: string;
   externalName?: string;
   roi: string;
 };
@@ -162,6 +162,7 @@ const XeniumAnalyser = () => {
               sampleId: sample.id,
               region: samplePosition?.region ?? '',
               externalName: sample.tissue.externalName ?? '',
+              sectionNumber: String(sample.section) ?? '',
               roi: ''
             });
           });
@@ -381,9 +382,9 @@ const XeniumAnalyser = () => {
                                           <div className={'flex items-center px-6'}>
                                             <label>{sample.address}</label>
                                           </div>
-                                          <label>{sample.sectionNumber}</label>
-                                          <label>{sample.region}</label>
-                                          <label>{sample.externalName}</label>
+                                          <label className={'flex items-center px-6'}>{sample.sectionNumber}</label>
+                                          <label className={'flex items-center'}>{sample.region}</label>
+                                          <label className={'flex items-center'}>{sample.externalName}</label>
                                         </div>
                                       );
                                     })}
