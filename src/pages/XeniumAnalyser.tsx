@@ -196,7 +196,7 @@ const XeniumAnalyser = () => {
                   return {
                     barcode: lw.barcode,
                     workNumber: lw.workNumber,
-                    position: lw.position === 'left' ? CassettePosition.Left : CassettePosition.Right,
+                    position: lw.position.toLowerCase() === 'left' ? CassettePosition.Left : CassettePosition.Right,
                     samples: labwareSample
                       ? labwareSample.samples.map((sample) => {
                           return {
