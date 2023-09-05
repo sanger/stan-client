@@ -1857,6 +1857,9 @@ svg.logo.loading rect:nth-child(3n+1) {
   -webkit-user-select: all;
           user-select: all;
 }
+.resize {
+  resize: both;
+}
 .list-inside {
   list-style-position: inside;
 }
@@ -2194,6 +2197,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .overflow-x-hidden {
   overflow-x: hidden;
+}
+.overflow-y-hidden {
+  overflow-y: hidden;
 }
 .overflow-y-visible {
   overflow-y: visible;
@@ -2689,6 +2695,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .pb-4 {
   padding-bottom: 1rem;
+}
+.pt-0 {
+  padding-top: 0;
 }
 .pr-5 {
   padding-right: 1.25rem;
@@ -4179,4 +4188,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.fc3c937f.css.map*/
+/*# sourceMappingURL=main.243f925b.css.map*/
