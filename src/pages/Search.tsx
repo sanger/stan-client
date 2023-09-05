@@ -26,6 +26,7 @@ import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
+import TopScrollingBar from '../components/TopScrollingBar';
 
 const validationSchema = Yup.object()
   .shape({
@@ -337,23 +338,25 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                         </p>
                       </div>
                     </div>
-                    {viewAllRecords ? (
-                      <DataTable
-                        sortable
-                        defaultSort={[{ id: 'donorId' }]}
-                        columns={columns}
-                        data={searchResult.entries}
-                        ref={sortedTableDataRef}
-                      />
-                    ) : (
-                      <DataTable
-                        sortable
-                        defaultSort={[{ id: 'barcode' }]}
-                        columns={uniqueBarcodeTableColumns}
-                        data={memoUniqueBarcodeData}
-                        ref={uniqueTableDataRef}
-                      />
-                    )}
+                    <TopScrollingBar>
+                      {viewAllRecords ? (
+                        <DataTable
+                          sortable
+                          defaultSort={[{ id: 'donorId' }]}
+                          columns={columns}
+                          data={searchResult.entries}
+                          ref={sortedTableDataRef}
+                        />
+                      ) : (
+                        <DataTable
+                          sortable
+                          defaultSort={[{ id: 'barcode' }]}
+                          columns={uniqueBarcodeTableColumns}
+                          data={memoUniqueBarcodeData}
+                          ref={uniqueTableDataRef}
+                        />
+                      )}
+                    </TopScrollingBar>
                   </div>
                 </>
               )}
