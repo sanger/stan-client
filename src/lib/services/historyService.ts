@@ -52,30 +52,32 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Array
     }
     samplePositionMapByOpId.get(operationId)?.set(sampleId, samplePosition);
   });
-
-  return history.entries.map((entry) => {
+  const entries: Array<HistoryTableEntry> = [];
+  history.entries.forEach((entry) => {
     const sourceLabware = labwareMap.get(entry.sourceLabwareId)!;
     const destinationLabware = labwareMap.get(entry.destinationLabwareId)!;
     const sample = entry.sampleId ? sampleMap.get(entry.sampleId) : undefined;
-
-    return {
-      eventId: entry.eventId,
-      date: new Date(entry.time).toLocaleDateString(),
-      sourceBarcode: sourceLabware.barcode,
-      destinationBarcode: destinationLabware.barcode,
-      labwareType: destinationLabware.labwareType.name,
-      sampleID: entry.sampleId,
-      donorName: sample?.tissue?.donor?.donorName ?? undefined,
-      externalName: sample?.tissue?.externalName ?? undefined,
-      sectionNumber: sample?.section ?? undefined,
-      eventType: entry.type,
-      biologicalState: sample?.bioState?.name ?? undefined,
-      labwareState: destinationLabware.state,
-      username: entry.username,
-      workNumber: entry.workNumber ?? undefined,
-      details: entry.details,
-      address: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.address,
-      sectionPosition: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.region
-    };
+    if (sourceLabware && destinationLabware && sample) {
+      entries.push({
+        eventId: entry.eventId,
+        date: new Date(entry.time).toLocaleDateString(),
+        sourceBarcode: sourceLabware ? sourceLabware.barcode : '',
+        destinationBarcode: destinationLabware ? destinationLabware.barcode : '',
+        labwareType: destinationLabware.labwareType.name,
+        sampleID: entry.sampleId,
+        donorName: sample?.tissue?.donor?.donorName ?? undefined,
+        externalName: sample?.tissue?.externalName ?? undefined,
+        sectionNumber: sample?.section ?? undefined,
+        eventType: entry.type,
+        biologicalState: sample?.bioState?.name ?? undefined,
+        labwareState: destinationLabware.state,
+        username: entry.username,
+        workNumber: entry.workNumber ?? undefined,
+        details: entry.details,
+        address: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.address,
+        sectionPosition: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.region
+      });
+    }
   });
+  return entries;
 }

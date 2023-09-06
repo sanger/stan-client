@@ -261,6 +261,8 @@ export type HistoryTableEntry = {
   username: string;
   workNumber?: Maybe<string>;
   details: Array<string>;
+  address?: string;
+  sectionPosition?:string
 };
 
 /*
