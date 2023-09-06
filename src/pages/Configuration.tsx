@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import AppShell from '../components/AppShell';
 import { GetConfigurationQuery, UserRole } from '../types/sdk';
-import EntityManager from '../components/entityManager/EntityManager';
+import EntityManager, { convertToBasicReleaseRecipient } from '../components/entityManager/EntityManager';
 import Heading from '../components/Heading';
 import { groupBy } from 'lodash';
 import StyledLink from '../components/StyledLink';
@@ -347,7 +347,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
           also available on the <StyledLink to={'/sgp'}>SGP Management</StyledLink> page as "Work Requester"
         </p>
         <EntityManager
-          initialEntities={configuration.releaseRecipients}
+          initialEntities={convertToBasicReleaseRecipient(configuration.releaseRecipients)}
           displayKeyColumnName={'username'}
           valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
@@ -357,11 +357,24 @@ export default function Configuration({ configuration }: ConfigurationParams) {
                 enabled,
                 username: entity.username
               })
-              .then((res) => res.setReleaseRecipientEnabled);
+              .then((res) => convertToBasicReleaseRecipient(res.setReleaseRecipientEnabled)[0]);
           }}
-          onCreate={(username) => stanCore.AddReleaseRecipient({ username }).then((res) => res.addReleaseRecipient)}
+          onCreate={(username, userFullName) => {
+            return stanCore
+              .AddReleaseRecipient({ username, userFullName })
+              .then((res) => convertToBasicReleaseRecipient(res.addReleaseRecipient)[0]);
+          }}
           valueFieldComponentInfo={{
             type: 'CHECKBOX'
+          }}
+          extraDisplayColumnName={{
+            label: 'User Full Name',
+            value: 'userFullName',
+            onChange: (username, userFullName) => {
+              return stanCore
+                .UpdateReleaseRecipientFullName({ username, userFullName })
+                .then((res) => convertToBasicReleaseRecipient(res.updateReleaseRecipientFullName)[0]);
+            }
           }}
         />
       </div>,

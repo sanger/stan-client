@@ -3,7 +3,9 @@ import {
   AddReleaseRecipientMutation,
   AddReleaseRecipientMutationVariables,
   SetReleaseRecipientEnabledMutation,
-  SetReleaseRecipientEnabledMutationVariables
+  SetReleaseRecipientEnabledMutationVariables,
+  UpdateReleaseRecipientFullNameMutation,
+  UpdateReleaseRecipientFullNameMutationVariables
 } from '../../types/sdk';
 import releaseRecipientFactory from '../../lib/factories/releaseRecipientFactory';
 import releaseRecipientRepository from '../repositories/releaseRecipientRepository';
@@ -37,6 +39,18 @@ const releaseRecipientHandlers = [
           ])
         );
       }
+    }
+  ),
+
+  graphql.mutation<UpdateReleaseRecipientFullNameMutation, UpdateReleaseRecipientFullNameMutationVariables>(
+    'UpdateReleaseRecipientFullName',
+    (req, res, ctx) => {
+      const updateReleaseRecipientFullName = releaseRecipientFactory.build({
+        username: req.variables.username,
+        userFullName: req.variables.userFullName
+      });
+      releaseRecipientRepository.save(updateReleaseRecipientFullName);
+      return res(ctx.data({ updateReleaseRecipientFullName }));
     }
   )
 ];

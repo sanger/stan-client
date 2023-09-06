@@ -1,0 +1,5 @@
+mutation UpdateReleaseRecipientFullName($username: String!, $userFullName: String) {
+  updateReleaseRecipientFullName(username: $username, userFullName: $userFullName) {
+    ...ReleaseRecipientFields
+  }
+}

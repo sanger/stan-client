@@ -1,5 +1,5 @@
-mutation AddReleaseRecipient($username: String!) {
-  addReleaseRecipient(username: $username) {
+mutation AddReleaseRecipient($username: String!, $userFullName: String) {
+  addReleaseRecipient(username: $username, userFullName: $userFullName) {
     ...ReleaseRecipientFields
   }
 }

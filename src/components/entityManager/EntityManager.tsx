@@ -4,7 +4,6 @@ import { Input } from '../forms/Input';
 import BlueButton from '../buttons/BlueButton';
 import { useMachine } from '@xstate/react';
 import Success from '../notifications/Success';
-import Warning from '../notifications/Warning';
 import { capitalize } from 'lodash';
 import WhiteButton from '../buttons/WhiteButton';
 import PinkButton from '../buttons/PinkButton';
@@ -14,6 +13,8 @@ import { BooleanEntityRow } from './BooleanEntityRow';
 import { createEntityManagerMachine } from './entityManager.machine';
 import { alphaNumericSortDefault } from '../../types/stan';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { ReleaseRecipient } from '../../types/sdk';
+import Warning from '../notifications/Warning';
 
 export type EntityValueType = boolean | string | number;
 
@@ -21,6 +22,12 @@ export type EntityValueType = boolean | string | number;
 type ValueFieldComponentInfo = {
   type: 'CHECKBOX' | 'SELECT';
   valueOptions?: string[];
+};
+
+type ExtraEntityColumn<E> = {
+  label: string;
+  value: string;
+  onChange(value: string, extraValue?: string): Promise<E>;
 };
 
 type EntityManagerProps<E> = {
@@ -55,7 +62,7 @@ type EntityManagerProps<E> = {
    * Callback when a new entity is to be created
    * @param value the value of the new entity
    */
-  onCreate(value: string): Promise<E>;
+  onCreate(value: string, extraValue?: string): Promise<E>;
 
   /**
    * Callback when value changes
@@ -66,8 +73,31 @@ type EntityManagerProps<E> = {
    * Display key field as a dropdown
    */
   displayKeyFieldAsDropDown?: boolean;
+
+  /**
+   * Extra property of the entity to display in the table
+   */
+  extraDisplayColumnName?: ExtraEntityColumn<E>;
 };
 
+type BasicReleaseRecipient = {
+  userFullName: string;
+  username: string;
+  enabled: boolean;
+};
+
+export const convertToBasicReleaseRecipient = (
+  recipients: ReleaseRecipient[] | ReleaseRecipient
+): BasicReleaseRecipient[] => {
+  if (!Array.isArray(recipients)) {
+    recipients = [recipients];
+  }
+  return recipients.map(({ userFullName, username, enabled }) => ({
+    userFullName: userFullName || '',
+    username,
+    enabled
+  }));
+};
 export default function EntityManager<E extends Record<string, EntityValueType>>({
   initialEntities,
   displayKeyColumnName,
@@ -76,22 +106,27 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
   valueFieldComponentInfo,
   onCreate,
   onChangeValue,
-  displayKeyFieldAsDropDown = false
+  displayKeyFieldAsDropDown = false,
+  extraDisplayColumnName = undefined
 }: EntityManagerProps<E>) {
   const entityManagerMachine = React.useMemo(() => {
     return createEntityManagerMachine<E>(initialEntities, displayKeyColumnName, valueColumnName).withConfig({
       services: {
         createEntity: (ctx, e) => {
           if (e.type !== 'CREATE_NEW_ENTITY') return Promise.reject();
-          return onCreate(e.value);
+          return onCreate(e.value, e.extraValue);
         },
         valueChanged: (context, e) => {
           if (e.type !== 'VALUE_CHANGE') return Promise.reject();
           return onChangeValue(e.entity, e.value);
+        },
+        updateExtraProperty: (context, e) => {
+          if (e.type !== 'EXTRA_PROPERTY_UPDATE_VALUE' || !extraDisplayColumnName) return Promise.reject();
+          return extraDisplayColumnName.onChange(e.value, e.extraValue);
         }
       }
     });
-  }, [initialEntities, displayKeyColumnName, valueColumnName, onChangeValue, onCreate]);
+  }, [initialEntities, displayKeyColumnName, valueColumnName, onChangeValue, onCreate, extraDisplayColumnName]);
 
   const [current, send] = useMachine(entityManagerMachine);
 
@@ -118,6 +153,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
    * Will receive focus when it appears on screen.
    */
   const inputRef = useRef<HTMLInputElement>(null);
+  const extraInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (current.matches('draftCreation')) {
       inputRef.current?.select();
@@ -132,9 +168,13 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
     if (value === '') {
       return;
     }
-    send({ type: 'CREATE_NEW_ENTITY', value });
+    let extraValue: string | undefined;
+    if (extraDisplayColumnName) {
+      extraValue = extraInputRef.current?.value.trim();
+    }
+    send({ type: 'CREATE_NEW_ENTITY', value, extraValue });
     setDraftValue('');
-  }, [draftValue, setDraftValue, send]);
+  }, [draftValue, setDraftValue, send, extraDisplayColumnName]);
 
   /**
    * Callback handler for when an EntityRow changes (i.e. enabled property is toggled)
@@ -171,6 +211,28 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
    */
   const handleOnCancel = () => send({ type: 'DISCARD_DRAFT' });
 
+  const handleExtraValueUpdate = useCallback(
+    (keyValue: string, extraValue: string) => {
+      send({
+        type: 'EXTRA_PROPERTY_UPDATE_VALUE',
+        value: keyValue,
+        extraValue: extraValue
+      });
+    },
+    [send]
+  );
+
+  const handleOnChangeForExtraDisplayColumn = useCallback(
+    (entity: E, extraValue: string) => {
+      if (!extraDisplayColumnName) return;
+      send({
+        type: 'EXTRA_PROPERTY_DRAFT_VALUE',
+        entity: { ...entity, [extraDisplayColumnName.value]: extraValue }
+      });
+    },
+    [send, extraDisplayColumnName]
+  );
+
   const getValueFieldComponent = (
     valueFieldComponentInfo: ValueFieldComponentInfo,
     entity: E | undefined,
@@ -204,6 +266,47 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
         return <></>;
     }
   };
+  const setInputFieldsRow = () => {
+    return (
+      <tr>
+        <TableCell colSpan={2}>
+          <Input
+            type={'text'}
+            placeholder="Enter user ID"
+            ref={inputRef}
+            data-testid="input-field"
+            disabled={isCreatingEntity}
+            onChange={handleOnInputChange}
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+              if (e.key === 'Enter') {
+                handleOnSave();
+              } else if (e.key === 'Escape') {
+                handleOnCancel();
+              }
+            }}
+          />
+        </TableCell>
+        {extraDisplayColumnName && (
+          <TableCell colSpan={2}>
+            <Input
+              type={'text'}
+              placeholder="Enter user full name"
+              ref={extraInputRef}
+              data-testid={'extra-input-field'}
+              disabled={isCreatingEntity}
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                if (e.key === 'Enter') {
+                  handleOnSave();
+                } else if (e.key === 'Escape') {
+                  handleOnCancel();
+                }
+              }}
+            />
+          </TableCell>
+        )}
+      </tr>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -213,6 +316,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
         <TableHead>
           <tr>
             <TableHeader>{displayKeyColumnName}</TableHeader>
+            {extraDisplayColumnName && <TableHeader>{extraDisplayColumnName.label}</TableHeader>}
             <TableHeader>{valueColumnName}</TableHeader>
           </tr>
         </TableHead>
@@ -241,7 +345,24 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
           ) : (
             orderedEntities.map((entity, indx) => (
               <tr key={indx}>
-                <TableCell>{entity[displayKeyColumnName]}</TableCell>
+                <TableCell colSpan={2}>{entity[displayKeyColumnName]}</TableCell>
+                {extraDisplayColumnName && (
+                  <TableCell colSpan={2}>
+                    <Input
+                      type="text"
+                      placeholder="Enter user full name"
+                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                        if (e.key === 'Enter') {
+                          handleExtraValueUpdate(String(entity[displayKeyColumnName]), e.currentTarget.value);
+                        }
+                      }}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        handleOnChangeForExtraDisplayColumn(entity, e.target.value);
+                      }}
+                      value={String(entity[extraDisplayColumnName.value])}
+                    />
+                  </TableCell>
+                )}
                 {getValueFieldComponent(
                   valueFieldComponentInfo,
                   entity,
@@ -251,26 +372,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
               </tr>
             ))
           )}
-          {showDraft && (
-            <tr>
-              <TableCell colSpan={2}>
-                <Input
-                  ref={inputRef}
-                  data-testid={'input-field'}
-                  type="text"
-                  disabled={isCreatingEntity}
-                  onChange={handleOnInputChange}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === 'Enter') {
-                      handleOnSave();
-                    } else if (e.key === 'Escape') {
-                      handleOnCancel();
-                    }
-                  }}
-                />
-              </TableCell>
-            </tr>
-          )}
+          {showDraft && setInputFieldsRow()}
         </TableBody>
       </Table>
       <div className="flex flex-row justify-end items-center space-x-3">
