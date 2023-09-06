@@ -271,7 +271,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
       <tr>
         <TableCell colSpan={2}>
           <Input
-            type={'text'}
+            type="text"
             placeholder="Enter user ID"
             ref={inputRef}
             data-testid="input-field"
@@ -289,10 +289,10 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
         {extraDisplayColumnName && (
           <TableCell colSpan={2}>
             <Input
-              type={'text'}
+              type="text"
               placeholder="Enter user full name"
               ref={extraInputRef}
-              data-testid={'extra-input-field'}
+              data-testid="extra-input-field"
               disabled={isCreatingEntity}
               onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                 if (e.key === 'Enter') {
@@ -315,9 +315,9 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
       <Table>
         <TableHead>
           <tr>
-            <TableHeader>{displayKeyColumnName}</TableHeader>
-            {extraDisplayColumnName && <TableHeader>{extraDisplayColumnName.label}</TableHeader>}
-            <TableHeader>{valueColumnName}</TableHeader>
+            <TableHeader colSpan={2}>{displayKeyColumnName}</TableHeader>
+            {extraDisplayColumnName && <TableHeader colSpan={2}>{extraDisplayColumnName.label}</TableHeader>}
+            <TableHeader colSpan={2}>{valueColumnName}</TableHeader>
           </tr>
         </TableHead>
         <TableBody>
