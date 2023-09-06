@@ -22,6 +22,7 @@ export default function HistoryInput() {
             workNumber={values.workNumber}
             multiple={false}
             dataTestId={'workNumber'}
+            workNumberType={'ALL'}
           />
         </div>
         <div className={'flex flex-col '}>
