@@ -25,16 +25,21 @@ type EntityManagerEvent<E> =
   | {
       type: 'CREATE_NEW_ENTITY';
       value: string;
+      extraValue?: string;
     }
   | {
       type: 'SELECT_ENTITY';
       entity: E | undefined;
     }
   | { type: 'DISCARD_DRAFT' }
+  | { type: 'EXTRA_PROPERTY_UPDATE_VALUE'; value: string; extraValue: string }
+  | { type: 'EXTRA_PROPERTY_DRAFT_VALUE'; entity: E }
   | MachineServiceDone<'valueChanged', E>
   | MachineServiceError<'valueChanged', ClientError>
   | MachineServiceDone<'createEntity', E>
-  | MachineServiceError<'createEntity', ClientError>;
+  | MachineServiceError<'createEntity', ClientError>
+  | MachineServiceDone<'updateExtraProperty', E>
+  | MachineServiceError<'updateExtraProperty', ClientError>;
 
 export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyof E, valueField: keyof E) {
   return createMachine<EntityManagerContext<E>, EntityManagerEvent<E>>(
@@ -53,7 +58,9 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
           on: {
             VALUE_CHANGE: 'loading.valueChanged',
             DRAFT_NEW_ENTITY: 'draftCreation',
-            SELECT_ENTITY: { actions: 'assignSelectedEntity' }
+            SELECT_ENTITY: { actions: 'assignSelectedEntity' },
+            EXTRA_PROPERTY_UPDATE_VALUE: 'loading.updatingExtraProperty',
+            EXTRA_PROPERTY_DRAFT_VALUE: { actions: 'draftExtraPropertyValue' }
           }
         },
         draftCreation: {
@@ -93,6 +100,20 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
                   actions: 'assignErrorMessage'
                 }
               }
+            },
+            updatingExtraProperty: {
+              invoke: {
+                id: 'updateExtraProperty',
+                src: 'updateExtraProperty',
+                onDone: {
+                  target: '#entityManager.ready',
+                  actions: 'updateExtraProperty'
+                },
+                onError: {
+                  target: '#entityManager.ready',
+                  actions: 'assignErrorMessage'
+                }
+              }
             }
           }
         }
@@ -111,7 +132,11 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
         }),
 
         assignErrorMessage: assign((ctx, e) => {
-          if (e.type !== 'error.platform.createEntity' && e.type !== 'error.platform.valueChanged') {
+          if (
+            e.type !== 'error.platform.createEntity' &&
+            e.type !== 'error.platform.valueChanged' &&
+            e.type !== 'error.platform.updateExtraProperty'
+          ) {
             return {};
           }
           return {
@@ -128,7 +153,6 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
             error: null
           };
         }),
-
         updateEntity: assign((ctx, e) => {
           if (e.type !== 'done.invoke.valueChanged') {
             return {};
@@ -148,6 +172,23 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
                 return entity;
               }
             })
+          };
+        }),
+        draftExtraPropertyValue: assign((ctx, e) => {
+          if (e.type !== 'EXTRA_PROPERTY_DRAFT_VALUE') return {};
+          return {
+            entities: ctx.entities.map((entity) =>
+              entity[ctx.keyField] === e.entity[ctx.keyField] ? e.entity : entity
+            )
+          };
+        }),
+        updateExtraProperty: assign((ctx, e) => {
+          if (e.type !== 'done.invoke.updateExtraProperty') {
+            return {};
+          }
+          return {
+            successMessage: `Changes for "${e.data[ctx.keyField]}" saved`,
+            entities: ctx.entities.map((entity) => (entity[ctx.keyField] === e.data[ctx.keyField] ? e.data : entity))
           };
         })
       }
