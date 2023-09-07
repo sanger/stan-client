@@ -166,7 +166,7 @@ export default function History(props: HistoryUrlParams) {
     return workNumbers;
   }, [history]);
 
-  const isValidInput = props.sampleId || props.barcode || props.externalName || props.donorName;
+  const isValidInput = props.sampleId || props.workNumber || props.barcode || props.externalName || props.donorName;
 
   /**
    * If the props change, send an update event to the machine
