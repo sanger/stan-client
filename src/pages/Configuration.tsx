@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import AppShell from '../components/AppShell';
 import { GetConfigurationQuery, UserRole } from '../types/sdk';
-import EntityManager, { convertToBasicReleaseRecipient } from '../components/entityManager/EntityManager';
+import EntityManager from '../components/entityManager/EntityManager';
 import Heading from '../components/Heading';
 import { groupBy } from 'lodash';
 import StyledLink from '../components/StyledLink';
@@ -347,7 +347,10 @@ export default function Configuration({ configuration }: ConfigurationParams) {
           also available on the <StyledLink to={'/sgp'}>SGP Management</StyledLink> page as "Work Requester"
         </p>
         <EntityManager
-          initialEntities={convertToBasicReleaseRecipient(configuration.releaseRecipients)}
+          initialEntities={configuration.releaseRecipients.map((rr) => ({
+            ...rr,
+            fullName: rr.fullName || ''
+          }))}
           displayKeyColumnName={'username'}
           valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
@@ -355,25 +358,38 @@ export default function Configuration({ configuration }: ConfigurationParams) {
             return stanCore
               .SetReleaseRecipientEnabled({
                 enabled,
-                username: entity.username
+                username: String(entity.username)
               })
-              .then((res) => convertToBasicReleaseRecipient(res.setReleaseRecipientEnabled)[0]);
+              .then((res) => {
+                return {
+                  ...res.setReleaseRecipientEnabled,
+                  fullName: res.setReleaseRecipientEnabled.fullName || ''
+                };
+              });
           }}
-          onCreate={(username, userFullName) => {
-            return stanCore
-              .AddReleaseRecipient({ username, userFullName })
-              .then((res) => convertToBasicReleaseRecipient(res.addReleaseRecipient)[0]);
+          onCreate={(username, fullName) => {
+            return stanCore.AddReleaseRecipient({ username, fullName }).then((res) => {
+              return {
+                ...res.addReleaseRecipient,
+                fullName: res.addReleaseRecipient.fullName || ''
+              };
+            });
           }}
           valueFieldComponentInfo={{
             type: 'CHECKBOX'
           }}
           extraDisplayColumnName={{
-            label: 'User Full Name',
-            value: 'userFullName',
-            onChange: (username, userFullName) => {
-              return stanCore
-                .UpdateReleaseRecipientFullName({ username, userFullName })
-                .then((res) => convertToBasicReleaseRecipient(res.updateReleaseRecipientFullName)[0]);
+            label: 'Full Name',
+            value: 'fullName',
+            extraFieldPlaceholder: 'Enter User Full Name',
+            keyFieldPlaceholder: 'Enter User ID',
+            onChange: (username, fullName) => {
+              return stanCore.UpdateReleaseRecipientFullName({ username, fullName }).then((res) => {
+                return {
+                  ...res.updateReleaseRecipientFullName,
+                  fullName: res.updateReleaseRecipientFullName.fullName || ''
+                };
+              });
             }
           }}
         />

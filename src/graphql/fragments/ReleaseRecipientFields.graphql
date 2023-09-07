@@ -1,5 +1,5 @@
 fragment ReleaseRecipientFields on ReleaseRecipient {
   username
-  userFullName
+  fullName
   enabled
 }

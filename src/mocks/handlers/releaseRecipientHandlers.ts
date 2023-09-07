@@ -47,7 +47,7 @@ const releaseRecipientHandlers = [
     (req, res, ctx) => {
       const updateReleaseRecipientFullName = releaseRecipientFactory.build({
         username: req.variables.username,
-        userFullName: req.variables.userFullName
+        fullName: req.variables.fullName
       });
       releaseRecipientRepository.save(updateReleaseRecipientFullName);
       return res(ctx.data({ updateReleaseRecipientFullName }));

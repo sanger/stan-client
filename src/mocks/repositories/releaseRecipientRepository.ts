@@ -5,7 +5,7 @@ import releaseRecipientFactory from '../../lib/factories/releaseRecipientFactory
 const seeds: Array<ReleaseRecipientFieldsFragment> = [
   releaseRecipientFactory.build({ username: 'et2' }),
   releaseRecipientFactory.build({ username: 'cm18' }),
-  releaseRecipientFactory.build({ username: 'cs41', userFullName: 'Csaba Csordas' }),
+  releaseRecipientFactory.build({ username: 'cs41', fullName: 'Csaba Csordas' }),
   releaseRecipientFactory.build({ username: 'kr19' }),
   releaseRecipientFactory.build({ username: 'lb28' }),
   releaseRecipientFactory.build({ username: 're5' }),

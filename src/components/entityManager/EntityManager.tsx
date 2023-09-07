@@ -13,7 +13,6 @@ import { BooleanEntityRow } from './BooleanEntityRow';
 import { createEntityManagerMachine } from './entityManager.machine';
 import { alphaNumericSortDefault } from '../../types/stan';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
-import { ReleaseRecipient } from '../../types/sdk';
 import Warning from '../notifications/Warning';
 
 export type EntityValueType = boolean | string | number;
@@ -27,6 +26,8 @@ type ValueFieldComponentInfo = {
 type ExtraEntityColumn<E> = {
   label: string;
   value: string;
+  keyFieldPlaceholder: string;
+  extraFieldPlaceholder: string;
   onChange(value: string, extraValue?: string): Promise<E>;
 };
 
@@ -78,25 +79,6 @@ type EntityManagerProps<E> = {
    * Extra property of the entity to display in the table
    */
   extraDisplayColumnName?: ExtraEntityColumn<E>;
-};
-
-type BasicReleaseRecipient = {
-  userFullName: string;
-  username: string;
-  enabled: boolean;
-};
-
-export const convertToBasicReleaseRecipient = (
-  recipients: ReleaseRecipient[] | ReleaseRecipient
-): BasicReleaseRecipient[] => {
-  if (!Array.isArray(recipients)) {
-    recipients = [recipients];
-  }
-  return recipients.map(({ userFullName, username, enabled }) => ({
-    userFullName: userFullName || '',
-    username,
-    enabled
-  }));
 };
 export default function EntityManager<E extends Record<string, EntityValueType>>({
   initialEntities,
@@ -272,7 +254,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
         <TableCell colSpan={2}>
           <Input
             type="text"
-            placeholder="Enter user ID"
+            placeholder={extraDisplayColumnName ? extraDisplayColumnName.keyFieldPlaceholder : ''}
             ref={inputRef}
             data-testid="input-field"
             disabled={isCreatingEntity}
@@ -290,7 +272,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
           <TableCell colSpan={2}>
             <Input
               type="text"
-              placeholder="Enter user full name"
+              placeholder={extraDisplayColumnName.extraFieldPlaceholder}
               ref={extraInputRef}
               data-testid="extra-input-field"
               disabled={isCreatingEntity}
@@ -354,6 +336,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
                       onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                         if (e.key === 'Enter') {
                           handleExtraValueUpdate(String(entity[displayKeyColumnName]), e.currentTarget.value);
+                          e.currentTarget.blur();
                         }
                       }}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

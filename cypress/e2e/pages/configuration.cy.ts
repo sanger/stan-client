@@ -195,7 +195,7 @@ describe('Configuration Spec', () => {
                 ctx.data({
                   updateReleaseRecipientFullName: {
                     username: 'et2',
-                    userFullName: 'Ethan Twin',
+                    fullName: 'Ethan Twin',
                     enabled: true
                   }
                 })
