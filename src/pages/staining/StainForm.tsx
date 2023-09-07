@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../../lib/machines/form/formMachine';
 import { GetStainInfoQuery, LabwareFieldsFragment, StainMutation, StainRequest } from '../../types/sdk';
-import { reload, stanCore } from '../../lib/sdk';
+import { history, reload, stanCore } from '../../lib/sdk';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import GrayBox, { Sidebar } from '../../components/layouts/GrayBox';
@@ -19,6 +19,8 @@ import columns from '../../components/dataTableColumns/labwareColumns';
 import FormikInput from '../../components/forms/Input';
 import PinkButton from '../../components/buttons/PinkButton';
 import OperationCompleteModal from '../../components/modal/OperationCompleteModal';
+import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
+import WhiteButton from '../../components/buttons/WhiteButton';
 
 /**
  * Type used for the values in the form.
@@ -217,6 +219,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
                             placeholder="mm"
                             min={0}
                             value={measurementType._minutes === 0 ? '' : measurementType._minutes}
+                            data-testid={`timeMeasurements.${i}.minutes`}
                           />
                           <FormikInput
                             label={''}
@@ -235,6 +238,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
                             placeholder="ss"
                             min={0}
                             value={measurementType._seconds === 0 ? '' : measurementType._seconds}
+                            data-testid={`timeMeasurements.${i}.seconds`}
                           />
                         </div>
 
@@ -276,7 +280,26 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
               </PinkButton>
             </Sidebar>
           </GrayBox>
-          <OperationCompleteModal show={current.matches('submitted')} message={'Staining Successful'} onReset={reload}>
+          <OperationCompleteModal
+            show={current.matches('submitted')}
+            message={'Staining Successful'}
+            onReset={reload}
+            additionalButtons={
+              <WhiteButton
+                type="button"
+                style={{ marginLeft: 'auto' }}
+                className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                onClick={() => {
+                  if (initialLabware.length > 0) {
+                    createSessionStorageForLabwareAwaiting(initialLabware);
+                  }
+                  history.push('/store');
+                }}
+              >
+                Store
+              </WhiteButton>
+            }
+          >
             <p>
               If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the
               Home screen.

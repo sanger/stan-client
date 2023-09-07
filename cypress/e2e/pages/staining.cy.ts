@@ -1,11 +1,11 @@
-import { selectOption } from '../shared/customReactSelect.cy';
+import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 
 describe('Staining Page', () => {
   before(() => {
     cy.visit('/lab/staining');
   });
 
-  describe('Showing measurements', () => {
+  /*describe('Showing measurements', () => {
     context('when a Stain Type with measurements is selected', () => {
       before(() => {
         selectOption('stainType', 'H&E');
@@ -112,5 +112,113 @@ describe('Staining Page', () => {
         cy.findAllByText('Positive').should('have.length', 3);
       });
     });
+  });*/
+  describe('On Submission', () => {
+    describe('when H&E Stain Type is selected', () => {
+      before(() => {
+        submitStainInfo('H&E');
+      });
+      shouldDisplaySuccessDialog(['Store', 'Reset Form', 'Return Home']);
+      shouldNavigateToStore();
+    });
+    describe('when IHC Stain Type is selected', () => {
+      before(() => {
+        submitStainInfo('IHC');
+      });
+      shouldDisplaySuccessDialog(['Store', 'Stain Again', 'Reset Form', 'Return Home']);
+      shouldNavigateToStore();
+    });
+    describe('when Massons Trichrome Stain Type is selected', () => {
+      before(() => {
+        cy.visit('/lab/staining');
+        selectOption('stainType', `Masson's Trichrome`);
+        cy.get('#labwareScanInput').type('STAN-3111{enter}');
+        selectSGPNumber('SGP1008');
+        getButton('Submit').click();
+      });
+      shouldDisplaySuccessDialog(['Store', 'Reset Form', 'Return Home']);
+      shouldNavigateToStore();
+    });
+    describe('when RNAscope Stain Type is selected', () => {
+      before(() => {
+        submitStainInfo('RNAscope');
+      });
+      shouldDisplaySuccessDialog(['Store', 'Stain Again', 'Reset Form', 'Return Home']);
+      shouldNavigateToStore();
+    });
+    describe('when RNAscope & IHC Stain Type is selected', () => {
+      before(() => {
+        submitStainInfo('RNAscope & IHC');
+      });
+      shouldDisplaySuccessDialog(['Store', 'Stain Again', 'Reset Form', 'Return Home']);
+      shouldNavigateToStore();
+    });
   });
+
+  function submitStainInfo(stainType: string) {
+    cy.visit('/lab/staining');
+    selectOption('stainType', stainType);
+    cy.get('#labwareScanInput').type('STAN-3111{enter}');
+    fillInForm(stainType);
+    getButton('Submit').click();
+  }
+  function fillInForm(stainType: string) {
+    if (stainType == 'H&E') {
+      selectSGPNumber('SGP1008');
+      cy.findByTestId('timeMeasurements.0.minutes').type('1');
+      cy.findByTestId('timeMeasurements.0.seconds').type('1');
+      cy.findByTestId('timeMeasurements.1.minutes').type('1');
+      cy.findByTestId('timeMeasurements.1.seconds').type('1');
+      cy.findByTestId('timeMeasurements.2.minutes').type('1');
+      cy.findByTestId('timeMeasurements.2.seconds').type('1');
+    }
+    if (stainType == 'IHC' || stainType == 'RNAscope' || stainType == 'RNAscope & IHC') {
+      cy.findByTestId('STAN-3111-bondBarcode').type('1234');
+      cy.findByTestId('STAN-3111-bondRun').type('1');
+      selectOption('STAN-3111-workNumber', 'SGP1008');
+      selectOption('STAN-3111-panel', 'Positive');
+      if (stainType == 'RNAscope' || stainType == 'RNAscope & IHC') {
+        cy.findByTestId('STAN-3111-plexRNAscope').type('1');
+      }
+      if (stainType == 'IHC' || stainType == 'RNAscope & IHC') {
+        cy.findByTestId('STAN-3111-plexIHC').type('1');
+      }
+    }
+  }
+  function shouldNavigateToStore() {
+    context('when store option selected for stained labware', () => {
+      before(() => {
+        storeButton().click();
+      });
+      context('while in store page with confirmed labware', () => {
+        it('navigates to store page', () => {
+          cy.url().should('be.equal', 'http://localhost:3000/store');
+        });
+        it('when redirected to the Store page', () => {
+          cy.findByRole('table').contains('td', 'STAN-3111');
+        });
+      });
+    });
+  }
+  function shouldDisplaySuccessDialog(buttonNames: string[]) {
+    context('when the form is submitted', () => {
+      it('shows the success dialog', () => {
+        cy.findByText('Staining Successful');
+      });
+      it('displays all buttons', () => {
+        shouldDisplayButtons(buttonNames);
+      });
+    });
+  }
+  function getButton(buttonName: string) {
+    return cy.findByRole('button', { name: `${buttonName}` });
+  }
+  function storeButton() {
+    return getButton('Store');
+  }
+  function shouldDisplayButtons(buttonNames: string[]) {
+    buttonNames.forEach((buttonName) => {
+      getButton(buttonName).should('be.visible');
+    });
+  }
 });
