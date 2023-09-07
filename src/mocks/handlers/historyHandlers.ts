@@ -33,7 +33,8 @@ export function buildHistory(workNumber?: string): HistoryFieldsFragment {
       type: 'Eat',
       username: 'user1',
       details: ['Taste: Great', 'Monkey: Foo'],
-      workNumber: workNumber ?? 'SGP123'
+      workNumber: workNumber ?? 'SGP123',
+      address: 'A1'
     }
   ];
 
