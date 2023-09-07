@@ -347,7 +347,10 @@ export default function Configuration({ configuration }: ConfigurationParams) {
           also available on the <StyledLink to={'/sgp'}>SGP Management</StyledLink> page as "Work Requester"
         </p>
         <EntityManager
-          initialEntities={configuration.releaseRecipients}
+          initialEntities={configuration.releaseRecipients.map((rr) => ({
+            ...rr,
+            fullName: rr.fullName || ''
+          }))}
           displayKeyColumnName={'username'}
           valueColumnName={'enabled'}
           onChangeValue={(entity, value) => {
@@ -355,13 +358,39 @@ export default function Configuration({ configuration }: ConfigurationParams) {
             return stanCore
               .SetReleaseRecipientEnabled({
                 enabled,
-                username: entity.username
+                username: String(entity.username)
               })
-              .then((res) => res.setReleaseRecipientEnabled);
+              .then((res) => {
+                return {
+                  ...res.setReleaseRecipientEnabled,
+                  fullName: res.setReleaseRecipientEnabled.fullName || ''
+                };
+              });
           }}
-          onCreate={(username) => stanCore.AddReleaseRecipient({ username }).then((res) => res.addReleaseRecipient)}
+          onCreate={(username, fullName) => {
+            return stanCore.AddReleaseRecipient({ username, fullName }).then((res) => {
+              return {
+                ...res.addReleaseRecipient,
+                fullName: res.addReleaseRecipient.fullName || ''
+              };
+            });
+          }}
           valueFieldComponentInfo={{
             type: 'CHECKBOX'
+          }}
+          extraDisplayColumnName={{
+            label: 'Full Name',
+            value: 'fullName',
+            extraFieldPlaceholder: 'Enter Full Name',
+            keyFieldPlaceholder: 'Enter User ID',
+            onChange: (username, fullName) => {
+              return stanCore.UpdateReleaseRecipientFullName({ username, fullName }).then((res) => {
+                return {
+                  ...res.updateReleaseRecipientFullName,
+                  fullName: res.updateReleaseRecipientFullName.fullName || ''
+                };
+              });
+            }
           }}
         />
       </div>,
