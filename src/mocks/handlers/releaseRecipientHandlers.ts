@@ -15,7 +15,8 @@ const releaseRecipientHandlers = [
     'AddReleaseRecipient',
     (req, res, ctx) => {
       const addReleaseRecipient = releaseRecipientFactory.build({
-        username: req.variables.username
+        username: req.variables.username,
+        fullName: req.variables.fullName
       });
       releaseRecipientRepository.save(addReleaseRecipient);
       return res(ctx.data({ addReleaseRecipient }));

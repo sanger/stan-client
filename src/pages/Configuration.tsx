@@ -381,7 +381,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
           extraDisplayColumnName={{
             label: 'Full Name',
             value: 'fullName',
-            extraFieldPlaceholder: 'Enter User Full Name',
+            extraFieldPlaceholder: 'Enter Full Name',
             keyFieldPlaceholder: 'Enter User ID',
             onChange: (username, fullName) => {
               return stanCore.UpdateReleaseRecipientFullName({ username, fullName }).then((res) => {

@@ -332,7 +332,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
                   <TableCell colSpan={2}>
                     <Input
                       type="text"
-                      placeholder="Enter user full name"
+                      placeholder={extraDisplayColumnName.extraFieldPlaceholder}
                       onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                         if (e.key === 'Enter') {
                           handleExtraValueUpdate(String(entity[displayKeyColumnName]), e.currentTarget.value);
