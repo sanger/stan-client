@@ -2062,6 +2062,13 @@ svg.logo.loading rect:nth-child(3n+1) {
   -webkit-column-gap: 0.5rem;
           column-gap: 0.5rem;
 }
+.gap-x-10 {
+  -webkit-column-gap: 2.5rem;
+          column-gap: 2.5rem;
+}
+.gap-y-6 {
+  row-gap: 1.5rem;
+}
 .gap-x-3 {
   -webkit-column-gap: 0.75rem;
           column-gap: 0.75rem;
@@ -2072,13 +2079,6 @@ svg.logo.loading rect:nth-child(3n+1) {
 .gap-x-20 {
   -webkit-column-gap: 5rem;
           column-gap: 5rem;
-}
-.gap-x-10 {
-  -webkit-column-gap: 2.5rem;
-          column-gap: 2.5rem;
-}
-.gap-y-6 {
-  row-gap: 1.5rem;
 }
 .gap-y-20 {
   row-gap: 5rem;
@@ -4188,4 +4188,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.243f925b.css.map*/
+/*# sourceMappingURL=main.fe3b2181.css.map*/
