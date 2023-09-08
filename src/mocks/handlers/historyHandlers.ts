@@ -35,7 +35,9 @@ export function buildHistory(workNumber?: string): HistoryFieldsFragment {
       type: 'Eat',
       username: 'user1',
       details: ['Taste: Great', 'Monkey: Foo'],
-      workNumber: workNumber ?? 'SGP1008'
+      workNumber: workNumber ?? 'SGP1008',
+      address: 'A1',
+      region: 'Bottom right'
     }
   ];
 
@@ -43,8 +45,7 @@ export function buildHistory(workNumber?: string): HistoryFieldsFragment {
     __typename: 'History',
     samples: [sample],
     labware: [sourceLabware, destinationLabware].map(buildLabwareFragment),
-    entries,
-    samplePositionResults: []
+    entries
   };
 }
 

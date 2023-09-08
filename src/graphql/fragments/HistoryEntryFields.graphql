@@ -8,4 +8,6 @@ fragment HistoryEntryFields on HistoryEntry {
   username
   type
   workNumber
+  address
+  region
 }

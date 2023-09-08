@@ -8,7 +8,4 @@ fragment HistoryFields on History {
   entries {
     ...HistoryEntryFields
   }
-  samplePositionResults {
-    ...SamplePositionFields
-  }
 }
