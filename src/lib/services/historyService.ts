@@ -1,50 +1,40 @@
 import { stanCore } from '../sdk';
-import { HistoryProps, HistoryTableEntry } from '../../types/stan';
+import { HistoryTableEntry } from '../../types/stan';
 import {
   HistoryFieldsFragment,
   LabwareFieldsFragment,
   SampleFieldsFragment,
   SamplePositionFieldsFragment
 } from '../../types/sdk';
+import { HistoryUrlParams } from '../../pages/History';
 
 /**
  * Retrieves the history for the given History props.
  */
-export async function findHistory(historyProps: HistoryProps): Promise<Array<HistoryTableEntry>> {
+export async function findHistory(historyProps: HistoryUrlParams): Promise<Array<HistoryTableEntry>> {
   let result;
-  let history: HistoryFieldsFragment;
-
-  switch (historyProps.kind) {
-    case 'sampleId':
-      result = await stanCore.FindHistoryForSampleId({
-        sampleId: historyProps.value
+  let history: HistoryFieldsFragment = {
+    entries: [],
+    labware: [],
+    samples: [],
+    samplePositionResults: [],
+    __typename: 'History'
+  };
+  if (historyProps.sampleId) {
+    result = await stanCore.FindHistoryForSampleId({
+      sampleId: Number(historyProps.sampleId)
+    });
+    history = result.historyForSampleId;
+  } else {
+    if (historyProps.workNumber || historyProps.barcode || historyProps.donorName || historyProps.externalName) {
+      result = await stanCore.FindHistory({
+        workNumber: historyProps.workNumber,
+        barcode: historyProps.barcode,
+        externalName: historyProps.externalName,
+        donorName: historyProps.donorName
       });
-      history = result.historyForSampleId;
-      break;
-    case 'externalName':
-      result = await stanCore.FindHistoryForExternalName({
-        externalName: historyProps.value
-      });
-      history = result.historyForExternalName;
-      break;
-    case 'donorName':
-      result = await stanCore.FindHistoryForDonorName({
-        donorName: historyProps.value
-      });
-      history = result.historyForDonorName;
-      break;
-    case 'labwareBarcode':
-      result = await stanCore.FindHistoryForLabwareBarcode({
-        barcode: historyProps.value
-      });
-      history = result.historyForLabwareBarcode;
-      break;
-    case 'workNumber':
-      result = await stanCore.FindHistoryForWorkNumber({
-        workNumber: historyProps.value
-      });
-      history = result.historyForWorkNumber;
-      break;
+      history = result.history;
+    }
   }
 
   const labwareMap: Map<number, LabwareFieldsFragment> = new Map();
@@ -62,17 +52,15 @@ export async function findHistory(historyProps: HistoryProps): Promise<Array<His
     }
     samplePositionMapByOpId.get(operationId)?.set(sampleId, samplePosition);
   });
-
   return history.entries.map((entry) => {
     const sourceLabware = labwareMap.get(entry.sourceLabwareId)!;
     const destinationLabware = labwareMap.get(entry.destinationLabwareId)!;
     const sample = entry.sampleId ? sampleMap.get(entry.sampleId) : undefined;
-
     return {
       eventId: entry.eventId,
       date: new Date(entry.time).toLocaleDateString(),
-      sourceBarcode: sourceLabware.barcode,
-      destinationBarcode: destinationLabware.barcode,
+      sourceBarcode: sourceLabware ? sourceLabware.barcode : '',
+      destinationBarcode: destinationLabware ? destinationLabware.barcode : '',
       labwareType: destinationLabware.labwareType.name,
       sampleID: entry.sampleId,
       donorName: sample?.tissue?.donor?.donorName ?? undefined,

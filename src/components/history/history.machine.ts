@@ -1,23 +1,24 @@
 import { createMachine } from 'xstate';
 import { Maybe } from '../../types/sdk';
-import { HistoryProps, HistoryTableEntry, MachineServiceDone, MachineServiceError } from '../../types/stan';
+import { HistoryTableEntry, MachineServiceDone, MachineServiceError } from '../../types/stan';
 import * as historyService from '../../lib/services/historyService';
 import { assign } from '@xstate/immer';
 import { ClientError } from 'graphql-request';
+import { HistoryUrlParams } from '../../pages/History';
 
 type HistoryContext = {
-  historyProps: HistoryProps;
+  historyProps: HistoryUrlParams;
   history: Array<HistoryTableEntry>;
   serverError: Maybe<ClientError>;
 };
 
 type HistoryEvent =
-  | { type: 'UPDATE_HISTORY_PROPS'; props: HistoryProps }
+  | { type: 'UPDATE_HISTORY_PROPS'; props: HistoryUrlParams }
   | { type: 'RETRY' }
   | MachineServiceDone<'findHistory', Array<HistoryTableEntry>>
   | MachineServiceError<'findHistory'>;
 
-export default function createHistoryMachine(initialHistoryProps: HistoryProps) {
+export default function createHistoryMachine(initialHistoryProps: HistoryUrlParams) {
   return createMachine<HistoryContext, HistoryEvent>(
     {
       id: 'historyMachine',
@@ -78,6 +79,7 @@ export default function createHistoryMachine(initialHistoryProps: HistoryProps) 
           ctx.serverError = e.data;
         })
       },
+
       services: {
         findHistory: (context) => {
           return historyService.findHistory(context.historyProps);
