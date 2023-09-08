@@ -71,8 +71,6 @@ const getCommentTextFromField = (
   return [];
 };
 
-const currentDateTime = getCurrentDateTime();
-
 const mapSampleAddressCommentIds = (
   address: string,
   sampleId: number,
@@ -124,7 +122,7 @@ const formInitialValues: ProbeHybridisationQCFormValues = {
   labwares: {
     '': {
       globalComments: [],
-      completionDateTime: currentDateTime,
+      completionDateTime: getCurrentDateTime(),
       sampleAddressComments: { '': [] }
     }
   }
@@ -232,9 +230,7 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
   );
 
   const validateCompletionDateTime = (selectedTime: string) => {
-    return new Date(selectedTime) > new Date(currentDateTime)
-      ? 'Please select a time on or before current time'
-      : undefined;
+    return new Date(selectedTime) > new Date() ? 'Please select a time on or before current time' : undefined;
   };
 
   return (
@@ -296,12 +292,11 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
                                   data-testid={'completionDateTime'}
                                   type="datetime-local"
                                   name={`labwares[${labware.barcode}].completionDateTime`}
-                                  max={currentDateTime}
-                                  min={currentDateTime.split('T')[0] + 'T00:00'}
+                                  max={getCurrentDateTime()}
                                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     setFieldValue(`labwares.${labware.barcode}.completionDateTime`, e.target.value);
                                   }}
-                                  value={values.labwares[labware.barcode]?.completionDateTime || currentDateTime}
+                                  value={values.labwares[labware.barcode]?.completionDateTime || getCurrentDateTime()}
                                   className="w-1/2"
                                   validate={validateCompletionDateTime}
                                 />
