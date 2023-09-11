@@ -48,7 +48,6 @@ export function awaitingStorageCheckOnExit(args: {
   /**PUSH is the action for  invoking/visiting a link or for pushing a new entry onto the history stack
    * POP is the action send while you navigate using the browser's forward/back buttons.
    * **/
-  debugger;
   if (
     (args.historyAction === 'POP' &&
       ['/locations', '/store'].some((path) => args.nextLocation.pathname.startsWith(path))) ||

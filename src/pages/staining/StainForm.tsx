@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../../lib/machines/form/formMachine';
 import { GetStainInfoQuery, LabwareFieldsFragment, StainMutation, StainRequest } from '../../types/sdk';
-import { reload, stanCore } from '../../lib/sdk';
+import { stanCore } from '../../lib/sdk';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import GrayBox, { Sidebar } from '../../components/layouts/GrayBox';

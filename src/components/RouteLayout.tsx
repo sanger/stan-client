@@ -49,19 +49,20 @@ import Destroy from '../pages/Destroy';
 import Configuration from '../pages/Configuration';
 import LabwareDetails from '../pages/LabwareDetails';
 import { useAuth } from '../context/AuthContext';
+import ErrorBoundary from './notifications/ErrorBoundary';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
   const { authState } = useAuth();
+
   const routes = createBrowserRouter(
     createRoutesFromElements(
-      <Route>
+      <Route errorElement={<ErrorBoundary />}>
         <Route path="/logout" element={<Logout />} />
-        <Route path={'/history'} element={<History />} />
+        <Route path="/history" element={<History />} />
         <Route path="/locations" element={<Store />} />
         <Route path="/store" element={<Store />} />
         <Route path="/login" element={<Login />} />
-        <Route path="store" element={<Store />} />
         <Route
           path="/"
           element={
@@ -96,8 +97,9 @@ const RouteLayout = () => {
         />
         <Route
           path="/file_viewer"
-          loader={() => {
-            return stanCore.GetAllWorkInfo();
+          loader={async () => {
+            const workInfo = await stanCore.GetAllWorkInfo();
+            return workInfo.works;
           }}
           element={<FileManager showUpload={false} />}
         />

@@ -168,7 +168,7 @@ export function buildAddresses(size: SizeInput, direction: GridDirection = GridD
  * @param params the URL params
  * @param allowedKeys list of keys to pick from params
  */
-export function cleanParams<T>(params: URLSearchParams, allowedKeys: Array<string>) {
+export function cleanParams(params: URLSearchParams, allowedKeys: Array<string>) {
   return _(params).pick(allowedKeys).omitBy(_.isNil).omitBy(_.isEmpty).omitBy(_.isArray).value();
 }
 
