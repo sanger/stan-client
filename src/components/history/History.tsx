@@ -3,7 +3,7 @@ import createHistoryMachine from './history.machine';
 import { useMachine } from '@xstate/react';
 import DataTable from '../DataTable';
 import { Cell, Column } from 'react-table';
-import { HistoryProps, HistoryTableEntry } from '../../types/stan';
+import { HistoryTableEntry } from '../../types/stan';
 import StyledLink from '../StyledLink';
 import Warning from '../notifications/Warning';
 import WhiteButton from '../buttons/WhiteButton';
@@ -15,11 +15,12 @@ import { useDownload } from '../../lib/hooks/useDownload';
 import Heading from '../Heading';
 import Table, { TableBody, TableCell } from '../Table';
 import { useAuth } from '../../context/AuthContext';
-
+import TopScrollingBar from '../TopScrollingBar';
+import { HistoryUrlParams } from '../../pages/History';
 /**
  * Component for looking up and displaying the history of labware and samples
  */
-export default function History(props: HistoryProps) {
+export default function History(props: HistoryUrlParams) {
   const historyMachine = React.useMemo(() => {
     return createHistoryMachine(props);
   }, [props]);
@@ -53,7 +54,7 @@ export default function History(props: HistoryProps) {
         Cell: (props: Cell<HistoryTableEntry>) => {
           const barcode = props.row.original.sourceBarcode;
           let classes =
-            historyProps.kind === 'labwareBarcode' && barcode === historyProps.value
+            historyProps.barcode === barcode
               ? 'bg-yellow-400 text-sp-600 hover:text-sp-700 font-semibold hover:underline text-base tracking-wide'
               : '';
           return (
@@ -69,7 +70,7 @@ export default function History(props: HistoryProps) {
         Cell: (props: Cell<HistoryTableEntry>) => {
           const barcode = props.row.original.destinationBarcode;
           let classes =
-            historyProps.kind === 'labwareBarcode' && barcode === historyProps.value
+            historyProps.barcode === barcode
               ? 'bg-yellow-400 text-sp-600 hover:text-sp-700 font-semibold hover:underline text-base tracking-wide'
               : '';
           return (
@@ -96,8 +97,8 @@ export default function History(props: HistoryProps) {
         accessor: 'sectionNumber'
       },
       {
-        Header: 'Slot Id',
-        accessor: 'slotId'
+        Header: 'Address',
+        accessor: 'address'
       },
       {
         Header: 'Section Position',
@@ -165,12 +166,14 @@ export default function History(props: HistoryProps) {
     return workNumbers;
   }, [history]);
 
+  const isValidInput = props.sampleId || props.workNumber || props.barcode || props.externalName || props.donorName;
+
   /**
    * If the props change, send an update event to the machine
    */
   useEffect(() => {
     send({ type: 'UPDATE_HISTORY_PROPS', props });
-  }, [props, send]);
+  }, [props, send, isValidInput]);
 
   /**
    * File upload option is only for authenticated users, so
@@ -182,8 +185,16 @@ export default function History(props: HistoryProps) {
     });
     return isAuthenticated() ? `/file_manager?${queryParamsStr}` : `/file_viewer?${queryParamsStr}`;
   };
+
+  const searchString = (keyValSeparator: string, tokenSeparator: string) => {
+    return Object.keys(historyProps)
+      .sort()
+      .map((key) => `${key}${keyValSeparator}${historyProps[key as keyof HistoryUrlParams]}`)
+      .join(tokenSeparator);
+  };
+
   return (
-    <div data-testid="history">
+    <div>
       {current.matches('error') && serverError && (
         <Warning message={'History Search Error'} error={serverError}>
           <WhiteButton onClick={() => send({ type: 'RETRY' })}>Retry</WhiteButton>
@@ -195,7 +206,6 @@ export default function History(props: HistoryProps) {
           <LoadingSpinner />
         </div>
       )}
-
       {current.matches('found') &&
         (history.length > 0 ? (
           <>
@@ -208,7 +218,7 @@ export default function History(props: HistoryProps) {
                 <Heading level={4} showBorder={false}>
                   Files Uploaded
                 </Heading>
-                <div className={'flex flex-col mt-4 justify-center'}>
+                <div className={'flex flex-col mt-4 justify-center'} data-testid="history">
                   <Table>
                     <TableBody>
                       <TableCell className={'flex flex-col justify-center  p-2'}>
@@ -225,29 +235,22 @@ export default function History(props: HistoryProps) {
               </div>
             )}
             <div className="mt-6 mb-2 flex flex-row items-center justify-end space-x-3">
-              <p className="text-sm text-gray-700">
-                History for {historyDisplayValues[props.kind]} <span className="font-medium">{props.value}</span>
-              </p>
-              <a
-                href={downloadURL}
-                download={`${getTimestampStr()}_${historyProps.kind}_${historyProps.value}${extension}`}
-              >
+              History for
+              <>&nbsp;</>
+              <span className="text-gray-700">{`${searchString(' ', ', ')}`}</span>
+              <a href={downloadURL} download={`${getTimestampStr()}_${searchString('=', '&')}${extension}`}>
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
-            <DataTable data-testid={'history-table'} columns={historyColumns} data={history} fixedHeader={true} />
+            <TopScrollingBar>
+              <DataTable data-testid={'history-table'} columns={historyColumns} data={history} fixedHeader={true} />
+            </TopScrollingBar>
           </>
-        ) : (
+        ) : isValidInput ? (
           <Warning message={'No results found.'} />
+        ) : (
+          <></>
         ))}
     </div>
   );
 }
-
-export const historyDisplayValues: { [key in HistoryProps['kind']]: string } = {
-  labwareBarcode: 'Labware Barcode',
-  sampleId: 'Sample ID',
-  externalName: 'External ID',
-  donorName: 'Donor Name',
-  workNumber: 'Work Number'
-};

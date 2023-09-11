@@ -1,4 +1,9 @@
-import { AddReleaseRecipientMutation, AddReleaseRecipientMutationVariables } from '../../../src/types/sdk';
+import {
+  AddReleaseRecipientMutation,
+  AddReleaseRecipientMutationVariables,
+  UpdateReleaseRecipientFullNameMutation,
+  UpdateReleaseRecipientFullNameMutationVariables
+} from '../../../src/types/sdk';
 import { selectOption } from '../shared/customReactSelect.cy';
 
 describe('Configuration Spec', () => {
@@ -116,6 +121,39 @@ describe('Configuration Spec', () => {
     });
   });
 
+  describe('displays extra input field when specified', () => {
+    const config = {
+      name: 'Release Recipients',
+      tabName: 'Release Recipients',
+      field: 'cs41',
+      extraFieldValue: 'Csaba Csordas',
+      buttonName: '+ Add Username',
+      newValue: 'az99',
+      newExtraFieldValue: 'Arielle Zimran'
+    };
+    context('configuration table should contains extra column to display extra field values', () => {
+      before(() => {
+        cy.scrollTo(0, 0);
+        cy.findByText(config.name).click();
+      });
+
+      it('displays extra field values', () => {
+        cy.get(`div[data-testid="config"]:contains(${config.name})`)
+          .find(`tr:contains(${config.field}) `)
+          .find('input')
+          .first()
+          .should('have.value', config.extraFieldValue);
+      });
+
+      it('displays extra field input when adding new entity', () => {
+        clickButton(config.buttonName);
+        cy.findByTestId('input-field').scrollIntoView().focus().type(`${config.newValue}`);
+        enterNewExtraFieldValue(config.extraFieldValue);
+        cy.findByText('Saved').scrollIntoView().should('be.visible');
+      });
+    });
+  });
+
   context('When adding a Release Recipients fails', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {
@@ -134,8 +172,6 @@ describe('Configuration Spec', () => {
           )
         );
       });
-      cy.scrollTo(0, 0);
-      cy.findByText('Release Recipients').click();
     });
 
     it('shows an error message', () => {
@@ -147,8 +183,40 @@ describe('Configuration Spec', () => {
       });
     });
   });
+
+  context('When Updating a Release Recipient full name successfully', () => {
+    before(() => {
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.mutation<UpdateReleaseRecipientFullNameMutation, UpdateReleaseRecipientFullNameMutationVariables>(
+            'UpdateReleaseRecipientFullName',
+            (req, res, ctx) => {
+              return res.once(
+                ctx.data({
+                  updateReleaseRecipientFullName: {
+                    username: 'et2',
+                    fullName: 'Ethan Twin',
+                    enabled: true
+                  }
+                })
+              );
+            }
+          )
+        );
+      });
+      cy.get(`div[data-testid="config"]:contains('Release Recipients')`)
+        .find(`tr:contains('et2') `)
+        .find('input')
+        .first()
+        .focus()
+        .type(`Ethan Twin {enter}`, { force: true });
+    });
+    it('shows a success message', () => {
+      cy.findByText('Changes for "et2" saved').should('be.visible');
+    });
+  });
   function selectElement(findTag: string) {
-    return cy.get(findTag).scrollIntoView().click({
+    return cy.get(findTag).last().scrollIntoView().click({
       force: true
     });
   }
@@ -157,5 +225,9 @@ describe('Configuration Spec', () => {
   }
   function enterNewValue(value: string) {
     cy.findByTestId('input-field').scrollIntoView().focus().type(`${value}{enter}`, { force: true });
+  }
+
+  function enterNewExtraFieldValue(value: string) {
+    cy.findByTestId('extra-input-field').scrollIntoView().focus().type(`${value}{enter}`, { force: true });
   }
 });

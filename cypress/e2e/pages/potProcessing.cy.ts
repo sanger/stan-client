@@ -73,6 +73,7 @@ describe('Pot Processing', () => {
   describe('Pot labware', () => {
     context('when adding Pot labware', () => {
       before(() => {
+        cy.findByRole('button', { name: /Cancel/i }).click();
         selectSGPNumber('SGP1008');
         selectOption('labwareType', 'Pot');
         cy.findByTestId('numLabware').type('{selectall}').type('2');

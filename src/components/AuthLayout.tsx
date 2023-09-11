@@ -11,6 +11,7 @@ type AuthWrapperProps = {
 };
 const AuthLayout = ({ role = UserRole.Normal }: AuthWrapperProps) => {
   const location = useLocation();
+  debugger;
   const auth = useAuth();
   if (auth.isAuthenticated() && auth.userRoleIncludes(role)) {
     return <Outlet />;
@@ -20,7 +21,7 @@ const AuthLayout = ({ role = UserRole.Normal }: AuthWrapperProps) => {
         <Navigate
           to="/login"
           replace
-          state={{ from: location, message: `Please sign in to access ${location.pathname}` }}
+          state={{ referrer: location, warning: `Please sign in to access ${location.pathname}` }}
         />
       );
     } else {
@@ -28,7 +29,7 @@ const AuthLayout = ({ role = UserRole.Normal }: AuthWrapperProps) => {
         <Navigate
           to="/"
           replace
-          state={{ from: location, message: `You are not authorised to access ${location.pathname}` }}
+          state={{ referrer: location, warning: `You are not authorised to access ${location.pathname}` }}
         />
       );
     }

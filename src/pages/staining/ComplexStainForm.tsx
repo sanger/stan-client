@@ -26,6 +26,8 @@ import Warning from '../../components/notifications/Warning';
 import WhiteButton from '../../components/buttons/WhiteButton';
 import { FormikFieldValueArray } from '../../components/forms/FormikFieldValueArray';
 import ComplexStainRow from './ComplexStainRow';
+import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
+import { useNavigate } from 'react-router-dom';
 
 type ComplexStainFormValues = ComplexStainRequest;
 
@@ -50,6 +52,8 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
 
   const { serverError } = current.context;
 
+  const navigate = useNavigate();
+
   const plexMin = 1;
   const plexMax = 100;
   const stainTypes = stainType === 'RNAscope & IHC' ? stainType.split('&').map((val) => val.trim()) : [stainType];
@@ -60,17 +64,15 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
     bondRun: Yup.number().integer().positive().label('Bond Run'),
     workNumber: Yup.string().required().label('SGP Number'),
     panel: Yup.string().oneOf(Object.values(StainPanel)).required().label('Experimental Panel'),
-    plexRNAscope: Yup.number().when('stainTypes', (stainTypes) => {
-      const value = stainTypes[0] as unknown as string;
-      if (value !== 'IHC') {
+    plexRNAscope: Yup.number().when('stainTypes', () => {
+      if (stainType !== 'IHC') {
         return Yup.number().integer().min(plexMin).max(plexMax).required().label('RNAScope Plex Number');
       } else {
         return Yup.number().notRequired();
       }
     }),
-    plexIHC: Yup.number().when('stainTypes', (stainTypes) => {
-      const value = stainTypes[0] as unknown as string;
-      if (value !== 'RNAscope') {
+    plexIHC: Yup.number().when('stainTypes', () => {
+      if (stainType !== 'RNAscope') {
         return Yup.number().required().integer().min(plexMin).max(plexMax).label('IHC Plex Number');
       } else {
         return Yup.number().notRequired();
@@ -219,14 +221,29 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
             show={current.matches('submitted')}
             message={'Staining Successful'}
             additionalButtons={
-              <WhiteButton
-                type="button"
-                style={{ marginRight: 'auto' }}
-                className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text-sm"
-                onClick={() => send({ type: 'RESET' })}
-              >
-                Stain Again
-              </WhiteButton>
+              <div className={'flex flex-row gap-x-3'}>
+                <WhiteButton
+                  type="button"
+                  style={{ marginRight: 'auto' }}
+                  className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={() => send({ type: 'RESET' })}
+                >
+                  Stain Again
+                </WhiteButton>
+                <WhiteButton
+                  type="button"
+                  style={{ marginLeft: 'auto' }}
+                  className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                  onClick={() => {
+                    if (initialLabware.length > 0) {
+                      createSessionStorageForLabwareAwaiting(initialLabware);
+                    }
+                    navigate('/store');
+                  }}
+                >
+                  Store
+                </WhiteButton>
+              </div>
             }
           >
             <p>

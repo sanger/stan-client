@@ -51,6 +51,7 @@ const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   const stanCore = useContext(StanCoreContext);
   useEffect(() => {
     async function checkCurrentUser() {
+      debugger;
       try {
         const { user } = await stanCore.CurrentUser();
         if (user) {

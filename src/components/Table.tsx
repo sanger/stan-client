@@ -15,6 +15,7 @@ interface TableHeaderProps {
   sortProps?: SortProps;
   children?: ReactNode | ReactNode[];
   allCapital?: boolean;
+  colSpan?: number;
 }
 /**
  * @example
@@ -36,7 +37,7 @@ interface TableHeaderProps {
  */
 const Table: React.FC<TableProps> = ({ children, ...rest }) => {
   return (
-    <div className="flex flex-col overflow-auto max-h-screen">
+    <div className="flex flex-col overflow-auto max-h-screen" datatype="table-wrapper">
       <div className="py-2 align-middle inline-block min-w-full">
         <div className="shadow border-b border-gray-200 sm:rounded-lg">
           <table className="min-w-full divide-y divide-gray-200" {...rest}>
@@ -58,9 +59,9 @@ export const TableHead = ({ children, fixed = false }: TableHeadProps) => {
   return <thead className={`${fixed ? 'sticky top-0' : ''}`}>{children}</thead>;
 };
 
-export const TableHeader = ({ children, sortProps, allCapital = true, ...rest }: TableHeaderProps) => {
+export const TableHeader = ({ children, sortProps, allCapital = true, colSpan, ...rest }: TableHeaderProps) => {
   return (
-    <th className="px-6 py-3 bg-gray-50 text-left select-none" {...rest}>
+    <th className="px-6 py-3 bg-gray-50 text-left select-none" colSpan={colSpan} {...rest}>
       <>
         {
           <IconButton
@@ -110,8 +111,16 @@ type Props = {
   children: string | ReactNode | ReactNode[];
 };
 export const TabelSubHeader: React.FC<Props> = ({ children, ...rest }) => {
-  return <div className="flex text-xs font-medium text-gray-500 uppercase">{children}</div>;
+  return (
+    <div className="flex text-xs font-medium text-gray-500 uppercase" {...rest}>
+      {children}
+    </div>
+  );
 };
 export const TabelCentredCell: React.FC<Props> = ({ children, ...rest }) => {
-  return <div className="flex items-center justify-center">{children}</div>;
+  return (
+    <div className="flex items-center justify-center" {...rest}>
+      {children}
+    </div>
+  );
 };

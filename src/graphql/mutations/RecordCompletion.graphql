@@ -1,0 +1,7 @@
+mutation RecordCompletion($request: CompletionRequest!) {
+  recordCompletion(request: $request) {
+    operations {
+      id
+    }
+  }
+}

@@ -73,6 +73,7 @@ const ComplexStainRow = ({
           label={''}
           name={rowID !== undefined ? `labware.${rowID}.bondBarcode` : `bondBarcode`}
           onChange={handleChange}
+          data-testid={`${barcode}-bondBarcode`}
         />
       </TableCell>
       <TableCell className={cellClassNames}>
@@ -82,6 +83,7 @@ const ComplexStainRow = ({
           type={'number'}
           min={0}
           onChange={handleChange}
+          data-testid={`${barcode}-bondRun`}
         />
       </TableCell>
       <TableCell className={cellClassNames}>
@@ -95,6 +97,7 @@ const ComplexStainRow = ({
             });
           }}
           workNumber={rowID !== undefined ? stainFormValues.labware[rowID].workNumber ?? '' : ''}
+          dataTestId={`${barcode}-workNumber`}
         />
       </TableCell>
       <TableCell className={cellClassNames}>
@@ -116,6 +119,7 @@ const ComplexStainRow = ({
             };
           })}
           value={rowID !== undefined ? stainFormValues.labware[rowID].panel ?? '' : ''}
+          data-testid={`${barcode}-panel`}
         />
       </TableCell>
       <TableCell className={cellClassNames}>

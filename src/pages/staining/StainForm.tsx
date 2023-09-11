@@ -19,6 +19,9 @@ import columns from '../../components/dataTableColumns/labwareColumns';
 import FormikInput from '../../components/forms/Input';
 import PinkButton from '../../components/buttons/PinkButton';
 import OperationCompleteModal from '../../components/modal/OperationCompleteModal';
+import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
+import WhiteButton from '../../components/buttons/WhiteButton';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Type used for the values in the form.
@@ -72,7 +75,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
   const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
-
+  const navigate = useNavigate();
   /**
    * Map of stain type name to list of its measurements.
    * Helpful for the form to only display measurement inputs when selected stain type has some
@@ -217,6 +220,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
                             placeholder="mm"
                             min={0}
                             value={measurementType._minutes === 0 ? '' : measurementType._minutes}
+                            data-testid={`timeMeasurements.${i}.minutes`}
                           />
                           <FormikInput
                             label={''}
@@ -235,6 +239,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
                             placeholder="ss"
                             min={0}
                             value={measurementType._seconds === 0 ? '' : measurementType._seconds}
+                            data-testid={`timeMeasurements.${i}.seconds`}
                           />
                         </div>
 
@@ -276,7 +281,25 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
               </PinkButton>
             </Sidebar>
           </GrayBox>
-          <OperationCompleteModal show={current.matches('submitted')} message={'Staining Successful'}>
+          <OperationCompleteModal
+            show={current.matches('submitted')}
+            message={'Staining Successful'}
+            additionalButtons={
+              <WhiteButton
+                type="button"
+                style={{ marginLeft: 'auto' }}
+                className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
+                onClick={() => {
+                  if (initialLabware.length > 0) {
+                    createSessionStorageForLabwareAwaiting(initialLabware);
+                  }
+                  navigate('/store');
+                }}
+              >
+                Store
+              </WhiteButton>
+            }
+          >
             <p>
               If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the
               Home screen.

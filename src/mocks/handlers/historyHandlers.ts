@@ -10,6 +10,8 @@ import {
   FindHistoryForSampleIdQueryVariables,
   FindHistoryForWorkNumberQuery,
   FindHistoryForWorkNumberQueryVariables,
+  FindHistoryQuery,
+  FindHistoryQueryVariables,
   HistoryEntry,
   HistoryFieldsFragment
 } from '../../types/sdk';
@@ -33,7 +35,7 @@ export function buildHistory(workNumber?: string): HistoryFieldsFragment {
       type: 'Eat',
       username: 'user1',
       details: ['Taste: Great', 'Monkey: Foo'],
-      workNumber: workNumber ?? 'SGP123'
+      workNumber: workNumber ?? 'SGP1008'
     }
   ];
 
@@ -47,6 +49,15 @@ export function buildHistory(workNumber?: string): HistoryFieldsFragment {
 }
 
 const historyHandlers = [
+  graphql.query<FindHistoryQuery, FindHistoryQueryVariables>('FindHistory', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        __typename: 'Query',
+        history: buildHistory()
+      })
+    );
+  }),
+
   graphql.query<FindHistoryForDonorNameQuery, FindHistoryForDonorNameQueryVariables>(
     'FindHistoryForDonorName',
     (req, res, ctx) => {

@@ -50,6 +50,8 @@ import Configuration from '../pages/Configuration';
 import LabwareDetails from '../pages/LabwareDetails';
 import { useAuth } from '../context/AuthContext';
 import ErrorBoundary from './notifications/ErrorBoundary';
+import ProbeHybridisationQC from '../pages/ProbeHybridisationQC';
+import XeniumQC from '../pages/XeniumQC';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -246,6 +248,33 @@ const RouteLayout = () => {
             element={
               <DataFetcher dataFetcher={stanCore.GetProbePanels}>
                 {(probePanelInfo) => <ProbeHybridisationXenium probePanelInfo={probePanelInfo} />}
+              </DataFetcher>
+            }
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/probe_hybridisation_qc"
+            element={
+              <DataFetcher
+                dataFetcher={() =>
+                  stanCore.GetComments({
+                    commentCategory: 'Probe QC',
+                    includeDisabled: false
+                  })
+                }
+              >
+                {(response) => <ProbeHybridisationQC comments={response.comments} />}
+              </DataFetcher>
+            }
+          />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/lab/xenium_qc"
+            element={
+              <DataFetcher dataFetcher={stanCore.GetXeniumQCInfo}>
+                {(xeniumQCInfo) => <XeniumQC info={xeniumQCInfo} />}
               </DataFetcher>
             }
           />

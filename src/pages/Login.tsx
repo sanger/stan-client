@@ -24,6 +24,7 @@ const Login = (): JSX.Element => {
   const auth = useAuth();
   let location = useLocation();
 
+  debugger;
   // If the user was redirected here because they were logged in, and then their session expired, clear the AuthState
   useEffect(() => {
     if (location?.state?.loggedOut) {

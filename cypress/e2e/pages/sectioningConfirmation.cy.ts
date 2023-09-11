@@ -150,6 +150,9 @@ describe('Sectioning Confirmation', () => {
 
         cy.findByText('Search').click();
       });
+      after(() => {
+        cy.findByRole('button', { name: /Cancel/ }).click();
+      });
     });
 
     context('when I edit the layout', () => {

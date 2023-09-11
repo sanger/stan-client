@@ -127,6 +127,26 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({
     category: 'clean up',
     text: 'Beads cracked during drying step'
+  }),
+  commentFactory.build({
+    category: 'QC labware',
+    text: 'Run terminated due to objective cleaning error'
+  }),
+  commentFactory.build({
+    category: 'QC labware',
+    text: 'Run terminated due to software error'
+  }),
+  commentFactory.build({
+    category: 'QC labware',
+    text: 'Run paused due to error, but retry permitted completion'
+  }),
+  commentFactory.build({
+    category: 'Probe QC',
+    text: 'Section detached'
+  }),
+  commentFactory.build({
+    category: 'Probe QC',
+    text: 'Issue with thermal cycler'
   })
 ];
 

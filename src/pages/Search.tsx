@@ -12,12 +12,12 @@ import LoadingSpinner from '../components/icons/LoadingSpinner';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';
 import { FindRequest, GetSearchInfoQuery, Work } from '../types/sdk';
-import { reload, stanCore } from '../lib/sdk';
+import { stanCore } from '../lib/sdk';
 import { useMachine } from '@xstate/react';
 import * as Yup from 'yup';
-import { cleanParams, getTimestampStr, objectKeys, stringify } from '../lib/helpers';
+import { getTimestampStr, objectKeys, stringify } from '../lib/helpers';
 import WhiteButton from '../components/buttons/WhiteButton';
-import { merge, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import { configContext } from '../context/ConfigContext';
 import searchMachine from '../lib/machines/search/searchMachine';
 import SearchService from '../lib/services/searchService';
@@ -26,6 +26,7 @@ import CustomReactSelect from '../components/forms/CustomReactSelect';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import TopScrollingBar from '../components/TopScrollingBar';
 
 const validationSchema = Yup.object()
   .shape({
@@ -76,7 +77,17 @@ type SearchProps = {
 
 function Search({ searchInfo }: SearchProps) {
   const [searchParams] = useSearchParams();
-  const findRequest: FindRequest = merge({}, emptyFindRequest, cleanParams(searchParams, emptyFindRequestKeys));
+
+  const findRequest = React.useMemo(() => {
+    debugger;
+    const request: FindRequest = emptyFindRequestKeys.reduce((request, key) => {
+      const value = searchParams.get(key) ?? '';
+      return { ...request, [key]: value.trim() };
+    }, emptyFindRequest);
+    return request;
+  }, [searchParams]);
+
+  debugger;
 
   const config = useContext(configContext)!;
   const search = searchMachine<FindRequest, SearchResultTableEntry>(new SearchService());
@@ -246,7 +257,7 @@ function Search({ searchInfo }: SearchProps) {
                       type="button"
                       onClick={() => {
                         resetForm({ values: emptyFindRequest });
-                        reload(navigate);
+                        navigate('/search', { replace: true, state: { reset: true } });
                       }}
                     >
                       Reset
@@ -337,23 +348,25 @@ function Search({ searchInfo }: SearchProps) {
                         </p>
                       </div>
                     </div>
-                    {viewAllRecords ? (
-                      <DataTable
-                        sortable
-                        defaultSort={[{ id: 'donorId' }]}
-                        columns={columns}
-                        data={searchResult.entries}
-                        ref={sortedTableDataRef}
-                      />
-                    ) : (
-                      <DataTable
-                        sortable
-                        defaultSort={[{ id: 'barcode' }]}
-                        columns={uniqueBarcodeTableColumns}
-                        data={memoUniqueBarcodeData}
-                        ref={uniqueTableDataRef}
-                      />
-                    )}
+                    <TopScrollingBar>
+                      {viewAllRecords ? (
+                        <DataTable
+                          sortable
+                          defaultSort={[{ id: 'donorId' }]}
+                          columns={columns}
+                          data={searchResult.entries}
+                          ref={sortedTableDataRef}
+                        />
+                      ) : (
+                        <DataTable
+                          sortable
+                          defaultSort={[{ id: 'barcode' }]}
+                          columns={uniqueBarcodeTableColumns}
+                          data={memoUniqueBarcodeData}
+                          ref={uniqueTableDataRef}
+                        />
+                      )}
+                    </TopScrollingBar>
                   </div>
                 </>
               )}

@@ -261,14 +261,18 @@ export type HistoryTableEntry = {
   username: string;
   workNumber?: Maybe<string>;
   details: Array<string>;
+  address?: string;
+  sectionPosition?:string
 };
 
+/*
 const historyStrKeys = [
   "externalName",
   "donorName",
   "labwareBarcode",
   "workNumber",
 ] as const;
+
 type HistoryStrKeys = typeof historyStrKeys[number];
 const historyNumKeys = ["sampleId"] as const;
 type HistoryNumKeys = typeof historyNumKeys[number];
@@ -292,7 +296,7 @@ export const historySchema = Yup.object({
     .required(),
 }).required();
 
-export type HistoryProps = HistoryStrProps | HistoryNumProps;
+export type HistoryProps = HistoryStrProps | HistoryNumProps;*/
 
 /**
  * Sort functionality for Status. The status need to be sorted in the order "active", "completed", "paused", "failed"
@@ -337,6 +341,11 @@ export function createSessionStorageForLabwareAwaiting( labware:LabwareFieldsFra
               )
           .join(',')
   );
+}
+
+// convert yyyy-mm-ddTHH:MM to yyyy-mm-dd HH:MM:00
+export function formatDateTimeForCore(dateTime: Maybe<string>) {
+  return dateTime ? dateTime.replace('T', ' ') + ':00' : "";
 }
 
 export function getCurrentDateTime() {

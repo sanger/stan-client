@@ -5,6 +5,7 @@ import {
   FindHistoryForWorkNumberQueryVariables
 } from '../../../src/types/sdk';
 import { buildHistory } from '../../../src/mocks/handlers/historyHandlers';
+import { shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
 describe('History Page', () => {
   context('when I visit the page with no URL params', () => {
     before(() => cy.visit('/history'));
@@ -18,7 +19,9 @@ describe('History Page', () => {
     before(() => cy.visit('/history?bad=params&no=search'));
 
     it('does not use the params to fill in the form', () => {
-      cy.get("input[name='value']").invoke('val').should('eq', '');
+      cy.get("input[name='barcode']").invoke('val').should('eq', '');
+      cy.get("input[name='externalName']").invoke('val').should('eq', '');
+      cy.get("input[name='donorName']").invoke('val').should('eq', '');
     });
 
     it('does not perform a history search', () => {
@@ -28,16 +31,15 @@ describe('History Page', () => {
 
   describe('By Labware Barcode', () => {
     context('when I visit the page with good URL params', () => {
-      before(() => cy.visit('/history?kind=labwareBarcode&value=STAN-1001'));
+      before(() => cy.visit('/history?barcode=STAN-1001'));
 
       it('uses the params to fill in the form', () => {
-        cy.get("input[name='value']").invoke('val').should('eq', 'STAN-1001');
-        cy.get("select[name='kind']").invoke('val').should('eq', 'labwareBarcode');
+        cy.get("input[name='barcode']").invoke('val').should('eq', 'STAN-1001');
       });
 
       it('performs a history search', () => {
         cy.findByTestId('history').should('exist');
-        cy.findByTextContent('History for Labware Barcode STAN-1001');
+        cy.contains('History for barcode STAN-1001');
       });
 
       it('hightlights the searched barcode in the table', () => {
@@ -64,13 +66,32 @@ describe('History Page', () => {
     });
   });
 
+  describe('By multiple search fields', () => {
+    before(() => {
+      cy.visit('/history?barcode=STAN-10001F&donorName=DNR123&workNumber=SGP1008&externalName=EXT123');
+    });
+    it('uses the params to fill in the form', () => {
+      cy.get("input[name='barcode']").invoke('val').should('eq', 'STAN-10001F');
+      cy.get("input[name='donorName']").invoke('val').should('eq', 'DNR123');
+      cy.get("input[name='externalName']").invoke('val').should('eq', 'EXT123');
+      shouldDisplaySelectedValue('workNumber', 'SGP1008');
+    });
+    it('performs a history search', () => {
+      cy.findByTestId('history').should('exist');
+      cy.contains('History for barcode STAN-10001F, donorName DNR123, externalName EXT123, workNumber SGP1008');
+    });
+    it('displays uploaded files section', () => {
+      cy.findByText('Files Uploaded').should('be.visible');
+    });
+  });
+
   describe('By Sample ID', () => {
     context('when I visit the page with good URL params', () => {
-      before(() => cy.visit('/history?kind=sampleId&value=10'));
+      before(() => cy.visit('/history?sampleId=10'));
 
       it('does performs a history search', () => {
         cy.findByTestId('history').should('exist');
-        cy.findByTextContent('History for Sample ID 10');
+        cy.contains('History for sampleId 10');
       });
       it('displays uploaded files section', () => {
         cy.findByText('Files Uploaded').should('be.visible');
@@ -80,16 +101,15 @@ describe('History Page', () => {
 
   describe('By External ID', () => {
     context('when I visit the page with good URL params', () => {
-      before(() => cy.visit('/history?kind=externalName&value=EXT123'));
+      before(() => cy.visit('/history?externalName=EXT123'));
 
       it('uses the params to fill in the form', () => {
-        cy.get("input[name='value']").invoke('val').should('eq', 'EXT123');
-        cy.get("select[name='kind']").invoke('val').should('eq', 'externalName');
+        cy.get("input[name='externalName']").invoke('val').should('eq', 'EXT123');
       });
 
       it('does performs a history search', () => {
         cy.findByTestId('history').should('exist');
-        cy.findByTextContent('History for External ID EXT123');
+        cy.contains('History for externalName EXT123');
       });
       it('displays uploaded files section', () => {
         cy.findByText('Files Uploaded').should('be.visible');
@@ -99,16 +119,15 @@ describe('History Page', () => {
 
   describe('By Donor Name', () => {
     context('when I visit the page with good URL params', () => {
-      before(() => cy.visit('/history?kind=donorName&value=DNR123'));
+      before(() => cy.visit('/history?donorName=DNR123'));
 
       it('uses the params to fill in the form', () => {
-        cy.get("input[name='value']").invoke('val').should('eq', 'DNR123');
-        cy.get("select[name='kind']").invoke('val').should('eq', 'donorName');
+        cy.get("input[name='donorName']").invoke('val').should('eq', 'DNR123');
       });
 
       it('does performs a history search', () => {
         cy.findByTestId('history').should('exist');
-        cy.findByTextContent('History for Donor Name DNR123');
+        cy.contains('History for donorName DNR123');
       });
       it('displays uploaded files section', () => {
         cy.findByText('Files Uploaded').should('be.visible');
@@ -118,16 +137,15 @@ describe('History Page', () => {
 
   describe('By Work Number', () => {
     context('when I visit the page with good URL params', () => {
-      before(() => cy.visit('/history?kind=workNumber&value=SGP1'));
+      before(() => cy.visit('/history?workNumber=SGP1008'));
 
       it('uses the params to fill in the form', () => {
-        cy.get("input[name='value']").invoke('val').should('eq', 'SGP1');
-        cy.get("select[name='kind']").invoke('val').should('eq', 'workNumber');
+        shouldDisplaySelectedValue('workNumber', 'SGP1008');
       });
 
       it('does performs a history search', () => {
         cy.findByTestId('history').should('exist');
-        cy.findByTextContent('History for Work Number SGP1');
+        cy.contains('History for workNumber SGP1008');
       });
       it('displays uploaded files section', () => {
         cy.findByText('Files Uploaded').should('be.visible');
@@ -154,10 +172,10 @@ describe('History Page', () => {
       });
       context(' when clicking on uploaded files link for authenticated users', () => {
         before(() => {
-          cy.visit('/history?kind=workNumber&value=SGP1008');
+          cy.visit('/history?workNumber=SGP1008');
           cy.contains('Files for SGP1008').click();
         });
-        it('goes to file manager page for SGP123', () => {
+        it('goes to file manager page for SGP1008', () => {
           cy.url().should('be.equal', 'http://localhost:3000/file_manager?workNumber=SGP1008');
           cy.findByText('Upload file').should('exist');
           cy.findByText('Files').should('exist');
@@ -165,7 +183,7 @@ describe('History Page', () => {
       });
       context('for non-authenticated users', () => {
         before(() => {
-          cy.visitAsGuest('/history?kind=workNumber&value=SGP1008');
+          cy.visitAsGuest('/history?workNumber=SGP1008');
           cy.contains('Files for SGP1008').click();
         });
         it('goes to file viewer page for SGP123', () => {
@@ -192,25 +210,25 @@ describe('History Page', () => {
             )
           );
         });
-        cy.visit('/history?kind=workNumber&value=SGP1001');
+        cy.visit('/history?workNumber=SGP1008');
       });
       context(' when clicking on uploaded files link for authenticated users', () => {
         before(() => {
-          cy.contains('Files for SGP1001').click();
+          cy.contains('Files for SGP1008').click();
         });
         it('goes to file manager page for SGP1001', () => {
-          cy.url().should('be.equal', 'http://localhost:3000/file_manager?workNumber=SGP1001');
+          cy.url().should('be.equal', 'http://localhost:3000/file_manager?workNumber=SGP1008');
           cy.findByText('Upload file').should('exist');
           cy.findByText('Files').should('exist');
         });
       });
       context('for non-authenticated users', () => {
         before(() => {
-          cy.visitAsGuest('/history?kind=workNumber&value=SGP1001');
-          cy.contains('Files for SGP1001').click();
+          cy.visitAsGuest('/history?workNumber=SGP1008');
+          cy.contains('Files for SGP1008').click();
         });
-        it('goes to file viewer page for SGP1001', () => {
-          cy.url().should('be.equal', 'http://localhost:3000/file_viewer?workNumber=SGP1001');
+        it('goes to file viewer page for SGP1008', () => {
+          cy.url().should('be.equal', 'http://localhost:3000/file_viewer?workNumber=SGP1008');
           cy.findByText('Upload file').should('not.exist');
           cy.findByText('Files').should('exist');
         });
@@ -220,12 +238,12 @@ describe('History Page', () => {
 
   context('when a search errors', () => {
     before(() => {
-      cy.visit('/history?kind=labwareBarcode&value=STAN-10001F');
+      cy.visit('/history?barcode=STAN-10001F');
 
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
           graphql.query<FindHistoryForLabwareBarcodeQuery, FindHistoryForLabwareBarcodeQueryVariables>(
-            'FindHistoryForLabwareBarcode',
+            'FindHistory',
             (req, res, ctx) => {
               return res.once(
                 ctx.errors([

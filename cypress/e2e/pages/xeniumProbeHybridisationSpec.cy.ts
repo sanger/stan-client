@@ -1,5 +1,5 @@
 import { selectOption, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
-import { RecordProbeOperationMutation, SlotCopyMutation, SlotCopyMutationVariables } from '../../../src/types/sdk';
+import { RecordProbeOperationMutation } from '../../../src/types/sdk';
 
 describe('Xenium Probe Hybridisation', () => {
   before(() => {

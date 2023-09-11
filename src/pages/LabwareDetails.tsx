@@ -115,7 +115,6 @@ export default function LabwareDetails() {
                   sampleColumns.slotAddress(),
                   sampleColumns.tissueType(),
                   sampleColumns.sectionNumber(),
-                  sampleColumns.slotId(),
                   sampleColumns.sectionPosition(),
                   sampleColumns.bioState(),
                   sampleColumns.replicateNumber(),
@@ -129,7 +128,7 @@ export default function LabwareDetails() {
           </div>
           <div className="space-y-4">
             <Heading level={2}>Labware History</Heading>
-            <History kind={'labwareBarcode'} value={labware.barcode} />
+            <History barcode={labware.barcode} />
           </div>
         </div>
       </AppShell.Main>

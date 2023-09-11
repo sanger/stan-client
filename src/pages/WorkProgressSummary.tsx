@@ -17,6 +17,7 @@ import WorkProgressSummaryInput, {
   WorkProgressSearchType,
   workProgressSummarySearchSchema
 } from '../components/workProgress/WorkProgressSummaryInput';
+import TopScrollingBar from '../components/TopScrollingBar';
 
 /**
  * Data structure to keep the data associated with this component
@@ -187,22 +188,24 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
                   <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
                 </a>
               </div>
-              <DataTable
-                sortable
-                defaultSort={[
-                  {
-                    id: 'workType',
-                    desc: false
-                  },
-                  {
-                    id: 'status',
-                    desc: false
-                  }
-                ]}
-                columns={columns}
-                data={workProgressSummaryData}
-                ref={sortedTableDataRef}
-              />
+              <TopScrollingBar>
+                <DataTable
+                  sortable
+                  defaultSort={[
+                    {
+                      id: 'workType',
+                      desc: false
+                    },
+                    {
+                      id: 'status',
+                      desc: false
+                    }
+                  ]}
+                  columns={columns}
+                  data={workProgressSummaryData}
+                  ref={sortedTableDataRef}
+                />
+              </TopScrollingBar>
             </>
           ) : (
             <Warning message={'There were no results for the given search. Please try again.'} />

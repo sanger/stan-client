@@ -1,23 +1,53 @@
 import React from 'react';
 import AppShell from '../components/AppShell';
 import { Form, Formik } from 'formik';
-import FormikInput from '../components/forms/Input';
-import FormikSelect from '../components/forms/Select';
 import BlueButton from '../components/buttons/BlueButton';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { objectKeys, safeParseQueryString, stringify } from '../lib/helpers';
-import HistoryComponent, { historyDisplayValues } from '../components/history/History';
-import { HistoryProps, historySchema } from '../types/stan';
+import { safeParseQueryString, stringify } from '../lib/helpers';
+import HistoryComponent from '../components/history/History';
 import Heading from '../components/Heading';
 import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 import Information from '../components/notifications/Information';
+import * as Yup from 'yup';
+import HistoryInput from '../components/history/HistoryInput';
+
+/**
+ * Data structure to keep the data associated with this component
+ */
+export type HistoryUrlParams = {
+  workNumber?: string;
+  barcode?: string;
+  donorName?: string;
+  externalName?: string;
+  sampleId?: string;
+};
+
+/**
+ * Form validation schema
+ */
+export const historySearchSchema = () => {
+  return Yup.object().shape({
+    workNumber: Yup.string(),
+    barcode: Yup.string(),
+    donorName: Yup.string(),
+    externalName: Yup.string()
+  });
+};
 
 export default function History() {
   const location = useLocation();
-  const historyProps = safeParseQueryString<HistoryProps>({
+  const historyProps = safeParseQueryString<HistoryUrlParams>({
     query: location.search,
-    schema: historySchema
+    schema: historySearchSchema()
   });
+
+  const defaultInitialValues: HistoryUrlParams = {
+    workNumber: undefined,
+    barcode: undefined,
+    donorName: undefined,
+    externalName: undefined
+  };
+
   // If the URL parameters don't parse to valid HistoryProps use the default values
   const initialValues = historyProps ?? defaultInitialValues;
   const navigate = useNavigate();
@@ -37,33 +67,16 @@ export default function History() {
                 <ExternalIDFieldSearchInfo />
               </Information>
             </div>
-            <Formik<HistoryProps>
+            <Formik<HistoryUrlParams>
               initialValues={initialValues}
               onSubmit={async (values) => {
                 navigate(`/history?${stringify(values)}`);
               }}
             >
               <Form>
-                <div className="md:flex md:flex-row md:justify-center md:items-center md:gap-4">
-                  <div className="md:flex-grow">
-                    <FormikInput name="value" label="" />
-                  </div>
-                  <div className="md:flex-grow">
-                    <FormikSelect label="" name="kind">
-                      {objectKeys(historyDisplayValues)
-                        .filter((selectValue) => selectValue !== 'sampleId')
-                        .sort()
-                        .map((selectValue) => (
-                          <option value={selectValue} key={selectValue}>
-                            {historyDisplayValues[selectValue]}
-                          </option>
-                        ))}
-                    </FormikSelect>
-                  </div>
-
-                  <div className="flex flex-row items-center justify-end space-x-4 mt-6">
-                    <BlueButton type="submit">Search</BlueButton>
-                  </div>
+                <HistoryInput />
+                <div className="flex flex-row items-center justify-end space-x-4 mt-6">
+                  <BlueButton type="submit">Search</BlueButton>
                 </div>
               </Form>
             </Formik>
@@ -74,11 +87,3 @@ export default function History() {
     </AppShell>
   );
 }
-
-/**
- * Initial values for the form if they're not provided from the URL
- */
-const defaultInitialValues: HistoryProps = {
-  kind: 'workNumber',
-  value: ''
-};
