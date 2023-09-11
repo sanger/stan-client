@@ -38,7 +38,7 @@ import PasteIcon from '../components/icons/PasteIcon';
 import BlueButton from '../components/buttons/BlueButton';
 import { ClientError } from 'graphql-request';
 import { stanCore } from '../lib/sdk';
-import { useLoaderData, useLocation } from 'react-router-dom';
+import { useLoaderData, useSearchParams } from 'react-router-dom';
 
 /**
  * The different ways of displaying stored items
@@ -64,13 +64,8 @@ export const LocationParentContext = React.createContext<Maybe<LocationParentCon
 
 const Location = () => {
   const storageLocation = useLoaderData() as LocationFieldsFragment;
-
-  const locationVal = useLocation();
-
-  React.useEffect(() => {
-    console.log(locationVal.pathname);
-  }, [locationVal]);
-
+  const [searchParams] = useSearchParams();
+  const memoLabwareBarcode = React.useMemo(() => searchParams.get('labwareBarcode') ?? '', [searchParams]);
   const memoLocationMachine = React.useMemo(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> = storageLocation.size
@@ -94,7 +89,7 @@ const Location = () => {
     const selectedAddress = selectedAddresses.length > 0 ? selectedAddresses[0] : null;
     return locationMachine.withContext({
       location: storageLocation,
-      locationSearchParams: { labwareBarcode: storageLocation.barcode },
+      locationSearchParams: { labwareBarcode: memoLabwareBarcode },
       locationAddresses,
       addressToItemMap,
       selectedAddress,
@@ -102,7 +97,7 @@ const Location = () => {
       errorMessage: '',
       serverError: null
     });
-  }, [storageLocation]);
+  }, [storageLocation, memoLabwareBarcode]);
 
   //Custom hook to retain the updated labware state
   const [current, send] = useMachine(() => memoLocationMachine);
@@ -270,12 +265,12 @@ const Location = () => {
   const labwareBarcodeToAddressMap: Map<string, string> = useMemo(() => {
     const map = new Map<string, string>();
     for (const item of location.stored) {
-      if (item.address && item.barcode === storageLocation.barcode) {
+      if (item.address && item.barcode === memoLabwareBarcode) {
         map.set(item.barcode, item.address);
       }
     }
     return map;
-  }, [location, storageLocation.barcode]);
+  }, [location, memoLabwareBarcode]);
 
   const locationParentContext: LocationParentContextType = useMemo(
     () => ({

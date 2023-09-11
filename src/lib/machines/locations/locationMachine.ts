@@ -11,7 +11,8 @@ import * as locationService from '../../services/locationService';
 import { MachineConfig } from 'xstate/lib/types';
 import { castDraft } from 'immer';
 import { stanCore } from '../../sdk';
-import { findNextAvailableAddress } from '../../helpers/locationHelper';
+import { buildOrderedAddresses, findNextAvailableAddress } from '../../helpers/locationHelper';
+import { GridDirection } from '../../../types/sdk';
 
 enum Action {
   ASSIGN_LOCATION = 'assignLocation',
@@ -63,6 +64,10 @@ export const machineOptions: Partial<MachineOptions<LocationContext, LocationEve
       ctx.location = e.type === 'UPDATE_LOCATION' ? e.location : e.data;
 
       ctx.addressToItemMap.clear();
+      // Create all the possible addresses for this location if it has a size.
+      ctx.locationAddresses = ctx.location.size
+        ? buildOrderedAddresses(ctx.location.size, ctx.location.direction ?? GridDirection.DownRight)
+        : new Map<string, number>();
 
       ctx.location.stored.forEach((storedItem) => {
         if (storedItem.address) {

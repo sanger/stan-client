@@ -128,7 +128,7 @@ describe('Store', () => {
           )
         );
       });
-      cy.visit('/locations/STO-001');
+      cy.visit('/locations/STO-014');
     });
     it('should display transfer items option', () => {
       cy.findByText('Transfer items from location').should('be.visible');
@@ -147,18 +147,18 @@ describe('Store', () => {
                 const location = locationRepository.findByBarcode(req.variables.barcode);
                 return res.once(
                   ctx.data({
-                    location: { ...locationResponse(location!), customName: 'STO-002 location' }
+                    location: { ...locationResponse(location!), customName: 'STO-014 location' }
                   })
                 );
               }
             )
           );
         });
-        cy.get('[id=source_barcode]').type('STO-002{enter}');
+        cy.get('[id=source_barcode]').type('STO-014{enter}');
       });
 
       it('should display description', () => {
-        cy.findByTestId('transfer-source-description').should('contain.text', 'STO-002 location');
+        cy.findByTestId('transfer-source-description').should('contain.text', 'STO-014 location');
       });
       context('Error on transfer', () => {
         before(() => {
@@ -190,7 +190,7 @@ describe('Store', () => {
       context('On successful transfer', () => {
         before(() => {
           cy.msw().then(({ worker, graphql }) => {
-            const location = locationRepository.findByBarcode('STO-002');
+            const location = locationRepository.findByBarcode('STO-014');
             worker.use(
               graphql.mutation<TransferLocationItemsMutation, TransferLocationItemsMutationVariables>(
                 'TransferLocationItems',
@@ -214,7 +214,7 @@ describe('Store', () => {
           cy.findByRole('button', { name: 'Transfer' }).click();
         });
         it('should display success message', () => {
-          cy.contains('All items transferred from STO-002').should('be.visible');
+          cy.contains('All items transferred from STO-014').should('be.visible');
         });
         it('should display transferred items', () => {
           cy.findByText('STAN-1011').should('be.visible');
