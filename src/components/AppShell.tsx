@@ -19,6 +19,7 @@ import { UserRole } from '../types/sdk';
 import { configContext } from '../context/ConfigContext';
 import NavLinkMenuItem from './menu/NavlinkMenuItem';
 import Menu from './menu/Menu';
+import { LocationState } from '../types/stan';
 
 interface AppShellParams {
   children?: React.ReactNode | React.ReactNode[];
@@ -27,7 +28,7 @@ interface AppShellParams {
 function AppShell({ children }: AppShellParams) {
   const config = useContext(configContext);
   const auth = useAuth();
-  const location = useLocation();
+  const locationState = useLocation().state as LocationState;
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -549,8 +550,8 @@ function AppShell({ children }: AppShellParams) {
           )}
         </AnimatePresence>
       </div>
-      {location.state?.warning && <Warning message={location.state.warning} />}
-      {location.state?.success && <Success message={location.state.success} />}
+      {locationState?.warning && <Warning message={locationState.warning} />}
+      {locationState?.success && <Success message={locationState.success} />}
       {children}
       <footer className={`border border-t-2 pt-5 pb-3 flex-shrink-0 ${config?.footerColor}`}>
         <div className="max-w-sm mx-auto px-4 sm:px-6">

@@ -40,12 +40,19 @@ const LocationSearch = ({ awaitingLabwares }: { awaitingLabwares?: LabwareAwaiti
             id={'labwareLocationScanInput'}
             onScan={(value) => {
               if (value.length > 0) {
-                navigate({
-                  pathname: `/locations`,
-                  search: stringify({
-                    labwareBarcode: value
-                  })
-                });
+                navigate(
+                  {
+                    pathname: `/locations`,
+                    search: stringify({
+                      labwareBarcode: value
+                    })
+                  },
+                  {
+                    state: {
+                      awaitingLabwares: awaitingLabwares ?? []
+                    }
+                  }
+                );
               }
             }}
           />
