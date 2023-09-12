@@ -1,4 +1,5 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 import { Formik } from 'formik';
 import ProbeAddPanel from '../../../../src/components/probeHybridisation/ProbeAddPanel';

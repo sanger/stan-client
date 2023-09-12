@@ -59,14 +59,14 @@ export const NormalReactSelect = ({
   ...props
 }: CustomReactSelectProps) => {
   const onChangeValue = React.useCallback(
-    (value) => {
+    (value: ValueType) => {
       if (!hasValueType(value)) return;
       handleChange?.(value);
     },
     [handleChange]
   );
   const onBlur = React.useCallback(
-    (value) => {
+    (value: ValueType) => {
       if (!hasValueType(value)) return;
       handleBlur?.(value);
     },

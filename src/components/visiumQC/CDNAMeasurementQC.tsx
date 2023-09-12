@@ -138,7 +138,7 @@ const CDNAMeasurementQC = ({
   }
 
   const onRemoveLabware = React.useCallback(
-    (barcode) => {
+    (barcode: string) => {
       removeLabware(barcode);
       setMeasurementName(qcType === QCType.CDNA_AMPLIFICATION ? 'Cq value' : '');
     },

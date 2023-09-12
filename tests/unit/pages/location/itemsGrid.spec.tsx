@@ -3,6 +3,7 @@ import ItemsGrid from '../../../../src/pages/location/ItemsGrid';
 import { LocationParentContext, LocationParentContextType } from '../../../../src/pages/Location';
 import React from 'react';
 import { createLabware } from '../../../../src/mocks/handlers/labwareHandlers';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

@@ -3,6 +3,8 @@ import { describe } from '@jest/globals';
 import CustomReactSelect from '../../../../src/components/forms/CustomReactSelect';
 import { getById } from '../../generic/utilities';
 import * as Formik from 'formik';
+import '@testing-library/jest-dom';
+
 afterEach(() => {
   cleanup();
 });

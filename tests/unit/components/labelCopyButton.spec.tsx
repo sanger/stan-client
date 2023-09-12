@@ -1,5 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import LabelCopyButton from '../../../src/components/LabelCopyButton';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();
