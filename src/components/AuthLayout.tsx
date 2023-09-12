@@ -11,7 +11,6 @@ type AuthWrapperProps = {
 };
 const AuthLayout = ({ role = UserRole.Normal }: AuthWrapperProps) => {
   const location = useLocation();
-  debugger;
   const auth = useAuth();
   if (auth.isAuthenticated() && auth.userRoleIncludes(role)) {
     return <Outlet />;

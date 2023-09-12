@@ -79,15 +79,12 @@ function Search({ searchInfo }: SearchProps) {
   const [searchParams] = useSearchParams();
 
   const findRequest = React.useMemo(() => {
-    debugger;
     const request: FindRequest = emptyFindRequestKeys.reduce((request, key) => {
       const value = searchParams.get(key) ?? '';
       return { ...request, [key]: value.trim() };
     }, emptyFindRequest);
     return request;
   }, [searchParams]);
-
-  debugger;
 
   const config = useContext(configContext)!;
   const search = searchMachine<FindRequest, SearchResultTableEntry>(new SearchService());

@@ -5,6 +5,6 @@ import _ from 'lodash';
 
 export default Factory.define<UserFieldsFragment>(({ params }) => ({
   __typename: 'User',
-  username: params.username ?? faker.random.word(),
+  username: params.username ?? faker.lorem.word(),
   role: Object.values(UserRole)[_.random(4)]
 }));

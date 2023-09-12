@@ -4,6 +4,6 @@ import { ReleaseDestinationFieldsFragment } from '../../types/sdk';
 
 export default Factory.define<ReleaseDestinationFieldsFragment>(({ params }) => ({
   __typename: 'ReleaseDestination',
-  name: params.name ?? faker.name.jobArea(),
+  name: params.name ?? faker.person.jobArea(),
   enabled: params.enabled ?? true
 }));

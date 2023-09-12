@@ -7,7 +7,6 @@ import AppShell from '../AppShell';
 
 const ErrorBoundary = () => {
   const navigate = useNavigate();
-  debugger;
   return (
     <AppShell>
       <AppShell.Header>
