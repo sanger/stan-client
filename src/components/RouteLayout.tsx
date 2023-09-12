@@ -68,7 +68,7 @@ const RouteLayout = () => {
         <Route
           path="/"
           loader={async () => {
-            const workProgress = await stanCore.GetWorkProgressInputs;
+            const workProgress = await stanCore.GetWorkProgressInputs();
             return workProgress;
           }}
           element={<WorkProgress />}
