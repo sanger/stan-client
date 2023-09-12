@@ -24,6 +24,7 @@ import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
 import Heading from '../components/Heading';
 import { useAuth } from '../context/AuthContext';
+import TopScrollingBar from '../components/TopScrollingBar';
 /**
  * Data structure to keep the data associated with this component
  */
@@ -229,24 +230,26 @@ const WorkProgress = ({
                       <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
                     </a>
                   </div>
-                  <DataTable
-                    sortable
-                    defaultSort={[
-                      //Sort by Status and within status sort with WorkNumber in descending order
-                      {
-                        id: 'status',
-                        desc: false
-                      },
-                      {
-                        id: 'workNumber',
-                        desc: true
-                      }
-                    ]}
-                    columns={columns}
-                    data={searchResult.entries}
-                    ref={sortedTableDataRef}
-                    fixedHeader={true}
-                  />
+                  <TopScrollingBar>
+                    <DataTable
+                      sortable
+                      defaultSort={[
+                        //Sort by Status and within status sort with WorkNumber in descending order
+                        {
+                          id: 'status',
+                          desc: false
+                        },
+                        {
+                          id: 'workNumber',
+                          desc: true
+                        }
+                      ]}
+                      columns={columns}
+                      data={searchResult.entries}
+                      ref={sortedTableDataRef}
+                      fixedHeader={true}
+                    />
+                  </TopScrollingBar>
                 </>
               ) : (
                 <Warning message={'There were no results for the given search. Please try again.'} />
