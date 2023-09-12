@@ -87,6 +87,22 @@ function Extraction() {
 
   const showGrayPanel = current.matches('ready') || current.matches('extractionFailed');
 
+  const validateLabware = useCallback(
+    (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): string[] => {
+      const hasSamples = (labwares: LabwareFieldsFragment): boolean => {
+        for (const slot of labwares.slots) {
+          if (slot.samples && slot.samples.length > 0) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      return hasSamples(foundLabware) ? [] : ['No samples found in the labware'];
+    },
+    []
+  );
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -105,7 +121,11 @@ function Extraction() {
           <div className="mt-8 space-y-4">
             <Heading level={3}>Section Tubes</Heading>
 
-            <LabwareScanner onChange={onLabwareScannerChange} locked={scannerLocked}>
+            <LabwareScanner
+              onChange={onLabwareScannerChange}
+              locked={scannerLocked}
+              labwareCheckFunction={validateLabware}
+            >
               <LabwareScanPanel columns={columns} />
             </LabwareScanner>
           </div>
