@@ -68,6 +68,7 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
    * Build the worktypes list
    */
   React.useEffect(() => {
+    if (!summaryData || !summaryData.worksSummary.workTypes) return;
     setWorkTypes(summaryData.worksSummary.workTypes.map((data) => data.name));
   }, [summaryData]);
 

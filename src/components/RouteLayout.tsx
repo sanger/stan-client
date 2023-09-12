@@ -67,19 +67,11 @@ const RouteLayout = () => {
         <Route path="/login" element={<Login />} />
         <Route
           path="/"
-          element={
-            <DataFetcher dataFetcher={stanCore.GetWorkProgressInputs}>
-              {(dataFetcher) => {
-                return (
-                  <WorkProgress
-                    workTypes={dataFetcher.workTypes.map((val) => val.name)}
-                    programs={dataFetcher.programs.map((val) => val.name)}
-                    requesters={dataFetcher.releaseRecipients.map((val) => val.username)}
-                  />
-                );
-              }}
-            </DataFetcher>
-          }
+          loader={async () => {
+            const workProgress = await stanCore.GetWorkProgressInputs;
+            return workProgress;
+          }}
+          element={<WorkProgress />}
         />
         <Route
           path={'/search'}
