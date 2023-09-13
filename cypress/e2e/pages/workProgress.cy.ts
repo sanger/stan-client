@@ -269,8 +269,9 @@ describe('Work Progress', () => {
         cy.findAllByRole('link', { name: 'SGP1008' }).eq(0).click();
       });
       it('displays the history page for SGP1008', () => {
-        cy.url().should('include', '/history/?kind=workNumber&value=SGP1008');
+        cy.url().should('include', '/history/?workNumber=SGP1008');
         cy.findAllByText('History').should('have.length.above', 1);
+        cy.findByTestId('history').should('exist');
       });
     });
   });
