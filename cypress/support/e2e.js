@@ -17,6 +17,11 @@
 import "./commands";
 import { worker } from "../../src/mocks/mswSetup";
 
+beforeEach(() => {
+  cy.then(() => null)
+  console.log("In beforeEach")
+})
+
 before(async () => {
   await worker.start();
 });
