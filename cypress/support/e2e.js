@@ -17,9 +17,12 @@
 import "./commands";
 import { worker } from "../../src/mocks/mswSetup";
 
+//There is a known issue from @testing-library/cypress v9.0 onwards that causes any find* command
+//fails when is first to run in a test context
+//https://github.com/testing-library/cypress-testing-library/issues/253
+//This is the suggested workaround to ensure this.get('prev') is always defined by the time your test runs.
 beforeEach(() => {
   cy.then(() => null)
-  console.log("In beforeEach")
 })
 
 before(async () => {
