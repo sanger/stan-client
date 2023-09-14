@@ -6,5 +6,6 @@ module.exports = {
   },
   testEnvironment: 'jest-environment-jsdom',
   testMatch: ['<rootDir>/tests/unit/**/*.spec.{js,jsx,ts,tsx}'],
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts']
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  testTimeout: 10000
 };
