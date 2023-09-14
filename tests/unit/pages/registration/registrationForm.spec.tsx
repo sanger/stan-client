@@ -364,10 +364,10 @@ describe('RegistrationForm', () => {
           expect(screen.queryByText('Sample Collection Date')).toBeInTheDocument();
         });
         it('enables HumFre field on entering Species', async () => {
-          const speciesCombo = getSelect('Species');
-          await waitFor(() => userEvent.type(speciesCombo, 'Human{enter}'));
-          const humFreCombo = getSelect('HuMFre');
-          expect(humFreCombo).toBeEnabled();
+          await waitFor(() => {
+            userEvent.type(getSelect('Species'), 'Human{enter}');
+            expect(screen.getByTestId('HuMFre')).toBeEnabled();
+          });
         });
       });
 
