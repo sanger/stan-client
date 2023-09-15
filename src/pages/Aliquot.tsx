@@ -16,7 +16,7 @@ import MutedText from '../components/MutedText';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import { useMachine } from '@xstate/react';
 import { LabwareFieldsFragment } from '../types/sdk';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ButtonBar from '../components/ButtonBar';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -95,7 +95,7 @@ function Aliquot() {
     numLabware > 0
   );
   const showGrayPanel = current.matches('ready') || current.matches('aliquotFailed');
-
+  const navigate = useNavigate();
   return (
     <AppShell>
       <AppShell.Header>
@@ -228,7 +228,7 @@ function Aliquot() {
 
       {current.matches('aliquotingDone') && (
         <ButtonBar>
-          <BlueButton onClick={reload} action="tertiary">
+          <BlueButton onClick={() => reload(navigate)} action="tertiary">
             Reset Form
           </BlueButton>
           <Link to={'/store'}>

@@ -10,10 +10,9 @@ import { alphaNumericSortDefault } from '../types/stan';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
 import { getTimestampStr, safeParseQueryString } from '../lib/helpers';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { WorkProgressUrlParams } from './WorkProgress';
 import BlueButton from '../components/buttons/BlueButton';
-import { history } from '../lib/sdk';
 import WorkProgressSummaryInput, {
   WorkProgressSearchType,
   workProgressSummarySearchSchema
@@ -51,6 +50,7 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
   const [workProgressSummaryData, setWorkProgressSummaryData] = React.useState<WorkProgressSummaryTableEntry[]>([]);
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const location = useLocation();
+  const navigate = useNavigate();
 
   /**
    * Rebuild the file object whenever the searchResult changes
@@ -68,6 +68,7 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
    * Build the worktypes list
    */
   React.useEffect(() => {
+    if (!summaryData || !summaryData.worksSummary.workTypes) return;
     setWorkTypes(summaryData.worksSummary.workTypes.map((data) => data.name));
   }, [summaryData]);
 
@@ -170,7 +171,7 @@ const WorkProgressSummary = ({ summaryData }: WorkProgressSummaryProps) => {
             searchTypes={[WorkProgressSearchType.WorkType, WorkProgressSearchType.Status]}
           />
           <div className="flex justify-end px-4 pb-6 ">
-            <BlueButton type="reset" disabled={!memoUrlParams} onClick={() => history.push(location.pathname)}>
+            <BlueButton type="reset" disabled={!memoUrlParams} onClick={() => navigate(location.pathname)}>
               Clear filter
             </BlueButton>
           </div>

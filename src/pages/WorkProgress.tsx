@@ -2,6 +2,7 @@ import React from 'react';
 import {
   FindWorkProgressQueryVariables,
   FindWorkProgressQueryVariables as WorkProgressQueryInput,
+  GetWorkProgressInputsQuery,
   WorkStatus
 } from '../types/sdk';
 
@@ -17,7 +18,7 @@ import { ClientError } from 'graphql-request';
 import { Cell, Column } from 'react-table';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
 import { alphaNumericSortDefault, SearchResultsType, statusSort } from '../types/stan';
-import { useLocation } from 'react-router-dom';
+import { useLoaderData, useLocation } from 'react-router-dom';
 import WorkProgressInput, { workProgressSearchSchema } from '../components/workProgress/WorkProgressInput';
 import StyledLink from '../components/StyledLink';
 import DownloadIcon from '../components/icons/DownloadIcon';
@@ -42,22 +43,19 @@ const defaultInitialValues: WorkProgressUrlParams = {
   workTypes: undefined,
   requesters: undefined
 };
-
+type WorkProgressProps = {
+  workTypes: string[];
+  programs: string[];
+  requesters: string[];
+};
 /**
  *
  * Example URL search params for the page e.g.
  * http://localhost:3000/?programs[]=program_1&programs[]=program_2&workNumber=SGP1008
  * */
-const WorkProgress = ({
-  workTypes,
-  programs,
-  requesters
-}: {
-  workTypes: string[];
-  programs: string[];
-  requesters: string[];
-}) => {
+const WorkProgress = () => {
   const location = useLocation();
+  const workProgress = useLoaderData() as GetWorkProgressInputsQuery;
 
   const workProgressMachine = searchMachine<FindWorkProgressQueryVariables, WorkProgressResultTableEntry>(
     new WorkProgressService()
@@ -79,6 +77,25 @@ const WorkProgress = ({
   const [downloadFileURL, setFileDownloadURL] = React.useState<string>('');
 
   const auth = useAuth();
+
+  const memoWorkProgress = React.useMemo(() => {
+    const retWorkProgress: WorkProgressProps = {
+      workTypes: [],
+      programs: [],
+      requesters: []
+    };
+    if (!retWorkProgress) return retWorkProgress;
+    if (workProgress.workTypes) {
+      retWorkProgress.workTypes = workProgress.workTypes?.map((workType) => workType.name);
+    }
+    if (workProgress.programs) {
+      retWorkProgress.programs = workProgress.programs?.map((program) => program.name);
+    }
+    if (workProgress.releaseRecipients) {
+      retWorkProgress.requesters = workProgress.releaseRecipients?.map((recipient) => recipient.username);
+    }
+    return retWorkProgress;
+  }, [workProgress]);
   /**
    * Rebuild the file object whenever the searchResult changes
    */
@@ -105,7 +122,11 @@ const WorkProgress = ({
      */
     const params = safeParseQueryString<WorkProgressUrlParams>({
       query: location.search,
-      schema: workProgressSearchSchema(workTypes, programs, requesters)
+      schema: workProgressSearchSchema(
+        memoWorkProgress.workTypes,
+        memoWorkProgress.programs,
+        memoWorkProgress.requesters
+      )
     });
     if (params) {
       return {
@@ -113,7 +134,7 @@ const WorkProgress = ({
         ...params
       };
     } else return params;
-  }, [location.search, workTypes, programs, requesters]);
+  }, [location.search, memoWorkProgress]);
 
   /**
    * Rebuild the blob object on download action
@@ -192,7 +213,8 @@ const WorkProgress = ({
               </Heading>
               <div className={'mx-auto flex w-full p-4 rounded-md justify-center bg-gray-400'}>
                 <StyledLink
-                  to={{ pathname: `${auth.isAuthenticated() ? 'sgp' : 'login'}`, state: { referrer: '/sgp' } }}
+                  to={`${auth.isAuthenticated() ? 'sgp' : 'login'}`}
+                  state={{ referrer: '/sgp' }}
                   className={'text-md'}
                 >
                   Allocate SGP Number
@@ -203,9 +225,9 @@ const WorkProgress = ({
 
           <WorkProgressInput
             urlParams={memoUrlParams ?? defaultInitialValues}
-            workTypes={workTypes}
-            programs={programs}
-            requesters={requesters}
+            workTypes={memoWorkProgress.workTypes}
+            programs={memoWorkProgress.programs}
+            requesters={memoWorkProgress.requesters}
           />
 
           <div className={'my-10 mx-auto max-w-screen-xl'}>

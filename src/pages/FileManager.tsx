@@ -5,9 +5,8 @@ import variants from '../lib/motionVariants';
 import Heading from '../components/Heading';
 import WorkNumberSelect, { WorkInfo } from '../components/WorkNumberSelect';
 import { parseQueryString } from '../lib/helpers';
-import { useLocation } from 'react-router-dom';
+import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import FileUploader, { ConfirmUploadProps } from '../components/upload/FileUploader';
-import { history } from '../lib/sdk';
 import { FileFieldsFragment, WorkStatus } from '../types/sdk';
 import DataTable from '../components/DataTable';
 import { Cell, Column } from 'react-table';
@@ -23,8 +22,6 @@ import Warning from '../components/notifications/Warning';
 type FileManagerProps = {
   /**Display upload option?**/
   showUpload?: boolean;
-  /**Work Info about all work numbers  **/
-  worksInfo: WorkInfo[];
 };
 
 /**Component to render File Manager page
@@ -32,7 +29,7 @@ type FileManagerProps = {
  * /file_manager is only for authenticated users and /file_viewer is for non-auth users (only view files without upload option)
  * If the work number selected in active, upload option will be active. Otherwise,upload will be disabled
  ***/
-const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo: workInfoProps }: FileManagerProps) => {
+const FileManager: React.FC<FileManagerProps> = ({ showUpload = true }: FileManagerProps) => {
   /**All work number information**/
   const [currentWorkInfoOptions, setCurrentWorkInfoOptions] = React.useState<WorkInfo[]>([]);
   /**Only active work numbers required?**/
@@ -45,6 +42,10 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
    */
   const ToastSuccess = (fileName: string) => <Success message={`${fileName} uploaded succesfully.`} />;
 
+  const navigate = useNavigate();
+  /**Work Info about all work numbers  **/
+  const workInfo = useLoaderData() as WorkInfo[];
+
   /**Update work numbers when ever query string in location changes **/
   const memoAllSelectedWork = React.useMemo(() => {
     const queryString = parseQueryString(location.search);
@@ -56,15 +57,15 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
           workNumbers.push(decodeURIComponent(workNumber));
         }
       });
-      return workInfoProps.filter((work) => workNumbers.some((workNumber) => work.workNumber === workNumber));
+      return workInfo.filter((work) => workNumbers.some((workNumber) => work.workNumber === workNumber));
     }
     //Single work number
     if (typeof queryString['workNumber'] === 'string') {
       const workNumber = decodeURIComponent(queryString['workNumber']);
-      return workInfoProps.filter((workInfo) => workInfo.workNumber === workNumber);
+      return workInfo.filter((workInfo) => workInfo.workNumber === workNumber);
     }
     return [];
-  }, [location.search, workInfoProps]);
+  }, [location.search, workInfo]);
 
   /**The 'active' checkbox need to be unchecked if there are any non-active sgp selected.
    *
@@ -83,10 +84,10 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
    */
   React.useEffect(() => {
     let availableWorksInfoArray = isOnlyActiveWorkNumbers
-      ? workInfoProps.filter((work) => work.status === WorkStatus.Active)
-      : workInfoProps;
+      ? workInfo.filter((work) => work.status === WorkStatus.Active)
+      : workInfo;
     setCurrentWorkInfoOptions(availableWorksInfoArray);
-  }, [workInfoProps, isOnlyActiveWorkNumbers, setCurrentWorkInfoOptions]);
+  }, [workInfo, isOnlyActiveWorkNumbers, setCurrentWorkInfoOptions]);
 
   /**Upload URL**/
   const memoURL = React.useMemo(() => {
@@ -213,7 +214,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true, worksInfo:
                           workNumbers.forEach(
                             (value) => value && params.append('workNumber', encodeURIComponent(value))
                           );
-                          history.replace(`/file_manager?${params}`);
+                          navigate(`/file_manager?${params}`);
                         }}
                         workNumberType={'ALL'}
                         multiple

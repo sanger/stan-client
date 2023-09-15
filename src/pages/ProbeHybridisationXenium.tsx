@@ -18,7 +18,7 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import FormikInput from '../components/forms/Input';
 import { useMachine } from '@xstate/react';
 import BlueButton from '../components/buttons/BlueButton';
-import { reload, StanCoreContext } from '../lib/sdk';
+import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
 import Warning from '../components/notifications/Warning';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
@@ -226,7 +226,6 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                   <OperationCompleteModal
                     show={submissionResult !== undefined}
                     message={'Xenium probe hybridisation recorded on all labware'}
-                    onReset={reload}
                   >
                     <p>
                       If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to

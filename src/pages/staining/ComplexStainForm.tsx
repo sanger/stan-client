@@ -18,7 +18,7 @@ import PinkButton from '../../components/buttons/PinkButton';
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../../lib/machines/form/formMachine';
-import { history, reload, stanCore } from '../../lib/sdk';
+import { stanCore } from '../../lib/sdk';
 import { FormikLabwareScanner } from '../../components/labwareScanner/FormikLabwareScanner';
 import Table, { TableBody, TableHead, TableHeader } from '../../components/Table';
 import OperationCompleteModal from '../../components/modal/OperationCompleteModal';
@@ -27,6 +27,7 @@ import WhiteButton from '../../components/buttons/WhiteButton';
 import { FormikFieldValueArray } from '../../components/forms/FormikFieldValueArray';
 import ComplexStainRow from './ComplexStainRow';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
+import { useNavigate } from 'react-router-dom';
 
 type ComplexStainFormValues = ComplexStainRequest;
 
@@ -50,6 +51,8 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
   const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
+
+  const navigate = useNavigate();
 
   const plexMin = 1;
   const plexMax = 100;
@@ -235,14 +238,13 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
                     if (initialLabware.length > 0) {
                       createSessionStorageForLabwareAwaiting(initialLabware);
                     }
-                    history.push('/store');
+                    navigate('/store');
                   }}
                 >
                   Store
                 </WhiteButton>
               </div>
             }
-            onReset={reload}
           >
             <p>
               If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the

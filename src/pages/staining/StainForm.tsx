@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../../lib/machines/form/formMachine';
 import { GetStainInfoQuery, LabwareFieldsFragment, StainMutation, StainRequest } from '../../types/sdk';
-import { history, reload, stanCore } from '../../lib/sdk';
+import { stanCore } from '../../lib/sdk';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import GrayBox, { Sidebar } from '../../components/layouts/GrayBox';
@@ -21,6 +21,7 @@ import PinkButton from '../../components/buttons/PinkButton';
 import OperationCompleteModal from '../../components/modal/OperationCompleteModal';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 import WhiteButton from '../../components/buttons/WhiteButton';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Type used for the values in the form.
@@ -74,7 +75,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
   const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
-
+  const navigate = useNavigate();
   /**
    * Map of stain type name to list of its measurements.
    * Helpful for the form to only display measurement inputs when selected stain type has some
@@ -283,7 +284,6 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
           <OperationCompleteModal
             show={current.matches('submitted')}
             message={'Staining Successful'}
-            onReset={reload}
             additionalButtons={
               <WhiteButton
                 type="button"
@@ -293,7 +293,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
                   if (initialLabware.length > 0) {
                     createSessionStorageForLabwareAwaiting(initialLabware);
                   }
-                  history.push('/store');
+                  navigate('/store');
                 }}
               >
                 Store

@@ -16,12 +16,12 @@ import RegistrationSuccess, { LabwareContainType } from './RegistrationSuccess';
 import { useConfirmLeave } from '../../lib/hooks';
 import { Column } from 'react-table';
 import { createRegistrationMachine } from '../../lib/machines/registration/registrationMachine';
-import { Prompt } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import variants from '../../lib/motionVariants';
 import Heading from '../../components/Heading';
 import WorkNumberSelect from '../../components/WorkNumberSelect';
 import { FormikErrorMessage } from '../../components/forms';
+import PromptOnLeave from '../../components/notifications/PromptOnLeave';
 
 /**
  * Expect form input interface
@@ -150,7 +150,7 @@ function Registration<M, T extends TissueValues<B>, B, R extends Required<Labwar
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          <Prompt when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
+          <PromptOnLeave when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
           {registrationErrors && (
             <div ref={warningRef}>
               <Warning message={'There was a problem registering your tissues'}>

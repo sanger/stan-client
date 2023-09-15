@@ -3,9 +3,8 @@ import AppShell from '../../components/AppShell';
 import { reload } from '../../lib/sdk';
 import { FindPlanDataQuery, GetSectioningConfirmInfoQuery, LabwareFieldsFragment } from '../../types/sdk';
 import SectioningConfirm from '../../components/sectioningConfirm/SectioningConfirm';
-import { Link, Prompt, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useConfirmLeave } from '../../lib/hooks';
-import { history } from '../../lib/sdk';
 import Heading from '../../components/Heading';
 import BlueButton from '../../components/buttons/BlueButton';
 import { motion } from 'framer-motion';
@@ -14,6 +13,7 @@ import Success from '../../components/notifications/Success';
 import variants from '../../lib/motionVariants';
 import { ConfirmPrintLabware } from '../../components/sectioningConfirm/ConfirmPrintLabware';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
+import PromptOnLeave from '../../components/notifications/PromptOnLeave';
 
 type SectioningConfirmProps = {
   readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
@@ -25,7 +25,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
   const plans: Array<FindPlanDataQuery> = state?.plans ?? [];
   const [shouldConfirm, setShouldConfirm] = useConfirmLeave(true);
   const [confirmedLabwares, setConfirmedLabwares] = React.useState<LabwareFieldsFragment[]>([]);
-
+  const navigate = useNavigate();
   const labwaresGroupedByType = React.useMemo(() => {
     const confirmedLabwareTypes = confirmedLabwares.reduce((prev: string[], labware) => {
       if (!prev.includes(labware.labwareType.name)) {
@@ -95,12 +95,12 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
                           if (confirmedLabwares.length > 0) {
                             createSessionStorageForLabwareAwaiting(confirmedLabwares);
                           }
-                          history.push('/store');
+                          navigate('/store');
                         }}
                       >
                         Store
                       </BlueButton>
-                      <BlueButton onClick={reload} action="tertiary">
+                      <BlueButton onClick={() => reload(navigate)} action="tertiary">
                         Reset Form
                       </BlueButton>
                       <Link to={'/'}>
@@ -115,7 +115,7 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
         </div>
       </AppShell.Main>
 
-      <Prompt when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
+      <PromptOnLeave when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
     </AppShell>
   );
 }

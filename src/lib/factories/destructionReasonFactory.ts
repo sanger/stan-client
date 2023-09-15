@@ -5,6 +5,6 @@ import { faker } from '@faker-js/faker';
 export default Factory.define<DestructionReasonFieldsFragment>(({ params, sequence }) => ({
   __typename: 'DestructionReason',
   id: params.id ?? sequence,
-  text: params.text ?? faker.random.words(),
+  text: params.text ?? faker.lorem.words(),
   enabled: params.enabled ?? true
 }));

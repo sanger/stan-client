@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { GetXeniumQcInfoQuery, QcLabware, QcLabwareRequest, RecordQcLabwareMutation } from '../types/sdk';
 import * as Yup from 'yup';
-import { reload, StanCoreContext } from '../lib/sdk';
+import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { useMachine } from '@xstate/react';
 import AppShell from '../components/AppShell';
@@ -176,7 +176,6 @@ const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
                 <OperationCompleteModal
                   show={submissionResult !== undefined}
                   message={'Xenium QC recorded on all labware'}
-                  onReset={reload}
                 >
                   <p>
                     If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to

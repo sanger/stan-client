@@ -109,8 +109,10 @@ describe('Sectioning Planning', () => {
             // Returning false cancels the event
             return false;
           });
-
           cy.findByText('Search').click();
+        });
+        after(() => {
+          cy.findByRole('button', { name: /Cancel/ }).click();
         });
       });
     });

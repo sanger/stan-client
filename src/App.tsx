@@ -1,19 +1,16 @@
 import React from 'react';
-import { Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { Routes } from './components/Routes';
-import { history, stanCore, StanCoreContext } from './lib/sdk';
+import { stanCore, StanCoreContext } from './lib/sdk';
 import { ConfigProvider } from './context/ConfigContext';
+import RouteLayout from './components/RouteLayout';
 
 function App() {
   return (
     <ConfigProvider>
       <StanCoreContext.Provider value={stanCore}>
-        <Router history={history}>
-          <AuthProvider>
-            <Routes />
-          </AuthProvider>
-        </Router>
+        <AuthProvider>
+          <RouteLayout />
+        </AuthProvider>
       </StanCoreContext.Provider>
     </ConfigProvider>
   );

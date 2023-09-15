@@ -21,12 +21,11 @@ import {
   findNextAvailableAddress
 } from '../lib/helpers/locationHelper';
 import { Authenticated, Unauthenticated } from '../components/Authenticated';
-import { RouteComponentProps } from 'react-router-dom';
-import { extractServerErrors, LocationMatchParams, LocationSearchParams } from '../types/stan';
+import { extractServerErrors } from '../types/stan';
 import { GridDirection, LocationFieldsFragment, Maybe, StoreInput, UserRole } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import { StoredItemFragment } from '../lib/machines/locations/locationMachineTypes';
-import createLocationMachine from '../lib/machines/locations/locationMachine';
+import { locationMachine } from '../lib/machines/locations/locationMachine';
 import { awaitingStorageCheckOnExit, getAwaitingLabwaresFromSession, LabwareAwaitingStorageInfo } from './Store';
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
 import warningToast from '../components/notifications/WarningToast';
@@ -39,6 +38,7 @@ import PasteIcon from '../components/icons/PasteIcon';
 import BlueButton from '../components/buttons/BlueButton';
 import { ClientError } from 'graphql-request';
 import { stanCore } from '../lib/sdk';
+import { useLoaderData, useSearchParams } from 'react-router-dom';
 
 /**
  * The different ways of displaying stored items
@@ -62,13 +62,11 @@ export type LocationParentContextType = {
 
 export const LocationParentContext = React.createContext<Maybe<LocationParentContextType>>(null);
 
-interface LocationProps extends RouteComponentProps<LocationMatchParams> {
-  storageLocation: LocationFieldsFragment;
-  locationSearchParams: Maybe<LocationSearchParams>;
-}
-
-const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchParams, match }) => {
-  const locationMachine = React.useMemo(() => {
+const Location = () => {
+  const storageLocation = useLoaderData() as LocationFieldsFragment;
+  const [searchParams] = useSearchParams();
+  const memoLabwareBarcode = React.useMemo(() => searchParams.get('labwareBarcode') ?? '', [searchParams]);
+  const memoLocationMachine = React.useMemo(() => {
     // Create all the possible addresses for this location if it has a size.
     const locationAddresses: Map<string, number> = storageLocation.size
       ? buildOrderedAddresses(storageLocation.size, storageLocation.direction ?? GridDirection.DownRight)
@@ -88,24 +86,30 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
       addressToItemMap: addressToItemMap
     });
 
-    const selectedAddress = selectedAddresses.length > 0 ? selectedAddresses[0] : undefined;
-    return createLocationMachine({
-      context: {
-        location: storageLocation,
-        locationSearchParams,
-        locationAddresses,
-        addressToItemMap,
-        selectedAddress
-      }
+    const selectedAddress = selectedAddresses.length > 0 ? selectedAddresses[0] : null;
+    return locationMachine.withContext({
+      location: storageLocation,
+      locationSearchParams: { labwareBarcode: memoLabwareBarcode },
+      locationAddresses,
+      addressToItemMap,
+      selectedAddress,
+      successMessage: '',
+      errorMessage: '',
+      serverError: null
     });
-  }, [storageLocation, locationSearchParams]);
-  //Custom hook to retain the updated labware state
-  const [current, send] = useMachine(locationMachine);
+  }, [storageLocation, memoLabwareBarcode]);
 
+  //Custom hook to retain the updated labware state
+  const [current, send] = useMachine(() => memoLocationMachine);
   const { location, locationAddresses, successMessage, errorMessage, serverError, addressToItemMap, selectedAddress } =
     current.context;
 
   const locationHasGrid = !!location.size;
+
+  React.useEffect(() => {
+    if (location.barcode === storageLocation.barcode) return;
+    send('UPDATE_LOCATION', { location: storageLocation });
+  }, [send, storageLocation, location.barcode]);
 
   /**
    * Should the page be displaying the grid or list view of the items
@@ -261,12 +265,12 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
   const labwareBarcodeToAddressMap: Map<string, string> = useMemo(() => {
     const map = new Map<string, string>();
     for (const item of location.stored) {
-      if (item.address && item.barcode === locationSearchParams?.labwareBarcode) {
+      if (item.address && item.barcode === memoLabwareBarcode) {
         map.set(item.barcode, item.address);
       }
     }
     return map;
-  }, [location, locationSearchParams?.labwareBarcode]);
+  }, [location, memoLabwareBarcode]);
 
   const locationParentContext: LocationParentContextType = useMemo(
     () => ({
@@ -428,7 +432,7 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
               </Success>
             ))}
           {current.matches('notFound') && (
-            <Warning message={`Location ${match.params.locationBarcode} could not be found`} />
+            <Warning message={`Location ${storageLocation.barcode} could not be found`} />
           )}
           <LocationSearch />
           {showLocation && (
@@ -468,10 +472,8 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
                 {location.parent && (
                   <StripyCardDetail term={'Parent'}>
                     <StyledLink
-                      to={{
-                        pathname: `/locations/${location.parent.barcode}`,
-                        state: awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}
-                      }}
+                      to={`/locations/${location.parent.barcode}`}
+                      state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
                     >
                       {location.parent.customName ?? location.parent.barcode}
                     </StyledLink>
@@ -492,10 +494,8 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
                         return (
                           <li key={child.barcode}>
                             <StyledLink
-                              to={{
-                                pathname: `/locations/${child.barcode}`,
-                                state: awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}
-                              }}
+                              to={`/locations/${child.barcode}`}
+                              state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
                             >
                               {child.customName ?? child.fixedName ?? child.barcode}
                             </StyledLink>
@@ -650,12 +650,13 @@ const Location: React.FC<LocationProps> = ({ storageLocation, locationSearchPara
           )}
         </div>
       </AppShell.Main>
-      <PromptOnLeave
-        when={awaitingLabwares.length > 0}
-        messageHandler={awaitingStorageCheckOnExit}
-        message={'You have labwares that are not stored. Are you sure you want to leave?'}
-        onPromptLeave={onLeave}
-      />
+      {awaitingLabwares.length > 0 && (
+        <PromptOnLeave
+          when={awaitingStorageCheckOnExit}
+          message={'You have labwares that are not stored. Are you sure you want to leave?'}
+          onPromptLeave={onLeave}
+        />
+      )}
     </AppShell>
   );
 };

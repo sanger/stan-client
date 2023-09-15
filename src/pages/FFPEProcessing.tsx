@@ -3,7 +3,7 @@ import { GetFfpeProcessingInfoQuery, PerformFfpeProcessingMutation, FfpeProcessi
 import AppShell from '../components/AppShell';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
-import { reload, stanCore } from '../lib/sdk';
+import { stanCore } from '../lib/sdk';
 import variants from '../lib/motionVariants';
 import { motion } from 'framer-motion';
 import { Form, Formik } from 'formik';
@@ -182,7 +182,6 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProces
                     <OperationCompleteModal
                       show={submissionResult !== undefined}
                       message={'FFPE processing type recorded on all labware'}
-                      onReset={reload}
                     >
                       <p>
                         If you wish to start the process again, click the "Reset Form" button. Otherwise you can return

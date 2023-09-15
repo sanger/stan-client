@@ -16,7 +16,7 @@ import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
-import { stanCore, reload } from '../lib/sdk';
+import { stanCore } from '../lib/sdk';
 import { AddExternalIdMutation, AddExternalIdRequest } from '../types/sdk';
 
 export default function AddExternalID() {
@@ -128,11 +128,7 @@ export default function AddExternalID() {
                     </PinkButton>
                   </Sidebar>
 
-                  <OperationCompleteModal
-                    show={current.matches('submitted')}
-                    message={'Operation Complete'}
-                    onReset={reload}
-                  >
+                  <OperationCompleteModal show={current.matches('submitted')} message={'Operation Complete'}>
                     <p>
                       If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
                       the Home screen.

@@ -9,7 +9,7 @@ import LocationIcon from '../components/icons/LocationIcon';
 import Heading from '../components/Heading';
 
 import storeConfig from '../static/store.json';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import BarcodeIcon from '../components/icons/BarcodeIcon';
 import { FindLocationByBarcodeQuery, Maybe } from '../types/sdk';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
@@ -17,9 +17,8 @@ import { isLocationSearch, LocationSearchParams } from '../types/stan';
 import { StanCoreContext } from '../lib/sdk';
 import { ClientError } from 'graphql-request';
 import LabwareAwaitingStorage from './location/LabwareAwaitingStorage';
-import * as H from 'history';
-import { history } from '../lib/sdk';
 import PromptOnLeave from '../components/notifications/PromptOnLeave';
+import { Action as HistoryAction, Location } from '@remix-run/router/dist/history';
 
 export type LabwareAwaitingStorageInfo = {
   barcode: string;
@@ -33,25 +32,30 @@ export type LabwareAwaitingStorageInfo = {
 
 /**
  *
- * @param location - location to navigate
- * @param action - action performed
- * @param message - message to display
+ * @param nextLocation - location to navigate
+ * @param currentLocation - current location
+ * @param historyAction - action performed
  * Clear session storage for awaiting labwares if it is navigating to a page other than /location or /store
  * Session storage will be used for following operations
  * a) Go back and Go forward operation to a Location/Store page
  * b) Going to a new location page by invoking a store location link or through a search
  */
-export function awaitingStorageCheckOnExit(location: H.Location, action: H.Action, message: string) {
+export function awaitingStorageCheckOnExit(args: {
+  currentLocation: Location;
+  nextLocation: Location;
+  historyAction: HistoryAction;
+}) {
   /**PUSH is the action for  invoking/visiting a link or for pushing a new entry onto the history stack
    * POP is the action send while you navigate using the browser's forward/back buttons.
    * **/
   if (
-    (action === 'POP' && ['/locations', '/store'].some((path) => location.pathname.startsWith(path))) ||
-    (action === 'PUSH' && location.pathname.startsWith('/locations'))
+    (args.historyAction === 'POP' &&
+      ['/locations', '/store'].some((path) => args.nextLocation.pathname.startsWith(path))) ||
+    (args.historyAction === 'PUSH' && args.nextLocation.pathname.startsWith('/locations'))
   ) {
-    return true;
+    return false;
   } else {
-    return message;
+    return true;
   }
 }
 
@@ -98,6 +102,8 @@ const Store = () => {
     sessionStorage.removeItem('awaitingLabwares');
   }, []);
 
+  const navigate = useNavigate();
+
   /**
    * Runs this hook if there's a `labwareBarcode` URL parameter
    * Looks up the location for the labware, and redirects to that page
@@ -107,7 +113,7 @@ const Store = () => {
       const locationBarcode = await findLabwareLocation(labwareBarcode);
       if (locationBarcode) {
         // Redirect to the location if it's found
-        history.push({
+        navigate({
           pathname: `/locations/${locationBarcode}`,
           search: stringify({
             labwareBarcode: labwareBarcode
@@ -126,7 +132,7 @@ const Store = () => {
         invokeFindLabwareLocation(locationSearchParams.labwareBarcode.trim());
       }
     }
-  }, [location.search, location.state]);
+  }, [location.search, location.state, navigate]);
 
   const awaitingLabwares = getAwaitingLabwaresFromSession();
 
@@ -161,12 +167,13 @@ const Store = () => {
           )}
         </div>
       </AppShell.Main>
-      <PromptOnLeave
-        when={awaitingLabwares.length > 0}
-        messageHandler={awaitingStorageCheckOnExit}
-        message={'You have labwares that are not stored. Are you sure you want to leave?'}
-        onPromptLeave={onLeave}
-      />
+      {awaitingLabwares.length > 0 && (
+        <PromptOnLeave
+          when={awaitingStorageCheckOnExit}
+          message={'You have labware that is not stored. Are you sure you want to leave?'}
+          onPromptLeave={onLeave}
+        />
+      )}
     </AppShell>
   );
 };

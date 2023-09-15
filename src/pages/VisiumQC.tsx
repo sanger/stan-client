@@ -19,7 +19,7 @@ import Heading from '../components/Heading';
 import { objectKeys } from '../lib/helpers';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
-import { reload, StanCoreContext } from '../lib/sdk';
+import { StanCoreContext } from '../lib/sdk';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import BlueButton from '../components/buttons/BlueButton';
@@ -345,7 +345,6 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                     currentRecordOpWithSlotComments.matches('submitted')
                   }
                   message={`${values.qcType} complete`}
-                  onReset={reload}
                 >
                   <p>
                     If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to

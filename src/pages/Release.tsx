@@ -34,6 +34,7 @@ import Label from '../components/forms/Label';
 import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
 import DataTable from '../components/DataTable';
 import RemoveButton from '../components/buttons/RemoveButton';
+import { useNavigate } from 'react-router-dom';
 
 const validationSchema = Yup.object().shape({
   releaseLabware: Yup.array()
@@ -109,6 +110,8 @@ function Release({ releaseInfo }: PageParams) {
   const [releaseLabware, setReleaseLabware] = React.useState<ReleaseLabware[]>([]);
   const [labwareFromSGP, setLabwareFromSGP] = React.useState<LabwareFieldsFragment[]>([]);
   const [releaseType, setReleaseType] = React.useState<ReleaseType>(ReleaseType.LABWARE_LOCATION);
+
+  const navigate = useNavigate();
 
   const initialValues: ReleaseRequest = {
     releaseLabware: releaseLabware,
@@ -477,7 +480,12 @@ function Release({ releaseInfo }: PageParams) {
                     )}
 
                     {current.matches('submitted') && (
-                      <PinkButton action="tertiary" onClick={reload} className="sm:w-full" type="button">
+                      <PinkButton
+                        action="tertiary"
+                        onClick={() => reload(navigate)}
+                        className="sm:w-full"
+                        type="button"
+                      >
                         Reset Form
                       </PinkButton>
                     )}

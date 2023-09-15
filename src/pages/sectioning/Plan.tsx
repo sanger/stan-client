@@ -4,7 +4,7 @@ import AppShell from '../../components/AppShell';
 import { LabwareTypeName, NewLabwareLayout } from '../../types/stan';
 import PinkButton from '../../components/buttons/PinkButton';
 import ButtonBar from '../../components/ButtonBar';
-import { Link, Prompt } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import _ from 'lodash';
 import { useConfirmLeave } from '../../lib/hooks';
 import LabwarePlan from '../../components/planning/LabwarePlan';
@@ -12,6 +12,7 @@ import labwareScanTableColumns from '../../components/dataTableColumns/labwareCo
 import Planner, { PlanChangedProps } from '../../components/planning/Planner';
 import { selectOptionValues } from '../../components/forms';
 import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
+import PromptOnLeave from '../../components/notifications/PromptOnLeave';
 
 /**
  * Types of labware the user is allowed to section onto
@@ -129,19 +130,14 @@ function Plan({ sectioningInfo }: SectioningParams) {
       </AppShell.Main>
 
       <ButtonBar>
-        <Link
-          to={{
-            pathname: '/lab/sectioning/confirm',
-            state: { plans: planPropsToPlanData(planProps) }
-          }}
-        >
+        <Link to="/lab/sectioning/confirm" state={{ plans: planPropsToPlanData(planProps) }}>
           <PinkButton disabled={shouldConfirm} action="primary">
             Next {'>'}
           </PinkButton>
         </Link>
       </ButtonBar>
 
-      <Prompt when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
+      <PromptOnLeave when={shouldConfirm} message={'You have unsaved changes. Are you sure you want to leave?'} />
     </AppShell>
   );
 }

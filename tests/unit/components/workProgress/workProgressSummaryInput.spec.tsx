@@ -6,6 +6,7 @@ import WorkProgressSummaryInput, {
   WorkProgressSearchType,
   workProgressSummarySearchSchema
 } from '../../../../src/components/workProgress/WorkProgressSummaryInput';
+import { BrowserRouter } from 'react-router-dom';
 
 afterEach(() => {
   cleanup();
@@ -19,6 +20,14 @@ jest.mock('react-router-dom', () => ({
       pathname: () => './work_progress_summary'
     };
   })
+}));
+
+// pay attention to write it at the top level of your file
+const mockedUsedNavigate = jest.fn();
+
+jest.mock('react-router-dom', () => ({
+  ...(jest.requireActual('react-router-dom') as any),
+  useNavigate: () => mockedUsedNavigate
 }));
 
 describe('WorkProgressSummaryInput.tsx', () => {
@@ -129,7 +138,11 @@ describe('WorkProgressSummaryInput.tsx', () => {
         workTypes: [],
         searchTypes: []
       };
-      render(<WorkProgressSummaryInput {...workProgressInputProps} />);
+      render(
+        <BrowserRouter>
+          <WorkProgressSummaryInput {...workProgressInputProps} />
+        </BrowserRouter>
+      );
 
       // Component header title
       expect(screen.getByTestId('heading')).toHaveTextContent('Search');
@@ -153,7 +166,11 @@ describe('WorkProgressSummaryInput.tsx', () => {
         workTypes: ['Work Type 1'],
         searchTypes: [WorkProgressSearchType.Status, WorkProgressSearchType.WorkNumber, WorkProgressSearchType.WorkType]
       };
-      render(<WorkProgressSummaryInput {...workProgressInputProps} />);
+      render(
+        <BrowserRouter>
+          <WorkProgressSummaryInput {...workProgressInputProps} />
+        </BrowserRouter>
+      );
 
       expect(screen.getByTestId('type')).toHaveTextContent('Work Type');
       expect(screen.getByTestId('valueSelect')).toHaveTextContent('Work Type 1');
@@ -168,7 +185,11 @@ describe('WorkProgressSummaryInput.tsx', () => {
         workTypes: ['Work Type 1'],
         searchTypes: [WorkProgressSearchType.Status, WorkProgressSearchType.WorkNumber, WorkProgressSearchType.WorkType]
       };
-      render(<WorkProgressSummaryInput {...workProgressInputProps} />);
+      render(
+        <BrowserRouter>
+          <WorkProgressSummaryInput {...workProgressInputProps} />
+        </BrowserRouter>
+      );
 
       expect(screen.getByTestId('type')).toHaveTextContent('SGP/R&D Number');
       const searchValues = screen.getByTestId('valueInput') as HTMLInputElement;
@@ -186,7 +207,11 @@ describe('WorkProgressSummaryInput.tsx', () => {
         workTypes: ['Work Type 1'],
         searchTypes: [WorkProgressSearchType.Status, WorkProgressSearchType.WorkNumber, WorkProgressSearchType.WorkType]
       };
-      render(<WorkProgressSummaryInput {...workProgressInputProps} />);
+      render(
+        <BrowserRouter>
+          <WorkProgressSummaryInput {...workProgressInputProps} />
+        </BrowserRouter>
+      );
 
       expect(screen.getByTestId('type')).toHaveTextContent('Status');
       expect(screen.getByTestId('valueSelect')).toHaveTextContent('unstarted');

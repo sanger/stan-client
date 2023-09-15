@@ -18,7 +18,7 @@ import Labware from '../components/labware/Labware';
 import PermDataField from '../components/forms/PermDataField';
 import FormikInput from '../components/forms/Input';
 import BlueButton from '../components/buttons/BlueButton';
-import { reload, stanCore } from '../lib/sdk';
+import { stanCore } from '../lib/sdk';
 import * as Yup from 'yup';
 import { FormikErrorMessage } from '../components/forms';
 import Warning from '../components/notifications/Warning';
@@ -202,11 +202,7 @@ export default function VisiumPerm() {
             )}
           </Formik>
         </div>
-        <OperationCompleteModal
-          show={current.matches('submitted')}
-          message={'Visium Permeabilisation complete'}
-          onReset={reload}
-        >
+        <OperationCompleteModal show={current.matches('submitted')} message={'Visium Permeabilisation complete'}>
           <p>
             If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the Home
             screen.

@@ -5,9 +5,8 @@ import React from 'react';
 import BlueButton from '../buttons/BlueButton';
 import { WorkStatus } from '../../types/sdk';
 import { WorkProgressUrlParams } from '../../pages/WorkProgress';
-import { history } from '../../lib/sdk';
 import { stringify } from '../../lib/helpers';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { statusSort } from '../../types/stan';
 import WorkNumberSelect from '../WorkNumberSelect';
 import CustomReactSelect from '../forms/CustomReactSelect';
@@ -47,6 +46,7 @@ type WorkProgressInputParams = {
 export default function WorkProgressInput({ urlParams, workTypes, programs, requesters }: WorkProgressInputParams) {
   const location = useLocation();
   const sortedStatues = Object.values(WorkStatus).sort((a, b) => statusSort(a, b));
+  const navigate = useNavigate();
 
   return (
     <div
@@ -62,7 +62,7 @@ export default function WorkProgressInput({ urlParams, workTypes, programs, requ
         validateOnBlur={false}
         validateOnMount={false}
         onSubmit={async (values) => {
-          history.push({
+          navigate({
             pathname: location.pathname,
             search: stringify({
               workNumber: values.workNumber,

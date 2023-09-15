@@ -5,9 +5,8 @@ import React from 'react';
 import BlueButton from '../buttons/BlueButton';
 import { WorkStatus } from '../../types/sdk';
 import { KeyValueSelector } from '../KeyValueSelector';
-import { history } from '../../lib/sdk';
 import { stringify } from '../../lib/helpers';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { statusSort } from '../../types/stan';
 import { WorkProgressSummaryUrlParams } from '../../pages/WorkProgressSummary';
 
@@ -75,6 +74,8 @@ export default function WorkProgressSummaryInput({
   programs
 }: WorkProgressSummaryInputParams) {
   const location = useLocation();
+  const navigate = useNavigate();
+
   const generateValuesForType = React.useCallback(
     (type: WorkProgressSearchType): string[] => {
       switch (type) {
@@ -116,7 +117,7 @@ export default function WorkProgressSummaryInput({
         validateOnBlur={false}
         validateOnMount={false}
         onSubmit={async (values) => {
-          history.push({
+          navigate({
             pathname: location.pathname,
             search: stringify({
               searchType: values.searchType,

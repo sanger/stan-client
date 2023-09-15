@@ -12,13 +12,12 @@ import LoadingSpinner from '../components/icons/LoadingSpinner';
 import Warning from '../components/notifications/Warning';
 import Heading from '../components/Heading';
 import { FindRequest, GetSearchInfoQuery, Work } from '../types/sdk';
-import { reload, stanCore, history } from '../lib/sdk';
+import { stanCore } from '../lib/sdk';
 import { useMachine } from '@xstate/react';
 import * as Yup from 'yup';
-import { cleanParams, getTimestampStr, objectKeys, parseQueryString, stringify } from '../lib/helpers';
+import { getTimestampStr, objectKeys, stringify } from '../lib/helpers';
 import WhiteButton from '../components/buttons/WhiteButton';
-import { ParsedQuery } from 'query-string';
-import { merge, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import { configContext } from '../context/ConfigContext';
 import searchMachine from '../lib/machines/search/searchMachine';
 import SearchService from '../lib/services/searchService';
@@ -26,6 +25,7 @@ import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import TopScrollingBar from '../components/TopScrollingBar';
 
 const validationSchema = Yup.object()
@@ -73,12 +73,18 @@ const emptyFindRequestKeys: Array<keyof FindRequest> = objectKeys(emptyFindReque
 
 type SearchProps = {
   searchInfo: GetSearchInfoQuery;
-  urlParamsString: string;
 };
 
-function Search({ searchInfo, urlParamsString }: SearchProps) {
-  const params: ParsedQuery = parseQueryString(urlParamsString);
-  const findRequest: FindRequest = merge({}, emptyFindRequest, cleanParams(params, emptyFindRequestKeys));
+function Search({ searchInfo }: SearchProps) {
+  const [searchParams] = useSearchParams();
+
+  const findRequest = React.useMemo(() => {
+    const request: FindRequest = emptyFindRequestKeys.reduce((request, key) => {
+      const value = searchParams.get(key) ?? '';
+      return { ...request, [key]: value.trim() };
+    }, emptyFindRequest);
+    return request;
+  }, [searchParams]);
 
   const config = useContext(configContext)!;
   const search = searchMachine<FindRequest, SearchResultTableEntry>(new SearchService());
@@ -102,11 +108,12 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
   const uniqueTableDataRef = React.useRef<SearchResultTableEntry[]>([]);
 
   const [viewAllRecords, setViewAllRecords] = React.useState(true);
+  const navigate = useNavigate();
 
   const onFormSubmit = (values: FindRequest) => {
     send({ type: 'FIND', request: values });
     // Replace instead of push so user doesn't have to go through a load of old searches when going back
-    history.replace(`/search?${stringify(values)}`);
+    navigate(`/search?${stringify(values)}`, { replace: true });
   };
 
   const [works, setWorks] = useState<Array<Pick<Work, 'workNumber'>>>([]);
@@ -247,7 +254,7 @@ function Search({ searchInfo, urlParamsString }: SearchProps) {
                       type="button"
                       onClick={() => {
                         resetForm({ values: emptyFindRequest });
-                        reload();
+                        navigate('/search', { replace: true, state: { reset: true } });
                       }}
                     >
                       Reset

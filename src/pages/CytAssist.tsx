@@ -10,7 +10,7 @@ import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
 import { Maybe, SlideCosting, SlotCopyContent } from '../types/sdk';
 import slotCopyMachine, { Destination } from '../lib/machines/slotCopy/slotCopyMachine';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Heading from '../components/Heading';
@@ -229,6 +229,7 @@ const CytAssist = () => {
   );
 
   const { serverErrors, destinations } = current.context;
+  const navigate = useNavigate();
 
   const selectedDestination = React.useMemo(() => {
     if (destinations.length > 0) {
@@ -422,7 +423,7 @@ const CytAssist = () => {
 
           {current.matches('copied') && (
             <>
-              <BlueButton onClick={reload} action="tertiary">
+              <BlueButton onClick={() => reload(navigate)} action="tertiary">
                 Reset Form
               </BlueButton>
               <Link to={'/'}>

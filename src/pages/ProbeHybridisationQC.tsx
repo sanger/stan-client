@@ -16,7 +16,7 @@ import { useCollection } from '../lib/hooks/useCollection';
 import { Form, Formik } from 'formik';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
-import { reload, StanCoreContext } from '../lib/sdk';
+import { StanCoreContext } from '../lib/sdk';
 
 import Panel from '../components/Panel';
 import RemoveButton from '../components/buttons/RemoveButton';
@@ -392,7 +392,6 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
               <OperationCompleteModal
                 show={submissionResult !== undefined}
                 message="Probe Hybridisation QC recorded for all labware(s)"
-                onReset={reload}
               >
                 <p>
                   If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the

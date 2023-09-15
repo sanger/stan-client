@@ -1,6 +1,5 @@
 import * as queryString from 'query-string';
 import * as Yup from 'yup';
-import { ParsedQuery } from 'query-string';
 import { GridDirection, Maybe } from '../types/sdk';
 import { HasEnabled, SizeInput } from '../types/stan';
 import _, { isNaN } from 'lodash';
@@ -169,7 +168,7 @@ export function buildAddresses(size: SizeInput, direction: GridDirection = GridD
  * @param params the URL params
  * @param allowedKeys list of keys to pick from params
  */
-export function cleanParams<T>(params: ParsedQuery<T>, allowedKeys: Array<string>) {
+export function cleanParams(params: URLSearchParams, allowedKeys: Array<string>) {
   return _(params).pick(allowedKeys).omitBy(_.isNil).omitBy(_.isEmpty).omitBy(_.isArray).value();
 }
 

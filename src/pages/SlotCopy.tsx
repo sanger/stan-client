@@ -11,8 +11,8 @@ import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
 import { LabwareFieldsFragment, LabwareState, SlotCopyContent } from '../types/sdk';
 import slotCopyMachine, { Destination, Source } from '../lib/machines/slotCopy/slotCopyMachine';
-import { Link } from 'react-router-dom';
-import { history, reload } from '../lib/sdk';
+import { Link, useNavigate } from 'react-router-dom';
+import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Heading from '../components/Heading';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../components/Table';
@@ -150,6 +150,8 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     initialOutputSlotCopy[0].labware
   );
   const { serverErrors, sourceLabwarePermData, sources, destinations, slotCopyResults } = current.context;
+
+  const navigate = useNavigate();
 
   /**Handler action to perform when a mapping is done  between source and destination**/
   const handleOnSlotMapperChange = useCallback(
@@ -372,7 +374,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
           {current.matches('copied') && (
             <>
-              <BlueButton onClick={reload} action="tertiary">
+              <BlueButton onClick={() => reload(navigate)} action="tertiary">
                 Reset Form
               </BlueButton>
               <Link to={'/'}>
@@ -401,9 +403,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
             {
               label: 'Visium permeabilisation',
               action: () => {
-                history.push({
-                  pathname: '/lab/visium_perm'
-                });
+                navigate('/lab/visium_perm');
                 setWarnBeforeSave(false);
               }
             }

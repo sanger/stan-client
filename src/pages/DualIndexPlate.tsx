@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
 import { SlotCopyContent } from '../types/sdk';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import Heading from '../components/Heading';
@@ -45,6 +45,7 @@ function DualIndexPlate() {
     })
   );
 
+  const navigate = useNavigate();
   const { serverErrors, sourceReagentPlate, destLabware, reagentTransfers, workNumber, plateType, validationError } =
     current.context;
 
@@ -216,7 +217,7 @@ function DualIndexPlate() {
             </BlueButton>
           ) : (
             <>
-              <BlueButton onClick={reload} action="tertiary">
+              <BlueButton onClick={() => reload(navigate)} action="tertiary">
                 Reset Form
               </BlueButton>
               <Link to={'/'}>

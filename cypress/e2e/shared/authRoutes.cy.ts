@@ -98,7 +98,7 @@ describe('Authorized routes', () => {
           cy.visitAsEndUser('/file_manager');
         });
         it('navigates to the page', () => {
-          cy.findByText('File Manager').should('be.visible');
+          cy.findAllByText('File Manager').should('have.length.above', 0);
         });
       });
       context('when visiting config page', () => {

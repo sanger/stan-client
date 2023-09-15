@@ -50,7 +50,6 @@ export function createMachineBuilder<TContext, TStateSchema extends StateSchema,
 ) {
   return (params?: CreateMachineParams<TContext, TEvent>) => {
     let machine = Machine<TContext, TStateSchema, TEvent>(machineConfig, machineOptions);
-
     if (params?.options) {
       machine = machine.withConfig(params.options);
     }

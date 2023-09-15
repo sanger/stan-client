@@ -15,7 +15,7 @@ import PinkButton from '../components/buttons/PinkButton';
 import * as Yup from 'yup';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
-import { reload, stanCore } from '../lib/sdk';
+import { stanCore } from '../lib/sdk';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { Column } from 'react-table';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
@@ -192,7 +192,7 @@ export default function RecordInPlace({ title, operationType, equipment, columns
             )}
           </Formik>
 
-          <OperationCompleteModal show={current.matches('submitted')} message={'Operation Complete'} onReset={reload}>
+          <OperationCompleteModal show={current.matches('submitted')} message={'Operation Complete'}>
             <p>
               If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the
               Home screen.
