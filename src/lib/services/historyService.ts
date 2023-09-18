@@ -1,11 +1,6 @@
 import { stanCore } from '../sdk';
 import { HistoryTableEntry } from '../../types/stan';
-import {
-  HistoryFieldsFragment,
-  LabwareFieldsFragment,
-  SampleFieldsFragment,
-  SamplePositionFieldsFragment
-} from '../../types/sdk';
+import { HistoryFieldsFragment, LabwareFieldsFragment, SampleFieldsFragment } from '../../types/sdk';
 import { HistoryUrlParams } from '../../pages/History';
 
 /**
@@ -17,7 +12,6 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Array
     entries: [],
     labware: [],
     samples: [],
-    samplePositionResults: [],
     __typename: 'History'
   };
   if (historyProps.sampleId) {
@@ -39,19 +33,10 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Array
 
   const labwareMap: Map<number, LabwareFieldsFragment> = new Map();
   const sampleMap: Map<number, SampleFieldsFragment> = new Map();
-  const samplePositionMapByOpId: Map<number, Map<number, SamplePositionFieldsFragment>> = new Map();
 
   history.labware.forEach((lw) => labwareMap.set(lw.id, lw));
   history.samples.forEach((sample) => sampleMap.set(sample.id, sample));
-  history.samplePositionResults.forEach((samplePosition) => {
-    const operationId = samplePosition.operationId;
-    const sampleId = samplePosition.sampleId;
 
-    if (!samplePositionMapByOpId.has(operationId)) {
-      samplePositionMapByOpId.set(operationId, new Map());
-    }
-    samplePositionMapByOpId.get(operationId)?.set(sampleId, samplePosition);
-  });
   return history.entries.map((entry) => {
     const sourceLabware = labwareMap.get(entry.sourceLabwareId)!;
     const destinationLabware = labwareMap.get(entry.destinationLabwareId)!;
@@ -72,8 +57,8 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Array
       username: entry.username,
       workNumber: entry.workNumber ?? undefined,
       details: entry.details,
-      address: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.address,
-      sectionPosition: samplePositionMapByOpId.get(entry.eventId)?.get(entry.sampleId as number)?.region
+      address: entry.address ?? undefined,
+      sectionPosition: entry.region ?? undefined
     };
   });
 }
