@@ -1,0 +1,128 @@
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import SlotMeasurements from '../../../src/components/slotMeasurement/SlotMeasurements';
+
+import { Formik } from 'formik';
+import userEvent from '@testing-library/user-event';
+afterEach(() => {
+  cleanup();
+});
+const FormikProps = {
+  onSubmit: () => {},
+  initialValues: {}
+};
+
+const renderSlotMeasurements = (props: any) => {
+  return render(
+    <Formik {...FormikProps}>
+      <SlotMeasurements {...props} />
+    </Formik>
+  );
+};
+
+describe('SlotMeasurements', () => {
+  it('renders slot measurements', () => {
+    renderSlotMeasurements({
+      slotMeasurements: [
+        { address: 'A1', name: 'Cost', value: '0' },
+        { address: 'A2', name: 'Cost', value: '0' }
+      ],
+      measurements: [{ name: 'Cost', stepIncrement: '0.01' }]
+    });
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getAllByTestId('Cost-input')).toHaveLength(2);
+  });
+  it('renders multiple measurements for slots', () => {
+    renderSlotMeasurements({
+      slotMeasurements: [
+        { address: 'A1', name: 'Cost', value: '0' },
+        { address: 'A1', name: 'Time', value: '0' },
+        { address: 'A2', name: 'Cost', value: '0' },
+        { address: 'A2', name: 'Time', value: '0' }
+      ],
+      measurements: [
+        { name: 'Cost', stepIncrement: '0.01' },
+        { name: 'Time', stepIncrement: '0.01' }
+      ]
+    });
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getAllByTestId('Cost-input')).toHaveLength(2);
+    expect(screen.getAllByTestId('Time-input')).toHaveLength(2);
+  });
+  it('callback function called when measurement value changes', async () => {
+    const handleChangeMeasurement = jest.fn();
+    renderSlotMeasurements({
+      slotMeasurements: [
+        { address: 'A1', name: 'Cost', value: '0' },
+        { address: 'A2', name: 'Cost', value: '0' }
+      ],
+      measurements: [{ name: 'Cost', stepIncrement: '0.01' }],
+      onChangeField: handleChangeMeasurement
+    });
+    const measurement = screen.getAllByTestId('Cost-input')[0];
+    await waitFor(() => {
+      fireEvent.change(measurement, { target: { value: '2' } });
+    });
+    expect(handleChangeMeasurement).toHaveBeenCalled();
+  });
+  it('calls validation function', async () => {
+    const validateValueMock = jest.fn();
+    renderSlotMeasurements({
+      slotMeasurements: [
+        { address: 'A1', name: 'Cost', value: '0' },
+        { address: 'A2', name: 'Cost', value: '0' }
+      ],
+      measurements: [{ name: 'Cost', stepIncrement: '0.01', validateValue: validateValueMock }],
+      onChangeField: jest.fn()
+    });
+    const measurement = screen.getAllByTestId('Cost-input')[0];
+    await waitFor(() => {
+      fireEvent.change(measurement, { target: { value: '-1' } });
+      fireEvent.blur(measurement);
+    });
+
+    expect(validateValueMock).toHaveBeenCalled();
+  });
+  it('renders comments measurements for slots', () => {
+    renderSlotMeasurements({
+      slotMeasurements: [
+        { address: 'A1', name: 'Cost', value: '0', commentId: 0 },
+        { address: 'A2', name: 'Cost', value: '0', commentId: 0 }
+      ],
+      measurements: [
+        { name: 'Cost', stepIncrement: '0.01' },
+        { name: 'Time', stepIncrement: '0.01' }
+      ],
+      comments: [
+        { id: 0, text: 'Comment 1', enabled: true },
+        { id: 1, text: 'Comment 2', enabled: true }
+      ]
+    });
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByText('Comments')).toBeInTheDocument();
+    const comments = screen.getByTestId('comments0');
+    expect(comments).toBeInTheDocument();
+  });
+  it('invokes callback when comment changes', async () => {
+    const handleChangeComment = jest.fn();
+    renderSlotMeasurements({
+      slotMeasurements: [{ address: 'A1', name: 'Cost', value: '0', commentId: 0 }],
+      measurements: [
+        { name: 'Cost', stepIncrement: '0.01' },
+        { name: 'Time', stepIncrement: '0.01' }
+      ],
+      comments: [
+        { id: 0, text: 'comment 1', enabled: true },
+        { id: 1, text: 'comment 2', enabled: true }
+      ],
+      onChangeField: handleChangeComment
+    });
+    const comments = screen.getByTestId('comments0');
+    expect(comments).toBeInTheDocument();
+
+    const commentsCombo = within(comments).getByRole('combobox', { hidden: true });
+    await waitFor(() => userEvent.type(commentsCombo, 'comment 2{enter}'));
+    expect(screen.getByTestId('comments0')).toHaveTextContent('comment 2');
+    expect(handleChangeComment).toHaveBeenCalled();
+  });
+});

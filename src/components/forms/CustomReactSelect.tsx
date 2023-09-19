@@ -131,7 +131,7 @@ export const NormalReactSelect = ({
                 '&:hover': {
                   backgroundColor: isDisabled ? 'gray' : '#4792E4'
                 },
-                height: label.length === 0 ? '35px' : styles.height,
+                height: label?.length === 0 ? '35px' : styles.height,
                 padding: '2px 2px 8px 8px'
               };
             }

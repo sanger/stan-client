@@ -5,16 +5,24 @@ import DataTable from '../DataTable';
 import FormikInput from '../forms/Input';
 import { selectOptionValues } from '../forms';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { Dictionary, groupBy } from 'lodash';
 
-type SlotMeasurementProps = {
-  slotMeasurements: SlotMeasurementRequest[];
-  measurementName: string;
+type MeasurementProps = {
+  name: string;
   stepIncrement: string;
-  comments?: CommentFieldsFragment[];
-  onChangeMeasurement: (address: string, fieldName: string, value: string) => void;
   validateValue?: (value: string) => void;
 };
+export type SlotMeasurementProps = {
+  slotMeasurements: SlotMeasurementRequest[];
+  measurements: MeasurementProps[];
+  comments?: CommentFieldsFragment[];
+  onChangeField: (fieldName: string, value: string) => void;
+};
 
+type MeasurementRow = {
+  address: string;
+  measurements: SlotMeasurementRequest[];
+};
 const setMeasurementNameTableTitle = (measurementName: string): string => {
   return measurementName === 'cDNA concentration' || measurementName === 'Library concentration'
     ? `${measurementName.toUpperCase()} (pg/\u00B5l)`
@@ -25,57 +33,82 @@ const setMeasurementNameTableTitle = (measurementName: string): string => {
  * Component to display SlotMeasurements as a table with two columns - slot address & measurement value
  *
  * @param slotMeasurements - SlotMeasurement data
- * @param measurementName  - Name of the measurement
- * @param stepIncrement - Measurement value increment step
  * @param comments - List of (concentration) comments to select from
  * @param onChangeMeasurement - Callback for measurementValue
- * @param validateValue - Function validate the format of data in value field
  *
  */
 
-const SlotMeasurements = ({
-  slotMeasurements,
-  measurementName,
-  stepIncrement,
-  comments,
-  onChangeMeasurement,
-  validateValue
-}: SlotMeasurementProps) => {
+const SlotMeasurements = ({ slotMeasurements, measurements, onChangeField, comments }: SlotMeasurementProps) => {
+  /**concatenate all mesaurements if there are multiple measurements */
+  const memoRows = React.useMemo(() => {
+    const groupedMeasurements: Dictionary<SlotMeasurementRequest[]> = groupBy(slotMeasurements, 'address');
+    return Object.keys(groupedMeasurements).map((address) => {
+      return {
+        address,
+        measurements: groupedMeasurements[address]
+      };
+    });
+  }, [slotMeasurements]);
+
+  const getIndex = React.useCallback(
+    (address: string, measurementName: string) => {
+      return slotMeasurements.findIndex((val) => val.address === address && val.name === measurementName);
+    },
+    [slotMeasurements]
+  );
   const columns = React.useMemo(() => {
     return [
       {
         Header: 'Address',
         id: 'address',
-        accessor: (measurement: SlotMeasurementRequest) => measurement.address
+        accessor: (measurement: MeasurementRow) => measurement.address
       },
-      {
-        Header: setMeasurementNameTableTitle(measurementName),
-        id: measurementName,
-        allCapital: false,
-        Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
-          return (
-            <FormikInput
-              className={'rounded-md'}
-              data-testid={`measurementValue${row.index}`}
-              type={'number'}
-              label={''}
-              name={`slotMeasurements.${row.index}.value`}
-              onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                onChangeMeasurement(row.original.address, `slotMeasurements.${row.index}.value`, e.currentTarget.value);
-              }}
-              validate={validateValue}
-              min={0}
-              step={stepIncrement}
-            />
-          );
-        }
-      },
+      ...measurements.map((measurement, index) => {
+        return {
+          Header: setMeasurementNameTableTitle(measurement.name),
+          id: measurement.name,
+          allCapital: false,
+          Cell: ({ row }: { row: Row<MeasurementRow> }) => {
+            return (
+              <>
+                <FormikInput
+                  key={row.original.address + index + row.index}
+                  data-testid={`${measurement.name}-input`}
+                  type={'number'}
+                  label={''}
+                  name={
+                    measurements.length > 1
+                      ? `slotMeasurements.${getIndex(row.original.address, measurement.name)}.value`
+                      : `slotMeasurements.${row.index}.value`
+                  }
+                  onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                    onChangeField(
+                      measurements.length > 1
+                        ? `slotMeasurements.${getIndex(row.original.address, measurement.name)}.value`
+                        : `slotMeasurements.${row.index}.value`,
+                      e.currentTarget.value
+                    );
+                  }}
+                  value={
+                    slotMeasurements.find(
+                      (val) => val.address === row.original.address && val.name === measurement.name
+                    )?.value
+                  }
+                  validate={measurement.validateValue}
+                  min={0}
+                  step={measurement.stepIncrement}
+                />
+              </>
+            );
+          }
+        };
+      }),
       ...(comments?.length
         ? [
             {
               Header: 'Comments',
               id: 'Comments',
-              Cell: ({ row }: { row: Row<SlotMeasurementRequest> }) => {
+              Cell: ({ row }: { row: Row<MeasurementRow> }) => {
                 return (
                   <CustomReactSelect
                     label={''}
@@ -83,12 +116,9 @@ const SlotMeasurements = ({
                     name={`slotMeasurements.${row.index}.commentId`}
                     className={'flex'}
                     emptyOption={true}
+                    value={slotMeasurements[row.index].commentId}
                     handleChange={(val) => {
-                      onChangeMeasurement(
-                        row.original.address,
-                        `slotMeasurements.${row.index}.commentId`,
-                        (val as OptionType).value
-                      );
+                      onChangeField?.(`slotMeasurements.${row.index}.commentId`, (val as OptionType).value);
                     }}
                     options={selectOptionValues(comments, 'text', 'id')}
                   />
@@ -98,11 +128,9 @@ const SlotMeasurements = ({
           ]
         : [])
     ];
-  }, [measurementName, onChangeMeasurement, validateValue, stepIncrement, comments]);
+  }, [measurements, onChangeField, comments, getIndex, slotMeasurements]);
 
-  return (
-    <>{slotMeasurements && slotMeasurements.length > 0 && <DataTable columns={columns} data={slotMeasurements} />}</>
-  );
+  return <>{slotMeasurements && slotMeasurements.length > 0 && <DataTable columns={columns} data={memoRows} />}</>;
 };
 
 export default SlotMeasurements;
