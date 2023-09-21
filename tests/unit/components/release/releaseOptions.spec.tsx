@@ -8,7 +8,11 @@ afterEach(() => {
 const navigateFunction = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...(jest.requireActual('react-router-dom') as any),
-  useLoaderData: () => ['Option 1', 'Option 2', 'Option 3'],
+  useLoaderData: () => [
+    { displayName: 'Option 1', queryParamName: 'option_1' },
+    { displayName: 'Option 2', queryParamName: 'option_2' },
+    { displayName: 'Option 3', queryParamName: 'option_3' }
+  ],
   useNavigate: () => navigateFunction
 }));
 describe('ReleaseOptions', () => {
@@ -30,7 +34,7 @@ describe('ReleaseOptions', () => {
   });
   it('On initial loading release options are selected based on query params', () => {
     const router = createMemoryRouter([{ path: '/releaseOptions', element: <ReleaseOptions /> }], {
-      initialEntries: ['/releaseOptions?id=123&groups=Option%201,Option%202']
+      initialEntries: ['/releaseOptions?id=123&groups=option_1,option_2']
     });
     render(<RouterProvider router={router} />);
     ['Option 1', 'Option 2'].forEach((option, indx) => {
@@ -49,17 +53,17 @@ describe('ReleaseOptions', () => {
       const option1 = screen.getAllByRole('checkbox')[0];
       fireEvent.click(option1);
     });
-    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=Option 1', { replace: true });
+    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=option_1', { replace: true });
   });
   it('calls navigate function with updated url when user deselects release options', async () => {
     const router = createMemoryRouter([{ path: '/releaseOptions', element: <ReleaseOptions /> }], {
-      initialEntries: ['/releaseOptions?id=123&groups=Option%201,Option%202']
+      initialEntries: ['/releaseOptions?id=123&groups=option_1,option_2']
     });
     render(<RouterProvider router={router} />);
     await waitFor(() => {
       const option1 = screen.getAllByRole('checkbox')[0];
       fireEvent.click(option1);
     });
-    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=Option 2', { replace: true });
+    expect(navigateFunction).toHaveBeenLastCalledWith('/releaseOptions?id=123&groups=option_2', { replace: true });
   });
 });

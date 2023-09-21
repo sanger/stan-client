@@ -4,13 +4,17 @@ import {
   GetReleaseColumnOptionsQueryVariables,
   GetReleaseInfoQuery,
   GetReleaseInfoQueryVariables,
+  ReleaseFileOptionFieldsFragment,
   ReleaseLabwareMutation,
   ReleaseLabwareMutationVariables
 } from '../../types/sdk';
 import releaseDestinationRepository from '../repositories/releaseDestinationRepository';
 import releaseRecipientRepository from '../repositories/releaseRecipientRepository';
-
-const releaseColumnOptions = ['Sample processing', 'Histology', 'Visium', 'Xenium'];
+const releaseColumnOptions: ReleaseFileOptionFieldsFragment[] = [
+  { displayName: 'Histology', queryParamName: 'histology' },
+  { displayName: 'Sample Processing', queryParamName: 'sample_processing' },
+  { displayName: 'Xenium', queryParamName: 'xenium' }
+];
 const releaseHandlers = [
   graphql.query<GetReleaseInfoQuery, GetReleaseInfoQueryVariables>('GetReleaseInfo', (req, res, ctx) => {
     return res(

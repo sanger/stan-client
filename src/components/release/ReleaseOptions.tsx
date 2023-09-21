@@ -9,10 +9,11 @@ import PinkButton from '../buttons/PinkButton';
 import { motion } from 'framer-motion';
 import DownloadIcon from '../icons/DownloadIcon';
 import Warning from '../notifications/Warning';
+import { ReleaseFileOptionFieldsFragment } from '../../types/sdk';
 
 const ReleaseOptions = () => {
   //Get all release options
-  const releaseOptions = useLoaderData() as string[];
+  const releaseOptions = useLoaderData() as ReleaseFileOptionFieldsFragment[];
 
   //Get query params, expected url example is /releaseOptions?id=123,456&groups=group1,group2
   const [searchParams] = useSearchParams();
@@ -44,19 +45,19 @@ const ReleaseOptions = () => {
               <motion.div variants={variants.fadeInWithLift} className="space-y-4 ">
                 <Heading level={3}>Release Columns</Heading>
                 {releaseOptions && releaseOptions.length > 0 ? (
-                  releaseOptions.map((releaseOption: string) => (
-                    <div className="flex flex-row items-center gap-x-2" key={releaseOption}>
+                  releaseOptions.map((releaseOption) => (
+                    <div className="flex flex-row items-center gap-x-2" key={releaseOption.displayName}>
                       <Input
                         type="checkbox"
                         className={'w-5 rounded'}
-                        checked={memoReleaseParams.groups.includes(releaseOption)}
-                        onChange={(values) => {
+                        checked={memoReleaseParams.groups.includes(releaseOption.queryParamName)}
+                        onChange={() => {
                           const valuesToSend = {
                             id: memoReleaseParams.id,
                             groups: [
-                              memoReleaseParams.groups.includes(releaseOption)
-                                ? memoReleaseParams.groups.filter((item) => item !== releaseOption)
-                                : [...memoReleaseParams.groups, releaseOption]
+                              memoReleaseParams.groups.includes(releaseOption.queryParamName)
+                                ? memoReleaseParams.groups.filter((item) => item !== releaseOption.queryParamName)
+                                : [...memoReleaseParams.groups, releaseOption.queryParamName]
                             ]
                           };
                           navigate(
@@ -67,7 +68,7 @@ const ReleaseOptions = () => {
                           );
                         }}
                       />
-                      <label className={'whitespace-nowrap'}>{releaseOption}</label>
+                      <label className={'whitespace-nowrap'}>{releaseOption.displayName}</label>
                     </div>
                   ))
                 ) : (

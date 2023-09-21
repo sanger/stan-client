@@ -1,3 +1,5 @@
 query GetReleaseColumnOptions {
-    releaseColumnOptions
+  releaseColumnOptions {
+    ...ReleaseFileOptionFields
+  }
 }

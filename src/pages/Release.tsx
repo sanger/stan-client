@@ -146,7 +146,9 @@ function Release({ releaseInfo }: PageParams) {
   const releaseOptionsFilePath = useMemo(() => {
     if (submissionResult) {
       const releaseIds = submissionResult.release.releases.map((r) => r.id);
-      return `/releaseOptions?id=${releaseIds.join(',')}&groups=${releaseInfo.releaseColumnOptions.join(',')}`;
+      return `/releaseOptions?id=${releaseIds.join(',')}&groups=${releaseInfo.releaseColumnOptions
+        .map((releaseOption) => releaseOption.queryParamName)
+        .join(',')}`;
     }
   }, [submissionResult, releaseInfo.releaseColumnOptions]);
 
