@@ -169,7 +169,7 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
   );
 
   const removeLabwareFromForm = useCallback(
-    (removeLabware, barcode: string, values: ProbeHybridisationQCFormValues) => {
+    (removeLabware: (barcode: string) => void, barcode: string, values: ProbeHybridisationQCFormValues) => {
       removeLabware(barcode);
       delete values.labwares[barcode];
     },

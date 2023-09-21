@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import ScanInput from '../../../../src/components/scanInput/ScanInput';
 import { Formik } from 'formik';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

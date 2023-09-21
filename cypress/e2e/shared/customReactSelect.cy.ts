@@ -71,7 +71,7 @@ export const removeSelections = (dataTestId: string) => {
 /**Check whether the dropdown with given data-testid has the given option**/
 export const shouldHaveOption = (dataTestId: string, option: string) => {
   const wrapperDiv = cy.findAllByTestId(dataTestId.length > 0 ? dataTestId : 'select-div');
-  wrapperDiv.within(() => {
+  wrapperDiv.first().within(() => {
     cy.findByRole('combobox').should('exist').click({ force: true });
     cy.contains(option).should('be.visible');
   });

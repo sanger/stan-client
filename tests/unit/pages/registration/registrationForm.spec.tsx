@@ -16,6 +16,7 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { getRegistrationFormTissue, RegistrationFormTissue } from '../../../../src/pages/BlockRegistration';
 import slotRegionRepository from '../../../../src/mocks/repositories/slotRegionRepository';
+import '@testing-library/jest-dom';
 
 const registrationInfo: GetRegistrationInfoQuery = {
   solutions: solutionRepository.findAll(),
@@ -236,8 +237,9 @@ describe('RegistrationForm', () => {
           renderOriginalRegistrationForm(tissues);
         });
 
-        await waitFor(() => screen.getByRole('button', { name: '+ Add Identical Tissue Sample' }));
-        screen.getByRole('button', { name: '+ Add Identical Tissue Sample' }).click();
+        await waitFor(() => {
+          fireEvent.click(screen.getByRole('button', { name: '+ Add Identical Tissue Sample' }));
+        });
 
         //Two sample pages
         expect(screen.getAllByTestId('sample-info-div')).toHaveLength(2);
@@ -261,11 +263,12 @@ describe('RegistrationForm', () => {
         expect(solutionDiv[0]).not.toHaveTextContent('Ethanol');
 
         //On "Delete Sample" button click'
-        await screen.getAllByRole('button', { name: 'Delete Sample' })[0].click();
-        await waitFor(() => screen.queryByRole('button', { name: 'Delete Sample' }));
-        //One sample page
-        expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
-        expect(screen.queryByRole('button', { name: 'Delete Sample' })).not.toBeInTheDocument();
+        await waitFor(() => {
+          fireEvent.click(screen.getAllByRole('button', { name: 'Delete Sample' })[0]);
+          //One sample page
+          expect(screen.getAllByTestId('sample-info-div')).toHaveLength(1);
+          expect(screen.queryByRole('button', { name: 'Delete Sample' })).not.toBeInTheDocument();
+        });
       });
     });
   });
@@ -361,10 +364,10 @@ describe('RegistrationForm', () => {
           expect(screen.queryByText('Sample Collection Date')).toBeInTheDocument();
         });
         it('enables HumFre field on entering Species', async () => {
-          const speciesCombo = getSelect('Species');
-          await waitFor(() => userEvent.type(speciesCombo, 'Human{enter}'));
-          const humFreCombo = getSelect('HuMFre');
-          expect(humFreCombo).toBeEnabled();
+          await waitFor(() => {
+            userEvent.type(getSelect('Species'), 'Human{enter}');
+            expect(screen.getByTestId('HuMFre')).toBeEnabled();
+          });
         });
       });
 

@@ -1,8 +1,10 @@
-import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, act, within } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import CustomReactSelect from '../../../../src/components/forms/CustomReactSelect';
 import { getById } from '../../generic/utilities';
 import * as Formik from 'formik';
+import '@testing-library/jest-dom';
+
 afterEach(() => {
   cleanup();
 });
@@ -50,7 +52,7 @@ const testDisplayProps = async (nameStr?: string) => {
   //expect(screen.getByText('Select options...')).toBeInTheDocument();
 };
 
-const testSelectOptions = async (nameStr?: string) => {
+const testSelectOptions = (nameStr?: string) => {
   const onChange = jest.fn();
 
   const customSelectProps = {
@@ -60,18 +62,13 @@ const testSelectOptions = async (nameStr?: string) => {
     name: nameStr ?? undefined,
     handleChange: () => {
       onChange();
-    }
+    },
+    dataTestId: 'select-div'
   };
-  await act(async () => {
-    if (nameStr) {
-      renderFormikSelect(customSelectProps);
-    } else {
-      renderNormalSelect(customSelectProps);
-    }
-  });
-
+  nameStr ? renderFormikSelect(customSelectProps) : renderNormalSelect(customSelectProps);
   // Opens the dropdown options list
-  const input = screen.getByRole('combobox');
+  const selectDiv = screen.getByTestId('select-div');
+  const input = within(selectDiv).getByRole('combobox', { hidden: true });
   expect(input).toBeInTheDocument();
   fireEvent.keyDown(input, { keyCode: 40 });
 
@@ -99,16 +96,9 @@ const testBlur = (nameStr?: string) => {
       onBlur();
     }
   };
-  act(() => {
-    if (nameStr) {
-      renderFormikSelect(customSelectProps);
-    } else {
-      renderNormalSelect(customSelectProps);
-    }
-  });
-
+  nameStr ? renderFormikSelect(customSelectProps) : renderNormalSelect(customSelectProps);
   // Opens the dropdown options list
-  const input = screen.getByRole('combobox');
+  const input = screen.getByRole('combobox', { hidden: true });
   expect(input).toBeInTheDocument();
 
   //Remove focus from select
@@ -136,7 +126,7 @@ const testFilterOptions = (nameStr?: string) => {
   };
   nameStr ? renderFormikSelect(customSelectProps) : renderNormalSelect(customSelectProps);
   // Opens the dropdown options list
-  const input = screen.getByRole('combobox');
+  const input = screen.getByRole('combobox', { hidden: true });
   expect(input).toBeInTheDocument();
   fireEvent.change(input, { target: { value: 'a' } });
   //Display filtered option list which has letter 'a'

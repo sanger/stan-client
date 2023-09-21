@@ -10,6 +10,7 @@ import { Location } from "history";
 import { ClientError } from "graphql-request";
 import * as Yup from "yup";
 import { regexSort } from "../lib/helpers";
+import {FunctionComponent} from "react";
 /**
  * Union of STAN's {@link OperationType} names
  */
@@ -41,6 +42,11 @@ export enum LabwareTypeName {
 export type Address = string;
 
 export type SizeInput = Omit<Size, "__typename">;
+
+type ChildrenProps = {
+  children: React.ReactNode;
+}
+export type FCWithChildren<P = {} & ChildrenProps> = FunctionComponent<P>;
 
 /**
  * Type for when a piece of labware has been created in the client, but has not
@@ -377,3 +383,4 @@ Yup.addMethod(Yup.array, "unique", function (
       (list = []) => list.length === new Set(list.map(mapper)).size
   );
 });*/
+

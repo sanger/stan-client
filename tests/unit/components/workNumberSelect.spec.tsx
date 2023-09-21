@@ -3,6 +3,7 @@ import { describe } from '@jest/globals';
 import WorkNumberSelect from '../../../src/components/WorkNumberSelect';
 import { FindWorkInfoQuery, GetAllWorkInfoQuery, WorkStatus } from '../../../src/types/sdk';
 import { Formik } from 'formik';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

@@ -653,7 +653,7 @@ const Location = () => {
       {awaitingLabwares.length > 0 && (
         <PromptOnLeave
           when={awaitingStorageCheckOnExit}
-          message={'You have labwares that are not stored. Are you sure you want to leave?'}
+          message={'You have unstored labware. Are you sure you want to leave?'}
           onPromptLeave={onLeave}
         />
       )}

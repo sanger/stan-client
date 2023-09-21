@@ -19,7 +19,7 @@ import { UserRole } from '../types/sdk';
 import { configContext } from '../context/ConfigContext';
 import NavLinkMenuItem from './menu/NavlinkMenuItem';
 import Menu from './menu/Menu';
-import { LocationState } from '../types/stan';
+import { FCWithChildren, LocationState } from '../types/stan';
 
 interface AppShellParams {
   children?: React.ReactNode | React.ReactNode[];
@@ -630,7 +630,7 @@ AppShell.Title = function ({ children }: { children: string }) {
   );
 };
 
-const Main: React.FC = ({ children }) => (
+const Main: FCWithChildren = ({ children }) => (
   <motion.main className="flex-auto" initial={{ opacity: 0.1 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
     <div className="py-6 px-4 sm:px-6 lg:px-8">
       {children}

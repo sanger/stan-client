@@ -13,6 +13,7 @@ import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../pages/
 
 interface LayoutPlannerProps {
   actor: LayoutMachineActorRef;
+  children: React.ReactNode;
 }
 
 const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {

@@ -1,5 +1,6 @@
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import Information from '../../../../src/components/notifications/Information';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

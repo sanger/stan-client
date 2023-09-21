@@ -2,17 +2,18 @@ import React from 'react';
 import { Link, LinkProps } from 'react-router-dom';
 import Heading from './Heading';
 import PinkButton from './buttons/PinkButton';
+import { FCWithChildren } from '../types/stan';
 
 /**
  * Display a list of cards on navigation pages e.g. Admin
  */
-const PageCardList: React.FC = ({ children }) => {
+const PageCardList: FCWithChildren = ({ children }) => {
   return <div className="flex flex-row flex-wrap justify-start items-start">{children}</div>;
 };
 
 export default PageCardList;
 
-interface PageCardProps {
+interface PageCardProps extends React.PropsWithChildren {
   page: LinkProps['to'];
   title: string;
 }

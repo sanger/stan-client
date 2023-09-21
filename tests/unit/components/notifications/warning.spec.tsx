@@ -1,6 +1,7 @@
 import { render, screen, cleanup } from '@testing-library/react';
 import Warning from '../../../../src/components/notifications/Warning';
 import { ClientError } from 'graphql-request';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

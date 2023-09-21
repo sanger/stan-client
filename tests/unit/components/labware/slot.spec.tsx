@@ -1,7 +1,8 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Slot } from '../../../../src/components/labware/Slot';
 import { filledSlotFactory } from '../../../../src/lib/factories/slotFactory';
 import { SlotFieldsFragment } from '../../../../src/types/sdk';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();
@@ -98,8 +99,8 @@ describe('Slot', () => {
             secondaryText={(_address: string, _slot: SlotFieldsFragment) => 'Testing'}
           />
         );
-        expect(screen.getByText('Testing')).toBeVisible();
       });
+      expect(screen.getByText('Testing')).toBeVisible();
     });
   });
 });
