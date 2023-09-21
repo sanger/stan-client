@@ -7,14 +7,15 @@ import { selectOptionValues } from '../forms';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { Dictionary, groupBy } from 'lodash';
 
-type MeasurementProps = {
+export type MeasurementConfigProps = {
   name: string;
   stepIncrement: string;
-  validateValue?: (value: string) => void;
+  validateFunction?: (value: string) => void;
+  initialMeasurementVal: string;
 };
 export type SlotMeasurementProps = {
   slotMeasurements: SlotMeasurementRequest[];
-  measurements: MeasurementProps[];
+  measurementConfig: MeasurementConfigProps[];
   comments?: CommentFieldsFragment[];
   onChangeField: (fieldName: string, value: string) => void;
 };
@@ -38,24 +39,30 @@ const setMeasurementNameTableTitle = (measurementName: string): string => {
  *
  */
 
-const SlotMeasurements = ({ slotMeasurements, measurements, onChangeField, comments }: SlotMeasurementProps) => {
-  /**concatenate all mesaurements if there are multiple measurements */
-  const memoRows = React.useMemo(() => {
-    const groupedMeasurements: Dictionary<SlotMeasurementRequest[]> = groupBy(slotMeasurements, 'address');
-    return Object.keys(groupedMeasurements).map((address) => {
-      return {
-        address,
-        measurements: groupedMeasurements[address]
-      };
-    });
-  }, [slotMeasurements]);
+const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, comments }: SlotMeasurementProps) => {
+  const [measurementRows, setMeasurementRows] = React.useState<MeasurementRow[]>([]);
+  const [measurementConfigOptions, setMeasurementConfigOptions] = React.useState<MeasurementConfigProps[]>([]);
 
-  const getIndex = React.useCallback(
-    (address: string, measurementName: string) => {
-      return slotMeasurements.findIndex((val) => val.address === address && val.name === measurementName);
-    },
-    [slotMeasurements]
-  );
+  /**concatenate all mesaurements if there are multiple measurements */
+
+  React.useEffect(() => {
+    if (measurementConfigOptions.length === measurementConfig.length) return;
+    setMeasurementConfigOptions(measurementConfig);
+  }, [measurementConfig, measurementConfigOptions, setMeasurementConfigOptions]);
+
+  React.useEffect(() => {
+    const groupedMeasurements: Dictionary<SlotMeasurementRequest[]> = groupBy(slotMeasurements, 'address');
+    if (Object.keys(groupedMeasurements).length === measurementRows?.length) return;
+    setMeasurementRows(
+      Object.keys(groupedMeasurements).map((address) => {
+        return {
+          address,
+          measurements: groupedMeasurements[address]
+        };
+      })
+    );
+  }, [slotMeasurements, measurementRows, setMeasurementRows]);
+
   const columns = React.useMemo(() => {
     return [
       {
@@ -63,40 +70,34 @@ const SlotMeasurements = ({ slotMeasurements, measurements, onChangeField, comme
         id: 'address',
         accessor: (measurement: MeasurementRow) => measurement.address
       },
-      ...measurements.map((measurement, index) => {
+
+      ...measurementConfigOptions.map((measurementProp, mesaurementIndex) => {
         return {
-          Header: setMeasurementNameTableTitle(measurement.name),
-          id: measurement.name,
+          Header: setMeasurementNameTableTitle(measurementProp.name),
+          id: measurementProp.name,
           allCapital: false,
           Cell: ({ row }: { row: Row<MeasurementRow> }) => {
             return (
               <>
                 <FormikInput
-                  key={row.original.address + index + row.index}
-                  data-testid={`${measurement.name}-input`}
+                  key={row.original.address + measurementProp.name + row.index}
+                  data-testid={`${measurementProp.name}-input`}
                   type={'number'}
                   label={''}
                   name={
-                    measurements.length > 1
-                      ? `slotMeasurements.${getIndex(row.original.address, measurement.name)}.value`
+                    measurementConfigOptions.length > 1
+                      ? `slotMeasurements.${row.index * measurementConfigOptions.length + mesaurementIndex}.value`
                       : `slotMeasurements.${row.index}.value`
                   }
                   onChange={(e: React.FormEvent<HTMLInputElement>) => {
                     onChangeField(
-                      measurements.length > 1
-                        ? `slotMeasurements.${getIndex(row.original.address, measurement.name)}.value`
-                        : `slotMeasurements.${row.index}.value`,
+                      `slotMeasurements.${row.index * measurementConfigOptions.length + mesaurementIndex}.value`,
                       e.currentTarget.value
                     );
                   }}
-                  value={
-                    slotMeasurements.find(
-                      (val) => val.address === row.original.address && val.name === measurement.name
-                    )?.value
-                  }
-                  validate={measurement.validateValue}
+                  validate={measurementProp.validateFunction}
                   min={0}
-                  step={measurement.stepIncrement}
+                  step={measurementProp.stepIncrement}
                 />
               </>
             );
@@ -116,7 +117,7 @@ const SlotMeasurements = ({ slotMeasurements, measurements, onChangeField, comme
                     name={`slotMeasurements.${row.index}.commentId`}
                     className={'flex'}
                     emptyOption={true}
-                    value={slotMeasurements[row.index].commentId}
+                    value={row.original.measurements[0].commentId}
                     handleChange={(val) => {
                       onChangeField?.(`slotMeasurements.${row.index}.commentId`, (val as OptionType).value);
                     }}
@@ -128,9 +129,17 @@ const SlotMeasurements = ({ slotMeasurements, measurements, onChangeField, comme
           ]
         : [])
     ];
-  }, [measurements, onChangeField, comments, getIndex, slotMeasurements]);
+  }, [comments, onChangeField, measurementConfigOptions]);
 
-  return <>{slotMeasurements && slotMeasurements.length > 0 && <DataTable columns={columns} data={memoRows} />}</>;
+  return (
+    <>
+      {slotMeasurements && slotMeasurements.length > 0 && (
+        <>
+          <DataTable columns={columns} data={measurementRows ?? []} />
+        </>
+      )}
+    </>
+  );
 };
 
 export default SlotMeasurements;

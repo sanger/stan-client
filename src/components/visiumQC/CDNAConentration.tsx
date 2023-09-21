@@ -4,7 +4,7 @@ import { CommentFieldsFragment, LabwareFieldsFragment, SlotMeasurementRequest } 
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
-import SlotMeasurements from '../slotMeasurement/SlotMeasurements';
+import SlotMeasurements, { MeasurementConfigProps } from '../slotMeasurement/SlotMeasurements';
 import { useFormikContext } from 'formik';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
@@ -24,19 +24,22 @@ const CDNAConcentration = ({
 }: CDNAConcentrationProps) => {
   const { setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
   const [measurementName, setMeasurementName] = useState('');
-  const measurements = ['cDNA concentration', 'Library concentration'].map((measurementName) => {
-    return {
-      name: measurementName,
-      stepIncrement: '.01',
-      initialMeasurementVal: '0',
-      validateFunction: validateConcentrationMeasurementValue,
-      concentrationComments: concentrationComments
-    };
-  });
+  const measurementConfig: MeasurementConfigProps[] = React.useMemo(
+    () =>
+      ['cDNA concentration', 'Library concentration'].map((measurementName) => {
+        return {
+          name: measurementName,
+          stepIncrement: '.01',
+          initialMeasurementVal: '0',
+          validateFunction: validateConcentrationMeasurementValue
+        };
+      }),
+    []
+  );
 
   const selectedMeasurement = React.useMemo(() => {
-    return measurements.find((measurement) => measurement.name === measurementName);
-  }, [measurementName, measurements]);
+    return measurementConfig.find((measurement) => measurement.name === measurementName);
+  }, [measurementName, measurementConfig]);
 
   /***
    * When labwares changes, the slotMeasurements has to be initialized accordingly
@@ -113,7 +116,7 @@ const CDNAConcentration = ({
                   className={'rounded-md'}
                   dataTestId={'measurementType'}
                   handleChange={(val) => setMeasurementName((val as OptionType).label)}
-                  options={measurements.map((measurement) => {
+                  options={measurementConfig.map((measurement) => {
                     return {
                       label: measurement.name,
                       value: measurement.name
@@ -128,18 +131,10 @@ const CDNAConcentration = ({
                   <SlotMeasurements
                     slotMeasurements={slotMeasurements}
                     onChangeField={handleChangeField}
-                    measurements={
-                      selectedMeasurement
-                        ? [
-                            {
-                              name: selectedMeasurement.name,
-                              stepIncrement: selectedMeasurement.stepIncrement,
-                              validateValue: selectedMeasurement.validateFunction
-                            }
-                          ]
-                        : []
-                    }
-                    comments={selectedMeasurement?.concentrationComments}
+                    measurementConfig={measurementConfig.filter(
+                      (measurement) => measurement.name === selectedMeasurement?.name
+                    )}
+                    comments={concentrationComments}
                   />
                 )}
               </div>

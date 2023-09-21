@@ -4,7 +4,7 @@ import { LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
-import SlotMeasurements from '../slotMeasurement/SlotMeasurements';
+import SlotMeasurements, { MeasurementConfigProps } from '../slotMeasurement/SlotMeasurements';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
 
@@ -17,7 +17,7 @@ export type AmplificationProps = {
 const Amplification = ({ labware, slotMeasurements, removeLabware }: AmplificationProps) => {
   const { values, setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
 
-  const measurements = React.useMemo(
+  const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
     () => [
       {
         name: 'Cq value',
@@ -48,7 +48,7 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: Amplificati
     }
     setFieldValue('barcode', labware.barcode);
     const slotMeasurements: SlotMeasurementRequest[] = labware.slots.filter(isSlotFilled).flatMap((slot) => {
-      return measurements.map((measurement) => {
+      return memoMeasurementConfig.map((measurement) => {
         return {
           address: slot.address,
           name: measurement.name,
@@ -57,7 +57,7 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: Amplificati
       });
     });
     setFieldValue('slotMeasurements', slotMeasurements);
-  }, [labware, setErrors, setTouched, setFieldValue, measurements]);
+  }, [labware, setErrors, setTouched, setFieldValue, memoMeasurementConfig]);
 
   const handleChangeMeasurement = React.useCallback(
     (measurementName: string, measurementValue: string) => {
@@ -141,7 +141,7 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: Amplificati
             </div>
             {
               <div className={'flex flex-row w-1/2 ml-2 space-x-6'}>
-                {measurements.map((measurement) => (
+                {memoMeasurementConfig.map((measurement) => (
                   <div className={'flex flex-col'} key={measurement.name}>
                     <label className={'mt-2'}>{measurement.name}</label>
                     <input
@@ -165,13 +165,7 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: Amplificati
                   <SlotMeasurements
                     slotMeasurements={slotMeasurements}
                     onChangeField={handleChangeMeasurement}
-                    measurements={measurements.map((measurement) => {
-                      return {
-                        name: measurement.name,
-                        stepIncrement: measurement.stepIncrement,
-                        validateValue: measurement.validateFunction
-                      };
-                    })}
+                    measurementConfig={memoMeasurementConfig}
                   />
                 )}
               </div>
