@@ -1,7 +1,7 @@
 import React from 'react';
 import Heading from './Heading';
 
-interface StripyCardProps {
+interface StripyCardProps extends React.PropsWithChildren {
   heading: string | React.ReactNode;
   description?: string | null | React.ReactNode;
 }
@@ -28,7 +28,7 @@ const StripyCard: React.FC<StripyCardProps> = ({ heading, description, children 
 
 export default StripyCard;
 
-interface StripyCardDetailProps {
+interface StripyCardDetailProps extends React.PropsWithChildren {
   term: string;
 }
 

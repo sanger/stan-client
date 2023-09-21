@@ -1,4 +1,4 @@
-import React, { useImperativeHandle } from 'react';
+import React, { ReactNode, useImperativeHandle } from 'react';
 import { Column, PluginHook, SortingRule, TableState, useSortBy, useTable } from 'react-table';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from './Table';
 import { motion } from 'framer-motion';
@@ -94,7 +94,7 @@ const DataTableComponent = <T extends Object>(
                 allCapital={(column as ColumnWithAllCapitalProp).allCapital}
                 {...column.getHeaderProps(sortable ? column.getSortByToggleProps() : undefined)}
               >
-                {column.render('Header')}
+                {column.render('Header') as ReactNode}
                 {column.isSorted ? (
                   column.isSortedDesc ? (
                     <svg
@@ -137,7 +137,7 @@ const DataTableComponent = <T extends Object>(
           return (
             <motion.tr initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} {...row.getRowProps()}>
               {row.cells.map((cell) => {
-                return <TableCell {...cell.getCellProps()}>{cell.render('Cell')}</TableCell>;
+                return <TableCell {...cell.getCellProps()}>{cell.render('Cell') as ReactNode}</TableCell>;
               })}
             </motion.tr>
           );

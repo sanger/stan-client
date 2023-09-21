@@ -1,12 +1,12 @@
 import React from 'react';
 import { getIn, useFormikContext } from 'formik';
-import { alphaNumericSortDefault } from '../../types/stan';
+import { alphaNumericSortDefault, FCWithChildren } from '../../types/stan';
 
 /**
  * Will display an error message if <code>name</code> has been touched and has an error
  * @param name a field's name in Formik state
  */
-export const FormikErrorMessage = ({ name }: { name: string }) => {
+export const FormikErrorMessage = ({ name }: React.PropsWithChildren<{ name: string }>) => {
   const { errors, touched } = useFormikContext();
   const error = getIn(errors, name);
   const touch = getIn(touched, name);
@@ -16,7 +16,7 @@ export const FormikErrorMessage = ({ name }: { name: string }) => {
 /**
  * Styled paragraph for an error message on a form input
  */
-export const ErrorMessage: React.FC = ({ children }) => {
+export const ErrorMessage: FCWithChildren = ({ children }) => {
   return <p className="flex-wrap text-red-500 text-xs italic">{children}</p>;
 };
 

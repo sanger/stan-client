@@ -7,6 +7,7 @@ import WorkProgressSummaryInput, {
   workProgressSummarySearchSchema
 } from '../../../../src/components/workProgress/WorkProgressSummaryInput';
 import { BrowserRouter } from 'react-router-dom';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

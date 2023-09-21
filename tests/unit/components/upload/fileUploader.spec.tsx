@@ -1,5 +1,6 @@
 import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
 import FileUploader from '../../../../src/components/upload/FileUploader';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

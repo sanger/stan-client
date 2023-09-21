@@ -1,5 +1,6 @@
 import { render, screen, cleanup } from '@testing-library/react';
 import Success from '../../../../src/components/notifications/Success';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

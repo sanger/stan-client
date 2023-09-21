@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import { MultiSelect } from '../../../../src/components/multiSelect/MultiSelect';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

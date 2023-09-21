@@ -9,6 +9,7 @@ import ConfirmLabware from './ConfirmLabware';
 import PinkButton from '../buttons/PinkButton';
 import {
   CommentFieldsFragment,
+  ConfirmSectionLabware,
   FindPlanDataQuery,
   LabwareFieldsFragment,
   SlotRegionFieldsFragment
@@ -104,7 +105,7 @@ export default function SectioningConfirm({
    * e.g. sections are added, comments are made against sections
    */
   const handleConfirmChange = useCallback(
-    (confirmSectionLabware) => {
+    (confirmSectionLabware: ConfirmSectionLabware) => {
       send({
         type: 'UPDATE_CONFIRM_SECTION_LABWARE',
         confirmSectionLabware

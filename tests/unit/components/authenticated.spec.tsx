@@ -3,6 +3,7 @@ import { describe } from '@jest/globals';
 import { Authenticated } from '../../../src/components/Authenticated';
 import { UserRole } from '../../../src/types/sdk';
 import * as AuthContext from '../../../src/context/AuthContext';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

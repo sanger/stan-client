@@ -19,7 +19,7 @@ export function useUpload(url: string, errorField?: string) {
 
   /**External request for upload**/
   const requestUpload = React.useCallback(
-    (file: File, setUploadInProgress) => {
+    (file: File, setUploadInProgress: (val: boolean) => void) => {
       async function postUpload(url: string, file: File) {
         const formData = new FormData();
         formData.append('file', file);

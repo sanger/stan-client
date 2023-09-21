@@ -2,6 +2,7 @@ import { act, cleanup, render, screen } from '@testing-library/react';
 import SlotColumnInfo from '../../../../src/components/labware/SlotColumnInfo';
 import { filledSlotFactory } from '../../../../src/lib/factories/slotFactory';
 import { SlotFieldsFragment } from '../../../../src/types/sdk';
+import '@testing-library/jest-dom';
 
 afterEach(() => {
   cleanup();

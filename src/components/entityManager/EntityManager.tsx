@@ -297,9 +297,9 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
       <Table>
         <TableHead>
           <tr>
-            <TableHeader colSpan={2}>{displayKeyColumnName}</TableHeader>
+            <TableHeader colSpan={2}>{displayKeyColumnName as string}</TableHeader>
             {extraDisplayColumnName && <TableHeader colSpan={2}>{extraDisplayColumnName.label}</TableHeader>}
-            <TableHeader colSpan={2}>{valueColumnName}</TableHeader>
+            <TableHeader colSpan={2}>{valueColumnName as string}</TableHeader>
           </tr>
         </TableHead>
         <TableBody>
