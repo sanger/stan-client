@@ -27,7 +27,7 @@ describe('SlotMeasurements', () => {
         { address: 'A1', name: 'Cost', value: '0' },
         { address: 'A2', name: 'Cost', value: '0' }
       ],
-      measurements: [{ name: 'Cost', stepIncrement: '0.01' }]
+      measurementConfig: [{ name: 'Cost', stepIncrement: '0.01', initialMeasurementVal: '0' }]
     });
     expect(screen.getByRole('table')).toBeInTheDocument();
     expect(screen.getAllByTestId('Cost-input')).toHaveLength(2);
@@ -40,9 +40,9 @@ describe('SlotMeasurements', () => {
         { address: 'A2', name: 'Cost', value: '0' },
         { address: 'A2', name: 'Time', value: '0' }
       ],
-      measurements: [
-        { name: 'Cost', stepIncrement: '0.01' },
-        { name: 'Time', stepIncrement: '0.01' }
+      measurementConfig: [
+        { name: 'Cost', stepIncrement: '0.01', initialMeasurementVal: '0' },
+        { name: 'Time', stepIncrement: '0.01', initialMeasurementVal: '0' }
       ]
     });
     expect(screen.getByRole('table')).toBeInTheDocument();
@@ -56,7 +56,7 @@ describe('SlotMeasurements', () => {
         { address: 'A1', name: 'Cost', value: '0' },
         { address: 'A2', name: 'Cost', value: '0' }
       ],
-      measurements: [{ name: 'Cost', stepIncrement: '0.01' }],
+      measurementConfig: [{ name: 'Cost', stepIncrement: '0.01', initialMeasurementVal: '0' }],
       onChangeField: handleChangeMeasurement
     });
     const measurement = screen.getAllByTestId('Cost-input')[0];
@@ -72,7 +72,9 @@ describe('SlotMeasurements', () => {
         { address: 'A1', name: 'Cost', value: '0' },
         { address: 'A2', name: 'Cost', value: '0' }
       ],
-      measurements: [{ name: 'Cost', stepIncrement: '0.01', validateValue: validateValueMock }],
+      measurementConfig: [
+        { name: 'Cost', stepIncrement: '0.01', validateFunction: validateValueMock, initialMeasurementVal: '0' }
+      ],
       onChangeField: jest.fn()
     });
     const measurement = screen.getAllByTestId('Cost-input')[0];
@@ -89,9 +91,9 @@ describe('SlotMeasurements', () => {
         { address: 'A1', name: 'Cost', value: '0', commentId: 0 },
         { address: 'A2', name: 'Cost', value: '0', commentId: 0 }
       ],
-      measurements: [
-        { name: 'Cost', stepIncrement: '0.01' },
-        { name: 'Time', stepIncrement: '0.01' }
+      measurementConfig: [
+        { name: 'Cost', stepIncrement: '0.01', initialMeasurementVal: '0' },
+        { name: 'Time', stepIncrement: '0.01', initialMeasurementVal: '0' }
       ],
       comments: [
         { id: 0, text: 'Comment 1', enabled: true },
@@ -107,9 +109,9 @@ describe('SlotMeasurements', () => {
     const handleChangeComment = jest.fn();
     renderSlotMeasurements({
       slotMeasurements: [{ address: 'A1', name: 'Cost', value: '0', commentId: 0 }],
-      measurements: [
-        { name: 'Cost', stepIncrement: '0.01' },
-        { name: 'Time', stepIncrement: '0.01' }
+      measurementConfig: [
+        { name: 'Cost', stepIncrement: '0.01', initialMeasurementVal: '0' },
+        { name: 'Time', stepIncrement: '0.01', initialMeasurementVal: '0' }
       ],
       comments: [
         { id: 0, text: 'comment 1', enabled: true },
