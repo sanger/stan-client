@@ -17,10 +17,8 @@ describe('Unrelease', () => {
     );
   });
   describe('on initialisation', () => {
-    it('should render without crashing', async () => {
-      await waitFor(() => {
-        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Unrelease');
-      });
+    it('should render without crashing', () => {
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Unrelease');
     });
     it('should display a SGP number field', async () => {
       await waitFor(() => {
@@ -47,11 +45,9 @@ describe('Unrelease', () => {
       await waitFor(async () => {
         await selectSGPNumber('SGP1008');
         await scanLabware();
-        await waitFor(async () => {
-          const highSectionInput = screen.getAllByRole('spinbutton')[0] as HTMLInputElement;
-          fireEvent.change(highSectionInput, { target: { value: -1 } });
-          fireEvent.click(screen.getByRole('button', { name: /submit/i }));
-        });
+        const highSectionInput = screen.getAllByRole('spinbutton')[0] as HTMLInputElement;
+        fireEvent.change(highSectionInput, { target: { value: -1 } });
+        fireEvent.click(screen.getByRole('button', { name: /submit/i }));
         expect(screen.getByText('Section number must be greater than or equal to 0')).toBeInTheDocument();
       });
     });
