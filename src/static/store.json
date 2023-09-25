@@ -2,9 +2,6 @@
   "locationType": {
     "Room Temperature": [
       {
-        "barcode": "STO-005B"
-      },
-      {
         "barcode": "STO-003D"
       },
       {
@@ -33,12 +30,6 @@
       },
       {
         "barcode": "STO-001F"
-      },
-      {
-        "barcode": "STO-0EF7"
-      },
-      {
-        "barcode": "STO-1333"
       },
       {
         "barcode": "STO-1807"
