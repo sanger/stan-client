@@ -1,0 +1,4 @@
+fragment ReleaseFileOptionFields on ReleaseFileOption {
+  displayName
+  queryParamName
+}

@@ -5,4 +5,7 @@ query GetReleaseInfo {
   releaseRecipients {
     ...ReleaseRecipientFields
   }
+  releaseColumnOptions {
+    ...ReleaseFileOptionFields
+  }
 }

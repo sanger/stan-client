@@ -21,7 +21,6 @@ import columns from '../components/dataTableColumns/labwareColumns';
 import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import PinkButton from '../components/buttons/PinkButton';
 import WhiteButton from '../components/buttons/WhiteButton';
-import DownloadIcon from '../components/icons/DownloadIcon';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
 import Success from '../components/notifications/Success';
@@ -34,6 +33,7 @@ import Label from '../components/forms/Label';
 import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
 import DataTable from '../components/DataTable';
 import RemoveButton from '../components/buttons/RemoveButton';
+import EditIcon from '../components/icons/EditIcon';
 import { useNavigate } from 'react-router-dom';
 
 const validationSchema = Yup.object().shape({
@@ -112,7 +112,6 @@ function Release({ releaseInfo }: PageParams) {
   const [releaseType, setReleaseType] = React.useState<ReleaseType>(ReleaseType.LABWARE_LOCATION);
 
   const navigate = useNavigate();
-
   const initialValues: ReleaseRequest = {
     releaseLabware: releaseLabware,
     destination: '',
@@ -144,12 +143,14 @@ function Release({ releaseInfo }: PageParams) {
   const { serverError, submissionResult } = current.context;
   const formLocked = !current.matches('fillingOutForm');
   const submitForm = async (values: ReleaseRequest) => send({ type: 'SUBMIT_FORM', values });
-  const releaseFilePath = useMemo(() => {
+  const releaseOptionsFilePath = useMemo(() => {
     if (submissionResult) {
       const releaseIds = submissionResult.release.releases.map((r) => r.id);
-      return `/release?id=${releaseIds.join(',')}`;
+      return `/releaseOptions?id=${releaseIds.join(',')}&groups=${releaseInfo.releaseColumnOptions
+        .map((releaseOption) => releaseOption.queryParamName)
+        .join(',')}`;
     }
-  }, [submissionResult]);
+  }, [submissionResult, releaseInfo.releaseColumnOptions]);
 
   useEffect(() => {
     if (current.matches('submitted')) {
@@ -465,23 +466,18 @@ function Release({ releaseInfo }: PageParams) {
                     >
                       Release Labware
                     </PinkButton>
-
-                    {current.matches('submitted') && releaseFilePath && (
-                      <WhiteButton className="sm:w-full">
-                        <a
-                          className="w-full text-gray-800 focus:outline-none"
-                          download={'release.tsv'}
-                          href={releaseFilePath}
-                        >
-                          <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
-                          Download Release File
-                        </a>
+                    {current.matches('submitted') && releaseOptionsFilePath && (
+                      <WhiteButton
+                        className="sm:w-full whitespace-nowrap"
+                        onClick={() => navigate(releaseOptionsFilePath)}
+                      >
+                        <EditIcon className={'inline-block h-5 w-5 -ml-1 mr-2'} />
+                        Select Release File Options
                       </WhiteButton>
                     )}
-
                     {current.matches('submitted') && (
                       <PinkButton
-                        action="tertiary"
+                        action={'tertiary'}
                         onClick={() => reload(navigate)}
                         className="sm:w-full"
                         type="button"

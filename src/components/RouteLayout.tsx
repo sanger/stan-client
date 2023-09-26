@@ -52,6 +52,7 @@ import { useAuth } from '../context/AuthContext';
 import ErrorBoundary from './notifications/ErrorBoundary';
 import ProbeHybridisationQC from '../pages/ProbeHybridisationQC';
 import XeniumQC from '../pages/XeniumQC';
+import ReleaseOptions from './release/ReleaseOptions';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -451,6 +452,16 @@ const RouteLayout = () => {
               }
             }}
             element={<FileManager showUpload={true} />}
+          />
+        </Route>
+        <Route>
+          <Route
+            path="/releaseOptions"
+            loader={async () => {
+              const res = await stanCore.GetReleaseColumnOptions();
+              return res.releaseColumnOptions;
+            }}
+            element={<ReleaseOptions />}
           />
         </Route>
       </Route>
