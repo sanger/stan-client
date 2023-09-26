@@ -116,8 +116,7 @@ describe('Release Page', () => {
       });
 
       it('shows the download button', () => {
-        cy.findByText('Download Release File').should('be.visible');
-        // cy.get("a[href='/release?id=1001,1002']").should("be.visible");
+        cy.findByText('Select Release File Options').should('be.visible');
       });
     });
 
@@ -264,7 +263,11 @@ describe('Release Page', () => {
       });
 
       it('shows the download button', () => {
-        cy.findByText('Download Release File').should('be.visible');
+        cy.findByText('Select Release File Options').should('be.visible');
+      });
+      it("goes to Release Options page when 'Select Release File Options' button is clicked", () => {
+        cy.findByText('Select Release File Options').click();
+        cy.url().should('include', '/releaseOptions');
       });
     });
   });
