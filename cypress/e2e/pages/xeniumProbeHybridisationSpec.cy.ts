@@ -1,5 +1,5 @@
 import { selectOption, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
-import { RecordProbeOperationMutation } from '../../../src/types/sdk';
+import { RecordProbeOperationMutation, RecordProbeOperationMutationVariables } from '../../../src/types/sdk';
 
 describe('Xenium Probe Hybridisation', () => {
   before(() => {
@@ -45,11 +45,12 @@ describe('Xenium Probe Hybridisation', () => {
       cy.findByTestId('STAN-3111-0-name').should('be.visible');
       cy.findByTestId('STAN-3111-0-lot').should('be.visible');
       cy.findByTestId('STAN-3111-0-plex').should('be.visible');
-      cy.findByTestId('STAN-3111-0-action').should('be.visible');
+      cy.findByTestId('STAN-3111-0-costing').should('be.visible');
+      cy.findByTestId('STAN-3111-0-action').should('be.visible').scrollIntoView();
       //Should not display remove button
       cy.findByTestId('STAN-3111-0-action').within(() => {
         cy.findByTestId('removeButton').should('not.exist');
-        cy.findByTestId('addButton').should('be.visible');
+        cy.findByTestId('addButton').should('be.visible').scrollIntoView();
       });
     });
   });
@@ -99,6 +100,7 @@ describe('Xenium Probe Hybridisation', () => {
         selectOption('probe-name', 'Custom breast');
         cy.findByTestId('probe-lot').type('1234');
         cy.findByTestId('probe-plex').type('2');
+        selectOption('probe-costing', 'Faculty');
         cy.findByRole('button', { name: 'Add to all' }).click();
       });
       it('should display probe information added for all labware', () => {
@@ -109,10 +111,11 @@ describe('Xenium Probe Hybridisation', () => {
         cy.findByTestId('STAN-3111-1-lot').should('have.value', '1234');
         cy.findByTestId('STAN-3111-1-plex').should('be.visible');
         cy.findByTestId('STAN-3111-1-plex').should('have.value', '2');
+        shouldDisplaySelectedValue('STAN-3111-1-costing', 'Faculty');
 
         //Display only remove for first row
         cy.findByTestId('STAN-3111-0-action').within(() => {
-          cy.findByTestId('removeButton').should('exist');
+          cy.findByTestId('removeButton').should('exist').scrollIntoView();
           cy.findByTestId('addButton').should('not.exist');
         });
         //Display remove and add button for added row
@@ -131,9 +134,11 @@ describe('Xenium Probe Hybridisation', () => {
   describe('Add and remove buttons', () => {
     context('when remove button is pressed', () => {
       before(() => {
-        cy.findByTestId('STAN-3111-0-action').within(() => {
-          cy.findByTestId('removeButton').click();
-        });
+        cy.findByTestId('STAN-3111-0-action')
+          .scrollIntoView()
+          .within(() => {
+            cy.findByTestId('removeButton').click();
+          });
       });
       it('should remove the first row', () => {
         cy.findByTestId('STAN-3111-1-action').should('not.exist');
@@ -141,6 +146,7 @@ describe('Xenium Probe Hybridisation', () => {
         shouldDisplaySelectedValue('STAN-3111-0-name', 'Custom breast');
         cy.findByTestId('STAN-3111-0-lot').should('have.value', '1234');
         cy.findByTestId('STAN-3111-0-plex').should('have.value', '2');
+        shouldDisplaySelectedValue('STAN-3111-0-costing', 'SGP');
         //Action column updated
         cy.findByTestId('STAN-3111-0-action').within(() => {
           cy.findByTestId('removeButton').should('not.exist');
@@ -160,6 +166,7 @@ describe('Xenium Probe Hybridisation', () => {
         shouldDisplaySelectedValue('STAN-3111-1-name', '');
         cy.findByTestId('STAN-3111-1-lot').should('have.value', '');
         cy.findByTestId('STAN-3111-1-plex').should('have.value', '');
+        shouldDisplaySelectedValue('STAN-3111-1-costing', '');
         //Action column updated
         cy.findByTestId('STAN-3111-1-action').within(() => {
           cy.findByTestId('removeButton').should('exist');
@@ -182,6 +189,7 @@ describe('Xenium Probe Hybridisation', () => {
       cy.findByTestId('STAN-3112-0-name').should('be.visible');
       cy.findByTestId('STAN-3112-0-lot').should('be.visible');
       cy.findByTestId('STAN-3112-0-plex').should('be.visible');
+      cy.findByTestId('STAN-3112-0-costing').should('be.visible');
       cy.findByTestId('STAN-3112-0-action').should('be.visible');
     });
   });
@@ -193,6 +201,7 @@ describe('Xenium Probe Hybridisation', () => {
         selectOption('STAN-3112-0-name', 'Custom breast');
         cy.findByTestId('STAN-3112-0-lot').type('1234');
         cy.findByTestId('STAN-3112-0-plex').type('2');
+        selectOption('STAN-3112-0-costing', 'SGP');
       });
       it('should enable save button', () => {
         cy.findByRole('button', { name: 'Save' }).should('be.enabled');
@@ -227,18 +236,25 @@ describe('Xenium Probe Hybridisation', () => {
         cy.findByTestId('STAN-3112-0-plex').type('2');
         cy.findByRole('button', { name: 'Save' }).should('be.enabled');
       });
+      it('changes status on  costing field', () => {
+        selectOption('STAN-3112-0-costing', '');
+        cy.findByRole('button', { name: 'Save' }).should('be.disabled');
+        selectOption('STAN-3112-0-costing', 'Faculty');
+        cy.findByRole('button', { name: 'Save' }).should('be.enabled');
+      });
     });
     context('When there is a server error', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<RecordProbeOperationMutation, RecordProbeOperationMutation>(
+            graphql.mutation<RecordProbeOperationMutation, RecordProbeOperationMutationVariables>(
               'RecordProbeOperation',
               (req, res, ctx) => {
                 return res.once(
                   ctx.errors([
                     {
-                      message: 'Exception while fetching data (/CytAssist) : The operation could not be validated.',
+                      message:
+                        'Exception while fetching data (/probe_hybridisation_xenium) : The operation could not be validated.',
                       extensions: {
                         problems: ['Labware is discarded: [STAN-3111]']
                       }
@@ -249,10 +265,10 @@ describe('Xenium Probe Hybridisation', () => {
             )
           );
         });
-
-        cy.findByRole('button', { name: 'Save' }).click();
       });
+
       it('shows an error', () => {
+        cy.findByRole('button', { name: 'Save' }).click();
         cy.findByText('Labware is discarded: [STAN-3111]').should('be.visible');
       });
     });

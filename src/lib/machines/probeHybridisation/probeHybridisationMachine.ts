@@ -3,7 +3,8 @@ import {
   Maybe,
   ProbeLot,
   ProbeOperationLabware,
-  RecordProbeOperationMutation
+  RecordProbeOperationMutation,
+  SlideCosting
 } from '../../../types/sdk';
 import { ClientError } from 'graphql-request';
 import { createMachine } from 'xstate';
@@ -181,7 +182,7 @@ export const probeHybridisationMachine = createMachine<ProbeHybridisationContext
           if (!ctx.probeLabware.some((plw) => plw.barcode === lw.barcode)) {
             ctx.probeLabware.push({
               barcode: lw.barcode,
-              probes: [{ name: '', lot: '', plex: -1 }],
+              probes: [{ name: '', lot: '', plex: -1, costing: SlideCosting.Sgp }],
               workNumber: ctx.workNumberAll ?? ''
             });
           }
@@ -215,7 +216,7 @@ export const probeHybridisationMachine = createMachine<ProbeHybridisationContext
         if (e.type !== 'ADD_PROBE_LOT') return;
         const probeLabware = ctx.probeLabware.find((plw) => plw.barcode === e.barcode);
         if (!probeLabware) return;
-        probeLabware.probes.push({ name: '', lot: '', plex: -1 });
+        probeLabware.probes.push({ name: '', lot: '', plex: -1, costing: SlideCosting.Sgp });
       }),
       updateProbeLot: assign((ctx, e) => {
         if (e.type !== 'UPDATE_PROBE_LOT') return;

@@ -2,12 +2,13 @@ import { selectOptionValues } from '../forms';
 import FormikInput from '../forms/Input';
 import { FieldArray, useFormikContext } from 'formik';
 import WhiteButton from '../buttons/WhiteButton';
-import { ProbeOperationLabware, ProbePanelFieldsFragment } from '../../types/sdk';
+import { ProbeOperationLabware, ProbePanelFieldsFragment, SlideCosting } from '../../types/sdk';
 import AddIcon from '../icons/AddIcon';
 import React from 'react';
 import { lotRegx, ProbeHybridisationXeniumFormValues } from '../../pages/ProbeHybridisationXenium';
 import MutedText from '../MutedText';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { objectKeys } from '../../lib/helpers';
 
 type ProbeLotAddPanelProps = {
   probePanels: ProbePanelFieldsFragment[];
@@ -17,7 +18,8 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
   const [probeName, setProbeName] = React.useState('');
   const [probeLot, setProbeLot] = React.useState('');
   const [probePlex, setProbePlex] = React.useState('');
-  const [probeLotError, setProbeLotError] = React.useState({ name: '', lot: '', plex: '' });
+  const [probeCosting, setProbeCosting] = React.useState('');
+  const [probeLotError, setProbeLotError] = React.useState({ name: '', lot: '', plex: '', costing: '' });
   const isTouched = React.useRef(false);
 
   const { values } = useFormikContext<ProbeHybridisationXeniumFormValues>();
@@ -63,6 +65,18 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
     [setProbeLotError]
   );
 
+  const validateProbeCosting = React.useCallback(
+    (probeCosting: string) => {
+      isTouched.current = true;
+      if (!probeCosting) {
+        setProbeLotError((prev) => ({ ...prev, costing: 'Probe costing is required.' }));
+        return;
+      }
+      setProbeLotError((prev) => ({ ...prev, costing: '' }));
+    },
+    [setProbeLotError]
+  );
+
   React.useEffect(() => {
     if (!isTouched.current) return;
     validateProbeName(probeName);
@@ -78,22 +92,29 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
     validateProbePlex(probePlex);
   }, [probePlex, validateProbePlex]);
 
+  React.useEffect(() => {
+    if (!isTouched.current) return;
+    validateProbeCosting(probeCosting);
+  }, [probeCosting, validateProbeCosting]);
+
   const isAddToAllDisabled = () => {
     return (
       !isTouched.current ||
       probeLotError.lot.length > 0 ||
       probeLotError.name.length > 0 ||
       probeLotError.plex.length > 0 ||
-      !(Number(probePlex) > 0 && probeName.length > 0 && probeLot.length > 0)
+      probeLotError.costing.length > 0 ||
+      !(Number(probePlex) > 0 && probeName.length > 0 && probeLot.length > 0 && probeCosting.length > 0)
     );
   };
 
   return (
-    <div className={'border-1 border-gray-300 shadow justify-end p-2'}>
-      <div className={'grid grid-cols-3 gap-x-3 p-4'} data-testid={'probe-all-table'}>
+    <div className={'border-1 border-gray-300 shadow justify-end p-2 basis-3/4'}>
+      <div className={'grid grid-cols-4 gap-x-3 p-4'} data-testid={'probe-all-table'}>
         <label>Probe Panel</label>
         <label>Lot</label>
         <label>Plex</label>
+        <label>Cost</label>
         <CustomReactSelect
           dataTestId={'probe-name'}
           emptyOption={true}
@@ -131,9 +152,29 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
             setProbePlex(e.target.value);
           }}
         />
+        <CustomReactSelect
+          isMulti={false}
+          label={''}
+          name={'costing'}
+          value={probeCosting}
+          handleChange={(val) => {
+            isTouched.current = true;
+            setProbeCosting((val as OptionType).value);
+          }}
+          onBlur={() => validateProbeCosting(probeCosting)}
+          emptyOption={true}
+          dataTestId="probe-costing"
+          options={objectKeys(SlideCosting).map((key) => {
+            return {
+              label: SlideCosting[key],
+              value: SlideCosting[key]
+            };
+          })}
+        />
         {probeLotError.name ? <MutedText className={'text-blue-400'}>{probeLotError.name}</MutedText> : <div />}
         {probeLotError.lot ? <MutedText className={'text-blue-400'}>{probeLotError.lot}</MutedText> : <div />}
         {probeLotError.plex ? <MutedText className={'text-blue-400'}>{probeLotError.plex}</MutedText> : <div />}
+        {probeLotError.costing ? <MutedText className={'text-blue-400'}>{probeLotError.costing}</MutedText> : <div />}
       </div>
 
       <div className="sm:flex sm:flex-row mt-2 items-center justify-end">
@@ -145,7 +186,15 @@ const ProbeAddPanel = ({ probePanels }: ProbeLotAddPanelProps) => {
                 values.labware.forEach((lw, index) => {
                   const updatedLabware: ProbeOperationLabware = {
                     ...lw,
-                    probes: [...lw.probes, { name: probeName, lot: probeLot, plex: Number(probePlex) }]
+                    probes: [
+                      ...lw.probes,
+                      {
+                        name: probeName,
+                        lot: probeLot,
+                        plex: Number(probePlex),
+                        costing: probeCosting === 'SGP' ? SlideCosting.Sgp : SlideCosting.Faculty
+                      }
+                    ]
                   };
                   helpers.replace(index, { ...updatedLabware });
                 });
