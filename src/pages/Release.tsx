@@ -18,7 +18,7 @@ import MutedText from '../components/MutedText';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import columns from '../components/dataTableColumns/labwareColumns';
-import { FormikErrorMessage, selectOptionValues } from '../components/forms';
+import { extendedSelectOptionValues, FormikErrorMessage, selectOptionValues } from '../components/forms';
 import PinkButton from '../components/buttons/PinkButton';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { useMachine } from '@xstate/react';
@@ -406,10 +406,17 @@ function Release({ releaseInfo }: PageParams) {
                         dataTestId="contact"
                         name={'recipient'}
                         emptyOption
-                        options={selectOptionValues(releaseInfo.releaseRecipients, 'username', 'username', true, {
-                          sort: true,
-                          alphaFirst: true
-                        })}
+                        options={extendedSelectOptionValues(
+                          releaseInfo.releaseRecipients,
+                          'username',
+                          'username',
+                          true,
+                          {
+                            sort: true,
+                            alphaFirst: true
+                          },
+                          'fullName'
+                        )}
                       />
                       <CustomReactSelect
                         isDisabled={formLocked}
@@ -418,12 +425,22 @@ function Release({ releaseInfo }: PageParams) {
                         name={'otherRecipients'}
                         emptyOption
                         isMulti
-                        options={selectOptionValues(releaseInfo.releaseRecipients, 'username', 'username')}
+                        options={extendedSelectOptionValues(
+                          releaseInfo.releaseRecipients,
+                          'username',
+                          'username',
+                          true,
+                          {
+                            sort: true,
+                            alphaFirst: true
+                          },
+                          'fullName'
+                        )}
                         value={values.otherRecipients}
                         handleChange={(values) => {
                           setFieldValue(
                             'otherRecipients',
-                            (values as OptionType[]).map((option) => option.label)
+                            (values as OptionType[]).map((option) => option.value)
                           );
                         }}
                       />

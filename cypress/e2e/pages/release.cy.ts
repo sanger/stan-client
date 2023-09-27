@@ -7,7 +7,7 @@ import {
 import { buildLabwareFragment } from '../../../src/lib/helpers/labwareHelper';
 import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
-import { selectOption, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
+import { selectOption, shouldDisplaySelectedValue, shouldHaveOption } from '../shared/customReactSelect.cy';
 
 describe('Release Page', () => {
   before(() => {
@@ -90,19 +90,19 @@ describe('Release Page', () => {
     });
     context('when destination is selected', () => {
       before(() => {
-        selectOption('contact', 'cs41');
+        selectOption('contact', 'cm18');
       });
       it('shows updated information in summary', () => {
-        cy.contains('The primary contact is cs41').should('be.visible');
+        cy.contains('The primary contact is cm18').should('be.visible');
       });
     });
     context('when cc contacts  are selected', () => {
       before(() => {
-        selectOption('cc', 'cs41');
+        selectOption('cc', 'cm18');
         selectOption('cc', 're5');
       });
       it('shows updated information in summary', () => {
-        cy.contains('The cc contact(s) are cs41,re5.').should('be.visible');
+        cy.contains('The cc contact(s) are cm18,re5.').should('be.visible');
       });
     });
 
@@ -119,7 +119,17 @@ describe('Release Page', () => {
         cy.findByText('Select Release File Options').should('be.visible');
       });
     });
-
+    context('when release recipients have full name property set ', () => {
+      before(() => {
+        cy.visit('/admin/release');
+      });
+      it('should display the full name within the username on the Primary Contact select list', () => {
+        shouldHaveOption('contact', 'cs41 (Csaba Csordas)');
+      });
+      it('should display the full name within the username on the Other Contacts select list', () => {
+        shouldHaveOption('cc', 'lh7 (Liam Hickey)');
+      });
+    });
     context('when form is submitted with a labware that has already been released', () => {
       before(() => {
         cy.visit('/admin/release');
@@ -254,7 +264,7 @@ describe('Release Page', () => {
     context('when all required fields are given', () => {
       before(() => {
         selectOption('group', 'Vento lab');
-        selectOption('contact', 'cs41');
+        selectOption('contact', 'cm18');
         cy.findByRole('button', { name: /Release Labware/i }).click({ force: true });
       });
 
@@ -276,6 +286,6 @@ function fillInForm() {
   cy.get('#labwareScanInput').type('STAN-123{enter}');
   cy.get('#labwareScanInput').type('STAN-456{enter}');
   selectOption('group', 'Vento lab');
-  selectOption('contact', 'cs41');
+  selectOption('contact', 'cm18');
   cy.findByRole('button', { name: /Release Labware/i }).click({ force: true });
 }
