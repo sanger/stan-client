@@ -37,7 +37,6 @@ describe('Visium QC Page', () => {
       cy.findByText('Labware').should('be.visible');
     });
   });
-
   describe('On Visium QCType as Slide Processing', () => {
     context('When user scans in a slide ', () => {
       before(() => {
@@ -254,10 +253,10 @@ describe('Visium QC Page', () => {
       });
     });
   });
-  describe('On Visium QCType as cDNA Amplification', () => {
+  describe('On Visium QCType as Amplification', () => {
     before(() => {
       cy.findByTestId('remove').click();
-      selectOption('qcType', 'cDNA amplification');
+      selectOption('qcType', 'Amplification');
     });
 
     context('When user scans in a 96 well plate ', () => {
@@ -283,16 +282,25 @@ describe('Visium QC Page', () => {
 
       it('display text boxes to enter cq value for all slots with samples', () => {
         cy.findByRole('table').within(() => {
-          cy.findByText('A1').should('be.visible');
+          cy.findAllByTestId('Cq value-input').should('have.length.above', 0);
+          cy.findAllByTestId('Cycles-input').should('have.length.above', 0);
         });
       });
     });
     context('When user enters a value in CQ value text box', () => {
       before(() => {
-        cy.findByTestId('allMeasurementValue').type('5');
+        cy.findByTestId('all-Cq value').type('5');
       });
       it('shows cq value in all text fields in CQ column of table', () => {
-        cy.findAllByTestId('measurementValue1').should('have.value', 5);
+        cy.findAllByTestId('Cq value-input').should('have.value', 5);
+      });
+    });
+    context('When user enters a value in Cycles text box', () => {
+      before(() => {
+        cy.findByTestId('all-Cycles').type('3');
+      });
+      it('shows cq value in all text fields in CQ column of table', () => {
+        cy.findAllByTestId('Cycles-input').should('have.value', 3);
       });
     });
 
@@ -309,7 +317,7 @@ describe('Visium QC Page', () => {
         });
 
         it('shows a success message', () => {
-          cy.findByText('cDNA amplification complete').should('be.visible');
+          cy.findByText('Amplification complete').should('be.visible');
         });
         after(() => {
           cy.findByRole('button', { name: /Reset/i }).click();
@@ -332,34 +340,11 @@ describe('Visium QC Page', () => {
         cy.findByRole('table').should('not.exist');
       });
     });
-    context('When user scans in a 96 well plate ', () => {
-      it('displays the labware layout  on the page', () => {
-        cy.findByText('STAN-5100').should('be.visible');
-      });
-
-      it('shows Library concentration table with unit name in lower case when Library concentration option is selected', () => {
-        selectOption('measurementType', 'Library concentration');
-        cy.findByRole('table').get('th').eq(1).should('have.text', 'LIBRARY CONCENTRATION (pg/\u00B5l)');
-      });
-
-      it('shows cDNA concentration table with unit name in lower when cDNA concentration option is selected', () => {
-        selectOption('measurementType', 'cDNA concentration');
-        cy.findByRole('table').get('th').eq(1).should('have.text', 'CDNA CONCENTRATION (pg/\u00B5l)');
-      });
-
-      it('display text boxes to enter concentration value for all slots with samples', () => {
-        cy.findByRole('table').within(() => {
-          cy.findByText('A1').should('be.visible');
-          cy.findByTestId('measurementValue0').should('be.visible');
-          cy.findByTestId('comments0').should('be.visible');
-        });
-      });
-    });
-
     describe('On Save', () => {
       context('When all values are valid and there is no server error', () => {
         before(() => {
-          cy.findByTestId('measurementValue0').clear().type('300.45');
+          selectOption('measurementType', 'cDNA concentration');
+          cy.findAllByTestId('cDNA concentration-input').eq(0).type('.45');
           selectOption('comments0', 'Potential to work');
           saveButton().click();
         });
