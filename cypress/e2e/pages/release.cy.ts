@@ -285,7 +285,7 @@ describe('Release Page', () => {
         cy.findByText('Download Release File').should('be.visible');
       });
 
-      it('shows the change release file Options button', () => {
+      it('shows the change release file options button', () => {
         cy.findByText('Change Release File Options').should('be.visible');
       });
       it("goes to Release Options page when 'Change Release File Options' button is clicked", () => {
