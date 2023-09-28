@@ -25,13 +25,14 @@ import { Form, Formik } from 'formik';
 import BlueButton from '../components/buttons/BlueButton';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
-import CDNAMeasurementQC from '../components/visiumQC/CDNAMeasurementQC';
+import Amplification from '../components/visiumQC/Amplification';
 import SlideProcessing from '../components/visiumQC/SlideProcessing';
 import Cleanup from '../components/visiumQC/Cleanup';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import CDNAConcentration from '../components/visiumQC/CDNAConentration';
 
 export enum QCType {
-  CDNA_AMPLIFICATION = 'cDNA amplification',
+  CDNA_AMPLIFICATION = 'Amplification',
   SLIDE_PROCESSING = 'Slide Processing',
   VISIUM_CONCENTRATION = 'Visium concentration',
   SPRI_CLEANUP = 'SPRI clean up'
@@ -296,31 +297,38 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                   <p>Please scan in any labware you wish to QC.</p>
                   <LabwareScanner limit={1}>
                     {({ labwares, removeLabware }) => {
-                      if (values.qcType === QCType.SLIDE_PROCESSING) {
-                        return (
-                          <SlideProcessing
-                            labware={labwares[0]}
-                            removeLabware={removeLabware}
-                            comments={slideProcessingComments}
-                            labwareResultProps={values.labwareResult}
-                          />
-                        );
-                      } else {
-                        if (values.qcType === QCType.SPRI_CLEANUP) {
+                      switch (values.qcType) {
+                        case QCType.SLIDE_PROCESSING:
+                          return (
+                            <SlideProcessing
+                              labware={labwares[0]}
+                              removeLabware={removeLabware}
+                              comments={slideProcessingComments}
+                              labwareResultProps={values.labwareResult}
+                            />
+                          );
+                        case QCType.SPRI_CLEANUP:
                           return (
                             <Cleanup labware={labwares[0]} comments={cleanupComments} removeLabware={removeLabware} />
                           );
-                        } else {
+
+                        case QCType.CDNA_AMPLIFICATION:
                           return (
-                            <CDNAMeasurementQC
-                              qcType={values.qcType}
+                            <Amplification
+                              slotMeasurements={values.slotMeasurements}
+                              labware={labwares[0]}
+                              removeLabware={removeLabware}
+                            />
+                          );
+                        case QCType.VISIUM_CONCENTRATION:
+                          return (
+                            <CDNAConcentration
                               slotMeasurements={values.slotMeasurements}
                               labware={labwares[0]}
                               removeLabware={removeLabware}
                               concentrationComments={concentrationComments}
                             />
                           );
-                        }
                       }
                     }}
                   </LabwareScanner>
