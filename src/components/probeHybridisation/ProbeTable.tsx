@@ -31,7 +31,7 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
         {values.labware.map((probeLw, lwIndex) => (
           <tr key={probeLw.barcode}>
             <TableCell>{probeLw.barcode}</TableCell>
-            <TableCell width={100}>
+            <TableCell>
               <WorkNumberSelect
                 name={`labware.${lwIndex}.workNumber`}
                 dataTestId={`${probeLw.barcode}-workNumber`}
@@ -39,7 +39,6 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                   setFieldValue(`labware.${lwIndex}.workNumber`, workNumber);
                 }}
                 workNumber={values.labware[lwIndex].workNumber}
-                fixedWidth={150}
               />
             </TableCell>
             <TableCell>
@@ -65,7 +64,6 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                           isMulti={false}
                           value={probe.name}
                           emptyOption={true}
-                          fixedWidth={200}
                         />
                       </TableCell>
                       <TableCell>
@@ -101,7 +99,6 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
                           isMulti={false}
                           value={probe.costing}
                           emptyOption={true}
-                          fixedWidth={130}
                         />
                       </TableCell>
                       <TableCell>

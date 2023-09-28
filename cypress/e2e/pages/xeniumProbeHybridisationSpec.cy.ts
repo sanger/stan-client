@@ -46,11 +46,11 @@ describe('Xenium Probe Hybridisation', () => {
       cy.findByTestId('STAN-3111-0-lot').should('be.visible');
       cy.findByTestId('STAN-3111-0-plex').should('be.visible');
       cy.findByTestId('STAN-3111-0-costing').should('be.visible');
-      cy.findByTestId('STAN-3111-0-action').should('be.visible').scrollIntoView();
+      cy.findByTestId('STAN-3111-0-action').should('be.visible');
       //Should not display remove button
       cy.findByTestId('STAN-3111-0-action').within(() => {
         cy.findByTestId('removeButton').should('not.exist');
-        cy.findByTestId('addButton').should('be.visible').scrollIntoView();
+        cy.findByTestId('addButton').should('be.visible');
       });
     });
   });
@@ -111,11 +111,12 @@ describe('Xenium Probe Hybridisation', () => {
         cy.findByTestId('STAN-3111-1-lot').should('have.value', '1234');
         cy.findByTestId('STAN-3111-1-plex').should('be.visible');
         cy.findByTestId('STAN-3111-1-plex').should('have.value', '2');
+        cy.findByTestId('STAN-3111-1-costing').scrollIntoView();
         shouldDisplaySelectedValue('STAN-3111-1-costing', 'Faculty');
 
         //Display only remove for first row
         cy.findByTestId('STAN-3111-0-action').within(() => {
-          cy.findByTestId('removeButton').should('exist').scrollIntoView();
+          cy.findByTestId('removeButton').should('exist');
           cy.findByTestId('addButton').should('not.exist');
         });
         //Display remove and add button for added row
@@ -134,11 +135,9 @@ describe('Xenium Probe Hybridisation', () => {
   describe('Add and remove buttons', () => {
     context('when remove button is pressed', () => {
       before(() => {
-        cy.findByTestId('STAN-3111-0-action')
-          .scrollIntoView()
-          .within(() => {
-            cy.findByTestId('removeButton').click();
-          });
+        cy.findByTestId('STAN-3111-0-action').within(() => {
+          cy.findByTestId('removeButton').click();
+        });
       });
       it('should remove the first row', () => {
         cy.findByTestId('STAN-3111-1-action').should('not.exist');
@@ -146,7 +145,8 @@ describe('Xenium Probe Hybridisation', () => {
         shouldDisplaySelectedValue('STAN-3111-0-name', 'Custom breast');
         cy.findByTestId('STAN-3111-0-lot').should('have.value', '1234');
         cy.findByTestId('STAN-3111-0-plex').should('have.value', '2');
-        shouldDisplaySelectedValue('STAN-3111-0-costing', 'SGP');
+        cy.findByTestId('STAN-3111-0-costing').scrollIntoView();
+        shouldDisplaySelectedValue('STAN-3111-0-costing', 'Faculty');
         //Action column updated
         cy.findByTestId('STAN-3111-0-action').within(() => {
           cy.findByTestId('removeButton').should('not.exist');
@@ -265,10 +265,10 @@ describe('Xenium Probe Hybridisation', () => {
             )
           );
         });
-      });
 
-      it('shows an error', () => {
         cy.findByRole('button', { name: 'Save' }).click();
+      });
+      it('shows an error', () => {
         cy.findByText('Labware is discarded: [STAN-3111]').should('be.visible');
       });
     });

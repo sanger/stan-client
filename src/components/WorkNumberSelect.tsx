@@ -52,7 +52,6 @@ type WorkSelectProps = {
 
   /**Work numbers to display as options, if not given it will be fetched using GetAllWorkInfo query**/
   worksInfoOptions?: Array<WorkInfo>;
-  fixedWidth?: number;
 };
 
 export type WorkInfo = {
@@ -76,8 +75,7 @@ export default function WorkNumberSelect({
   multiple = false,
   emptyOption = true,
   requiredField = true,
-  worksInfoOptions,
-  fixedWidth
+  worksInfoOptions
 }: WorkSelectProps) {
   /**
    * State for holding all  work
@@ -222,7 +220,6 @@ export default function WorkNumberSelect({
         isMulti={multiple}
         value={workNumber}
         aria-label="work-number"
-        fixedWidth={fixedWidth}
       />
       {!name && error.length ? <p className="text-red-500 text-xs italic">{error}</p> : ''}
       <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
