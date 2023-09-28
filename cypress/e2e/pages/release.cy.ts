@@ -105,18 +105,7 @@ describe('Release Page', () => {
         cy.contains('The cc contact(s) are cs41,re5.').should('be.visible');
       });
     });
-    context('when group/team is selected', () => {
-      it('shows all release columns by default', () => {
-        cy.contains('The selected release columns are Histology,Sample Processing,Xenium.').should('be.visible');
-        cy.findByTestId('Histology-checkbox').should('be.checked');
-        cy.findByTestId('Sample Processing-checkbox').should('be.checked');
-        cy.findByTestId('Xenium-checkbox').should('be.checked');
-      });
-      it('updates the  column selection on click', () => {
-        cy.findByTestId('Histology-checkbox').click();
-        cy.contains('The selected release columns are Sample Processing,Xenium.').should('be.visible');
-      });
-    });
+
     context('when all is valid', () => {
       before(() => {
         fillInForm();
@@ -126,12 +115,8 @@ describe('Release Page', () => {
         cy.findByText('Labware(s) Released').should('be.visible');
       });
 
-      it("'shows the download button", () => {
-        cy.findByText('Download Release File').should('exist');
-      });
-
-      it('shows the Change Release File Options button', () => {
-        cy.findByText('Change Release File Options').should('be.visible');
+      it('shows the download button', () => {
+        cy.findByText('Select Release File Options').should('be.visible');
       });
     });
 
@@ -167,10 +152,6 @@ describe('Release Page', () => {
 
       it("doesn't show the download button", () => {
         cy.findByText('Download Release File').should('not.exist');
-      });
-
-      it("doesn't the change release file Options button", () => {
-        cy.findByText('Change Release File Options').should('not.exist');
       });
     });
 
@@ -282,15 +263,11 @@ describe('Release Page', () => {
       });
 
       it('shows the download button', () => {
-        cy.findByText('Download Release File').should('be.visible');
+        cy.findByText('Select Release File Options').should('be.visible');
       });
-
-      it('shows the change release file Options button', () => {
-        cy.findByText('Change Release File Options').should('be.visible');
-      });
-      it("goes to Release Options page when 'Change Release File Options' button is clicked", () => {
-        cy.findByText('Change Release File Options').click();
-        cy.url().should('include', '/releaseOptions?id=1001,1002,1003,1004&groups=histology,sample_processing,xenium');
+      it("goes to Release Options page when 'Select Release File Options' button is clicked", () => {
+        cy.findByText('Select Release File Options').click();
+        cy.url().should('include', '/releaseOptions');
       });
     });
   });
