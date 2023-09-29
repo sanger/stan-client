@@ -169,7 +169,7 @@ describe('Release Page', () => {
         cy.findByText('Download Release File').should('not.exist');
       });
 
-      it("doesn't the change release file Options button", () => {
+      it("doesn't show the change release file Options button", () => {
         cy.findByText('Change Release File Options').should('not.exist');
       });
     });
