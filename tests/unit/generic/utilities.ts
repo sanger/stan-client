@@ -1,5 +1,6 @@
-import { queryByAttribute, screen, within, getByRole, fireEvent } from '@testing-library/react';
+import { queryByAttribute, screen, within, getByRole } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { UserRole } from '../../../src/types/sdk';
 
 export const getById = queryByAttribute.bind(null, 'id');
 
@@ -47,12 +48,6 @@ export const selectOption = async (dataTestId: string, optionValue: string) => {
   await userEvent.click(option);
 };
 
-export const selectFocusBlur = async (dataTestId = 'select-div') => {
-  const selectBox = within(screen.getByTestId(dataTestId)).getByRole('combobox', { hidden: true });
-  await userEvent.click(selectBox);
-  await userEvent.tab();
-};
-
 export const uncheck = async () => {
   const checkbox = screen.queryByRole('checkbox') as HTMLInputElement;
   if (checkbox && checkbox.checked) {
@@ -65,4 +60,18 @@ export const check = async () => {
   if (checkbox && !checkbox.checked) {
     await userEvent.click(checkbox);
   }
+};
+
+export const visitAsEndUser = () => {
+  jest.mock('../../../src/lib/sdk', () => ({
+    stanCore: {
+      CurrentUser: jest.fn().mockResolvedValue({
+        user: {
+          __typename: 'User',
+          username: 'user1',
+          role: UserRole.Enduser
+        }
+      })
+    }
+  }));
 };

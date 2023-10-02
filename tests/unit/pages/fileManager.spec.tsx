@@ -10,9 +10,11 @@ import { findUploadedFiles } from '../../../src/lib/services/fileService';
 import {
   selectSGPNumber,
   uncheck,
+  visitAsEndUser,
   workNumberNumOptionsShouldBe,
   workNumberNumOptionsShouldBeMoreThan
 } from '../generic/utilities';
+import workRepository from '../../../src/mocks/repositories/workRepository';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -399,6 +401,31 @@ describe('Active checkbox', () => {
     it('should display more options', () => {
       workNumberNumOptionsShouldBeMoreThan(2);
     });
+  });
+});
+describe('when visiting the page as an end user', () => {
+  beforeEach(() => {
+    visitAsEndUser();
+    const work = workRepository.findAll()[0];
+    jest.mock('../../../src/lib/sdk', () => ({
+      stanCore: {
+        FindWorksCreatedByQuery: jest.fn().mockResolvedValue({
+          worksCreatedBy: [
+            { ...work, workNumber: 'SGP_123' },
+            { ...work, workNumber: 'SGP_456' }
+          ]
+        })
+      }
+    }));
+    require('react-router-dom').useLocation.mockImplementation(() => {
+      return {
+        pathname: () => './file_manager'
+      };
+    });
+    renderFileManagerComponent();
+  });
+  it('should display a couple option', async () => {
+    await workNumberNumOptionsShouldBe(3);
   });
 });
 const renderFileManagerComponent = (showUpload = true) => {
