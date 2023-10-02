@@ -34,11 +34,12 @@ export type OptionTemplate<L extends string, V extends string, LV = string | num
 /**
  * Extends OptionTemplate to allow for additional properties.
  */
-export type ExtendedOptionTemplate<L extends string, V extends string, LV = string | number, VV = string | number> = {
-  [key in L]: LV;
-} & {
-  [key in V]: VV;
-} & {
+export type ExtendedOptionTemplate<
+  L extends string,
+  V extends string,
+  LV = string | number,
+  VV = string | number
+> = OptionTemplate<L, V, LV, VV> & {
   [key: string]: any;
 };
 
