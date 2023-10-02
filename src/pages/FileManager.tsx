@@ -19,7 +19,7 @@ import Label from '../components/forms/Label';
 import { Input } from '../components/forms/Input';
 import Warning from '../components/notifications/Warning';
 
-type FileManagerProps = {
+export type FileManagerProps = {
   /**Display upload option?**/
   showUpload?: boolean;
 };
@@ -40,7 +40,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true }: FileMana
   /**
    * Success notification when file is uploaded
    */
-  const ToastSuccess = (fileName: string) => <Success message={`${fileName} uploaded succesfully.`} />;
+  const ToastSuccess = (fileName: string) => <Success message={`${fileName} uploaded successfully.`} />;
 
   const navigate = useNavigate();
   /**Work Info about all work numbers  **/
