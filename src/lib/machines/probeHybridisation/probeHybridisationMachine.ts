@@ -16,6 +16,14 @@ import { MachineServiceDone, MachineServiceError } from '../../../types/stan';
 /**
  * Context for ProbeHybridisation
  */
+export type ProbeOperationLabwareWithOptionalCosting = Omit<ProbeOperationLabware, 'probes'> & {
+  probes: Array<ProbeLotWithOptionalCosting>;
+};
+
+export type ProbeLotWithOptionalCosting = Omit<ProbeLot, 'costing'> & {
+  costing?: SlideCosting;
+};
+
 export interface ProbeHybridisationContext {
   /**
    * Operation type
@@ -38,7 +46,7 @@ export interface ProbeHybridisationContext {
   /***
    * The labware involved in probe hybridisation operation
    */
-  probeLabware: ProbeOperationLabware[];
+  probeLabware: ProbeOperationLabwareWithOptionalCosting[];
   /**
    * The time when the operation was performed, if specified.
    */
@@ -182,7 +190,7 @@ export const probeHybridisationMachine = createMachine<ProbeHybridisationContext
           if (!ctx.probeLabware.some((plw) => plw.barcode === lw.barcode)) {
             ctx.probeLabware.push({
               barcode: lw.barcode,
-              probes: [{ name: '', lot: '', plex: -1, costing: SlideCosting.Sgp }],
+              probes: [{ name: '', lot: '', plex: -1, costing: undefined }],
               workNumber: ctx.workNumberAll ?? ''
             });
           }
@@ -216,7 +224,7 @@ export const probeHybridisationMachine = createMachine<ProbeHybridisationContext
         if (e.type !== 'ADD_PROBE_LOT') return;
         const probeLabware = ctx.probeLabware.find((plw) => plw.barcode === e.barcode);
         if (!probeLabware) return;
-        probeLabware.probes.push({ name: '', lot: '', plex: -1, costing: SlideCosting.Sgp });
+        probeLabware.probes.push({ name: '', lot: '', plex: -1, costing: undefined });
       }),
       updateProbeLot: assign((ctx, e) => {
         if (e.type !== 'UPDATE_PROBE_LOT') return;
@@ -259,7 +267,16 @@ export const probeHybridisationMachine = createMachine<ProbeHybridisationContext
         return stanCore.RecordProbeOperation({
           request: {
             operationType: ctx.operationType,
-            labware: ctx.probeLabware,
+            labware: ctx.probeLabware.map((item) => ({
+              barcode: item.barcode,
+              workNumber: item.workNumber,
+              probes: item.probes.map((probe) => ({
+                name: probe.name,
+                lot: probe.lot,
+                plex: probe.plex,
+                costing: probe.costing!
+              }))
+            })),
             performed: ctx.performed
           }
         });
