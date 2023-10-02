@@ -445,8 +445,7 @@ function Release({ releaseInfo }: PageParams) {
                               checked={selectedReleaseColumns.some(
                                 (column) =>
                                   column.displayName === releaseOption.displayName &&
-                                  column.queryParamName &&
-                                  releaseOption.queryParamName
+                                  column.queryParamName === releaseOption.queryParamName
                               )}
                               onChange={() => {
                                 setSelectedReleaseColumns((prevSelected) => {
