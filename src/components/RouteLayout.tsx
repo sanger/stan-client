@@ -178,7 +178,20 @@ const RouteLayout = () => {
           <Route path="/lab/add_external_id" element={<AddExternalID />} />
         </Route>
         <Route element={<AuthLayout />}>
-          <Route path="/lab/extraction" element={<Extraction />} />
+          <Route
+            path="/lab/extraction"
+            element={
+              <DataFetcher
+                dataFetcher={() =>
+                  stanCore.GetEquipments({
+                    category: 'extract'
+                  })
+                }
+              >
+                {(equipmentInfo) => <Extraction equipments={equipmentInfo.equipments} />}
+              </DataFetcher>
+            }
+          />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
