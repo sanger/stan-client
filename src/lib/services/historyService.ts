@@ -8,6 +8,7 @@ import { HistoryUrlParams } from '../../pages/History';
  */
 export async function findHistory(historyProps: HistoryUrlParams): Promise<Array<HistoryTableEntry>> {
   let result;
+  debugger;
   let history: HistoryFieldsFragment = {
     entries: [],
     labware: [],
@@ -20,12 +21,19 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Array
     });
     history = result.historyForSampleId;
   } else {
-    if (historyProps.workNumber || historyProps.barcode || historyProps.donorName || historyProps.externalName) {
+    if (
+      historyProps.workNumber ||
+      historyProps.barcode ||
+      historyProps.donorName ||
+      historyProps.externalName ||
+      historyProps.eventType
+    ) {
       result = await stanCore.FindHistory({
         workNumber: historyProps.workNumber,
         barcode: historyProps.barcode,
         externalName: historyProps.externalName,
-        donorName: historyProps.donorName
+        donorName: historyProps.donorName,
+        eventType: historyProps.eventType
       });
       history = result.history;
     }

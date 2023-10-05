@@ -12,6 +12,8 @@ import {
   FindHistoryForWorkNumberQueryVariables,
   FindHistoryQuery,
   FindHistoryQueryVariables,
+  GetEventTypesQuery,
+  GetEventTypesQueryVariables,
   HistoryEntry,
   HistoryFieldsFragment
 } from '../../types/sdk';
@@ -55,6 +57,15 @@ const historyHandlers = [
       ctx.data({
         __typename: 'Query',
         history: buildHistory()
+      })
+    );
+  }),
+
+  graphql.query<GetEventTypesQuery, GetEventTypesQueryVariables>('GetEventTypes', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        __typename: 'Query',
+        eventTypes: ['Register', 'Record result', 'Unrelease', 'Section', 'Stain']
       })
     );
   }),
