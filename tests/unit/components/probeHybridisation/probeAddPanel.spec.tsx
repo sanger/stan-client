@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { Formik } from 'formik';
@@ -33,6 +33,7 @@ describe('ProbeAddPanel', () => {
       expect(screen.getByTestId('probe-name')).toBeVisible();
       expect(screen.getByTestId('probe-lot')).toBeVisible();
       expect(screen.getByTestId('probe-plex')).toBeVisible();
+      expect(screen.getByTestId('probe-costing')).toBeVisible();
       expect(screen.getByRole('button', { name: 'Add to all' })).toBeVisible();
       expect(screen.getByRole('button', { name: 'Add to all' })).toBeDisabled();
     });
@@ -45,10 +46,7 @@ describe('ProbeAddPanel', () => {
         </Formik>
       );
       /**Change selection from 'Custom breast' to empty */
-      const select = screen.getByRole('combobox');
-      expect(select).toBeInTheDocument();
-      fireEvent.keyDown(select, { keyCode: 40 });
-      fireEvent.blur(select);
+      blurSelect('probe-name');
       expect(screen.getByText('Probe panel is required')).toBeVisible();
       expect(screen.getByRole('button', { name: 'Add to all' })).toBeDisabled();
     });
@@ -107,6 +105,16 @@ describe('ProbeAddPanel', () => {
       expect(screen.getByText('Plex is required and should be a positive integer.')).toBeVisible();
       expect(screen.getByRole('button', { name: 'Add to all' })).toBeDisabled();
     });
+    it('displays error if costing field is empty', async () => {
+      render(
+        <Formik {...FormikProps}>
+          <ProbeAddPanel probePanels={probePanels} />
+        </Formik>
+      );
+      blurSelect('probe-costing');
+      expect(screen.getByText('Probe costing is required.')).toBeVisible();
+      expect(screen.getByRole('button', { name: 'Add to all' })).toBeDisabled();
+    });
     describe('Valid values', () => {
       it('enables add to all button when all fields are valid', async () => {
         render(
@@ -114,12 +122,7 @@ describe('ProbeAddPanel', () => {
             <ProbeAddPanel probePanels={probePanels} />
           </Formik>
         );
-        const select = screen.getByRole('combobox');
-        await waitFor(() => {
-          fireEvent.keyDown(select, { keyCode: 40 });
-          const option = screen.getByText('Custom breast');
-          fireEvent.click(option);
-        });
+        await selectOption('probe-name', 'Custom breast');
         const lot = screen.getByTestId('probe-lot');
         await waitFor(() => {
           fireEvent.change(lot, { target: { value: '123' } });
@@ -129,9 +132,28 @@ describe('ProbeAddPanel', () => {
         await waitFor(() => {
           fireEvent.change(plex, { target: { value: '1' } });
         });
+        await selectOption('probe-costing', 'SGP');
         expect(screen.getByTestId('probe-plex')).toHaveValue(1);
         expect(screen.getByRole('button', { name: 'Add to all' })).toBeEnabled();
       });
     });
   });
 });
+
+const selectOption = async (dataTesId: string, optionText: string) => {
+  const probePanelDiv = screen.getByTestId(dataTesId);
+  const select = within(probePanelDiv).getByRole('combobox');
+  await waitFor(() => {
+    fireEvent.keyDown(select, { keyCode: 40 });
+    const option = screen.getByText(optionText);
+    fireEvent.click(option);
+  });
+};
+
+const blurSelect = (dataTesId: string) => {
+  const probePanelDiv = screen.getByTestId(dataTesId);
+  const select = within(probePanelDiv).getByRole('combobox');
+  expect(select).toBeInTheDocument();
+  fireEvent.keyDown(select, { keyCode: 40 });
+  fireEvent.blur(select);
+};

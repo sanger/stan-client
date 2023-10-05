@@ -5,11 +5,12 @@ import FormikInput from '../forms/Input';
 import React from 'react';
 import { FieldArray, useFormikContext } from 'formik';
 import { ProbeHybridisationXeniumFormValues, probeLotDefault } from '../../pages/ProbeHybridisationXenium';
-import { ProbePanelFieldsFragment } from '../../types/sdk';
+import { ProbePanelFieldsFragment, SlideCosting } from '../../types/sdk';
 import RemoveButton from '../buttons/RemoveButton';
 import IconButton from '../buttons/IconButton';
 import AddIcon from '../icons/AddIcon';
 import CustomReactSelect from '../forms/CustomReactSelect';
+import { objectKeys } from '../../lib/helpers';
 
 type ProbeTableProps = {
   probePanels: ProbePanelFieldsFragment[];
@@ -24,7 +25,6 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
           <TableHeader>Barcode</TableHeader>
           <TableHeader>SGP Number</TableHeader>
           <TableHeader>Probe</TableHeader>
-          <TableHeader />
         </tr>
       </TableHead>
       <TableBody>
@@ -42,84 +42,105 @@ const ProbeTable: React.FC<ProbeTableProps> = ({ probePanels }) => {
               />
             </TableCell>
             <TableCell>
-              <TableHead>
-                <tr>
-                  <TableHeader>Probe Panel</TableHeader>
-                  <TableHeader>Lot</TableHeader>
-                  <TableHeader>Plex</TableHeader>
-                </tr>
-              </TableHead>
-              <TableBody>
-                {probeLw.probes.map((probe, probeIndex) => (
-                  <tr key={`probeLw.barcode-${lwIndex}-${probeIndex}`}>
-                    <TableCell>
-                      <CustomReactSelect
-                        label={''}
-                        dataTestId={`${probeLw.barcode}-${probeIndex}-name`}
-                        name={`labware.${lwIndex}.probes.${probeIndex}.name`}
-                        options={selectOptionValues(probePanels, 'name', 'name')}
-                        isMulti={false}
-                        value={probe.name}
-                        emptyOption={true}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormikInput
-                        label={''}
-                        data-testid={`${probeLw.barcode}-${probeIndex}-lot`}
-                        name={`labware.${lwIndex}.probes.${probeIndex}.lot`}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormikInput
-                        label={''}
-                        name={`labware.${lwIndex}.probes.${probeIndex}.plex`}
-                        type={'number'}
-                        data-testid={`${probeLw.barcode}-${probeIndex}-plex`}
-                        min={0}
-                        value={probe.plex > 0 ? probe.plex : ''}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div
-                        className={'flex flex-row space-x-2'}
-                        data-testid={`${probeLw.barcode}-${probeIndex}-action`}
-                      >
-                        {probeIndex === 0 && probeLw.probes.length === 1 ? (
-                          <></>
-                        ) : (
-                          <FieldArray name={`labware.${lwIndex}.probes`}>
-                            {(helpers) => (
-                              <RemoveButton
-                                type={'button'}
-                                onClick={() => {
-                                  //probeLabware.probes.splice(row.index, 1);
-                                  helpers.remove(probeIndex);
-                                }}
-                              />
-                            )}
-                          </FieldArray>
-                        )}
-                        {probeIndex === probeLw.probes.length - 1 && (
-                          <FieldArray name={`labware.${lwIndex}.probes`}>
-                            {(helpers) => (
-                              <IconButton
-                                dataTestId={'addButton'}
-                                onClick={() => {
-                                  helpers.push(probeLotDefault);
-                                }}
-                                className={'focus:outline-none'}
-                              >
-                                <AddIcon className="inline-block text-green-500 h-5 w-5 -ml-1 mr-2" />
-                              </IconButton>
-                            )}
-                          </FieldArray>
-                        )}
-                      </div>
-                    </TableCell>
+              <Table>
+                <TableHead>
+                  <tr>
+                    <TableHeader>Probe Panel</TableHeader>
+                    <TableHeader>Lot</TableHeader>
+                    <TableHeader>Plex</TableHeader>
+                    <TableHeader>Costing</TableHeader>
+                    <TableHeader></TableHeader>
                   </tr>
-                ))}
-              </TableBody>
+                </TableHead>
+                <TableBody>
+                  {probeLw.probes.map((probe, probeIndex) => (
+                    <tr key={`probeLw.barcode-${lwIndex}-${probeIndex}`}>
+                      <TableCell>
+                        <CustomReactSelect
+                          label={''}
+                          dataTestId={`${probeLw.barcode}-${probeIndex}-name`}
+                          name={`labware.${lwIndex}.probes.${probeIndex}.name`}
+                          options={selectOptionValues(probePanels, 'name', 'name')}
+                          isMulti={false}
+                          value={probe.name}
+                          emptyOption={true}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormikInput
+                          label={''}
+                          data-testid={`${probeLw.barcode}-${probeIndex}-lot`}
+                          name={`labware.${lwIndex}.probes.${probeIndex}.lot`}
+                          //width={100}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormikInput
+                          label={''}
+                          name={`labware.${lwIndex}.probes.${probeIndex}.plex`}
+                          type={'number'}
+                          data-testid={`${probeLw.barcode}-${probeIndex}-plex`}
+                          min={0}
+                          value={probe.plex > 0 ? probe.plex : ''}
+                          //   width={50}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <CustomReactSelect
+                          label={''}
+                          dataTestId={`${probeLw.barcode}-${probeIndex}-costing`}
+                          name={`labware.${lwIndex}.probes.${probeIndex}.costing`}
+                          options={objectKeys(SlideCosting).map((key) => {
+                            return {
+                              label: SlideCosting[key],
+                              value: SlideCosting[key]
+                            };
+                          })}
+                          isMulti={false}
+                          value={probe.costing}
+                          emptyOption={true}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div
+                          className={'flex flex-row space-x-2'}
+                          data-testid={`${probeLw.barcode}-${probeIndex}-action`}
+                        >
+                          {probeIndex === 0 && probeLw.probes.length === 1 ? (
+                            <></>
+                          ) : (
+                            <FieldArray name={`labware.${lwIndex}.probes`}>
+                              {(helpers) => (
+                                <RemoveButton
+                                  type={'button'}
+                                  onClick={() => {
+                                    helpers.remove(probeIndex);
+                                  }}
+                                />
+                              )}
+                            </FieldArray>
+                          )}
+                          {probeIndex === probeLw.probes.length - 1 && (
+                            <FieldArray name={`labware.${lwIndex}.probes`}>
+                              {(helpers) => (
+                                <IconButton
+                                  dataTestId={'addButton'}
+                                  onClick={() => {
+                                    helpers.push(probeLotDefault);
+                                  }}
+                                  className={'focus:outline-none'}
+                                >
+                                  <AddIcon className="inline-block text-green-500 h-5 w-5 -ml-1 mr-2" />
+                                </IconButton>
+                              )}
+                            </FieldArray>
+                          )}
+                        </div>
+                      </TableCell>
+                    </tr>
+                  ))}
+                </TableBody>
+              </Table>
             </TableCell>
           </tr>
         ))}
