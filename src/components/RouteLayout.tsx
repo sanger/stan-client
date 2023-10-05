@@ -178,7 +178,16 @@ const RouteLayout = () => {
           <Route path="/lab/add_external_id" element={<AddExternalID />} />
         </Route>
         <Route element={<AuthLayout />}>
-          <Route path="/lab/extraction" element={<Extraction />} />
+          <Route
+            path="/lab/extraction"
+            loader={async ({ params }) => {
+              const res = await stanCore.GetEquipments({
+                category: 'extract'
+              });
+              return res.equipments;
+            }}
+            element={<Extraction />}
+          />
         </Route>
         <Route element={<AuthLayout />}>
           <Route

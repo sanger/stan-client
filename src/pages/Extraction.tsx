@@ -17,13 +17,15 @@ import MutedText from '../components/MutedText';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import { useMachine } from '@xstate/react';
 import { buildSampleColors } from '../lib/helpers/labwareHelper';
-import { LabwareFieldsFragment } from '../types/sdk';
+import { EquipmentFieldsFragment, LabwareFieldsFragment } from '../types/sdk';
 import extractionMachine, { ExtractionContext } from '../lib/machines/extraction/extractionMachine';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 import ButtonBar from '../components/ButtonBar';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import LabelCopyButton from '../components/LabelCopyButton';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import { selectOptionValues } from '../components/forms';
 
 function buildExtractionTableData(ctx: ExtractionContext) {
   if (!ctx.extraction) return [];
@@ -45,13 +47,27 @@ function buildExtractionTableData(ctx: ExtractionContext) {
     })
     .flat();
 }
+const extractionEquipments = (equipments: EquipmentFieldsFragment[]) => {
+  const methods: Array<{ value: number; label: string }> = [];
+
+  equipments.forEach((equipment) => {
+    methods.push({ value: equipment.id, label: `Automated - ${equipment.name}` });
+  });
+  methods.push({ value: -1, label: 'Manual' });
+  return methods;
+};
 
 function Extraction() {
-  const [current, send] = useMachine(() => extractionMachine.withContext({ labwares: [], workNumber: '' }));
+  const equipments = useLoaderData() as EquipmentFieldsFragment[];
+  const [current, send] = useMachine(() =>
+    extractionMachine.withContext({ labwares: [], workNumber: '', equipmentId: 0 })
+  );
 
   const { handleOnPrint, handleOnPrintError, handleOnPrinterChange, printResult, currentPrinter } = usePrinters();
 
   const { labwares, serverErrors, extraction } = current.context;
+
+  const extractionMethodOptions = useMemo(() => extractionEquipments(equipments), [equipments]);
 
   const sampleColors: Map<number, string> = useMemo(() => {
     return buildSampleColors(labwares);
@@ -105,6 +121,13 @@ function Extraction() {
     []
   );
 
+  const handleExtractMethodChange = useCallback(
+    (equipmentId: number) => {
+      send({ type: 'UPDATE_EQUIPMENT_ID', equipmentId });
+    },
+    [send]
+  );
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -119,10 +142,24 @@ function Extraction() {
               <WorkNumberSelect onWorkNumberChange={handleWorkNumberChange} />
             </div>
           </div>
+          <div className="mt-8 space-y-4">
+            <Heading level={3}>Extraction Method</Heading>
+            <p className="mt-2">Select an extraction method for all scanned labware.</p>
+            <div className="mt-4 md:w-1/2">
+              <CustomReactSelect
+                dataTestId="equipmentId"
+                emptyOption
+                handleChange={(val) => {
+                  const value = (val as OptionType).value;
+                  handleExtractMethodChange(value === '' ? 0 : parseInt(value, 10));
+                }}
+                options={selectOptionValues(extractionMethodOptions, 'label', 'value')}
+              />
+            </div>
+          </div>
 
           <div className="mt-8 space-y-4">
             <Heading level={3}>Section Tubes</Heading>
-
             <LabwareScanner
               onChange={onLabwareScannerChange}
               locked={scannerLocked}

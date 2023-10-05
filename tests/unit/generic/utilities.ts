@@ -1,4 +1,4 @@
-import { queryByAttribute, screen, within, getByRole } from '@testing-library/react';
+import { queryByAttribute, screen, within, getByRole, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserRole } from '../../../src/types/sdk';
 
@@ -60,6 +60,12 @@ export const check = async () => {
   if (checkbox && !checkbox.checked) {
     await userEvent.click(checkbox);
   }
+};
+
+export const scanLabware = async (labwareBarcode: string) => {
+  const labwareInput = screen.getByTestId('input');
+  await userEvent.type(labwareInput, labwareBarcode);
+  await userEvent.type(labwareInput, '{enter}');
 };
 
 export const visitAsEndUser = () => {

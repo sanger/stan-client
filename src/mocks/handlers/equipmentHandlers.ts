@@ -2,11 +2,14 @@ import { graphql } from 'msw';
 import {
   AddEquipmentMutation,
   AddEquipmentMutationVariables,
+  GetEquipmentsQuery,
+  GetEquipmentsQueryVariables,
   SetEquipmentEnabledMutation,
   SetEquipmentEnabledMutationVariables
 } from '../../types/sdk';
 import equipmentFactory from '../../lib/factories/equipmentFactory';
 import equipmentRepository from '../repositories/equipmentRepository';
+import { isEnabled } from '../../lib/helpers';
 
 const equipmentHandlers = [
   graphql.mutation<AddEquipmentMutation, AddEquipmentMutationVariables>('AddEquipment', (req, res, ctx) => {
@@ -35,7 +38,20 @@ const equipmentHandlers = [
         );
       }
     }
-  )
+  ),
+  graphql.query<GetEquipmentsQuery, GetEquipmentsQueryVariables>('GetEquipments', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        equipments: equipmentRepository
+          .findAll()
+          .filter(
+            (equipment) =>
+              (!req.variables.category || req.variables.category === equipment.category) &&
+              (req.variables.includeDisabled || isEnabled(equipment))
+          )
+      })
+    );
+  })
 ];
 
 export default equipmentHandlers;
