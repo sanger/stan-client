@@ -1809,6 +1809,12 @@ svg.logo.loading rect:nth-child(3n+1) {
 .flex-grow-0 {
   flex-grow: 0;
 }
+.basis-1\/4 {
+  flex-basis: 25%;
+}
+.basis-3\/4 {
+  flex-basis: 75%;
+}
 .origin-top-right {
   -webkit-transform-origin: top right;
           transform-origin: top right;
@@ -4188,4 +4194,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.fe3b2181.css.map*/
+/*# sourceMappingURL=main.f90909ac.css.map*/
