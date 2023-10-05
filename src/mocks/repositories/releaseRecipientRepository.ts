@@ -12,7 +12,7 @@ const seeds: Array<ReleaseRecipientFieldsFragment> = [
   releaseRecipientFactory.build({ username: 'lh7', fullName: 'Liam Hickey' }),
   releaseRecipientFactory.build({ username: 'vk8' }),
   releaseRecipientFactory.build({ username: 'cc36' }),
-  releaseRecipientFactory.build({ username: 'aw24' }),
+  releaseRecipientFactory.build({ username: 'aw24', fullName: 'Andrew Wiles' }),
   releaseRecipientFactory.build({ username: 'cs24', enabled: false })
 ];
 

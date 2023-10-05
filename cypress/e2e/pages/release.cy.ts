@@ -139,10 +139,10 @@ describe('Release Page', () => {
         cy.visit('/admin/release');
       });
       it('should display the full name within the username on the Primary Contact select list', () => {
-        shouldHaveOption('contact', 'cs41 (Csaba Csordas)');
+        shouldHaveOption('contact', 'aw24 (Andrew Wiles)');
       });
       it('should display the full name within the username on the Other Contacts select list', () => {
-        shouldHaveOption('cc', 'lh7 (Liam Hickey)');
+        shouldHaveOption('cc', 'aw24 (Andrew Wiles)');
       });
     });
     context('when form is submitted with a labware that has already been released', () => {

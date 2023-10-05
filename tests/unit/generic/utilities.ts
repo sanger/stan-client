@@ -76,6 +76,12 @@ export const check = async () => {
   }
 };
 
+export const scanLabware = async (labwareBarcode: string) => {
+  const labwareInput = screen.getByTestId('input');
+  await userEvent.type(labwareInput, labwareBarcode);
+  await userEvent.type(labwareInput, '{enter}');
+};
+
 export const visitAsEndUser = () => {
   jest.mock('../../../src/lib/sdk', () => ({
     stanCore: {

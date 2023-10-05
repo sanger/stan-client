@@ -8,6 +8,7 @@ import { stanCore } from '../../sdk';
 export interface ExtractionContext {
   workNumber: string;
   labwares: LabwareFieldsFragment[];
+  equipmentId: number;
   extraction?: ExtractMutation;
   serverErrors?: ClientError;
 }
@@ -28,6 +29,7 @@ type ExtractErrorEvent = {
 
 export type ExtractionEvent =
   | { type: 'UPDATE_WORK_NUMBER'; workNumber: string }
+  | { type: 'UPDATE_EQUIPMENT_ID'; equipmentId: number }
   | { type: 'IS_VALID' }
   | { type: 'IS_INVALID' }
   | UpdateLabwaresEvent
@@ -49,6 +51,10 @@ export const extractionMachine = createMachine<ExtractionContext, ExtractionEven
           },
           UPDATE_LABWARES: {
             actions: 'assignLabwares',
+            target: 'validating'
+          },
+          UPDATE_EQUIPMENT_ID: {
+            actions: 'assignEquipmentId',
             target: 'validating'
           }
         },
@@ -114,6 +120,11 @@ export const extractionMachine = createMachine<ExtractionContext, ExtractionEven
       assignWorkNumber: assign((ctx, e) => {
         if (e.type !== 'UPDATE_WORK_NUMBER') return;
         ctx.workNumber = e.workNumber;
+      }),
+
+      assignEquipmentId: assign((ctx, e) => {
+        if (e.type !== 'UPDATE_EQUIPMENT_ID') return;
+        ctx.equipmentId = e.equipmentId;
       })
     },
 
@@ -123,12 +134,13 @@ export const extractionMachine = createMachine<ExtractionContext, ExtractionEven
           request: {
             workNumber: ctx.workNumber,
             labwareType: 'Tube',
-            barcodes: ctx.labwares.map((lw) => lw.barcode)
+            barcodes: ctx.labwares.map((lw) => lw.barcode),
+            equipmentId: ctx.equipmentId > 0 ? ctx.equipmentId : undefined
           }
         });
       },
       validateExtraction: (ctx: ExtractionContext) => (send) => {
-        const isValid = ctx.labwares.length > 0 && ctx.workNumber !== '';
+        const isValid = ctx.labwares.length > 0 && ctx.workNumber !== '' && ctx.equipmentId !== 0;
         send(isValid ? 'IS_VALID' : 'IS_INVALID');
       }
     }
