@@ -4,6 +4,7 @@ import { Form, Formik } from 'formik';
 import {
   GetReleaseInfoQuery,
   LabwareFieldsFragment,
+  ReleaseFileOptionFieldsFragment,
   ReleaseLabware,
   ReleaseLabwareMutation,
   ReleaseRequest
@@ -18,7 +19,7 @@ import MutedText from '../components/MutedText';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import columns from '../components/dataTableColumns/labwareColumns';
-import { FormikErrorMessage, selectOptionValues } from '../components/forms';
+import { extendedSelectOptionValues, FormikErrorMessage, selectOptionValues } from '../components/forms';
 import PinkButton from '../components/buttons/PinkButton';
 import WhiteButton from '../components/buttons/WhiteButton';
 import { useMachine } from '@xstate/react';
@@ -35,6 +36,8 @@ import DataTable from '../components/DataTable';
 import RemoveButton from '../components/buttons/RemoveButton';
 import EditIcon from '../components/icons/EditIcon';
 import { useNavigate } from 'react-router-dom';
+import { Input } from '../components/forms/Input';
+import DownloadIcon from '../components/icons/DownloadIcon';
 
 const validationSchema = Yup.object().shape({
   releaseLabware: Yup.array()
@@ -110,7 +113,9 @@ function Release({ releaseInfo }: PageParams) {
   const [releaseLabware, setReleaseLabware] = React.useState<ReleaseLabware[]>([]);
   const [labwareFromSGP, setLabwareFromSGP] = React.useState<LabwareFieldsFragment[]>([]);
   const [releaseType, setReleaseType] = React.useState<ReleaseType>(ReleaseType.LABWARE_LOCATION);
-
+  const [selectedReleaseColumns, setSelectedReleaseColumns] = React.useState<ReleaseFileOptionFieldsFragment[]>(
+    releaseInfo.releaseColumnOptions ?? []
+  );
   const navigate = useNavigate();
   const initialValues: ReleaseRequest = {
     releaseLabware: releaseLabware,
@@ -146,11 +151,11 @@ function Release({ releaseInfo }: PageParams) {
   const releaseOptionsFilePath = useMemo(() => {
     if (submissionResult) {
       const releaseIds = submissionResult.release.releases.map((r) => r.id);
-      return `/releaseOptions?id=${releaseIds.join(',')}&groups=${releaseInfo.releaseColumnOptions
+      return `/releaseOptions?id=${releaseIds.join(',')}&groups=${selectedReleaseColumns
         .map((releaseOption) => releaseOption.queryParamName)
         .join(',')}`;
     }
-  }, [submissionResult, releaseInfo.releaseColumnOptions]);
+  }, [submissionResult, selectedReleaseColumns]);
 
   useEffect(() => {
     if (current.matches('submitted')) {
@@ -406,10 +411,17 @@ function Release({ releaseInfo }: PageParams) {
                         dataTestId="contact"
                         name={'recipient'}
                         emptyOption
-                        options={selectOptionValues(releaseInfo.releaseRecipients, 'username', 'username', true, {
-                          sort: true,
-                          alphaFirst: true
-                        })}
+                        options={extendedSelectOptionValues(
+                          releaseInfo.releaseRecipients,
+                          'username',
+                          'username',
+                          true,
+                          {
+                            sort: true,
+                            alphaFirst: true
+                          },
+                          'fullName'
+                        )}
                       />
                       <CustomReactSelect
                         isDisabled={formLocked}
@@ -418,16 +430,62 @@ function Release({ releaseInfo }: PageParams) {
                         name={'otherRecipients'}
                         emptyOption
                         isMulti
-                        options={selectOptionValues(releaseInfo.releaseRecipients, 'username', 'username')}
+                        options={extendedSelectOptionValues(
+                          releaseInfo.releaseRecipients,
+                          'username',
+                          'username',
+                          true,
+                          {
+                            sort: true,
+                            alphaFirst: true
+                          },
+                          'fullName'
+                        )}
                         value={values.otherRecipients}
                         handleChange={(values) => {
                           setFieldValue(
                             'otherRecipients',
-                            (values as OptionType[]).map((option) => option.label)
+                            (values as OptionType[]).map((option) => option.value)
                           );
                         }}
                       />
                     </motion.div>
+                    {releaseInfo.releaseColumnOptions && releaseInfo.releaseColumnOptions.length > 0 && (
+                      <motion.div variants={variants.fadeInWithLift} className="space-y-4 ">
+                        <Heading level={3}>Release Columns</Heading>
+                        {releaseInfo.releaseColumnOptions.map((releaseOption) => (
+                          <div className="flex flex-row items-center gap-x-2" key={releaseOption.displayName}>
+                            <Input
+                              type="checkbox"
+                              data-testid={`${releaseOption.displayName}-checkbox`}
+                              className={'w-5 rounded'}
+                              checked={selectedReleaseColumns.some(
+                                (column) =>
+                                  column.displayName === releaseOption.displayName &&
+                                  column.queryParamName === releaseOption.queryParamName
+                              )}
+                              onChange={() => {
+                                setSelectedReleaseColumns((prevSelected) => {
+                                  const findIndex = prevSelected.findIndex(
+                                    (option) =>
+                                      option.displayName === releaseOption.displayName &&
+                                      option.queryParamName === releaseOption.queryParamName
+                                  );
+                                  if (findIndex < 0) {
+                                    return [...prevSelected, releaseOption];
+                                  } else {
+                                    const newSelected = [...prevSelected];
+                                    newSelected.splice(findIndex, 1);
+                                    return newSelected;
+                                  }
+                                });
+                              }}
+                            />
+                            <label className={'whitespace-nowrap'}>{releaseOption.displayName}</label>
+                          </div>
+                        ))}
+                      </motion.div>
+                    )}
                   </motion.div>
 
                   <Sidebar data-testid={'summary'}>
@@ -458,6 +516,20 @@ function Release({ releaseInfo }: PageParams) {
                         The cc contact(s) are <span className="font-semibold">{values.otherRecipients.join(',')}</span>.
                       </p>
                     )}
+                    {values.otherRecipients && values.otherRecipients.length > 0 && (
+                      <p>
+                        The cc contact(s) are <span className="font-semibold">{values.otherRecipients.join(',')}</span>.
+                      </p>
+                    )}
+                    {selectedReleaseColumns.length > 0 && (
+                      <p>
+                        The selected release columns are{' '}
+                        <span className="font-semibold">
+                          {selectedReleaseColumns.map((col) => col.displayName).join(',')}
+                        </span>
+                        .
+                      </p>
+                    )}
                     <PinkButton
                       disabled={formLocked}
                       loading={current.matches('submitting')}
@@ -466,15 +538,30 @@ function Release({ releaseInfo }: PageParams) {
                     >
                       Release Labware
                     </PinkButton>
+                    {submissionResult && (
+                      <PinkButton className="sm:w-full">
+                        <a
+                          className="w-full text-gray-800 focus:outline-none"
+                          download={'release.tsv'}
+                          href={`/release?id=${submissionResult.release.releases.map(
+                            (r) => r.id
+                          )}&groups=${selectedReleaseColumns.map((col) => col.queryParamName).join(',')}`}
+                        >
+                          <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
+                          Download Release File
+                        </a>
+                      </PinkButton>
+                    )}
                     {current.matches('submitted') && releaseOptionsFilePath && (
                       <WhiteButton
                         className="sm:w-full whitespace-nowrap"
                         onClick={() => navigate(releaseOptionsFilePath)}
                       >
                         <EditIcon className={'inline-block h-5 w-5 -ml-1 mr-2'} />
-                        Select Release File Options
+                        Change Release File Options
                       </WhiteButton>
                     )}
+
                     {current.matches('submitted') && (
                       <PinkButton
                         action={'tertiary'}

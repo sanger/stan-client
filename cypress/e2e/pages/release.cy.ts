@@ -7,7 +7,7 @@ import {
 import { buildLabwareFragment } from '../../../src/lib/helpers/labwareHelper';
 import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
-import { selectOption, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
+import { selectOption, shouldDisplaySelectedValue, shouldHaveOption } from '../shared/customReactSelect.cy';
 
 describe('Release Page', () => {
   before(() => {
@@ -90,22 +90,33 @@ describe('Release Page', () => {
     });
     context('when destination is selected', () => {
       before(() => {
-        selectOption('contact', 'cs41');
+        selectOption('contact', 'cm18');
       });
       it('shows updated information in summary', () => {
-        cy.contains('The primary contact is cs41').should('be.visible');
+        cy.contains('The primary contact is cm18').should('be.visible');
       });
     });
     context('when cc contacts  are selected', () => {
       before(() => {
-        selectOption('cc', 'cs41');
+        selectOption('cc', 'cm18');
         selectOption('cc', 're5');
       });
       it('shows updated information in summary', () => {
-        cy.contains('The cc contact(s) are cs41,re5.').should('be.visible');
+        cy.contains('The cc contact(s) are cm18,re5.').should('be.visible');
       });
     });
-
+    context('when group/team is selected', () => {
+      it('shows all release columns by default', () => {
+        cy.contains('The selected release columns are Histology,Sample Processing,Xenium.').should('be.visible');
+        cy.findByTestId('Histology-checkbox').should('be.checked');
+        cy.findByTestId('Sample Processing-checkbox').should('be.checked');
+        cy.findByTestId('Xenium-checkbox').should('be.checked');
+      });
+      it('updates the  column selection on click', () => {
+        cy.findByTestId('Histology-checkbox').click();
+        cy.contains('The selected release columns are Sample Processing,Xenium.').should('be.visible');
+      });
+    });
     context('when all is valid', () => {
       before(() => {
         fillInForm();
@@ -115,11 +126,25 @@ describe('Release Page', () => {
         cy.findByText('Labware(s) Released').should('be.visible');
       });
 
-      it('shows the download button', () => {
-        cy.findByText('Select Release File Options').should('be.visible');
+      it("'shows the download button", () => {
+        cy.findByText('Download Release File').should('exist');
+      });
+
+      it('shows the Change Release File Options button', () => {
+        cy.findByText('Change Release File Options').should('be.visible');
       });
     });
-
+    context('when release recipients have full name property set ', () => {
+      before(() => {
+        cy.visit('/admin/release');
+      });
+      it('should display the full name within the username on the Primary Contact select list', () => {
+        shouldHaveOption('contact', 'cs41 (Csaba Csordas)');
+      });
+      it('should display the full name within the username on the Other Contacts select list', () => {
+        shouldHaveOption('cc', 'lh7 (Liam Hickey)');
+      });
+    });
     context('when form is submitted with a labware that has already been released', () => {
       before(() => {
         cy.visit('/admin/release');
@@ -152,6 +177,10 @@ describe('Release Page', () => {
 
       it("doesn't show the download button", () => {
         cy.findByText('Download Release File').should('not.exist');
+      });
+
+      it("doesn't show the change release file Options button", () => {
+        cy.findByText('Change Release File Options').should('not.exist');
       });
     });
 
@@ -254,7 +283,7 @@ describe('Release Page', () => {
     context('when all required fields are given', () => {
       before(() => {
         selectOption('group', 'Vento lab');
-        selectOption('contact', 'cs41');
+        selectOption('contact', 'cm18');
         cy.findByRole('button', { name: /Release Labware/i }).click({ force: true });
       });
 
@@ -263,11 +292,15 @@ describe('Release Page', () => {
       });
 
       it('shows the download button', () => {
-        cy.findByText('Select Release File Options').should('be.visible');
+        cy.findByText('Download Release File').should('be.visible');
       });
-      it("goes to Release Options page when 'Select Release File Options' button is clicked", () => {
-        cy.findByText('Select Release File Options').click();
-        cy.url().should('include', '/releaseOptions');
+
+      it('shows the change release file options button', () => {
+        cy.findByText('Change Release File Options').should('be.visible');
+      });
+      it("goes to Release Options page when 'Change Release File Options' button is clicked", () => {
+        cy.findByText('Change Release File Options').click();
+        cy.url().should('include', '/releaseOptions?id=1001,1002,1003,1004&groups=histology,sample_processing,xenium');
       });
     });
   });
@@ -276,6 +309,6 @@ function fillInForm() {
   cy.get('#labwareScanInput').type('STAN-123{enter}');
   cy.get('#labwareScanInput').type('STAN-456{enter}');
   selectOption('group', 'Vento lab');
-  selectOption('contact', 'cs41');
+  selectOption('contact', 'cm18');
   cy.findByRole('button', { name: /Release Labware/i }).click({ force: true });
 }

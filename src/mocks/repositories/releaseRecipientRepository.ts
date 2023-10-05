@@ -9,7 +9,7 @@ const seeds: Array<ReleaseRecipientFieldsFragment> = [
   releaseRecipientFactory.build({ username: 'kr19' }),
   releaseRecipientFactory.build({ username: 'lb28' }),
   releaseRecipientFactory.build({ username: 're5' }),
-  releaseRecipientFactory.build({ username: 'lh7' }),
+  releaseRecipientFactory.build({ username: 'lh7', fullName: 'Liam Hickey' }),
   releaseRecipientFactory.build({ username: 'vk8' }),
   releaseRecipientFactory.build({ username: 'cc36' }),
   releaseRecipientFactory.build({ username: 'aw24' }),

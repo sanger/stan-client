@@ -3,7 +3,9 @@ import Cookies from 'js-cookie';
 import React from 'react';
 import { getSdk } from '../types/sdk';
 import { NavigateFunction } from 'react-router-dom';
-export const graphQLClient = new GraphQLClient('/graphql');
+
+const endpoint = process.env.NODE_ENV === 'test' ? 'http://localhost:3000/graphql' : '/graphql';
+export const graphQLClient = new GraphQLClient(endpoint);
 
 const xsrf = Cookies.get('XSRF-TOKEN');
 if (xsrf) {

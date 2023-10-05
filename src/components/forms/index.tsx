@@ -32,6 +32,64 @@ export type OptionTemplate<L extends string, V extends string, LV = string | num
 };
 
 /**
+ * Extends OptionTemplate to allow for additional properties.
+ */
+export type ExtendedOptionTemplate<
+  L extends string,
+  V extends string,
+  LV = string | number,
+  VV = string | number
+> = OptionTemplate<L, V, LV, VV> & {
+  [key: string]: any;
+};
+
+type SortProps = {
+  sort: boolean;
+  sortType?: 'Ascending' | 'Descending';
+  alphaFirst?: boolean;
+  excludeWords?: string[];
+};
+
+/**
+ * Sorts a given array of entities based on specified sort properties and a label.
+ *
+ * @template L - A type representing the label's string keys.
+ * @template V - A type representing the value's string keys.
+ * @template T - A type representing the entities, which could be either OptionTemplate or ExtendedOptionTemplate.
+ *
+ * @param {T[]} entities - The list of entities to be sorted.
+ * @param {L} label - The label key based on which the entities are to be sorted.
+ * @param {SortProps} sortProps - An object containing sort properties:
+ *   @prop {boolean} sort - Indicates whether to sort or not.
+ *   @prop {('Ascending' | 'Descending')} [sortType='Ascending'] - The type of sort, defaults to 'Ascending'.
+ *   @prop {boolean} [alphaFirst=false] - A flag indicating if alphanumeric sorting should prioritize alphabetical characters. Defaults to `false`.
+ *   @prop {string[]} [excludeWords=['None']] - A list of words to be excluded from the sort operation.
+ *
+ * @returns {T[]} - A sorted list of entities. If no sorting is required, the original list is returned.
+ *
+ * @example
+ * const data = [{username: 'Alice', age: 28}, {username: 'Bob', age: 22}];
+ * const sortedData = sortEntities(data, 'username', { sort: true, sortType: 'Ascending' });
+ */
+
+function sortEntities<
+  L extends string,
+  V extends string,
+  T extends OptionTemplate<L, V> | ExtendedOptionTemplate<L, V>
+>(entities: T[], label: L, sortProps: SortProps) {
+  if (!entities || entities.length === 0) return [];
+  if (!sortProps.sort) return entities;
+
+  return [...entities].sort((a, b) => {
+    const sortType = sortProps.sortType ?? 'Ascending';
+    const aVal = sortType === 'Ascending' ? a[label] : b[label];
+    const bVal = sortType === 'Ascending' ? b[label] : a[label];
+    if (sortProps.excludeWords?.includes(String(aVal)) || String(bVal) === 'None') return 0;
+    return alphaNumericSortDefault(String(aVal).toUpperCase(), String(bVal).toUpperCase(), sortProps.alphaFirst);
+  });
+}
+
+/**
  * Utility for generating a list of <code><option></code> tags
  * @param entities list of models to generate options for
  * @param label name of the property on each entity to use for the label
@@ -48,7 +106,7 @@ export function optionValues<L extends string, V extends string, T extends Optio
   label: L,
   value: V,
   keyAsValue?: boolean,
-  sortProps: { sort: boolean; sortType?: 'Ascending' | 'Descending'; alphaFirst?: boolean; excludeWords?: string[] } = {
+  sortProps: SortProps = {
     sort: true,
     sortType: 'Ascending',
     alphaFirst: false,
@@ -56,16 +114,7 @@ export function optionValues<L extends string, V extends string, T extends Optio
   }
 ) {
   if (!entities || entities.length === 0) return <option />;
-  let mapEntities = sortProps.sort
-    ? [...entities].sort((a, b) => {
-        const sortType = sortProps.sortType ?? 'Ascending';
-        const aVal = sortType === 'Ascending' ? a[label] : b[label];
-        const bVal = sortType === 'Ascending' ? b[label] : a[label];
-        if (sortProps.excludeWords?.includes(String(aVal)) || String(bVal) === 'None') return 0;
-        return alphaNumericSortDefault(String(aVal).toUpperCase(), String(bVal).toUpperCase(), sortProps.alphaFirst);
-      })
-    : entities;
-  return mapEntities.map((e, index) => {
+  return sortEntities(entities, label, sortProps).map((e, index) => {
     return (
       <option key={keyAsValue ? e[value] : index} value={e[value]}>
         {e[label]}
@@ -79,25 +128,36 @@ export function selectOptionValues<L extends string, V extends string, T extends
   label: L,
   value: V,
   keyAsValue?: boolean,
-  sortProps: { sort: boolean; sortType?: 'Ascending' | 'Descending'; alphaFirst?: boolean; excludeWords?: string[] } = {
+  sortProps: SortProps = {
     sort: true,
     sortType: 'Ascending',
     alphaFirst: false,
     excludeWords: ['None']
   }
 ) {
-  if (!entities || entities.length === 0) return [];
-  let mapEntities = sortProps.sort
-    ? [...entities].sort((a, b) => {
-        const sortType = sortProps.sortType ?? 'Ascending';
-        const aVal = sortType === 'Ascending' ? a[label] : b[label];
-        const bVal = sortType === 'Ascending' ? b[label] : a[label];
-        if (sortProps.excludeWords?.includes(String(aVal)) || String(bVal) === 'None') return 0;
-        return alphaNumericSortDefault(String(aVal).toUpperCase(), String(bVal).toUpperCase(), sortProps.alphaFirst);
-      })
-    : entities;
-  return mapEntities.map((e) => {
+  return sortEntities(entities, label, sortProps).map((e) => {
     return { value: String(e[value]), label: e[label] };
+  });
+}
+
+export function extendedSelectOptionValues<L extends string, V extends string, T extends ExtendedOptionTemplate<L, V>>(
+  entities: T[],
+  label: L,
+  value: V,
+  keyAsValue?: boolean,
+  sortProps: SortProps = {
+    sort: true,
+    sortType: 'Ascending',
+    alphaFirst: false,
+    excludeWords: ['None']
+  },
+  extraProperty?: string
+) {
+  return sortEntities(entities, label, sortProps).map((e) => {
+    return {
+      value: String(e[value]),
+      label: extraProperty && e[extraProperty] ? `${e[label]}  (${e[extraProperty]})` : e[label]
+    };
   });
 }
 
