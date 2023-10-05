@@ -12,7 +12,9 @@ const seeds: Array<EquipmentFieldsFragment> = [
     name: 'Iron Patriot',
     category: 'robot',
     enabled: false
-  })
+  }),
+  equipmentFactory.build({ name: 'EZ2', category: 'extract' }),
+  equipmentFactory.build({ name: 'QiCube', category: 'extract' })
 ];
 
 const equipmentRepository = createSessionStorageRepository('EQUIPMENT', 'name', seeds);

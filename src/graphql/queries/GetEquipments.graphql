@@ -1,0 +1,5 @@
+query GetEquipments($category: String, $includeDisabled: Boolean) {
+  equipments(category: $category, includeDisabled: $includeDisabled) {
+    ...EquipmentFields
+  }
+}
