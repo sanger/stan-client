@@ -75,14 +75,14 @@ export default function createLabwareResultMachine({ availableComments, labwareR
         assignAllPassed: assign((ctx, e) => {
           if (e.type !== 'PASS_ALL') return;
 
-          ctx.labwareResult.sampleResults.forEach((sr) => {
+          ctx.labwareResult.sampleResults?.forEach((sr) => {
             sr.result = PassFail.Pass;
           });
         }),
 
         assignAllFailed: assign((ctx, e) => {
           if (e.type !== 'FAIL_ALL') return;
-          ctx.labwareResult.sampleResults.forEach((sr) => {
+          ctx.labwareResult.sampleResults?.forEach((sr) => {
             sr.result = PassFail.Fail;
           });
         }),
@@ -90,7 +90,7 @@ export default function createLabwareResultMachine({ availableComments, labwareR
         assignSlotPassed: assign((ctx, e) => {
           if (e.type !== 'PASS') return;
 
-          const sampleResult = ctx.labwareResult.sampleResults.find((sr) => sr.address === e.address);
+          const sampleResult = ctx.labwareResult.sampleResults?.find((sr) => sr.address === e.address);
 
           if (sampleResult) {
             sampleResult.result = PassFail.Pass;
@@ -100,7 +100,7 @@ export default function createLabwareResultMachine({ availableComments, labwareR
         assignSlotFailed: assign((ctx, e) => {
           if (e.type !== 'FAIL') return;
 
-          const sampleResult = ctx.labwareResult.sampleResults.find((sr) => sr.address === e.address);
+          const sampleResult = ctx.labwareResult.sampleResults?.find((sr) => sr.address === e.address);
 
           if (sampleResult) {
             sampleResult.result = PassFail.Fail;
@@ -110,7 +110,7 @@ export default function createLabwareResultMachine({ availableComments, labwareR
         assignSlotComment: assign((ctx, e) => {
           if (e.type !== 'SET_COMMENT') return;
 
-          const sampleResult = ctx.labwareResult.sampleResults.find((sr) => sr.address === e.address);
+          const sampleResult = ctx.labwareResult.sampleResults?.find((sr) => sr.address === e.address);
           if (!sampleResult?.result) {
             return;
           }
@@ -119,7 +119,7 @@ export default function createLabwareResultMachine({ availableComments, labwareR
         assignSampleComments: assign((ctx, e) => {
           if (e.type !== 'SET_SAMPLE_COMMENTS') return;
           /**Find result belong to this address**/
-          const sampleResult = ctx.labwareResult.sampleResults.find((sr) => sr.address === e.address);
+          const sampleResult = ctx.labwareResult.sampleResults?.find((sr) => sr.address === e.address);
           if (!sampleResult?.result) {
             return;
           }
@@ -152,7 +152,7 @@ export default function createLabwareResultMachine({ availableComments, labwareR
            *
            *sr.result.commentId is used in places where only one comment is assigned and mostly one section per slot (backward compatibility)
            *sr.result.sampleComments is supported in places where there are multiple comments and multiple sections in a slot**/
-          ctx.labwareResult.sampleResults.forEach((sr) => {
+          ctx.labwareResult.sampleResults?.forEach((sr) => {
             if (sr.result) {
               const sampleComments: SampleIdCommentId[] = [];
               /**No comments given, so reset all comments**/
