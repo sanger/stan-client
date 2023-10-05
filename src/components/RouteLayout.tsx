@@ -180,17 +180,13 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/extraction"
-            element={
-              <DataFetcher
-                dataFetcher={() =>
-                  stanCore.GetEquipments({
-                    category: 'extract'
-                  })
-                }
-              >
-                {(equipmentInfo) => <Extraction equipments={equipmentInfo.equipments} />}
-              </DataFetcher>
-            }
+            loader={async ({ params }) => {
+              const res = await stanCore.GetEquipments({
+                category: 'extract'
+              });
+              return res.equipments;
+            }}
+            element={<Extraction />}
           />
         </Route>
         <Route element={<AuthLayout />}>

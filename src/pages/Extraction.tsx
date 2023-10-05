@@ -19,7 +19,7 @@ import { useMachine } from '@xstate/react';
 import { buildSampleColors } from '../lib/helpers/labwareHelper';
 import { EquipmentFieldsFragment, LabwareFieldsFragment } from '../types/sdk';
 import extractionMachine, { ExtractionContext } from '../lib/machines/extraction/extractionMachine';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 import ButtonBar from '../components/ButtonBar';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -47,14 +47,6 @@ function buildExtractionTableData(ctx: ExtractionContext) {
     })
     .flat();
 }
-
-/***
- * Equipments with 'extract' category
- */
-type ExtractionEquipments = {
-  equipments: EquipmentFieldsFragment[];
-};
-
 const extractionEquipments = (equipments: EquipmentFieldsFragment[]) => {
   const methods: Array<{ value: number; label: string }> = [];
 
@@ -65,7 +57,8 @@ const extractionEquipments = (equipments: EquipmentFieldsFragment[]) => {
   return methods;
 };
 
-function Extraction({ equipments }: ExtractionEquipments) {
+function Extraction() {
+  const equipments = useLoaderData() as EquipmentFieldsFragment[];
   const [current, send] = useMachine(() =>
     extractionMachine.withContext({ labwares: [], workNumber: '', equipmentId: 0 })
   );
@@ -167,7 +160,6 @@ function Extraction({ equipments }: ExtractionEquipments) {
 
           <div className="mt-8 space-y-4">
             <Heading level={3}>Section Tubes</Heading>
-
             <LabwareScanner
               onChange={onLabwareScannerChange}
               locked={scannerLocked}
