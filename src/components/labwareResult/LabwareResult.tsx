@@ -10,6 +10,7 @@ import {
   LabwareResult as CoreLabwareResult,
   PassFail,
   SamplePositionFieldsFragment,
+  SampleResult,
   SlotFieldsFragment,
   SlotMeasurementRequest
 } from '../../types/sdk';
@@ -44,6 +45,15 @@ type LabwareResultComponentProps = {
    * Is it required to select comments for each section in slot?
    */
   commentsForSlotSections?: boolean;
+
+  /**Display pass fail buttons? */
+  displayPassFail?: boolean;
+
+  /**Display comments? */
+  displayComments?: boolean;
+
+  /**Display measurement? */
+  displayMeasurement?: boolean;
 };
 
 /**
@@ -55,7 +65,10 @@ export default function LabwareResult({
   availableComments,
   onRemoveClick,
   onChange,
-  commentsForSlotSections = false
+  commentsForSlotSections = false,
+  displayPassFail = true,
+  displayComments = true,
+  displayMeasurement = true
 }: LabwareResultComponentProps) {
   const labwareResultMachine = React.useMemo(() => {
     return createLabwareResultMachine({
@@ -67,7 +80,9 @@ export default function LabwareResult({
   const [samplePositions, setSamplePositions] = useState<SamplePositionFieldsFragment[]>([]);
   const { labwareResult } = current.context;
   const [allComments, setAllComments] = React.useState<Array<string>>([]);
-  const sampleResults = mapify(labwareResult.sampleResults, 'address');
+  const sampleResults = labwareResult.sampleResults
+    ? mapify(labwareResult.sampleResults, 'address')
+    : new Map<string, SampleResult>();
   const slotMeasurements = labwareResult.slotMeasurements
     ? mapify(labwareResult.slotMeasurements, 'address')
     : new Map<string, SlotMeasurementRequest>();
@@ -124,8 +139,8 @@ export default function LabwareResult({
       isSlotFilled(slot) && (
         <div className={'flex flex-col w-full mx-auto space-y-4 py-2 border-b-2 border-gray-300 mb-2'}>
           <div className={'flex flex-row w-full'}>
-            {isMeasurementExist && (
-              <div className={'flex flex-row space-x-2 w-1/2'}>
+            {isMeasurementExist && displayMeasurement && (
+              <div className={'flex flex-row space-x-3 w-1/2 mt-2'}>
                 <div className="flex mb-4">Coverage</div>
                 <div className="flex flex-row items-center h-8">
                   <Input
@@ -134,6 +149,7 @@ export default function LabwareResult({
                     min={0}
                     max={100}
                     value={slotMeasurements.get(slot.address)!.value}
+                    className={'rounded rounded-md w-20'}
                     onChange={(e) => {
                       if (validateMeasurementField(e.currentTarget.value)) {
                         send({
@@ -148,81 +164,85 @@ export default function LabwareResult({
                 </div>
               </div>
             )}
-            <div className={'flex flex-row w-1/2'}>
-              <div className="flex justify-center ml-8 mb-4">Pass/Fail</div>
-              <div className="flex flex-row justify-center ">
-                <PassIcon
-                  data-testid={'passIcon'}
-                  className={`h-6 w-6 cursor-pointer ${
-                    sampleResults.get(slot.address)!.result === PassFail.Pass ? 'text-green-700' : 'text-gray-500'
-                  }`}
-                  onClick={() => {
-                    send({ type: 'PASS', address: slot.address });
-                  }}
-                />
-                <FailIcon
-                  data-testid={'failIcon'}
-                  className={`h-6 w-6 cursor-pointer ${
-                    sampleResults.get(slot.address)!.result === PassFail.Fail ? 'text-red-700' : 'text-gray-500'
-                  }`}
-                  onClick={() => send({ type: 'FAIL', address: slot.address })}
-                />
+            {displayPassFail && (
+              <div className={'flex flex-row w-1/2 space-x-2'}>
+                <div className={`flex justify-center ${displayMeasurement ? 'ml-8 mb-4' : 'mb-2 mt-2'}`}>Pass/Fail</div>
+                <div className={`flex flex-row justify-center  ${!displayMeasurement && 'mb-2 mt-2'}`}>
+                  <PassIcon
+                    data-testid={'passIcon'}
+                    className={`h-6 w-6 cursor-pointer ${
+                      sampleResults.get(slot.address)!.result === PassFail.Pass ? 'text-green-700' : 'text-gray-500'
+                    }`}
+                    onClick={() => {
+                      send({ type: 'PASS', address: slot.address });
+                    }}
+                  />
+                  <FailIcon
+                    data-testid={'failIcon'}
+                    className={`h-6 w-6 cursor-pointer ${
+                      sampleResults.get(slot.address)!.result === PassFail.Fail ? 'text-red-700' : 'text-gray-500'
+                    }`}
+                    onClick={() => send({ type: 'FAIL', address: slot.address })}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          {displayComments && (
+            <div className={`flex ${slot.samples.length > 1 ? 'flex-col' : 'flex-row space-x-2'}`}>
+              <div className="flex mb-4 justify-start">Comments</div>
+              <div className={'flex flex-col space-y-2'}>
+                {
+                  /** Is it required to display comments for every section in sample **/
+                  commentsForSlotSections ? (
+                    slot.samples.map((sample) => (
+                      <div key={sample.section} className={'flex flex-row justify-end'}>
+                        {slot.samples.length > 1 && (
+                          <label className={'justify-start'}>{getSampleRegion(slot.address, sample.id)}</label>
+                        )}
+                        <div className={`flex ml-2 `}>
+                          <CustomReactSelect
+                            dataTestId={'comment'}
+                            value={getCommentsForSample(slot.address, sample.id)}
+                            handleChange={(val) => {
+                              send({
+                                type: 'SET_SAMPLE_COMMENTS',
+                                address: slot.address,
+                                sampleId: sample.id,
+                                commentIds: (val as OptionType[]).map((option) => Number(option.value))
+                              });
+                            }}
+                            emptyOption
+                            isMulti
+                            options={availableComments.map((comment) => {
+                              return { label: comment.text, value: comment.id + '' };
+                            })}
+                            fixedWidth={200}
+                          />
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <CustomReactSelect
+                      value={getComment(slot.address) ?? ''}
+                      dataTestId={'comment'}
+                      handleChange={(val) =>
+                        send({
+                          type: 'SET_COMMENT',
+                          address: slot.address,
+                          commentId: (val as OptionType).value !== '' ? Number((val as OptionType).value) : undefined
+                        })
+                      }
+                      emptyOption
+                      options={availableComments.map((comment) => {
+                        return { label: comment.text, value: comment.id + '' };
+                      })}
+                    />
+                  )
+                }
               </div>
             </div>
-          </div>
-          <div className={`flex ${slot.samples.length > 1 ? 'flex-col' : 'flex-row space-x-2'}`}>
-            <div className="flex mb-4 justify-start">Comments</div>
-            <div className={'flex flex-col space-y-2'}>
-              {
-                /** Is it required to display comments for every section in sample **/
-                commentsForSlotSections ? (
-                  slot.samples.map((sample) => (
-                    <div key={sample.section} className={'flex flex-row justify-end'}>
-                      {slot.samples.length > 1 && (
-                        <label className={'justify-start'}>{getSampleRegion(slot.address, sample.id)}</label>
-                      )}
-                      <div className={`flex ml-2 `}>
-                        <CustomReactSelect
-                          dataTestId={'comment'}
-                          value={getCommentsForSample(slot.address, sample.id)}
-                          handleChange={(val) => {
-                            send({
-                              type: 'SET_SAMPLE_COMMENTS',
-                              address: slot.address,
-                              sampleId: sample.id,
-                              commentIds: (val as OptionType[]).map((option) => Number(option.value))
-                            });
-                          }}
-                          emptyOption
-                          isMulti
-                          options={availableComments.map((comment) => {
-                            return { label: comment.text, value: comment.id + '' };
-                          })}
-                          fixedWidth={200}
-                        />
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <CustomReactSelect
-                    value={getComment(slot.address) ?? ''}
-                    dataTestId={'comment'}
-                    handleChange={(val) =>
-                      send({
-                        type: 'SET_COMMENT',
-                        address: slot.address,
-                        commentId: (val as OptionType).value !== '' ? Number((val as OptionType).value) : undefined
-                      })
-                    }
-                    emptyOption
-                    options={availableComments.map((comment) => {
-                      return { label: comment.text, value: comment.id + '' };
-                    })}
-                  />
-                )
-              }
-            </div>
-          </div>
+          )}
         </div>
       )
     );
@@ -241,49 +261,55 @@ export default function LabwareResult({
 
         {/* Display the list of pass/fail comments */}
         <div className="mt-8 flex flex-row items-end justify-between gap-x-4">
-          <BlueButton
-            className="flex-shrink-0"
-            data-testid={'passAll'}
-            type="button"
-            onClick={() => send({ type: 'PASS_ALL' })}
-          >
-            Pass All
-          </BlueButton>
-          <PinkButton
-            className="flex-shrink-0"
-            data-testid={'failAll'}
-            type="button"
-            onClick={() => send({ type: 'FAIL_ALL' })}
-          >
-            Fail All
-          </PinkButton>
-          <CustomReactSelect
-            dataTestId={'commentAll'}
-            emptyOption
-            value={allComments}
-            handleChange={(val) => {
-              if (Array.isArray(val)) {
-                setAllComments((val as OptionType[]).map((option) => option.value));
-                send({
-                  type: 'SET_ALL_COMMENTS',
-                  commentId: (val as OptionType[]).map((val) => Number(val.value)),
-                  slots: labware.slots
-                });
-              } else {
-                setAllComments([(val as OptionType).value]);
-                send({
-                  type: 'SET_ALL_COMMENTS',
-                  commentId: Number((val as OptionType).value),
-                  slots: labware.slots
-                });
-              }
-            }}
-            options={availableComments.map((comment) => {
-              return { label: comment.text, value: comment.id + '' };
-            })}
-            isMulti={commentsForSlotSections}
-            fixedWidth={400}
-          />
+          {displayPassFail && (
+            <>
+              <BlueButton
+                className="flex-shrink-0"
+                data-testid={'passAll'}
+                type="button"
+                onClick={() => send({ type: 'PASS_ALL' })}
+              >
+                Pass All
+              </BlueButton>
+              <PinkButton
+                className="flex-shrink-0"
+                data-testid={'failAll'}
+                type="button"
+                onClick={() => send({ type: 'FAIL_ALL' })}
+              >
+                Fail All
+              </PinkButton>
+            </>
+          )}
+          {displayComments && (
+            <CustomReactSelect
+              dataTestId={'commentAll'}
+              emptyOption
+              value={allComments}
+              handleChange={(val) => {
+                if (Array.isArray(val)) {
+                  setAllComments((val as OptionType[]).map((option) => option.value));
+                  send({
+                    type: 'SET_ALL_COMMENTS',
+                    commentId: (val as OptionType[]).map((val) => Number(val.value)),
+                    slots: labware.slots
+                  });
+                } else {
+                  setAllComments([(val as OptionType).value]);
+                  send({
+                    type: 'SET_ALL_COMMENTS',
+                    commentId: Number((val as OptionType).value),
+                    slots: labware.slots
+                  });
+                }
+              }}
+              options={availableComments.map((comment) => {
+                return { label: comment.text, value: comment.id + '' };
+              })}
+              isMulti={commentsForSlotSections}
+              fixedWidth={400}
+            />
+          )}
         </div>
       </div>
     </div>

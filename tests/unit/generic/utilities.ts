@@ -1,6 +1,14 @@
-import { queryByAttribute, screen, within, getByRole } from '@testing-library/react';
+import {
+  screen,
+  within,
+  getByRole,
+  waitForOptions,
+  waitFor as _waitFor,
+  queryByAttribute
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserRole } from '../../../src/types/sdk';
+import { merge } from 'lodash';
 import * as AuthContext from '../../../src/context/AuthContext';
 
 export const getById = queryByAttribute.bind(null, 'id');
@@ -53,6 +61,12 @@ export const shouldDisplayValue = (dataTestId: string, value: string, index?: nu
   expect(selectDiv).toHaveTextContent(value);
 };
 
+export const selectFocusBlur = async (dataTestId = 'select-div') => {
+  const selectBox = within(screen.getByTestId(dataTestId)).getByRole('combobox', { hidden: true });
+  await userEvent.click(selectBox);
+  await userEvent.tab();
+};
+
 export const uncheck = async () => {
   const checkbox = screen.queryByRole('checkbox') as HTMLInputElement;
   if (checkbox && checkbox.checked) {
@@ -65,6 +79,12 @@ export const check = async () => {
   if (checkbox && !checkbox.checked) {
     await userEvent.click(checkbox);
   }
+};
+
+export const scanLabware = async (labwareBarcode: string) => {
+  const labwareInput = screen.getByTestId('input');
+  await userEvent.type(labwareInput, labwareBarcode);
+  await userEvent.type(labwareInput, '{enter}');
 };
 
 export const visitAsEndUser = () => {
@@ -95,4 +115,16 @@ export const spyUser = (username: string, role: UserRole, isAuthenticated: boole
     clearAuthState: jest.fn(),
     userRoleIncludes: jest.fn((givenRole) => givenRole === role)
   });
+};
+
+export const waitFor = <T>(callback: () => T | Promise<T>, options?: waitForOptions): Promise<T> => {
+  // Overwrite default options
+  const mergedOptions = merge(
+    {
+      timeout: 150000
+    },
+    options
+  );
+
+  return _waitFor(callback, mergedOptions);
 };

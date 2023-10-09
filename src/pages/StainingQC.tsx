@@ -21,6 +21,7 @@ import Heading from '../components/Heading';
 import Panel from '../components/Panel';
 import { useCollection } from '../lib/hooks/useCollection';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
+import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 
 type StainingQCProps = {
   info: GetStainingQcInfoQuery;
@@ -28,8 +29,12 @@ type StainingQCProps = {
 
 export const TISSUE_COVERAGE_MEASUREMENT_NAME = 'Tissue coverage';
 
+const STAIN_QC_TYPES = ['Stain QC', 'Tissue coverage'];
+
 export default function StainingQC({ info }: StainingQCProps) {
   const [workNumber, setWorkNumber] = useState<string>('');
+  const [qcType, setQCType] = useState<string>('');
+
   const labwareResults = useCollection<CoreLabwareResult>({
     getKey: (item) => item.barcode
   });
@@ -41,18 +46,30 @@ export default function StainingQC({ info }: StainingQCProps) {
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          /**Omit all measurements for which the tissue coverage is not specified**/
-          const newLabwareResults = e.values.labwareResults.map((labwareResult) => {
-            const slotMeasurements = labwareResult.slotMeasurements?.filter(
-              (sm) => sm.value !== '' && sm.name === TISSUE_COVERAGE_MEASUREMENT_NAME
-            );
-            return slotMeasurements && slotMeasurements.length > 0
-              ? { ...labwareResult, slotMeasurements }
-              : {
-                  sampleResults: labwareResult.sampleResults,
-                  barcode: labwareResult.barcode
-                };
-          });
+          let newLabwareResults: CoreLabwareResult[] = [];
+          //Remove sampleResults from labwareResults if qcType is Tissue coverage
+          if (e.values.operationType === STAIN_QC_TYPES[1]) {
+            /**Omit all measurements for which the tissue coverage is not specified**/
+            newLabwareResults = e.values.labwareResults.map((labwareResult) => {
+              const slotMeasurements = labwareResult.slotMeasurements?.filter(
+                (sm) => sm.value !== '' && sm.name === TISSUE_COVERAGE_MEASUREMENT_NAME
+              );
+              return slotMeasurements && slotMeasurements.length > 0
+                ? { barcode: labwareResult.barcode, slotMeasurements }
+                : {
+                    barcode: labwareResult.barcode
+                  };
+            });
+          }
+          if (e.values.operationType === STAIN_QC_TYPES[0]) {
+            //Remove slotMeasurements from labwareResults if qcType is Stain QC
+            newLabwareResults = e.values.labwareResults.map((labwareResult) => {
+              return {
+                barcode: labwareResult.barcode,
+                sampleResults: labwareResult.sampleResults
+              };
+            });
+          }
           return stanCore.RecordStainResult({
             request: {
               labwareResults: newLabwareResults,
@@ -99,6 +116,25 @@ export default function StainingQC({ info }: StainingQCProps) {
               <WorkNumberSelect onWorkNumberChange={setWorkNumber} />
             </div>
           </div>
+          <div className="space-y-2">
+            <Heading level={2}>QC Type</Heading>
+
+            <p>Select QC Type.</p>
+
+            <div className="mt-4 md:w-1/2">
+              <CustomReactSelect
+                dataTestId={'qcType'}
+                handleChange={(value) => {
+                  setQCType((value as OptionType).value);
+                }}
+                options={STAIN_QC_TYPES.map((qcType) => ({
+                  label: qcType,
+                  value: qcType
+                }))}
+                emptyOption
+              />
+            </div>
+          </div>
 
           <div className="mt-8 space-y-2">
             <Heading level={2}>Slides</Heading>
@@ -118,6 +154,9 @@ export default function StainingQC({ info }: StainingQCProps) {
                           onRemoveClick={removeLabware}
                           commentsForSlotSections
                           onChange={(labwareResult) => labwareResults.update(labwareResult)}
+                          displayComments={qcType === STAIN_QC_TYPES[0]}
+                          displayPassFail={qcType === STAIN_QC_TYPES[0]}
+                          displayMeasurement={qcType === STAIN_QC_TYPES[1]}
                         />
                       </Panel>
                     )
@@ -135,6 +174,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                 send({
                   type: 'SUBMIT_FORM',
                   values: {
+                    operationType: qcType,
                     workNumber,
                     labwareResults: labwareResults.items
                   }
@@ -146,7 +186,7 @@ export default function StainingQC({ info }: StainingQCProps) {
           </div>
         </div>
 
-        <OperationCompleteModal show={current.matches('submitted')} message={'Stain QC complete'}>
+        <OperationCompleteModal show={current.matches('submitted')} message={`${qcType} complete`}>
           <p>
             If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the Home
             screen.

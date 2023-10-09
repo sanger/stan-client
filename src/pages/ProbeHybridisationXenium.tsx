@@ -3,7 +3,8 @@ import {
   GetProbePanelsQuery,
   ProbeOperationLabware,
   ProbeOperationRequest,
-  RecordProbeOperationMutation
+  RecordProbeOperationMutation,
+  SlideCosting
 } from '../types/sdk';
 import AppShell from '../components/AppShell';
 import { FieldArray, Form, Formik } from 'formik';
@@ -98,7 +99,8 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                   ),
                 plex: Yup.number()
                   .required('Plex is a required field')
-                  .min(1, 'Plex number should be a positive integer.')
+                  .min(1, 'Plex number should be a positive integer.'),
+                costing: Yup.string().oneOf(Object.values(SlideCosting)).required('Probe costing is a required field')
               })
             )
             .min(1)
@@ -180,8 +182,8 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
 
                             <div className={'flex flex-col mt-4'}>
                               <div className={'w-full border-2 border-gray-100 mb-4'} />
-                              <div className={'grid grid-cols-2 gap-x-6'}>
-                                <div>
+                              <div className={'flex flex-row gap-x-6'}>
+                                <div className={'basis-1/4'}>
                                   <WorkNumberSelect
                                     label={'SGP Number'}
                                     name={'workNumberAll'}
