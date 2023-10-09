@@ -1,8 +1,8 @@
 import {
-  FindHistoryForLabwareBarcodeQuery,
-  FindHistoryForLabwareBarcodeQueryVariables,
   FindHistoryForWorkNumberQuery,
-  FindHistoryForWorkNumberQueryVariables
+  FindHistoryForWorkNumberQueryVariables,
+  FindHistoryQuery,
+  FindHistoryQueryVariables
 } from '../../../src/types/sdk';
 import { buildHistory } from '../../../src/mocks/handlers/historyHandlers';
 import { shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
@@ -214,26 +214,22 @@ describe('History Page', () => {
     });
   });
 
-  context('when a search errors', () => {
+  describe('when a search errors', () => {
     before(() => {
-      cy.visit('/history?barcode=STAN-10001F');
-
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.query<FindHistoryForLabwareBarcodeQuery, FindHistoryForLabwareBarcodeQueryVariables>(
-            'FindHistory',
-            (req, res, ctx) => {
-              return res.once(
-                ctx.errors([
-                  {
-                    message: 'Exception while fetching data (/history) : An error occured'
-                  }
-                ])
-              );
-            }
-          )
+          graphql.query<FindHistoryQuery, FindHistoryQueryVariables>('FindHistory', (req, res, ctx) => {
+            return res(
+              ctx.errors([
+                {
+                  message: 'Exception while fetching data (/history) : An error occured'
+                }
+              ])
+            );
+          })
         );
       });
+      cy.visit('/history?barcode=STAN-10001F');
     });
 
     it('displays an error', () => {
