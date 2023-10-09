@@ -1,19 +1,20 @@
 import { queryByAttribute, screen, within, getByRole } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserRole } from '../../../src/types/sdk';
+import * as AuthContext from '../../../src/context/AuthContext';
 
 export const getById = queryByAttribute.bind(null, 'id');
 
 export const workNumberNumOptionsShouldBe = async (length: number) => {
   await optionsShouldHaveLength('workNumber', length);
 };
-const optionsShouldHaveLength = async (dataTestId: string, length: number) => {
+export const optionsShouldHaveLength = async (dataTestId: string, length: number) => {
   getCustomSelectOptions(dataTestId).then((options) => {
     expect(options).toHaveLength(length);
   });
 };
 
-const getCustomSelectOptions = async (dataTestId: string) => {
+export const getCustomSelectOptions = async (dataTestId: string) => {
   const user = userEvent.setup();
   const wrapperDiv = screen.getByTestId(dataTestId);
 
@@ -47,6 +48,10 @@ export const selectOption = async (dataTestId: string, optionValue: string) => {
   expect(option).toBeInTheDocument();
   await userEvent.click(option);
 };
+export const shouldDisplayValue = (dataTestId: string, value: string, index?: number) => {
+  const selectDiv = screen.getAllByTestId(dataTestId)[0];
+  expect(selectDiv).toHaveTextContent(value);
+};
 
 export const uncheck = async () => {
   const checkbox = screen.queryByRole('checkbox') as HTMLInputElement;
@@ -74,4 +79,20 @@ export const visitAsEndUser = () => {
       })
     }
   }));
+};
+
+export const spyUser = (username: string, role: UserRole, isAuthenticated: boolean = true) => {
+  jest.spyOn(AuthContext, 'useAuth').mockReturnValue({
+    authState: {
+      user: {
+        username: username,
+        role: role
+      }
+    },
+    isAuthenticated: jest.fn(() => isAuthenticated),
+    setAuthState: jest.fn(),
+    logout: jest.fn(),
+    clearAuthState: jest.fn(),
+    userRoleIncludes: jest.fn((givenRole) => givenRole === role)
+  });
 };

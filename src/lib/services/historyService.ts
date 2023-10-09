@@ -8,7 +8,6 @@ import { HistoryUrlParams } from '../../pages/History';
  */
 export async function findHistory(historyProps: HistoryUrlParams): Promise<Array<HistoryTableEntry>> {
   let result;
-  debugger;
   let history: HistoryFieldsFragment = {
     entries: [],
     labware: [],

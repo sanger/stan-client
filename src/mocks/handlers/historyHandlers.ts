@@ -61,15 +61,6 @@ const historyHandlers = [
     );
   }),
 
-  graphql.query<GetEventTypesQuery, GetEventTypesQueryVariables>('GetEventTypes', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        __typename: 'Query',
-        eventTypes: ['Register', 'Record result', 'Unrelease', 'Section', 'Stain']
-      })
-    );
-  }),
-
   graphql.query<FindHistoryForDonorNameQuery, FindHistoryForDonorNameQueryVariables>(
     'FindHistoryForDonorName',
     (req, res, ctx) => {
@@ -128,7 +119,15 @@ const historyHandlers = [
         })
       );
     }
-  )
+  ),
+  graphql.query<GetEventTypesQuery, GetEventTypesQueryVariables>('GetEventTypes', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        __typename: 'Query',
+        eventTypes: ['Event 1', 'Event 2']
+      })
+    );
+  })
 ];
 
 export default historyHandlers;

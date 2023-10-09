@@ -30,19 +30,20 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
           />
         </div>
         <div className={'flex flex-col '}>
-          <FormikInput name="barcode" label="Barcode" />
+          <FormikInput name="barcode" label="Barcode" data-testid={'barcode'} />
         </div>
         <div className={'flex flex-col '}>
-          <FormikInput name="externalName" label="External Name" />
+          <FormikInput name="externalName" label="External Name" data-testid={'external-name'} />
         </div>
         <div className={'flex flex-col '}>
-          <FormikInput name="donorName" label="Donor Name" />
+          <FormikInput name="donorName" label="Donor Name" data-testid={'donor-name'} />
         </div>
         <div className={'flex flex-col '}>
           <CustomReactSelect
             name="eventType"
             label="Event Type"
             emptyOption
+            dataTestId={'event-type'}
             options={eventTypes.map((evtType) => ({ label: evtType, value: evtType }))}
             value={values.eventType}
           />
