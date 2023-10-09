@@ -481,7 +481,7 @@ const Location = () => {
                 )}
 
                 {location.size && (
-                  <StripyCardDetail term={'Size'}>
+                  <StripyCardDetail term={'Size'} dataTestId={'location-size'}>
                     <span className="font-semibold">{location.size.numRows}</span> row(s) and{' '}
                     <span className="font-semibold">{location.size.numColumns}</span> column(s)
                   </StripyCardDetail>

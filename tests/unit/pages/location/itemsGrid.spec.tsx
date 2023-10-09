@@ -72,19 +72,6 @@ jest.mock('../../../../src/lib/sdk', () => ({
     };
   })
 }));
-jest.mock('.../../../../src/context/AuthContext', () => ({
-  ...jest.requireActual('.../../../../src/context/AuthContext'),
-  useAuth: jest.fn().mockImplementation(() => {
-    return {
-      isAuthenticated: jest.fn().mockImplementation(() => {
-        return true;
-      }),
-      userRoleIncludes: jest.fn().mockImplementation(() => {
-        return true;
-      })
-    };
-  })
-}));
 
 jest.mock('.../../../../src/context/AuthContext', () => ({
   ...jest.requireActual('.../../../../src/context/AuthContext'),
