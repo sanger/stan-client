@@ -30,11 +30,14 @@ export default StripyCard;
 
 interface StripyCardDetailProps extends React.PropsWithChildren {
   term: string;
+  dataTestId?: string;
 }
 
-export const StripyCardDetail: React.FC<StripyCardDetailProps> = ({ term, children }) => (
+export const StripyCardDetail: React.FC<StripyCardDetailProps> = ({ term, dataTestId, children }) => (
   <div className="odd:bg-gray-50 even:bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
     <dt className="text-sm font-medium text-gray-500">{term}</dt>
-    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{children}</dd>
+    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2" data-testid={dataTestId}>
+      {children}
+    </dd>
   </div>
 );
