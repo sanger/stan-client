@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import LabwareScanner, { useLabwareContext } from '../../../../src/components/labwareScanner/LabwareScanner';
-import { getById } from '../../generic/utilities';
+import { getById } from '../../../generic/utilities';
 import React from 'react';
 import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
 import { LabwareFieldsFragment } from '../../../../src/types/sdk';

@@ -3,7 +3,7 @@ import AppShell from '../../components/AppShell';
 import { reload } from '../../lib/sdk';
 import { FindPlanDataQuery, GetSectioningConfirmInfoQuery, LabwareFieldsFragment } from '../../types/sdk';
 import SectioningConfirm from '../../components/sectioningConfirm/SectioningConfirm';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { useConfirmLeave } from '../../lib/hooks';
 import Heading from '../../components/Heading';
 import BlueButton from '../../components/buttons/BlueButton';
@@ -15,11 +15,8 @@ import { ConfirmPrintLabware } from '../../components/sectioningConfirm/ConfirmP
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 import PromptOnLeave from '../../components/notifications/PromptOnLeave';
 
-type SectioningConfirmProps = {
-  readonly sectioningConfirmInfo: GetSectioningConfirmInfoQuery;
-};
-
-function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
+function Confirm() {
+  const sectioningConfirmInfo = useLoaderData() as GetSectioningConfirmInfoQuery;
   const location = useLocation();
   const state = location.state as { plans?: Array<FindPlanDataQuery> };
   const plans: Array<FindPlanDataQuery> = state?.plans ?? [];
@@ -100,7 +97,12 @@ function Confirm({ sectioningConfirmInfo }: SectioningConfirmProps) {
                       >
                         Store
                       </BlueButton>
-                      <BlueButton onClick={() => reload(navigate)} action="tertiary">
+                      <BlueButton
+                        onClick={() => {
+                          location.state == null ? reload(navigate) : navigate('/lab/sectioning');
+                        }}
+                        action="tertiary"
+                      >
                         Reset Form
                       </BlueButton>
                       <Link to={'/'}>
