@@ -44,7 +44,7 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
             label="Event Type"
             emptyOption
             dataTestId={'event-type'}
-            options={eventTypes.map((evtType) => ({ label: evtType, value: evtType }))}
+            options={eventTypes.sort().map((evtType) => ({ label: evtType, value: evtType }))}
             value={values.eventType}
           />
         </div>
