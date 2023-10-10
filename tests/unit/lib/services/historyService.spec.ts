@@ -1,12 +1,4 @@
-import { SearchService } from '../../../../src/lib/services/searchService';
-import {
-  FindHistoryForSampleIdQuery,
-  FindHistoryQuery,
-  FindHistoryQueryVariables,
-  FindQuery,
-  FindResult,
-  LabwareState
-} from '../../../../src/types/sdk';
+import { FindHistoryForSampleIdQuery, FindHistoryQuery, FindHistoryQueryVariables } from '../../../../src/types/sdk';
 import { buildHistory } from '../../../../src/mocks/handlers/historyHandlers';
 import * as sdk from '../../../../src/lib/sdk';
 import { findHistory } from '../../../../src/lib/services/historyService';
