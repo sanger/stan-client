@@ -1,85 +1,169 @@
 import { SearchService } from '../../../../src/lib/services/searchService';
-import { buildFindResult } from '../../../../src/mocks/handlers/findHandlers';
-import { FindHistoryQuery, FindQuery, FindResult } from '../../../../src/types/sdk';
+import {
+  FindHistoryForSampleIdQuery,
+  FindHistoryQuery,
+  FindHistoryQueryVariables,
+  FindQuery,
+  FindResult,
+  LabwareState
+} from '../../../../src/types/sdk';
 import { buildHistory } from '../../../../src/mocks/handlers/historyHandlers';
-import * as sdk from '../../../src/lib/sdk';
-import { HistoryUrlParams } from '../../../../src/pages/History';
+import * as sdk from '../../../../src/lib/sdk';
 import { findHistory } from '../../../../src/lib/services/historyService';
 import { HistoryTableEntry } from '../../../../src/types/stan';
+import { cleanup } from '@testing-library/react';
 
-/*const getExpectedHistorySearchEntries:Array<HistoryTableEntry> = () => {
-  const historySearchResult = buildHistory();
-  //Convert to HistoryTableEntry
-    const historySearchEntries:Array<HistoryTableEntry> = [];
-    historySearchResult.entries.map((entry) => {
-        return ({
-          eventId: entry.eventId,
-          eventType: entry.type,
-            date: new Date(entry.time).toLocaleDateString(),
-            sourceBarcode: entry.sourceLabwareId,
-            destinationBarcode: entry.destinationLabwareId,
-            labwareType: entry.labwareType.name,
-
-
-        })
-    })
-}*/
-/*jest.mock('../../../src/lib/sdk', () => ({
-  stanCore: {
-    Find: jest
-      .fn()
-      .mockImplementationOnce(() => {
-        return new Promise<FindHistoryQuery>((resolve) => {
-          resolve({
-            history: buildHistory()
-          });
-        });
-      })
-      .mockImplementationOnce(() => {
-        return new Promise<FindHistoryQuery>((_resolve, reject) => {
-          reject({
-            response: {
-              errors: [
-                {
-                  message: 'Exception while fetching data (/history) : No labware found with barcode: STAN-3001'
-                }
-              ]
-            }
-          });
-        });
-      })
-  }
-}));
-
+const expectSuccesResult = (results: HistoryTableEntry[]) => {
+  expect(results.length).toEqual(1);
+  expect(results[0].workNumber).toEqual('SGP1008');
+  expect(results[0].details).toEqual(['Taste: Great', 'Monkey: Foo']);
+  expect(results[0].address).toEqual('A1');
+  expect(results[0].sectionPosition).toEqual('Bottom right');
+  expect(results[0].eventType).toEqual('Eat');
+};
+afterEach(() => {
+  jest.clearAllMocks();
+  cleanup();
+});
 describe('historyService.ts', () => {
-  describe('Searching history for empty values', () => {
-    beforeEach(() => {
-      jest.spyOn(sdk.stanCore, 'FindHistory').mockImplementation(() => {
-        return new Promise<FindHistoryQuery>((resolve) => {
-          resolve({
-            history: buildHistory()
-          });
+  describe('On success', () => {
+    const findHistoryMock = jest.fn(() => {
+      return new Promise<FindHistoryQuery>((resolve) => {
+        resolve({
+          history: buildHistory()
         });
-      })
-    })
-    const historyRequest: HistoryUrlParams = {};
-    it('emptyValues', async () => {
-      const results = await findHistory(historyRequest);
-      expect(results).toEqual({
-        [e]
       });
     });
+    const findHistoryForSampleIdMock = jest.fn(() => {
+      return new Promise<FindHistoryForSampleIdQuery>((resolve) => {
+        resolve({
+          historyForSampleId: buildHistory()
+        });
+      });
+    });
+    beforeEach(() => {
+      jest.spyOn(sdk.stanCore, 'FindHistory').mockImplementation(findHistoryMock);
+      jest.spyOn(sdk.stanCore, 'FindHistoryForSampleId').mockImplementation(findHistoryForSampleIdMock);
+    });
 
-    it('returns an error if the find request fails', async () => {
-      const searchService = new SearchService();
+    it('returns empty array when request is empty ', async () => {
+      const results = await findHistory({});
+      expect(results).toEqual([]);
+    });
+
+    const testProps = [
+      { barcode: 'STAN-3001' },
+      { donorName: 'Donor1' },
+      { eventType: 'Event1' },
+      { workNumber: 'SGP1008' },
+      { donorName: 'Donor1,Donor2' },
+      { externalName: 'Ext1' },
+      { externalName: 'Ext1,Ext2' },
+      {
+        workNumber: 'SGP1008',
+        eventType: 'Event1',
+        donorName: 'Donor1',
+        externalName: 'Ext1',
+        barcode: 'STAN-3001'
+      }
+    ];
+    test.each(testProps)('returns results when request has %p', async (props) => {
+      const results = await findHistory(props);
+      expectSuccesResult(results);
+      let expectedProps: FindHistoryQueryVariables = props;
+      if (props.donorName) {
+        expectedProps = { ...props, donorName: props.donorName.split(',') };
+      }
+      if (props.externalName) {
+        expectedProps = { ...expectedProps, externalName: props.externalName.split(',') };
+      }
+      expect(findHistoryMock).toHaveBeenCalledWith(expectedProps);
+    });
+    it('returns results when request has sampleId', async () => {
+      const results = await findHistory({ sampleId: '1' });
+      expectSuccesResult(results);
+      expect(findHistoryForSampleIdMock).toHaveBeenCalledWith({ sampleId: 1 });
+    });
+    it('calls the findHistoryForSampleId query when sampleId is provided even other fields are given', async () => {
+      await findHistory({
+        sampleId: '1',
+        workNumber: 'SGP1008',
+        eventType: 'Event1',
+        donorName: 'Donor1',
+        externalName: 'Ext1',
+        barcode: 'STAN-3001'
+      });
+      expect(findHistoryForSampleIdMock).toHaveBeenCalledWith({ sampleId: 1 });
+    });
+  });
+  describe('On failure', () => {
+    const findHistoryMock = jest.fn(() => {
+      return new Promise<FindHistoryQuery>((resolve, reject) => {
+        reject({
+          response: {
+            errors: [
+              {
+                message: 'Exception while fetching data (/findHistory) : No History entries found'
+              }
+            ]
+          }
+        });
+      });
+    });
+    const findHistoryForSampleIdMock = jest.fn(() => {
+      return new Promise<FindHistoryForSampleIdQuery>((resolve, reject) => {
+        reject({
+          response: {
+            errors: [
+              {
+                message: 'Exception while fetching data (/findHistory) : No History entries found'
+              }
+            ]
+          }
+        });
+      });
+    });
+    beforeEach(() => {
+      jest.spyOn(sdk.stanCore, 'FindHistory').mockImplementation(findHistoryMock);
+      jest.spyOn(sdk.stanCore, 'FindHistoryForSampleId').mockImplementation(findHistoryForSampleIdMock);
+    });
+
+    it('returns an error if the findHistory request fails', async () => {
       try {
-        await searchService.search(findRequest);
+        await findHistory({
+          workNumber: 'SGP1008',
+          eventType: 'Event1',
+          donorName: 'Donor1',
+          externalName: 'Ext1',
+          barcode: 'STAN-3001'
+        });
       } catch (e) {
         expect(e).toEqual({
           response: {
             errors: [
               {
-                message: 'Exception while fetching data (/find) : No labware found with barcode: STAN-3001'
+                message: 'Exception while fetching data (/findHistory) : No History entries found'
+              }
+            ]
+          }
+        });
+      }
+    });
+    it('returns an error if the findHistory request  with sampleId fails ', async () => {
+      try {
+        await findHistory({
+          workNumber: 'SGP1008',
+          eventType: 'Event1',
+          donorName: 'Donor1',
+          externalName: 'Ext1',
+          barcode: 'STAN-3001'
+        });
+      } catch (e) {
+        expect(e).toEqual({
+          response: {
+            errors: [
+              {
+                message: 'Exception while fetching data (/findHistory) : No History entries found'
               }
             ]
           }
@@ -87,6 +171,4 @@ describe('historyService.ts', () => {
       }
     });
   });
-
-
-});*/
+});
