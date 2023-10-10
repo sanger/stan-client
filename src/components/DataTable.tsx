@@ -87,8 +87,8 @@ const DataTableComponent = <T extends Object>(
   return (
     <Table {...getTableProps()}>
       <TableHead fixed={fixedHeader}>
-        {headerGroups.map((headerGroup) => (
-          <tr {...headerGroup.getHeaderGroupProps()}>
+        {headerGroups.map((headerGroup, indx) => (
+          <tr {...headerGroup.getHeaderGroupProps()} key={indx}>
             {headerGroup.headers.map((column) => (
               <TableHeader
                 allCapital={(column as ColumnWithAllCapitalProp).allCapital}
@@ -136,8 +136,12 @@ const DataTableComponent = <T extends Object>(
           prepareRow(row);
           return (
             <motion.tr initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} {...row.getRowProps()}>
-              {row.cells.map((cell) => {
-                return <TableCell {...cell.getCellProps()}>{cell.render('Cell') as ReactNode}</TableCell>;
+              {row.cells.map((cell, indx) => {
+                return (
+                  <TableCell {...cell.getCellProps()} key={row.index + ',' + indx}>
+                    {cell.render('Cell') as ReactNode}
+                  </TableCell>
+                );
               })}
             </motion.tr>
           );

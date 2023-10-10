@@ -10,6 +10,7 @@ import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 import Information from '../components/notifications/Information';
 import * as Yup from 'yup';
 import HistoryInput from '../components/history/HistoryInput';
+import { stanCore } from '../lib/sdk';
 
 /**
  * Data structure to keep the data associated with this component
@@ -20,6 +21,7 @@ export type HistoryUrlParams = {
   donorName?: string;
   externalName?: string;
   sampleId?: string;
+  eventType?: string;
 };
 
 /**
@@ -30,11 +32,14 @@ export const historySearchSchema = () => {
     workNumber: Yup.string(),
     barcode: Yup.string(),
     donorName: Yup.string(),
-    externalName: Yup.string()
+    externalName: Yup.string(),
+    eventType: Yup.string()
   });
 };
 
 export default function History() {
+  const [eventTypes, setEventTypes] = React.useState<string[]>([]);
+
   const location = useLocation();
   const historyProps = safeParseQueryString<HistoryUrlParams>({
     query: location.search,
@@ -45,8 +50,17 @@ export default function History() {
     workNumber: undefined,
     barcode: undefined,
     donorName: undefined,
-    externalName: undefined
+    externalName: undefined,
+    eventType: undefined
   };
+
+  React.useEffect(() => {
+    const fetchEventTypes = async () => {
+      const ret = await stanCore.GetEventTypes();
+      setEventTypes(ret.eventTypes);
+    };
+    fetchEventTypes();
+  }, [setEventTypes]);
 
   // If the URL parameters don't parse to valid HistoryProps use the default values
   const initialValues = historyProps ?? defaultInitialValues;
@@ -74,7 +88,7 @@ export default function History() {
               }}
             >
               <Form>
-                <HistoryInput />
+                <HistoryInput eventTypes={eventTypes} />
                 <div className="flex flex-row items-center justify-end space-x-4 mt-6">
                   <BlueButton type="submit">Search</BlueButton>
                 </div>

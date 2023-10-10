@@ -2,13 +2,10 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import '@testing-library/jest-dom';
 
 import { Formik } from 'formik';
-import CDNAConcentration, { CDNAConcentrationProps } from '../../../../src/components/visiumQC/CDNAConentration';
 import { slideFactory } from '../../../../src/lib/factories/labwareFactory';
 import { LabwareFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
 import Amplification, { AmplificationProps } from '../../../../src/components/visiumQC/Amplification';
-import userEvent from '@testing-library/user-event';
-import { getRegistrationFormTissueSample } from '../../../../src/pages/OriginalSampleRegistration';
 afterEach(() => {
   cleanup();
 });

@@ -12,6 +12,8 @@ import {
   FindHistoryForWorkNumberQueryVariables,
   FindHistoryQuery,
   FindHistoryQueryVariables,
+  GetEventTypesQuery,
+  GetEventTypesQueryVariables,
   HistoryEntry,
   HistoryFieldsFragment
 } from '../../types/sdk';
@@ -117,7 +119,15 @@ const historyHandlers = [
         })
       );
     }
-  )
+  ),
+  graphql.query<GetEventTypesQuery, GetEventTypesQueryVariables>('GetEventTypes', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        __typename: 'Query',
+        eventTypes: ['Event 1', 'Event 2']
+      })
+    );
+  })
 ];
 
 export default historyHandlers;

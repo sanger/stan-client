@@ -11,5 +11,5 @@ type LabwareStatePillProps = {
  * Component for displaying the state of a labware in a coloured pill
  */
 export function LabwareStatePill({ labware }: LabwareStatePillProps) {
-  return <Pill color={isLabwareUsable(labware) ? 'blue' : 'pink'}>{labware.state.toUpperCase()}</Pill>;
+  return <Pill color={isLabwareUsable(labware) ? 'blue' : 'pink'}>{labware.state?.toUpperCase()}</Pill>;
 }

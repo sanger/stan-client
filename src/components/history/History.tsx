@@ -22,9 +22,13 @@ import { HistoryUrlParams } from '../../pages/History';
  */
 export default function History(props: HistoryUrlParams) {
   const historyMachine = React.useMemo(() => {
-    return createHistoryMachine(props);
-  }, [props]);
-  const [current, send] = useMachine(historyMachine);
+    return createHistoryMachine();
+  }, []);
+  const [current, send] = useMachine(historyMachine, {
+    context: {
+      historyProps: props
+    }
+  });
 
   const { isAuthenticated } = useAuth();
 
@@ -58,7 +62,11 @@ export default function History(props: HistoryUrlParams) {
               ? 'bg-yellow-400 text-sp-600 hover:text-sp-700 font-semibold hover:underline text-base tracking-wide'
               : '';
           return (
-            <StyledLink to={`/labware/${barcode}`} className={classes ? classes : undefined}>
+            <StyledLink
+              data-testid={'source-barcode-link'}
+              to={`/labware/${barcode}`}
+              className={classes ? classes : undefined}
+            >
               {barcode}
             </StyledLink>
           );
@@ -74,7 +82,11 @@ export default function History(props: HistoryUrlParams) {
               ? 'bg-yellow-400 text-sp-600 hover:text-sp-700 font-semibold hover:underline text-base tracking-wide'
               : '';
           return (
-            <StyledLink to={`/labware/${barcode}`} className={classes ? classes : undefined}>
+            <StyledLink
+              data-testid="destination-barcode-link"
+              to={`/labware/${barcode}`}
+              className={classes ? classes : undefined}
+            >
               {barcode}
             </StyledLink>
           );
@@ -122,12 +134,12 @@ export default function History(props: HistoryUrlParams) {
           const details = props.row.original.details.map((detail) => {
             return <li key={detail}>{detail}</li>;
           });
-          if (props.row.original.eventType.toLowerCase() === 'release') {
+          if (props.row.original.eventType?.toLowerCase() === 'release') {
             const releaseId = props.row.original.eventId;
             const releaseUrl = `/release?id=${releaseId}`;
             details.push(
               <li key={releaseUrl}>
-                <a href={releaseUrl} download={'release.tsv'}>
+                <a data-testid="release-download-link" href={releaseUrl} download={'release.tsv'}>
                   <DownloadIcon className={'inline-block h-5 w-5 -mt-1 -ml-1 mr-2'} />
                   Release file
                 </a>
@@ -202,7 +214,7 @@ export default function History(props: HistoryUrlParams) {
       )}
 
       {current.matches('searching') && (
-        <div className="flex flex-row justify-center">
+        <div className="flex flex-row justify-center" data-testid={'loading-spinner'}>
           <LoadingSpinner />
         </div>
       )}
@@ -224,6 +236,8 @@ export default function History(props: HistoryUrlParams) {
                       <TableCell className={'flex flex-col justify-center  p-2'}>
                         {uniqueWorkNumbers.map((workNumber, indx) => (
                           <StyledLink
+                            data-testid={`styled-link-${workNumber}`}
+                            key={workNumber}
                             to={fileAccessUrlPath(workNumber)}
                             className={`text-center bg-white ${indx > 0 && 'border-t-2 border-gray-100'}  p-2`}
                           >{`Files for ${workNumber}`}</StyledLink>
@@ -238,16 +252,20 @@ export default function History(props: HistoryUrlParams) {
               History for
               <>&nbsp;</>
               <span className="text-gray-700">{`${searchString(' ', ', ')}`}</span>
-              <a href={downloadURL} download={`${getTimestampStr()}_${searchString('=', '&')}${extension}`}>
+              <a
+                data-testid="download-button"
+                href={downloadURL}
+                download={`${getTimestampStr()}_${searchString('=', '&')}${extension}`}
+              >
                 <DownloadIcon name="Download" className="h-4 w-4 text-sdb" />
               </a>
             </div>
             <TopScrollingBar>
-              <DataTable data-testid={'history-table'} columns={historyColumns} data={history} fixedHeader={true} />
+              <DataTable columns={historyColumns} data={history} fixedHeader={true} />
             </TopScrollingBar>
           </>
         ) : isValidInput ? (
-          <Warning message={'No results found.'} />
+          <Warning data-testid={'warning'} message={'No results found.'} />
         ) : (
           <></>
         ))}

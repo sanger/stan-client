@@ -1,5 +1,17 @@
-query FindHistory($workNumber: String, $barcode: String, $donorName: String, $externalName: String) {
-  history(workNumber: $workNumber, barcode: $barcode, donorName: $donorName, externalName: $externalName) {
+query FindHistory(
+  $workNumber: String
+  $barcode: String
+  $donorName: String
+  $externalName: String
+  $eventType: String
+) {
+  history(
+    workNumber: $workNumber
+    barcode: $barcode
+    donorName: $donorName
+    externalName: $externalName
+    eventType: $eventType
+  ) {
     ...HistoryFields
   }
 }

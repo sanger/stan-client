@@ -9,19 +9,20 @@ import {
 import userEvent from '@testing-library/user-event';
 import { UserRole } from '../../../src/types/sdk';
 import { merge } from 'lodash';
+import * as AuthContext from '../../../src/context/AuthContext';
 
 export const getById = queryByAttribute.bind(null, 'id');
 
 export const workNumberNumOptionsShouldBe = async (length: number) => {
   await optionsShouldHaveLength('workNumber', length);
 };
-const optionsShouldHaveLength = async (dataTestId: string, length: number) => {
+export const optionsShouldHaveLength = async (dataTestId: string, length: number) => {
   getCustomSelectOptions(dataTestId).then((options) => {
     expect(options).toHaveLength(length);
   });
 };
 
-const getCustomSelectOptions = async (dataTestId: string) => {
+export const getCustomSelectOptions = async (dataTestId: string) => {
   const user = userEvent.setup();
   const wrapperDiv = screen.getByTestId(dataTestId);
 
@@ -54,6 +55,10 @@ export const selectOption = async (dataTestId: string, optionValue: string) => {
   const option = screen.getAllByText(optionValue)[0];
   expect(option).toBeInTheDocument();
   await userEvent.click(option);
+};
+export const shouldDisplayValue = (dataTestId: string, value: string, index?: number) => {
+  const selectDiv = screen.getAllByTestId(dataTestId)[0];
+  expect(selectDiv).toHaveTextContent(value);
 };
 
 export const selectFocusBlur = async (dataTestId = 'select-div') => {
@@ -94,6 +99,22 @@ export const visitAsEndUser = () => {
       })
     }
   }));
+};
+
+export const spyUser = (username: string, role: UserRole, isAuthenticated: boolean = true) => {
+  jest.spyOn(AuthContext, 'useAuth').mockReturnValue({
+    authState: {
+      user: {
+        username: username,
+        role: role
+      }
+    },
+    isAuthenticated: jest.fn(() => isAuthenticated),
+    setAuthState: jest.fn(),
+    logout: jest.fn(),
+    clearAuthState: jest.fn(),
+    userRoleIncludes: jest.fn((givenRole) => givenRole === role)
+  });
 };
 
 export const waitFor = <T>(callback: () => T | Promise<T>, options?: waitForOptions): Promise<T> => {

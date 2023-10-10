@@ -18,13 +18,13 @@ type HistoryEvent =
   | MachineServiceDone<'findHistory', Array<HistoryTableEntry>>
   | MachineServiceError<'findHistory'>;
 
-export default function createHistoryMachine(initialHistoryProps: HistoryUrlParams) {
+export default function createHistoryMachine() {
   return createMachine<HistoryContext, HistoryEvent>(
     {
       id: 'historyMachine',
       initial: 'searching',
       context: {
-        historyProps: initialHistoryProps,
+        historyProps: {},
         history: [],
         serverError: null
       },

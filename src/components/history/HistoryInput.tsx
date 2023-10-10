@@ -3,8 +3,12 @@ import React from 'react';
 import WorkNumberSelect from '../WorkNumberSelect';
 import { HistoryUrlParams } from '../../pages/History';
 import FormikInput from '../forms/Input';
+import CustomReactSelect from '../forms/CustomReactSelect';
 
-export default function HistoryInput() {
+type HistoryInputProps = {
+  eventTypes: string[];
+};
+export default function HistoryInput({ eventTypes }: HistoryInputProps) {
   const { values, setFieldValue } = useFormikContext<HistoryUrlParams>();
 
   return (
@@ -26,13 +30,23 @@ export default function HistoryInput() {
           />
         </div>
         <div className={'flex flex-col '}>
-          <FormikInput name="barcode" label="Barcode" />
+          <FormikInput name="barcode" label="Barcode" data-testid={'barcode'} />
         </div>
         <div className={'flex flex-col '}>
-          <FormikInput name="externalName" label="External Name" />
+          <FormikInput name="externalName" label="External Name" data-testid={'external-name'} />
         </div>
         <div className={'flex flex-col '}>
-          <FormikInput name="donorName" label="Donor Name" />
+          <FormikInput name="donorName" label="Donor Name" data-testid={'donor-name'} />
+        </div>
+        <div className={'flex flex-col '}>
+          <CustomReactSelect
+            name="eventType"
+            label="Event Type"
+            emptyOption
+            dataTestId={'event-type'}
+            options={eventTypes.map((evtType) => ({ label: evtType, value: evtType }))}
+            value={values.eventType}
+          />
         </div>
       </div>
     </div>
