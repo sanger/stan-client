@@ -4,6 +4,7 @@ import WorkNumberSelect from '../WorkNumberSelect';
 import { HistoryUrlParams } from '../../pages/History';
 import FormikInput from '../forms/Input';
 import CustomReactSelect from '../forms/CustomReactSelect';
+import ExternalIDFieldSearchInfo from '../info/ExternalFieldInfo';
 
 type HistoryInputProps = {
   eventTypes: string[];
@@ -33,10 +34,36 @@ export default function HistoryInput({ eventTypes }: HistoryInputProps) {
           <FormikInput name="barcode" label="Barcode" data-testid={'barcode'} />
         </div>
         <div className={'flex flex-col '}>
-          <FormikInput name="externalName" label="External Name" data-testid={'external-name'} />
+          <FormikInput
+            name="externalName"
+            label="External Name"
+            data-testid={'external-name'}
+            info={<ExternalIDFieldSearchInfo />}
+          />
         </div>
         <div className={'flex flex-col '}>
-          <FormikInput name="donorName" label="Donor Name" data-testid={'donor-name'} />
+          <FormikInput
+            name="donorName"
+            label="Donor Name"
+            data-testid={'donor-name'}
+            info={
+              <div className={'flex flex-col whitespace-pre-wrap space-x-2 space-y-2'}>
+                <p className={'font-medium'}>
+                  The donor field supports search by multiple donors using comma separated values.
+                </p>
+                <p className={'italic text-gray-600'}>
+                  E.g. to search for blocks with multiple donor names you can use{' '}
+                  <span className={'text-blue-600'}>
+                    <code>Donor1</code>
+                  </span>
+                  ,
+                  <span className={'text-blue-600'}>
+                    <code>Donor2</code>
+                  </span>
+                </p>
+              </div>
+            }
+          />
         </div>
         <div className={'flex flex-col '}>
           <CustomReactSelect

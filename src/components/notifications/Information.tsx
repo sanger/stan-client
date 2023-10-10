@@ -21,7 +21,7 @@ const Information = ({ title, children, className }: InformationProps): JSX.Elem
       onMouseOver={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      <InfoIcon className={`bg-white inline-block ${hover ? 'text-pink-600' : 'text-pink-400'}`} />
+      <InfoIcon className={`bg-white inline-block ${hover ? 'text-blue-600' : 'text-blue-400'}`} />
       {hover && (
         <motion.div variants={variants.fadeInWithLift} initial={'hidden'} animate={'visible'} className="relative">
           <Modal show={hover}>
