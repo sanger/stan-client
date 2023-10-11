@@ -3,9 +3,9 @@ import { buildFindResult } from '../../../../src/mocks/handlers/findHandlers';
 import { FindQuery, FindResult } from '../../../../src/types/sdk';
 
 const findResults = buildFindResult(2, 2);
-jest.mock('../../../src/lib/sdk', () => ({
+jest.mock('../../../../src/lib/sdk', () => ({
   stanCore: {
-    FindHistory: jest
+    Find: jest
       .fn()
       .mockImplementationOnce(() => {
         return new Promise<FindQuery>((resolve) => {
