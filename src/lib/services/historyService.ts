@@ -30,8 +30,8 @@ export async function findHistory(historyProps: HistoryUrlParams): Promise<Array
       result = await stanCore.FindHistory({
         workNumber: historyProps.workNumber,
         barcode: historyProps.barcode,
-        externalName: historyProps.externalName,
-        donorName: historyProps.donorName,
+        externalName: historyProps.externalName?.split(','),
+        donorName: historyProps.donorName?.split(','),
         eventType: historyProps.eventType
       });
       history = result.history;

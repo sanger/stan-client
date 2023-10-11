@@ -1,9 +1,9 @@
-import { SearchService } from '../../../src/lib/services/searchService';
-import { buildFindResult } from '../../../src/mocks/handlers/findHandlers';
-import { FindQuery, FindResult } from '../../../src/types/sdk';
+import { SearchService } from '../../../../src/lib/services/searchService';
+import { buildFindResult } from '../../../../src/mocks/handlers/findHandlers';
+import { FindQuery, FindResult } from '../../../../src/types/sdk';
 
 const findResults = buildFindResult(2, 2);
-jest.mock('../../../src/lib/sdk', () => ({
+jest.mock('../../../../src/lib/sdk', () => ({
   stanCore: {
     Find: jest
       .fn()

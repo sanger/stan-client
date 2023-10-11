@@ -1,8 +1,8 @@
 query FindHistory(
   $workNumber: String
   $barcode: String
-  $donorName: String
-  $externalName: String
+  $donorName: [String!]
+  $externalName: [String!]
   $eventType: String
 ) {
   history(
