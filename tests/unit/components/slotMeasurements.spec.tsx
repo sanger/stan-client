@@ -4,6 +4,7 @@ import SlotMeasurements from '../../../src/components/slotMeasurement/SlotMeasur
 
 import { Formik } from 'formik';
 import userEvent from '@testing-library/user-event';
+import { selectOption } from '../generic/utilities';
 afterEach(() => {
   cleanup();
 });
@@ -122,9 +123,11 @@ describe('SlotMeasurements', () => {
     const comments = screen.getByTestId('comments0');
     expect(comments).toBeInTheDocument();
 
-    const commentsCombo = within(comments).getByRole('combobox', { hidden: true });
-    await waitFor(() => userEvent.type(commentsCombo, 'comment 2{enter}'));
-    expect(screen.getByTestId('comments0')).toHaveTextContent('comment 2');
-    expect(handleChangeComment).toHaveBeenCalled();
+    await selectOption('comments0', 'comment 2');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('comments0')).toHaveTextContent('comment 2');
+      expect(handleChangeComment).toHaveBeenCalled();
+    });
   });
 });
