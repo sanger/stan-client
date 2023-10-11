@@ -4,7 +4,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { describe } from '@jest/globals';
 import Extraction from '../../../src/pages/Extraction';
 import equipmentRepository from '../../../src/mocks/repositories/equipmentRepository';
-import { scanLabware, selectOption, selectSGPNumber } from '../generic/utilities';
+import { scanLabware, selectOption, selectSGPNumber } from '../../generic/utilities';
 import { ExtractMutation, ExtractMutationVariables } from '../../../src/types/sdk';
 import { graphql } from 'msw';
 import { server } from '../../../src/mocks/server';

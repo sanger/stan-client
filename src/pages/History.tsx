@@ -6,8 +6,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { safeParseQueryString, stringify } from '../lib/helpers';
 import HistoryComponent from '../components/history/History';
 import Heading from '../components/Heading';
-import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
-import Information from '../components/notifications/Information';
 import * as Yup from 'yup';
 import HistoryInput from '../components/history/HistoryInput';
 import { stanCore } from '../lib/sdk';
@@ -77,9 +75,6 @@ export default function History() {
               <Heading level={3} showBorder={false}>
                 Search
               </Heading>
-              <Information title={'External ID'}>
-                <ExternalIDFieldSearchInfo />
-              </Information>
             </div>
             <Formik<HistoryUrlParams>
               initialValues={initialValues}

@@ -6,7 +6,7 @@ import React from 'react';
 import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
 import { LabwareFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
-import { getById } from '../../generic/utilities';
+import { getById } from '../../../generic/utilities';
 import '@testing-library/jest-dom';
 
 beforeEach(() => {

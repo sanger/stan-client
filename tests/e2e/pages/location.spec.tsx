@@ -2,10 +2,10 @@ import { describe } from '@jest/globals';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import Location from '../../../../src/pages/Location';
+import Location from '../../../src/pages/Location';
 import userEvent from '@testing-library/user-event';
-import { locationRepository } from '../../../../src/mocks/repositories/locationRepository';
-import { locationResponse } from '../../../../src/mocks/handlers/locationHandlers';
+import { locationRepository } from '../../../src/mocks/repositories/locationRepository';
+import { locationResponse } from '../../../src/mocks/handlers/locationHandlers';
 import { enableMapSet } from 'immer';
 import React from 'react';
 jest.mock('../../../../src/pages/location/ItemsGrid', () => {

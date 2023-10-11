@@ -13,7 +13,7 @@ import {
   visitAsEndUser,
   workNumberNumOptionsShouldBe,
   workNumberNumOptionsShouldBeMoreThan
-} from '../generic/utilities';
+} from '../../generic/utilities';
 import workRepository from '../../../src/mocks/repositories/workRepository';
 
 afterEach(() => {
