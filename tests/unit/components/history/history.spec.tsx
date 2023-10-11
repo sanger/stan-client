@@ -6,7 +6,7 @@ import { LabwareState, UserRole } from '../../../../src/types/sdk';
 import { BrowserRouter } from 'react-router-dom';
 import { HistoryTableEntry } from '../../../../src/types/stan';
 import * as xState from '@xstate/react';
-import { spyUser } from '../../generic/utilities';
+import { spyUser } from '../../../generic/utilities';
 
 afterEach(() => {
   cleanup();

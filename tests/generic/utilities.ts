@@ -7,9 +7,9 @@ import {
   queryByAttribute
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { UserRole } from '../../../src/types/sdk';
+import { UserRole } from '../../src/types/sdk';
 import { merge } from 'lodash';
-import * as AuthContext from '../../../src/context/AuthContext';
+import * as AuthContext from '../../src/context/AuthContext';
 
 export const getById = queryByAttribute.bind(null, 'id');
 

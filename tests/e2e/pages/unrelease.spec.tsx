@@ -5,7 +5,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import { BrowserRouter } from 'react-router-dom';
 import Unrelease from '../../../src/pages/Unrelease';
-import { selectFocusBlur, selectSGPNumber, waitFor } from '../generic/utilities';
+import { selectFocusBlur, selectSGPNumber, waitFor } from '../../generic/utilities';
 import { server } from '../../../src/mocks/server';
 import { graphql } from 'msw';
 describe('Unrelease', () => {

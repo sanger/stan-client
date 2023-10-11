@@ -104,11 +104,10 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/sectioning/confirm"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetSectioningConfirmInfo}>
-                {(sectioningInfo) => <Confirm sectioningConfirmInfo={sectioningInfo} />}
-              </DataFetcher>
-            }
+            element={<Confirm />}
+            loader={async () => {
+              return await stanCore.GetSectioningConfirmInfo();
+            }}
           />
         </Route>
         <Route element={<AuthLayout />}>
