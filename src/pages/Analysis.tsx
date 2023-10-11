@@ -64,12 +64,12 @@ function Analysis({ comments }: AnalysisProps) {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title> Analysis</AppShell.Title>
+        <AppShell.Title>Analysis</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           <div className="mt-8 space-y-4">
-            <Heading level={3}> Section Tubes </Heading>
+            <Heading level={3}> Labware </Heading>
             <ExtractResultPanel onChangeExtractResults={onChangeExtractResults} locked={analysisMode} />
           </div>
         </div>
