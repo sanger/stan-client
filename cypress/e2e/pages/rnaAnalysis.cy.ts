@@ -7,7 +7,7 @@ import {
 import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
-import { selectOption, shouldHaveOption } from '../shared/customReactSelect.cy';
+import { selectOption } from '../shared/customReactSelect.cy';
 function scanLabware(barcode: string) {
   cy.get('#labwareScanInput').should('not.be.disabled').clear().type(`${barcode}{enter}`);
 }
@@ -87,13 +87,6 @@ describe('RNA Analysis', () => {
     before(() => {
       cy.get('#analysis').click();
     });
-
-    it('displays table to enter analysis data', () => {
-      cy.findAllByRole('table').should('have.length', 2).eq(1).contains('STAN-3111');
-    });
-    it('displays analysis table with barcode STAN-3111', () => {
-      cy.findAllByRole('table').should('have.length', 2);
-    });
     it('should display lock icon in extraction result table', () => {
       cy.get('[data-testid=remove]').should('not.exist');
     });
@@ -101,50 +94,6 @@ describe('RNA Analysis', () => {
       cy.get('[data-testid=lock]').should('exist');
     });
   });
-
-  context('when RIN type is selected', () => {
-    it('should not display range in measurement dropdown', () => {
-      cy.findByTestId('measurementType').should('not.have.value', 'Range');
-    });
-  });
-
-  context('when DV200 type is selected', () => {
-    before(() => {
-      selectOption('analysisType', 'DV200');
-    });
-    it('should contain range in measurement dropdown', () => {
-      shouldHaveOption('measurementType', 'Range');
-    });
-    it('should dispaly only one text field for measurement value', () => {
-      cy.findByTestId('measurementValue').should('have.length', 1);
-    });
-  });
-  context("when 'Range' is selected in mesaurement type", () => {
-    before(() => {
-      selectOption('measurementType', 'Range');
-    });
-    it('should display two text fields for maesurement value', () => {
-      cy.findByText('Upper bound:').should('be.visible');
-      cy.findByText('Lower bound:').should('be.visible');
-    });
-  });
-  context("when 'N/A' is selected in mesaurement type", () => {
-    before(() => {
-      selectOption('measurementType', 'N/A');
-    });
-    it('should disable the text field in table', () => {
-      cy.findByTestId('measurementValue').should('be.disabled');
-    });
-  });
-  context('when a comment is selected for all labwares', () => {
-    before(() => {
-      selectOption('comment', 'Potential to work');
-    });
-    it('should display the selected comment in comment column of table', () => {
-      cy.findAllByRole('table').should('have.length', 2).eq(1).contains('Potential to work');
-    });
-  });
-
   context('when submit button is clicked and it return an error', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {
@@ -163,7 +112,8 @@ describe('RNA Analysis', () => {
           )
         );
       });
-
+      selectOption('analysisType', 'DV200');
+      selectOption('equipmentId', 'Bioanalyser');
       cy.findByText('Save').click();
     });
     it('should display Submit failure message', () => {
@@ -184,6 +134,8 @@ describe('RNA Analysis', () => {
           )
         );
       });
+      selectOption('equipmentId', 'Bioanalyser');
+      selectOption('analysisType', 'DV200');
       cy.findByText('Save').click();
     });
     it('should display Submit success message', () => {

@@ -1,7 +1,7 @@
 import { Form, Formik } from 'formik';
 import React, { useCallback } from 'react';
 import Heading from '../Heading';
-import { CommentFieldsFragment, RnaAnalysisLabware } from '../../types/sdk';
+import { CommentFieldsFragment, EquipmentFieldsFragment, RnaAnalysisLabware } from '../../types/sdk';
 import { Row } from 'react-table';
 import { motion } from 'framer-motion';
 import DataTable from '../DataTable';
@@ -12,18 +12,26 @@ import WorkNumberSelect from '../WorkNumberSelect';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { selectOptionValues } from '../forms';
 
-type RecordAnalysisProps = {
+export type RecordAnalysisProps = {
   barcodes: string[];
   comments: CommentFieldsFragment[];
+  equipments: EquipmentFieldsFragment[];
   analysisLabwares: RnaAnalysisLabware[];
   onChangeLabwareData: (operationType: string, labwares: RnaAnalysisLabware[]) => void;
+  onChangeEquipment: (equipmentId: number) => void;
 };
 export enum OperationType {
   RIN = 'RIN analysis',
   DV200 = 'DV200 analysis'
 }
 
-export default function AnalysisLabware({ barcodes, comments, onChangeLabwareData }: RecordAnalysisProps) {
+export default function AnalysisLabware({
+  barcodes,
+  comments,
+  equipments,
+  onChangeLabwareData,
+  onChangeEquipment
+}: RecordAnalysisProps) {
   const defaultLabwareValues = barcodes.map((barcode) => {
     return {
       barcode: barcode,
@@ -37,7 +45,7 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
   const memoAnalysisLabwareMachine = React.useMemo(() => {
     return analysisLabwareMachine.withContext({
       analysisLabwares: defaultLabwareValues,
-      operationType: OperationType.RIN
+      operationType: undefined
     });
   }, [defaultLabwareValues]);
 
@@ -45,7 +53,7 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
   const { operationType, analysisLabwares } = current.context;
 
   React.useEffect(() => {
-    onChangeLabwareData(operationType, analysisLabwares);
+    onChangeLabwareData(operationType!, analysisLabwares);
   }, [analysisLabwares, onChangeLabwareData, operationType]);
 
   const handleOnChange = useCallback(
@@ -77,6 +85,7 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
   );
 
   const columns = React.useMemo(() => {
+    if (!operationType) return [];
     return [
       {
         Header: 'Barcode',
@@ -119,28 +128,38 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
       <Heading level={3}> Analysis</Heading>
       <Formik initialValues={barcodes} onSubmit={() => {}}>
         <Form>
-          <div className="md:grid mt-4 md:grid-cols-3 md:space-y-0 md:gap-4 space-y-2 mb-8">
+          <div className="md:grid mt-4 md:grid-cols-2 md:space-y-0 md:gap-4 space-y-2 mb-8">
+            <CustomReactSelect
+              label={'Equipment'}
+              dataTestId="equipmentId"
+              name={'equipmentId'}
+              emptyOption
+              handleChange={(val) => {
+                onChangeEquipment(parseInt((val as OptionType).value, 10));
+              }}
+              options={selectOptionValues(equipments, 'name', 'id')}
+            />
+            <CustomReactSelect
+              label={'Type'}
+              dataTestId={'analysisType'}
+              name={'type'}
+              emptyOption={false}
+              handleChange={(value) => {
+                send({
+                  type: 'UPDATE_ANALYSIS_TYPE',
+                  value: (value as OptionType).label
+                });
+              }}
+              options={[AnalysisMeasurementType.RIN, AnalysisMeasurementType.DV200].map((type) => {
+                return {
+                  value: type,
+                  label: type
+                };
+              })}
+            />
+          </div>
+          <div className="md:grid mt-4 md:grid-cols-2 md:space-y-0 md:gap-4 space-y-2 mb-8">
             <div className="">
-              <CustomReactSelect
-                label={'Type'}
-                dataTestId={'analysisType'}
-                name={'type'}
-                emptyOption={false}
-                handleChange={(value) => {
-                  send({
-                    type: 'UPDATE_ANALYSIS_TYPE',
-                    value: (value as OptionType).label
-                  });
-                }}
-                options={[AnalysisMeasurementType.RIN, AnalysisMeasurementType.DV200].map((type) => {
-                  return {
-                    value: type,
-                    label: type
-                  };
-                })}
-              />
-            </div>
-            <div className="mt-4">
               <div>SGP Number</div>
               <WorkNumberSelect
                 onWorkNumberChange={(workNumber) => {
@@ -172,7 +191,7 @@ export default function AnalysisLabware({ barcodes, comments, onChangeLabwareDat
           </div>
         </Form>
       </Formik>
-      {barcodes.length > 0 && (
+      {barcodes.length > 0 && operationType && (
         <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
           <DataTable columns={columns} data={analysisLabwares} />
         </motion.div>
