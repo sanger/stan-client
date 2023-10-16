@@ -220,12 +220,17 @@ function Release({ releaseInfo }: PageParams) {
     [stanCore, setReleaseLabware, setLabwareFromSGP, releaseLabware, updateFieldValues]
   );
 
-  const onRemoveLabwareForWorkNumberRelease = React.useCallback(
-    (barcode: string) => {
-      setLabwareFromSGP((prev) => prev.filter((lw) => lw.barcode !== barcode));
-      setReleaseLabware((prev) => prev.filter((lw) => lw.barcode !== barcode));
+  const onRemoveLabware = React.useCallback(
+    (
+      barcode: string,
+      values: ReleaseRequest,
+      setValues: (values: React.SetStateAction<ReleaseRequest>, shouldValidate?: boolean | undefined) => void
+    ) => {
+      const updatedReleaseLw = values.releaseLabware.filter((lw) => lw.barcode !== barcode);
+      setReleaseLabware(updatedReleaseLw);
+      setValues({ ...values, releaseLabware: updatedReleaseLw });
     },
-    [setReleaseLabware, setLabwareFromSGP]
+    [setReleaseLabware]
   );
 
   return (
@@ -236,7 +241,7 @@ function Release({ releaseInfo }: PageParams) {
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={submitForm}>
-            {({ values, setFieldValue }) => (
+            {({ values, setFieldValue, setValues }) => (
               <Form>
                 <GrayBox>
                   <motion.div
@@ -305,7 +310,10 @@ function Release({ releaseInfo }: PageParams) {
                                           type={'button'}
                                           onClick={() => {
                                             if (row.original.barcode) {
-                                              onRemoveLabwareForWorkNumberRelease(row.original.barcode);
+                                              setLabwareFromSGP((prev) =>
+                                                prev.filter((lw) => lw.barcode !== row.original.barcode)
+                                              );
+                                              onRemoveLabware(row.original.barcode, values, setValues);
                                             }
                                           }}
                                         />
@@ -327,11 +335,7 @@ function Release({ releaseInfo }: PageParams) {
                               onAddLabware(labware, setFieldValue);
                             }}
                             onRemove={(labware) => {
-                              const updatedReleasedLabware = releaseLabware.filter(
-                                (rlw) => rlw.barcode !== labware.barcode
-                              );
-                              setReleaseLabware(updatedReleasedLabware);
-                              updateFieldValues(updatedReleasedLabware, setFieldValue);
+                              onRemoveLabware(labware.barcode, values, setValues);
                             }}
                             locked={formLocked}
                             labwareCheckFunction={labwareBioStateCheck}
