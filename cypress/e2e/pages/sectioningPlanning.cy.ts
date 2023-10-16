@@ -23,7 +23,7 @@ describe('Sectioning Planning', () => {
     context('when a source labware loaded with fetal samples less than 12 weeks old', () => {
       before(() => {
         const sourceLabware = labwareFactory.build(
-          { barcode: 'STAN-3333' },
+          { barcode: 'STAN-113' },
           {
             associations: {
               labwareType: labwareTypes[LabwareTypeName.CASSETTE].build()
@@ -46,11 +46,11 @@ describe('Sectioning Planning', () => {
             })
           );
         });
-        cy.get('#labwareScanInput').type('STAN-3333{enter}');
+        cy.get('#labwareScanInput').type('STAN-113{enter}');
       });
 
       it('should display a warning message', () => {
-        cy.findByText('STAN-3333').should('be.visible');
+        cy.findByText('STAN-113').should('be.visible');
       });
     });
   });
