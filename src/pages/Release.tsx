@@ -138,7 +138,6 @@ function Release({ releaseInfo }: PageParams) {
               } else return { barcode: suggestedWork.barcode };
             })
           };
-          alert(newValues.releaseLabware.map((s) => s.barcode).join(','));
           return stanCore.ReleaseLabware({ releaseRequest: newValues });
         }
       }
