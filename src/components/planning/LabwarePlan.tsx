@@ -168,6 +168,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                     {(outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP ||
                       outputLabware.labwareType.name === LabwareTypeName.XENIUM) && (
                       <FormikInput
+                        value={''}
                         name={'barcode'}
                         label={'Barcode'}
                         type={'text'}
@@ -209,6 +210,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                         />
                         <FormikErrorMessage name={'lotNumber'} />
                         <FormikSelect
+                          data-testid={'slide-costing'}
                           label={'Slide costings'}
                           name={'costing'}
                           emptyOption={true}
@@ -347,7 +349,7 @@ function buildInitialValues(operationType: string, labwareType: LabwareTypeField
     labwareType.name === LabwareTypeName.VISIUM_TO ||
     labwareType.name === LabwareTypeName.VISIUM_ADH
   ) {
-    formValues.costing = '';
+    formValues.costing = undefined;
     formValues.lotNumber = '';
   }
 
@@ -387,10 +389,20 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
     labwareType.name === LabwareTypeName.VISIUM_ADH ||
     labwareType.name === LabwareTypeName.XENIUM
   ) {
+    formShape.costing = Yup.string().oneOf(Object.values(SlideCosting)).required('Slide costing is a required field');
+  }
+  if (
+    labwareType.name === LabwareTypeName.VISIUM_LP ||
+    labwareType.name === LabwareTypeName.VISIUM_TO ||
+    labwareType.name === LabwareTypeName.VISIUM_ADH
+  ) {
     formShape.lotNumber = Yup.string()
       .required()
       .matches(/^\d{6,7}$/, 'Slide lot number should be a 6-7 digits number');
-    formShape.costing = Yup.string().oneOf(Object.values(SlideCosting)).required('Slide costing is a required field');
+  } else if (labwareType.name === LabwareTypeName.XENIUM) {
+    formShape.lotNumber = Yup.string()
+      .required()
+      .matches(/^\d-\d{4}[A-Za-z]$/, 'Slide lot number should be in format: Digit, hyphen, 4 digits, letter');
   }
   return Yup.object().shape(formShape).defined();
 }
@@ -398,7 +410,7 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
 /**
  * Builds the initial layout for this plan.
  */
-function buildInitialLayoutPlan(
+export function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFieldsFragment>,
   sampleColors: Map<number, string>,
   outputLabware: NewLabwareLayout
