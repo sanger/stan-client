@@ -211,7 +211,9 @@ describe('Fields validations', () => {
       waitFor(async () => {
         await userEvent.type(screen.getByTestId('formInput'), '12345566');
         await userEvent.click(screen.getByTestId('Barcode'));
-        expect(screen.getByText('Slide lot number should be in format: Digit, hyphen, 4 digits, letter')).toBeVisible();
+        expect(
+          screen.getByText('Slide lot number should be in format: Digit, hyphen, 4 digits, uppercase letter')
+        ).toBeVisible();
       });
     });
     it('validates Barcode to 7 digit number', () => {

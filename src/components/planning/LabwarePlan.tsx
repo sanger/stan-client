@@ -402,7 +402,7 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
   } else if (labwareType.name === LabwareTypeName.XENIUM) {
     formShape.lotNumber = Yup.string()
       .required()
-      .matches(/^\d-\d{4}[A-Za-z]$/, 'Slide lot number should be in format: Digit, hyphen, 4 digits, letter');
+      .matches(/^\d-\d{4}[A-Z]$/, 'Slide lot number should be in format: Digit, hyphen, 4 digits, uppercase letter');
   }
   return Yup.object().shape(formShape).defined();
 }
