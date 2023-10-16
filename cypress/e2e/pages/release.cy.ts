@@ -300,7 +300,7 @@ describe('Release Page', () => {
       });
       it("goes to Release Options page when 'Change Release File Options' button is clicked", () => {
         cy.findByText('Change Release File Options').click();
-        cy.url().should('include', '/releaseOptions?id=1001,1002,1003,1004&groups=histology,sample_processing,xenium');
+        cy.url().should('include', '/releaseOptions?id=1001,1002,1003&groups=histology,sample_processing,xenium');
       });
     });
   });
