@@ -12,12 +12,12 @@ describe('Labware Info Page', () => {
     });
   });
 
-  context('when I visit as a logged in user and the labware is usable', () => {
+  context('when I visit as a logged in user', () => {
     before(() => {
       cy.visit('/labware/STAN-0001F');
     });
 
-    it('does not show the label printer', () => {
+    it('shows the label printer', () => {
       cy.findByText('Print Labels').should('be.visible');
     });
   });
@@ -41,8 +41,8 @@ describe('Labware Info Page', () => {
       });
     });
 
-    it('does not show the label printer', () => {
-      cy.findByText('Print Labels').should('not.exist');
+    it('shows label printing option', () => {
+      cy.findByText('Print Labels').should('exist');
     });
   });
 });

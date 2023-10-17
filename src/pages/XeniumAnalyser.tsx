@@ -45,7 +45,8 @@ type LabwareSamples = {
 };
 
 export type XeniumAnalyserFormValues = {
-  lotNumber: string;
+  lotNumberA: string;
+  lotNumberB: string;
   runName: string;
   performed: string;
   labware: Array<AnalyserLabware>;
@@ -53,7 +54,8 @@ export type XeniumAnalyserFormValues = {
 };
 const formInitialValues: XeniumAnalyserFormValues = {
   runName: '',
-  lotNumber: '',
+  lotNumberB: '',
+  lotNumberA: '',
   labware: [],
   performed: getCurrentDateTime(),
   workNumberAll: ''
@@ -80,9 +82,17 @@ const XeniumAnalyser = () => {
   const [current, send] = useMachine(formMachine);
   const { serverError, submissionResult } = current.context;
   const validationSchema = Yup.object().shape({
-    lotNumber: Yup.string()
-      .required('Decoding reagent lot number is a required field')
-      .label('Lot Number')
+    lotNumberA: Yup.string()
+      .required('Decoding reagent A lot number is a required field')
+      .label('A Lot Number')
+      .max(20, 'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.')
+      .matches(
+        /^[A-Za-z0-9]{1,20}$/,
+        'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
+      ),
+    lotNumberB: Yup.string()
+      .required('Decoding reagent B lot number is a required field')
+      .label('B Lot Number')
       .max(20, 'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.')
       .matches(
         /^[A-Za-z0-9]{1,20}$/,
@@ -213,7 +223,8 @@ const XeniumAnalyser = () => {
                   values: {
                     performed: values.performed.replace('T', ' ') + ':00',
                     runName: values.runName,
-                    lotNumber: values.lotNumber,
+                    lotNumberA: values.lotNumberA,
+                    lotNumberB: values.lotNumberB,
                     labware: labwareROIData,
                     operationType: 'Xenium analyser'
                   }
@@ -264,7 +275,7 @@ const XeniumAnalyser = () => {
                     <>
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4 py-4">
                         <Heading level={3}>Analyser Details</Heading>
-                        <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
+                        <div className="grid grid-cols-4 gap-x-6 mt-2 pt-4">
                           <div className={'flex flex-col'}>
                             <FormikInput
                               label={'Time'}
@@ -285,10 +296,19 @@ const XeniumAnalyser = () => {
                           </div>
                           <div className={'flex flex-col'}>
                             <FormikInput
-                              label={'Decoding reagent lot number'}
+                              label={'Decoding reagent A lot number'}
                               type="text"
-                              name="lotNumber"
-                              data-testid="lotNumber"
+                              name="lotNumberA"
+                              data-testid="lotNumberA"
+                              className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            />
+                          </div>
+                          <div className={'flex flex-col'}>
+                            <FormikInput
+                              label={'Decoding reagent B lot number'}
+                              type="text"
+                              name="lotNumberB"
+                              data-testid="lotNumberB"
                               className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                             />
                           </div>

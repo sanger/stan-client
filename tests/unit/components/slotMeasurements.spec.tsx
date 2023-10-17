@@ -1,8 +1,9 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import SlotMeasurements from '../../../src/components/slotMeasurement/SlotMeasurements';
 import { Formik } from 'formik';
 import { selectOption } from '../../generic/utilities';
+
 afterEach(() => {
   cleanup();
 });
