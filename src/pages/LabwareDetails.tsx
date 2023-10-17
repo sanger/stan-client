@@ -95,15 +95,12 @@ export default function LabwareDetails() {
                     </StripyCardDetail>
                   </StripyCard>
                 </div>
-
-                {isLabwareUsable(labware) && (
-                  <Authenticated role={UserRole.Normal}>
-                    <div className="space-y-4">
-                      <Heading level={4}>Re-Print Labels</Heading>
-                      <LabelPrinter labwares={[labware]} />
-                    </div>
-                  </Authenticated>
-                )}
+                <Authenticated role={UserRole.Normal}>
+                  <div className="space-y-4">
+                    <Heading level={4}>Re-Print Labels</Heading>
+                    <LabelPrinter labwares={[labware]} />
+                  </div>
+                </Authenticated>
               </div>
             </div>
 
