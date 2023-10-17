@@ -38,7 +38,6 @@ export type BlockFormValue = {
   sourceBarcode: string;
   labwareType: string;
   replicateNumber: string;
-  medium?: string;
   commentId?: number;
   preBarcode?: string;
 };
@@ -240,12 +239,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
         .of(
           Yup.object().shape({
             sourceBarcode: Yup.string().required().min(1),
-            medium: Yup.string()
-              .required('Medium is required')
-              .oneOf(
-                processingInfo.mediums.map((medium) => medium.name),
-                'Medium is required'
-              ),
             replicateNumber: Yup.string().required('Replicate number is required'),
             commentId: Yup.number().optional(),
             labwareType: Yup.string()
@@ -286,7 +279,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
         preBarcode: plan.preBarcode,
         commentId: plan.commentId,
         replicate: plan.replicateNumber,
-        medium: plan.medium ?? '',
         labwareType: plan.labwareType
       })),
       discardSourceBarcodes: formData.discardSources?.filter((ds) => ds.discard).map((ds) => ds.sourceBarcode)
@@ -354,7 +346,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
         columns={[
           columns.barcode(),
           columns.labwareType(),
-          columns.medium(),
           columns.fixative(),
           columns.donorId(),
           columns.tissueType(),
