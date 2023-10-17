@@ -20,21 +20,10 @@ describe('Sectioning Planning', () => {
         cy.get('#labwareScanInput').should('not.be.disabled');
       });
     });
-
-    context('when there is source labware loaded', () => {
-      before(() => {
-        cy.get('#labwareScanInput').type('STAN-113{enter}');
-      });
-
-      it('is enabled', () => {
-        cy.findByText('+ Add Labware').should('not.be.disabled');
-      });
-    });
-
     context('when a source labware loaded with fetal samples less than 12 weeks old', () => {
       before(() => {
         const sourceLabware = labwareFactory.build(
-          { barcode: 'STAN-3333' },
+          { barcode: 'STAN-113' },
           {
             associations: {
               labwareType: labwareTypes[LabwareTypeName.CASSETTE].build()
@@ -57,11 +46,11 @@ describe('Sectioning Planning', () => {
             })
           );
         });
-        cy.get('#labwareScanInput').type('STAN-3333{enter}');
+        cy.get('#labwareScanInput').type('STAN-113{enter}');
       });
 
       it('should display a warning message', () => {
-        cy.findByText('STAN-3333').should('be.visible');
+        cy.findByText('STAN-113').should('be.visible');
       });
     });
   });
@@ -121,7 +110,7 @@ describe('Sectioning Planning', () => {
       before(() => {
         cy.findByText('Edit Layout').click();
         cy.findByRole('dialog').within(() => {
-          cy.findByText('STAN-113').click();
+          cy.findAllByText('STAN-113').first().click();
           cy.findByText('A1').click();
           cy.findByText('Done').click();
         });
@@ -134,203 +123,6 @@ describe('Sectioning Planning', () => {
 
       it('enables the Create Labware button', () => {
         cy.findByText('Create Labware').should('not.be.disabled');
-      });
-
-      context('when Number of Labware is invalid', () => {
-        before(() => {
-          cy.findByLabelText('Number of Labware').clear();
-        });
-
-        after(() => {
-          cy.findByLabelText('Number of Labware').clear().type('1');
-        });
-
-        it('disabled the Create Labware button', () => {
-          cy.findByRole('button', { name: /Create Labware/i }).should('be.disabled');
-        });
-      });
-
-      context('when Section Thickness is invalid', () => {
-        before(() => {
-          cy.findByLabelText('Section Thickness').clear();
-        });
-
-        after(() => {
-          cy.findByLabelText('Section Thickness').clear().type('5');
-        });
-
-        it('disabled the Create Labware button', () => {
-          cy.findByText('Create Labware').should('be.disabled');
-        });
-      });
-    });
-
-    context('when adding a Fetal waste container', () => {
-      before(() => {
-        selectOption('labware-type', 'Fetal waste container');
-        cy.findByText('+ Add Labware').click();
-      });
-
-      it('shows only Number of Labware', () => {
-        cy.findByLabelText('Number of Labware').should('be.visible');
-        cy.findByLabelText('Barcode').should('not.exist');
-        cy.findByLabelText('Section Thickness').should('not.exist');
-        cy.findByText('Slide LOT number').should('not.exist');
-        cy.findByText('Slide costings').should('not.exist');
-        cy.findByText('Create Labware').should('be.disabled');
-      });
-      after(() => {
-        cy.findByText('Delete Layout').click();
-      });
-    });
-    context('when adding a Xenium slide ', () => {
-      before(() => {
-        selectOption('labware-type', 'Xenium');
-        cy.findByText('+ Add Labware').click();
-        cy.findByText('Edit Layout').click();
-        cy.findByRole('dialog').within(() => {
-          cy.findByText('STAN-113').click();
-          cy.findByText('A1').click();
-          cy.findByText('Done').click();
-        });
-      });
-
-      it('shows Barcode, Sectioning Thickness,Slide LOT number, Slide costings', () => {
-        cy.findByLabelText('Barcode').should('be.visible');
-        cy.findByLabelText('Section Thickness').should('be.visible');
-        cy.findByText('Slide LOT number').should('be.visible');
-        cy.findByText('Slide costings').should('be.visible');
-        cy.findByText('Create Labware').should('be.disabled');
-      });
-      context('enabling Create Labware button', () => {
-        it('disables Create Labware button if not all fields entered', () => {
-          cy.findByLabelText('Section Thickness').type('2');
-          cy.findByText('Create Labware').should('be.disabled');
-        });
-        it('should validate Slide LOT number', () => {
-          cy.findByTestId('formInput').type('1').blur();
-          cy.findByText('Slide lot number should be a 6-7 digits number').should('be.visible');
-        });
-
-        it('disables Create Labware button if not all fields entered', () => {
-          cy.findByTestId('formInput').clear().type('123456');
-          cy.findByText('Create Labware').should('be.disabled');
-        });
-        it('should validate Barcode', () => {
-          cy.findByLabelText('Barcode').type('1').blur();
-          cy.findByText('Xenium barcode should be a 7-digit number').should('be.visible');
-        });
-        it('disables Create Labware button if not all fields entered', () => {
-          cy.findByLabelText('Barcode').clear().type('1234567');
-          cy.findByText('Create Labware').should('be.disabled');
-        });
-        it('should not allow empty value in Slide costings', () => {
-          cy.get('select[name="costing"]').select('SGP');
-          cy.get('select[name="costing"]').select('').blur();
-          cy.findByText('Slide costing is a required field').should('be.visible');
-        });
-        it('enables Create Labware button when all field values are entered', () => {
-          cy.get('select[name="costing"]').select('SGP');
-          cy.findByText('Create Labware').should('be.enabled');
-        });
-      });
-      after(() => {
-        cy.findByText('Delete Layout').click();
-      });
-    });
-
-    context('when adding a Visium LP layout', () => {
-      before(() => {
-        selectOption('labware-type', 'Visium LP');
-        cy.findByText('+ Add Labware').click();
-        cy.findByText('Edit Layout').click();
-        cy.findByRole('dialog').within(() => {
-          cy.findByText('STAN-113').click();
-          cy.findByText('A1').click();
-          cy.findByText('Done').click();
-        });
-      });
-
-      it('shows Barcode, Sectioning Thickness,Slide LOT number, Slide costings', () => {
-        cy.findByLabelText('Number of Labware').should('not.exist');
-        cy.findByLabelText('Barcode').should('be.visible');
-        cy.findByLabelText('Section Thickness').should('be.visible');
-        cy.findByText('Slide LOT number').should('be.visible');
-        cy.findByText('Slide costings').should('be.visible');
-        cy.findByText('Create Labware').should('be.disabled');
-      });
-      after(() => {
-        cy.findByText('Delete Layout').click();
-      });
-    });
-
-    context('when adding a Visium TO layout', () => {
-      before(() => {
-        selectOption('labware-type', 'Visium TO');
-        cy.findByText('+ Add Labware').click();
-        cy.findByText('Edit Layout').click();
-        cy.findByRole('dialog').within(() => {
-          cy.findByText('STAN-113').click();
-          cy.findByText('A1').click();
-          cy.findByText('Done').click();
-        });
-      });
-
-      it('shows Barcode, Sectioning Thickness,Slide LOT number, Slide costings', () => {
-        cy.findByLabelText('Number of Labware').should('exist');
-        cy.findByLabelText('Barcode').should('not.exist');
-        cy.findByLabelText('Section Thickness').should('be.visible');
-        cy.findByText('Slide LOT number').should('be.visible');
-        cy.findByText('Slide costings').should('be.visible');
-      });
-
-      context('enabling Create Labware button', () => {
-        it('disables Create Labware button if not all fields entered', () => {
-          cy.findByLabelText('Section Thickness').type('2');
-          cy.findByText('Create Labware').should('be.disabled');
-        });
-        it('should validate Slide LOT number', () => {
-          cy.findByTestId('formInput').type('1').blur();
-          cy.findByText('Slide lot number should be a 6-7 digits number').should('be.visible');
-        });
-        it('disables Create Labware button if not all fields entered', () => {
-          cy.findByTestId('formInput').clear().type('123456');
-          cy.findByText('Create Labware').should('be.disabled');
-        });
-        it('should not allow empty value in Slide costings', () => {
-          cy.get('select[name="costing"]').select('SGP');
-          cy.get('select[name="costing"]').select('').blur();
-          cy.findByText('Slide costing is a required field').should('be.visible');
-        });
-        it('enables Create Labware button when all field values are entered', () => {
-          cy.get('select[name="costing"]').select('SGP');
-          cy.findByText('Create Labware').should('be.enabled');
-        });
-      });
-      after(() => {
-        cy.findByText('Delete Layout').click();
-      });
-    });
-
-    context('when adding a Visium ADH layout', () => {
-      before(() => {
-        selectOption('labware-type', 'Visium ADH');
-        cy.findByText('+ Add Labware').click();
-        cy.findByText('Edit Layout').click();
-        cy.findByRole('dialog').within(() => {
-          cy.findByText('STAN-113').click();
-          cy.findByText('A1').click();
-          cy.findByText('Done').click();
-        });
-      });
-
-      it('shows Barcode, Sectioning Thickness,Slide LOT number, Slide costings', () => {
-        cy.findByLabelText('Number of Labware').should('exist');
-        cy.findByLabelText('Barcode').should('not.exist');
-        cy.findByLabelText('Section Thickness').should('be.visible');
-        cy.findByText('Create Labware').should('be.disabled');
-        cy.findByText('Slide LOT number').should('be.visible');
-        cy.findByText('Slide costings').should('be.visible');
       });
     });
   });

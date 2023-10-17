@@ -191,18 +191,21 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/rna_analysis"
-            element={
-              <DataFetcher
-                dataFetcher={() =>
-                  stanCore.GetComments({
-                    commentCategory: 'RNA analysis',
-                    includeDisabled: false
-                  })
-                }
-              >
-                {(commentInfo) => <Analysis comments={commentInfo.comments} />}
-              </DataFetcher>
-            }
+            loader={async ({ params }) => {
+              const comments = await stanCore.GetComments({
+                commentCategory: 'RNA analysis',
+                includeDisabled: false
+              });
+              const equipments = await stanCore.GetEquipments({
+                category: 'RNA analysis'
+              });
+
+              return {
+                comments: comments.comments,
+                equipments: equipments.equipments
+              };
+            }}
+            element={<Analysis />}
           />
         </Route>
         <Route element={<AuthLayout />}>

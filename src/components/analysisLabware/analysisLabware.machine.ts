@@ -5,7 +5,7 @@ import { OperationType } from './analysisLabware';
 
 export type AnalysisLabwareContext = {
   analysisLabwares: RnaAnalysisLabware[];
-  operationType: string;
+  operationType: string | undefined;
 };
 
 type UpdateAnalysisTypeEvent = {
@@ -91,7 +91,7 @@ export const analysisLabwareMachine = createMachine<AnalysisLabwareContext, Anal
       assignMeasurementType: (ctx, e) => {
         if (e.type !== 'UPDATE_MEASUREMENT_TYPE') return;
         const indx = ctx.analysisLabwares.findIndex((labware) => labware.barcode === e.barcode);
-        if (indx < 0) return;
+        if (indx < 0 || !ctx.operationType) return;
 
         const updateAnalysisLabware = {
           ...ctx.analysisLabwares[indx],
