@@ -6,7 +6,7 @@ describe('Search', () => {
   context('when URL query params are set', () => {
     before(() => {
       cy.visit(
-        '/search?donorName=DNR123&labwareBarcode=STAN-0001F&tissueExternalName=EXT987&tissueTypeName=Tissue Type 1&workNumber=SGP1008' +
+        '/search?donorNames=DNR123&labwareBarcode=STAN-0001F&tissueExternalNames=EXT987&tissueTypeName=Tissue Type 1&workNumber=SGP1008' +
           '&createdMin=2021-07-01&createdMax=2021-07-31'
       );
     });
@@ -85,7 +85,7 @@ describe('Search', () => {
       cy.findByRole('table').should('not.exist');
     });
     it('will show an info icon', () => {
-      cy.findByTestId('info-icon').should('exist');
+      cy.findAllByTestId('info-icon').should('have.length', 2);
     });
 
     context(
@@ -102,6 +102,32 @@ describe('Search', () => {
         });
       }
     );
+
+    context('search by multiple donor names', () => {
+      before(() => {
+        cy.visit('/search');
+        cy.findByLabelText('Donor ID').type('DNR123,DNR124');
+        cy.findByRole('button', { name: /Search/i }).click();
+      });
+
+      it('displays the returned records and set the URL accordingly', () => {
+        cy.findByRole('table').should('be.visible');
+        cy.url().should('include', 'donorNames=DNR123%2CDNR124');
+      });
+    });
+    context('search by multiple external id', () => {
+      before(() => {
+        cy.visit('/search');
+        cy.findByLabelText('External Identifier').type('EXT987,ID2');
+        cy.findByRole('button', { name: /Search/i }).click();
+      });
+
+      it('displays the returned records and set the URL accordingly', () => {
+        cy.findByRole('table').should('be.visible');
+        cy.url().should('include', 'tissueExternalNames=EXT987%2CID2');
+      });
+    });
+
     context('when a search has more results than the requested amount', () => {
       before(() => {
         cy.visit('/search');

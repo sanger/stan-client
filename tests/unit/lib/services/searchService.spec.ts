@@ -1,6 +1,7 @@
 import { SearchService } from '../../../../src/lib/services/searchService';
 import { buildFindResult } from '../../../../src/mocks/handlers/findHandlers';
 import { FindQuery, FindResult } from '../../../../src/types/sdk';
+import { FormFindRequest } from '../../../../src/pages/Search';
 
 const findResults = buildFindResult(2, 2);
 jest.mock('../../../../src/lib/sdk', () => ({
@@ -32,12 +33,12 @@ jest.mock('../../../../src/lib/sdk', () => ({
 
 describe('searchService.ts', () => {
   describe('search', () => {
-    const findRequest = {
+    const findRequest: FormFindRequest = {
       createdMin: '',
       createdMax: '',
-      donorName: '',
+      donorNames: '',
       labwareBarcode: 'STAN-3000',
-      tissueExternalName: '',
+      tissueExternalNames: '',
       tissueTypeName: '',
       workNumber: ''
     };
