@@ -5,6 +5,7 @@ import {
   AnalyserLabware,
   AnalyserRequest,
   CassettePosition,
+  EquipmentFieldsFragment,
   LabwareFieldsFragment,
   RecordAnalyserMutation,
   SamplePositionFieldsFragment
@@ -28,7 +29,8 @@ import CustomReactSelect from '../components/forms/CustomReactSelect';
 import { objectKeys } from '../lib/helpers';
 import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
-import { FormikErrorMessage } from '../components/forms';
+import { FormikErrorMessage, selectOptionValues } from '../components/forms';
+import { useLoaderData } from 'react-router-dom';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -47,6 +49,7 @@ type LabwareSamples = {
 export type XeniumAnalyserFormValues = {
   lotNumberA: string;
   lotNumberB: string;
+  equipmentId: number | undefined;
   runName: string;
   performed: string;
   labware: Array<AnalyserLabware>;
@@ -56,12 +59,14 @@ const formInitialValues: XeniumAnalyserFormValues = {
   runName: '',
   lotNumberB: '',
   lotNumberA: '',
+  equipmentId: undefined,
   labware: [],
   performed: getCurrentDateTime(),
   workNumberAll: ''
 };
 
 const XeniumAnalyser = () => {
+  const equipments = useLoaderData() as EquipmentFieldsFragment[];
   const [labwareSamples, setLabwareSamples] = React.useState<LabwareSamples[]>([]);
   const [hybridisation, setHybridisation] = React.useState<{ barcode: string; performed: boolean } | undefined>(
     undefined
@@ -103,6 +108,7 @@ const XeniumAnalyser = () => {
       .max(new Date(), 'Please select a date and time on or before current time')
       .required('Time is a required field')
       .label('Time'),
+    equipmentId: Yup.number().required().label('Equipment').required('Equipment is a required field'),
     labware: Yup.array()
       .of(
         Yup.object().shape({
@@ -222,6 +228,7 @@ const XeniumAnalyser = () => {
                   type: 'SUBMIT_FORM',
                   values: {
                     performed: values.performed.replace('T', ' ') + ':00',
+                    equipmentId: values.equipmentId!,
                     runName: values.runName,
                     lotNumberA: values.lotNumberA,
                     lotNumberB: values.lotNumberB,
@@ -275,7 +282,7 @@ const XeniumAnalyser = () => {
                     <>
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4 py-4">
                         <Heading level={3}>Analyser Details</Heading>
-                        <div className="grid grid-cols-4 gap-x-6 mt-2 pt-4">
+                        <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
                           <div className={'flex flex-col'}>
                             <FormikInput
                               label={'Time'}
@@ -283,6 +290,15 @@ const XeniumAnalyser = () => {
                               type="datetime-local"
                               name={'performed'}
                               max={getCurrentDateTime()}
+                            />
+                          </div>
+                          <div className={'flex flex-col'}>
+                            <CustomReactSelect
+                              label={'Equipment'}
+                              options={selectOptionValues(equipments, 'name', 'id')}
+                              name="equipmentId"
+                              dataTestId="equipmentId"
+                              emptyOption={true}
                             />
                           </div>
                           <div className={'flex flex-col'}>
@@ -294,6 +310,8 @@ const XeniumAnalyser = () => {
                               className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                             />
                           </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-x-6 mt-2 pt-4">
                           <div className={'flex flex-col'}>
                             <FormikInput
                               label={'Decoding reagent A lot number'}
