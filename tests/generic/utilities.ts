@@ -56,7 +56,7 @@ export const selectOption = async (dataTestId: string, optionValue: string) => {
   expect(option).toBeInTheDocument();
   await userEvent.click(option);
 };
-export const shouldDisplayValue = (dataTestId: string, value: string, index?: number) => {
+export const shouldDisplayValue = (dataTestId: string, value: string) => {
   const selectDiv = screen.getAllByTestId(dataTestId)[0];
   expect(selectDiv).toHaveTextContent(value);
 };
@@ -65,6 +65,17 @@ export const selectFocusBlur = async (dataTestId = 'select-div') => {
   const selectBox = within(screen.getByTestId(dataTestId)).getByRole('combobox', { hidden: true });
   await userEvent.click(selectBox);
   await userEvent.tab();
+};
+
+export const shouldHaveOption = async (dataTestId = 'select-div', option: string) => {
+  const wrapperDiv = dataTestId ? screen.getByTestId(dataTestId) : screen.getByRole('combobox');
+  await userEvent.click(wrapperDiv);
+
+  const comboBox = within(wrapperDiv).getByRole('combobox');
+  expect(comboBox).toBeInTheDocument();
+
+  const optionElement = within(comboBox).getByText(option);
+  expect(optionElement).toBeVisible();
 };
 
 export const uncheck = async () => {

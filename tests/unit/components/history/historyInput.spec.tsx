@@ -2,7 +2,8 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom';
 import { Formik } from 'formik';
 import HistoryInput from '../../../../src/components/history/HistoryInput';
-import { getCustomSelectOptions, optionsShouldHaveLength, shouldDisplayValue } from '../../../generic/utilities';
+import { optionsShouldHaveLength, shouldDisplayValue } from '../../../generic/utilities';
+import React from 'react';
 
 afterEach(() => {
   cleanup();
@@ -11,6 +12,20 @@ afterEach(() => {
 jest.mock('"../../../../src/lib/hooks/useDownload', () => ({
   useDownload: () => ['/download', jest.fn(), '']
 }));
+
+jest.mock('../../../../src/components/WorkNumberSelect', () => {
+  return {
+    __esModule: true,
+    default: jest.fn(({ onConfirmed }) => {
+      return (
+        <select data-testid="workNumber">
+          <option value="SGP1008">SGP1008</option>
+          <option value="SGP1009">SGP1009</option>
+        </select>
+      );
+    })
+  };
+});
 
 const initialFormValues = {};
 const inputProps = { eventTypes: ['Section', 'Stain'] };

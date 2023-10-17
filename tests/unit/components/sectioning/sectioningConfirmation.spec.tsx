@@ -14,6 +14,21 @@ afterEach(() => {
   cleanup();
   jest.clearAllMocks();
 });
+
+jest.mock('../../../../src/components/WorkNumberSelect', () => {
+  return {
+    __esModule: true,
+    default: jest.fn(({ onConfirmed }) => {
+      return (
+        <select data-testid="workNumber">
+          <option value="SGP1008">SGP1008</option>
+          <option value="SGP1009">SGP1009</option>
+        </select>
+      );
+    })
+  };
+});
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(),

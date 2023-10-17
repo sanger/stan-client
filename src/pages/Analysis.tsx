@@ -3,6 +3,7 @@ import AppShell from '../components/AppShell';
 import Heading from '../components/Heading';
 import {
   CommentFieldsFragment,
+  EquipmentFieldsFragment,
   ExtractResultQuery,
   RecordRnaAnalysisMutation,
   RnaAnalysisLabware,
@@ -19,20 +20,28 @@ import { reload, stanCore } from '../lib/sdk';
 import ButtonBar from '../components/ButtonBar';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 
 // TODO Add front-end validation to this page
 
 type AnalysisProps = {
   /***
-   * Comments for 'analysis' category
+   * Comments for 'RNA analysis' category
    */
   comments: CommentFieldsFragment[];
+  /***
+   * equipments for 'RNA analysis' category
+   */
+  equipments: [];
 };
 
-function Analysis({ comments }: AnalysisProps) {
+function Analysis() {
+  const analysisProps = useLoaderData() as AnalysisProps;
+  const comments = analysisProps.comments;
+  const equipments: EquipmentFieldsFragment[] = analysisProps.equipments;
   const [extractResults, setExtractResults] = React.useState<ExtractResultQuery[]>([]);
   const [analysisLabwares, setAnalysisLabwares] = React.useState<RnaAnalysisLabware[]>([]);
+  const [equipmentId, setEquipmentId] = React.useState(0);
   const [operationType, setOperationType] = React.useState('');
   const [analysisMode, setAnalysisMode] = React.useState(false);
 
@@ -61,6 +70,10 @@ function Analysis({ comments }: AnalysisProps) {
     setOperationType(operationType);
   }, []);
 
+  const onChangeEquipment = useCallback((equipmentId: number) => {
+    setEquipmentId(equipmentId);
+  }, []);
+
   return (
     <AppShell>
       <AppShell.Header>
@@ -78,8 +91,10 @@ function Analysis({ comments }: AnalysisProps) {
             <AnalysisLabware
               barcodes={extractResults.map((result) => result.extractResult.labware.barcode)}
               comments={comments}
+              equipments={equipments}
               analysisLabwares={analysisLabwares}
               onChangeLabwareData={onChangeLabwareData}
+              onChangeEquipment={onChangeEquipment}
             />
           </motion.div>
         )}
@@ -128,15 +143,17 @@ function Analysis({ comments }: AnalysisProps) {
               <BlueButton action="primary">Return Home</BlueButton>
             </Link>
             <BlueButton
-              onClick={() =>
+              onClick={() => {
                 send({
                   type: 'SUBMIT_FORM',
                   values: {
                     operationType: operationType,
-                    labware: analysisLabwares
+                    labware: analysisLabwares,
+                    equipmentId: equipmentId
                   }
-                })
-              }
+                });
+              }}
+              disabled={equipmentId > 0 && operationType && operationType.length > 1 ? false : true}
             >
               Save
             </BlueButton>
