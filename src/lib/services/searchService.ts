@@ -4,18 +4,23 @@ import _ from 'lodash';
 import { addressToLocationAddress } from '../helpers/locationHelper';
 import { stanCore } from '../sdk';
 import { SearchServiceInterface } from './searchServiceInterface';
+import { FormFindRequest } from '../../pages/Search';
 
-export class SearchService implements SearchServiceInterface<FindRequest, SearchResultTableEntry> {
+export class SearchService implements SearchServiceInterface<FormFindRequest, SearchResultTableEntry> {
   /**
    * Do a find query on core. Format the response into a list of table rows
    * @param findRequest the variables that go into a Find query
    */
 
-  search = async (findRequest: FindRequest): Promise<SearchResultsType<SearchResultTableEntry>> => {
-    // Tidy up the search parameters e.g. removing undefined and null values
+  search = async (findRequest: FormFindRequest): Promise<SearchResultsType<SearchResultTableEntry>> => {
     const request: FindRequest = _(findRequest)
       .omitBy((val) => (typeof val === 'number' ? val === 0 : _.isEmpty(val)))
-      .mapValues((value: any) => (typeof value === 'string' ? value.trim() : value))
+      .mapValues((value: any, key: string) => {
+        if (['tissueExternalNames', 'donorNames'].includes(key) && typeof value === 'string') {
+          return value.split(',').map((v) => v.trim());
+        }
+        return typeof value === 'string' ? value.trim() : value;
+      })
       .value();
     const response = await stanCore.Find({ request });
     return {

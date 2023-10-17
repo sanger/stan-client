@@ -207,7 +207,7 @@ describe('Search', () => {
 
       it('displays the returned records and set the URL accordingly', () => {
         cy.findByRole('table').should('be.visible');
-        cy.url().should('include', 'donorNames=ID1%2CID2');
+        cy.url().should('include', 'tissueExternalNames=EXT987%2CID2');
       });
     });
   });

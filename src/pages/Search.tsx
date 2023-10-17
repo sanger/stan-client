@@ -28,6 +28,17 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import TopScrollingBar from '../components/TopScrollingBar';
 import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 
+export type FormFindRequest = {
+  labwareBarcode?: string;
+  donorNames?: string;
+  tissueExternalNames?: string;
+  tissueTypeName?: string;
+  maxRecords?: number;
+  workNumber?: string;
+  createdMin?: string;
+  createdMax?: string;
+};
+
 const validationSchema = Yup.object()
   .shape({
     // ensure transforms undefined and null to empty strings which is easier for extra validation later
@@ -59,12 +70,12 @@ const validationSchema = Yup.object()
     }
   });
 
-const emptyFindRequest: FindRequest = {
+const emptyFindRequest: FormFindRequest = {
   createdMin: '',
   createdMax: '',
-  donorNames: [],
+  donorNames: '',
   labwareBarcode: '',
-  tissueExternalNames: [],
+  tissueExternalNames: '',
   tissueTypeName: '',
   workNumber: ''
 };
@@ -79,7 +90,7 @@ function Search({ searchInfo }: SearchProps) {
   const [searchParams] = useSearchParams();
 
   const findRequest = React.useMemo(() => {
-    const request: FindRequest = emptyFindRequestKeys.reduce((request, key) => {
+    const request: FormFindRequest = emptyFindRequestKeys.reduce((request, key) => {
       const value = searchParams.get(key) ?? '';
       return { ...request, [key]: value.trim() };
     }, emptyFindRequest);
@@ -87,7 +98,7 @@ function Search({ searchInfo }: SearchProps) {
   }, [searchParams]);
 
   const config = useContext(configContext)!;
-  const search = searchMachine<FindRequest, SearchResultTableEntry>(new SearchService());
+  const search = searchMachine<FormFindRequest, SearchResultTableEntry>(new SearchService());
 
   const memoSearchMachine = React.useMemo(() => {
     return search.withContext({
@@ -110,7 +121,7 @@ function Search({ searchInfo }: SearchProps) {
   const [viewAllRecords, setViewAllRecords] = React.useState(true);
   const navigate = useNavigate();
 
-  const onFormSubmit = (values: FindRequest) => {
+  const onFormSubmit = (values: FormFindRequest) => {
     send({ type: 'FIND', request: values });
     // Replace instead of push so user doesn't have to go through a load of old searches when going back
     navigate(`/search?${stringify(values)}`, { replace: true });
