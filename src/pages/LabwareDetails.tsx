@@ -14,7 +14,6 @@ import LabelPrinter from '../components/LabelPrinter';
 import DataTable from '../components/DataTable';
 import * as sampleColumns from '../components/dataTableColumns/sampleColumns';
 import { Authenticated } from '../components/Authenticated';
-import { isLabwareUsable } from '../lib/helpers/labwareHelper';
 import History from '../components/history/History';
 import { LabwareStatePill } from '../components/LabwareStatePill';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
