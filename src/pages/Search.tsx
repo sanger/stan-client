@@ -21,19 +21,19 @@ import { uniqBy } from 'lodash';
 import { configContext } from '../context/ConfigContext';
 import searchMachine from '../lib/machines/search/searchMachine';
 import SearchService from '../lib/services/searchService';
-import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import TopScrollingBar from '../components/TopScrollingBar';
+import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 
 const validationSchema = Yup.object()
   .shape({
     // ensure transforms undefined and null to empty strings which is easier for extra validation later
     labwareBarcode: Yup.string().ensure(),
-    tissueExternalName: Yup.string().ensure(),
-    donorName: Yup.string().ensure(),
+    tissueExternalNames: Yup.string().ensure(),
+    donorNames: Yup.string().ensure(),
     tissueTypeName: Yup.string().ensure(),
     workNumber: Yup.string().ensure(),
     createdAfter: Yup.date().notRequired(),
@@ -44,8 +44,8 @@ const validationSchema = Yup.object()
     test: function (value) {
       const isValid = !!(
         value?.labwareBarcode.trim() ||
-        value?.tissueExternalName.trim() ||
-        value?.donorName.trim() ||
+        value?.tissueExternalNames.trim() ||
+        value?.donorNames.trim() ||
         value?.tissueTypeName.trim() ||
         value?.workNumber
       );
@@ -62,9 +62,9 @@ const validationSchema = Yup.object()
 const emptyFindRequest: FindRequest = {
   createdMin: '',
   createdMax: '',
-  donorName: '',
+  donorNames: [],
   labwareBarcode: '',
-  tissueExternalName: '',
+  tissueExternalNames: [],
   tissueTypeName: '',
   workNumber: ''
 };
@@ -211,14 +211,35 @@ function Search({ searchInfo }: SearchProps) {
                     </div>
                     <div className="inline-block">
                       <FormikInput
-                        name="tissueExternalName"
+                        name="tissueExternalNames"
                         label="External Identifier"
                         info={<ExternalIDFieldSearchInfo />}
                         className={'w-full'}
                       />
                     </div>
                     <div>
-                      <FormikInput name="donorName" label="Donor ID" />
+                      <FormikInput
+                        name="donorNames"
+                        label="Donor ID"
+                        data-testid={'donor-names'}
+                        info={
+                          <div className={'flex flex-col whitespace-pre-wrap space-x-2 space-y-2'}>
+                            <p className={'font-medium'}>
+                              The donor field supports search by multiple donors using comma separated values.
+                            </p>
+                            <p className={'italic text-gray-600'}>
+                              E.g. to search for blocks with multiple donor names you can use{' '}
+                              <span className={'text-blue-600'}>
+                                <code>Donor1</code>
+                              </span>
+                              ,
+                              <span className={'text-blue-600'}>
+                                <code>Donor2</code>
+                              </span>
+                            </p>
+                          </div>
+                        }
+                      />
                     </div>
                     <div>
                       <CustomReactSelect

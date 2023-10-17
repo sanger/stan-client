@@ -35,9 +35,9 @@ describe('searchService.ts', () => {
     const findRequest = {
       createdMin: '',
       createdMax: '',
-      donorName: '',
+      donorNames: '',
       labwareBarcode: 'STAN-3000',
-      tissueExternalName: '',
+      tissueExternalNames: '',
       tissueTypeName: '',
       workNumber: ''
     };
