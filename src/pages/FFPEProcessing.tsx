@@ -166,6 +166,12 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProces
                         <p className="text-sm italic">No Program selected.</p>
                       )}
 
+                      {values.barcodes.length > 0 && (
+                        <p>
+                          Samples are embedded in <span className="font-semibold">Paraffin</span> medium
+                        </p>
+                      )}
+
                       <div className="my-4 mx-4 sm:mx-auto p-1 rounded-md bg-sdb-400 italic">
                         <p className="my-3 text-white-800 text-xs leading-normal">
                           Once <span className="font-bold text-white-800">all labware</span> have been scanned and a
