@@ -105,9 +105,7 @@ describe('Xenium analyser', () => {
             await userEvent.type(screen.getByTestId('lotNumberA'), new Array(22).join('a'));
             await userEvent.tab();
             expect(
-              screen.getByText(
-                'Decoding reagent lot number should be a string of up to 32 letters and numbers.'
-              )
+              screen.getByText('Decoding reagent lot number should be a string of up to 32 letters and numbers.')
             ).toBeVisible();
           });
         });
@@ -116,9 +114,7 @@ describe('Xenium analyser', () => {
             await userEvent.type(screen.getByTestId('lotNumberA'), 'a*456bh');
             await userEvent.tab();
             expect(
-              screen.getByText(
-                'Decoding reagent lot number should be a string of letters and numbers.'
-              )
+              screen.getByText('Decoding reagent lot number should be a string of letters and numbers.')
             ).toBeVisible();
           });
         });
