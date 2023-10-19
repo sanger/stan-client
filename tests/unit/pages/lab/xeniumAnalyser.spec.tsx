@@ -105,20 +105,16 @@ describe('Xenium analyser', () => {
             await userEvent.type(screen.getByTestId('lotNumberA'), new Array(22).join('a'));
             await userEvent.tab();
             expect(
-              screen.getByText(
-                'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
-              )
+              screen.getByText('Decoding reagent lot number should be a string of up to 32 letters and numbers.')
             ).toBeVisible();
           });
         });
-        it('should display an error message when entered value contains any characters other than capital letters, numbers and underscores', () => {
+        it('should display an error message when entered value contains any characters other than letters and numbers', () => {
           waitFor(async () => {
             await userEvent.type(screen.getByTestId('lotNumberA'), 'a*456bh');
             await userEvent.tab();
             expect(
-              screen.getByText(
-                'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
-              )
+              screen.getByText('Decoding reagent lot number should be a string of letters and numbers.')
             ).toBeVisible();
           });
         });

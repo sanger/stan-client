@@ -85,19 +85,13 @@ const XeniumAnalyser = () => {
     lotNumberA: Yup.string()
       .required('Decoding reagent A lot number is a required field')
       .label('A Lot Number')
-      .max(20, 'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.')
-      .matches(
-        /^[A-Za-z0-9]{1,20}$/,
-        'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
-      ),
+      .max(32, 'Decoding reagent lot number should be a string of up to 32 letters and numbers.')
+      .matches(/^[A-Za-z0-9]+$/, 'Decoding reagent lot number should be a string of letters and numbers.'),
     lotNumberB: Yup.string()
       .required('Decoding reagent B lot number is a required field')
       .label('B Lot Number')
-      .max(20, 'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.')
-      .matches(
-        /^[A-Za-z0-9]{1,20}$/,
-        'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
-      ),
+      .max(32, 'Decoding reagent lot number should be a string of up to 32 letters and numbers.')
+      .matches(/^[A-Za-z0-9]+$/, 'Decoding reagent lot number should be a string of letters and numbers.'),
     runName: Yup.string().required().label('Run Name').max(255, 'Run name should be a string of maximum length 255'),
     performed: Yup.date()
       .max(new Date(), 'Please select a date and time on or before current time')
