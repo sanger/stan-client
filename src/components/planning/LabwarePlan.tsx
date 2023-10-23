@@ -168,7 +168,6 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
                     {(outputLabware.labwareType.name === LabwareTypeName.VISIUM_LP ||
                       outputLabware.labwareType.name === LabwareTypeName.XENIUM) && (
                       <FormikInput
-                        value={''}
                         name={'barcode'}
                         label={'Barcode'}
                         type={'text'}
