@@ -8,7 +8,7 @@ import { locationRepository } from '../../../src/mocks/repositories/locationRepo
 import { locationResponse } from '../../../src/mocks/handlers/locationHandlers';
 import { enableMapSet } from 'immer';
 import React from 'react';
-jest.mock('../../../../src/pages/location/ItemsGrid', () => {
+jest.mock('../../../src/pages/location/ItemsGrid', () => {
   return {
     __esModule: true,
     default: jest.fn(() => {
