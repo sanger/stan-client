@@ -13,6 +13,18 @@ const fileHandlers = [
     return res(ctx.status(200), ctx.json({ upload: 'OK' }));
   }),
 
+  rest.post('/register/original', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        labwareSolutions: [
+          { barcode: 'STAN-3111', solution: 'Solution 1' },
+          { barcode: 'STAN-3112', solution: 'Solution 2' }
+        ]
+      })
+    );
+  }),
+
   //Query files
   graphql.query<FindFilesQuery, FindFilesQueryVariables>('FindFiles', (req, res, ctx) => {
     const files = fileRepository.findAll().map((file) => {

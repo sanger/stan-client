@@ -1,22 +1,30 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   GetRegistrationInfoQuery,
-  LifeStage,
-  RegisterOriginalSamplesMutationVariables,
-  OriginalSampleData,
   LabwareFieldsFragment,
-  SampleFieldsFragment,
-  RegisterResultFieldsFragment
+  LifeStage,
+  OriginalSampleData,
+  RegisterOriginalSamplesMutationVariables,
+  RegisterResultFieldsFragment,
+  SampleFieldsFragment
 } from '../types/sdk';
 import * as Yup from 'yup';
 import RegistrationValidation from '../lib/validation/registrationValidation';
 import { LabwareTypeName } from '../types/stan';
 import { PartialBy } from '../lib/helpers';
-import { RegistrationFormBlock, RegistrationFormTissue } from './BlockRegistration';
-import Registration from './registration/Registration';
-import { registerOriginalSamples } from '../lib/services/registrationService';
+import { RegistrationFormBlock, RegistrationFormTissue, RegistrationMethod } from './BlockRegistration';
 import { valueFromSamples } from '../components/dataTableColumns';
 import { Column } from 'react-table';
+import AppShell from '../components/AppShell';
+import Heading from '../components/Heading';
+import { RadioButtonInput } from '../components/forms/RadioGroup';
+import FileUploader from '../components/upload/FileUploader';
+import Registration from './registration/Registration';
+import { registerOriginalSamples } from '../lib/services/registrationService';
+import RegistrationSuccess from './registration/RegistrationSuccess';
+import warningToast from '../components/notifications/WarningToast';
+import { toast } from 'react-toastify';
+import { stanCore } from '../lib/sdk';
 
 /**Following modifications required for RegistrationFormBlock Type so that it can be reused
  - "medium" and "lastknownSectionNumber" fields are omitted
@@ -115,6 +123,17 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
   const availableLabwareTypes = useMemo(() => {
     return registrationInfo.labwareTypes.filter((lt) => [LabwareTypeName.POT].includes(lt.name as LabwareTypeName));
   }, [registrationInfo]);
+
+  const [registrationMethod, setRegistrationMethod] = useState(RegistrationMethod.NONE);
+  const [fileRegisterResult, setFileRegisterResult] = React.useState<LabwareResultData[] | undefined>(undefined);
+
+  const displayWarning = (msg: string) => {
+    warningToast({
+      message: msg,
+      position: toast.POSITION.TOP_RIGHT,
+      autoClose: 5000
+    });
+  };
 
   /**
    * Builds the registerTissueSample mutation variables from the RegistrationFormTissueSampleValues
@@ -217,16 +236,40 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
     ];
   }, []);
 
-  const formatSuccessData = React.useCallback((registerResult: RegisterResultFieldsFragment) => {
-    return registerResult.labware.map((lw) => {
-      return {
-        labware: lw,
-        extraData: [
-          registerResult.labwareSolutions.find((lwSolution) => lwSolution?.barcode === lw.barcode)?.solutionName ?? ''
-        ]
-      };
-    });
-  }, []);
+  const onFileUploadFinished = React.useCallback(
+    (file: File, isSuccess: boolean, result?: { barcode: [] }) => {
+      if (!isSuccess) return;
+      if (result && 'labwareSolutions' in result) {
+        type LabwareSolution = {
+          barcode: string;
+          solution: string;
+        };
+        const labwareSolutions: LabwareSolution[] = result['labwareSolutions'];
+        const labwarePromises = labwareSolutions.map((ls) => stanCore.FindLabware({ barcode: ls.barcode }));
+        Promise.all(labwarePromises)
+          .then((labwares) => {
+            if (labwares.length > 0) {
+              setFileRegisterResult(
+                labwares.map((labware) => {
+                  const solution = labwareSolutions.find((ls) => ls.barcode === labware.labware!.barcode)?.solution;
+                  return { labware: labware.labware!, extraData: solution };
+                }) as LabwareResultData[]
+              );
+            } else {
+              displayWarning(`No original sample has been registered. Please check your file.`);
+            }
+          })
+          .catch(() => {
+            displayWarning('Cannot retrieve details of newly registered original sample(s).');
+          });
+      }
+    },
+    [setFileRegisterResult]
+  );
+
+  if (fileRegisterResult && fileRegisterResult.length > 0) {
+    return <RegistrationSuccess<LabwareResultData> successData={fileRegisterResult} columns={resultColumns} />;
+  }
 
   /**These are changes required for labels in Registration page for Original sample registration
    * The changes are mapped here so that Registration and RegistrationForm components  can be reused **/
@@ -235,7 +278,7 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
     .set('Embedding', 'Solution')
     .set('Optional', ['Replicate Number', 'External Identifier']);
 
-  return (
+  const ManualRegistrationForm = (
     <Registration<
       RegisterOriginalSamplesMutationVariables,
       RegistrationFormOriginalSample,
@@ -251,9 +294,59 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
       registrationValidationSchema={validationSchema}
       successDisplayTableColumns={resultColumns}
       keywordsMap={keywords}
-      formatSuccessData={formatSuccessData}
+      formatSuccessData={(registerResult: RegisterResultFieldsFragment) => {
+        return registerResult.labware.map((lw) => {
+          return {
+            labware: lw,
+            extraData: [
+              registerResult.labwareSolutions.find((lwSolution) => lwSolution?.barcode === lw.barcode)?.solutionName ??
+                ''
+            ]
+          };
+        });
+      }}
     />
   );
+
+  const OriginalRegistrationOptionsPage = (
+    <AppShell>
+      <AppShell.Header>
+        <AppShell.Title>Original Sample registration</AppShell.Title>
+      </AppShell.Header>
+      <AppShell.Main>
+        <div className="max-w-screen-xl mx-auto">
+          <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
+            <Heading level={4}>Register</Heading>
+            <div className="my-4 p-4 rounded-md bg-white">
+              <RadioButtonInput
+                name="manual"
+                onChange={() => setRegistrationMethod(RegistrationMethod.MANUAL)}
+                label="Register manually"
+              />
+            </div>
+            <div className="my-4 p-4 rounded-md bg-white">
+              <RadioButtonInput
+                name="file"
+                checked={registrationMethod === RegistrationMethod.UPLOAD_FILE}
+                onChange={() => setRegistrationMethod(RegistrationMethod.UPLOAD_FILE)}
+                label="Register from file"
+              />
+              {registrationMethod === RegistrationMethod.UPLOAD_FILE && (
+                <FileUploader
+                  url={'/register/original'}
+                  enableUpload={true}
+                  notifyUploadOutcome={onFileUploadFinished}
+                  errorField={'problems'}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </AppShell.Main>
+    </AppShell>
+  );
+
+  return registrationMethod === RegistrationMethod.MANUAL ? ManualRegistrationForm : OriginalRegistrationOptionsPage;
 }
 
 export default OriginalSampleRegistration;
