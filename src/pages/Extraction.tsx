@@ -26,6 +26,7 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import LabelCopyButton from '../components/LabelCopyButton';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../components/forms';
+import { hasSamples } from '../lib/helpers';
 
 function buildExtractionTableData(ctx: ExtractionContext) {
   if (!ctx.extraction) return [];
@@ -107,15 +108,6 @@ function Extraction() {
 
   const validateLabware = useCallback(
     (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): string[] => {
-      const hasSamples = (labwares: LabwareFieldsFragment): boolean => {
-        for (const slot of labwares.slots) {
-          if (slot.samples && slot.samples.length > 0) {
-            return true;
-          }
-        }
-        return false;
-      };
-
       return hasSamples(foundLabware) ? [] : ['No samples found in the labware'];
     },
     []
