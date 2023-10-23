@@ -126,6 +126,7 @@ describe('Xenium Analyser', () => {
     cy.findByTestId('runName').clear().type('Run 123').blur();
     cy.findByTestId('lotNumberA').clear().type('Lot123').blur();
     cy.findByTestId('lotNumberB').clear().type('Lot456').blur();
+    selectOption('equipmentId', 'Xenium 1');
     selectOption('STAN-3111-workNumber', 'SGP1008');
     selectOption('STAN-3111-position', 'Left');
     for (let indx = 0; indx < 8; indx++) {

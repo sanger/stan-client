@@ -284,7 +284,16 @@ const RouteLayout = () => {
           />
         </Route>
         <Route element={<AuthLayout />}>
-          <Route path="/lab/xenium_analyser" element={<XeniumAnalyser />} />
+          <Route
+            path="/lab/xenium_analyser"
+            loader={async () => {
+              const res = await stanCore.GetEquipments({
+                category: 'xenium analyser'
+              });
+              return res.equipments;
+            }}
+            element={<XeniumAnalyser />}
+          />
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/lab/cytassist" element={<CytAssist />} />
