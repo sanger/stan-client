@@ -82,7 +82,7 @@ describe('Registration', () => {
 
   describe('Manual Registration', () => {
     before(() => {
-      cy.visit('tissue_registration');
+      cy.visit('/admin/tissue_registration');
       cy.get('[type="radio"][name="manual"]').check();
     });
     describe('Validation', () => {
@@ -230,7 +230,6 @@ describe('Registration', () => {
 
       before(() => {
         cy.reload();
-
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<RegisterOriginalSamplesMutation, RegisterOriginalSamplesMutationVariables>(
@@ -270,6 +269,7 @@ describe('Registration', () => {
 });
 
 function fillInForm() {
+  cy.get('[type="radio"][name="manual"]').check();
   cy.findByLabelText('Donor ID').type('DONOR_1');
   cy.findByLabelText('Fetal').click();
   cy.findByLabelText('Sample Collection Date').type('2022-01-01', {
