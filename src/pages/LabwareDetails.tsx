@@ -18,7 +18,7 @@ import History from '../components/history/History';
 import { LabwareStatePill } from '../components/LabwareStatePill';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
 import { useLoaderData } from 'react-router-dom';
-import { hasSamples } from '../lib/helpers';
+import { tissue } from '../lib/helpers/labwareHelper';
 
 /**
  * Props passed in to the {@link LabwareDetails} page
@@ -63,13 +63,13 @@ export default function LabwareDetails() {
     );
   };
 
-  const samplesDetails = (): React.ReactNode => {
-    if (hasSamples(labware)) {
-      const tissue = labware.slots[0].samples[0].tissue;
+  const tissueDetails = (): React.ReactNode => {
+    const labwareTissue = tissue(labware);
+    if (labwareTissue) {
       return (
         <>
-          <StripyCardDetail term={'Medium'}>{tissue.medium.name}</StripyCardDetail>
-          <StripyCardDetail term={'Fixative'}>{tissue.fixative.name}</StripyCardDetail>
+          <StripyCardDetail term={'Medium'}>{labwareTissue.medium.name}</StripyCardDetail>
+          <StripyCardDetail term={'Fixative'}>{labwareTissue.fixative.name}</StripyCardDetail>
         </>
       );
     }
@@ -103,7 +103,7 @@ export default function LabwareDetails() {
 
                     <StripyCardDetail term={'Date of Creation'}>{labware.created}</StripyCardDetail>
 
-                    {samplesDetails()}
+                    {tissueDetails()}
 
                     <StripyCardDetail term={'State'}>
                       <LabwareStatePill labware={labware} />

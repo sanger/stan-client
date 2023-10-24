@@ -26,7 +26,7 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import LabelCopyButton from '../components/LabelCopyButton';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { selectOptionValues } from '../components/forms';
-import { hasSamples } from '../lib/helpers';
+import { hasSamples } from '../lib/helpers/labwareHelper';
 
 function buildExtractionTableData(ctx: ExtractionContext) {
   if (!ctx.extraction) return [];

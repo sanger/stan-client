@@ -1,6 +1,6 @@
 import * as queryString from 'query-string';
 import * as Yup from 'yup';
-import { GridDirection, LabwareFieldsFragment, Maybe } from '../types/sdk';
+import { GridDirection, Maybe } from '../types/sdk';
 import { HasEnabled, SizeInput } from '../types/stan';
 import _, { isNaN } from 'lodash';
 import { Key } from 'react';
@@ -391,12 +391,3 @@ export function generateRandomIntegerInRange(min: number, max: number) {
 export function isSameArray(array1: string[], array2: string[]) {
   return array1.length === array2.length && array1.every((element) => array2.includes(element));
 }
-
-/**
- * Checks whether the given labware has samples in any of its slots.
- * @param labware - The labware to check for samples.
- * @returns `true` if samples are found in any slot, `false` otherwise.
- */
-export const hasSamples = (labware: LabwareFieldsFragment): boolean => {
-  return labware.slots.some((slot) => slot.samples && slot.samples.length > 0);
-};
