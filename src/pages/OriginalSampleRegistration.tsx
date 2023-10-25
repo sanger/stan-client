@@ -252,7 +252,7 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
               setFileRegisterResult(
                 labwares.map((labware) => {
                   const solution = labwareSolutions.find((ls) => ls.barcode === labware.labware!.barcode)?.solution;
-                  return { labware: labware.labware!, extraData: solution };
+                  return { labware: labware.labware!, extraData: [solution] };
                 }) as LabwareResultData[]
               );
             } else {
