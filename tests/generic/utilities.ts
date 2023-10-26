@@ -1,11 +1,4 @@
-import {
-  screen,
-  within,
-  getByRole,
-  waitForOptions,
-  waitFor as _waitFor,
-  queryByAttribute
-} from '@testing-library/react';
+import { screen, within, waitForOptions, waitFor as _waitFor, queryByAttribute } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserRole } from '../../src/types/sdk';
 import { merge } from 'lodash';
@@ -99,7 +92,7 @@ export const scanLabware = async (labwareBarcode: string) => {
 };
 
 export const visitAsEndUser = () => {
-  jest.mock('../../../src/lib/sdk', () => ({
+  jest.mock('../../src/lib/sdk', () => ({
     stanCore: {
       CurrentUser: jest.fn().mockResolvedValue({
         user: {

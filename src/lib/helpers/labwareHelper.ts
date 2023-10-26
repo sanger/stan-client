@@ -178,3 +178,12 @@ export const tissue = (labware: LabwareFieldsFragment | undefined) => {
     return labware.slots[0].samples[0].tissue;
   else return undefined;
 };
+
+/**
+ * Checks whether the given labware has samples in any of its slots.
+ * @param labware - The labware to check for samples.
+ * @returns `true` if samples are found in any slot, `false` otherwise.
+ */
+export const hasSamples = (labware: LabwareFieldsFragment): boolean => {
+  return labware.slots.some((slot) => slot.samples && slot.samples.length > 0);
+};

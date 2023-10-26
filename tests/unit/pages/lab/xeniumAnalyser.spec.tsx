@@ -4,7 +4,7 @@ import { describe } from '@jest/globals';
 import { BrowserRouter } from 'react-router-dom';
 import XeniumAnalyser from '../../../../src/pages/XeniumAnalyser';
 import React from 'react';
-import { scanLabware, selectOption, shouldDisplayValue } from '../../../generic/utilities';
+import { scanLabware, selectFocusBlur, selectOption, shouldDisplayValue } from '../../../generic/utilities';
 import userEvent from '@testing-library/user-event';
 
 afterEach(() => {
@@ -13,7 +13,11 @@ afterEach(() => {
 
 jest.mock('react-router-dom', () => ({
   ...(jest.requireActual('react-router-dom') as any),
-  useNavigate: () => jest.fn()
+  useNavigate: () => jest.fn(),
+  useLoaderData: () => [
+    { id: 1, name: 'Xenium 1' },
+    { id: 2, name: 'Xenium 2' }
+  ]
 }));
 describe('Xenium analyser', () => {
   beforeEach(() => {
@@ -38,6 +42,7 @@ describe('Xenium analyser', () => {
           expect(screen.getByText('Analyser Details')).toBeVisible();
           expect(screen.getByTestId('performed')).toBeVisible();
           expect(screen.getByTestId('runName')).toBeVisible();
+          expect(screen.getByTestId('equipmentId')).toBeVisible();
           expect(screen.getByTestId('lotNumberA')).toBeVisible();
           expect(screen.getByTestId('lotNumberB')).toBeVisible();
           expect(screen.getByTestId('workNumberAll')).toBeVisible();
@@ -105,20 +110,16 @@ describe('Xenium analyser', () => {
             await userEvent.type(screen.getByTestId('lotNumberA'), new Array(22).join('a'));
             await userEvent.tab();
             expect(
-              screen.getByText(
-                'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
-              )
+              screen.getByText('Decoding reagent lot number should be a string of up to 32 letters and numbers.')
             ).toBeVisible();
           });
         });
-        it('should display an error message when entered value contains any characters other than capital letters, numbers and underscores', () => {
+        it('should display an error message when entered value contains any characters other than letters and numbers', () => {
           waitFor(async () => {
             await userEvent.type(screen.getByTestId('lotNumberA'), 'a*456bh');
             await userEvent.tab();
             expect(
-              screen.getByText(
-                'Decoding reagent lot number should be a string of maximum length 20 of letters and numbers.'
-              )
+              screen.getByText('Decoding reagent lot number should be a string of letters and numbers.')
             ).toBeVisible();
           });
         });
@@ -129,6 +130,21 @@ describe('Xenium analyser', () => {
             await userEvent.click(screen.getByTestId('STAN-011-0-roi'));
             await userEvent.tab();
             expect(screen.getByText('Region of interest is a required field')).toBeVisible();
+          });
+        });
+        it('should display an error message when entered value is longer than 64 characters', () => {
+          waitFor(async () => {
+            await userEvent.type(screen.getByTestId('STAN-011-0-roi'), new Array(66).join('a'));
+            await userEvent.tab();
+            expect(screen.getByText('Region of interest field should be string of maximum length 64')).toBeVisible();
+          });
+        });
+      });
+      describe('Equipment', () => {
+        it('should display an error message on blur when no equipment is selected', () => {
+          waitFor(async () => {
+            await selectFocusBlur('equipmentId');
+            expect(screen.getByText('Equipment is a required field')).toBeVisible();
           });
         });
         it('should display an error message when entered value is longer than 64 characters', () => {
@@ -188,6 +204,7 @@ const fillInTheForm = async () => {
   await userEvent.type(screen.getByTestId('runName'), 'Run 123');
   await userEvent.type(screen.getByTestId('lotNumberA'), 'Lot123');
   await selectOption('STAN-3111-position', 'Left');
+  await selectOption('equipmentId', 'Xenium 1');
   for (let indx = 0; indx < 8; indx++) {
     await userEvent.type(screen.getByTestId(`STAN-3111-${indx}-roi`), '123456789');
   }

@@ -17,7 +17,11 @@ const seeds: Array<EquipmentFieldsFragment> = [
   equipmentFactory.build({ name: 'QiCube', category: 'extract' }),
 
   equipmentFactory.build({ name: 'Bioanalyser', category: 'RNA analysis' }),
-  equipmentFactory.build({ name: 'Tapestation', category: 'RNA analysis' })
+  equipmentFactory.build({ name: 'Tapestation', category: 'RNA analysis' }),
+
+  equipmentFactory.build({ name: 'Xenium 1', category: 'xenium analyser' }),
+  equipmentFactory.build({ name: 'Xenium 2', category: 'xenium analyser' }),
+  equipmentFactory.build({ name: 'Xenium 3', category: 'xenium analyser' })
 ];
 
 const equipmentRepository = createSessionStorageRepository('EQUIPMENT', 'name', seeds);

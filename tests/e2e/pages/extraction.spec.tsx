@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { describe } from '@jest/globals';
@@ -33,32 +33,41 @@ describe('Extraction', () => {
     it('renders the page with extract button disabled', () => {
       expect(screen.getByRole('button', { name: 'Extract' })).toBeDisabled();
     });
-    it('enables extract button when fields are filled', async () => {
-      await fillInTheFields();
-      await waitFor(() => {
+    it('enables extract button when fields are filled', () => {
+      act(() => {
+        fillInTheFields();
+      });
+      waitFor(() => {
         expect(screen.getByRole('button', { name: 'Extract' })).toBeEnabled();
       });
     });
   });
   describe('when extraction is successful', () => {
-    beforeEach(async () => {
-      await fillInTheFields();
-      fireEvent.click(screen.getByRole('button', { name: 'Extract' }));
-    });
-
-    it('hides the Extract button', async () => {
-      await waitFor(() => {
-        expect(screen.queryByRole('button', { name: 'Extract' })).not.toBeInTheDocument();
+    it('hides the Extract button', () => {
+      act(() => {
+        fillInTheFields();
+        fireEvent.click(screen.getByRole('button', { name: 'Extract' }));
+      });
+      waitFor(() => {
+        expect(screen.queryByRole('button', { name: 'Extract' })).toBeNull();
       });
     });
 
-    it('shows a success message', async () => {
-      await waitFor(() => {
+    it('shows a success message', () => {
+      act(() => {
+        fillInTheFields();
+        fireEvent.click(screen.getByRole('button', { name: 'Extract' }));
+      });
+      waitFor(() => {
         expect(screen.getByText('Extraction Complete')).toBeVisible();
       });
     });
-    it('shows a copy label button', async () => {
-      await waitFor(() => {
+    it('shows a copy label button', () => {
+      act(() => {
+        fillInTheFields();
+        fireEvent.click(screen.getByRole('button', { name: 'Extract' }));
+      });
+      waitFor(() => {
         expect(screen.getByRole('button', { name: /Copy Labels/i })).toBeVisible();
       });
     });
@@ -76,24 +85,34 @@ describe('Extraction', () => {
           );
         })
       );
-      await fillInTheFields();
-      fireEvent.click(screen.getByRole('button', { name: 'Extract' }));
     });
 
-    it("doesn't lock the labware scan table", async () => {
-      await waitFor(() => {
+    it("doesn't lock the labware scan table", () => {
+      act(() => {
+        fillInTheFields();
+        fireEvent.click(screen.getByRole('button', { name: 'Extract' }));
+      });
+      waitFor(() => {
         expect(screen.getByTestId('input')).toBeEnabled();
       });
     });
 
-    it("doesn't disable the Extract button", async () => {
-      await waitFor(() => {
+    it("doesn't disable the Extract button", () => {
+      act(() => {
+        fillInTheFields();
+        fireEvent.click(screen.getByRole('button', { name: 'Extract' }));
+      });
+      waitFor(() => {
         expect(screen.getByRole('button', { name: 'Extract' })).toBeEnabled();
       });
     });
 
-    it('shows an error message', async () => {
-      await waitFor(() => {
+    it('shows an error message', () => {
+      act(() => {
+        fillInTheFields();
+        fireEvent.click(screen.getByRole('button', { name: 'Extract' }));
+      });
+      waitFor(() => {
         expect(screen.getByText('Failed to extract')).toBeVisible();
       });
     });
