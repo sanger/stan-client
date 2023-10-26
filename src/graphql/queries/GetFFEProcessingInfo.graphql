@@ -1,5 +1,5 @@
-query GetFFPEProcessingInfo {
-  comments(includeDisabled: false, category: "FFPE processing program") {
+query GetParaffinProcessingInfo {
+  comments(includeDisabled: false, category: "Paraffin processing program") {
     ...CommentFields
   }
 }

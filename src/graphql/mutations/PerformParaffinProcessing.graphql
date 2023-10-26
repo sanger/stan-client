@@ -1,5 +1,5 @@
-mutation PerformFFPEProcessing($request: FFPEProcessingRequest!) {
-  performFFPEProcessing(request: $request) {
+mutation PerformParaffinProcessing($request: ParaffinProcessingRequest!) {
+  performParaffinProcessing(request: $request) {
     labware {
       ...LabwareFields
     }

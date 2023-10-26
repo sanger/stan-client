@@ -42,7 +42,7 @@ import reagentTransferHandlers from './handlers/reagentTransferHandlers';
 import originalSampleProcessingHandlers from './handlers/originalSampleProcessingHandlers';
 import solutionHandlers from './handlers/solutionHandlers';
 import solutionTransferHandlers from './handlers/solutionTransferHandlers';
-import ffpeProcessingHandlers from './handlers/ffpeProcessingHandlers';
+import paraffinProcessingHandlers from './handlers/paraffinProcessingHandlers';
 import workProgressSummaryHandlers from './handlers/summaryWorkProgressHandlers';
 import fileHandlers from './handlers/fileHandlers';
 import programHandlers from './handlers/programHandlers';
@@ -94,7 +94,7 @@ export const handlers = [
   ...reagentTransferHandlers,
   ...originalSampleProcessingHandlers,
   ...solutionHandlers,
-  ...ffpeProcessingHandlers,
+  ...paraffinProcessingHandlers,
   ...solutionTransferHandlers,
   ...workProgressSummaryHandlers,
   ...fileHandlers,

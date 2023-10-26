@@ -101,15 +101,15 @@ const seeds: Array<CommentFieldsFragment> = [
     text: 'Fixatives damaged'
   }),
   commentFactory.build({
-    category: 'FFPE processing program',
+    category: 'Paraffin processing program',
     text: 'Rapid biopsy'
   }),
   commentFactory.build({
-    category: 'FFPE processing program',
+    category: 'Paraffin processing program',
     text: 'Soft tissue'
   }),
   commentFactory.build({
-    category: 'FFPE processing program',
+    category: 'Paraffin processing program',
     text: 'Hard tissue'
   }),
   commentFactory.build({

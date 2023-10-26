@@ -118,8 +118,8 @@ function AppShell({ children }: AppShellParams) {
                       }
                     />
                     <NavLinkMenuItem
-                      caption={'FFPE Processing'}
-                      path="/lab/ffpe_processing"
+                      caption={'Paraffin Processing'}
+                      path="/lab/paraffin_processing"
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Records the type of processing cycle run on the sample.'}
                     />
@@ -435,7 +435,7 @@ function AppShell({ children }: AppShellParams) {
                       <StanMobileNavLink to="/lab/original_sample_processing">
                         Original Sample Processing
                       </StanMobileNavLink>
-                      <StanMobileNavLink to="/lab/original_sample_processing">FFPE Processing</StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/original_sample_processing">Paraffin Processing</StanMobileNavLink>
                     </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">RNA</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
