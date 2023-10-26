@@ -48,7 +48,7 @@ export interface RegistrationFormValues {
   workNumbers: Array<string>;
 }
 
-enum RegistrationMethod {
+export enum RegistrationMethod {
   MANUAL,
   UPLOAD_FILE,
   NONE
