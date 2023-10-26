@@ -319,17 +319,17 @@ export default function Planner<M>({
         onLabwarePlanComplete,
         scrollRef
       )}
-      <div ref={scrollRef} className="my-4 max-w-2xl mx-auto p-4 rounded-md bg-gray-100">
+      <div ref={scrollRef} className="my-4 max-w-2xl mx-auto p-2 rounded-md bg-gray-100">
         <p className="my-3 text-gray-800 text-sm text-center leading-normal">
           Once <span className="font-bold text-gray-900">all source labware</span> has been scanned, select a type of
           labware to plan layouts:
         </p>
-        <div className="flex flex-row items-center gap-x-4 justify-center">
+        <div className="flex flex-col items-center justify-center space-y-4">
           {
             /**Render plan creation settings panel using the callback method (passed as props) so that it will be done by the parent component **/
             buildPlanCreationSettings()
           }
-          <div className={'flex-shrink-0  '}>
+          <div className={'flex w-full justify-end flex-shrink-0 border-t-2 border-gray-200 py-2'}>
             <BlueButton
               id="#addLabware"
               onClick={onAddLabwareClick}

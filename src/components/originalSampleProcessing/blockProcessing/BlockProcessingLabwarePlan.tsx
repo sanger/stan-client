@@ -123,20 +123,6 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
       setFieldValue(`plans.${rowIndex}.replicateNumber`, replicateNumber === -1 ? '' : replicateNumber + '');
     }, [replicateNumber, rowIndex, setFieldValue]);
 
-    React.useEffect(() => {
-      const defaultMediumForlabwareTyps = [
-        { lwType: LabwareTypeName.PRE_BARCODED_TUBE, medium: 'None' },
-        { lwType: LabwareTypeName.TUBE, medium: 'None' },
-        { lwType: LabwareTypeName.PROVIASETTE, medium: 'OCT' },
-        { lwType: LabwareTypeName.CASSETTE, medium: 'Paraffin' }
-      ];
-      const mediumLwType = defaultMediumForlabwareTyps.find(
-        (item) =>
-          item.lwType === outputLabware.labwareType.name &&
-          blockProcessInfo.mediums.find((medium) => medium.name === item.medium) !== undefined
-      );
-      mediumLwType && setFieldValue(`plans.${rowIndex}.medium`, mediumLwType.medium);
-    }, [blockProcessInfo, setFieldValue, outputLabware, rowIndex]);
     /**
      * Fill source barcode in form data
      * and
@@ -193,13 +179,6 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                   disabled={true}
                 />
 
-                <CustomReactSelect
-                  label={'Medium'}
-                  dataTestId={'medium'}
-                  name={`plans.${rowIndex}.medium`}
-                  emptyOption={true}
-                  options={selectOptionValues(blockProcessInfo.mediums, 'name', 'name')}
-                />
                 <CustomReactSelect
                   label={'Processing comments'}
                   dataTestId={'comments'}

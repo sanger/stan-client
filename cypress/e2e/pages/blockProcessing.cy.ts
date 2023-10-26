@@ -205,15 +205,11 @@ describe('Block Processing', () => {
         cy.visit('/lab/original_sample_processing?type=block');
         scanInput('STAN-113');
         addLabware('Tube');
-        selectOption('medium', '');
         selectOption('workNumber', '');
         cy.findByRole('button', { name: /Save/i }).click();
       });
       it('Shows error for replicate number', () => {
         cy.findByText('Replicate number is required').should('be.visible');
-      });
-      it('Shows error for medium', () => {
-        cy.findByText('Medium is required').should('be.visible');
       });
       it('Shows error for SGP Number', () => {
         cy.findByText('SGP number is required').should('be.visible');
@@ -269,14 +265,11 @@ describe('Block Processing', () => {
         });
 
         it('displays the table column headers in correct order', () => {
-          cy.get('th').eq(0).contains('Barcode');
-          cy.get('th').eq(1).contains('Labware Type');
-          cy.get('th').eq(2).contains('Medium');
-          cy.get('th').eq(3).contains('Fixative');
-          cy.get('th').eq(4).contains('Donor ID');
-          cy.get('th').eq(5).contains('Tissue type');
-          cy.get('th').eq(6).contains('Spatial location');
-          cy.get('th').eq(7).contains('Replicate');
+          ['Barcode', 'Labware Type', 'Fixative', 'Donor ID', 'Tissue type', 'Spatial location', 'Replicate'].forEach(
+            (val, indx) => {
+              cy.get('th').eq(indx).contains(val);
+            }
+          );
         });
 
         it('should not display all destination labware except Pre-barcoded Tube', function () {
@@ -302,7 +295,6 @@ describe('Block Processing', () => {
         addLabware('Tube');
         selectSource();
         selectSGPNumber('SGP1008');
-        fillMedium();
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<PerformTissueBlockMutation, PerformTissueBlockMutationVariables>(
@@ -333,7 +325,6 @@ describe('Block Processing', () => {
 });
 function checkBlockProcessingFields() {
   cy.findByLabelText('Replicate Number').should('be.visible');
-  cy.findByLabelText('Medium').should('be.visible');
   cy.findByLabelText('Processing comments').should('be.visible');
 }
 
@@ -344,9 +335,7 @@ function addLabware(labwareType: string) {
   selectOption('labwareType', labwareType);
   cy.findByText('+ Add Labware').click();
 }
-function fillMedium() {
-  selectOption('medium', 'None');
-}
+
 function selectSource() {
   cy.findByText('Edit Layout').click();
   cy.findByRole('dialog').within(() => {
