@@ -106,7 +106,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Sample Processing Comments</AppShell.Title>
+        <AppShell.Title>Labware generation</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className={'max-w-screen-xl mx-auto'}>
@@ -207,7 +207,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
 
                     <OperationCompleteModal
                       show={submissionResult !== undefined}
-                      message={'Sample processing comments recorded on all labware'}
+                      message={'Labware generation comments recorded on all labware'}
                     >
                       <p>
                         If you wish to start the process again, click the "Reset Form" button. Otherwise you can return

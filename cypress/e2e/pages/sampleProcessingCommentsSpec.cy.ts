@@ -7,7 +7,7 @@ import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { selectOption } from '../shared/customReactSelect.cy';
 
-describe('Sample Processing Comments', () => {
+describe('Sample processing comments', () => {
   before(() => {
     cy.visit('/lab/sample_processing_comments');
   });
