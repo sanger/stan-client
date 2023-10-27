@@ -385,7 +385,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                 <motion.div variants={variants.fadeInWithLift} className="space-y-10">
                   <motion.div variants={variants.fadeInWithLift}>
                     <Heading level={3}>SGP Number</Heading>
-                    <p className="mt-2">Please select an SGP number to associate with block processing.</p>
+                    <p className="mt-2">Please select an SGP number to associate with the block.</p>
                     <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
                       <WorkNumberSelect
                         onWorkNumberChange={(workNumber) => {
@@ -408,7 +408,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                     ]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                   />
-                  {serverError && <Warning message={'Failed to perform Block Processing'} error={serverError} />}
+                  {serverError && <Warning message={'Failed to perform block processing'} error={serverError} />}
                   {values.plans.length > 0 && (
                     <motion.div variants={variants.fadeInWithLift} className={'sm:flex mt-4 sm:flex-row justify-end'}>
                       <ButtonBar>

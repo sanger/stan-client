@@ -28,7 +28,7 @@ type PotProcessingLabwarePlanProps = {
    */
   outputLabware: NewLabwareLayout;
   /**
-   * Additional information required for block processing
+   * Additional information required for pot processing
    */
   potProcessInfo: GetPotProcessingInfoQuery;
   /**

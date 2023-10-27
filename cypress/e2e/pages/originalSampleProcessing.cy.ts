@@ -11,19 +11,19 @@ describe('Original Sample Processing', () => {
     });
   });
 
-  context('when Block Processing is selected', () => {
+  context('when Block is selected', () => {
     before(() => {
-      selectOption('processing-type', 'Block Processing');
+      selectOption('processing-type', 'Block');
     });
 
     it('should display Block Processing page ', () => {
       cy.url().should('include', '/lab/original_sample_processing?type=block');
     });
   });
-  context('when Pot Processing is selected', () => {
+  context('when Pot is selected', () => {
     before(() => {
       cy.visit('/lab/original_sample_processing');
-      selectOption('processing-type', 'Pot Processing');
+      selectOption('processing-type', 'Pot');
     });
 
     it('should display Pot Processing page ', () => {
