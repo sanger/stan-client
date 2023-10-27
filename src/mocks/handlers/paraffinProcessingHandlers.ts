@@ -1,30 +1,30 @@
 import { graphql } from 'msw';
 import {
-  GetFfpeProcessingInfoQuery,
-  GetFfpeProcessingInfoQueryVariables,
-  PerformFfpeProcessingMutation,
-  PerformFfpeProcessingMutationVariables
+  GetParaffinProcessingInfoQuery,
+  GetParaffinProcessingInfoQueryVariables,
+  PerformParaffinProcessingMutation,
+  PerformParaffinProcessingMutationVariables
 } from '../../types/sdk';
 import commentRepository from '../repositories/commentRepository';
 import { createLabware } from './labwareHandlers';
 import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 
-const ffpeProcessingHandlers = [
-  graphql.query<GetFfpeProcessingInfoQuery, GetFfpeProcessingInfoQueryVariables>(
-    'GetFFPEProcessingInfo',
+const paraffinProcessingHandlers = [
+  graphql.query<GetParaffinProcessingInfoQuery, GetParaffinProcessingInfoQueryVariables>(
+    'GetParaffinProcessingInfo',
     (req, res, ctx) => {
       return res(
         ctx.data({
           comments: commentRepository
             .findAll()
-            .filter((comment) => comment.category === 'FFPE processing program' && comment.enabled)
+            .filter((comment) => comment.category === 'Paraffin processing program' && comment.enabled)
         })
       );
     }
   ),
 
-  graphql.mutation<PerformFfpeProcessingMutation, PerformFfpeProcessingMutationVariables>(
-    'PerformFFPEProcessing',
+  graphql.mutation<PerformParaffinProcessingMutation, PerformParaffinProcessingMutationVariables>(
+    'PerformParaffinProcessing',
     (req, res, ctx) => {
       const confirmedLabwares = req.variables.request.barcodes.map((barcode) => {
         const labware = createLabware(barcode);
@@ -32,7 +32,7 @@ const ffpeProcessingHandlers = [
       });
       return res(
         ctx.data({
-          performFFPEProcessing: {
+          performParaffinProcessing: {
             labware: confirmedLabwares,
             operations: []
           }
@@ -41,4 +41,4 @@ const ffpeProcessingHandlers = [
     }
   )
 ];
-export default ffpeProcessingHandlers;
+export default paraffinProcessingHandlers;

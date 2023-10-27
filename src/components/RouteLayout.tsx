@@ -21,7 +21,7 @@ import BlockProcessing from './originalSampleProcessing/blockProcessing/BlockPro
 import PotProcessing from './originalSampleProcessing/potProcessing/PotProcessing';
 import SampleProcessingComments from '../pages/SampleProcessingComments';
 import SolutionTransfer from '../pages/SolutionTransfer';
-import FFPEProcessing from '../pages/FFPEProcessing';
+import ParaffinProcessing from '../pages/ParaffinProcessing';
 import AddExternalID from '../pages/AddExternalID';
 import Extraction from '../pages/Extraction';
 import Analysis from '../pages/Analysis';
@@ -165,10 +165,10 @@ const RouteLayout = () => {
         </Route>
         <Route element={<AuthLayout />}>
           <Route
-            path="/lab/ffpe_processing"
+            path="/lab/paraffin_processing"
             element={
-              <DataFetcher dataFetcher={() => stanCore.GetFFPEProcessingInfo()}>
-                {(ffpeInfo) => <FFPEProcessing ffPeInfo={ffpeInfo} />}
+              <DataFetcher dataFetcher={() => stanCore.GetParaffinProcessingInfo()}>
+                {(paraffinProcessingInfo) => <ParaffinProcessing paraffinProcessingInfo={paraffinProcessingInfo} />}
               </DataFetcher>
             }
           />

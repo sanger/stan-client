@@ -1,5 +1,9 @@
 import React from 'react';
-import { GetFfpeProcessingInfoQuery, PerformFfpeProcessingMutation, FfpeProcessingRequest } from '../types/sdk';
+import {
+  GetParaffinProcessingInfoQuery,
+  ParaffinProcessingRequest,
+  PerformParaffinProcessingMutation
+} from '../types/sdk';
 import AppShell from '../components/AppShell';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
@@ -20,17 +24,19 @@ import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
 import PinkButton from '../components/buttons/PinkButton';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 
-interface FFPEProcessingParams {
-  ffPeInfo: GetFfpeProcessingInfoQuery;
+interface ParaffinProcessingParams {
+  paraffinProcessingInfo: GetParaffinProcessingInfoQuery;
 }
 
-const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProcessingParams) => {
+const ParaffinProcessing: React.FC<ParaffinProcessingParams> = ({
+  paraffinProcessingInfo
+}: ParaffinProcessingParams) => {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<FfpeProcessingRequest, PerformFfpeProcessingMutation>().withConfig({
+    return createFormMachine<ParaffinProcessingRequest, PerformParaffinProcessingMutation>().withConfig({
       services: {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.PerformFFPEProcessing({
+          return stanCore.PerformParaffinProcessing({
             request: e.values
           });
         }
@@ -55,19 +61,19 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProces
 
   const getComment = (commentId: number) => {
     if (commentId < 0) return '';
-    const comment = ffPeInfo.comments.find((comment) => comment.id === commentId);
+    const comment = paraffinProcessingInfo.comments.find((comment) => comment.id === commentId);
     return comment !== undefined ? comment.text : '';
   };
 
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>FFPE Processing</AppShell.Title>
+        <AppShell.Title>Paraffin Processing</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className={'max-w-screen-xl mx-auto'}>
-          {ffPeInfo && (
-            <Formik<FfpeProcessingRequest>
+          {paraffinProcessingInfo && (
+            <Formik<ParaffinProcessingRequest>
               initialValues={{
                 workNumber: '',
                 barcodes: [],
@@ -94,7 +100,7 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProces
                       {serverError && <Warning error={serverError} />}
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                         <Heading level={3}>SGP Number</Heading>
-                        <p className="mt-2">Please select an SGP number to associate with FFPE processing.</p>
+                        <p className="mt-2">Please select an SGP number to associate with paraffin processing.</p>
                         <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
                           <WorkNumberSelect
                             onWorkNumberChange={(workNumber) => {
@@ -136,7 +142,7 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProces
                           label={''}
                           emptyOption
                           className={'w-1/2'}
-                          options={ffPeInfo.comments.map((comment) => {
+                          options={paraffinProcessingInfo.comments.map((comment) => {
                             return {
                               label: comment.text,
                               value: comment.id + ''
@@ -187,7 +193,7 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProces
 
                     <OperationCompleteModal
                       show={submissionResult !== undefined}
-                      message={'FFPE processing type recorded on all labware'}
+                      message={'Paraffin processing recorded on all labware'}
                     >
                       <p>
                         If you wish to start the process again, click the "Reset Form" button. Otherwise you can return
@@ -205,4 +211,4 @@ const FFPEProcessing: React.FC<FFPEProcessingParams> = ({ ffPeInfo }: FFPEProces
   );
 };
 
-export default FFPEProcessing;
+export default ParaffinProcessing;

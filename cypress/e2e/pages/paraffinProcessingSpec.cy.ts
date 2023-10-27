@@ -1,12 +1,12 @@
-import { PerformFfpeProcessingMutation, PerformFfpeProcessingMutationVariables } from '../../../src/types/sdk';
+import { PerformParaffinProcessingMutation, PerformParaffinProcessingMutationVariables } from '../../../src/types/sdk';
 import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 import { selectOption, selectSGPNumber, shouldOptionsHaveLengthAbove } from '../shared/customReactSelect.cy';
 
-describe('FFPE Processing', () => {
-  shouldDisplyProjectAndUserNameForWorkNumber('/lab/ffpe_processing');
+describe('Paraffin Processing', () => {
+  shouldDisplyProjectAndUserNameForWorkNumber('/lab/paraffin_processing');
 
   describe('Validation', () => {
     context('when all form fields are empty', () => {
@@ -36,8 +36,8 @@ describe('FFPE Processing', () => {
         fillForm();
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<PerformFfpeProcessingMutation, PerformFfpeProcessingMutationVariables>(
-              'PerformFFPEProcessing',
+            graphql.mutation<PerformParaffinProcessingMutation, PerformParaffinProcessingMutationVariables>(
+              'PerformParaffinProcessing',
               (req, res, ctx) => {
                 const labwareType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.POT);
                 const labware = req.variables.request.barcodes.map((barcode) =>
@@ -45,7 +45,7 @@ describe('FFPE Processing', () => {
                 );
                 return res(
                   ctx.data({
-                    performFFPEProcessing: {
+                    performParaffinProcessing: {
                       labware,
                       operations: []
                     }
@@ -64,12 +64,12 @@ describe('FFPE Processing', () => {
 
     context('when request is unsuccessful', () => {
       before(() => {
-        cy.visit('/lab/ffpe_processing');
+        cy.visit('/lab/paraffin_processing');
         fillForm();
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<PerformFfpeProcessingMutation, PerformFfpeProcessingMutationVariables>(
-              'PerformFFPEProcessing',
+            graphql.mutation<PerformParaffinProcessingMutation, PerformParaffinProcessingMutationVariables>(
+              'PerformParaffinProcessing',
               (req, res, ctx) => {
                 return res.once(
                   ctx.errors([
