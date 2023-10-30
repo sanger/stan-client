@@ -9,9 +9,10 @@ import PotProcessing from '../components/originalSampleProcessing/potProcessing/
 import { GetBlockProcessingInfoQuery, GetPotProcessingInfoQuery } from '../types/sdk';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+
 enum OriginalSampleProcessingType {
-  BLOCK = 'Block Processing',
-  POT = 'Pot Processing'
+  BLOCK = 'Block',
+  POT = 'Pot'
 }
 
 export const OriginalSampleProcessing: React.FC = () => {

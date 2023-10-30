@@ -110,7 +110,7 @@ function AppShell({ children }: AppShellParams) {
                     description={'Original sample operations'}
                   >
                     <NavLinkMenuItem
-                      caption={'Sample Processing'}
+                      caption={'Labware generation'}
                       path="/lab/original_sample_processing"
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                       description={
@@ -138,10 +138,10 @@ function AppShell({ children }: AppShellParams) {
                     />
 
                     <NavLinkMenuItem
-                      caption={'Sample processing comments'}
+                      caption={'Labware generation comments'}
                       path="/lab/sample_processing_comments"
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
-                      description={'Records extra sample processing commentas.'}
+                      description={'Records extra labware generation comments.'}
                     />
                   </Menu>
 
