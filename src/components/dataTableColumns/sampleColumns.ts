@@ -87,3 +87,13 @@ export const sectionPosition: ColumnFactory = () => ({
   Header: 'Section Position',
   accessor: (sample) => sample.sectionPosition
 });
+
+export const medium: ColumnFactory = () => ({
+  Header: 'Medium',
+  accessor: (sample) => sample.tissue.medium.name
+});
+
+export const fixative: ColumnFactory = () => ({
+  Header: 'Fixative',
+  accessor: (sample) => sample.tissue.fixative.name
+});
