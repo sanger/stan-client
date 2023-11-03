@@ -97,3 +97,8 @@ export const fixative: ColumnFactory = () => ({
   Header: 'Fixative',
   accessor: (sample) => sample.tissue.fixative.name
 });
+
+export const externalId: ColumnFactory = () => ({
+  Header: 'External ID',
+  accessor: (sample) => sample.tissue.externalName
+});
