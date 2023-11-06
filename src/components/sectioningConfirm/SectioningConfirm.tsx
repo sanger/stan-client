@@ -74,11 +74,11 @@ export default function SectioningConfirm({
   useEffect(() => {
     const subscription = service.subscribe((state) => {
       if (state.matches('confirmed')) {
-        onConfirmed(confirmSectionResultLabwares);
+        onConfirmed([...confirmSectionResultLabwares, ...sourceLabware]);
       }
     });
     return subscription.unsubscribe;
-  }, [service, onConfirmed, confirmSectionResultLabwares]);
+  }, [service, onConfirmed, confirmSectionResultLabwares, sourceLabware]);
 
   /**
    * Callback for when the work number select changes
