@@ -370,8 +370,8 @@ describe('Sectioning Confirmation', () => {
       it('displays Print option in updated page after success', () => {
         cy.findByTestId('print-div').within(() => {
           cy.findByText('Tube').should('be.visible');
-          cy.findByRole('table').contains('td', 'STAN-0001F');
-          cy.findByRole('table').contains('td', 'STAN-0001E');
+          cy.findAllByRole('table').eq(0).contains('td', 'STAN-0001F');
+          cy.findAllByRole('table').eq(0).contains('td', 'STAN-0001E');
         });
       });
     });
@@ -399,6 +399,7 @@ describe('Sectioning Confirmation', () => {
       it('when redirected to the Store page', () => {
         cy.findByRole('table').contains('td', 'STAN-0001F');
         cy.findByRole('table').contains('td', 'STAN-0001E');
+        cy.findByRole('table').contains('td', 'STAN-2222');
       });
       it('store all button should be disabled', () => {
         cy.findByRole('button', { name: /Store All/i }).should('be.disabled');
