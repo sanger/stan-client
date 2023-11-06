@@ -47,7 +47,7 @@ export interface VisiumQCFormData {
   qcType: QCType;
   barcode: string;
   slotMeasurements?: Array<SlotMeasurementRequest>;
-  labwareResult?: CoreLabwareResult;
+  labwareResult?: CoreLabwareResult[];
   costing?: SlideCosting;
   reagentLot?: string;
   slotComments?: Array<AddressCommentInput>;
@@ -57,14 +57,16 @@ const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
   barcode: Yup.string().optional(),
   qcType: Yup.string().required().label('QC Type'),
-  labwareResult: Yup.object().when('qcType', (qcType) => {
-    const val = qcType as unknown as string;
-    if (val === QCType.SLIDE_PROCESSING) {
-      return Yup.object().required();
-    } else {
-      return Yup.object().notRequired();
-    }
-  }),
+  labwareResult: Yup.array()
+    .of(Yup.object())
+    .when('qcType', (qcType) => {
+      const val = qcType as unknown as string;
+      if (val === QCType.SLIDE_PROCESSING) {
+        return Yup.array().required();
+      } else {
+        return Yup.array().notRequired();
+      }
+    }),
   slotMeasurements: Yup.array()
     .of(
       Yup.object().shape({
@@ -73,14 +75,7 @@ const validationSchema = Yup.object().shape({
         value: Yup.string().required('Positive value required')
       })
     )
-    .when('qcType', (qcType) => {
-      const val = qcType[0] as unknown as string;
-      if (val === QCType.SLIDE_PROCESSING) {
-        return Yup.array().notRequired();
-      } else {
-        return Yup.array().notRequired();
-      }
-    }),
+    .notRequired(),
 
   costing: Yup.string().when('qcType', (qcType) => {
     const val = qcType[0] as unknown as string;
@@ -152,6 +147,8 @@ export default function VisiumQC({ info }: VisiumQCProps) {
     })
   );
 
+  const [labwareLimit, setLabwareLimit] = React.useState(2);
+
   const [currentRecordOpWithSlotComments, sendRecordOpWithSlotComments] = useMachine(
     createFormMachine<OpWithSlotCommentsRequest, RecordOpWithSlotCommentsMutation>().withConfig({
       services: {
@@ -178,7 +175,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
         type: 'SUBMIT_FORM',
         values: {
           workNumber: values.workNumber,
-          labwareResults: [{ ...values.labwareResult }],
+          labwareResults: values.labwareResult,
           operationType: QCType.SLIDE_PROCESSING
         }
       });
@@ -278,6 +275,9 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                   <CustomReactSelect
                     handleChange={(val) => {
                       setFieldValue('qcType', (val as OptionType).label);
+                      setLabwareLimit(() => {
+                        return (val as OptionType).label === QCType.SLIDE_PROCESSING ? 2 : 1;
+                      });
                     }}
                     dataTestId={'qcType'}
                     emptyOption={true}
@@ -295,43 +295,45 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                 <div className="mt-8 space-y-2">
                   <Heading level={2}>Labware</Heading>
                   <p>Please scan in any labware you wish to QC.</p>
-                  <LabwareScanner limit={1}>
-                    {({ labwares, removeLabware }) => {
-                      switch (values.qcType) {
-                        case QCType.SLIDE_PROCESSING:
-                          return (
-                            <SlideProcessing
-                              labware={labwares[0]}
-                              removeLabware={removeLabware}
-                              comments={slideProcessingComments}
-                              labwareResultProps={values.labwareResult}
-                            />
-                          );
-                        case QCType.SPRI_CLEANUP:
-                          return (
-                            <Cleanup labware={labwares[0]} comments={cleanupComments} removeLabware={removeLabware} />
-                          );
+                  <div key={`labware-scanner-${labwareLimit}`}>
+                    <LabwareScanner limit={labwareLimit}>
+                      {({ labwares, removeLabware }) => {
+                        switch (values.qcType) {
+                          case QCType.SLIDE_PROCESSING:
+                            return (
+                              <SlideProcessing
+                                labware={labwares}
+                                removeLabware={removeLabware}
+                                comments={slideProcessingComments}
+                                labwaresResultsProps={values.labwareResult}
+                              />
+                            );
+                          case QCType.SPRI_CLEANUP:
+                            return (
+                              <Cleanup labware={labwares[0]} comments={cleanupComments} removeLabware={removeLabware} />
+                            );
 
-                        case QCType.CDNA_AMPLIFICATION:
-                          return (
-                            <Amplification
-                              slotMeasurements={values.slotMeasurements}
-                              labware={labwares[0]}
-                              removeLabware={removeLabware}
-                            />
-                          );
-                        case QCType.VISIUM_CONCENTRATION:
-                          return (
-                            <CDNAConcentration
-                              slotMeasurements={values.slotMeasurements}
-                              labware={labwares[0]}
-                              removeLabware={removeLabware}
-                              concentrationComments={concentrationComments}
-                            />
-                          );
-                      }
-                    }}
-                  </LabwareScanner>
+                          case QCType.CDNA_AMPLIFICATION:
+                            return (
+                              <Amplification
+                                slotMeasurements={values.slotMeasurements}
+                                labware={labwares[0]}
+                                removeLabware={removeLabware}
+                              />
+                            );
+                          case QCType.VISIUM_CONCENTRATION:
+                            return (
+                              <CDNAConcentration
+                                slotMeasurements={values.slotMeasurements}
+                                labware={labwares[0]}
+                                removeLabware={removeLabware}
+                                concentrationComments={concentrationComments}
+                              />
+                            );
+                        }
+                      }}
+                    </LabwareScanner>
+                  </div>
                 </div>
 
                 {getServerError(values) && (
