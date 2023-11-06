@@ -106,6 +106,7 @@ export default function LabwareDetails() {
               <DataTable
                 columns={[
                   sampleColumns.slotAddress(),
+                  sampleColumns.externalId(),
                   sampleColumns.tissueType(),
                   sampleColumns.sectionNumber(),
                   sampleColumns.sectionPosition(),
