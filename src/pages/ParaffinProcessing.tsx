@@ -57,7 +57,7 @@ const ParaffinProcessing: React.FC<ParaffinProcessingParams> = ({
   React.useEffect(() => {
     if (!submissionResult) return;
     createSessionStorageForLabwareAwaiting(submissionResult.performParaffinProcessing.labware);
-  }, [submissionResult, createSessionStorageForLabwareAwaiting]);
+  }, [submissionResult]);
 
   function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({
