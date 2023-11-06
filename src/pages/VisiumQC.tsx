@@ -302,7 +302,7 @@ export default function VisiumQC({ info }: VisiumQCProps) {
                           case QCType.SLIDE_PROCESSING:
                             return (
                               <SlideProcessing
-                                labwares={labwares}
+                                labware={labwares}
                                 removeLabware={removeLabware}
                                 comments={slideProcessingComments}
                                 labwaresResultsProps={values.labwareResult}

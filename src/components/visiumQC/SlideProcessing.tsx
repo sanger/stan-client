@@ -19,11 +19,11 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type SlideProcessingProps = {
   comments: CommentFieldsFragment[];
-  labwares: LabwareFieldsFragment[];
+  labware: LabwareFieldsFragment[];
   labwaresResultsProps: CoreLabwareResult[] | undefined;
   removeLabware: (barcode: string) => void;
 };
-const SlideProcessing = ({ comments, labwares, labwaresResultsProps, removeLabware }: SlideProcessingProps) => {
+const SlideProcessing = ({ comments, labware, labwaresResultsProps, removeLabware }: SlideProcessingProps) => {
   const { setFieldValue, values } = useFormikContext<VisiumQCFormData>();
   /***
    * When labwares changes, the labwareResults has to be initialized accordingly
@@ -32,24 +32,24 @@ const SlideProcessing = ({ comments, labwares, labwaresResultsProps, removeLabwa
   const [initialCosting, setInitialCosting] = React.useState<SlideCosting | undefined>(undefined);
 
   React.useEffect(() => {
-    if (labwares.length === 0 || initialCosting) return;
+    if (labware.length === 0 || initialCosting) return;
     async function fetchLabwareCosting() {
-      const response = await stanCore.GetLabwareCosting(labwares[labwares.length - 1]);
+      const response = await stanCore.GetLabwareCosting(labware[labware.length - 1]);
       const costing = response.labwareCosting ?? undefined;
       setInitialCosting(costing);
       setFieldValue('costing', costing);
     }
     fetchLabwareCosting();
-  }, [labwares, setFieldValue, initialCosting]);
+  }, [labware, setFieldValue, initialCosting]);
 
   React.useEffect(() => {
-    if (labwares.length === 0) {
+    if (labware.length === 0) {
       setFieldValue('labwareResult', undefined);
       return;
     }
     setFieldValue(
       'labwareResult',
-      labwares.map((lw) => ({
+      labware.map((lw) => ({
         barcode: lw.barcode,
         costing: values.costing,
         reagentLot: values.reagentLot,
@@ -59,7 +59,7 @@ const SlideProcessing = ({ comments, labwares, labwaresResultsProps, removeLabwa
         }))
       }))
     );
-  }, [setFieldValue, labwares, values.costing, values.reagentLot]);
+  }, [setFieldValue, labware, values.costing, values.reagentLot]);
 
   React.useEffect(() => {
     if (values.costing || values.reagentLot) {
@@ -78,7 +78,7 @@ const SlideProcessing = ({ comments, labwares, labwaresResultsProps, removeLabwa
 
   return (
     <>
-      {labwaresResultsProps && labwares.length > 0 && labwaresResultsProps.length === labwares.length && (
+      {labwaresResultsProps && labware.length > 0 && labwaresResultsProps.length === labware.length && (
         <div>
           <Panel>
             <div className={'grid grid-cols-2 bg-gray-100 p-4 gap-x-20'}>
@@ -107,7 +107,7 @@ const SlideProcessing = ({ comments, labwares, labwaresResultsProps, removeLabwa
               </div>
             </div>
           </Panel>
-          {labwares.map((lw, index) => {
+          {labware.map((lw, index) => {
             return (
               <div className="pt-4">
                 <Panel key={lw.barcode}>
