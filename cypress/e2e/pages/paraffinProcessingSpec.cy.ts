@@ -59,6 +59,21 @@ describe('Paraffin Processing', () => {
       });
       it('displays Operation complete message', () => {
         cy.findByText('Operation Complete').should('be.visible');
+        cy.findByRole('button', { name: 'Store' }).should('be.enabled');
+        cy.findByRole('button', { name: 'Reset Form' }).should('be.enabled');
+        cy.findByRole('button', { name: 'Return Home' }).should('be.enabled');
+      });
+    });
+
+    describe('when store option selected for the processed labware', () => {
+      before(() => {
+        cy.findByRole('button', { name: /Store/i }).click();
+      });
+      it('navigates to the store page', () => {
+        cy.url().should('be.equal', 'http://localhost:3000/store');
+      });
+      it('displays the processed labware within the awaiting storage table', () => {
+        cy.findByRole('table').contains('td', 'STAN-3111');
       });
     });
 
