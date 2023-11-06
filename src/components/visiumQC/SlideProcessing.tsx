@@ -19,109 +19,123 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type SlideProcessingProps = {
   comments: CommentFieldsFragment[];
-  labware: LabwareFieldsFragment;
-  labwareResultProps: CoreLabwareResult | undefined;
+  labware: LabwareFieldsFragment[];
+  labwaresResultsProps: CoreLabwareResult[] | undefined;
   removeLabware: (barcode: string) => void;
 };
-const SlideProcessing = ({ comments, labware, labwareResultProps, removeLabware }: SlideProcessingProps) => {
+const SlideProcessing = ({ comments, labware, labwaresResultsProps, removeLabware }: SlideProcessingProps) => {
   const { setFieldValue, values } = useFormikContext<VisiumQCFormData>();
   /***
    * When labwares changes, the labwareResults has to be initialized accordingly
    */
-  const [labwareResult, setLabwareResult] = React.useState<CoreLabwareResult | undefined>(labwareResultProps);
+  const [labwaresResults, setLabwaresResults] = React.useState<CoreLabwareResult[] | undefined>(labwaresResultsProps);
   const [initialCosting, setInitialCosting] = React.useState<SlideCosting | undefined>(undefined);
 
   React.useEffect(() => {
-    if (!labware) return;
+    if (labware.length === 0 || initialCosting) return;
     async function fetchLabwareCosting() {
-      const response = await stanCore.GetLabwareCosting(labware);
+      const response = await stanCore.GetLabwareCosting(labware[labware.length - 1]);
       const costing = response.labwareCosting ?? undefined;
       setInitialCosting(costing);
-      setFieldValue('costing', costing ?? '');
+      setFieldValue('costing', costing);
     }
     fetchLabwareCosting();
-  }, [labware, setInitialCosting, setFieldValue]);
+  }, [labware, setFieldValue, initialCosting]);
 
   React.useEffect(() => {
-    if (!labware) {
+    if (labware.length === 0) {
       setFieldValue('labwareResult', undefined);
       return;
     }
-    setFieldValue('labwareResult', {
-      barcode: labware.barcode,
-      sampleResults: labware.slots.filter(isSlotFilled).map((slot) => ({
-        address: slot.address,
-        result: PassFail.Pass
-      })),
-      costing: values.costing,
-      reagentLot: values.reagentLot
-    });
+    setFieldValue(
+      'labwareResult',
+      labware.map((lw) => ({
+        barcode: lw.barcode,
+        costing: values.costing,
+        reagentLot: values.reagentLot,
+        sampleResults: lw.slots.filter(isSlotFilled).map((slot) => ({
+          address: slot.address,
+          result: PassFail.Pass
+        }))
+      }))
+    );
   }, [setFieldValue, labware, values.costing, values.reagentLot]);
 
   React.useEffect(() => {
-    if (values.costing) {
-      setFieldValue('labwareResult', { ...labwareResult, costing: values.costing, reagentLot: values.reagentLot });
+    if (values.costing || values.reagentLot) {
+      setFieldValue(
+        'labwareResult',
+        labwaresResults?.map((lr) => {
+          return {
+            ...lr,
+            costing: values.costing,
+            reagentLot: values.reagentLot
+          };
+        })
+      );
     }
-  }, [labwareResult, setFieldValue, values.costing, values.reagentLot]);
+  }, [setFieldValue, values.costing, values.reagentLot, labwaresResults]);
 
-  React.useEffect(() => {
-    if (values.reagentLot) {
-      setFieldValue('labwareResult', { ...labwareResult, reagentLot: values.reagentLot, costing: values.costing });
-    }
-  }, [labwareResult, setFieldValue, values.reagentLot, values.costing]);
   return (
     <>
-      {labwareResultProps && labware && (
-        <Panel key={labware.barcode}>
-          <div className={'grid grid-cols-2 bg-gray-100 p-4 gap-x-20'}>
-            <div className={'flex flex-col'}>
-              <CustomReactSelect
-                label={'Slide costings'}
-                name={'costing'}
-                value={labwareResultProps.costing}
-                handleChange={(val) => {
-                  const slideCosting =
-                    (val as OptionType).label.length === 0
-                      ? undefined
-                      : ((val as OptionType).label as unknown as SlideCosting);
-                  setFieldValue('costing', (val as OptionType).label);
-                  setLabwareResult(
-                    labwareResult
-                      ? {
-                          ...labwareResult,
-                          costing: slideCosting
-                        }
-                      : {
-                          barcode: labware.barcode,
-                          sampleResults: labwareResultProps.sampleResults,
-                          costing: slideCosting
-                        }
-                  );
-                }}
-                emptyOption={true}
-                isDisabled={initialCosting !== undefined}
-                dataTestId="slide-costing"
-                options={objectKeys(SlideCosting).map((key) => {
-                  return {
-                    label: SlideCosting[key],
-                    value: SlideCosting[key]
-                  };
-                })}
-              />
+      {labwaresResultsProps && labware.length > 0 && labwaresResultsProps.length === labware.length && (
+        <div>
+          <Panel>
+            <div className={'grid grid-cols-2 bg-gray-100 p-4 gap-x-20'}>
+              <div className={'flex flex-col'}>
+                <CustomReactSelect
+                  label={'Slide costings'}
+                  name={'costing'}
+                  value={values.costing}
+                  handleChange={(val) => {
+                    setFieldValue('costing', (val as OptionType).label);
+                  }}
+                  emptyOption={true}
+                  isDisabled={initialCosting !== undefined}
+                  dataTestId="slide-costing"
+                  options={objectKeys(SlideCosting).map((key) => {
+                    return {
+                      label: SlideCosting[key],
+                      value: SlideCosting[key]
+                    };
+                  })}
+                />
+              </div>
+              <div className={'flex flex-col'}>
+                <ScanInput label={'Reagent LOT number'} name={'reagentLot'} />
+                <FormikErrorMessage name={'reagentLot'} />
+              </div>
             </div>
-            <div className={'flex flex-col'}>
-              <ScanInput label={'Reagent LOT number'} name={'reagentLot'} />
-              <FormikErrorMessage name={'reagentLot'} />
-            </div>
-          </div>
-          <LabwareResult
-            initialLabwareResult={labwareResultProps}
-            labware={labware}
-            availableComments={comments ? comments : []}
-            onRemoveClick={removeLabware}
-            onChange={(labwareResult) => setLabwareResult(labwareResult)}
-          />
-        </Panel>
+          </Panel>
+          {labware.map((lw, index) => {
+            return (
+              <div className="pt-4">
+                <Panel key={lw.barcode}>
+                  <LabwareResult
+                    key={lw.barcode}
+                    initialLabwareResult={labwaresResultsProps[index]}
+                    labware={lw}
+                    availableComments={comments ? comments : []}
+                    onRemoveClick={removeLabware}
+                    onChange={(lr) => {
+                      const updatedItem: CoreLabwareResult = {
+                        ...lr,
+                        costing: values.costing,
+                        reagentLot: values.reagentLot
+                      };
+                      labwaresResultsProps[index] = updatedItem;
+                      setLabwaresResults((prev) => {
+                        if (!prev) return [updatedItem];
+                        prev[index] = updatedItem;
+                        return prev;
+                      });
+                    }}
+                  />
+                </Panel>
+              </div>
+            );
+          })}
+        </div>
       )}
     </>
   );

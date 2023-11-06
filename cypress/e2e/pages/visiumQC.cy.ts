@@ -59,9 +59,6 @@ describe('Visium QC Page', () => {
           });
         });
       });
-      it('displays scan field as disabled', () => {
-        cy.get('#labwareScanInput').should('be.disabled');
-      });
       after(() => {
         cy.findByTestId('remove').click();
       });
@@ -150,6 +147,8 @@ describe('Visium QC Page', () => {
       context('When there is no server error', () => {
         context('When slide costing field is empty, all other fields are valid', () => {
           before(() => {
+            cy.reload();
+            cy.get('#labwareScanInput').type('STAN-2105{enter}');
             selectOption('slide-costing', '');
             selectSGPNumber('SGP1008');
             cy.findByTestId('formInput').type('123456');
@@ -252,10 +251,23 @@ describe('Visium QC Page', () => {
         });
       });
     });
+    context('when the user scan two labwares', () => {
+      before(() => {
+        cy.reload();
+        cy.get('#labwareScanInput').clear().type('STAN-2100{enter}');
+        cy.get('#labwareScanInput').type('STAN-2101{enter}');
+      });
+      it('should display both labwares', () => {
+        cy.findAllByTestId('passFailComments').should('have.length', 2);
+      });
+      it('displays scan field as disabled', () => {
+        cy.get('#labwareScanInput').should('be.disabled');
+      });
+    });
   });
   describe('On Visium QCType as Amplification', () => {
     before(() => {
-      cy.findByTestId('remove').click();
+      cy.reload();
       selectOption('qcType', 'Amplification');
     });
 
@@ -285,6 +297,9 @@ describe('Visium QC Page', () => {
           cy.findAllByTestId('Cq value-input').should('have.length.above', 0);
           cy.findAllByTestId('Cycles-input').should('have.length.above', 0);
         });
+      });
+      it('displays scan field as disabled', () => {
+        cy.get('#labwareScanInput').should('be.disabled');
       });
     });
     context('When user enters a value in CQ value text box', () => {
@@ -328,6 +343,7 @@ describe('Visium QC Page', () => {
 
   describe('On Visium QCType as Visium concentration', () => {
     before(() => {
+      cy.reload();
       selectSGPNumber('SGP1008');
       selectOption('qcType', 'Visium concentration');
     });
@@ -338,6 +354,9 @@ describe('Visium QC Page', () => {
       it('shows measurementType dropdown with no option selected', () => {
         shouldDisplaySelectedValue('measurementType', '');
         cy.findByRole('table').should('not.exist');
+      });
+      it('displays scan field as disabled', () => {
+        cy.get('#labwareScanInput').should('be.disabled');
       });
     });
     describe('On Save', () => {
@@ -362,6 +381,7 @@ describe('Visium QC Page', () => {
 
   describe('On SPRI clean up', () => {
     before(() => {
+      cy.reload();
       selectSGPNumber('SGP1008');
       selectOption('qcType', 'SPRI clean up');
     });
