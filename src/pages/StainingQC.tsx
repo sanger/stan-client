@@ -29,7 +29,7 @@ type StainingQCProps = {
 
 export const TISSUE_COVERAGE_MEASUREMENT_NAME = 'Tissue coverage';
 
-const STAIN_QC_TYPES = ['Stain QC', 'Tissue coverage'];
+const STAIN_QC_TYPES = ['Stain QC', 'Tissue coverage', 'Pretreatment QC'];
 
 export default function StainingQC({ info }: StainingQCProps) {
   const [workNumber, setWorkNumber] = useState<string>('');
@@ -47,6 +47,15 @@ export default function StainingQC({ info }: StainingQCProps) {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           let newLabwareResults: CoreLabwareResult[] = [];
+          if (e.values.operationType === STAIN_QC_TYPES[0]) {
+            //Remove slotMeasurements from labwareResults if qcType is Stain QC
+            newLabwareResults = e.values.labwareResults.map((labwareResult) => {
+              return {
+                barcode: labwareResult.barcode,
+                sampleResults: labwareResult.sampleResults
+              };
+            });
+          }
           //Remove sampleResults from labwareResults if qcType is Tissue coverage
           if (e.values.operationType === STAIN_QC_TYPES[1]) {
             /**Omit all measurements for which the tissue coverage is not specified**/
@@ -61,15 +70,21 @@ export default function StainingQC({ info }: StainingQCProps) {
                   };
             });
           }
-          if (e.values.operationType === STAIN_QC_TYPES[0]) {
-            //Remove slotMeasurements from labwareResults if qcType is Stain QC
+          if (e.values.operationType === STAIN_QC_TYPES[2]) {
+            //Remove slotMeasurements from labwareResults and passFail from each sampleResult if qcType is Pretreatment QC
             newLabwareResults = e.values.labwareResults.map((labwareResult) => {
               return {
                 barcode: labwareResult.barcode,
-                sampleResults: labwareResult.sampleResults
+                sampleResults: labwareResult.sampleResults?.map((sampleResult) => {
+                  return {
+                    ...sampleResult,
+                    result: undefined
+                  };
+                })
               };
             });
           }
+          debugger;
           return stanCore.RecordStainResult({
             request: {
               labwareResults: newLabwareResults,
@@ -154,7 +169,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                           onRemoveClick={removeLabware}
                           commentsForSlotSections
                           onChange={(labwareResult) => labwareResults.update(labwareResult)}
-                          displayComments={qcType === STAIN_QC_TYPES[0]}
+                          displayComments={qcType === STAIN_QC_TYPES[0] || qcType === STAIN_QC_TYPES[2]}
                           displayPassFail={qcType === STAIN_QC_TYPES[0]}
                           displayMeasurement={qcType === STAIN_QC_TYPES[1]}
                         />

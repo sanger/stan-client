@@ -131,5 +131,42 @@ describe('Staining QC', () => {
         });
       });
     });
+
+    describe('when Pretreatment QC is selected', () => {
+      before(() => {
+        cy.visit('/lab/staining_qc');
+      });
+
+      it('should  not display measurement fields', () => {
+        selectOption('qcType', 'Pretreatment QC');
+        selectSGPNumber('SGP1008');
+        cy.get('#labwareScanInput').type('STAN-411{enter}');
+        cy.findAllByTestId('coverage').should('have.length', 0);
+      });
+      it('should not display Pass/Fail icons', () => {
+        cy.findAllByTestId('passIcon').should('have.length', 0);
+      });
+      it('has comment dropdowns enabled', () => {
+        getAllSelect('comment').forEach((elem: any) => {
+          cy.wrap(elem).should('be.enabled');
+        });
+      });
+      context('when changing the comment all dropdown', () => {
+        before(() => {
+          selectOption('commentAll', 'Wrong morphology');
+        });
+        it('changes all the comments', () => {
+          cy.findByTestId('passFailComments').within(() => {
+            shouldDisplaySelectedValue('comment', 'Wrong morphology');
+          });
+        });
+      });
+      context('when Save is selected', () => {
+        it('displays Operation complete message', () => {
+          cy.findByRole('button', { name: 'Save' }).should('be.enabled').click();
+          cy.findByText('Pretreatment QC complete').should('be.visible');
+        });
+      });
+    });
   });
 });
