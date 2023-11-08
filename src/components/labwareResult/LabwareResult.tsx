@@ -71,12 +71,15 @@ export default function LabwareResult({
   displayMeasurement = true
 }: LabwareResultComponentProps) {
   const labwareResultMachine = React.useMemo(() => {
-    return createLabwareResultMachine({
+    return createLabwareResultMachine();
+  }, []);
+
+  const [current, send] = useMachine(labwareResultMachine, {
+    context: {
       labwareResult: initialLabwareResult,
       availableComments
-    });
-  }, [initialLabwareResult, availableComments]);
-  const [current, send] = useMachine(labwareResultMachine);
+    }
+  });
   const [samplePositions, setSamplePositions] = useState<SamplePositionFieldsFragment[]>([]);
   const { labwareResult } = current.context;
   const [allComments, setAllComments] = React.useState<Array<string>>([]);
@@ -137,10 +140,7 @@ export default function LabwareResult({
   const slotBuilder = (slot: SlotFieldsFragment): React.ReactNode => {
     return (
       isSlotFilled(slot) && (
-        <div
-          className={'flex flex-col w-full mx-auto space-y-4 py-2 border-b-2 border-gray-300 mb-2'}
-          data-testid={'Filled'}
-        >
+        <div className={'flex flex-col w-full mx-auto space-y-4 py-2 border-b-2 border-gray-300 mb-2'}>
           <div className={'flex flex-row w-full'}>
             {isMeasurementExist && displayMeasurement && (
               <div className={'flex flex-row space-x-3 w-1/2 mt-2'}>
@@ -256,7 +256,7 @@ export default function LabwareResult({
   };
 
   return (
-    <div>
+    <div data-testid={'labwareResult'}>
       <div className="flex flex-row items-center justify-end">
         {<RemoveButton data-testid={'remove'} type="button" onClick={() => onRemoveClick(labware.barcode)} />}
       </div>

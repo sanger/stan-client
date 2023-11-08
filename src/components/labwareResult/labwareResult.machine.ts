@@ -30,14 +30,14 @@ type LabwareResultEvent =
   | { type: 'SET_ALL_COMMENTS'; commentId: number[] | number | undefined; slots?: SlotFieldsFragment[] }
   | { type: 'SET_TISSUE_COVERAGE'; address: string; value: string };
 
-export default function createLabwareResultMachine({ availableComments, labwareResult }: LabwareResultContext) {
+export default function createLabwareResultMachine() {
   return createMachine<LabwareResultContext, LabwareResultEvent>(
     {
       id: 'labwareResultMachine',
       initial: 'ready',
       context: {
-        availableComments,
-        labwareResult
+        availableComments: [],
+        labwareResult: { barcode: '', sampleResults: [] }
       },
       states: {
         ready: {

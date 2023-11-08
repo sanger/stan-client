@@ -84,7 +84,6 @@ export default function StainingQC({ info }: StainingQCProps) {
               };
             });
           }
-          debugger;
           return stanCore.RecordStainResult({
             request: {
               labwareResults: newLabwareResults,
@@ -113,7 +112,7 @@ export default function StainingQC({ info }: StainingQCProps) {
     [labwareResults]
   );
 
-  const blueButtonDisabled = labwareResults.items.length <= 0 || workNumber === '';
+  const blueButtonDisabled = labwareResults.items.length <= 0 || workNumber === '' || qcType === '';
 
   return (
     <AppShell>
