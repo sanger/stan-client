@@ -20,6 +20,7 @@ interface ProcessingSuccessProps {
   successMessage: string;
 }
 
+//This component will create a session storage for the labware on mount
 const ProcessingSuccess: React.FC<ProcessingSuccessProps> = ({ labware, columns, successMessage }) => {
   const navigate = useNavigate();
   React.useEffect(() => {
