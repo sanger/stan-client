@@ -7,7 +7,7 @@ import {
 import AppShell from '../components/AppShell';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
-import { stanCore } from '../lib/sdk';
+import { reload, stanCore } from '../lib/sdk';
 import variants from '../lib/motionVariants';
 import { motion } from 'framer-motion';
 import { Form, Formik } from 'formik';
@@ -18,11 +18,16 @@ import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import { FormikErrorMessage } from '../components/forms';
 import LabwareScanTable from '../components/labwareScanPanel/LabwareScanPanel';
 import labwareScanTableColumns from '../components/dataTableColumns/labwareColumns';
-import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
 import PinkButton from '../components/buttons/PinkButton';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
+import { createSessionStorageForLabwareAwaiting } from '../types/stan';
+import ButtonBar from '../components/ButtonBar';
+import BlueButton from '../components/buttons/BlueButton';
+import { Link, useNavigate } from 'react-router-dom';
+import WhiteButton from '../components/buttons/WhiteButton';
+import Success from '../components/notifications/Success';
 
 interface ParaffinProcessingParams {
   paraffinProcessingInfo: GetParaffinProcessingInfoQuery;
@@ -44,9 +49,15 @@ const ParaffinProcessing: React.FC<ParaffinProcessingParams> = ({
     });
   }, []);
 
+  const navigate = useNavigate();
   const [current, send] = useMachine(formMachine);
 
   const { serverError, submissionResult } = current.context;
+
+  React.useEffect(() => {
+    if (!submissionResult) return;
+    createSessionStorageForLabwareAwaiting(submissionResult.performParaffinProcessing.labware);
+  }, [submissionResult]);
 
   function buildValidationSchema(): Yup.AnyObjectSchema {
     return Yup.object().shape({
@@ -98,6 +109,9 @@ const ParaffinProcessing: React.FC<ParaffinProcessingParams> = ({
                       className="md:w-2/3 space-y-10"
                     >
                       {serverError && <Warning error={serverError} />}
+                      {submissionResult && (
+                        <Success message={'Operation Complete'}>Paraffin processing recorded on all labware.</Success>
+                      )}
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                         <Heading level={3}>SGP Number</Heading>
                         <p className="mt-2">Please select an SGP number to associate with paraffin processing.</p>
@@ -190,16 +204,6 @@ const ParaffinProcessing: React.FC<ParaffinProcessingParams> = ({
                         Submit
                       </PinkButton>
                     </Sidebar>
-
-                    <OperationCompleteModal
-                      show={submissionResult !== undefined}
-                      message={'Paraffin processing recorded on all labware'}
-                    >
-                      <p>
-                        If you wish to start the process again, click the "Reset Form" button. Otherwise you can return
-                        to the Home screen.
-                      </p>
-                    </OperationCompleteModal>
                   </GrayBox>
                 </Form>
               )}
@@ -207,6 +211,28 @@ const ParaffinProcessing: React.FC<ParaffinProcessingParams> = ({
           )}
         </div>
       </AppShell.Main>
+
+      {submissionResult && (
+        <motion.div
+          initial={'hidden'}
+          animate={'visible'}
+          variants={variants.fadeIn}
+          className="mt-12 space-y-4"
+          data-testid={'newLabelDiv'}
+        >
+          <ButtonBar>
+            <BlueButton onClick={() => reload(navigate)} action="tertiary">
+              Reset Form
+            </BlueButton>
+            <Link to={'/store'}>
+              <WhiteButton action="primary">Store</WhiteButton>
+            </Link>
+            <Link to={'/'}>
+              <BlueButton action="primary">Return Home</BlueButton>
+            </Link>
+          </ButtonBar>
+        </motion.div>
+      )}
     </AppShell>
   );
 };

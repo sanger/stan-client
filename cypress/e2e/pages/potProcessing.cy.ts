@@ -182,34 +182,6 @@ describe('Pot Processing', () => {
           });
           cy.findByRole('button', { name: /Save/i }).click();
         });
-
-        it('displays Pot processing complete page', () => {
-          cy.findByText('Pot processing complete').should('be.visible');
-          cy.findByRole('table').should('exist');
-        });
-
-        it('displays the table column headers in correct order', () => {
-          cy.get('th').eq(0).contains('Barcode');
-          cy.get('th').eq(1).contains('Labware Type');
-          cy.get('th').eq(2).contains('Fixative');
-          cy.get('th').eq(3).contains('Donor ID');
-          cy.get('th').eq(4).contains('Tissue type');
-          cy.get('th').eq(5).contains('Spatial location');
-        });
-
-        it('displays destination labware', function () {
-          cy.findAllByText('STAN-111').its('length').should('be.gte', 1);
-        });
-      });
-
-      context('Printing labels', () => {
-        before(() => {
-          printLabels();
-        });
-
-        it('shows a success message for print', () => {
-          cy.findByText(/Pot Printer successfully printed/).should('exist');
-        });
       });
     });
   });

@@ -57,7 +57,7 @@ describe('Paraffin Processing', () => {
         });
         cy.findByRole('button', { name: /Submit/i }).click();
       });
-      it('displays Operation complete message', () => {
+      it('loads the processingSuccess component', () => {
         cy.findByText('Operation Complete').should('be.visible');
       });
     });
