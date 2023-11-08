@@ -17,6 +17,8 @@ import { isSlotFilled } from '../../../../src/lib/helpers/slotHelper';
 import { emptySlotFactory, filledSlotFactory } from '../../../../src/lib/factories/slotFactory';
 import SlotColumnInfo from '../../../../src/components/labware/SlotColumnInfo';
 import { TISSUE_COVERAGE_MEASUREMENT_NAME } from '../../../../src/pages/StainingQC';
+import * as xState from '@xstate/react';
+import userEvent from '@testing-library/user-event';
 
 afterEach(() => {
   cleanup();
@@ -29,6 +31,7 @@ jest.mock('../../../../src/components/labware/Labware', () => {
     })
   };
 });
+
 const comments: CommentFieldsFragment[] = [
   {
     id: 1,
@@ -232,7 +235,7 @@ describe('LabwareResult', () => {
     });
   });
   describe('When comment for all is selected', () => {
-    it('displays passFailComments', async () => {
+    it('sends selected comments to state machine', async () => {
       const initialLwResult: CoreLabwareResult = {
         barcode: labware.barcode,
         slotMeasurements: [
@@ -243,6 +246,18 @@ describe('LabwareResult', () => {
           }
         ]
       };
+      const sendEvent = jest.fn().mockImplementation((evt) => {
+        expect(evt.type).toEqual('SET_ALL_COMMENTS');
+      });
+      jest.spyOn(xState, 'useMachine').mockReturnValue([
+        {
+          context: {
+            labwareResult: initialLwResult
+          }
+        },
+        sendEvent
+      ] as any);
+
       render(
         <LabwareResult
           labware={labware}
@@ -253,12 +268,281 @@ describe('LabwareResult', () => {
           displayPassFail={false}
         />
       );
-      //All comment drop downs should display options
-      waitFor(async () => {
-        await selectOption('commentAll', 'Comment2');
-        shouldDisplayValue('comment', 'Comment2', 0);
-        shouldDisplayValue('comment', 'Comment2', 1);
+      await selectOption('commentAll', 'Comment2');
+      expect(sendEvent).toHaveBeenCalled();
+    });
+  });
+  describe('When Pass all is selected  ', () => {
+    it('sends pass all status to the state machine', async () => {
+      const sendEvent = jest.fn().mockImplementation((evt) => {
+        expect(evt.type).toEqual('PASS_ALL');
       });
+      const initialLwResult: CoreLabwareResult = {
+        barcode: labware.barcode,
+        slotMeasurements: [
+          {
+            address: 'A1',
+            name: TISSUE_COVERAGE_MEASUREMENT_NAME,
+            value: ''
+          }
+        ]
+      };
+      jest.spyOn(xState, 'useMachine').mockReturnValue([
+        {
+          context: {
+            labwareResult: initialLwResult
+          }
+        },
+        sendEvent
+      ] as any);
+
+      render(
+        <LabwareResult
+          labware={labware}
+          initialLabwareResult={initialLwResult}
+          onRemoveClick={() => {}}
+          onChange={() => {}}
+          availableComments={comments}
+          displayPassFail={true}
+        />
+      );
+      fireEvent.click(screen.getByTestId('passAll'));
+      expect(sendEvent).toHaveBeenCalled();
+    });
+  });
+  describe('When Fail all is selected  ', () => {
+    it('sends fail all status to the state machine', async () => {
+      const sendEvent = jest.fn().mockImplementation((evt) => {
+        expect(evt.type).toEqual('FAIL_ALL');
+      });
+      const initialLwResult: CoreLabwareResult = {
+        barcode: labware.barcode,
+        slotMeasurements: [
+          {
+            address: 'A1',
+            name: TISSUE_COVERAGE_MEASUREMENT_NAME,
+            value: ''
+          }
+        ]
+      };
+      jest.spyOn(xState, 'useMachine').mockReturnValue([
+        {
+          context: {
+            labwareResult: initialLwResult
+          }
+        },
+        sendEvent
+      ] as any);
+
+      render(
+        <LabwareResult
+          labware={labware}
+          initialLabwareResult={initialLwResult}
+          onRemoveClick={() => {}}
+          onChange={() => {}}
+          availableComments={comments}
+          displayPassFail={true}
+        />
+      );
+      fireEvent.click(screen.getByTestId('failAll'));
+      expect(sendEvent).toHaveBeenCalled();
+    });
+  });
+  describe('When tissue coverage is changed for a slot ', () => {
+    it('sends the updated tissue coverage to the state machine if valid', async () => {
+      const sendEvent = jest.fn().mockImplementation((evt) => {
+        expect(evt.type).toEqual('SET_TISSUE_COVERAGE');
+        expect(evt.value).toEqual('10');
+      });
+      const initialLwResult: CoreLabwareResult = {
+        barcode: labware.barcode,
+        slotMeasurements: [
+          {
+            address: 'A1',
+            name: TISSUE_COVERAGE_MEASUREMENT_NAME,
+            value: ''
+          }
+        ]
+      };
+
+      jest.spyOn(xState, 'useMachine').mockReturnValue([
+        {
+          context: {
+            labwareResult: initialLwResult
+          }
+        },
+        sendEvent
+      ] as any);
+
+      render(
+        <LabwareResult
+          labware={labware}
+          initialLabwareResult={initialLwResult}
+          onRemoveClick={() => {}}
+          onChange={() => {}}
+          availableComments={comments}
+          displayPassFail={false}
+        />
+      );
+      fireEvent.change(screen.getAllByTestId('coverage')[0], { target: { value: '10' } });
+      expect(sendEvent).toHaveBeenCalled();
+    });
+    it('will not sends the updated tissue coverage to the state machine if invalid', async () => {
+      const sendEvent = jest.fn();
+      const initialLwResult: CoreLabwareResult = {
+        barcode: labware.barcode,
+        slotMeasurements: [
+          {
+            address: 'A1',
+            name: TISSUE_COVERAGE_MEASUREMENT_NAME,
+            value: ''
+          }
+        ]
+      };
+
+      jest.spyOn(xState, 'useMachine').mockReturnValue([
+        {
+          context: {
+            labwareResult: initialLwResult
+          }
+        },
+        sendEvent
+      ] as any);
+
+      render(
+        <LabwareResult
+          labware={labware}
+          initialLabwareResult={initialLwResult}
+          onRemoveClick={() => {}}
+          onChange={() => {}}
+          availableComments={comments}
+          displayPassFail={false}
+        />
+      );
+      fireEvent.change(screen.getAllByTestId('coverage')[0], { target: { value: '1000' } });
+      expect(sendEvent).not.toHaveBeenCalled();
+    });
+  });
+  describe('When pass button is clicked for a slot ', () => {
+    it('sends the pass state to the state machine', async () => {
+      const sendEvent = jest.fn().mockImplementation((evt) => {
+        expect(evt.type).toEqual('PASS');
+        expect(evt.address).toEqual('A1');
+      });
+      const initialLwResult: CoreLabwareResult = {
+        barcode: labware.barcode,
+        slotMeasurements: [
+          {
+            address: 'A1',
+            name: TISSUE_COVERAGE_MEASUREMENT_NAME,
+            value: ''
+          }
+        ]
+      };
+
+      jest.spyOn(xState, 'useMachine').mockReturnValue([
+        {
+          context: {
+            labwareResult: initialLwResult
+          }
+        },
+        sendEvent
+      ] as any);
+
+      render(
+        <LabwareResult
+          labware={labware}
+          initialLabwareResult={initialLwResult}
+          onRemoveClick={() => {}}
+          onChange={() => {}}
+          availableComments={comments}
+          displayPassFail={true}
+        />
+      );
+      fireEvent.click(screen.getAllByTestId('passIcon')[0]);
+      expect(sendEvent).toHaveBeenCalled();
+    });
+  });
+
+  describe('When fail button is clicked for a slot ', () => {
+    it('sends the fail state to the state machine', async () => {
+      const sendEvent = jest.fn().mockImplementation((evt) => {
+        expect(evt.type).toEqual('FAIL');
+        expect(evt.address).toEqual('A1');
+      });
+      const initialLwResult: CoreLabwareResult = {
+        barcode: labware.barcode,
+        slotMeasurements: [
+          {
+            address: 'A1',
+            name: TISSUE_COVERAGE_MEASUREMENT_NAME,
+            value: ''
+          }
+        ]
+      };
+
+      jest.spyOn(xState, 'useMachine').mockReturnValue([
+        {
+          context: {
+            labwareResult: initialLwResult
+          }
+        },
+        sendEvent
+      ] as any);
+
+      render(
+        <LabwareResult
+          labware={labware}
+          initialLabwareResult={initialLwResult}
+          onRemoveClick={() => {}}
+          onChange={() => {}}
+          availableComments={comments}
+          displayPassFail={true}
+        />
+      );
+      fireEvent.click(screen.getAllByTestId('failIcon')[0]);
+      expect(sendEvent).toHaveBeenCalled();
+    });
+  });
+  describe('When a comment button is selected for a slot ', () => {
+    it('sends the updated tissue coverage to the state machine', async () => {
+      const sendEvent = jest.fn().mockImplementation((evt) => {
+        expect(evt.type).toEqual('SET_COMMENT');
+        expect(evt.address).toEqual('A1');
+        expect(evt.commentId).toEqual(2);
+      });
+      const initialLwResult: CoreLabwareResult = {
+        barcode: labware.barcode,
+        slotMeasurements: [
+          {
+            address: 'A1',
+            name: TISSUE_COVERAGE_MEASUREMENT_NAME,
+            value: ''
+          }
+        ]
+      };
+
+      jest.spyOn(xState, 'useMachine').mockReturnValue([
+        {
+          context: {
+            labwareResult: initialLwResult
+          }
+        },
+        sendEvent
+      ] as any);
+
+      render(
+        <LabwareResult
+          labware={labware}
+          initialLabwareResult={initialLwResult}
+          onRemoveClick={() => {}}
+          onChange={() => {}}
+          availableComments={comments}
+          displayPassFail={true}
+        />
+      );
+      await selectOption('comment', 'Comment2', 0);
+      expect(sendEvent).toHaveBeenCalled();
     });
   });
 });
