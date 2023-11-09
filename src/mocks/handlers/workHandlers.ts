@@ -134,7 +134,7 @@ const workHandlers = [
     const omeroProject = req.variables.omeroProject
       ? omeroProjectRepository.find('name', req.variables.omeroProject)
       : undefined;
-    const dnapStudy = req.variables.dnapStudy ? dnapStudyRepository.find('name', req.variables.dnapStudy) : undefined;
+    const dnapStudy = req.variables.ssStudyId ? dnapStudyRepository.find('name', req.variables.ssStudyId) : undefined;
     const workRequester = releaseRecipientRepository.find('username', req.variables.workRequester);
 
     if (!workType) {
@@ -341,14 +341,14 @@ const workHandlers = [
         );
       }
       let dnapStudy: DnapStudy | null = null;
-      if (req.variables.dnapStudy) {
-        dnapStudy = dnapStudyRepository.find('name', req.variables.dnapStudy);
+      if (req.variables.ssStudyId) {
+        dnapStudy = dnapStudyRepository.find('name', req.variables.ssStudyId);
       }
       if (!dnapStudy) {
         return res(
           ctx.errors([
             {
-              message: `DNAP Study ID and description ${req.variables.dnapStudy} not found`
+              message: `DNAP Study ID and description ${req.variables.ssStudyId} not found`
             }
           ])
         );

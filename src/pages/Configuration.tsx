@@ -124,24 +124,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
       <div data-testid="config">
         <Heading level={2}>DNAP study ID and description</Heading>
         <p className="mt-3 mb-6 text-lg" />
-        <EntityManager
-          initialEntities={configuration.dnapStudies}
-          displayKeyColumnName={'name'}
-          valueColumnName={'enabled'}
-          onChangeValue={(entity, value) => {
-            const enabled = typeof value === 'boolean' ? value : false;
-            return stanCore
-              .SetDnapStudyEnabled({
-                name: entity.name,
-                enabled
-              })
-              .then((res) => res.setDnapStudyEnabled);
-          }}
-          onCreate={(name) => stanCore.AddDnapStudy({ name }).then((res) => res.addDnapStudy)}
-          valueFieldComponentInfo={{
-            type: 'CHECKBOX'
-          }}
-        />
+        <EntityManager initialEntities={configuration.dnapStudies} displayKeyColumnName={'name'} />
       </div>,
 
       /**Equipments**/

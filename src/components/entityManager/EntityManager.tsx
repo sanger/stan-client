@@ -52,23 +52,23 @@ type EntityManagerProps<E> = {
   /**
    * Which property of the entity should be used to display as value
    */
-  valueColumnName: keyof E;
+  valueColumnName?: keyof E;
 
   /***
    * How to display in Value field
    */
-  valueFieldComponentInfo: ValueFieldComponentInfo;
+  valueFieldComponentInfo?: ValueFieldComponentInfo;
 
   /**
    * Callback when a new entity is to be created
    * @param value the value of the new entity
    */
-  onCreate(value: string, extraValue?: string): Promise<E>;
+  onCreate?: (value: string, extraValue?: string) => Promise<E>;
 
   /**
    * Callback when value changes
    */
-  onChangeValue(entity: E, value: EntityValueType): Promise<E>;
+  onChangeValue?: (entity: E, value: EntityValueType) => Promise<E>;
 
   /**
    * Display key field as a dropdown
@@ -96,11 +96,11 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
       services: {
         createEntity: (ctx, e) => {
           if (e.type !== 'CREATE_NEW_ENTITY') return Promise.reject();
-          return onCreate(e.value, e.extraValue);
+          return onCreate!(e.value, e.extraValue);
         },
         valueChanged: (context, e) => {
           if (e.type !== 'VALUE_CHANGE') return Promise.reject();
-          return onChangeValue(e.entity, e.value);
+          return onChangeValue!(e.entity, e.value);
         },
         updateExtraProperty: (context, e) => {
           if (e.type !== 'EXTRA_PROPERTY_UPDATE_VALUE' || !extraDisplayColumnName) return Promise.reject();
@@ -317,12 +317,13 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
                 handleChange={handleEntitySelection}
                 className={'p-4'}
               />
-              {getValueFieldComponent(
-                valueFieldComponentInfo,
-                selectedEntity,
-                String(displayKeyColumnName),
-                String(valueColumnName)
-              )}
+              {valueFieldComponentInfo &&
+                getValueFieldComponent(
+                  valueFieldComponentInfo,
+                  selectedEntity,
+                  String(displayKeyColumnName),
+                  String(valueColumnName)
+                )}
             </tr>
           ) : (
             orderedEntities.map((entity, indx) => (
@@ -346,12 +347,13 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
                     />
                   </TableCell>
                 )}
-                {getValueFieldComponent(
-                  valueFieldComponentInfo,
-                  entity,
-                  String(displayKeyColumnName),
-                  String(valueColumnName)
-                )}
+                {valueFieldComponentInfo &&
+                  getValueFieldComponent(
+                    valueFieldComponentInfo,
+                    entity,
+                    String(displayKeyColumnName),
+                    String(valueColumnName)
+                  )}
               </tr>
             ))
           )}
@@ -361,7 +363,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
       <div className="flex flex-row justify-end items-center space-x-3">
         {isLoading && <LoadingSpinner />}
 
-        {!showDraft && (
+        {onCreate && !showDraft && (
           <BlueButton disabled={isLoading} onClick={() => send({ type: 'DRAFT_NEW_ENTITY' })}>
             + Add{' '}
             {capitalize(alternateKeyColumnName ? alternateKeyColumnName.toString() : displayKeyColumnName.toString())}

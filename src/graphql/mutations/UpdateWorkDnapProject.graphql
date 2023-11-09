@@ -1,5 +1,5 @@
-mutation UpdateWorkDnapProject($workNumber: String!, $dnapStudy: String) {
-  updateWorkDnapProject(workNumber: $workNumber, dnapStudy: $dnapStudy) {
+mutation UpdateWorkDnapProject($workNumber: String!, $ssStudyId: Int) {
+  updateWorkDnapProject(workNumber: $workNumber, ssStudyId: $ssStudyId) {
     ...WorkFields
   }
 }

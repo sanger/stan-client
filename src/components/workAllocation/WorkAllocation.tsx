@@ -34,7 +34,7 @@ const initialValues: WorkAllocationFormValues = {
   numSlides: undefined,
   numBlocks: undefined,
   numOriginalSamples: undefined,
-  dnapStudy: undefined
+  ssStudyId: undefined
 };
 export const MAX_NUM_BLOCKANDSLIDES = 200;
 
@@ -279,7 +279,7 @@ export default function WorkAllocation() {
             }, 500);
             const valuesToSubmit = {
               ...values,
-              dnapStudy: values.dnapStudy?.length === 0 ? undefined : values.dnapStudy
+              dnapStudy: values.ssStudyId ? undefined : values.ssStudyId
             };
             send({ type: 'ALLOCATE_WORK', values: valuesToSubmit });
           }}

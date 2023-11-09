@@ -1,5 +1,0 @@
-mutation SetDnapStudyEnabled($name: String!, $enabled: Boolean!) {
-  setDnapStudyEnabled(name: $name, enabled: $enabled) {
-    ...DnapStudyFields
-  }
-}

@@ -69,9 +69,9 @@ export type WorkAllocationFormValues = {
   numOriginalSamples: number | undefined;
 
   /**
-   * Dnap Study Id and description
+   *The Sequencescape study id study
    */
-  dnapStudy?: string;
+  ssStudyId?: number;
 
   /**
    * Whether or not an R&D number is being created. Will use a different prefix on call to core.
@@ -323,7 +323,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numBlocks,
             numSlides,
             numOriginalSamples,
-            dnapStudy
+            ssStudyId
           } = e.values;
 
           return stanCore.CreateWork({
@@ -337,7 +337,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numSlides,
             numOriginalSamples,
             omeroProject,
-            dnapStudy
+            ssStudyId
           });
         },
 
