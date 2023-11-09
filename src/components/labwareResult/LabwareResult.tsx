@@ -71,12 +71,15 @@ export default function LabwareResult({
   displayMeasurement = true
 }: LabwareResultComponentProps) {
   const labwareResultMachine = React.useMemo(() => {
-    return createLabwareResultMachine({
+    return createLabwareResultMachine();
+  }, []);
+
+  const [current, send] = useMachine(labwareResultMachine, {
+    context: {
       labwareResult: initialLabwareResult,
       availableComments
-    });
-  }, [initialLabwareResult, availableComments]);
-  const [current, send] = useMachine(labwareResultMachine);
+    }
+  });
   const [samplePositions, setSamplePositions] = useState<SamplePositionFieldsFragment[]>([]);
   const { labwareResult } = current.context;
   const [allComments, setAllComments] = React.useState<Array<string>>([]);
@@ -114,7 +117,7 @@ export default function LabwareResult({
     return false;
   };
   const getComment = (address: string) => {
-    const commentId = sampleResults.get(address)!.commentId;
+    const commentId = sampleResults.get(address)?.commentId;
     return commentId ? commentId + '' : '';
   };
   const getSampleRegion = (address: string, sampleId: number) => {
@@ -148,7 +151,7 @@ export default function LabwareResult({
                     data-testid="coverage"
                     min={0}
                     max={100}
-                    value={slotMeasurements.get(slot.address)!.value}
+                    value={slotMeasurements.get(slot.address)?.value}
                     className={'rounded rounded-md w-20'}
                     onChange={(e) => {
                       if (validateMeasurementField(e.currentTarget.value)) {
@@ -171,7 +174,7 @@ export default function LabwareResult({
                   <PassIcon
                     data-testid={'passIcon'}
                     className={`h-6 w-6 cursor-pointer ${
-                      sampleResults.get(slot.address)!.result === PassFail.Pass ? 'text-green-700' : 'text-gray-500'
+                      sampleResults.get(slot.address)?.result === PassFail.Pass ? 'text-green-700' : 'text-gray-500'
                     }`}
                     onClick={() => {
                       send({ type: 'PASS', address: slot.address });
@@ -180,7 +183,7 @@ export default function LabwareResult({
                   <FailIcon
                     data-testid={'failIcon'}
                     className={`h-6 w-6 cursor-pointer ${
-                      sampleResults.get(slot.address)!.result === PassFail.Fail ? 'text-red-700' : 'text-gray-500'
+                      sampleResults.get(slot.address)?.result === PassFail.Fail ? 'text-red-700' : 'text-gray-500'
                     }`}
                     onClick={() => send({ type: 'FAIL', address: slot.address })}
                   />
@@ -196,7 +199,11 @@ export default function LabwareResult({
                   /** Is it required to display comments for every section in sample **/
                   commentsForSlotSections ? (
                     slot.samples.map((sample) => (
-                      <div key={sample.section} className={'flex flex-row justify-end'}>
+                      <div
+                        key={sample.section}
+                        className={'flex flex-row justify-end'}
+                        data-testid={'commentsSlotSections'}
+                      >
                         {slot.samples.length > 1 && (
                           <label className={'justify-start'}>{getSampleRegion(slot.address, sample.id)}</label>
                         )}
@@ -249,7 +256,7 @@ export default function LabwareResult({
   };
 
   return (
-    <div>
+    <div data-testid={'labwareResult'}>
       <div className="flex flex-row items-center justify-end">
         {<RemoveButton data-testid={'remove'} type="button" onClick={() => onRemoveClick(labware.barcode)} />}
       </div>

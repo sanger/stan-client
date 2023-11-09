@@ -40,8 +40,8 @@ export const selectSGPNumber = async (optionValue: string) => {
   await selectOption('workNumber', optionValue);
 };
 
-export const selectOption = async (dataTestId: string, optionValue: string) => {
-  const selectDiv = screen.getAllByTestId(dataTestId)[0];
+export const selectOption = async (dataTestId: string, optionValue: string, index?: number) => {
+  const selectDiv = screen.getAllByTestId(dataTestId)[index ?? 0];
   const input = within(selectDiv).getByRole('combobox', { hidden: true });
   expect(input).toBeInTheDocument();
   await userEvent.type(input, '{arrowDown}');
@@ -49,8 +49,8 @@ export const selectOption = async (dataTestId: string, optionValue: string) => {
   expect(option).toBeInTheDocument();
   await userEvent.click(option);
 };
-export const shouldDisplayValue = (dataTestId: string, value: string) => {
-  const selectDiv = screen.getAllByTestId(dataTestId)[0];
+export const shouldDisplayValue = (dataTestId: string, value: string, index?: number) => {
+  const selectDiv = screen.getAllByTestId(dataTestId)[index ?? 0];
   expect(selectDiv).toHaveTextContent(value);
 };
 
