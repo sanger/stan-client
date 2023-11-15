@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import createWorkAllocationMachine, { WorkAllocationFormValues } from './workAllocation.machine';
 import { useMachine } from '@xstate/react';
 import Table, { SortProps, TableBody, TableHead, TableHeader } from '../Table';
@@ -24,6 +24,8 @@ import LoadingSpinner from '../icons/LoadingSpinner';
 import BlueButton from '../buttons/BlueButton';
 import InfoIcon from '../icons/InfoIcon';
 import TopScrollingBar from '../TopScrollingBar';
+import { stanCore } from '../../lib/sdk';
+import Pill from '../Pill';
 const initialValues: WorkAllocationFormValues = {
   workType: '',
   workRequester: '',
@@ -98,7 +100,6 @@ export default function WorkAllocation() {
     workWithComments,
     workTypes,
     workRequesters,
-    dnapStudies,
     availableComments,
     requestError,
     successMessage,
@@ -133,6 +134,7 @@ export default function WorkAllocation() {
 
   /**Custom hook to download data**/
   const { downloadURL, extension } = useDownload<string[]>(downloadData);
+  const [studyName, setStudyName] = useState<string | undefined>(undefined);
 
   /**
    * When the URL search params change, send an event to the machine
@@ -205,10 +207,20 @@ export default function WorkAllocation() {
       .oneOf(omeroProjects.map((cc) => cc.name))
       .optional()
       .label('Omero Project'),
-    dnapStudy: Yup.string()
-      .oneOf(dnapStudies.map((cc) => cc.name))
+    ssStudyId: Yup.number()
+      .label('DNAP study ID')
       .optional()
-      .label('DNAP study ID and description'),
+      .test('ssStudyId', `Unknown Sequencescape study id`, async (studyId, context) => {
+        if (!studyId) return true;
+        const study = await stanCore.GetDnapStudy({ ssId: studyId });
+        if (!study || !study.dnapStudy) {
+          setStudyName(undefined);
+          return false;
+        } else {
+          setStudyName(study.dnapStudy.name);
+          return true;
+        }
+      }),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
     numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
@@ -279,7 +291,7 @@ export default function WorkAllocation() {
             }, 500);
             const valuesToSubmit = {
               ...values,
-              dnapStudy: values.ssStudyId ? undefined : values.ssStudyId
+              ssStudyId: values.ssStudyId ? values.ssStudyId : undefined
             };
             send({ type: 'ALLOCATE_WORK', values: valuesToSubmit });
           }}
@@ -351,15 +363,14 @@ export default function WorkAllocation() {
                 />
               </div>
               <div className="md:flex-grow">
-                <CustomReactSelect
-                  label="DNAP study ID and description"
-                  name="dnapStudy"
-                  dataTestId="dnapStudy"
-                  emptyOption={true}
-                  options={selectOptionValues(dnapStudies, 'name', 'name', true, { sort: true, alphaFirst: true })}
+                <FormikInput
+                  label={'Number of original samples'}
+                  name={'numOriginalSamples'}
+                  type={'number'}
+                  maxLength={MAX_NUM_BLOCKANDSLIDES}
+                  min={0}
                 />
               </div>
-
               <div className="md:flex-grow">
                 <FormikInput
                   label={'Number of blocks'}
@@ -379,13 +390,12 @@ export default function WorkAllocation() {
                 />
               </div>
               <div className="md:flex-grow">
-                <FormikInput
-                  label={'Number of original samples'}
-                  name={'numOriginalSamples'}
-                  type={'number'}
-                  maxLength={MAX_NUM_BLOCKANDSLIDES}
-                  min={0}
-                />
+                <FormikInput type={'number'} label="DNAP study ID" name="ssStudyId" />
+                {studyName && (
+                  <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
+                    {studyName && <Pill color={'blue'}>{studyName}</Pill>}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -467,8 +477,8 @@ export default function WorkAllocation() {
                         Project (cost code description)
                       </TableHeader>
                       <TableHeader sortProps={getTableSortProps('Omero Project')}>Omero Project</TableHeader>
-                      <TableHeader sortProps={getTableSortProps('DNAP Study ID and description')}>
-                        DNAP Study ID and description
+                      <TableHeader colSpan={2} sortProps={getTableSortProps('DNAP Study ID')}>
+                        DNAP Study ID
                       </TableHeader>
                       <TableHeader sortProps={getTableSortProps('Program')}>Program</TableHeader>
                       <TableHeader sortProps={getTableSortProps('Cost Code')}>Cost Code</TableHeader>
@@ -487,7 +497,6 @@ export default function WorkAllocation() {
                         initialWork={workWithComment}
                         availableComments={availableComments}
                         availableOmeroProjects={omeroProjects}
-                        availableDnapStudies={dnapStudies}
                         key={workWithComment.work.workNumber}
                         rowIndex={index}
                         onWorkFieldUpdate={onWorkUpdate}

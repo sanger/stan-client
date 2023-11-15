@@ -1,0 +1,5 @@
+query GetDnapStudy($ssId: Int!) {
+    dnapStudy(ssId: $ssId) {
+        ...DnapStudyFields
+    }
+}

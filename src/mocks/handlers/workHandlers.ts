@@ -134,7 +134,7 @@ const workHandlers = [
     const omeroProject = req.variables.omeroProject
       ? omeroProjectRepository.find('name', req.variables.omeroProject)
       : undefined;
-    const dnapStudy = req.variables.ssStudyId ? dnapStudyRepository.find('name', req.variables.ssStudyId) : undefined;
+    const dnapStudy = req.variables.ssStudyId ? dnapStudyRepository.find('ssId', req.variables.ssStudyId) : undefined;
     const workRequester = releaseRecipientRepository.find('username', req.variables.workRequester);
 
     if (!workType) {
@@ -342,7 +342,7 @@ const workHandlers = [
       }
       let dnapStudy: DnapStudy | null = null;
       if (req.variables.ssStudyId) {
-        dnapStudy = dnapStudyRepository.find('name', req.variables.ssStudyId);
+        dnapStudy = dnapStudyRepository.find('ssId', req.variables.ssStudyId);
       }
       if (!dnapStudy) {
         return res(

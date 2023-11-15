@@ -53,8 +53,8 @@ describe('Work Allocation', () => {
           selectOption('workType', 'TEST_WT_1');
           selectOption('workRequester', 'et2');
           selectOption('project', 'TEST999');
+          cy.findByTestId('DNAP study ID').type('123');
           selectOption('omeroProject', 'OMERO_TEST999');
-          selectOption('dnapStudy', 'S40315 - Heart Study_NB');
           selectOption('program', 'PROGRAM_999');
           selectOption('costCode', 'S999');
           cy.findByLabelText('Number of blocks').type('5');
@@ -65,7 +65,7 @@ describe('Work Allocation', () => {
         it('allocates new Work', () => {
           cy.findByRole('button', { name: /Submit/i }).click();
           cy.findByText(
-            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project \(cost code description\) TEST999, Omero project OMERO_TEST999, DNAP study ID and description 'S40315 - Heart Study_NB' and program PROGRAM_999 using cost code S999 with the work requester et2/
+            /Assigned SGP\d+ \(TEST_WT_1 - 5 blocks and 15 slides and 1 original samples\) to project \(cost code description\) TEST999, Omero project OMERO_TEST999, DNAP study name 'S10315 - Orphan Tumour Study_NB_sNuc' and program PROGRAM_999 using cost code S999 with the work requester et2/
           ).should('exist');
         });
 
@@ -154,25 +154,16 @@ describe('Work Allocation', () => {
     context("Entering a value in 'Priority' cell in table", () => {
       before(() => {
         cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
-        cy.get('td').eq(0).type('A12');
-        //change the focus
-        cy.findAllByRole('button', { name: /Edit Status/i })
-          .eq(0)
-          .focus();
+        cy.findByTestId('SGP1008-priority').clear().type('A12').blur();
       });
-
       it('updates priority', () => {
-        cy.findByTestId('SGP1010-priority').scrollIntoView().should('have.value', 'A12');
+        cy.findByTestId('SGP1008-priority').scrollIntoView().should('have.value', 'A12');
       });
     });
 
     context("Entering an invalid value in 'Priority' cell in table", () => {
       before(() => {
-        cy.get('td').eq(0).clear().type('15');
-        //change the focus
-        cy.findAllByRole('button', { name: /Edit Status/i }).then((editButtons) => {
-          editButtons[0].focus();
-        });
+        cy.findByTestId('SGP1008-priority').clear().type('15').blur();
       });
 
       it('displays a validation error message', () => {
@@ -221,28 +212,14 @@ describe('Work Allocation', () => {
       });
     });
 
-    context('Selecting a value in DNAP Study Id and description cell in table', () => {
+    context('Selecting a value in DNAP Study Id and name cell in table', () => {
       before(() => {
         cy.visit('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
-        selectOption('SGP1008-DnapStudy', 'S40315 - Heart Study_NB');
+        cy.findByTestId('SGP1008-DnapStudy').clear({ force: true }).type('11', { force: true }).blur();
       });
 
       it('updates dnap study column', () => {
-        shouldDisplaySelectedValue('SGP1008-DnapStudy', 'S40315 - Heart Study_NB');
-      });
-    });
-
-    context("Entering an invalid value in 'Priority' cell in table", () => {
-      before(() => {
-        cy.get('td').eq(0).click().type('15');
-        //change the focus
-        cy.findAllByRole('button', { name: /Edit Status/i }).then((editButtons) => {
-          editButtons[0].focus();
-        });
-      });
-
-      it('displays a validation error message', () => {
-        cy.findByText('Invalid format').scrollIntoView().should('be.visible');
+        cy.findByText('S40315 - Heart Study_NB').scrollIntoView().should('exist');
       });
     });
   });
@@ -275,7 +252,7 @@ describe('Work Allocation', () => {
       cy.visitAsEndUser('/sgp');
     });
     it('shows only Allocate new SGP Number section', () => {
-      cy.findByText('Allocate a new SGP number').should('be.visible');
+      cy.findByText('Allocate a new SGP number').scrollIntoView().should('be.visible');
       cy.findByText('Filter SGP Numbers').should('not.exist');
       cy.findByRole('table').should('not.exist');
     });

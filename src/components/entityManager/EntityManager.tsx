@@ -26,9 +26,9 @@ type ValueFieldComponentInfo = {
 type ExtraEntityColumn<E> = {
   label: string;
   value: string;
-  keyFieldPlaceholder: string;
-  extraFieldPlaceholder: string;
-  onChange(value: string, extraValue?: string): Promise<E>;
+  keyFieldPlaceholder?: string;
+  extraFieldPlaceholder?: string;
+  onChange?: (value: string, extraValue?: string) => Promise<E>;
 };
 
 type EntityManagerProps<E> = {
@@ -103,7 +103,8 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
           return onChangeValue!(e.entity, e.value);
         },
         updateExtraProperty: (context, e) => {
-          if (e.type !== 'EXTRA_PROPERTY_UPDATE_VALUE' || !extraDisplayColumnName) return Promise.reject();
+          if (e.type !== 'EXTRA_PROPERTY_UPDATE_VALUE' || !extraDisplayColumnName || !extraDisplayColumnName.onChange)
+            return Promise.reject();
           return extraDisplayColumnName.onChange(e.value, e.extraValue);
         }
       }
@@ -331,20 +332,24 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
                 <TableCell colSpan={2}>{entity[displayKeyColumnName]}</TableCell>
                 {extraDisplayColumnName && (
                   <TableCell colSpan={2}>
-                    <Input
-                      type="text"
-                      placeholder={extraDisplayColumnName.extraFieldPlaceholder}
-                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                        if (e.key === 'Enter') {
-                          handleExtraValueUpdate(String(entity[displayKeyColumnName]), e.currentTarget.value);
-                          e.currentTarget.blur();
-                        }
-                      }}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        handleOnChangeForExtraDisplayColumn(entity, e.target.value);
-                      }}
-                      value={String(entity[extraDisplayColumnName.value])}
-                    />
+                    {extraDisplayColumnName.onChange ? (
+                      <Input
+                        type="text"
+                        placeholder={extraDisplayColumnName.extraFieldPlaceholder}
+                        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                          if (e.key === 'Enter') {
+                            handleExtraValueUpdate(String(entity[displayKeyColumnName]), e.currentTarget.value);
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          handleOnChangeForExtraDisplayColumn(entity, e.target.value);
+                        }}
+                        value={String(entity[extraDisplayColumnName.value])}
+                      />
+                    ) : (
+                      entity[extraDisplayColumnName.value]
+                    )}
                   </TableCell>
                 )}
                 {valueFieldComponentInfo &&

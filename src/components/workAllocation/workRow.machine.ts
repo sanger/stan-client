@@ -10,9 +10,12 @@ import {
   WorkStatus,
   WorkWithCommentFieldsFragment
 } from '../../types/sdk';
-import { MachineServiceDone } from '../../types/stan';
+import { MachineServiceDone, MachineServiceError } from '../../types/stan';
 import { stanCore } from '../../lib/sdk';
 import { assign } from '@xstate/immer';
+import { castDraft } from 'immer';
+import { Maybe } from 'yup';
+import { ClientError } from 'graphql-request';
 
 type WorkRowMachineContext = {
   /**
@@ -24,6 +27,11 @@ type WorkRowMachineContext = {
    * Is the user currently editing the Work status?
    */
   editModeEnabled: boolean;
+
+  /**
+   * Errors from server, if any
+   */
+  serverErrors?: Maybe<ClientError>;
 };
 
 export type WorkRowEvent =
@@ -42,13 +50,14 @@ export type WorkRowEvent =
     }
   | { type: 'UPDATE_PRIORITY'; priority: string | undefined }
   | { type: 'UPDATE_OMERO_PROJECT'; omeroProject: string | undefined }
-  | { type: 'UPDATE_DNAP_PROJECT'; dnapStudy: string | undefined }
+  | { type: 'UPDATE_DNAP_PROJECT'; ssStudyId: number }
   | MachineServiceDone<'updateWorkStatus', UpdateWorkStatusMutation>
   | MachineServiceDone<'updateWorkNumBlocks', UpdateWorkNumBlocksMutation>
   | MachineServiceDone<'updateWorkNumSlides', UpdateWorkNumSlidesMutation>
   | MachineServiceDone<'updateWorkPriority', UpdateWorkPriorityMutation>
   | MachineServiceDone<'updateWorkOmeroProject', UpdateWorkOmeroProjectMutation>
-  | MachineServiceDone<' updateWorkDnapProject', UpdateWorkDnapProjectMutation>
+  | MachineServiceDone<'updateWorkDnapProject', UpdateWorkDnapProjectMutation>
+  | MachineServiceError<'updateWorkDnapProject'>
   | MachineServiceDone<'updateWorkNumOriginalSamples', UpdateWorkNumOriginalSamplesMutation>;
 
 type CreateWorkRowMachineParams = Pick<WorkRowMachineContext, 'workWithComment'>;
@@ -191,7 +200,10 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
               actions: 'assignWorkDnapProject',
               target: 'deciding'
             },
-            onError: { target: 'deciding' }
+            onError: {
+              target: 'deciding',
+              actions: 'assignServerError'
+            }
           }
         }
       }
@@ -223,10 +235,16 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
           ctx.workWithComment.work = e.data.updateWorkOmeroProject;
         }),
         assignWorkDnapProject: assign((ctx, e) => {
-          if (e.type !== 'done.invoke. updateWorkDnapProject') return;
+          if (e.type !== 'done.invoke.updateWorkDnapProject') return;
           ctx.workWithComment.work = e.data.updateWorkDnapProject;
         }),
-        toggleEditMode: assign((ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled))
+        toggleEditMode: assign((ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled)),
+        assignServerError: assign((ctx, e) => {
+          if (e.type !== 'error.platform.updateWorkDnapProject') {
+            return;
+          }
+          ctx.serverErrors = castDraft(e.data);
+        })
       },
 
       services: {
@@ -276,11 +294,13 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
           return stanCore.UpdateWorkOmeroProject(params);
         },
         updateWorkDnapProject: (ctx, e) => {
-          let params: { workNumber: string; dnapStudy?: string } = {
-            workNumber: ctx.workWithComment.work.workNumber
-          };
-          if ('dnapStudy' in e && e.dnapStudy) params['dnapStudy'] = e.dnapStudy;
-          return stanCore.UpdateWorkDnapProject(params);
+          if ('ssStudyId' in e) {
+            return stanCore.UpdateWorkDnapProject({
+              workNumber: ctx.workWithComment.work.workNumber,
+              ssStudyId: e.ssStudyId
+            });
+          }
+          return Promise.reject();
         }
       }
     }

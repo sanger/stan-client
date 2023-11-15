@@ -4,7 +4,6 @@ import {
   CommentFieldsFragment,
   CostCodeFieldsFragment,
   CreateWorkMutation,
-  DnapStudyFieldsFragment,
   GetWorkAllocationInfoQuery,
   OmeroProjectFieldsFragment,
   ProgramFieldsFragment,
@@ -17,11 +16,6 @@ import { stanCore } from '../../lib/sdk';
 import { assign } from '@xstate/immer';
 import { ClientError } from 'graphql-request';
 import { WorkAllocationUrlParams } from './WorkAllocation';
-
-export enum NUMBER_TYPE_FIELD {
-  BLOCKS = 'Number of blocks',
-  SLIDES = 'Number of slides'
-}
 
 export type WorkAllocationFormValues = {
   /**
@@ -134,10 +128,6 @@ type WorkAllocationContext = {
    * List of cost codes to to allocate Work to
    */
   costCodes: Array<CostCodeFieldsFragment>;
-  /**
-   * List of Dnap studies to to allocate Work to
-   */
-  dnapStudies: Array<DnapStudyFieldsFragment>;
 
   /**
    * List of possible reasons Work state changed
@@ -183,7 +173,6 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
         costCodes: [],
         omeroProjects: [],
         availableComments: [],
-        dnapStudies: [],
         urlParams
       },
       initial: 'loading',
@@ -240,8 +229,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             worksWithComments,
             workTypes,
             costCodes,
-            releaseRecipients,
-            dnapStudies
+            releaseRecipients
           } = e.data;
           ctx.availableComments = comments;
           ctx.projects = projects;
@@ -251,7 +239,6 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           ctx.costCodes = costCodes;
           ctx.omeroProjects = omeroProjects;
           ctx.workRequesters = releaseRecipients;
-          ctx.dnapStudies = dnapStudies;
         }),
 
         assignServerError: assign((ctx, e) => {
@@ -288,9 +275,9 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             workType.name
           } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
             omeroProject ? `, Omero project ${omeroProject.name}` : ''
-          }${dnapStudy ? `, DNAP study ID and description '${dnapStudy.name}'` : ''} and program ${
-            program.name
-          } using cost code ${costCode.code} with the work requester ${workRequester?.username}`;
+          }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''} and program ${program.name} using cost code ${
+            costCode.code
+          } with the work requester ${workRequester?.username}`;
         }),
 
         updateWork: assign((ctx, e) => {
@@ -325,7 +312,6 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numOriginalSamples,
             ssStudyId
           } = e.values;
-
           return stanCore.CreateWork({
             workType,
             workRequester,
