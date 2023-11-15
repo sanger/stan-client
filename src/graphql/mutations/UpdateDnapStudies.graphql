@@ -1,7 +1,7 @@
-mutation UpdateDnapStudies{
-    updateDnapStudies {
-        ssId
-        name
-        enabled
-    }
+mutation UpdateDnapStudies {
+  updateDnapStudies {
+    ssId
+    name
+    enabled
+  }
 }

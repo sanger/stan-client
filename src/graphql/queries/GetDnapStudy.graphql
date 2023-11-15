@@ -1,5 +1,5 @@
 query GetDnapStudy($ssId: Int!) {
-    dnapStudy(ssId: $ssId) {
-        ...DnapStudyFields
-    }
+  dnapStudy(ssId: $ssId) {
+    ...DnapStudyFields
+  }
 }
