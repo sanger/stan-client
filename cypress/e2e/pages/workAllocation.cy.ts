@@ -50,16 +50,7 @@ describe('Work Allocation', () => {
       () => {
         before(() => {
           cy.visitAsAdmin('/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused');
-          selectOption('workType', 'TEST_WT_1');
-          selectOption('workRequester', 'et2');
-          selectOption('project', 'TEST999');
-          cy.findByTestId('DNAP study ID').type('123');
-          selectOption('omeroProject', 'OMERO_TEST999');
-          selectOption('program', 'PROGRAM_999');
-          selectOption('costCode', 'S999');
-          cy.findByLabelText('Number of blocks').type('5');
-          cy.findByLabelText('Number of slides').type('15');
-          cy.findByLabelText('Number of original samples').type('1');
+          fillInTheForm();
         });
 
         it('allocates new Work', () => {
@@ -69,23 +60,31 @@ describe('Work Allocation', () => {
           ).should('exist');
         });
 
-        it('shows an error when the request errors', () => {
-          cy.msw().then(({ graphql, worker }) => {
-            worker.use(
-              graphql.mutation<CreateWorkMutation, CreateWorkMutationVariables>('CreateWork', (req, res, ctx) => {
-                return res.once(
-                  ctx.errors([
-                    {
-                      message: 'Exception while fetching data (/createWork) : An error occured'
-                    }
-                  ])
-                );
-              })
+        describe('when the create work fails on the server side', () => {
+          before(() => {
+            cy.msw().then(({ graphql, worker }) => {
+              worker.use(
+                graphql.mutation<CreateWorkMutation, CreateWorkMutationVariables>('CreateWork', (req, res, ctx) => {
+                  return res.once(
+                    ctx.errors([
+                      {
+                        message: 'Exception while fetching data (/createWork) : An error occured'
+                      }
+                    ])
+                  );
+                })
+              );
+            });
+            cy.visitAsAdmin(
+              '/sgp?status[]=unstarted&status[]=active&status[]=failed&status[]=completed&status[]=paused'
             );
+            fillInTheForm();
           });
-          cy.findByRole('button', { name: /Submit/i }).click();
-          cy.findByText('SGP Request Error').should('exist');
-          cy.findByText('An error occured').should('exist');
+          it('shows an error message', () => {
+            cy.findByRole('button', { name: /Submit/i }).click();
+            cy.findByText('SGP Request Error').should('exist');
+            cy.findByText('An error occured').should('exist');
+          });
         });
       }
     );
@@ -128,12 +127,7 @@ describe('Work Allocation', () => {
         before(() => {
           cy.findByTestId('SGP1008-block').type('1');
           cy.findByTestId('SGP1008-slide').type('2');
-          cy.findByTestId('SGP1008-originalSamples').type('3');
-
-          //change the focus
-          cy.findAllByRole('button', { name: /Edit Status/i }).then((editButtons) => {
-            editButtons[0].focus();
-          });
+          cy.findByTestId('SGP1008-originalSamples').type('3').blur();
         });
 
         it('updates the number of blocks', () => {
@@ -258,15 +252,7 @@ describe('Work Allocation', () => {
     });
     context('when a work is allocated', () => {
       before(() => {
-        selectOption('workType', 'TEST_WT_1');
-        selectOption('workRequester', 'et2');
-        selectOption('project', 'TEST999');
-        selectOption('omeroProject', 'OMERO_TEST999');
-        selectOption('program', 'PROGRAM_999');
-        selectOption('costCode', 'S999');
-        cy.findByLabelText('Number of blocks').type('5');
-        cy.findByLabelText('Number of slides').type('15');
-        cy.findByLabelText('Number of original samples').type('1');
+        fillInTheForm();
         cy.findByRole('button', { name: /Submit/i }).click();
       });
 
@@ -324,3 +310,16 @@ describe('Work Allocation', () => {
     });
   });*/
 });
+
+const fillInTheForm = () => {
+  selectOption('workType', 'TEST_WT_1');
+  selectOption('workRequester', 'et2');
+  selectOption('project', 'TEST999');
+  cy.findByTestId('DNAP study ID').type('123');
+  selectOption('omeroProject', 'OMERO_TEST999');
+  selectOption('program', 'PROGRAM_999');
+  selectOption('costCode', 'S999');
+  cy.findByLabelText('Number of blocks').type('5');
+  cy.findByLabelText('Number of slides').type('15');
+  cy.findByLabelText('Number of original samples').type('1');
+};

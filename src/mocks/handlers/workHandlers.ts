@@ -28,8 +28,8 @@ import {
   FindWorksCreatedByQuery,
   FindWorksCreatedByQueryVariables,
   DnapStudy,
-  UpdateWorkDnapProjectMutation,
-  UpdateWorkDnapProjectMutationVariables
+  UpdateWorkDnapStudyMutation,
+  UpdateWorkDnapStudyMutationVariables
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -327,8 +327,8 @@ const workHandlers = [
       );
     }
   ),
-  graphql.mutation<UpdateWorkDnapProjectMutation, UpdateWorkDnapProjectMutationVariables>(
-    'UpdateWorkDnapProject',
+  graphql.mutation<UpdateWorkDnapStudyMutation, UpdateWorkDnapStudyMutationVariables>(
+    'UpdateWorkDnapStudy',
     (req, res, ctx) => {
       const work = workRepository.find('workNumber', req.variables.workNumber);
       if (!work) {
@@ -357,7 +357,7 @@ const workHandlers = [
       workRepository.save(work);
       return res(
         ctx.data({
-          updateWorkDnapProject: work
+          updateWorkDnapStudy: work
         })
       );
     }

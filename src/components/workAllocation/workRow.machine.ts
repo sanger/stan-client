@@ -1,6 +1,6 @@
 import { createMachine } from 'xstate';
 import {
-  UpdateWorkDnapProjectMutation,
+  UpdateWorkDnapStudyMutation,
   UpdateWorkNumBlocksMutation,
   UpdateWorkNumOriginalSamplesMutation,
   UpdateWorkNumSlidesMutation,
@@ -56,7 +56,7 @@ export type WorkRowEvent =
   | MachineServiceDone<'updateWorkNumSlides', UpdateWorkNumSlidesMutation>
   | MachineServiceDone<'updateWorkPriority', UpdateWorkPriorityMutation>
   | MachineServiceDone<'updateWorkOmeroProject', UpdateWorkOmeroProjectMutation>
-  | MachineServiceDone<'updateWorkDnapProject', UpdateWorkDnapProjectMutation>
+  | MachineServiceDone<'updateWorkDnapProject', UpdateWorkDnapStudyMutation>
   | MachineServiceError<'updateWorkDnapProject'>
   | MachineServiceDone<'updateWorkNumOriginalSamples', UpdateWorkNumOriginalSamplesMutation>;
 
@@ -236,7 +236,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         }),
         assignWorkDnapProject: assign((ctx, e) => {
           if (e.type !== 'done.invoke.updateWorkDnapProject') return;
-          ctx.workWithComment.work = e.data.updateWorkDnapProject;
+          ctx.workWithComment.work = e.data.updateWorkDnapStudy;
         }),
         toggleEditMode: assign((ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled)),
         assignServerError: assign((ctx, e) => {
@@ -295,7 +295,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         },
         updateWorkDnapProject: (ctx, e) => {
           if ('ssStudyId' in e) {
-            return stanCore.UpdateWorkDnapProject({
+            return stanCore.UpdateWorkDnapStudy({
               workNumber: ctx.workWithComment.work.workNumber,
               ssStudyId: e.ssStudyId
             });
