@@ -383,14 +383,14 @@ const CytAssist = () => {
             outputLabwareConfigPanel={
               <CytAssistOutputlabwareScanPanel
                 preBarcode={selectedDestination && selectedDestination.slotCopyDetails.preBarcode}
-                labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType : ''}
+                labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : ''}
                 onChangeBarcode={handleChangeOutputLabwareBarcode}
                 onChangeLabwareType={handleChangeOutputLabwareType}
                 onChangeCosting={handleChangeCosting}
                 onChangeLOTNumber={handleChangeLOTNumber}
               />
             }
-            labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType : ''}
+            labwareType={selectedDestination ? selectedDestination.slotCopyDetails.labwareType ?? '' : ''}
           />
 
           {selectedDestination && selectedDestination.slotCopyDetails.contents.length > 0 && (

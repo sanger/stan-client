@@ -21,7 +21,10 @@ import Label from '../components/forms/Label';
 import { plateFactory } from '../lib/factories/labwareFactory';
 import LabelCopyButton from '../components/LabelCopyButton';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
-import { SlotCopyMode } from '../components/slotMapper/slotMapper.types';
+import { DestinationSelectionMode, SlotCopyMode } from '../components/slotMapper/slotMapper.types';
+import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
+import LabwareScanner from '../components/labwareScanner/LabwareScanner';
+import RemoveButton from '../components/buttons/RemoveButton';
 import { objectKeys } from '../lib/helpers';
 
 type PageParams = {
@@ -38,6 +41,8 @@ interface DestinationLabwareScanPanelProps {
   labware: Destination | undefined;
   onAddLabware: () => void;
   onChangeBioState: (bioState: string) => void;
+  onLabwareScan?: (labware: LabwareFieldsFragment[]) => void;
+  onDestinationSelectionModeChange?: (mode: DestinationSelectionMode) => void;
 }
 
 const transferTypes = [
@@ -59,29 +64,82 @@ interface SourceLabwareScanPanelProps {
 const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps> = ({
   labware,
   onAddLabware,
-  onChangeBioState
+  onChangeBioState,
+  onLabwareScan,
+  onDestinationSelectionModeChange
 }) => {
+  const [destinationSelectionMode, setDestinationSelectionMode] = React.useState(DestinationSelectionMode.DEFAULT);
+  const validateLabware = useCallback(
+    (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): string[] => {
+      return foundLabware.state === LabwareState.Active ? [] : ['Labware is not active'];
+    },
+    []
+  );
+
   return (
-    <div className={'w-full flex flex-row space-x-4 mb-8'} data-testid="input-labware">
-      <div className={'w-1/2 flex flex-col'}>
-        <Label className={'flex items-center whitespace-nowrap'} name={'Bio State'} />
-        <CustomReactSelect
-          handleChange={(val) => onChangeBioState((val as OptionType).label)}
-          value={labware && labware.slotCopyDetails.bioState ? labware.slotCopyDetails.bioState : ''}
-          emptyOption={true}
-          dataTestId="transfer-type"
-          options={transferTypes.map((type) => {
-            return {
-              label: type,
-              value: type
-            };
-          })}
-        />
+    <div className={'w-full flex flex-col space-y-2'} data-testid="input-labware">
+      <div className="flex flex-row w-1/2 pb-2">
+        <RadioGroup label="Output labware selection " name={'selectDestination'} withFormik={false}>
+          {Object.values(DestinationSelectionMode).map((mode) => (
+            <RadioButtonInput
+              key={mode}
+              data-testid={`${mode}`}
+              name={'destinationMode'}
+              value={mode}
+              checked={mode === destinationSelectionMode}
+              onChange={() => {
+                setDestinationSelectionMode(mode);
+                onDestinationSelectionModeChange?.(mode);
+              }}
+              label={mode}
+            />
+          ))}
+        </RadioGroup>
       </div>
-      <div className={'w-1/2 flex justify-end items-center'}>
-        <BlueButton onClick={onAddLabware} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
-          + Add Plate
-        </BlueButton>
+      <div className={'w-full flex flex-row space-x-4 mb-8'} data-testid="input-labware">
+        {destinationSelectionMode === DestinationSelectionMode.DEFAULT ? (
+          <>
+            <div className={'w-1/2 flex flex-col'}>
+              <Label className={'flex items-center whitespace-nowrap'} name={'Bio State'} />
+              <CustomReactSelect
+                handleChange={(val) => onChangeBioState((val as OptionType).label)}
+                value={labware && labware.slotCopyDetails.bioState ? labware.slotCopyDetails.bioState : ''}
+                emptyOption={true}
+                dataTestId="transfer-type"
+                options={transferTypes.map((type) => {
+                  return {
+                    label: type,
+                    value: type
+                  };
+                })}
+              />
+            </div>
+            <div className={'w-1/2 flex justify-end items-center'}>
+              <BlueButton onClick={onAddLabware} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
+                + Add Plate
+              </BlueButton>
+            </div>
+          </>
+        ) : (
+          <div className={'flex flex-col w-full space-y-2'}>
+            <LabwareScanner onChange={onLabwareScan} limit={1} labwareCheckFunction={validateLabware}>
+              {(props) => {
+                return (
+                  <div className="flex flex-row justify-end">
+                    {props.labwares.length > 0 && (
+                      <RemoveButton
+                        onClick={() => {
+                          labware?.labware.barcode && props.removeLabware(labware?.labware.barcode);
+                          onLabwareScan?.([]);
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              }}
+            </LabwareScanner>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -152,6 +210,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
   const { serverErrors, sourceLabwarePermData, sources, destinations, slotCopyResults } = current.context;
 
   const navigate = useNavigate();
+  const destinationSelectionMode = React.useRef(DestinationSelectionMode.DEFAULT);
 
   /**Handler action to perform when a mapping is done  between source and destination**/
   const handleOnSlotMapperChange = useCallback(
@@ -203,6 +262,16 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     [send]
   );
 
+  /**Handler for output labware selection mode change**/
+  const onDestinationSelectionModeChange = React.useCallback(
+    (mode: DestinationSelectionMode) => {
+      destinationSelectionMode.current = mode;
+      const labware = mode === DestinationSelectionMode.DEFAULT ? [initialOutputSlotCopy[0].labware] : [];
+      send({ type: 'UPDATE_DESTINATION_LABWARE', labware });
+    },
+    [initialOutputSlotCopy, send]
+  );
+
   /**Handler for 'Add Plate' button click**/
   const onAddDestinationLabware = React.useCallback(() => {
     const labware = plateFactory.build({});
@@ -241,6 +310,13 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     [selectedDestination, send]
   );
 
+  /**Handler for output labware selection mode change**/
+  const onDestinationLabwareScan = React.useCallback(
+    (labware: LabwareFieldsFragment[]) => {
+      send({ type: 'UPDATE_DESTINATION_LABWARE', labware });
+    },
+    [send]
+  );
   /**
    * Save action invoked, so check whether a warning to be given to user if any labware and it's ancestral labware
    * with no perm done is copied
@@ -274,7 +350,11 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   /**Check Labware state and Bio state is selected respectively for all source and destinations**/
   const isValidationFailure = () => {
-    return sources.some((src) => !src.labwareState) || destinations.some((dest) => !dest.slotCopyDetails.bioState);
+    if (destinationSelectionMode.current === DestinationSelectionMode.DEFAULT) {
+      return sources.some((src) => !src.labwareState) || destinations.some((dest) => !dest.slotCopyDetails.bioState);
+    } else {
+      return sources.some((src) => !src.labwareState);
+    }
   };
 
   /**
@@ -328,12 +408,18 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
               <SlotCopyDestinationConfigPanel
                 onAddLabware={onAddDestinationLabware}
                 onChangeBioState={onChangeBioState}
+                onLabwareScan={onDestinationLabwareScan}
+                onDestinationSelectionModeChange={onDestinationSelectionModeChange}
                 labware={destinations.find((dest) => dest.labware.id === selectedDestination.id)}
               />
             }
             onSelectInputLabware={setSelectedSource}
             onSelectOutputLabware={setSelectedDestination}
-            slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
+            slotCopyModes={
+              destinationSelectionMode.current === DestinationSelectionMode.DEFAULT
+                ? objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])
+                : [SlotCopyMode.ONE_TO_ONE]
+            }
           />
 
           {slotCopyResults.length > 0 && (

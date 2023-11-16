@@ -11,7 +11,7 @@ const slotCopyHandlers = [
       labwareFactory.build(undefined, {
         associations: {
           labwareType: find(labwareTypeInstances, {
-            name: dest.labwareType
+            name: dest.labwareType!
           })
         }
       })
