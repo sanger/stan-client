@@ -48,6 +48,16 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
         });
       }
     });
+    // if (barcode.length === 5) {
+    //   labware.discarded = true;
+    // }
+    // if (barcode.length === 6) {
+    //   labware.destroyed = true;
+    // }
+    console.log('labwareFactory', params, associations, transientParams);
+    console.log(params.barcode);
+    console.log(params.barcode?.length);
+    console.log(params.barcode?.length === 11);
 
     return {
       __typename: 'Labware',
@@ -56,8 +66,8 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
       barcode: params.barcode ?? null,
       externalBarcode: params.externalBarcode ?? 'EXTERN-BARCODE',
       slots: associations.slots ?? [],
-      destroyed: params.destroyed ?? false,
-      discarded: params.discarded ?? false,
+      destroyed: params.destroyed ?? params.barcode?.length === 12,
+      discarded: params.discarded ?? params.barcode?.length === 11,
       released: params.released ?? false,
       created: params.created ?? new Date().toISOString(),
       state: params.state ?? LabwareState.Active
