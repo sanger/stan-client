@@ -1,5 +1,10 @@
 import { graphql } from 'msw';
-import { ReactivateLabwareMutation, ReactivateLabwareMutationVariables } from '../../types/sdk';
+import {
+  LabwareState,
+  ReactivateLabware,
+  ReactivateLabwareMutation,
+  ReactivateLabwareMutationVariables
+} from '../../types/sdk';
 
 const reactivateHandlers = [
   graphql.mutation<ReactivateLabwareMutation, ReactivateLabwareMutationVariables>(
@@ -11,6 +16,12 @@ const reactivateHandlers = [
             operations: [
               {
                 id: 1
+              }
+            ],
+            labware: [
+              {
+                barcode: (req.variables.items as Array<ReactivateLabware>)[0].barcode,
+                state: LabwareState.Active
               }
             ]
           }

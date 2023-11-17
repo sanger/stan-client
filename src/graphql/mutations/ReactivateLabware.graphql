@@ -1,5 +1,9 @@
-mutation ReactivateLabware($request: [ReactivateLabware!]!) {
-  reactivateLabware(items: $request) {
+mutation ReactivateLabware($items: [ReactivateLabware!]!) {
+  reactivateLabware(items: $items) {
+    labware {
+      barcode
+      state
+    }
     operations {
       id
     }

@@ -74,7 +74,7 @@ export const Reactivate = () => {
         submitForm: (ctx, e) => {
           if (e.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.ReactivateLabware({
-            request: e.values
+            items: e.values
           });
         }
       }
@@ -86,8 +86,6 @@ export const Reactivate = () => {
 
   const convertValuesAndSubmit = (formValues: ReactivateFormValues) => {
     const items: ReactivateLabware[] = [];
-    console.log('==== convertValuesAndSubmit ====');
-    console.log(formValues);
     formValues.labwareToReactivate!.forEach((labware) => {
       items.push({
         barcode: labware.barcode!,
@@ -95,8 +93,6 @@ export const Reactivate = () => {
         workNumber: formValues.workNumber!
       });
     });
-    console.log('==== items ====');
-    console.log(items);
     sendForm({ type: 'SUBMIT_FORM', values: items });
   };
 
@@ -132,8 +128,6 @@ export const Reactivate = () => {
                   <MutedText>Please scan in the labware you wish to reactivate.</MutedText>
                   <LabwareScanner
                     onAdd={(lw) => {
-                      console.log('==== onAdd ================');
-                      console.log(lw);
                       const lwToReactivate = { barcode: lw.barcode, commentId: undefined };
                       values.labwareToReactivate === undefined
                         ? (values.labwareToReactivate = [lwToReactivate])

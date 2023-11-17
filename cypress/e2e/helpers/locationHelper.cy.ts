@@ -48,7 +48,6 @@ describe('Location Helper', () => {
 
     tests.forEach((test) => {
       it(`correctly builds addresses for size ${test[0].numRows},${test[0].numColumns} direction ${test[1]}`, () => {
-        console.log(buildOrderedAddresses(test[0], test[1]), test[2]);
         expect(buildOrderedAddresses(test[0], test[1])).to.deep.equal(test[2]);
       });
     });

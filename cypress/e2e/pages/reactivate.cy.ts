@@ -43,6 +43,7 @@ describe('Reactivate', () => {
     });
     context('when  errors', () => {
       before(() => {
+        cy.visit('/admin/reactivate');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.mutation<ReactivateLabwareMutation, ReactivateLabwareMutationVariables>(
@@ -51,7 +52,10 @@ describe('Reactivate', () => {
                 return res.once(
                   ctx.errors([
                     {
-                      message: 'The request could not be performed.'
+                      message: 'The request could not be performed.',
+                      extensions: {
+                        problems: ['Something wrong happened.']
+                      }
                     }
                   ])
                 );
@@ -59,14 +63,13 @@ describe('Reactivate', () => {
             )
           );
         });
-        cy.visit('/admin/reactivate');
         selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').type('STAN-123456{enter}');
         selectOption('labwareToReactivate[0].commentId', 'Discarded by mistake');
         cy.findByRole('button', { name: 'Reactivate' }).click();
       });
       it('displays an error message', () => {
-        cy.findByText('The request could not be performed.').should('be.visible');
+        cy.findByText('Something wrong happened.').should('be.visible');
       });
     });
   });

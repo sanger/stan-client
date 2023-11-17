@@ -48,17 +48,6 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
         });
       }
     });
-    // if (barcode.length === 5) {
-    //   labware.discarded = true;
-    // }
-    // if (barcode.length === 6) {
-    //   labware.destroyed = true;
-    // }
-    console.log('labwareFactory', params, associations, transientParams);
-    console.log(params.barcode);
-    console.log(params.barcode?.length);
-    console.log(params.barcode?.length === 11);
-
     return {
       __typename: 'Labware',
       labwareType: associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
