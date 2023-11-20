@@ -153,6 +153,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
    * This check is very important because it can result in recursive calls between parent and this component.
    */
   useEffect(() => {
+    if (!currentOutput && initialOutputLabware?.length === 0) return;
     if (initialOutputLabware?.length === 0) {
       setCurrentOutput(null);
       send({ type: 'UPDATE_OUTPUT_LABWARE', outputSlotCopyContent: [] });
@@ -176,7 +177,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
     if (initialOutputLabware.some((lw) => !outputSlotCopies.map((osc) => osc.labware.id).includes(lw.labware.id))) {
       send({ type: 'UPDATE_OUTPUT_LABWARE', outputSlotCopyContent: initialOutputLabware });
     }
-  }, [initialOutputLabware, outputSlotCopies, send, currentOutput?.labware]);
+  }, [initialOutputLabware, outputSlotCopies, send, currentOutput]);
 
   const getSourceSlotColor = useCallback(
     (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
@@ -246,7 +247,14 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
         return `bg-${colorByBarcode.get(scc.sourceBarcode)}-500`;
       }
     },
-    [colorByBarcode, disabledOutputSlotAddresses, oneToManyCopyInProgress, selectedInputAddresses, currentInputLabware]
+    [
+      colorByBarcode,
+      disabledOutputSlotAddresses,
+      oneToManyCopyInProgress,
+      selectedInputAddresses,
+      currentInputLabware,
+      currentOutput?.labware
+    ]
   );
 
   /**
@@ -380,7 +388,14 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
         }
       }
     },
-    [currentInputLabware, handleCopySlots, failedSlots, selectedInputAddresses, disabledOutputSlotAddresses]
+    [
+      currentInputLabware,
+      handleCopySlots,
+      failedSlots,
+      selectedInputAddresses,
+      disabledOutputSlotAddresses,
+      currentOutput?.labware
+    ]
   );
 
   const handleOneToManyCopy = React.useCallback(
@@ -607,9 +622,9 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-2 auto-rows-auto">
-        <Heading level={4}>Input Labwares</Heading>
+        <Heading level={4}>Input Labware</Heading>
 
-        <Heading level={4}>Output Labwares</Heading>
+        <Heading level={4}>Output Labware</Heading>
         {slotCopyModes && (
           <>
             <div className="flex flex-row p-4 space-x-4">

@@ -105,7 +105,7 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
                 handleChange={(val) => onChangeBioState((val as OptionType).label)}
                 value={labware && labware.slotCopyDetails.bioState ? labware.slotCopyDetails.bioState : ''}
                 emptyOption={true}
-                dataTestId="transfer-type"
+                dataTestId="bioState"
                 options={transferTypes.map((type) => {
                   return {
                     label: type,
@@ -121,7 +121,7 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
             </div>
           </>
         ) : (
-          <div className={'flex flex-col w-full space-y-2'}>
+          <div className={'flex flex-col w-full space-y-2'} data-testid={'dest-scanner'}>
             <LabwareScanner onChange={onLabwareScan} limit={1} labwareCheckFunction={validateLabware}>
               {(props) => {
                 return (
