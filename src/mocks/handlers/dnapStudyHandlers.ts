@@ -23,7 +23,7 @@ const dnapStudyHandlers = [
       return res(
         ctx.errors([
           {
-            message: `Unknown Sequencescape study id: ${req.variables.ssId}`
+            message: `Exception while fetching data (/getDnapStudy) : Unknown Sequencescape study id:  ${req.variables.ssId}`
           }
         ])
       );

@@ -348,7 +348,7 @@ const workHandlers = [
         return res(
           ctx.errors([
             {
-              message: `DNAP Study ID and description ${req.variables.ssStudyId} not found`
+              message: `Exception while fetching data (/updateWorkDnapStudy) : Unknown Sequencescape study id: ${req.variables.ssStudyId}`
             }
           ])
         );

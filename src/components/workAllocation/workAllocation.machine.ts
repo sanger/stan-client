@@ -63,9 +63,13 @@ export type WorkAllocationFormValues = {
   numOriginalSamples: number | undefined;
 
   /**
-   *The Sequencescape study id study
+   *The Sequencescape study id
    */
   ssStudyId?: number;
+  /**
+   *The Sequencescape study name
+   */
+  studyName?: string;
 
   /**
    * Whether or not an R&D number is being created. Will use a different prefix on call to core.

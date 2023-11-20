@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import createWorkAllocationMachine, { WorkAllocationFormValues } from './workAllocation.machine';
 import { useMachine } from '@xstate/react';
 import Table, { SortProps, TableBody, TableHead, TableHeader } from '../Table';
@@ -134,7 +134,6 @@ export default function WorkAllocation() {
 
   /**Custom hook to download data**/
   const { downloadURL, extension } = useDownload<string[]>(downloadData);
-  const [studyName, setStudyName] = useState<string | undefined>(undefined);
 
   /**
    * When the URL search params change, send an event to the machine
@@ -207,20 +206,7 @@ export default function WorkAllocation() {
       .oneOf(omeroProjects.map((cc) => cc.name))
       .optional()
       .label('Omero Project'),
-    ssStudyId: Yup.number()
-      .label('DNAP study ID')
-      .optional()
-      .test('ssStudyId', `Unknown Sequencescape study id`, async (studyId, context) => {
-        if (!studyId) return true;
-        const study = await stanCore.GetDnapStudy({ ssId: studyId });
-        if (!study || !study.dnapStudy) {
-          setStudyName(undefined);
-          return false;
-        } else {
-          setStudyName(study.dnapStudy.name);
-          return true;
-        }
-      }),
+    ssStudyId: Yup.number().label('DNAP study ID').optional(),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
     numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
@@ -297,115 +283,134 @@ export default function WorkAllocation() {
           }}
           validationSchema={validationSchema}
         >
-          <Form>
-            <div className=" md:grid md:grid-cols-3 md:px-10 sm:flex sm:flex-row md:justify-center md:items-start md:gap-y-4 md:gap-x-8">
-              <div className="md:flex-grow">
-                <CustomReactSelect
-                  label="Work Type"
-                  name="workType"
-                  emptyOption={true}
-                  dataTestId={'workType'}
-                  options={selectOptionValues(workTypes, 'name', 'name')}
-                />
+          {({ setFieldValue, values }) => (
+            <Form>
+              <div className=" md:grid md:grid-cols-3 md:px-10 sm:flex sm:flex-row md:justify-center md:items-start md:gap-y-4 md:gap-x-8">
+                <div className="md:flex-grow">
+                  <CustomReactSelect
+                    label="Work Type"
+                    name="workType"
+                    emptyOption={true}
+                    dataTestId={'workType'}
+                    options={selectOptionValues(workTypes, 'name', 'name')}
+                  />
+                </div>
+
+                <div className="md:flex-grow">
+                  <CustomReactSelect
+                    label="Work Requester"
+                    name="workRequester"
+                    dataTestId="workRequester"
+                    emptyOption={true}
+                    options={selectOptionValues(workRequesters, 'username', 'username', true, {
+                      sort: true,
+                      alphaFirst: true
+                    })}
+                  />
+                </div>
+
+                <div className="md:flex-grow">
+                  <CustomReactSelect
+                    label="Project (cost code description)"
+                    name="project"
+                    dataTestId="project"
+                    fixedWidth={210}
+                    emptyOption={true}
+                    options={selectOptionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
+                  />
+                </div>
+
+                <div className="md:flex-grow">
+                  <CustomReactSelect
+                    label="Omero Project"
+                    name="omeroProject"
+                    dataTestId="omeroProject"
+                    emptyOption={true}
+                    options={selectOptionValues(omeroProjects, 'name', 'name', true, { sort: true, alphaFirst: true })}
+                  />
+                </div>
+
+                <div className="md:flex-grow">
+                  <CustomReactSelect
+                    label="Program"
+                    name="program"
+                    dataTestId="program"
+                    emptyOption={true}
+                    options={selectOptionValues(programs, 'name', 'name')}
+                  />
+                </div>
+
+                <div className="md:flex-grow">
+                  <CustomReactSelect
+                    label="Cost Code"
+                    name="costCode"
+                    dataTestId="costCode"
+                    emptyOption={true}
+                    options={selectOptionValues(costCodes, 'code', 'code')}
+                  />
+                </div>
+                <div className="md:flex-grow">
+                  <FormikInput
+                    label={'Number of original samples'}
+                    name={'numOriginalSamples'}
+                    type={'number'}
+                    maxLength={MAX_NUM_BLOCKANDSLIDES}
+                    min={0}
+                  />
+                </div>
+                <div className="md:flex-grow">
+                  <FormikInput
+                    label={'Number of blocks'}
+                    name={'numBlocks'}
+                    type={'number'}
+                    maxLength={MAX_NUM_BLOCKANDSLIDES}
+                    min={0}
+                  />
+                </div>
+                <div className="md:flex-grow">
+                  <FormikInput
+                    label={'Number of slides'}
+                    name={'numSlides'}
+                    type={'number'}
+                    maxLength={MAX_NUM_BLOCKANDSLIDES}
+                    min={0}
+                  />
+                </div>
+                <div className="md:flex-grow">
+                  <FormikInput
+                    type={'number'}
+                    label="DNAP study ID"
+                    name="ssStudyId"
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      const ssId = Number(e.currentTarget.value);
+                      stanCore
+                        .GetDnapStudy({ ssId: ssId })
+                        .then((study) => {
+                          if (study && study.dnapStudy) {
+                            setFieldValue('studyName', study.dnapStudy.name);
+                          }
+                        })
+                        .catch((e) => {
+                          setFieldValue('studyName', 'undefined');
+                        });
+                    }}
+                  />
+                  {values.studyName && (
+                    <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
+                      <Pill color={values.studyName === 'undefined' ? 'pink' : 'blue'}>{values.studyName}</Pill>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="md:flex-grow">
-                <CustomReactSelect
-                  label="Work Requester"
-                  name="workRequester"
-                  dataTestId="workRequester"
-                  emptyOption={true}
-                  options={selectOptionValues(workRequesters, 'username', 'username', true, {
-                    sort: true,
-                    alphaFirst: true
-                  })}
-                />
+              <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
+                <FormikInput label={'R&D?'} name={'isRnD'} type={'checkbox'} />
+                <BlueButton disabled={current.matches('allocating') || submitted} type="submit">
+                  Submit
+                </BlueButton>
               </div>
-
-              <div className="md:flex-grow">
-                <CustomReactSelect
-                  label="Project (cost code description)"
-                  name="project"
-                  dataTestId="project"
-                  fixedWidth={210}
-                  emptyOption={true}
-                  options={selectOptionValues(projects, 'name', 'name', true, { sort: true, alphaFirst: true })}
-                />
-              </div>
-
-              <div className="md:flex-grow">
-                <CustomReactSelect
-                  label="Omero Project"
-                  name="omeroProject"
-                  dataTestId="omeroProject"
-                  emptyOption={true}
-                  options={selectOptionValues(omeroProjects, 'name', 'name', true, { sort: true, alphaFirst: true })}
-                />
-              </div>
-
-              <div className="md:flex-grow">
-                <CustomReactSelect
-                  label="Program"
-                  name="program"
-                  dataTestId="program"
-                  emptyOption={true}
-                  options={selectOptionValues(programs, 'name', 'name')}
-                />
-              </div>
-
-              <div className="md:flex-grow">
-                <CustomReactSelect
-                  label="Cost Code"
-                  name="costCode"
-                  dataTestId="costCode"
-                  emptyOption={true}
-                  options={selectOptionValues(costCodes, 'code', 'code')}
-                />
-              </div>
-              <div className="md:flex-grow">
-                <FormikInput
-                  label={'Number of original samples'}
-                  name={'numOriginalSamples'}
-                  type={'number'}
-                  maxLength={MAX_NUM_BLOCKANDSLIDES}
-                  min={0}
-                />
-              </div>
-              <div className="md:flex-grow">
-                <FormikInput
-                  label={'Number of blocks'}
-                  name={'numBlocks'}
-                  type={'number'}
-                  maxLength={MAX_NUM_BLOCKANDSLIDES}
-                  min={0}
-                />
-              </div>
-              <div className="md:flex-grow">
-                <FormikInput
-                  label={'Number of slides'}
-                  name={'numSlides'}
-                  type={'number'}
-                  maxLength={MAX_NUM_BLOCKANDSLIDES}
-                  min={0}
-                />
-              </div>
-              <div className="md:flex-grow">
-                <FormikInput type={'number'} label="DNAP study ID" name="ssStudyId" />
-                {studyName && (
-                  <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
-                    {studyName && <Pill color={'blue'}>{studyName}</Pill>}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="sm:flex sm:flex-row mt-4 justify-end space-x-4">
-              <FormikInput label={'R&D?'} name={'isRnD'} type={'checkbox'} />
-              <BlueButton disabled={current.matches('allocating') || submitted} type="submit">
-                Submit
-              </BlueButton>
-            </div>
-          </Form>
+            </Form>
+          )}
         </Formik>
       </div>
       <Authenticated role={UserRole.Normal}>

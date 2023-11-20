@@ -24,10 +24,29 @@ type ValueFieldComponentInfo = {
 };
 
 type ExtraEntityColumn<E> = {
+  /**
+   * The column label
+   */
   label: string;
+  /**
+   * The cell value
+   */
   value: string;
+  /**
+   * The cell placeholder
+   */
   keyFieldPlaceholder?: string;
+  /**
+   * If the entity contains extra information, it needs to be displayed within the extraDisplayColumnName
+   * (i.e., Release Recipients requires user id(value) and the username(extraField) to be displayed).
+   */
   extraFieldPlaceholder?: string;
+
+  /**
+   * Callback when an entity is to be updated.
+   * @param value The value of the new entity.
+   * @param extraValue The extra value if any.
+   */
   onChange?: (value: string, extraValue?: string) => Promise<E>;
 };
 
@@ -96,11 +115,11 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
       services: {
         createEntity: (ctx, e) => {
           if (e.type !== 'CREATE_NEW_ENTITY') return Promise.reject();
-          return onCreate!(e.value, e.extraValue);
+          return onCreate ? onCreate(e.value, e.extraValue) : Promise.reject();
         },
         valueChanged: (context, e) => {
           if (e.type !== 'VALUE_CHANGE') return Promise.reject();
-          return onChangeValue!(e.entity, e.value);
+          return onChangeValue ? onChangeValue(e.entity, e.value) : Promise.reject();
         },
         updateExtraProperty: (context, e) => {
           if (e.type !== 'EXTRA_PROPERTY_UPDATE_VALUE' || !extraDisplayColumnName || !extraDisplayColumnName.onChange)
