@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { GetXeniumQcInfoQuery, QcLabware, QcLabwareRequest, RecordQcLabwareMutation } from '../types/sdk';
+import { CommentFieldsFragment, QcLabware, QcLabwareRequest, RecordQcLabwareMutation } from '../types/sdk';
 import * as Yup from 'yup';
 import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
@@ -15,10 +15,7 @@ import BlueButton from '../components/buttons/BlueButton';
 import FormikInput from '../components/forms/Input';
 import { getCurrentDateTime } from '../types/stan';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
-
-type XeniumQCProps = {
-  info: GetXeniumQcInfoQuery;
-};
+import { useLoaderData } from 'react-router-dom';
 
 export type XeniumQCFormData = {
   workNumberAll: string;
@@ -26,7 +23,8 @@ export type XeniumQCFormData = {
   completion: string;
 };
 
-const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
+const XeniumQC = () => {
+  const comments = useLoaderData() as CommentFieldsFragment[];
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
     return createFormMachine<QcLabwareRequest, RecordQcLabwareMutation>().withConfig({
@@ -93,7 +91,7 @@ const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
               send({ type: 'SUBMIT_FORM', values: request });
             }}
           >
-            {({ values, setFieldValue, isValid, errors }) => (
+            {({ values, setFieldValue, isValid }) => (
               <Form>
                 <div className="mt-8 space-y-2">
                   <Heading level={2}>Labware</Heading>
@@ -155,7 +153,7 @@ const XeniumQC: React.FC<XeniumQCProps> = ({ info }) => {
                                   <XeniumLabwareQC
                                     key={lw.barcode}
                                     labware={lw}
-                                    comments={info.comments}
+                                    comments={comments}
                                     index={index}
                                     removeLabware={removeLabware}
                                   />

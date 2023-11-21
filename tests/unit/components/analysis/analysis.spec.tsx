@@ -1,10 +1,12 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import React from 'react';
 import Analysis from '../../../../src/pages/Analysis';
 import { describe } from '@jest/globals';
-import { scanLabware, selectOption } from '../../../generic/utilities';
+import { scanLabware } from '../../../generic/utilities';
+import labwareFactory from '../../../../src/lib/factories/labwareFactory';
+import { PassFail } from '../../../../src/types/sdk';
 
 afterEach(() => {
   cleanup();
@@ -21,37 +23,62 @@ jest.mock('react-router-dom', () => ({
   }),
   useNavigate: jest.fn().mockImplementation(() => ({
     navigate: jest.fn()
-  }))
+  })),
+  useLocation: jest.fn().mockReturnValue({
+    state: []
+  })
 }));
 
-describe('Render Analysis Component', () => {
-  beforeEach(() => {
-    renderAnalysis();
-  });
-  it('renders the labware input field only with analysis button disabled', () => {
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Analysis');
-    expect(screen.getByRole('button', { name: 'Analysis' })).toBeDisabled();
-    expect(screen.getByTestId('input')).toBeVisible();
+describe('Analysis Component', () => {
+  describe('Render without crashing', () => {
+    beforeEach(() => {
+      renderAnalysis();
+    });
+    it('renders the labware input field only with analysis button disabled', () => {
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Analysis');
+      expect(screen.getByRole('button', { name: 'Analysis' })).toBeDisabled();
+      expect(screen.getByTestId('input')).toBeEnabled();
+    });
   });
 
   describe('when a user scans a labware', () => {
     beforeEach(() => {
-      scanLabware('STAN-611');
+      renderAnalysis();
     });
-    it('renders with save button disabled until the user selects an equipment and an analysis type', () => {
-      waitFor(async () => {
-        expect(screen.getAllByRole('table')).toHaveLength(1);
-        expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
-        expect(screen.getByRole('button', { name: 'Reset Form' })).toBeEnabled();
-        expect(screen.getByRole('button', { name: 'Return Home' })).toBeEnabled();
+    it('renders tablw with information of the scanner labware and enables the Analysis button', async () => {
+      await act(async () => {
+        await scanLabware('STAN-611');
       });
+      expect(screen.getAllByRole('table')).toHaveLength(1);
+      expect(screen.getAllByRole('table')[0]).toContainHTML('STAN-611');
+      expect(screen.getByRole('button', { name: 'Analysis' })).toBeEnabled();
     });
-    it('enables the save button when the user selects an equipment and an analysis type', () => {
-      waitFor(async () => {
-        await selectOption('equipmentId', 'Equipment 2');
-        await selectOption('analysisType', 'RIN');
-        expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+  });
+
+  describe('when the page is loaded from RNA Extraction result page', () => {
+    beforeEach(() => {
+      const extractedLabware = labwareFactory.build({ barcode: 'STAN-1234' });
+      require('react-router-dom').useLocation.mockImplementation(() => {
+        return {
+          state: [{ extractResult: { labware: extractedLabware, concentration: '4.5', result: PassFail.Pass } }]
+        };
       });
+      renderAnalysis();
+    });
+    it('renders with the labware already extracted', () => {
+      expect(screen.getAllByRole('table')).toHaveLength(1);
+      const extractedLabwareTable = screen.getAllByRole('table')[0];
+      expect(extractedLabwareTable).toContainHTML('STAN-1234');
+      expect(extractedLabwareTable).toContainHTML('4.5');
+    });
+    it('allows the  user to remove the extracted labware', () => {
+      expect(screen.getAllByTestId('remove')[0]).toBeEnabled();
+    });
+    it('allows the user to scan different labware', () => {
+      expect(screen.getAllByTestId('input')[0]).toBeEnabled();
+    });
+    it('renders with the analysis button enabled', () => {
+      expect(screen.getAllByRole('button', { name: 'Analysis' })[0]).toBeEnabled();
     });
   });
 });
