@@ -157,7 +157,7 @@ const PotProcessingLabwarePlan = React.forwardRef<HTMLDivElement, PotProcessingL
 
                 <CustomReactSelect
                   dataTestId={'pot-comments'}
-                  label={'Processing comments'}
+                  label={'Labware generation comments'}
                   name={`plans.${rowIndex}.commentId`}
                   emptyOption={true}
                   options={selectOptionValues(potProcessInfo.comments, 'text', 'id')}

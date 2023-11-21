@@ -180,7 +180,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                 />
 
                 <CustomReactSelect
-                  label={'Processing comments'}
+                  label={'Labware generation comments'}
                   dataTestId={'comments'}
                   name={`plans.${rowIndex}.commentId`}
                   emptyOption={true}

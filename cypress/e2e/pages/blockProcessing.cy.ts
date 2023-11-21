@@ -259,8 +259,8 @@ describe('Block Processing', () => {
           selectSGPNumber('SGP1008');
           cy.findByRole('button', { name: /Save/i }).click();
         });
-        it('displays Block processing complete page', () => {
-          cy.findByText('Block processing complete').should('be.visible');
+        it('displays Block labware generation', () => {
+          cy.findByText('Block labware generation complete').should('be.visible');
           cy.findByRole('table').should('exist');
         });
 
@@ -325,7 +325,7 @@ describe('Block Processing', () => {
 });
 function checkBlockProcessingFields() {
   cy.findByLabelText('Replicate Number').should('be.visible');
-  cy.findByLabelText('Processing comments').should('be.visible');
+  cy.findByLabelText('Labware generation comments').should('be.visible');
 }
 
 function scanInput(barcode: string) {
