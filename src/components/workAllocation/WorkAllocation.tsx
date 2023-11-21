@@ -36,7 +36,8 @@ const initialValues: WorkAllocationFormValues = {
   numSlides: undefined,
   numBlocks: undefined,
   numOriginalSamples: undefined,
-  ssStudyId: undefined
+  ssStudyId: undefined,
+  studyName: undefined
 };
 export const MAX_NUM_BLOCKANDSLIDES = 200;
 
@@ -398,7 +399,11 @@ export default function WorkAllocation() {
                   />
                   {values.studyName && (
                     <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
-                      <Pill color={values.studyName === 'undefined' ? 'pink' : 'blue'}>{values.studyName}</Pill>
+                      {values.studyName === 'undefined' ? (
+                        <Pill color="pink">{`Unknown Sequencescape study id`}</Pill>
+                      ) : (
+                        <Pill color="blue">{values.studyName}</Pill>
+                      )}
                     </div>
                   )}
                 </div>
