@@ -7,7 +7,7 @@ import { EntityValueType } from './EntityManager';
 interface EntityManagerContext<E> {
   entities: Array<E>;
   keyField: keyof E;
-  valueField: keyof E;
+  valueField?: keyof E;
   successMessage: Maybe<string>;
   error: Maybe<ClientError>;
   selectedEntity?: E;
@@ -41,7 +41,7 @@ type EntityManagerEvent<E> =
   | MachineServiceDone<'updateExtraProperty', E>
   | MachineServiceError<'updateExtraProperty', ClientError>;
 
-export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyof E, valueField: keyof E) {
+export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyof E, valueField?: keyof E) {
   return createMachine<EntityManagerContext<E>, EntityManagerEvent<E>>(
     {
       context: {
@@ -154,7 +154,7 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
           };
         }),
         updateEntity: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.valueChanged') {
+          if (e.type !== 'done.invoke.valueChanged' || !ctx.valueField) {
             return {};
           }
 

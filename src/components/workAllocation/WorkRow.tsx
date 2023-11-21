@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { TableCell } from '../Table';
 import {
   CommentFieldsFragment,
-  DnapStudyFieldsFragment,
+  DnapStudy,
   OmeroProjectFieldsFragment,
   WorkStatus,
   WorkWithCommentFieldsFragment
@@ -16,8 +16,12 @@ import { capitalize } from 'lodash';
 import { Form, Formik } from 'formik';
 import PinkButton from '../buttons/PinkButton';
 import { MAX_NUM_BLOCKANDSLIDES } from './WorkAllocation';
-import FormikInput from '../forms/Input';
+import FormikInput, { Input } from '../forms/Input';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import Pill from '../Pill';
+import { extractServerErrors } from '../../types/stan';
+import warningToast from '../notifications/WarningToast';
+import { toast } from 'react-toastify';
 
 /**
  * The type of values for the edit form
@@ -48,10 +52,6 @@ type WorkRowProps = {
    * The Omero projects available for the user to select when updating Work status
    */
   availableOmeroProjects: Array<OmeroProjectFieldsFragment>;
-  /**
-   * The DNAP study id and description fields available for the user to select when updating Work status
-   */
-  availableDnapStudies: Array<DnapStudyFieldsFragment>;
 
   rowIndex: number;
   onWorkFieldUpdate: (index: number, work: WorkWithCommentFieldsFragment) => void;
@@ -65,7 +65,6 @@ export default function WorkRow({
   initialWork,
   availableComments,
   availableOmeroProjects,
-  availableDnapStudies,
   rowIndex,
   onWorkFieldUpdate
 }: WorkRowProps) {
@@ -76,7 +75,8 @@ export default function WorkRow({
 
   const {
     editModeEnabled,
-    workWithComment: { work, comment }
+    workWithComment: { work, comment },
+    serverErrors
   } = current.context;
 
   /**Notify the changes in work fields*/
@@ -86,11 +86,23 @@ export default function WorkRow({
       current.event.type === 'done.invoke.updateWorkNumSlides' ||
       current.event.type === 'done.invoke.updateWorkNumBlocks' ||
       current.event.type === 'done.invoke.updateWorkStatus' ||
-      current.event.type === 'done.invoke.updateWorkOmeroProject'
+      current.event.type === 'done.invoke.updateWorkOmeroProject' ||
+      current.event.type === 'done.invoke.updateWorkDnapProject'
     ) {
       onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
     }
   }, [work, comment, onWorkFieldUpdate, rowIndex, current]);
+
+  /** Notify the user if enters an invalid DNAP study ID. */
+  useEffect(() => {
+    if (serverErrors) {
+      warningToast({
+        message: extractServerErrors(serverErrors).message!,
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 5000
+      });
+    }
+  }, [serverErrors]);
   /**
    * Should the edit button by displayed to the user right now
    */
@@ -145,6 +157,16 @@ export default function WorkRow({
     [send]
   );
 
+  const handleUpdateWorkStudyId = useCallback(
+    (ssStudyId: number) => {
+      send({
+        type: 'UPDATE_DNAP_PROJECT',
+        ssStudyId
+      });
+    },
+    [send]
+  );
+
   const renderWorkNumValueField = (workNumber: string, workNumValue: number | undefined, workNumValueType: string) => {
     return (
       <input
@@ -177,19 +199,19 @@ export default function WorkRow({
     );
   };
 
-  const renderWorkDnapProjectField = (workNumber: string, dnapStudy: string | undefined) => {
+  const renderWorkDnapProjectField = (workNumber: string, dnapStudy: DnapStudy | undefined) => {
     return (
-      <CustomReactSelect
-        dataTestId={`${workNumber}-DnapStudy`}
-        handleChange={(val) => {
-          send({
-            type: 'UPDATE_DNAP_PROJECT',
-            dnapStudy: (val as OptionType).label
-          });
-        }}
-        value={dnapStudy}
-        options={selectOptionValues(availableDnapStudies, 'name', 'name')}
-      />
+      <div className="grid  grid grid-flow-row auto-rows-max">
+        <Input
+          data-testid={`${workNumber}-DnapStudy`}
+          type="number"
+          onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+            handleUpdateWorkStudyId(Number(e.currentTarget.value));
+          }}
+          defaultValue={dnapStudy && dnapStudy.ssId}
+        />
+        {dnapStudy && <Pill color={'blue'}>{dnapStudy.name}</Pill>}
+      </div>
     );
   };
 
@@ -251,7 +273,7 @@ export default function WorkRow({
       <TableCell>{work.workRequester?.username}</TableCell>
       <TableCell>{work.project.name}</TableCell>
       <TableCell>{rendeWorkOmeroProjectField(work.workNumber, work.omeroProject?.name)}</TableCell>
-      <TableCell>{renderWorkDnapProjectField(work.workNumber, work.dnapStudy?.name)}</TableCell>
+      <TableCell colSpan={2}>{renderWorkDnapProjectField(work.workNumber, work.dnapStudy ?? undefined)}</TableCell>
       <TableCell>{work.program.name}</TableCell>
       <TableCell>{work.costCode.code}</TableCell>
       <TableCell>
