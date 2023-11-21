@@ -12,6 +12,10 @@ const renderAnalysisLabware = (props: any) => {
   );
 };
 
+afterEach(() => {
+  cleanup();
+});
+
 jest.mock('../../../../src/components/WorkNumberSelect', () => {
   return {
     __esModule: true,
@@ -37,14 +41,18 @@ describe('AnalysisLabware', () => {
         { id: 1, name: 'Equipment 1' },
         { id: 2, name: 'Equipment 2' }
       ],
-      analysisLabwares: [],
+      analysisLabwares: [
+        {
+          barcode: 'STAN-123',
+          measurements: [{ name: 'DV200', value: '' }],
+          workNumber: 'SGP1008'
+        }
+      ],
       onChangeLabwareData: jest.fn(),
       onChangeEquipment: jest.fn()
     });
   });
-  afterEach(() => {
-    cleanup();
-  });
+
   it('renders Analysis options without the analysis table', () => {
     expect(screen.getByTestId('equipmentId')).toBeVisible();
     expect(screen.getByTestId('analysisType')).toBeVisible();
@@ -92,7 +100,7 @@ describe('AnalysisLabware', () => {
       });
     });
   });
-  describe("when 'N/A' is selected in mesaurement type", () => {
+  describe("when 'N/A' is selected in measurement type", () => {
     it('should disable the text field in table', async () => {
       act(() => {
         selectOption('analysisType', 'DV200').then(() => {
@@ -104,7 +112,7 @@ describe('AnalysisLabware', () => {
       });
     });
   });
-  describe('when a comment is selected for all labwares', () => {
+  describe('when a comment is selected for all labware', () => {
     it('should display the selected comment in comment column of table', async () => {
       act(() => {
         selectOption('analysisType', 'DV200').then(() => {
