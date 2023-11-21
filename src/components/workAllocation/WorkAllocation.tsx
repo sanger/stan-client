@@ -388,6 +388,7 @@ export default function WorkAllocation() {
                         .then((study) => {
                           if (study && study.dnapStudy) {
                             setFieldValue('studyName', study.dnapStudy.name);
+                            setFieldValue('ssStudyId', ssId);
                           }
                         })
                         .catch((e) => {

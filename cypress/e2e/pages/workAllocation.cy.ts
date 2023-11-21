@@ -68,7 +68,7 @@ describe('Work Allocation', () => {
                   return res.once(
                     ctx.errors([
                       {
-                        message: 'Exception while fetching data (/createWork) : An error occured'
+                        message: 'Exception while fetching data (/createWork) : An error occurred'
                       }
                     ])
                   );
@@ -83,7 +83,7 @@ describe('Work Allocation', () => {
           it('shows an error message', () => {
             cy.findByRole('button', { name: /Submit/i }).click();
             cy.findByText('SGP Request Error').should('exist');
-            cy.findByText('An error occured').should('exist');
+            cy.findByText('An error occurred').should('exist');
           });
         });
       }
