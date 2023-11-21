@@ -20,7 +20,7 @@ import { reload, stanCore } from '../lib/sdk';
 import ButtonBar from '../components/ButtonBar';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
-import { Link, useLoaderData, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 
 // TODO Add front-end validation to this page
 
@@ -37,15 +37,16 @@ type AnalysisProps = {
 
 function Analysis() {
   const analysisProps = useLoaderData() as AnalysisProps;
+  const navigate = useNavigate();
+  const initExtractResult: ExtractResultQuery[] = useLocation().state as ExtractResultQuery[];
   const comments = analysisProps.comments;
   const equipments: EquipmentFieldsFragment[] = analysisProps.equipments;
-  const [extractResults, setExtractResults] = React.useState<ExtractResultQuery[]>([]);
+  const [extractResults, setExtractResults] = React.useState<ExtractResultQuery[]>(initExtractResult ?? []);
   const [analysisLabwares, setAnalysisLabwares] = React.useState<RnaAnalysisLabware[]>([]);
   const [equipmentId, setEquipmentId] = React.useState(0);
   const [operationType, setOperationType] = React.useState('');
   const [analysisMode, setAnalysisMode] = React.useState(false);
 
-  const navigate = useNavigate();
   const formMachine = React.useMemo(() => {
     return createFormMachine<RnaAnalysisRequest, RecordRnaAnalysisMutation>().withConfig({
       services: {
@@ -83,7 +84,11 @@ function Analysis() {
         <div className="max-w-screen-xl mx-auto">
           <div className="mt-8 space-y-4">
             <Heading level={3}> Labware </Heading>
-            <ExtractResultPanel onChangeExtractResults={onChangeExtractResults} locked={analysisMode} />
+            <ExtractResultPanel
+              onChangeExtractResults={onChangeExtractResults}
+              locked={analysisMode}
+              initExtractedResults={initExtractResult}
+            />
           </div>
         </div>
         {analysisMode && (

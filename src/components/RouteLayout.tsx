@@ -277,11 +277,11 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/xenium_qc"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetXeniumQCInfo}>
-                {(xeniumQCInfo) => <XeniumQC info={xeniumQCInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetXeniumQCInfo();
+              return res.comments;
+            }}
+            element={<XeniumQC />}
           />
         </Route>
         <Route element={<AuthLayout />}>

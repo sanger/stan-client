@@ -26,15 +26,21 @@ type ExtractResultPanelProps = {
    * True is the scanner should be locked; false otherwise
    */
   locked: boolean;
+
+  initExtractedResults?: ExtractResultQuery[];
 };
 
-const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({ onChangeExtractResults, locked }) => {
+const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
+  onChangeExtractResults,
+  locked,
+  initExtractedResults
+}) => {
   const machine = React.useMemo(() => {
     return extractResultMachine.withContext({
-      extractResults: [],
+      extractResults: initExtractedResults ?? [],
       currentBarcode: ''
     });
-  }, []);
+  }, [initExtractedResults]);
   const [current, send] = useMachine(() => machine);
 
   const { serverError, extractResults, scanErrorMessage, currentBarcode } = current.context;

@@ -138,7 +138,7 @@ function AppShell({ children }: AppShellParams) {
                     />
 
                     <NavLinkMenuItem
-                      caption={'Labware generation comments'}
+                      caption={'Sample Processing Comments'}
                       path="/lab/sample_processing_comments"
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
                       description={'Records extra labware generation comments.'}
@@ -438,9 +438,7 @@ function AppShell({ children }: AppShellParams) {
                     <StanMobileNavLink to="/lab/fetal_waste">Fetal Waste</StanMobileNavLink>
                     <h4 className="px-3 pt-2 text-sm font-normal mt-2 ml-2 text-sp-600">Original Sample</h4>
                     <div className="grid grid-cols-2 ml-2 gap-y-4 gap-x-8">
-                      <StanMobileNavLink to="/lab/original_sample_processing">
-                        Original Sample Processing
-                      </StanMobileNavLink>
+                      <StanMobileNavLink to="/lab/original_sample_processing">Labware Generation</StanMobileNavLink>
                       <StanMobileNavLink to="/lab/original_sample_processing">Paraffin Processing</StanMobileNavLink>
                     </div>
                     <h4 className="px-3 pt-2 text-sm font-normal ml-2 text-sp-600">RNA</h4>

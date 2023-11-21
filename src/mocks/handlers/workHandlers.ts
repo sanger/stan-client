@@ -28,8 +28,8 @@ import {
   FindWorksCreatedByQuery,
   FindWorksCreatedByQueryVariables,
   DnapStudy,
-  UpdateWorkDnapProjectMutation,
-  UpdateWorkDnapProjectMutationVariables
+  UpdateWorkDnapStudyMutation,
+  UpdateWorkDnapStudyMutationVariables
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -134,7 +134,7 @@ const workHandlers = [
     const omeroProject = req.variables.omeroProject
       ? omeroProjectRepository.find('name', req.variables.omeroProject)
       : undefined;
-    const dnapStudy = req.variables.dnapStudy ? dnapStudyRepository.find('name', req.variables.dnapStudy) : undefined;
+    const dnapStudy = req.variables.ssStudyId ? dnapStudyRepository.find('ssId', req.variables.ssStudyId) : undefined;
     const workRequester = releaseRecipientRepository.find('username', req.variables.workRequester);
 
     if (!workType) {
@@ -327,8 +327,8 @@ const workHandlers = [
       );
     }
   ),
-  graphql.mutation<UpdateWorkDnapProjectMutation, UpdateWorkDnapProjectMutationVariables>(
-    'UpdateWorkDnapProject',
+  graphql.mutation<UpdateWorkDnapStudyMutation, UpdateWorkDnapStudyMutationVariables>(
+    'UpdateWorkDnapStudy',
     (req, res, ctx) => {
       const work = workRepository.find('workNumber', req.variables.workNumber);
       if (!work) {
@@ -341,14 +341,14 @@ const workHandlers = [
         );
       }
       let dnapStudy: DnapStudy | null = null;
-      if (req.variables.dnapStudy) {
-        dnapStudy = dnapStudyRepository.find('name', req.variables.dnapStudy);
+      if (req.variables.ssStudyId) {
+        dnapStudy = dnapStudyRepository.find('ssId', req.variables.ssStudyId);
       }
       if (!dnapStudy) {
         return res(
           ctx.errors([
             {
-              message: `DNAP Study ID and description ${req.variables.dnapStudy} not found`
+              message: `Exception while fetching data (/updateWorkDnapStudy) : Unknown Sequencescape study id: ${req.variables.ssStudyId}`
             }
           ])
         );
@@ -357,7 +357,7 @@ const workHandlers = [
       workRepository.save(work);
       return res(
         ctx.data({
-          updateWorkDnapProject: work
+          updateWorkDnapStudy: work
         })
       );
     }
