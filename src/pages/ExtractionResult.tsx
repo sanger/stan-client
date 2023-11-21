@@ -2,6 +2,7 @@ import React from 'react';
 import AppShell from '../components/AppShell';
 import {
   ExtractResultLabware,
+  ExtractResultQuery,
   ExtractResultRequest,
   GetRecordExtractResultInfoQuery,
   LabwareFieldsFragment,
@@ -10,29 +11,38 @@ import {
 } from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
-import { stanCore } from '../lib/sdk';
+import { reload, stanCore } from '../lib/sdk';
 import { Form, Formik } from 'formik';
 import Heading from '../components/Heading';
 import WorkNumberSelect from '../components/WorkNumberSelect';
 import { FormikLabwareScanner } from '../components/labwareScanner/FormikLabwareScanner';
 import * as Yup from 'yup';
 import BlueButton from '../components/buttons/BlueButton';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ExtractResultLabwareTable } from '../components/extractResultLabwareTable/ExtractResultLabwareTable';
 import Warning from '../components/notifications/Warning';
-import OperationCompleteModal from '../components/modal/OperationCompleteModal';
+import ButtonBar from '../components/ButtonBar';
 
 type ExtractionResultProps = {
   info: GetRecordExtractResultInfoQuery;
 };
 
+type ExtractResultLabwareForm = ExtractResultLabware & { lw: LabwareFieldsFragment };
+
+type ExtractResultRequestForm = {
+  workNumber: string;
+  labware: ExtractResultLabwareForm[];
+};
+
 export default function ExtractionResult({ info }: ExtractionResultProps) {
   // There will be initial labware if user has come from the Extraction page
   const location = useLocation();
+  const navigate = useNavigate();
   const state = location.state as { labware?: Array<LabwareFieldsFragment> };
   const initialLabware: Array<LabwareFieldsFragment> = state === null ? [] : state.labware ?? [];
+  const [labwareToAnalyse, setLabwareToAnalyse] = React.useState<ExtractResultQuery[]>([]);
 
-  const initialValues: ExtractResultRequest = {
+  const initialValues: ExtractResultRequestForm = {
     workNumber: '',
     labware: initialLabware.map(buildExtractResultLabware)
   };
@@ -59,6 +69,7 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
       .label('Labware')
       .of(
         Yup.object().shape({
+          lw: Yup.object().required(),
           barcode: Yup.string().required(),
           result: Yup.string().oneOf([PassFail.Pass, PassFail.Fail]).required(),
           concentration: Yup.string()
@@ -89,11 +100,28 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
-          <Formik<ExtractResultRequest>
+          <Formik<ExtractResultRequestForm>
             validationSchema={validationSchema}
             initialValues={initialValues}
             validateOnMount={true}
-            onSubmit={async (values) => send({ type: 'SUBMIT_FORM', values })}
+            onSubmit={async (values) => {
+              setLabwareToAnalyse(
+                values.labware.map((lw) => {
+                  return {
+                    extractResult: {
+                      labware: lw.lw,
+                      passFail: lw.result,
+                      concentration: lw.concentration,
+                      commentId: lw.commentId
+                    }
+                  };
+                })
+              );
+              return send({
+                type: 'SUBMIT_FORM',
+                values: { ...values, labware: values.labware.map(({ lw, ...rest }) => rest) }
+              });
+            }}
           >
             {({ isValid, setFieldValue }) => (
               <Form className="space-y-8">
@@ -111,7 +139,7 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
                 <div className="space-y-4">
                   <Heading level={3}>Labware</Heading>
 
-                  <FormikLabwareScanner<ExtractResultLabware>
+                  <FormikLabwareScanner<ExtractResultLabwareForm>
                     initialLabwares={initialLabware}
                     buildLabware={buildExtractResultLabware}
                   >
@@ -127,12 +155,21 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
                   </BlueButton>
                 </div>
 
-                <OperationCompleteModal show={current.matches('submitted')} message={'Operation Complete'}>
-                  <p>
-                    If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to
-                    the Home screen.
-                  </p>
-                </OperationCompleteModal>
+                {current.matches('submitted') && (
+                  <ButtonBar>
+                    <BlueButton onClick={() => reload(navigate)} action="tertiary">
+                      Reset Form
+                    </BlueButton>
+                    <Link to={'/'}>
+                      <BlueButton action="primary">Return Home</BlueButton>
+                    </Link>
+                    <div className={''}>
+                      <Link to={'/lab/rna_analysis'} state={labwareToAnalyse}>
+                        <BlueButton action="primary">Go to RNA analysis &gt;</BlueButton>
+                      </Link>
+                    </div>
+                  </ButtonBar>
+                )}
               </Form>
             )}
           </Formik>
@@ -146,8 +183,9 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
  * Builds the default {@link ExtractResultLabware} for a labware
  * @param labware the labware to build a default for
  */
-function buildExtractResultLabware(labware: LabwareFieldsFragment): ExtractResultLabware {
+function buildExtractResultLabware(labware: LabwareFieldsFragment): ExtractResultLabwareForm {
   return {
+    lw: labware,
     barcode: labware.barcode,
     result: PassFail.Pass,
     concentration: '0.00',

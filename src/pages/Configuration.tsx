@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import AppShell from '../components/AppShell';
 import { GetConfigurationQuery, UserRole } from '../types/sdk';
 import EntityManager from '../components/entityManager/EntityManager';
@@ -10,6 +10,9 @@ import { TabList } from '../components/TabbedPane';
 import { Item } from '@react-stately/collections';
 import MutedText from '../components/MutedText';
 import { alphaNumericSortDefault } from '../types/stan';
+import BlueButton from '../components/buttons/BlueButton';
+import LoadingSpinner from '../components/icons/LoadingSpinner';
+import Success from '../components/notifications/Success';
 
 type ConfigurationParams = {
   configuration: GetConfigurationQuery;
@@ -25,7 +28,7 @@ export default function Configuration({ configuration }: ConfigurationParams) {
     'Comments',
     'Cost Codes',
     'Destruction Reasons',
-    'DNAP study ID and description',
+    'DNAP study ID and name',
     'Equipments',
     'Fixatives',
     'HuMFre Numbers',
@@ -40,6 +43,19 @@ export default function Configuration({ configuration }: ConfigurationParams) {
     'Users',
     'Work Types'
   ];
+
+  const [dnapStudies, setDnapStudies] = useState(configuration.dnapStudies);
+  const [loading, setLoading] = useState(false);
+  const [numberOfDnapStudies, setNumberOfDnapStudies] = useState<number | null>(null);
+
+  const handleRefreshReprojectedEntries = useCallback(() => {
+    setLoading(true);
+    stanCore.UpdateDnapStudies().then((res) => {
+      setDnapStudies(res.updateDnapStudies);
+      setNumberOfDnapStudies(res.updateDnapStudies.length);
+      setLoading(false);
+    });
+  }, [stanCore, setLoading, setDnapStudies]);
 
   //Fill in the Config panels in same order as config Elements
   const configPanels = React.useMemo(() => {
@@ -120,26 +136,25 @@ export default function Configuration({ configuration }: ConfigurationParams) {
         />
       </div>,
 
-      /**DNAP study ID and description**/
+      /**DNAP study ID and name**/
+
       <div data-testid="config">
-        <Heading level={2}>DNAP study ID and description</Heading>
+        <Heading level={2}>DNAP study ID and name</Heading>
         <p className="mt-3 mb-6 text-lg" />
+        <div className="inline-flex">
+          <BlueButton onClick={() => handleRefreshReprojectedEntries()}>Refresh DNAP Studies </BlueButton>
+          <MutedText className={'pl-2'}>Proceed with caution, as this action demands substantial resources.</MutedText>
+        </div>
+        <p className="mt-3 mb-6 text-lg" />
+        {numberOfDnapStudies !== null && <Success message={`Number of records retrieved: ${numberOfDnapStudies}`} />}
+
+        {loading && <LoadingSpinner />}
         <EntityManager
-          initialEntities={configuration.dnapStudies}
-          displayKeyColumnName={'name'}
-          valueColumnName={'enabled'}
-          onChangeValue={(entity, value) => {
-            const enabled = typeof value === 'boolean' ? value : false;
-            return stanCore
-              .SetDnapStudyEnabled({
-                name: entity.name,
-                enabled
-              })
-              .then((res) => res.setDnapStudyEnabled);
-          }}
-          onCreate={(name) => stanCore.AddDnapStudy({ name }).then((res) => res.addDnapStudy)}
-          valueFieldComponentInfo={{
-            type: 'CHECKBOX'
+          initialEntities={dnapStudies}
+          displayKeyColumnName={'ssId'}
+          extraDisplayColumnName={{
+            label: 'Name',
+            value: 'name'
           }}
         />
       </div>,
@@ -486,7 +501,16 @@ export default function Configuration({ configuration }: ConfigurationParams) {
         />
       </div>
     ];
-  }, [groupedComments, configuration, groupedEquipments, stanCore]);
+  }, [
+    groupedComments,
+    configuration,
+    groupedEquipments,
+    stanCore,
+    handleRefreshReprojectedEntries,
+    loading,
+    dnapStudies,
+    numberOfDnapStudies
+  ]);
 
   return (
     <AppShell>

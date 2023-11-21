@@ -24,11 +24,30 @@ type ValueFieldComponentInfo = {
 };
 
 type ExtraEntityColumn<E> = {
+  /**
+   * The column label
+   */
   label: string;
+  /**
+   * The cell value
+   */
   value: string;
-  keyFieldPlaceholder: string;
-  extraFieldPlaceholder: string;
-  onChange(value: string, extraValue?: string): Promise<E>;
+  /**
+   * The cell placeholder
+   */
+  keyFieldPlaceholder?: string;
+  /**
+   * If the entity contains extra information, it needs to be displayed within the extraDisplayColumnName
+   * (i.e., Release Recipients requires user id(value) and the username(extraField) to be displayed).
+   */
+  extraFieldPlaceholder?: string;
+
+  /**
+   * Callback when an entity is to be updated.
+   * @param value The value of the new entity.
+   * @param extraValue The extra value if any.
+   */
+  onChange?: (value: string, extraValue?: string) => Promise<E>;
 };
 
 type EntityManagerProps<E> = {
@@ -52,23 +71,23 @@ type EntityManagerProps<E> = {
   /**
    * Which property of the entity should be used to display as value
    */
-  valueColumnName: keyof E;
+  valueColumnName?: keyof E;
 
   /***
    * How to display in Value field
    */
-  valueFieldComponentInfo: ValueFieldComponentInfo;
+  valueFieldComponentInfo?: ValueFieldComponentInfo;
 
   /**
    * Callback when a new entity is to be created
    * @param value the value of the new entity
    */
-  onCreate(value: string, extraValue?: string): Promise<E>;
+  onCreate?: (value: string, extraValue?: string) => Promise<E>;
 
   /**
    * Callback when value changes
    */
-  onChangeValue(entity: E, value: EntityValueType): Promise<E>;
+  onChangeValue?: (entity: E, value: EntityValueType) => Promise<E>;
 
   /**
    * Display key field as a dropdown
@@ -96,14 +115,15 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
       services: {
         createEntity: (ctx, e) => {
           if (e.type !== 'CREATE_NEW_ENTITY') return Promise.reject();
-          return onCreate(e.value, e.extraValue);
+          return onCreate ? onCreate(e.value, e.extraValue) : Promise.reject();
         },
         valueChanged: (context, e) => {
           if (e.type !== 'VALUE_CHANGE') return Promise.reject();
-          return onChangeValue(e.entity, e.value);
+          return onChangeValue ? onChangeValue(e.entity, e.value) : Promise.reject();
         },
         updateExtraProperty: (context, e) => {
-          if (e.type !== 'EXTRA_PROPERTY_UPDATE_VALUE' || !extraDisplayColumnName) return Promise.reject();
+          if (e.type !== 'EXTRA_PROPERTY_UPDATE_VALUE' || !extraDisplayColumnName || !extraDisplayColumnName.onChange)
+            return Promise.reject();
           return extraDisplayColumnName.onChange(e.value, e.extraValue);
         }
       }
@@ -317,12 +337,13 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
                 handleChange={handleEntitySelection}
                 className={'p-4'}
               />
-              {getValueFieldComponent(
-                valueFieldComponentInfo,
-                selectedEntity,
-                String(displayKeyColumnName),
-                String(valueColumnName)
-              )}
+              {valueFieldComponentInfo &&
+                getValueFieldComponent(
+                  valueFieldComponentInfo,
+                  selectedEntity,
+                  String(displayKeyColumnName),
+                  String(valueColumnName)
+                )}
             </tr>
           ) : (
             orderedEntities.map((entity, indx) => (
@@ -330,28 +351,33 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
                 <TableCell colSpan={2}>{entity[displayKeyColumnName]}</TableCell>
                 {extraDisplayColumnName && (
                   <TableCell colSpan={2}>
-                    <Input
-                      type="text"
-                      placeholder={extraDisplayColumnName.extraFieldPlaceholder}
-                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                        if (e.key === 'Enter') {
-                          handleExtraValueUpdate(String(entity[displayKeyColumnName]), e.currentTarget.value);
-                          e.currentTarget.blur();
-                        }
-                      }}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        handleOnChangeForExtraDisplayColumn(entity, e.target.value);
-                      }}
-                      value={String(entity[extraDisplayColumnName.value])}
-                    />
+                    {extraDisplayColumnName.onChange ? (
+                      <Input
+                        type="text"
+                        placeholder={extraDisplayColumnName.extraFieldPlaceholder}
+                        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                          if (e.key === 'Enter') {
+                            handleExtraValueUpdate(String(entity[displayKeyColumnName]), e.currentTarget.value);
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          handleOnChangeForExtraDisplayColumn(entity, e.target.value);
+                        }}
+                        value={String(entity[extraDisplayColumnName.value])}
+                      />
+                    ) : (
+                      entity[extraDisplayColumnName.value]
+                    )}
                   </TableCell>
                 )}
-                {getValueFieldComponent(
-                  valueFieldComponentInfo,
-                  entity,
-                  String(displayKeyColumnName),
-                  String(valueColumnName)
-                )}
+                {valueFieldComponentInfo &&
+                  getValueFieldComponent(
+                    valueFieldComponentInfo,
+                    entity,
+                    String(displayKeyColumnName),
+                    String(valueColumnName)
+                  )}
               </tr>
             ))
           )}
@@ -361,7 +387,7 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
       <div className="flex flex-row justify-end items-center space-x-3">
         {isLoading && <LoadingSpinner />}
 
-        {!showDraft && (
+        {onCreate && !showDraft && (
           <BlueButton disabled={isLoading} onClick={() => send({ type: 'DRAFT_NEW_ENTITY' })}>
             + Add{' '}
             {capitalize(alternateKeyColumnName ? alternateKeyColumnName.toString() : displayKeyColumnName.toString())}

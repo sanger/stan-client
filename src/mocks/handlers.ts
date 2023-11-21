@@ -52,6 +52,7 @@ import samplePositionHandlers from './handlers/samplePositionHandlers';
 import probePanelHandlers from './handlers/probePanelHandlers';
 import probeHybridisationHandlers from './handlers/probeHybridisationHandlers';
 import xeniumHandlers from './handlers/xeniumHandlers';
+import dnapStudyHandlers from './handlers/dnapStudyHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -104,5 +105,6 @@ export const handlers = [
   ...samplePositionHandlers,
   ...probePanelHandlers,
   ...probeHybridisationHandlers,
-  ...xeniumHandlers
+  ...xeniumHandlers,
+  ...dnapStudyHandlers
 ];
