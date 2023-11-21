@@ -7,7 +7,7 @@ describe('Original Sample Processing', () => {
 
   context('when there is no type selected', () => {
     it('displays text to start choosing processing type ', () => {
-      cy.findByText('Choose a processing type to get started:').should('be.visible');
+      cy.findByText('Choose a generation type to get started:').should('be.visible');
     });
   });
 

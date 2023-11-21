@@ -352,7 +352,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
           columns.spatialLocation(),
           columns.replicate()
         ]}
-        successMessage={'Block processing complete'}
+        successMessage={'Block labware generation complete'}
       />
     );
   }
@@ -408,7 +408,9 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                     ]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                   />
-                  {serverError && <Warning message={'Failed to perform block processing'} error={serverError} />}
+                  {serverError && (
+                    <Warning message={'Failed to perform block labware generation'} error={serverError} />
+                  )}
                   {values.plans.length > 0 && (
                     <motion.div variants={variants.fadeInWithLift} className={'sm:flex mt-4 sm:flex-row justify-end'}>
                       <ButtonBar>
