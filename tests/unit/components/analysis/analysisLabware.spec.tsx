@@ -112,7 +112,7 @@ describe('AnalysisLabware', () => {
         });
       });
       await waitFor(async () => {
-        expect(screen.getByRole('table')).toContainHTML('This is a comment');
+        expect(screen.getByRole('table').querySelectorAll('tbody td')[4]).toHaveTextContent('This is a comment');
       });
     });
   });
