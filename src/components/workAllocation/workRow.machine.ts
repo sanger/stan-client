@@ -124,9 +124,24 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
             UPDATE_DNAP_PROJECT: 'updateDnapProject'
           }
         },
-        completed: {},
-        failed: {},
-        withdrawn: {},
+        completed: {
+          on: {
+            EDIT: { actions: 'toggleEditMode' },
+            REACTIVATE: 'updating'
+          }
+        },
+        failed: {
+          on: {
+            EDIT: { actions: 'toggleEditMode' },
+            REACTIVATE: 'updating'
+          }
+        },
+        withdrawn: {
+          on: {
+            EDIT: { actions: 'toggleEditMode' },
+            REACTIVATE: 'updating'
+          }
+        },
         updating: {
           invoke: {
             src: 'updateWorkStatus',
