@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, getAllByTestId, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, getAllByTestId, render, screen, waitFor, within } from '@testing-library/react';
 import SlotMapper from '../../../../src/components/slotMapper/SlotMapper';
 import { OutputSlotCopyData, SlotCopyMode } from '../../../../src/components/slotMapper/slotMapper.types';
 import { objectKeys } from '../../../../src/lib/helpers';
@@ -42,8 +42,8 @@ describe('slotMapper.spec.tsx', () => {
     expect(screen.queryByTestId('copyMode-One to one')).toBeInTheDocument();
 
     //It should display the input and output labwares
-    expect(screen.getByText('Input Labwares')).toBeInTheDocument();
-    expect(screen.getByText('Output Labwares')).toBeInTheDocument();
+    expect(screen.getByText('Input Labware')).toBeInTheDocument();
+    expect(screen.getByText('Output Labware')).toBeInTheDocument();
   });
   it('displays the correct number of input and output labwares', () => {
     const inputLabware = plateFactory.build({ barcode: 'STAN-3111' });
@@ -229,5 +229,34 @@ describe('slotMapper.spec.tsx', () => {
       fireEvent.click(screen.getByTestId('clearAll'));
     });
     expect(screen).not.toContain(screen.getByTestId('mapping-div'));
+  });
+  describe('when a scanned labware is passed in as initialOutputLabware props', () => {
+    const inputLabware = plateFactory.build();
+    //Convert  NewLabwareLayout to LabwareFieldsFragment
+    const inputLw: LabwareFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
+    const outputLabware = plateFactory.build();
+    //Convert  NewLabwareLayout to LabwareFieldsFragment
+    const outputLw: OutputSlotCopyData[] = [
+      { labware: { ...outputLabware, barcode: 'STAN-5112' }, slotCopyContent: [] }
+    ];
+    beforeEach(() => {
+      render(
+        <SlotMapper
+          slotCopyModes={[SlotCopyMode.ONE_TO_ONE]}
+          initialInputLabware={inputLw}
+          initialOutputLabware={outputLw}
+        />
+      );
+    });
+    it('should render the component properly', () => {
+      //It should display the given slot copy modes
+      expect(screen.queryByTestId('copyMode-One to one')).toBeInTheDocument();
+
+      //It should display the input and output labwares
+      expect(screen.getByText('Input Labware')).toBeInTheDocument();
+      expect(screen.getByText('Output Labware')).toBeInTheDocument();
+      expect(screen.getByText('Labware-STAN-5111')).toBeInTheDocument();
+      expect(screen.getByText('Labware-STAN-5112')).toBeInTheDocument();
+    });
   });
 });

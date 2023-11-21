@@ -19,6 +19,7 @@ import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import createSlotMapperMachine from './slotMapper.machine';
 import PinkButton from '../buttons/PinkButton';
 import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
+import { isSlotFilled } from '../../lib/helpers/slotHelper';
 
 type LabwareType = {
   labwareType?: string;
@@ -152,6 +153,12 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
    * This check is very important because it can result in recursive calls between parent and this component.
    */
   useEffect(() => {
+    if (!currentOutput && initialOutputLabware?.length === 0) return;
+    if (initialOutputLabware?.length === 0) {
+      setCurrentOutput(null);
+      send({ type: 'UPDATE_OUTPUT_LABWARE', outputSlotCopyContent: [] });
+      return;
+    }
     const matchingLabware = initialOutputLabware?.find((outputLw) => outputLw.labware.id === currentOutput?.labware.id);
     //Update changes in barcode , if any
     if (matchingLabware && matchingLabware.labware.barcode !== currentOutput?.labware.barcode) {
@@ -170,7 +177,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
     if (initialOutputLabware.some((lw) => !outputSlotCopies.map((osc) => osc.labware.id).includes(lw.labware.id))) {
       send({ type: 'UPDATE_OUTPUT_LABWARE', outputSlotCopyContent: initialOutputLabware });
     }
-  }, [initialOutputLabware, outputSlotCopies, send, currentOutput?.labware]);
+  }, [initialOutputLabware, outputSlotCopies, send, currentOutput]);
 
   const getSourceSlotColor = useCallback(
     (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
@@ -214,6 +221,12 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
 
   const getDestinationSlotColor = useCallback(
     (outputSlotCopyData: OutputSlotCopyData, address: string) => {
+      if (currentOutput?.labware.barcode) {
+        const slot = currentOutput.labware.slots.find((s) => s.address === address);
+        if (slot && isSlotFilled(slot)) {
+          return 'bg-gray-300 ring-0 ring-offset-0 text-gray-300 border-0 border-gray-300';
+        }
+      }
       //Is this slot specified as disabled in props given?
       if (disabledOutputSlotAddresses?.includes(address)) {
         return 'bg-gray-300 ring-0 ring-offset-0 text-gray-300 border-0 border-gray-300';
@@ -234,7 +247,14 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
         return `bg-${colorByBarcode.get(scc.sourceBarcode)}-500`;
       }
     },
-    [colorByBarcode, disabledOutputSlotAddresses, oneToManyCopyInProgress, selectedInputAddresses, currentInputLabware]
+    [
+      colorByBarcode,
+      disabledOutputSlotAddresses,
+      oneToManyCopyInProgress,
+      selectedInputAddresses,
+      currentInputLabware,
+      currentOutput?.labware
+    ]
   );
 
   /**
@@ -343,6 +363,13 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
     (outputAddress: string) => {
       if (disabledOutputSlotAddresses?.includes(outputAddress)) return;
       setDestinationAddress(outputAddress);
+      //Check whether it is a scanned labware, if so allow copting to empty slots
+      if (currentOutput?.labware?.barcode) {
+        const slot = currentOutput?.labware?.slots.find((slot) => slot.address === outputAddress);
+        if (slot && isSlotFilled(slot)) {
+          return;
+        }
+      }
       //Check whether any selected input slots are failed in QC
       if (currentInputLabware) {
         const slotFails = failedSlots.get(currentInputLabware.barcode);
@@ -361,7 +388,14 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
         }
       }
     },
-    [currentInputLabware, handleCopySlots, failedSlots, selectedInputAddresses, disabledOutputSlotAddresses]
+    [
+      currentInputLabware,
+      handleCopySlots,
+      failedSlots,
+      selectedInputAddresses,
+      disabledOutputSlotAddresses,
+      currentOutput?.labware
+    ]
   );
 
   const handleOneToManyCopy = React.useCallback(
@@ -588,9 +622,9 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-2 auto-rows-auto">
-        <Heading level={4}>Input Labwares</Heading>
+        <Heading level={4}>Input Labware</Heading>
 
-        <Heading level={4}>Output Labwares</Heading>
+        <Heading level={4}>Output Labware</Heading>
         {slotCopyModes && (
           <>
             <div className="flex flex-row p-4 space-x-4">
@@ -608,10 +642,12 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
                 ))}
               </RadioGroup>
             </div>
-            <div className={'flex flex-col my-2 text-gray-700 text-xs italic'}>
-              <p>For selection of multiple slots :</p>
-              <p>Hold 'Shift' key to select consecutive items</p>
-              <p>Hold 'Ctrl' (Cmd for Mac) key to select non-consecutive items</p>
+            <div className={'flex flex-row w-full my-2 '}>
+              <div className={'flex flex-col my-2 text-gray-700 text-xs italic'}>
+                <p>For selection of multiple slots :</p>
+                <p>Hold 'Shift' key to select consecutive items</p>
+                <p>Hold 'Ctrl' (Cmd for Mac) key to select non-consecutive items</p>
+              </div>
             </div>
           </>
         )}
@@ -668,7 +704,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
             </div>
           )}
           <div className={'flex items-center justify-center'}>
-            {currentOutput?.labware && (
+            {initialOutputLabware?.length > 0 && currentOutput?.labware && (
               <div className="flex flex-col space-y-2">
                 <div className="flex justify-end">
                   {oneToManyCopyInProgress && (

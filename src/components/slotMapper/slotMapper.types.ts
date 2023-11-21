@@ -7,6 +7,10 @@ import {
 } from '../../types/sdk';
 import { ClientError } from 'graphql-request';
 
+export enum DestinationSelectionMode {
+  DEFAULT = 'Default',
+  SCAN = 'Scan Labware'
+}
 export interface SlotMapperProps {
   /**
    * Callback that's called whenever a slot is mapped or unmapped
@@ -71,8 +75,13 @@ export interface SlotMapperProps {
   /**Callback to notify when an output labware is selected (through pagination)**/
   onSelectOutputLabware?: (labware: NewLabwareLayout) => void;
 
-  /**Callback to notify when an output labware is selected (through pagination)**/
+  /**Callback to notify when an input labware is selected (through pagination)**/
   onSelectInputLabware?: (labware: LabwareFieldsFragment) => void;
+
+  /**Callback to notify when an output labware selection type changes*/
+  onOutputLabwareSelectionModeChange?: (mode: DestinationSelectionMode) => void;
+
+  selectedDestinationMode?: DestinationSelectionMode;
 }
 export type OutputSlotCopyData = {
   labware: NewLabwareLayout;

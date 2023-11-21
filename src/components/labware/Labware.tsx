@@ -253,7 +253,7 @@ const Labware = ({
   }, [numColumns, slots]);
 
   return (
-    <div className={'flex flex-row'}>
+    <div className={'flex flex-row'} data-testid={`labware-${labware.barcode ?? ''}`}>
       {slotColumns.length > 0 && slotBuilder && (
         <SlotColumnInfo slotColumn={slotColumns[0]} slotBuilder={slotBuilder} numRows={numRows} />
       )}

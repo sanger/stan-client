@@ -322,7 +322,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           if (!destination) {
             return {
               labware: newDest,
-              slotCopyDetails: { labwareType: newDest.labwareType.name, contents: [] }
+              slotCopyDetails: { labwareType: newDest.labwareType.name, barcode: newDest.barcode, contents: [] }
             };
           } else {
             return destination;
