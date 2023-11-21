@@ -52,8 +52,8 @@ describe('On load', () => {
       expect(screen.getByTestId('input')).toBeVisible();
     });
 
-    it('does not display the submit button', () => {
-      expect(screen.queryByRole('button', { name: 'Reactivate' })).not.toBeInTheDocument();
+    it('submit button is disabled', () => {
+      expect(screen.queryByRole('button', { name: 'Reactivate' })).toBeDisabled();
     });
   });
   describe('when a discarded or destroyed labware is scanned', () => {
@@ -96,8 +96,8 @@ describe('On load', () => {
       expect(screen.queryByTestId('labware')).not.toBeInTheDocument();
       expect(screen.queryByText('Reason to Reactivate')).not.toBeInTheDocument();
     });
-    it('does not display the submit button', () => {
-      expect(screen.queryByRole('button', { name: 'Reactivate' })).not.toBeInTheDocument();
+    it('does not enable the submit button', () => {
+      expect(screen.queryByRole('button', { name: 'Reactivate' })).toBeDisabled();
     });
   });
 });
