@@ -62,15 +62,13 @@ export const OriginalSampleProcessing: React.FC = () => {
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>
-          {`Original Sample ${processingType.length !== 0 ? ` - ${processingType}` : 'Processing'}`}
-        </AppShell.Title>
+        <AppShell.Title>{processingType.length !== 0 ? processingType : 'Labware Generation'}</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className="max-w-screen-xl mx-auto">
           {processingType.length === 0 && (
             <div className="my-4 mx-4 max-w-screen-sm sm:mx-auto p-4 rounded-md bg-gray-100">
-              <p className="my-3 text-gray-800 text-sm leading-normal">Choose a processing type to get started:</p>
+              <p className="my-3 text-gray-800 text-sm leading-normal">Choose a generation type to get started:</p>
 
               <div className="flex flex-row items-center justify-center gap-4">
                 <CustomReactSelect
