@@ -276,7 +276,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
           columns.tissueType(),
           columns.spatialLocation()
         ]}
-        successMessage={'Pot processing complete'}
+        successMessage={'Pot labware generation complete'}
       />
     );
   }
@@ -342,7 +342,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
                     singleSourceAllowed={true}
                   />
 
-                  {serverError && <Warning message={'Failed to perform pot processing'} error={serverError} />}
+                  {serverError && <Warning message={'Failed to perform pot labware generation'} error={serverError} />}
                   {values.plans.length > 0 && (
                     <motion.div variants={variants.fadeInWithLift} className={'sm:flex mt-4 sm:flex-row justify-end'}>
                       <ButtonBar>

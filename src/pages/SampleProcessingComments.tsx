@@ -106,7 +106,7 @@ const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
   return (
     <AppShell>
       <AppShell.Header>
-        <AppShell.Title>Labware generation</AppShell.Title>
+        <AppShell.Title>Sample Processing Comments</AppShell.Title>
       </AppShell.Header>
       <AppShell.Main>
         <div className={'max-w-screen-xl mx-auto'}>
