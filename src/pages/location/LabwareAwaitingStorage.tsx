@@ -6,7 +6,7 @@ import BlueButton from '../../components/buttons/BlueButton';
 import Panel from '../../components/Panel';
 import { LabwareAwaitingStorageInfo } from '../Store';
 
-interface LabwareAwaitingStorageProps {
+export interface LabwareAwaitingStorageProps {
   /***
    * List of labwares
    */
