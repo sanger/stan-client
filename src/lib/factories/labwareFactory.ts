@@ -48,7 +48,6 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
         });
       }
     });
-
     return {
       __typename: 'Labware',
       labwareType: associations.labwareType ?? labwareTypes[LabwareTypeName.TUBE].build(),
@@ -56,8 +55,8 @@ export const unregisteredLabwareFactory = Factory.define<NewLabwareLayout>(
       barcode: params.barcode ?? null,
       externalBarcode: params.externalBarcode ?? 'EXTERN-BARCODE',
       slots: associations.slots ?? [],
-      destroyed: params.destroyed ?? false,
-      discarded: params.discarded ?? false,
+      destroyed: params.destroyed ?? params.barcode?.length === 12,
+      discarded: params.discarded ?? params.barcode?.length === 11,
       released: params.released ?? false,
       created: params.created ?? new Date().toISOString(),
       state: params.state ?? LabwareState.Active

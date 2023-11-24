@@ -147,7 +147,9 @@ const seeds: Array<CommentFieldsFragment> = [
   commentFactory.build({
     category: 'Probe QC',
     text: 'Issue with thermal cycler'
-  })
+  }),
+  commentFactory.build({ text: 'Destroyed by mistake', category: 'reactivate' }),
+  commentFactory.build({ text: 'Discarded by mistake', category: 'reactivate' })
 ];
 
 const commentRepository = createSessionStorageRepository('COMMENTS', 'text', seeds);

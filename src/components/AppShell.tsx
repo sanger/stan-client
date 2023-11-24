@@ -316,6 +316,12 @@ function AppShell({ children }: AppShellParams) {
                     description={'Destroy multiple pieces of labware and have STAN remove them from storage.'}
                   />
                   <NavLinkMenuItem
+                    caption={'Reactivate'}
+                    path={'/admin/reactivate'}
+                    icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                    description={'Reactivate destroyed and discarded labware.'}
+                  />
+                  <NavLinkMenuItem
                     caption={'Release'}
                     path={'/admin/release'}
                     icon={<SupportIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
@@ -487,6 +493,8 @@ function AppShell({ children }: AppShellParams) {
                         <StanMobileNavLink to={'/admin/tissue_registration'}>Tissue Registration</StanMobileNavLink>
 
                         <StanMobileNavLink to="/admin/destroy">Destroy</StanMobileNavLink>
+
+                        <StanMobileNavLink to="/admin/reactivate">Reactivate</StanMobileNavLink>
 
                         <StanMobileNavLink to="/admin/release">Release</StanMobileNavLink>
 
