@@ -53,6 +53,7 @@ import ErrorBoundary from './notifications/ErrorBoundary';
 import ProbeHybridisationQC from '../pages/ProbeHybridisationQC';
 import XeniumQC from '../pages/XeniumQC';
 import ReleaseOptions from './release/ReleaseOptions';
+import { Reactivate } from '../pages/Reactivate';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -373,6 +374,20 @@ const RouteLayout = () => {
             }
           />
         </Route>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/admin/reactivate"
+            element={<Reactivate />}
+            loader={async () => {
+              const res = await stanCore.GetComments({
+                commentCategory: 'reactivate',
+                includeDisabled: false
+              });
+              return res.comments;
+            }}
+          />
+        </Route>
+
         <Route element={<AuthLayout />}>
           <Route
             path="/admin/release"
