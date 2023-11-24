@@ -115,8 +115,8 @@ describe('AnalysisLabware', () => {
   describe('when a comment is selected for all labware', () => {
     it('should display the selected comment in comment column of table', async () => {
       act(() => {
-        selectOption('analysisType', 'DV200').then(() => {
-          selectOption('comment', 'This is a comment');
+        selectOption('analysisType', 'DV200').then(async () => {
+          await selectOption('comment', 'This is a comment');
         });
       });
       await waitFor(async () => {
