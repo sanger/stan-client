@@ -1,25 +1,25 @@
 import React from 'react';
+import { UploadProgress } from './FileUploader';
 
 /**
  * React hook for uploading a file
  * @param url - Upload url
  * @param errorField - Field in response to use as error message
  */
-export function useUpload(url: string, errorField?: string) {
-  const [error, setError] = React.useState<Error | undefined>(undefined);
-  const [uploadSuccess, setUploadSuccess] = React.useState<boolean>(false);
-  const [uploadResponse, setUploadResponse] = React.useState(undefined);
+export interface UploadResult<T> {
+  file: File;
+  success: boolean;
+  error?: Error;
+  response?: T;
+}
 
-  /**Initialize hook state**/
-  const initializeUpload = React.useCallback(() => {
-    setError(undefined);
-    setUploadSuccess(false);
-    setUploadResponse(undefined);
-  }, [setError, setUploadSuccess]);
+export function useUpload<T>(url: string, errorField?: string) {
+  const [uploadResult, setUploadResult] = React.useState<UploadResult<T> | undefined>(undefined);
 
   /**External request for upload**/
   const requestUpload = React.useCallback(
-    (file: File, setUploadInProgress: (val: boolean) => void) => {
+    (file: File, setUploadInProgress: (val: UploadProgress) => void) => {
+      const retUploadResult: UploadResult<T> = { file, success: false, error: undefined, response: undefined };
       async function postUpload(url: string, file: File) {
         const formData = new FormData();
         formData.append('file', file);
@@ -29,35 +29,36 @@ export function useUpload(url: string, errorField?: string) {
           body: formData
         });
       }
-      //Reset Upload status
-      setError(undefined);
-      setUploadSuccess(false);
+
       if (!file) return;
       postUpload(url, file)
         .then((response) => {
-          setUploadInProgress(false);
+          setUploadInProgress({ file, progress: false });
           const success = response.ok;
-          if (success) setUploadSuccess(true);
+          retUploadResult.success = true;
           response
             .json()
             .then((response) => {
               if (!success) {
-                setError(new Error(errorField ? response[errorField] : response.message));
+                retUploadResult.error = new Error(errorField ? response[errorField] : response.message);
               } else {
-                setUploadResponse(response);
+                retUploadResult.response = response;
               }
+              setUploadResult(retUploadResult);
             })
             .catch((error) => {
               // setting it so the notifyUploadOutcome still been called from the FileUpload component when the response does not contain a JSON
-              setUploadResponse(error);
+              retUploadResult.response = error;
+              setUploadResult(retUploadResult);
             });
         })
         .catch((error) => {
-          setError(new Error(error));
+          retUploadResult.error = new Error(error);
+          setUploadResult(retUploadResult);
         });
     },
-    [url, errorField, setError, setUploadSuccess]
+    [url, errorField]
   );
 
-  return { error, uploadSuccess, uploadResponse, requestUpload, initializeUpload };
+  return { requestUpload, uploadResult };
 }
