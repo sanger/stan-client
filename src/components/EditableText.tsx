@@ -56,6 +56,7 @@ const EditableText: React.FC<EditableTextProps> = ({ onChange, children, default
     <div>
       {isEditing ? (
         <Input
+          data-testid="editable-text"
           type="text"
           ref={inputRef}
           onBlur={handleEdit}

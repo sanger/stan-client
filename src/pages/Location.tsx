@@ -472,6 +472,7 @@ const Location = () => {
                 {location.parent && (
                   <StripyCardDetail term={'Parent'}>
                     <StyledLink
+                      data-testid={'location-parent'}
                       to={`/locations/${location.parent.barcode}`}
                       state={awaitingLabwares ? { awaitingLabwares: awaitingLabwares } : {}}
                     >
@@ -488,7 +489,7 @@ const Location = () => {
                 )}
 
                 {location.children.length > 0 && (
-                  <StripyCardDetail term={'Children'}>
+                  <StripyCardDetail term={'Children'} dataTestId={'location-children'}>
                     <ul className="list-disc list-inside">
                       {location.children.map((child) => {
                         return (
