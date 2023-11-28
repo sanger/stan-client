@@ -140,7 +140,6 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true }: FileMana
         const filesWithSameName = files.filter((fileExist) =>
           uploadedFilesForWorkNumber.some((file) => fileExist.name === file.name)
         );
-        debugger;
         if (filesWithSameName.length > 0) {
           return {
             title: 'File already exists',
