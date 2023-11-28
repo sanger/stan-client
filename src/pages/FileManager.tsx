@@ -137,17 +137,16 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true }: FileMana
        * If a file already exists in the same name, give a warning to user about file getting overwritten
        */
       if (uploadedFilesForWorkNumber.length > 0 && memoAllSelectedWork.length) {
-        const filesWithSameName = uploadedFilesForWorkNumber.filter((fileExist) =>
-          files.some((file) => fileExist.name === file.name)
+        const filesWithSameName = files.filter((fileExist) =>
+          uploadedFilesForWorkNumber.some((file) => fileExist.name === file.name)
         );
+        debugger;
         if (filesWithSameName.length > 0) {
           return {
             title: 'File already exists',
-            confirmMessage: `File ${filesWithSameName
+            confirmMessage: `File(s) ${filesWithSameName
               .map((file) => file.name)
-              .join(',')} already uploaded for ${filesWithSameName
-              .map((file) => file.work.workNumber)
-              .join(',')} and will be over-written.`
+              .join(',')} already uploaded for selected work numbers and will be over-written.`
           };
         } else {
           return undefined;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input } from '../forms/Input';
 import BlueButton from '../buttons/BlueButton';
-import { UploadResult, useUpload } from './useUpload';
+import { UploadProgress, UploadResult, useUpload } from './useUpload';
 import LoadingSpinner from '../icons/LoadingSpinner';
 import FileIcon from '../icons/FileIcon';
 import FailIcon from '../icons/FailIcon';
@@ -23,11 +23,6 @@ interface FileUploaderProps<T extends object> {
   notifyUploadOutcome?: (results: UploadResult<T>[]) => void;
   errorField?: string;
 }
-
-export type UploadProgress = {
-  file: File;
-  progress: boolean;
-};
 
 /**
  * File upload Component which displays a file input with an upload button
@@ -54,22 +49,44 @@ const FileUploader = <T extends object>({
   const [fileAlreadySelectedError, setFileAlreadySelectedError] = React.useState<string>('');
   const [filesUploadResult, setFilesUploadResult] = React.useState<UploadResult<any>[]>([]);
 
-  const { requestUpload, uploadResult } = useUpload(url, errorField);
+  const { initialiseUpload, requestUpload, uploadResult } = useUpload(url, errorField);
 
   React.useEffect(() => {
+    setUploadInProgress(undefined);
+    setConfirmUploadOutcome(undefined);
+
+    //If there is no upload result or the upload result is already handled, return
     if (!uploadResult) return;
     if (filesUploadResult.find((resFile) => uploadResult?.file.name === resFile.file.name)) {
       return;
     }
+    //Add new upload result to the list of upload results
     const results = [...filesUploadResult, uploadResult];
-    setFilesUploadResult(results);
-    if (files.length !== results.length) return;
+    //All files are not uploaded yet, return
+    if (files.length !== results.length) {
+      setFilesUploadResult(results);
+      return;
+    }
+    //All files are uploaded, check if all files are uploaded successfully
     if (files.every((file) => results.find((res) => res.file.name === file.name))) {
-      notifyUploadOutcome?.(results);
-      setFiles([]);
-      setFilesUploadResult([]);
-      setUploadInProgress(undefined);
-      setConfirmUploadOutcome(undefined);
+      //Separate success and failed results
+      const failedResults = results.filter((res) => !res.success);
+      const successResults = results.filter((res) => res.success);
+
+      //If some files are uploaded successfully, notify upload outcome with success results
+      if (successResults.length > 0) {
+        notifyUploadOutcome?.(successResults);
+        //If all files are uploaded successfully, reset files and upload results
+        if (failedResults.length === 0) {
+          setFiles([]);
+          setFilesUploadResult([]);
+        }
+      }
+      //If some files are failed to upload, keep the failed files and it's upload results for retry
+      if (failedResults.length > 0) {
+        setFilesUploadResult(failedResults);
+        setFiles(failedResults.map((res) => res.file));
+      }
     }
   }, [
     uploadResult,
@@ -95,6 +112,7 @@ const FileUploader = <T extends object>({
   /**Callback function to handle file change**/
   const onFileChange = React.useCallback(
     (evt: React.ChangeEvent<HTMLInputElement>) => {
+      initialiseUpload();
       //This file is already selected
       if (files.length > 0 && files.some((f) => f.name === evt.currentTarget.files![0].name)) {
         setFileAlreadySelectedError('File already selected');
@@ -109,7 +127,7 @@ const FileUploader = <T extends object>({
       setFiles(selectedFiles);
       evt.target.value = '';
     },
-    [setFiles, files, allowMultipleFiles]
+    [setFiles, files, allowMultipleFiles, initialiseUpload]
   );
 
   /**Handler for 'Upload' button click**/
@@ -126,15 +144,14 @@ const FileUploader = <T extends object>({
   /**Handler for 'Remove' button click for file**/
   const onRemoveFile = React.useCallback(
     (file: File) => {
+      initialiseUpload();
       setFiles((prev) => prev.filter((f) => f.name !== file.name));
+      setFilesUploadResult((prev) => prev.filter((res) => res.file.name !== file.name));
       setUploadInProgress(undefined);
       setConfirmUploadOutcome(undefined);
     },
-    [setFiles, setUploadInProgress, setConfirmUploadOutcome]
+    [setFiles, setUploadInProgress, setConfirmUploadOutcome, setFilesUploadResult, initialiseUpload]
   );
-
-  const isFileUploadInProgress = (file: File) =>
-    uploadInProgress && uploadInProgress.file.name === file.name && uploadInProgress.progress;
 
   const uploadResultFile = (file: File) => filesUploadResult.find((res) => res.file.name === file.name);
 
@@ -149,6 +166,7 @@ const FileUploader = <T extends object>({
             onChange={onFileChange}
             data-testid="file-input"
             className="hidden disabled:bg-gray-100"
+            multiple={allowMultipleFiles}
           />
           <label
             htmlFor="file"
@@ -161,26 +179,22 @@ const FileUploader = <T extends object>({
             Select file...
           </label>
         </div>
+
         {!url && (
           <MutedText className={'text-gray-600'}>Please select an SGP Number to enable file selection</MutedText>
         )}
         {fileAlreadySelectedError && <MutedText className={'text-red-400'}>{fileAlreadySelectedError}</MutedText>}
       </div>
+
       <div data-testid={'file-description'} className={'flex flex-col w-full p-2 border-b-2 border-gray-200 bg-white'}>
-        {files.map((file) => (
-          <div key={file.name}>
+        {files.map((file, indx) => (
+          <div key={`${file.name}-${indx}`}>
             <div className={'flex flex-row '}>
               <div>
                 <FileIcon data-testid={'fileIcon'} className={'text-gray-600'} />
               </div>
               <span className={'whitespace-nowrap'}>{file?.name}</span>
               <div className={'w-full flex justify-end p-2 space-x-4'}>
-                {isFileUploadInProgress(file) && (
-                  <div className="flex flex-row ml-3 -mr-1 whitespace-nowrap space-x-6 justify-end">
-                    <div className={'text-blue-600 text-sm'}>{`Uploading in progress...`}</div>
-                    <LoadingSpinner className={'text-blue-600'} />
-                  </div>
-                )}
                 {uploadResultFile(file)?.success ? (
                   <PassIcon className={'h-4 w-4 text-green-600'} />
                 ) : (
@@ -191,8 +205,9 @@ const FileUploader = <T extends object>({
                 )}
               </div>
             </div>
+
             {uploadResultFile(file)?.error && (
-              <div data-testid={'error-div'} className={'text-red-600 text-sm whitespace-nowrap'}>
+              <div data-testid={'error-div'} className={'flex flex-col text-red-600 text-sm'}>
                 Error:
                 {uploadResultFile(file)
                   ?.error?.message.split(',')
@@ -204,6 +219,12 @@ const FileUploader = <T extends object>({
           </div>
         ))}
       </div>
+      {uploadInProgress?.progress && (
+        <div className="flex flex-row whitespace-nowrap p-4 space-x-6 justify-start">
+          <div className={'text-blue-600 text-sm'}>{'Uploading in progress...'}</div>
+          <LoadingSpinner className={'w-3 h-3 mt-1 text-blue-600'} />
+        </div>
+      )}
       <div className="flex bg-white mt-2 p-4 justify-end">
         <BlueButton
           type={'button'}
@@ -219,6 +240,7 @@ const FileUploader = <T extends object>({
           />
         </BlueButton>
       </div>
+
       <ConfirmationModal
         show={confirmUploadOutcome !== undefined}
         header={confirmUploadOutcome?.title ?? ''}

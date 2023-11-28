@@ -1,5 +1,4 @@
 import React from 'react';
-import { UploadProgress } from './FileUploader';
 
 /**
  * React hook for uploading a file
@@ -13,12 +12,21 @@ export interface UploadResult<T> {
   response?: T;
 }
 
+export type UploadProgress = {
+  file: File;
+  progress: boolean;
+};
+
 export function useUpload<T>(url: string, errorField?: string) {
   const [uploadResult, setUploadResult] = React.useState<UploadResult<T> | undefined>(undefined);
 
+  const initialiseUpload = React.useCallback(() => {
+    setUploadResult(undefined);
+  }, [setUploadResult]);
+
   /**External request for upload**/
   const requestUpload = React.useCallback(
-    (file: File, setUploadInProgress: (val: UploadProgress) => void) => {
+    (file: File, notifyUploadProgress?: (uploadProgress: UploadProgress | undefined) => void) => {
       const retUploadResult: UploadResult<T> = { file, success: false, error: undefined, response: undefined };
       async function postUpload(url: string, file: File) {
         const formData = new FormData();
@@ -31,34 +39,34 @@ export function useUpload<T>(url: string, errorField?: string) {
       }
 
       if (!file) return;
+      notifyUploadProgress?.({ file, progress: true });
       postUpload(url, file)
         .then((response) => {
-          setUploadInProgress({ file, progress: false });
-          const success = response.ok;
-          retUploadResult.success = true;
+          retUploadResult.success = response.ok;
           response
             .json()
             .then((response) => {
-              if (!success) {
+              if (!retUploadResult.success) {
                 retUploadResult.error = new Error(errorField ? response[errorField] : response.message);
               } else {
                 retUploadResult.response = response;
               }
               setUploadResult(retUploadResult);
+              notifyUploadProgress?.(undefined);
             })
             .catch((error) => {
               // setting it so the notifyUploadOutcome still been called from the FileUpload component when the response does not contain a JSON
-              retUploadResult.response = error;
-              setUploadResult(retUploadResult);
+              setUploadResult({ ...retUploadResult, response: error });
+              notifyUploadProgress?.(undefined);
             });
         })
         .catch((error) => {
-          retUploadResult.error = new Error(error);
-          setUploadResult(retUploadResult);
+          setUploadResult({ ...retUploadResult, error: new Error(error) });
+          notifyUploadProgress?.(undefined);
         });
     },
     [url, errorField]
   );
 
-  return { requestUpload, uploadResult };
+  return { initialiseUpload, requestUpload, uploadResult };
 }

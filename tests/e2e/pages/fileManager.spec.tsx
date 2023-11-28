@@ -296,7 +296,7 @@ describe('On load', () => {
         });
       });
     });
-    describe('on uploading a file', () => {
+    describe('on uploading files', () => {
       beforeEach(() => {
         require('react-router-dom').useLocation.mockImplementation(() => {
           return {
@@ -313,15 +313,53 @@ describe('On load', () => {
           }
         ]);
       });
-      describe('on Upload failure', () => {
+      describe('on Upload success', () => {
         beforeEach(() => {
           global.fetch = jest.fn().mockImplementationOnce(() =>
             Promise.resolve({
-              ok: false,
-              status: 500,
-              json: () => Promise.resolve({ message: 'java.io.IOException: Error message here.' })
+              ok: true,
+              status: 200,
+              json: () => Promise.resolve({ message: '' })
             })
           );
+        });
+        it('should not display upload failure message', async () => {
+          act(() => {
+            renderFileManagerComponent();
+          });
+          await screen.findByTestId('file-input').then(async (fileInput) => {
+            expect(fileInput).toBeEnabled();
+            await userEvent.upload(fileInput, new File(['sample content1'], 'sample1.txt', { type: 'text/plain' }));
+            await userEvent.upload(fileInput, new File(['sample content2'], 'sample2.txt', { type: 'text/plain' }));
+            screen.findByTestId('upload-btn').then(async (uploadBtn) => {
+              expect(uploadBtn).toBeEnabled();
+              userEvent.click(uploadBtn).then(async () => {
+                expect(screen.queryByTestId('error-div')).not.toBeInTheDocument();
+                expect(screen.queryByTestId('sample1.txt-0')).not.toBeInTheDocument();
+                expect(screen.queryByTestId('sample2.txt-1')).not.toBeInTheDocument();
+              });
+            });
+          });
+        });
+      });
+      describe('on Upload failure', () => {
+        beforeEach(() => {
+          global.fetch = jest
+            .fn()
+            .mockImplementation(() =>
+              Promise.resolve({
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve({ message: '' })
+              })
+            )
+            .mockImplementation(() =>
+              Promise.resolve({
+                ok: true,
+                status: 500,
+                json: () => Promise.resolve({ message: 'java.io.IOException: Error message here.' })
+              })
+            );
         });
         it('should display upload failure message', async () => {
           act(() => {
@@ -329,19 +367,21 @@ describe('On load', () => {
           });
           await screen.findByTestId('file-input').then(async (fileInput) => {
             expect(fileInput).toBeEnabled();
-            await userEvent
-              .upload(fileInput, new File(['sample content'], 'sample.txt', { type: 'text/plain' }))
-              .then(async () => {
-                await screen.findByTestId('upload-btn').then(async (uploadBtn) => {
-                  expect(uploadBtn).toBeEnabled();
-                  await userEvent.click(uploadBtn).then(async () => {
-                    await screen.findByTestId('error-div').then(async (errorDiv) => {
-                      expect(errorDiv).toBeVisible();
-                      expect(errorDiv).toHaveTextContent('Error:java.io.IOException: Error message here.');
-                    });
-                  });
+            //succesfull upload
+            await userEvent.upload(fileInput, new File(['sample content1'], 'sample1.txt', { type: 'text/plain' }));
+            //failed upload
+            await userEvent.upload(fileInput, new File(['sample content2'], 'sample2.txt', { type: 'text/plain' }));
+            screen.findByTestId('upload-btn').then(async (uploadBtn) => {
+              expect(uploadBtn).toBeEnabled();
+              userEvent.click(uploadBtn).then(async () => {
+                await screen.findByTestId('error-div').then(async (errorDiv) => {
+                  expect(errorDiv).toBeVisible();
+                  expect(errorDiv).toHaveTextContent('Error:java.io.IOException: Error message here.');
+                  expect(screen.queryByTestId('sample2.txt-1')).toBeInTheDocument();
+                  expect(screen.queryByTestId('sample1.txt-0')).not.toBeInTheDocument();
                 });
               });
+            });
           });
         });
       });
