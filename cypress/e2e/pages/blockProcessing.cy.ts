@@ -4,6 +4,9 @@ import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
+import { sampleFactory, tissueFactory } from '../../../src/lib/factories/sampleFactory';
+import { slotFactory } from '../../../src/lib/factories/slotFactory';
+import { createLabwareFromParams } from '../../../src/mocks/handlers/labwareHandlers';
 
 describe('Block Processing', () => {
   shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=block');
@@ -185,6 +188,25 @@ describe('Block Processing', () => {
         cy.findAllByLabelText('Replicate Number').eq(4).should('have.value', 7);
       });
     });
+    context('when adding a labware with a source labware that does not hold a replicate number', () => {
+      before(() => {
+        const tissue = tissueFactory.build({ replicate: null });
+        const sample = sampleFactory.build({ tissue: tissue });
+        createLabwareFromParams({ barcode: 'STAN-5555', slots: [slotFactory.build({ samples: [sample] })] });
+        cy.visit('/lab/original_sample_processing?type=block');
+        scanInput('STAN-5555');
+        cy.findByText('+ Add Labware').click();
+        cy.findByText('Edit Layout').click();
+        cy.findByRole('dialog').within(() => {
+          cy.findAllByText('STAN-5555').eq(0).click();
+          cy.findByText('A1').click();
+          cy.findByText('Done').click();
+        });
+      });
+      it('replicate number field should be empty and enabled', () => {
+        cy.findByLabelText('Replicate Number').should('have.value', '').and('be.enabled');
+      });
+    });
   });
   describe('Leaving page', () => {
     context('when I try and leave the page', () => {
@@ -205,6 +227,7 @@ describe('Block Processing', () => {
         cy.visit('/lab/original_sample_processing?type=block');
         scanInput('STAN-113');
         addLabware('Tube');
+        cy.findByTestId('Replicate Number').click();
         selectOption('workNumber', '');
         cy.findByRole('button', { name: /Save/i }).click();
       });

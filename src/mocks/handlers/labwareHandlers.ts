@@ -8,12 +8,14 @@ import {
   GetLabwareOperationsQueryVariables,
   GetSuggestedWorkForLabwareQuery,
   GetSuggestedWorkForLabwareQueryVariables,
+  Labware,
   UserRole
 } from '../../types/sdk';
 import labwareFactory from '../../lib/factories/labwareFactory';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 import workFactory from '../../lib/factories/workFactory';
+import { DeepPartial } from 'fishery';
 
 export function createLabware(barcode: string) {
   // The number after STAN- determines what kind of labware will be returned
@@ -39,7 +41,12 @@ export function createLabware(barcode: string) {
   });
 
   sessionStorage.setItem(`labware-${labware.barcode}`, JSON.stringify(labware));
+  return labware;
+}
 
+export function createLabwareFromParams(params: DeepPartial<Labware>) {
+  const labware = labwareFactory.build(params);
+  sessionStorage.setItem(`labware-${labware.barcode}`, JSON.stringify(labware));
   return labware;
 }
 
@@ -66,7 +73,8 @@ const labwareHandlers = [
         ])
       );
     }
-    const labware = createLabware(barcode);
+    const labwareJson = sessionStorage.getItem(`labware-${barcode}`);
+    const labware: Labware = labwareJson ? JSON.parse(labwareJson) : createLabware(barcode);
     const payload: FindLabwareQuery = {
       labware: buildLabwareFragment(labware)
     };
