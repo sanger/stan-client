@@ -13,6 +13,9 @@ fragment SampleFields on Sample {
       }
       code
     }
+    hmdmc {
+      hmdmc
+    }
     replicate
     medium {
       name
@@ -26,4 +29,5 @@ fragment SampleFields on Sample {
   bioState {
     name
   }
+
 }

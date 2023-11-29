@@ -116,7 +116,8 @@ export default function LabwareDetails() {
                   sampleColumns.lifeStage(),
                   sampleColumns.donorName(),
                   sampleColumns.medium(),
-                  sampleColumns.fixative()
+                  sampleColumns.fixative(),
+                  sampleColumns.huMFre()
                 ]}
                 data={sampleColumns.buildSampleDataTableRows(labware, samplePositionResults)}
               />
