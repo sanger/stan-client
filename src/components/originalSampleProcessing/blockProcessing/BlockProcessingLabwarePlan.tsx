@@ -20,9 +20,6 @@ import { createLabwarePlanMachine } from '../../planning/labwarePlan.machine';
 import { BlockFormData } from './BlockProcessing';
 import { Source } from '../../../lib/machines/layout/layoutContext';
 import CustomReactSelect from '../../forms/CustomReactSelect';
-import { sampleFactory, tissueFactory } from '../../../lib/factories/sampleFactory';
-import { slotFactory } from '../../../lib/factories/slotFactory';
-import { createLabwareFromParams } from '../../../mocks/handlers/labwareHandlers';
 
 type BlockProcessingLabwarePlanProps = {
   /**

@@ -13,7 +13,7 @@ import columns from '../../dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import BlockProcessingLabwarePlan from './BlockProcessingLabwarePlan';
-import { Dictionary, groupBy, values } from 'lodash';
+import { Dictionary, groupBy } from 'lodash';
 import Heading from '../../Heading';
 import Planner from '../../planning/Planner';
 import createFormMachine from '../../../lib/machines/form/formMachine';
