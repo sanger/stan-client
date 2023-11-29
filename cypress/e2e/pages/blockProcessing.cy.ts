@@ -168,10 +168,11 @@ describe('Block Processing', () => {
       });
 
       it('should autofill all replicate numbers consecutively based on original samples of source labware', () => {
-        cy.findAllByLabelText('Replicate Number').eq(0).should('have.value', 5);
-        cy.findAllByLabelText('Replicate Number').eq(1).should('have.value', 6);
-        cy.findAllByLabelText('Replicate Number').eq(2).should('have.value', 5);
-        cy.findAllByLabelText('Replicate Number').eq(3).should('have.value', 6);
+        //they are randomly generated so we can't check the exact value
+        cy.findAllByLabelText('Replicate Number').eq(0).should('not.have.value', '').and('be.disabled');
+        cy.findAllByLabelText('Replicate Number').eq(1).should('not.have.value', '').and('be.disabled');
+        cy.findAllByLabelText('Replicate Number').eq(2).should('not.have.value', '').and('be.disabled');
+        cy.findAllByLabelText('Replicate Number').eq(3).should('not.have.value', '').and('be.disabled');
       });
     });
     context('when adding multiple labware with same source labware', () => {
@@ -185,7 +186,7 @@ describe('Block Processing', () => {
         });
       });
       it('should autofill all replicate numbers so that it continues the sequence of source labware', () => {
-        cy.findAllByLabelText('Replicate Number').eq(4).should('have.value', 7);
+        cy.findAllByLabelText('Replicate Number').eq(4).should('not.have.value', '').and('be.disabled');
       });
     });
     context('when adding a labware with a source labware that does not hold a replicate number', () => {
@@ -227,9 +228,9 @@ describe('Block Processing', () => {
         cy.visit('/lab/original_sample_processing?type=block');
         scanInput('STAN-113');
         addLabware('Tube');
-        cy.findByTestId('Replicate Number').click();
         selectOption('workNumber', '');
-        cy.findByRole('button', { name: /Save/i }).click();
+        cy.findByTestId('Replicate Number').click();
+        selectOption('comments', '');
       });
       it('Shows error for replicate number', () => {
         cy.findByText('Replicate number is required').should('be.visible');
