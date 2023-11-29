@@ -120,7 +120,7 @@ describe('Aliquoting', () => {
       cy.findByRole('button', { name: /Print Labels/ }).click();
     });
     it('should display a print success message', () => {
-      cy.findByText('Tube Printer successfully printed STAN-1005, STAN-1006, STAN-1007, STAN-1008').should(
+      cy.findByText('Tube Printer successfully printed STAN-1001, STAN-1002, STAN-1003, STAN-1004').should(
         'be.visible'
       );
     });
