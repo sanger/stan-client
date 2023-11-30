@@ -11,7 +11,9 @@ export default defineConfig({
       return require("./cypress/plugins/index.js")(on, config);
     },
     baseUrl: "http://localhost:3000",
-    testIsolation: false
+    testIsolation: false,
   },
+  screenshotsFolder:"tests/e2e/screenshots"
+
 
 });
