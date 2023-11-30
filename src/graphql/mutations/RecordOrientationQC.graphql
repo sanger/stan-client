@@ -1,0 +1,7 @@
+mutation RecordOrientationQC($request: OrientationRequest!) {
+    recordOrientationQC(request: $request) {
+        operations {
+           id
+        }
+    }
+}

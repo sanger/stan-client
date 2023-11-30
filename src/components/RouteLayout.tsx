@@ -54,6 +54,7 @@ import ProbeHybridisationQC from '../pages/ProbeHybridisationQC';
 import XeniumQC from '../pages/XeniumQC';
 import ReleaseOptions from './release/ReleaseOptions';
 import { Reactivate } from '../pages/Reactivate';
+import OrientationQC from '../pages/OrientationQC';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -120,6 +121,9 @@ const RouteLayout = () => {
               </DataFetcher>
             }
           />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/lab/sectioning/orientation_qc" element={<OrientationQC />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/lab/original_sample_processing" element={<OriginalSampleProcessing />} />
