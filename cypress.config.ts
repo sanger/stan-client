@@ -13,7 +13,4 @@ export default defineConfig({
     baseUrl: "http://localhost:3000",
     testIsolation: false,
   },
-  screenshotsFolder:"tests/e2e/screenshots"
-
-
 });
