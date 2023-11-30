@@ -123,6 +123,7 @@ describe('Aliquoting', () => {
       cy.findByText('Tube Printer successfully printed STAN-1001, STAN-1002, STAN-1003, STAN-1004').should(
         'be.visible'
       );
+      cy.screenshot('clicking-on-print-labels');
     });
   });
   context('when store button is clicked', () => {
