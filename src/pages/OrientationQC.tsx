@@ -13,15 +13,16 @@ import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import PinkButton from '../components/buttons/PinkButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
-import { OrientationRequest, RecordOrientationQcMutation } from '../types/sdk';
+import { LabwareFieldsFragment, OrientationRequest, RecordOrientationQcMutation } from '../types/sdk';
 import { stanCore } from '../lib/sdk';
 import columns from '../components/dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { useMachine } from '@xstate/react';
 import { objectKeys } from '../lib/helpers';
+import { hasBlock } from '../lib/helpers/labwareHelper';
 
-enum OrientationType {
+export enum OrientationType {
   Correct = 'Correct',
   Incorrect = 'Incorrect'
 }
@@ -49,6 +50,10 @@ const OrientationQC = () => {
   const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
+
+  const blockLabwareCheck = (labware: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment) => {
+    return hasBlock(foundLabware) ? [] : ['Labware ' + foundLabware.barcode + ' is not a block labware.'];
+  };
 
   return (
     <AppShell>
@@ -102,6 +107,8 @@ const OrientationQC = () => {
                           }
                         }}
                         locked={current.matches('submitted')}
+                        labwareCheckFunction={blockLabwareCheck}
+                        limit={1}
                       >
                         <LabwareScanPanel
                           columns={[
@@ -115,28 +122,29 @@ const OrientationQC = () => {
                       </LabwareScanner>
                       <FormikErrorMessage name={'barcodes'} />
                     </motion.div>
+                    {values.barcode && (
+                      <motion.div variants={variants.fadeInWithLift} className="space-y-4">
+                        <Heading level={3}>Embedding Orientation</Heading>
 
-                    <motion.div variants={variants.fadeInWithLift} className="space-y-4">
-                      <Heading level={3}>Embedding Orientation</Heading>
-
-                      <CustomReactSelect
-                        isDisabled={!values.barcode}
-                        label={'Orientation type'}
-                        name={'orientation'}
-                        dataTestId={'orientation'}
-                        emptyOption
-                        handleChange={(val) => {
-                          const value = (val as OptionType).value;
-                          setFieldValue('orientation', value);
-                        }}
-                        options={objectKeys(OrientationType).map((key) => {
-                          return {
-                            label: OrientationType[key],
-                            value: OrientationType[key]
-                          };
-                        })}
-                      />
-                    </motion.div>
+                        <CustomReactSelect
+                          label={'Orientation type'}
+                          name={'orientation'}
+                          dataTestId={'orientation'}
+                          emptyOption
+                          handleChange={(val) => {
+                            const value = (val as OptionType).value;
+                            setFieldValue('orientation', value);
+                          }}
+                          options={objectKeys(OrientationType).map((key) => {
+                            return {
+                              label: OrientationType[key],
+                              value: OrientationType[key]
+                            };
+                          })}
+                          value={values.orientation}
+                        />
+                      </motion.div>
+                    )}
                   </motion.div>
 
                   <Sidebar>
@@ -145,21 +153,21 @@ const OrientationQC = () => {
                     </Heading>
 
                     {values.workNumber ? (
-                      <p>
+                      <p data-testid={'summary-sgp'}>
                         The selected SGP number is <span className="font-semibold">{values.workNumber}</span>.
                       </p>
                     ) : (
                       <p className="text-sm italic">No SGP number selected.</p>
                     )}
                     {values.barcode ? (
-                      <p>
+                      <p data-testid={'summary-barcode'}>
                         The selected labware is <span className="font-semibold">{values.barcode}</span>.
                       </p>
                     ) : (
                       <p className="text-sm italic">No labware scanned.</p>
                     )}
                     {values.orientation && (
-                      <p>
+                      <p data-testid={'summary-orientation'}>
                         The embedding orientation is <span className="font-semibold">{values.orientation}</span>.
                       </p>
                     )}
@@ -174,9 +182,7 @@ const OrientationQC = () => {
                       </div>
                     }
                     <PinkButton
-                      disabled={
-                        current.matches('submitted') || !(values.workNumber && values.barcode && values.orientation)
-                      }
+                      disabled={!(values.workNumber && values.barcode && values.orientation)}
                       loading={current.matches('submitting')}
                       type="submit"
                       className="sm:w-full"
@@ -189,7 +195,10 @@ const OrientationQC = () => {
             )}
           </Formik>
 
-          <OperationCompleteModal show={current.matches('submitted')} message={'Operation Complete'}>
+          <OperationCompleteModal
+            show={current.matches('submitted')}
+            message={'Orientation QC submitted successfully.'}
+          >
             <p>
               If you wish to start the process again, click the "Reset Form" button. Otherwise you can return to the
               Home screen.
