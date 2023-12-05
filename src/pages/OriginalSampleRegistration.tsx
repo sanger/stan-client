@@ -25,6 +25,7 @@ import RegistrationSuccess from './registration/RegistrationSuccess';
 import warningToast from '../components/notifications/WarningToast';
 import { toast } from 'react-toastify';
 import { stanCore } from '../lib/sdk';
+import { UploadResult } from '../components/upload/useUpload';
 
 /**Following modifications required for RegistrationFormBlock Type so that it can be reused
  - "medium" and "lastknownSectionNumber" fields are omitted
@@ -237,31 +238,33 @@ function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
   }, []);
 
   const onFileUploadFinished = React.useCallback(
-    (file: File, isSuccess: boolean, result?: { barcode: [] }) => {
-      if (!isSuccess) return;
-      if (result && 'labwareSolutions' in result) {
-        type LabwareSolution = {
-          barcode: string;
-          solution: string;
-        };
-        const labwareSolutions: LabwareSolution[] = result['labwareSolutions'];
-        const labwarePromises = labwareSolutions.map((ls) => stanCore.FindLabware({ barcode: ls.barcode }));
-        Promise.all(labwarePromises)
-          .then((labwares) => {
-            if (labwares.length > 0) {
-              setFileRegisterResult(
-                labwares.map((labware) => {
-                  const solution = labwareSolutions.find((ls) => ls.barcode === labware.labware!.barcode)?.solution;
-                  return { labware: labware.labware!, extraData: [solution] };
-                }) as LabwareResultData[]
-              );
-            } else {
-              displayWarning(`No original sample has been registered. Please check your file.`);
-            }
-          })
-          .catch(() => {
-            displayWarning('Cannot retrieve details of newly registered original sample(s).');
-          });
+    (results: UploadResult<{ barcode: [] }>[]) => {
+      if (results.length > 0) {
+        const result = results[0].response;
+        if (result && 'labwareSolutions' in result) {
+          type LabwareSolution = {
+            barcode: string;
+            solution: string;
+          };
+          const labwareSolutions: LabwareSolution[] = result['labwareSolutions'];
+          const labwarePromises = labwareSolutions.map((ls) => stanCore.FindLabware({ barcode: ls.barcode }));
+          Promise.all(labwarePromises)
+            .then((labwares) => {
+              if (labwares.length > 0) {
+                setFileRegisterResult(
+                  labwares.map((labware) => {
+                    const solution = labwareSolutions.find((ls) => ls.barcode === labware.labware!.barcode)?.solution;
+                    return { labware: labware.labware!, extraData: [solution] };
+                  }) as LabwareResultData[]
+                );
+              } else {
+                displayWarning(`No original sample has been registered. Please check your file.`);
+              }
+            })
+            .catch(() => {
+              displayWarning('Cannot retrieve details of newly registered original sample(s).');
+            });
+        }
       }
     },
     [setFileRegisterResult]

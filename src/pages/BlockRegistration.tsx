@@ -20,6 +20,7 @@ import { StanCoreContext } from '../lib/sdk';
 import warningToast from '../components/notifications/WarningToast';
 import { toast } from 'react-toastify';
 import RegistrationSuccess from './registration/RegistrationSuccess';
+import { UploadResult } from '../components/upload/useUpload';
 
 export interface RegistrationFormBlock {
   clientId: number;
@@ -188,22 +189,24 @@ function BlockRegistration({ registrationInfo }: RegistrationParams) {
   const stanCore = useContext(StanCoreContext);
   const [fileRegisterResult, setFileRegisterResult] = React.useState<LabwareFieldsFragment[] | undefined>(undefined);
   const onFileUploadFinished = React.useCallback(
-    (file: File, isSuccess: boolean, result?: { barcode: [] }) => {
-      if (!isSuccess) return;
-      if (result && 'barcodes' in result) {
-        const barcodes: string[] = result['barcodes'];
-        const labwarePromises = barcodes.map((barcode: string) => stanCore.FindLabware({ barcode }));
-        Promise.all(labwarePromises)
-          .then((labwares) => {
-            if (labwares.length > 0) {
-              setFileRegisterResult(labwares.map((labware) => labware.labware!) as LabwareFieldsFragment[]);
-            } else {
-              displayWarningMsg(`No block has been registered. Please check your file.`);
-            }
-          })
-          .catch(() => {
-            displayWarningMsg('Cannot retrieve details of newly registered block(s).');
-          });
+    (results: UploadResult<{ barcode: [] }>[]) => {
+      if (results.length > 0) {
+        const result = results[0].response;
+        if (result && 'barcodes' in result) {
+          const barcodes: string[] = result['barcodes'];
+          const labwarePromises = barcodes.map((barcode: string) => stanCore.FindLabware({ barcode }));
+          Promise.all(labwarePromises)
+            .then((labwares) => {
+              if (labwares.length > 0) {
+                setFileRegisterResult(labwares.map((labware) => labware.labware!) as LabwareFieldsFragment[]);
+              } else {
+                displayWarningMsg(`No block has been registered. Please check your file.`);
+              }
+            })
+            .catch(() => {
+              displayWarningMsg('Cannot retrieve details of newly registered block(s).');
+            });
+        }
       }
     },
     [setFileRegisterResult, stanCore]
