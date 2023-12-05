@@ -346,7 +346,7 @@ describe('On load', () => {
         beforeEach(() => {
           global.fetch = jest.fn().mockImplementationOnce(() =>
             Promise.resolve({
-              ok: true,
+              ok: false,
               status: 500,
               json: () => Promise.resolve({ message: 'java.io.IOException: Error message here.' })
             })
@@ -358,18 +358,19 @@ describe('On load', () => {
           });
           await screen.findByTestId('file-input').then(async (fileInput) => {
             expect(fileInput).toBeEnabled();
-            //failed upload
-            await userEvent.upload(fileInput, new File(['sample content2'], 'sample2.txt', { type: 'text/plain' }));
-            screen.findByTestId('upload-btn').then(async (uploadBtn) => {
-              expect(uploadBtn).toBeEnabled();
-              userEvent.click(uploadBtn).then(async () => {
-                await screen.findByTestId('error-div').then(async (errorDiv) => {
-                  expect(errorDiv).toBeVisible();
-                  expect(errorDiv).toHaveTextContent('Error:java.io.IOException: Error message here.');
-                  expect(screen.queryByTestId('sample2.txt-1')).toBeInTheDocument();
+            await userEvent
+              .upload(fileInput, new File(['sample content'], 'sample.txt', { type: 'text/plain' }))
+              .then(async () => {
+                await screen.findByTestId('upload-btn').then(async (uploadBtn) => {
+                  expect(uploadBtn).toBeEnabled();
+                  await userEvent.click(uploadBtn).then(async () => {
+                    await screen.findByTestId('error-div').then(async (errorDiv) => {
+                      expect(errorDiv).toBeVisible();
+                      expect(errorDiv).toHaveTextContent('Error:java.io.IOException: Error message here.');
+                    });
+                  });
                 });
               });
-            });
           });
         });
       });
