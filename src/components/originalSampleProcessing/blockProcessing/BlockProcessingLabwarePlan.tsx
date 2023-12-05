@@ -1,5 +1,5 @@
 import { GetBlockProcessingInfoQuery, LabwareFieldsFragment } from '../../../types/sdk';
-import React from 'react';
+import React, { useState } from 'react';
 import { useMachine } from '@xstate/react';
 import { motion } from 'framer-motion';
 import variants from '../../../lib/motionVariants';
@@ -52,7 +52,6 @@ type BlockProcessingLabwarePlanProps = {
    */
   rowIndex: number;
 
-  replicateNumber: number;
   notifySourceSelection: (cid: string, sourceBarcode: string) => void;
 };
 
@@ -85,17 +84,7 @@ function buildInitialLayoutPlan(
 
 const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcessingLabwarePlanProps>(
   (
-    {
-      cid,
-      outputLabware,
-      blockProcessInfo,
-      sourceLabware,
-      sampleColors,
-      onDelete,
-      rowIndex,
-      replicateNumber,
-      notifySourceSelection
-    },
+    { cid, outputLabware, blockProcessInfo, sourceLabware, sampleColors, onDelete, rowIndex, notifySourceSelection },
     ref
   ) => {
     const labwarePlanMachine = React.useMemo(() => {
@@ -105,6 +94,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
     const { requestError, layoutPlan } = current.context;
     const { layoutMachine } = current.children;
     const { setFieldValue, values } = useFormikContext<BlockFormData>();
+    const [disableRepNumber, setDisableRepNumber] = useState<boolean>(false);
 
     /**
      * Fill all form fields that need to be auto-filled
@@ -119,10 +109,6 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
       setFieldValue(`plans.${rowIndex}.labwareType`, outputLabware.labwareType.name);
     }, [outputLabware, rowIndex, setFieldValue]);
 
-    React.useEffect(() => {
-      setFieldValue(`plans.${rowIndex}.replicateNumber`, replicateNumber === -1 ? '' : replicateNumber + '');
-    }, [replicateNumber, rowIndex, setFieldValue]);
-
     /**
      * Fill source barcode in form data
      * and
@@ -133,9 +119,11 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
       const plannedActions: Source[] | undefined = layoutPlan.plannedActions.get('A1');
       if (plannedActions && plannedActions.length > 0) {
         setFieldValue(`plans.${rowIndex}.sourceBarcode`, plannedActions[0].labware.barcode);
+        setFieldValue(`plans.${rowIndex}.replicateNumber`, plannedActions[0].replicateNumber);
+        setDisableRepNumber(plannedActions[0].replicateNumber!.length > 0);
         notifySourceSelection(cid, plannedActions[0].labware.barcode);
       }
-    }, [setFieldValue, rowIndex, layoutPlan.plannedActions, cid, notifySourceSelection]);
+    }, [setFieldValue, rowIndex, layoutPlan.plannedActions, cid, notifySourceSelection, setDisableRepNumber]);
     return (
       <motion.div
         variants={variants.fadeInWithLift}
@@ -176,7 +164,12 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                   name={`plans.${rowIndex}.replicateNumber`}
                   label={'Replicate Number'}
                   type={'text'}
-                  disabled={true}
+                  disabled={disableRepNumber}
+                  value={
+                    values.plans[rowIndex] && values.plans[rowIndex].replicateNumber
+                      ? values.plans[rowIndex].replicateNumber
+                      : ''
+                  }
                 />
 
                 <CustomReactSelect

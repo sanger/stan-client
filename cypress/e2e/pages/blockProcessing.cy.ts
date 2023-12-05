@@ -4,6 +4,9 @@ import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
+import { sampleFactory, tissueFactory } from '../../../src/lib/factories/sampleFactory';
+import { slotFactory } from '../../../src/lib/factories/slotFactory';
+import { createLabwareFromParams } from '../../../src/mocks/handlers/labwareHandlers';
 
 describe('Block Processing', () => {
   shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=block');
@@ -165,10 +168,11 @@ describe('Block Processing', () => {
       });
 
       it('should autofill all replicate numbers consecutively based on original samples of source labware', () => {
-        cy.findAllByLabelText('Replicate Number').eq(0).should('have.value', 5);
-        cy.findAllByLabelText('Replicate Number').eq(1).should('have.value', 6);
-        cy.findAllByLabelText('Replicate Number').eq(2).should('have.value', 5);
-        cy.findAllByLabelText('Replicate Number').eq(3).should('have.value', 6);
+        //they are randomly generated so we can't check the exact value
+        cy.findAllByLabelText('Replicate Number').eq(0).should('not.have.value', '').and('be.disabled');
+        cy.findAllByLabelText('Replicate Number').eq(1).should('not.have.value', '').and('be.disabled');
+        cy.findAllByLabelText('Replicate Number').eq(2).should('not.have.value', '').and('be.disabled');
+        cy.findAllByLabelText('Replicate Number').eq(3).should('not.have.value', '').and('be.disabled');
       });
     });
     context('when adding multiple labware with same source labware', () => {
@@ -182,7 +186,26 @@ describe('Block Processing', () => {
         });
       });
       it('should autofill all replicate numbers so that it continues the sequence of source labware', () => {
-        cy.findAllByLabelText('Replicate Number').eq(4).should('have.value', 7);
+        cy.findAllByLabelText('Replicate Number').eq(4).should('not.have.value', '').and('be.disabled');
+      });
+    });
+    context('when adding a labware with a source labware that does not hold a replicate number', () => {
+      before(() => {
+        const tissue = tissueFactory.build({ replicate: null });
+        const sample = sampleFactory.build({ tissue: tissue });
+        createLabwareFromParams({ barcode: 'STAN-5555', slots: [slotFactory.build({ samples: [sample] })] });
+        cy.visit('/lab/original_sample_processing?type=block');
+        scanInput('STAN-5555');
+        cy.findByText('+ Add Labware').click();
+        cy.findByText('Edit Layout').click();
+        cy.findByRole('dialog').within(() => {
+          cy.findAllByText('STAN-5555').eq(0).click();
+          cy.findByText('A1').click();
+          cy.findByText('Done').click();
+        });
+      });
+      it('replicate number field should be empty and enabled', () => {
+        cy.findByLabelText('Replicate Number').should('have.value', '').and('be.enabled');
       });
     });
   });
@@ -206,7 +229,8 @@ describe('Block Processing', () => {
         scanInput('STAN-113');
         addLabware('Tube');
         selectOption('workNumber', '');
-        cy.findByRole('button', { name: /Save/i }).click();
+        cy.findByTestId('Replicate Number').click();
+        selectOption('comments', '');
       });
       it('Shows error for replicate number', () => {
         cy.findByText('Replicate number is required').should('be.visible');
