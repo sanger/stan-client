@@ -165,6 +165,11 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
                   label={'Replicate Number'}
                   type={'text'}
                   disabled={disableRepNumber}
+                  value={
+                    values.plans[rowIndex] && values.plans[rowIndex].replicateNumber
+                      ? values.plans[rowIndex].replicateNumber
+                      : ''
+                  }
                 />
 
                 <CustomReactSelect
