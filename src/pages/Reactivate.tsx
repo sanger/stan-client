@@ -62,7 +62,7 @@ export const Reactivate = () => {
 
   const isLabwareInactive = useCallback(
     (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): string[] => {
-      return foundLabware.discarded === false || foundLabware.destroyed === false
+      return foundLabware.discarded === false && foundLabware.destroyed === false
         ? ['This labware is neither discarded nor destroyed.']
         : [];
     },
