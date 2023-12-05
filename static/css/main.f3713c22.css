@@ -1722,6 +1722,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 .h-16 {
   height: 4rem;
 }
+.h-3 {
+  height: 0.75rem;
+}
 .h-24 {
   height: 6rem;
 }
@@ -1772,6 +1775,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .w-16 {
   width: 4rem;
+}
+.w-3 {
+  width: 0.75rem;
 }
 .min-w-full {
   min-width: 100%;
@@ -2937,6 +2943,10 @@ svg.logo.loading rect:nth-child(3n+1) {
 .text-black {
   --tw-text-opacity: 1;
   color: rgb(0 0 0 / var(--tw-text-opacity));
+}
+.text-green-600 {
+  --tw-text-opacity: 1;
+  color: rgb(56 161 105 / var(--tw-text-opacity));
 }
 .text-pink-600 {
   --tw-text-opacity: 1;
@@ -4196,4 +4206,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.eb380dc8.css.map*/
+/*# sourceMappingURL=main.f3713c22.css.map*/
