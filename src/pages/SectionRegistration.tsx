@@ -26,7 +26,6 @@ import Heading from '../components/Heading';
 import FileUploader from '../components/upload/FileUploader';
 import { toast } from 'react-toastify';
 import warningToast from '../components/notifications/WarningToast';
-import { UploadResult } from '../components/upload/useUpload';
 
 const availableLabware: Array<LabwareTypeName> = [
   LabwareTypeName.FOUR_SLOT_SLIDE,
@@ -233,26 +232,25 @@ export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) 
 
   /**Callback notification send from child after finishing upload**/
   const onFileUploadFinished = React.useCallback(
-    (results: UploadResult<{ barcode: [] }>[]) => {
-      if (results.length > 0) {
-        const result = results[0].response;
-        //Upload success, but no result, return
-        if (result && 'barcodes' in result) {
-          const barcodes: string[] = result['barcodes'];
-          const labwarePromises = barcodes.map((barcode: string) => stanCore.FindLabware({ barcode }));
-          //Retrieve details of newly registered labware
-          Promise.all(labwarePromises)
-            .then((labwares) => {
-              setFileRegisterResult(labwares.map((labware) => labware.labware!) as LabwareFieldsFragment[]);
-            })
-            .catch(() => {
-              warningToast({
-                message: `Cannot retrieve details of newly registered labware ${barcodes.join(',')}.`,
-                position: toast.POSITION.TOP_RIGHT,
-                autoClose: 5000
-              });
+    (file: File, isSuccess: boolean, result?: { barcodes: [] }) => {
+      //Upload failed, return
+      if (!isSuccess) return;
+      //Upload success, but no result, return
+      if (result && 'barcodes' in result) {
+        const barcodes = result['barcodes'];
+        const labwarePromises = barcodes.map((barcode: string) => stanCore.FindLabware({ barcode }));
+        //Retrieve details of newly registered labware
+        Promise.all(labwarePromises)
+          .then((labwares) => {
+            setFileRegisterResult(labwares.map((labware) => labware.labware!) as LabwareFieldsFragment[]);
+          })
+          .catch(() => {
+            warningToast({
+              message: `Cannot retrieve details of newly registered labware ${barcodes.join(',')}.`,
+              position: toast.POSITION.TOP_RIGHT,
+              autoClose: 5000
             });
-        }
+          });
       }
     },
     [setFileRegisterResult, stanCore]
