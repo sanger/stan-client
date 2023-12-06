@@ -7,7 +7,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Dependencies
 
-- `Node v21.4.0`
+- `Node v16.15.1`
 - `Yarn v1.22.11`
 
 ## Getting Started
