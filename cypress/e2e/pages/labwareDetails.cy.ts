@@ -45,4 +45,15 @@ describe('Labware Info Page', () => {
       cy.findByText('Print Labels').should('exist');
     });
   });
+
+  context('when I check a flagged labware details', () => {
+    before(() => {
+      cy.visit('/labware/STAN-100'); // barcodes ending 00 are flagged
+    });
+
+    it('display the related flags table', () => {
+      cy.findByText('Related Flags').should('be.visible');
+      cy.findAllByTestId('flag-icon').should('have.length.at.least', 1);
+    });
+  });
 });

@@ -1,0 +1,5 @@
+query FindFlaggedLabware($barcode: String!) {
+  labwareFlagged(barcode: $barcode) {
+    ...LabwareFlaggedFields
+  }
+}
