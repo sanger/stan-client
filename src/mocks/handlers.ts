@@ -54,6 +54,7 @@ import probeHybridisationHandlers from './handlers/probeHybridisationHandlers';
 import xeniumHandlers from './handlers/xeniumHandlers';
 import dnapStudyHandlers from './handlers/dnapStudyHandlers';
 import reactivateHandlers from './handlers/reactivateHandlers';
+import { flagLabwareHandlers } from './handlers/flagLabwareHandlers';
 
 export const handlers = [
   ...labwareHandlers,
@@ -108,5 +109,6 @@ export const handlers = [
   ...probeHybridisationHandlers,
   ...xeniumHandlers,
   ...reactivateHandlers,
-  ...dnapStudyHandlers
+  ...dnapStudyHandlers,
+  ...flagLabwareHandlers
 ];
