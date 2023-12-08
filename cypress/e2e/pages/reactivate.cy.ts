@@ -6,7 +6,7 @@ describe('Reactivate', () => {
     before(() => {
       cy.visit('/admin/reactivate');
       cy.get('#labwareScanInput').type('STAN-123456{enter}');
-      selectOption('labwareToReactivate[0].commentId', 'Destroyed by mistake');
+      selectOption('labwareToReactivate[0].commentId', 'Poor quality tissue');
       cy.findByRole('button', { name: 'Reactivate' }).click();
     });
     it('displays error message when no SGP number is entered', () => {
@@ -19,7 +19,7 @@ describe('Reactivate', () => {
       selectSGPNumber('SGP1008');
       cy.get('#labwareScanInput').type('STAN-123456{enter}');
       cy.get('#labwareScanInput').type('STAN-123457{enter}');
-      selectOption('labwareToReactivate[0].commentId', 'Destroyed by mistake');
+      selectOption('labwareToReactivate[0].commentId', 'Poor quality tissue');
       cy.findByRole('button', { name: 'Reactivate' }).click();
     });
     context('Each labware must have a reactivation reason', () => {
@@ -34,7 +34,7 @@ describe('Reactivate', () => {
         cy.visit('/admin/reactivate');
         selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').type('STAN-123456{enter}');
-        selectOption('labwareToReactivate[0].commentId', 'Destroyed by mistake');
+        selectOption('labwareToReactivate[0].commentId', 'Poor quality tissue');
         cy.findByRole('button', { name: 'Reactivate' }).click();
       });
       it('displays success message', () => {
@@ -65,7 +65,7 @@ describe('Reactivate', () => {
         });
         selectSGPNumber('SGP1008');
         cy.get('#labwareScanInput').type('STAN-123456{enter}');
-        selectOption('labwareToReactivate[0].commentId', 'Discarded by mistake');
+        selectOption('labwareToReactivate[0].commentId', 'Poor quality tissue');
         cy.findByRole('button', { name: 'Reactivate' }).click();
       });
       it('displays an error message', () => {
