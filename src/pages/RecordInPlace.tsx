@@ -135,22 +135,24 @@ export default function RecordInPlace({ title, operationType, columns, descripti
                       <FormikErrorMessage name={'barcodes'} />
                     </motion.div>
 
-                    <motion.div variants={variants.fadeInWithLift} className="space-y-4">
-                      <Heading level={3}>Equipment</Heading>
+                    {equipments && equipments.length > 0 && (
+                      <motion.div variants={variants.fadeInWithLift} className="space-y-4">
+                        <Heading level={3}>Equipment</Heading>
 
-                      <CustomReactSelect
-                        isDisabled={current.matches('submitted')}
-                        label={'Equipment'}
-                        name={'equipmentId'}
-                        dataTestId={'equipment'}
-                        emptyOption
-                        handleChange={(val) => {
-                          const value = (val as OptionType).value;
-                          setFieldValue('equipmentId', value === '' ? undefined : parseInt(value, 10));
-                        }}
-                        options={selectOptionValues(equipments, 'name', 'id')}
-                      />
-                    </motion.div>
+                        <CustomReactSelect
+                          isDisabled={current.matches('submitted')}
+                          label={'Equipment'}
+                          name={'equipmentId'}
+                          dataTestId={'equipment'}
+                          emptyOption
+                          handleChange={(val) => {
+                            const value = (val as OptionType).value;
+                            setFieldValue('equipmentId', value === '' ? undefined : parseInt(value, 10));
+                          }}
+                          options={selectOptionValues(equipments, 'name', 'id')}
+                        />
+                      </motion.div>
+                    )}
                   </motion.div>
 
                   <Sidebar>
