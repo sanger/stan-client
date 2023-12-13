@@ -27,16 +27,14 @@ import {
 import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import MutedText from '../components/MutedText';
-
-interface SolutionTransferParams {
-  solutionTransferInfo: GetSolutionTransferInfoQuery;
-}
+import { useLoaderData } from 'react-router-dom';
 
 type SolutionTransferFormData = Required<SolutionTransferRequest> & {
   /**Solution to apply to all labware**/
   applyAllSolution: string;
 };
-const SolutionTransfer: React.FC<SolutionTransferParams> = ({ solutionTransferInfo }: SolutionTransferParams) => {
+const SolutionTransfer: React.FC = () => {
+  const solutionTransferInfo = useLoaderData() as GetSolutionTransferInfoQuery;
   const formMachine = React.useMemo(() => {
     return createFormMachine<SolutionTransferRequest, PerformSolutionTransferMutation>().withConfig({
       services: {

@@ -30,6 +30,7 @@ import SlideProcessing from '../components/visiumQC/SlideProcessing';
 import Cleanup from '../components/visiumQC/Cleanup';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import CDNAConcentration from '../components/visiumQC/CDNAConentration';
+import { useLoaderData } from 'react-router-dom';
 
 export enum QCType {
   CDNA_AMPLIFICATION = 'Amplification',
@@ -37,10 +38,6 @@ export enum QCType {
   VISIUM_CONCENTRATION = 'Visium concentration',
   SPRI_CLEANUP = 'SPRI clean up'
 }
-
-type VisiumQCProps = {
-  info: GetCommentsQuery;
-};
 
 export interface VisiumQCFormData {
   workNumber: string;
@@ -106,7 +103,8 @@ const validationSchema = Yup.object().shape({
     })
 });
 
-export default function VisiumQC({ info }: VisiumQCProps) {
+export default function VisiumQC() {
+  const visiumQcInfo = useLoaderData() as GetCommentsQuery;
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
     return createFormMachine<ResultRequest, RecordVisiumQcMutation>().withConfig({
@@ -123,16 +121,16 @@ export default function VisiumQC({ info }: VisiumQCProps) {
   const [currentSlideProcessing, sendSlideProcessing] = useMachine(formMachine);
 
   const slideProcessingComments = React.useMemo(() => {
-    return info.comments.filter((comment) => comment.category === 'Visium QC');
-  }, [info]);
+    return visiumQcInfo.comments.filter((comment) => comment.category === 'Visium QC');
+  }, [visiumQcInfo]);
 
   const concentrationComments = React.useMemo(() => {
-    return info.comments.filter((comment) => comment.category === 'Concentration');
-  }, [info]);
+    return visiumQcInfo.comments.filter((comment) => comment.category === 'Concentration');
+  }, [visiumQcInfo]);
 
   const cleanupComments = React.useMemo(() => {
-    return info.comments.filter((comment) => comment.category === 'clean up');
-  }, [info]);
+    return visiumQcInfo.comments.filter((comment) => comment.category === 'clean up');
+  }, [visiumQcInfo]);
 
   const [currentCDNA, sendCDNA] = useMachine(
     createFormMachine<OpWithSlotMeasurementsRequest, RecordOpWithSlotMeasurementsMutation>().withConfig({

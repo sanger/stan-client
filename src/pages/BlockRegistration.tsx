@@ -21,6 +21,7 @@ import warningToast from '../components/notifications/WarningToast';
 import { toast } from 'react-toastify';
 import RegistrationSuccess from './registration/RegistrationSuccess';
 import { UploadResult } from '../components/upload/useUpload';
+import { useLoaderData } from 'react-router-dom';
 
 export interface RegistrationFormBlock {
   clientId: number;
@@ -161,10 +162,6 @@ export function buildRegisterTissuesMutationVariables(
   });
 }
 
-interface RegistrationParams {
-  registrationInfo: GetRegistrationInfoQuery;
-}
-
 const displayWarningMsg = (msg: string) => {
   warningToast({
     message: msg,
@@ -173,7 +170,8 @@ const displayWarningMsg = (msg: string) => {
   });
 };
 
-function BlockRegistration({ registrationInfo }: RegistrationParams) {
+function BlockRegistration() {
+  const registrationInfo = useLoaderData() as GetRegistrationInfoQuery;
   const resultColumns = [columns.barcode(), columns.labwareType(), columns.externalName()];
   const validationSchema = useMemo(() => {
     return buildRegistrationSchema(registrationInfo);

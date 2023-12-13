@@ -13,12 +13,10 @@ import { alphaNumericSortDefault } from '../types/stan';
 import BlueButton from '../components/buttons/BlueButton';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
 import Success from '../components/notifications/Success';
+import { useLoaderData } from 'react-router-dom';
 
-type ConfigurationParams = {
-  configuration: GetConfigurationQuery;
-};
-
-export default function Configuration({ configuration }: ConfigurationParams) {
+export default function Configuration() {
+  const configuration = useLoaderData() as GetConfigurationQuery;
   const stanCore = useContext(StanCoreContext);
   const groupedComments = groupBy(configuration.comments, 'category');
   const groupedEquipments = groupBy(configuration.equipments, 'category');
