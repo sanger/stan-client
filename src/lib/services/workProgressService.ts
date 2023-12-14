@@ -63,7 +63,6 @@ export class WorkProgressService
   search = async (
     workProgressRequest: FindWorkProgressQueryVariables
   ): Promise<SearchResultsType<WorkProgressResultTableEntry>> => {
-    debugger;
     if (
       !workProgressRequest.workNumber &&
       !workProgressRequest.programs &&
@@ -82,7 +81,6 @@ export class WorkProgressService
       .mapValues((value: any) => (typeof value === 'string' ? value.trim() : value))
       .value();
     const response = await stanCore.FindWorkProgress(request);
-    debugger;
     return {
       numDisplayed: response.workProgress.entries.length,
       entries: this.formatFindResult(response.workProgress)
@@ -97,8 +95,6 @@ export class WorkProgressService
     if (!findResult) {
       return [];
     }
-
-    debugger;
     return findResult.map((entry) => {
       const timeStampMap = new Map<WorkProgressTimeStampType, String>();
       entry.timestamps.forEach((timeStamp) => {
