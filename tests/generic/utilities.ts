@@ -43,10 +43,10 @@ export const selectSGPNumber = async (optionValue: string) => {
 export const selectOption = async (dataTestId: string, optionValue: string, index?: number) => {
   const selectDiv = screen.getAllByTestId(dataTestId)[index ?? 0];
   const input = within(selectDiv).getByRole('combobox', { hidden: true });
-  expect(input).toBeInTheDocument();
+  await waitFor(() => expect(input).toBeInTheDocument());
   await userEvent.type(input, '{arrowDown}');
   const option = screen.getAllByText(optionValue)[0];
-  expect(option).toBeInTheDocument();
+  await waitFor(() => expect(option).toBeInTheDocument());
   await userEvent.click(option);
 };
 export const shouldDisplayValue = (dataTestId: string, value: string, index?: number) => {
@@ -65,7 +65,7 @@ export const shouldHaveOption = async (dataTestId = 'select-div', option: string
   await userEvent.click(wrapperDiv);
 
   const comboBox = within(wrapperDiv).getByRole('combobox');
-  expect(comboBox).toBeInTheDocument();
+  await waitFor(() => expect(comboBox).toBeInTheDocument());
 
   const optionElement = within(comboBox).getByText(option);
   expect(optionElement).toBeVisible();
