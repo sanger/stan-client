@@ -326,23 +326,22 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/imaging"
+            loader={async () => {
+              const recordInPlaceInfo = await stanCore.GetRecordInPlaceInfo({ category: 'scanner' });
+              return recordInPlaceInfo.equipments;
+            }}
             element={
-              <DataFetcher dataFetcher={() => stanCore.GetRecordInPlaceInfo({ category: 'scanner' })}>
-                {(recordInPlaceInfo) => (
-                  <RecordInPlace
-                    title={'Imaging'}
-                    operationType={'image'}
-                    equipment={recordInPlaceInfo.equipments}
-                    columns={[
-                      columns.barcode(),
-                      columns.donorId(),
-                      columns.labwareType(),
-                      columns.externalName(),
-                      columns.bioState()
-                    ]}
-                  />
-                )}
-              </DataFetcher>
+              <RecordInPlace
+                title={'Imaging'}
+                operationType={'image'}
+                columns={[
+                  columns.barcode(),
+                  columns.donorId(),
+                  columns.labwareType(),
+                  columns.externalName(),
+                  columns.bioState()
+                ]}
+              />
             }
           />
         </Route>
