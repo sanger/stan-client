@@ -63,9 +63,9 @@ export type WorkAllocationFormValues = {
   numOriginalSamples: number | undefined;
 
   /**
-   *The Sequencescape study id
+   *The Sequencescape study id - set to string to to init the field the empty string and prevent formik console error
    */
-  ssStudyId?: number;
+  ssStudyId?: string;
   /**
    *The Sequencescape study name
    */
@@ -327,7 +327,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numSlides,
             numOriginalSamples,
             omeroProject,
-            ssStudyId
+            ssStudyId: Number(ssStudyId)
           });
         },
 
