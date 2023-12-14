@@ -381,7 +381,7 @@ const RouteLayout = () => {
             element={<Reactivate />}
             loader={async () => {
               const res = await stanCore.GetComments({
-                commentCategory: 'work status',
+                commentCategory: 'Work status',
                 includeDisabled: false
               });
               return res.comments;

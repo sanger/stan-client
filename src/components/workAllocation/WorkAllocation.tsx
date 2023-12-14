@@ -394,16 +394,16 @@ export default function WorkAllocation() {
                             setFieldValue('studyName', 'undefined');
                           }
                         })
-                        .catch(() => {
-                          setFieldValue('studyName', undefined);
+                        .catch((e) => {
+                          setFieldValue('studyName', 'undefined');
                         });
                       setFieldValue('ssStudyId', e.currentTarget.value);
                     }}
                   />
                   {values.studyName && values.ssStudyId && (
-                    <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
+                    <div className="flex-row whitespace-nowrap space-x-2 p-0">
                       {values.studyName === 'undefined' ? (
-                        <Pill color="pink">{`Unknown Sequencescape study id`}</Pill>
+                        <Pill color="pink">Unknown Sequencescape study id</Pill>
                       ) : (
                         <Pill color="blue">{values.studyName}</Pill>
                       )}

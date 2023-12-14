@@ -27,7 +27,7 @@ interface DataTableProps<T extends object> {
   fixedHeader?: boolean;
 
   /**
-   * Is table column header fixed?
+   * class name list to assign to each cell, defaults to whitespace-nowrap, if none is provided
    */
   cellClassName?: string;
 }
