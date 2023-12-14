@@ -36,7 +36,7 @@ const initialValues: WorkAllocationFormValues = {
   numSlides: undefined,
   numBlocks: undefined,
   numOriginalSamples: undefined,
-  ssStudyId: undefined,
+  ssStudyId: '',
   studyName: undefined
 };
 export const MAX_NUM_BLOCKANDSLIDES = 200;
@@ -207,7 +207,7 @@ export default function WorkAllocation() {
       .oneOf(omeroProjects.map((cc) => cc.name))
       .optional()
       .label('Omero Project'),
-    ssStudyId: Yup.number().label('DNAP study ID').optional(),
+    ssStudyId: Yup.string().label('DNAP study ID').optional(),
     isRnD: Yup.boolean().required(),
     numBlocks: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
     numSlides: Yup.number().max(MAX_NUM_BLOCKANDSLIDES),
@@ -278,7 +278,7 @@ export default function WorkAllocation() {
             }, 500);
             const valuesToSubmit = {
               ...values,
-              ssStudyId: values.ssStudyId ? values.ssStudyId : undefined
+              ssStudyId: values.ssStudyId ?? undefined
             };
             send({ type: 'ALLOCATE_WORK', values: valuesToSubmit });
           }}
@@ -382,6 +382,7 @@ export default function WorkAllocation() {
                     type={'number'}
                     label="DNAP study ID"
                     name="ssStudyId"
+                    value={values.ssStudyId}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       const ssId = Number(e.currentTarget.value);
                       stanCore
@@ -389,18 +390,20 @@ export default function WorkAllocation() {
                         .then((study) => {
                           if (study && study.dnapStudy) {
                             setFieldValue('studyName', study.dnapStudy.name);
-                            setFieldValue('ssStudyId', ssId);
+                          } else {
+                            setFieldValue('studyName', 'undefined');
                           }
                         })
                         .catch((e) => {
                           setFieldValue('studyName', 'undefined');
                         });
+                      setFieldValue('ssStudyId', e.currentTarget.value);
                     }}
                   />
-                  {values.studyName && (
-                    <div className={'flex-row whitespace-nowrap space-x-2 p-0'}>
+                  {values.studyName && values.ssStudyId && (
+                    <div className="flex-row whitespace-nowrap space-x-2 p-0">
                       {values.studyName === 'undefined' ? (
-                        <Pill color="pink">{`Unknown Sequencescape study id`}</Pill>
+                        <Pill color="pink">Unknown Sequencescape study id</Pill>
                       ) : (
                         <Pill color="blue">{values.studyName}</Pill>
                       )}

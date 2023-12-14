@@ -18,13 +18,13 @@ const useLoaderDataMock = jest.fn().mockReturnValue([
   {
     id: 1,
     text: 'Comment1',
-    category: 'reactivate',
+    category: 'work status',
     enabled: true
   },
   {
     id: 2,
     text: 'Comment2',
-    category: 'reactivate',
+    category: 'work status',
     enabled: true
   }
 ]);

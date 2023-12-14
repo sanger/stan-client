@@ -54,6 +54,7 @@ import ProbeHybridisationQC from '../pages/ProbeHybridisationQC';
 import XeniumQC from '../pages/XeniumQC';
 import ReleaseOptions from './release/ReleaseOptions';
 import { Reactivate } from '../pages/Reactivate';
+import OrientationQC from '../pages/OrientationQC';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -120,6 +121,9 @@ const RouteLayout = () => {
               </DataFetcher>
             }
           />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/lab/sectioning/orientation_qc" element={<OrientationQC />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/lab/original_sample_processing" element={<OriginalSampleProcessing />} />
@@ -322,23 +326,22 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/imaging"
+            loader={async () => {
+              const recordInPlaceInfo = await stanCore.GetRecordInPlaceInfo({ category: 'scanner' });
+              return recordInPlaceInfo.equipments;
+            }}
             element={
-              <DataFetcher dataFetcher={() => stanCore.GetRecordInPlaceInfo({ category: 'scanner' })}>
-                {(recordInPlaceInfo) => (
-                  <RecordInPlace
-                    title={'Imaging'}
-                    operationType={'image'}
-                    equipment={recordInPlaceInfo.equipments}
-                    columns={[
-                      columns.barcode(),
-                      columns.donorId(),
-                      columns.labwareType(),
-                      columns.externalName(),
-                      columns.bioState()
-                    ]}
-                  />
-                )}
-              </DataFetcher>
+              <RecordInPlace
+                title={'Imaging'}
+                operationType={'image'}
+                columns={[
+                  columns.barcode(),
+                  columns.donorId(),
+                  columns.labwareType(),
+                  columns.externalName(),
+                  columns.bioState()
+                ]}
+              />
             }
           />
         </Route>
@@ -380,7 +383,7 @@ const RouteLayout = () => {
             element={<Reactivate />}
             loader={async () => {
               const res = await stanCore.GetComments({
-                commentCategory: 'reactivate',
+                commentCategory: 'Work status',
                 includeDisabled: false
               });
               return res.comments;

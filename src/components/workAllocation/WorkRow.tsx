@@ -76,7 +76,8 @@ export default function WorkRow({
   const {
     editModeEnabled,
     workWithComment: { work, comment },
-    serverErrors
+    serverErrors,
+    serverSuccess
   } = current.context;
 
   /**Notify the changes in work fields*/
@@ -103,6 +104,15 @@ export default function WorkRow({
       });
     }
   }, [serverErrors]);
+
+  useEffect(() => {
+    if (serverSuccess) {
+      toast.success(serverSuccess, {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 5000
+      });
+    }
+  }, [serverSuccess]);
   /**
    * Should the edit button by displayed to the user right now
    */
