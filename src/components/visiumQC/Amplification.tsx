@@ -1,15 +1,16 @@
 import Panel from '../Panel';
-import React from 'react';
-import { LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import React, { useMemo } from 'react';
+import { LabwareFlaggedFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
 import SlotMeasurements, { MeasurementConfigProps } from '../slotMeasurement/SlotMeasurements';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
+import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 export type AmplificationProps = {
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   slotMeasurements: SlotMeasurementRequest[] | undefined;
   removeLabware: (barcode: string) => void;
 };
@@ -124,6 +125,8 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: Amplificati
     [removeLabware]
   );
 
+  const labwareFields = useMemo(() => extractLabwareFromFlagged([labware])[0], [labware]);
+
   return (
     <div className="max-w-screen-xl mx-auto">
       {labware && (
@@ -170,7 +173,7 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: Amplificati
                 )}
               </div>
               <div className="flex flex-col w-full items-end justify-center p-4" data-testid={'labware'}>
-                <Labware labware={labware} name={labware.labwareType.name} />
+                <Labware labware={labwareFields} name={labware.labwareType.name} />
               </div>
             </div>
           </Panel>

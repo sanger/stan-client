@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
-import { LabwareFieldsFragment } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import { createLabwareMachine } from '../../lib/machines/labware/labwareMachine';
 import ScanInput from '../scanInput/ScanInput';
@@ -12,7 +12,7 @@ export type LabwareScannerProps = {
   /**
    * The initial list of labwares the scanner should be displaying
    */
-  initialLabwares?: LabwareFieldsFragment[];
+  initialLabwares?: LabwareFlaggedFieldsFragment[];
 
   /**
    * True is the scanner should be locked; false otherwise
@@ -28,28 +28,28 @@ export type LabwareScannerProps = {
    * A function to check for problems with new labware because it is added
    */
   labwareCheckFunction?: (
-    labwares: LabwareFieldsFragment[],
-    foundLabware: LabwareFieldsFragment
+    labwares: LabwareFlaggedFieldsFragment[],
+    foundLabware: LabwareFlaggedFieldsFragment
   ) => string[] | Promise<string[]>;
 
   /**
    * Called when labware is added or removed
    * @param labwares the list of current labwares
    */
-  onChange?: (labwares: LabwareFieldsFragment[]) => void;
+  onChange?: (labwares: LabwareFlaggedFieldsFragment[]) => void;
 
   /**
    * Callback for when a labware is added
    * @param labware the added labware
    */
-  onAdd?: (labware: LabwareFieldsFragment) => void;
+  onAdd?: (labware: LabwareFlaggedFieldsFragment) => void;
 
   /**
    * Callback for when a labware is removed
    * @param labware the removed labware
    * @param index the index of the removed labware
    */
-  onRemove?: (labware: LabwareFieldsFragment, index: number) => void;
+  onRemove?: (labware: LabwareFlaggedFieldsFragment, index: number) => void;
 
   /**
    * Children can either be a react node (if using the useLabware hook)
@@ -58,6 +58,11 @@ export type LabwareScannerProps = {
   children: React.ReactNode | ((props: LabwareScannerContextType) => React.ReactNode);
 
   enableLocationScanner?: boolean;
+
+  /**
+   * defaults to false, when set to true labwareMachine runs the FindFlaggedLabware query instead of the FindLabware query.
+   */
+  enableFlaggedLabwareCheck?: boolean;
 };
 
 export default function LabwareScanner({
@@ -69,7 +74,8 @@ export default function LabwareScanner({
   onAdd,
   onRemove,
   children,
-  enableLocationScanner
+  enableLocationScanner,
+  enableFlaggedLabwareCheck = false
 }: LabwareScannerProps) {
   const slicedInitialLabware = React.useMemo(() => {
     if (!initialLabwares) return [];
@@ -86,7 +92,8 @@ export default function LabwareScanner({
     context: {
       labwares: slicedInitialLabware,
       foundLabwareCheck: labwareCheckFunction,
-      limit
+      limit,
+      enableFlaggedLabwareCheck
     }
   });
 
@@ -134,7 +141,8 @@ export default function LabwareScanner({
         send({ type: 'REMOVE_LABWARE', value: barcode });
       },
       [send]
-    )
+    ),
+    enableFlaggedLabwareCheck: enableFlaggedLabwareCheck
   };
 
   const handleOnScanInputChange = useCallback(
@@ -200,14 +208,16 @@ export default function LabwareScanner({
 
 type LabwareScannerContextType = {
   locked: boolean;
-  labwares: LabwareFieldsFragment[];
+  labwares: LabwareFlaggedFieldsFragment[];
   removeLabware: (barcode: string) => void;
+  enableFlaggedLabwareCheck?: boolean;
 };
 
 const LabwareScannerContext = React.createContext<LabwareScannerContextType>({
   locked: false,
   labwares: [],
-  removeLabware: (_barcode) => {}
+  removeLabware: (_barcode) => {},
+  enableFlaggedLabwareCheck: false
 });
 
 export function useLabwareContext() {

@@ -4,6 +4,7 @@ import { Form, Formik } from 'formik';
 import {
   GetReleaseInfoQuery,
   LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   ReleaseFileOptionFieldsFragment,
   ReleaseLabware,
   ReleaseLabwareMutation,
@@ -54,7 +55,7 @@ const validationSchema = Yup.object().shape({
   otherRecipients: Yup.array().optional().label('CC contacts')
 });
 
-const labwareBsContent = (labware: LabwareFieldsFragment) => {
+const labwareBsContent = (labware: LabwareFlaggedFieldsFragment) => {
   const bss = new Set(labware.slots.flatMap((slot) => slot.samples).map((sam) => sam.bioState.name.toLowerCase()));
   if (bss.has('cdna')) {
     return { cdna: true, other: bss.size > 1 };
@@ -62,7 +63,7 @@ const labwareBsContent = (labware: LabwareFieldsFragment) => {
   return { cdna: false, other: bss.size > 0 };
 };
 
-const labwareBioStateCheck = (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment) => {
+const labwareBioStateCheck = (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment) => {
   if (foundLabware.released) {
     return ['Labware ' + foundLabware.barcode + ' has already been released.'];
   }
@@ -182,7 +183,7 @@ function Release({ releaseInfo }: PageParams) {
 
   const onAddLabware = React.useCallback(
     async (
-      labware: LabwareFieldsFragment[],
+      labware: LabwareFlaggedFieldsFragment[],
       setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void
     ) => {
       if (labware.length <= releaseLabware.length) return;

@@ -6,7 +6,7 @@ import {
   AnalyserRequest,
   CassettePosition,
   EquipmentFieldsFragment,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   RecordAnalyserMutation,
   SamplePositionFieldsFragment
 } from '../types/sdk';
@@ -127,8 +127,8 @@ const XeniumAnalyser = () => {
 
   /**This creates the slot related information for the labware */
   const createTableDataForSlots = React.useCallback(
-    (labware: LabwareFieldsFragment) => {
-      const setLabwareSampleData = async (lw: LabwareFieldsFragment) => {
+    (labware: LabwareFlaggedFieldsFragment) => {
+      const setLabwareSampleData = async (lw: LabwareFlaggedFieldsFragment) => {
         const samples: SampleWithRegion[] = [];
         /**
          * FindSamplePositions - if no samples in the labware have a region, the array would be empty.
@@ -258,6 +258,7 @@ const XeniumAnalyser = () => {
                               }
                             });
                           }}
+                          enableFlaggedLabwareCheck={true}
                         >
                           <LabwareScanPanel
                             columns={[

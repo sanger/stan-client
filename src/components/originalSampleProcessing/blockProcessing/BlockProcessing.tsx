@@ -1,6 +1,7 @@
 import {
   GetBlockProcessingInfoQuery,
   LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   PerformTissueBlockMutation,
   TissueBlockRequest
 } from '../../../types/sdk';
@@ -117,7 +118,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   const buildPlanLayouts = React.useCallback(
     (
       plans: Map<string, NewLabwareLayout>,
-      sourceLabware: LabwareFieldsFragment[],
+      sourceLabware: LabwareFlaggedFieldsFragment[],
       sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
       confirmAction?: (cid: string, plan: undefined) => void,

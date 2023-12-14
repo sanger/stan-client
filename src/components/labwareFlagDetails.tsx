@@ -3,8 +3,7 @@ import Heading from './Heading';
 import React from 'react';
 import DataTable from './DataTable';
 import { Cell, Column } from 'react-table';
-import StyledLink from './StyledLink';
-import FlagIcon from './icons/FlagIcon';
+import { flaggedBarcodeDiv } from './dataTableColumns/labwareColumns';
 
 const columns = (): Column<FlagSummary>[] => {
   return [
@@ -12,17 +11,7 @@ const columns = (): Column<FlagSummary>[] => {
       width: 300,
       Header: 'barcode',
       accessor: (flagSummary: FlagSummary) => {
-        return (
-          <div className="whitespace-nowrap">
-            <StyledLink
-              className="text-sp bg-transparent hover:text-sp-700 active:text-sp-800"
-              to={`/labware/${flagSummary.barcode}`}
-            >
-              <FlagIcon className="inline-block h-5 w-5 -ml-1 mr-1 mb-2" />
-              {flagSummary.barcode}
-            </StyledLink>
-          </div>
-        );
+        return flaggedBarcodeDiv(flagSummary.barcode);
       }
     },
     {

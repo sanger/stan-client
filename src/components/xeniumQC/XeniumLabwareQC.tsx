@@ -1,5 +1,5 @@
 import React from 'react';
-import { CommentFieldsFragment, LabwareFieldsFragment } from '../../types/sdk';
+import { CommentFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import RemoveButton from '../buttons/RemoveButton';
 import Panel from '../Panel';
 import Labware from '../labware/Labware';
@@ -8,10 +8,11 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { selectOptionValues } from '../forms';
 import { FieldArray, useFormikContext } from 'formik';
 import { XeniumQCFormData } from '../../pages/XeniumQC';
+import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 type XeniumLabwareQCProps = {
   comments: CommentFieldsFragment[];
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   index: number;
   removeLabware: (barcode: string) => void;
 };
@@ -65,7 +66,7 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                     </div>
                   </div>
                   <div className="flex flex-col w-full items-center justify-center p-4" data-testid={'labware'}>
-                    <Labware labware={labware} name={labware.labwareType.name} />
+                    <Labware labware={extractLabwareFromFlagged([labware])[0]} name={labware.labwareType.name} />
                   </div>
                 </div>
               </Panel>

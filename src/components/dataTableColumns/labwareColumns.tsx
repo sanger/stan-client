@@ -1,14 +1,18 @@
 import React from 'react';
 import { CellProps, Column } from 'react-table';
-import { Labware, LabwareFieldsFragment } from '../../types/sdk';
+import { Labware, LabwareFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import Circle from '../Circle';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
 import { valueFromSamples } from './index';
+import StyledLink from '../StyledLink';
+import FlagIcon from '../icons/FlagIcon';
 
 /**
  * Defined type for a function that returns a column that displays some property of Labware
  */
 export type ColumnFactory<E = any> = (meta?: E) => Column<LabwareFieldsFragment>;
+
+export type FlaggedColumnFactory<E = any> = (meta?: E) => Column<LabwareFlaggedFieldsFragment>;
 
 const color: ColumnFactory<Map<number, any>> = (meta) => {
   return {
@@ -25,8 +29,33 @@ const color: ColumnFactory<Map<number, any>> = (meta) => {
 const barcode: ColumnFactory = () => {
   return {
     Header: 'Barcode',
-    accessor: 'barcode'
+    accessor: 'barcode',
+    id: 'barcode'
   };
+};
+
+const flaggedBarcode: FlaggedColumnFactory = () => {
+  return {
+    Header: 'Barcode',
+    accessor: (lw: LabwareFlaggedFieldsFragment) => {
+      return lw.flagged ? flaggedBarcodeDiv(lw.barcode) : lw.barcode;
+    }
+  };
+};
+
+export const flaggedBarcodeDiv = (barcode: string) => {
+  return (
+    <div className="whitespace-nowrap">
+      <StyledLink
+        className="text-sp bg-transparent hover:text-sp-700 active:text-sp-800"
+        to={`/labware/${barcode}`}
+        target="_blank"
+      >
+        <FlagIcon className="inline-block h-5 w-5 -ml-1 mr-1 mb-2" />
+        {barcode}
+      </StyledLink>
+    </div>
+  );
 };
 
 /**
@@ -126,6 +155,7 @@ const fixative: ColumnFactory = () => {
 const columns = {
   color,
   barcode,
+  flaggedBarcode,
   donorId,
   tissueType,
   spatialLocation,

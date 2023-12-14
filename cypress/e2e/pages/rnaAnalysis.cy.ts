@@ -1,6 +1,7 @@
 import {
   ExtractResultQuery,
   ExtractResultQueryVariables,
+  LabwareFlagged,
   RecordRnaAnalysisMutation,
   RecordRnaAnalysisMutationVariables
 } from '../../../src/types/sdk';
@@ -56,16 +57,16 @@ describe('RNA Analysis', () => {
         const labwareType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.TUBE);
         // Create the new bit of labware
         const newLabware = labwareFactory.build({
-          labwareType
+          labwareType,
+          barcode: 'STAN-3112'
         });
-        newLabware.barcode = 'STAN-3112';
         worker.use(
           graphql.query<ExtractResultQuery, ExtractResultQueryVariables>('ExtractResult', (req, res, ctx) => {
             return res.once(
               ctx.data({
                 extractResult: {
                   result: undefined,
-                  labware: newLabware,
+                  labware: newLabware as LabwareFlagged,
                   concentration: undefined
                 }
               })

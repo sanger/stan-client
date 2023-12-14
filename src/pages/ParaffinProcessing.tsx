@@ -135,6 +135,7 @@ const ParaffinProcessing: React.FC<ParaffinProcessingParams> = ({
                               labwares.map((lw) => lw.barcode)
                             )
                           }
+                          enableFlaggedLabwareCheck={true}
                         >
                           <LabwareScanTable
                             columns={[

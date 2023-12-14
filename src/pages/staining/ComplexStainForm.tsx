@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ComplexStainLabware,
   ComplexStainRequest,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   RecordComplexStainMutation,
   StainPanel
 } from '../../types/sdk';
@@ -28,13 +28,14 @@ import { FormikFieldValueArray } from '../../components/forms/FormikFieldValueAr
 import ComplexStainRow from './ComplexStainRow';
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 import { useNavigate } from 'react-router-dom';
+import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 type ComplexStainFormValues = ComplexStainRequest;
 
 type ComplexStainFormProps = {
   stainType: string;
-  initialLabware: LabwareFieldsFragment[];
-  onLabwareChange: (labware: LabwareFieldsFragment[]) => void;
+  initialLabware: LabwareFlaggedFieldsFragment[];
+  onLabwareChange: (labware: LabwareFlaggedFieldsFragment[]) => void;
 };
 
 export default function ComplexStainForm({ stainType, initialLabware, onLabwareChange }: ComplexStainFormProps) {
@@ -48,6 +49,7 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
       }
     });
   }, []);
+
   const [current, send] = useMachine(formMachine);
 
   const { serverError } = current.context;
@@ -83,6 +85,10 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
     stainTypes: Yup.array().required().label('Stain Type'),
     labware: Yup.array().of(labwareValidationSchema).min(1).required().label('Labware')
   });
+
+  const initialLabwareFields = useMemo(() => {
+    return extractLabwareFromFlagged(initialLabware);
+  }, [initialLabware]);
 
   return (
     <Formik<ComplexStainFormValues>
@@ -124,6 +130,7 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
                   onChange={onLabwareChange}
                   buildLabware={buildLabware}
                   locked={current.matches('submitted')}
+                  enableFlaggedLabwareCheck={true}
                 >
                   <LabwareScanPanel
                     columns={[columns.barcode(), columns.donorId(), columns.labwareType(), columns.externalName()]}
@@ -236,7 +243,7 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
                   className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
                   onClick={() => {
                     if (initialLabware.length > 0) {
-                      createSessionStorageForLabwareAwaiting(initialLabware);
+                      createSessionStorageForLabwareAwaiting(initialLabwareFields);
                     }
                     navigate('/store');
                   }}
@@ -257,7 +264,7 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
   );
 }
 
-function buildLabware(labware: LabwareFieldsFragment) {
+function buildLabware(labware: LabwareFlaggedFieldsFragment) {
   return {
     barcode: labware.barcode,
     bondBarcode: '',

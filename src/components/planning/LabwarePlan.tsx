@@ -17,6 +17,7 @@ import DataTable from '../DataTable';
 import { CellProps } from 'react-table';
 import {
   LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   LabwareType,
   LabwareTypeFieldsFragment,
   PlanMutation,
@@ -45,7 +46,7 @@ type LabwarePlanProps = {
    */
   outputLabware: NewLabwareLayout;
 
-  sourceLabware: LabwareFieldsFragment[];
+  sourceLabware: LabwareFlaggedFieldsFragment[];
 
   operationType: string;
 
@@ -410,7 +411,7 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
  * Builds the initial layout for this plan.
  */
 export function buildInitialLayoutPlan(
-  sourceLabware: Array<LabwareFieldsFragment>,
+  sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
   outputLabware: NewLabwareLayout
 ) {

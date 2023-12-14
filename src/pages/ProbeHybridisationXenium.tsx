@@ -159,6 +159,7 @@ const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
                               }
                             });
                           }}
+                          enableFlaggedLabwareCheck={true}
                         >
                           <LabwareScanPanel
                             columns={[

@@ -1,4 +1,4 @@
-import { GetBlockProcessingInfoQuery, LabwareFieldsFragment } from '../../../types/sdk';
+import { GetBlockProcessingInfoQuery, LabwareFlaggedFieldsFragment } from '../../../types/sdk';
 import React, { useState } from 'react';
 import { useMachine } from '@xstate/react';
 import { motion } from 'framer-motion';
@@ -29,7 +29,7 @@ type BlockProcessingLabwarePlanProps = {
   /**
    * All source labware
    */
-  sourceLabware: LabwareFieldsFragment[];
+  sourceLabware: LabwareFlaggedFieldsFragment[];
   /**
    * Destination labware plans created
    */
@@ -59,7 +59,7 @@ type BlockProcessingLabwarePlanProps = {
  * Builds the initial layout for this plan.
  */
 function buildInitialLayoutPlan(
-  sourceLabware: Array<LabwareFieldsFragment>,
+  sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
   outputLabware: NewLabwareLayout
 ) {

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useMachine } from '@xstate/react';
 import createFormMachine from '../../lib/machines/form/formMachine';
-import { GetStainInfoQuery, LabwareFieldsFragment, StainMutation, StainRequest } from '../../types/sdk';
+import { GetStainInfoQuery, LabwareFlaggedFieldsFragment, StainMutation, StainRequest } from '../../types/sdk';
 import { stanCore } from '../../lib/sdk';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
@@ -22,6 +22,7 @@ import OperationCompleteModal from '../../components/modal/OperationCompleteModa
 import { createSessionStorageForLabwareAwaiting } from '../../types/stan';
 import WhiteButton from '../../components/buttons/WhiteButton';
 import { useNavigate } from 'react-router-dom';
+import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 /**
  * Type used for the values in the form.
@@ -57,8 +58,8 @@ type StainFormValues = Omit<StainRequest, 'timeMeasurements'> & {
 type StainFormProps = {
   stainType: string;
   stainingInfo: GetStainInfoQuery;
-  initialLabware: LabwareFieldsFragment[];
-  onLabwareChange: (labware: LabwareFieldsFragment[]) => void;
+  initialLabware: LabwareFlaggedFieldsFragment[];
+  onLabwareChange: (labware: LabwareFlaggedFieldsFragment[]) => void;
 };
 
 export default function StainForm({ stainType, stainingInfo, initialLabware, onLabwareChange }: StainFormProps) {
@@ -86,6 +87,10 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
       return memo;
     }, new Map());
   }, [stainingInfo]);
+
+  const initialLabwareFields = useMemo(() => {
+    return extractLabwareFromFlagged(initialLabware);
+  }, [initialLabware]);
 
   /**
    * Validation schema for the staining form
@@ -170,6 +175,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
                     onLabwareChange(labwares);
                   }}
                   locked={current.matches('submitted')}
+                  enableFlaggedLabwareCheck={true}
                 >
                   <LabwareScanPanel
                     columns={[
@@ -291,7 +297,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
                 className="w-full text-base md:ml-0 sm:ml-3 sm:w-auto sm:text:sm"
                 onClick={() => {
                   if (initialLabware.length > 0) {
-                    createSessionStorageForLabwareAwaiting(initialLabware);
+                    createSessionStorageForLabwareAwaiting(initialLabwareFields);
                   }
                   navigate('/store');
                 }}

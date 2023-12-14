@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   CommentFieldsFragment,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   LabwareResult as CoreLabwareResult,
   PassFail,
   SlideCosting
@@ -16,10 +16,11 @@ import ScanInput from '../scanInput/ScanInput';
 import { FormikErrorMessage } from '../forms';
 import { stanCore } from '../../lib/sdk';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
+import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 type SlideProcessingProps = {
   comments: CommentFieldsFragment[];
-  labware: LabwareFieldsFragment[];
+  labware: LabwareFlaggedFieldsFragment[];
   labwaresResultsProps: CoreLabwareResult[] | undefined;
   removeLabware: (barcode: string) => void;
 };
@@ -114,7 +115,7 @@ const SlideProcessing = ({ comments, labware, labwaresResultsProps, removeLabwar
                   <LabwareResult
                     key={lw.barcode}
                     initialLabwareResult={labwaresResultsProps[index]}
-                    labware={lw}
+                    labware={extractLabwareFromFlagged([lw])[0]}
                     availableComments={comments ? comments : []}
                     onRemoveClick={removeLabware}
                     onChange={(lr) => {

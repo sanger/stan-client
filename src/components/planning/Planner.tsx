@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useEffect, useReducer } from 'react';
-import { LabwareFieldsFragment, LabwareTypeFieldsFragment, Maybe } from '../../types/sdk';
+import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, LabwareTypeFieldsFragment, Maybe } from '../../types/sdk';
 import { uniqueId } from 'lodash';
 import BlueButton from '../buttons/BlueButton';
 import { NewLabwareLayout } from '../../types/stan';
@@ -7,7 +7,7 @@ import produce, { castDraft } from 'immer';
 import { unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
 import LabwareScanTable from '../labwareScanPanel/LabwareScanPanel';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
-import { buildSampleColors } from '../../lib/helpers/labwareHelper';
+import { buildSampleColors, extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
@@ -39,7 +39,7 @@ type PlannerProps<M> = {
    */
   buildPlanLayouts: (
     layout: Map<string, NewLabwareLayout>, //All layouts created
-    sourceLabware: LabwareFieldsFragment[],
+    sourceLabware: LabwareFlaggedFieldsFragment[],
     sampleColors: Map<number, string>,
     deleteAction: (cid: string) => void,
     confirmAction?: (cid: string, plan: M) => void,
@@ -70,7 +70,7 @@ type PlannerProps<M> = {
 export type PlanChangedProps<M> = {
   numberOfPlans: number;
   completedPlans: Array<M>;
-  sourceLabware: Array<LabwareFieldsFragment>;
+  sourceLabware: Array<LabwareFlaggedFieldsFragment>;
   layoutPlans: Map<string, NewLabwareLayout>;
 };
 
@@ -86,7 +86,7 @@ type PlannerContextType = {
   /**
    * Labware that can be chosen as a source
    */
-  sourceLabware: Array<LabwareFieldsFragment>;
+  sourceLabware: Array<LabwareFlaggedFieldsFragment>;
 
   /**
    * Map of sampleId to colors. Used for showing consistent sample colours in different {@link LabwarePlan LabwarePlans}
@@ -104,7 +104,7 @@ type PlannerState<M> = {
   /**
    * Labware scanned in by the user
    */
-  sourceLabware: Array<LabwareFieldsFragment>;
+  sourceLabware: Array<LabwareFlaggedFieldsFragment>;
 
   /**
    * Map of client ID to labware
@@ -136,7 +136,7 @@ const initialState = {
 };
 
 type Action<M> =
-  | { type: 'SET_SOURCE_LABWARE'; labware: Array<LabwareFieldsFragment> }
+  | { type: 'SET_SOURCE_LABWARE'; labware: Array<LabwareFlaggedFieldsFragment> }
   | {
       type: 'ADD_LABWARE_PLAN';
       labwareType: LabwareTypeFieldsFragment;
@@ -226,8 +226,8 @@ export default function Planner<M>({
    * Handler for LabwareScanner's onChange event
    */
   const onLabwareScannerChange = useCallback(
-    (labware: Array<LabwareFieldsFragment>) => {
-      dispatch({ type: 'SET_SOURCE_LABWARE', labware });
+    (labware: Array<LabwareFlaggedFieldsFragment>) => {
+      dispatch({ type: 'SET_SOURCE_LABWARE', labware: labware });
     },
     [dispatch]
   );
@@ -270,7 +270,7 @@ export default function Planner<M>({
    * Used by various components to keep the same samples the same colours within different components.
    */
   const sampleColors: Map<number, string> = React.useMemo(() => {
-    return buildSampleColors(state.sourceLabware);
+    return buildSampleColors(extractLabwareFromFlagged(state.sourceLabware));
   }, [state.sourceLabware]);
 
   /**
@@ -299,6 +299,7 @@ export default function Planner<M>({
       <LabwareScanner
         locked={state.isLabwareScannerLocked || (singleSourceAllowed && state.sourceLabware.length === 1)}
         onChange={onLabwareScannerChange}
+        enableFlaggedLabwareCheck={true}
       >
         <LabwareScanTable columns={[labwareScanTableColumns.color(sampleColors), ...columns]} />
       </LabwareScanner>

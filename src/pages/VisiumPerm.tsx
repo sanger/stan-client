@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import AppShell from '../components/AppShell';
 import Heading from '../components/Heading';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -28,6 +28,7 @@ import columns from '../components/dataTableColumns/labwareColumns';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import PermPositiveControl from '../components/forms/PermPositiveControl';
 import { ConfirmationModal } from '../components/modal/ConfirmationModal';
+import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
@@ -151,6 +152,7 @@ export default function VisiumPerm() {
                           values.permData.forEach((value, i) => remove(i));
                         }}
                         limit={1}
+                        enableFlaggedLabwareCheck={true}
                       >
                         <LabwareScannerSlotsTable />
                         <VisiumPermForm />
@@ -221,6 +223,9 @@ function VisiumPermForm() {
   /**
    * Initialize the control tube when there is no labware scanned (Removing a labware)
    */
+
+  const labwareFields = useMemo(() => extractLabwareFromFlagged(labwares), [labwares]);
+
   React.useEffect(() => {
     if (labwares.length === 0) {
       setControlTube(undefined);
@@ -263,12 +268,13 @@ function VisiumPermForm() {
           <div className="flex flex-row" />
           <LabwareScanner
             onAdd={(labware) => {
-              setControlTube(labware);
+              setControlTube(extractLabwareFromFlagged([labware])[0]);
             }}
             onRemove={() => {
               setControlTube(undefined);
             }}
             limit={1}
+            enableFlaggedLabwareCheck={true}
           >
             <LabwareScanPanel columns={[columns.barcode()]} />
           </LabwareScanner>
@@ -278,7 +284,7 @@ function VisiumPermForm() {
 
       <div className="flex flex-row items-center justify-around">
         <Labware
-          labware={labwares[0]}
+          labware={labwareFields[0]}
           slotBuilder={(slot: SlotFieldsFragment) => {
             if (addressToIndexMap.has(slot.address)) {
               return isSlotEmpty(slot) ? (

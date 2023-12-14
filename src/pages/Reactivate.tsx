@@ -1,6 +1,6 @@
 import {
   CommentFieldsFragment,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   ReactivateLabware,
   ReactivateLabwareMutation
 } from '../types/sdk';
@@ -26,6 +26,7 @@ import MutedText from '../components/MutedText';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
 import PinkButton from '../components/buttons/PinkButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
+import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required('SGP Number is a required field'),
@@ -61,7 +62,7 @@ export const Reactivate = () => {
   const comments = useLoaderData() as CommentFieldsFragment[];
 
   const isLabwareInactive = useCallback(
-    (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): string[] => {
+    (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): string[] => {
       return !foundLabware.discarded && !foundLabware.destroyed
         ? ['This labware is neither discarded nor destroyed.']
         : [];
@@ -81,7 +82,7 @@ export const Reactivate = () => {
       }
     });
   }, []);
-  const [labwareToReactivate, setLabwareToReactivate] = React.useState<LabwareFieldsFragment[]>([]);
+  const [labwareToReactivate, setLabwareToReactivate] = React.useState<LabwareFlaggedFieldsFragment[]>([]);
   const [currentForm, sendForm] = useMachine(() => formSubmitMachine);
 
   const { serverError, submissionResult } = currentForm.context;
@@ -167,7 +168,10 @@ export const Reactivate = () => {
                               </div>
                               <div className="flex flex-row">
                                 <div className="flex flex-col w-full" data-testid={'labware'}>
-                                  <Labware labware={labware} name={labware.labwareType.name} />
+                                  <Labware
+                                    labware={extractLabwareFromFlagged([labware])[0]}
+                                    name={labware.labwareType.name}
+                                  />
                                 </div>
                                 <div className="flex flex-col w-full bg-gray-100">
                                   <div className="flex flex-row w-full p-4">

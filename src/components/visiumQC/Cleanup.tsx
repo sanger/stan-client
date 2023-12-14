@@ -1,5 +1,10 @@
-import React from 'react';
-import { AddressCommentInput, CommentFieldsFragment, LabwareFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
+import React, { useMemo } from 'react';
+import {
+  AddressCommentInput,
+  CommentFieldsFragment,
+  LabwareFlaggedFieldsFragment,
+  SlotFieldsFragment
+} from '../../types/sdk';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
@@ -10,10 +15,11 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { LabwareTypeName } from '../../types/stan';
 import SlotComments from '../slotComments/SlotComments';
 import Panel from '../Panel';
+import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 type CleanupProps = {
   comments: CommentFieldsFragment[];
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   removeLabware: (barcode: string) => void;
 };
 const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
@@ -28,6 +34,8 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
         }),
     [labware]
   );
+
+  const labwareFields = useMemo(() => extractLabwareFromFlagged([labware])[0], [labware]);
 
   /**Initialise all comments for slots when labware changes**/
   React.useEffect(() => {
@@ -115,13 +123,13 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
                     />
                   )}
                   <div className="flex flex-col mt-2" data-testid={'labware'}>
-                    <Labware labware={labware} name={labware.labwareType.name} />
+                    <Labware labware={labwareFields} name={labware.labwareType.name} />
                   </div>
                 </div>
               </Panel>
             ) : (
               <div className="bg-blue-100" data-testid={'labware'}>
-                <Labware labware={labware} slotBuilder={slotBuilder} />
+                <Labware labware={labwareFields} slotBuilder={slotBuilder} />
               </div>
             )}
 

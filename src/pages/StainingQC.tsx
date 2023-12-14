@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useState } from 'react';
 import {
   GetStainingQcInfoQuery,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   LabwareResult as CoreLabwareResult,
   PassFail,
   RecordStainResultMutation,
@@ -22,6 +22,7 @@ import Panel from '../components/Panel';
 import { useCollection } from '../lib/hooks/useCollection';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
 type StainingQCProps = {
   info: GetStainingQcInfoQuery;
@@ -99,14 +100,14 @@ export default function StainingQC({ info }: StainingQCProps) {
 
   const { serverError } = current.context;
   const onAddLabware = useCallback(
-    (labware: LabwareFieldsFragment) => {
+    (labware: LabwareFlaggedFieldsFragment) => {
       labwareResults.append(buildLabwareResult(labware));
     },
     [labwareResults]
   );
 
   const onRemoveLabware = useCallback(
-    (labware: LabwareFieldsFragment) => {
+    (labware: LabwareFlaggedFieldsFragment) => {
       labwareResults.remove(labware.barcode);
     },
     [labwareResults]
@@ -155,7 +156,7 @@ export default function StainingQC({ info }: StainingQCProps) {
 
             <p>Please scan in any slides you wish to QC.</p>
 
-            <LabwareScanner onAdd={onAddLabware} onRemove={onRemoveLabware}>
+            <LabwareScanner onAdd={onAddLabware} onRemove={onRemoveLabware} enableFlaggedLabwareCheck={true}>
               {({ labwares, removeLabware }) =>
                 labwares.map(
                   (labware) =>
@@ -163,7 +164,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                       <Panel key={labware.barcode}>
                         <LabwareResult
                           initialLabwareResult={labwareResults.getItem(labware.barcode)!}
-                          labware={labware}
+                          labware={extractLabwareFromFlagged([labware])[0]}
                           availableComments={info.comments}
                           onRemoveClick={removeLabware}
                           commentsForSlotSections
@@ -211,7 +212,7 @@ export default function StainingQC({ info }: StainingQCProps) {
   );
 }
 
-function buildLabwareResult(labware: LabwareFieldsFragment): CoreLabwareResult {
+function buildLabwareResult(labware: LabwareFlaggedFieldsFragment): CoreLabwareResult {
   return {
     barcode: labware.barcode,
     sampleResults: labware.slots.filter(isSlotFilled).map((slot) => ({

@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect } from 'react';
-import { FindPlanDataQuery, LabwareFieldsFragment } from '../../types/sdk';
+import { FindPlanDataQuery, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import { planFinderMachine } from './planFinder.machine';
 import Warning from '../notifications/Warning';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
+import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 type PlanFinderParams = {
   /**
@@ -71,8 +72,8 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
    * Callback for when the user submits the barcode in the <ScanInput />
    */
   const handleOnScan = useCallback(
-    (labware: LabwareFieldsFragment) => {
-      send({ type: 'SUBMIT_LABWARE', labware });
+    (labware: LabwareFlaggedFieldsFragment) => {
+      send({ type: 'SUBMIT_LABWARE', labware: extractLabwareFromFlagged([labware])[0] });
     },
     [send]
   );

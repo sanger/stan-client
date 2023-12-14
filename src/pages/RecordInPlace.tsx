@@ -131,6 +131,7 @@ export default function RecordInPlace({ title, operationType, equipment, columns
                           )
                         }
                         locked={current.matches('submitted')}
+                        enableFlaggedLabwareCheck={true}
                       >
                         <LabwareScanPanel columns={columns} />
                       </LabwareScanner>

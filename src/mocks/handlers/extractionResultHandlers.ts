@@ -1,5 +1,5 @@
 import { graphql } from 'msw';
-import { ExtractResultQuery, ExtractResultQueryVariables, PassFail } from '../../types/sdk';
+import { ExtractResultQuery, ExtractResultQueryVariables, LabwareFlagged, PassFail } from '../../types/sdk';
 import labwareFactory from '../../lib/factories/labwareFactory';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../types/stan';
@@ -10,9 +10,10 @@ const extractionResultHandlers = [
     const labwareType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.TUBE);
     // Create the new bit of labware
     const newLabware = labwareFactory.build({
-      labwareType
-    });
-    newLabware.barcode = req.variables.barcode;
+      labwareType,
+      barcode: req.variables.barcode
+    }) as LabwareFlagged;
+    newLabware.flagged = req.variables.barcode.endsWith('00');
 
     return res(
       ctx.data({

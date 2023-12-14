@@ -1,4 +1,11 @@
-import { Labware, LabwareFieldsFragment, LabwareState, LabwareType, SlotFieldsFragment } from '../../types/sdk';
+import {
+  Labware,
+  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
+  LabwareState,
+  LabwareType,
+  SlotFieldsFragment
+} from '../../types/sdk';
 import { cycleColors } from '../helpers';
 import { orderBy } from 'lodash';
 import { Addressable, LabwareTypeName } from '../../types/stan';
@@ -184,6 +191,14 @@ export const tissue = (labware: LabwareFieldsFragment | undefined) => {
  * @param labware - The labware to check for samples.
  * @returns `true` if samples are found in any slot, `false` otherwise.
  */
-export const hasSamples = (labware: LabwareFieldsFragment): boolean => {
+export const hasSamples = (labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment): boolean => {
   return labware.slots.some((slot) => slot.samples && slot.samples.length > 0);
+};
+
+export const convertLabwareToFlaggedLabware = (labware: LabwareFieldsFragment[]): LabwareFlaggedFieldsFragment[] => {
+  return labware.map((lw) => ({ flagged: false, ...lw } as LabwareFlaggedFieldsFragment));
+};
+
+export const extractLabwareFromFlagged = (flagged: LabwareFlaggedFieldsFragment[]): LabwareFieldsFragment[] => {
+  return flagged.map(({ flagged, ...rest }) => rest as LabwareFieldsFragment);
 };

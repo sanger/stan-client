@@ -1,4 +1,4 @@
-import { LabwareFieldsFragment, Maybe } from '../../../types/sdk';
+import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, Maybe } from '../../../types/sdk';
 import { Address, NewLabwareLayout } from '../../../types/stan';
 
 export interface LayoutPlan {
@@ -25,7 +25,7 @@ export interface LayoutPlan {
 
 export interface Source {
   sampleId: number;
-  labware: LabwareFieldsFragment;
+  labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment;
   newSection: number;
   address?: Maybe<Address>;
   region?: string;

@@ -19,7 +19,7 @@ import ReagentTransferSlotMapper from '../components/slotMapper/ReagentTransferS
 import labwareFactory from '../lib/factories/labwareFactory';
 import { labwareTypeInstances } from '../lib/factories/labwareTypeFactory';
 import MutedText from '../components/MutedText';
-import { buildLabwareFragment } from '../lib/helpers/labwareHelper';
+import { buildLabwareFragment, extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
 import { ErrorMessage } from '../components/forms';
 import Label from '../components/forms/Label';
@@ -165,7 +165,7 @@ function DualIndexPlate() {
                   onChange={(labwares) =>
                     send({
                       type: 'SET_DESTINATION_LABWARE',
-                      labware: labwares[0]
+                      labware: extractLabwareFromFlagged(labwares)[0]
                     })
                   }
                   locked={destLabware !== undefined}

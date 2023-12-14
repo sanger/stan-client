@@ -6,7 +6,13 @@ import { usePrevious } from '../../lib/hooks';
 import WhiteButton from '../buttons/WhiteButton';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
 import RemoveButton from '../buttons/RemoveButton';
-import { LabwareFieldsFragment, Maybe, SlotFieldsFragment, SlotPassFailFieldsFragment } from '../../types/sdk';
+import {
+  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
+  Maybe,
+  SlotFieldsFragment,
+  SlotPassFailFieldsFragment
+} from '../../types/sdk';
 import SlotMapperTable from './SlotMapperTable';
 import Heading from '../Heading';
 import MutedText from '../MutedText';
@@ -20,6 +26,7 @@ import createSlotMapperMachine from './slotMapper.machine';
 import PinkButton from '../buttons/PinkButton';
 import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
+import { convertLabwareToFlaggedLabware, extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 type LabwareType = {
   labwareType?: string;
@@ -56,6 +63,8 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   const [current, send] = useMachine(() => memoSlotMapperMachine);
 
   const { inputLabware, outputSlotCopies, colorByBarcode, failedSlots, errors } = current.context;
+
+  const flaggedInputLabware = useMemo(() => convertLabwareToFlaggedLabware(inputLabware), [inputLabware]);
 
   /**
    * State to track the current input labware (for paging)
@@ -570,9 +579,10 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
    * Callback whenever the input labware is added or removed by the labware scanner
    */
   const onLabwareScannerChange = React.useCallback(
-    (labware: LabwareFieldsFragment[]) => {
-      send({ type: 'UPDATE_INPUT_LABWARE', labware });
-      onInputLabwareChange?.(labware);
+    (labware: LabwareFlaggedFieldsFragment[]) => {
+      const labwareFields = extractLabwareFromFlagged([labware][0]);
+      send({ type: 'UPDATE_INPUT_LABWARE', labware: labwareFields });
+      onInputLabwareChange?.(labwareFields);
     },
     [send, onInputLabwareChange]
   );
@@ -653,7 +663,11 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
         )}
 
         <div id="inputLabwares" className="bg-gray-100 p-4">
-          <LabwareScanner initialLabwares={inputLabware} onChange={onLabwareScannerChange} limit={inputLabwareLimit}>
+          <LabwareScanner
+            initialLabwares={flaggedInputLabware}
+            onChange={onLabwareScannerChange}
+            limit={inputLabwareLimit}
+          >
             {(props) => {
               if (!currentInputLabware) {
                 return <MutedText>Add labware using the scan input above</MutedText>;

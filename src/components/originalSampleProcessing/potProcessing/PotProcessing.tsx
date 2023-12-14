@@ -1,6 +1,6 @@
 import {
   GetPotProcessingInfoQuery,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   PerformTissuePotMutation,
   PotProcessingRequest
 } from '../../../types/sdk';
@@ -91,7 +91,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
   const buildPlanLayouts = React.useCallback(
     (
       plans: Map<string, NewLabwareLayout>,
-      sourceLabware: LabwareFieldsFragment[],
+      sourceLabware: LabwareFlaggedFieldsFragment[],
       sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
       confirmAction?: (cid: string, plan: undefined) => void,

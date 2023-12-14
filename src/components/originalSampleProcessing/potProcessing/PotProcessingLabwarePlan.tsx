@@ -1,4 +1,4 @@
-import { GetPotProcessingInfoQuery, LabwareFieldsFragment } from '../../../types/sdk';
+import { GetPotProcessingInfoQuery, LabwareFlaggedFieldsFragment } from '../../../types/sdk';
 import React from 'react';
 import { useMachine } from '@xstate/react';
 import { motion } from 'framer-motion';
@@ -22,7 +22,7 @@ type PotProcessingLabwarePlanProps = {
   /**
    * Source labware scanned
    */
-  sourceLabware: LabwareFieldsFragment[];
+  sourceLabware: LabwareFlaggedFieldsFragment[];
   /**
    * Destination labware plans created
    */
@@ -54,7 +54,7 @@ type PotProcessingLabwarePlanProps = {
  * Builds the initial layout for this plan.
  */
 function buildInitialLayoutPlan(
-  sourceLabware: Array<LabwareFieldsFragment>,
+  sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
   outputLabware: NewLabwareLayout
 ) {

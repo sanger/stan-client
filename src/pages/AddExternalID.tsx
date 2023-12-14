@@ -83,6 +83,7 @@ export default function AddExternalID() {
                       onRemove={() => {
                         setFieldValue('labwareBarcode', '');
                       }}
+                      enableFlaggedLabwareCheck={true}
                     >
                       <motion.div variants={variants.fadeInWithLift}>
                         <LabwareScanTable

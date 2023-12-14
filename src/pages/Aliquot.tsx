@@ -23,6 +23,7 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import aliquotMachine, { AliquotContext } from '../lib/machines/aliquot/aliquotMachine';
 import { Input } from '../components/forms/Input';
 import WhiteButton from '../components/buttons/WhiteButton';
+import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
 /**Create table data from Aliquot mutation results*/
 function buildAliquotTableData(ctx: AliquotContext) {
@@ -115,9 +116,10 @@ function Aliquot() {
             <Heading level={3}>Source Tube</Heading>
 
             <LabwareScanner
-              onChange={(labwares) => onLabwareScannerChange(labwares[0])}
+              onChange={(labwares) => onLabwareScannerChange(extractLabwareFromFlagged(labwares)[0])}
               locked={scannerLocked}
               limit={1}
+              enableFlaggedLabwareCheck={true}
             >
               <LabwareScanPanel columns={columns} />
             </LabwareScanner>

@@ -1,6 +1,6 @@
 import Panel from '../Panel';
-import React, { useState } from 'react';
-import { CommentFieldsFragment, LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import React, { useMemo, useState } from 'react';
+import { CommentFieldsFragment, LabwareFlaggedFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
@@ -8,9 +8,10 @@ import SlotMeasurements, { MeasurementConfigProps } from '../slotMeasurement/Slo
 import { useFormikContext } from 'formik';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
+import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 export type CDNAConcentrationProps = {
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   slotMeasurements: SlotMeasurementRequest[] | undefined;
   concentrationComments: CommentFieldsFragment[];
   removeLabware: (barcode: string) => void;
@@ -40,6 +41,8 @@ const CDNAConcentration = ({
   const selectedMeasurement = React.useMemo(() => {
     return measurementConfig.find((measurement) => measurement.name === measurementName);
   }, [measurementName, measurementConfig]);
+
+  const labwareFields = useMemo(() => extractLabwareFromFlagged([labware])[0], [labware]);
 
   /***
    * When labwares changes, the slotMeasurements has to be initialized accordingly
@@ -139,7 +142,7 @@ const CDNAConcentration = ({
                 )}
               </div>
               <div className="flex flex-col w-full items-end justify-center p-4" data-testid={'labware'}>
-                <Labware labware={labware} name={labware.labwareType.name} />
+                <Labware labware={labwareFields} name={labware.labwareType.name} />
               </div>
             </div>
           </Panel>

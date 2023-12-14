@@ -9,7 +9,7 @@ import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
 import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
-import { LabwareFieldsFragment, LabwareState, SlotCopyContent } from '../types/sdk';
+import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, LabwareState, SlotCopyContent } from '../types/sdk';
 import slotCopyMachine, { Destination, Source } from '../lib/machines/slotCopy/slotCopyMachine';
 import { Link, useNavigate } from 'react-router-dom';
 import { reload } from '../lib/sdk';
@@ -26,6 +26,7 @@ import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import RemoveButton from '../components/buttons/RemoveButton';
 import { objectKeys } from '../lib/helpers';
+import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
 type PageParams = {
   title: string;
@@ -41,7 +42,7 @@ interface DestinationLabwareScanPanelProps {
   labware: Destination | undefined;
   onAddLabware: () => void;
   onChangeBioState: (bioState: string) => void;
-  onLabwareScan?: (labware: LabwareFieldsFragment[]) => void;
+  onLabwareScan?: (labware: LabwareFlaggedFieldsFragment[]) => void;
   onDestinationSelectionModeChange?: (mode: DestinationSelectionMode) => void;
 }
 
@@ -70,7 +71,7 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
 }) => {
   const [destinationSelectionMode, setDestinationSelectionMode] = React.useState(DestinationSelectionMode.DEFAULT);
   const validateLabware = useCallback(
-    (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): string[] => {
+    (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): string[] => {
       return foundLabware.state === LabwareState.Active ? [] : ['Labware is not active'];
     },
     []
@@ -312,8 +313,8 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   /**Handler for output labware selection mode change**/
   const onDestinationLabwareScan = React.useCallback(
-    (labware: LabwareFieldsFragment[]) => {
-      send({ type: 'UPDATE_DESTINATION_LABWARE', labware });
+    (labware: LabwareFlaggedFieldsFragment[]) => {
+      send({ type: 'UPDATE_DESTINATION_LABWARE', labware: extractLabwareFromFlagged(labware) });
     },
     [send]
   );
