@@ -18,6 +18,7 @@ import { findUploadedFiles } from '../lib/services/fileService';
 import Label from '../components/forms/Label';
 import { Input } from '../components/forms/Input';
 import Warning from '../components/notifications/Warning';
+import { UploadResult } from '../components/upload/useUpload';
 
 export type FileManagerProps = {
   /**Display upload option?**/
@@ -112,12 +113,10 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true }: FileMana
 
   /**Callback notification send from child after finishing upload**/
   const onFileUploadFinished = React.useCallback(
-    (file: File, isSuccess: boolean) => {
+    (result: UploadResult<any>[]) => {
       //Upload failed, return
-      if (!isSuccess) return;
-
       /** Notify user with success message and also update the files section with this new uploaded file**/
-      toast(ToastSuccess(file.name), {
+      toast(ToastSuccess(result.map((res) => res.file.name).join(',')), {
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 4000,
         hideProgressBar: true
@@ -133,18 +132,20 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true }: FileMana
 
   /**Callback function to confirm the upload which is called before upload action**/
   const onConfirmUpload = React.useCallback(
-    (file: File): ConfirmUploadProps | undefined => {
+    (files: File[]): ConfirmUploadProps | undefined => {
       /**
        * If a file already exists in the same name, give a warning to user about file getting overwritten
        */
       if (uploadedFilesForWorkNumber.length > 0 && memoAllSelectedWork.length) {
-        const filesWithSameName = uploadedFilesForWorkNumber.filter((fileExist) => fileExist.name === file.name);
+        const filesWithSameName = files.filter((fileExist) =>
+          uploadedFilesForWorkNumber.some((file) => fileExist.name === file.name)
+        );
         if (filesWithSameName.length > 0) {
           return {
             title: 'File already exists',
-            confirmMessage: `File ${file?.name} already uploaded for ${filesWithSameName
-              .map((file) => file.work.workNumber)
-              .join(',')} and will be over-written.`
+            confirmMessage: `File(s) ${filesWithSameName
+              .map((file) => file.name)
+              .join(',')} already uploaded for selected work numbers and will be over-written.`
           };
         } else {
           return undefined;
@@ -239,6 +240,7 @@ const FileManager: React.FC<FileManagerProps> = ({ showUpload = true }: FileMana
                       confirmUpload={onConfirmUpload}
                       notifyUploadOutcome={onFileUploadFinished}
                       errorField={'message'}
+                      allowMultipleFiles={true}
                     />
                   </motion.div>
                 )}

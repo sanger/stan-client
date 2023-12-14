@@ -27,6 +27,7 @@ const aliquotHandlers = [
       // Create the new bit of destination labware using the same slots and samples as the source
 
       const newLabware = labwareFactory.build({
+        barcode: `STAN-100${indx + 1}`, //assign fixed barcodes to conduct more reliable test cases
         labwareType,
         slots: labware.slots
       });

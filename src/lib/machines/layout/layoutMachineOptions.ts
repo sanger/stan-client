@@ -3,6 +3,7 @@ import { LayoutContext, Source } from './layoutContext';
 import { LayoutEvents } from './layoutEvents';
 import { assign } from '@xstate/immer';
 import { isEqual } from 'lodash';
+import { tissue } from '../../helpers/labwareHelper';
 
 export const layoutMachineKey = 'layoutMachine';
 
@@ -44,6 +45,7 @@ export const machineOptions: Partial<MachineOptions<LayoutContext, LayoutEvents>
         plannedActions.delete(e.address);
       } else {
         const action: Source = Object.assign({}, ctx.selected);
+        action.replicateNumber = tissue(Object.assign({}, action.labware))?.replicate ?? '';
         plannedActions.set(e.address, [action]);
       }
     }),

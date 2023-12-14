@@ -107,11 +107,11 @@ describe('Aliquoting', () => {
   context('while printing the label from table', () => {
     before(() => {
       cy.findByTestId('newLabelDiv').within(() => {
-        cy.contains('STAN-1005').parents('tr').find('button').click();
+        cy.contains('STAN-1004').parents('tr').find('button').click();
       });
     });
     it('should display a print success message', () => {
-      cy.findByText('Tube Printer successfully printed STAN-1005').should('be.visible');
+      cy.findByText('Tube Printer successfully printed STAN-1004').should('be.visible');
     });
   });
 
@@ -120,7 +120,7 @@ describe('Aliquoting', () => {
       cy.findByRole('button', { name: /Print Labels/ }).click();
     });
     it('should display a print success message', () => {
-      cy.findByText('Tube Printer successfully printed STAN-1005, STAN-1006, STAN-1007, STAN-1008').should(
+      cy.findByText('Tube Printer successfully printed STAN-1001, STAN-1002, STAN-1003, STAN-1004').should(
         'be.visible'
       );
     });

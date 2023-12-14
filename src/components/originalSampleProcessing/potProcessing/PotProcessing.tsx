@@ -274,7 +274,8 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
           columns.fixative(),
           columns.donorId(),
           columns.tissueType(),
-          columns.spatialLocation()
+          columns.spatialLocation(),
+          columns.replicate()
         ]}
         successMessage={'Pot labware generation complete'}
       />
@@ -337,7 +338,13 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
                     numPlansToCreate={numLabware}
                     onPlanChanged={() => {}}
                     buildPlanLayouts={buildPlanLayouts}
-                    columns={[columns.barcode(), columns.donorId(), columns.tissueType(), columns.spatialLocation()]}
+                    columns={[
+                      columns.barcode(),
+                      columns.donorId(),
+                      columns.tissueType(),
+                      columns.spatialLocation(),
+                      columns.replicate()
+                    ]}
                     buildPlanCreationSettings={buildPlanCreationSettings}
                     singleSourceAllowed={true}
                   />

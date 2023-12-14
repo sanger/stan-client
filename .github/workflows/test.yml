@@ -37,6 +37,12 @@ jobs:
           config: baseUrl=http://localhost:3000
           timeout-minutes: 5
           browser: chrome
+      # store any screenshots of the failing tests as artifacts
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
 
   snyk_test:
     name: Run snyk tests

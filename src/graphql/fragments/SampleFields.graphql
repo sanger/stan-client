@@ -13,6 +13,9 @@ fragment SampleFields on Sample {
       }
       code
     }
+    hmdmc {
+      hmdmc
+    }
     replicate
     medium {
       name

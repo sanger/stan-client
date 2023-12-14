@@ -102,3 +102,10 @@ export const externalId: ColumnFactory = () => ({
   Header: 'External ID',
   accessor: (sample) => sample.tissue.externalName
 });
+
+export const huMFre: ColumnFactory = () => {
+  return {
+    Header: 'HuMFre',
+    accessor: (sample) => sample.tissue.hmdmc?.hmdmc
+  };
+};

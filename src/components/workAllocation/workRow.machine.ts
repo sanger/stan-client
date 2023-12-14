@@ -32,6 +32,11 @@ type WorkRowMachineContext = {
    * Errors from server, if any
    */
   serverErrors?: Maybe<ClientError>;
+
+  /**
+   * success message, if any
+   */
+  serverSuccess?: Maybe<string>;
 };
 
 export type WorkRowEvent =
@@ -252,6 +257,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         assignWorkDnapProject: assign((ctx, e) => {
           if (e.type !== 'done.invoke.updateWorkDnapProject') return;
           ctx.workWithComment.work = e.data.updateWorkDnapStudy;
+          ctx.serverSuccess = 'DNAP project successfully updated to ' + e.data.updateWorkDnapStudy.dnapStudy!.name;
         }),
         toggleEditMode: assign((ctx) => (ctx.editModeEnabled = !ctx.editModeEnabled)),
         assignServerError: assign((ctx, e) => {
