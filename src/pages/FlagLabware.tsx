@@ -71,14 +71,15 @@ const FlagLabware = () => {
 
   const checkRelatedFlagges = useCallback(
     async (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): Promise<string[]> => {
-      return stanCore
-        .GetLabwareFlagDetails({
+      try {
+        const response = await stanCore.GetLabwareFlagDetails({
           barcodes: [foundLabware.barcode]
-        })
-        .then((response) => {
-          setRelatedFlags(response.labwareFlagDetails);
-          return [];
         });
+        setRelatedFlags(response.labwareFlagDetails);
+        return [];
+      } catch (error) {
+        return ['Error fetching labware flag details.'];
+      }
     },
     [stanCore]
   );
@@ -132,7 +133,6 @@ const FlagLabware = () => {
 
                                 <Field
                                   as={'textarea'}
-                                  placeholder="Enter your the reason for flagging the labware here."
                                   rows={5}
                                   cols={77}
                                   maxLength={500}
