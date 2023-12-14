@@ -35,7 +35,7 @@ import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
 import DataTable from '../components/DataTable';
 import RemoveButton from '../components/buttons/RemoveButton';
 import EditIcon from '../components/icons/EditIcon';
-import { useNavigate } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { Input } from '../components/forms/Input';
 import DownloadIcon from '../components/icons/DownloadIcon';
 
@@ -99,16 +99,13 @@ const labwareBioStateCheck = (labwares: LabwareFieldsFragment[], foundLabware: L
   return [];
 };
 
-interface PageParams {
-  releaseInfo: GetReleaseInfoQuery;
-}
-
 enum ReleaseType {
   WORK_NUMBER = 'SGP Number',
   LABWARE_LOCATION = 'Labware/Location'
 }
 
-function Release({ releaseInfo }: PageParams) {
+function Release() {
+  const releaseInfo = useLoaderData() as GetReleaseInfoQuery;
   const stanCore = useContext(StanCoreContext);
   const [releaseLabware, setReleaseLabware] = React.useState<ReleaseLabware[]>([]);
   const [labwareFromSGP, setLabwareFromSGP] = React.useState<LabwareFieldsFragment[]>([]);

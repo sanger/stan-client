@@ -24,7 +24,7 @@ import SearchService from '../lib/services/searchService';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLoaderData, useNavigate, useSearchParams } from 'react-router-dom';
 import TopScrollingBar from '../components/TopScrollingBar';
 import ExternalIDFieldSearchInfo from '../components/info/ExternalFieldInfo';
 
@@ -82,12 +82,9 @@ const emptyFindRequest: FormFindRequest = {
 
 const emptyFindRequestKeys: Array<keyof FindRequest> = objectKeys(emptyFindRequest);
 
-type SearchProps = {
-  searchInfo: GetSearchInfoQuery;
-};
-
-function Search({ searchInfo }: SearchProps) {
+function Search() {
   const [searchParams] = useSearchParams();
+  const searchInfo = useLoaderData() as GetSearchInfoQuery;
 
   const findRequest = React.useMemo(() => {
     const request: FormFindRequest = emptyFindRequestKeys.reduce((request, key) => {

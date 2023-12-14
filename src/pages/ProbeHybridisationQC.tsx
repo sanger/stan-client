@@ -31,10 +31,7 @@ import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
 import * as Yup from 'yup';
-
-type SectionComments = {
-  comments: CommentFieldsFragment[];
-};
+import { useLoaderData } from 'react-router-dom';
 
 type SampleAddressFormRow = {
   [key: string]: string[]; //key: address-sampleId, values: the selected comments
@@ -128,7 +125,8 @@ const formInitialValues: ProbeHybridisationQCFormValues = {
   }
 };
 
-export default function ProbeHybridisationQC({ comments }: SectionComments) {
+export default function ProbeHybridisationQC() {
+  const comments = useLoaderData() as CommentFieldsFragment[];
   const stanCore = useContext(StanCoreContext);
 
   const labwares = useCollection<LabwareFieldsFragment>({
