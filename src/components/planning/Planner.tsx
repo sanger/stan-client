@@ -2,12 +2,12 @@ import React, { createContext, useCallback, useEffect, useReducer } from 'react'
 import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, LabwareTypeFieldsFragment, Maybe } from '../../types/sdk';
 import { uniqueId } from 'lodash';
 import BlueButton from '../buttons/BlueButton';
-import { NewLabwareLayout } from '../../types/stan';
+import { NewFlaggedLabwareLayout } from '../../types/stan';
 import produce, { castDraft } from 'immer';
 import { unregisteredLabwareFactory } from '../../lib/factories/labwareFactory';
 import LabwareScanTable from '../labwareScanPanel/LabwareScanPanel';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
-import { buildSampleColors, extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
+import { buildSampleColors } from '../../lib/helpers/labwareHelper';
 import Heading from '../Heading';
 import { getNumberOfDaysBetween } from '../../lib/helpers';
 import Warning from '../notifications/Warning';
@@ -38,7 +38,7 @@ type PlannerProps<M> = {
    *Callback to render the plan layouts created. This allows to customise the plan layout depending on the context it is called.
    */
   buildPlanLayouts: (
-    layout: Map<string, NewLabwareLayout>, //All layouts created
+    layout: Map<string, NewFlaggedLabwareLayout>, //All layouts created
     sourceLabware: LabwareFlaggedFieldsFragment[],
     sampleColors: Map<number, string>,
     deleteAction: (cid: string) => void,
@@ -71,7 +71,7 @@ export type PlanChangedProps<M> = {
   numberOfPlans: number;
   completedPlans: Array<M>;
   sourceLabware: Array<LabwareFlaggedFieldsFragment>;
-  layoutPlans: Map<string, NewLabwareLayout>;
+  layoutPlans: Map<string, NewFlaggedLabwareLayout>;
 };
 
 /**
@@ -109,7 +109,7 @@ type PlannerState<M> = {
   /**
    * Map of client ID to labware
    */
-  labwarePlans: Map<string, NewLabwareLayout>;
+  labwarePlans: Map<string, NewFlaggedLabwareLayout>;
 
   /**
    * Map of client ID to completed plans
@@ -166,7 +166,7 @@ function reducer<M>(state: PlannerState<M>, action: Action<M>): PlannerState<M> 
                   labwareType: action.labwareType
                 }
               }
-            )
+            ) as NewFlaggedLabwareLayout
           );
         }
         // As soon as there are any plans present, stop the user from adding
@@ -270,7 +270,7 @@ export default function Planner<M>({
    * Used by various components to keep the same samples the same colours within different components.
    */
   const sampleColors: Map<number, string> = React.useMemo(() => {
-    return buildSampleColors(extractLabwareFromFlagged(state.sourceLabware));
+    return buildSampleColors(state.sourceLabware);
   }, [state.sourceLabware]);
 
   /**

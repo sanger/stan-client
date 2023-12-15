@@ -22,7 +22,6 @@ import Panel from '../components/Panel';
 import { useCollection } from '../lib/hooks/useCollection';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
-import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
 type StainingQCProps = {
   info: GetStainingQcInfoQuery;
@@ -164,7 +163,7 @@ export default function StainingQC({ info }: StainingQCProps) {
                       <Panel key={labware.barcode}>
                         <LabwareResult
                           initialLabwareResult={labwareResults.getItem(labware.barcode)!}
-                          labware={extractLabwareFromFlagged([labware])[0]}
+                          labware={labware}
                           availableComments={info.comments}
                           onRemoveClick={removeLabware}
                           commentsForSlotSections

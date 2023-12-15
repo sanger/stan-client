@@ -26,9 +26,7 @@ import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import ProbeTable from '../components/probeHybridisation/ProbeTable';
 import { getCurrentDateTime } from '../types/stan';
 import ProbeAddPanel from '../components/probeHybridisation/ProbeAddPanel';
-type ProbeHybridisationXeniumProps = {
-  probePanelInfo: GetProbePanelsQuery;
-};
+import { useLoaderData } from 'react-router-dom';
 
 export type ProbeHybridisationXeniumFormValues = {
   labware: ProbeOperationLabware[];
@@ -43,9 +41,8 @@ const formInitialValues: ProbeHybridisationXeniumFormValues = {
   performed: getCurrentDateTime(),
   workNumberAll: ''
 };
-const ProbeHybridisationXenium: React.FC<ProbeHybridisationXeniumProps> = ({
-  probePanelInfo
-}: ProbeHybridisationXeniumProps) => {
+const ProbeHybridisationXenium: React.FC = () => {
+  const probePanelInfo = useLoaderData() as GetProbePanelsQuery;
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
     return createFormMachine<ProbeOperationRequest, RecordProbeOperationMutation>().withConfig({

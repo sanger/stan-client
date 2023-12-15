@@ -7,9 +7,10 @@ import {
   PlanMutation
 } from '../../types/sdk';
 import AppShell from '../../components/AppShell';
-import { LabwareTypeName, NewLabwareLayout } from '../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import PinkButton from '../../components/buttons/PinkButton';
 import ButtonBar from '../../components/ButtonBar';
+import { Link, useLoaderData } from 'react-router-dom';
 import _ from 'lodash';
 import { useConfirmLeave } from '../../lib/hooks';
 import LabwarePlan from '../../components/planning/LabwarePlan';
@@ -19,7 +20,6 @@ import { selectOptionValues } from '../../components/forms';
 import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
 import PromptOnLeave from '../../components/notifications/PromptOnLeave';
 import { convertLabwareToFlaggedLabware } from '../../lib/helpers/labwareHelper';
-import { Link } from 'react-router-dom';
 
 /**
  * Types of labware the user is allowed to section onto
@@ -35,11 +35,7 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
   LabwareTypeName.XENIUM
 ];
 
-type SectioningParams = {
-  readonly sectioningInfo: GetSectioningInfoQuery;
-};
-
-function Plan({ sectioningInfo }: SectioningParams) {
+function Plan() {
   /**
    * The list of currently completed plans from the planner
    */
@@ -52,6 +48,7 @@ function Plan({ sectioningInfo }: SectioningParams) {
 
   const [selectedLabwareType, setSelectedLabwareType] = React.useState<string>(LabwareTypeName.TUBE);
 
+  const sectioningInfo = useLoaderData() as GetSectioningInfoQuery;
   /**
    * Limit the labware types the user can Section on to.
    */
@@ -74,7 +71,7 @@ function Plan({ sectioningInfo }: SectioningParams) {
 
   const buildPlanLayouts = React.useCallback(
     (
-      plans: Map<string, NewLabwareLayout>,
+      plans: Map<string, NewFlaggedLabwareLayout>,
       sourceLabware: LabwareFlaggedFieldsFragment[],
       sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,

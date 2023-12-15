@@ -54,7 +54,9 @@ import ProbeHybridisationQC from '../pages/ProbeHybridisationQC';
 import XeniumQC from '../pages/XeniumQC';
 import ReleaseOptions from './release/ReleaseOptions';
 import { Reactivate } from '../pages/Reactivate';
+import OrientationQC from '../pages/OrientationQC';
 import FlagLabware from '../pages/FlagLabware';
+import { NewFlaggedLabwareLayout } from '../types/stan';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -78,11 +80,11 @@ const RouteLayout = () => {
         />
         <Route
           path={'/search'}
-          element={
-            <DataFetcher dataFetcher={stanCore.GetSearchInfo}>
-              {(searchInfo) => <Search searchInfo={searchInfo} />}
-            </DataFetcher>
-          }
+          loader={async () => {
+            const searchInfo = await stanCore.GetSearchInfo();
+            return searchInfo;
+          }}
+          element={<Search />}
         />
         <Route
           path={'/work_progress_summary'}
@@ -115,12 +117,15 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/sectioning"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetSectioningInfo}>
-                {(sectioningInfo) => <Plan sectioningInfo={sectioningInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetSectioningInfo();
+              return res;
+            }}
+            element={<Plan />}
           />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/lab/sectioning/orientation_qc" element={<OrientationQC />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/lab/original_sample_processing" element={<OriginalSampleProcessing />} />
@@ -128,51 +133,51 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/original_sample_processing/block"
-            element={
-              <DataFetcher dataFetcher={() => stanCore.GetBlockProcessingInfo()}>
-                {(blockInfo) => <BlockProcessing processingInfo={blockInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetBlockProcessingInfo();
+              return res;
+            }}
+            element={<BlockProcessing />}
           />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/original_sample_processing/pot"
-            element={
-              <DataFetcher dataFetcher={() => stanCore.GetPotProcessingInfo()}>
-                {(blockInfo) => <PotProcessing processingInfo={blockInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetPotProcessingInfo();
+              return res;
+            }}
+            element={<PotProcessing />}
           />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/sample_processing_comments"
-            element={
-              <DataFetcher dataFetcher={() => stanCore.GetSampleProcessingCommentsInfo()}>
-                {(samnpleCommentsInfo) => <SampleProcessingComments sampleCommentsInfo={samnpleCommentsInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetSampleProcessingCommentsInfo();
+              return res;
+            }}
+            element={<SampleProcessingComments />}
           />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/solution_transfer"
-            element={
-              <DataFetcher dataFetcher={() => stanCore.GetSolutionTransferInfo()}>
-                {(solnTransferInfo) => <SolutionTransfer solutionTransferInfo={solnTransferInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetSolutionTransferInfo();
+              return res;
+            }}
+            element={<SolutionTransfer />}
           />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/paraffin_processing"
-            element={
-              <DataFetcher dataFetcher={() => stanCore.GetParaffinProcessingInfo()}>
-                {(paraffinProcessingInfo) => <ParaffinProcessing paraffinProcessingInfo={paraffinProcessingInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetParaffinProcessingInfo();
+              return res;
+            }}
+            element={<ParaffinProcessing />}
           />
         </Route>
         <Route element={<AuthLayout />}>
@@ -213,11 +218,11 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/extraction_result"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetRecordExtractResultInfo}>
-                {(info) => <ExtractionResult info={info} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetRecordExtractResultInfo();
+              return res;
+            }}
+            element={<ExtractionResult />}
           />
         </Route>
         <Route element={<AuthLayout />}>
@@ -226,17 +231,19 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/transfer"
-            element={<SlotCopy title={'Transfer'} initialOutputLabware={[plateFactory.build()]} />}
+            element={
+              <SlotCopy title={'Transfer'} initialOutputLabware={[plateFactory.build() as NewFlaggedLabwareLayout]} />
+            }
           />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/visium_qc"
-            element={
-              <DataFetcher dataFetcher={() => stanCore.GetComments({ includeDisabled: false })}>
-                {(visiumQCInfo) => <VisiumQC info={visiumQCInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetComments({ includeDisabled: false });
+              return res;
+            }}
+            element={<VisiumQC />}
           />
         </Route>
         <Route element={<AuthLayout />}>
@@ -251,28 +258,24 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/probe_hybridisation_xenium"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetProbePanels}>
-                {(probePanelInfo) => <ProbeHybridisationXenium probePanelInfo={probePanelInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetProbePanels();
+              return res;
+            }}
+            element={<ProbeHybridisationXenium />}
           />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/probe_hybridisation_qc"
-            element={
-              <DataFetcher
-                dataFetcher={() =>
-                  stanCore.GetComments({
-                    commentCategory: 'Probe QC',
-                    includeDisabled: false
-                  })
-                }
-              >
-                {(response) => <ProbeHybridisationQC comments={response.comments} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetComments({
+                commentCategory: 'Probe QC',
+                includeDisabled: false
+              });
+              return res.comments;
+            }}
+            element={<ProbeHybridisationQC />}
           />
         </Route>
         <Route element={<AuthLayout />}>
@@ -303,11 +306,11 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/staining"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetStainInfo}>
-                {(stainingInfo) => <Staining stainingInfo={stainingInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetStainInfo();
+              return res;
+            }}
+            element={<Staining />}
           />
         </Route>
         <Route element={<AuthLayout />}>
@@ -323,56 +326,53 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/imaging"
+            loader={async () => {
+              const recordInPlaceInfo = await stanCore.GetRecordInPlaceInfo({ category: 'scanner' });
+              return recordInPlaceInfo.equipments;
+            }}
             element={
-              <DataFetcher dataFetcher={() => stanCore.GetRecordInPlaceInfo({ category: 'scanner' })}>
-                {(recordInPlaceInfo) => (
-                  <RecordInPlace
-                    title={'Imaging'}
-                    operationType={'image'}
-                    equipment={recordInPlaceInfo.equipments}
-                    columns={[
-                      columns.barcode(),
-                      columns.donorId(),
-                      columns.labwareType(),
-                      columns.externalName(),
-                      columns.bioState()
-                    ]}
-                  />
-                )}
-              </DataFetcher>
+              <RecordInPlace
+                title={'Imaging'}
+                operationType={'image'}
+                columns={[
+                  columns.barcode(),
+                  columns.donorId(),
+                  columns.labwareType(),
+                  columns.externalName(),
+                  columns.bioState()
+                ]}
+              />
             }
           />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
             path="/admin/registration"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetRegistrationInfo}>
-                {(registrationInfo) => <BlockRegistration registrationInfo={registrationInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetRegistrationInfo();
+              return res;
+            }}
+            element={<BlockRegistration />}
           />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
             path="/admin/section_registration"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetRegistrationInfo}>
-                {(registrationInfo) => <SectionRegistration registrationInfo={registrationInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetRegistrationInfo();
+              return res;
+            }}
+            element={<SectionRegistration />}
           />
         </Route>
         <Route element={<AuthLayout />}>
           <Route
             path="/admin/tissue_registration"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetRegistrationInfo}>
-                {(registrationInfo) => {
-                  return <OriginalSampleRegistration registrationInfo={registrationInfo} />;
-                }}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetRegistrationInfo();
+              return res;
+            }}
+            element={<OriginalSampleRegistration />}
           />
         </Route>
         <Route element={<AuthLayout />}>
@@ -392,11 +392,11 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/admin/release"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetReleaseInfo}>
-                {(releaseInfo) => <Release releaseInfo={releaseInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = stanCore.GetReleaseInfo();
+              return res;
+            }}
+            element={<Release />}
           />
         </Route>
         <Route element={<AuthLayout />}>
@@ -424,21 +424,21 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/admin/destroy"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetDestroyInfo}>
-                {(destroyInfo) => <Destroy destroyInfo={destroyInfo} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetDestroyInfo();
+              return res;
+            }}
+            element={<Destroy />}
           />
         </Route>
         <Route element={<AuthLayout role={UserRole.Admin} />}>
           <Route
             path="/config"
-            element={
-              <DataFetcher dataFetcher={stanCore.GetConfiguration}>
-                {(configuration) => <Configuration configuration={configuration} />}
-              </DataFetcher>
-            }
+            loader={async () => {
+              const res = await stanCore.GetConfiguration();
+              return res;
+            }}
+            element={<Configuration />}
           />
         </Route>
         <Route

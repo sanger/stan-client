@@ -13,7 +13,7 @@ import { stanCore } from '../../lib/sdk';
 import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
 import _, { Dictionary, groupBy } from 'lodash';
 import { Address, LabwareTypeName, MachineServiceDone, MachineServiceError } from '../../types/stan';
-import { buildSampleColors, extractLabwareFromFlagged, sortDownRight } from '../../lib/helpers/labwareHelper';
+import { buildSampleColors, sortDownRight } from '../../lib/helpers/labwareHelper';
 import { ClientError } from 'graphql-request';
 import { SectionNumberMode } from './SectioningConfirm';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
@@ -229,6 +229,8 @@ export function createSectioningConfirmMachine() {
           }
         }),
         assignLayoutPlans: assign((ctx) => {
+          console.log('assignLayoutPlans');
+          console.log(ctx);
           const layoutPlans: LayoutPlan[] = Object.values(ctx.layoutPlansByLabwareType).flatMap((plan) => plan);
 
           /**Remove deleted plans**/
@@ -243,6 +245,7 @@ export function createSectioningConfirmMachine() {
           );
           /**New plans are added, so create LayoutPlan for all new plans and add to the list*/
           if (addedPlans.length > 0) {
+            console.log('adding plans');
             /**Create the layoutPlans for all newly added plans**/
             const layoutPlans = buildLayoutPlans(addedPlans, ctx.sourceLabware);
             updatedLayoutPlans = [...updatedLayoutPlans, ...layoutPlans];
@@ -490,19 +493,18 @@ function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, 
  * @param sourceLabwares the list of all source labware
  */
 function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array<LabwareFlaggedFieldsFragment>) {
-  const sources = extractLabwareFromFlagged(sourceLabwares);
-  const sampleColors = buildSampleColors(sources);
+  const sampleColors = buildSampleColors(sourceLabwares);
 
   // For each layoutPlan build a LayoutPlan
   const layoutPlans: Array<LayoutPlan> = plans.map((plan) => {
     return {
-      destinationLabware: extractLabwareFromFlagged([plan.planData.destination])[0],
+      destinationLabware: plan.planData.destination,
       sampleColors,
       plannedActions: plan.planData.plan.planActions.reduce<Map<Address, Array<Source>>>((memo, planAction) => {
         const slotActions: Array<Source> = [
           {
             sampleId: planAction.sample.id,
-            labware: sources.find((lw) => lw.id === planAction.source.labwareId)!,
+            labware: sourceLabwares.find((lw) => lw.id === planAction.source.labwareId)!,
             newSection: 0,
             address: planAction.source.address
           }

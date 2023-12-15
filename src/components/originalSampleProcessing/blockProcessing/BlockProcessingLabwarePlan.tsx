@@ -7,7 +7,7 @@ import Labware from '../../labware/Labware';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../../pages/sectioning';
 import PinkButton from '../../buttons/PinkButton';
 import Heading from '../../Heading';
-import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../../types/stan';
 import { selectOptionValues } from '../../forms';
 import Modal, { ModalBody, ModalFooter } from '../../Modal';
 import LayoutPlanner from '../../LayoutPlanner';
@@ -33,7 +33,7 @@ type BlockProcessingLabwarePlanProps = {
   /**
    * Destination labware plans created
    */
-  outputLabware: NewLabwareLayout;
+  outputLabware: NewFlaggedLabwareLayout;
   /**
    * Additional information required for block processing
    */
@@ -61,7 +61,7 @@ type BlockProcessingLabwarePlanProps = {
 function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
-  outputLabware: NewLabwareLayout
+  outputLabware: NewFlaggedLabwareLayout
 ) {
   return {
     sources: sourceLabware.flatMap((lw) =>

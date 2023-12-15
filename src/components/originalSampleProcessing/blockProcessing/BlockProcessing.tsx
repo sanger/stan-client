@@ -9,7 +9,7 @@ import { useMachine } from '@xstate/react';
 import ButtonBar from '../../ButtonBar';
 import BlueButton from '../../buttons/BlueButton';
 import React from 'react';
-import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../../types/stan';
 import columns from '../../dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
@@ -30,6 +30,7 @@ import { Row } from 'react-table';
 import FormikInput from '../../forms/Input';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import PromptOnLeave from '../../notifications/PromptOnLeave';
+import { useLoaderData } from 'react-router-dom';
 
 /**
  * Used as Formik's values
@@ -55,10 +56,12 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
 ];
 
 type BlockProcessingParams = {
-  readonly processingInfo: GetBlockProcessingInfoQuery;
+  readonly processingInfo?: GetBlockProcessingInfoQuery;
 };
 
 export default function BlockProcessing({ processingInfo }: BlockProcessingParams) {
+  const processingInfoLoaderData = useLoaderData() as GetBlockProcessingInfoQuery;
+
   const formMachine = React.useMemo(() => {
     return createFormMachine<TissueBlockRequest, PerformTissueBlockMutation>().withConfig({
       services: {
@@ -74,6 +77,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   const [current, send] = useMachine(formMachine);
 
   const { submissionResult, serverError } = current.context;
+
   /**
    * For tracking whether the user gets a prompt if they tried to navigate to another page
    */
@@ -88,13 +92,12 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   /**
    * Limit the labware types the user can Section on to.
    */
-  const allowedLabwareTypes = React.useMemo(
-    () =>
-      processingInfo
-        ? processingInfo.labwareTypes.filter((lw) => allowedLabwareTypeNames.includes(lw.name as LabwareTypeName))
-        : [],
-    [processingInfo]
-  );
+  const allowedLabwareTypes = React.useMemo(() => {
+    const blockProcessingInfo = processingInfo || processingInfoLoaderData;
+    return blockProcessingInfo
+      ? blockProcessingInfo.labwareTypes.filter((lw) => allowedLabwareTypeNames.includes(lw.name as LabwareTypeName))
+      : [];
+  }, [processingInfo, processingInfoLoaderData]);
 
   /**A source is selected for a plan, so update the mapping state between source and plan**/
   const notifySourceSelection = React.useCallback(
@@ -117,7 +120,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   /** Display created Labware plans**/
   const buildPlanLayouts = React.useCallback(
     (
-      plans: Map<string, NewLabwareLayout>,
+      plans: Map<string, NewFlaggedLabwareLayout>,
       sourceLabware: LabwareFlaggedFieldsFragment[],
       sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
@@ -126,7 +129,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
     ) => {
       type PlanWithId = {
         cid: string;
-        plan: NewLabwareLayout | undefined;
+        plan: NewFlaggedLabwareLayout | undefined;
       };
       //Group plans labware type
       const planWithKeys: PlanWithId[] = Array.from(plans.keys()).map((k) => {

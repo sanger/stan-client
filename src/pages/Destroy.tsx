@@ -19,6 +19,7 @@ import createFormMachine from '../lib/machines/form/formMachine';
 import { StanCoreContext } from '../lib/sdk';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
+import { useLoaderData } from 'react-router-dom';
 
 const initialValues: DestroyRequest = {
   barcodes: [],
@@ -33,11 +34,8 @@ function buildValidationSchema(destroyInfo: GetDestroyInfoQuery): Yup.AnyObjectS
   });
 }
 
-interface PageParams {
-  destroyInfo: GetDestroyInfoQuery;
-}
-
-const Destroy: React.FC<PageParams> = ({ destroyInfo }) => {
+const Destroy: React.FC = () => {
+  const destroyInfo = useLoaderData() as GetDestroyInfoQuery;
   const stanCore = useContext(StanCoreContext);
 
   const formMachine = React.useMemo(() => {

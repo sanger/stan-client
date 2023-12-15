@@ -8,8 +8,8 @@ import {
   VisiumAnalysisMutation,
   VisiumAnalysisMutationVariables
 } from '../../types/sdk';
-import { createLabware } from './labwareHandlers';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
+import { createFlaggedLabware } from './flagLabwareHandlers';
 
 const handlers = [
   graphql.mutation<RecordPermMutation, RecordPermMutationVariables>('RecordPerm', (req, res, ctx) => {
@@ -53,7 +53,7 @@ const handlers = [
       );
     }
 
-    const labware = createLabware(barcode);
+    const labware = createFlaggedLabware(barcode);
     const samplePositionResults: SamplePositionFieldsFragment[] = [];
     return res(
       ctx.data({

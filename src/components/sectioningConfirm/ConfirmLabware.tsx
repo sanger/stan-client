@@ -181,8 +181,8 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
                       labware.labwareType.name === LabwareTypeName.FETAL_WASTE_CONTAINER
                         ? SectionNumberSetting.HIDE
                         : mode === SectionNumberMode.Auto || current.matches('done')
-                        ? SectionNumberSetting.DISABLE
-                        : SectionNumberSetting.NORMAL
+                          ? SectionNumberSetting.DISABLE
+                          : SectionNumberSetting.NORMAL
                     }
                     comments={comments}
                     layoutPlan={layoutPlan}

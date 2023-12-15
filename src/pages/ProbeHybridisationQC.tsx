@@ -34,9 +34,7 @@ import Warning from '../components/notifications/Warning';
 import * as Yup from 'yup';
 import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
-type SectionComments = {
-  comments: CommentFieldsFragment[];
-};
+import { useLoaderData } from 'react-router-dom';
 
 type SampleAddressFormRow = {
   [key: string]: string[]; //key: address-sampleId, values: the selected comments
@@ -130,7 +128,8 @@ const formInitialValues: ProbeHybridisationQCFormValues = {
   }
 };
 
-export default function ProbeHybridisationQC({ comments }: SectionComments) {
+export default function ProbeHybridisationQC() {
+  const comments = useLoaderData() as CommentFieldsFragment[];
   const stanCore = useContext(StanCoreContext);
 
   const labwares = useCollection<LabwareFieldsFragment>({
@@ -283,10 +282,7 @@ export default function ProbeHybridisationQC({ comments }: SectionComments) {
                           </div>
                           <div className="flex flex-row">
                             <div className="flex flex-col w-full" data-testid={'labware'}>
-                              <Labware
-                                labware={extractLabwareFromFlagged([labware])[0]}
-                                name={labware.labwareType.name}
-                              />
+                              <Labware labware={labware} name={labware.labwareType.name} />
                             </div>
                             <div className="flex flex-col w-full bg-gray-100">
                               <div className="p-4">

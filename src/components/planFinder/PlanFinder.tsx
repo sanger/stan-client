@@ -4,7 +4,6 @@ import { useMachine } from '@xstate/react';
 import { planFinderMachine } from './planFinder.machine';
 import Warning from '../notifications/Warning';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
-import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 type PlanFinderParams = {
   /**
@@ -73,7 +72,7 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
    */
   const handleOnScan = useCallback(
     (labware: LabwareFlaggedFieldsFragment) => {
-      send({ type: 'SUBMIT_LABWARE', labware: extractLabwareFromFlagged([labware])[0] });
+      send({ type: 'SUBMIT_LABWARE', labware });
     },
     [send]
   );
@@ -90,7 +89,9 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
     <div className={'max-w-screen-xl mx-auto'}>
       {showError && <Warning message={validationError ?? 'Plan Search Error'} error={requestError} />}
       <div data-testid="plan-finder">
-        <LabwareScanner onAdd={handleOnScan}>{}</LabwareScanner>
+        <LabwareScanner onAdd={handleOnScan} enableFlaggedLabwareCheck={true}>
+          {}
+        </LabwareScanner>
       </div>
       {children({ plans: Array.from(plans.values()), removePlanByBarcode })}
     </div>

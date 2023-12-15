@@ -1,7 +1,7 @@
 import { Machine, MachineOptions } from 'xstate';
 import { OutputSlotCopyData, SlotMapperContext, SlotMapperEvent, SlotMapperSchema } from './slotMapper.types';
 import { assign } from '@xstate/immer';
-import { GridDirection, LabwareFieldsFragment, PassFail, SlotCopyContent } from '../../types/sdk';
+import { GridDirection, LabwareFlaggedFieldsFragment, PassFail, SlotCopyContent } from '../../types/sdk';
 import { buildAddresses, cycleColors } from '../../lib/helpers';
 import { sortWithDirection } from '../../lib/helpers/addressHelper';
 import { find, indexOf, intersection, map } from 'lodash';
@@ -245,7 +245,7 @@ const machineConfig: Partial<MachineOptions<SlotMapperContext, SlotMapperEvent>>
 };
 
 interface SlotMapperMachineParams {
-  inputLabware: Array<LabwareFieldsFragment>;
+  inputLabware: Array<LabwareFlaggedFieldsFragment>;
   outputSlotCopies: Array<OutputSlotCopyData>;
   failedSlotsCheck?: boolean;
 }

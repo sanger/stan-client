@@ -1,4 +1,4 @@
-import { FindPlanDataQuery, LabwareFieldsFragment, Maybe } from '../../types/sdk';
+import { FindPlanDataQuery, LabwareFlaggedFieldsFragment, Maybe } from '../../types/sdk';
 import { ClientError } from 'graphql-request';
 import { createMachine } from 'xstate';
 import { assign } from '@xstate/immer';
@@ -8,7 +8,7 @@ type PlanFinderContext = {
   /**
    * The current value of the scan input
    */
-  labware: LabwareFieldsFragment | undefined;
+  labware: LabwareFlaggedFieldsFragment | undefined;
 
   /**
    * Map of labware barcode to plan retrieved for that barcode
@@ -27,7 +27,7 @@ type PlanFinderContext = {
 };
 
 type PlanFinderEvent =
-  | { type: 'SUBMIT_LABWARE'; labware: LabwareFieldsFragment }
+  | { type: 'SUBMIT_LABWARE'; labware: LabwareFlaggedFieldsFragment }
   | { type: 'REMOVE_PLAN_BY_BARCODE'; barcode: string }
   | {
       type: 'done.invoke.findPlan';

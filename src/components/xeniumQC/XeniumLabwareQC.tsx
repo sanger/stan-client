@@ -8,7 +8,6 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { selectOptionValues } from '../forms';
 import { FieldArray, useFormikContext } from 'formik';
 import { XeniumQCFormData } from '../../pages/XeniumQC';
-import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 type XeniumLabwareQCProps = {
   comments: CommentFieldsFragment[];
@@ -66,7 +65,7 @@ export const XeniumLabwareQC = ({ labware, comments, index, removeLabware }: Xen
                     </div>
                   </div>
                   <div className="flex flex-col w-full items-center justify-center p-4" data-testid={'labware'}>
-                    <Labware labware={extractLabwareFromFlagged([labware])[0]} name={labware.labwareType.name} />
+                    <Labware labware={labware} name={labware.labwareType.name} />
                   </div>
                 </div>
               </Panel>

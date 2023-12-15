@@ -25,17 +25,12 @@ import CustomReactSelect from '../components/forms/CustomReactSelect';
 import { createSessionStorageForLabwareAwaiting } from '../types/stan';
 import ButtonBar from '../components/ButtonBar';
 import BlueButton from '../components/buttons/BlueButton';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 import WhiteButton from '../components/buttons/WhiteButton';
 import Success from '../components/notifications/Success';
 
-interface ParaffinProcessingParams {
-  paraffinProcessingInfo: GetParaffinProcessingInfoQuery;
-}
-
-const ParaffinProcessing: React.FC<ParaffinProcessingParams> = ({
-  paraffinProcessingInfo
-}: ParaffinProcessingParams) => {
+const ParaffinProcessing: React.FC = () => {
+  const paraffinProcessingInfo = useLoaderData() as GetParaffinProcessingInfoQuery;
   const formMachine = React.useMemo(() => {
     return createFormMachine<ParaffinProcessingRequest, PerformParaffinProcessingMutation>().withConfig({
       services: {

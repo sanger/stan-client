@@ -28,18 +28,14 @@ import {
   SampleProcessingCommentRequest
 } from '../types/sdk';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
-
-interface SampleProcessingCommentsParams {
-  sampleCommentsInfo: GetSampleProcessingCommentsInfoQuery;
-}
+import { useLoaderData } from 'react-router-dom';
 
 type SampleCommentsFormData = Required<SampleProcessingCommentRequest> & {
   /**Solution to apply to all labware**/
   applyAllComment: string;
 };
-const SampleProcessingComments: React.FC<SampleProcessingCommentsParams> = ({
-  sampleCommentsInfo
-}: SampleProcessingCommentsParams) => {
+const SampleProcessingComments: React.FC = () => {
+  const sampleCommentsInfo = useLoaderData() as GetSampleProcessingCommentsInfoQuery;
   const formMachine = React.useMemo(() => {
     return createFormMachine<SampleProcessingCommentRequest, RecordSampleProcessingCommentsMutation>().withConfig({
       services: {

@@ -20,7 +20,7 @@ import { useMachine } from '@xstate/react';
 import createFormMachine from '../lib/machines/form/formMachine';
 import { parseQueryString } from '../lib/helpers';
 import { StanCoreContext } from '../lib/sdk';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import Heading from '../components/Heading';
 import FileUploader from '../components/upload/FileUploader';
@@ -181,11 +181,8 @@ const defaultSectionRegistrationContext = {
 
 export const SectionRegistrationContext = React.createContext(defaultSectionRegistrationContext);
 
-interface PageParams {
-  registrationInfo: GetRegistrationInfoQuery;
-}
-
-export const SectionRegistration: React.FC<PageParams> = ({ registrationInfo }) => {
+export const SectionRegistration: React.FC = () => {
+  const registrationInfo = useLoaderData() as GetRegistrationInfoQuery;
   const location = useLocation();
   const stanCore = useContext(StanCoreContext);
   const navigate = useNavigate();

@@ -467,5 +467,25 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastRelease96WellPlateData, rowB.original.lastRelease96WellPlateData);
     }
+  },
+  {
+    Header: 'Last Xenium Probe Hybridisation Date',
+    accessor: 'lastXeniumProbeHybridisationDate',
+    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, 'lastXeniumProbeHybridisationDate'),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(
+        rowA.original.lastXeniumProbeHybridisationDate,
+        rowB.original.lastXeniumProbeHybridisationDate
+      );
+    }
+  },
+  {
+    Header: 'Last Xenium Analyser Date',
+    accessor: 'lastXeniumAnalyserDate',
+    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastXeniumAnalyserDate'),
+    sortType: (rowA, rowB) => {
+      return getDateSortType(rowA.original.lastXeniumAnalyserDate, rowB.original.lastXeniumAnalyserDate);
+    }
   }
 ];

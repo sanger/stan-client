@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import variants from '../../../lib/motionVariants';
 import Labware from '../../labware/Labware';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../../pages/sectioning';
-import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../../types/stan';
 import { selectOptionValues } from '../../forms';
 import BlueButton from '../../buttons/BlueButton';
 import { useFormikContext } from 'formik';
@@ -26,7 +26,7 @@ type PotProcessingLabwarePlanProps = {
   /**
    * Destination labware plans created
    */
-  outputLabware: NewLabwareLayout;
+  outputLabware: NewFlaggedLabwareLayout;
   /**
    * Additional information required for pot processing
    */
@@ -56,7 +56,7 @@ type PotProcessingLabwarePlanProps = {
 function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
-  outputLabware: NewLabwareLayout
+  outputLabware: NewFlaggedLabwareLayout
 ) {
   return {
     sources: sourceLabware.flatMap((lw) =>

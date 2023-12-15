@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import AppShell from '../components/AppShell';
 import Heading from '../components/Heading';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -224,8 +224,6 @@ function VisiumPermForm() {
    * Initialize the control tube when there is no labware scanned (Removing a labware)
    */
 
-  const labwareFields = useMemo(() => extractLabwareFromFlagged(labwares), [labwares]);
-
   React.useEffect(() => {
     if (labwares.length === 0) {
       setControlTube(undefined);
@@ -284,7 +282,7 @@ function VisiumPermForm() {
 
       <div className="flex flex-row items-center justify-around">
         <Labware
-          labware={labwareFields[0]}
+          labware={labwares[0]}
           slotBuilder={(slot: SlotFieldsFragment) => {
             if (addressToIndexMap.has(slot.address)) {
               return isSlotEmpty(slot) ? (

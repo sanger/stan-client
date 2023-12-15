@@ -26,6 +26,7 @@ import warningToast from '../components/notifications/WarningToast';
 import { toast } from 'react-toastify';
 import { stanCore } from '../lib/sdk';
 import { UploadResult } from '../components/upload/useUpload';
+import { useLoaderData } from 'react-router-dom';
 
 /**Following modifications required for RegistrationFormBlock Type so that it can be reused
  - "medium" and "lastknownSectionNumber" fields are omitted
@@ -113,11 +114,8 @@ function buildRegistrationSchema(registrationInfo: GetRegistrationInfoQuery) {
   });
 }
 
-interface RegistrationParams {
-  registrationInfo: GetRegistrationInfoQuery;
-}
-
-function OriginalSampleRegistration({ registrationInfo }: RegistrationParams) {
+function OriginalSampleRegistration() {
+  const registrationInfo = useLoaderData() as GetRegistrationInfoQuery;
   const validationSchema = useMemo(() => {
     return buildRegistrationSchema(registrationInfo);
   }, [registrationInfo]);

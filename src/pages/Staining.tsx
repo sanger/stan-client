@@ -7,6 +7,7 @@ import Label from '../components/forms/Label';
 import MutedText from '../components/MutedText';
 import ComplexStainForm from './staining/ComplexStainForm';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import { useLoaderData } from 'react-router-dom';
 
 /**
  * By default, any new stain types will use the "simple" form. Any that need to use the
@@ -15,11 +16,8 @@ import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSe
 const complexStains = new Set(['RNAscope', 'IHC', 'RNAscope & IHC']);
 const isComplexStain = (stainName: string) => complexStains.has(stainName);
 
-type StainingProps = {
-  stainingInfo: GetStainInfoQuery;
-};
-
-export default function Staining({ stainingInfo }: StainingProps) {
+export default function Staining() {
+  const stainingInfo = useLoaderData() as GetStainInfoQuery;
   const [stainType, setStainType] = useState<string>('');
   const [labwares, setLabwares] = useState<LabwareFlaggedFieldsFragment[]>([]);
 

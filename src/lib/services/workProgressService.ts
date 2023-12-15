@@ -27,6 +27,8 @@ export type WorkProgressResultTableEntry = {
   lastStainTODate: Date | undefined;
   lastStainLPDate: Date | undefined;
   lastRelease96WellPlateData: Date | undefined;
+  lastXeniumProbeHybridisationDate: Date | undefined;
+  lastXeniumAnalyserDate: Date | undefined;
   workRequester: string | undefined;
   mostRecentOperation: string | undefined;
   workComment: string | undefined;
@@ -47,7 +49,9 @@ export type WorkProgressTimeStampType =
   | 'Release 96 well plate'
   | 'Analysis'
   | 'Most Recent Operation'
-  | 'Work Comment';
+  | 'Work Comment'
+  | 'Probe hybridisation Xenium'
+  | 'Xenium analyser';
 
 export class WorkProgressService
   implements SearchServiceInterface<FindWorkProgressQueryVariables, WorkProgressResultTableEntry>
@@ -91,7 +95,6 @@ export class WorkProgressService
     if (!findResult) {
       return [];
     }
-
     return findResult.map((entry) => {
       const timeStampMap = new Map<WorkProgressTimeStampType, String>();
       entry.timestamps.forEach((timeStamp) => {
@@ -108,6 +111,8 @@ export class WorkProgressService
       const lastSlideImagedDate = timeStampMap.get('Image');
       const lastRNAAnalysisDate = timeStampMap.get('Analysis');
       const lastRelease96WellPlateData = timeStampMap.get('Release 96 well plate');
+      const lastXeniumProbeHybridisationDate = timeStampMap.get('Probe hybridisation Xenium');
+      const lastXeniumAnalyserDate = timeStampMap.get('Xenium analyser');
 
       return {
         priority: entry.work.priority ?? undefined,
@@ -128,6 +133,9 @@ export class WorkProgressService
         lastVisiumADHStainDate: lastVisiumADHStainDate && new Date(lastVisiumADHStainDate.toString()),
         lastSlideImagedDate: lastSlideImagedDate && new Date(lastSlideImagedDate.toString()),
         lastRelease96WellPlateData: lastRelease96WellPlateData && new Date(lastRelease96WellPlateData.toString()),
+        lastXeniumProbeHybridisationDate:
+          lastXeniumProbeHybridisationDate && new Date(lastXeniumProbeHybridisationDate.toString()),
+        lastXeniumAnalyserDate: lastXeniumAnalyserDate && new Date(lastXeniumAnalyserDate.toString()),
         workRequester: entry.work.workRequester ? entry.work.workRequester.username : '',
         mostRecentOperation: entry.mostRecentOperation ? entry.mostRecentOperation : '',
         workComment: entry.workComment ? entry.workComment : ''

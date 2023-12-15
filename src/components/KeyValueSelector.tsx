@@ -125,8 +125,8 @@ export const KeyValueSelector: React.FC<KeyValueViewerProps> = ({
                 ? multiSelectValues
                   ? selected.value
                   : selected.value.length > 0
-                  ? selected.value[0]
-                  : ''
+                    ? selected.value[0]
+                    : ''
                 : ''
             }
             handleChange={(val) => {

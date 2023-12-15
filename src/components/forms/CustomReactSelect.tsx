@@ -180,8 +180,8 @@ const FormikReactSelect = ({
       let val = Array.isArray(value)
         ? value.map((val) => (valueAsNumber ? Number(val.value) : val.value))
         : valueAsNumber
-        ? Number(value.value)
-        : value.value;
+          ? Number(value.value)
+          : value.value;
       name && setFieldValue?.(name, val);
       handleChange?.(value);
     },

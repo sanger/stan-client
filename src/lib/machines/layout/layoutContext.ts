@@ -1,5 +1,5 @@
 import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, Maybe } from '../../../types/sdk';
-import { Address, NewLabwareLayout } from '../../../types/stan';
+import { Address, NewFlaggedLabwareLayout, NewLabwareLayout } from '../../../types/stan';
 
 export interface LayoutPlan {
   /**
@@ -10,7 +10,7 @@ export interface LayoutPlan {
   /**
    * The labware we're laying out onto
    */
-  destinationLabware: NewLabwareLayout;
+  destinationLabware: NewFlaggedLabwareLayout;
 
   /**
    * Map of sample ID to hex color

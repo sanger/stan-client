@@ -10,7 +10,7 @@ import Labware from '../labware/Labware';
 import { motion } from 'framer-motion';
 import variants from '../../lib/motionVariants';
 import Warning from '../notifications/Warning';
-import { LabwareTypeName, NewLabwareLayout } from '../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import LabelPrinter, { PrintResult } from '../LabelPrinter';
 import LabelPrinterButton from '../LabelPrinterButton';
 import DataTable from '../DataTable';
@@ -44,7 +44,7 @@ type LabwarePlanProps = {
   /**
    * The labware to plan onto
    */
-  outputLabware: NewLabwareLayout;
+  outputLabware: NewFlaggedLabwareLayout;
 
   sourceLabware: LabwareFlaggedFieldsFragment[];
 
@@ -413,7 +413,7 @@ function buildValidationSchema(labwareType: LabwareType): Yup.AnyObjectSchema {
 export function buildInitialLayoutPlan(
   sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
-  outputLabware: NewLabwareLayout
+  outputLabware: NewFlaggedLabwareLayout
 ) {
   return {
     sources: sourceLabware.flatMap((lw) => {

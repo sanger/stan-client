@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   AddressCommentInput,
   CommentFieldsFragment,
@@ -15,7 +15,6 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { LabwareTypeName } from '../../types/stan';
 import SlotComments from '../slotComments/SlotComments';
 import Panel from '../Panel';
-import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
 
 type CleanupProps = {
   comments: CommentFieldsFragment[];
@@ -34,8 +33,6 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
         }),
     [labware]
   );
-
-  const labwareFields = useMemo(() => extractLabwareFromFlagged([labware])[0], [labware]);
 
   /**Initialise all comments for slots when labware changes**/
   React.useEffect(() => {
@@ -123,13 +120,13 @@ const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {
                     />
                   )}
                   <div className="flex flex-col mt-2" data-testid={'labware'}>
-                    <Labware labware={labwareFields} name={labware.labwareType.name} />
+                    <Labware labware={labware} name={labware.labwareType.name} />
                   </div>
                 </div>
               </Panel>
             ) : (
               <div className="bg-blue-100" data-testid={'labware'}>
-                <Labware labware={labwareFields} slotBuilder={slotBuilder} />
+                <Labware labware={labware} slotBuilder={slotBuilder} />
               </div>
             )}
 

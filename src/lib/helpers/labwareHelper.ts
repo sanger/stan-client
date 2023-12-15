@@ -24,7 +24,7 @@ export function isTube(maybeTube: Pick<LabwareType, 'name'>): boolean {
  * Build an array of all {@link Sample samples} in a {@link Labware} along with its {@link Slot} plus the original {@link Labware}
  * @param labware a {@link LabwareFieldsFragment}
  */
-export function labwareSamples(labware: LabwareFieldsFragment) {
+export function labwareSamples(labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment) {
   return labware.slots
     .map((slot) => {
       return slot.samples.map((sample) => {
@@ -39,7 +39,9 @@ export function labwareSamples(labware: LabwareFieldsFragment) {
  *
  * @param labwares list of labwares to get colors for
  */
-export function buildSampleColors(labwares: LabwareFieldsFragment[]): Map<number, string> {
+export function buildSampleColors(
+  labwares: LabwareFieldsFragment[] | LabwareFlaggedFieldsFragment[]
+): Map<number, string> {
   const colors = cycleColors();
   const sampleColors = new Map();
   labwares.forEach((labware) => {
@@ -196,7 +198,7 @@ export const hasSamples = (labware: LabwareFieldsFragment | LabwareFlaggedFields
 };
 
 export const convertLabwareToFlaggedLabware = (labware: LabwareFieldsFragment[]): LabwareFlaggedFieldsFragment[] => {
-  return labware.map((lw) => ({ flagged: false, ...lw } as LabwareFlaggedFieldsFragment));
+  return labware.map((lw) => ({ flagged: false, ...lw }) as LabwareFlaggedFieldsFragment);
 };
 
 export const extractLabwareFromFlagged = (flagged: LabwareFlaggedFieldsFragment[]): LabwareFieldsFragment[] => {

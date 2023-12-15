@@ -18,14 +18,10 @@ import WorkNumberSelect from '../components/WorkNumberSelect';
 import { FormikLabwareScanner } from '../components/labwareScanner/FormikLabwareScanner';
 import * as Yup from 'yup';
 import BlueButton from '../components/buttons/BlueButton';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
 import { ExtractResultLabwareTable } from '../components/extractResultLabwareTable/ExtractResultLabwareTable';
 import Warning from '../components/notifications/Warning';
 import ButtonBar from '../components/ButtonBar';
-
-type ExtractionResultProps = {
-  info: GetRecordExtractResultInfoQuery;
-};
 
 export type ExtractResultLabwareForm = ExtractResultLabware & { lw: LabwareFlaggedFieldsFragment };
 
@@ -34,7 +30,8 @@ export type ExtractResultRequestForm = {
   labware: ExtractResultLabwareForm[];
 };
 
-export default function ExtractionResult({ info }: ExtractionResultProps) {
+export default function ExtractionResult() {
+  const extractionResultInfo = useLoaderData() as GetRecordExtractResultInfoQuery;
   // There will be initial labware if user has come from the Extraction page
   const location = useLocation();
   const navigate = useNavigate();
@@ -86,7 +83,7 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
               return val === PassFail.Fail
                 ? Yup.number()
                     .required()
-                    .oneOf(info.comments.map((c) => c.id))
+                    .oneOf(extractionResultInfo.comments.map((c) => c.id))
                 : schema;
             })
         })
@@ -144,7 +141,7 @@ export default function ExtractionResult({ info }: ExtractionResultProps) {
                     buildLabware={buildExtractResultLabware}
                     enableFlaggedLabwareCheck={true}
                   >
-                    <ExtractResultLabwareTable availableComments={info.comments} />
+                    <ExtractResultLabwareTable availableComments={extractionResultInfo.comments} />
                   </FormikLabwareScanner>
                 </div>
 

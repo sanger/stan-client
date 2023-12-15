@@ -6,7 +6,7 @@ import createLabwareResultMachine from './labwareResult.machine';
 import { useMachine } from '@xstate/react';
 import {
   CommentFieldsFragment,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   LabwareResult as CoreLabwareResult,
   PassFail,
   SamplePositionFieldsFragment,
@@ -24,7 +24,7 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { stanCore } from '../../lib/sdk';
 
 type LabwareResultComponentProps = {
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   initialLabwareResult: CoreLabwareResult;
   availableComments: Array<CommentFieldsFragment>;
 

@@ -3,13 +3,13 @@ import AppShell from '../components/AppShell';
 import SlotMapper from '../components/slotMapper/SlotMapper';
 import BlueButton from '../components/buttons/BlueButton';
 import LabelPrinter from '../components/LabelPrinter';
-import { NewLabwareLayout } from '../types/stan';
+import { NewFlaggedLabwareLayout } from '../types/stan';
 import Warning from '../components/notifications/Warning';
 import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
 import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
-import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment, LabwareState, SlotCopyContent } from '../types/sdk';
+import { LabwareFlaggedFieldsFragment, LabwareState, SlotCopyContent } from '../types/sdk';
 import slotCopyMachine, { Destination, Source } from '../lib/machines/slotCopy/slotCopyMachine';
 import { Link, useNavigate } from 'react-router-dom';
 import { reload } from '../lib/sdk';
@@ -26,11 +26,10 @@ import RadioGroup, { RadioButtonInput } from '../components/forms/RadioGroup';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import RemoveButton from '../components/buttons/RemoveButton';
 import { objectKeys } from '../lib/helpers';
-import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
 type PageParams = {
   title: string;
-  initialOutputLabware: NewLabwareLayout[];
+  initialOutputLabware: NewFlaggedLabwareLayout[];
 };
 
 /**
@@ -123,7 +122,12 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
           </>
         ) : (
           <div className={'flex flex-col w-full space-y-2'} data-testid={'dest-scanner'}>
-            <LabwareScanner onChange={onLabwareScan} limit={1} labwareCheckFunction={validateLabware}>
+            <LabwareScanner
+              onChange={onLabwareScan}
+              limit={1}
+              labwareCheckFunction={validateLabware}
+              enableFlaggedLabwareCheck={true}
+            >
               {(props) => {
                 return (
                   <div className="flex flex-row justify-end">
@@ -197,15 +201,15 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
   const [current, send] = useMachine(() => memoSlotCopyMachine);
 
   /**Keep track of input labware with no permeabilisation done**/
-  const [labwaresWithoutPerm, setLabwaresWithoutPerm] = React.useState<LabwareFieldsFragment[]>([]);
+  const [labwaresWithoutPerm, setLabwaresWithoutPerm] = React.useState<LabwareFlaggedFieldsFragment[]>([]);
 
   const [warnBeforeSave, setWarnBeforeSave] = React.useState(false);
 
   /** State to keep  track of selected source labware**/
-  const [selectedSource, setSelectedSource] = React.useState<LabwareFieldsFragment | undefined>(undefined);
+  const [selectedSource, setSelectedSource] = React.useState<LabwareFlaggedFieldsFragment | undefined>(undefined);
 
   /** State to keep track of selected destination labware**/
-  const [selectedDestination, setSelectedDestination] = React.useState<NewLabwareLayout>(
+  const [selectedDestination, setSelectedDestination] = React.useState<NewFlaggedLabwareLayout>(
     initialOutputSlotCopy[0].labware
   );
   const { serverErrors, sourceLabwarePermData, sources, destinations, slotCopyResults } = current.context;
@@ -215,7 +219,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   /**Handler action to perform when a mapping is done  between source and destination**/
   const handleOnSlotMapperChange = useCallback(
-    (labware: NewLabwareLayout, slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
+    (labware: NewFlaggedLabwareLayout, slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
       send({
         type: 'UPDATE_SLOT_COPY_CONTENT',
         labware,
@@ -242,7 +246,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   /**Action callback(from SlotMapper) when there is a change in source labware (addition/deletion)**/
   const handleInputLabwareChange = React.useCallback(
-    (sourcesChanged: LabwareFieldsFragment[]) => {
+    (sourcesChanged: LabwareFlaggedFieldsFragment[]) => {
       send({ type: 'UPDATE_SOURCE_LABWARE', labware: sourcesChanged });
       send({
         type: 'UPDATE_SOURCE_LABWARE_PERMTIME',
@@ -257,7 +261,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
    * (It will be normally a deletion operation as the addition is handled within SlotCopy itself)
    * **/
   const handleOutputLabwareChange = React.useCallback(
-    (destinations: NewLabwareLayout[]) => {
+    (destinations: NewFlaggedLabwareLayout[]) => {
       send({ type: 'UPDATE_DESTINATION_LABWARE', labware: destinations });
     },
     [send]
@@ -275,7 +279,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
 
   /**Handler for 'Add Plate' button click**/
   const onAddDestinationLabware = React.useCallback(() => {
-    const labware = plateFactory.build({});
+    const labware = plateFactory.build({}) as NewFlaggedLabwareLayout;
     const labwareArray = destinations.map((dest) => dest.labware);
     labwareArray.push(labware);
     send({ type: 'UPDATE_DESTINATION_LABWARE', labware: labwareArray });
@@ -314,7 +318,7 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
   /**Handler for output labware selection mode change**/
   const onDestinationLabwareScan = React.useCallback(
     (labware: LabwareFlaggedFieldsFragment[]) => {
-      send({ type: 'UPDATE_DESTINATION_LABWARE', labware: extractLabwareFromFlagged(labware) });
+      send({ type: 'UPDATE_DESTINATION_LABWARE', labware: labware });
     },
     [send]
   );
