@@ -1,0 +1,7 @@
+mutation FlagLabware($request: FlagLabwareRequest!) {
+  flagLabware(request: $request) {
+    operations {
+      id
+    }
+  }
+}

@@ -76,7 +76,6 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   const [current, send] = useMachine(formMachine);
 
   const { submissionResult, serverError } = current.context;
-
   /**
    * For tracking whether the user gets a prompt if they tried to navigate to another page
    */

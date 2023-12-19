@@ -25,10 +25,22 @@ interface DataTableProps<T extends object> {
    * Is table column header fixed?
    */
   fixedHeader?: boolean;
+
+  /**
+   * class name list to assign to each cell, defaults to whitespace-nowrap, if none is provided
+   */
+  cellClassName?: string;
 }
 
 const DataTableComponent = <T extends Object>(
-  { columns, data, defaultSort, sortable = false, fixedHeader = false }: React.PropsWithChildren<DataTableProps<T>>,
+  {
+    columns,
+    data,
+    defaultSort,
+    sortable = false,
+    fixedHeader = false,
+    cellClassName
+  }: React.PropsWithChildren<DataTableProps<T>>,
   ref?: React.Ref<T[]>
 ): React.ReactElement<DataTableProps<T>> => {
   /**
@@ -138,7 +150,7 @@ const DataTableComponent = <T extends Object>(
             <motion.tr initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} {...row.getRowProps()}>
               {row.cells.map((cell, indx) => {
                 return (
-                  <TableCell {...cell.getCellProps()} key={row.index + ',' + indx}>
+                  <TableCell className={cellClassName} {...cell.getCellProps()} key={row.index + ',' + indx}>
                     {cell.render('Cell') as ReactNode}
                   </TableCell>
                 );
