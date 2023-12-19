@@ -1,12 +1,5 @@
-import {
-  FindLabwareQuery,
-  FindLabwareQueryVariables,
-  RecordOrientationQcMutation,
-  RecordOrientationQcMutationVariables
-} from '../../../src/types/sdk';
+import { RecordOrientationQcMutation, RecordOrientationQcMutationVariables } from '../../../src/types/sdk';
 import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
-import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
-import { buildLabwareFragment } from '../../../src/lib/helpers/labwareHelper';
 
 describe('Release Page', () => {
   before(() => {
