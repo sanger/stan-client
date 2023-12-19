@@ -35,7 +35,7 @@ describe('Release Page', () => {
       });
     });
     it('shows an error', () => {
-      cy.get('#labwareScanInput').type('STAN-3111{enter}');
+      cy.get('#labwareScanInput').type('STAN-1111{enter}');
       selectSGPNumber('SGP1008');
       selectOption('orientation', 'Correct');
       cy.findByRole('button', { name: /Submit/i }).click();
