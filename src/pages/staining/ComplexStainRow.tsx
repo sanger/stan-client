@@ -136,8 +136,8 @@ const ComplexStainRow = ({
             stainType === 'IHC'
               ? ''
               : stainRowApplyAllSettings
-              ? stainRowApplyAllSettings.stainValuesToAll.plexRNAscope
-              : stainFormValues.labware[rowID!].plexRNAscope
+                ? stainRowApplyAllSettings.stainValuesToAll.plexRNAscope
+                : stainFormValues.labware[rowID!].plexRNAscope
           }
           onChange={handleChange}
         />
@@ -157,8 +157,8 @@ const ComplexStainRow = ({
             stainType === 'RNAscope'
               ? ''
               : stainRowApplyAllSettings
-              ? stainRowApplyAllSettings.stainValuesToAll.plexIHC
-              : stainFormValues.labware[rowID!].plexIHC
+                ? stainRowApplyAllSettings.stainValuesToAll.plexIHC
+                : stainFormValues.labware[rowID!].plexIHC
           }
         />
       </TableCell>

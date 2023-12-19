@@ -90,6 +90,12 @@ function AppShell({ children }: AppShellParams) {
                     description={'Recording sectioning planning and confirmation.'}
                   >
                     <NavLinkMenuItem
+                      caption={'Orientation QC'}
+                      path={'/lab/sectioning/orientation_qc'}
+                      icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
+                      description={'Recording the embedding orientation.'}
+                    />
+                    <NavLinkMenuItem
                       caption={'Planning'}
                       path={'/lab/sectioning'}
                       icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
@@ -263,7 +269,7 @@ function AppShell({ children }: AppShellParams) {
                   <Menu
                     caption={'Xenium'}
                     icon={<LabwareIcon className="flex-shrink-0 h-6 w-6 text-sdb-400" />}
-                    description={'Recording Probe hybridisation'}
+                    description={'Recording Xenium run information'}
                   >
                     <NavLinkMenuItem
                       caption={'Xenium Analyser'}

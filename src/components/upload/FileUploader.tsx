@@ -211,9 +211,7 @@ const FileUploader = <T extends object>({
                 Error:
                 {uploadResultFile(file)
                   ?.error?.message.split(',')
-                  .map((err, index) => (
-                    <div key={index}>{`${err}`}</div>
-                  ))}
+                  .map((err, index) => <div key={index}>{`${err}`}</div>)}
               </div>
             )}
           </div>

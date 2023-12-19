@@ -56,8 +56,8 @@ const ExtractResultPanel: React.FC<ExtractResultPanelProps> = ({
   const scanError = scanErrorMessage
     ? scanErrorMessage
     : serverError
-    ? formatErrorMessage(serverError.message)
-    : undefined;
+      ? formatErrorMessage(serverError.message)
+      : undefined;
 
   React.useEffect(() => {
     onChangeExtractResults && onChangeExtractResults(extractResults);

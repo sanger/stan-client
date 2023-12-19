@@ -28,6 +28,7 @@ import columns from '../../dataTableColumns/labwareColumns';
 import { useConfirmLeave } from '../../../lib/hooks';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import PromptOnLeave from '../../notifications/PromptOnLeave';
+import { useLoaderData } from 'react-router-dom';
 
 /**
  * Used as Formik's values
@@ -47,10 +48,12 @@ export type PotFormData = {
 const allowedLabwareTypeNames: Array<LabwareTypeName> = [LabwareTypeName.POT, LabwareTypeName.FETAL_WASTE_CONTAINER];
 
 type PotProcessingParams = {
-  readonly processingInfo: GetPotProcessingInfoQuery;
+  readonly processingInfo?: GetPotProcessingInfoQuery;
 };
 
 export default function PotProcessing({ processingInfo }: PotProcessingParams) {
+  const processingInfoLoaderData = useLoaderData() as GetPotProcessingInfoQuery;
+
   const formMachine = React.useMemo(() => {
     return createFormMachine<PotProcessingRequest, PerformTissuePotMutation>().withConfig({
       services: {
@@ -74,16 +77,19 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
    */
   const [shouldConfirm] = useConfirmLeave(true);
 
+  const memoPotProcessingInfo = React.useMemo(
+    () => processingInfo || processingInfoLoaderData,
+    [processingInfo, processingInfoLoaderData]
+  );
+
   /**
    * Limit the labware types the user can Section on to.
    */
-  const allowedLabwareTypes = React.useMemo(
-    () =>
-      processingInfo
-        ? processingInfo.labwareTypes.filter((lw) => allowedLabwareTypeNames.includes(lw.name as LabwareTypeName))
-        : [],
-    [processingInfo]
-  );
+  const allowedLabwareTypes = React.useMemo(() => {
+    return memoPotProcessingInfo
+      ? memoPotProcessingInfo.labwareTypes.filter((lw) => allowedLabwareTypeNames.includes(lw.name as LabwareTypeName))
+      : [];
+  }, [memoPotProcessingInfo]);
 
   /**
    * Display all plans created
@@ -195,7 +201,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
             handleChange={(value) => setSelectedFixative((value as OptionType).label)}
             dataTestId={'fixative'}
             value={selectedFixative}
-            options={selectOptionValues(processingInfo.fixatives, 'name', 'name')}
+            options={selectOptionValues(memoPotProcessingInfo?.fixatives, 'name', 'name')}
           />
         )}
         <input
@@ -215,7 +221,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
     setNumLabware,
     selectedFixative,
     setSelectedFixative,
-    processingInfo.fixatives,
+    memoPotProcessingInfo?.fixatives,
     allowedLabwareTypes
   ]);
 

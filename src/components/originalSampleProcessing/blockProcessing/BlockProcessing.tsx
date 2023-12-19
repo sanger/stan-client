@@ -29,6 +29,7 @@ import { Row } from 'react-table';
 import FormikInput from '../../forms/Input';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import PromptOnLeave from '../../notifications/PromptOnLeave';
+import { useLoaderData } from 'react-router-dom';
 
 /**
  * Used as Formik's values
@@ -54,10 +55,12 @@ const allowedLabwareTypeNames: Array<LabwareTypeName> = [
 ];
 
 type BlockProcessingParams = {
-  readonly processingInfo: GetBlockProcessingInfoQuery;
+  readonly processingInfo?: GetBlockProcessingInfoQuery;
 };
 
 export default function BlockProcessing({ processingInfo }: BlockProcessingParams) {
+  const processingInfoLoaderData = useLoaderData() as GetBlockProcessingInfoQuery;
+
   const formMachine = React.useMemo(() => {
     return createFormMachine<TissueBlockRequest, PerformTissueBlockMutation>().withConfig({
       services: {
@@ -87,13 +90,12 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   /**
    * Limit the labware types the user can Section on to.
    */
-  const allowedLabwareTypes = React.useMemo(
-    () =>
-      processingInfo
-        ? processingInfo.labwareTypes.filter((lw) => allowedLabwareTypeNames.includes(lw.name as LabwareTypeName))
-        : [],
-    [processingInfo]
-  );
+  const allowedLabwareTypes = React.useMemo(() => {
+    const blockProcessingInfo = processingInfo || processingInfoLoaderData;
+    return blockProcessingInfo
+      ? blockProcessingInfo.labwareTypes.filter((lw) => allowedLabwareTypeNames.includes(lw.name as LabwareTypeName))
+      : [];
+  }, [processingInfo, processingInfoLoaderData]);
 
   /**A source is selected for a plan, so update the mapping state between source and plan**/
   const notifySourceSelection = React.useCallback(

@@ -19,6 +19,7 @@ import { stanCore } from '../lib/sdk';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { Column } from 'react-table';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import { useLoaderData } from 'react-router-dom';
 
 type RecordInPlaceProps = {
   /**
@@ -30,11 +31,6 @@ type RecordInPlaceProps = {
    * The name of the operation that is being performed
    */
   operationType: string;
-
-  /**
-   * The equipment available for this operation
-   */
-  equipment?: Array<EquipmentFieldsFragment>;
 
   /**
    * The columns to display on labware scan for this operation
@@ -49,7 +45,9 @@ type RecordInPlaceProps = {
 
 type RecordInPlaceForm = InPlaceOpRequest;
 
-export default function RecordInPlace({ title, operationType, equipment, columns, description }: RecordInPlaceProps) {
+export default function RecordInPlace({ title, operationType, columns, description }: RecordInPlaceProps) {
+  // The equipment available for this operation
+  const equipments = useLoaderData() as EquipmentFieldsFragment[];
   const formMachine = React.useMemo(() => {
     return createFormMachine<InPlaceOpRequest, RecordInPlaceMutation>().withConfig({
       services: {
@@ -70,7 +68,7 @@ export default function RecordInPlace({ title, operationType, equipment, columns
   const validationSchema = Yup.object().shape({
     barcodes: Yup.array().of(Yup.string().required()).min(1).required().label('Labware'),
     equipmentId: Yup.number()
-      .oneOf(equipment ? equipment.map((e) => e.id) : [])
+      .oneOf(equipments ? equipments.map((e) => e.id) : [])
       .optional()
       .label('Equipment'),
     operationType: Yup.string().required().label('Operation Type'),
@@ -137,7 +135,7 @@ export default function RecordInPlace({ title, operationType, equipment, columns
                       <FormikErrorMessage name={'barcodes'} />
                     </motion.div>
 
-                    {equipment && equipment.length > 0 && (
+                    {equipments && equipments.length > 0 && (
                       <motion.div variants={variants.fadeInWithLift} className="space-y-4">
                         <Heading level={3}>Equipment</Heading>
 
@@ -151,7 +149,7 @@ export default function RecordInPlace({ title, operationType, equipment, columns
                             const value = (val as OptionType).value;
                             setFieldValue('equipmentId', value === '' ? undefined : parseInt(value, 10));
                           }}
-                          options={selectOptionValues(equipment, 'name', 'id')}
+                          options={selectOptionValues(equipments, 'name', 'id')}
                         />
                       </motion.div>
                     )}
