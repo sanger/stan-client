@@ -9,30 +9,12 @@ import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
 import { buildLabwareFragment } from '../../../src/lib/helpers/labwareHelper';
 
 describe('Release Page', () => {
-  beforeEach(() => {
-    cy.msw().then(({ worker, graphql }) => {
-      worker.use(
-        graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', (req, res, ctx) => {
-          const barcode = req.variables.barcode;
-          const labware = createLabware(barcode);
-          labware.slots = [labware.slots[0]];
-          labware.slots[0].samples = [labware.slots[0].samples[0]];
-          labware.slots[0].block = true;
-          const payload: FindLabwareQuery = {
-            labware: buildLabwareFragment(labware)
-          };
-
-          return res(ctx.data(payload));
-        })
-      );
-    });
-  });
   before(() => {
     cy.visit('lab/sectioning/orientation_qc');
   });
   context('when submitted succesfully', () => {
     it('should display Submit success message', () => {
-      cy.get('#labwareScanInput').type('STAN-3112{enter}');
+      cy.get('#labwareScanInput').type('STAN-1112{enter}');
       selectSGPNumber('SGP1008');
       selectOption('orientation', 'Correct');
       cy.findByRole('button', { name: /Submit/i }).click();

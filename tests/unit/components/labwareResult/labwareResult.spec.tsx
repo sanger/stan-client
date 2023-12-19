@@ -1,24 +1,17 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import {
-  getById,
-  optionsShouldHaveLength,
-  selectOption,
-  shouldDisplayValue,
-  shouldHaveOption
-} from '../../../generic/utilities';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { selectOption } from '../../../generic/utilities';
 import React from 'react';
 import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
-import { CommentFieldsFragment, LabwareFieldsFragment } from '../../../../src/types/sdk';
+import { CommentFieldsFragment, LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
 import LabwareResult from '../../../../src/components/labwareResult/LabwareResult';
 import { LabwareResult as CoreLabwareResult } from '../../../../src/types/sdk';
 import '@testing-library/jest-dom';
 import { enableMapSet } from 'immer';
-import { isSlotFilled } from '../../../../src/lib/helpers/slotHelper';
 import { emptySlotFactory, filledSlotFactory } from '../../../../src/lib/factories/slotFactory';
 import SlotColumnInfo from '../../../../src/components/labware/SlotColumnInfo';
 import { TISSUE_COVERAGE_MEASUREMENT_NAME } from '../../../../src/pages/StainingQC';
 import * as xState from '@xstate/react';
-import userEvent from '@testing-library/user-event';
+import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
 
 afterEach(() => {
   cleanup();
@@ -47,8 +40,8 @@ const comments: CommentFieldsFragment[] = [
   }
 ];
 describe('LabwareResult', () => {
-  const inputLabware = plateFactory.build({ barcode: 'STAN-3111' });
-  const labware: LabwareFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
+  const inputLabware = plateFactory.build({ barcode: 'STAN-3111' }) as NewFlaggedLabwareLayout;
+  const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
 
   beforeAll(() => {
     enableMapSet();
