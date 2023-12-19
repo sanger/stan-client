@@ -24,7 +24,7 @@ import Panel from '../components/Panel';
 import RemoveButton from '../components/buttons/RemoveButton';
 import DataTable from '../components/DataTable';
 import { FormikErrorMessage } from '../components/forms';
-import { LabwareFlagDetails } from '../components/labwareFlagDetails';
+import { LabwareFlagDetails } from '../components/LabwareFlagDetails';
 import { Column } from 'react-table';
 
 type FormFlagLabware = {
@@ -119,7 +119,7 @@ const FlagLabware = () => {
                         onAdd={(lw) => {
                           setFieldValue('labware', lw);
                         }}
-                        enableFlaggedLabwareCheck={true}
+                        enableFlaggedLabwareCheck
                         labwareCheckFunction={checkRelatedFlags}
                       >
                         {({ labwares, removeLabware }) =>

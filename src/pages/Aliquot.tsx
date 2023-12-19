@@ -119,7 +119,7 @@ function Aliquot() {
               onChange={(labwares) => onLabwareScannerChange(extractLabwareFromFlagged(labwares)[0])}
               locked={scannerLocked}
               limit={1}
-              enableFlaggedLabwareCheck={true}
+              enableFlaggedLabwareCheck
             >
               <LabwareScanPanel columns={columns} />
             </LabwareScanner>

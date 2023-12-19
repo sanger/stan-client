@@ -299,7 +299,7 @@ export default function Planner<M>({
       <LabwareScanner
         locked={state.isLabwareScannerLocked || (singleSourceAllowed && state.sourceLabware.length === 1)}
         onChange={onLabwareScannerChange}
-        enableFlaggedLabwareCheck={true}
+        enableFlaggedLabwareCheck
       >
         <LabwareScanTable columns={[labwareScanTableColumns.color(sampleColors), ...columns]} />
       </LabwareScanner>

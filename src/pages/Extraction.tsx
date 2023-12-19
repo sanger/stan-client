@@ -156,7 +156,7 @@ function Extraction() {
               onChange={onLabwareScannerChange}
               locked={scannerLocked}
               labwareCheckFunction={validateLabware}
-              enableFlaggedLabwareCheck={true}
+              enableFlaggedLabwareCheck
             >
               <LabwareScanPanel columns={columns} />
             </LabwareScanner>

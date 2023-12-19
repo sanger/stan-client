@@ -109,7 +109,7 @@ const OrientationQC = () => {
                         locked={current.matches('submitted')}
                         labwareCheckFunction={blockLabwareCheck}
                         limit={1}
-                        enableFlaggedLabwareCheck={true}
+                        enableFlaggedLabwareCheck
                       >
                         <LabwareScanPanel
                           columns={[

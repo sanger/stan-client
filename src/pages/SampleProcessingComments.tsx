@@ -148,7 +148,7 @@ const SampleProcessingComments: React.FC = () => {
                             const updatedLabware = values.labware.filter((lw) => lw.barcode !== labware.barcode);
                             setFieldValue('labware', updatedLabware);
                           }}
-                          enableFlaggedLabwareCheck={true}
+                          enableFlaggedLabwareCheck
                         >
                           {values.labware.length === 0 && <FormikErrorMessage name={'labware'} />}
                           <motion.div variants={variants.fadeInWithLift}>

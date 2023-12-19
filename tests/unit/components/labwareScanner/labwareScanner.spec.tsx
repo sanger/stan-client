@@ -1,10 +1,13 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, getAllByRole, render, screen, waitFor } from '@testing-library/react';
 import LabwareScanner, { useLabwareContext } from '../../../../src/components/labwareScanner/LabwareScanner';
-import { getById } from '../../../generic/utilities';
+import { getById, scanLabware } from '../../../generic/utilities';
 import React from 'react';
 import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
-import { LabwareFieldsFragment } from '../../../../src/types/sdk';
+import { LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
 import '@testing-library/jest-dom';
+import LabwareScanTable from '../../../../src/components/labwareScanPanel/LabwareScanPanel';
+import columns from '../../../../src/components/dataTableColumns/labwareColumns';
+import { MemoryRouter } from 'react-router';
 
 afterEach(() => {
   cleanup();
@@ -86,8 +89,8 @@ describe('LabwareScannaer', () => {
       expect(screen.getByTestId('list')).toBeVisible();
     });
     it('displays contextual information on entering value in labware scanner', async () => {
-      const inputLabware = plateFactory.build({ barcode: 'STAN-3111' });
-      const labware: LabwareFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
+      const inputLabware = plateFactory.build({ barcode: 'STAN-3111' }) as LabwareFlaggedFieldsFragment;
+      const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
 
       act(() => {
         render(
@@ -103,8 +106,8 @@ describe('LabwareScannaer', () => {
       expect(screen.getByTestId('removeButton')).toBeVisible();
     });
     it('removes labware on remove button click', async () => {
-      const inputLabware = plateFactory.build({ barcode: 'STAN-3111' });
-      const labware: LabwareFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
+      const inputLabware = plateFactory.build({ barcode: 'STAN-3111' }) as LabwareFlaggedFieldsFragment;
+      const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
 
       act(() => {
         render(
@@ -118,6 +121,54 @@ describe('LabwareScannaer', () => {
       });
       expect(screen.queryByTestId('list-item')).not.toBeInTheDocument();
       expect(screen).not.toContain('STAN-3111');
+    });
+  });
+  describe('on enabling flagged labware check', () => {
+    describe('on adding labwareScanPanel as children', () => {
+      it('displays the scanned labware barcode as flagged link ', async () => {
+        const { getByRole, getByTestId } = render(
+          <MemoryRouter>
+            <LabwareScanner enableFlaggedLabwareCheck={true}>
+              <LabwareScanTable columns={[columns.barcode(), columns.externalName()]} />
+            </LabwareScanner>
+          </MemoryRouter>
+        );
+        await act(async () => {
+          await scanLabware('STAN-3100');
+        });
+        await waitFor(() => {
+          expect(getByRole('table')).toBeVisible();
+          expect(getByTestId('flag-icon')).toBeVisible();
+          expect(getByRole('link')).toHaveTextContent('STAN-3100');
+        });
+      });
+    });
+    describe('when setting the scanner with initially flagged labware', () => {
+      it('displays the flagged labware barcode as flagged link ', async () => {
+        const labware = [
+          {
+            ...(plateFactory.build({ barcode: 'STAN-3100' }) as LabwareFlaggedFieldsFragment),
+            flagged: true
+          },
+          {
+            ...(plateFactory.build({ barcode: 'STAN-1234' }) as LabwareFlaggedFieldsFragment),
+            flagged: false
+          }
+        ];
+        const { getByRole, getAllByRole } = render(
+          <MemoryRouter>
+            <LabwareScanner enableFlaggedLabwareCheck initialLabwares={labware}>
+              <LabwareScanTable columns={[columns.barcode(), columns.externalName()]} />
+            </LabwareScanner>
+          </MemoryRouter>
+        );
+        await waitFor(() => {
+          expect(getByRole('table')).toBeVisible();
+          expect(getByRole('table').querySelectorAll('tbody tr')).toHaveLength(2);
+          expect(getAllByRole('link')).toHaveLength(1);
+          expect(getByRole('link')).toHaveTextContent('STAN-3100');
+        });
+      });
     });
   });
 });

@@ -292,7 +292,7 @@ const Labware = ({
               {barcode}
             </span>
           )}
-          {barcode && isFlagged && (
+          {barcode && isFlagged ? (
             <span>
               <Link
                 className="flex flex-row text-sp-700 hover:text-sp-800 font-semibold hover:underline"
@@ -303,6 +303,8 @@ const Labware = ({
                 {barcode}
               </Link>
             </span>
+          ) : (
+            ''
           )}
         </div>
       </div>

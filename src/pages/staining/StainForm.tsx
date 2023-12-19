@@ -175,7 +175,7 @@ export default function StainForm({ stainType, stainingInfo, initialLabware, onL
                     onLabwareChange(labwares);
                   }}
                   locked={current.matches('submitted')}
-                  enableFlaggedLabwareCheck={true}
+                  enableFlaggedLabwareCheck
                 >
                   <LabwareScanPanel
                     columns={[

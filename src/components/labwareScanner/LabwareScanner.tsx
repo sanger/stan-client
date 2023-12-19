@@ -142,7 +142,7 @@ export default function LabwareScanner({
       },
       [send]
     ),
-    enableFlaggedLabwareCheck: enableFlaggedLabwareCheck
+    enableFlaggedLabwareCheck
   };
 
   const handleOnScanInputChange = useCallback(

@@ -3,7 +3,7 @@ import Heading from './Heading';
 import React from 'react';
 import DataTable from './DataTable';
 import { Cell, Column } from 'react-table';
-import { flaggedBarcodeDiv } from './dataTableColumns/labwareColumns';
+import { FlaggedBarcodeLink } from './dataTableColumns/labwareColumns';
 
 const columns = (): Column<FlagSummary>[] => {
   return [
@@ -11,7 +11,7 @@ const columns = (): Column<FlagSummary>[] => {
       width: 300,
       Header: 'barcode',
       accessor: (flagSummary: FlagSummary) => {
-        return flaggedBarcodeDiv(flagSummary.barcode);
+        return FlaggedBarcodeLink(flagSummary.barcode);
       }
     },
     {

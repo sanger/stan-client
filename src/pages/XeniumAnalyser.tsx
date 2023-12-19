@@ -258,7 +258,7 @@ const XeniumAnalyser = () => {
                               }
                             });
                           }}
-                          enableFlaggedLabwareCheck={true}
+                          enableFlaggedLabwareCheck
                         >
                           <LabwareScanPanel
                             columns={[

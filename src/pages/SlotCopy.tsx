@@ -126,7 +126,7 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
               onChange={onLabwareScan}
               limit={1}
               labwareCheckFunction={validateLabware}
-              enableFlaggedLabwareCheck={true}
+              enableFlaggedLabwareCheck
             >
               {(props) => {
                 return (

@@ -9,7 +9,7 @@ import FormikSelect from '../forms/Select';
 import { optionValues } from '../forms';
 import RemoveButton from '../buttons/RemoveButton';
 import { ExtractResultLabwareForm, ExtractResultRequestForm } from '../../pages/ExtractionResult';
-import { flaggedBarcodeDiv } from '../dataTableColumns/labwareColumns';
+import { FlaggedBarcodeLink } from '../dataTableColumns/labwareColumns';
 
 type ExtractResultLabwareTableProps = {
   /**
@@ -102,7 +102,7 @@ function ExtractResultLabwareRow({ labware, index, availableComments }: ExtractR
   );
 
   const barcodeCell = useMemo(() => {
-    return labware.lw.flagged ? flaggedBarcodeDiv(labware.lw.barcode) : labware.lw.barcode;
+    return labware.lw.flagged ? FlaggedBarcodeLink(labware.lw.barcode) : labware.lw.barcode;
   }, [labware]);
 
   return (

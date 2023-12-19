@@ -152,7 +152,7 @@ export default function VisiumPerm() {
                           values.permData.forEach((value, i) => remove(i));
                         }}
                         limit={1}
-                        enableFlaggedLabwareCheck={true}
+                        enableFlaggedLabwareCheck
                       >
                         <LabwareScannerSlotsTable />
                         <VisiumPermForm />
@@ -272,7 +272,7 @@ function VisiumPermForm() {
               setControlTube(undefined);
             }}
             limit={1}
-            enableFlaggedLabwareCheck={true}
+            enableFlaggedLabwareCheck
           >
             <LabwareScanPanel columns={[columns.barcode()]} />
           </LabwareScanner>

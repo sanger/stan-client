@@ -657,7 +657,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
             initialLabwares={inputLabware}
             onChange={onLabwareScannerChange}
             limit={inputLabwareLimit}
-            enableFlaggedLabwareCheck={true}
+            enableFlaggedLabwareCheck
           >
             {(props) => {
               if (!currentInputLabware) {

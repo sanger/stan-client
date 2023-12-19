@@ -155,7 +155,7 @@ export default function StainingQC({ info }: StainingQCProps) {
 
             <p>Please scan in any slides you wish to QC.</p>
 
-            <LabwareScanner onAdd={onAddLabware} onRemove={onRemoveLabware} enableFlaggedLabwareCheck={true}>
+            <LabwareScanner onAdd={onAddLabware} onRemove={onRemoveLabware} enableFlaggedLabwareCheck>
               {({ labwares, removeLabware }) =>
                 labwares.map(
                   (labware) =>

@@ -38,12 +38,12 @@ const flaggedBarcode: FlaggedColumnFactory = () => {
   return {
     Header: 'Barcode',
     accessor: (lw: LabwareFlaggedFieldsFragment) => {
-      return lw.flagged ? flaggedBarcodeDiv(lw.barcode) : lw.barcode;
+      return lw.flagged ? FlaggedBarcodeLink(lw.barcode) : lw.barcode;
     }
   };
 };
 
-export const flaggedBarcodeDiv = (barcode: string) => {
+export const FlaggedBarcodeLink = (barcode: string) => {
   return (
     <div className="whitespace-nowrap">
       <StyledLink

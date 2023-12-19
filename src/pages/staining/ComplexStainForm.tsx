@@ -130,7 +130,7 @@ export default function ComplexStainForm({ stainType, initialLabware, onLabwareC
                   onChange={onLabwareChange}
                   buildLabware={buildLabware}
                   locked={current.matches('submitted')}
-                  enableFlaggedLabwareCheck={true}
+                  enableFlaggedLabwareCheck
                 >
                   <LabwareScanPanel
                     columns={[columns.barcode(), columns.donorId(), columns.labwareType(), columns.externalName()]}

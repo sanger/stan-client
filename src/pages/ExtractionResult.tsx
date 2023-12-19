@@ -139,7 +139,7 @@ export default function ExtractionResult() {
                   <FormikLabwareScanner<ExtractResultLabwareForm>
                     initialLabwares={initialLabware}
                     buildLabware={buildExtractResultLabware}
-                    enableFlaggedLabwareCheck={true}
+                    enableFlaggedLabwareCheck
                   >
                     <ExtractResultLabwareTable availableComments={extractionResultInfo.comments} />
                   </FormikLabwareScanner>

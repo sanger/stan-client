@@ -229,8 +229,6 @@ export function createSectioningConfirmMachine() {
           }
         }),
         assignLayoutPlans: assign((ctx) => {
-          console.log('assignLayoutPlans');
-          console.log(ctx);
           const layoutPlans: LayoutPlan[] = Object.values(ctx.layoutPlansByLabwareType).flatMap((plan) => plan);
 
           /**Remove deleted plans**/
@@ -245,7 +243,6 @@ export function createSectioningConfirmMachine() {
           );
           /**New plans are added, so create LayoutPlan for all new plans and add to the list*/
           if (addedPlans.length > 0) {
-            console.log('adding plans');
             /**Create the layoutPlans for all newly added plans**/
             const layoutPlans = buildLayoutPlans(addedPlans, ctx.sourceLabware);
             updatedLayoutPlans = [...updatedLayoutPlans, ...layoutPlans];

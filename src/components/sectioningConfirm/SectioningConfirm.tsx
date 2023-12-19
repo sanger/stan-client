@@ -99,7 +99,6 @@ export default function SectioningConfirm({
    */
   const handlePlanChange = useCallback(
     (plans: Array<FindPlanDataQuery>) => {
-      console.log('handlePlanChange', plans);
       send({ type: 'UPDATE_PLANS', plans });
     },
     [send]

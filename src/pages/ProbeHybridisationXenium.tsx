@@ -156,7 +156,7 @@ const ProbeHybridisationXenium: React.FC = () => {
                               }
                             });
                           }}
-                          enableFlaggedLabwareCheck={true}
+                          enableFlaggedLabwareCheck
                         >
                           <LabwareScanPanel
                             columns={[

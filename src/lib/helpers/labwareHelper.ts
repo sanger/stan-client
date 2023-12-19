@@ -197,10 +197,22 @@ export const hasSamples = (labware: LabwareFieldsFragment | LabwareFlaggedFields
   return labware.slots.some((slot) => slot.samples && slot.samples.length > 0);
 };
 
+/**
+ * Converts an array of Labware objects to an array of Flagged Labware objects.
+ *
+ * @param labware - An array of Labware objects to be converted.
+ * @returns An array of Flagged Labware objects with the 'flagged' property set to false.
+ */
 export const convertLabwareToFlaggedLabware = (labware: LabwareFieldsFragment[]): LabwareFlaggedFieldsFragment[] => {
   return labware.map((lw) => ({ flagged: false, ...lw }) as LabwareFlaggedFieldsFragment);
 };
 
+/**
+ * Extracts Labware objects from an array of Flagged Labware objects.
+ *
+ * @param flagged - An array of Flagged Labware objects to extract Labware from.
+ * @returns An array of Labware objects without the 'flagged' property.
+ */
 export const extractLabwareFromFlagged = (flagged: LabwareFlaggedFieldsFragment[]): LabwareFieldsFragment[] => {
   return flagged.map(({ flagged, ...rest }) => rest as LabwareFieldsFragment);
 };

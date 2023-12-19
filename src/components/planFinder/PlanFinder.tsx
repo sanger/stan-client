@@ -89,7 +89,7 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
     <div className={'max-w-screen-xl mx-auto'}>
       {showError && <Warning message={validationError ?? 'Plan Search Error'} error={requestError} />}
       <div data-testid="plan-finder">
-        <LabwareScanner onAdd={handleOnScan} enableFlaggedLabwareCheck={true}>
+        <LabwareScanner onAdd={handleOnScan} enableFlaggedLabwareCheck>
           {}
         </LabwareScanner>
       </div>
