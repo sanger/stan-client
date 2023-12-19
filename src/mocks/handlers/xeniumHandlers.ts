@@ -1,39 +1,23 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import commentRepository from '../repositories/commentRepository';
 import { RecordAnalyserMutation, RecordAnalyserMutationVariables } from '../../types/sdk';
 
 const xeniumHandlers = [
   //Get Xenium QC Info
-  graphql.query('GetXeniumQCInfo', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        comments: commentRepository.findAll().filter((comment) => comment.category === 'QC labware' && comment.enabled)
-      })
-    );
+  graphql.query('GetXeniumQCInfo', () => {
+    return HttpResponse.json({
+      data: {
+        comments: commentRepository.findAll().filter((comment) => comment.category === 'Xenium QC' && comment.enabled)
+      }
+    });
   }),
   //Record Analyser mutatio
-  graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('RecordAnalyser', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        recordAnalyser: {
-          operations: [
-            {
-              id: 1
-            }
-          ]
-        }
-      })
-    );
+  graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('RecordAnalyser', () => {
+    return HttpResponse.json({ data: { recordAnalyser: { operations: [{ id: 1 }] } } });
   }),
   //Record QC Labware mutation
-  graphql.mutation('RecordQCLabware', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        recordQcLabware: {
-          operations: [{ id: 1 }]
-        }
-      })
-    );
+  graphql.mutation('RecordQCLabware', () => {
+    return HttpResponse.json({ data: { recordQcLabware: { operations: [{ id: 1 }] } } });
   })
 ];
 

@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import { GetLabwareInLocationQuery, GetLabwareInLocationQueryVariables, Labware } from '../../types/sdk';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import labwareFactory from '../../lib/factories/labwareFactory';
@@ -27,7 +27,7 @@ const createLabware = (barcode: string): Labware => {
 export const labwareLocationHandlers = [
   graphql.query<GetLabwareInLocationQuery, GetLabwareInLocationQueryVariables>(
     'GetLabwareInLocation',
-    (req, res, ctx) => {
+    ({ variables }) => {
       // The number after STAN- determines what kind of labware will be returned
       const labwaresBarcodes: string[] = ['STAN-3111', 'STAN-3112', 'STAN-3113', 'STAN-1001', 'STAN-1002'];
       const labwares = labwaresBarcodes.map((barcode) => {
@@ -39,14 +39,7 @@ export const labwareLocationHandlers = [
       const payload: GetLabwareInLocationQuery = {
         labwareInLocation: labwares
       };
-      /*return res(
-        ctx.errors([
-          {
-            message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.locationBarcode}`,
-          },
-        ])
-      );*/
-      return res(ctx.data(payload));
+      return HttpResponse.json({ data: payload });
     }
   )
 ];
