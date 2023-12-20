@@ -1707,15 +1707,6 @@ svg.logo.loading rect:nth-child(3n+1) {
 .-mt-px {
   margin-top: -1px;
 }
-.-ml-1 {
-  margin-left: -0.25rem;
-}
-.mr-1 {
-  margin-right: 0.25rem;
-}
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
 .mt-8 {
   margin-top: 2rem;
 }
@@ -1740,6 +1731,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 .-mt-1 {
   margin-top: -0.25rem;
 }
+.-ml-1 {
+  margin-left: -0.25rem;
+}
 .mr-2 {
   margin-right: 0.5rem;
 }
@@ -1752,6 +1746,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 .mr-4 {
   margin-right: 1rem;
 }
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
 .ml-4 {
   margin-left: 1rem;
 }
@@ -1760,6 +1757,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 }
 .-mr-1 {
   margin-right: -0.25rem;
+}
+.mr-1 {
+  margin-right: 0.25rem;
 }
 .ml-6 {
   margin-left: 1.5rem;
@@ -2608,9 +2608,6 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity));
 }
-.bg-transparent {
-  background-color: transparent;
-}
 .bg-gray-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(203 213 224 / var(--tw-bg-opacity));
@@ -2618,6 +2615,9 @@ svg.logo.loading rect:nth-child(3n+1) {
 .bg-sdb-600 {
   --tw-bg-opacity: 1;
   background-color: rgb(18 19 33 / var(--tw-bg-opacity));
+}
+.bg-transparent {
+  background-color: transparent;
 }
 .bg-sp-700 {
   --tw-bg-opacity: 1;
@@ -3001,10 +3001,6 @@ svg.logo.loading rect:nth-child(3n+1) {
   --tw-text-opacity: 1;
   color: rgb(226 232 240 / var(--tw-text-opacity));
 }
-.text-sp {
-  --tw-text-opacity: 1;
-  color: rgb(233 30 99 / var(--tw-text-opacity));
-}
 .text-red-400 {
   --tw-text-opacity: 1;
   color: rgb(252 129 129 / var(--tw-text-opacity));
@@ -3012,6 +3008,10 @@ svg.logo.loading rect:nth-child(3n+1) {
 .text-blue-600 {
   --tw-text-opacity: 1;
   color: rgb(49 130 206 / var(--tw-text-opacity));
+}
+.text-sp {
+  --tw-text-opacity: 1;
+  color: rgb(233 30 99 / var(--tw-text-opacity));
 }
 .text-sp-800 {
   --tw-text-opacity: 1;
@@ -3032,6 +3032,10 @@ svg.logo.loading rect:nth-child(3n+1) {
 .text-blue-500 {
   --tw-text-opacity: 1;
   color: rgb(66 153 225 / var(--tw-text-opacity));
+}
+.text-sp-700 {
+  --tw-text-opacity: 1;
+  color: rgb(140 18 59 / var(--tw-text-opacity));
 }
 .text-red-700 {
   --tw-text-opacity: 1;
@@ -3366,6 +3370,10 @@ svg.logo.loading rect:nth-child(3n+1) {
 .hover\:text-red-300:hover {
   --tw-text-opacity: 1;
   color: rgb(254 178 178 / var(--tw-text-opacity));
+}
+.hover\:text-sp-800:hover {
+  --tw-text-opacity: 1;
+  color: rgb(105 14 45 / var(--tw-text-opacity));
 }
 .hover\:text-red-500:hover {
   --tw-text-opacity: 1;
@@ -4389,4 +4397,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.246cef99.css.map*/
+/*# sourceMappingURL=main.9eb4eae7.css.map*/
