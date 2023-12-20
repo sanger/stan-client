@@ -1,10 +1,16 @@
 import { createMachine } from 'xstate';
 import { assign } from '@xstate/immer';
 import { castDraft } from 'immer';
-import { MachineServiceDone, MachineServiceError, NewLabwareLayout, OperationTypeName } from '../../../types/stan';
+import {
+  MachineServiceDone,
+  MachineServiceError,
+  NewFlaggedLabwareLayout,
+  OperationTypeName
+} from '../../../types/stan';
 import {
   FindPermDataQuery,
   LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   LabwareState,
   Maybe,
   SlideCosting,
@@ -21,7 +27,7 @@ import { ClientError } from 'graphql-request';
  */
 
 export type Destination = {
-  labware: NewLabwareLayout;
+  labware: NewFlaggedLabwareLayout;
   slotCopyDetails: SlotCopyDestination;
 };
 
@@ -29,7 +35,7 @@ export type Destination = {
  * Making 'labwareState' field optional thereby allowing to keep a list of source labware without state
  */
 export type Source = {
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   labwareState?: LabwareState;
 };
 
@@ -68,62 +74,62 @@ export interface SlotCopyContext {
 
 type UpdateSlotCopyContentType = {
   type: 'UPDATE_SLOT_COPY_CONTENT';
-  labware: NewLabwareLayout;
+  labware: NewFlaggedLabwareLayout;
   slotCopyContent: Array<SlotCopyContent>;
   anySourceMapped: boolean;
 };
 
 type UpdateSourceLabwarePermTime = {
   type: 'UPDATE_SOURCE_LABWARE_PERMTIME';
-  labwares: Array<LabwareFieldsFragment>;
+  labwares: Array<LabwareFlaggedFieldsFragment>;
   destinaton: Destination | undefined;
 };
 
 type UpdateDestinationPreBarcode = {
   type: 'UPDATE_DESTINATION_PRE_BARCODE';
   preBarcode: string;
-  labware: NewLabwareLayout;
+  labware: NewFlaggedLabwareLayout;
 };
 
 type UpdateDestinationLabwareType = {
   type: 'UPDATE_DESTINATION_LABWARE_TYPE';
   /**Old labware**/
-  labwareToReplace: NewLabwareLayout;
+  labwareToReplace: NewFlaggedLabwareLayout;
   /**New labware**/
-  labware: NewLabwareLayout;
+  labware: NewFlaggedLabwareLayout;
 };
 type UpdateDestinationCosting = {
   type: 'UPDATE_DESTINATION_COSTING';
-  labware: NewLabwareLayout;
+  labware: NewFlaggedLabwareLayout;
   labwareCosting: SlideCosting | undefined;
 };
 type UpdateDestinationBioState = {
   type: 'UPDATE_DESTINATION_BIO_STATE';
-  labware: NewLabwareLayout;
+  labware: NewFlaggedLabwareLayout;
   bioState: string;
 };
 
 type UpdateDestinationLOTNumber = {
   type: 'UPDATE_DESTINATION_LOT_NUMBER';
-  labware: NewLabwareLayout;
+  labware: NewFlaggedLabwareLayout;
   lotNumber: string;
   isProbe: boolean;
 };
 
 type UpdateSourceLabwareState = {
   type: 'UPDATE_SOURCE_LABWARE_STATE';
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   labwareState: LabwareState;
 };
 
 type UpdateSourceLabware = {
   type: 'UPDATE_SOURCE_LABWARE';
-  labware: LabwareFieldsFragment[];
+  labware: LabwareFlaggedFieldsFragment[];
 };
 
 type UpdateDestinationLabware = {
   type: 'UPDATE_DESTINATION_LABWARE';
-  labware: NewLabwareLayout[];
+  labware: NewFlaggedLabwareLayout[];
 };
 
 type FindPermDataEvent = {
@@ -471,7 +477,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
         }
         return new Promise<{
           findPermTimes: FindPermDataQuery[];
-          inputLabwares: LabwareFieldsFragment[];
+          inputLabwares: LabwareFlaggedFieldsFragment[];
           destination: Destination | undefined;
         }>((resolve) => {
           return resolve({

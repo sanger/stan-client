@@ -13,7 +13,7 @@ import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import PinkButton from '../components/buttons/PinkButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
-import { LabwareFieldsFragment, OrientationRequest, RecordOrientationQcMutation } from '../types/sdk';
+import { LabwareFlaggedFieldsFragment, OrientationRequest, RecordOrientationQcMutation } from '../types/sdk';
 import { stanCore } from '../lib/sdk';
 import columns from '../components/dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
@@ -51,7 +51,7 @@ const OrientationQC = () => {
 
   const { serverError } = current.context;
 
-  const blockLabwareCheck = (labware: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment) => {
+  const blockLabwareCheck = (labware: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment) => {
     return hasBlock(foundLabware) ? [] : ['Labware ' + foundLabware.barcode + ' is not a block labware.'];
   };
 
@@ -109,6 +109,7 @@ const OrientationQC = () => {
                         locked={current.matches('submitted')}
                         labwareCheckFunction={blockLabwareCheck}
                         limit={1}
+                        enableFlaggedLabwareCheck
                       >
                         <LabwareScanPanel
                           columns={[

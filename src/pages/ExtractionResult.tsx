@@ -5,7 +5,7 @@ import {
   ExtractResultQuery,
   ExtractResultRequest,
   GetRecordExtractResultInfoQuery,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   PassFail,
   RecordExtractResultMutation
 } from '../types/sdk';
@@ -23,9 +23,9 @@ import { ExtractResultLabwareTable } from '../components/extractResultLabwareTab
 import Warning from '../components/notifications/Warning';
 import ButtonBar from '../components/ButtonBar';
 
-type ExtractResultLabwareForm = ExtractResultLabware & { lw: LabwareFieldsFragment };
+export type ExtractResultLabwareForm = ExtractResultLabware & { lw: LabwareFlaggedFieldsFragment };
 
-type ExtractResultRequestForm = {
+export type ExtractResultRequestForm = {
   workNumber: string;
   labware: ExtractResultLabwareForm[];
 };
@@ -35,8 +35,8 @@ export default function ExtractionResult() {
   // There will be initial labware if user has come from the Extraction page
   const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state as { labware?: Array<LabwareFieldsFragment> };
-  const initialLabware: Array<LabwareFieldsFragment> = state === null ? [] : state.labware ?? [];
+  const state = location.state as { labware?: Array<LabwareFlaggedFieldsFragment> };
+  const initialLabware: Array<LabwareFlaggedFieldsFragment> = state === null ? [] : state.labware ?? [];
   const [labwareToAnalyse, setLabwareToAnalyse] = React.useState<ExtractResultQuery[]>([]);
 
   const initialValues: ExtractResultRequestForm = {
@@ -139,6 +139,7 @@ export default function ExtractionResult() {
                   <FormikLabwareScanner<ExtractResultLabwareForm>
                     initialLabwares={initialLabware}
                     buildLabware={buildExtractResultLabware}
+                    enableFlaggedLabwareCheck
                   >
                     <ExtractResultLabwareTable availableComments={extractionResultInfo.comments} />
                   </FormikLabwareScanner>
@@ -180,7 +181,7 @@ export default function ExtractionResult() {
  * Builds the default {@link ExtractResultLabware} for a labware
  * @param labware the labware to build a default for
  */
-function buildExtractResultLabware(labware: LabwareFieldsFragment): ExtractResultLabwareForm {
+function buildExtractResultLabware(labware: LabwareFlaggedFieldsFragment): ExtractResultLabwareForm {
   return {
     lw: labware,
     barcode: labware.barcode,

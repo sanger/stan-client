@@ -56,6 +56,7 @@ import ReleaseOptions from './release/ReleaseOptions';
 import { Reactivate } from '../pages/Reactivate';
 import OrientationQC from '../pages/OrientationQC';
 import FlagLabware from '../pages/FlagLabware';
+import { NewFlaggedLabwareLayout } from '../types/stan';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -230,7 +231,9 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/transfer"
-            element={<SlotCopy title={'Transfer'} initialOutputLabware={[plateFactory.build()]} />}
+            element={
+              <SlotCopy title={'Transfer'} initialOutputLabware={[plateFactory.build() as NewFlaggedLabwareLayout]} />
+            }
           />
         </Route>
         <Route element={<AuthLayout />}>

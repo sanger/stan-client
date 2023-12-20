@@ -5,9 +5,12 @@ import {
   FlagLabwareMutation,
   FlagLabwareMutationVariables,
   GetLabwareFlagDetailsQuery,
-  GetLabwareFlagDetailsQueryVariables
+  GetLabwareFlagDetailsQueryVariables,
+  Labware,
+  LabwareFlaggedFieldsFragment
 } from '../../types/sdk';
-import labwareFactory from '../../lib/factories/labwareFactory';
+import { buildLabwareFragment, convertLabwareToFlaggedLabware } from '../../lib/helpers/labwareHelper';
+import { createLabware } from './labwareHandlers';
 
 /**
  * Returns a flagged labware if the given barcode ends with '00'
@@ -24,74 +27,7 @@ export const flagLabwareHandlers = [
         ])
       );
     }
-    const labware = labwareFactory.build({ barcode: barcode });
-    const payload: FindFlaggedLabwareQuery = {
-      labwareFlagged: {
-        __typename: 'LabwareFlagged',
-        id: labware.id,
-        barcode: labware.barcode,
-        externalBarcode: labware.externalBarcode,
-        destroyed: labware.destroyed,
-        discarded: labware.discarded,
-        released: labware.released,
-        created: labware.created,
-        flagged: barcode.endsWith('00'),
-        state: labware.state,
-        labwareType: {
-          __typename: 'LabwareType',
-          name: labware.labwareType.name,
-          numRows: labware.labwareType.numRows,
-          numColumns: labware.labwareType.numColumns,
-          labelType: labware.labwareType.labelType
-        },
-        slots: labware.slots.map((slot) => ({
-          __typename: 'Slot',
-          id: slot.id,
-          address: slot.address,
-          labwareId: slot.labwareId,
-          blockHighestSection: slot.blockHighestSection,
-          block: slot.block,
-          samples: slot.samples.map((sample) => ({
-            id: sample.id,
-            section: sample.section,
-            bioState: {
-              __typename: 'BioState',
-              name: sample.bioState.name
-            },
-            tissue: {
-              donor: {
-                donorName: sample.tissue.donor.donorName,
-                lifeStage: sample.tissue.donor.lifeStage,
-                __typename: 'Donor'
-              },
-              externalName: sample.tissue.externalName,
-              spatialLocation: {
-                tissueType: {
-                  name: sample.tissue.spatialLocation.tissueType.name,
-                  __typename: 'TissueType'
-                },
-                code: sample.tissue.spatialLocation.code,
-                __typename: 'SpatialLocation'
-              },
-              replicate: sample.tissue.replicate,
-              medium: {
-                name: sample.tissue.medium.name,
-                __typename: 'Medium'
-              },
-              fixative: {
-                name: sample.tissue.fixative.name,
-                enabled: sample.tissue.fixative.enabled,
-                __typename: 'Fixative'
-              },
-              __typename: 'Tissue'
-            },
-            __typename: 'Sample'
-          }))
-        }))
-      }
-    };
-
-    return res(ctx.data(payload));
+    return res(ctx.data({ labwareFlagged: createFlaggedLabware(barcode) }));
   }),
 
   graphql.query<GetLabwareFlagDetailsQuery, GetLabwareFlagDetailsQueryVariables>(
@@ -138,3 +74,17 @@ export const flagLabwareHandlers = [
     );
   })
 ];
+
+export const createFlaggedLabware = (barcode: string): LabwareFlaggedFieldsFragment => {
+  const labwareJson = sessionStorage.getItem(`labware-${barcode}`);
+  const labware: Labware = labwareJson ? JSON.parse(labwareJson) : createLabware(barcode);
+  const flaggedLabware = convertLabwareToFlaggedLabware([buildLabwareFragment(labware)])[0];
+  flaggedLabware.flagged = barcode.endsWith('00');
+  return flaggedLabware;
+};
+
+export const buildFlaggedLabwareFragment = (lw: Labware): LabwareFlaggedFieldsFragment => {
+  const labware = buildLabwareFragment(lw) as LabwareFlaggedFieldsFragment;
+  labware.flagged = lw.barcode.endsWith('00');
+  return labware;
+};

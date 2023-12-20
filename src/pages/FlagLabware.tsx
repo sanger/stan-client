@@ -11,14 +11,21 @@ import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { StanCoreContext } from '../lib/sdk';
 import createFormMachine from '../lib/machines/form/formMachine';
-import { FlagDetail, FlagLabwareMutation, FlagLabwareRequest, LabwareFieldsFragment } from '../types/sdk';
+import {
+  FlagDetail,
+  FlagLabwareMutation,
+  FlagLabwareRequest,
+  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment
+} from '../types/sdk';
 import { useMachine } from '@xstate/react';
 import * as Yup from 'yup';
 import Panel from '../components/Panel';
 import RemoveButton from '../components/buttons/RemoveButton';
 import DataTable from '../components/DataTable';
 import { FormikErrorMessage } from '../components/forms';
-import { LabwareFlagDetails } from '../components/labwareFlagDetails';
+import { LabwareFlagDetails } from '../components/LabwareFlagDetails';
+import { Column } from 'react-table';
 
 type FormFlagLabware = {
   labware: LabwareFieldsFragment | undefined;
@@ -64,13 +71,19 @@ const FlagLabware = () => {
   const serverError = current.context.serverError;
 
   const labwareColumns = useMemo(() => {
-    return [columns.barcode(), columns.externalName(), columns.donorId(), columns.tissueType(), columns.labwareType()];
+    return [
+      columns.barcode(),
+      columns.externalName(),
+      columns.donorId(),
+      columns.tissueType(),
+      columns.labwareType()
+    ] as Array<Column<LabwareFlaggedFieldsFragment>>;
   }, []);
 
   const [relatedFlags, setRelatedFlags] = React.useState<FlagDetail[]>([]);
 
-  const checkRelatedFlagges = useCallback(
-    async (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): Promise<string[]> => {
+  const checkRelatedFlags = useCallback(
+    async (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): Promise<string[]> => {
       try {
         const response = await stanCore.GetLabwareFlagDetails({
           barcodes: [foundLabware.barcode]
@@ -106,7 +119,8 @@ const FlagLabware = () => {
                         onAdd={(lw) => {
                           setFieldValue('labware', lw);
                         }}
-                        labwareCheckFunction={checkRelatedFlagges}
+                        enableFlaggedLabwareCheck
+                        labwareCheckFunction={checkRelatedFlags}
                       >
                         {({ labwares, removeLabware }) =>
                           labwares.map((labware, index) => (

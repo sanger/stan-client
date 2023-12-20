@@ -1,9 +1,10 @@
 import React from 'react';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
-import { LabwareFieldsFragment, SlotCopyContent, SlotFieldsFragment } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment, SlotCopyContent, SlotFieldsFragment } from '../../types/sdk';
+import { FlaggedBarcodeLink } from '../dataTableColumns/labwareColumns';
 
 type SlotMapperTableProps = {
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   slots: SlotFieldsFragment[];
   slotCopyContent: Array<SlotCopyContent>;
 };
@@ -57,7 +58,7 @@ export default function SlotMapperTable({ labware, slots, slotCopyContent }: Slo
       <TableBody>
         {mappingForSlots.map(({ slot, destinationAddress }) => (
           <tr key={`${slot.address}-${slot.labwareId}-${destinationAddress}`}>
-            <TableCell>{labware.barcode}</TableCell>
+            <TableCell>{labware.flagged ? FlaggedBarcodeLink(labware.barcode) : labware.barcode}</TableCell>
             <TableCell>{slot.address}</TableCell>
             <TableCell>{slot.samples.length > 0 ? slot.samples[0].tissue.externalName : ''}</TableCell>
             <TableCell>{slot.samples.length > 0 ? slot.samples[0].tissue.spatialLocation.code : ''}</TableCell>

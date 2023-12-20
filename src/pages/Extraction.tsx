@@ -16,8 +16,8 @@ import { usePrinters } from '../lib/hooks';
 import MutedText from '../components/MutedText';
 import LabwareScanner from '../components/labwareScanner/LabwareScanner';
 import { useMachine } from '@xstate/react';
-import { buildSampleColors } from '../lib/helpers/labwareHelper';
-import { EquipmentFieldsFragment, LabwareFieldsFragment } from '../types/sdk';
+import { buildSampleColors, extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
+import { EquipmentFieldsFragment, LabwareFlaggedFieldsFragment } from '../types/sdk';
 import extractionMachine, { ExtractionContext } from '../lib/machines/extraction/extractionMachine';
 import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 import ButtonBar from '../components/ButtonBar';
@@ -99,15 +99,15 @@ function Extraction() {
     [send]
   );
 
-  const onLabwareScannerChange = (labwares: Array<LabwareFieldsFragment>) =>
-    send({ type: 'UPDATE_LABWARES', labwares });
+  const onLabwareScannerChange = (labwares: Array<LabwareFlaggedFieldsFragment>) =>
+    send({ type: 'UPDATE_LABWARES', labwares: extractLabwareFromFlagged(labwares) });
 
   const scannerLocked = !current.matches('ready') && !current.matches('extractionFailed');
 
   const showGrayPanel = current.matches('ready') || current.matches('extractionFailed');
 
   const validateLabware = useCallback(
-    (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): string[] => {
+    (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): string[] => {
       return hasSamples(foundLabware) ? [] : ['No samples found in the labware'];
     },
     []
@@ -156,6 +156,7 @@ function Extraction() {
               onChange={onLabwareScannerChange}
               locked={scannerLocked}
               labwareCheckFunction={validateLabware}
+              enableFlaggedLabwareCheck
             >
               <LabwareScanPanel columns={columns} />
             </LabwareScanner>

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   CommentFieldsFragment,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   LabwareResult as CoreLabwareResult,
   PassFail,
   SlideCosting
@@ -19,7 +19,7 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 
 type SlideProcessingProps = {
   comments: CommentFieldsFragment[];
-  labware: LabwareFieldsFragment[];
+  labware: LabwareFlaggedFieldsFragment[];
   labwaresResultsProps: CoreLabwareResult[] | undefined;
   removeLabware: (barcode: string) => void;
 };

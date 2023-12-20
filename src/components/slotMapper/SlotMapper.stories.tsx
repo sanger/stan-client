@@ -4,7 +4,8 @@ import { Meta, Story } from '@storybook/react';
 import SlotMapper from './SlotMapper';
 import labwareFactory, { plateFactory } from '../../lib/factories/labwareFactory';
 import { labwareTypes } from '../../lib/factories/labwareTypeFactory';
-import { LabwareTypeName } from '../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
+import { LabwareFlagged } from '../../types/sdk';
 
 const meta: Meta = {
   title: 'Slot Mapper',
@@ -21,6 +22,6 @@ Default.args = {
     associations: {
       labwareType: labwareTypes[LabwareTypeName.VISIUM_LP].build()
     }
-  }),
-  initialOutputLabware: [{ labware: plateFactory.build(), slotCopyContent: [] }]
+  }) as Array<LabwareFlagged>,
+  initialOutputLabware: [{ labware: plateFactory.build() as NewFlaggedLabwareLayout, slotCopyContent: [] }]
 };

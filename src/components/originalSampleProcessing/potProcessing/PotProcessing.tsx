@@ -1,6 +1,6 @@
 import {
   GetPotProcessingInfoQuery,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   PerformTissuePotMutation,
   PotProcessingRequest
 } from '../../../types/sdk';
@@ -8,7 +8,7 @@ import { useMachine } from '@xstate/react';
 import ButtonBar from '../../ButtonBar';
 import BlueButton from '../../buttons/BlueButton';
 import React from 'react';
-import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../../types/stan';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
 import { Dictionary, groupBy } from 'lodash';
@@ -96,8 +96,8 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
    */
   const buildPlanLayouts = React.useCallback(
     (
-      plans: Map<string, NewLabwareLayout>,
-      sourceLabware: LabwareFieldsFragment[],
+      plans: Map<string, NewFlaggedLabwareLayout>,
+      sourceLabware: LabwareFlaggedFieldsFragment[],
       sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
       confirmAction?: (cid: string, plan: undefined) => void,
@@ -105,7 +105,7 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
     ) => {
       type PlanWithId = {
         cid: string;
-        plan: NewLabwareLayout | undefined;
+        plan: NewFlaggedLabwareLayout | undefined;
       };
       //Group by labware type
       const planWithKeys: PlanWithId[] = Array.from(plans.keys()).map((k) => {

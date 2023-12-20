@@ -1,6 +1,7 @@
 import {
   GetBlockProcessingInfoQuery,
   LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   PerformTissueBlockMutation,
   TissueBlockRequest
 } from '../../../types/sdk';
@@ -8,7 +9,7 @@ import { useMachine } from '@xstate/react';
 import ButtonBar from '../../ButtonBar';
 import BlueButton from '../../buttons/BlueButton';
 import React from 'react';
-import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../../types/stan';
 import columns from '../../dataTableColumns/labwareColumns';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
@@ -118,8 +119,8 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   /** Display created Labware plans**/
   const buildPlanLayouts = React.useCallback(
     (
-      plans: Map<string, NewLabwareLayout>,
-      sourceLabware: LabwareFieldsFragment[],
+      plans: Map<string, NewFlaggedLabwareLayout>,
+      sourceLabware: LabwareFlaggedFieldsFragment[],
       sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
       confirmAction?: (cid: string, plan: undefined) => void,
@@ -127,7 +128,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
     ) => {
       type PlanWithId = {
         cid: string;
-        plan: NewLabwareLayout | undefined;
+        plan: NewFlaggedLabwareLayout | undefined;
       };
       //Group plans labware type
       const planWithKeys: PlanWithId[] = Array.from(plans.keys()).map((k) => {

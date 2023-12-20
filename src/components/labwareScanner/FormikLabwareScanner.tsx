@@ -1,4 +1,4 @@
-import { LabwareFieldsFragment } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import React from 'react';
 import { FieldArray } from 'formik';
 import LabwareScanner, { LabwareScannerProps } from './LabwareScanner';
@@ -14,12 +14,17 @@ type FormikLabwareScannerProps<T> = Omit<LabwareScannerProps, 'children' | 'onAd
    * Callback for building the initial labware form value
    * @param labware
    */
-  buildLabware: (labware: LabwareFieldsFragment) => T;
+  buildLabware: (labware: LabwareFlaggedFieldsFragment) => T;
 
   /**
    * React children that will have access to {@link LabwareScanner} context
    */
-  children: React.ReactNode;
+  children?: React.ReactNode;
+
+  /**
+   * defaults to false, when set to true labwareMachine runs the FindFlaggedLabware query instead of the FindLabware query.
+   */
+  enableFlaggedLabwareCheck?: boolean;
 };
 
 /**

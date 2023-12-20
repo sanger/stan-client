@@ -4,6 +4,7 @@ import {
   CommentFieldsFragment,
   CompletionRequest,
   LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   LabwareSampleComments,
   RecordCompletionMutation,
   SampleAddressComment
@@ -31,6 +32,8 @@ import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
 import * as Yup from 'yup';
+import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
+
 import { useLoaderData } from 'react-router-dom';
 
 type SampleAddressFormRow = {
@@ -134,15 +137,15 @@ export default function ProbeHybridisationQC() {
   });
 
   const onAddLabware = useCallback(
-    (labware: LabwareFieldsFragment) => {
-      labwares.append(labware);
+    (labware: LabwareFlaggedFieldsFragment) => {
+      labwares.append(extractLabwareFromFlagged([labware])[0]);
     },
     [labwares]
   );
 
   const validateProbeHybridisationQcLabware = useCallback(
-    async (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): Promise<string[]> => {
-      const errors: Promise<string[]> = stanCore
+    async (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): Promise<string[]> => {
+      return stanCore
         .FindLatestOperation({
           barcode: foundLabware.barcode,
           operationType: 'Probe hybridisation Xenium'
@@ -154,13 +157,12 @@ export default function ProbeHybridisationQC() {
                 `No Probe Hybridisation Xenium operation has been recorded on the following labware: ${foundLabware.barcode}`
               ];
         });
-      return errors;
     },
     [stanCore]
   );
 
   const onRemoveLabware = useCallback(
-    (labware: LabwareFieldsFragment) => {
+    (labware: LabwareFlaggedFieldsFragment) => {
       labwares.remove(labware.barcode);
     },
     [labwares]
@@ -210,8 +212,7 @@ export default function ProbeHybridisationQC() {
   const updateSectionCommentsFromGlobal = useCallback(
     (
       options: OptionType[],
-      labware: LabwareFieldsFragment,
-      values: ProbeHybridisationQCFormValues,
+      labware: LabwareFlaggedFieldsFragment,
       setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void
     ) => {
       labware.slots.forEach((slot) => {
@@ -308,12 +309,7 @@ export default function ProbeHybridisationQC() {
                                   options={selectOptionValues(comments, 'text', 'id')}
                                   isMulti={true}
                                   handleChange={(options) => {
-                                    updateSectionCommentsFromGlobal(
-                                      options as OptionType[],
-                                      labware,
-                                      values,
-                                      setFieldValue
-                                    );
+                                    updateSectionCommentsFromGlobal(options as OptionType[], labware, setFieldValue);
                                   }}
                                   value={() => {
                                     const labwareData = values.labwares[labware.barcode];

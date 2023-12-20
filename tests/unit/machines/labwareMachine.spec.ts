@@ -1,7 +1,14 @@
 import { interpret } from 'xstate';
-import { FindLabwareQuery, GetLabwareInLocationQuery, LabwareState, LifeStage } from '../../../src/types/sdk';
+import {
+  FindFlaggedLabwareQuery,
+  FindLabwareQuery,
+  GetLabwareInLocationQuery,
+  LabwareState,
+  LifeStage
+} from '../../../src/types/sdk';
 import { log } from 'xstate/lib/actions';
 import { createLabwareMachine, LabwareContext } from '../../../src/lib/machines/labware/labwareMachine';
+import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
 
 describe('labwareMachine', () => {
   it('has an initial state of idle.normal', (done) => {
@@ -348,6 +355,49 @@ describe('labwareMachine', () => {
       machine.start();
       machine.send({ type: 'LOCK' });
       machine.send({ type: 'UNLOCK' });
+    });
+  });
+  describe('When enableFlaggedLabwareCheck is true', () => {
+    describe('when a flagged labware barcode is scanned', () => {
+      it('runs FindFlaggedLabware query', (done) => {
+        const labwareMachine = createLabwareMachine();
+        const mockMachine = labwareMachine
+          .withConfig({
+            actions: {
+              notifyParent: log('stubbed update labwares')
+            },
+            services: {
+              findLabwareByBarcode: (_ctx: LabwareContext) => {
+                return new Promise<FindFlaggedLabwareQuery>((resolve) => {
+                  resolve({
+                    labwareFlagged: createFlaggedLabware('STAN-12300')
+                  });
+                });
+              }
+            }
+          })
+          .withContext(
+            Object.assign({}, createLabwareMachine().context, {
+              enableFlaggedLabwareCheck: true
+            })
+          );
+
+        const stateMachine = interpret(mockMachine).onTransition((state) => {
+          if (state.matches('idle.normal') && state.context.labwares.length > 0) {
+            expect(state.context.labwares.length).toEqual(1);
+            expect(state.context.labwares[0].flagged).toEqual(true);
+            done();
+          }
+        });
+        stateMachine.start();
+        stateMachine.send({
+          type: 'UPDATE_CURRENT_BARCODE',
+          value: 'STO-12300',
+          locationScan: false
+        });
+        stateMachine.send({ type: 'SUBMIT_BARCODE' });
+        expect(stateMachine.state.context.enableFlaggedLabwareCheck).toEqual(true);
+      });
     });
   });
 });

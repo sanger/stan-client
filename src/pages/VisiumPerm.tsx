@@ -28,6 +28,7 @@ import columns from '../components/dataTableColumns/labwareColumns';
 import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import PermPositiveControl from '../components/forms/PermPositiveControl';
 import { ConfirmationModal } from '../components/modal/ConfirmationModal';
+import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
@@ -151,6 +152,7 @@ export default function VisiumPerm() {
                           values.permData.forEach((value, i) => remove(i));
                         }}
                         limit={1}
+                        enableFlaggedLabwareCheck
                       >
                         <LabwareScannerSlotsTable />
                         <VisiumPermForm />
@@ -221,6 +223,7 @@ function VisiumPermForm() {
   /**
    * Initialize the control tube when there is no labware scanned (Removing a labware)
    */
+
   React.useEffect(() => {
     if (labwares.length === 0) {
       setControlTube(undefined);
@@ -263,12 +266,13 @@ function VisiumPermForm() {
           <div className="flex flex-row" />
           <LabwareScanner
             onAdd={(labware) => {
-              setControlTube(labware);
+              setControlTube(extractLabwareFromFlagged([labware])[0]);
             }}
             onRemove={() => {
               setControlTube(undefined);
             }}
             limit={1}
+            enableFlaggedLabwareCheck
           >
             <LabwareScanPanel columns={[columns.barcode()]} />
           </LabwareScanner>

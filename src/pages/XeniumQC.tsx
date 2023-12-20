@@ -111,6 +111,7 @@ const XeniumQC = () => {
                             });
                           }
                         }}
+                        enableFlaggedLabwareCheck
                       >
                         {({ labwares, removeLabware }) => (
                           <>

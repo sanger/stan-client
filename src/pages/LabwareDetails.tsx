@@ -19,7 +19,7 @@ import History from '../components/history/History';
 import { LabwareStatePill } from '../components/LabwareStatePill';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
 import { useLoaderData } from 'react-router-dom';
-import { LabwareFlagDetails } from '../components/labwareFlagDetails';
+import { LabwareFlagDetails } from '../components/LabwareFlagDetails';
 
 /**
  * Props passed in to the {@link LabwareDetails} page

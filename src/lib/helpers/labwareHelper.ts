@@ -1,4 +1,11 @@
-import { Labware, LabwareFieldsFragment, LabwareState, LabwareType, SlotFieldsFragment } from '../../types/sdk';
+import {
+  Labware,
+  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
+  LabwareState,
+  LabwareType,
+  SlotFieldsFragment
+} from '../../types/sdk';
 import { cycleColors } from '../helpers';
 import { orderBy } from 'lodash';
 import { Addressable, LabwareTypeName } from '../../types/stan';
@@ -17,7 +24,7 @@ export function isTube(maybeTube: Pick<LabwareType, 'name'>): boolean {
  * Build an array of all {@link Sample samples} in a {@link Labware} along with its {@link Slot} plus the original {@link Labware}
  * @param labware a {@link LabwareFieldsFragment}
  */
-export function labwareSamples(labware: LabwareFieldsFragment) {
+export function labwareSamples(labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment) {
   return labware.slots
     .map((slot) => {
       return slot.samples.map((sample) => {
@@ -32,7 +39,9 @@ export function labwareSamples(labware: LabwareFieldsFragment) {
  *
  * @param labwares list of labwares to get colors for
  */
-export function buildSampleColors(labwares: LabwareFieldsFragment[]): Map<number, string> {
+export function buildSampleColors(
+  labwares: LabwareFieldsFragment[] | LabwareFlaggedFieldsFragment[]
+): Map<number, string> {
   const colors = cycleColors();
   const sampleColors = new Map();
   labwares.forEach((labware) => {
@@ -184,6 +193,26 @@ export const tissue = (labware: LabwareFieldsFragment | undefined) => {
  * @param labware - The labware to check for samples.
  * @returns `true` if samples are found in any slot, `false` otherwise.
  */
-export const hasSamples = (labware: LabwareFieldsFragment): boolean => {
+export const hasSamples = (labware: LabwareFieldsFragment | LabwareFlaggedFieldsFragment): boolean => {
   return labware.slots.some((slot) => slot.samples && slot.samples.length > 0);
+};
+
+/**
+ * Converts an array of Labware objects to an array of Flagged Labware objects.
+ *
+ * @param labware - An array of Labware objects to be converted.
+ * @returns An array of Flagged Labware objects with the 'flagged' property set to false.
+ */
+export const convertLabwareToFlaggedLabware = (labware: LabwareFieldsFragment[]): LabwareFlaggedFieldsFragment[] => {
+  return labware.map((lw) => ({ flagged: false, ...lw }) as LabwareFlaggedFieldsFragment);
+};
+
+/**
+ * Extracts Labware objects from an array of Flagged Labware objects.
+ *
+ * @param flagged - An array of Flagged Labware objects to extract Labware from.
+ * @returns An array of Labware objects without the 'flagged' property.
+ */
+export const extractLabwareFromFlagged = (flagged: LabwareFlaggedFieldsFragment[]): LabwareFieldsFragment[] => {
+  return flagged.map(({ flagged, ...rest }) => rest as LabwareFieldsFragment);
 };

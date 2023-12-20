@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { PlanFinder } from '../planFinder/PlanFinder';
 import Heading from '../Heading';
-import DataTable from '../DataTable';
 import columns from '../dataTableColumns/labwareColumns';
 import { LabwareTypeName } from '../../types/stan';
 import ConfirmTubes from './ConfirmTubes';
@@ -12,6 +11,7 @@ import {
   ConfirmSectionLabware,
   FindPlanDataQuery,
   LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   SlotRegionFieldsFragment
 } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
@@ -21,6 +21,9 @@ import WorkNumberSelect from '../WorkNumberSelect';
 import RadioGroup, { RadioButtonInput } from '../forms/RadioGroup';
 import { objectKeys } from '../../lib/helpers';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
+import { Column } from 'react-table';
+import { extractLabwareFromFlagged } from '../../lib/helpers/labwareHelper';
+import DataTable from '../DataTable';
 
 type SectioningConfirmProps = {
   /**
@@ -74,7 +77,8 @@ export default function SectioningConfirm({
   useEffect(() => {
     const subscription = service.subscribe((state) => {
       if (state.matches('confirmed')) {
-        onConfirmed([...confirmSectionResultLabwares, ...sourceLabware]);
+        const sources = extractLabwareFromFlagged(sourceLabware);
+        onConfirmed([...confirmSectionResultLabwares, ...sources]);
       }
     });
     return subscription.unsubscribe;
@@ -178,8 +182,11 @@ export default function SectioningConfirm({
                     <div className="space-y-4">
                       <Heading level={3}>Source Labware</Heading>
                       <DataTable
+                        columns={[
+                          columns.flaggedBarcode(),
+                          columns.highestSectionForSlot('A1') as Column<LabwareFlaggedFieldsFragment>
+                        ]}
                         data={sourceLabware}
-                        columns={[columns.barcode(), columns.highestSectionForSlot('A1')]}
                       />
                     </div>
 

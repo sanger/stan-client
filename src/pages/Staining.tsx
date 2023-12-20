@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GetStainInfoQuery, LabwareFieldsFragment } from '../types/sdk';
+import { GetStainInfoQuery, LabwareFlaggedFieldsFragment } from '../types/sdk';
 import AppShell from '../components/AppShell';
 import StainForm from './staining/StainForm';
 import { selectOptionValues } from '../components/forms';
@@ -19,7 +19,7 @@ const isComplexStain = (stainName: string) => complexStains.has(stainName);
 export default function Staining() {
   const stainingInfo = useLoaderData() as GetStainInfoQuery;
   const [stainType, setStainType] = useState<string>('');
-  const [labwares, setLabwares] = useState<LabwareFieldsFragment[]>([]);
+  const [labwares, setLabwares] = useState<LabwareFlaggedFieldsFragment[]>([]);
 
   return (
     <AppShell>

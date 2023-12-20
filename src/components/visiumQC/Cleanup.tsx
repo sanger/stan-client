@@ -1,5 +1,10 @@
 import React from 'react';
-import { AddressCommentInput, CommentFieldsFragment, LabwareFieldsFragment, SlotFieldsFragment } from '../../types/sdk';
+import {
+  AddressCommentInput,
+  CommentFieldsFragment,
+  LabwareFlaggedFieldsFragment,
+  SlotFieldsFragment
+} from '../../types/sdk';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
@@ -13,7 +18,7 @@ import Panel from '../Panel';
 
 type CleanupProps = {
   comments: CommentFieldsFragment[];
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   removeLabware: (barcode: string) => void;
 };
 const Cleanup = ({ comments, labware, removeLabware }: CleanupProps) => {

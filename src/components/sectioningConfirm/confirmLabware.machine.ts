@@ -4,7 +4,7 @@ import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
 import { assign } from '@xstate/immer';
 import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 import { cloneDeep } from 'lodash';
-import { Address, NewLabwareLayout } from '../../types/stan';
+import { Address, NewFlaggedLabwareLayout } from '../../types/stan';
 
 export interface ConfirmLabwareContext {
   /**
@@ -20,7 +20,7 @@ export interface ConfirmLabwareContext {
   /**
    * The destination labware
    */
-  labware: NewLabwareLayout;
+  labware: NewFlaggedLabwareLayout;
 
   /**
    * All comments available for the outcome confirmation
@@ -136,7 +136,7 @@ function buildConfirmSections(destinationAddress: string, plannedActions: Array<
  */
 export const createConfirmLabwareMachine = (
   comments: Array<Comment>,
-  labware: NewLabwareLayout,
+  labware: NewFlaggedLabwareLayout,
   layoutPlan: LayoutPlan
 ) =>
   createMachine<ConfirmLabwareContext, ConfirmLabwareEvent>(

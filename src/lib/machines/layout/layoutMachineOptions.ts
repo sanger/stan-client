@@ -4,6 +4,7 @@ import { LayoutEvents } from './layoutEvents';
 import { assign } from '@xstate/immer';
 import { isEqual } from 'lodash';
 import { tissue } from '../../helpers/labwareHelper';
+import { LabwareFieldsFragment } from '../../../types/sdk';
 
 export const layoutMachineKey = 'layoutMachine';
 
@@ -45,7 +46,7 @@ export const machineOptions: Partial<MachineOptions<LayoutContext, LayoutEvents>
         plannedActions.delete(e.address);
       } else {
         const action: Source = Object.assign({}, ctx.selected);
-        action.replicateNumber = tissue(Object.assign({}, action.labware))?.replicate ?? '';
+        action.replicateNumber = tissue(Object.assign({}, action.labware as LabwareFieldsFragment))?.replicate ?? '';
         plannedActions.set(e.address, [action]);
       }
     }),

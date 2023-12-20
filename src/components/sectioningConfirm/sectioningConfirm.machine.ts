@@ -4,6 +4,7 @@ import {
   ConfirmSectionMutation,
   FindPlanDataQuery,
   LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   Maybe
 } from '../../types/sdk';
 import { createMachine } from 'xstate';
@@ -31,7 +32,7 @@ type SectioningConfirmContext = {
   /**
    * A list of deduped source labware derived from the plans
    */
-  sourceLabware: Array<LabwareFieldsFragment>;
+  sourceLabware: Array<LabwareFlaggedFieldsFragment>;
 
   /**
    * A map of labware type of a list of layout plans for that labware type
@@ -488,7 +489,7 @@ function autoFillSectionNumbers(layoutPlan: LayoutPlan, incrementFill: boolean, 
  * @param plans the list of plans to confirm
  * @param sourceLabwares the list of all source labware
  */
-function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array<LabwareFieldsFragment>) {
+function buildLayoutPlans(plans: Array<FindPlanDataQuery>, sourceLabwares: Array<LabwareFlaggedFieldsFragment>) {
   const sampleColors = buildSampleColors(sourceLabwares);
 
   // For each layoutPlan build a LayoutPlan

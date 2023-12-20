@@ -11,9 +11,9 @@ import {
 import { labwareTypeInstances, labwareTypes } from '../../lib/factories/labwareTypeFactory';
 import labwareFactory from '../../lib/factories/labwareFactory';
 import { uniqueId } from 'lodash';
-import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 import { LabwareTypeName } from '../../types/stan';
 import { generateLabwareIdFromBarcode } from './labwareHandlers';
+import { buildFlaggedLabwareFragment } from './flagLabwareHandlers';
 
 const planHandlers = [
   graphql.mutation<PlanMutation, PlanMutationVariables>('Plan', (req, res, ctx) => {
@@ -123,8 +123,8 @@ export function findPlanData(
 ) {
   return ctx.data({
     planData: {
-      sources: [buildLabwareFragment(sourceLabware)],
-      destination: buildLabwareFragment(destinationLabware),
+      sources: [buildFlaggedLabwareFragment(sourceLabware)],
+      destination: buildFlaggedLabwareFragment(destinationLabware),
       plan: {
         operationType: {
           __typename: 'OperationType',

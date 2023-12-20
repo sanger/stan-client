@@ -1,6 +1,6 @@
 import Panel from '../Panel';
 import React, { useState } from 'react';
-import { CommentFieldsFragment, LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import { CommentFieldsFragment, LabwareFlaggedFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
@@ -10,7 +10,7 @@ import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
 
 export type CDNAConcentrationProps = {
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   slotMeasurements: SlotMeasurementRequest[] | undefined;
   concentrationComments: CommentFieldsFragment[];
   removeLabware: (barcode: string) => void;

@@ -1,6 +1,6 @@
 import Panel from '../Panel';
 import React from 'react';
-import { LabwareFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
@@ -9,7 +9,7 @@ import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
 
 export type AmplificationProps = {
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   slotMeasurements: SlotMeasurementRequest[] | undefined;
   removeLabware: (barcode: string) => void;
 };

@@ -1,5 +1,6 @@
 import { Column } from 'react-table';
 import { ExtractResultQuery } from '../../types/sdk';
+import { FlaggedBarcodeLink } from './labwareColumns';
 
 /**
  * Defined type for a function that returns a column that displays some property of ExtractResultQuery
@@ -12,7 +13,10 @@ type ColumnFactory<E = any> = (meta?: E) => Column<ExtractResultQuery>;
 const barcode: ColumnFactory = () => {
   return {
     Header: 'Barcode',
-    accessor: (result) => result.extractResult.labware.barcode
+    accessor: (result) =>
+      result.extractResult.labware.flagged
+        ? FlaggedBarcodeLink(result.extractResult.labware.barcode)
+        : result.extractResult.labware.barcode
   };
 };
 
