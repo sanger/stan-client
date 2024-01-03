@@ -7,7 +7,7 @@ const xeniumHandlers = [
   graphql.query('GetXeniumQCInfo', () => {
     return HttpResponse.json({
       data: {
-        comments: commentRepository.findAll().filter((comment) => comment.category === 'Xenium QC' && comment.enabled)
+        comments: commentRepository.findAll().filter((comment) => comment.category === 'QC labware' && comment.enabled)
       }
     });
   }),

@@ -6,6 +6,7 @@ import {
 } from '../../../src/types/sdk';
 import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
 import { selectOption, selectSGPNumber, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('Transfer Page', () => {
   describe('Output labware', () => {
@@ -153,15 +154,13 @@ describe('Transfer Page', () => {
         it('displays the table with D1 slot', () => {
           cy.findByRole('table').contains('td', 'D1');
         });
-
-        after(() => {
-          cy.findByTestId('removeButton').click();
-        });
       });
 
       context('when user adds a destination well plate', () => {
         before(() => {
-          cy.findByRole('button', { name: '+ Add Plate' }).click();
+          cy.get('#outputLabwares').within(() => {
+            cy.findByRole('button', { name: '+ Add Plate' }).click();
+          });
         });
         it('updates page with added labware ', () => {
           cy.contains('2 of 2').should('be.visible');
@@ -197,6 +196,7 @@ describe('Transfer Page', () => {
         });
         after(() => {
           cy.findAllByTestId('removeButton').eq(1).click();
+          cy.findAllByTestId('removeButton').eq(0).click();
         });
       });
 
@@ -300,17 +300,17 @@ describe('Transfer Page', () => {
           before(() => {
             cy.msw().then(({ worker, graphql }) => {
               worker.use(
-                graphql.mutation<SlotCopyMutation, SlotCopyMutationVariables>('SlotCopy', (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
+                graphql.mutation<SlotCopyMutation, SlotCopyMutationVariables>('SlotCopy', () => {
+                  return HttpResponse.json({
+                    errors: [
                       {
                         message: 'Exception while fetching data (/slotCopy) : The operation could not be validated.',
                         extensions: {
                           problems: ['Labware is discarded: [STAN-4100]']
                         }
                       }
-                    ])
-                  );
+                    ]
+                  });
                 })
               );
             });
@@ -392,17 +392,17 @@ function saveSlotForLabwareWithNoPerm() {
   cy.visit('/lab/transfer');
   selectSGPNumber('SGP1008');
   cy.msw().then(({ worker, graphql }) => {
-    const labware = createLabware('STAN-3200');
     worker.use(
-      graphql.query<FindPermDataQuery, FindPermDataQueryVariables>('FindPermData', (req, res, ctx) => {
-        return res.once(
-          ctx.data({
+      graphql.query<FindPermDataQuery, FindPermDataQueryVariables>('FindPermData', () => {
+        return HttpResponse.json({
+          data: {
             visiumPermData: {
-              labware: { ...labware, barcode: 'STAN-3200' },
-              addressPermData: []
+              labware: createLabware('STAN-3200'),
+              addressPermData: [],
+              samplePositionResults: []
             }
-          })
-        );
+          }
+        });
       })
     );
   });
@@ -416,5 +416,8 @@ function saveSlotForLabwareWithNoPerm() {
   });
   selectOption('bioState', 'Probes');
   selectOption('input-labware-state', 'used');
+  cy.get('#outputLabwares').within(() => {
+    cy.findByText('A1').click();
+  });
   saveButton().click();
 }

@@ -4,7 +4,7 @@ import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
 import { selectFocusBlur, selectOption } from '../shared/customReactSelect.cy';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 describe('Registration', () => {
   before(() => {
@@ -53,20 +53,15 @@ describe('Registration', () => {
         cy.get('[type="radio"][name="file"]').check();
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            rest.post('/register/original', (req, res, ctx) => {
-              return res(
-                ctx.status(500),
-                ctx.json({
-                  problems: 'Error Message'
-                })
-              );
+            http.post('/register/original', () => {
+              return HttpResponse.json({ problems: 'Error Message' }, { status: 500 });
             })
           );
         });
         cy.get('input[type=file]').selectFile(
           {
             contents: Cypress.Buffer.from('file contents'),
-            fileName: 'file2.xlsx',
+            fileName: 'file.xlsx',
             mimeType: 'text/plain',
             lastModified: Date.now()
           },
@@ -186,16 +181,16 @@ describe('Registration', () => {
             worker.use(
               graphql.mutation<RegisterOriginalSamplesMutation, RegisterOriginalSamplesMutationVariables>(
                 'RegisterOriginalSamples',
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
+                () => {
+                  return HttpResponse.json({
+                    errors: [
                       {
                         extensions: {
                           problems: ['This thing went wrong', 'This other thing went wrong']
                         }
                       }
-                    ])
-                  );
+                    ]
+                  });
                 }
               )
             );
@@ -222,9 +217,9 @@ describe('Registration', () => {
           worker.use(
             graphql.mutation<RegisterOriginalSamplesMutation, RegisterOriginalSamplesMutationVariables>(
               'RegisterOriginalSamples',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.data({
+              () => {
+                return HttpResponse.json({
+                  data: {
                     registerOriginalSamples: {
                       labware: [],
                       clashes: [
@@ -235,8 +230,8 @@ describe('Registration', () => {
                       ],
                       labwareSolutions: []
                     }
-                  })
-                );
+                  }
+                });
               }
             )
           );

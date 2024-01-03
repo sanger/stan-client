@@ -4,6 +4,7 @@ import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 import { selectOption, selectSGPNumber, shouldOptionsHaveLengthAbove } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('Paraffin Processing', () => {
   shouldDisplyProjectAndUserNameForWorkNumber('/lab/paraffin_processing');
@@ -38,19 +39,19 @@ describe('Paraffin Processing', () => {
           worker.use(
             graphql.mutation<PerformParaffinProcessingMutation, PerformParaffinProcessingMutationVariables>(
               'PerformParaffinProcessing',
-              (req, res, ctx) => {
+              ({ variables }) => {
                 const labwareType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.POT);
-                const labware = req.variables.request.barcodes.map((barcode) =>
+                const labware = variables.request.barcodes.map((barcode) =>
                   labwareFactory.build({ labwareType, barcode })
                 );
-                return res(
-                  ctx.data({
+                return HttpResponse.json({
+                  data: {
                     performParaffinProcessing: {
                       labware,
                       operations: []
                     }
-                  })
-                );
+                  }
+                });
               }
             )
           );
@@ -70,16 +71,16 @@ describe('Paraffin Processing', () => {
           worker.use(
             graphql.mutation<PerformParaffinProcessingMutation, PerformParaffinProcessingMutationVariables>(
               'PerformParaffinProcessing',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.errors([
+              () => {
+                return HttpResponse.json({
+                  errors: [
                     {
                       extensions: {
                         problems: ['This thing went wrong', 'This other thing went wrong']
                       }
                     }
-                  ])
-                );
+                  ]
+                });
               }
             )
           );

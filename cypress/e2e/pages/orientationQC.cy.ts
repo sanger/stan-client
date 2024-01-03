@@ -7,13 +7,14 @@ import {
 import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
 import { buildLabwareFragment } from '../../../src/lib/helpers/labwareHelper';
+import { HttpResponse } from 'msw';
 
 describe('Release Page', () => {
   beforeEach(() => {
     cy.msw().then(({ worker, graphql }) => {
       worker.use(
-        graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', (req, res, ctx) => {
-          const barcode = req.variables.barcode;
+        graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', ({ variables }) => {
+          const barcode = variables.barcode;
           const labware = createLabware(barcode);
           labware.slots = [labware.slots[0]];
           labware.slots[0].samples = [labware.slots[0].samples[0]];
@@ -21,8 +22,7 @@ describe('Release Page', () => {
           const payload: FindLabwareQuery = {
             labware: buildLabwareFragment(labware)
           };
-
-          return res(ctx.data(payload));
+          return HttpResponse.json({ data: payload });
         })
       );
     });
@@ -46,14 +46,14 @@ describe('Release Page', () => {
         worker.use(
           graphql.mutation<RecordOrientationQcMutation, RecordOrientationQcMutationVariables>(
             'RecordOrientationQC',
-            (req, res, ctx) => {
-              return res.once(
-                ctx.errors([
+            () => {
+              return HttpResponse.json({
+                errors: [
                   {
-                    message: 'Exception while submitting : Something went wrong'
+                    message: `Exception while submitting : Something went wrong`
                   }
-                ])
-              );
+                ]
+              });
             }
           )
         );

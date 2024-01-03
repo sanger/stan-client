@@ -29,7 +29,8 @@ import {
   FindWorksCreatedByQueryVariables,
   DnapStudy,
   UpdateWorkDnapStudyMutation,
-  UpdateWorkDnapStudyMutationVariables
+  UpdateWorkDnapStudyMutationVariables,
+  GetAllWorkInfoQueryVariables
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -275,7 +276,7 @@ const workHandlers = [
   graphql.query<GetWorkNumbersQuery, GetWorkNumbersQueryVariables>('GetWorkNumbers', () => {
     return HttpResponse.json({ data: { works: workRepository.findAll() } });
   }),
-  graphql.query<GetAllWorkInfoQuery, GetAllWorkInfoQuery>('GetAllWorkInfo', () => {
+  graphql.query<GetAllWorkInfoQuery, GetAllWorkInfoQueryVariables>('GetAllWorkInfo', () => {
     return HttpResponse.json({
       data: {
         works: [

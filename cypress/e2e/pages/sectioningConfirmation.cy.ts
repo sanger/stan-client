@@ -9,6 +9,7 @@ import { labwareTypes } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { findPlanData } from '../../../src/mocks/handlers/planHandlers';
 import { getAllSelect, selectOptionForMultiple, selectSGPNumber } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('Sectioning Confirmation', () => {
   before(() => {
@@ -19,14 +20,14 @@ describe('Sectioning Confirmation', () => {
     before(() => {
       cy.msw().then(({ graphql, worker }) => {
         worker.use(
-          graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', (req, res, ctx) => {
-            return res.once(
-              ctx.errors([
+          graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', () => {
+            return HttpResponse.json({
+              errors: [
                 {
                   message: 'Exception while fetching data (/confirmSection) : An error occured'
                 }
-              ])
-            );
+              ]
+            });
           })
         );
       });
@@ -102,8 +103,12 @@ describe('Sectioning Confirmation', () => {
         );
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
-            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', (req, res, ctx) => {
-              return res.once(findPlanData(sourceLabware, destinationLabware, ctx));
+            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', () => {
+              return HttpResponse.json({
+                data: {
+                  ...findPlanData(sourceLabware, destinationLabware)
+                }
+              });
             })
           );
         });
@@ -225,8 +230,12 @@ describe('Sectioning Confirmation', () => {
         destinationLabware.id = -2;
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
-            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', (req, res, ctx) => {
-              return res.once(findPlanData(sourceLabware, destinationLabware, ctx));
+            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', () => {
+              return HttpResponse.json({
+                data: {
+                  ...findPlanData(sourceLabware, destinationLabware)
+                }
+              });
             })
           );
         });
@@ -265,8 +274,12 @@ describe('Sectioning Confirmation', () => {
         );
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
-            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', (req, res, ctx) => {
-              return res.once(findPlanData(sourceLabware, destinationLabware, ctx));
+            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', () => {
+              return HttpResponse.json({
+                data: {
+                  ...findPlanData(sourceLabware, destinationLabware)
+                }
+              });
             })
           );
         });
@@ -333,18 +346,15 @@ describe('Sectioning Confirmation', () => {
       before(() => {
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
-            graphql.mutation<ConfirmSectionMutation, ConfirmSectionMutationVariables>(
-              'ConfirmSection',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.errors([
-                    {
-                      message: 'There was an error confirming the Sectioning operation'
-                    }
-                  ])
-                );
-              }
-            )
+            graphql.mutation<ConfirmSectionMutation, ConfirmSectionMutationVariables>('ConfirmSection', () => {
+              return HttpResponse.json({
+                errors: [
+                  {
+                    message: 'There was an error confirming the Sectioning operation'
+                  }
+                ]
+              });
+            })
           );
         });
 

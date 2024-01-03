@@ -115,7 +115,11 @@ const SlotCopyDestinationConfigPanel: React.FC<DestinationLabwareScanPanelProps>
               />
             </div>
             <div className={'w-1/2 flex justify-end items-center'}>
-              <BlueButton onClick={onAddLabware} className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm">
+              <BlueButton
+                data-testid={'add-plate'}
+                onClick={onAddLabware}
+                className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+              >
                 + Add Plate
               </BlueButton>
             </div>

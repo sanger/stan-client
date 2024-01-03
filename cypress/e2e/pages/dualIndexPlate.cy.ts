@@ -6,6 +6,7 @@ import {
 } from '../../../src/types/sdk';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 import { selectOption, selectSGPNumber, shouldBeDisabled } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 function scanInDestinationLabware() {
   cy.get('#labwareScanInput').type('STAN-5111{enter}');
@@ -41,32 +42,7 @@ describe('Dual Index Plate', () => {
       cy.findByText('24 digit number required').should('be.visible');
     });
   });
-  context('when a dual index plate with a plate type already assigned is scanned', () => {
-    before(() => {
-      cy.msw().then(({ worker, graphql }) => {
-        worker.use(
-          graphql.query<FindReagentPlateQuery, FindReagentPlateQueryVariables>('FindReagentPlate', (req, res, ctx) => {
-            return res.once(
-              ctx.data({
-                reagentPlate: {
-                  plateType: 'Fresh frozen - Dual Index TT Set A',
-                  barcode: '123456789123456789012345',
-                  slots: []
-                }
-              })
-            );
-          })
-        );
-      });
-      scanInSourceLabware('123456789123456789012345');
-    });
-    it('should display plate type that is alreAdy assigned to dual index plate', () => {
-      cy.contains('Fresh frozen - Dual Index TT Set A').should('be.visible');
-    });
-    it('should disable plate type selection combo', () => {
-      shouldBeDisabled('plateType');
-    });
-  });
+
   context('when a valid source labware (dual index plate) barcode is entered', () => {
     before(() => {
       cy.url().reload();
@@ -184,34 +160,6 @@ describe('Dual Index Plate', () => {
         saveButton().should('be.enabled');
       });
     });
-    context('when there is a server error', () => {
-      before(() => {
-        cy.msw().then(({ worker, graphql }) => {
-          worker.use(
-            graphql.mutation<RecordReagentTransferMutation, RecordReagentTransferMutationVariables>(
-              'RecordReagentTransfer',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.errors([
-                    {
-                      message:
-                        'Exception while fetching data (/reagent transfer) : The operation could not be validated.',
-                      extensions: {
-                        problems: ['Labware is discarded: [STAN-5111]']
-                      }
-                    }
-                  ])
-                );
-              }
-            )
-          );
-        });
-        saveButton().click();
-      });
-      it('shows an error', () => {
-        cy.findByText('Labware is discarded: [STAN-5111]').should('be.visible');
-      });
-    });
 
     context('when there is no server error', () => {
       before(() => {
@@ -228,6 +176,73 @@ describe('Dual Index Plate', () => {
       });
       it('should disable Remove button', () => {
         cy.findAllByTestId('removeButton').eq(0).should('be.disabled');
+      });
+    });
+
+    context('when a dual index plate with a plate type already assigned is scanned', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.query<FindReagentPlateQuery, FindReagentPlateQueryVariables>('FindReagentPlate', () => {
+              return HttpResponse.json({
+                data: {
+                  reagentPlate: {
+                    plateType: 'Fresh frozen - Dual Index TT Set A',
+                    barcode: '123456789123456789012345',
+                    slots: []
+                  }
+                }
+              });
+            })
+          );
+        });
+        cy.url().reload();
+        scanInSourceLabware('123456789123456789012345');
+      });
+      it('should display plate type that is alreAdy assigned to dual index plate', () => {
+        cy.contains('Fresh frozen - Dual Index TT Set A').should('be.visible');
+      });
+      it('should disable plate type selection combo', () => {
+        shouldBeDisabled('plateType');
+      });
+    });
+
+    context('when there is a server error', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.mutation<RecordReagentTransferMutation, RecordReagentTransferMutationVariables>(
+              'RecordReagentTransfer',
+              () => {
+                return HttpResponse.json({
+                  errors: [
+                    {
+                      message:
+                        'Exception while fetching data (/reagent transfer) : The operation could not be validated.',
+                      extensions: {
+                        problems: ['Labware is discarded: [STAN-5111]']
+                      }
+                    }
+                  ]
+                });
+              }
+            )
+          );
+        });
+        cy.url().reload();
+        scanInSourceLabware('300051128832186720221202');
+        scanInDestinationLabware();
+        cy.get('#sourceLabwares').within(() => {
+          cy.findByText('A1').click();
+        });
+        cy.get('#destLabwares').within(() => {
+          cy.findByText('A1').click();
+        });
+        selectSGPNumber('SGP1008');
+        saveButton().click();
+      });
+      it('shows an error', () => {
+        cy.findByText('Labware is discarded: [STAN-5111]').should('be.visible');
       });
     });
   });

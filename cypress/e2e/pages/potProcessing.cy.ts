@@ -9,6 +9,7 @@ import {
   selectSGPNumber,
   shouldDisplaySelectedValue
 } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('Pot Processing', () => {
   shouldDisplyProjectAndUserNameForWorkNumber('/lab/original_sample_processing?type=pot');
@@ -165,19 +166,16 @@ describe('Pot Processing', () => {
             const newLabware = labwareFactory.build({ labwareType, barcode });
 
             worker.use(
-              graphql.mutation<PerformTissuePotMutation, PerformTissuePotMutationVariables>(
-                'PerformTissuePot',
-                (req, res, ctx) => {
-                  return res(
-                    ctx.data({
-                      performPotProcessing: {
-                        labware: [newLabware],
-                        operations: []
-                      }
-                    })
-                  );
-                }
-              )
+              graphql.mutation<PerformTissuePotMutation, PerformTissuePotMutationVariables>('PerformTissuePot', () => {
+                return HttpResponse.json({
+                  data: {
+                    performPotProcessing: {
+                      labware: [newLabware],
+                      operations: []
+                    }
+                  }
+                });
+              })
             );
           });
           cy.findByRole('button', { name: /Save/i }).click();
@@ -197,20 +195,17 @@ describe('Pot Processing', () => {
       selectSGPNumber('SGP1008');
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.mutation<PerformTissuePotMutation, PerformTissuePotMutationVariables>(
-            'PerformTissuePot',
-            (req, res, ctx) => {
-              return res.once(
-                ctx.errors([
-                  {
-                    extensions: {
-                      problems: ['This thing went wrong', 'This other thing went wrong']
-                    }
+          graphql.mutation<PerformTissuePotMutation, PerformTissuePotMutationVariables>('PerformTissuePot', () => {
+            return HttpResponse.json({
+              errors: [
+                {
+                  extensions: {
+                    problems: ['This thing went wrong', 'This other thing went wrong']
                   }
-                ])
-              );
-            }
-          )
+                }
+              ]
+            });
+          })
         );
       });
       cy.findByRole('button', { name: /Save/i }).click();
@@ -225,9 +220,4 @@ describe('Pot Processing', () => {
 
 function scanInput() {
   cy.get('#labwareScanInput').type('STAN-113{enter}');
-}
-
-function printLabels() {
-  cy.findByLabelText('printers').select('Pot Printer');
-  cy.findByText('Print Labels').click();
 }

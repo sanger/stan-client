@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, screen, act, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, act, waitFor, cleanup } from '@testing-library/react';
 import { describe } from '@jest/globals';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
@@ -7,7 +7,7 @@ import OrientationQC from '../../../../src/pages/OrientationQC';
 import { scanLabware, selectOption, selectSGPNumber, shouldHaveOption } from '../../../generic/utilities';
 import { FindLabwareQuery, FindLabwareQueryVariables } from '../../../../src/types/sdk';
 import { server } from '../../../../src/mocks/server';
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import { createLabware } from '../../../../src/mocks/handlers/labwareHandlers';
 import { buildLabwareFragment } from '../../../../src/lib/helpers/labwareHelper';
 
@@ -20,8 +20,8 @@ describe('Orientation QC', () => {
   beforeEach(() => {
     server.resetHandlers();
     server.use(
-      graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', (req, res, ctx) => {
-        const barcode = req.variables.barcode;
+      graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', ({ variables }) => {
+        const barcode = variables.barcode;
         const labware = createLabware(barcode);
         if (barcode === 'STAN-3111') {
           labware.slots = [labware.slots[0]];
@@ -31,10 +31,10 @@ describe('Orientation QC', () => {
         const payload: FindLabwareQuery = {
           labware: buildLabwareFragment(labware)
         };
-
-        return res(ctx.data(payload));
+        return HttpResponse.json({ data: payload });
       })
     );
+
     act(() => {
       render(
         <BrowserRouter>

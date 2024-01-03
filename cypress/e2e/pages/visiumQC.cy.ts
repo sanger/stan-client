@@ -15,6 +15,7 @@ import {
   shouldDisplaySelectedValue,
   shouldHaveOption
 } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('Visium QC Page', () => {
   shouldDisplyProjectAndUserNameForWorkNumber('/lab/visium_qc');
@@ -222,21 +223,18 @@ describe('Visium QC Page', () => {
         before(() => {
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
-              graphql.mutation<RecordVisiumQcMutation, RecordVisiumQcMutationVariables>(
-                'RecordVisiumQC',
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
-                      {
-                        message: 'Exception while fetching data : The operation could not be validated.',
-                        extensions: {
-                          problems: ['Labware is discarded: [STAN-2100]']
-                        }
+              graphql.mutation<RecordVisiumQcMutation, RecordVisiumQcMutationVariables>('RecordVisiumQC', () => {
+                return HttpResponse.json({
+                  errors: [
+                    {
+                      message: 'Exception while fetching data : The operation could not be validated.',
+                      extensions: {
+                        problems: ['Labware is discarded: [STAN-2100]']
                       }
-                    ])
-                  );
-                }
-              )
+                    }
+                  ]
+                });
+              })
             );
           });
           cy.get('#labwareScanInput').type('STAN-2100{enter}');
@@ -454,17 +452,17 @@ describe('Visium QC Page', () => {
             worker.use(
               graphql.mutation<RecordOpWithSlotCommentsMutation, RecordOpWithSlotCommentsMutationVariables>(
                 'RecordOpWithSlotComments',
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
+                () => {
+                  return HttpResponse.json({
+                    errors: [
                       {
                         message: 'Exception while fetching data : The operation could not be validated.',
                         extensions: {
                           problems: ['Labware is discarded: [STAN-2100]']
                         }
                       }
-                    ])
-                  );
+                    ]
+                  });
                 }
               )
             );
@@ -546,17 +544,17 @@ describe('Visium QC Page', () => {
             worker.use(
               graphql.mutation<RecordOpWithSlotCommentsMutation, RecordOpWithSlotCommentsMutationVariables>(
                 'RecordOpWithSlotComments',
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
+                () => {
+                  return HttpResponse.json({
+                    errors: [
                       {
                         message: 'Exception while fetching data : The operation could not be validated.',
                         extensions: {
                           problems: ['Labware is discarded: [STAN-2100]']
                         }
                       }
-                    ])
-                  );
+                    ]
+                  });
                 }
               )
             );
