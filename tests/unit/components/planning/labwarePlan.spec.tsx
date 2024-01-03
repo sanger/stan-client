@@ -9,6 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { LabwareType } from '../../../../src/types/sdk';
 import { createLabwarePlanMachine } from '../../../../src/components/planning/labwarePlan.machine';
 import { interpret } from 'xstate';
+import { convertLabwareToFlaggedLabware } from '../../../../src/lib/helpers/labwareHelper';
 beforeAll(() => {
   enableMapSet();
 });
@@ -113,9 +114,9 @@ describe('When all the fields are correctly field', () => {
       renderLabwarePlan(LabwareTypeName.TUBE);
       const machine = createLabwarePlanMachine(
         buildInitialLayoutPlan(
-          [buildLabware(LabwareTypeName.TUBE)],
+          [buildFlaggedLabware(LabwareTypeName.TUBE)],
           sampleColors,
-          buildLabware(LabwareTypeName.TUBE, 'STAN-124')
+          buildFlaggedLabware(LabwareTypeName.TUBE, 'STAN-124')
         )
       );
       const service = interpret(machine).start();
@@ -264,10 +265,10 @@ const renderLabwarePlan = (outputLabwareType: string) => {
       <LabwarePlan
         key="labwarePlan"
         cid="labwarePlan"
-        outputLabware={buildLabware(outputLabwareType, 'STAN-124')}
+        outputLabware={buildFlaggedLabware(outputLabwareType, 'STAN-124')}
         sampleColors={sampleColors}
         operationType={'Section'}
-        sourceLabware={[buildLabware(LabwareTypeName.TUBE)]}
+        sourceLabware={[buildFlaggedLabware(LabwareTypeName.TUBE)]}
         onDeleteButtonClick={jest.fn()}
         onComplete={jest.fn()}
       />
@@ -286,8 +287,13 @@ const sampleColors = new Map([
   [7804, 'green']
 ]);
 
-const buildLabware = (labwareTypeName: string, barcode = 'STAN-123') => {
-  return labwareFactory.build({ labwareType: labwareType(labwareTypeName), barcode });
+const buildFlaggedLabware = (labwareTypeName: string, barcode = 'STAN-123') => {
+  return convertLabwareToFlaggedLabware([
+    labwareFactory.build({
+      labwareType: labwareType(labwareTypeName),
+      barcode
+    })
+  ])[0];
 };
 
 const labwareType = (labwareTypeName: string): LabwareType | undefined => {

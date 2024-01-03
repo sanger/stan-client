@@ -4,9 +4,7 @@ import commentRepository from '../../../src/mocks/repositories/commentRepository
 import { HttpResponse } from 'msw';
 
 describe('Xenium QC', () => {
-  const comments = commentRepository
-    .findAll()
-    .filter((comment) => comment.category === 'QC labware' && comment.enabled);
+  const comments = commentRepository.findAll().filter((comment) => comment.category === 'Xenium QC' && comment.enabled);
 
   before(() => {
     cy.visit('/lab/xenium_qc');

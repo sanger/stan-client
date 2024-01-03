@@ -1,5 +1,5 @@
 import React from 'react';
-import { CommentFieldsFragment, LabwareFieldsFragment } from '../../types/sdk';
+import { CommentFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import RemoveButton from '../buttons/RemoveButton';
 import Panel from '../Panel';
 import Labware from '../labware/Labware';
@@ -11,7 +11,7 @@ import { XeniumQCFormData } from '../../pages/XeniumQC';
 
 type XeniumLabwareQCProps = {
   comments: CommentFieldsFragment[];
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
   index: number;
   removeLabware: (barcode: string) => void;
 };

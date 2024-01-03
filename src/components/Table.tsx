@@ -99,9 +99,9 @@ export const TableBody = ({ children, ...rest }: TableHeadProps) => {
 
 export const TableCell: React.FC<
   React.DetailedHTMLProps<React.TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>
-> = ({ children, ...rest }) => {
+> = ({ children, className, ...rest }) => {
   return (
-    <td className="px-6 py-4 whitespace-nowrap" {...rest}>
+    <td className={`px-6 py-4 ${className ? className : 'whitespace-nowrap'}`} {...rest}>
       {children}
     </td>
   );

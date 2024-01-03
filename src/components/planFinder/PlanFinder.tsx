@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { FindPlanDataQuery, LabwareFieldsFragment } from '../../types/sdk';
+import { FindPlanDataQuery, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import { planFinderMachine } from './planFinder.machine';
 import Warning from '../notifications/Warning';
@@ -71,7 +71,7 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
    * Callback for when the user submits the barcode in the <ScanInput />
    */
   const handleOnScan = useCallback(
-    (labware: LabwareFieldsFragment) => {
+    (labware: LabwareFlaggedFieldsFragment) => {
       send({ type: 'SUBMIT_LABWARE', labware });
     },
     [send]
@@ -89,7 +89,9 @@ export function PlanFinder({ initialPlans, onChange, children }: PlanFinderParam
     <div className={'max-w-screen-xl mx-auto'}>
       {showError && <Warning message={validationError ?? 'Plan Search Error'} error={requestError} />}
       <div data-testid="plan-finder">
-        <LabwareScanner onAdd={handleOnScan}>{}</LabwareScanner>
+        <LabwareScanner onAdd={handleOnScan} enableFlaggedLabwareCheck>
+          {}
+        </LabwareScanner>
       </div>
       {children({ plans: Array.from(plans.values()), removePlanByBarcode })}
     </div>

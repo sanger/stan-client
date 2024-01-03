@@ -1,4 +1,4 @@
-import { GetBlockProcessingInfoQuery, LabwareFieldsFragment } from '../../../types/sdk';
+import { GetBlockProcessingInfoQuery, LabwareFlaggedFieldsFragment } from '../../../types/sdk';
 import React, { useState } from 'react';
 import { useMachine } from '@xstate/react';
 import { motion } from 'framer-motion';
@@ -7,7 +7,7 @@ import Labware from '../../labware/Labware';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../../../pages/sectioning';
 import PinkButton from '../../buttons/PinkButton';
 import Heading from '../../Heading';
-import { LabwareTypeName, NewLabwareLayout } from '../../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../../types/stan';
 import { selectOptionValues } from '../../forms';
 import Modal, { ModalBody, ModalFooter } from '../../Modal';
 import LayoutPlanner from '../../LayoutPlanner';
@@ -29,11 +29,11 @@ type BlockProcessingLabwarePlanProps = {
   /**
    * All source labware
    */
-  sourceLabware: LabwareFieldsFragment[];
+  sourceLabware: LabwareFlaggedFieldsFragment[];
   /**
    * Destination labware plans created
    */
-  outputLabware: NewLabwareLayout;
+  outputLabware: NewFlaggedLabwareLayout;
   /**
    * Additional information required for block processing
    */
@@ -59,9 +59,9 @@ type BlockProcessingLabwarePlanProps = {
  * Builds the initial layout for this plan.
  */
 function buildInitialLayoutPlan(
-  sourceLabware: Array<LabwareFieldsFragment>,
+  sourceLabware: Array<LabwareFlaggedFieldsFragment>,
   sampleColors: Map<number, string>,
-  outputLabware: NewLabwareLayout
+  outputLabware: NewFlaggedLabwareLayout
 ) {
   return {
     sources: sourceLabware.flatMap((lw) =>

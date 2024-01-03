@@ -55,6 +55,8 @@ import XeniumQC from '../pages/XeniumQC';
 import ReleaseOptions from './release/ReleaseOptions';
 import { Reactivate } from '../pages/Reactivate';
 import OrientationQC from '../pages/OrientationQC';
+import FlagLabware from '../pages/FlagLabware';
+import { NewFlaggedLabwareLayout } from '../types/stan';
 
 const RouteLayout = () => {
   const stanCore = useContext(StanCoreContext);
@@ -229,7 +231,9 @@ const RouteLayout = () => {
         <Route element={<AuthLayout />}>
           <Route
             path="/lab/transfer"
-            element={<SlotCopy title={'Transfer'} initialOutputLabware={[plateFactory.build()]} />}
+            element={
+              <SlotCopy title={'Transfer'} initialOutputLabware={[plateFactory.build() as NewFlaggedLabwareLayout]} />
+            }
           />
         </Route>
         <Route element={<AuthLayout />}>
@@ -459,7 +463,13 @@ const RouteLayout = () => {
               const res = await stanCore.FindPermData({
                 barcode: params.barcode
               });
-              return res.visiumPermData;
+              const flagDetails = await stanCore.GetLabwareFlagDetails({
+                barcodes: [params.barcode]
+              });
+              return {
+                ...res.visiumPermData,
+                labwareFlagDetails: flagDetails.labwareFlagDetails
+              };
             }
           }} // the loader will be called with the params object
           element={<LabwareDetails />}
@@ -495,6 +505,9 @@ const RouteLayout = () => {
             }}
             element={<ReleaseOptions />}
           />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/admin/flagLabware" element={<FlagLabware />} />
         </Route>
       </Route>
     )

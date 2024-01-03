@@ -3,6 +3,7 @@ import AppShell from '../components/AppShell';
 import LabwareView from '../components/labware/Labware';
 import {
   AddressPermDataFieldsFragment,
+  FlagDetail,
   LabwareFieldsFragment,
   SamplePositionFieldsFragment,
   SlotFieldsFragment,
@@ -18,6 +19,7 @@ import History from '../components/history/History';
 import { LabwareStatePill } from '../components/LabwareStatePill';
 import { isSlotFilled } from '../lib/helpers/slotHelper';
 import { useLoaderData } from 'react-router-dom';
+import { LabwareFlagDetails } from '../components/LabwareFlagDetails';
 
 /**
  * Props passed in to the {@link LabwareDetails} page
@@ -26,10 +28,11 @@ type LabwareDetailsProps = {
   labware: LabwareFieldsFragment;
   permData?: AddressPermDataFieldsFragment[];
   samplePositionResults: SamplePositionFieldsFragment[];
+  labwareFlagDetails: FlagDetail[];
 };
 
 export default function LabwareDetails() {
-  const { labware, permData, samplePositionResults } = useLoaderData() as LabwareDetailsProps;
+  const { labware, permData, samplePositionResults, labwareFlagDetails } = useLoaderData() as LabwareDetailsProps;
   const getPermDataForSlot = (
     slot: SlotFieldsFragment,
     permData: AddressPermDataFieldsFragment[]
@@ -100,6 +103,7 @@ export default function LabwareDetails() {
               </div>
             </div>
 
+            {labwareFlagDetails.length > 0 && <LabwareFlagDetails flagDetails={labwareFlagDetails} />}
             <div className="space-y-4">
               <Heading level={2}>Samples</Heading>
 

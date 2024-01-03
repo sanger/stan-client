@@ -4,10 +4,11 @@ import { OutputSlotCopyData, SlotCopyMode } from '../../../../src/components/slo
 import { objectKeys } from '../../../../src/lib/helpers';
 import React from 'react';
 import { plateFactory } from '../../../../src/lib/factories/labwareFactory';
-import { LabwareFieldsFragment } from '../../../../src/types/sdk';
+import { LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
 import { getById } from '../../../generic/utilities';
 import '@testing-library/jest-dom';
+import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
 
 beforeEach(() => {
   enableMapSet();
@@ -46,9 +47,9 @@ describe('slotMapper.spec.tsx', () => {
     expect(screen.getByText('Output Labware')).toBeInTheDocument();
   });
   it('displays the correct number of input and output labwares', () => {
-    const inputLabware = plateFactory.build({ barcode: 'STAN-3111' });
+    const inputLabware = plateFactory.build({ barcode: 'STAN-3111' }) as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const labware: LabwareFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
+    const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
     const wrapper = render(
       <SlotMapper
         slotCopyModes={objectKeys(SlotCopyMode).map((key) => SlotCopyMode[key])}
@@ -61,9 +62,9 @@ describe('slotMapper.spec.tsx', () => {
   });
 
   it('displays multiple input  labware from props', () => {
-    const inputLabware = plateFactory.build();
+    const inputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const labware: LabwareFieldsFragment[] = [
+    const labware: LabwareFlaggedFieldsFragment[] = [
       { ...inputLabware, barcode: 'STAN-5111' },
       { ...inputLabware, barcode: 'STAN-5112' }
     ];
@@ -89,9 +90,9 @@ describe('slotMapper.spec.tsx', () => {
   });
 
   it('removes input labware on remove button click', async () => {
-    const inputLabware = plateFactory.build();
+    const inputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const labware: LabwareFieldsFragment[] = [
+    const labware: LabwareFlaggedFieldsFragment[] = [
       { ...inputLabware, barcode: 'STAN-5111' },
       { ...inputLabware, barcode: 'STAN-5112' }
     ];
@@ -112,9 +113,9 @@ describe('slotMapper.spec.tsx', () => {
     expect(getById(container, 'inputLabwares')).toHaveTextContent('STAN-5112');
   });
   it('displays previous and next input labware on previous and next button clicks', async () => {
-    const inputLabware = plateFactory.build();
+    const inputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const labware: LabwareFieldsFragment[] = [
+    const labware: LabwareFlaggedFieldsFragment[] = [
       { ...inputLabware, barcode: 'STAN-5111' },
       { ...inputLabware, barcode: 'STAN-5112' }
     ];
@@ -142,9 +143,9 @@ describe('slotMapper.spec.tsx', () => {
     expect(screen.getByTestId('input-labware-div')).toHaveTextContent('STAN-5111');
   });
   it('displays slot information in table when user selects input slots', async () => {
-    const inputLabware = plateFactory.build();
+    const inputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const labware: LabwareFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
+    const labware: LabwareFlaggedFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
     act(() => {
       render(
         <SlotMapper
@@ -162,8 +163,12 @@ describe('slotMapper.spec.tsx', () => {
 
   it('on One to Many mapping', async () => {
     //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const inputLabware: LabwareFieldsFragment[] = [{ ...plateFactory.build(), barcode: 'STAN-5111' }];
-    const outputLabware: OutputSlotCopyData[] = [{ labware: plateFactory.build(), slotCopyContent: [] }];
+    const inputLabware: LabwareFlaggedFieldsFragment[] = [
+      { ...(plateFactory.build() as NewFlaggedLabwareLayout), barcode: 'STAN-5111' }
+    ];
+    const outputLabware: OutputSlotCopyData[] = [
+      { labware: plateFactory.build() as NewFlaggedLabwareLayout, slotCopyContent: [] }
+    ];
     act(() => {
       render(
         <SlotMapper
@@ -197,8 +202,12 @@ describe('slotMapper.spec.tsx', () => {
   });
   it('clear All button clears all the mappings', async () => {
     //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const inputLabware: LabwareFieldsFragment[] = [{ ...plateFactory.build(), barcode: 'STAN-5111' }];
-    const outputLabware: OutputSlotCopyData[] = [{ labware: plateFactory.build(), slotCopyContent: [] }];
+    const inputLabware: LabwareFlaggedFieldsFragment[] = [
+      { ...(plateFactory.build() as NewFlaggedLabwareLayout), barcode: 'STAN-5111' }
+    ];
+    const outputLabware: OutputSlotCopyData[] = [
+      { labware: plateFactory.build() as NewFlaggedLabwareLayout, slotCopyContent: [] }
+    ];
     act(() => {
       render(
         <SlotMapper
@@ -231,10 +240,10 @@ describe('slotMapper.spec.tsx', () => {
     expect(screen).not.toContain(screen.getByTestId('mapping-div'));
   });
   describe('when a scanned labware is passed in as initialOutputLabware props', () => {
-    const inputLabware = plateFactory.build();
+    const inputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
-    const inputLw: LabwareFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
-    const outputLabware = plateFactory.build();
+    const inputLw: LabwareFlaggedFieldsFragment[] = [{ ...inputLabware, barcode: 'STAN-5111' }];
+    const outputLabware = plateFactory.build() as NewFlaggedLabwareLayout;
     //Convert  NewLabwareLayout to LabwareFieldsFragment
     const outputLw: OutputSlotCopyData[] = [
       { labware: { ...outputLabware, barcode: 'STAN-5112' }, slotCopyContent: [] }

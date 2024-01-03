@@ -1,5 +1,5 @@
 import {
-  LabwareFieldsFragment,
+  LabwareFieldsFragment, LabwareFlaggedFieldsFragment,
   LabwareState,
   Maybe,
   PrinterFieldsFragment,
@@ -53,6 +53,7 @@ export type FCWithChildren<P = {} & ChildrenProps> = FunctionComponent<P>;
  * yet been persisted, and so will not have a barcode yet.
  */
 export type NewLabwareLayout = Nullable<LabwareFieldsFragment, "barcode">;
+export type NewFlaggedLabwareLayout = Nullable<LabwareFlaggedFieldsFragment, "barcode">;
 
 export interface ServerErrors {
   /**

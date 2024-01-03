@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import AppShell from '../components/AppShell';
 import SlotMapper from '../components/slotMapper/SlotMapper';
 import BlueButton from '../components/buttons/BlueButton';
-import { LabwareTypeName, NewLabwareLayout } from '../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout, NewLabwareLayout } from '../types/stan';
 import Warning from '../components/notifications/Warning';
 import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
@@ -195,7 +195,7 @@ const SlotMappingContentTable = ({ slotCopyContent }: { slotCopyContent: SlotCop
 
       <TableBody>
         {slotCopyContent.map((slot) => (
-          <tr key={`${slot.sourceAddress}-${slot.sourceBarcode}`}>
+          <tr key={`${slot.destinationAddress}-${slot.sourceBarcode}`}>
             <TableCell>{slot.sourceBarcode}</TableCell>
             <TableCell>{slot.sourceAddress}</TableCell>
             <TableCell>{slot.destinationAddress}</TableCell>
@@ -207,7 +207,7 @@ const SlotMappingContentTable = ({ slotCopyContent }: { slotCopyContent: SlotCop
 };
 
 const CytAssist = () => {
-  const initialOutputLabwarePlaceHolder = visiumLPCytAssistFactory.build();
+  const initialOutputLabwarePlaceHolder = visiumLPCytAssistFactory.build() as NewFlaggedLabwareLayout;
   initialOutputLabwarePlaceHolder.labwareType.name = '';
 
   const initialOutputLabware: Destination = {
@@ -239,7 +239,7 @@ const CytAssist = () => {
 
   /**Handler for changes in slot mappings**/
   const handleOnSlotMapperChange = useCallback(
-    (labware: NewLabwareLayout, slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
+    (labware: NewFlaggedLabwareLayout, slotCopyContent: Array<SlotCopyContent>, anySourceMapped: boolean) => {
       send({
         type: 'UPDATE_SLOT_COPY_CONTENT',
         labware,
@@ -296,7 +296,7 @@ const CytAssist = () => {
         [LabwareTypeName.VISIUM_LP_CYTASSIST_XL]: visiumLPCytAssistXLFactory.build()
       };
       if (!selectedDestination) return;
-      const destLabware = labwareFactories[labwareType] || initialOutputLabwarePlaceHolder;
+      const destLabware = (labwareFactories[labwareType] as NewFlaggedLabwareLayout) || initialOutputLabwarePlaceHolder;
       send({
         type: 'UPDATE_DESTINATION_LABWARE_TYPE',
         labwareToReplace: selectedDestination.labware!,

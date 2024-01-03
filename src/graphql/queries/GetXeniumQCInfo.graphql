@@ -1,5 +1,5 @@
 query GetXeniumQCInfo {
-  comments(includeDisabled: false, category: "QC labware") {
+  comments(includeDisabled: false, category: "Xenium QC") {
     ...CommentFields
   }
 }

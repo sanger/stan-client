@@ -1,6 +1,6 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useFormikContext } from 'formik';
-import { CommentFieldsFragment, ExtractResultLabware, ExtractResultRequest, PassFail } from '../../types/sdk';
+import { CommentFieldsFragment, ExtractResultRequest, PassFail } from '../../types/sdk';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../Table';
 import { useLabwareContext } from '../labwareScanner/LabwareScanner';
 import { PassFailInput } from '../forms/PassFailInput';
@@ -8,6 +8,8 @@ import FormikInput from '../forms/Input';
 import FormikSelect from '../forms/Select';
 import { optionValues } from '../forms';
 import RemoveButton from '../buttons/RemoveButton';
+import { ExtractResultLabwareForm, ExtractResultRequestForm } from '../../pages/ExtractionResult';
+import { FlaggedBarcodeLink } from '../dataTableColumns/labwareColumns';
 
 type ExtractResultLabwareTableProps = {
   /**
@@ -20,7 +22,7 @@ type ExtractResultLabwareTableProps = {
  * Component to build an {@link ExtractResultLabware}. Must be used inside a Formik form.
  */
 export function ExtractResultLabwareTable({ availableComments }: ExtractResultLabwareTableProps) {
-  const { values } = useFormikContext<ExtractResultRequest>();
+  const { values } = useFormikContext<ExtractResultRequestForm>();
 
   if (values.labware.length === 0) {
     return null;
@@ -56,7 +58,7 @@ type ExtractResultLabwareRowProps = {
   /**
    * The labware to display in the row
    */
-  labware: ExtractResultLabware;
+  labware: ExtractResultLabwareForm;
 
   /**
    * The index of this row
@@ -80,6 +82,7 @@ function ExtractResultLabwareRow({ labware, index, availableComments }: ExtractR
     (newPassFail: PassFail) => {
       if (newPassFail === PassFail.Pass) {
         setFieldValue(`labware.${index}`, {
+          lw: labware.lw,
           barcode: labware.barcode,
           commentId: undefined,
           concentration: '0.00',
@@ -87,6 +90,7 @@ function ExtractResultLabwareRow({ labware, index, availableComments }: ExtractR
         });
       } else {
         setFieldValue(`labware.${index}`, {
+          lw: labware.lw,
           barcode: labware.barcode,
           commentId: availableComments[0].id,
           concentration: undefined,
@@ -94,12 +98,16 @@ function ExtractResultLabwareRow({ labware, index, availableComments }: ExtractR
         });
       }
     },
-    [setFieldValue, labware.barcode, index, availableComments]
+    [setFieldValue, labware.barcode, index, availableComments, labware.lw]
   );
+
+  const barcodeCell = useMemo(() => {
+    return labware.lw.flagged ? FlaggedBarcodeLink(labware.lw.barcode) : labware.lw.barcode;
+  }, [labware]);
 
   return (
     <tr>
-      <TableCell>{labware.barcode}</TableCell>
+      <TableCell>{barcodeCell}</TableCell>
       <TableCell>
         <PassFailInput onChange={handlePassFailChange} value={labware.result} />
       </TableCell>

@@ -1,6 +1,6 @@
 import {
   CommentFieldsFragment,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   ReactivateLabware,
   ReactivateLabwareMutation
 } from '../types/sdk';
@@ -61,7 +61,7 @@ export const Reactivate = () => {
   const comments = useLoaderData() as CommentFieldsFragment[];
 
   const isLabwareInactive = useCallback(
-    (labwares: LabwareFieldsFragment[], foundLabware: LabwareFieldsFragment): string[] => {
+    (labwares: LabwareFlaggedFieldsFragment[], foundLabware: LabwareFlaggedFieldsFragment): string[] => {
       return !foundLabware.discarded && !foundLabware.destroyed
         ? ['This labware is neither discarded nor destroyed.']
         : [];
@@ -81,7 +81,7 @@ export const Reactivate = () => {
       }
     });
   }, []);
-  const [labwareToReactivate, setLabwareToReactivate] = React.useState<LabwareFieldsFragment[]>([]);
+  const [labwareToReactivate, setLabwareToReactivate] = React.useState<LabwareFlaggedFieldsFragment[]>([]);
   const [currentForm, sendForm] = useMachine(() => formSubmitMachine);
 
   const { serverError, submissionResult } = currentForm.context;

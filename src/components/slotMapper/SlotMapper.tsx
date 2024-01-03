@@ -6,7 +6,7 @@ import { usePrevious } from '../../lib/hooks';
 import WhiteButton from '../buttons/WhiteButton';
 import LabwareScanner from '../labwareScanner/LabwareScanner';
 import RemoveButton from '../buttons/RemoveButton';
-import { LabwareFieldsFragment, Maybe, SlotFieldsFragment, SlotPassFailFieldsFragment } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment, Maybe, SlotFieldsFragment, SlotPassFailFieldsFragment } from '../../types/sdk';
 import SlotMapperTable from './SlotMapperTable';
 import Heading from '../Heading';
 import MutedText from '../MutedText';
@@ -60,7 +60,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   /**
    * State to track the current input labware (for paging)
    */
-  const [currentInputLabware, setCurrentInputLabware] = useState<Maybe<LabwareFieldsFragment>>(() => {
+  const [currentInputLabware, setCurrentInputLabware] = useState<Maybe<LabwareFlaggedFieldsFragment>>(() => {
     return initialInputLabware?.length === 0 ? null : initialInputLabware[0];
   });
 
@@ -180,7 +180,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
   }, [initialOutputLabware, outputSlotCopies, send, currentOutput]);
 
   const getSourceSlotColor = useCallback(
-    (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
+    (labware: LabwareFlaggedFieldsFragment, address: string, slot: SlotFieldsFragment) => {
       if (!currentOutput) {
         return 'bg-white';
       }
@@ -570,7 +570,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
    * Callback whenever the input labware is added or removed by the labware scanner
    */
   const onLabwareScannerChange = React.useCallback(
-    (labware: LabwareFieldsFragment[]) => {
+    (labware: LabwareFlaggedFieldsFragment[]) => {
       send({ type: 'UPDATE_INPUT_LABWARE', labware });
       onInputLabwareChange?.(labware);
     },
@@ -653,7 +653,12 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
         )}
 
         <div id="inputLabwares" className="bg-gray-100 p-4">
-          <LabwareScanner initialLabwares={inputLabware} onChange={onLabwareScannerChange} limit={inputLabwareLimit}>
+          <LabwareScanner
+            initialLabwares={inputLabware}
+            onChange={onLabwareScannerChange}
+            limit={inputLabwareLimit}
+            enableFlaggedLabwareCheck
+          >
             {(props) => {
               if (!currentInputLabware) {
                 return <MutedText>Add labware using the scan input above</MutedText>;

@@ -5,7 +5,7 @@ import { castDraft } from 'immer';
 import { ClientError } from 'graphql-request';
 import {
   FindReagentPlateQuery,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   Maybe,
   ReagentPlate,
   ReagentTransfer,
@@ -42,7 +42,7 @@ export interface ReagentTransferContext {
   /**
    * 96 well plate, which is the destination labware, to which the reagent is copied
    */
-  destLabware: LabwareFieldsFragment | undefined;
+  destLabware: LabwareFlaggedFieldsFragment | undefined;
 
   /**
    * All the transfers to record between slots in source and destination
@@ -77,7 +77,7 @@ type SetSourceLabware = {
 
 type SetDestinationLabware = {
   type: 'SET_DESTINATION_LABWARE';
-  labware: LabwareFieldsFragment;
+  labware: LabwareFlaggedFieldsFragment;
 };
 
 type SetPlateType = {

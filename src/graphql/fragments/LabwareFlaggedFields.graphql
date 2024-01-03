@@ -1,0 +1,17 @@
+fragment LabwareFlaggedFields on LabwareFlagged {
+  id
+  barcode
+  externalBarcode
+  destroyed
+  discarded
+  released
+  flagged
+  state
+  created
+  labwareType {
+    ...LabwareTypeFields
+  }
+  slots {
+    ...SlotFields
+  }
+}

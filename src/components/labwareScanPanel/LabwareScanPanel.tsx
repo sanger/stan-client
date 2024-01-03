@@ -1,5 +1,5 @@
 import React from 'react';
-import { LabwareFieldsFragment } from '../../types/sdk';
+import { LabwareFieldsFragment, LabwareFlaggedFieldsFragment } from '../../types/sdk';
 import { motion } from 'framer-motion';
 import { Column, Row } from 'react-table';
 import MutedText from '../MutedText';
@@ -7,6 +7,7 @@ import LockIcon from '../icons/LockIcon';
 import DataTable from '../DataTable';
 import RemoveButton from '../buttons/RemoveButton';
 import { useLabwareContext } from '../labwareScanner/LabwareScanner';
+import labwareColumns from '../dataTableColumns/labwareColumns';
 
 /**
  * Props for {@link LabwareScanPanel}
@@ -16,20 +17,24 @@ interface LabwareScanPanelProps {
    * The list of columns to display in the table
    */
   columns: Column<LabwareFieldsFragment>[];
-  onRemove?: (labware: LabwareFieldsFragment) => void;
+  onRemove?: (labware: LabwareFlaggedFieldsFragment) => void;
 }
 const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns, onRemove }) => {
-  const { labwares, removeLabware, locked } = useLabwareContext();
+  const { labwares, removeLabware, locked, enableFlaggedLabwareCheck } = useLabwareContext();
 
   // Memoize the data for the table
   const data = React.useMemo(() => labwares, [labwares]);
 
+  const columnsToDisplay = React.useMemo(() => {
+    return columns as Array<Column<LabwareFlaggedFieldsFragment>>;
+  }, [columns]);
+
   // Column with actions (such as delete) to add to the end of the labwareScanTableColumns passed in
-  const actionsColumn = React.useMemo(() => {
+  const removeLabwareColumn = React.useMemo(() => {
     return {
       Header: '',
       id: 'actions',
-      Cell: ({ row }: { row: Row<LabwareFieldsFragment> }) => {
+      Cell: ({ row }: { row: Row<LabwareFlaggedFieldsFragment> }) => {
         if (locked) {
           return <LockIcon className="block m-2 h-5 w-5 text-gray-800" />;
         }
@@ -51,8 +56,16 @@ const LabwareScanPanel: React.FC<LabwareScanPanelProps> = ({ columns, onRemove }
 
   /**
    * Merge the columns passed in with the actionsColumn, memoizing the result.
+   * When enableFlaggedLabwareCheck is set to true, the barcode column displays flag information if the labware is flagged.
    */
-  const allColumns: Column<LabwareFieldsFragment>[] = [...columns, actionsColumn];
+  const allColumns: Column<LabwareFlaggedFieldsFragment>[] = React.useMemo(() => {
+    return enableFlaggedLabwareCheck
+      ? [
+          ...columnsToDisplay.map((c) => (c.id === 'barcode' ? labwareColumns.flaggedBarcode() : c)),
+          removeLabwareColumn
+        ]
+      : [...columnsToDisplay, removeLabwareColumn];
+  }, [columnsToDisplay, removeLabwareColumn, enableFlaggedLabwareCheck]);
 
   return (
     <div>

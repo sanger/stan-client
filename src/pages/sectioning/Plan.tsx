@@ -1,7 +1,13 @@
 import React, { useCallback, useState } from 'react';
-import { FindPlanDataQuery, GetSectioningInfoQuery, LabwareFieldsFragment, Maybe, PlanMutation } from '../../types/sdk';
+import {
+  FindPlanDataQuery,
+  GetSectioningInfoQuery,
+  LabwareFlaggedFieldsFragment,
+  Maybe,
+  PlanMutation
+} from '../../types/sdk';
 import AppShell from '../../components/AppShell';
-import { LabwareTypeName, NewLabwareLayout } from '../../types/stan';
+import { LabwareTypeName, NewFlaggedLabwareLayout } from '../../types/stan';
 import PinkButton from '../../components/buttons/PinkButton';
 import ButtonBar from '../../components/ButtonBar';
 import { Link, useLoaderData } from 'react-router-dom';
@@ -13,6 +19,7 @@ import Planner, { PlanChangedProps } from '../../components/planning/Planner';
 import { selectOptionValues } from '../../components/forms';
 import CustomReactSelect, { OptionType } from '../../components/forms/CustomReactSelect';
 import PromptOnLeave from '../../components/notifications/PromptOnLeave';
+import { convertLabwareToFlaggedLabware } from '../../lib/helpers/labwareHelper';
 
 /**
  * Types of labware the user is allowed to section onto
@@ -56,7 +63,6 @@ function Plan() {
   const handlePlanChange = useCallback(
     (props: PlanChangedProps<PlanMutation>) => {
       const allPlansComplete = props.completedPlans.length > 0 && props.numberOfPlans === props.completedPlans.length;
-
       setShouldConfirm(!allPlansComplete);
       setPlanProps(props);
     },
@@ -65,8 +71,8 @@ function Plan() {
 
   const buildPlanLayouts = React.useCallback(
     (
-      plans: Map<string, NewLabwareLayout>,
-      sourceLabware: LabwareFieldsFragment[],
+      plans: Map<string, NewFlaggedLabwareLayout>,
+      sourceLabware: LabwareFlaggedFieldsFragment[],
       sampleColors: Map<number, string>,
       deleteAction: (cid: string) => void,
       confirmAction?: (cid: string, plan: PlanMutation) => void
@@ -166,8 +172,8 @@ function planPropsToPlanData(planProps: Maybe<PlanChangedProps<PlanMutation>>): 
   return Object.keys(planActions).map((labwareId) => {
     return {
       planData: {
-        sources,
-        destination: destinationLabware[labwareId],
+        sources: sources,
+        destination: convertLabwareToFlaggedLabware([destinationLabware[labwareId]])[0],
         plan: {
           operationType: {
             name: 'Section'

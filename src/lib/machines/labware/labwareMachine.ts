@@ -1,11 +1,18 @@
 import { createMachine } from 'xstate';
 import * as Yup from 'yup';
-import { FindLabwareQuery, GetLabwareInLocationQuery, LabwareFieldsFragment, Maybe } from '../../../types/sdk';
+import {
+  FindFlaggedLabwareQuery,
+  FindLabwareQuery,
+  GetLabwareInLocationQuery,
+  LabwareFlaggedFieldsFragment,
+  Maybe
+} from '../../../types/sdk';
 import { extractServerErrors } from '../../../types/stan';
 import { assign } from '@xstate/immer';
 import { stanCore } from '../../sdk';
 import { ClientError } from 'graphql-request';
 import { findIndex } from 'lodash';
+import { convertLabwareToFlaggedLabware } from '../../helpers/labwareHelper';
 
 const resolveStringArrayPromise = (data: string[] | Promise<string[]>): string[] => {
   let resolvedData: string[] = [];
@@ -28,17 +35,17 @@ export interface LabwareContext {
   /**
    * The labware loaded from a scanned barcode
    */
-  foundLabware: Maybe<LabwareFieldsFragment>;
+  foundLabware: Maybe<LabwareFlaggedFieldsFragment>;
 
   /**
    * The list of sourceLabwares fetched so far
    */
-  labwares: LabwareFieldsFragment[];
+  labwares: LabwareFlaggedFieldsFragment[];
 
   /**
    * The most recently removed labware
    */
-  removedLabware: Maybe<{ labware: LabwareFieldsFragment; index: number }>;
+  removedLabware: Maybe<{ labware: LabwareFlaggedFieldsFragment; index: number }>;
 
   /**
    * A {@link https://github.com/jquense/yup#string Yup string schema} to validate the barcode on submission
@@ -52,8 +59,8 @@ export interface LabwareContext {
    * @return a list of any problems identified
    */
   foundLabwareCheck?: (
-    labwares: LabwareFieldsFragment[],
-    foundLabware: LabwareFieldsFragment
+    labwares: LabwareFlaggedFieldsFragment[],
+    foundLabware: LabwareFlaggedFieldsFragment
   ) => string[] | Promise<string[]>;
 
   /**
@@ -75,6 +82,11 @@ export interface LabwareContext {
    * The maximum number of labware to hold in context
    */
   limit?: number;
+
+  /**
+   * When set to true runs FindFlaggedLabware instead of FindLabware
+   */
+  enableFlaggedLabwareCheck?: boolean;
 }
 
 /**
@@ -125,6 +137,11 @@ type FindLabwareDoneEvent = {
   data: FindLabwareQuery;
 };
 
+type FindFlaggedLabwareDoneEvent = {
+  type: 'done.invoke.findLabware';
+  data: FindFlaggedLabwareQuery;
+};
+
 type FindLabwareErrorEvent = {
   type: 'error.platform.findLabware';
   data: ClientError;
@@ -132,7 +149,7 @@ type FindLabwareErrorEvent = {
 
 type AddFoundLabwareEvent = {
   type: 'done.invoke.validateFoundLabware';
-  data: LabwareFieldsFragment;
+  data: LabwareFlaggedFieldsFragment;
 };
 
 type FoundLabwareCheckErrorEvent = {
@@ -148,6 +165,7 @@ export type LabwareEvents =
   | UnlockEvent
   | ValidationErrorEvent
   | FindLabwareDoneEvent
+  | FindFlaggedLabwareDoneEvent
   | FindLabwareErrorEvent
   | FindLocationDoneEvent
   | FindLocationErrorEvent
@@ -354,7 +372,9 @@ export const createLabwareMachine = () =>
           if (e.type !== 'done.invoke.findLabware') {
             return;
           }
-          ctx.foundLabware = e.data.labware;
+          ctx.foundLabware = ctx.enableFlaggedLabwareCheck
+            ? (e as FindFlaggedLabwareDoneEvent).data.labwareFlagged
+            : convertLabwareToFlaggedLabware([(e as FindLabwareDoneEvent).data.labware])[0];
           ctx.currentBarcode = '';
         }),
 
@@ -386,13 +406,18 @@ export const createLabwareMachine = () =>
                If validation is success, add that labware to the list of labwares, otherwise add the error message
                for failure*/
               problem = resolveStringArrayPromise(
-                ctx.foundLabwareCheck ? ctx.foundLabwareCheck(e.data.labwareInLocation, labware) : []
+                ctx.foundLabwareCheck
+                  ? ctx.foundLabwareCheck(
+                      convertLabwareToFlaggedLabware(e.data.labwareInLocation),
+                      convertLabwareToFlaggedLabware([labware])[0]
+                    )
+                  : []
               );
             }
             if (problem.length !== 0) {
               problems.push(problem.join('\n'));
             } else {
-              ctx.labwares.push(labware);
+              ctx.labwares.push(convertLabwareToFlaggedLabware([labware])[0]);
             }
           });
           if (problems.length > 0) {
@@ -425,6 +450,7 @@ export const createLabwareMachine = () =>
       },
       services: {
         findLabwareByBarcode: (ctx: LabwareContext) => {
+          if (ctx.enableFlaggedLabwareCheck) return stanCore.FindFlaggedLabware({ barcode: ctx.currentBarcode });
           return stanCore.FindLabware({ barcode: ctx.currentBarcode });
         },
         findLabwareInLocation: (ctx: LabwareContext) => {

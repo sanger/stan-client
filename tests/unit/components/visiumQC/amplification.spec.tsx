@@ -1,11 +1,12 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { Formik } from 'formik';
 import { slideFactory } from '../../../../src/lib/factories/labwareFactory';
-import { LabwareFieldsFragment } from '../../../../src/types/sdk';
+import { LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
 import Amplification, { AmplificationProps } from '../../../../src/components/visiumQC/Amplification';
+import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
 afterEach(() => {
   cleanup();
 });
@@ -18,8 +19,8 @@ const FormikProps = {
 };
 
 const renderAmplification = (props?: AmplificationProps) => {
-  const inputLabware = slideFactory.build();
-  const labware: LabwareFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
+  const inputLabware = slideFactory.build() as NewFlaggedLabwareLayout;
+  const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
   const initialProps = props ?? {
     slotMeasurements: [
       { address: 'A1', name: 'Cost', value: '0' },
@@ -48,8 +49,8 @@ describe('Amplification', () => {
     });
   });
   it('invokes remove function when labware is removed', async () => {
-    const inputLabware = slideFactory.build();
-    const labware: LabwareFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
+    const inputLabware = slideFactory.build() as NewFlaggedLabwareLayout;
+    const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
     const removeFunction = jest.fn();
     const initialProps = {
       slotMeasurements: [

@@ -7,7 +7,7 @@ import Success from '../components/notifications/Success';
 import { toast } from 'react-toastify';
 import { useScrollToRef } from '../lib/hooks';
 import { useMachine } from '@xstate/react';
-import { SlotCopyContent } from '../types/sdk';
+import { LabwareFlaggedFieldsFragment, SlotCopyContent } from '../types/sdk';
 import { Link, useNavigate } from 'react-router-dom';
 import { reload } from '../lib/sdk';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -19,11 +19,11 @@ import ReagentTransferSlotMapper from '../components/slotMapper/ReagentTransferS
 import labwareFactory from '../lib/factories/labwareFactory';
 import { labwareTypeInstances } from '../lib/factories/labwareTypeFactory';
 import MutedText from '../components/MutedText';
-import { buildLabwareFragment } from '../lib/helpers/labwareHelper';
 
 import { ErrorMessage } from '../components/forms';
 import Label from '../components/forms/Label';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
+import { buildLabwareFragment } from '../lib/helpers/labwareHelper';
 
 /**
  * Success notification when slots have been copied
@@ -199,7 +199,7 @@ function DualIndexPlate() {
 
           <ReagentTransferSlotMapper
             initialDestLabware={destLabware}
-            initialSourceLabware={memoInputLabware}
+            initialSourceLabware={memoInputLabware ? (memoInputLabware as LabwareFlaggedFieldsFragment) : undefined}
             onChange={handleOnSlotMapperChange}
             disabled={current.matches('transferred')}
           />

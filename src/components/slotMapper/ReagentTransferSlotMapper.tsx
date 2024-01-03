@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Labware, { LabwareImperativeRef } from '../labware/Labware';
 import WhiteButton from '../buttons/WhiteButton';
-import { LabwareFieldsFragment, SlotCopyContent, SlotFieldsFragment } from '../../types/sdk';
+import { LabwareFlaggedFieldsFragment, SlotCopyContent, SlotFieldsFragment } from '../../types/sdk';
 import { useMachine } from '@xstate/react';
 import { find } from 'lodash';
 import { findSlotByAddress, isSlotEmpty } from '../../lib/helpers/slotHelper';
@@ -29,12 +29,12 @@ export interface ReagentTransferMappingProps {
   /**
    * Initial input labware
    */
-  initialSourceLabware: LabwareFieldsFragment | undefined;
+  initialSourceLabware: LabwareFlaggedFieldsFragment | undefined;
 
   /**
    * Initial output labware
    */
-  initialDestLabware: LabwareFieldsFragment | undefined;
+  initialDestLabware: LabwareFlaggedFieldsFragment | undefined;
 }
 
 function ReagentTransferSlotMapper({
@@ -111,7 +111,7 @@ function ReagentTransferSlotMapper({
   }, [memoOutputSlotCopies, initialSourceLabware, initialDestLabware]);
 
   const getSourceSlotColor = useCallback(
-    (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
+    (labware: LabwareFlaggedFieldsFragment, address: string, slot: SlotFieldsFragment) => {
       if (disabled) {
         return `bg-gray-400 `;
       } else {
@@ -133,7 +133,7 @@ function ReagentTransferSlotMapper({
   );
 
   const getDestinationSlotColor = useCallback(
-    (labware: LabwareFieldsFragment, address: string, slot: SlotFieldsFragment) => {
+    (labware: LabwareFlaggedFieldsFragment, address: string, slot: SlotFieldsFragment) => {
       if (disabled) {
         return `bg-gray-400`;
       } else {

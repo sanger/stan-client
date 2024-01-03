@@ -1,7 +1,7 @@
-import { NewLabwareLayout } from '../../types/stan';
+import { NewFlaggedLabwareLayout } from '../../types/stan';
 import {
   FindPassFailsQuery,
-  LabwareFieldsFragment,
+  LabwareFlaggedFieldsFragment,
   SlotCopyContent,
   SlotPassFailFieldsFragment
 } from '../../types/sdk';
@@ -18,17 +18,21 @@ export interface SlotMapperProps {
    * @param slotCopyContent the current mapping of source to destination slots
    * @param allSourcesMapped true if input labware exists and their non-empty slots have been mapped, false otherwise
    */
-  onChange?: (labware: NewLabwareLayout, slotCopyContent: Array<SlotCopyContent>, allSourcesMapped: boolean) => void;
+  onChange?: (
+    labware: NewFlaggedLabwareLayout,
+    slotCopyContent: Array<SlotCopyContent>,
+    allSourcesMapped: boolean
+  ) => void;
 
   /**
    * Callback to notify whenever an input labware is scanned/removed
    */
-  onInputLabwareChange?: (labwaresWithoutPerm: LabwareFieldsFragment[]) => void;
+  onInputLabwareChange?: (labwaresWithoutPerm: LabwareFlaggedFieldsFragment[]) => void;
 
   /**
    * Callback to notify whenever an output labware is removed
    */
-  onOutputLabwareChange?: (labwaresWithoutPerm: NewLabwareLayout[]) => void;
+  onOutputLabwareChange?: (labwaresWithoutPerm: NewFlaggedLabwareLayout[]) => void;
 
   /**
    * Lock the SlotMapper.
@@ -38,7 +42,7 @@ export interface SlotMapperProps {
   /**
    * Input labware
    */
-  initialInputLabware?: Array<LabwareFieldsFragment>;
+  initialInputLabware?: Array<LabwareFlaggedFieldsFragment>;
 
   /**
    * Output labware
@@ -73,10 +77,10 @@ export interface SlotMapperProps {
   displayMappedTable?: boolean;
 
   /**Callback to notify when an output labware is selected (through pagination)**/
-  onSelectOutputLabware?: (labware: NewLabwareLayout) => void;
+  onSelectOutputLabware?: (labware: NewFlaggedLabwareLayout) => void;
 
   /**Callback to notify when an input labware is selected (through pagination)**/
-  onSelectInputLabware?: (labware: LabwareFieldsFragment) => void;
+  onSelectInputLabware?: (labware: LabwareFlaggedFieldsFragment) => void;
 
   /**Callback to notify when an output labware selection type changes*/
   onOutputLabwareSelectionModeChange?: (mode: DestinationSelectionMode) => void;
@@ -84,12 +88,12 @@ export interface SlotMapperProps {
   selectedDestinationMode?: DestinationSelectionMode;
 }
 export type OutputSlotCopyData = {
-  labware: NewLabwareLayout;
+  labware: NewFlaggedLabwareLayout;
   slotCopyContent: Array<SlotCopyContent>;
 };
 export interface SlotMapperContext {
   /**All input labware scanned**/
-  inputLabware: Array<LabwareFieldsFragment>;
+  inputLabware: Array<LabwareFlaggedFieldsFragment>;
   /**Mapped slots data**/
   outputSlotCopies: Array<OutputSlotCopyData>;
   /**Map between color to display in slots and labware**/
@@ -112,7 +116,7 @@ export interface SlotMapperSchema {
 
 type UpdateInputLabwareEvent = {
   type: 'UPDATE_INPUT_LABWARE';
-  labware: Array<LabwareFieldsFragment>;
+  labware: Array<LabwareFlaggedFieldsFragment>;
 };
 type UpdateOutputLabwareEvent = {
   type: 'UPDATE_OUTPUT_LABWARE';

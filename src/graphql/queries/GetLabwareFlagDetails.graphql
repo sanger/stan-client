@@ -1,0 +1,9 @@
+query GetLabwareFlagDetails($barcodes: [String!]!) {
+  labwareFlagDetails(barcodes: $barcodes) {
+    barcode
+    flags {
+      barcode
+      description
+    }
+  }
+}
