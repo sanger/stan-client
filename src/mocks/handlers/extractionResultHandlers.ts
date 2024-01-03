@@ -1,5 +1,10 @@
 import { graphql, HttpResponse } from 'msw';
-import { ExtractResultQuery, ExtractResultQueryVariables, PassFail } from '../../types/sdk';
+import {
+  ExtractResultQuery,
+  ExtractResultQueryVariables,
+  LabwareFlaggedFieldsFragment,
+  PassFail
+} from '../../types/sdk';
 import labwareFactory from '../../lib/factories/labwareFactory';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../types/stan';
@@ -14,10 +19,12 @@ const extractionResultHandlers = [
     });
     newLabware.barcode = variables.barcode;
 
-    return HttpResponse.json(
-      { data: { extractResult: { result: PassFail.Pass, labware: newLabware, concentration: '1.3' } } },
-      { status: 200 }
-    );
+    const labwareFlagged: LabwareFlaggedFieldsFragment = { ...newLabware, __typename: 'LabwareFlagged', flagged: true };
+    return HttpResponse.json({
+      data: {
+        extractResult: { result: PassFail.Pass, labware: labwareFlagged, concentration: '1.3' }
+      }
+    });
   })
 ];
 export default extractionResultHandlers;

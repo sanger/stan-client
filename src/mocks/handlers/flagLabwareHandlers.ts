@@ -2,6 +2,7 @@ import { graphql, HttpResponse } from 'msw';
 import {
   FindFlaggedLabwareQuery,
   FindFlaggedLabwareQueryVariables,
+  FindLabwareQuery,
   FlagLabwareMutation,
   FlagLabwareMutationVariables,
   GetLabwareFlagDetailsQuery,
@@ -27,13 +28,10 @@ export const flagLabwareHandlers = [
         ]
       });
     }
-    return HttpResponse.json({
-      data: {
-        findFlaggedLabware: {
-          labware: [createFlaggedLabware(barcode)]
-        }
-      }
-    });
+    const payload: FindFlaggedLabwareQuery = {
+      labwareFlagged: createFlaggedLabware(barcode)
+    };
+    return HttpResponse.json({ data: payload }, { status: 200 });
   }),
 
   graphql.query<GetLabwareFlagDetailsQuery, GetLabwareFlagDetailsQueryVariables>(
@@ -85,11 +83,13 @@ export const createFlaggedLabware = (barcode: string): LabwareFlaggedFieldsFragm
   const labware: Labware = labwareJson ? JSON.parse(labwareJson) : createLabware(barcode);
   const flaggedLabware = convertLabwareToFlaggedLabware([buildLabwareFragment(labware)])[0];
   flaggedLabware.flagged = barcode.endsWith('00');
+  flaggedLabware.__typename = 'LabwareFlagged';
   return flaggedLabware;
 };
 
 export const buildFlaggedLabwareFragment = (lw: Labware): LabwareFlaggedFieldsFragment => {
   const labware = buildLabwareFragment(lw) as LabwareFlaggedFieldsFragment;
   labware.flagged = lw.barcode.endsWith('00');
+  labware.__typename = 'LabwareFlagged';
   return labware;
 };
