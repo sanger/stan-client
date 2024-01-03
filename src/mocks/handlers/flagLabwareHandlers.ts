@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   FindFlaggedLabwareQuery,
   FindFlaggedLabwareQueryVariables,
@@ -16,27 +16,33 @@ import { createLabware } from './labwareHandlers';
  * Returns a flagged labware if the given barcode ends with '00'
  */
 export const flagLabwareHandlers = [
-  graphql.query<FindFlaggedLabwareQuery, FindFlaggedLabwareQueryVariables>('FindFlaggedLabware', (req, res, ctx) => {
-    const barcode = req.variables.barcode;
+  graphql.query<FindFlaggedLabwareQuery, FindFlaggedLabwareQueryVariables>('FindFlaggedLabware', ({ variables }) => {
+    const barcode = variables.barcode;
     if (!barcode.startsWith('STAN-')) {
-      return res(
-        ctx.errors([
+      return HttpResponse.json({
+        errors: [
           {
-            message: `Exception while fetching data (/labware) : No labware found with barcode: ${barcode}`
+            message: `Exception while fetching data (/labware) : Invalid barcode: ${barcode}`
           }
-        ])
-      );
+        ]
+      });
     }
-    return res(ctx.data({ labwareFlagged: createFlaggedLabware(barcode) }));
+    return HttpResponse.json({
+      data: {
+        findFlaggedLabware: {
+          labware: [createFlaggedLabware(barcode)]
+        }
+      }
+    });
   }),
 
   graphql.query<GetLabwareFlagDetailsQuery, GetLabwareFlagDetailsQueryVariables>(
     'GetLabwareFlagDetails',
-    (req, res, ctx) => {
-      const barcode = req.variables.barcodes[0];
-      return res(
-        ctx.data({
-          labwareFlagDetails: req.variables.barcodes[0].endsWith('00')
+    ({ variables }) => {
+      const barcode = variables.barcodes[0];
+      return HttpResponse.json({
+        data: {
+          labwareFlagDetails: variables.barcodes[0].endsWith('00')
             ? [
                 {
                   barcode: barcode,
@@ -55,14 +61,13 @@ export const flagLabwareHandlers = [
                 }
               ]
             : []
-        })
-      );
+        }
+      });
     }
   ),
-
-  graphql.mutation<FlagLabwareMutation, FlagLabwareMutationVariables>('FlagLabware', (req, res, ctx) => {
-    return res(
-      ctx.data({
+  graphql.mutation<FlagLabwareMutation, FlagLabwareMutationVariables>('FlagLabware', () => {
+    return HttpResponse.json({
+      data: {
         flagLabware: {
           operations: [
             {
@@ -70,8 +75,8 @@ export const flagLabwareHandlers = [
             }
           ]
         }
-      })
-    );
+      }
+    });
   })
 ];
 
