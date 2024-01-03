@@ -2,7 +2,6 @@ import { graphql, HttpResponse } from 'msw';
 import {
   FindFlaggedLabwareQuery,
   FindFlaggedLabwareQueryVariables,
-  FindLabwareQuery,
   FlagLabwareMutation,
   FlagLabwareMutationVariables,
   GetLabwareFlagDetailsQuery,
