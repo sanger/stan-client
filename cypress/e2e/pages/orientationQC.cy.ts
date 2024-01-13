@@ -1,4 +1,6 @@
 import {
+  FindFlaggedLabwareQuery,
+  FindFlaggedLabwareQueryVariables,
   FindLabwareQuery,
   FindLabwareQueryVariables,
   RecordOrientationQcMutation,
@@ -8,22 +10,26 @@ import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
 import { buildLabwareFragment } from '../../../src/lib/helpers/labwareHelper';
 import { HttpResponse } from 'msw';
+import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
 
 describe('Release Page', () => {
   beforeEach(() => {
     cy.msw().then(({ worker, graphql }) => {
       worker.use(
-        graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', ({ variables }) => {
-          const barcode = variables.barcode;
-          const labware = createLabware(barcode);
-          labware.slots = [labware.slots[0]];
-          labware.slots[0].samples = [labware.slots[0].samples[0]];
-          labware.slots[0].block = true;
-          const payload: FindLabwareQuery = {
-            labware: buildLabwareFragment(labware)
-          };
-          return HttpResponse.json({ data: payload });
-        })
+        graphql.query<FindFlaggedLabwareQuery, FindFlaggedLabwareQueryVariables>(
+          'FindFlaggedLabware',
+          ({ variables }) => {
+            const barcode = variables.barcode;
+            const labware = createFlaggedLabware(barcode);
+            labware.slots = [labware.slots[0]];
+            labware.slots[0].samples = [labware.slots[0].samples[0]];
+            labware.slots[0].block = true;
+            const payload: FindFlaggedLabwareQuery = {
+              labwareFlagged: labware
+            };
+            return HttpResponse.json({ data: payload });
+          }
+        )
       );
     });
   });

@@ -65,10 +65,10 @@ describe('Transfer Page', () => {
     });
     it('should allow transfer to an empty slot', () => {
       cy.get('#inputLabwares').within((elem) => {
-        cy.wrap(elem).get('#labwareScanInput').type('STAN-3111{enter}');
+        cy.wrap(elem).get('#labwareScanInput').clear().type('STAN-3111{enter}');
       });
       cy.findByTestId('dest-scanner').within((elem) => {
-        cy.wrap(elem).get('#labwareScanInput').type('STAN-3000{enter}');
+        cy.wrap(elem).get('#labwareScanInput').clear().type('STAN-3000{enter}');
       });
       cy.get('#inputLabwares').within(() => {
         cy.findByText('A1').click({ force: true });
@@ -227,6 +227,7 @@ describe('Transfer Page', () => {
           });
           cy.get('#outputLabwares').within(() => {
             cy.findByText('G1').click();
+            cy.findByText('G2').click();
             cy.findByText('G5').click();
           });
         });

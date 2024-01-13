@@ -239,6 +239,7 @@ describe('Dual Index Plate', () => {
           cy.findByText('A1').click();
         });
         selectSGPNumber('SGP1008');
+        selectOption('plateType', 'Fresh frozen - Dual Index TT Set A');
         saveButton().click();
       });
       it('shows an error', () => {

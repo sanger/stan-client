@@ -5,6 +5,15 @@ import { RegisterTissuesMutation, RegisterTissuesMutationVariables } from '../..
 import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 describe('Block Registration Page', () => {
+  beforeEach(() => {
+    cy.msw().then(({ worker, graphql }) => {
+      worker.use(
+        http.post('/register/block', () => {
+          return HttpResponse.json({ barcodes: ['STAN-3111', 'STAN-3112'] }, { status: 200 });
+        })
+      );
+    });
+  });
   describe('Initial display', () => {
     before(() => {
       cy.visit('/admin/registration');
@@ -15,37 +24,26 @@ describe('Block Registration Page', () => {
     });
   });
   describe('File Registration', () => {
-    before(() => {
-      cy.msw().then(({ worker, graphql }) => {
-        worker.use(
-          http.post('/register/block', () => {
-            return HttpResponse.json({ barcodes: ['STAN-3111', 'STAN-3112'] }, { status: 200 });
-          })
-        );
-      });
-      cy.get('[type="radio"][name="file-registration-btn"]').check();
-    });
     it('should display upload file form', () => {
+      cy.get('[type="radio"][name="file-registration-btn"]').check();
       cy.findByText('Select file...').should('be.visible');
     });
     it('upload btn should be disabled until the user selected a file', () => {
       cy.findByTestId('upload-btn').should('be.disabled');
     });
-    context('On file upload success', () => {
-      it('shows the registered block', () => {
-        cy.get('input[type=file]').selectFile(
-          {
-            contents: Cypress.Buffer.from('file contents'),
-            fileName: 'file.xlsx',
-            mimeType: 'text/plain',
-            lastModified: Date.now()
-          },
-          { force: true }
-        );
-        cy.findByTestId('upload-btn').click();
-        cy.findByText('STAN-3111').should('be.visible');
-        cy.findByText('STAN-3112').should('be.visible');
-      });
+    it('shows the registered block', () => {
+      cy.get('input[type=file]').selectFile(
+        {
+          contents: Cypress.Buffer.from('file contents'),
+          fileName: 'file.xlsx',
+          mimeType: 'text/plain',
+          lastModified: Date.now()
+        },
+        { force: true }
+      );
+      cy.findByTestId('upload-btn').click();
+      cy.findByText('STAN-3111').should('be.visible');
+      cy.findByText('STAN-3112').should('be.visible');
     });
 
     context('On file upload failure', () => {

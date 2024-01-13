@@ -84,7 +84,7 @@ describe('Visium QC Page', () => {
           cy.get('#labwareScanInput').type('aaa{enter}');
         });
         it('shows barcode not found message', () => {
-          cy.findByText('No labware found with barcode: aaa').should('be.visible');
+          cy.findByText('Invalid barcode: aaa').should('be.visible');
         });
       });
       context('when user enters a labware which has not assigned a costing', () => {
@@ -237,14 +237,15 @@ describe('Visium QC Page', () => {
               })
             );
           });
-          cy.get('#labwareScanInput').type('STAN-2100{enter}');
-          selectOption('slide-costing', 'Faculty');
-          selectSGPNumber('SGP1008');
-          cy.findByTestId('formInput').clear().type('123456');
-          cy.findByRole('button', { name: /Save/i }).click();
         });
 
         it('shows an error', () => {
+          cy.get('#labwareScanInput').type('STAN-2100{enter}');
+          selectOption('slide-costing', 'SGP');
+          selectSGPNumber('SGP1008');
+          selectOption('slide-costing', 'Faculty');
+          cy.findByTestId('formInput').clear().type('123456');
+          cy.findByRole('button', { name: /Save/i }).click();
           cy.findByText('Failed to record Slide Processing').should('be.visible');
         });
       });
