@@ -1,14 +1,10 @@
 import {
   FindFlaggedLabwareQuery,
   FindFlaggedLabwareQueryVariables,
-  FindLabwareQuery,
-  FindLabwareQueryVariables,
   RecordOrientationQcMutation,
   RecordOrientationQcMutationVariables
 } from '../../../src/types/sdk';
 import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
-import { createLabware } from '../../../src/mocks/handlers/labwareHandlers';
-import { buildLabwareFragment } from '../../../src/lib/helpers/labwareHelper';
 import { HttpResponse } from 'msw';
 import { createFlaggedLabware } from '../../../src/mocks/handlers/flagLabwareHandlers';
 
