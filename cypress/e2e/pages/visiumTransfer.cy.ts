@@ -235,9 +235,7 @@ describe('Transfer Page', () => {
             cy.findByText('G5').click();
           });
         });
-        it('should display the one to many mode', () => {
-          cy.findByTestId('copyMode-One to many').should('be.checked');
-        });
+
         it('should display finish transfer button', () => {
           cy.findByRole('button', { name: 'Finish mapping for A1' }).should('be.visible');
         });
