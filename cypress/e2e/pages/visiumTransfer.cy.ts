@@ -225,9 +225,9 @@ describe('Transfer Page', () => {
           selectSGPNumber('SGP1008');
           cy.get('#labwareScanInput').type('STAN-3100{enter}');
           selectOption('bioState', 'Probes');
-          cy.findByTestId('copyMode-One to many').click();
+          cy.findByTestId('copyMode-One to many').click({ force: true });
           cy.get('#inputLabwares').within(() => {
-            cy.findByText('A1').click();
+            cy.findByText('A1').click({ force: true });
           });
           cy.get('#outputLabwares').within(() => {
             cy.findByText('G1').click();
