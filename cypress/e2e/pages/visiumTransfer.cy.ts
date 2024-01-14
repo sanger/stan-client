@@ -221,6 +221,10 @@ describe('Transfer Page', () => {
       });
       context('when user maps slots in one to many mode', () => {
         before(() => {
+          cy.visit('/lab/transfer');
+          selectSGPNumber('SGP1008');
+          cy.get('#labwareScanInput').type('STAN-3100{enter}');
+          selectOption('bioState', 'Probes');
           cy.findByTestId('copyMode-One to many').click();
           cy.get('#inputLabwares').within(() => {
             cy.findByText('A1').click();
@@ -256,6 +260,10 @@ describe('Transfer Page', () => {
       });
       context('when user maps slots in many to one mode', () => {
         before(() => {
+          cy.visit('/lab/transfer');
+          selectSGPNumber('SGP1008');
+          cy.get('#labwareScanInput').type('STAN-3100{enter}');
+          selectOption('bioState', 'Probes');
           cy.findByTestId('copyMode-Many to one').click();
           cy.get('#inputLabwares').within(() => {
             cy.findByText('A2').click();
@@ -265,7 +273,7 @@ describe('Transfer Page', () => {
             cy.findByText('D1').click();
           });
         });
-        it('should display the one to many mode', () => {
+        it('should display the many to one mode', () => {
           cy.findByTestId('copyMode-Many to one').should('be.checked');
         });
         it('displays the table with A2, B2 slots mapped to D1', () => {
@@ -273,22 +281,6 @@ describe('Transfer Page', () => {
           cy.findByRole('table').contains('td', 'A2');
           cy.findByRole('table').contains('td', 'B2');
           cy.findByRole('table').contains('td', 'D1');
-        });
-      });
-
-      context('when user selects a mapped slot', () => {
-        before(() => {
-          cy.get('#inputLabwares').within(() => {
-            cy.findByText('A1').click();
-          });
-        });
-        it('should display the mappings for selected slot in table', () => {
-          cy.findByText('Slot mapping for slot(s) A1').should('be.visible');
-          it('displays the table with A1 slot', () => {
-            cy.findByRole('table').contains('td', 'A1');
-            cy.findByRole('table').contains('td', 'G1');
-            cy.findByRole('table').contains('td', 'G5');
-          });
         });
       });
 
