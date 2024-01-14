@@ -230,9 +230,9 @@ describe('Transfer Page', () => {
             cy.findByText('A1').click({ force: true });
           });
           cy.get('#outputLabwares').within(() => {
-            cy.findByText('G1').click();
-            cy.findByText('G2').click();
-            cy.findByText('G5').click();
+            cy.findByText('G1').click({ force: true });
+            cy.findByText('G2').click({ force: true });
+            cy.findByText('G5').click({ force: true });
           });
         });
 
@@ -259,13 +259,13 @@ describe('Transfer Page', () => {
           selectSGPNumber('SGP1008');
           cy.get('#labwareScanInput').type('STAN-3100{enter}');
           selectOption('bioState', 'Probes');
-          cy.findByTestId('copyMode-Many to one').click();
+          cy.findByTestId('copyMode-Many to one').click({ force: true });
           cy.get('#inputLabwares').within(() => {
-            cy.findByText('A2').click();
-            cy.findByText('B2').click({ cmdKey: true });
+            cy.findByText('A2').click({ force: true });
+            cy.findByText('B2').click({ cmdKey: true, force: true });
           });
           cy.get('#outputLabwares').within(() => {
-            cy.findByText('D1').click();
+            cy.findByText('D1').click({ force: true });
           });
         });
         it('should display the many to one mode', () => {
