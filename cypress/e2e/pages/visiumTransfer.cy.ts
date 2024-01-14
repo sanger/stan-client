@@ -237,7 +237,7 @@ describe('Transfer Page', () => {
         });
 
         it('should display finish transfer button', () => {
-          cy.findByRole('button', { name: 'Finish mapping for A1' }).should('be.visible');
+          cy.findByRole('button', { name: 'Finish mapping for A1' }).scrollIntoView().should('be.visible');
         });
         it('displays the table with A1 slot', () => {
           cy.findByRole('table').contains('td', 'A1');
@@ -249,7 +249,7 @@ describe('Transfer Page', () => {
 
         context('when user click on finish transfer button', () => {
           before(() => {
-            cy.findByRole('button', { name: 'Finish mapping for A1' }).click();
+            cy.findByRole('button', { name: 'Finish mapping for A1' }).scrollIntoView().click({ force: true });
           });
           it('should remove the finish transfer button', () => {
             cy.findByRole('button', { name: 'Finish mapping for A1' }).should('not.exist');
