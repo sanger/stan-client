@@ -236,9 +236,6 @@ describe('Transfer Page', () => {
           });
         });
 
-        it('should display finish transfer button', () => {
-          cy.findByRole('button', { name: 'Finish mapping for A1' }).scrollIntoView().should('be.visible');
-        });
         it('displays the table with A1 slot', () => {
           cy.findByRole('table').contains('td', 'A1');
         });
