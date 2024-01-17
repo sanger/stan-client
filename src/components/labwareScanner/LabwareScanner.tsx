@@ -116,7 +116,7 @@ export default function LabwareScanner({
         inputRef.current?.focus();
       }
       const currentLabwareLength = observer.context.labwares.length;
-
+      const labwares = observer.context.labwares;
       if (typeof previousLabwareLength !== 'undefined') {
         if (currentLabwareLength !== previousLabwareLength) {
           onChange?.(labwares);
