@@ -121,19 +121,21 @@ const TubeRow: React.FC<TubeRowProps> = ({
 
   //Notify parent about section layout changes
   useEffect(() => {
+    //sabrine subsribe
+    const currentEventType = service.getSnapshot().getMeta().event.type;
     if (
       layoutPlan &&
-      ((current.event.type === 'done.invoke.layoutMachine' && notifySectionChange.current) ||
-        current.event.type === 'TOGGLE_CANCEL')
+      ((currentEventType === 'xstate.done.actor.layoutMachine' && notifySectionChange.current) ||
+        currentEventType === 'TOGGLE_CANCEL')
     ) {
       notifySectionChange.current = false;
       onSectionUpdate(layoutPlan);
     }
-  }, [layoutPlan, current.event, onSectionUpdate]);
+  }, [layoutPlan, service, onSectionUpdate]);
 
   /**Update for source changes in parent**/
   useEffect(() => {
-    send('UPDATE_ALL_SOURCES', initialLayoutPlan);
+    send({ type: 'UPDATE_ALL_SOURCES', plannedActions: initialLayoutPlan.plannedActions });
   }, [initialLayoutPlan, send]);
 
   const rowClassnames = classNames(
@@ -219,7 +221,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
               <ModalBody>
                 <Heading level={3}>Set Layout</Heading>
                 {layoutMachine && (
-                  <LayoutPlanner actor={layoutMachine}>
+                  <LayoutPlanner actor={layoutMachine.getSnapshot()}>
                     <div className="my-2">
                       <p className="text-gray-900 text-sm leading-normal">
                         Click a slot to increase the number of sections in that slot.

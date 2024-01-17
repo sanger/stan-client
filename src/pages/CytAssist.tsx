@@ -218,15 +218,15 @@ const CytAssist = () => {
     }
   };
 
-  const [current, send] = useMachine(() =>
-    slotCopyMachine.withContext({
+  const [current, send] = useMachine(slotCopyMachine, {
+    input: {
       workNumber: '',
       operationType: 'CytAssist',
       slotCopyResults: [],
       destinations: [initialOutputLabware],
       sources: []
-    })
-  );
+    }
+  });
 
   const { serverErrors, destinations } = current.context;
   const navigate = useNavigate();

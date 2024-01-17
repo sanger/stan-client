@@ -1,8 +1,7 @@
 import React from 'react';
-import { useActor } from '@xstate/react';
 import { isEqual } from 'lodash';
 import Labware from './labware/Labware';
-import { LayoutEvents, LayoutMachineActorRef, LayoutMachineType } from '../lib/machines/layout';
+import { LayoutContext, LayoutEvents } from '../lib/machines/layout';
 import {
   removeSection,
   selectDestination,
@@ -10,44 +9,44 @@ import {
   setAllDestinations
 } from '../lib/machines/layout/layoutEvents';
 import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../pages/sectioning/index';
+import { ActorRef, MachineSnapshot } from 'xstate';
 
 interface LayoutPlannerProps {
-  actor: LayoutMachineActorRef;
+  actor: ActorRef<MachineSnapshot<LayoutContext, LayoutEvents, any, any, any, any>, any>;
   children: React.ReactNode;
 }
 
 const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
-  const [current, send] = useActor<LayoutEvents, LayoutMachineType['state']>(actor);
-  const { layoutPlan, selected } = current.context;
-
+  //const [current, send] = useActor(actor.);
+  const { layoutPlan, selected } = actor.getSnapshot().context ?? {};
   return (
     <div>
       {children}
       <div className="my-6 md:flex md:flex-row md:items-centre md:justify-around">
         <div className="">
-          {layoutPlan.destinationLabware && (
+          {layoutPlan?.destinationLabware && (
             <Labware
               labware={layoutPlan.destinationLabware}
               name={layoutPlan.destinationLabware.labwareType.name}
               selectable={'none'}
-              onSlotClick={(address) => send(selectDestination(address))}
-              onSlotCtrlClick={(address) => send(removeSection(address))}
+              onSlotClick={(address) => actor.send(selectDestination(address))}
+              onSlotCtrlClick={(address) => actor.send(removeSection(address))}
               slotText={(address) => buildSlotText(layoutPlan, address)}
               slotSecondaryText={(address) => buildSlotSecondaryText(layoutPlan, address)}
               slotColor={(address) => buildSlotColor(layoutPlan, address)}
             />
           )}
         </div>
-        {layoutPlan.sources.length > 0 && (
+        {layoutPlan?.sources && layoutPlan?.sources?.length > 0 && (
           <div className="mt-2 grid gap-2 grid-cols-3">
             {layoutPlan.sources.map((source, i) => (
               <div key={i} className="">
                 <span
                   onClick={() => {
-                    send(selectSource(source));
+                    actor.send(selectSource(source));
                   }}
                   onDoubleClick={() => {
-                    send(setAllDestinations(source));
+                    actor.send(setAllDestinations(source));
                   }}
                   className={`${
                     isEqual(source, selected) && 'ring-2 ring-offset-2 ring-gray-700'

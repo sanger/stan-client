@@ -20,6 +20,7 @@ import { StanCoreContext } from '../lib/sdk';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import CustomReactSelect from '../components/forms/CustomReactSelect';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 const initialValues: DestroyRequest = {
   barcodes: [],
@@ -39,16 +40,16 @@ const Destroy: React.FC = () => {
   const stanCore = useContext(StanCoreContext);
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<DestroyRequest, DestroyMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.Destroy({ request: e.values });
-        }
+    return createFormMachine<DestroyRequest, DestroyMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.Destroy({ request: input.event.values });
+        })
       }
     });
   }, [stanCore]);
-  const [current, send] = useMachine(() => formMachine);
+  const [current, send] = useMachine(formMachine);
 
   const validationSchema = useMemo(() => buildValidationSchema(destroyInfo), [destroyInfo]);
 

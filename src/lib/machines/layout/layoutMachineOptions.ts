@@ -1,10 +1,9 @@
-import { MachineOptions } from 'xstate';
 import { LayoutContext, Source } from './layoutContext';
-import { LayoutEvents } from './layoutEvents';
-import { assign } from '@xstate/immer';
 import { isEqual } from 'lodash';
 import { tissue } from '../../helpers/labwareHelper';
 import { LabwareFieldsFragment } from '../../../types/sdk';
+import { assign, MachineImplementations } from 'xstate';
+import { LayoutEvents } from './layoutEvents';
 
 export const layoutMachineKey = 'layoutMachine';
 
@@ -19,111 +18,119 @@ export enum Actions {
   REMOVE_SECTION = 'layoutMachine.removeSection'
 }
 
-export const machineOptions: Partial<MachineOptions<LayoutContext, LayoutEvents>> = {
+export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents> = {
   actions: {
-    [Actions.ASSIGN_SELECTED]: assign((ctx, e) => {
-      if (e.type !== 'SELECT_SOURCE') {
-        return;
+    [Actions.ASSIGN_SELECTED]: assign(({ context, event }) => {
+      if (event.type !== 'SELECT_SOURCE') {
+        return context;
       }
 
-      ctx.selected = isEqual(ctx.selected, e.source) ? null : e.source;
+      context.selected = isEqual(context.selected, event.source) ? null : event.source;
+      return context;
     }),
 
-    [Actions.DELETE_DESTINATION_ACTION]: assign((ctx, e) => {
-      if (e.type !== 'SELECT_DESTINATION') {
-        return;
+    [Actions.DELETE_DESTINATION_ACTION]: assign(({ context, event }) => {
+      if (event.type !== 'SELECT_DESTINATION') {
+        return context;
       }
-      ctx.layoutPlan.plannedActions.delete(e.address);
+      context.layoutPlan.plannedActions.delete(event.address);
+      return context;
     }),
 
-    [Actions.ASSIGN_DESTINATION]: assign((ctx, e) => {
-      if (e.type !== 'SELECT_DESTINATION') {
-        return;
+    [Actions.ASSIGN_DESTINATION]: assign(({ context, event }) => {
+      if (event.type !== 'SELECT_DESTINATION') {
+        return context;
       }
-      const plannedActions = ctx.layoutPlan.plannedActions;
+      const plannedActions = context.layoutPlan.plannedActions;
 
-      if (!ctx.selected || ctx.selected.sampleId === plannedActions.get(e.address)?.[0].sampleId) {
-        plannedActions.delete(e.address);
+      if (!context.selected || context.selected.sampleId === plannedActions.get(event.address)?.[0].sampleId) {
+        plannedActions.delete(event.address);
       } else {
-        const action: Source = Object.assign({}, ctx.selected);
+        const action: Source = Object.assign({}, context.selected);
         action.replicateNumber = tissue(Object.assign({}, action.labware as LabwareFieldsFragment))?.replicate ?? '';
-        plannedActions.set(e.address, [action]);
+        plannedActions.set(event.address, [action]);
       }
+      return context;
     }),
 
-    [Actions.REMOVE_PLANNED_ACTION]: assign((ctx, e) => {
-      if (e.type !== 'SELECT_DESTINATION') {
-        return;
+    [Actions.REMOVE_PLANNED_ACTION]: assign(({ context, event }) => {
+      if (event.type !== 'SELECT_DESTINATION') {
+        return context;
       }
-      ctx.layoutPlan.plannedActions.delete(e.address);
+      context.layoutPlan.plannedActions.delete(event.address);
+      return context;
     }),
 
-    [Actions.ASSIGN_DESTINATION_ACTIONS]: assign((ctx, e) => {
-      if (e.type !== 'SET_ALL_DESTINATIONS') {
-        return;
+    [Actions.ASSIGN_DESTINATION_ACTIONS]: assign(({ context, event }) => {
+      if (event.type !== 'SET_ALL_DESTINATIONS') {
+        return context;
       }
 
-      ctx.layoutPlan.destinationLabware.slots.forEach((slot) => {
-        ctx.layoutPlan.plannedActions.set(slot.address, [e.source]);
+      context.layoutPlan.destinationLabware.slots.forEach((slot) => {
+        context.layoutPlan.plannedActions.set(slot.address, [event.source]);
       });
+      return context;
     }),
 
-    [Actions.ADD_SECTION]: assign((ctx, e) => {
-      if (e.type !== 'SELECT_DESTINATION') {
-        return;
+    [Actions.ADD_SECTION]: assign(({ context, event }) => {
+      if (event.type !== 'SELECT_DESTINATION') {
+        return context;
       }
-      if (!ctx.possibleActions?.has(e.address)) {
-        return;
+      if (!context.possibleActions?.has(event.address)) {
+        return context;
       }
-      const slotActions = ctx.possibleActions?.get(e.address)!;
+      const slotActions = context.possibleActions?.get(event.address)!;
       //Initialise section numbers to 0 for new additions
-      Array.from(slotActions.values()).forEach((val) => (val.newSection = 0));
-      const plannedActionsForSlot = ctx.layoutPlan.plannedActions.get(e.address);
+      Array.from(slotActions.values()).forEach((val: Source) => (val.newSection = 0));
+      const plannedActionsForSlot = context.layoutPlan.plannedActions.get(event.address);
       if (!plannedActionsForSlot) {
-        ctx.layoutPlan.plannedActions.set(e.address, slotActions);
+        context.layoutPlan.plannedActions.set(event.address, slotActions);
       } else {
-        ctx.layoutPlan.plannedActions.set(e.address, [...plannedActionsForSlot, ...slotActions]);
+        context.layoutPlan.plannedActions.set(event.address, [...plannedActionsForSlot, ...slotActions]);
       }
+      return context;
     }),
 
-    [Actions.REMOVE_SECTION]: assign((ctx, e) => {
-      if (e.type !== 'REMOVE_SECTION') {
-        return;
+    [Actions.REMOVE_SECTION]: assign(({ context, event }) => {
+      if (event.type !== 'REMOVE_SECTION') {
+        return context;
       }
-      if (!ctx.possibleActions?.has(e.address)) {
-        return;
+      if (!context.possibleActions?.has(event.address)) {
+        return context;
       }
 
-      const slotActions = ctx.layoutPlan.plannedActions.get(e.address) ?? [];
+      const slotActions = context.layoutPlan.plannedActions.get(event.address) ?? [];
 
       if (slotActions.length > 1) {
         slotActions.pop();
       } else if (slotActions.length === 1) {
-        ctx.layoutPlan.plannedActions.delete(e.address);
+        context.layoutPlan.plannedActions.delete(event.address);
       }
+      return context;
     }),
 
-    [Actions.TOGGLE_DESTINATION]: assign((ctx, e) => {
-      if (e.type !== 'SELECT_DESTINATION') {
-        return;
+    [Actions.TOGGLE_DESTINATION]: assign(({ context, event }) => {
+      if (event.type !== 'SELECT_DESTINATION') {
+        return context;
       }
       // If there was never anything in this slot, do nothing
-      if (ctx.possibleActions && !ctx.possibleActions.has(e.address)) {
-        return;
+      if (context.possibleActions && !context.possibleActions.has(event.address)) {
+        return context;
       }
 
-      const slotActions = ctx.layoutPlan.plannedActions.get(e.address) ?? [];
+      const slotActions = context.layoutPlan.plannedActions.get(event.address) ?? [];
 
       if (slotActions.length > 1) {
         slotActions.pop();
       } else if (slotActions.length === 1) {
-        ctx.layoutPlan.plannedActions.delete(e.address);
+        context.layoutPlan.plannedActions.delete(event.address);
       } else {
-        const source = ctx.possibleActions?.get(e.address);
+        const source = context.possibleActions?.get(event.address);
         if (source) {
-          ctx.layoutPlan.plannedActions.set(e.address, source);
+          context.layoutPlan.plannedActions.set(event.address, source);
         }
       }
+      return context;
     })
   }
 };

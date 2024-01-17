@@ -167,7 +167,7 @@ type ClearAllSlotMappingsBetweenEvent = {
 };
 
 type SlotPassFailEvent = {
-  type: 'done.invoke.passFailsSlots';
+  type: 'xstate.done.actor.passFailsSlots';
   data: {
     barcode: string;
     result: FindPassFailsQuery;

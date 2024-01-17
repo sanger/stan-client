@@ -29,6 +29,7 @@ import { useConfirmLeave } from '../../../lib/hooks';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import PromptOnLeave from '../../notifications/PromptOnLeave';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 /**
  * Used as Formik's values
@@ -55,14 +56,14 @@ export default function PotProcessing({ processingInfo }: PotProcessingParams) {
   const processingInfoLoaderData = useLoaderData() as GetPotProcessingInfoQuery;
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<PotProcessingRequest, PerformTissuePotMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<PotProcessingRequest, PerformTissuePotMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.PerformTissuePot({
-            request: e.values
+            request: input.event.values
           });
-        }
+        })
       }
     });
   }, []);

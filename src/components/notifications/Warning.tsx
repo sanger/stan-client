@@ -6,7 +6,7 @@ import { ClientError } from 'graphql-request';
 
 interface WarningProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> {
   message?: string;
-  error?: Maybe<ClientError>;
+  error?: Maybe<ClientError> | Maybe<ServerErrors>;
 }
 
 const Warning = ({ message, error, children, className, ...rest }: WarningProps): JSX.Element => {
@@ -17,7 +17,7 @@ const Warning = ({ message, error, children, className, ...rest }: WarningProps)
   let serverErrors: ServerErrors | undefined;
 
   if (error) {
-    serverErrors = extractServerErrors(error);
+    serverErrors = error instanceof ClientError ? extractServerErrors(error) : error;
   }
   return (
     <section {...rest} className={sectionClasses} data-testid="warning">

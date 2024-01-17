@@ -1,12 +1,9 @@
-import { createMachine } from 'xstate';
+import { ActorRef, assign, createMachine, fromPromise } from 'xstate';
 import { Maybe, PlanMutation, PlanRequestLabware, SlideCosting } from '../../types/sdk';
-import { LabwareTypeName } from '../../types/stan';
+import { LabwareTypeName, ServerErrors } from '../../types/stan';
 import { LayoutPlan } from '../../lib/machines/layout/layoutContext';
-import { assign } from '@xstate/immer';
-import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 import { stanCore } from '../../lib/sdk';
-import { ClientError } from 'graphql-request';
-import { LayoutMachineActorRef } from '../../lib/machines/layout';
+import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 
 //region Events
 type CreateLabwareEvent = {
@@ -25,24 +22,26 @@ type UpdateLayoutPlanEvent = {
 };
 
 type PlanSectionResolveEvent = {
-  type: 'done.invoke.planSection';
-  data: PlanMutation;
+  type: 'xstate.done.actor.planSection';
+  output: PlanMutation;
 };
 
 type PlanSectionRejectEvent = {
-  type: 'error.platform.planSection';
-  data: ClientError;
+  type: 'xstate.error.actor.planSection';
+  error: ServerErrors;
 };
 
 type LayoutMachineDone = {
-  type: 'done.invoke.layoutMachine';
-  data: { layoutPlan: LayoutPlan };
+  type: 'xstate.done.actor.layoutMachine';
+  output: { layoutPlan: LayoutPlan };
 };
 
 type LabwarePlanEvent =
   | { type: 'EDIT_LAYOUT' }
   | { type: 'CANCEL_EDIT_LAYOUT' }
   | { type: 'DONE_EDIT_LAYOUT' }
+  | { type: 'EDIT_LAYOUT.assignLayoutMachine' }
+  | { type: 'STOP_LAYOUT_MACHINE' }
   | CreateLabwareEvent
   | UpdateLayoutPlanEvent
   | PlanSectionResolveEvent
@@ -57,17 +56,12 @@ interface LabwarePlanContext {
   /**
    * Errors returned from the server
    */
-  requestError: Maybe<ClientError>;
+  requestError: Maybe<ServerErrors>;
 
   /**
    * The plan for how sources will be mapped onto a piece of labware
    */
   layoutPlan: LayoutPlan;
-
-  /**
-   * Reference to a `LayoutMachine` Actor
-   */
-  layoutPlanRef?: LayoutMachineActorRef;
 
   /**
    * A plan returned from core
@@ -83,15 +77,22 @@ interface LabwarePlanContext {
    * Message from the label printer containing details of how the printer failed
    */
   printErrorMessage?: string;
+
+  layoutMachine?: ActorRef<any, any>;
 }
 
 /**
  * Machine for the planning how samples will be laid out onto labware.
  */
+
 export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
-  createMachine<LabwarePlanContext, LabwarePlanEvent>(
+  createMachine(
     {
-      key: 'labwarePlan',
+      types: {} as {
+        context: LabwarePlanContext;
+        events: LabwarePlanEvent;
+      },
+      id: 'labwarePlan',
       context: {
         requestError: null,
         layoutPlan: initialLayoutPlan
@@ -122,25 +123,48 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           }
         },
         editingLayout: {
-          invoke: {
-            src: 'layoutMachine',
-            id: 'layoutMachine',
-            onDone: {
-              target: 'validatingLayout',
-              actions: 'assignLayoutPlan'
-            }
+          entry: [
+            assign({
+              layoutMachine: ({ spawn, context }) => spawn(createLayoutMachine(context.layoutPlan))
+            })
+          ],
+          onDone: {
+            target: 'validatingLayout',
+            actions: 'assignLayoutPlan'
           }
         },
         validatingLayout: {
-          always: [{ cond: 'isLayoutValid', target: 'prep.valid' }, { target: 'prep.invalid' }]
+          always: [{ guard: 'isLayoutValid', target: 'prep.valid' }, { target: 'prep.invalid' }]
         },
         creating: {
           invoke: {
             id: 'planSection',
-            src: 'planSection',
+            src: fromPromise(({ input }) => {
+              return stanCore.Plan({
+                request: { labware: input.labware, operationType: input.operationType }
+              });
+            }),
+            input: ({ context, event }) => {
+              if (event.type !== 'CREATE_LABWARE') {
+                return undefined;
+              }
+              const planRequestLabware = buildPlanRequestLabware({
+                sampleThickness: event.sectionThickness,
+                lotNumber: event.lotNumber,
+                costing: event.costing,
+                layoutPlan: context.layoutPlan,
+                destinationLabwareTypeName: context.layoutPlan.destinationLabware.labwareType.name,
+                barcode: event.barcode
+              });
+              const labware: PlanRequestLabware[] = new Array(event.quantity).fill(planRequestLabware);
+              return {
+                labware,
+                operationType: event.operationType
+              };
+            },
             onDone: [
               {
-                cond: 'isVisiumLP',
+                guard: 'isVisiumLP',
                 target: 'done',
                 actions: ['assignPlanResponse']
               },
@@ -156,63 +180,52 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           }
         },
         printing: {},
-        done: {}
+        done: {},
+        stopLayoutMachine: {}
       }
     },
     {
       actions: {
-        assignLayoutPlan: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.layoutMachine' || !e.data) {
-            return;
+        assignLayoutPlan: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.layoutMachine' || !event.output) {
+            return context;
           }
-          ctx.layoutPlan = e.data.layoutPlan;
+          context.layoutPlan = event.output.layoutPlan;
+          return context;
         }),
 
-        assignPlanResponse: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.planSection' || !e.data) {
-            return;
+        assignPlanResponse: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.planSection' || !event.output) {
+            return context;
           }
 
-          ctx.plan = e.data;
+          context.plan = event.output;
+          return context;
         }),
 
-        assignRequestErrors: assign((ctx, e) => {
-          if (e.type !== 'error.platform.planSection') {
-            return;
+        assignRequestErrors: assign(({ context, event }) => {
+          if (event.type !== 'xstate.error.actor.planSection') {
+            return context;
           }
-          ctx.requestError = e.data;
+          context.requestError = event.error;
+          return context;
+        }),
+        stopLayoutMachine: assign(({ context, event }) => {
+          if (event.type !== 'STOP_LAYOUT_MACHINE') {
+            return context;
+          }
+          if (context.layoutMachine) {
+            context.layoutMachine.stop();
+          }
+          return context;
         })
       },
 
       guards: {
-        isVisiumLP: (ctx) => ctx.layoutPlan.destinationLabware.labwareType.name === LabwareTypeName.VISIUM_LP,
+        isVisiumLP: ({ context }) =>
+          context.layoutPlan.destinationLabware.labwareType.name === LabwareTypeName.VISIUM_LP,
 
-        isLayoutValid: (ctx) => ctx.layoutPlan.plannedActions.size > 0
-      },
-
-      services: {
-        layoutMachine: (ctx, _e) => {
-          return createLayoutMachine(ctx.layoutPlan);
-        },
-
-        planSection: (ctx, e) => {
-          if (e.type !== 'CREATE_LABWARE') {
-            return Promise.reject();
-          }
-
-          const planRequestLabware = buildPlanRequestLabware({
-            sampleThickness: e.sectionThickness,
-            lotNumber: e.lotNumber,
-            costing: e.costing,
-            layoutPlan: ctx.layoutPlan,
-            destinationLabwareTypeName: ctx.layoutPlan.destinationLabware.labwareType.name,
-            barcode: e.barcode
-          });
-          const labware: PlanRequestLabware[] = new Array(e.quantity).fill(planRequestLabware);
-          return stanCore.Plan({
-            request: { labware, operationType: e.operationType }
-          });
-        }
+        isLayoutValid: ({ context }) => context.layoutPlan.plannedActions.size > 0
       }
     }
   );

@@ -75,7 +75,7 @@ export default function LabwareResult({
   }, []);
 
   const [current, send] = useMachine(labwareResultMachine, {
-    context: {
+    input: {
       labwareResult: initialLabwareResult,
       availableComments
     }

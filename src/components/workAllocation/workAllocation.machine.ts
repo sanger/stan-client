@@ -1,5 +1,5 @@
-import { createMachine } from 'xstate';
-import { MachineServiceDone, MachineServiceError } from '../../types/stan';
+import { assign, createMachine, fromPromise } from 'xstate';
+import { ServerErrors } from '../../types/stan';
 import {
   CommentFieldsFragment,
   CostCodeFieldsFragment,
@@ -13,8 +13,6 @@ import {
   WorkWithCommentFieldsFragment
 } from '../../types/sdk';
 import { stanCore } from '../../lib/sdk';
-import { assign } from '@xstate/immer';
-import { ClientError } from 'graphql-request';
 import { WorkAllocationUrlParams } from './WorkAllocation';
 
 export type WorkAllocationFormValues = {
@@ -78,10 +76,10 @@ export type WorkAllocationFormValues = {
 };
 
 type WorkAllocationEvent =
-  | MachineServiceDone<'loadWorkAllocationInfo', GetWorkAllocationInfoQuery>
-  | MachineServiceDone<'allocateWork', CreateWorkMutation>
-  | MachineServiceError<'loadWorkAllocationInfo'>
-  | MachineServiceError<'allocateWork'>
+  | { type: 'xstate.done.actor.loadWorkAllocationInfo'; output: GetWorkAllocationInfoQuery }
+  | { type: 'xstate.done.actor.allocateWork'; output: CreateWorkMutation }
+  | { type: 'xstate.error.actor.allocateWork'; error: ServerErrors }
+  | { type: 'xstate.error.actor.loadWorkAllocationInfo'; error: ServerErrors }
   | {
       type: 'ALLOCATE_WORK';
       values: WorkAllocationFormValues;
@@ -156,7 +154,7 @@ type WorkAllocationContext = {
   /**
    * An error caused by a request to core
    */
-  requestError?: ClientError;
+  requestError?: ServerErrors;
 };
 
 type CreateWorkAllocationMachineParams = {
@@ -165,9 +163,13 @@ type CreateWorkAllocationMachineParams = {
 
 export default function createWorkAllocationMachine({ urlParams }: CreateWorkAllocationMachineParams) {
   /**Hook to sort table*/
-  return createMachine<WorkAllocationContext, WorkAllocationEvent>(
+  return createMachine(
     {
       id: 'workAllocation',
+      types: {} as {
+        context: WorkAllocationContext;
+        events: WorkAllocationEvent;
+      },
       context: {
         workWithComments: [],
         workTypes: [],
@@ -183,8 +185,14 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
       states: {
         loading: {
           invoke: {
-            src: 'loadWorkAllocationInfo',
             id: 'loadWorkAllocationInfo',
+            src: fromPromise(({ input }) =>
+              stanCore.GetWorkAllocationInfo({
+                commentCategory: 'Work status',
+                workStatuses: input.status
+              })
+            ),
+            input: ({ context }) => ({ status: context.urlParams.status }),
             onDone: { actions: 'assignWorkAllocationInfo', target: 'ready' },
             onError: { actions: 'assignServerError', target: 'ready' }
           }
@@ -208,8 +216,41 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
         },
         allocating: {
           invoke: {
-            src: 'allocateWork',
             id: 'allocateWork',
+            src: fromPromise(({ input }) => {
+              const {
+                workType,
+                workRequester,
+                project,
+                program,
+                omeroProject,
+                costCode,
+                isRnD,
+                numBlocks,
+                numSlides,
+                numOriginalSamples,
+                ssStudyId
+              } = input.values;
+              return stanCore.CreateWork({
+                workType,
+                workRequester,
+                project,
+                program,
+                costCode,
+                prefix: isRnD ? 'R&D' : 'SGP',
+                numBlocks,
+                numSlides,
+                numOriginalSamples,
+                omeroProject,
+                ssStudyId: ssStudyId ? Number(ssStudyId) : null
+              });
+            }),
+            input: ({ event }) => {
+              if (event.type !== 'ALLOCATE_WORK') return {};
+              return {
+                values: event.values
+              };
+            },
             onDone: { actions: 'assignSuccessMessage', target: 'loading' },
             onError: { actions: 'assignServerError', target: 'loading' }
           }
@@ -218,13 +259,14 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
     },
     {
       actions: {
-        assignUrlParams: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_URL_PARAMS') return;
-          ctx.urlParams = e.urlParams;
+        assignUrlParams: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_URL_PARAMS') return context;
+          context.urlParams = event.urlParams;
+          return context;
         }),
 
-        assignWorkAllocationInfo: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.loadWorkAllocationInfo') return;
+        assignWorkAllocationInfo: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.loadWorkAllocationInfo') return context;
           const {
             comments,
             projects,
@@ -234,26 +276,31 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             workTypes,
             costCodes,
             releaseRecipients
-          } = e.data;
-          ctx.availableComments = comments;
-          ctx.projects = projects;
-          ctx.programs = programs;
-          ctx.workWithComments = worksWithComments;
-          ctx.workTypes = workTypes;
-          ctx.costCodes = costCodes;
-          ctx.omeroProjects = omeroProjects;
-          ctx.workRequesters = releaseRecipients;
+          } = event.output;
+          context.availableComments = comments;
+          context.projects = projects;
+          context.programs = programs;
+          context.workWithComments = worksWithComments;
+          context.workTypes = workTypes;
+          context.costCodes = costCodes;
+          context.omeroProjects = omeroProjects;
+          context.workRequesters = releaseRecipients;
+          return context;
         }),
 
-        assignServerError: assign((ctx, e) => {
-          if (e.type !== 'error.platform.loadWorkAllocationInfo' && e.type !== 'error.platform.allocateWork') {
-            return;
+        assignServerError: assign(({ context, event }) => {
+          if (
+            event.type !== 'xstate.error.actor.loadWorkAllocationInfo' &&
+            event.type !== 'xstate.error.actor.allocateWork'
+          ) {
+            return context;
           }
-          ctx.requestError = e.data;
+          context.requestError = event.error;
+          return context;
         }),
 
-        assignSuccessMessage: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.allocateWork') return;
+        assignSuccessMessage: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.allocateWork') return context;
           const {
             workNumber,
             workRequester,
@@ -266,7 +313,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numOriginalSamples,
             omeroProject,
             dnapStudy
-          } = e.data.createWork;
+          } = event.output.createWork;
           const blockSlideSampleMsg = [
             numBlocks ? `${numBlocks} blocks` : undefined,
             numSlides ? `${numSlides} slides` : undefined,
@@ -274,68 +321,34 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
           ]
             .filter((msg) => msg)
             .join(' and ');
-          ctx.allocatedWorkNumber = workNumber;
-          ctx.successMessage = `Assigned ${workNumber} (${
+          context.allocatedWorkNumber = workNumber;
+          context.successMessage = `Assigned ${workNumber} (${
             workType.name
           } - ${blockSlideSampleMsg}) to project (cost code description) ${project.name.trim()}${
             omeroProject ? `, Omero project ${omeroProject.name}` : ''
           }${dnapStudy ? `, DNAP study name '${dnapStudy.name}'` : ''} and program ${program.name} using cost code ${
             costCode.code
           } with the work requester ${workRequester?.username}`;
+          return context;
         }),
 
-        updateWork: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_WORK') return;
-          ctx.workWithComments.splice(e.rowIndex, 1, e.workWithComment);
+        updateWork: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_WORK') return context;
+          context.workWithComments.splice(event.rowIndex, 1, event.workWithComment);
+          return context;
         }),
-        assignSortedWorks: assign((ctx, e) => {
-          if (e.type !== 'SORT_WORKS') return;
-          e.workWithComments.forEach((workWithComment, indx) => {
-            ctx.workWithComments.splice(indx, 1, workWithComment);
+        assignSortedWorks: assign(({ context, event }) => {
+          if (event.type !== 'SORT_WORKS') return context;
+          event.workWithComments.forEach((workWithComment, indx) => {
+            context.workWithComments.splice(indx, 1, workWithComment);
           });
+          return context;
         }),
-        clearNotifications: assign((ctx) => {
-          ctx.successMessage = undefined;
-          ctx.requestError = undefined;
+        clearNotifications: assign(({ context }) => {
+          context.successMessage = undefined;
+          context.requestError = undefined;
+          return context;
         })
-      },
-
-      services: {
-        allocateWork: (ctx, e) => {
-          if (e.type !== 'ALLOCATE_WORK') return Promise.reject();
-          const {
-            workType,
-            workRequester,
-            project,
-            program,
-            omeroProject,
-            costCode,
-            isRnD,
-            numBlocks,
-            numSlides,
-            numOriginalSamples,
-            ssStudyId
-          } = e.values;
-          return stanCore.CreateWork({
-            workType,
-            workRequester,
-            project,
-            program,
-            costCode,
-            prefix: isRnD ? 'R&D' : 'SGP',
-            numBlocks,
-            numSlides,
-            numOriginalSamples,
-            omeroProject,
-            ssStudyId: ssStudyId ? Number(ssStudyId) : null
-          });
-        },
-
-        loadWorkAllocationInfo: (ctx) =>
-          stanCore.GetWorkAllocationInfo({
-            commentCategory: 'Work status',
-            workStatuses: ctx.urlParams.status
-          })
       }
     }
   );

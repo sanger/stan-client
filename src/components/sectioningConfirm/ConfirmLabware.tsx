@@ -111,16 +111,17 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
 
   useEffect(() => {
     //Notify parent only for layout changes
-    if (layoutPlan && current.event.type === 'done.invoke.layoutMachine' && notifySectionChange.current) {
+    const currentEvent = service.getSnapshot().getMeta().state.event;
+    if (layoutPlan && currentEvent.type === 'xstate.done.actor.layoutMachine' && notifySectionChange.current) {
       notifySectionChange.current = false;
       onSectionUpdate && onSectionUpdate(layoutPlan);
     }
-  }, [layoutPlan, current.event, onSectionUpdate]);
+  }, [layoutPlan, service, onSectionUpdate]);
 
   /***Update sources whenever there is an update in a source in parent**/
   useEffect(() => {
     if (originalLayoutPlan) {
-      send('UPDATE_ALL_SOURCES', originalLayoutPlan);
+      send({ type: 'UPDATE_ALL_SOURCES', plannedActions: originalLayoutPlan.plannedActions });
     }
   }, [originalLayoutPlan, send]);
 
@@ -246,7 +247,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
         <ModalBody>
           <Heading level={3}>Set Layout</Heading>
           {layoutMachine && (
-            <LayoutPlanner actor={layoutMachine}>
+            <LayoutPlanner actor={layoutMachine.getSnapshot()}>
               <div className="my-2">
                 <p className="text-gray-900 text-sm leading-normal">
                   Click a slot to increase the number of sections in that slot.

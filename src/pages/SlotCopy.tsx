@@ -187,18 +187,16 @@ function SlotCopy({ title, initialOutputLabware }: PageParams) {
     });
   }, [initialOutputLabware]);
 
-  const memoSlotCopyMachine = React.useMemo(() => {
-    return slotCopyMachine.withContext({
+  const [current, send] = useMachine(slotCopyMachine, {
+    input: {
       workNumber: '',
       operationType: 'Transfer',
       destinations: initialOutputSlotCopy,
       sources: [],
       slotCopyResults: [],
       sourceLabwarePermData: []
-    });
-  }, [initialOutputSlotCopy]);
-
-  const [current, send] = useMachine(() => memoSlotCopyMachine);
+    }
+  });
 
   /**Keep track of input labware with no permeabilisation done**/
   const [labwaresWithoutPerm, setLabwaresWithoutPerm] = React.useState<LabwareFlaggedFieldsFragment[]>([]);

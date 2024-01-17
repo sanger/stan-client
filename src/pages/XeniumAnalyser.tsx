@@ -31,6 +31,7 @@ import BlueButton from '../components/buttons/BlueButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { FormikErrorMessage, selectOptionValues } from '../components/forms';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 /**Sample data type to represent a sample row which includes all fields to be saved and displayed. */
 type SampleWithRegion = {
@@ -73,14 +74,14 @@ const XeniumAnalyser = () => {
   );
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
-    return createFormMachine<AnalyserRequest, RecordAnalyserMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<AnalyserRequest, RecordAnalyserMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordAnalyser({
-            request: { ...e.values }
+            request: { ...input.event.values }
           });
-        }
+        })
       }
     });
   }, [stanCore]);

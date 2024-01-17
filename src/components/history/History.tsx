@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import createHistoryMachine from './history.machine';
 import { useMachine } from '@xstate/react';
 import DataTable from '../DataTable';
-import { Cell, Column } from 'react-table';
+import { CellProps, Column } from 'react-table';
 import { HistoryTableEntry } from '../../types/stan';
 import StyledLink from '../StyledLink';
 import Warning from '../notifications/Warning';
@@ -22,19 +22,15 @@ import { HistoryUrlParams } from '../../pages/History';
  */
 export default function History(props: HistoryUrlParams) {
   const historyMachine = React.useMemo(() => {
-    return createHistoryMachine();
-  }, []);
-  const [current, send] = useMachine(historyMachine, {
-    context: {
-      historyProps: props
-    }
-  });
+    return createHistoryMachine({ historyProps: props, history: [], serverError: null });
+  }, [props]);
+  const [current, send] = useMachine(historyMachine);
 
   const { isAuthenticated } = useAuth();
 
   const { history, historyProps, serverError } = current.context;
 
-  const historyColumns: Array<Column> = React.useMemo(
+  const historyColumns: Array<Column<HistoryTableEntry>> = React.useMemo(
     () => [
       {
         Header: 'Date',
@@ -55,7 +51,7 @@ export default function History(props: HistoryUrlParams) {
       {
         Header: 'Source',
         accessor: 'sourceBarcode',
-        Cell: (props: Cell<HistoryTableEntry>) => {
+        Cell: (props: CellProps<HistoryTableEntry>) => {
           const barcode = props.row.original.sourceBarcode;
           let classes =
             historyProps.barcode === barcode
@@ -75,7 +71,7 @@ export default function History(props: HistoryUrlParams) {
       {
         Header: 'Destination',
         accessor: 'destinationBarcode',
-        Cell: (props: Cell<HistoryTableEntry>) => {
+        Cell: (props: CellProps<HistoryTableEntry>) => {
           const barcode = props.row.original.destinationBarcode;
           let classes =
             historyProps.barcode === barcode
@@ -123,14 +119,14 @@ export default function History(props: HistoryUrlParams) {
       {
         Header: 'Labware State',
         accessor: 'labwareState',
-        Cell: (props: Cell<HistoryTableEntry>) => (
+        Cell: (props: CellProps<HistoryTableEntry>) => (
           <LabwareStatePill labware={{ state: props.row.original.labwareState }} />
         )
       },
       {
         Header: 'Details',
         accessor: 'details',
-        Cell: (props: Cell<HistoryTableEntry>) => {
+        Cell: (props: CellProps<HistoryTableEntry>) => {
           const details = props.row.original.details.map((detail) => {
             return <li key={detail}>{detail}</li>;
           });

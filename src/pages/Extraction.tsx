@@ -60,9 +60,7 @@ const extractionEquipments = (equipments: EquipmentFieldsFragment[]) => {
 
 function Extraction() {
   const equipments = useLoaderData() as EquipmentFieldsFragment[];
-  const [current, send] = useMachine(() =>
-    extractionMachine.withContext({ labwares: [], workNumber: '', equipmentId: 0 })
-  );
+  const [current, send] = useMachine(extractionMachine);
 
   const { handleOnPrint, handleOnPrintError, handleOnPrinterChange, printResult, currentPrinter } = usePrinters();
 

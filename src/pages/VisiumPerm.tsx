@@ -29,6 +29,7 @@ import LabwareScanPanel from '../components/labwareScanPanel/LabwareScanPanel';
 import PermPositiveControl from '../components/forms/PermPositiveControl';
 import { ConfirmationModal } from '../components/modal/ConfirmationModal';
 import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
+import { fromPromise } from 'xstate';
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required().label('SGP number'),
@@ -47,12 +48,12 @@ const validationSchema = Yup.object().shape({
 
 export default function VisiumPerm() {
   const formMachine = React.useMemo(() => {
-    return createFormMachine<RecordPermRequest, RecordPermMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.RecordPerm({ request: e.values });
-        }
+    return createFormMachine<RecordPermRequest, RecordPermMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.RecordPerm({ request: input.event.values });
+        })
       }
     });
   }, []);

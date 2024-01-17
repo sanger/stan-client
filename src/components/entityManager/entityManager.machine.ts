@@ -1,7 +1,6 @@
 import { assign, createMachine } from 'xstate';
-import { MachineServiceDone, MachineServiceError } from '../../types/stan';
+import { ServerErrors } from '../../types/stan';
 import { Maybe } from '../../types/sdk';
-import { ClientError } from 'graphql-request';
 import { EntityValueType } from './EntityManager';
 
 interface EntityManagerContext<E> {
@@ -9,7 +8,7 @@ interface EntityManagerContext<E> {
   keyField: keyof E;
   valueField?: keyof E;
   successMessage: Maybe<string>;
-  error: Maybe<ClientError>;
+  error: Maybe<ServerErrors>;
   selectedEntity?: E;
 }
 
@@ -34,16 +33,20 @@ type EntityManagerEvent<E> =
   | { type: 'DISCARD_DRAFT' }
   | { type: 'EXTRA_PROPERTY_UPDATE_VALUE'; value: string; extraValue: string }
   | { type: 'EXTRA_PROPERTY_DRAFT_VALUE'; entity: E }
-  | MachineServiceDone<'valueChanged', E>
-  | MachineServiceError<'valueChanged', ClientError>
-  | MachineServiceDone<'createEntity', E>
-  | MachineServiceError<'createEntity', ClientError>
-  | MachineServiceDone<'updateExtraProperty', E>
-  | MachineServiceError<'updateExtraProperty', ClientError>;
+  | { type: 'xstate.done.actor.valueChanged'; output: E }
+  | { type: 'xstate.error.actor.valueChanged'; error: ServerErrors }
+  | { type: 'xstate.done.actor.createEntity'; output: E }
+  | { type: 'xstate.error.actor.createEntity'; error: ServerErrors }
+  | { type: 'xstate.done.actor.updateExtraProperty'; output: E }
+  | { type: 'xstate.error.actor.updateExtraProperty'; error: ServerErrors };
 
 export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyof E, valueField?: keyof E) {
-  return createMachine<EntityManagerContext<E>, EntityManagerEvent<E>>(
+  return createMachine(
     {
+      types: {} as {
+        context: EntityManagerContext<E>;
+        events: EntityManagerEvent<E>;
+      },
       context: {
         entities,
         keyField,
@@ -72,10 +75,12 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
         },
         loading: {
           entry: ['clearMessages'],
+          initial: 'valueChanged',
           states: {
             valueChanged: {
               invoke: {
                 src: 'valueChanged',
+                input: ({ event }) => ({ ...event }),
                 id: 'valueChanged',
                 onDone: {
                   target: '#entityManager.ready',
@@ -91,6 +96,7 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
               invoke: {
                 id: 'createEntity',
                 src: 'createEntity',
+                input: ({ event }) => ({ ...event }),
                 onDone: {
                   target: '#entityManager.ready',
                   actions: 'addEntity'
@@ -105,6 +111,7 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
               invoke: {
                 id: 'updateExtraProperty',
                 src: 'updateExtraProperty',
+                input: ({ event }) => ({ ...event }),
                 onDone: {
                   target: '#entityManager.ready',
                   actions: 'updateExtraProperty'
@@ -121,74 +128,79 @@ export function createEntityManagerMachine<E>(entities: Array<E>, keyField: keyo
     },
     {
       actions: {
-        addEntity: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.createEntity') {
+        addEntity: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.createEntity') {
             return {};
           }
           return {
             successMessage: `Saved`,
-            entities: [...ctx.entities, e.data]
+            entities: [...context.entities, event.output]
           };
         }),
 
-        assignErrorMessage: assign((ctx, e) => {
+        assignErrorMessage: assign(({ context, event }) => {
           if (
-            e.type !== 'error.platform.createEntity' &&
-            e.type !== 'error.platform.valueChanged' &&
-            e.type !== 'error.platform.updateExtraProperty'
+            event.type !== 'xstate.error.actor.createEntity' &&
+            event.type !== 'xstate.error.actor.valueChanged' &&
+            event.type !== 'xstate.error.actor.updateExtraProperty'
           ) {
             return {};
           }
+
           return {
-            error: e.data
+            error: event.error
           };
         }),
-        assignSelectedEntity: assign((ctx, e) => {
-          if (e.type !== 'SELECT_ENTITY') return {};
-          return { selectedEntity: e.entity };
+        assignSelectedEntity: assign(({ event }) => {
+          if (event.type !== 'SELECT_ENTITY') return {};
+          return { selectedEntity: event.entity };
         }),
-        clearMessages: assign((_ctx) => {
+        clearMessages: assign(() => {
           return {
             successMessage: null,
             error: null
           };
         }),
-        updateEntity: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.valueChanged' || !ctx.valueField) {
+        updateEntity: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.valueChanged' || !context.valueField) {
             return {};
           }
 
           const successMessage =
-            typeof e.data[ctx.valueField] === 'boolean'
-              ? `"${e.data[ctx.keyField]}" ${e.data[ctx.valueField] ? 'enabled' : 'disabled'}`
-              : `"${e.data[ctx.keyField]}" - ${ctx.valueField as string} changed to ${e.data[ctx.valueField]}`;
+            typeof event.output[context.valueField] === 'boolean'
+              ? `"${event.output[context.keyField]}" ${event.output[context.valueField] ? 'enabled' : 'disabled'}`
+              : `"${event.output[context.keyField]}" - ${context.valueField as string} changed to ${
+                  event.output[context.valueField]
+                }`;
 
           return {
             successMessage,
-            entities: ctx.entities.map((entity) => {
-              if (entity[ctx.keyField] === e.data[ctx.keyField]) {
-                return e.data;
+            entities: context.entities.map((entity) => {
+              if (entity[context.keyField] === event.output[context.keyField]) {
+                return event.output;
               } else {
                 return entity;
               }
             })
           };
         }),
-        draftExtraPropertyValue: assign((ctx, e) => {
-          if (e.type !== 'EXTRA_PROPERTY_DRAFT_VALUE') return {};
+        draftExtraPropertyValue: assign(({ context, event }) => {
+          if (event.type !== 'EXTRA_PROPERTY_DRAFT_VALUE') return {};
           return {
-            entities: ctx.entities.map((entity) =>
-              entity[ctx.keyField] === e.entity[ctx.keyField] ? e.entity : entity
+            entities: context.entities.map((entity) =>
+              entity[context.keyField] === event.entity[context.keyField] ? event.entity : entity
             )
           };
         }),
-        updateExtraProperty: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.updateExtraProperty') {
+        updateExtraProperty: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.updateExtraProperty') {
             return {};
           }
           return {
-            successMessage: `Changes for "${e.data[ctx.keyField]}" saved`,
-            entities: ctx.entities.map((entity) => (entity[ctx.keyField] === e.data[ctx.keyField] ? e.data : entity))
+            successMessage: `Changes for "${event.output[context.keyField]}" saved`,
+            entities: context.entities.map((entity) =>
+              entity[context.keyField] === event.output[context.keyField] ? event.output : entity
+            )
           };
         })
       }

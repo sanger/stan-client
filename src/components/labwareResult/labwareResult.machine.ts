@@ -1,4 +1,4 @@
-import { createMachine } from 'xstate';
+import { assign, createMachine } from 'xstate';
 import {
   CommentFieldsFragment,
   LabwareResult as CoreLabwareResult,
@@ -6,7 +6,6 @@ import {
   SampleIdCommentId,
   SlotFieldsFragment
 } from '../../types/sdk';
-import { assign } from '@xstate/immer';
 
 export type LabwareResultContext = {
   /**
@@ -31,14 +30,15 @@ type LabwareResultEvent =
   | { type: 'SET_TISSUE_COVERAGE'; address: string; value: string };
 
 export default function createLabwareResultMachine() {
-  return createMachine<LabwareResultContext, LabwareResultEvent>(
+  return createMachine(
     {
       id: 'labwareResultMachine',
-      initial: 'ready',
-      context: {
-        availableComments: [],
-        labwareResult: { barcode: '', sampleResults: [] }
+      types: {} as {
+        context: LabwareResultContext;
+        events: LabwareResultEvent;
       },
+      initial: 'ready',
+      context: ({ input }: { input: LabwareResultContext }) => ({ ...input }),
       states: {
         ready: {
           on: {
@@ -72,79 +72,85 @@ export default function createLabwareResultMachine() {
     },
     {
       actions: {
-        assignAllPassed: assign((ctx, e) => {
-          if (e.type !== 'PASS_ALL') return;
+        assignAllPassed: assign(({ context, event }) => {
+          if (event.type !== 'PASS_ALL') return context;
 
-          ctx.labwareResult.sampleResults?.forEach((sr) => {
+          context.labwareResult.sampleResults?.forEach((sr) => {
             sr.result = PassFail.Pass;
           });
+          return context;
         }),
 
-        assignAllFailed: assign((ctx, e) => {
-          if (e.type !== 'FAIL_ALL') return;
-          ctx.labwareResult.sampleResults?.forEach((sr) => {
+        assignAllFailed: assign(({ context, event }) => {
+          if (event.type !== 'FAIL_ALL') return context;
+          context.labwareResult.sampleResults?.forEach((sr) => {
             sr.result = PassFail.Fail;
           });
+          return context;
         }),
 
-        assignSlotPassed: assign((ctx, e) => {
-          if (e.type !== 'PASS') return;
+        assignSlotPassed: assign(({ context, event }) => {
+          if (event.type !== 'PASS') return context;
 
-          const sampleResult = ctx.labwareResult.sampleResults?.find((sr) => sr.address === e.address);
+          const sampleResult = context.labwareResult.sampleResults?.find((sr) => sr.address === event.address);
 
           if (sampleResult) {
             sampleResult.result = PassFail.Pass;
           }
+          return context;
         }),
 
-        assignSlotFailed: assign((ctx, e) => {
-          if (e.type !== 'FAIL') return;
+        assignSlotFailed: assign(({ context, event }) => {
+          if (event.type !== 'FAIL') return context;
 
-          const sampleResult = ctx.labwareResult.sampleResults?.find((sr) => sr.address === e.address);
+          const sampleResult = context.labwareResult.sampleResults?.find((sr) => sr.address === event.address);
 
           if (sampleResult) {
             sampleResult.result = PassFail.Fail;
           }
+          return context;
         }),
 
-        assignSlotComment: assign((ctx, e) => {
-          if (e.type !== 'SET_COMMENT') return;
+        assignSlotComment: assign(({ context, event }) => {
+          if (event.type !== 'SET_COMMENT') return context;
 
-          const sampleResult = ctx.labwareResult.sampleResults?.find((sr) => sr.address === e.address);
+          const sampleResult = context.labwareResult.sampleResults?.find((sr) => sr.address === event.address);
           if (!sampleResult?.result) {
-            return;
+            return context;
           }
-          sampleResult.commentId = e.commentId;
+          sampleResult.commentId = event.commentId;
+          return context;
         }),
-        assignSampleComments: assign((ctx, e) => {
-          if (e.type !== 'SET_SAMPLE_COMMENTS') return;
+        assignSampleComments: assign(({ context, event }) => {
+          if (event.type !== 'SET_SAMPLE_COMMENTS') return context;
           /**Find result belong to this address**/
-          const sampleResult = ctx.labwareResult.sampleResults?.find((sr) => sr.address === e.address);
+          const sampleResult = context.labwareResult.sampleResults?.find((sr) => sr.address === event.address);
           if (!sampleResult?.result) {
-            return;
+            return context;
           }
           /**Remove all existing sample comments belong to the given sample id
            * (Multiple comments can be selected against each sample)
            ***/
           const sampleComments = sampleResult?.sampleComments
-            ? sampleResult?.sampleComments.filter((sc) => sc.sampleId !== e.sampleId)
+            ? sampleResult?.sampleComments.filter((sc) => sc.sampleId !== event.sampleId)
             : [];
           /**Save all given comments for the given sample.
            * Each comment for a sample is saved as a {@link SampleIdCommentId} object
            ***/
-          if (e.commentIds) {
-            e.commentIds.forEach((commentId) => {
+          if (event.commentIds) {
+            event.commentIds.forEach((commentId) => {
               sampleComments.push({
-                sampleId: e.sampleId,
+                sampleId: event.sampleId,
                 commentId
               });
             });
           }
           sampleResult.sampleComments = sampleComments;
+          return context;
         }),
 
-        assignAllComments: assign((ctx, e) => {
-          if (e.type !== 'SET_ALL_COMMENTS') return;
+        assignAllComments: assign(({ context, event }) => {
+          if (event.type !== 'SET_ALL_COMMENTS') return context;
 
           /**This can be called with multiple comments,single comments for slots with single sections nad multiple sections.
            * To allow storing multiple comments against a slot , or to store single/multiple comments in multiple
@@ -152,22 +158,22 @@ export default function createLabwareResultMachine() {
            *
            *sr.result.commentId is used in places where only one comment is assigned and mostly one section per slot (backward compatibility)
            *sr.result.sampleComments is supported in places where there are multiple comments and multiple sections in a slot**/
-          ctx.labwareResult.sampleResults?.forEach((sr) => {
+          context.labwareResult.sampleResults?.forEach((sr) => {
             if (sr.result) {
               const sampleComments: SampleIdCommentId[] = [];
               /**No comments given, so reset all comments**/
-              if (!e.commentId) {
+              if (!event.commentId) {
                 sr.sampleComments = [];
                 sr.commentId = undefined;
-                return;
+                return context;
               }
               /**Slots given**/
-              if (e.slots) {
-                const slotsForAddress = e.slots.find((slot) => slot.address === sr.address);
+              if (event.slots) {
+                const slotsForAddress = event.slots.find((slot) => slot.address === sr.address);
                 if (slotsForAddress) {
                   /**Multiple comments supported,so store each of them as a separate sampleComment object**/
-                  if (Array.isArray(e.commentId)) {
-                    e.commentId.forEach((commentId) => {
+                  if (Array.isArray(event.commentId)) {
+                    event.commentId.forEach((commentId) => {
                       slotsForAddress.samples.forEach((sample) => {
                         sampleComments.push({ sampleId: sample.id, commentId });
                       });
@@ -179,35 +185,37 @@ export default function createLabwareResultMachine() {
                      * and store as a sampleComment object **/
                     if (slotsForAddress.samples.length > 1) {
                       slotsForAddress.samples.forEach((sample) => {
-                        sampleComments.push({ sampleId: sample.id, commentId: e.commentId as number });
+                        sampleComments.push({ sampleId: sample.id, commentId: event.commentId as number });
                       });
                     } else {
                       /**One comment and one section per slot**/
-                      sr.commentId = e.commentId as number;
+                      sr.commentId = event.commentId as number;
                     }
                   }
                 }
               } else {
                 /**No slot information given, so store a single comment (even if multiple comments are given) in commentId**/
-                sr.commentId = e.commentId
-                  ? Array.isArray(e.commentId)
-                    ? e.commentId.length > 0
-                      ? e.commentId[0]
+                sr.commentId = event.commentId
+                  ? Array.isArray(event.commentId)
+                    ? event.commentId.length > 0
+                      ? event.commentId[0]
                       : undefined
-                    : (e.commentId as number)
+                    : (event.commentId as number)
                   : undefined;
               }
             }
           });
+          return context;
         }),
 
-        assignTissueCoverage: assign((ctx, e) => {
-          if (e.type !== 'SET_TISSUE_COVERAGE') return;
-          const slotMeasurement = ctx.labwareResult.slotMeasurements?.find((sr) => sr.address === e.address);
+        assignTissueCoverage: assign(({ context, event }) => {
+          if (event.type !== 'SET_TISSUE_COVERAGE') return context;
+          const slotMeasurement = context.labwareResult.slotMeasurements?.find((sr) => sr.address === event.address);
           if (!slotMeasurement) {
-            return;
+            return context;
           }
-          slotMeasurement.value = e.value;
+          slotMeasurement.value = event.value;
+          return context;
         })
       }
     }

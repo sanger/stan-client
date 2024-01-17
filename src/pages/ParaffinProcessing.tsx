@@ -28,18 +28,19 @@ import BlueButton from '../components/buttons/BlueButton';
 import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 import WhiteButton from '../components/buttons/WhiteButton';
 import Success from '../components/notifications/Success';
+import { fromPromise } from 'xstate';
 
 const ParaffinProcessing: React.FC = () => {
   const paraffinProcessingInfo = useLoaderData() as GetParaffinProcessingInfoQuery;
   const formMachine = React.useMemo(() => {
-    return createFormMachine<ParaffinProcessingRequest, PerformParaffinProcessingMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<ParaffinProcessingRequest, PerformParaffinProcessingMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.PerformParaffinProcessing({
-            request: e.values
+            request: input.evemt.values
           });
-        }
+        })
       }
     });
   }, []);

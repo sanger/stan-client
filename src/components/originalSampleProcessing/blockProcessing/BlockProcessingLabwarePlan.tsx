@@ -202,7 +202,7 @@ const BlockProcessingLabwarePlan = React.forwardRef<HTMLDivElement, BlockProcess
           <ModalBody>
             <Heading level={3}>Set Layout</Heading>
             {layoutMachine && (
-              <LayoutPlanner actor={layoutMachine}>
+              <LayoutPlanner actor={layoutMachine.getSnapshot()}>
                 <div className="my-2">
                   <p className="text-gray-900 text-sm leading-normal">
                     To add sections to a slot, select a source for the buttons on the right, and then click a

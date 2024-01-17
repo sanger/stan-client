@@ -88,7 +88,7 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
 
     const plannedLabware = plan?.plan.labware ?? [];
 
-    const { layoutMachine } = current.children;
+    const { layoutMachine } = current.context;
 
     // Special case column that renders a label printer button for each row
     const printColumn = {
@@ -273,20 +273,24 @@ const LabwarePlan = React.forwardRef<HTMLDivElement, LabwarePlanProps>(
               </LayoutPlanner>
             )}
           </ModalBody>
-          <ModalFooter>
-            <BlueButton
-              onClick={() => layoutMachine.send({ type: 'DONE' })}
-              className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Done
-            </BlueButton>
-            <WhiteButton
-              onClick={() => layoutMachine.send({ type: 'CANCEL' })}
-              className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Cancel
-            </WhiteButton>
-          </ModalFooter>
+          {layoutMachine && (
+            <ModalFooter>
+              <BlueButton
+                onClick={() => {
+                  layoutMachine.send({ type: 'DONE' });
+                }}
+                className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                Done
+              </BlueButton>
+              <WhiteButton
+                onClick={() => layoutMachine.send({ type: 'CANCEL' })}
+                className="mt-3 w-full sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                Cancel
+              </WhiteButton>
+            </ModalFooter>
+          )}
         </Modal>
       </motion.div>
     );

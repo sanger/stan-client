@@ -20,6 +20,7 @@ import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import { Column } from 'react-table';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 type RecordInPlaceProps = {
   /**
@@ -49,12 +50,12 @@ export default function RecordInPlace({ title, operationType, columns, descripti
   // The equipment available for this operation
   const equipments = useLoaderData() as EquipmentFieldsFragment[];
   const formMachine = React.useMemo(() => {
-    return createFormMachine<InPlaceOpRequest, RecordInPlaceMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.RecordInPlace({ request: e.values });
-        }
+    return createFormMachine<InPlaceOpRequest, RecordInPlaceMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.RecordInPlace({ request: input.event.values });
+        })
       }
     });
   }, []);

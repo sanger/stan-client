@@ -6,7 +6,7 @@ import ScanInput from '../scanInput/ScanInput';
 import Success from '../notifications/Success';
 import Warning from '../notifications/Warning';
 import { isFunction } from 'lodash';
-import { usePrevious } from '../../lib/hooks';
+import * as Yup from 'yup';
 
 export type LabwareScannerProps = {
   /**
@@ -55,7 +55,7 @@ export type LabwareScannerProps = {
    * Children can either be a react node (if using the useLabware hook)
    * Or it can be a function that will have the context passed in
    */
-  children: React.ReactNode | ((props: LabwareScannerContextType) => React.ReactNode);
+  children?: React.ReactNode | ((props: LabwareScannerContextType) => React.ReactNode);
 
   enableLocationScanner?: boolean;
 
@@ -89,49 +89,54 @@ export default function LabwareScanner({
   }, []);
 
   const [current, send, service] = useMachine(labwareMachine, {
-    context: {
+    input: {
       labwares: slicedInitialLabware,
       foundLabwareCheck: labwareCheckFunction,
       limit,
-      enableFlaggedLabwareCheck
+      enableFlaggedLabwareCheck,
+      currentBarcode: '',
+      foundLabware: null,
+      removedLabware: null,
+      validator: Yup.string().trim().required('Barcode is required'),
+      successMessage: null,
+      errorMessage: null,
+      locationScan: false
     }
   });
 
   const { labwares, removedLabware, successMessage, errorMessage, currentBarcode, locationScan } = current.context;
-
   /**
    * After transition into the "idle" state, focus the scan input
    */
   const inputRef = useRef<HTMLInputElement>(null);
+  const previousLabwareLength = service.getSnapshot().context.labwares.length;
   useEffect(() => {
     const subscription = service.subscribe((observer) => {
       if (observer.matches('idle') && !observer.context.locationScan) {
         inputRef.current?.focus();
       }
+      const currentLabwareLength = observer.context.labwares.length;
+
+      if (typeof previousLabwareLength !== 'undefined') {
+        if (currentLabwareLength !== previousLabwareLength) {
+          onChange?.(labwares);
+        }
+
+        if (currentLabwareLength > previousLabwareLength) {
+          onAdd?.(labwares[labwares.length - 1]);
+        }
+
+        if (currentLabwareLength < previousLabwareLength) {
+          removedLabware && onRemove?.(removedLabware.labware, removedLabware.index);
+        }
+      }
     });
     return subscription.unsubscribe;
-  }, [service]);
+  }, [service, onChange, onAdd, onRemove, labwares, removedLabware, previousLabwareLength]);
 
   useEffect(() => {
     send(locked ? { type: 'LOCK' } : { type: 'UNLOCK' });
   }, [send, locked]);
-
-  // Call relevant handlers whenever labwares change
-  const previousLabwareLength = usePrevious(labwares.length);
-  useEffect(() => {
-    if (typeof previousLabwareLength === 'undefined') return;
-    if (labwares.length !== previousLabwareLength) {
-      onChange?.(labwares);
-    }
-
-    if (labwares.length > previousLabwareLength) {
-      onAdd?.(labwares[labwares.length - 1]);
-    }
-
-    if (labwares.length < previousLabwareLength) {
-      removedLabware && onRemove?.(removedLabware.labware, removedLabware.index);
-    }
-  }, [labwares, onChange, onAdd, removedLabware, onRemove, previousLabwareLength]);
 
   const ctxValue: LabwareScannerContextType = {
     locked: current.matches('locked'),

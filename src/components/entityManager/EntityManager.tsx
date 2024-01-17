@@ -14,6 +14,7 @@ import { createEntityManagerMachine } from './entityManager.machine';
 import { alphaNumericSortDefault } from '../../types/stan';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import Warning from '../notifications/Warning';
+import { fromPromise } from 'xstate';
 
 export type EntityValueType = boolean | string | number;
 
@@ -111,21 +112,25 @@ export default function EntityManager<E extends Record<string, EntityValueType>>
   extraDisplayColumnName = undefined
 }: EntityManagerProps<E>) {
   const entityManagerMachine = React.useMemo(() => {
-    return createEntityManagerMachine<E>(initialEntities, displayKeyColumnName, valueColumnName).withConfig({
-      services: {
-        createEntity: (ctx, e) => {
-          if (e.type !== 'CREATE_NEW_ENTITY') return Promise.reject();
-          return onCreate ? onCreate(e.value, e.extraValue) : Promise.reject();
-        },
-        valueChanged: (context, e) => {
-          if (e.type !== 'VALUE_CHANGE') return Promise.reject();
-          return onChangeValue ? onChangeValue(e.entity, e.value) : Promise.reject();
-        },
-        updateExtraProperty: (context, e) => {
-          if (e.type !== 'EXTRA_PROPERTY_UPDATE_VALUE' || !extraDisplayColumnName || !extraDisplayColumnName.onChange)
+    return createEntityManagerMachine<E>(initialEntities, displayKeyColumnName, valueColumnName).provide({
+      actors: {
+        createEntity: fromPromise(({ input }) => {
+          if (input.type !== 'CREATE_NEW_ENTITY') return Promise.reject();
+          return onCreate ? onCreate(input.value, input.extraValue) : Promise.reject();
+        }),
+        valueChanged: fromPromise(({ input }) => {
+          if (input.type !== 'VALUE_CHANGE') return Promise.reject();
+          return onChangeValue ? onChangeValue(input.entity, input.value) : Promise.reject();
+        }),
+        updateExtraProperty: fromPromise(({ input }) => {
+          if (
+            input.type !== 'EXTRA_PROPERTY_UPDATE_VALUE' ||
+            !extraDisplayColumnName ||
+            !extraDisplayColumnName.onChange
+          )
             return Promise.reject();
-          return extraDisplayColumnName.onChange(e.value, e.extraValue);
-        }
+          return extraDisplayColumnName.onChange(input.value, input.extraValue);
+        })
       }
     });
   }, [initialEntities, displayKeyColumnName, valueColumnName, onChangeValue, onCreate, extraDisplayColumnName]);

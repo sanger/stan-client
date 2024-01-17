@@ -244,7 +244,7 @@ function OriginalSampleRegistration() {
             barcode: string;
             solution: string;
           };
-          const labwareSolutions: LabwareSolution[] = result['labwareSolutions'];
+          const labwareSolutions: LabwareSolution[] = result['labwareSolutions'] as LabwareSolution[];
           const labwarePromises = labwareSolutions.map((ls) => stanCore.FindLabware({ barcode: ls.barcode }));
           Promise.all(labwarePromises)
             .then((labwares) => {

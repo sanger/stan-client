@@ -44,13 +44,13 @@ function buildAliquotTableData(ctx: AliquotContext) {
 }
 
 function Aliquot() {
-  const [current, send] = useMachine(() =>
-    aliquotMachine.withContext({
+  const [current, send] = useMachine(aliquotMachine, {
+    input: {
       labware: undefined,
       numLabware: 0,
       workNumber: ''
-    })
-  );
+    }
+  });
 
   const { handleOnPrint, handleOnPrintError, handleOnPrinterChange, printResult, currentPrinter } = usePrinters();
 

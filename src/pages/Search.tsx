@@ -5,7 +5,7 @@ import FormikInput, { Input } from '../components/forms/Input';
 import BlueButton from '../components/buttons/BlueButton';
 import { selectOptionValues } from '../components/forms';
 import DataTable from '../components/DataTable';
-import { Cell, Column } from 'react-table';
+import { CellProps, Column } from 'react-table';
 import StyledLink from '../components/StyledLink';
 import { SearchResultTableEntry, alphaNumericSortDefault } from '../types/stan';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
@@ -95,15 +95,14 @@ function Search() {
   }, [searchParams]);
 
   const config = useContext(configContext)!;
-  const search = searchMachine<FormFindRequest, SearchResultTableEntry>(new SearchService());
 
   const memoSearchMachine = React.useMemo(() => {
-    return search.withContext({
+    return searchMachine<FormFindRequest, SearchResultTableEntry>(new SearchService(), {
       findRequest,
       maxRecords: config.maxSearchRecords
     });
-  }, [findRequest, search, config]);
-  const [current, send] = useMachine(() => memoSearchMachine);
+  }, [findRequest, config]);
+  const [current, send] = useMachine(memoSearchMachine);
 
   const { serverError, searchResult } = current.context;
 
@@ -409,7 +408,7 @@ export default Search;
 const barcodeColumn: Column<SearchResultTableEntry> = {
   Header: 'Barcode',
   accessor: 'barcode',
-  Cell: (props: Cell<SearchResultTableEntry>) => {
+  Cell: (props: CellProps<SearchResultTableEntry>) => {
     const barcode = props.row.original.barcode;
     return <StyledLink to={`/labware/${barcode}`}>{barcode}</StyledLink>;
   }
@@ -430,7 +429,7 @@ const locationColumn: Column<SearchResultTableEntry> = {
     if (!displayNameA && displayNameB) return -1;
     return 0;
   },
-  Cell: (props: Cell<SearchResultTableEntry>) => {
+  Cell: (props: CellProps<SearchResultTableEntry>) => {
     const location = props.row.original.location;
 
     if (!location) {

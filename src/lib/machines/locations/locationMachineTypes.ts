@@ -1,4 +1,3 @@
-import { Interpreter, State, StateNode } from 'xstate';
 import { LocationFieldsFragment, Maybe, StoreInput } from '../../../types/sdk';
 import { ClientError } from 'graphql-request';
 import { LocationSearchParams } from '../../../types/stan';
@@ -78,29 +77,29 @@ type FetchLocationEvent = {
 };
 
 type FetchLocationResolveEvent = {
-  type: 'done.invoke.fetchLocation';
-  data: LocationFieldsFragment;
+  type: 'xstate.done.actor.fetchLocation';
+  output: LocationFieldsFragment;
 };
 
 type FetchLocationErrorEvent = {
-  type: 'error.platform.fetchLocation';
-  data: ClientError;
+  type: 'xstate.error.actor.fetchLocation';
+  error: ClientError;
 };
 
-type StoreBarcodeEvent = {
+export type StoreBarcodeEvent = {
   type: 'STORE_BARCODE';
   barcode: string;
   address?: string;
 };
 
 type StoreBarcodeResolveEvent = {
-  type: 'done.invoke.storeBarcode';
-  data: LocationFieldsFragment;
+  type: 'xstate.done.actor.storeBarcode';
+  output: LocationFieldsFragment;
 };
 
 type StoreBarcodeErrorEvent = {
-  type: 'error.platform.storeBarcode';
-  data: ClientError;
+  type: 'xstate.error.actor.storeBarcode';
+  error: ClientError;
 };
 
 type UnstoreBarcodeEvent = {
@@ -109,13 +108,13 @@ type UnstoreBarcodeEvent = {
 };
 
 type UnstoreBarcodeResolveEvent = {
-  type: 'done.invoke.unstoreBarcode';
-  data: LocationFieldsFragment;
+  type: 'xstate.done.actor.unstoreBarcode';
+  output: LocationFieldsFragment;
 };
 
 type UnstoreBarcodeErrorEvent = {
-  type: 'error.platform.unstoreBarcode';
-  data: ClientError;
+  type: 'xstate.error.actor.unstoreBarcode';
+  error: ClientError;
 };
 
 type EmptyLocationEvent = {
@@ -123,13 +122,13 @@ type EmptyLocationEvent = {
 };
 
 type EmptyLocationResolveEvent = {
-  type: 'done.invoke.emptyLocation';
-  data: LocationFieldsFragment;
+  type: 'xstate.done.actor.emptyLocation';
+  output: LocationFieldsFragment;
 };
 
 type EmptyLocationErrorEvent = {
-  type: 'error.platform.emptyLocation';
-  data: ClientError;
+  type: 'xstate.error.actor.emptyLocation';
+  error: ClientError;
 };
 
 type UpdateLocationEvent = {
@@ -158,13 +157,13 @@ type StoreEvent = {
 };
 
 type StoreResolveEvent = {
-  type: 'done.invoke.store';
-  data: LocationFieldsFragment;
+  type: 'xstate.done.actor.store';
+  output: LocationFieldsFragment;
 };
 
 type StoreErrorEvent = {
   type: 'error.platform.store';
-  data: ClientError;
+  error: ClientError;
 };
 
 export type LocationEvent =
@@ -191,11 +190,6 @@ export type LocationEvent =
 /**
  * The type of an interpreted Location Machine
  */
-export type LocationMachineService = Interpreter<LocationContext, LocationSchema, LocationEvent>;
-
-export type LocationMachine = StateNode<LocationContext, LocationSchema, LocationEvent>;
-
-export type LocationState = State<LocationContext, LocationEvent, LocationSchema>;
 
 export type StoredItemFragment = LocationFieldsFragment['stored'][number];
 

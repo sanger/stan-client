@@ -1,12 +1,5 @@
-import { createMachine } from 'xstate';
-import { assign } from '@xstate/immer';
-import { castDraft } from 'immer';
-import {
-  MachineServiceDone,
-  MachineServiceError,
-  NewFlaggedLabwareLayout,
-  OperationTypeName
-} from '../../../types/stan';
+import { assign, createMachine, fromPromise } from 'xstate';
+import { NewFlaggedLabwareLayout, OperationTypeName, ServerErrors } from '../../../types/stan';
 import {
   FindPermDataQuery,
   LabwareFieldsFragment,
@@ -20,7 +13,6 @@ import {
   SlotCopySource
 } from '../../../types/sdk';
 import { stanCore } from '../../sdk';
-import { ClientError } from 'graphql-request';
 
 /**
  * Context for SlotCopy Machine
@@ -69,7 +61,7 @@ export interface SlotCopyContext {
   /**
    * Errors from server, if any
    */
-  serverErrors?: Maybe<ClientError>;
+  serverErrors?: Maybe<ServerErrors>;
 }
 
 type UpdateSlotCopyContentType = {
@@ -133,8 +125,8 @@ type UpdateDestinationLabware = {
 };
 
 type FindPermDataEvent = {
-  type: 'done.invoke.findPermTime';
-  data: {
+  type: 'xstate.done.actor.findPermTime';
+  output: {
     findPermTimes: FindPermDataQuery[];
     inputLabwares: LabwareFieldsFragment[];
     destination: Destination | undefined;
@@ -142,6 +134,15 @@ type FindPermDataEvent = {
 };
 
 type SaveEvent = { type: 'SAVE' };
+
+type SlotCopyDoneEvent = {
+  type: 'xstate.done.actor.copySlots';
+  output: SlotCopyMutation;
+};
+type SlotCopyErrorEvent = {
+  type: 'xstate.error.actor.copySlots';
+  error: unknown;
+};
 
 export type SlotCopyEvent =
   | { type: 'UPDATE_WORK_NUMBER'; workNumber: string }
@@ -157,15 +158,31 @@ export type SlotCopyEvent =
   | UpdateDestinationLOTNumber
   | SaveEvent
   | FindPermDataEvent
-  | MachineServiceDone<'copySlots', SlotCopyMutation>
-  | MachineServiceError<'copySlots'>;
+  | SlotCopyDoneEvent
+  | SlotCopyErrorEvent;
 
 /**
  * SlotCopy Machine Config
  */
-export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
+
+export const slotCopyMachine = createMachine(
   {
     id: 'slotCopy',
+    types: {} as {
+      context: SlotCopyContext;
+      events: SlotCopyEvent;
+    },
+    context: ({
+      input: { workNumber, operationType, sources, destinations, slotCopyResults }
+    }: {
+      input: SlotCopyContext;
+    }): SlotCopyContext => ({
+      workNumber,
+      operationType,
+      sources,
+      destinations,
+      slotCopyResults
+    }),
     initial: 'mapping',
     states: {
       mapping: {
@@ -182,7 +199,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           UPDATE_SLOT_COPY_CONTENT: [
             {
               target: 'readyToCopy',
-              cond: (ctx, e) => e.anySourceMapped,
+              guard: ({ event }) => event.anySourceMapped,
               actions: ['assignSCC']
             },
             {
@@ -226,7 +243,7 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
           UPDATE_SLOT_COPY_CONTENT: [
             {
               target: 'mapping',
-              cond: (ctx, e) => !e.anySourceMapped,
+              guard: ({ event }) => !event.anySourceMapped,
               actions: ['assignSCC']
             },
             {
@@ -259,9 +276,29 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       },
       copying: {
         entry: ['emptyServerError'],
+        id: 'copySlots',
         invoke: {
-          src: 'copySlots',
-          id: 'copySlots',
+          src: fromPromise(({ input }) =>
+            stanCore.SlotCopy({
+              request: {
+                workNumber: input.workNumber,
+                operationType: input.operationType,
+                destinations: input.destinations.map((dest: Destination) => dest.slotCopyDetails),
+                sources: input.sources.reduce((arr: SlotCopySource[], curr: Source) => {
+                  if (curr.labwareState) {
+                    arr.push({ barcode: curr.labware.barcode, labwareState: curr.labwareState });
+                  }
+                  return arr;
+                }, [])
+              }
+            })
+          ),
+          input: ({ context }) => ({
+            workNumber: context.workNumber,
+            operationType: context.operationType,
+            destinations: context.destinations,
+            sources: context.sources
+          }),
           onDone: {
             target: 'copied',
             actions: ['assignResult']
@@ -274,14 +311,39 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
       },
       updateSourceLabwarePermTime: {
         invoke: {
-          src: 'findPermTime',
           id: 'findPermTime',
+          src: fromPromise(async ({ input }) => {
+            const findPermDataQueries: FindPermDataQuery[] = [];
+            for (const inputlw of input.labwares) {
+              if (
+                !input.sourceLabwarePermData?.some(
+                  (permData: FindPermDataQuery) => permData.visiumPermData.labware.barcode === inputlw.barcode
+                )
+              ) {
+                const val = await stanCore.FindPermData({ barcode: inputlw.barcode });
+                findPermDataQueries.push(val);
+              }
+            }
+            return {
+              findPermTimes: findPermDataQueries,
+              inputLabwares: input.labwares,
+              destination: input.destinaton
+            };
+          }),
+          input: ({ context, event }) => ({
+            labwares: (event as UpdateSourceLabwarePermTime).labwares,
+            destinaton: (event as UpdateSourceLabwarePermTime).destinaton,
+            sourceLabwarePermData: context.sourceLabwarePermData
+          }),
           onDone: [
             {
               target: 'readyToCopy',
-              cond: (context, e) => {
-                if (e.data.inputLabwares.length > 0) {
-                  return e.data.destination !== undefined && e.data.destination.slotCopyDetails.contents.length > 0;
+              guard: ({ event }) => {
+                if (event.output.inputLabwares.length > 0) {
+                  return (
+                    event.output.destination !== undefined &&
+                    event.output.destination.slotCopyDetails.contents.length > 0
+                  );
                 } else {
                   return false;
                 }
@@ -302,12 +364,12 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
   },
   {
     actions: {
-      assignSourceLabware: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_SOURCE_LABWARE') {
-          return;
+      assignSourceLabware: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_SOURCE_LABWARE') {
+          return context;
         }
-        ctx.sources = e.labware.map((newSource) => {
-          const source = ctx.sources.find((src) => src.labware.barcode === newSource.barcode);
+        context.sources = event.labware.map((newSource) => {
+          const source = context.sources.find((src) => src.labware.barcode === newSource.barcode);
           //There is no source exists , so add this
           if (!source) {
             return {
@@ -317,13 +379,14 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
             return source;
           }
         });
+        return context;
       }),
-      assignDestinationLabware: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_DESTINATION_LABWARE') {
-          return;
+      assignDestinationLabware: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_DESTINATION_LABWARE') {
+          return context;
         }
-        ctx.destinations = e.labware.map((newDest) => {
-          const destination = ctx.destinations.find((dest) => dest.labware.id === newDest.id);
+        context.destinations = event.labware.map((newDest) => {
+          const destination = context.destinations.find((dest) => dest.labware.id === newDest.id);
           //There is no destination exists , so add this
           if (!destination) {
             return {
@@ -334,159 +397,130 @@ export const slotCopyMachine = createMachine<SlotCopyContext, SlotCopyEvent>(
             return destination;
           }
         });
+        return context;
       }),
 
-      assignSCC: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_SLOT_COPY_CONTENT') {
-          return;
+      assignSCC: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_SLOT_COPY_CONTENT') {
+          return context;
         }
-        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
+        const destination = context.destinations.find((dest) => dest.labware.id === event.labware.id);
         if (destination) {
-          destination.slotCopyDetails.contents = e.slotCopyContent;
+          destination.slotCopyDetails.contents = event.slotCopyContent;
         }
+        return context;
       }),
 
-      assignResult: assign((ctx, e) => {
-        if (e.type !== 'done.invoke.copySlots') {
-          return;
+      assignResult: assign(({ context, event }) => {
+        if (event.type !== 'xstate.done.actor.copySlots') {
+          return context;
         }
-        ctx.slotCopyResults = e.data.slotCopy.labware;
+        context.slotCopyResults = event.output.slotCopy.labware;
+        return context;
       }),
 
-      assignServerError: assign((ctx, e) => {
-        if (e.type !== 'error.platform.copySlots') {
-          return;
+      assignServerError: assign(({ context, event }) => {
+        if (event.type !== 'xstate.error.actor.copySlots') {
+          return context;
         }
-        ctx.serverErrors = castDraft(e.data);
+        context.serverErrors = event.error as ServerErrors;
+        return context;
       }),
 
-      assignWorkNumber: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_WORK_NUMBER') return;
-        ctx.workNumber = e.workNumber;
+      assignWorkNumber: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_WORK_NUMBER') return context;
+        context.workNumber = event.workNumber;
+        return context;
       }),
-      assignSourceLabwarePermTimes: assign((ctx, e) => {
-        if (e.type !== 'done.invoke.findPermTime') return;
+      assignSourceLabwarePermTimes: assign(({ context, event }) => {
+        if (event.type !== 'xstate.done.actor.findPermTime') return context;
         //Sync the permData array with current input labware list
-        ctx.sourceLabwarePermData = ctx.sourceLabwarePermData?.filter((permData) =>
-          e.data.inputLabwares.some((lw) => lw.barcode === permData.visiumPermData.labware.barcode)
+        context.sourceLabwarePermData = context.sourceLabwarePermData?.filter((permData) =>
+          event.output.inputLabwares.some((lw) => lw.barcode === permData.visiumPermData.labware.barcode)
         );
         //Add newly fetched perm times if any
-        e.data.findPermTimes.forEach((permData) => {
-          ctx.sourceLabwarePermData?.push(permData);
+        event.output.findPermTimes.forEach((permData) => {
+          context.sourceLabwarePermData?.push(permData);
         });
 
         //update slot copy content with updated labware
-        ctx.destinations.forEach((dest) => {
+        context.destinations.forEach((dest) => {
           dest.slotCopyDetails.contents = dest.slotCopyDetails.contents.filter((scc) =>
-            e.data.inputLabwares.some((lw) => lw.barcode === scc.sourceBarcode)
+            event.output.inputLabwares.some((lw) => lw.barcode === scc.sourceBarcode)
           );
         });
+        return context;
       }),
-      assignDestinationBioState: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_DESTINATION_BIO_STATE') return;
-        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
+      assignDestinationBioState: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_DESTINATION_BIO_STATE') return context;
+        const destination = context.destinations.find((dest) => dest.labware.id === event.labware.id);
         if (!destination) {
-          return;
+          return context;
         }
-        destination.slotCopyDetails.bioState = e.bioState;
+        destination.slotCopyDetails.bioState = event.bioState;
+        return context;
       }),
-      assignDestinationPreBarcode: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_DESTINATION_PRE_BARCODE') return;
-        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
+      assignDestinationPreBarcode: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_DESTINATION_PRE_BARCODE') return context;
+        const destination = context.destinations.find((dest) => dest.labware.id === event.labware.id);
         if (!destination) {
-          return;
+          return context;
         }
         //update barcode in destination labware and in slotCopy details
-        destination.labware.barcode = e.preBarcode;
-        destination.slotCopyDetails.preBarcode = e.preBarcode;
+        destination.labware.barcode = event.preBarcode;
+        destination.slotCopyDetails.preBarcode = event.preBarcode;
+        return context;
       }),
-      assignDestinationLabwareType: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_DESTINATION_LABWARE_TYPE') return;
-        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labwareToReplace.id);
-        if (!destination || destination.labware.labwareType.name === e.labware.labwareType.name) {
-          return;
+      assignDestinationLabwareType: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_DESTINATION_LABWARE_TYPE') return context;
+        const destination = context.destinations.find((dest) => dest.labware.id === event.labwareToReplace.id);
+        if (!destination || destination.labware.labwareType.name === event.labware.labwareType.name) {
+          return context;
         }
-        destination.labware = e.labware;
+        destination.labware = event.labware;
         destination.slotCopyDetails = {
           ...destination.slotCopyDetails,
-          labwareType: e.labware.labwareType.name,
+          labwareType: event.labware.labwareType.name,
           contents: []
         };
+        return context;
       }),
-      assignDestinationCosting: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_DESTINATION_COSTING') return;
-        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
+      assignDestinationCosting: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_DESTINATION_COSTING') return context;
+        const destination = context.destinations.find((dest) => dest.labware.id === event.labware.id);
         if (!destination) {
-          return;
+          return context;
         }
-        destination.slotCopyDetails.costing = e.labwareCosting;
+        destination.slotCopyDetails.costing = event.labwareCosting;
+        return context;
       }),
-      assignDestinationLOTNumber: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_DESTINATION_LOT_NUMBER') return;
-        const destination = ctx.destinations.find((dest) => dest.labware.id === e.labware.id);
+      assignDestinationLOTNumber: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_DESTINATION_LOT_NUMBER') return context;
+        const destination = context.destinations.find((dest) => dest.labware.id === event.labware.id);
         if (!destination) {
-          return;
+          return context;
         }
-        if (e.isProbe) {
-          destination.slotCopyDetails.probeLotNumber = e.lotNumber;
+        if (event.isProbe) {
+          destination.slotCopyDetails.probeLotNumber = event.lotNumber;
         } else {
-          destination.slotCopyDetails.lotNumber = e.lotNumber;
+          destination.slotCopyDetails.lotNumber = event.lotNumber;
         }
+        return context;
       }),
-      assignSourceLabwareState: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_SOURCE_LABWARE_STATE') return;
-        const src = ctx.sources.find((src) => src.labware.barcode === e.labware.barcode);
+      assignSourceLabwareState: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_SOURCE_LABWARE_STATE') return context;
+        const src = context.sources.find((src) => src.labware.barcode === event.labware.barcode);
         if (src) {
-          src.labwareState = e.labwareState;
+          src.labwareState = event.labwareState;
         } else {
-          ctx.sources.push({ labware: e.labware, labwareState: e.labwareState });
+          context.sources.push({ labware: event.labware, labwareState: event.labwareState });
         }
+        return context;
       }),
-      emptyServerError: assign((ctx) => {
-        ctx.serverErrors = null;
+      emptyServerError: assign(({ context }) => {
+        context.serverErrors = null;
+        return context;
       })
-    },
-    services: {
-      copySlots: (ctx) => {
-        return stanCore.SlotCopy({
-          request: {
-            workNumber: ctx.workNumber,
-            operationType: ctx.operationType,
-            destinations: ctx.destinations.map((dest) => dest.slotCopyDetails),
-            sources: ctx.sources.reduce((arr: SlotCopySource[], curr) => {
-              if (curr.labwareState) {
-                arr.push({ barcode: curr.labware.barcode, labwareState: curr.labwareState });
-              }
-              return arr;
-            }, [])
-          }
-        });
-      },
-      findPermTime: async (ctx, e) => {
-        const findPermDataQueries: FindPermDataQuery[] = [];
-        if (e.type !== 'UPDATE_SOURCE_LABWARE_PERMTIME') return Promise.reject();
-        for (const inputlw of e.labwares) {
-          if (
-            !ctx.sourceLabwarePermData?.some((permData) => permData.visiumPermData.labware.barcode === inputlw.barcode)
-          ) {
-            const val = await stanCore.FindPermData({
-              barcode: inputlw.barcode
-            });
-            findPermDataQueries.push(val);
-          }
-        }
-        return new Promise<{
-          findPermTimes: FindPermDataQuery[];
-          inputLabwares: LabwareFlaggedFieldsFragment[];
-          destination: Destination | undefined;
-        }>((resolve) => {
-          return resolve({
-            findPermTimes: findPermDataQueries,
-            inputLabwares: e.labwares,
-            destination: e.destinaton
-          });
-        });
-      }
     }
   }
 );

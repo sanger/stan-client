@@ -1,50 +1,49 @@
-import { MachineConfig, MachineOptions } from 'xstate';
+import { assign, createMachine, fromPromise } from 'xstate';
 import { DataFetcherContext, DataFetcherEvent, DataFetcherSchema } from './dataFetcherMachineTypes';
-import { assign } from '@xstate/immer';
-import { createMachineBuilder } from '../index';
-
-/**
- * DataFetcher Machine Options
- */
-export const machineOptions: Partial<MachineOptions<DataFetcherContext, DataFetcherEvent>> = {
-  services: {
-    fetchData: (ctx) => ctx.dataFetcher()
-  }
-};
 
 /**
  * DataFetcher Machine Config
  */
-export const machineConfig: MachineConfig<DataFetcherContext, DataFetcherSchema, DataFetcherEvent> = {
-  id: 'dataFetcher',
-  initial: 'loading',
-  states: {
-    loading: {
-      invoke: {
-        src: 'fetchData',
-        onDone: {
-          target: 'done',
-          actions: assign((ctx, e) => {
-            ctx.data = e.data;
-          })
-        },
-        onError: 'failed'
-      }
-    },
-    failed: {
-      on: {
-        RETRY: 'loading'
-      }
-    },
-    done: {
-      type: 'final'
-    }
-  }
-};
 
-const createDataFetcherMachine = createMachineBuilder<DataFetcherContext, DataFetcherSchema, DataFetcherEvent>(
-  machineConfig,
-  machineOptions
-);
+const defaultContext: DataFetcherContext = {
+  dataFetcher: () => Promise.resolve(),
+  data: undefined
+};
+export function createDataFetcherMachine(context = defaultContext) {
+  return createMachine({
+    id: 'dataFetcher',
+    initial: 'loading',
+    types: {} as {
+      context: DataFetcherContext;
+      events: DataFetcherEvent;
+      schema: DataFetcherSchema;
+    },
+    context,
+    states: {
+      loading: {
+        invoke: {
+          src: fromPromise(({ input }) => input.dataFetcher()),
+          input: ({ context }) => ({ dataFetcher: context.dataFetcher }),
+          onDone: {
+            target: 'done',
+            actions: assign(({ context, event }) => {
+              context.data = event.output;
+              return context;
+            })
+          },
+          onError: 'failed'
+        }
+      },
+      failed: {
+        on: {
+          RETRY: 'loading'
+        }
+      },
+      done: {
+        type: 'final'
+      }
+    }
+  });
+}
 
 export default createDataFetcherMachine;

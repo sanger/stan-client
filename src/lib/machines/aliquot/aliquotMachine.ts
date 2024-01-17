@@ -1,9 +1,8 @@
 import { AliquotMutation, LabwareFieldsFragment } from '../../../types/sdk';
-import { ClientError } from 'graphql-request';
-import { createMachine } from 'xstate';
-import { assign } from '@xstate/immer';
+import { assign, createMachine, fromPromise } from 'xstate';
 import { castDraft } from 'immer';
 import { stanCore } from '../../sdk';
+import { ServerErrors } from '../../../types/stan';
 
 export interface AliquotContext {
   /**The work number to associate with this aliquot operation**/
@@ -19,7 +18,7 @@ export interface AliquotContext {
   aliquotResult?: AliquotMutation;
 
   /**Error returned from server**/
-  serverErrors?: ClientError;
+  serverErrors?: ServerErrors;
 }
 const aliquotLabwareType: string = 'Tube';
 const aliquotOperationType: string = 'Aliquot';
@@ -37,12 +36,12 @@ type AliquotEvent = {
   type: 'ALIQUOT';
 };
 type AliquotDoneEvent = {
-  type: 'done.invoke.aliquot';
-  data: AliquotMutation;
+  type: 'xstate.done.actor.aliquot';
+  output: AliquotMutation;
 };
 type AliquotErrorEvent = {
-  type: 'error.platform.aliquot';
-  data: ClientError;
+  type: 'xstate.error.actor.aliquot';
+  error: ServerErrors;
 };
 
 export type AliquottingEvent =
@@ -53,9 +52,16 @@ export type AliquottingEvent =
   | UpdateLabwareEvent
   | UpdateNumLabwareEvent;
 
-export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
+export const aliquotMachine = createMachine(
   {
     id: 'aliquot',
+    types: {} as {
+      context: AliquotContext;
+      events: AliquottingEvent;
+    },
+    context: ({ input }: { input: AliquotContext }): AliquotContext => ({
+      ...input
+    }),
     initial: 'ready',
     states: {
       ready: {
@@ -63,13 +69,33 @@ export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
           UPDATE_WORK_NUMBER: { actions: 'assignWorkNumber' },
           UPDATE_LABWARE: { actions: 'assignLabware' },
           UPDATE_NUM_LABWARE: { actions: 'assignNumLabware' },
-          ALIQUOT: { target: 'aliquoting', cond: 'validAliquotInput' }
+          ALIQUOT: { target: 'aliquoting', guard: 'validAliquotInput' }
         }
       },
       aliquoting: {
+        id: 'aliquot',
         invoke: {
-          src: 'aliquot',
-          id: 'aliquot',
+          src: fromPromise(({ input }) => {
+            if (input.labware) {
+              return stanCore.Aliquot({
+                request: {
+                  workNumber: input.workNumber,
+                  labwareType: aliquotLabwareType,
+                  barcode: input.labware.barcode,
+                  numLabware: input.numLabware,
+                  operationType: aliquotOperationType
+                }
+              });
+            } else {
+              return Promise.reject();
+            }
+          }),
+          input: ({ context, event }) => ({
+            workNumber: context.workNumber,
+            barcode: context.labware?.barcode,
+            numLabware: context.numLabware,
+            labware: context.labware
+          }),
           onDone: {
             target: 'aliquotingDone',
             actions: 'assignAliquotResult'
@@ -82,7 +108,7 @@ export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
       },
       aliquotFailed: {
         on: {
-          ALIQUOT: { target: 'aliquoting', cond: 'validAliquotInput' },
+          ALIQUOT: { target: 'aliquoting', guard: 'validAliquotInput' },
           UPDATE_WORK_NUMBER: { actions: 'assignWorkNumber' },
           UPDATE_LABWARE: { actions: 'assignLabware' },
           UPDATE_NUM_LABWARE: { actions: 'assignNumLabware' }
@@ -93,55 +119,44 @@ export const aliquotMachine = createMachine<AliquotContext, AliquottingEvent>(
   },
   {
     actions: {
-      assignLabware: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_LABWARE') {
-          return;
+      assignLabware: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_LABWARE') {
+          return context;
         }
-        ctx.labware = e.labware;
-        ctx.serverErrors = undefined;
+        context.labware = event.labware;
+        context.serverErrors = undefined;
+        return context;
       }),
-      assignNumLabware: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_NUM_LABWARE') {
-          return;
+      assignNumLabware: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_NUM_LABWARE') {
+          return context;
         }
-        ctx.numLabware = e.numLabware;
+        context.numLabware = event.numLabware;
+        return context;
       }),
-      assignWorkNumber: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_WORK_NUMBER') {
-          return;
+      assignWorkNumber: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_WORK_NUMBER') {
+          return context;
         }
-        ctx.workNumber = e.workNumber;
+        context.workNumber = event.workNumber;
+        return context;
       }),
-      assignAliquotResult: assign((ctx, e) => {
-        if (e.type !== 'done.invoke.aliquot') {
-          return;
+      assignAliquotResult: assign(({ context, event }) => {
+        if (event.type !== 'xstate.done.actor.aliquot') {
+          return context;
         }
-        ctx.aliquotResult = e.data;
+        context.aliquotResult = event.output;
+        return context;
       }),
-      assignServerErrors: assign((ctx, e) => {
-        if (e.type !== 'error.platform.aliquot') return;
-        ctx.serverErrors = castDraft(e.data);
+      assignServerErrors: assign(({ context, event }) => {
+        if (event.type !== 'xstate.error.actor.aliquot') return context;
+        context.serverErrors = castDraft(event.error);
+        return context;
       })
     },
     guards: {
-      validAliquotInput: (ctx) => ctx.labware !== undefined && ctx.labware.barcode.length > 0 && ctx.numLabware > 0
-    },
-    services: {
-      aliquot: (ctx, _e) => {
-        if (ctx.labware) {
-          return stanCore.Aliquot({
-            request: {
-              workNumber: ctx.workNumber,
-              labwareType: aliquotLabwareType,
-              barcode: ctx.labware.barcode,
-              numLabware: ctx.numLabware,
-              operationType: aliquotOperationType
-            }
-          });
-        } else {
-          return Promise.reject();
-        }
-      }
+      validAliquotInput: ({ context }) =>
+        context.labware !== undefined && context.labware.barcode.length > 0 && context.numLabware > 0
     }
   }
 );

@@ -33,17 +33,7 @@ const ToastSuccess = () => <Success message={'Reagents transferred'} />;
 const PLATE_TYPES = ['Fresh frozen - Dual Index TT Set A', 'FFPE - Dual Index TS Set A'];
 
 function DualIndexPlate() {
-  const [current, send] = useMachine(() =>
-    reagentTransferMachine.withContext({
-      operationType: 'Dual index plate',
-      sourceReagentPlate: undefined,
-      destLabware: undefined,
-      workNumber: '',
-      reagentTransfers: [],
-      reagentTransferResult: undefined,
-      plateType: ''
-    })
-  );
+  const [current, send] = useMachine(reagentTransferMachine);
 
   const navigate = useNavigate();
   const { serverErrors, sourceReagentPlate, destLabware, reagentTransfers, workNumber, plateType, validationError } =

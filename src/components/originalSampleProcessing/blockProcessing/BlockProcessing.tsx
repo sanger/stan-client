@@ -31,6 +31,7 @@ import FormikInput from '../../forms/Input';
 import CustomReactSelect, { OptionType } from '../../forms/CustomReactSelect';
 import PromptOnLeave from '../../notifications/PromptOnLeave';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 /**
  * Used as Formik's values
@@ -63,14 +64,14 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
   const processingInfoLoaderData = useLoaderData() as GetBlockProcessingInfoQuery;
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<TissueBlockRequest, PerformTissueBlockMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<TissueBlockRequest, PerformTissueBlockMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.PerformTissueBlock({
-            request: e.values
+            request: input.event.values
           });
-        }
+        })
       }
     });
   }, []);

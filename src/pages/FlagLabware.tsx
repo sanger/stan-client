@@ -26,6 +26,7 @@ import DataTable from '../components/DataTable';
 import { FormikErrorMessage } from '../components/forms';
 import { LabwareFlagDetails } from '../components/LabwareFlagDetails';
 import { Column } from 'react-table';
+import { fromPromise } from 'xstate';
 
 type FormFlagLabware = {
   labware: LabwareFieldsFragment | undefined;
@@ -47,16 +48,16 @@ function buildValidationSchema() {
 const FlagLabware = () => {
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
-    return createFormMachine<FlagLabwareRequest, FlagLabwareMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.FlagLabware({ request: e.values });
-        }
+    return createFormMachine<FlagLabwareRequest, FlagLabwareMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.FlagLabware({ request: input.event.values });
+        })
       }
     });
   }, [stanCore]);
-  const [current, send] = useMachine(() => formMachine);
+  const [current, send] = useMachine(formMachine);
   const validationSchema = useMemo(() => buildValidationSchema(), []);
 
   const convertValuesAndSubmit = async (values: FormFlagLabware) => {
@@ -116,9 +117,7 @@ const FlagLabware = () => {
                       <MutedText>Please scan in the labware you wish to flag.</MutedText>
                       <LabwareScanner
                         limit={1}
-                        onAdd={(lw) => {
-                          setFieldValue('labware', lw);
-                        }}
+                        onAdd={(lw) => setFieldValue('labware', lw)}
                         enableFlaggedLabwareCheck
                         labwareCheckFunction={checkRelatedFlags}
                       >
@@ -130,8 +129,8 @@ const FlagLabware = () => {
                                   <RemoveButton
                                     data-testid={'remove'}
                                     onClick={() => {
-                                      setFieldValue('labware', undefined);
                                       removeLabware(labware.barcode);
+                                      return setFieldValue('labware', undefined);
                                     }}
                                   />
                                 }

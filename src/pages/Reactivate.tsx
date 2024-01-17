@@ -26,6 +26,7 @@ import MutedText from '../components/MutedText';
 import GrayBox, { Sidebar } from '../components/layouts/GrayBox';
 import PinkButton from '../components/buttons/PinkButton';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
+import { fromPromise } from 'xstate';
 
 const validationSchema = Yup.object().shape({
   workNumber: Yup.string().required('SGP Number is a required field'),
@@ -70,19 +71,19 @@ export const Reactivate = () => {
   );
 
   const formSubmitMachine = React.useMemo(() => {
-    return createFormMachine<ReactivateLabware[] | ReactivateLabware, ReactivateLabwareMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<ReactivateLabware[] | ReactivateLabware, ReactivateLabwareMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.ReactivateLabware({
-            items: e.values
+            items: input.event.values
           });
-        }
+        })
       }
     });
   }, []);
   const [labwareToReactivate, setLabwareToReactivate] = React.useState<LabwareFlaggedFieldsFragment[]>([]);
-  const [currentForm, sendForm] = useMachine(() => formSubmitMachine);
+  const [currentForm, sendForm] = useMachine(formSubmitMachine);
 
   const { serverError, submissionResult } = currentForm.context;
 

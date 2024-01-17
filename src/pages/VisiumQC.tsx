@@ -3,6 +3,7 @@ import {
   AddressCommentInput,
   GetCommentsQuery,
   LabwareResult as CoreLabwareResult,
+  LabwareWithSlotCommentsRequest,
   OpWithSlotCommentsRequest,
   OpWithSlotMeasurementsRequest,
   RecordOpWithSlotCommentsMutation,
@@ -31,6 +32,7 @@ import Cleanup from '../components/visiumQC/Cleanup';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import CDNAConcentration from '../components/visiumQC/CDNAConentration';
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 export enum QCType {
   CDNA_AMPLIFICATION = 'Amplification',
@@ -107,14 +109,14 @@ export default function VisiumQC() {
   const visiumQcInfo = useLoaderData() as GetCommentsQuery;
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
-    return createFormMachine<ResultRequest, RecordVisiumQcMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<ResultRequest, RecordVisiumQcMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordVisiumQC({
-            request: e.values
+            request: input.event.values
           });
-        }
+        })
       }
     });
   }, [stanCore]);
@@ -133,14 +135,14 @@ export default function VisiumQC() {
   }, [visiumQcInfo]);
 
   const [currentCDNA, sendCDNA] = useMachine(
-    createFormMachine<OpWithSlotMeasurementsRequest, RecordOpWithSlotMeasurementsMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    createFormMachine<OpWithSlotMeasurementsRequest, RecordOpWithSlotMeasurementsMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordOpWithSlotMeasurements({
-            request: e.values
+            request: input.event.values
           });
-        }
+        })
       }
     })
   );
@@ -148,17 +150,17 @@ export default function VisiumQC() {
   const [labwareLimit, setLabwareLimit] = React.useState(2);
 
   const [currentRecordOpWithSlotComments, sendRecordOpWithSlotComments] = useMachine(
-    createFormMachine<OpWithSlotCommentsRequest, RecordOpWithSlotCommentsMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
-          const labware = e.values.labware.map((lw) => {
+    createFormMachine<OpWithSlotCommentsRequest, RecordOpWithSlotCommentsMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          const labware = input.event.values.labware.map((lw: LabwareWithSlotCommentsRequest) => {
             return { ...lw, addressComments: lw.addressComments.filter((ac) => ac.commentId !== -1) };
           });
           return stanCore.RecordOpWithSlotComments({
-            request: { ...e.values, labware: labware }
+            request: { ...input.event.values, labware: labware }
           });
-        }
+        })
       }
     })
   );

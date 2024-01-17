@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   FindWorkProgressQueryVariables,
   FindWorkProgressQueryVariables as WorkProgressQueryInput,
@@ -14,10 +14,9 @@ import Warning from '../components/notifications/Warning';
 import { WorkProgressResultTableEntry, WorkProgressService } from '../lib/services/workProgressService';
 
 import DataTable from '../components/DataTable';
-import { ClientError } from 'graphql-request';
-import { Cell, Column } from 'react-table';
+import { CellProps, Column } from 'react-table';
 import LoadingSpinner from '../components/icons/LoadingSpinner';
-import { alphaNumericSortDefault, SearchResultsType, statusSort } from '../types/stan';
+import { alphaNumericSortDefault, SearchResultsType, ServerErrors, statusSort } from '../types/stan';
 import { useLoaderData, useLocation } from 'react-router-dom';
 import WorkProgressInput, { workProgressSearchSchema } from '../components/workProgress/WorkProgressInput';
 import StyledLink from '../components/StyledLink';
@@ -57,20 +56,20 @@ const WorkProgress = () => {
   const location = useLocation();
   const workProgress = useLoaderData() as GetWorkProgressInputsQuery;
 
-  const workProgressMachine = searchMachine<FindWorkProgressQueryVariables, WorkProgressResultTableEntry>(
-    new WorkProgressService()
+  const workProgressMachine = useMemo(
+    () =>
+      searchMachine<FindWorkProgressQueryVariables, WorkProgressResultTableEntry>(new WorkProgressService(), {
+        findRequest: formatInputData(defaultInitialValues)
+      }),
+    []
   );
-  const [current, send] = useMachine(() =>
-    workProgressMachine.withContext({
-      findRequest: formatInputData(defaultInitialValues)
-    })
-  );
+  const [current, send] = useMachine(workProgressMachine);
 
   const {
     serverError,
     searchResult
   }: {
-    serverError?: ClientError | undefined | null;
+    serverError?: ServerErrors | undefined | null;
     searchResult?: SearchResultsType<WorkProgressResultTableEntry>;
   } = current.context;
   const sortedTableDataRef = React.useRef<WorkProgressResultTableEntry[]>([]);
@@ -300,7 +299,7 @@ const getDateSortType = (rowADate: Date | undefined, rowBDate: Date | undefined)
 };
 
 const formatDateFieldDisplay = (
-  props: Cell<WorkProgressResultTableEntry>,
+  props: CellProps<WorkProgressResultTableEntry>,
   propName: keyof WorkProgressResultTableEntry
 ) => {
   if (!Object.keys(props.row.original).find((key) => key === propName)) {
@@ -323,7 +322,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'SGP/R&D Number',
     accessor: 'workNumber',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => {
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => {
       const workNumber = props.row.original.workNumber;
       return (
         <StyledLink to={`/history/?workNumber=${workNumber ? encodeURIComponent(workNumber) : workNumber}`}>
@@ -383,7 +382,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last Sectioning Date',
     accessor: 'lastSectionDate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastSectionDate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastSectionDate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastSectionDate, rowB.original.lastSectionDate);
     }
@@ -391,7 +390,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last Staining Date',
     accessor: 'lastStainingDate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastStainingDate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastStainingDate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastStainingDate, rowB.original.lastStainingDate);
     }
@@ -399,7 +398,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last RNAscope/IHC Staining Date',
     accessor: 'lastRNAScopeIHCStainDate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRNAScopeIHCStainDate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRNAScopeIHCStainDate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastRNAScopeIHCStainDate, rowB.original.lastRNAScopeIHCStainDate);
     }
@@ -407,7 +406,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last Imaging Date',
     accessor: 'lastSlideImagedDate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastSlideImagedDate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastSlideImagedDate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastSlideImagedDate, rowB.original.lastSlideImagedDate);
     }
@@ -415,7 +414,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last RNA Extraction Date',
     accessor: 'lastRNAExtractionDate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRNAExtractionDate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRNAExtractionDate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastRNAExtractionDate, rowB.original.lastRNAExtractionDate);
     }
@@ -423,7 +422,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last RNA Analysis Date',
     accessor: 'lastRNAAnalysisDate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRNAAnalysisDate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRNAAnalysisDate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastRNAAnalysisDate, rowB.original.lastRNAAnalysisDate);
     }
@@ -431,7 +430,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last Visium ADH Stain Date',
     accessor: 'lastVisiumADHStainDate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastVisiumADHStainDate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastVisiumADHStainDate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastVisiumADHStainDate, rowB.original.lastVisiumADHStainDate);
     }
@@ -439,7 +438,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last Visium TO Staining Date',
     accessor: 'lastStainTODate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastStainTODate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastStainTODate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastStainTODate, rowB.original.lastStainTODate);
     }
@@ -447,7 +446,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last Visium LP Staining Date',
     accessor: 'lastStainLPDate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastStainLPDate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastStainLPDate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastStainLPDate, rowB.original.lastStainLPDate);
     }
@@ -455,7 +454,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last cDNA Transfer Date',
     accessor: 'lastCDNADate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastCDNADate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastCDNADate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastCDNADate, rowB.original.lastCDNADate);
     }
@@ -463,7 +462,8 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last Date 96 Well Plate Released',
     accessor: 'lastRelease96WellPlateData',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastRelease96WellPlateData'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) =>
+      formatDateFieldDisplay(props, 'lastRelease96WellPlateData'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastRelease96WellPlateData, rowB.original.lastRelease96WellPlateData);
     }
@@ -471,7 +471,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last Xenium Probe Hybridisation Date',
     accessor: 'lastXeniumProbeHybridisationDate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) =>
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) =>
       formatDateFieldDisplay(props, 'lastXeniumProbeHybridisationDate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(
@@ -483,7 +483,7 @@ const columns: Column<WorkProgressResultTableEntry>[] = [
   {
     Header: 'Last Xenium Analyser Date',
     accessor: 'lastXeniumAnalyserDate',
-    Cell: (props: Cell<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastXeniumAnalyserDate'),
+    Cell: (props: CellProps<WorkProgressResultTableEntry>) => formatDateFieldDisplay(props, 'lastXeniumAnalyserDate'),
     sortType: (rowA, rowB) => {
       return getDateSortType(rowA.original.lastXeniumAnalyserDate, rowB.original.lastXeniumAnalyserDate);
     }

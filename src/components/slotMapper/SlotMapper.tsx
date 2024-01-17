@@ -53,7 +53,7 @@ const SlotMapper: React.FC<ExtendedSlotMapperProps> = ({
     });
   }, [initialOutputLabware, failedSlotsCheck, initialInputLabware]);
 
-  const [current, send] = useMachine(() => memoSlotMapperMachine);
+  const [current, send] = useMachine(memoSlotMapperMachine);
 
   const { inputLabware, outputSlotCopies, colorByBarcode, failedSlots, errors } = current.context;
 

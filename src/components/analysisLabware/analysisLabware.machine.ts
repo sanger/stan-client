@@ -43,9 +43,16 @@ type AnalysisLabwareEvent =
   | UpdateAllCommentTypeEvent
   | UpdateAllWorkNumbersEvent;
 
-export const analysisLabwareMachine = createMachine<AnalysisLabwareContext, AnalysisLabwareEvent>(
+export const analysisLabwareMachine = createMachine(
   {
     id: 'record_analysis',
+    types: {} as {
+      context: AnalysisLabwareContext;
+      events: AnalysisLabwareEvent;
+    },
+    context: ({ input }: { input: AnalysisLabwareContext }): AnalysisLabwareContext => ({
+      ...input
+    }),
     initial: 'ready',
     states: {
       ready: {
@@ -76,60 +83,60 @@ export const analysisLabwareMachine = createMachine<AnalysisLabwareContext, Anal
   },
   {
     actions: {
-      assignAnalysisType: (ctx, e) => {
-        if (e.type !== 'UPDATE_ANALYSIS_TYPE') return;
-        ctx.operationType = e.value === AnalysisMeasurementType.RIN ? OperationType.RIN : OperationType.DV200;
-        const measurements = buildMeasurementFields(MeasurementValueCategory.SINGLE_VALUE_TYPE, ctx.operationType);
+      assignAnalysisType: ({ context, event }) => {
+        if (event.type !== 'UPDATE_ANALYSIS_TYPE') return;
+        context.operationType = event.value === AnalysisMeasurementType.RIN ? OperationType.RIN : OperationType.DV200;
+        const measurements = buildMeasurementFields(MeasurementValueCategory.SINGLE_VALUE_TYPE, context.operationType);
         //Change measurement data in all labwares
-        ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
+        context.analysisLabwares = context.analysisLabwares.map((labware) => {
           return {
             ...labware,
             measurements: measurements
           };
         });
       },
-      assignMeasurementType: (ctx, e) => {
-        if (e.type !== 'UPDATE_MEASUREMENT_TYPE') return;
-        const indx = ctx.analysisLabwares.findIndex((labware) => labware.barcode === e.barcode);
-        if (indx < 0 || !ctx.operationType) return;
+      assignMeasurementType: ({ context, event }) => {
+        if (event.type !== 'UPDATE_MEASUREMENT_TYPE') return;
+        const indx = context.analysisLabwares.findIndex((labware) => labware.barcode === event.barcode);
+        if (indx < 0 || !context.operationType) return;
 
         const updateAnalysisLabware = {
-          ...ctx.analysisLabwares[indx],
-          measurements: buildMeasurementFields(e.value, ctx.operationType)
+          ...context.analysisLabwares[indx],
+          measurements: buildMeasurementFields(event.value, context.operationType)
         };
-        ctx.analysisLabwares = [
-          ...ctx.analysisLabwares.slice(0, indx),
+        context.analysisLabwares = [
+          ...context.analysisLabwares.slice(0, indx),
           updateAnalysisLabware,
-          ...ctx.analysisLabwares.slice(indx + 1)
+          ...context.analysisLabwares.slice(indx + 1)
         ];
       },
-      assignLabwareData: (ctx, e) => {
-        if (e.type !== 'UPDATE_LABWARE_DATA') return;
-        const indx = ctx.analysisLabwares.findIndex((labware) => labware.barcode === e.labware.barcode);
+      assignLabwareData: ({ context, event }) => {
+        if (event.type !== 'UPDATE_LABWARE_DATA') return;
+        const indx = context.analysisLabwares.findIndex((labware) => labware.barcode === event.labware.barcode);
         if (indx < 0) return;
-        const updateAnalysisLabware = { ...ctx.analysisLabwares[indx] };
-        switch (e.labware.field) {
+        const updateAnalysisLabware = { ...context.analysisLabwares[indx] };
+        switch (event.labware.field) {
           case 'workNumber': {
-            updateAnalysisLabware.workNumber = e.labware.value;
+            updateAnalysisLabware.workNumber = event.labware.value;
             break;
           }
           case 'measurements': {
-            if (!e.labware.measurementType) return;
+            if (!event.labware.measurementType) return;
             const measurement = {
-              name: e.labware.measurementType,
-              value: e.labware.value
+              name: event.labware.measurementType,
+              value: event.labware.value
             };
             if (
-              e.labware.measurementType === AnalysisMeasurementType.RIN ||
-              e.labware.measurementType === AnalysisMeasurementType.DV200
+              event.labware.measurementType === AnalysisMeasurementType.RIN ||
+              event.labware.measurementType === AnalysisMeasurementType.DV200
             )
               updateAnalysisLabware.measurements = [measurement];
             else {
               updateAnalysisLabware.measurements = updateAnalysisLabware.measurements.map((measurement) => {
-                if (measurement.name === e.labware.measurementType) {
+                if (measurement.name === event.labware.measurementType) {
                   return {
                     ...measurement,
-                    value: e.labware.value
+                    value: event.labware.value
                   };
                 } else return measurement;
               });
@@ -137,33 +144,33 @@ export const analysisLabwareMachine = createMachine<AnalysisLabwareContext, Anal
             break;
           }
           case 'comment': {
-            updateAnalysisLabware.commentId = e.labware.value !== '' ? Number(e.labware.value) : undefined;
+            updateAnalysisLabware.commentId = event.labware.value !== '' ? Number(event.labware.value) : undefined;
             break;
           }
         }
-        ctx.analysisLabwares = [
-          ...ctx.analysisLabwares.slice(0, indx),
+        context.analysisLabwares = [
+          ...context.analysisLabwares.slice(0, indx),
           updateAnalysisLabware,
-          ...ctx.analysisLabwares.slice(indx + 1)
+          ...context.analysisLabwares.slice(indx + 1)
         ];
       },
-      assignComments: (ctx, e) => {
-        if (e.type !== 'UPDATE_ALL_COMMENTS_TYPE') return;
+      assignComments: ({ context, event }) => {
+        if (event.type !== 'UPDATE_ALL_COMMENTS_TYPE') return;
         //Change measurement data in all labwares
-        ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
+        context.analysisLabwares = context.analysisLabwares.map((labware) => {
           return {
             ...labware,
-            commentId: e.commentId !== '' ? Number(e.commentId) : undefined
+            commentId: event.commentId !== '' ? Number(event.commentId) : undefined
           };
         });
       },
-      assignWorkNumbers: (ctx, e) => {
-        if (e.type !== 'UPDATE_ALL_WORKNUMBERS') return;
+      assignWorkNumbers: ({ context, event }) => {
+        if (event.type !== 'UPDATE_ALL_WORKNUMBERS') return;
         //Change measurement data in all labwares
-        ctx.analysisLabwares = ctx.analysisLabwares.map((labware) => {
+        context.analysisLabwares = context.analysisLabwares.map((labware) => {
           return {
             ...labware,
-            workNumber: e.workNumber
+            workNumber: event.workNumber
           };
         });
       }

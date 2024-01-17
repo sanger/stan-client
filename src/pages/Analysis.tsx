@@ -21,6 +21,7 @@ import ButtonBar from '../components/ButtonBar';
 import OperationCompleteModal from '../components/modal/OperationCompleteModal';
 import Warning from '../components/notifications/Warning';
 import { Link, useLoaderData, useLocation, useNavigate } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 // TODO Add front-end validation to this page
 
@@ -48,14 +49,14 @@ function Analysis() {
   const [analysisMode, setAnalysisMode] = React.useState(false);
 
   const formMachine = React.useMemo(() => {
-    return createFormMachine<RnaAnalysisRequest, RecordRnaAnalysisMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<RnaAnalysisRequest, RecordRnaAnalysisMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordRNAAnalysis({
-            request: e.values
+            request: input.event.values
           });
-        }
+        })
       }
     });
   }, []);

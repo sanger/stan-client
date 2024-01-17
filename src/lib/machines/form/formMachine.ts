@@ -1,12 +1,10 @@
-import { MachineServiceDone, MachineServiceError } from '../../../types/stan';
-import { createMachine } from 'xstate';
-import { assign } from '@xstate/immer';
+import { assign, createMachine } from 'xstate';
 import { castDraft } from 'immer';
-import { ClientError } from 'graphql-request';
+import { ServerErrors } from '../../../types/stan';
 
 export interface FormContext<R> {
   submissionResult?: R;
-  serverError?: ClientError;
+  serverError?: ServerErrors;
 }
 
 export type FormEvent<V, R> =
@@ -15,15 +13,19 @@ export type FormEvent<V, R> =
       values: V;
     }
   | { type: 'RESET' }
-  | MachineServiceDone<'submitForm', R>
-  | MachineServiceError<'submitForm'>;
+  | { type: 'xstate.done.actor.submitForm'; output: R }
+  | { type: 'xstate.error.actor.submitForm'; error: ServerErrors };
 
 /**
  * Create a form machine
  */
 export default function createFormMachine<V, R>() {
-  return createMachine<FormContext<R>, FormEvent<V, R>>(
+  return createMachine(
     {
+      types: {
+        events: {} as FormEvent<V, R>,
+        context: {} as FormContext<R>
+      },
       id: 'createFormMachine',
       initial: 'fillingOutForm',
       states: {
@@ -36,6 +38,7 @@ export default function createFormMachine<V, R>() {
           entry: 'unsetServerError',
           invoke: {
             src: 'submitForm',
+            input: ({ context, event }) => ({ context, event }),
             id: 'submitForm',
             onDone: {
               target: 'submitted',
@@ -59,22 +62,30 @@ export default function createFormMachine<V, R>() {
     },
     {
       actions: {
-        unsetServerError: assign((ctx) => (ctx.serverError = undefined)),
-
-        unsetSubmissionResult: assign((ctx) => (ctx.submissionResult = undefined)),
-
-        assignSubmissionResult: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.submitForm') {
-            return;
-          }
-          ctx.submissionResult = castDraft(e.data);
+        unsetServerError: assign(({ context }) => {
+          context.serverError = undefined;
+          return context;
         }),
 
-        assignSubmissionError: assign((ctx, e) => {
-          if (e.type !== 'error.platform.submitForm') {
-            return;
+        unsetSubmissionResult: assign(({ context }) => {
+          context.submissionResult = undefined;
+          return context;
+        }),
+
+        assignSubmissionResult: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.submitForm') {
+            return context;
           }
-          ctx.serverError = castDraft(e.data);
+          context.submissionResult = event.output;
+          return context;
+        }),
+
+        assignSubmissionError: assign(({ context, event }) => {
+          if (event.type !== 'xstate.error.actor.submitForm') {
+            return context;
+          }
+          context.serverError = castDraft(event.error);
+          return context;
         })
       }
     }

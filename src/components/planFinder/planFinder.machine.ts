@@ -1,8 +1,7 @@
 import { FindPlanDataQuery, LabwareFlaggedFieldsFragment, Maybe } from '../../types/sdk';
-import { ClientError } from 'graphql-request';
-import { createMachine } from 'xstate';
-import { assign } from '@xstate/immer';
+import { assign, createMachine, fromPromise } from 'xstate';
 import { stanCore } from '../../lib/sdk';
+import { ServerErrors } from '../../types/stan';
 
 type PlanFinderContext = {
   /**
@@ -23,31 +22,30 @@ type PlanFinderContext = {
   /**
    * Error returned from a core request
    */
-  requestError: Maybe<ClientError>;
+  requestError: Maybe<ServerErrors>;
 };
 
 type PlanFinderEvent =
   | { type: 'SUBMIT_LABWARE'; labware: LabwareFlaggedFieldsFragment }
   | { type: 'REMOVE_PLAN_BY_BARCODE'; barcode: string }
   | {
-      type: 'done.invoke.findPlan';
-      data: FindPlanDataQuery;
+      type: 'xstate.done.actor.findPlan';
+      output: FindPlanDataQuery;
     }
   | {
-      type: 'error.platform.findPlan';
-      data: ClientError;
+      type: 'xstate.error.actor.findPlan';
+      error: ServerErrors;
     };
 
-export const planFinderMachine = createMachine<PlanFinderContext, PlanFinderEvent>(
+export const planFinderMachine = createMachine(
   {
     id: 'planFinderMachine',
-    initial: 'idle',
-    context: {
-      labware: undefined,
-      plans: new Map(),
-      validationError: null,
-      requestError: null
+    types: {} as {
+      context: PlanFinderContext;
+      events: PlanFinderEvent;
     },
+    initial: 'idle',
+    context: ({ input }: { input: PlanFinderContext }) => ({ ...input }),
     states: {
       idle: {
         on: {
@@ -62,7 +60,7 @@ export const planFinderMachine = createMachine<PlanFinderContext, PlanFinderEven
         always: [
           {
             // Check plan hasn't already been found for this labware
-            cond: (ctx) => ctx.plans.has(ctx.labware!.barcode),
+            guard: ({ context }) => context.plans.has(context.labware!.barcode),
             target: 'idle',
             actions: ['assignDuplicationError', 'resetLabware']
           },
@@ -71,8 +69,13 @@ export const planFinderMachine = createMachine<PlanFinderContext, PlanFinderEven
       },
       searching: {
         invoke: {
-          src: 'findPlan',
           id: 'findPlan',
+          src: fromPromise(({ input }) =>
+            stanCore.FindPlanData({
+              barcode: input.barcode
+            })
+          ),
+          input: ({ context }) => ({ barcode: context.labware!.barcode }),
           onDone: {
             target: 'idle',
             actions: ['assignPlan', 'resetLabware']
@@ -87,48 +90,50 @@ export const planFinderMachine = createMachine<PlanFinderContext, PlanFinderEven
   },
   {
     actions: {
-      assignLabware: assign((ctx, e) => {
-        if (e.type !== 'SUBMIT_LABWARE') return;
-        ctx.labware = e.labware;
+      assignLabware: assign(({ context, event }) => {
+        if (event.type !== 'SUBMIT_LABWARE') return context;
+        context.labware = event.labware;
+        return context;
       }),
 
-      assignDuplicationError: assign((ctx, e) => {
-        if (e.type !== 'SUBMIT_LABWARE') return;
-        ctx.validationError = `Plan has already been found for ${e.labware.barcode}`;
+      assignDuplicationError: assign(({ context, event }) => {
+        if (event.type !== 'SUBMIT_LABWARE') return context;
+        context.validationError = `Plan has already been found for ${event.labware.barcode}`;
+        return context;
       }),
 
-      assignPlan: assign((ctx, e) => {
-        if (e.type !== 'done.invoke.findPlan') return;
+      assignPlan: assign(({ context, event }) => {
+        if (event.type !== 'xstate.done.actor.findPlan') return context;
         //Remove all actions, if any that doesn't belong to the labware in context
-        e.data.planData.plan.planActions = e.data.planData.plan.planActions.filter(
-          (action) => action.destination.labwareId === ctx.labware!.id
+        event.output.planData.plan.planActions = event.output.planData.plan.planActions.filter(
+          (action) => action.destination.labwareId === context.labware!.id
         );
-        ctx.plans.set(ctx.labware!.barcode, e.data);
+        context.plans.set(context.labware!.barcode, event.output);
+        return context;
       }),
 
-      assignRequestError: assign((ctx, e) => {
-        if (e.type !== 'error.platform.findPlan') return;
-        ctx.requestError = e.data;
+      assignRequestError: assign(({ context, event }) => {
+        if (event.type !== 'xstate.error.actor.findPlan') return context;
+        context.requestError = event.error;
+        return context;
       }),
 
-      clearErrors: assign((ctx) => {
-        ctx.requestError = null;
-        ctx.validationError = null;
+      clearErrors: assign(({ context }) => {
+        context.requestError = null;
+        context.validationError = null;
+        return context;
       }),
 
-      removePlanByBarcode: assign((ctx, e) => {
-        if (e.type !== 'REMOVE_PLAN_BY_BARCODE') return;
-        ctx.plans.delete(e.barcode);
+      removePlanByBarcode: assign(({ context, event }) => {
+        if (event.type !== 'REMOVE_PLAN_BY_BARCODE') return context;
+        context.plans.delete(event.barcode);
+        return context;
       }),
 
-      resetLabware: assign((ctx) => (ctx.labware = undefined))
-    },
-
-    services: {
-      findPlan: (ctx) =>
-        stanCore.FindPlanData({
-          barcode: ctx.labware!.barcode
-        })
+      resetLabware: assign(({ context }) => {
+        context.labware = undefined;
+        return context;
+      })
     }
   }
 );

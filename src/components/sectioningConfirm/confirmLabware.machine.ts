@@ -1,8 +1,6 @@
-import { createMachine } from 'xstate';
+import { assign, createMachine } from 'xstate';
 import { Comment, ConfirmOperationLabware, ConfirmSection, ConfirmSectionLabware, Maybe } from '../../types/sdk';
 import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
-import { assign } from '@xstate/immer';
-import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 import { cloneDeep } from 'lodash';
 import { Address, NewFlaggedLabwareLayout } from '../../types/stan';
 
@@ -75,8 +73,8 @@ type CancelEditLayoutEvent = { type: 'CANCEL_EDIT_LAYOUT' };
 type DoneEditLayoutEvent = { type: 'DONE_EDIT_LAYOUT' };
 
 export type LayoutMachineDone = {
-  type: 'done.invoke.layoutMachine';
-  data: { layoutPlan: LayoutPlan };
+  type: 'xstate.done.actor.layoutMachine';
+  output: { layoutPlan: LayoutPlan };
 };
 
 type ToggleCancelEvent = { type: 'TOGGLE_CANCEL' };
@@ -139,9 +137,13 @@ export const createConfirmLabwareMachine = (
   labware: NewFlaggedLabwareLayout,
   layoutPlan: LayoutPlan
 ) =>
-  createMachine<ConfirmLabwareContext, ConfirmLabwareEvent>(
+  createMachine(
     {
       id: 'sectioningOutcome',
+      types: {} as {
+        context: ConfirmLabwareContext;
+        events: ConfirmLabwareEvent;
+      },
       initial: 'editableMode',
       context: {
         comments,
@@ -188,7 +190,11 @@ export const createConfirmLabwareMachine = (
         },
         editingLayout: {
           invoke: {
-            src: 'layoutMachine',
+            src: 'createLayoutMachine',
+            input: ({ context }) => ({
+              layoutPlan: context.layoutPlan,
+              plannedActions: context.originalLayoutPlan.plannedActions
+            }),
             id: 'layoutMachine',
             onDone: {
               target: 'editableMode',
@@ -206,107 +212,114 @@ export const createConfirmLabwareMachine = (
         /**
          * Assign a comment to a particular address
          */
-        assignAddressComment: assign((ctx, e) => {
-          if (e.type !== 'SET_COMMENT_FOR_ADDRESS') {
-            return;
+        assignAddressComment: assign(({ context, event }) => {
+          if (event.type !== 'SET_COMMENT_FOR_ADDRESS') {
+            return context;
           }
-          if (e.commentId === '') {
-            ctx.addressToCommentMap.delete(e.address);
+          if (event.commentId === '') {
+            context.addressToCommentMap.delete(event.address);
           } else {
-            ctx.addressToCommentMap.set(e.address, Number(e.commentId));
+            context.addressToCommentMap.set(event.address, Number(event.commentId));
           }
+          return context;
         }),
-        assignSectionAddressComment: assign((ctx, e) => {
-          if (e.type !== 'SET_COMMENTS_FOR_SECTION') {
-            return;
+        assignSectionAddressComment: assign(({ context, event }) => {
+          if (event.type !== 'SET_COMMENTS_FOR_SECTION') {
+            return context;
           }
-          const plannedAction = ctx.layoutPlan.plannedActions.get(e.address);
+          const plannedAction = context.layoutPlan.plannedActions.get(event.address);
 
-          if (plannedAction && plannedAction[e.sectionIndex]) {
-            plannedAction[e.sectionIndex].commentIds = e.commentIds.map((commentID) => Number(commentID));
+          if (plannedAction && plannedAction[event.sectionIndex]) {
+            plannedAction[event.sectionIndex].commentIds = event.commentIds.map((commentID) => Number(commentID));
           }
+          return context;
         }),
         /**
          * Assign all the addresses with planned actions in the same comment
          */
-        assignAllComment: assign((ctx, e) => {
-          if (e.type !== 'SET_COMMENT_FOR_ALL') {
-            return;
+        assignAllComment: assign(({ context, event }) => {
+          if (event.type !== 'SET_COMMENT_FOR_ALL') {
+            return context;
           }
-          if (e.commentIds.length === 0) {
-            ctx.addressToCommentMap.clear();
+          if (event.commentIds.length === 0) {
+            context.addressToCommentMap.clear();
           } else {
-            ctx.layoutPlan.plannedActions.forEach((value, key) => {
-              ctx.addressToCommentMap.set(key, Number(e.commentIds[0]));
+            context.layoutPlan.plannedActions.forEach((value, key) => {
+              context.addressToCommentMap.set(key, Number(event.commentIds[0]));
             });
           }
-          ctx.commentsForAllSections = e.commentIds;
-          ctx.layoutPlan.plannedActions.forEach((action) => {
+          context.commentsForAllSections = event.commentIds;
+          context.layoutPlan.plannedActions.forEach((action) => {
             action.forEach((action) => {
-              action.commentIds = e.commentIds.map((commentID) => Number(commentID));
+              action.commentIds = event.commentIds.map((commentID) => Number(commentID));
             });
           });
+          return context;
         }),
         /**
          * Assign all the addresses with planned actions in the same comment
          */
-        assignRegionInSection: assign((ctx, e) => {
-          if (e.type !== 'SET_REGION_FOR_SECTION') {
-            return;
+        assignRegionInSection: assign(({ context, event }) => {
+          if (event.type !== 'SET_REGION_FOR_SECTION') {
+            return context;
           }
-          const plannedAction = ctx.layoutPlan.plannedActions.get(e.address);
-          if (plannedAction && plannedAction[e.sectionIndex]) {
-            plannedAction[e.sectionIndex].region = e.region;
+          const plannedAction = context.layoutPlan.plannedActions.get(event.address);
+          if (plannedAction && plannedAction[event.sectionIndex]) {
+            plannedAction[event.sectionIndex].region = event.region;
           }
+          return context;
         }),
 
         /**
          * Assign the layout plan that comes back from the layout machine.
          * If there are any comments for slots that have now been removed, removed the comment also
          */
-        assignLayoutPlan: assign((ctx, e) => {
-          if (e.type !== 'done.invoke.layoutMachine' || !e.data) {
-            return;
+        assignLayoutPlan: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.layoutMachine' || !event.output) {
+            return context;
           }
-          ctx.layoutPlan = e.data.layoutPlan;
+          context.layoutPlan = event.output.layoutPlan;
 
-          const unemptyAddresses = new Set(ctx.layoutPlan.plannedActions.keys());
-          ctx.addressToCommentMap.forEach((_, key) => {
+          const unemptyAddresses = new Set(context.layoutPlan.plannedActions.keys());
+          context.addressToCommentMap.forEach((_, key) => {
             if (!unemptyAddresses.has(key)) {
-              ctx.addressToCommentMap.delete(key);
+              context.addressToCommentMap.delete(key);
             }
           });
+          return context;
         }),
 
         /**
          * Toggles whether this labware was used or not
          */
-        toggleCancel: assign((ctx, e) => {
-          if (e.type !== 'TOGGLE_CANCEL') {
-            return;
+        toggleCancel: assign(({ context, event }) => {
+          if (event.type !== 'TOGGLE_CANCEL') {
+            return context;
           }
-          ctx.cancelled = !ctx.cancelled;
+          context.cancelled = !context.cancelled;
+          return context;
         }),
 
-        updateSectionNumber: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_SECTION_NUMBER') {
-            return;
+        updateSectionNumber: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_SECTION_NUMBER') {
+            return context;
           }
-          const plannedAction = ctx.layoutPlan.plannedActions.get(e.slotAddress);
+          const plannedAction = context.layoutPlan.plannedActions.get(event.slotAddress);
 
-          if (plannedAction && plannedAction[e.sectionIndex]) {
-            plannedAction[e.sectionIndex].newSection = e.sectionNumber;
+          if (plannedAction && plannedAction[event.sectionIndex]) {
+            plannedAction[event.sectionIndex].newSection = event.sectionNumber;
           }
+          return context;
         }),
 
-        updateAllSources: assign((ctx, e) => {
-          if (e.type !== 'UPDATE_ALL_SOURCES') {
-            return;
+        updateAllSources: assign(({ context, event }) => {
+          if (event.type !== 'UPDATE_ALL_SOURCES') {
+            return context;
           }
           /**There is a change in sections (precisely section numbers) from parent , so update the plans in this machine context**/
           //copy the changes to current layout plan as well
-          for (let [key, updateSources] of e.plannedActions.entries()) {
-            const currentSources = ctx.layoutPlan.plannedActions.get(key);
+          for (let [key, updateSources] of event.plannedActions.entries()) {
+            const currentSources = context.layoutPlan.plannedActions.get(key);
             updateSources &&
               updateSources.forEach((source, indx) => {
                 if (currentSources && currentSources.length > indx) {
@@ -314,27 +327,24 @@ export const createConfirmLabwareMachine = (
                 }
               });
           }
+          return context;
         }),
-        commitConfirmation: assign((ctx) => {
+        commitConfirmation: assign(({ context }) => {
           const confirmSections: Array<ConfirmSection> = [];
-          for (let [destinationAddress, originalPlannedActions] of ctx.layoutPlan.plannedActions.entries()) {
+          for (let [destinationAddress, originalPlannedActions] of context.layoutPlan.plannedActions.entries()) {
             confirmSections.push(...buildConfirmSections(destinationAddress, originalPlannedActions));
           }
-          ctx.confirmSectionLabware = {
-            barcode: ctx.labware.barcode!,
-            cancelled: ctx.cancelled,
-            confirmSections: ctx.cancelled ? undefined : confirmSections,
-            addressComments: Array.from(ctx.addressToCommentMap.entries()).map(([address, commentId]) => ({
+          context.confirmSectionLabware = {
+            barcode: context.labware.barcode!,
+            cancelled: context.cancelled,
+            confirmSections: context.cancelled ? undefined : confirmSections,
+            addressComments: Array.from(context.addressToCommentMap.entries()).map(([address, commentId]) => ({
               address,
               commentId
             }))
           };
+          return context;
         })
-      },
-      services: {
-        layoutMachine: (ctx, _e) => {
-          return createLayoutMachine(ctx.layoutPlan, ctx.originalLayoutPlan.plannedActions);
-        }
       }
     }
   );

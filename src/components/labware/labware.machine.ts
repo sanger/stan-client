@@ -1,33 +1,37 @@
-import { Machine, MachineOptions, send } from 'xstate';
+import { assign, createMachine, enqueueActions } from 'xstate';
 import { LabwareMachineContext, LabwareMachineEvent, LabwareMachineSchema } from './labware.types';
-import { assign } from '@xstate/immer';
-import { pure } from 'xstate/lib/actions';
 import { emptySlots, filledSlots, findSlotByAddress, isSlotEmpty, isSlotFilled } from '../../lib/helpers/slotHelper';
 import { sortDownRight } from '../../lib/helpers/labwareHelper';
+import { SlotFieldsFragment } from '../../types/sdk';
 
 function createLabwareMachine() {
-  return Machine<LabwareMachineContext, LabwareMachineSchema, LabwareMachineEvent>(
+  return createMachine(
     {
       id: 'labwareMachine',
-      initial: 'unknown',
-      context: {
-        slots: [],
-        selectedAddresses: new Set<string>(),
-        lastSelectedAddress: null,
-        selectionMode: 'single',
-        selectable: 'none'
+      types: {} as {
+        context: LabwareMachineContext;
+        schema: LabwareMachineSchema;
+        events: LabwareMachineEvent;
       },
+      initial: 'unknown',
+      context: ({ input }: { input: LabwareMachineContext }) => ({
+        slots: input.slots ?? [],
+        selectedAddresses: input.selectedAddresses ?? new Set<string>(),
+        lastSelectedAddress: input.lastSelectedAddress ?? null,
+        selectionMode: input.selectionMode ?? 'single',
+        selectable: input.selectable ?? 'none'
+      }),
       on: {
         RESET_SELECTED: {
-          actions: assign((ctx) => ctx.selectedAddresses.clear())
+          actions: ({ context }) => context.selectedAddresses.clear()
         },
         CHANGE_SELECTION_MODE: {
-          actions: assign((ctx, e) => {
-            ctx.selectable = e.selectable;
-            ctx.selectionMode = e.selectionMode;
-            ctx.selectedAddresses.clear();
-          }),
-          target: 'unknown'
+          actions: ({ context, event }) => {
+            context.selectable = event.selectable;
+            context.selectionMode = event.selectionMode;
+            context.selectedAddresses.clear();
+          },
+          target: '.unknown'
         },
         UPDATE_SLOTS: {
           actions: 'updateSlots'
@@ -39,8 +43,10 @@ function createLabwareMachine() {
         },
         non_selectable: {},
         selectable: {
+          initial: 'any',
           states: {
             any: {
+              initial: 'single',
               states: {
                 single: {
                   on: {
@@ -58,6 +64,7 @@ function createLabwareMachine() {
               }
             },
             non_empty: {
+              initial: 'single',
               states: {
                 /**
                  * The event handlers in this state are the same as `{any: single}` above
@@ -83,6 +90,7 @@ function createLabwareMachine() {
               }
             },
             empty: {
+              initial: 'single',
               states: {
                 single: {
                   on: {
@@ -112,86 +120,96 @@ function createLabwareMachine() {
         locked: {}
       }
     },
-    machineOptions
+    {
+      actions: {
+        clearSelectedSlots: assign(({ context }) => {
+          context.selectedAddresses.clear();
+          return context;
+        }),
+
+        deselectSlot: assign(({ context, event }) => {
+          'address' in event && context.selectedAddresses.delete(event.address);
+          return context;
+        }),
+
+        forwardEvent: enqueueActions(({ context, event, enqueue }) => {
+          enqueue(event);
+        }),
+
+        selectSlot: assign(({ context, event }) => {
+          'address' in event && context.selectedAddresses.add(event.address);
+          return context;
+        }),
+
+        storeLastSelectedSlot: assign(({ context, event }) => {
+          'address' in event && (context.lastSelectedAddress = event.address);
+          return context;
+        }),
+
+        /**
+         * Selects all slots between the `ctx.lastSelectedAddress` (if available), and the newly clicked address.
+         * Takes into account the current state (e.g. empty, non-empty) of the machine
+         */
+        selectSlotsBetween: assign(({ context, event, self }) => {
+          if (event.type !== 'SELECT_TO_SLOT' || context.lastSelectedAddress == null) {
+            return context;
+          }
+          // This may need to be configurable in the future...?
+          const sortedSlots = sortDownRight(context.slots) as SlotFieldsFragment[];
+
+          const selectedAddressIndex = sortedSlots.findIndex((slot) => slot.address === event.address);
+          const lastSelectedAddressIndex = sortedSlots.findIndex(
+            (slot) => slot.address === context.lastSelectedAddress
+          );
+
+          const [startSlotIndex, endSlotIndex] = [
+            selectedAddressIndex,
+            lastSelectedAddressIndex
+            // The default JS sort is stupid, as it converts values to strings, and compares them lexicographically.
+            // e.g. you end up with nonsense like 9 > 80.
+            //  To compare numbers, we must provide our own comparator.
+          ].sort((a, b) => a - b);
+
+          let selectedSlots = sortedSlots.slice(startSlotIndex, endSlotIndex + 1);
+          const state = self.getSnapshot().getMeta().state;
+
+          // If we only want to select non-empty wells, filter out empty ones...
+          if (state.matches({ selectable: { non_empty: 'multi' } })) {
+            selectedSlots = filledSlots(selectedSlots);
+
+            // If we only want to select empty wells, filter out non-empty ones...
+          } else if (state.matches({ selectable: { empty: 'multi' } })) {
+            selectedSlots = emptySlots(selectedSlots);
+          }
+
+          selectedSlots.forEach((slot) => context.selectedAddresses.add(slot.address));
+          return context;
+        }),
+
+        updateSlots: assign(({ context, event }) => {
+          event.type === 'UPDATE_SLOTS' && (context.slots = event.slots);
+          return context;
+        })
+      },
+
+      guards: {
+        isSelectedEmpty: ({ context, event }) => {
+          return 'address' in event && isSlotEmpty(findSlotByAddress(context.slots, event.address));
+        },
+
+        isSelectedNotEmpty: ({ context, event }) => {
+          return 'address' in event && isSlotFilled(findSlotByAddress(context.slots, event.address));
+        },
+
+        isSlotSelected: ({ context, event }) => {
+          return 'address' in event && context.selectedAddresses.has(event.address);
+        },
+
+        isLastSelectedSlot: ({ context, event }) => context.lastSelectedAddress != null
+      }
+    }
   );
 }
-
-const machineOptions: Partial<MachineOptions<LabwareMachineContext, LabwareMachineEvent>> = {
-  actions: {
-    clearSelectedSlots: assign((ctx) => ctx.selectedAddresses.clear()),
-
-    deselectSlot: assign((ctx, e) => {
-      'address' in e && ctx.selectedAddresses.delete(e.address);
-    }),
-
-    forwardEvent: pure((ctx, event) => send(event)),
-
-    selectSlot: assign((ctx, e) => {
-      'address' in e && ctx.selectedAddresses.add(e.address);
-    }),
-
-    storeLastSelectedSlot: assign((ctx, e) => {
-      'address' in e && (ctx.lastSelectedAddress = e.address);
-    }),
-
-    /**
-     * Selects all slots between the `ctx.lastSelectedAddress` (if available), and the newly clicked address.
-     * Takes into account the current state (e.g. empty, non-empty) of the machine
-     */
-    selectSlotsBetween: assign((ctx, e, meta) => {
-      if (e.type !== 'SELECT_TO_SLOT' || ctx.lastSelectedAddress == null) {
-        return;
-      }
-
-      // This may need to be configurable in the future...?
-      const sortedSlots = sortDownRight(ctx.slots);
-
-      const selectedAddressIndex = sortedSlots.findIndex((slot) => slot.address === e.address);
-      const lastSelectedAddressIndex = sortedSlots.findIndex((slot) => slot.address === ctx.lastSelectedAddress);
-
-      const [startSlotIndex, endSlotIndex] = [
-        selectedAddressIndex,
-        lastSelectedAddressIndex
-        // The default JS sort is stupid, as it converts values to strings, and compares them lexicographically.
-        // e.g. you end up with nonsense like 9 > 80.
-        //  To compare numbers, we must provide our own comparator.
-      ].sort((a, b) => a - b);
-
-      let selectedSlots = sortedSlots.slice(startSlotIndex, endSlotIndex + 1);
-
-      // If we only want to select non-empty wells, filter out empty ones...
-      if (meta.state?.matches({ selectable: { non_empty: 'multi' } })) {
-        selectedSlots = filledSlots(selectedSlots);
-
-        // If we only want to select empty wells, filter out non-empty ones...
-      } else if (meta.state?.matches({ selectable: { empty: 'multi' } })) {
-        selectedSlots = emptySlots(selectedSlots);
-      }
-
-      selectedSlots.forEach((slot) => ctx.selectedAddresses.add(slot.address));
-    }),
-
-    updateSlots: assign((ctx, e) => {
-      e.type === 'UPDATE_SLOTS' && (ctx.slots = e.slots);
-    })
-  },
-
-  guards: {
-    isSelectedEmpty: (ctx, e) => {
-      return 'address' in e && isSlotEmpty(findSlotByAddress(ctx.slots, e.address));
-    },
-
-    isSelectedNotEmpty: (ctx, e) => {
-      return 'address' in e && isSlotFilled(findSlotByAddress(ctx.slots, e.address));
-    },
-
-    isSlotSelected: (ctx, e) => {
-      return 'address' in e && ctx.selectedAddresses.has(e.address);
-    },
-
-    isLastSelectedSlot: (ctx) => ctx.lastSelectedAddress != null
-  }
-};
 
 export default createLabwareMachine;
 
@@ -200,31 +218,37 @@ export default createLabwareMachine;
  */
 const chooseState = [
   {
-    cond: (ctx: LabwareMachineContext) => ctx.selectable === 'none',
+    guard: ({ context }: { context: LabwareMachineContext }) => context.selectable === 'none',
     target: 'non_selectable'
   },
   {
-    cond: (ctx: LabwareMachineContext) => ctx.selectable === 'any' && ctx.selectionMode === 'single',
+    guard: ({ context }: { context: LabwareMachineContext }) =>
+      context.selectable === 'any' && context.selectionMode === 'single',
     target: 'selectable.any.single'
   },
   {
-    cond: (ctx: LabwareMachineContext) => ctx.selectable === 'any' && ctx.selectionMode === 'multi',
+    guard: ({ context }: { context: LabwareMachineContext }) =>
+      context.selectable === 'any' && context.selectionMode === 'multi',
     target: 'selectable.any.multi'
   },
   {
-    cond: (ctx: LabwareMachineContext) => ctx.selectable === 'non_empty' && ctx.selectionMode === 'single',
+    guard: ({ context }: { context: LabwareMachineContext }) =>
+      context.selectable === 'non_empty' && context.selectionMode === 'single',
     target: 'selectable.non_empty.single'
   },
   {
-    cond: (ctx: LabwareMachineContext) => ctx.selectable === 'non_empty' && ctx.selectionMode === 'multi',
+    guard: ({ context }: { context: LabwareMachineContext }) =>
+      context.selectable === 'non_empty' && context.selectionMode === 'multi',
     target: 'selectable.non_empty.multi'
   },
   {
-    cond: (ctx: LabwareMachineContext) => ctx.selectable === 'empty' && ctx.selectionMode === 'single',
+    guard: ({ context }: { context: LabwareMachineContext }) =>
+      context.selectable === 'empty' && context.selectionMode === 'single',
     target: 'selectable.empty.single'
   },
   {
-    cond: (ctx: LabwareMachineContext) => ctx.selectable === 'empty' && ctx.selectionMode === 'multi',
+    guard: ({ context }: { context: LabwareMachineContext }) =>
+      context.selectable === 'empty' && context.selectionMode === 'multi',
     target: 'selectable.empty.multi'
   }
 ];
@@ -233,11 +257,11 @@ const chooseState = [
  * Event handlers with conditions for checking if a selected slot is empty or not
  */
 const isSelectedEmptyHandler = {
-  cond: 'isSelectedEmpty'
+  guard: 'isSelectedEmpty'
 };
 
 const isSelectedNotEmptyHandler = {
-  cond: 'isSelectedNotEmpty'
+  guard: 'isSelectedNotEmpty'
 };
 
 /**
@@ -245,7 +269,7 @@ const isSelectedNotEmptyHandler = {
  */
 const singleSelectSlotHandler = [
   {
-    cond: 'isSlotSelected'
+    guard: 'isSlotSelected'
   },
   {
     actions: ['clearSelectedSlots', 'selectSlot']
@@ -253,7 +277,7 @@ const singleSelectSlotHandler = [
 ];
 const singleCtrlSelectSlotHandler = [
   {
-    cond: 'isSlotSelected',
+    guard: 'isSlotSelected',
     actions: ['deselectSlot']
   },
   {
@@ -267,11 +291,11 @@ const multiSelectSlotHandler = [
 ];
 const multiSelectToSlotHandler = [
   {
-    cond: 'isSlotSelected',
+    guard: 'isSlotSelected',
     actions: ['deselectSlot']
   },
   {
-    cond: 'isLastSelectedSlot',
+    guard: 'isLastSelectedSlot',
     actions: ['selectSlotsBetween']
   },
   {
@@ -280,7 +304,7 @@ const multiSelectToSlotHandler = [
 ];
 const multiCtrlSelectSlotHandler = [
   {
-    cond: 'isSlotSelected',
+    guard: 'isSlotSelected',
     actions: ['deselectSlot']
   },
   {

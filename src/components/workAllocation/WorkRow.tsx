@@ -19,9 +19,9 @@ import { MAX_NUM_BLOCKANDSLIDES } from './WorkAllocation';
 import FormikInput, { Input } from '../forms/Input';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import Pill from '../Pill';
-import { extractServerErrors } from '../../types/stan';
 import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
+import { AnyMachineSnapshot } from 'xstate';
 
 /**
  * The type of values for the edit form
@@ -71,7 +71,7 @@ export default function WorkRow({
   const workRowMachine = React.useMemo(() => {
     return createWorkRowMachine({ workWithComment: initialWork });
   }, [initialWork]);
-  const [current, send] = useMachine(workRowMachine);
+  const [current, send, actor] = useMachine(workRowMachine);
 
   const {
     editModeEnabled,
@@ -82,23 +82,31 @@ export default function WorkRow({
 
   /**Notify the changes in work fields*/
   React.useEffect(() => {
+    //  current.matches('updating');
+    // const currentEvent = actor.getSnapshot().getMeta().state.event.type;
     if (
-      current.event.type === 'done.invoke.updateWorkPriority' ||
-      current.event.type === 'done.invoke.updateWorkNumSlides' ||
-      current.event.type === 'done.invoke.updateWorkNumBlocks' ||
-      current.event.type === 'done.invoke.updateWorkStatus' ||
-      current.event.type === 'done.invoke.updateWorkOmeroProject' ||
-      current.event.type === 'done.invoke.updateWorkDnapProject'
+      current.matches('xstate.done.actor.updateWorkPriority') ||
+      current.matches('xstate.done.actor.updateWorkNumSlides') ||
+      current.matches('xstate.done.actor.updateWorkNumBlocks') ||
+      current.matches('xstate.done.actor.updateWorkStatus') ||
+      current.matches('xstate.done.actor.updateWorkOmeroProject') ||
+      current.matches('xstate.done.actor.updateWorkDnapProject')
+      // currentEvent === 'xstate.done.actor.updateWorkPriority' ||
+      // currentEvent === 'xstate.done.actor.updateWorkNumSlides' ||
+      // currentEvent === 'xstate.done.actor.updateWorkNumBlocks' ||
+      // currentEvent === 'xstate.done.actor.updateWorkStatus' ||
+      // currentEvent === 'xstate.done.actor.updateWorkOmeroProject' ||
+      // currentEvent === 'xstate.done.actor.updateWorkDnapProject'
     ) {
       onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
     }
-  }, [work, comment, onWorkFieldUpdate, rowIndex, current]);
+  }, [work, comment, onWorkFieldUpdate, rowIndex, current, actor]);
 
   /** Notify the user if enters an invalid DNAP study ID. */
   useEffect(() => {
     if (serverErrors) {
       warningToast({
-        message: extractServerErrors(serverErrors).message!,
+        message: serverErrors.message!,
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 5000
       });
@@ -116,14 +124,20 @@ export default function WorkRow({
   /**
    * Should the edit button by displayed to the user right now
    */
-  const showEditButton = !editModeEnabled && current.nextEvents.includes('EDIT');
+
+  function getNextEvents(snapshot: AnyMachineSnapshot) {
+    return [...new Set([...snapshot._nodes.flatMap((sn) => sn.ownEvents)])];
+  }
+  const showEditButton = !editModeEnabled && getNextEvents(current).includes('EDIT');
 
   /**
    * List of possible events that can change the current status (excluding edit)
    */
-  const nextStatuses = current.nextEvents.filter(
-    (e) => e !== 'EDIT' && e !== 'UPDATE_NUM_SLIDES' && e !== 'UPDATE_NUM_BLOCKS' && e !== 'UPDATE_PRIORITY'
-  );
+  // const nextStatuses = getNextEvents(current).filter(
+  //   (e) => e !== 'EDIT' && e !== 'UPDATE_NUM_SLIDES' && e !== 'UPDATE_NUM_BLOCKS' && e !== 'UPDATE_PRIORITY'
+  // );
+
+  const nextStatuses = getNextEvents(current);
 
   /**
    * Set the initial values for the form to the first next status and first available comment
@@ -140,8 +154,10 @@ export default function WorkRow({
    * Event handler for the form submission. Sends an event to the machine.
    * @param values the form values
    */
+
   const onFormSubmit = async (values: FormValues) => {
-    send(values.type, {
+    send({
+      type: values.type as 'COMPLETE' | 'REACTIVATE',
       commentId: requiresComment(values.type) ? Number(values.commentId) : undefined
     });
   };
@@ -211,7 +227,7 @@ export default function WorkRow({
 
   const renderWorkDnapProjectField = (workNumber: string, dnapStudy: DnapStudy | undefined) => {
     return (
-      <div className="grid  grid grid-flow-row auto-rows-max">
+      <div className="grid grid-flow-row auto-rows-max">
         <Input
           data-testid={`${workNumber}-DnapStudy`}
           type="number"
@@ -257,9 +273,9 @@ export default function WorkRow({
                       name={'priority'}
                       data-testid={`${work.workNumber}-priority`}
                       className={`border-0 border-gray-100`}
-                      onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                      onChange={async (e: React.FormEvent<HTMLInputElement>) => {
                         const priority = e.currentTarget.value.toUpperCase();
-                        setFieldValue('priority', priority);
+                        await setFieldValue('priority', priority);
                         if (validateWorkPriority(priority).length === 0) {
                           send({
                             type: 'UPDATE_PRIORITY',

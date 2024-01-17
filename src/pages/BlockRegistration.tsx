@@ -191,7 +191,7 @@ function BlockRegistration() {
       if (results.length > 0) {
         const result = results[0].response;
         if (result && 'barcodes' in result) {
-          const barcodes: string[] = result['barcodes'];
+          const barcodes: string[] = result['barcodes'] as string[];
           const labwarePromises = barcodes.map((barcode: string) => stanCore.FindLabware({ barcode }));
           Promise.all(labwarePromises)
             .then((labwares) => {

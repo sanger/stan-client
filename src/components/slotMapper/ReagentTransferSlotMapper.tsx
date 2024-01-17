@@ -50,7 +50,7 @@ function ReagentTransferSlotMapper({
     });
   }, [initialSourceLabware, initialDestLabware]);
 
-  const [current, send] = useMachine(() => memoSlotMapperMachine);
+  const [current, send] = useMachine(memoSlotMapperMachine);
 
   const memoOutputSlotCopies = React.useMemo(() => {
     return current.context.outputSlotCopies.length > 0

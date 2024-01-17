@@ -35,6 +35,7 @@ import * as Yup from 'yup';
 import { extractLabwareFromFlagged } from '../lib/helpers/labwareHelper';
 
 import { useLoaderData } from 'react-router-dom';
+import { fromPromise } from 'xstate';
 
 type SampleAddressFormRow = {
   [key: string]: string[]; //key: address-sampleId, values: the selected comments
@@ -177,18 +178,18 @@ export default function ProbeHybridisationQC() {
   );
 
   const formSubmitMachine = React.useMemo(() => {
-    return createFormMachine<CompletionRequest, RecordCompletionMutation>().withConfig({
-      services: {
-        submitForm: (ctx, e) => {
-          if (e.type !== 'SUBMIT_FORM') return Promise.reject();
+    return createFormMachine<CompletionRequest, RecordCompletionMutation>().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.RecordCompletion({
-            request: e.values
+            request: input.event.values
           });
-        }
+        })
       }
     });
   }, [stanCore]);
-  const [currentForm, sendForm] = useMachine(() => formSubmitMachine);
+  const [currentForm, sendForm] = useMachine(formSubmitMachine);
 
   const { serverError, submissionResult } = currentForm.context;
 

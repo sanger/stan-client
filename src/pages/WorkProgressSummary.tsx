@@ -5,7 +5,7 @@ import AppShell from '../components/AppShell';
 import Warning from '../components/notifications/Warning';
 
 import DataTable from '../components/DataTable';
-import { Cell, Column } from 'react-table';
+import { CellProps, Column } from 'react-table';
 import { alphaNumericSortDefault } from '../types/stan';
 import DownloadIcon from '../components/icons/DownloadIcon';
 import { useDownload } from '../lib/hooks/useDownload';
@@ -252,28 +252,28 @@ const columns: Column<WorkProgressSummaryTableEntry>[] = [
   {
     Header: 'Number of Work Requests',
     accessor: 'numWorks',
-    Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
+    Cell: (props: CellProps<WorkProgressSummaryTableEntry>) => {
       return <p className="text-center">{props.row.original.numWorks}</p>;
     }
   },
   {
     Header: 'Total Number of Blocks',
     accessor: 'totalNumBlocks',
-    Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
+    Cell: (props: CellProps<WorkProgressSummaryTableEntry>) => {
       return <p className="text-center">{props.row.original.totalNumBlocks}</p>;
     }
   },
   {
     Header: 'Total Number of Slides',
     accessor: 'totalNumSlides',
-    Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
+    Cell: (props: CellProps<WorkProgressSummaryTableEntry>) => {
       return <p className="text-center">{props.row.original.totalNumSlides}</p>;
     }
   },
   {
     Header: 'Total Number of Original Samples',
     accessor: 'totalNumOriginalSamples',
-    Cell: (props: Cell<WorkProgressSummaryTableEntry>) => {
+    Cell: (props: CellProps<WorkProgressSummaryTableEntry>) => {
       return <p className="text-center">{props.row.original.totalNumOriginalSamples}</p>;
     }
   }

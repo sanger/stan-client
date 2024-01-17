@@ -1,5 +1,4 @@
-import { createMachine } from 'xstate';
-import { assign } from '@xstate/immer';
+import { assign, createMachine, fromPromise } from 'xstate';
 import { castDraft } from 'immer';
 
 import { ClientError } from 'graphql-request';
@@ -87,6 +86,16 @@ type SetPlateType = {
 
 type SaveEvent = { type: 'SAVE' };
 
+type FindReagentPlateEventDone = {
+  type: 'xstate.done.actor.findReagentPlate';
+  output: FindReagentPlateQuery;
+};
+
+type FindReagentPlateEventError = {
+  type: 'xstate.error.actor.findReagentPlate';
+  error: unknown;
+};
+
 export type ReagentTransferEvent =
   | UpdateWorkNumber
   | SetSourceLabware
@@ -96,16 +105,29 @@ export type ReagentTransferEvent =
   | SaveEvent
   | MachineServiceDone<'reagentTransfer', RecordReagentTransferMutation>
   | MachineServiceError<'reagentTransfer'>
-  | MachineServiceDone<'findReagentPlate', FindReagentPlateQuery>
-  | MachineServiceError<'findReagentPlate'>;
+  | FindReagentPlateEventDone
+  | FindReagentPlateEventError;
 
 /**
  * Reagent Transfer Machine Config
  */
-export const reagentTransferMachine = createMachine<ReagentTransferContext, ReagentTransferEvent>(
+export const reagentTransferMachine = createMachine(
   {
+    types: {} as {
+      context: ReagentTransferContext;
+      event: ReagentTransferEvent;
+    },
     id: 'slotCopy',
     initial: 'ready',
+    context: {
+      operationType: 'Dual index plate',
+      sourceReagentPlate: undefined,
+      destLabware: undefined,
+      workNumber: '',
+      reagentTransfers: [],
+      reagentTransferResult: undefined,
+      plateType: ''
+    },
     states: {
       ready: {
         on: {
@@ -115,7 +137,7 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
           SET_SOURCE_LABWARE: [
             {
               target: 'finding',
-              cond: (ctx, e) => /^[0-9]{24}$/.test(e.barcode),
+              guard: ({ event }) => /^[0-9]{24}$/.test(event.barcode),
               actions: ['emptyValidationError', 'assignSourceBarcode']
             },
             {
@@ -131,7 +153,7 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
           UPDATE_TRANSFER_CONTENT: [
             {
               target: 'readyToCopy',
-              cond: (ctx) => ctx.sourceReagentPlate !== undefined && ctx.destLabware !== undefined,
+              guard: ({ event }) => event.reagentTransfers.length > 0,
               actions: 'assignTransfers'
             },
             {
@@ -142,8 +164,9 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
       },
       finding: {
         invoke: {
-          src: 'findReagentPlate',
           id: 'findReagentPlate',
+          src: fromPromise(({ input }) => stanCore.FindReagentPlate({ barcode: input.barcode })),
+          input: ({ event }) => ({ barcode: event.barcode }),
           onDone: {
             target: 'ready',
             actions: 'assignReagentPlate'
@@ -171,8 +194,29 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
       transferring: {
         entry: 'emptyServerError',
         invoke: {
-          src: 'reagentTransfer',
           id: 'reagentTransfer',
+          src: fromPromise(({ input }) => {
+            if (!input.sourceReagentPlate) {
+              return Promise.reject();
+            }
+            return stanCore.RecordReagentTransfer({
+              request: {
+                workNumber: input.workNumber,
+                operationType: input.operationType,
+                destinationBarcode: input.destLabware!.barcode,
+                transfers: input.reagentTransfers,
+                plateType: input.plateType
+              }
+            });
+          }),
+          input: ({ context }) => ({
+            workNumber: context.workNumber,
+            operationType: context.operationType,
+            destinationBarcode: context.destLabware!.barcode,
+            transfers: context.reagentTransfers,
+            plateType: context.plateType,
+            sourceReagentPlate: context.sourceReagentPlate
+          }),
           onDone: {
             target: 'transferred',
             actions: 'assignResult'
@@ -190,82 +234,76 @@ export const reagentTransferMachine = createMachine<ReagentTransferContext, Reag
   },
   {
     actions: {
-      assignWorkNumber: assign((ctx, e) => {
-        if (e.type !== 'UPDATE_WORK_NUMBER') return;
-        ctx.workNumber = e.workNumber;
+      assignWorkNumber: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_WORK_NUMBER') return context;
+        context.workNumber = event.workNumber;
+        return context;
       }),
-      assignSourceBarcode: assign((ctx, e) => {
-        if (e.type !== 'SET_SOURCE_LABWARE') return;
-        ctx.sourceBarcode = e.barcode;
+      assignSourceBarcode: assign(({ context, event }) => {
+        if (event.type !== 'SET_SOURCE_LABWARE') return context;
+        context.sourceBarcode = event.barcode;
+        return context;
       }),
-      assignDestination: assign((ctx, e) => {
-        if (e.type !== 'SET_DESTINATION_LABWARE') return;
-        ctx.destLabware = e.labware;
+      assignDestination: assign(({ context, event }) => {
+        if (event.type !== 'SET_DESTINATION_LABWARE') return context;
+        context.destLabware = event.labware;
+        return context;
       }),
-      assignPlateType: assign((ctx, e) => {
-        if (e.type !== 'SET_PLATE_TYPE') return;
-        ctx.plateType = e.plateType;
+      assignPlateType: assign(({ context, event }) => {
+        if (event.type !== 'SET_PLATE_TYPE') return context;
+        context.plateType = event.plateType;
+        return context;
       }),
-      assignReagentPlate: assign((ctx, e) => {
-        if (e.type !== 'done.invoke.findReagentPlate' || ctx.sourceBarcode === undefined) return;
-        ctx.sourceReagentPlate = e.data.reagentPlate
+      assignReagentPlate: assign(({ context, event }) => {
+        if (event.type !== 'xstate.done.actor.findReagentPlate' || context.sourceBarcode === undefined) return context;
+        context.sourceReagentPlate = event.data.reagentPlate
           ? {
-              barcode: e.data.reagentPlate.barcode,
-              slots: e.data.reagentPlate.slots ?? [],
-              plateType: e.data.reagentPlate.plateType
+              barcode: event.data.reagentPlate.barcode,
+              slots: event.data.reagentPlate.slots ?? [],
+              plateType: event.data.reagentPlate.plateType
             }
-          : { barcode: ctx.sourceBarcode, slots: [] };
-        if (e.data.reagentPlate && e.data.reagentPlate.plateType) {
-          ctx.plateType = e.data.reagentPlate.plateType;
+          : { barcode: context.sourceBarcode, slots: [] };
+        if (event.data.reagentPlate && event.data.reagentPlate.plateType) {
+          context.plateType = event.data.reagentPlate.plateType;
         }
+        return context;
       }),
-      assignTransfers: assign((ctx, e) => {
-        e.type === 'UPDATE_TRANSFER_CONTENT' && (ctx.reagentTransfers = e.reagentTransfers);
+      assignTransfers: assign(({ context, event }) => {
+        event.type === 'UPDATE_TRANSFER_CONTENT' && (context.reagentTransfers = event.reagentTransfers);
+        return context;
       }),
 
-      assignResult: assign((ctx, e) => {
-        if (e.type !== 'done.invoke.reagentTransfer') {
-          return;
+      assignResult: assign(({ context, event }) => {
+        if (event.type !== 'xstate.done.actor.reagentTransfer') {
+          return context;
         }
-        ctx.reagentTransferResult = e.data;
+        context.reagentTransferResult = event.data;
+        return context;
       }),
 
-      assignServerError: assign((ctx, e) => {
-        if (e.type !== 'error.platform.reagentTransfer' && e.type !== 'error.platform.findReagentPlate') {
-          return;
+      assignServerError: assign(({ context, event }) => {
+        if (
+          event.type !== 'xstate.error.actor.reagentTransfer' &&
+          event.type !== 'xstate.error.actor.findReagentPlate'
+        ) {
+          return context;
         }
-        ctx.serverErrors = castDraft(e.data);
+        context.serverErrors = castDraft(event.error);
+        return context;
       }),
 
-      emptyServerError: assign((ctx) => {
-        ctx.serverErrors = null;
+      emptyServerError: assign(({ context }) => {
+        context.serverErrors = null;
+        return context;
       }),
-      assignValidationError: assign((ctx) => {
-        ctx.validationError = '24 digit number required';
+      assignValidationError: assign(({ context }) => {
+        context.validationError = '24 digit number required';
+        return context;
       }),
-      emptyValidationError: assign((ctx) => {
-        ctx.validationError = undefined;
+      emptyValidationError: assign(({ context }) => {
+        context.validationError = undefined;
+        return context;
       })
-    },
-    services: {
-      reagentTransfer: (ctx) => {
-        if (!ctx.sourceReagentPlate) {
-          return Promise.reject();
-        }
-        return stanCore.RecordReagentTransfer({
-          request: {
-            workNumber: ctx.workNumber,
-            operationType: ctx.operationType,
-            destinationBarcode: ctx.destLabware!.barcode,
-            transfers: ctx.reagentTransfers,
-            plateType: ctx.plateType
-          }
-        });
-      },
-      findReagentPlate: (ctx, e) => {
-        if (e.type !== 'SET_SOURCE_LABWARE') return Promise.reject();
-        return stanCore.FindReagentPlate({ barcode: e.barcode });
-      }
     }
   }
 );
