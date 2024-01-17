@@ -120,7 +120,9 @@ function OriginalSampleRegistration() {
     return buildRegistrationSchema(registrationInfo);
   }, [registrationInfo]);
   const availableLabwareTypes = useMemo(() => {
-    return registrationInfo.labwareTypes.filter((lt) => [LabwareTypeName.POT].includes(lt.name as LabwareTypeName));
+    return registrationInfo.labwareTypes.filter((lt) =>
+      [LabwareTypeName.POT, LabwareTypeName.CASSETTE].includes(lt.name as LabwareTypeName)
+    );
   }, [registrationInfo]);
 
   const [registrationMethod, setRegistrationMethod] = useState(RegistrationMethod.NONE);
