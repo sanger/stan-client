@@ -99,7 +99,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
   const confirmOperationLabware = useSelector(service, selectConfirmOperationLabware);
 
   const { addressToCommentMap, labware, layoutPlan, commentsForAllSections } = current.context;
-  const { layoutMachine } = current.children;
+  const { layoutMachine } = current.context;
   const [notifyDelete, setNotifyDelete] = React.useState(false);
   const notifySectionChange = React.useRef(false);
 
@@ -111,12 +111,17 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
 
   useEffect(() => {
     //Notify parent only for layout changes
-    const currentEvent = service.getSnapshot().getMeta().state.event;
-    if (layoutPlan && currentEvent.type === 'xstate.done.actor.layoutMachine' && notifySectionChange.current) {
+    if (
+      layoutPlan &&
+      current.matches('editingLayout') &&
+      layoutMachine &&
+      layoutMachine.getSnapshot().output &&
+      notifySectionChange.current
+    ) {
       notifySectionChange.current = false;
       onSectionUpdate && onSectionUpdate(layoutPlan);
     }
-  }, [layoutPlan, service, onSectionUpdate]);
+  }, [layoutPlan, service, onSectionUpdate, current, layoutMachine]);
 
   /***Update sources whenever there is an update in a source in parent**/
   useEffect(() => {
@@ -247,7 +252,7 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
         <ModalBody>
           <Heading level={3}>Set Layout</Heading>
           {layoutMachine && (
-            <LayoutPlanner actor={layoutMachine.getSnapshot()}>
+            <LayoutPlanner actor={layoutMachine}>
               <div className="my-2">
                 <p className="text-gray-900 text-sm leading-normal">
                   Click a slot to increase the number of sections in that slot.
@@ -257,20 +262,22 @@ const ConfirmLabware: React.FC<ConfirmLabwareProps> = ({
             </LayoutPlanner>
           )}
         </ModalBody>
-        <ModalFooter>
-          <BlueButton
-            onClick={() => {
-              notifySectionChange.current = true;
-              layoutMachine.send({ type: 'DONE' });
-            }}
-            className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
-          >
-            Done
-          </BlueButton>
-          <WhiteButton onClick={() => layoutMachine.send({ type: 'CANCEL' })} className="mt-3 w-full sm:mt-0 sm:ml-3">
-            Cancel
-          </WhiteButton>
-        </ModalFooter>
+        {layoutMachine && (
+          <ModalFooter>
+            <BlueButton
+              onClick={() => {
+                notifySectionChange.current = true;
+                layoutMachine.send({ type: 'DONE' });
+              }}
+              className="w-full text-base sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Done
+            </BlueButton>
+            <WhiteButton onClick={() => layoutMachine.send({ type: 'CANCEL' })} className="mt-3 w-full sm:mt-0 sm:ml-3">
+              Cancel
+            </WhiteButton>
+          </ModalFooter>
+        )}
       </Modal>
       {
         <ConfirmationModal

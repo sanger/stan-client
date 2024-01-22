@@ -44,13 +44,15 @@ function ReagentTransferSlotMapper({
   disabled
 }: ReagentTransferMappingProps) {
   const memoSlotMapperMachine = React.useMemo(() => {
-    return createSlotMapperMachine({
+    return createSlotMapperMachine;
+  }, []);
+
+  const [current, send] = useMachine(memoSlotMapperMachine, {
+    input: {
       inputLabware: initialSourceLabware ? [initialSourceLabware] : [],
       outputSlotCopies: initialDestLabware ? [{ labware: initialDestLabware, slotCopyContent: [] }] : []
-    });
-  }, [initialSourceLabware, initialDestLabware]);
-
-  const [current, send] = useMachine(memoSlotMapperMachine);
+    }
+  });
 
   const memoOutputSlotCopies = React.useMemo(() => {
     return current.context.outputSlotCopies.length > 0

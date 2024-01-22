@@ -1,18 +1,19 @@
-import { assign, createMachine, fromPromise, MachineConfig } from 'xstate';
+import { assign, createMachine, fromPromise, MachineConfig, MachineImplementations } from 'xstate';
 import { LabelPrinterContext, LabelPrinterEvent, LabelPrinterSchema } from './labelPrinterMachineTypes';
 import { find } from 'lodash';
 import { castDraft } from 'immer';
 import { stanCore } from '../../sdk';
 import { LabelType, LabwareFieldsFragment, PrinterFieldsFragment } from '../../../types/sdk';
+import { Maybe } from 'yup';
 
 /**
  * LabelPrinter Machine Options
  */
-const machineOptions = {
+const machineOptions: MachineImplementations<LabelPrinterContext, LabelPrinterEvent> = {
   actions: {
     assignPrinters: assign(({ context, event }) => {
       if (event.type !== 'xstate.done.actor.fetchPrinters') {
-        return;
+        return context;
       }
 
       const labwareLabelTypes = new Set(
@@ -24,19 +25,22 @@ const machineOptions = {
         printer.labelTypes.some((lt: LabelType) => labwareLabelTypes.has(lt.name))
       );
       context.selectedPrinter = context.printers[0];
+      return context;
     }),
 
     assignServerErrors: assign(({ context, event }) => {
       if (event.type !== 'xstate.error.actor.fetchPrinters') {
-        return;
+        return context;
       }
       context.serverErrors = castDraft(event.error);
+      return context;
     }),
 
     assignLabelPrinter: assign(({ context, event }) => {
       if (event.type === 'UPDATE_SELECTED_LABEL_PRINTER') {
         context.selectedPrinter = find(context.printers, (printer) => printer.name === event.name) ?? null;
       }
+      return context;
     })
   },
 
@@ -48,16 +52,21 @@ const machineOptions = {
 /**
  * LabelPrinter Machine Config
  */
-const machineConfig: MachineConfig<LabelPrinterContext, LabelPrinterEvent> = {
+const machineConfig = (
+  labwares: Array<LabwareFieldsFragment>,
+  selectedPrinter?: Maybe<PrinterFieldsFragment>
+): MachineConfig<LabelPrinterContext, LabelPrinterEvent> => ({
   id: 'labelPrinter',
   types: {} as {
     context: LabelPrinterContext;
     schema: LabelPrinterSchema;
     events: LabelPrinterEvent;
   },
-  context: ({ input }) => ({
-    ...input
-  }),
+  context: {
+    selectedPrinter: selectedPrinter ?? null,
+    labwares,
+    printers: []
+  },
   initial: 'init',
   states: {
     init: {
@@ -135,9 +144,9 @@ const machineConfig: MachineConfig<LabelPrinterContext, LabelPrinterEvent> = {
       }
     }
   }
-};
-const createLabelPrinterMachine = createMachine({
-  ...machineConfig,
-  ...machineOptions
 });
+const createLabelPrinterMachine = (labwares: LabwareFieldsFragment[], selectedPrinter?: Maybe<PrinterFieldsFragment>) =>
+  createMachine(machineConfig(labwares, selectedPrinter), {
+    ...machineOptions
+  });
 export default createLabelPrinterMachine;

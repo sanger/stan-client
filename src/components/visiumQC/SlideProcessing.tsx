@@ -109,7 +109,7 @@ const SlideProcessing = ({ comments, labware, labwaresResultsProps, removeLabwar
           </Panel>
           {labware.map((lw, index) => {
             return (
-              <div className="pt-4">
+              <div className="pt-4" key={lw.barcode}>
                 <Panel key={lw.barcode}>
                   <LabwareResult
                     key={lw.barcode}

@@ -79,11 +79,11 @@ export const extractResultMachine = (initExtractedResults: ExtractResultQuery[])
           entry: ['unassignServerError', 'unassignErrorMessage'],
           invoke: {
             id: 'extractResult',
-            src: fromPromise(({ input }) =>
-              stanCore.ExtractResult({
-                barcode: input.currentBarcode
-              })
-            ),
+            src: fromPromise(({ input }) => {
+              return stanCore.ExtractResult({
+                barcode: input.barcode
+              });
+            }),
             input: ({ context }) => ({ barcode: context.currentBarcode }),
             onDone: {
               target: 'extractResultSuccess',

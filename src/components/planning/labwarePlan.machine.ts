@@ -31,22 +31,25 @@ type PlanSectionRejectEvent = {
   error: ServerErrors;
 };
 
-type LayoutMachineDone = {
-  type: 'xstate.done.actor.layoutMachine';
-  output: { layoutPlan: LayoutPlan };
+type AssignLayoutPlanEvent = {
+  type: 'ASSIGN_LAYOUT_PLAN';
+  layoutPlan: LayoutPlan;
+};
+
+type CancelEditLayout = {
+  type: 'CANCEL_EDIT_LAYOUT';
 };
 
 type LabwarePlanEvent =
   | { type: 'EDIT_LAYOUT' }
   | { type: 'CANCEL_EDIT_LAYOUT' }
   | { type: 'DONE_EDIT_LAYOUT' }
-  | { type: 'EDIT_LAYOUT.assignLayoutMachine' }
-  | { type: 'STOP_LAYOUT_MACHINE' }
   | CreateLabwareEvent
   | UpdateLayoutPlanEvent
   | PlanSectionResolveEvent
   | PlanSectionRejectEvent
-  | LayoutMachineDone;
+  | AssignLayoutPlanEvent
+  | CancelEditLayout;
 //endregion Events
 
 /**
@@ -78,6 +81,9 @@ interface LabwarePlanContext {
    */
   printErrorMessage?: string;
 
+  /**
+   * Actor reference to the layout machine, so the spawned machine can be accessed from the context
+   */
   layoutMachine?: ActorRef<any, any>;
 }
 
@@ -123,14 +129,21 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           }
         },
         editingLayout: {
+          id: 'layoutMachine',
           entry: [
             assign({
               layoutMachine: ({ spawn, context }) => spawn(createLayoutMachine(context.layoutPlan))
             })
           ],
-          onDone: {
-            target: 'validatingLayout',
-            actions: 'assignLayoutPlan'
+          on: {
+            ASSIGN_LAYOUT_PLAN: {
+              actions: 'assignLayoutPlan',
+              target: 'validatingLayout'
+            },
+            CANCEL_EDIT_LAYOUT: {
+              actions: 'cancelEditLayout',
+              target: 'prep'
+            }
           }
         },
         validatingLayout: {
@@ -180,17 +193,23 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
           }
         },
         printing: {},
-        done: {},
-        stopLayoutMachine: {}
+        done: {}
       }
     },
     {
       actions: {
         assignLayoutPlan: assign(({ context, event }) => {
-          if (event.type !== 'xstate.done.actor.layoutMachine' || !event.output) {
+          if (event.type !== 'ASSIGN_LAYOUT_PLAN') {
             return context;
           }
-          context.layoutPlan = event.output.layoutPlan;
+          context.layoutPlan = event.layoutPlan;
+          return context;
+        }),
+        cancelEditLayout: assign(({ context, event }) => {
+          if (event.type !== 'CANCEL_EDIT_LAYOUT') {
+            return context;
+          }
+          context.layoutPlan.plannedActions.clear();
           return context;
         }),
 
@@ -208,15 +227,6 @@ export const createLabwarePlanMachine = (initialLayoutPlan: LayoutPlan) =>
             return context;
           }
           context.requestError = event.error;
-          return context;
-        }),
-        stopLayoutMachine: assign(({ context, event }) => {
-          if (event.type !== 'STOP_LAYOUT_MACHINE') {
-            return context;
-          }
-          if (context.layoutMachine) {
-            context.layoutMachine.stop();
-          }
           return context;
         })
       },

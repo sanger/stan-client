@@ -168,13 +168,13 @@ type ClearAllSlotMappingsBetweenEvent = {
 
 type SlotPassFailEvent = {
   type: 'xstate.done.actor.passFailsSlots';
-  data: {
+  output: {
     barcode: string;
     result: FindPassFailsQuery;
   };
 };
 type SlotPassFailErrorEvent = {
-  type: 'error.platform.passFailsSlots';
+  type: 'xstate.error.actor.passFailsSlots';
   barcode: string;
   error: ClientError;
 };

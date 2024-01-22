@@ -11,10 +11,11 @@ import { assign, createMachine, fromCallback, fromPromise } from 'xstate';
 import { stanCore } from '../../lib/sdk';
 import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
 import _, { Dictionary, groupBy } from 'lodash';
-import { Address, LabwareTypeName, ServerErrors } from '../../types/stan';
+import { Address, LabwareTypeName } from '../../types/stan';
 import { buildSampleColors, sortDownRight } from '../../lib/helpers/labwareHelper';
 import { SectionNumberMode } from './SectioningConfirm';
 import { maybeFindSlotByAddress } from '../../lib/helpers/slotHelper';
+import { ClientError } from 'graphql-request';
 
 type SectioningConfirmContext = {
   /**
@@ -66,7 +67,7 @@ type SectioningConfirmContext = {
   /**
    * Possible errors returned from stan core after a confirmSection request
    */
-  requestError: Maybe<ServerErrors>;
+  requestError: Maybe<ClientError>;
 };
 
 type SectioningConfirmEvent =
@@ -103,7 +104,7 @@ type SectioningConfirmEvent =
   | { type: 'IS_INVALID' }
   | { type: 'CONFIRM' }
   | { type: 'xstate.done.actor.confirmSection'; output: ConfirmSectionMutation }
-  | { type: 'xstate.error.actor.confirmSection'; error: ServerErrors };
+  | { type: 'xstate.error.actor.confirmSection'; error: ClientError };
 
 const isValidSectionLabware = (ctx: SectioningConfirmContext): boolean => {
   return (

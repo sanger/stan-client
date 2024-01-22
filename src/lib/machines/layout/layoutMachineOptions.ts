@@ -2,7 +2,7 @@ import { LayoutContext, Source } from './layoutContext';
 import { isEqual } from 'lodash';
 import { tissue } from '../../helpers/labwareHelper';
 import { LabwareFieldsFragment } from '../../../types/sdk';
-import { assign, MachineImplementations } from 'xstate';
+import { assign, MachineImplementations, sendParent } from 'xstate';
 import { LayoutEvents } from './layoutEvents';
 
 export const layoutMachineKey = 'layoutMachine';
@@ -15,7 +15,9 @@ export enum Actions {
   ASSIGN_DESTINATION_ACTIONS = 'layoutMachine.assignDestinationActions',
   TOGGLE_DESTINATION = 'layoutMachine.toggleDestination',
   ADD_SECTION = 'layoutMachine.addSection',
-  REMOVE_SECTION = 'layoutMachine.removeSection'
+  REMOVE_SECTION = 'layoutMachine.removeSection',
+  SEND_LAYOUT_TO_PARENT = 'layoutMachine.sendLayoutToParent',
+  CANCEL_EDIT_LAYOUT = 'layoutMachine.cancelEditLayout'
 }
 
 export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents> = {
@@ -24,7 +26,6 @@ export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents>
       if (event.type !== 'SELECT_SOURCE') {
         return context;
       }
-
       context.selected = isEqual(context.selected, event.source) ? null : event.source;
       return context;
     }),
@@ -50,6 +51,8 @@ export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents>
         action.replicateNumber = tissue(Object.assign({}, action.labware as LabwareFieldsFragment))?.replicate ?? '';
         plannedActions.set(event.address, [action]);
       }
+      context.layoutPlan.plannedActions = plannedActions;
+
       return context;
     }),
 
@@ -131,6 +134,17 @@ export const machineOptions: MachineImplementations<LayoutContext, LayoutEvents>
         }
       }
       return context;
+    }),
+    [Actions.SEND_LAYOUT_TO_PARENT]: sendParent(({ context }) => {
+      return {
+        type: 'ASSIGN_LAYOUT_PLAN',
+        layoutPlan: { ...context.layoutPlan }
+      };
+    }),
+    [Actions.CANCEL_EDIT_LAYOUT]: sendParent(() => {
+      return {
+        type: 'CANCEL_EDIT_LAYOUT'
+      };
     })
   }
 };

@@ -1,6 +1,7 @@
 import { assign, createMachine, fromPromise } from 'xstate';
-import { ServerErrors } from '../../../types/stan';
+import { extractServerErrors, ServerErrors } from '../../../types/stan';
 import { Maybe, RegisterResultFieldsFragment } from '../../../types/sdk';
+import { ClientError } from 'graphql-request';
 
 export interface RegistrationContext<F, M> {
   registrationFormInput: Maybe<F>;
@@ -27,7 +28,7 @@ type SubmittingDoneEvent = {
 
 type SubmittingErrorEvent = {
   type: 'xstate.error.actor.submitting';
-  error: unknown;
+  error: ClientError;
 };
 
 export type RegistrationEvent<F> =
@@ -137,7 +138,7 @@ export function createRegistrationMachine<F, M>(
           if (event.type !== 'xstate.error.actor.submitting') {
             return context;
           }
-          context.registrationErrors = event.error as ServerErrors;
+          context.registrationErrors = extractServerErrors(event.error);
           return context;
         })
       },

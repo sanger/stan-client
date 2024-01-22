@@ -38,7 +38,7 @@ const ParaffinProcessing: React.FC = () => {
         submitForm: fromPromise(({ input }) => {
           if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
           return stanCore.PerformParaffinProcessing({
-            request: input.evemt.values
+            request: input.event.values
           });
         })
       }

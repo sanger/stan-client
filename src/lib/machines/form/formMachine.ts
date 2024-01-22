@@ -1,10 +1,10 @@
 import { assign, createMachine } from 'xstate';
 import { castDraft } from 'immer';
-import { ServerErrors } from '../../../types/stan';
+import { ClientError } from 'graphql-request';
 
 export interface FormContext<R> {
   submissionResult?: R;
-  serverError?: ServerErrors;
+  serverError?: ClientError;
 }
 
 export type FormEvent<V, R> =
@@ -14,7 +14,7 @@ export type FormEvent<V, R> =
     }
   | { type: 'RESET' }
   | { type: 'xstate.done.actor.submitForm'; output: R }
-  | { type: 'xstate.error.actor.submitForm'; error: ServerErrors };
+  | { type: 'xstate.error.actor.submitForm'; error: ClientError };
 
 /**
  * Create a form machine

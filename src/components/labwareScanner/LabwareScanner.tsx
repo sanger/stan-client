@@ -127,7 +127,8 @@ export default function LabwareScanner({
         }
 
         if (currentLabwareLength < previousLabwareLength) {
-          removedLabware && onRemove?.(removedLabware.labware, removedLabware.index);
+          observer.context.removedLabware &&
+            onRemove?.(observer.context.removedLabware.labware, observer.context.removedLabware.index);
         }
       }
     });

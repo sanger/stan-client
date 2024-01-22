@@ -8,7 +8,7 @@ import {
   selectSource,
   setAllDestinations
 } from '../lib/machines/layout/layoutEvents';
-import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../pages/sectioning/index';
+import { buildSlotColor, buildSlotSecondaryText, buildSlotText } from '../pages/sectioning';
 import { ActorRef, MachineSnapshot } from 'xstate';
 
 interface LayoutPlannerProps {
@@ -17,8 +17,15 @@ interface LayoutPlannerProps {
 }
 
 const LayoutPlanner: React.FC<LayoutPlannerProps> = ({ children, actor }) => {
-  //const [current, send] = useActor(actor.);
-  const { layoutPlan, selected } = actor.getSnapshot().context ?? {};
+  const [context, setContext] = React.useState<LayoutContext>(actor.getSnapshot().context);
+  const { layoutPlan, selected } = context ?? {};
+  React.useEffect(() => {
+    const subscription = actor.subscribe((snapshot) => {
+      setContext(snapshot.context ?? {});
+    });
+    return () => subscription.unsubscribe();
+  }, [actor]);
+
   return (
     <div>
       {children}

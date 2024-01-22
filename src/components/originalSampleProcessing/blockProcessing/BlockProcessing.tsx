@@ -342,11 +342,7 @@ export default function BlockProcessing({ processingInfo }: BlockProcessingParam
                     <Heading level={3}>SGP Number</Heading>
                     <p className="mt-2">Please select an SGP number to associate with the block.</p>
                     <motion.div variants={variants.fadeInWithLift} className="mt-4 md:w-1/2">
-                      <WorkNumberSelect
-                        onWorkNumberChange={(workNumber) => {
-                          setFieldValue('workNumber', workNumber);
-                        }}
-                      />
+                      <WorkNumberSelect onWorkNumberChange={(workNumber) => setFieldValue('workNumber', workNumber)} />
                     </motion.div>
                   </motion.div>
                   <Planner<undefined>

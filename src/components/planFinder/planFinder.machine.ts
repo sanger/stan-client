@@ -37,103 +37,109 @@ type PlanFinderEvent =
       error: ServerErrors;
     };
 
-export const planFinderMachine = createMachine(
-  {
-    id: 'planFinderMachine',
-    types: {} as {
-      context: PlanFinderContext;
-      events: PlanFinderEvent;
-    },
-    initial: 'idle',
-    context: ({ input }: { input: PlanFinderContext }) => ({ ...input }),
-    states: {
-      idle: {
-        on: {
-          REMOVE_PLAN_BY_BARCODE: { actions: 'removePlanByBarcode' },
-          SUBMIT_LABWARE: {
-            target: 'validatingBarcode',
-            actions: ['assignLabware', 'clearErrors']
+export const planFinderMachine = (plans: Map<string, FindPlanDataQuery>) =>
+  createMachine(
+    {
+      id: 'planFinderMachine',
+      types: {} as {
+        context: PlanFinderContext;
+        events: PlanFinderEvent;
+      },
+      initial: 'idle',
+      context: {
+        plans,
+        labware: undefined,
+        validationError: null,
+        requestError: null
+      },
+      states: {
+        idle: {
+          on: {
+            REMOVE_PLAN_BY_BARCODE: { actions: 'removePlanByBarcode' },
+            SUBMIT_LABWARE: {
+              target: 'validatingBarcode',
+              actions: ['assignLabware', 'clearErrors']
+            }
           }
-        }
-      },
-      validatingBarcode: {
-        always: [
-          {
-            // Check plan hasn't already been found for this labware
-            guard: ({ context }) => context.plans.has(context.labware!.barcode),
-            target: 'idle',
-            actions: ['assignDuplicationError', 'resetLabware']
-          },
-          { target: 'searching' }
-        ]
-      },
-      searching: {
-        invoke: {
-          id: 'findPlan',
-          src: fromPromise(({ input }) =>
-            stanCore.FindPlanData({
-              barcode: input.barcode
-            })
-          ),
-          input: ({ context }) => ({ barcode: context.labware!.barcode }),
-          onDone: {
-            target: 'idle',
-            actions: ['assignPlan', 'resetLabware']
-          },
-          onError: {
-            target: 'idle',
-            actions: 'assignRequestError'
+        },
+        validatingBarcode: {
+          always: [
+            {
+              // Check plan hasn't already been found for this labware
+              guard: ({ context }) => context.plans.has(context.labware!.barcode),
+              target: 'idle',
+              actions: ['assignDuplicationError', 'resetLabware']
+            },
+            { target: 'searching' }
+          ]
+        },
+        searching: {
+          invoke: {
+            id: 'findPlan',
+            src: fromPromise(({ input }) =>
+              stanCore.FindPlanData({
+                barcode: input.barcode
+              })
+            ),
+            input: ({ context }) => ({ barcode: context.labware!.barcode }),
+            onDone: {
+              target: 'idle',
+              actions: ['assignPlan', 'resetLabware']
+            },
+            onError: {
+              target: 'idle',
+              actions: 'assignRequestError'
+            }
           }
         }
       }
+    },
+    {
+      actions: {
+        assignLabware: assign(({ context, event }) => {
+          if (event.type !== 'SUBMIT_LABWARE') return context;
+          context.labware = event.labware;
+          return context;
+        }),
+
+        assignDuplicationError: assign(({ context, event }) => {
+          if (event.type !== 'SUBMIT_LABWARE') return context;
+          context.validationError = `Plan has already been found for ${event.labware.barcode}`;
+          return context;
+        }),
+
+        assignPlan: assign(({ context, event }) => {
+          if (event.type !== 'xstate.done.actor.findPlan') return context;
+          //Remove all actions, if any that doesn't belong to the labware in context
+          event.output.planData.plan.planActions = event.output.planData.plan.planActions.filter(
+            (action) => action.destination.labwareId === context.labware!.id
+          );
+          context.plans.set(context.labware!.barcode, event.output);
+          return context;
+        }),
+
+        assignRequestError: assign(({ context, event }) => {
+          if (event.type !== 'xstate.error.actor.findPlan') return context;
+          context.requestError = event.error;
+          return context;
+        }),
+
+        clearErrors: assign(({ context }) => {
+          context.requestError = null;
+          context.validationError = null;
+          return context;
+        }),
+
+        removePlanByBarcode: assign(({ context, event }) => {
+          if (event.type !== 'REMOVE_PLAN_BY_BARCODE') return context;
+          context.plans.delete(event.barcode);
+          return context;
+        }),
+
+        resetLabware: assign(({ context }) => {
+          context.labware = undefined;
+          return context;
+        })
+      }
     }
-  },
-  {
-    actions: {
-      assignLabware: assign(({ context, event }) => {
-        if (event.type !== 'SUBMIT_LABWARE') return context;
-        context.labware = event.labware;
-        return context;
-      }),
-
-      assignDuplicationError: assign(({ context, event }) => {
-        if (event.type !== 'SUBMIT_LABWARE') return context;
-        context.validationError = `Plan has already been found for ${event.labware.barcode}`;
-        return context;
-      }),
-
-      assignPlan: assign(({ context, event }) => {
-        if (event.type !== 'xstate.done.actor.findPlan') return context;
-        //Remove all actions, if any that doesn't belong to the labware in context
-        event.output.planData.plan.planActions = event.output.planData.plan.planActions.filter(
-          (action) => action.destination.labwareId === context.labware!.id
-        );
-        context.plans.set(context.labware!.barcode, event.output);
-        return context;
-      }),
-
-      assignRequestError: assign(({ context, event }) => {
-        if (event.type !== 'xstate.error.actor.findPlan') return context;
-        context.requestError = event.error;
-        return context;
-      }),
-
-      clearErrors: assign(({ context }) => {
-        context.requestError = null;
-        context.validationError = null;
-        return context;
-      }),
-
-      removePlanByBarcode: assign(({ context, event }) => {
-        if (event.type !== 'REMOVE_PLAN_BY_BARCODE') return context;
-        context.plans.delete(event.barcode);
-        return context;
-      }),
-
-      resetLabware: assign(({ context }) => {
-        context.labware = undefined;
-        return context;
-      })
-    }
-  }
-);
+  );

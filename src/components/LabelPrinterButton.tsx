@@ -23,9 +23,10 @@ const LabelPrinterButton: React.FC<LabelPrinterButtonProps> = ({
   onPrint,
   onPrintError
 }) => {
-  const [current, send, service] = useMachine(createLabelPrinterMachine, {
-    input: { selectedPrinter, labwares }
-  });
+  const labelPrinterMachine = React.useMemo(() => {
+    return createLabelPrinterMachine(labwares, selectedPrinter);
+  }, [labwares, selectedPrinter]);
+  const [current, send, service] = useMachine(labelPrinterMachine);
 
   useEffect(() => {
     const subscription = service.subscribe((state) => {

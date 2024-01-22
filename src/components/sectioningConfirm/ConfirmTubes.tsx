@@ -107,7 +107,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
   }, [comments, initialLayoutPlan]);
   const [current, send, service] = useMachine(confirmLabwareMachine);
   const { cancelled, layoutPlan, labware } = current.context;
-  const { layoutMachine } = current.children;
+  const { layoutMachine } = current.context;
   const [notifyCancel, setNotifyCancel] = React.useState(false);
   const notifySectionChange = React.useRef(false);
 
@@ -118,20 +118,15 @@ const TubeRow: React.FC<TubeRowProps> = ({
       onChange(confirmOperationLabware);
     }
   }, [onChange, confirmOperationLabware]);
-
-  //Notify parent about section layout changes
   useEffect(() => {
-    //sabrine subsribe
-    const currentEventType = service.getSnapshot().getMeta().event.type;
     if (
-      layoutPlan &&
-      ((currentEventType === 'xstate.done.actor.layoutMachine' && notifySectionChange.current) ||
-        currentEventType === 'TOGGLE_CANCEL')
+      (layoutPlan && current.context.isLayoutUpdated && notifySectionChange.current) ||
+      current.context.isCancelToggled
     ) {
       notifySectionChange.current = false;
       onSectionUpdate(layoutPlan);
     }
-  }, [layoutPlan, service, onSectionUpdate]);
+  }, [layoutPlan, service, onSectionUpdate, current]);
 
   /**Update for source changes in parent**/
   useEffect(() => {
@@ -207,7 +202,7 @@ const TubeRow: React.FC<TubeRowProps> = ({
               slotColor={(address) => buildSlotColor(layoutPlan, address)}
             />
 
-            <PinkButton disabled={current.matches('done')} onClick={() => !cancelled && send({ type: 'EDIT_LAYOUT' })}>
+            <PinkButton disabled={current.matches('.done')} onClick={() => !cancelled && send({ type: 'EDIT_LAYOUT' })}>
               Edit Layout
             </PinkButton>
           </div>
@@ -217,11 +212,11 @@ const TubeRow: React.FC<TubeRowProps> = ({
           <span className={`${cancelled ? 'line-through' : ''}`}>{layoutPlan.destinationLabware.barcode}</span>
 
           {layoutMachine && (
-            <Modal show={true}>
+            <Modal show={current.matches('editingLayout')}>
               <ModalBody>
                 <Heading level={3}>Set Layout</Heading>
                 {layoutMachine && (
-                  <LayoutPlanner actor={layoutMachine.getSnapshot()}>
+                  <LayoutPlanner actor={layoutMachine}>
                     <div className="my-2">
                       <p className="text-gray-900 text-sm leading-normal">
                         Click a slot to increase the number of sections in that slot.

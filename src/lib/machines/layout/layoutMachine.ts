@@ -19,16 +19,18 @@ export const createLayoutMachine = (layoutPlan: LayoutPlan, possibleActions?: La
         possibleActions,
         selected: null
       },
-      output: () => ({
+      output: ({ context }) => ({
         data: {
-          layoutPlan: (ctx: LayoutContext) => ctx.layoutPlan
+          layoutPlan: context.layoutPlan
         }
       }),
       on: {
         DONE: {
+          actions: Actions.SEND_LAYOUT_TO_PARENT,
           target: `.${State.DONE}`
         },
         CANCEL: {
+          actions: Actions.CANCEL_EDIT_LAYOUT,
           target: `.${State.CANCELLED}`
         }
       },
@@ -87,9 +89,6 @@ export const createLayoutMachine = (layoutPlan: LayoutPlan, possibleActions?: La
         },
         [State.DONE]: {
           type: 'final'
-          // data: {
-          //   layoutPlan: (ctx: LayoutContext) => ctx.layoutPlan
-          // }
         },
         [State.CANCELLED]: {
           type: 'final'

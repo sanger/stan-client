@@ -1,8 +1,9 @@
-import { assign, createMachine } from 'xstate';
+import { ActorRef, assign, createMachine } from 'xstate';
 import { Comment, ConfirmOperationLabware, ConfirmSection, ConfirmSectionLabware, Maybe } from '../../types/sdk';
 import { LayoutPlan, Source } from '../../lib/machines/layout/layoutContext';
 import { cloneDeep } from 'lodash';
 import { Address, NewFlaggedLabwareLayout } from '../../types/stan';
+import { createLayoutMachine } from '../../lib/machines/layout/layoutMachine';
 
 export interface ConfirmLabwareContext {
   /**
@@ -41,6 +42,19 @@ export interface ConfirmLabwareContext {
   cancelled: boolean;
 
   confirmSectionLabware: Maybe<ConfirmSectionLabware>;
+
+  /**
+   * Actor reference to the layout machine, so the spawned machine can be accessed from the context
+   */
+  layoutMachine?: ActorRef<any, any>;
+
+  /**
+   * A boolean flags indicating the machine event. This is primarily used as a replacement for assertions based on context.event.type,
+   * given that the event object has been removed from the context in XState v5.
+   * In the current (snapshot, using the new terminology in XState v5), only context parameters are directly accessible.
+   */
+  isCancelToggled?: boolean;
+  isLayoutUpdated?: boolean;
 }
 
 type SetCommentForAddressEvent = {
@@ -69,13 +83,7 @@ type SetCommentForAllEvent = {
 };
 
 type EditLayoutEvent = { type: 'EDIT_LAYOUT' };
-type CancelEditLayoutEvent = { type: 'CANCEL_EDIT_LAYOUT' };
 type DoneEditLayoutEvent = { type: 'DONE_EDIT_LAYOUT' };
-
-export type LayoutMachineDone = {
-  type: 'xstate.done.actor.layoutMachine';
-  output: { layoutPlan: LayoutPlan };
-};
 
 type ToggleCancelEvent = { type: 'TOGGLE_CANCEL' };
 
@@ -100,20 +108,29 @@ export type SectioningConfirmationCompleteEvent = {
   type: 'SECTIONING_CONFIRMATION_COMPLETE';
 };
 
+type AssignLayoutPlanEvent = {
+  type: 'ASSIGN_LAYOUT_PLAN';
+  layoutPlan: LayoutPlan;
+};
+
+type CancelEditLayoutEvent = {
+  type: 'CANCEL_EDIT_LAYOUT';
+};
+
 export type ConfirmLabwareEvent =
   | SetCommentForAddressEvent
   | SetCommentsForSectionEvent
   | SetCommentForAllEvent
   | SetRegionForSectionEvent
   | EditLayoutEvent
-  | CancelEditLayoutEvent
   | DoneEditLayoutEvent
-  | LayoutMachineDone
   | ToggleCancelEvent
   | UpdateSectionNumberEvent
   | UpdateAllSourcesEvent
   | CommitConfirmationEvent
-  | SectioningConfirmationCompleteEvent;
+  | SectioningConfirmationCompleteEvent
+  | AssignLayoutPlanEvent
+  | CancelEditLayoutEvent;
 
 function buildConfirmSection(destinationAddress: string, plannedAction: Source): ConfirmSection {
   return {
@@ -156,7 +173,7 @@ export const createConfirmLabwareMachine = (
         commentsForAllSections: []
       },
       on: {
-        SECTIONING_CONFIRMATION_COMPLETE: 'done'
+        SECTIONING_CONFIRMATION_COMPLETE: '.done'
       },
       entry: 'commitConfirmation',
       states: {
@@ -189,16 +206,21 @@ export const createConfirmLabwareMachine = (
           }
         },
         editingLayout: {
-          invoke: {
-            src: 'createLayoutMachine',
-            input: ({ context }) => ({
-              layoutPlan: context.layoutPlan,
-              plannedActions: context.originalLayoutPlan.plannedActions
-            }),
-            id: 'layoutMachine',
-            onDone: {
-              target: 'editableMode',
-              actions: ['assignLayoutPlan', 'commitConfirmation']
+          id: 'layoutMachine',
+          entry: [
+            assign({
+              layoutMachine: ({ spawn, context }) =>
+                spawn(createLayoutMachine(context.layoutPlan, context.originalLayoutPlan.plannedActions))
+            })
+          ],
+          on: {
+            ASSIGN_LAYOUT_PLAN: {
+              actions: ['assignLayoutPlan', 'commitConfirmation'],
+              target: 'editableMode'
+            },
+            CANCEL_EDIT_LAYOUT: {
+              actions: 'cancelEditLayout',
+              target: 'editableMode'
             }
           }
         },
@@ -275,10 +297,10 @@ export const createConfirmLabwareMachine = (
          * If there are any comments for slots that have now been removed, removed the comment also
          */
         assignLayoutPlan: assign(({ context, event }) => {
-          if (event.type !== 'xstate.done.actor.layoutMachine' || !event.output) {
+          if (event.type !== 'ASSIGN_LAYOUT_PLAN' || !event.layoutPlan) {
             return context;
           }
-          context.layoutPlan = event.output.layoutPlan;
+          context.layoutPlan = event.layoutPlan;
 
           const unemptyAddresses = new Set(context.layoutPlan.plannedActions.keys());
           context.addressToCommentMap.forEach((_, key) => {
@@ -286,6 +308,7 @@ export const createConfirmLabwareMachine = (
               context.addressToCommentMap.delete(key);
             }
           });
+          context.isLayoutUpdated = true;
           return context;
         }),
 
@@ -297,6 +320,7 @@ export const createConfirmLabwareMachine = (
             return context;
           }
           context.cancelled = !context.cancelled;
+          context.isCancelToggled = true;
           return context;
         }),
 
@@ -343,6 +367,13 @@ export const createConfirmLabwareMachine = (
               commentId
             }))
           };
+          return context;
+        }),
+        cancelEditLayout: assign(({ context, event }) => {
+          if (event.type !== 'CANCEL_EDIT_LAYOUT') {
+            return context;
+          }
+          context.layoutPlan = context.originalLayoutPlan;
           return context;
         })
       }

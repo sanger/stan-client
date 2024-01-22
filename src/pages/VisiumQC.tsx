@@ -109,7 +109,7 @@ export default function VisiumQC() {
   const visiumQcInfo = useLoaderData() as GetCommentsQuery;
   const stanCore = useContext(StanCoreContext);
   const formMachine = React.useMemo(() => {
-    return createFormMachine<ResultRequest, RecordVisiumQcMutation>().provide({
+    const slideProcessingMachine = createFormMachine<ResultRequest, RecordVisiumQcMutation>().provide({
       actors: {
         submitForm: fromPromise(({ input }) => {
           if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
@@ -119,8 +119,38 @@ export default function VisiumQC() {
         })
       }
     });
+    const cdnaFormMachine = createFormMachine<
+      OpWithSlotMeasurementsRequest,
+      RecordOpWithSlotMeasurementsMutation
+    >().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          return stanCore.RecordOpWithSlotMeasurements({
+            request: input.event.values
+          });
+        })
+      }
+    });
+    const recordOpWithSlotCommentsMachine = createFormMachine<
+      OpWithSlotCommentsRequest,
+      RecordOpWithSlotCommentsMutation
+    >().provide({
+      actors: {
+        submitForm: fromPromise(({ input }) => {
+          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
+          const labware = input.event.values.labware.map((lw: LabwareWithSlotCommentsRequest) => {
+            return { ...lw, addressComments: lw.addressComments.filter((ac) => ac.commentId !== -1) };
+          });
+          return stanCore.RecordOpWithSlotComments({
+            request: { ...input.event.values, labware: labware }
+          });
+        })
+      }
+    });
+    return { slideProcessingMachine, cdnaFormMachine, recordOpWithSlotCommentsMachine };
   }, [stanCore]);
-  const [currentSlideProcessing, sendSlideProcessing] = useMachine(formMachine);
+  const [currentSlideProcessing, sendSlideProcessing] = useMachine(formMachine.slideProcessingMachine);
 
   const slideProcessingComments = React.useMemo(() => {
     return visiumQcInfo.comments.filter((comment) => comment.category === 'Visium QC');
@@ -134,35 +164,12 @@ export default function VisiumQC() {
     return visiumQcInfo.comments.filter((comment) => comment.category === 'clean up');
   }, [visiumQcInfo]);
 
-  const [currentCDNA, sendCDNA] = useMachine(
-    createFormMachine<OpWithSlotMeasurementsRequest, RecordOpWithSlotMeasurementsMutation>().provide({
-      actors: {
-        submitForm: fromPromise(({ input }) => {
-          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
-          return stanCore.RecordOpWithSlotMeasurements({
-            request: input.event.values
-          });
-        })
-      }
-    })
-  );
+  const [currentCDNA, sendCDNA] = useMachine(formMachine.cdnaFormMachine);
 
-  const [labwareLimit, setLabwareLimit] = React.useState(2);
+  const labwareLimit = React.useRef(2);
 
   const [currentRecordOpWithSlotComments, sendRecordOpWithSlotComments] = useMachine(
-    createFormMachine<OpWithSlotCommentsRequest, RecordOpWithSlotCommentsMutation>().provide({
-      actors: {
-        submitForm: fromPromise(({ input }) => {
-          if (input.event.type !== 'SUBMIT_FORM') return Promise.reject();
-          const labware = input.event.values.labware.map((lw: LabwareWithSlotCommentsRequest) => {
-            return { ...lw, addressComments: lw.addressComments.filter((ac) => ac.commentId !== -1) };
-          });
-          return stanCore.RecordOpWithSlotComments({
-            request: { ...input.event.values, labware: labware }
-          });
-        })
-      }
-    })
+    formMachine.recordOpWithSlotCommentsMachine
   );
 
   const { serverError: serverErrorSlideProcessing } = currentSlideProcessing.context;
@@ -275,9 +282,7 @@ export default function VisiumQC() {
                   <CustomReactSelect
                     handleChange={(val) => {
                       setFieldValue('qcType', (val as OptionType).label);
-                      setLabwareLimit(() => {
-                        return (val as OptionType).label === QCType.SLIDE_PROCESSING ? 2 : 1;
-                      });
+                      labwareLimit.current = (val as OptionType).label === QCType.SLIDE_PROCESSING ? 2 : 1;
                     }}
                     dataTestId={'qcType'}
                     emptyOption={true}
@@ -296,7 +301,7 @@ export default function VisiumQC() {
                   <Heading level={2}>Labware</Heading>
                   <p>Please scan in any labware you wish to QC.</p>
                   <div key={`labware-scanner-${labwareLimit}`}>
-                    <LabwareScanner limit={labwareLimit} enableFlaggedLabwareCheck>
+                    <LabwareScanner limit={labwareLimit.current} enableFlaggedLabwareCheck>
                       {({ labwares, removeLabware }) => {
                         switch (values.qcType) {
                           case QCType.SLIDE_PROCESSING:

@@ -1,5 +1,5 @@
 import { RnaAnalysisLabware, StringMeasurement } from '../../types/sdk';
-import { createMachine } from 'xstate';
+import { assign, createMachine } from 'xstate';
 import { AnalysisMeasurementType, MeasurementValueCategory } from './measurementColumn';
 import { OperationType } from './analysisLabware';
 
@@ -83,22 +83,24 @@ export const analysisLabwareMachine = createMachine(
   },
   {
     actions: {
-      assignAnalysisType: ({ context, event }) => {
-        if (event.type !== 'UPDATE_ANALYSIS_TYPE') return;
+      assignAnalysisType: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_ANALYSIS_TYPE') return context;
         context.operationType = event.value === AnalysisMeasurementType.RIN ? OperationType.RIN : OperationType.DV200;
         const measurements = buildMeasurementFields(MeasurementValueCategory.SINGLE_VALUE_TYPE, context.operationType);
         //Change measurement data in all labwares
+
         context.analysisLabwares = context.analysisLabwares.map((labware) => {
           return {
             ...labware,
             measurements: measurements
           };
         });
-      },
-      assignMeasurementType: ({ context, event }) => {
-        if (event.type !== 'UPDATE_MEASUREMENT_TYPE') return;
+        return context;
+      }),
+      assignMeasurementType: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_MEASUREMENT_TYPE') return context;
         const indx = context.analysisLabwares.findIndex((labware) => labware.barcode === event.barcode);
-        if (indx < 0 || !context.operationType) return;
+        if (indx < 0 || !context.operationType) return context;
 
         const updateAnalysisLabware = {
           ...context.analysisLabwares[indx],
@@ -109,11 +111,12 @@ export const analysisLabwareMachine = createMachine(
           updateAnalysisLabware,
           ...context.analysisLabwares.slice(indx + 1)
         ];
-      },
-      assignLabwareData: ({ context, event }) => {
-        if (event.type !== 'UPDATE_LABWARE_DATA') return;
+        return context;
+      }),
+      assignLabwareData: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_LABWARE_DATA') return context;
         const indx = context.analysisLabwares.findIndex((labware) => labware.barcode === event.labware.barcode);
-        if (indx < 0) return;
+        if (indx < 0) return context;
         const updateAnalysisLabware = { ...context.analysisLabwares[indx] };
         switch (event.labware.field) {
           case 'workNumber': {
@@ -121,7 +124,7 @@ export const analysisLabwareMachine = createMachine(
             break;
           }
           case 'measurements': {
-            if (!event.labware.measurementType) return;
+            if (!event.labware.measurementType) return context;
             const measurement = {
               name: event.labware.measurementType,
               value: event.labware.value
@@ -153,9 +156,10 @@ export const analysisLabwareMachine = createMachine(
           updateAnalysisLabware,
           ...context.analysisLabwares.slice(indx + 1)
         ];
-      },
-      assignComments: ({ context, event }) => {
-        if (event.type !== 'UPDATE_ALL_COMMENTS_TYPE') return;
+        return context;
+      }),
+      assignComments: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_ALL_COMMENTS_TYPE') return context;
         //Change measurement data in all labwares
         context.analysisLabwares = context.analysisLabwares.map((labware) => {
           return {
@@ -163,9 +167,10 @@ export const analysisLabwareMachine = createMachine(
             commentId: event.commentId !== '' ? Number(event.commentId) : undefined
           };
         });
-      },
-      assignWorkNumbers: ({ context, event }) => {
-        if (event.type !== 'UPDATE_ALL_WORKNUMBERS') return;
+        return context;
+      }),
+      assignWorkNumbers: assign(({ context, event }) => {
+        if (event.type !== 'UPDATE_ALL_WORKNUMBERS') return context;
         //Change measurement data in all labwares
         context.analysisLabwares = context.analysisLabwares.map((labware) => {
           return {
@@ -173,7 +178,8 @@ export const analysisLabwareMachine = createMachine(
             workNumber: event.workNumber
           };
         });
-      }
+        return context;
+      })
     }
   }
 );

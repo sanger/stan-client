@@ -22,6 +22,7 @@ import Pill from '../Pill';
 import warningToast from '../notifications/WarningToast';
 import { toast } from 'react-toastify';
 import { AnyMachineSnapshot } from 'xstate';
+import { extractServerErrors } from '../../types/stan';
 
 /**
  * The type of values for the edit form
@@ -82,22 +83,7 @@ export default function WorkRow({
 
   /**Notify the changes in work fields*/
   React.useEffect(() => {
-    //  current.matches('updating');
-    // const currentEvent = actor.getSnapshot().getMeta().state.event.type;
-    if (
-      current.matches('xstate.done.actor.updateWorkPriority') ||
-      current.matches('xstate.done.actor.updateWorkNumSlides') ||
-      current.matches('xstate.done.actor.updateWorkNumBlocks') ||
-      current.matches('xstate.done.actor.updateWorkStatus') ||
-      current.matches('xstate.done.actor.updateWorkOmeroProject') ||
-      current.matches('xstate.done.actor.updateWorkDnapProject')
-      // currentEvent === 'xstate.done.actor.updateWorkPriority' ||
-      // currentEvent === 'xstate.done.actor.updateWorkNumSlides' ||
-      // currentEvent === 'xstate.done.actor.updateWorkNumBlocks' ||
-      // currentEvent === 'xstate.done.actor.updateWorkStatus' ||
-      // currentEvent === 'xstate.done.actor.updateWorkOmeroProject' ||
-      // currentEvent === 'xstate.done.actor.updateWorkDnapProject'
-    ) {
+    if (current.context.isInvokeActorDone) {
       onWorkFieldUpdate(rowIndex, { work: work, comment: comment });
     }
   }, [work, comment, onWorkFieldUpdate, rowIndex, current, actor]);
@@ -106,7 +92,7 @@ export default function WorkRow({
   useEffect(() => {
     if (serverErrors) {
       warningToast({
-        message: serverErrors.message!,
+        message: extractServerErrors(serverErrors).message!,
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 5000
       });

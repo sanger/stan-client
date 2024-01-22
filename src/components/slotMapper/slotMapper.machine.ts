@@ -4,30 +4,26 @@ import { buildAddresses, cycleColors } from '../../lib/helpers';
 import { sortWithDirection } from '../../lib/helpers/addressHelper';
 import { find, indexOf, intersection, map } from 'lodash';
 import { stanCore } from '../../lib/sdk';
-import { assign, createMachine, fromPromise } from 'xstate';
+import { assign, createMachine, fromPromise, MachineImplementations } from 'xstate';
 
 const colors = cycleColors();
 
-const machineConfig = {
+const machineConfig: MachineImplementations<SlotMapperContext, SlotMapperEvent> = {
   actions: {
     assignInputLabware: assign(({ context, event }) => {
       event.type === 'UPDATE_INPUT_LABWARE' && (context.inputLabware = event.labware);
       //update the failedSlots array  if it  has entries for any removed labware
-      let keys = context.failedSlots
-        .keys()
-        .filter(
-          (key: string) =>
-            context.inputLabware.findIndex((labware: LabwareFlaggedFieldsFragment) => labware.barcode === key) === -1
-        );
+      let keys = Array.from(context.failedSlots.keys()).filter(
+        (key: string) =>
+          context.inputLabware.findIndex((labware: LabwareFlaggedFieldsFragment) => labware.barcode === key) === -1
+      );
       keys.forEach((key: string) => context.failedSlots.delete(key));
 
       //update the error array  if it  has entries for any removed labware
-      keys = context.errors
-        .keys()
-        .filter(
-          (key: string) =>
-            context.inputLabware.findIndex((labware: LabwareFlaggedFieldsFragment) => labware.barcode === key) === -1
-        );
+      keys = Array.from(context.errors.keys()).filter(
+        (key: string) =>
+          context.inputLabware.findIndex((labware: LabwareFlaggedFieldsFragment) => labware.barcode === key) === -1
+      );
       keys.forEach((key: string) => context.errors.delete(key));
 
       //Update destination slotCopyContent if it  has entries for any removed labware
@@ -40,6 +36,7 @@ const machineConfig = {
     }),
     assignOutputLabware: assign(({ context, event }) => {
       event.type === 'UPDATE_OUTPUT_LABWARE' && (context.outputSlotCopies = event.outputSlotCopyContent);
+      return context;
     }),
 
     assignLabwareColors: assign(({ context }) => {
@@ -48,6 +45,7 @@ const machineConfig = {
           context.colorByBarcode.set(lw.barcode, colors.next().value);
         }
       });
+      return context;
     }),
 
     checkSlots: assign(({ context }) => {
@@ -57,11 +55,12 @@ const machineConfig = {
           inputLabwareBarcodes.includes(scc.sourceBarcode)
         );
       });
+      return context;
     }),
 
     clearSlots: assign(({ context, event }) => {
       if (event.type !== 'CLEAR_SLOTS') {
-        return;
+        return context;
       }
       const outputScc = context.outputSlotCopies.find(
         (outputScc: OutputSlotCopyData) => outputScc.labware.id === event.outputLabwareId
@@ -71,10 +70,11 @@ const machineConfig = {
           (scc: SlotCopyContent) => !event.outputAddresses.includes(scc.destinationAddress)
         );
       }
+      return context;
     }),
     clearSlotMappingsBetween: assign(({ context, event }) => {
       if (event.type !== 'CLEAR_ALL_SLOT_MAPPINGS_BETWEEN') {
-        return;
+        return context;
       }
       const outputScc = context.outputSlotCopies.find(
         (outputScc: OutputSlotCopyData) => outputScc.labware.id === event.outputLabwareId
@@ -84,10 +84,11 @@ const machineConfig = {
           (scc: SlotCopyContent) => scc.sourceBarcode !== event.inputLabwareBarcode
         );
       }
+      return context;
     }),
     copyOneToOneSlots: assign(({ context, event }) => {
       if (event.type !== 'COPY_ONE_TO_ONE_SLOTS') {
-        return;
+        return context;
       }
 
       const inputLabware = find(context.inputLabware, { id: event.inputLabwareId });
@@ -96,7 +97,7 @@ const machineConfig = {
       );
 
       if (!inputLabware || !outputScc) {
-        return;
+        return context;
       }
 
       // Get all the addresses of the output labware
@@ -106,7 +107,7 @@ const machineConfig = {
       const destinationAddressIndex = indexOf(outputAddresses, event.outputAddress);
 
       if (destinationAddressIndex === -1) {
-        return;
+        return context;
       }
 
       // Sort the input addresses
@@ -125,12 +126,12 @@ const machineConfig = {
         intersection(map(outputScc.slotCopyContent, 'destinationAddress'), Object.values(sourceToDestination)).length >
         0
       ) {
-        return;
+        return context;
       }
 
       // Don't map if all source addresses can not fit where user has clicked
       if (destinationAddressIndex + event.inputAddresses.length > outputAddresses.length) {
-        return;
+        return context;
       }
 
       // Everything looks good, so we can create the list of SlotCopyContent
@@ -149,10 +150,11 @@ const machineConfig = {
         })
         // Then add on the newly created slot copy content
         .concat(newSlotCopyContent);
+      return context;
     }),
     copyManyToOneSlots: assign(({ context, event }) => {
       if (event.type !== 'COPY_MANY_TO_ONE_SLOTS') {
-        return;
+        return context;
       }
 
       const inputLabware = find(context.inputLabware, { id: event.inputLabwareId });
@@ -161,7 +163,7 @@ const machineConfig = {
       );
 
       if (!inputLabware || !outputScc) {
-        return;
+        return context;
       }
       // Get all the addresses of the output labware
       const outputAddresses = buildAddresses(outputScc.labware.labwareType, GridDirection.DownRight);
@@ -170,11 +172,11 @@ const machineConfig = {
       const destinationAddressIndex = indexOf(outputAddresses, event.outputAddress);
 
       if (destinationAddressIndex === -1) {
-        return;
+        return context;
       }
       // Don't map if the destination addresses are already filled.
       if (outputScc.slotCopyContent.find((scc: SlotCopyContent) => scc.destinationAddress === event.outputAddress)) {
-        return;
+        return context;
       }
       //Create mapping between all selected input addresses and output address
       event.inputAddresses.forEach((inputAddress: string) =>
@@ -184,10 +186,11 @@ const machineConfig = {
           sourceAddress: inputAddress
         })
       );
+      return context;
     }),
     copyOneToManySlots: assign(({ context, event }) => {
       if (event.type !== 'COPY_ONE_TO_MANY_SLOTS') {
-        return;
+        return context;
       }
       const inputLabware = find(context.inputLabware, { id: event.inputLabwareId });
       const outputScc = context.outputSlotCopies.find(
@@ -195,7 +198,7 @@ const machineConfig = {
       );
 
       if (!inputLabware || !outputScc) {
-        return;
+        return context;
       }
 
       // Get all the addresses of the output labware
@@ -205,11 +208,11 @@ const machineConfig = {
       const destinationAddressIndex = indexOf(outputAddresses, event.outputAddress);
 
       if (destinationAddressIndex === -1) {
-        return;
+        return context;
       }
       // Don't map if the destination addresses are already filled.
       if (outputScc.slotCopyContent.find((scc: SlotCopyContent) => scc.destinationAddress === event.outputAddress)) {
-        return;
+        return context;
       }
       //Update Slot content with the mapping
       outputScc.slotCopyContent.push({
@@ -217,10 +220,11 @@ const machineConfig = {
         sourceBarcode: inputLabware.barcode,
         sourceAddress: event.inputAddress
       });
+      return context;
     }),
 
     assignFailedSlots: assign(({ context, event }) => {
-      if (event.type !== 'xstate.done.actor.passFailsSlots') return;
+      if (event.type !== 'xstate.done.actor.passFailsSlots') return context;
 
       /*If there are multiple slide processing performed on same labware, check the latest matching operation recorded
        which would be the last one in the array.
@@ -235,6 +239,7 @@ const machineConfig = {
           }
         }
       }
+      return context;
     }),
     assignPassFailError: assign(({ context, event }) => {
       if (event.type !== 'xstate.error.actor.passFailsSlots') return context;
@@ -250,8 +255,8 @@ interface SlotMapperMachineParams {
   failedSlotsCheck?: boolean;
 }
 
-function createSlotMapperMachine({ inputLabware, outputSlotCopies, failedSlotsCheck = true }: SlotMapperMachineParams) {
-  return createMachine({
+const createSlotMapperMachine = createMachine(
+  {
     id: 'slotMapperMachine',
     types: {} as {
       context: SlotMapperContext;
@@ -259,18 +264,16 @@ function createSlotMapperMachine({ inputLabware, outputSlotCopies, failedSlotsCh
       events: SlotMapperEvent;
     },
     initial: 'ready',
-    context: {
-      inputLabware,
-      outputSlotCopies,
-      failedSlotsCheck,
+    context: ({ input }: { input: SlotMapperMachineParams }): SlotMapperContext => ({
+      ...input,
+      failedSlotsCheck: input.failedSlotsCheck || true,
       colorByBarcode: new Map(),
       failedSlots: new Map(),
       errors: new Map()
-    },
+    }),
     states: {
       ready: {
         entry: 'assignLabwareColors',
-
         on: {
           COPY_ONE_TO_ONE_SLOTS: {
             actions: 'copyOneToOneSlots'
@@ -305,7 +308,7 @@ function createSlotMapperMachine({ inputLabware, outputSlotCopies, failedSlotsCh
         invoke: {
           id: 'passFailsSlots',
           src: fromPromise(async ({ input }) => {
-            if (input.labware.length <= 0) {
+            if (!input) {
               return Promise.reject('No labwares scanned');
             }
             const response = await stanCore.FindPassFails({
@@ -318,7 +321,7 @@ function createSlotMapperMachine({ inputLabware, outputSlotCopies, failedSlotsCh
             };
           }),
           input: ({ event }) => {
-            if (event.type !== 'UPDATE_INPUT_LABWARE') return {};
+            if (event.type !== 'UPDATE_INPUT_LABWARE') return undefined;
             return {
               labware: event.labware
             };
@@ -338,9 +341,11 @@ function createSlotMapperMachine({ inputLabware, outputSlotCopies, failedSlotsCh
           UNLOCK: 'ready'
         }
       }
-    },
+    }
+  },
+  {
     ...machineConfig
-  });
-}
+  }
+);
 
 export default createSlotMapperMachine;

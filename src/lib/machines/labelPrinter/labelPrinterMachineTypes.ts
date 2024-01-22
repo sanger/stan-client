@@ -11,7 +11,7 @@ export interface LabelPrinterContext {
   /**
    * Error message from core
    */
-  serverErrors: Maybe<ServerErrors>;
+  serverErrors?: ClientError;
 
   /**
    * The currently selected printer
@@ -45,12 +45,12 @@ export interface LabelPrinterSchema {
 
 type FetchPrintersDoneEvent = {
   type: 'xstate.done.actor.fetchPrinters';
-  data: GetPrintersQuery;
+  output: GetPrintersQuery;
 };
 
 type FetchPrintersErrorEvent = {
-  type: 'error.platform.fetchPrinters';
-  data: ClientError;
+  type: 'xstate.error.actor.fetchPrinters';
+  error: ClientError;
 };
 
 type PrintEvent = { type: 'PRINT'; labelsPerBarcode?: number };

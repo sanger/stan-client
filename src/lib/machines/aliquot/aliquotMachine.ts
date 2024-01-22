@@ -2,7 +2,7 @@ import { AliquotMutation, LabwareFieldsFragment } from '../../../types/sdk';
 import { assign, createMachine, fromPromise } from 'xstate';
 import { castDraft } from 'immer';
 import { stanCore } from '../../sdk';
-import { ServerErrors } from '../../../types/stan';
+import { ClientError } from 'graphql-request';
 
 export interface AliquotContext {
   /**The work number to associate with this aliquot operation**/
@@ -18,7 +18,7 @@ export interface AliquotContext {
   aliquotResult?: AliquotMutation;
 
   /**Error returned from server**/
-  serverErrors?: ServerErrors;
+  serverErrors?: ClientError;
 }
 const aliquotLabwareType: string = 'Tube';
 const aliquotOperationType: string = 'Aliquot';
@@ -41,7 +41,7 @@ type AliquotDoneEvent = {
 };
 type AliquotErrorEvent = {
   type: 'xstate.error.actor.aliquot';
-  error: ServerErrors;
+  error: ClientError;
 };
 
 export type AliquottingEvent =
@@ -75,14 +75,15 @@ export const aliquotMachine = createMachine(
       aliquoting: {
         id: 'aliquot',
         invoke: {
+          id: 'aliquot',
           src: fromPromise(({ input }) => {
             if (input.labware) {
               return stanCore.Aliquot({
                 request: {
                   workNumber: input.workNumber,
-                  labwareType: aliquotLabwareType,
                   barcode: input.labware.barcode,
                   numLabware: input.numLabware,
+                  labwareType: aliquotLabwareType,
                   operationType: aliquotOperationType
                 }
               });
@@ -92,7 +93,6 @@ export const aliquotMachine = createMachine(
           }),
           input: ({ context, event }) => ({
             workNumber: context.workNumber,
-            barcode: context.labware?.barcode,
             numLabware: context.numLabware,
             labware: context.labware
           }),
@@ -114,7 +114,9 @@ export const aliquotMachine = createMachine(
           UPDATE_NUM_LABWARE: { actions: 'assignNumLabware' }
         }
       },
-      aliquotingDone: {}
+      aliquotingDone: {
+        type: 'final'
+      }
     }
   },
   {
@@ -155,8 +157,9 @@ export const aliquotMachine = createMachine(
       })
     },
     guards: {
-      validAliquotInput: ({ context }) =>
-        context.labware !== undefined && context.labware.barcode.length > 0 && context.numLabware > 0
+      validAliquotInput: ({ context }) => {
+        return context.labware !== undefined && context.labware.barcode.length > 0 && context.numLabware > 0;
+      }
     }
   }
 );

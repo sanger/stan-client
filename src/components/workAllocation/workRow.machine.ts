@@ -10,10 +10,10 @@ import {
   WorkStatus,
   WorkWithCommentFieldsFragment
 } from '../../types/sdk';
-import { ServerErrors } from '../../types/stan';
 import { stanCore } from '../../lib/sdk';
 import { castDraft } from 'immer';
 import { Maybe } from 'yup';
+import { ClientError } from 'graphql-request';
 
 type WorkRowMachineContext = {
   /**
@@ -29,12 +29,19 @@ type WorkRowMachineContext = {
   /**
    * Errors from server, if any
    */
-  serverErrors?: Maybe<ServerErrors>;
+  serverErrors?: Maybe<ClientError>;
 
   /**
    * success message, if any
    */
   serverSuccess?: Maybe<string>;
+
+  /**
+   * A boolean flags indicating the machine event. This is primarily used as a replacement for assertions based on context.event.type,
+   * given that the event object has been removed from the context in XState v5.
+   * In the current (snapshot, using the new terminology in XState v5), only context parameters are directly accessible.
+   */
+  isInvokeActorDone?: boolean;
 };
 
 export type WorkRowEvent =
@@ -60,7 +67,7 @@ export type WorkRowEvent =
   | { type: 'xstate.done.actor.updateWorkPriority'; output: UpdateWorkPriorityMutation }
   | { type: 'xstate.done.actor.updateWorkOmeroProject'; output: UpdateWorkOmeroProjectMutation }
   | { type: 'xstate.done.actor.updateWorkDnapProject'; output: UpdateWorkDnapStudyMutation }
-  | { type: 'xstate.error.actor.updateWorkDnapProject'; error: ServerErrors }
+  | { type: 'xstate.error.actor.updateWorkDnapProject'; error: ClientError }
   | { type: 'xstate.done.actor.updateWorkNumOriginalSamples'; output: UpdateWorkNumOriginalSamplesMutation };
 
 type CreateWorkRowMachineParams = Pick<WorkRowMachineContext, 'workWithComment'>;
@@ -279,16 +286,19 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         assignSgpNumber: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkStatus') return context;
           context.workWithComment = event.output.updateWorkStatus;
+          context.isInvokeActorDone = true;
           return context;
         }),
         assignWorkNumBlocks: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkNumBlocks') return context;
           context.workWithComment.work = event.output.updateWorkNumBlocks;
+          context.isInvokeActorDone = true;
           return context;
         }),
         assignWorkNumSlides: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkNumSlides') return context;
           context.workWithComment.work = event.output.updateWorkNumSlides;
+          context.isInvokeActorDone = true;
           return context;
         }),
         assignWorkNumOriginalSamples: assign(({ context, event }) => {
@@ -299,11 +309,13 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
         assignWorkPriority: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkPriority') return context;
           context.workWithComment.work = event.output.updateWorkPriority;
+          context.isInvokeActorDone = true;
           return context;
         }),
         assignWorkOmeroProject: assign(({ context, event }) => {
           if (event.type !== 'xstate.done.actor.updateWorkOmeroProject') return context;
           context.workWithComment.work = event.output.updateWorkOmeroProject;
+          context.isInvokeActorDone = true;
           return context;
         }),
         assignWorkDnapProject: assign(({ context, event }) => {
@@ -311,6 +323,7 @@ export default function createWorkRowMachine({ workWithComment }: CreateWorkRowM
           context.workWithComment.work = event.output.updateWorkDnapStudy;
           context.serverSuccess =
             'DNAP project successfully updated to ' + event.output.updateWorkDnapStudy.dnapStudy!.name;
+          context.isInvokeActorDone = true;
           return context;
         }),
         toggleEditMode: assign(({ context, event }) => {

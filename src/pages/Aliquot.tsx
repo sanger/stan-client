@@ -206,7 +206,7 @@ function Aliquot() {
             <p className="my-3 text-gray-800 text-sm leading-normal">
               Once <span className="font-bold text-gray-900">source tube</span> is scanned and
               <span className="font-bold text-gray-900"> number of destination tubes </span> are entered,{' '}
-              <p>click Aliquot to create destination tubes.</p>
+              <span>click Aliquot to create destination tubes.</span>
             </p>
 
             <p className="my-4 text-gray-800 text-xs leading-relaxed italic text-center">
