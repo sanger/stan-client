@@ -1,20 +1,14 @@
 import Panel from '../Panel';
 import React from 'react';
-import { LabwareFlaggedFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
-import SlotMeasurements, { MeasurementConfigProps } from '../slotMeasurement/SlotMeasurements';
+import SlotMeasurements, { MeasurementConfigProps, SlotMeasurement } from '../slotMeasurement/SlotMeasurements';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
+import { CDNAProps } from './Amplification';
 
-export type CDNAProps = {
-  labware: LabwareFlaggedFieldsFragment;
-  slotMeasurements: SlotMeasurementRequest[] | undefined;
-  removeLabware: (barcode: string) => void;
-};
-
-const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) => {
+const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) => {
   const { values, setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
 
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
@@ -23,12 +17,6 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) 
         name: 'Cq value',
         stepIncrement: '.01',
         validateFunction: validateCqMeasurementValue,
-        initialMeasurementVal: ''
-      },
-      {
-        name: 'Cycles',
-        stepIncrement: '1',
-        validateFunction: validateCyclesMeasurementValue,
         initialMeasurementVal: ''
       }
     ],
@@ -39,7 +27,6 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) 
    * When labwares changes, the slotMeasurements has to be initialized accordingly
    */
   React.useEffect(() => {
-    //Reset Errors
     setErrors({});
     setTouched({});
 
@@ -47,10 +34,12 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) 
       return;
     }
     setFieldValue('barcode', labware.barcode);
-    const slotMeasurements: SlotMeasurementRequest[] = labware.slots.filter(isSlotFilled).flatMap((slot) => {
+    const slotMeasurements: SlotMeasurement[] = labware.slots.filter(isSlotFilled).flatMap((slot) => {
       return memoMeasurementConfig.map((measurement) => {
         return {
           address: slot.address,
+          externalName: slot.samples.flatMap((sample) => sample.tissue.externalName)[0],
+          sectionNumber: slot.samples.flatMap((sample) => sample.section)[0],
           name: measurement.name,
           value: measurement.initialMeasurementVal
         };
@@ -93,25 +82,6 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) 
     } else {
       if (Number(value) < 0) {
         error = 'Positive value required';
-      }
-    }
-    return error;
-  }
-
-  /***
-   * Only accept integer values for cDNA Amplification
-   * @param value
-   */
-  function validateCyclesMeasurementValue(value: string) {
-    let error;
-    if (value === '') {
-      error = 'Required';
-    } else {
-      if (Number(value) < 0) {
-        error = 'Positive value required';
-      }
-      if (!Number.isInteger(Number(value))) {
-        error = 'Integer value required';
       }
     }
     return error;
@@ -179,4 +149,4 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) 
     </div>
   );
 };
-export default Amplification;
+export default QPcrResults;

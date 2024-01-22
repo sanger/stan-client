@@ -129,4 +129,23 @@ describe('SlotMeasurements', () => {
       expect(handleChangeComment).toHaveBeenCalled();
     });
   });
+
+  it('displays sample information when mentioned', async () => {
+    renderSlotMeasurements({
+      slotMeasurements: [
+        { address: 'A1', externalName: 'P69044', sectionNumber: 1, value: '0' },
+        { address: 'A1', externalName: 'P69045', sectionNumber: 2, value: '0' }
+      ],
+      measurementConfig: [
+        { name: 'Cq value', stepIncrement: '.01', initialMeasurementVal: '', validateFunction: jest.fn() }
+      ],
+      onChangeField: jest.fn()
+    });
+    await waitFor(() => {
+      expect(screen.getByText('External ID')).toBeInTheDocument();
+      expect(screen.getByText('Section Number')).toBeInTheDocument();
+      expect(screen.getByText('P69044')).toBeInTheDocument();
+      expect(screen.getByText('P69045')).toBeInTheDocument();
+    });
+  });
 });

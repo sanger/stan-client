@@ -574,6 +574,43 @@ describe('Visium QC Page', () => {
     });
   });
 
+  describe('When selecting qPCR Results for QCType', () => {
+    before(() => {
+      cy.reload();
+      selectOption('qcType', 'qPCR results');
+    });
+
+    context('When a user enters a global CQ value', () => {
+      before(() => {
+        cy.findByTestId('all-Cq value').type('5');
+      });
+      it('updates all the Cq value inputs inside the table related to the slots', () => {
+        cy.findAllByTestId('Cq value-input').should('have.value', 5);
+      });
+    });
+
+    describe('On Save', () => {
+      it('Save button should be disabled when there is no SGP number', () => {
+        selectSGPNumber('');
+        cy.findByRole('button', { name: /Save/i }).should('be.disabled');
+      });
+
+      context('When there is no server error', () => {
+        before(() => {
+          selectSGPNumber('SGP1008');
+          cy.findByRole('button', { name: /Save/i }).should('not.be.disabled').click();
+        });
+
+        it('shows a success message', () => {
+          cy.findByText('qPCR results complete').should('be.visible');
+        });
+        after(() => {
+          cy.findByRole('button', { name: /Reset/i }).click();
+        });
+      });
+    });
+  });
+
   function saveButton() {
     return cy.findByRole('button', { name: /Save/i });
   }

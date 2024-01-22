@@ -1,5 +1,5 @@
 import React from 'react';
-import { CommentFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import { CommentFieldsFragment, Maybe, SlotMeasurementRequest } from '../../types/sdk';
 import { Row } from 'react-table';
 import DataTable from '../DataTable';
 import FormikInput from '../forms/Input';
@@ -13,8 +13,13 @@ export type MeasurementConfigProps = {
   validateFunction?: (value: string) => void;
   initialMeasurementVal: string;
 };
+
+export interface SlotMeasurement extends SlotMeasurementRequest {
+  externalName?: Maybe<string>;
+  sectionNumber?: Maybe<number>;
+}
 export type SlotMeasurementProps = {
-  slotMeasurements: SlotMeasurementRequest[];
+  slotMeasurements: SlotMeasurement[];
   measurementConfig: MeasurementConfigProps[];
   comments?: CommentFieldsFragment[];
   onChangeField: (fieldName: string, value: string) => void;
@@ -23,6 +28,8 @@ export type SlotMeasurementProps = {
 type MeasurementRow = {
   address: string;
   measurements: SlotMeasurementRequest[];
+  externalName?: Maybe<string>;
+  sectionNumber?: Maybe<number>;
 };
 const setMeasurementNameTableTitle = (measurementName: string): string => {
   return measurementName === 'cDNA concentration' || measurementName === 'Library concentration'
@@ -40,28 +47,43 @@ const setMeasurementNameTableTitle = (measurementName: string): string => {
  */
 
 const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, comments }: SlotMeasurementProps) => {
-  const [measurementRows, setMeasurementRows] = React.useState<MeasurementRow[]>([]);
   const [measurementConfigOptions, setMeasurementConfigOptions] = React.useState<MeasurementConfigProps[]>([]);
 
-  /**concatenate all mesaurements if there are multiple measurements */
+  const isWithSampleInfo = React.useMemo(
+    () => slotMeasurements.some((measurement) => measurement.externalName && measurement.sectionNumber),
+    [slotMeasurements]
+  );
 
+  /**concatenate all mesaurements if there are multiple measurements */
   React.useEffect(() => {
     if (measurementConfigOptions.length === measurementConfig.length) return;
     setMeasurementConfigOptions(measurementConfig);
   }, [measurementConfig, measurementConfigOptions, setMeasurementConfigOptions]);
 
-  React.useEffect(() => {
-    const groupedMeasurements: Dictionary<SlotMeasurementRequest[]> = groupBy(slotMeasurements, 'address');
-    if (Object.keys(groupedMeasurements).length === measurementRows?.length) return;
-    setMeasurementRows(
-      Object.keys(groupedMeasurements).map((address) => {
-        return {
+  const measurementRowValues: MeasurementRow[] = React.useMemo(() => {
+    const groupedMeasurements: Dictionary<SlotMeasurement[]> = groupBy(slotMeasurements, 'address');
+    const values: MeasurementRow[] = [];
+    if (isWithSampleInfo) {
+      for (const address in groupedMeasurements) {
+        groupedMeasurements[address].forEach((measurement) => {
+          values.push({
+            address,
+            measurements: groupedMeasurements[address],
+            externalName: measurement.externalName,
+            sectionNumber: measurement.sectionNumber
+          });
+        });
+      }
+    } else {
+      for (const address in groupedMeasurements) {
+        values.push({
           address,
           measurements: groupedMeasurements[address]
-        };
-      })
-    );
-  }, [slotMeasurements, measurementRows, setMeasurementRows]);
+        });
+      }
+    }
+    return values;
+  }, [slotMeasurements, isWithSampleInfo]);
 
   const columns = React.useMemo(() => {
     return [
@@ -70,7 +92,20 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
         id: 'address',
         accessor: (measurement: MeasurementRow) => measurement.address
       },
-
+      ...(isWithSampleInfo
+        ? [
+            {
+              Header: 'External ID',
+              id: 'externalName',
+              accessor: (measurement: MeasurementRow) => measurement.externalName
+            },
+            {
+              Header: 'Section Number',
+              id: 'sectionNumber',
+              accessor: (measurement: MeasurementRow) => measurement.sectionNumber
+            }
+          ]
+        : []),
       ...measurementConfigOptions.map((measurementProp, mesaurementIndex) => {
         return {
           Header: setMeasurementNameTableTitle(measurementProp.name),
@@ -129,13 +164,13 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
           ]
         : [])
     ];
-  }, [comments, onChangeField, measurementConfigOptions]);
+  }, [comments, onChangeField, measurementConfigOptions, isWithSampleInfo]);
 
   return (
     <>
       {slotMeasurements && slotMeasurements.length > 0 && (
         <>
-          <DataTable columns={columns} data={measurementRows ?? []} />
+          <DataTable columns={columns} data={measurementRowValues ?? []} />
         </>
       )}
     </>
