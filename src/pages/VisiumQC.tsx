@@ -214,7 +214,7 @@ export default function VisiumQC() {
     if (
       value.qcType === QCType.CDNA_AMPLIFICATION ||
       value.qcType === QCType.VISIUM_CONCENTRATION ||
-      QCType.QPCR_RESULTS
+      value.qcType === QCType.QPCR_RESULTS
     ) {
       if (value.slotMeasurements) {
         const val = value.slotMeasurements.filter((measurement) => measurement.value === '');

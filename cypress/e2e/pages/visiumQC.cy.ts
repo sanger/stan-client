@@ -578,6 +578,7 @@ describe('Visium QC Page', () => {
     before(() => {
       cy.reload();
       selectOption('qcType', 'qPCR results');
+      cy.get('#labwareScanInput').type('STAN-2100{enter}');
     });
 
     context('When a user enters a global CQ value', () => {
