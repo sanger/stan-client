@@ -5,7 +5,7 @@ import { Formik } from 'formik';
 import { slideFactory } from '../../../../src/lib/factories/labwareFactory';
 import { LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
-import Amplification, { AmplificationProps } from '../../../../src/components/visiumQC/Amplification';
+import Amplification, { CDNAProps } from '../../../../src/components/visiumQC/Amplification';
 import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
 afterEach(() => {
   cleanup();
@@ -18,7 +18,7 @@ const FormikProps = {
   initialValues: {}
 };
 
-const renderAmplification = (props?: AmplificationProps) => {
+const renderAmplification = (props?: CDNAProps) => {
   const inputLabware = slideFactory.build() as NewFlaggedLabwareLayout;
   const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
   const initialProps = props ?? {
