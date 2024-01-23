@@ -5,9 +5,9 @@ name: Test
 
 on:
   push:
-    branches: [x1034_msw_update,devel]
+    branches: [devel]
   pull_request:
-    branches: [x1034_msw_update,devel]
+    branches: [devel]
 
 jobs:
   cypress:
