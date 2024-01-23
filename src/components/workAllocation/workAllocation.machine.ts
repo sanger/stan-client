@@ -327,7 +327,7 @@ export default function createWorkAllocationMachine({ urlParams }: CreateWorkAll
             numSlides,
             numOriginalSamples,
             omeroProject,
-            ssStudyId: Number(ssStudyId)
+            ssStudyId: ssStudyId ? Number(ssStudyId) : null
           });
         },
 
