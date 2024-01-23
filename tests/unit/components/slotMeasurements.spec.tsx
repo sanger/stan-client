@@ -3,6 +3,7 @@ import '@testing-library/jest-dom';
 import SlotMeasurements from '../../../src/components/slotMeasurement/SlotMeasurements';
 import { Formik } from 'formik';
 import { selectOption } from '../../generic/utilities';
+import { sampleFactory, tissueFactory } from '../../../src/lib/factories/sampleFactory';
 
 afterEach(() => {
   cleanup();
@@ -133,8 +134,14 @@ describe('SlotMeasurements', () => {
   it('displays sample information when mentioned', async () => {
     renderSlotMeasurements({
       slotMeasurements: [
-        { address: 'A1', externalName: 'P69044', sectionNumber: 1, value: '0' },
-        { address: 'A1', externalName: 'P69045', sectionNumber: 2, value: '0' }
+        {
+          address: 'A1',
+          samples: [
+            sampleFactory.build({ section: 2, tissue: tissueFactory.build({ externalName: 'P69044' }) }),
+            sampleFactory.build({ section: 1, tissue: tissueFactory.build({ externalName: 'P69045' }) })
+          ],
+          value: '0'
+        }
       ],
       measurementConfig: [
         { name: 'Cq value', stepIncrement: '.01', initialMeasurementVal: '', validateFunction: jest.fn() }
