@@ -21,14 +21,14 @@ jobs:
         id: node_version
         run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: >-
           echo "::set-output name=dir::$(yarn cache dir)"
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
