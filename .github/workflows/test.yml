@@ -5,22 +5,22 @@ name: Test
 
 on:
   push:
-    branches: [devel]
+    branches: [x1034_msw_update,devel]
   pull_request:
-    branches: [devel]
+    branches: [x1034_msw_update,devel]
 
 jobs:
   cypress:
     name: Run cypress tests
     runs-on: ubuntu-latest
     container: 
-      image: cypress/browsers:node18.12.0-chrome106-ff106
+      image: cypress/browsers:latest
       options: --user 1001
     steps:
       - uses: actions/checkout@v4
         name: Checkout
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'yarn'
