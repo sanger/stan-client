@@ -5,6 +5,7 @@ import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
 import { selectFocusBlur, selectOption } from '../shared/customReactSelect.cy';
 import { http, HttpResponse } from 'msw';
+import { shouldHaveOption } from '../../../tests/generic/utilities';
 
 describe('Registration', () => {
   before(() => {
@@ -93,6 +94,11 @@ describe('Registration', () => {
         cy.findByText(
           'External Identifier contains invalid characters. Only letters, numbers, hyphens, and underscores are permitted'
         ).should('be.visible');
+      });
+
+      it('should have display labware types', () => {
+        shouldHaveOption('Labware Type', 'Pot');
+        shouldHaveOption('Labware Type', 'Cassette');
       });
 
       it('requires Labware Type', () => {
