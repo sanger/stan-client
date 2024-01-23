@@ -1,6 +1,5 @@
 import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 import { RecordInPlaceMutation, RecordInPlaceMutationVariables } from '../../../src/types/sdk';
-import { HttpResponse } from 'msw';
 
 describe('Imaging Page', () => {
   before(() => {
@@ -35,14 +34,14 @@ describe('Imaging Page', () => {
 
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.mutation<RecordInPlaceMutation, RecordInPlaceMutationVariables>('RecordInPlace', () => {
-            return HttpResponse.json({
-              errors: [
+          graphql.mutation<RecordInPlaceMutation, RecordInPlaceMutationVariables>('RecordInPlace', (req, res, ctx) => {
+            return res.once(
+              ctx.errors([
                 {
-                  message: `Exception while fetching data (/imaging) : Something went wrong`
+                  message: `Exception while fetching data (/destroy) : Something went wrong`
                 }
-              ]
-            });
+              ])
+            );
           })
         );
       });

@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   AddReleaseDestinationMutation,
   AddReleaseDestinationMutationVariables,
@@ -11,27 +11,30 @@ import releaseDestinationRepository from '../repositories/releaseDestinationRepo
 const releaseDestinationHandlers = [
   graphql.mutation<AddReleaseDestinationMutation, AddReleaseDestinationMutationVariables>(
     'AddReleaseDestination',
-    ({ variables }) => {
+    (req, res, ctx) => {
       const addReleaseDestination = releaseDestinationFactory.build({
-        name: variables.name
+        name: req.variables.name
       });
       releaseDestinationRepository.save(addReleaseDestination);
-      return HttpResponse.json({ data: { addReleaseDestination } }, { status: 200 });
+      return res(ctx.data({ addReleaseDestination }));
     }
   ),
 
   graphql.mutation<SetReleaseDestinationEnabledMutation, SetReleaseDestinationEnabledMutationVariables>(
     'SetReleaseDestinationEnabled',
-    ({ variables }) => {
-      const releaseDestination = releaseDestinationRepository.find('name', variables.name);
+    (req, res, ctx) => {
+      const releaseDestination = releaseDestinationRepository.find('name', req.variables.name);
       if (releaseDestination) {
-        releaseDestination.enabled = variables.enabled;
+        releaseDestination.enabled = req.variables.enabled;
         releaseDestinationRepository.save(releaseDestination);
-        return HttpResponse.json({ data: { setReleaseDestinationEnabled: releaseDestination } }, { status: 200 });
+        return res(ctx.data({ setReleaseDestinationEnabled: releaseDestination }));
       } else {
-        return HttpResponse.json(
-          { errors: [{ message: `Could not find release destination: "${variables.name}"` }] },
-          { status: 404 }
+        return res(
+          ctx.errors([
+            {
+              message: `Could not find release destination: "${req.variables.name}"`
+            }
+          ])
         );
       }
     }

@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   CreateWorkMutation,
   CreateWorkMutationVariables,
@@ -29,8 +29,7 @@ import {
   FindWorksCreatedByQueryVariables,
   DnapStudy,
   UpdateWorkDnapStudyMutation,
-  UpdateWorkDnapStudyMutationVariables,
-  GetAllWorkInfoQueryVariables
+  UpdateWorkDnapStudyMutationVariables
 } from '../../types/sdk';
 import costCodeRepository from '../repositories/costCodeRepository';
 import projectRepository from '../repositories/projectRepository';
@@ -49,21 +48,24 @@ import dnapStudyRepository from '../repositories/dnapStudyRepository';
 const workHandlers = [
   graphql.query<GetWorkAllocationInfoQuery, GetWorkAllocationInfoQueryVariables>(
     'GetWorkAllocationInfo',
-    ({ variables }) => {
+    (req, res, ctx) => {
       const comments = commentRepository
         .findAll()
-        .filter((comment) => comment.category === variables.commentCategory && isEnabled(comment));
+        .filter((comment) => comment.category === req.variables.commentCategory && isEnabled(comment));
       let works = workRepository.findAll();
 
-      if (variables.workStatuses) {
-        let workStatuses = Array.isArray(variables.workStatuses) ? variables.workStatuses : [variables.workStatuses];
+      if (req.variables.workStatuses) {
+        let workStatuses = Array.isArray(req.variables.workStatuses)
+          ? req.variables.workStatuses
+          : [req.variables.workStatuses];
 
         if (workStatuses.length > 0) {
           works = works.filter((work) => workStatuses.includes(work.status));
         }
       }
-      return HttpResponse.json({
-        data: {
+
+      return res(
+        ctx.data({
           costCodes: costCodeRepository.findAll().filter(isEnabled),
           omeroProjects: omeroProjectRepository.findAll().filter(isEnabled),
           projects: projectRepository.findAll().filter(isEnabled),
@@ -80,16 +82,16 @@ const workHandlers = [
           workTypes: workTypeRepository.findAll().filter(isEnabled),
           releaseRecipients: releaseRecipientRepository.findAll().filter(isEnabled),
           dnapStudies: dnapStudyRepository.findAll().filter(isEnabled)
-        }
-      });
+        })
+      );
     }
   ),
-  graphql.query<FindWorkInfoQuery, FindWorkInfoQueryVariables>('FindWorkInfo', ({ variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query<FindWorkInfoQuery, FindWorkInfoQueryVariables>('FindWorkInfo', (req, res, ctx) => {
+    return res(
+      ctx.data({
         works: workRepository
           .findAll()
-          .filter((w) => w.status === variables.status)
+          .filter((w) => w.status === req.variables.status)
           .map((work) => {
             return {
               __typename: 'Work',
@@ -112,173 +114,272 @@ const workHandlers = [
               }
             };
           })
-      }
-    });
+      })
+    );
   }),
 
-  graphql.query<FindWorksCreatedByQuery, FindWorksCreatedByQueryVariables>('FindWorksCreatedBy', () => {
-    return HttpResponse.json({ data: { worksCreatedBy: workRepository.findAll() } });
+  graphql.query<FindWorksCreatedByQuery, FindWorksCreatedByQueryVariables>('FindWorksCreatedBy', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        worksCreatedBy: workRepository.findAll()
+      })
+    );
   }),
 
-  graphql.mutation<CreateWorkMutation, CreateWorkMutationVariables>('CreateWork', ({ variables }) => {
-    const workType = workTypeRepository.find('name', variables.workType);
-    const costCode = costCodeRepository.find('code', variables.costCode);
-    const project = projectRepository.find('name', variables.project);
-    const program = programRepository.find('name', variables.program) ?? undefined;
-    const omeroProject = variables.omeroProject
-      ? omeroProjectRepository.find('name', variables.omeroProject)
+  graphql.mutation<CreateWorkMutation, CreateWorkMutationVariables>('CreateWork', (req, res, ctx) => {
+    const workType = workTypeRepository.find('name', req.variables.workType);
+    const costCode = costCodeRepository.find('code', req.variables.costCode);
+    const project = projectRepository.find('name', req.variables.project);
+    const program = programRepository.find('name', req.variables.program) ?? undefined;
+    const omeroProject = req.variables.omeroProject
+      ? omeroProjectRepository.find('name', req.variables.omeroProject)
       : undefined;
-    const dnapStudy = variables.ssStudyId ? dnapStudyRepository.find('ssId', variables.ssStudyId) : undefined;
-    const workRequester = releaseRecipientRepository.find('username', variables.workRequester);
+    const dnapStudy = req.variables.ssStudyId ? dnapStudyRepository.find('ssId', req.variables.ssStudyId) : undefined;
+    const workRequester = releaseRecipientRepository.find('username', req.variables.workRequester);
 
     if (!workType) {
-      return HttpResponse.json({ errors: [{ message: `Work type ${variables.workType} not found` }] }, { status: 404 });
+      return res(ctx.errors([{ message: `Work type ${req.variables.workType} not found` }]));
     }
 
     if (!costCode) {
-      return HttpResponse.json({ errors: [{ message: `Cost code ${variables.costCode} not found` }] }, { status: 404 });
+      return res(
+        ctx.errors([
+          {
+            message: `Cost code ${req.variables.costCode} not found`
+          }
+        ])
+      );
     }
 
     if (!project) {
-      return HttpResponse.json({ errors: [{ message: `Project ${variables.project} not found` }] }, { status: 404 });
+      return res(
+        ctx.errors([
+          {
+            message: `Project ${req.variables.project} not found`
+          }
+        ])
+      );
     }
 
     if (!workRequester) {
-      return HttpResponse.json(
-        { errors: [{ message: `Work requester ${variables.workRequester} not found` }] },
-        { status: 404 }
+      return res(
+        ctx.errors([
+          {
+            message: `Work requester ${req.variables.workRequester} not found`
+          }
+        ])
       );
     }
 
     const createWork = workFactory.build(
       {
-        numSlides: variables.numSlides,
-        numBlocks: variables.numBlocks,
-        numOriginalSamples: variables.numOriginalSamples
+        numSlides: req.variables.numSlides,
+        numBlocks: req.variables.numBlocks,
+        numOriginalSamples: req.variables.numOriginalSamples
       },
       {
         associations: { workType, costCode, project, program, workRequester, omeroProject, dnapStudy },
-        transient: { isRnD: variables.prefix === 'R&D' }
+        transient: { isRnD: req.variables.prefix === 'R&D' }
       }
     );
 
     workRepository.save(createWork);
-    return HttpResponse.json({ data: { createWork } }, { status: 200 });
+
+    return res(
+      ctx.data({
+        createWork
+      })
+    );
   }),
 
-  graphql.mutation<UpdateWorkStatusMutation, UpdateWorkStatusMutationVariables>('UpdateWorkStatus', ({ variables }) => {
-    const work = workRepository.find('workNumber', variables.workNumber);
+  graphql.mutation<UpdateWorkStatusMutation, UpdateWorkStatusMutationVariables>('UpdateWorkStatus', (req, res, ctx) => {
+    const work = workRepository.find('workNumber', req.variables.workNumber);
 
     let comment = null;
 
-    if (variables.commentId) {
-      comment = commentRepository.find('id', variables.commentId)?.text;
+    if (req.variables.commentId) {
+      comment = commentRepository.find('id', req.variables.commentId)?.text;
     }
 
     if (!work) {
-      return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
+      return res(
+        ctx.errors([
+          {
+            message: `Work ${req.variables.workNumber} not found`
+          }
+        ])
+      );
     }
 
-    work.status = variables.status;
+    work.status = req.variables.status;
     workRepository.save(work);
 
-    return HttpResponse.json({ data: { updateWorkStatus: { work, comment } } }, { status: 200 });
+    return res(
+      ctx.data({
+        updateWorkStatus: {
+          work,
+          comment
+        }
+      })
+    );
   }),
   graphql.mutation<UpdateWorkNumBlocksMutation, UpdateWorkNumBlocksMutationVariables>(
     'UpdateWorkNumBlocks',
-    ({ variables }) => {
-      const work = workRepository.find('workNumber', variables.workNumber);
+    (req, res, ctx) => {
+      const work = workRepository.find('workNumber', req.variables.workNumber);
       if (!work) {
-        return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
+        return res(
+          ctx.errors([
+            {
+              message: `Work ${req.variables.workNumber} not found`
+            }
+          ])
+        );
       }
-      work.numBlocks = variables.numBlocks;
+      work.numBlocks = req.variables.numBlocks;
       workRepository.save(work);
-      return HttpResponse.json({ data: { updateWorkNumBlocks: work } }, { status: 200 });
+      return res(
+        ctx.data({
+          updateWorkNumBlocks: work
+        })
+      );
     }
   ),
 
   graphql.mutation<UpdateWorkNumSlidesMutation, UpdateWorkNumSlidesMutationVariables>(
     'UpdateWorkNumSlides',
-    ({ variables }) => {
-      const work = workRepository.find('workNumber', variables.workNumber);
+    (req, res, ctx) => {
+      const work = workRepository.find('workNumber', req.variables.workNumber);
       if (!work) {
-        return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
+        return res(
+          ctx.errors([
+            {
+              message: `Work ${req.variables.workNumber} not found`
+            }
+          ])
+        );
       }
-      work.numSlides = variables.numSlides;
+      work.numSlides = req.variables.numSlides;
       workRepository.save(work);
-      return HttpResponse.json({ data: { updateWorkNumSlides: work } }, { status: 200 });
+      return res(
+        ctx.data({
+          updateWorkNumSlides: work
+        })
+      );
     }
   ),
 
   graphql.mutation<UpdateWorkPriorityMutation, UpdateWorkPriorityMutationVariables>(
     'UpdateWorkPriority',
-    ({ variables }) => {
-      const work = workRepository.find('workNumber', variables.workNumber);
+    (req, res, ctx) => {
+      const work = workRepository.find('workNumber', req.variables.workNumber);
       if (!work) {
-        return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
+        return res(
+          ctx.errors([
+            {
+              message: `Work ${req.variables.workNumber} not found`
+            }
+          ])
+        );
       }
-      work.priority = variables.priority;
+      work.priority = req.variables.priority;
       workRepository.save(work);
-      return HttpResponse.json({ data: { updateWorkPriority: work } }, { status: 200 });
+      return res(
+        ctx.data({
+          updateWorkPriority: work
+        })
+      );
     }
   ),
 
   graphql.mutation<UpdateWorkOmeroProjectMutation, UpdateWorkOmeroProjectMutationVariables>(
     'UpdateWorkOmeroProject',
-    ({ variables }) => {
-      const work = workRepository.find('workNumber', variables.workNumber);
+    (req, res, ctx) => {
+      const work = workRepository.find('workNumber', req.variables.workNumber);
       if (!work) {
-        return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
+        return res(
+          ctx.errors([
+            {
+              message: `Work ${req.variables.workNumber} not found`
+            }
+          ])
+        );
       }
       let omeroProject: OmeroProject | null = null;
-      if (variables.omeroProject) {
-        omeroProject = omeroProjectRepository.find('name', variables.omeroProject);
+      if (req.variables.omeroProject) {
+        omeroProject = omeroProjectRepository.find('name', req.variables.omeroProject);
       }
       if (!omeroProject) {
-        return HttpResponse.json(
-          { errors: [{ message: `Omero project ${variables.omeroProject} not found` }] },
-          { status: 404 }
+        return res(
+          ctx.errors([
+            {
+              message: `Omero project ${req.variables.omeroProject} not found`
+            }
+          ])
         );
       }
       work.omeroProject = omeroProject;
       workRepository.save(work);
-      return HttpResponse.json({ data: { updateWorkOmeroProject: work } }, { status: 200 });
+      return res(
+        ctx.data({
+          updateWorkOmeroProject: work
+        })
+      );
     }
   ),
   graphql.mutation<UpdateWorkDnapStudyMutation, UpdateWorkDnapStudyMutationVariables>(
     'UpdateWorkDnapStudy',
-    ({ variables }) => {
-      const work = workRepository.find('workNumber', variables.workNumber);
+    (req, res, ctx) => {
+      const work = workRepository.find('workNumber', req.variables.workNumber);
       if (!work) {
-        return HttpResponse.json({ errors: [{ message: `Work ${variables.workNumber} not found` }] }, { status: 404 });
+        return res(
+          ctx.errors([
+            {
+              message: `Work ${req.variables.workNumber} not found`
+            }
+          ])
+        );
       }
       let dnapStudy: DnapStudy | null = null;
-      if (variables.ssStudyId) {
-        dnapStudy = dnapStudyRepository.find('ssId', variables.ssStudyId);
+      if (req.variables.ssStudyId) {
+        dnapStudy = dnapStudyRepository.find('ssId', req.variables.ssStudyId);
       }
       if (!dnapStudy) {
-        return HttpResponse.json(
-          { errors: [{ message: `Unknown Sequencescape study id: ${variables.ssStudyId}` }] },
-          { status: 404 }
+        return res(
+          ctx.errors([
+            {
+              message: `Exception while fetching data (/updateWorkDnapStudy) : Unknown Sequencescape study id: ${req.variables.ssStudyId}`
+            }
+          ])
         );
       }
       work.dnapStudy = dnapStudy;
       workRepository.save(work);
-      return HttpResponse.json({ data: { updateWorkDnapStudy: work } }, { status: 200 });
+      return res(
+        ctx.data({
+          updateWorkDnapStudy: work
+        })
+      );
     }
   ),
-  graphql.query<FindWorkNumbersQuery, FindWorkNumbersQueryVariables>('FindWorkNumbers', ({ variables }) => {
-    return HttpResponse.json({
-      data: { works: workRepository.findAll().filter((w) => w.status === variables.status) }
-    });
+  graphql.query<FindWorkNumbersQuery, FindWorkNumbersQueryVariables>('FindWorkNumbers', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        works: workRepository.findAll().filter((w) => w.status === req.variables.status)
+      })
+    );
   }),
 
-  graphql.query<GetWorkNumbersQuery, GetWorkNumbersQueryVariables>('GetWorkNumbers', () => {
-    return HttpResponse.json({ data: { works: workRepository.findAll() } });
+  graphql.query<GetWorkNumbersQuery, GetWorkNumbersQueryVariables>('GetWorkNumbers', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        works: workRepository.findAll()
+      })
+    );
   }),
-  graphql.query<GetAllWorkInfoQuery, GetAllWorkInfoQueryVariables>('GetAllWorkInfo', () => {
-    return HttpResponse.json({
-      data: {
+  graphql.query<GetAllWorkInfoQuery, GetAllWorkInfoQuery>('GetAllWorkInfo', (req, res, ctx) => {
+    return res(
+      ctx.data({
         works: [
           ...workRepository.findAll(),
           {
@@ -288,13 +389,17 @@ const workHandlers = [
             project: { name: 'Project 1' }
           }
         ]
-      }
-    });
+      })
+    );
   }),
   graphql.query<GetSuggestedLabwareForWorkQuery, GetSuggestedLabwareForWorkQueryVariables>(
     'GetSuggestedLabwareForWork',
-    () => {
-      return HttpResponse.json({ data: { suggestedLabwareForWork: labwareFactory.buildList(2) } });
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          suggestedLabwareForWork: labwareFactory.buildList(2)
+        })
+      );
     }
   )
 ];

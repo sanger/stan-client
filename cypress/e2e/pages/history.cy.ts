@@ -6,7 +6,6 @@ import {
 } from '../../../src/types/sdk';
 import { buildHistory } from '../../../src/mocks/handlers/historyHandlers';
 import { shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
-import { HttpResponse } from 'msw';
 describe('History Page', () => {
   describe('By Labware Barcode', () => {
     context('when I visit the page with good URL params', () => {
@@ -133,26 +132,28 @@ describe('History Page', () => {
 
     context('When an active SGP number is searched', () => {
       before(() => {
-        cy.visit('/history?workNumber=SGP1008');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.query<FindHistoryForWorkNumberQuery, FindHistoryForWorkNumberQueryVariables>(
               'FindHistoryForWorkNumber',
-              () => {
-                return HttpResponse.json({
-                  data: {
+              (req, res, ctx) => {
+                return res(
+                  ctx.data({
+                    __typename: 'Query',
                     historyForWorkNumber: buildHistory('SGP1008')
-                  },
-                  once: true
-                });
+                  })
+                );
               }
             )
           );
         });
       });
       context(' when clicking on uploaded files link for authenticated users', () => {
-        it('goes to file manager page for SGP1008', () => {
+        before(() => {
+          cy.visit('/history?workNumber=SGP1008');
           cy.contains('Files for SGP1008').click();
+        });
+        it('goes to file manager page for SGP1008', () => {
           cy.url().should('be.equal', 'http://localhost:3000/file_manager?workNumber=SGP1008');
           cy.findByText('Upload file').should('exist');
           cy.findByText('Files').should('exist');
@@ -170,25 +171,24 @@ describe('History Page', () => {
         });
       });
     });
-
     context('When an inactive SGP number is searched', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
             graphql.query<FindHistoryForWorkNumberQuery, FindHistoryForWorkNumberQueryVariables>(
               'FindHistoryForWorkNumber',
-              () => {
-                return HttpResponse.json({
-                  data: {
+              (req, res, ctx) => {
+                return res(
+                  ctx.data({
+                    __typename: 'Query',
                     historyForWorkNumber: buildHistory('SGP1001')
-                  },
-                  once: true
-                });
+                  })
+                );
               }
             )
           );
         });
-        cy.visitAsAdmin('/history?workNumber=SGP1008');
+        cy.visit('/history?workNumber=SGP1008');
       });
       context(' when clicking on uploaded files link for authenticated users', () => {
         before(() => {
@@ -218,14 +218,14 @@ describe('History Page', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.query<FindHistoryQuery, FindHistoryQueryVariables>('FindHistory', () => {
-            return HttpResponse.json({
-              errors: [
+          graphql.query<FindHistoryQuery, FindHistoryQueryVariables>('FindHistory', (req, res, ctx) => {
+            return res(
+              ctx.errors([
                 {
                   message: 'Exception while fetching data (/history) : An error occured'
                 }
-              ]
-            });
+              ])
+            );
           })
         );
       });

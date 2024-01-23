@@ -53,7 +53,6 @@ export const ItemsGrid: React.FC = () => {
 
   const selectedLabware = React.useMemo(() => {
     if (!selectedAddress) return undefined;
-    debugger;
     const barcodeInSelectedAddress = addressToItemMap.get(selectedAddress)?.barcode;
     if (!barcodeInSelectedAddress) return undefined;
     return labwareInLocation.find((lw) => lw.barcode === barcodeInSelectedAddress);

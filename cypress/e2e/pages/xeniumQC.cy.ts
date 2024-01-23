@@ -1,7 +1,6 @@
 import { selectOption, shouldDisplaySelectedValue, shouldHaveOption } from '../shared/customReactSelect.cy';
 import { RecordQcLabwareMutation, RecordQcLabwareMutationVariables } from '../../../src/types/sdk';
 import commentRepository from '../../../src/mocks/repositories/commentRepository';
-import { HttpResponse } from 'msw';
 
 describe('Xenium QC', () => {
   const comments = commentRepository.findAll().filter((comment) => comment.category === 'Xenium QC' && comment.enabled);
@@ -144,18 +143,21 @@ describe('Xenium QC', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<RecordQcLabwareMutation, RecordQcLabwareMutationVariables>('RecordQCLabware', () => {
-              return HttpResponse.json({
-                errors: [
-                  {
-                    message: 'Exception while fetching data (/CytAssist) : The operation could not be validated.',
-                    extensions: {
-                      problems: ['Labware is discarded: [STAN-3111]']
+            graphql.mutation<RecordQcLabwareMutation, RecordQcLabwareMutationVariables>(
+              'RecordQCLabware',
+              (req, res, ctx) => {
+                return res.once(
+                  ctx.errors([
+                    {
+                      message: 'Exception while fetching data (/CytAssist) : The operation could not be validated.',
+                      extensions: {
+                        problems: ['Labware is discarded: [STAN-3111]']
+                      }
                     }
-                  }
-                ]
-              });
-            })
+                  ])
+                );
+              }
+            )
           );
         });
 

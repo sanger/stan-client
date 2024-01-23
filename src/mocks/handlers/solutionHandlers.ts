@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   AddSolutionMutation,
   AddSolutionMutationVariables,
@@ -9,26 +9,29 @@ import solutionFactory from '../../lib/factories/solutionFactory';
 import solutionRepository from '../repositories/solutionRepository';
 
 const solutionHandlers = [
-  graphql.mutation<AddSolutionMutation, AddSolutionMutationVariables>('AddSolution', ({ variables }) => {
+  graphql.mutation<AddSolutionMutation, AddSolutionMutationVariables>('AddSolution', (req, res, ctx) => {
     const addSolution = solutionFactory.build({
-      name: variables.name
+      name: req.variables.name
     });
     solutionRepository.save(addSolution);
-    return HttpResponse.json({ data: { addSolution } }, { status: 200 });
+    return res(ctx.data({ addSolution }));
   }),
 
   graphql.mutation<SetSolutionEnabledMutation, SetSolutionEnabledMutationVariables>(
     'SetSolutionEnabled',
-    ({ variables }) => {
-      const solution = solutionRepository.find('name', variables.name);
+    (req, res, ctx) => {
+      const solution = solutionRepository.find('name', req.variables.name);
       if (solution) {
-        solution.enabled = variables.enabled;
+        solution.enabled = req.variables.enabled;
         solutionRepository.save(solution);
-        return HttpResponse.json({ data: { setSolutionEnabled: solution } }, { status: 200 });
+        return res(ctx.data({ setSolutionEnabled: solution }));
       } else {
-        return HttpResponse.json(
-          { errors: [{ message: `Could not find Solution: "${variables.name}"` }] },
-          { status: 404 }
+        return res(
+          ctx.errors([
+            {
+              message: `Could not find Solution: "${req.variables.name}"`
+            }
+          ])
         );
       }
     }
