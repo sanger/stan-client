@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   ConfirmSectionMutation,
   ConfirmSectionMutationVariables,
@@ -14,38 +14,33 @@ import { createLabware } from './labwareHandlers';
 import slotRegionRepository from '../repositories/slotRegionRepository';
 
 const sectioningHandlers = [
-  graphql.query<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>('GetSectioningInfo', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        labwareTypes: labwareTypeInstances
-      })
-    );
+  graphql.query<GetSectioningInfoQuery, GetSectioningInfoQueryVariables>('GetSectioningInfo', ({ variables }) => {
+    return HttpResponse.json({ data: { labwareTypes: labwareTypeInstances } }, { status: 200 });
   }),
 
   graphql.query<GetSectioningConfirmInfoQuery, GetSectioningConfirmInfoQueryVariables>(
     'GetSectioningConfirmInfo',
-    (req, res, ctx) => {
-      return res(
-        ctx.data({
-          comments: commentRepository.findAll().filter((c) => c.category === 'section'),
-          slotRegions: slotRegionRepository.findAll().filter((slotRegion) => slotRegion.enabled)
-        })
+    () => {
+      return HttpResponse.json(
+        {
+          data: {
+            comments: commentRepository.findAll().filter((c) => c.category === 'section'),
+            slotRegions: slotRegionRepository.findAll().filter((slotRegion) => slotRegion.enabled)
+          }
+        },
+        { status: 200 }
       );
     }
   ),
 
-  graphql.mutation<ConfirmSectionMutation, ConfirmSectionMutationVariables>('ConfirmSection', (req, res, ctx) => {
-    const confirmedLabwares = req.variables.request.labware.map((confirmLabware) => {
+  graphql.mutation<ConfirmSectionMutation, ConfirmSectionMutationVariables>('ConfirmSection', ({ variables }) => {
+    const confirmedLabwares = variables.request.labware.map((confirmLabware) => {
       const labware = createLabware(confirmLabware.barcode);
       return buildLabwareFragment(labware);
     });
-    return res(
-      ctx.data({
-        confirmSection: {
-          labware: confirmedLabwares,
-          operations: []
-        }
-      })
+    return HttpResponse.json(
+      { data: { confirmSection: { labware: confirmedLabwares, operations: [] } } },
+      { status: 200 }
     );
   })
 ];

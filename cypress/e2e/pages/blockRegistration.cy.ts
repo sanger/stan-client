@@ -1,10 +1,19 @@
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { selectFocusBlur, selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 import { RegistrationType, shouldBehaveLikeARegistrationForm } from '../shared/registration.cy';
 import { RegisterTissuesMutation, RegisterTissuesMutationVariables } from '../../../src/types/sdk';
 import { tissueFactory } from '../../../src/lib/factories/sampleFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 describe('Block Registration Page', () => {
+  beforeEach(() => {
+    cy.msw().then(({ worker, graphql }) => {
+      worker.use(
+        http.post('/register/block', () => {
+          return HttpResponse.json({ barcodes: ['STAN-3111', 'STAN-3112'] }, { status: 200 });
+        })
+      );
+    });
+  });
   describe('Initial display', () => {
     before(() => {
       cy.visit('/admin/registration');
@@ -15,58 +24,36 @@ describe('Block Registration Page', () => {
     });
   });
   describe('File Registration', () => {
-    before(() => {
-      cy.get('[type="radio"][name="file-registration-btn"]').check();
-    });
     it('should display upload file form', () => {
+      cy.get('[type="radio"][name="file-registration-btn"]').check();
       cy.findByText('Select file...').should('be.visible');
     });
     it('upload btn should be disabled until the user selected a file', () => {
       cy.findByTestId('upload-btn').should('be.disabled');
     });
-    context('On file upload success', () => {
-      before(() => {
-        cy.msw().then(({ worker, graphql }) => {
-          worker.use(
-            rest.post('/register/block', (req, res, ctx) => {
-              return res(
-                ctx.status(200),
-                ctx.json({
-                  barcodes: ['STAN-3111', 'STAN-3112']
-                })
-              );
-            })
-          );
-        });
-        cy.get('input[type=file]').selectFile(
-          {
-            contents: Cypress.Buffer.from('file contents'),
-            fileName: 'file.xlsx',
-            mimeType: 'text/plain',
-            lastModified: Date.now()
-          },
-          { force: true }
-        );
-        cy.findByTestId('upload-btn').click();
-      });
-      it('shows the registered block', () => {
-        cy.findByText('STAN-3111').should('be.visible');
-        cy.findByText('STAN-3112').should('be.visible');
-      });
+    it('shows the registered block', () => {
+      cy.get('input[type=file]').selectFile(
+        {
+          contents: Cypress.Buffer.from('file contents'),
+          fileName: 'file.xlsx',
+          mimeType: 'text/plain',
+          lastModified: Date.now()
+        },
+        { force: true }
+      );
+      cy.findByTestId('upload-btn').click();
+      cy.findByText('STAN-3111').should('be.visible');
+      cy.findByText('STAN-3112').should('be.visible');
     });
+
     context('On file upload failure', () => {
       before(() => {
         cy.visit('/admin/registration');
         cy.get('[type="radio"][name="file-registration-btn"]').check();
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            rest.post('/register/block', (req, res, ctx) => {
-              return res(
-                ctx.status(500),
-                ctx.json({
-                  problems: 'Error Message'
-                })
-              );
+            http.post('/register/block', () => {
+              return HttpResponse.json({ problems: 'Error Message' }, { status: 500 });
             })
           );
         });
@@ -221,20 +208,17 @@ describe('Block Registration Page', () => {
           cy.get('[type="radio"][name="manual-registration-btn"]').check();
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
-              graphql.mutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>(
-                'RegisterTissues',
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
-                      {
-                        extensions: {
-                          problems: ['This thing went wrong', 'This other thing went wrong']
-                        }
+              graphql.mutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>('RegisterTissues', () => {
+                return HttpResponse.json({
+                  errors: [
+                    {
+                      extensions: {
+                        problems: ['This thing went wrong', 'This other thing went wrong']
                       }
-                    ])
-                  );
-                }
-              )
+                    }
+                  ]
+                });
+              })
             );
           });
           selectSGPNumber('SGP1008');
@@ -259,25 +243,22 @@ describe('Block Registration Page', () => {
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>(
-              'RegisterTissues',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.data({
-                    register: {
-                      labware: [],
-                      clashes: [
-                        {
-                          tissue,
-                          labware
-                        }
-                      ],
-                      labwareSolutions: []
-                    }
-                  })
-                );
-              }
-            )
+            graphql.mutation<RegisterTissuesMutation, RegisterTissuesMutationVariables>('RegisterTissues', () => {
+              return HttpResponse.json({
+                data: {
+                  register: {
+                    labware: [],
+                    clashes: [
+                      {
+                        tissue,
+                        labware
+                      }
+                    ],
+                    labwareSolutions: []
+                  }
+                }
+              });
+            })
           );
         });
 

@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   AddProgramMutation,
   AddProgramMutationVariables,
@@ -11,28 +11,27 @@ import programFactory from '../../lib/factories/programFactory';
 import programRepository from '../repositories/programRepository';
 
 const programHandlers = [
-  graphql.query<GetProgramsQuery, GetProgramsQueryVariables>('GetPrograms', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        programs: programRepository.findAll()
-      })
-    );
+  graphql.query<GetProgramsQuery, GetProgramsQueryVariables>('GetPrograms', () => {
+    return HttpResponse.json({ data: { programs: programRepository.findAll() } }, { status: 200 });
   }),
-  graphql.mutation<AddProgramMutation, AddProgramMutationVariables>('AddProgram', (req, res, ctx) => {
-    const addProgram = programFactory.build({ name: req.variables.name });
+  graphql.mutation<AddProgramMutation, AddProgramMutationVariables>('AddProgram', ({ variables }) => {
+    const addProgram = programFactory.build({ name: variables.name });
     programRepository.save(addProgram);
-    return res(ctx.data({ addProgram }));
+    return HttpResponse.json({ data: { addProgram } }, { status: 200 });
   }),
   graphql.mutation<SetProgramEnabledMutation, SetProgramEnabledMutationVariables>(
     'SetProgramEnabled',
-    (req, res, ctx) => {
-      const program = programRepository.find('name', req.variables.name);
+    ({ variables }) => {
+      const program = programRepository.find('name', variables.name);
       if (program) {
-        program.enabled = req.variables.enabled;
+        program.enabled = variables.enabled;
         programRepository.save(program);
-        return res(ctx.data({ setProgramEnabled: program }));
+        return HttpResponse.json({ data: { setProgramEnabled: program } }, { status: 200 });
       } else {
-        return res(ctx.errors([{ message: `Could not find Program: "${req.variables.name}"` }]));
+        return HttpResponse.json(
+          { errors: [{ message: `Could not find Program: "${variables.name}"` }] },
+          { status: 404 }
+        );
       }
     }
   )

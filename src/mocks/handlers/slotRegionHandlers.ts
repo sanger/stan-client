@@ -6,43 +6,43 @@ import {
   GetSlotRegionsQuery,
   GetSlotRegionsQueryVariables
 } from '../../types/sdk';
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import slotRegionFactory from '../../lib/factories/slotRegionFactory';
 import slotRegionRepository from '../repositories/slotRegionRepository';
 import { isEnabled } from '../../lib/helpers';
 
 const slotRegionHandlers = [
-  graphql.query<GetSlotRegionsQuery, GetSlotRegionsQueryVariables>('GetSlotRegions', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        slotRegions: slotRegionRepository
-          .findAll()
-          .filter((slotRegion) => req.variables.includeDisabled || isEnabled(slotRegion))
-      })
+  graphql.query<GetSlotRegionsQuery, GetSlotRegionsQueryVariables>('GetSlotRegions', ({ variables }) => {
+    return HttpResponse.json(
+      {
+        data: {
+          slotRegions: slotRegionRepository
+            .findAll()
+            .filter((slotRegion) => variables.includeDisabled || isEnabled(slotRegion))
+        }
+      },
+      { status: 200 }
     );
   }),
-  graphql.mutation<AddSlotRegionMutation, AddSlotRegionMutationVariables>('AddSlotRegion', (req, res, ctx) => {
+  graphql.mutation<AddSlotRegionMutation, AddSlotRegionMutationVariables>('AddSlotRegion', ({ variables }) => {
     const addSlotRegion = slotRegionFactory.build({
-      name: req.variables.name
+      name: variables.name
     });
     slotRegionRepository.save(addSlotRegion);
-    return res(ctx.data({ addSlotRegion }));
+    return HttpResponse.json({ data: { addSlotRegion } }, { status: 200 });
   }),
   graphql.mutation<SetSlotRegionEnabledMutation, SetSlotRegionEnabledMutationVariables>(
     'SetSlotRegionEnabled',
-    (req, res, ctx) => {
-      const slotRegion = slotRegionRepository.find('name', req.variables.name);
+    ({ variables }) => {
+      const slotRegion = slotRegionRepository.find('name', variables.name);
       if (slotRegion) {
-        slotRegion.enabled = req.variables.enabled;
+        slotRegion.enabled = variables.enabled;
         slotRegionRepository.save(slotRegion);
-        return res(ctx.data({ setSlotRegionEnabled: slotRegion }));
+        return HttpResponse.json({ data: { setSlotRegionEnabled: slotRegion } }, { status: 200 });
       } else {
-        return res(
-          ctx.errors([
-            {
-              message: `Could not find Slot region: "${req.variables.name}"`
-            }
-          ])
+        return HttpResponse.json(
+          { errors: [{ message: `Could not find Slot region: "${variables.name}"` }] },
+          { status: 404 }
         );
       }
     }
