@@ -5,7 +5,7 @@ name: Deploy Storybook
 
 on:
   push:
-    branches: [devel]
+    branches: [devel,x1034_msw_update]
 
 jobs:
   build:
