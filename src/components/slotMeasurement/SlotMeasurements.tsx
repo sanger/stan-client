@@ -1,11 +1,12 @@
 import React from 'react';
-import { CommentFieldsFragment, Maybe, SlotMeasurementRequest } from '../../types/sdk';
+import { CommentFieldsFragment, SampleFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import { Row } from 'react-table';
 import DataTable from '../DataTable';
 import FormikInput from '../forms/Input';
 import { selectOptionValues } from '../forms';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { Dictionary, groupBy } from 'lodash';
+import { TableCell } from '../Table';
 
 export type MeasurementConfigProps = {
   name: string;
@@ -15,8 +16,7 @@ export type MeasurementConfigProps = {
 };
 
 export interface SlotMeasurement extends SlotMeasurementRequest {
-  externalName?: Maybe<string>;
-  sectionNumber?: Maybe<number>;
+  samples?: SampleFieldsFragment[];
 }
 export type SlotMeasurementProps = {
   slotMeasurements: SlotMeasurement[];
@@ -28,8 +28,7 @@ export type SlotMeasurementProps = {
 type MeasurementRow = {
   address: string;
   measurements: SlotMeasurementRequest[];
-  externalName?: Maybe<string>;
-  sectionNumber?: Maybe<number>;
+  samples?: SampleFieldsFragment[];
 };
 const setMeasurementNameTableTitle = (measurementName: string): string => {
   return measurementName === 'cDNA concentration' || measurementName === 'Library concentration'
@@ -50,7 +49,7 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
   const [measurementConfigOptions, setMeasurementConfigOptions] = React.useState<MeasurementConfigProps[]>([]);
 
   const isWithSampleInfo = React.useMemo(
-    () => slotMeasurements.some((measurement) => measurement.externalName && measurement.sectionNumber),
+    () => slotMeasurements.some((measurement) => measurement.samples),
     [slotMeasurements]
   );
 
@@ -69,8 +68,7 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
           values.push({
             address,
             measurements: groupedMeasurements[address],
-            externalName: measurement.externalName,
-            sectionNumber: measurement.sectionNumber
+            samples: measurement.samples
           });
         });
       }
@@ -96,13 +94,37 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
         ? [
             {
               Header: 'External ID',
-              id: 'externalName',
-              accessor: (measurement: MeasurementRow) => measurement.externalName
+              id: 'externalId',
+              Cell: ({ row }: { row: Row<MeasurementRow> }) => {
+                return (
+                  <TableCell>
+                    {row.original.samples?.map((sample) => {
+                      return (
+                        <div className="flex px-6">
+                          <label>{sample.tissue.externalName}</label>
+                        </div>
+                      );
+                    })}
+                  </TableCell>
+                );
+              }
             },
             {
               Header: 'Section Number',
               id: 'sectionNumber',
-              accessor: (measurement: MeasurementRow) => measurement.sectionNumber
+              Cell: ({ row }: { row: Row<MeasurementRow> }) => {
+                return (
+                  <TableCell>
+                    {row.original.samples?.map((sample) => {
+                      return (
+                        <div className="flex items-right px-6">
+                          <label>{sample.section}</label>
+                        </div>
+                      );
+                    })}
+                  </TableCell>
+                );
+              }
             }
           ]
         : []),
