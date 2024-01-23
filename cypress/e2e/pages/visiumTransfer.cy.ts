@@ -231,7 +231,7 @@ describe('Transfer Page', () => {
           });
           cy.findByText('Finish mapping for A1').should('be.visible');
           cy.get('#outputLabwares').within(() => {
-            cy.findByText('G1').scrollIntoView().click({ force: true });
+            cy.findByText('G1').click({ force: true });
             cy.findByText('G2').click({ force: true });
             cy.findByText('G5').click({ force: true });
           });
