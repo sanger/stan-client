@@ -7,6 +7,7 @@ import { LabwareFlaggedFieldsFragment } from '../../../../src/types/sdk';
 import { enableMapSet } from 'immer';
 import { NewFlaggedLabwareLayout } from '../../../../src/types/stan';
 import QPcrResults from '../../../../src/components/visiumQC/QPcrResults';
+import { sampleFactory, tissueFactory } from '../../../../src/lib/factories/sampleFactory';
 afterEach(() => {
   cleanup();
 });
@@ -26,10 +27,19 @@ const mockRemoveLabware = jest.fn();
 const renderQpcrResults = () => {
   const inputLabware = slideFactory.build() as NewFlaggedLabwareLayout;
   const labware: LabwareFlaggedFieldsFragment = { ...inputLabware, barcode: inputLabware.barcode ?? '' };
+  const tissue = [tissueFactory.build({ externalName: 'test 1' }), tissueFactory.build({ externalName: 'test 2' })];
   const initialProps = {
     slotMeasurements: [
-      { address: 'A1', name: 'Cq value', value: '0', externalName: 'test 1', sectionNumber: 1 },
-      { address: 'A2', name: 'Cq value', value: '0', externalName: 'test 2', sectionNumber: 2 }
+      {
+        address: 'A1',
+        name: 'Cq value',
+        value: '0',
+        samples: [
+          sampleFactory.build({ section: 2, tissue: tissue[1] }),
+          sampleFactory.build({ section: 1, tissue: tissue[0] })
+        ]
+      },
+      { address: 'A2', name: 'Cq value', value: '0', samples: [] }
     ],
     labware: labware,
     removeLabware: mockRemoveLabware
