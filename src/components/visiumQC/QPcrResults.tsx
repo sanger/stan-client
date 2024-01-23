@@ -38,10 +38,9 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) =>
       return memoMeasurementConfig.map((measurement) => {
         return {
           address: slot.address,
-          externalName: slot.samples.flatMap((sample) => sample.tissue.externalName)[0],
-          sectionNumber: slot.samples.flatMap((sample) => sample.section)[0],
           name: measurement.name,
-          value: measurement.initialMeasurementVal
+          value: measurement.initialMeasurementVal,
+          samples: slot.samples
         };
       });
     });
@@ -129,8 +128,8 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) =>
               </div>
             }
 
-            <div className={'flex flex-row mt-8 justify-between'}>
-              <div className="flex flex-col w-full">
+            <div className={'grid grid-cols-11 gap-2 justify-between'}>
+              <div className="col-span-6">
                 {slotMeasurements && slotMeasurements.length > 0 && (
                   <SlotMeasurements
                     slotMeasurements={slotMeasurements}
@@ -139,7 +138,7 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) =>
                   />
                 )}
               </div>
-              <div className="flex flex-col w-full items-end justify-center p-4" data-testid={'labware'}>
+              <div className="col-span-5 w-full flex items-center justify-center p-4" data-testid={'labware'}>
                 <Labware labware={labware} name={labware.labwareType.name} />
               </div>
             </div>

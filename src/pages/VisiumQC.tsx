@@ -190,7 +190,7 @@ export default function VisiumQC() {
         values: {
           workNumber: values.workNumber,
           barcode: values.barcode,
-          slotMeasurements: values.slotMeasurements?.map(({ externalName, sectionNumber, ...rest }) => rest) ?? [],
+          slotMeasurements: values.slotMeasurements?.map(({ samples, ...rest }) => rest) ?? [],
           operationType: values.qcType
         }
       });
