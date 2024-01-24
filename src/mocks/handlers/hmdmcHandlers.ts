@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   AddHmdmcMutation,
   AddHmdmcMutationVariables,
@@ -9,24 +9,27 @@ import hmdmcFactory from '../../lib/factories/hmdmcFactory';
 import hmdmcRepository from '../repositories/hmdmcRepository';
 
 const hmdmcHandlers = [
-  graphql.mutation<AddHmdmcMutation, AddHmdmcMutationVariables>('AddHmdmc', ({ variables }) => {
+  graphql.mutation<AddHmdmcMutation, AddHmdmcMutationVariables>('AddHmdmc', (req, res, ctx) => {
     const addHmdmc = hmdmcFactory.build({
-      hmdmc: variables.hmdmc
+      hmdmc: req.variables.hmdmc
     });
     hmdmcRepository.save(addHmdmc);
-    return HttpResponse.json({ data: { addHmdmc } }, { status: 200 });
+    return res(ctx.data({ addHmdmc }));
   }),
 
-  graphql.mutation<SetHmdmcEnabledMutation, SetHmdmcEnabledMutationVariables>('SetHmdmcEnabled', ({ variables }) => {
-    const hmdmc = hmdmcRepository.find('hmdmc', variables.hmdmc);
+  graphql.mutation<SetHmdmcEnabledMutation, SetHmdmcEnabledMutationVariables>('SetHmdmcEnabled', (req, res, ctx) => {
+    const hmdmc = hmdmcRepository.find('hmdmc', req.variables.hmdmc);
     if (hmdmc) {
-      hmdmc.enabled = variables.enabled;
+      hmdmc.enabled = req.variables.enabled;
       hmdmcRepository.save(hmdmc);
-      return HttpResponse.json({ data: { setHmdmcEnabled: hmdmc } }, { status: 200 });
+      return res(ctx.data({ setHmdmcEnabled: hmdmc }));
     } else {
-      return HttpResponse.json(
-        { errors: [{ message: `Could not find HMDMC: "${variables.hmdmc}"` }] },
-        { status: 404 }
+      return res(
+        ctx.errors([
+          {
+            message: `Could not find HMDMC: "${req.variables.hmdmc}"`
+          }
+        ])
       );
     }
   })

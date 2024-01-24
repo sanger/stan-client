@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   ExtractMutation,
   ExtractMutationVariables,
@@ -12,8 +12,8 @@ import labwareFactory from '../../lib/factories/labwareFactory';
 import commentRepository from '../repositories/commentRepository';
 
 const extractionHandlers = [
-  graphql.mutation<ExtractMutation, ExtractMutationVariables>('Extract', ({ variables }) => {
-    const extract: ExtractMutation['extract'] = variables.request.barcodes.reduce<ExtractMutation['extract']>(
+  graphql.mutation<ExtractMutation, ExtractMutationVariables>('Extract', (req, res, ctx) => {
+    const extract: ExtractMutation['extract'] = req.variables.request.barcodes.reduce<ExtractMutation['extract']>(
       (memo, barcode) => {
         // Fetch the labware out of session storage
         const labwareJson = sessionStorage.getItem(`labware-${barcode}`);
@@ -26,7 +26,7 @@ const extractionHandlers = [
         const labware = JSON.parse(labwareJson);
 
         // Find the requested labware type by name
-        const labwareType = labwareTypeInstances.find((lt) => lt.name === variables.request.labwareType);
+        const labwareType = labwareTypeInstances.find((lt) => lt.name === req.variables.request.labwareType);
         // Create the new bit of destination labware using the same slots and samples as the source
         const newLabware = labwareFactory.build({
           labwareType,
@@ -62,28 +62,43 @@ const extractionHandlers = [
       }
     );
 
-    return HttpResponse.json({
-      data: {
+    return res(
+      ctx.data({
         extract: {
           labware: extract.labware,
           operations: extract.operations
         }
-      }
-    });
+      })
+    );
   }),
 
   graphql.query<GetRecordExtractResultInfoQuery, GetRecordExtractResultInfoQueryVariables>(
     'GetRecordExtractResultInfo',
-    () => {
-      return HttpResponse.json({
-        data: { comments: commentRepository.findAll().filter((c) => c.category === 'extract result') }
-      });
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          comments: commentRepository.findAll().filter((c) => c.category === 'extract result')
+        })
+      );
     }
   ),
 
-  graphql.mutation<RecordExtractResultMutation, RecordExtractResultMutationVariables>('RecordExtractResult', () => {
-    return HttpResponse.json({ data: { recordExtractResult: { operations: [{ id: 1 }] } } });
-  })
+  graphql.mutation<RecordExtractResultMutation, RecordExtractResultMutationVariables>(
+    'RecordExtractResult',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          recordExtractResult: {
+            operations: [
+              {
+                id: 1
+              }
+            ]
+          }
+        })
+      );
+    }
+  )
 ];
 
 export default extractionHandlers;

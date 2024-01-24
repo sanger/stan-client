@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import { GetConfigurationQuery, GetConfigurationQueryVariables } from '../../types/sdk';
 import releaseDestinationRepository from '../repositories/releaseDestinationRepository';
 import releaseRecipientRepository from '../repositories/releaseRecipientRepository';
@@ -19,9 +19,9 @@ import dnapStudyRepository from '../repositories/dnapStudyRepository';
 import probePanelRepository from '../repositories/probePanelRepository';
 
 const configurationHandlers = [
-  graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>('GetConfiguration', () => {
-    return HttpResponse.json({
-      data: {
+  graphql.query<GetConfigurationQuery, GetConfigurationQueryVariables>('GetConfiguration', (req, res, ctx) => {
+    return res(
+      ctx.data({
         destructionReasons: destructionReasonRepository.findAll(),
         releaseRecipients: releaseRecipientRepository.findAll(),
         comments: commentRepository.findAll(),
@@ -39,8 +39,8 @@ const configurationHandlers = [
         omeroProjects: omeroProjectRepository.findAll(),
         dnapStudies: dnapStudyRepository.findAll(),
         probePanels: probePanelRepository.findAll()
-      }
-    });
+      })
+    );
   })
 ];
 

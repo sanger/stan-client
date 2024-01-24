@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   FindPermDataQuery,
   FindPermDataQueryVariables,
@@ -12,32 +12,51 @@ import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import { createFlaggedLabware } from './flagLabwareHandlers';
 
 const handlers = [
-  graphql.mutation<RecordPermMutation, RecordPermMutationVariables>('RecordPerm', () => {
-    return HttpResponse.json({ data: { recordPerm: { operations: [{ id: 1 }] } } });
+  graphql.mutation<RecordPermMutation, RecordPermMutationVariables>('RecordPerm', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        recordPerm: {
+          operations: [
+            {
+              id: 1
+            }
+          ]
+        }
+      })
+    );
   }),
 
-  graphql.mutation<VisiumAnalysisMutation, VisiumAnalysisMutationVariables>('VisiumAnalysis', () => {
-    return HttpResponse.json({ data: { visiumAnalysis: { operations: [{ id: 100 }] } } });
+  graphql.mutation<VisiumAnalysisMutation, VisiumAnalysisMutationVariables>('VisiumAnalysis', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        visiumAnalysis: {
+          operations: [
+            {
+              id: 100
+            }
+          ]
+        }
+      })
+    );
   }),
 
-  graphql.query<FindPermDataQuery, FindPermDataQueryVariables>('FindPermData', ({ variables }) => {
-    const barcode = variables.barcode;
+  graphql.query<FindPermDataQuery, FindPermDataQueryVariables>('FindPermData', (req, res, ctx) => {
+    const barcode = req.variables.barcode;
 
     if (!barcode.startsWith('STAN-')) {
-      return HttpResponse.json(
-        {
-          errors: [
-            { message: `Exception while fetching data (/findPermData) : No labware found with barcode: ${barcode}` }
-          ]
-        },
-        { status: 200 }
+      return res(
+        ctx.errors([
+          {
+            message: `Exception while fetching data (/findPermData) : No labware found with barcode: ${barcode}`
+          }
+        ])
       );
     }
 
     const labware = createFlaggedLabware(barcode);
     const samplePositionResults: SamplePositionFieldsFragment[] = [];
-    return HttpResponse.json({
-      data: {
+    return res(
+      ctx.data({
         visiumPermData: {
           samplePositionResults,
           labware,
@@ -56,8 +75,8 @@ const handlers = [
               return memo;
             }, [])
         }
-      }
-    });
+      })
+    );
   })
 ];
 

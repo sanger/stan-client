@@ -9,7 +9,6 @@ import { labwareTypes } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { findPlanData } from '../../../src/mocks/handlers/planHandlers';
 import { getAllSelect, selectOptionForMultiple, selectSGPNumber } from '../shared/customReactSelect.cy';
-import { HttpResponse } from 'msw';
 
 describe('Sectioning Confirmation', () => {
   before(() => {
@@ -20,14 +19,14 @@ describe('Sectioning Confirmation', () => {
     before(() => {
       cy.msw().then(({ graphql, worker }) => {
         worker.use(
-          graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', () => {
-            return HttpResponse.json({
-              errors: [
+          graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', (req, res, ctx) => {
+            return res.once(
+              ctx.errors([
                 {
                   message: 'Exception while fetching data (/confirmSection) : An error occured'
                 }
-              ]
-            });
+              ])
+            );
           })
         );
       });
@@ -103,12 +102,8 @@ describe('Sectioning Confirmation', () => {
         );
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
-            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', () => {
-              return HttpResponse.json({
-                data: {
-                  ...findPlanData(sourceLabware, destinationLabware)
-                }
-              });
+            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', (req, res, ctx) => {
+              return res.once(findPlanData(sourceLabware, destinationLabware, ctx));
             })
           );
         });
@@ -230,12 +225,8 @@ describe('Sectioning Confirmation', () => {
         destinationLabware.id = -2;
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
-            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', () => {
-              return HttpResponse.json({
-                data: {
-                  ...findPlanData(sourceLabware, destinationLabware)
-                }
-              });
+            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', (req, res, ctx) => {
+              return res.once(findPlanData(sourceLabware, destinationLabware, ctx));
             })
           );
         });
@@ -274,12 +265,8 @@ describe('Sectioning Confirmation', () => {
         );
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
-            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', () => {
-              return HttpResponse.json({
-                data: {
-                  ...findPlanData(sourceLabware, destinationLabware)
-                }
-              });
+            graphql.query<FindPlanDataQuery, FindPlanDataQueryVariables>('FindPlanData', (req, res, ctx) => {
+              return res.once(findPlanData(sourceLabware, destinationLabware, ctx));
             })
           );
         });
@@ -346,15 +333,18 @@ describe('Sectioning Confirmation', () => {
       before(() => {
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
-            graphql.mutation<ConfirmSectionMutation, ConfirmSectionMutationVariables>('ConfirmSection', () => {
-              return HttpResponse.json({
-                errors: [
-                  {
-                    message: 'There was an error confirming the Sectioning operation'
-                  }
-                ]
-              });
-            })
+            graphql.mutation<ConfirmSectionMutation, ConfirmSectionMutationVariables>(
+              'ConfirmSection',
+              (req, res, ctx) => {
+                return res.once(
+                  ctx.errors([
+                    {
+                      message: 'There was an error confirming the Sectioning operation'
+                    }
+                  ])
+                );
+              }
+            )
           );
         });
 
@@ -381,7 +371,7 @@ describe('Sectioning Confirmation', () => {
         cy.findByTestId('print-div').within(() => {
           cy.findByText('Tube').should('be.visible');
           cy.findAllByRole('table').eq(0).contains('td', 'STAN-0001F');
-          cy.findAllByRole('table').eq(0).contains('td', 'STAN-0001D');
+          cy.findAllByRole('table').eq(0).contains('td', 'STAN-0001E');
         });
       });
     });
@@ -408,7 +398,7 @@ describe('Sectioning Confirmation', () => {
       });
       it('when redirected to the Store page', () => {
         cy.findByRole('table').contains('td', 'STAN-0001F');
-        cy.findByRole('table').contains('td', 'STAN-0001D');
+        cy.findByRole('table').contains('td', 'STAN-0001E');
         cy.findByRole('table').contains('td', 'STAN-2222');
       });
       it('store all button should be disabled', () => {

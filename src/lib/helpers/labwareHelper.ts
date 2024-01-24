@@ -204,7 +204,7 @@ export const hasSamples = (labware: LabwareFieldsFragment | LabwareFlaggedFields
  * @returns An array of Flagged Labware objects with the 'flagged' property set to false.
  */
 export const convertLabwareToFlaggedLabware = (labware: LabwareFieldsFragment[]): LabwareFlaggedFieldsFragment[] => {
-  return labware.map((lw) => ({ __typename: 'LabwareFlagged', flagged: false, ...lw }) as LabwareFlaggedFieldsFragment);
+  return labware.map((lw) => ({ flagged: false, ...lw }) as LabwareFlaggedFieldsFragment);
 };
 
 /**

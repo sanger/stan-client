@@ -1,27 +1,16 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { BrowserRouter } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { describe } from '@jest/globals';
 import Extraction from '../../../src/pages/Extraction';
 import equipmentRepository from '../../../src/mocks/repositories/equipmentRepository';
 import { scanLabware, selectOption, selectSGPNumber } from '../../generic/utilities';
-import {
-  ExtractMutation,
-  ExtractMutationVariables,
-  GetAllWorkInfoQuery,
-  GetAllWorkInfoQueryVariables,
-  WorkStatus
-} from '../../../src/types/sdk';
-import { graphql, HttpResponse } from 'msw';
+import { ExtractMutation, ExtractMutationVariables } from '../../../src/types/sdk';
+import { graphql } from 'msw';
 import { server } from '../../../src/mocks/server';
-import React from 'react';
 
 afterEach(() => {
   cleanup();
-});
-
-afterAll(() => {
-  jest.resetAllMocks();
 });
 
 const useLoaderDataMock = jest
@@ -35,22 +24,6 @@ jest.mock('react-router-dom', () => ({
 
 describe('Extraction', () => {
   beforeEach(() => {
-    server.use(
-      graphql.query<GetAllWorkInfoQuery, GetAllWorkInfoQueryVariables>('GetAllWorkInfo', () => {
-        return HttpResponse.json({
-          data: {
-            works: [
-              {
-                workNumber: 'SGP1008',
-                workRequester: { username: 'Requestor 1' },
-                status: WorkStatus.Withdrawn,
-                project: { name: 'Project 1' }
-              }
-            ]
-          }
-        });
-      })
-    );
     renderExtraction();
   });
   describe('Extraction page is loaded correctly', () => {
@@ -69,7 +42,6 @@ describe('Extraction', () => {
       });
     });
   });
-
   describe('when extraction is successful', () => {
     it('hides the Extract button', () => {
       act(() => {
@@ -103,14 +75,14 @@ describe('Extraction', () => {
   describe('when extraction fails', () => {
     beforeEach(async () => {
       server.use(
-        graphql.mutation<ExtractMutation, ExtractMutationVariables>('Extract', () => {
-          return HttpResponse.json({
-            errors: [
+        graphql.mutation<ExtractMutation, ExtractMutationVariables>('Extract', (req, res, ctx) => {
+          return res(
+            ctx.errors([
               {
                 message: 'Exception while fetching data (/extract) : Failed to extract'
               }
-            ]
-          });
+            ])
+          );
         })
       );
     });
@@ -148,11 +120,18 @@ describe('Extraction', () => {
 });
 
 const renderExtraction = () => {
-  return render(
-    <BrowserRouter>
-      <Extraction />
-    </BrowserRouter>
+  const router = createMemoryRouter(
+    [
+      {
+        path: '/lab/extraction',
+        element: <Extraction />
+      }
+    ],
+    {
+      initialEntries: ['/lab/extraction']
+    }
   );
+  render(<RouterProvider router={router} />);
 };
 
 const fillInTheFields = async () => {

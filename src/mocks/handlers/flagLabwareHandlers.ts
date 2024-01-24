@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   FindFlaggedLabwareQuery,
   FindFlaggedLabwareQueryVariables,
@@ -16,30 +16,27 @@ import { createLabware } from './labwareHandlers';
  * Returns a flagged labware if the given barcode ends with '00'
  */
 export const flagLabwareHandlers = [
-  graphql.query<FindFlaggedLabwareQuery, FindFlaggedLabwareQueryVariables>('FindFlaggedLabware', ({ variables }) => {
-    const barcode = variables.barcode;
+  graphql.query<FindFlaggedLabwareQuery, FindFlaggedLabwareQueryVariables>('FindFlaggedLabware', (req, res, ctx) => {
+    const barcode = req.variables.barcode;
     if (!barcode.startsWith('STAN-')) {
-      return HttpResponse.json({
-        errors: [
+      return res(
+        ctx.errors([
           {
-            message: `Exception while fetching data (/labware) : Invalid barcode: ${barcode}`
+            message: `Exception while fetching data (/labware) : No labware found with barcode: ${barcode}`
           }
-        ]
-      });
+        ])
+      );
     }
-    const payload: FindFlaggedLabwareQuery = {
-      labwareFlagged: createFlaggedLabware(barcode)
-    };
-    return HttpResponse.json({ data: payload }, { status: 200 });
+    return res(ctx.data({ labwareFlagged: createFlaggedLabware(barcode) }));
   }),
 
   graphql.query<GetLabwareFlagDetailsQuery, GetLabwareFlagDetailsQueryVariables>(
     'GetLabwareFlagDetails',
-    ({ variables }) => {
-      const barcode = variables.barcodes[0];
-      return HttpResponse.json({
-        data: {
-          labwareFlagDetails: variables.barcodes[0].endsWith('00')
+    (req, res, ctx) => {
+      const barcode = req.variables.barcodes[0];
+      return res(
+        ctx.data({
+          labwareFlagDetails: req.variables.barcodes[0].endsWith('00')
             ? [
                 {
                   barcode: barcode,
@@ -58,13 +55,14 @@ export const flagLabwareHandlers = [
                 }
               ]
             : []
-        }
-      });
+        })
+      );
     }
   ),
-  graphql.mutation<FlagLabwareMutation, FlagLabwareMutationVariables>('FlagLabware', () => {
-    return HttpResponse.json({
-      data: {
+
+  graphql.mutation<FlagLabwareMutation, FlagLabwareMutationVariables>('FlagLabware', (req, res, ctx) => {
+    return res(
+      ctx.data({
         flagLabware: {
           operations: [
             {
@@ -72,8 +70,8 @@ export const flagLabwareHandlers = [
             }
           ]
         }
-      }
-    });
+      })
+    );
   })
 ];
 
@@ -82,13 +80,11 @@ export const createFlaggedLabware = (barcode: string): LabwareFlaggedFieldsFragm
   const labware: Labware = labwareJson ? JSON.parse(labwareJson) : createLabware(barcode);
   const flaggedLabware = convertLabwareToFlaggedLabware([buildLabwareFragment(labware)])[0];
   flaggedLabware.flagged = barcode.endsWith('00');
-  flaggedLabware.__typename = 'LabwareFlagged';
   return flaggedLabware;
 };
 
 export const buildFlaggedLabwareFragment = (lw: Labware): LabwareFlaggedFieldsFragment => {
   const labware = buildLabwareFragment(lw) as LabwareFlaggedFieldsFragment;
   labware.flagged = lw.barcode.endsWith('00');
-  labware.__typename = 'LabwareFlagged';
   return labware;
 };
