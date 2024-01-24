@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   FindLabwareQuery,
   FindLabwareQueryVariables,
@@ -61,15 +61,16 @@ export function generateLabwareIdFromBarcode(barcode: string) {
 }
 
 const labwareHandlers = [
-  graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', ({ variables }) => {
-    const barcode = variables.barcode;
+  graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', (req, res, ctx) => {
+    const barcode = req.variables.barcode;
 
     if (!barcode.startsWith('STAN-')) {
-      return HttpResponse.json(
-        {
-          errors: [{ message: `Exception while fetching data (/labware) : No labware found with barcode: ${barcode}` }]
-        },
-        { status: 400 }
+      return res(
+        ctx.errors([
+          {
+            message: `Exception while fetching data (/labware) : No labware found with barcode: ${barcode}`
+          }
+        ])
       );
     }
     const labwareJson = sessionStorage.getItem(`labware-${barcode}`);
@@ -77,16 +78,16 @@ const labwareHandlers = [
     const payload: FindLabwareQuery = {
       labware: buildLabwareFragment(labware)
     };
-    return HttpResponse.json({ data: payload }, { status: 200 });
+
+    return res(ctx.data(payload));
   }),
 
   graphql.query<GetLabwareOperationsQuery, GetLabwareOperationsQueryVariables>(
     'GetLabwareOperations',
-    ({ variables }) => {
-      const optype = variables.operationType;
-
-      return HttpResponse.json({
-        data: {
+    (req, res, ctx) => {
+      const optype = req.variables.operationType;
+      return res(
+        ctx.data({
           labwareOperations: [
             {
               id: 1,
@@ -101,31 +102,36 @@ const labwareHandlers = [
               performed: ''
             }
           ]
-        }
-      });
+        })
+      );
     }
   ),
 
   graphql.query<GetSuggestedWorkForLabwareQuery, GetSuggestedWorkForLabwareQueryVariables>(
     'GetSuggestedWorkForLabware',
-    ({ variables }) => {
+    (req, res, ctx) => {
       const work = workFactory.build({ workNumber: 'SGP1008' });
-
-      return HttpResponse.json({
-        data: {
+      return res(
+        ctx.data({
           suggestedWorkForLabware: {
-            suggestedWorks: [...variables.barcodes].map((barcode) => ({
+            suggestedWorks: [...req.variables.barcodes].map((barcode) => ({
               workNumber: work.workNumber,
               barcode: barcode
             }))
           }
-        }
-      });
+        })
+      );
     }
   ),
 
-  graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
-    return HttpResponse.json({ data: { findLatestOp: { id: 1 } } });
+  graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        findLatestOp: {
+          id: 1
+        }
+      })
+    );
   })
 ];
 

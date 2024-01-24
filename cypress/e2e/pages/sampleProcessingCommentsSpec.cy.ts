@@ -6,7 +6,6 @@ import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFact
 import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { selectOption } from '../shared/customReactSelect.cy';
-import { HttpResponse } from 'msw';
 
 describe('Sample processing comments', () => {
   before(() => {
@@ -57,19 +56,19 @@ describe('Sample processing comments', () => {
           worker.use(
             graphql.mutation<RecordSampleProcessingCommentsMutation, RecordSampleProcessingCommentsMutationVariables>(
               'RecordSampleProcessingComments',
-              ({ variables }) => {
+              (req, res, ctx) => {
                 const labwareType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.POT);
-                const labware = variables.request.labware.map((lw) =>
+                const labware = req.variables.request.labware.map((lw) =>
                   labwareFactory.build({ labwareType, barcode: lw.barcode })
                 );
-                return HttpResponse.json({
-                  data: {
+                return res(
+                  ctx.data({
                     recordSampleProcessingComments: {
                       labware,
                       operations: []
                     }
-                  }
-                });
+                  })
+                );
               }
             )
           );
@@ -90,16 +89,16 @@ describe('Sample processing comments', () => {
           worker.use(
             graphql.mutation<RecordSampleProcessingCommentsMutation, RecordSampleProcessingCommentsMutationVariables>(
               'RecordSampleProcessingComments',
-              () => {
-                return HttpResponse.json({
-                  errors: [
+              (req, res, ctx) => {
+                return res.once(
+                  ctx.errors([
                     {
                       extensions: {
                         problems: ['This thing went wrong', 'This other thing went wrong']
                       }
                     }
-                  ]
-                });
+                  ])
+                );
               }
             )
           );

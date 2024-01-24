@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   AddSpeciesMutation,
   AddSpeciesMutationVariables,
@@ -9,26 +9,29 @@ import speciesFactory from '../../lib/factories/speciesFactory';
 import speciesRepository from '../repositories/speciesRepository';
 
 const speciesHandlers = [
-  graphql.mutation<AddSpeciesMutation, AddSpeciesMutationVariables>('AddSpecies', ({ variables }) => {
+  graphql.mutation<AddSpeciesMutation, AddSpeciesMutationVariables>('AddSpecies', (req, res, ctx) => {
     const addSpecies = speciesFactory.build({
-      name: variables.name
+      name: req.variables.name
     });
     speciesRepository.save(addSpecies);
-    return HttpResponse.json({ data: { addSpecies } }, { status: 200 });
+    return res(ctx.data({ addSpecies }));
   }),
 
   graphql.mutation<SetSpeciesEnabledMutation, SetSpeciesEnabledMutationVariables>(
     'SetSpeciesEnabled',
-    ({ variables }) => {
-      const species = speciesRepository.find('name', variables.name);
+    (req, res, ctx) => {
+      const species = speciesRepository.find('name', req.variables.name);
       if (species) {
-        species.enabled = variables.enabled;
+        species.enabled = req.variables.enabled;
         speciesRepository.save(species);
-        return HttpResponse.json({ data: { setSpeciesEnabled: species } }, { status: 200 });
+        return res(ctx.data({ setSpeciesEnabled: species }));
       } else {
-        return HttpResponse.json(
-          { errors: [{ message: `Could not find Species: "${variables.name}"` }] },
-          { status: 404 }
+        return res(
+          ctx.errors([
+            {
+              message: `Could not find Species: "${req.variables.name}"`
+            }
+          ])
         );
       }
     }

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { faker } from '@faker-js/faker';
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   FindEntry,
   FindQuery,
@@ -16,13 +16,17 @@ import locationFactory from '../../lib/factories/locationFactory';
 import tissueTypeRepository from '../repositories/tissueTypeRepository';
 
 const findHandlers = [
-  graphql.query<GetSearchInfoQuery, GetSearchInfoQueryVariables>('GetSearchInfo', () => {
-    return HttpResponse.json({ data: { tissueTypes: tissueTypeRepository.findAll() } }, { status: 200 });
+  graphql.query<GetSearchInfoQuery, GetSearchInfoQueryVariables>('GetSearchInfo', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        tissueTypes: tissueTypeRepository.findAll()
+      })
+    );
   }),
 
-  graphql.query<FindQuery, FindQueryVariables>('Find', ({ variables }) => {
-    const maxRecords = variables.request.maxRecords ?? 40;
-    return HttpResponse.json({ data: { find: buildFindResult(10, maxRecords) } }, { status: 200 });
+  graphql.query<FindQuery, FindQueryVariables>('Find', (req, res, ctx) => {
+    const maxRecords = req.variables.request.maxRecords ?? 40;
+    return res(ctx.data({ find: buildFindResult(10, maxRecords) }));
   })
 ];
 

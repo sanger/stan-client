@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   GetParaffinProcessingInfoQuery,
   GetParaffinProcessingInfoQueryVariables,
@@ -12,32 +12,32 @@ import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 const paraffinProcessingHandlers = [
   graphql.query<GetParaffinProcessingInfoQuery, GetParaffinProcessingInfoQueryVariables>(
     'GetParaffinProcessingInfo',
-    () => {
-      return HttpResponse.json({
-        data: {
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
           comments: commentRepository
             .findAll()
             .filter((comment) => comment.category === 'Paraffin processing program' && comment.enabled)
-        }
-      });
+        })
+      );
     }
   ),
 
   graphql.mutation<PerformParaffinProcessingMutation, PerformParaffinProcessingMutationVariables>(
     'PerformParaffinProcessing',
-    ({ variables }) => {
-      const confirmedLabwares = variables.request.barcodes.map((barcode) => {
+    (req, res, ctx) => {
+      const confirmedLabwares = req.variables.request.barcodes.map((barcode) => {
         const labware = createLabware(barcode);
         return buildLabwareFragment(labware);
       });
-      return HttpResponse.json({
-        data: {
+      return res(
+        ctx.data({
           performParaffinProcessing: {
             labware: confirmedLabwares,
             operations: []
           }
-        }
-      });
+        })
+      );
     }
   )
 ];

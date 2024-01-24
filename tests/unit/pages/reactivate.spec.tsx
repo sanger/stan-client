@@ -5,9 +5,6 @@ import React from 'react';
 import { Reactivate } from '../../../src/pages/Reactivate';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import { server } from '../../../src/mocks/server';
-import { graphql, HttpResponse } from 'msw';
-import { GetAllWorkInfoQuery, GetAllWorkInfoQueryVariables, WorkStatus } from '../../../src/types/sdk';
 afterEach(() => {
   cleanup();
   jest.clearAllMocks();
@@ -38,22 +35,6 @@ jest.mock('react-router-dom', () => ({
 
 describe('On load', () => {
   beforeEach(() => {
-    server.use(
-      graphql.query<GetAllWorkInfoQuery, GetAllWorkInfoQueryVariables>('GetAllWorkInfo', () => {
-        return HttpResponse.json({
-          data: {
-            works: [
-              {
-                workNumber: 'SGP1008',
-                workRequester: { username: 'Requestor 1' },
-                status: WorkStatus.Withdrawn,
-                project: { name: 'Project 1' }
-              }
-            ]
-          }
-        });
-      })
-    );
     render(
       <BrowserRouter>
         <Reactivate />

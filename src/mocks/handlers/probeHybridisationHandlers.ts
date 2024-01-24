@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   RecordCompletionMutation,
   RecordCompletionMutationVariables,
@@ -7,10 +7,11 @@ import {
 } from '../../types/sdk';
 
 const probeHybridisationHandlers = [
-  graphql.mutation<RecordProbeOperationMutation, RecordProbeOperationMutationVariables>('RecordProbeOperation', () => {
-    return HttpResponse.json(
-      {
-        data: {
+  graphql.mutation<RecordProbeOperationMutation, RecordProbeOperationMutationVariables>(
+    'RecordProbeOperation',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
           recordProbeOperation: {
             operations: [
               {
@@ -18,26 +19,22 @@ const probeHybridisationHandlers = [
               }
             ]
           }
-        }
-      },
-      { status: 200 }
-    );
-  }),
+        })
+      );
+    }
+  ),
 
-  graphql.mutation<RecordCompletionMutation, RecordCompletionMutationVariables>('RecordCompletion', () => {
-    return HttpResponse.json(
-      {
-        data: {
-          recordCompletion: {
-            operations: [
-              {
-                id: 1
-              }
-            ]
-          }
+  graphql.mutation<RecordCompletionMutation, RecordCompletionMutationVariables>('RecordCompletion', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        recordCompletion: {
+          operations: [
+            {
+              id: 1
+            }
+          ]
         }
-      },
-      { status: 200 }
+      })
     );
   })
 ];

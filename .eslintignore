@@ -9,4 +9,3 @@ README.md
 .github
 .storybook
 .prettierignore
-jest.polyfills.js
