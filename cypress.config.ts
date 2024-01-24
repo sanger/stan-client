@@ -4,7 +4,8 @@ export default defineConfig({
   video: false,
   defaultCommandTimeout: 15000,
   retries: 2,
-  numTestsKeptInMemory: 20,
+  numTestsKeptInMemory: 0,
+  experimentalMemoryManagement: true,
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
