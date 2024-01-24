@@ -10,7 +10,7 @@ import { Authenticated } from '../../components/Authenticated';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
 import { getLabwareInLocation } from '../../lib/services/locationService';
 import { GridDirection, LabwareFieldsFragment, SuggestedWorkFieldsFragment, UserRole } from '../../types/sdk';
-import { tissue, tissues } from '../../lib/helpers/labwareHelper';
+import { tissues } from '../../lib/helpers/labwareHelper';
 import { stanCore } from '../../lib/sdk';
 import { friendlyName } from '../../lib/helpers';
 
