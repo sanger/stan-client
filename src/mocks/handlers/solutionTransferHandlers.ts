@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   GetSolutionTransferInfoQuery,
   GetSolutionTransferInfoQueryVariables,
@@ -10,32 +10,24 @@ import { buildLabwareFragment } from '../../lib/helpers/labwareHelper';
 import solutionRepository from '../repositories/solutionRepository';
 
 const solutionTransferHandlers = [
-  graphql.query<GetSolutionTransferInfoQuery, GetSolutionTransferInfoQueryVariables>(
-    'GetSolutionTransferInfo',
-    (req, res, ctx) => {
-      return res(
-        ctx.data({
-          solutions: solutionRepository.findAll().filter((soln) => soln.enabled)
-        })
-      );
-    }
-  ),
+  graphql.query<GetSolutionTransferInfoQuery, GetSolutionTransferInfoQueryVariables>('GetSolutionTransferInfo', () => {
+    return HttpResponse.json(
+      { data: { solutions: solutionRepository.findAll().filter((soln) => soln.enabled) } },
+      { status: 200 }
+    );
+  }),
 
   graphql.mutation<PerformSolutionTransferMutation, PerformSolutionTransferMutationVariables>(
     'PerformSolutionTransfer',
-    (req, res, ctx) => {
-      const confirmedLabwares = req.variables.request.labware.map((confirmLabware) => {
+    ({ variables }) => {
+      const confirmedLabwares = variables.request.labware.map((confirmLabware) => {
         const labware = createLabware(confirmLabware.barcode);
         return buildLabwareFragment(labware);
       });
 
-      return res(
-        ctx.data({
-          performSolutionTransfer: {
-            labware: confirmedLabwares,
-            operations: []
-          }
-        })
+      return HttpResponse.json(
+        { data: { performSolutionTransfer: { labware: confirmedLabwares, operations: [] } } },
+        { status: 200 }
       );
     }
   )

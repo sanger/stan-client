@@ -1,5 +1,6 @@
 import { DestroyMutation, DestroyMutationVariables } from '../../../src/types/sdk';
 import { selectOption } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('Destroy Page', () => {
   before(() => {
@@ -36,14 +37,14 @@ describe('Destroy Page', () => {
 
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.mutation<DestroyMutation, DestroyMutationVariables>('Destroy', (req, res, ctx) => {
-            return res.once(
-              ctx.errors([
+          graphql.mutation<DestroyMutation, DestroyMutationVariables>('Destroy', () => {
+            return HttpResponse.json({
+              errors: [
                 {
                   message: `Exception while fetching data (/destroy) : Something went wrong`
                 }
-              ])
-            );
+              ]
+            });
           })
         );
       });

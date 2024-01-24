@@ -1,6 +1,7 @@
 import { SlotCopyMutation, SlotCopyMutationVariables } from '../../../src/types/sdk';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { selectOption, selectSGPNumber, shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('CytAssist Page', () => {
   before(() => {
@@ -306,17 +307,17 @@ describe('CytAssist Page', () => {
         before(() => {
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
-              graphql.mutation<SlotCopyMutation, SlotCopyMutationVariables>('SlotCopy', (req, res, ctx) => {
-                return res.once(
-                  ctx.errors([
+              graphql.mutation<SlotCopyMutation, SlotCopyMutationVariables>('SlotCopy', () => {
+                return HttpResponse.json({
+                  errors: [
                     {
                       message: 'Exception while fetching data (/CytAssist) : The operation could not be validated.',
                       extensions: {
                         problems: ['Labware is discarded: [STAN-4100]']
                       }
                     }
-                  ])
-                );
+                  ]
+                });
               })
             );
           });
@@ -329,15 +330,8 @@ describe('CytAssist Page', () => {
       });
 
       context('When there is no server error', () => {
-        before(() => {
-          cy.msw().then(({ worker }) => {
-            worker.resetHandlers();
-          });
-
-          saveButton().should('not.be.disabled').click();
-        });
-
         it('shows a success message', () => {
+          saveButton().should('not.be.disabled').click();
           cy.findByText('Slots copied').should('be.visible');
         });
       });

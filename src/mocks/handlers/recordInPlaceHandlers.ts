@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   GetRecordInPlaceInfoQuery,
   GetRecordInPlaceInfoQueryVariables,
@@ -11,23 +11,18 @@ import { isEnabled } from '../../lib/helpers';
 const recordInPlaceHandlers = [
   graphql.query<GetRecordInPlaceInfoQuery, GetRecordInPlaceInfoQueryVariables>(
     'GetRecordInPlaceInfo',
-    (req, res, ctx) => {
+    ({ variables }) => {
       let equipments = equipmentRepository.findAll().filter(isEnabled);
 
-      if (req.variables.category) {
-        equipments = equipments.filter((equipment) => equipment.category === req.variables.category);
+      if (variables.category) {
+        equipments = equipments.filter((equipment) => equipment.category === variables.category);
       }
-
-      return res(
-        ctx.data({
-          equipments
-        })
-      );
+      return HttpResponse.json({ data: { equipments } }, { status: 200 });
     }
   ),
 
-  graphql.mutation<RecordInPlaceMutation, RecordInPlaceMutationVariables>('RecordInPlace', (req, res, ctx) => {
-    return res(ctx.data({ recordInPlace: { labware: [] } }));
+  graphql.mutation<RecordInPlaceMutation, RecordInPlaceMutationVariables>('RecordInPlace', () => {
+    return HttpResponse.json({ data: { recordInPlace: { labware: [] } } }, { status: 200 });
   })
 ];
 
