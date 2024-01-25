@@ -9,7 +9,6 @@ import {
 import { setAwaitingLabwareInSessionStorage } from '../shared/awaitingStorage.cy';
 import { locationResponse } from '../../../src/mocks/handlers/locationHandlers';
 import { locationRepository } from '../../../src/mocks/repositories/locationRepository';
-import { HttpResponse } from 'msw';
 
 describe('Store', () => {
   describe('Location search', () => {
@@ -43,19 +42,22 @@ describe('Store', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.query<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>('FindLabwareLocation', () => {
-              return HttpResponse.json({
-                data: {
-                  stored: [
-                    {
-                      location: {
-                        barcode: 'STO-015'
+            graphql.query<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>(
+              'FindLabwareLocation',
+              (req, res, ctx) => {
+                return res.once(
+                  ctx.data({
+                    stored: [
+                      {
+                        location: {
+                          barcode: 'STO-015'
+                        }
                       }
-                    }
-                  ]
-                }
-              });
-            })
+                    ]
+                  })
+                );
+              }
+            )
           );
         });
 
@@ -115,13 +117,13 @@ describe('Store', () => {
         worker.use(
           graphql.query<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>(
             'FindLocationByBarcode',
-            ({ variables }) => {
-              const location = locationRepository.findByBarcode(variables.barcode);
-              return HttpResponse.json({
-                data: {
+            (req, res, ctx) => {
+              const location = locationRepository.findByBarcode(req.variables.barcode);
+              return res.once(
+                ctx.data({
                   location: { ...locationResponse(location!), children: [] }
-                }
-              });
+                })
+              );
             }
           )
         );
@@ -141,13 +143,13 @@ describe('Store', () => {
           worker.use(
             graphql.query<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>(
               'FindLocationByBarcode',
-              ({ variables }) => {
-                const location = locationRepository.findByBarcode(variables.barcode);
-                return HttpResponse.json({
-                  data: {
+              (req, res, ctx) => {
+                const location = locationRepository.findByBarcode(req.variables.barcode);
+                return res.once(
+                  ctx.data({
                     location: { ...locationResponse(location!), customName: 'STO-014 location' }
-                  }
-                });
+                  })
+                );
               }
             )
           );
@@ -164,17 +166,17 @@ describe('Store', () => {
             worker.use(
               graphql.mutation<TransferLocationItemsMutation, TransferLocationItemsMutationVariables>(
                 'TransferLocationItems',
-                () => {
-                  return HttpResponse.json({
-                    errors: [
+                (req, res, ctx) => {
+                  return res.once(
+                    ctx.errors([
                       {
                         message: 'Exception while fetching data : The operation could not be validated.',
                         extensions: {
                           problems: []
                         }
                       }
-                    ]
-                  });
+                    ])
+                  );
                 }
               )
             );
@@ -192,9 +194,9 @@ describe('Store', () => {
             worker.use(
               graphql.mutation<TransferLocationItemsMutation, TransferLocationItemsMutationVariables>(
                 'TransferLocationItems',
-                () => {
-                  return HttpResponse.json({
-                    data: {
+                (req, res, ctx) => {
+                  return res.once(
+                    ctx.data({
                       transfer: {
                         ...locationResponse(location!),
                         children: [],
@@ -203,8 +205,8 @@ describe('Store', () => {
                           { barcode: 'STAN-1022', address: 'A2' }
                         ]
                       }
-                    }
-                  });
+                    })
+                  );
                 }
               )
             );

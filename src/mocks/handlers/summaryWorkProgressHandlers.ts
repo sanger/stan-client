@@ -1,12 +1,12 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import { GetWorkSummaryQuery, GetWorkSummaryQueryVariables, WorkStatus } from '../../types/sdk';
 import workTypeRepository from '../repositories/workTypeRepository';
 import { generateRandomIntegerInRange, objectKeys } from '../../lib/helpers';
 
 const workProgressSummaryHandlers = [
-  graphql.query<GetWorkSummaryQuery, GetWorkSummaryQueryVariables>('GetWorkSummary', () => {
-    return HttpResponse.json({
-      data: {
+  graphql.query<GetWorkSummaryQuery, GetWorkSummaryQueryVariables>('GetWorkSummary', (req, res, ctx) => {
+    return res(
+      ctx.data({
         __typename: 'Query',
         worksSummary: {
           workSummaryGroups: workTypeRepository.findAll().map((workType, index) => {
@@ -24,8 +24,8 @@ const workProgressSummaryHandlers = [
           }),
           workTypes: workTypeRepository.findAll()
         }
-      }
-    });
+      })
+    );
   })
 ];
 

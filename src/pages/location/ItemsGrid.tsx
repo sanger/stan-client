@@ -10,8 +10,9 @@ import { Authenticated } from '../../components/Authenticated';
 import Table, { TableBody, TableCell, TableHead, TableHeader } from '../../components/Table';
 import { getLabwareInLocation } from '../../lib/services/locationService';
 import { GridDirection, LabwareFieldsFragment, SuggestedWorkFieldsFragment, UserRole } from '../../types/sdk';
-import { tissue } from '../../lib/helpers/labwareHelper';
+import { tissues } from '../../lib/helpers/labwareHelper';
 import { stanCore } from '../../lib/sdk';
+import { friendlyName } from '../../lib/helpers';
 
 /**
  * Component for showing the stored items for a location in a grid
@@ -53,7 +54,6 @@ export const ItemsGrid: React.FC = () => {
 
   const selectedLabware = React.useMemo(() => {
     if (!selectedAddress) return undefined;
-    debugger;
     const barcodeInSelectedAddress = addressToItemMap.get(selectedAddress)?.barcode;
     if (!barcodeInSelectedAddress) return undefined;
     return labwareInLocation.find((lw) => lw.barcode === barcodeInSelectedAddress);
@@ -107,10 +107,22 @@ export const ItemsGrid: React.FC = () => {
                     <TableCell>
                       {selectedLabware ? workNumberForLabware(workNumbersForLabware, selectedLabware.barcode) : ''}
                     </TableCell>
-                    <TableCell>{selectedLabware && tissue(selectedLabware)?.externalName}</TableCell>
-                    <TableCell>{selectedLabware && tissue(selectedLabware)?.donor.donorName}</TableCell>
-                    <TableCell>{selectedLabware && tissue(selectedLabware)?.spatialLocation.code}</TableCell>
-                    <TableCell>{selectedLabware && tissue(selectedLabware)?.replicate}</TableCell>
+                    <TableCell>
+                      {selectedLabware &&
+                        friendlyName(tissues(selectedLabware).map((tissue) => tissue.externalName ?? ''))}
+                    </TableCell>
+                    <TableCell>
+                      {selectedLabware &&
+                        friendlyName(tissues(selectedLabware).map((tissue) => tissue.donor.donorName))}
+                    </TableCell>
+                    <TableCell>
+                      {selectedLabware &&
+                        friendlyName(tissues(selectedLabware).map((tissue) => String(tissue.spatialLocation.code)))}
+                    </TableCell>
+                    <TableCell>
+                      {selectedLabware &&
+                        friendlyName(tissues(selectedLabware).map((tissue) => tissue.replicate ?? ''))}
+                    </TableCell>
                   </tr>
                 </TableBody>
               </Table>

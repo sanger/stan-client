@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   GetBlockProcessingInfoQuery,
   GetBlockProcessingInfoQueryVariables,
@@ -24,32 +24,38 @@ import fixativeRepository from '../repositories/fixativeRepository';
 import labwareFactory from '../../lib/factories/labwareFactory';
 
 const originalSampleProcessingHandlers = [
-  graphql.query<GetBlockProcessingInfoQuery, GetBlockProcessingInfoQueryVariables>('GetBlockProcessingInfo', () => {
-    return HttpResponse.json({
-      data: {
-        mediums: [{ name: 'None' }, { name: 'OCT' }, { name: 'Paraffin' }],
-        comments: commentRepository
-          .findAll()
-          .filter((comment) => comment.category === 'Sample Processing' && comment.enabled),
-        labwareTypes: labwareTypeInstances
-      }
-    });
-  }),
-  graphql.query<GetPotProcessingInfoQuery, GetPotProcessingInfoQueryVariables>('GetPotProcessingInfo', () => {
-    return HttpResponse.json({
-      data: {
-        comments: commentRepository
-          .findAll()
-          .filter((comment) => comment.category === 'Sample Processing' && comment.enabled),
-        labwareTypes: labwareTypeInstances,
-        fixatives: fixativeRepository.findAll().filter((fixative) => fixative.enabled)
-      }
-    });
-  }),
+  graphql.query<GetBlockProcessingInfoQuery, GetBlockProcessingInfoQueryVariables>(
+    'GetBlockProcessingInfo',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          mediums: [{ name: 'None' }, { name: 'OCT' }, { name: 'Paraffin' }],
+          comments: commentRepository
+            .findAll()
+            .filter((comment) => comment.category === 'Sample Processing' && comment.enabled),
+          labwareTypes: labwareTypeInstances
+        })
+      );
+    }
+  ),
+  graphql.query<GetPotProcessingInfoQuery, GetPotProcessingInfoQueryVariables>(
+    'GetPotProcessingInfo',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          comments: commentRepository
+            .findAll()
+            .filter((comment) => comment.category === 'Sample Processing' && comment.enabled),
+          labwareTypes: labwareTypeInstances,
+          fixatives: fixativeRepository.findAll().filter((fixative) => fixative.enabled)
+        })
+      );
+    }
+  ),
   graphql.query<GetNextReplicateNumberQuery, GetNextReplicateNumberQueryVariables>(
     'GetNextReplicateNumber',
-    ({ variables }) => {
-      const sourceBarcodes = [...variables.barcodes];
+    (req, res, ctx) => {
+      const sourceBarcodes = [...req.variables.barcodes];
       const nextReplicateData: NextReplicateData[] = [];
       /***Keeps labware in pairs as a group. This is to enable testing for all cases**/
       for (let indx = 0; indx < sourceBarcodes.length; indx += 2) {
@@ -60,69 +66,73 @@ const originalSampleProcessingHandlers = [
           spatialLocationId: 1
         });
       }
-      return HttpResponse.json({ data: { nextReplicateNumbers: nextReplicateData } });
+      return res(
+        ctx.data({
+          nextReplicateNumbers: nextReplicateData
+        })
+      );
     }
   ),
   graphql.query<GetSampleProcessingCommentsInfoQuery, GetSampleProcessingCommentsInfoQueryVariables>(
     'GetSampleProcessingCommentsInfo',
-    () => {
-      return HttpResponse.json({
-        data: {
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
           comments: commentRepository
             .findAll()
             .filter((comment) => comment.category === 'Sample Processing' && comment.enabled)
-        }
-      });
+        })
+      );
     }
   ),
   graphql.mutation<PerformTissueBlockMutation, PerformTissueBlockMutationVariables>(
     'PerformTissueBlock',
-    ({ variables }) => {
-      const confirmedLabwares = variables.request.labware.map((confirmLabware) => {
+    (req, res, ctx) => {
+      const confirmedLabwares = req.variables.request.labware.map((confirmLabware) => {
         const labware = createLabware(confirmLabware.sourceBarcode);
         return buildLabwareFragment(labware);
       });
 
-      return HttpResponse.json({
-        data: {
+      return res(
+        ctx.data({
           performTissueBlock: {
             labware: confirmedLabwares,
             operations: []
           }
-        }
-      });
+        })
+      );
     }
   ),
-  graphql.mutation<PerformTissuePotMutation, PerformTissuePotMutationVariables>('PerformTissuePot', ({ variables }) => {
-    const confirmedLabwares = variables.request.destinations.map(() => {
+  graphql.mutation<PerformTissuePotMutation, PerformTissuePotMutationVariables>('PerformTissuePot', (req, res, ctx) => {
+    const confirmedLabwares = req.variables.request.destinations.map(() => {
       const labware = labwareFactory.build({ id: Math.random() });
       return buildLabwareFragment(labware);
     });
 
-    return HttpResponse.json({
-      data: {
+    return res(
+      ctx.data({
         performPotProcessing: {
           labware: confirmedLabwares,
           operations: []
         }
-      }
-    });
+      })
+    );
   }),
   graphql.mutation<RecordSampleProcessingCommentsMutation, RecordSampleProcessingCommentsMutationVariables>(
     'RecordSampleProcessingComments',
-    ({ variables }) => {
-      const confirmedLabwares = variables.request.labware.map((confirmLabware) => {
+    (req, res, ctx) => {
+      const confirmedLabwares = req.variables.request.labware.map((confirmLabware) => {
         const labware = createLabware(confirmLabware.barcode);
         return buildLabwareFragment(labware);
       });
-      return HttpResponse.json({
-        data: {
+      return res(
+        ctx.data({
           recordSampleProcessingComments: {
             labware: confirmedLabwares,
             operations: []
           }
-        }
-      });
+        })
+      );
     }
   )
 ];

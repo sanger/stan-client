@@ -8,7 +8,6 @@ import { buildLabwareFragment } from '../../../src/lib/helpers/labwareHelper';
 import { labwareTypeInstances } from '../../../src/lib/factories/labwareTypeFactory';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { selectOption, shouldDisplaySelectedValue, shouldHaveOption } from '../shared/customReactSelect.cy';
-import { HttpResponse } from 'msw';
 
 describe('Release Page', () => {
   before(() => {
@@ -153,17 +152,17 @@ describe('Release Page', () => {
           worker.use(
             graphql.mutation<ReleaseLabwareMutation, ReleaseLabwareMutationVariables>(
               'ReleaseLabware',
-              ({ variables }) => {
-                const { releaseLabware } = variables.releaseRequest;
-                return HttpResponse.json({
-                  errors: [
+              (req, res, ctx) => {
+                const { releaseLabware } = req.variables.releaseRequest;
+                return res.once(
+                  ctx.errors([
                     {
                       message: `Exception while fetching data (/release) : Labware has already been released: [${releaseLabware
                         .map((rlw) => rlw.barcode)
                         .join(',')}]`
                     }
-                  ]
-                });
+                  ])
+                );
               }
             )
           );
@@ -189,37 +188,40 @@ describe('Release Page', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.query<GetLabwareInLocationQuery, GetLabwareInLocationQueryVariables>('GetLabwareInLocation', () => {
-              // The number after STAN- determines what kind of labware will be returned
-              const labwaresBarcodes: string[] = ['STAN-3111', 'STAN-3112', 'STAN-3113'];
-              const labwares = labwaresBarcodes.map((barcode) => {
-                const magicNumber = parseInt(barcode.substr(5, 1));
-                const labwareType = labwareTypeInstances[magicNumber % labwareTypeInstances.length];
-                // The number after that determines how many samples to put in each slot
-                const samplesPerSlot = parseInt(barcode.substr(6, 1));
+            graphql.query<GetLabwareInLocationQuery, GetLabwareInLocationQueryVariables>(
+              'GetLabwareInLocation',
+              (req, res, ctx) => {
+                // The number after STAN- determines what kind of labware will be returned
+                const labwaresBarcodes: string[] = ['STAN-3111', 'STAN-3112', 'STAN-3113'];
+                const labwares = labwaresBarcodes.map((barcode) => {
+                  const magicNumber = parseInt(barcode.substr(5, 1));
+                  const labwareType = labwareTypeInstances[magicNumber % labwareTypeInstances.length];
+                  // The number after that determines how many samples to put in each slot
+                  const samplesPerSlot = parseInt(barcode.substr(6, 1));
 
-                const labware = labwareFactory.build(
-                  {
-                    barcode: barcode
-                  },
-                  {
-                    transient: {
-                      samplesPerSlot
+                  const labware = labwareFactory.build(
+                    {
+                      barcode: barcode
                     },
-                    associations: {
-                      labwareType
+                    {
+                      transient: {
+                        samplesPerSlot
+                      },
+                      associations: {
+                        labwareType
+                      }
                     }
-                  }
+                  );
+                  return buildLabwareFragment(labware);
+                });
+                labwares[0].released = true;
+                return res(
+                  ctx.data({
+                    labwareInLocation: labwares
+                  })
                 );
-                return buildLabwareFragment(labware);
-              });
-              labwares[0].released = true;
-              return HttpResponse.json({
-                data: {
-                  labwareInLocation: labwares
-                }
-              });
-            })
+              }
+            )
           );
         });
         cy.get('#locationScanInput').clear().type('STO-111{enter}');

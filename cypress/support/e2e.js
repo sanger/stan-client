@@ -29,10 +29,6 @@ before(async () => {
   await worker.start();
 });
 
-afterEach(() => {
-    worker.resetHandlers();
-});
-
 after(() => {
   worker.resetHandlers()
   worker.stop();

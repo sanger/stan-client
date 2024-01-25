@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   FindHistoryForDonorNameQuery,
   FindHistoryForDonorNameQueryVariables,
@@ -52,49 +52,81 @@ export function buildHistory(workNumber?: string): HistoryFieldsFragment {
 }
 
 const historyHandlers = [
-  graphql.query<FindHistoryQuery, FindHistoryQueryVariables>('FindHistory', () => {
-    return HttpResponse.json({ data: { __typename: 'Query', history: buildHistory() } }, { status: 200 });
+  graphql.query<FindHistoryQuery, FindHistoryQueryVariables>('FindHistory', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        __typename: 'Query',
+        history: buildHistory()
+      })
+    );
   }),
 
-  graphql.query<FindHistoryForDonorNameQuery, FindHistoryForDonorNameQueryVariables>('FindHistoryForDonorName', () => {
-    return HttpResponse.json({ data: { __typename: 'Query', historyForDonorName: buildHistory() } }, { status: 200 });
-  }),
+  graphql.query<FindHistoryForDonorNameQuery, FindHistoryForDonorNameQueryVariables>(
+    'FindHistoryForDonorName',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          historyForDonorName: buildHistory()
+        })
+      );
+    }
+  ),
 
   graphql.query<FindHistoryForExternalNameQuery, FindHistoryForExternalNameQueryVariables>(
     'FindHistoryForExternalName',
-    () => {
-      return HttpResponse.json(
-        { data: { __typename: 'Query', historyForExternalName: buildHistory() } },
-        { status: 200 }
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          historyForExternalName: buildHistory()
+        })
       );
     }
   ),
 
   graphql.query<FindHistoryForLabwareBarcodeQuery, FindHistoryForLabwareBarcodeQueryVariables>(
     'FindHistoryForLabwareBarcode',
-    () => {
-      return HttpResponse.json(
-        { data: { __typename: 'Query', historyForLabwareBarcode: buildHistory() } },
-        { status: 200 }
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          historyForLabwareBarcode: buildHistory()
+        })
       );
     }
   ),
 
-  graphql.query<FindHistoryForSampleIdQuery, FindHistoryForSampleIdQueryVariables>('FindHistoryForSampleId', () => {
-    return HttpResponse.json({ data: { __typename: 'Query', historyForSampleId: buildHistory() } }, { status: 200 });
-  }),
+  graphql.query<FindHistoryForSampleIdQuery, FindHistoryForSampleIdQueryVariables>(
+    'FindHistoryForSampleId',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          historyForSampleId: buildHistory()
+        })
+      );
+    }
+  ),
 
   graphql.query<FindHistoryForWorkNumberQuery, FindHistoryForWorkNumberQueryVariables>(
     'FindHistoryForWorkNumber',
-    () => {
-      return HttpResponse.json(
-        { data: { __typename: 'Query', historyForWorkNumber: buildHistory() } },
-        { status: 200 }
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          __typename: 'Query',
+          historyForWorkNumber: buildHistory()
+        })
       );
     }
   ),
-  graphql.query<GetEventTypesQuery, GetEventTypesQueryVariables>('GetEventTypes', () => {
-    return HttpResponse.json({ data: { __typename: 'Query', eventTypes: ['Event 1', 'Event 2'] } }, { status: 200 });
+  graphql.query<GetEventTypesQuery, GetEventTypesQueryVariables>('GetEventTypes', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        __typename: 'Query',
+        eventTypes: ['Event 1', 'Event 2']
+      })
+    );
   })
 ];
 

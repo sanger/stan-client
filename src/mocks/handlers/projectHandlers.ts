@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   AddProjectMutation,
   AddProjectMutationVariables,
@@ -9,25 +9,22 @@ import projectFactory from '../../lib/factories/projectFactory';
 import projectRepository from '../repositories/projectRepository';
 
 const projectHandlers = [
-  graphql.mutation<AddProjectMutation, AddProjectMutationVariables>('AddProject', ({ variables }) => {
-    const addProject = projectFactory.build({ name: variables.name });
+  graphql.mutation<AddProjectMutation, AddProjectMutationVariables>('AddProject', (req, res, ctx) => {
+    const addProject = projectFactory.build({ name: req.variables.name });
     projectRepository.save(addProject);
-    return HttpResponse.json({ data: { addProject } }, { status: 200 });
+    return res(ctx.data({ addProject }));
   }),
 
   graphql.mutation<SetProjectEnabledMutation, SetProjectEnabledMutationVariables>(
     'SetProjectEnabled',
-    ({ variables }) => {
-      const project = projectRepository.find('name', variables.name);
+    (req, res, ctx) => {
+      const project = projectRepository.find('name', req.variables.name);
       if (project) {
-        project.enabled = variables.enabled;
+        project.enabled = req.variables.enabled;
         projectRepository.save(project);
-        return HttpResponse.json({ data: { setProjectEnabled: project } }, { status: 200 });
+        return res(ctx.data({ setProjectEnabled: project }));
       } else {
-        return HttpResponse.json(
-          { errors: [{ message: `Could not find Project: "${variables.name}"` }] },
-          { status: 404 }
-        );
+        return res(ctx.errors([{ message: `Could not find Project: "${req.variables.name}"` }]));
       }
     }
   )

@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   AddCostCodeMutation,
   AddCostCodeMutationVariables,
@@ -9,24 +9,27 @@ import costCodeFactory from '../../lib/factories/costCodeFactory';
 import costCodeRepository from '../repositories/costCodeRepository';
 
 const costCodeHandlers = [
-  graphql.mutation<AddCostCodeMutation, AddCostCodeMutationVariables>('AddCostCode', ({ variables }) => {
-    const addCostCode = costCodeFactory.build({ code: variables.code });
+  graphql.mutation<AddCostCodeMutation, AddCostCodeMutationVariables>('AddCostCode', (req, res, ctx) => {
+    const addCostCode = costCodeFactory.build({ code: req.variables.code });
     costCodeRepository.save(addCostCode);
-    return HttpResponse.json({ data: { addCostCode } }, { status: 200 });
+    return res(ctx.data({ addCostCode }));
   }),
 
   graphql.mutation<SetCostCodeEnabledMutation, SetCostCodeEnabledMutationVariables>(
     'SetCostCodeEnabled',
-    ({ variables }) => {
-      const costCode = costCodeRepository.find('code', variables.code);
+    (req, res, ctx) => {
+      const costCode = costCodeRepository.find('code', req.variables.code);
       if (costCode) {
-        costCode.enabled = variables.enabled;
+        costCode.enabled = req.variables.enabled;
         costCodeRepository.save(costCode);
-        return HttpResponse.json({ data: { setCostCodeEnabled: costCode } }, { status: 200 });
+        return res(ctx.data({ setCostCodeEnabled: costCode }));
       } else {
-        return HttpResponse.json(
-          { errors: [{ message: `Could not find Cost Code: "${variables.code}"` }] },
-          { status: 404 }
+        return res(
+          ctx.errors([
+            {
+              message: `Could not find Cost Code: "${req.variables.code}"`
+            }
+          ])
         );
       }
     }

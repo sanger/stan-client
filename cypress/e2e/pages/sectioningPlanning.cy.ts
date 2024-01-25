@@ -8,7 +8,6 @@ import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { labwareTypes } from '../../../src/lib/factories/labwareTypeFactory';
 import { LabwareTypeName } from '../../../src/types/stan';
 import { selectOption } from '../shared/customReactSelect.cy';
-import { HttpResponse } from 'msw';
 
 describe('Sectioning Planning', () => {
   before(() => {
@@ -38,12 +37,12 @@ describe('Sectioning Planning', () => {
         );
         cy.msw().then(({ graphql, worker }) => {
           worker.use(
-            graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', () => {
-              return HttpResponse.json({
-                data: {
+            graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', (req, res, ctx) => {
+              return res.once(
+                ctx.data({
                   labware: sourceLabware
-                }
-              });
+                })
+              );
             })
           );
         });
@@ -182,16 +181,16 @@ describe('Sectioning Planning', () => {
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<PlanMutation, PlanMutationVariables>('Plan', () => {
-              return HttpResponse.json({
-                errors: [
+            graphql.mutation<PlanMutation, PlanMutationVariables>('Plan', (req, res, ctx) => {
+              return res.once(
+                ctx.errors([
                   {
                     extensions: {
                       problems: ['This thing went wrong', 'This other thing went wrong']
                     }
                   }
-                ]
-              });
+                ])
+              );
             })
           );
         });
@@ -228,14 +227,14 @@ describe('Sectioning Planning', () => {
         cy.visit('/lab/sectioning');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation('Print', () => {
-              return HttpResponse.json({
-                errors: [
+            graphql.mutation('Print', (req, res, ctx) => {
+              return res.once(
+                ctx.errors([
                   {
                     message: 'Exception while fetching data (/print) : An error occured'
                   }
-                ]
-              });
+                ])
+              );
             })
           );
         });

@@ -100,13 +100,15 @@ describe('Load location with no child ', () => {
 
     describe('When clicking the "Remove All Labware" button', () => {
       it('removes all labware from the Location', async () => {
-        await userEvent.click(screen.getByRole('button', { name: /Empty Location/i }));
-        await waitFor(() => {
-          expect(screen.getByRole('dialog')).toBeVisible();
+        act(() => {
+          userEvent.click(screen.getByRole('button', { name: /Empty Location/i })).then(async () => {
+            await screen.findByRole('dialog');
+            await userEvent.click(screen.getByRole('button', { name: /Remove All Labware/i }));
+          });
         });
-        await userEvent.click(screen.getByRole('button', { name: /Remove All Labware/i }));
         await waitFor(() => {
           expect(screen.getByText('Location emptied')).toBeVisible();
+          expect(screen.getByTestId('storedItemsCount')).toHaveTextContent('0');
         });
       });
     });

@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   FindWorkProgressQuery,
   FindWorkProgressQueryVariables,
@@ -45,17 +45,20 @@ function buildWorkComment(work: Work) {
 }
 
 const workProgressHandlers = [
-  graphql.query<GetWorkProgressInputsQuery, GetWorkProgressInputsQueryVariables>('GetWorkProgressInputs', () => {
-    return HttpResponse.json({
-      data: {
-        workTypes: workTypeRepository.findAll(),
-        programs: programRepository.findAll(),
-        releaseRecipients: releaseRecipientRepository.findAll()
-      }
-    });
-  }),
-  graphql.query<FindWorkProgressQuery, FindWorkProgressQueryVariables>('FindWorkProgress', ({ variables }) => {
-    const { workNumber, workTypes, statuses, programs, requesters } = variables;
+  graphql.query<GetWorkProgressInputsQuery, GetWorkProgressInputsQueryVariables>(
+    'GetWorkProgressInputs',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          workTypes: workTypeRepository.findAll(),
+          programs: programRepository.findAll(),
+          releaseRecipients: releaseRecipientRepository.findAll()
+        })
+      );
+    }
+  ),
+  graphql.query<FindWorkProgressQuery, FindWorkProgressQueryVariables>('FindWorkProgress', (req, res, ctx) => {
+    const { workNumber, workTypes, statuses, programs, requesters } = req.variables;
     const works = workRepository.findAll().map((work, indx) => {
       const status = indx % 2 === 0 ? WorkStatus.Active : indx % 3 === 1 ? WorkStatus.Completed : WorkStatus.Paused;
       /**Assign a work requester to first few  work entries to enable mock testing**/
@@ -85,8 +88,8 @@ const workProgressHandlers = [
         ? filteredWorks.filter((work) => requesters.some((requester) => requester === work.workRequester?.username))
         : filteredWorks.filter((work) => work.workRequester?.username === requesters);
     }
-    return HttpResponse.json({
-      data: {
+    return res(
+      ctx.data({
         __typename: 'Query',
         workProgress: filteredWorks.map((work) => {
           return {
@@ -107,8 +110,8 @@ const workProgressHandlers = [
             workComment: buildWorkComment(work)
           };
         })
-      }
-    });
+      })
+    );
   })
 ];
 
