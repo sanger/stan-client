@@ -10,8 +10,7 @@ import {
   RecordOpWithSlotMeasurementsMutation,
   RecordVisiumQcMutation,
   ResultRequest,
-  SlideCosting,
-  SlotMeasurementRequest
+  SlideCosting
 } from '../types/sdk';
 import AppShell from '../components/AppShell';
 import WorkNumberSelect from '../components/WorkNumberSelect';
@@ -32,20 +31,23 @@ import Cleanup from '../components/visiumQC/Cleanup';
 import CustomReactSelect, { OptionType } from '../components/forms/CustomReactSelect';
 import CDNAConcentration from '../components/visiumQC/CDNAConentration';
 import { useLoaderData } from 'react-router-dom';
+import QPcrResults from '../components/visiumQC/QPcrResults';
+import { SlotMeasurement } from '../components/slotMeasurement/SlotMeasurements';
 import { fromPromise } from 'xstate';
 
 export enum QCType {
   CDNA_AMPLIFICATION = 'Amplification',
   SLIDE_PROCESSING = 'Slide Processing',
   VISIUM_CONCENTRATION = 'Visium concentration',
-  SPRI_CLEANUP = 'SPRI clean up'
+  SPRI_CLEANUP = 'SPRI clean up',
+  QPCR_RESULTS = 'qPCR results'
 }
 
 export interface VisiumQCFormData {
   workNumber: string;
   qcType: QCType;
   barcode: string;
-  slotMeasurements?: Array<SlotMeasurementRequest>;
+  slotMeasurements?: Array<SlotMeasurement>;
   labwareResult?: CoreLabwareResult[];
   costing?: SlideCosting;
   reagentLot?: string;
@@ -189,6 +191,7 @@ export default function VisiumQC() {
     }
     if (
       values.qcType === QCType.VISIUM_CONCENTRATION ||
+      values.qcType === QCType.QPCR_RESULTS ||
       (values.qcType === QCType.CDNA_AMPLIFICATION && values.slotMeasurements)
     ) {
       sendCDNA({
@@ -196,7 +199,7 @@ export default function VisiumQC() {
         values: {
           workNumber: values.workNumber,
           barcode: values.barcode,
-          slotMeasurements: values.slotMeasurements ?? [],
+          slotMeasurements: values.slotMeasurements?.map(({ samples, ...rest }) => rest) ?? [],
           operationType: values.qcType
         }
       });
@@ -217,7 +220,11 @@ export default function VisiumQC() {
     if (value.workNumber === '') {
       return false;
     }
-    if (value.qcType === QCType.CDNA_AMPLIFICATION || value.qcType === QCType.VISIUM_CONCENTRATION) {
+    if (
+      value.qcType === QCType.CDNA_AMPLIFICATION ||
+      value.qcType === QCType.VISIUM_CONCENTRATION ||
+      value.qcType === QCType.QPCR_RESULTS
+    ) {
       if (value.slotMeasurements) {
         const val = value.slotMeasurements.filter((measurement) => measurement.value === '');
         return val.length <= 0;
@@ -233,7 +240,11 @@ export default function VisiumQC() {
   };
 
   const getServerError = (value: VisiumQCFormData) => {
-    if (value.qcType === QCType.CDNA_AMPLIFICATION || value.qcType === QCType.VISIUM_CONCENTRATION) {
+    if (
+      value.qcType === QCType.CDNA_AMPLIFICATION ||
+      value.qcType === QCType.VISIUM_CONCENTRATION ||
+      value.qcType === QCType.QPCR_RESULTS
+    ) {
       return value.slotMeasurements && value.slotMeasurements.length > 0 ? serverErrorCDNA : undefined;
     }
     if (value.qcType === QCType.SLIDE_PROCESSING) {
@@ -333,6 +344,14 @@ export default function VisiumQC() {
                                 labware={labwares[0]}
                                 removeLabware={removeLabware}
                                 concentrationComments={concentrationComments}
+                              />
+                            );
+                          case QCType.QPCR_RESULTS:
+                            return (
+                              <QPcrResults
+                                slotMeasurements={values.slotMeasurements}
+                                labware={labwares[0]}
+                                removeLabware={removeLabware}
                               />
                             );
                         }
