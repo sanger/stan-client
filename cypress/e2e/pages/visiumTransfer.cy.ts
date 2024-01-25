@@ -231,14 +231,14 @@ describe('Transfer Page', () => {
           });
           cy.findByText('Finish mapping for A1').should('be.visible');
           cy.get('#outputLabwares').within(() => {
-            cy.findByText('G1').click({ force: true });
-            cy.findByText('G2').click({ force: true });
-            cy.findByText('G5').click({ force: true });
+            cy.findByText('G1').scrollIntoView().click({ force: true });
+            cy.findByText('G2').scrollIntoView().click({ force: true });
+            cy.findByText('G5').scrollIntoView().click({ force: true });
           });
         });
 
         it('displays the table with A1 slot', () => {
-          cy.findByRole('table').contains('td', 'A1');
+          cy.findByRole('table').scrollIntoView().contains('td', 'A1');
         });
         it('displays the table with G1 and G5 slots', () => {
           cy.findByRole('table').contains('td', 'G1');
