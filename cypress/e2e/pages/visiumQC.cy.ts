@@ -609,6 +609,39 @@ describe('Visium QC Page', () => {
           cy.findByRole('button', { name: /Reset/i }).click();
         });
       });
+      context('With server failure', () => {
+        before(() => {
+          cy.msw().then(({ worker, graphql }) => {
+            worker.use(
+              graphql.mutation<RecordVisiumQcMutation, RecordVisiumQcMutationVariables>(
+                'RecordVisiumQC',
+                (req, res, ctx) => {
+                  return res.once(
+                    ctx.errors([
+                      {
+                        message: 'Exception while fetching data : The operation could not be validated.',
+                        extensions: {
+                          problems: ['Labware is discarded: [STAN-2100]']
+                        }
+                      }
+                    ])
+                  );
+                }
+              )
+            );
+          });
+          cy.reload();
+          selectSGPNumber('SGP1008');
+          selectOption('qcType', 'qPCR results');
+          cy.get('#labwareScanInput').type('STAN-2100{enter}');
+          cy.findByTestId('all-Cq value').type('5');
+          cy.findByRole('button', { name: /Save/i }).click();
+        });
+
+        it('shows an error', () => {
+          cy.findByText('Failed to record qPCR results').should('be.visible');
+        });
+      });
     });
   });
 
