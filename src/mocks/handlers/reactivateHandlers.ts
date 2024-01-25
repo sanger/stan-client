@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   LabwareState,
   ReactivateLabware,
@@ -9,23 +9,26 @@ import {
 const reactivateHandlers = [
   graphql.mutation<ReactivateLabwareMutation, ReactivateLabwareMutationVariables>(
     'ReactivateLabware',
-    (req, res, ctx) => {
-      return res(
-        ctx.data({
-          reactivateLabware: {
-            operations: [
-              {
-                id: 1
-              }
-            ],
-            labware: [
-              {
-                barcode: (req.variables.items as Array<ReactivateLabware>)[0].barcode,
-                state: LabwareState.Active
-              }
-            ]
+    ({ variables }) => {
+      return HttpResponse.json(
+        {
+          data: {
+            reactivateLabware: {
+              operations: [
+                {
+                  id: 1
+                }
+              ],
+              labware: [
+                {
+                  barcode: (variables.items as Array<ReactivateLabware>)[0].barcode,
+                  state: LabwareState.Active
+                }
+              ]
+            }
           }
-        })
+        },
+        { status: 200 }
       );
     }
   )

@@ -4,6 +4,7 @@ import { LabwareTypeName } from '../../../src/types/stan';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
 import { shouldDisplyProjectAndUserNameForWorkNumber } from '../shared/workNumberExtraInfo.cy';
 import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('Solution Transfer', () => {
   shouldDisplyProjectAndUserNameForWorkNumber('/lab/solution_transfer');
@@ -57,19 +58,19 @@ describe('Solution Transfer', () => {
           worker.use(
             graphql.mutation<PerformSolutionTransferMutation, PerformSolutionTransferMutationVariables>(
               'PerformSolutionTransfer',
-              (req, res, ctx) => {
+              ({ variables }) => {
                 const labwareType = labwareTypeInstances.find((lt) => lt.name === LabwareTypeName.POT);
-                const labware = req.variables.request.labware.map((lw) =>
+                const labware = variables.request.labware.map((lw) =>
                   labwareFactory.build({ labwareType, barcode: lw.barcode })
                 );
-                return res(
-                  ctx.data({
+                return HttpResponse.json({
+                  data: {
                     performSolutionTransfer: {
                       labware,
                       operations: []
                     }
-                  })
-                );
+                  }
+                });
               }
             )
           );
@@ -91,16 +92,16 @@ describe('Solution Transfer', () => {
           worker.use(
             graphql.mutation<PerformSolutionTransferMutation, PerformSolutionTransferMutationVariables>(
               'PerformSolutionTransfer',
-              (req, res, ctx) => {
-                return res.once(
-                  ctx.errors([
+              () => {
+                return HttpResponse.json({
+                  errors: [
                     {
                       extensions: {
                         problems: ['This thing went wrong', 'This other thing went wrong']
                       }
                     }
-                  ])
-                );
+                  ]
+                });
               }
             )
           );

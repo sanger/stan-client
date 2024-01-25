@@ -1,6 +1,7 @@
 import { GetLabwareInLocationQuery, GetLabwareInLocationQueryVariables } from '../../../../src/types/sdk';
 import { createLabware } from '../../../../src/mocks/handlers/labwareHandlers';
 import { buildLabwareFragment } from '../../../../src/lib/helpers/labwareHelper';
+import { HttpResponse } from 'msw';
 
 describe('Location Grid View', () => {
   before(() => {
@@ -15,22 +16,19 @@ describe('Location Grid View', () => {
     before(() => {
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.query<GetLabwareInLocationQuery, GetLabwareInLocationQueryVariables>(
-            'GetLabwareInLocation',
-            (req, res, ctx) => {
-              // The number after STAN- determines what kind of labware will be returned
-              const labwares = ['STAN-2001'].map((barcode) => {
-                const labware = createLabware(barcode);
-                sessionStorage.setItem(`labware-${labware.barcode}`, JSON.stringify(labware));
-                return buildLabwareFragment(labware);
-              });
+          graphql.query<GetLabwareInLocationQuery, GetLabwareInLocationQueryVariables>('GetLabwareInLocation', () => {
+            // The number after STAN- determines what kind of labware will be returned
+            const labwares = ['STAN-2001'].map((barcode) => {
+              const labware = createLabware(barcode);
+              sessionStorage.setItem(`labware-${labware.barcode}`, JSON.stringify(labware));
+              return buildLabwareFragment(labware);
+            });
 
-              const payload: GetLabwareInLocationQuery = {
-                labwareInLocation: labwares
-              };
-              return res.once(ctx.data(payload));
-            }
-          )
+            const payload: GetLabwareInLocationQuery = {
+              labwareInLocation: labwares
+            };
+            return HttpResponse.json({ data: payload });
+          })
         );
       });
       cy.findByPlaceholderText('Labware barcode...').type('STAN-2001{enter}');

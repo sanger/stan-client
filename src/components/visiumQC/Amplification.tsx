@@ -8,13 +8,13 @@ import SlotMeasurements, { MeasurementConfigProps } from '../slotMeasurement/Slo
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
 
-export type CDNAProps = {
+export type AmplificationProps = {
   labware: LabwareFlaggedFieldsFragment;
   slotMeasurements: SlotMeasurementRequest[] | undefined;
   removeLabware: (barcode: string) => void;
 };
 
-const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) => {
+const Amplification = ({ labware, slotMeasurements, removeLabware }: AmplificationProps) => {
   const { values, setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
 
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(

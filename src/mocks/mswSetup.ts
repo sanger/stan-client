@@ -1,4 +1,5 @@
-import { setupWorker, graphql } from 'msw';
+import { graphql } from 'msw';
+import { setupWorker } from 'msw/browser';
 import { handlers } from './handlers';
 
 // This configures a Service Worker with the given request handlers.

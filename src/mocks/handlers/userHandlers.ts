@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   AddUserMutation,
   AddUserMutationVariables,
@@ -18,11 +18,11 @@ import userRepository from '../repositories/userRepository';
 const CURRENT_USER_KEY = 'currentUser';
 
 const userHandlers = [
-  graphql.mutation<LoginMutation, LoginMutationVariables>('Login', (req, res, ctx) => {
-    const { username } = req.variables;
+  graphql.mutation<LoginMutation, LoginMutationVariables>('Login', ({ variables }) => {
+    const { username } = variables;
     sessionStorage.setItem(CURRENT_USER_KEY, username);
-    return res(
-      ctx.data({
+    return HttpResponse.json({
+      data: {
         login: {
           user: {
             __typename: 'User',
@@ -30,69 +30,62 @@ const userHandlers = [
             role: UserRole.Normal
           }
         }
-      })
-    );
+      }
+    });
   }),
 
-  graphql.mutation<LogoutMutation, LogoutMutationVariables>('Logout', (req, res, ctx) => {
+  graphql.mutation<LogoutMutation, LogoutMutationVariables>('Logout', () => {
     sessionStorage.removeItem(CURRENT_USER_KEY);
-    return res(
-      ctx.data({
-        logout: 'OK'
-      })
-    );
+    return HttpResponse.json({ data: { logout: 'OK' } });
   }),
 
-  graphql.query<CurrentUserQuery, CurrentUserQueryVariables>('CurrentUser', (req, res, ctx) => {
+  graphql.query<CurrentUserQuery, CurrentUserQueryVariables>('CurrentUser', () => {
     const currentUser = sessionStorage.getItem(CURRENT_USER_KEY);
 
     // By default we want the user to be logged in.
     // If this is the first request, currentUser won't be set yet.
     if (!currentUser) {
       sessionStorage.setItem(CURRENT_USER_KEY, 'jb1');
-      return res(
-        ctx.data({
+      return HttpResponse.json({
+        data: {
           user: {
             __typename: 'User',
             username: 'jb1',
             role: UserRole.Normal
           }
-        })
-      );
+        }
+      });
     } else {
-      return res(
-        ctx.data({
+      return HttpResponse.json({
+        data: {
           user: {
             __typename: 'User',
             username: currentUser,
             role: UserRole.Normal
           }
-        })
-      );
+        }
+      });
     }
   }),
 
-  graphql.mutation<AddUserMutation, AddUserMutationVariables>('AddUser', (req, res, ctx) => {
+  graphql.mutation<AddUserMutation, AddUserMutationVariables>('AddUser', ({ variables }) => {
     const addUser = userFactory.build({
-      username: req.variables.username
+      username: variables.username
     });
     userRepository.save(addUser);
-    return res(ctx.data({ addUser }));
+    return HttpResponse.json({ data: { addUser } }, { status: 200 });
   }),
 
-  graphql.mutation<SetUserRoleMutation, SetUserRoleMutationVariables>('SetUserRole', (req, res, ctx) => {
-    const user = userRepository.find('username', req.variables.username);
+  graphql.mutation<SetUserRoleMutation, SetUserRoleMutationVariables>('SetUserRole', ({ variables }) => {
+    const user = userRepository.find('username', variables.username);
     if (user) {
-      user.role = req.variables.role;
+      user.role = variables.role;
       userRepository.save(user);
-      return res(ctx.data({ setUserRole: user }));
+      return HttpResponse.json({ data: { setUserRole: user } }, { status: 200 });
     } else {
-      return res(
-        ctx.errors([
-          {
-            message: `Could not find user: "${req.variables.username}"`
-          }
-        ])
+      return HttpResponse.json(
+        { errors: [{ message: `Could not find user: "${variables.username}"` }] },
+        { status: 404 }
       );
     }
   })

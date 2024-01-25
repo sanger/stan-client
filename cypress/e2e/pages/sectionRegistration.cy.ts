@@ -7,7 +7,7 @@ import {
   selectSGPNumber,
   shouldDisplaySelectedValue
 } from '../shared/customReactSelect.cy';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 describe('Section Registration Page', () => {
   describe('Initial display', () => {
@@ -27,13 +27,11 @@ describe('Section Registration Page', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            rest.post('/register/section', (req, res, ctx) => {
-              return res(
-                ctx.status(200),
-                ctx.json({
-                  barcodes: ['STAN-3111', 'STAN-3112']
-                })
-              );
+            http.post('/register/section', () => {
+              return HttpResponse.json({
+                barcodes: ['STAN-3111', 'STAN-3112'],
+                status: 200
+              });
             })
           );
         });
@@ -58,13 +56,8 @@ describe('Section Registration Page', () => {
         cy.visit('/admin/section_registration');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            rest.post('/register/section', (req, res, ctx) => {
-              return res(
-                ctx.status(500),
-                ctx.json({
-                  problems: 'Error 1, Error 2'
-                })
-              );
+            http.post('/register/section', () => {
+              return HttpResponse.json({ problems: 'Error 1, Error 2' }, { status: 500 });
             })
           );
         });
@@ -248,20 +241,17 @@ describe('Section Registration Page', () => {
         before(() => {
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
-              graphql.mutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>(
-                'RegisterSections',
-                (req, res, ctx) => {
-                  return res.once(
-                    ctx.errors([
-                      {
-                        extensions: {
-                          problems: ['This thing went wrong', 'This other thing went wrong']
-                        }
+              graphql.mutation<RegisterSectionsMutation, RegisterSectionsMutationVariables>('RegisterSections', () => {
+                return HttpResponse.json({
+                  errors: [
+                    {
+                      extensions: {
+                        problems: ['This thing went wrong', 'This other thing went wrong']
                       }
-                    ])
-                  );
-                }
-              )
+                    }
+                  ]
+                });
+              })
             );
           });
           fillInForm();
@@ -277,10 +267,6 @@ describe('Section Registration Page', () => {
 
       context('when the submission is successful', () => {
         before(() => {
-          cy.msw().then(({ worker }) => {
-            worker.resetHandlers();
-          });
-
           fillInForm();
           selectSGPNumber('SGP1008');
           cy.findByText('Register').click();

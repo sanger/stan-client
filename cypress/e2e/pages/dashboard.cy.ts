@@ -1,18 +1,4 @@
 describe('Dashboard', () => {
-  context('when visiting as a guest', () => {
-    before(() => {
-      cy.visitAsGuest('/');
-    });
-
-    it('does not show the Admin nav link', () => {
-      cy.findByText('Admin').should('not.exist');
-    });
-
-    it('does not show the user menu', () => {
-      cy.findByRole('menu').should('not.exist');
-    });
-  });
-
   context('when visiting as an authenticated user', () => {
     before(() => {
       cy.visit('/');
@@ -42,6 +28,20 @@ describe('Dashboard', () => {
       it('shows a link to logout', () => {
         cy.findByRole('menu').find("a[href='/logout']").should('be.visible');
       });
+    });
+  });
+
+  context('when visiting as a guest', () => {
+    before(() => {
+      cy.visitAsGuest('/');
+    });
+
+    it('does not show the Admin nav link', () => {
+      cy.findByText('Admin').should('not.exist');
+    });
+
+    it('does not show the user menu', () => {
+      cy.findByRole('menu').should('not.exist');
     });
   });
 });

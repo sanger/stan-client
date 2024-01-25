@@ -1,11 +1,11 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import { AliquotMutation, AliquotMutationVariables } from '../../types/sdk';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 import labwareFactory from '../../lib/factories/labwareFactory';
 
 const aliquotHandlers = [
-  graphql.mutation<AliquotMutation, AliquotMutationVariables>('Aliquot', (req, res, ctx) => {
-    const barcode = req.variables.request.barcode;
+  graphql.mutation<AliquotMutation, AliquotMutationVariables>('Aliquot', ({ variables }) => {
+    const barcode = variables.request.barcode;
     const labwareJson = sessionStorage.getItem(`labware-${barcode}`);
     if (!labwareJson) {
       throw new Error(`Couldn't find labware with barcode ${barcode} in sessionStorage`);
@@ -20,10 +20,10 @@ const aliquotHandlers = [
     const labware = JSON.parse(labwareJson);
 
     // Find the requested labware type by name
-    const labwareType = labwareTypeInstances.find((lt) => lt.name === req.variables.request.labwareType);
+    const labwareType = labwareTypeInstances.find((lt) => lt.name === variables.request.labwareType);
 
     //Create as many destination labwares as required
-    for (let indx = 0; indx < req.variables.request.numLabware; indx++) {
+    for (let indx = 0; indx < variables.request.numLabware; indx++) {
       // Create the new bit of destination labware using the same slots and samples as the source
 
       const newLabware = labwareFactory.build({
@@ -53,14 +53,14 @@ const aliquotHandlers = [
       };
       aliquot.operations[0].actions.push(action);
     }
-    return res(
-      ctx.data({
+    return HttpResponse.json({
+      data: {
         aliquot: {
           labware: aliquot.labware,
           operations: aliquot.operations
         }
-      })
-    );
+      }
+    });
   })
 ];
 

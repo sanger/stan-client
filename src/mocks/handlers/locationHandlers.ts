@@ -24,213 +24,138 @@ import {
   UnstoreBarcodeMutation,
   UnstoreBarcodeMutationVariables
 } from '../../types/sdk';
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 
 const locationHandlers = [
   graphql.query<FindLocationByBarcodeQuery, FindLocationByBarcodeQueryVariables>(
     'FindLocationByBarcode',
-    (req, res, ctx) => {
-      const location: Maybe<Location> = locationRepository.findByBarcode(req.variables.barcode);
+    ({ variables }) => {
+      const location: Maybe<Location> = locationRepository.findByBarcode(variables.barcode);
 
       if (!location) {
-        return res(
-          ctx.errors([
-            {
-              message: `Location with barcode ${req.variables.barcode} could not be found`
-            }
-          ])
+        return HttpResponse.json(
+          { errors: [{ message: `Location with barcode ${variables.barcode} could not be found` }] },
+          { status: 404 }
         );
       }
 
-      return res(
-        ctx.data({
-          location: locationResponse(location)
-        })
-      );
+      return HttpResponse.json({ data: { location: locationResponse(location) } }, { status: 200 });
     }
   ),
 
-  graphql.mutation<StoreBarcodeMutation, StoreBarcodeMutationVariables>('StoreBarcode', (req, res, ctx) => {
+  graphql.mutation<StoreBarcodeMutation, StoreBarcodeMutationVariables>('StoreBarcode', ({ variables }) => {
     let item;
     try {
-      item = locationRepository.storeBarcode(
-        req.variables.barcode,
-        req.variables.locationBarcode,
-        req.variables.address
-      );
+      item = locationRepository.storeBarcode(variables.barcode, variables.locationBarcode, variables.address);
     } catch (e) {
-      return res(
-        ctx.errors([
-          {
-            message: (e as Error).message
-          }
-        ])
-      );
+      return HttpResponse.json({ errors: [{ message: (e as Error).message }] }, { status: 400 });
     }
-
-    return res(
-      ctx.data({
-        storeBarcode: {
-          location: locationResponse(item.location)
-        }
-      })
+    return HttpResponse.json(
+      { data: { storeBarcode: { location: locationResponse(item.location) } } },
+      { status: 200 }
     );
   }),
 
-  graphql.mutation<StoreMutation, StoreMutationVariables>('Store', (req, res, ctx) => {
+  graphql.mutation<StoreMutation, StoreMutationVariables>('Store', ({ variables }) => {
     let location;
     try {
-      location = locationRepository.store(req.variables.store, req.variables.locationBarcode);
+      location = locationRepository.store(variables.store, variables.locationBarcode);
     } catch (e) {
-      return res(
-        ctx.errors([
-          {
-            message: (e as Error).message
-          }
-        ])
-      );
+      return HttpResponse.json({ errors: [{ message: (e as Error).message }] }, { status: 400 });
     }
-    return res(
-      ctx.data({
-        store: locationResponse(location)
-      })
-    );
+    return HttpResponse.json({ data: { store: locationResponse(location) } }, { status: 200 });
   }),
 
-  graphql.mutation<UnstoreBarcodeMutation, UnstoreBarcodeMutationVariables>('UnstoreBarcode', (req, res, ctx) => {
+  graphql.mutation<UnstoreBarcodeMutation, UnstoreBarcodeMutationVariables>('UnstoreBarcode', ({ variables }) => {
     let item: Maybe<StoredItem> = null;
     try {
-      item = locationRepository.unstoreBarcode(req.variables.barcode);
+      item = locationRepository.unstoreBarcode(variables.barcode);
     } catch (e) {
-      return res(
-        ctx.errors([
-          {
-            message: (e as Error).message
-          }
-        ])
-      );
+      return HttpResponse.json({ errors: [{ message: (e as Error).message }] }, { status: 400 });
     }
-
-    return res(
-      ctx.data({
-        unstoreBarcode: !item
-          ? null
-          : {
-              barcode: item.barcode,
-              address: item.address
-            }
-      })
+    return HttpResponse.json(
+      { data: { unstoreBarcode: !item ? null : { barcode: item.barcode, address: item.address } } },
+      { status: 200 }
     );
   }),
 
-  graphql.mutation<EmptyLocationMutation, EmptyLocationMutationVariables>('EmptyLocation', (req, res, ctx) => {
+  graphql.mutation<EmptyLocationMutation, EmptyLocationMutationVariables>('EmptyLocation', ({ variables }) => {
     let numUnstored;
     try {
-      numUnstored = locationRepository.empty(req.variables.barcode);
+      numUnstored = locationRepository.empty(variables.barcode);
     } catch (e) {
-      return res(
-        ctx.errors([
-          {
-            message: (e as Error).message
-          }
-        ])
-      );
+      return HttpResponse.json({ errors: [{ message: (e as Error).message }] }, { status: 400 });
     }
-
-    return res(
-      ctx.data({
-        empty: { numUnstored }
-      })
-    );
+    return HttpResponse.json({ data: { empty: { numUnstored } } }, { status: 200 });
   }),
 
-  graphql.query<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>('FindLabwareLocation', (req, res, ctx) => {
+  graphql.query<FindLabwareLocationQuery, FindLabwareLocationQueryVariables>('FindLabwareLocation', ({ variables }) => {
     const storedItems: Array<StoredItem> = locationRepository.findByLabwareBarcode(
-      Array.isArray(req.variables.barcodes) ? req.variables.barcodes : [req.variables.barcodes]
+      Array.isArray(variables.barcodes) ? variables.barcodes : [variables.barcodes]
     );
-
-    return res(
-      ctx.data({
-        stored: storedItems.map((item) => ({
-          location: {
-            barcode: item.location.barcode
-          }
-        }))
-      })
+    return HttpResponse.json(
+      {
+        data: {
+          stored: storedItems.map((item) => ({
+            location: {
+              barcode: item.location.barcode
+            }
+          }))
+        }
+      },
+      { status: 200 }
     );
   }),
 
   graphql.mutation<SetLocationCustomNameMutation, SetLocationCustomNameMutationVariables>(
     'SetLocationCustomName',
-    (req, res, ctx) => {
-      const location = locationRepository.findByBarcode(req.variables.locationBarcode);
+    ({ variables }) => {
+      const location = locationRepository.findByBarcode(variables.locationBarcode);
 
       if (location == null) {
-        return res(
-          ctx.errors([
-            {
-              message: `Location ${req.variables.locationBarcode} could not be found`
-            }
-          ])
+        return HttpResponse.json(
+          { errors: [{ message: `Location ${variables.locationBarcode} could not be found` }] },
+          { status: 404 }
         );
       }
 
-      location.customName = req.variables.newCustomName;
+      location.customName = variables.newCustomName;
       locationRepository.save(location);
-
-      return res(
-        ctx.data({
-          setLocationCustomName: locationResponse(location)
-        })
-      );
+      return HttpResponse.json({ data: { setLocationCustomName: locationResponse(location) } }, { status: 200 });
     }
   ),
 
   graphql.mutation<TransferLocationItemsMutation, TransferLocationItemsMutationVariables>(
     'TransferLocationItems',
-    (req, res, ctx) => {
-      const sourceLocation = locationRepository.findByBarcode(req.variables.sourceBarcode);
-      const destLocation = locationRepository.findByBarcode(req.variables.destinationBarcode);
+    ({ variables }) => {
+      const sourceLocation = locationRepository.findByBarcode(variables.sourceBarcode);
+      const destLocation = locationRepository.findByBarcode(variables.destinationBarcode);
       if (!sourceLocation) {
-        return res(
-          ctx.errors([
-            {
-              message: `Location ${req.variables.sourceBarcode} could not be found`
-            }
-          ])
+        return HttpResponse.json(
+          { errors: [{ message: `Location ${variables.sourceBarcode} could not be found` }] },
+          { status: 404 }
         );
       }
       if (!destLocation) {
-        return res(
-          ctx.errors([
-            {
-              message: `Location ${req.variables.destinationBarcode} could not be found`
-            }
-          ])
+        return HttpResponse.json(
+          { errors: [{ message: `Location ${variables.destinationBarcode} could not be found` }] },
+          { status: 404 }
         );
       }
       destLocation.stored = [...sourceLocation.stored];
       sourceLocation.stored = [];
 
-      return res(
-        ctx.data({
-          transfer: destLocation
-        })
-      );
+      return HttpResponse.json({ data: { transfer: destLocation } }, { status: 200 });
     }
   ),
 
   /*** The root is the first element, and the location  requested is the last element
         For example, if there is a box in a drawer in a freezer, the freezer will be first and the box will be last
    ***/
-  graphql.query<FindStoragePathQuery, FindStoragePathQueryVariables>('FindStoragePath', (req, res, ctx) => {
+  graphql.query<FindStoragePathQuery, FindStoragePathQueryVariables>('FindStoragePath', ({ variables }) => {
     const linkedLocationArray: LinkedLocationFieldsFragment[] = [];
-    addLocationHierarchy(req.variables.locationBarcode, linkedLocationArray);
-    return res(
-      ctx.data({
-        storagePath: linkedLocationArray
-      })
-    );
+    addLocationHierarchy(variables.locationBarcode, linkedLocationArray);
+    return HttpResponse.json({ data: { storagePath: linkedLocationArray } }, { status: 200 });
   })
 ];
 
