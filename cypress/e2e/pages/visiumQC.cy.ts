@@ -314,7 +314,7 @@ describe('Visium QC Page', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<FindMeasurementByBarcodeAndNameQuery, FindMeasurementByBarcodeAndNameQueryVariables>(
+            graphql.query<FindMeasurementByBarcodeAndNameQuery, FindMeasurementByBarcodeAndNameQueryVariables>(
               'FindMeasurementByBarcodeAndName',
               (req, res, ctx) => {
                 return res.once(
@@ -347,6 +347,7 @@ describe('Visium QC Page', () => {
         cy.reload();
         selectOption('qcType', 'Amplification');
         cy.get('#labwareScanInput').type('STAN-5100{enter}');
+        cy.findByTestId('all-Cycles').type('3');
       });
       it('Save button should be disabled when there is no SGP number', () => {
         selectSGPNumber('');
