@@ -326,6 +326,9 @@ describe('Visium QC Page', () => {
             )
           );
         });
+        cy.reload();
+        selectOption('qcType', 'Amplification');
+        cy.get('#labwareScanInput').type('STAN-5100{enter}');
       });
       it('displays error message', () => {
         cy.findByText('No Cq values associated to the labware slots').should('be.visible');
@@ -340,6 +343,11 @@ describe('Visium QC Page', () => {
     });
 
     describe('On Save', () => {
+      before(() => {
+        cy.reload();
+        selectOption('qcType', 'Amplification');
+        cy.get('#labwareScanInput').type('STAN-5100{enter}');
+      });
       it('Save button should be disabled when there is no SGP number', () => {
         selectSGPNumber('');
         cy.findByRole('button', { name: /Save/i }).should('be.disabled');
