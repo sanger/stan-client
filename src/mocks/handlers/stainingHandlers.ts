@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   GetStainInfoQuery,
   GetStainInfoQueryVariables,
@@ -10,20 +10,17 @@ import {
 import stainTypeRepository from '../repositories/stainTypeRepository';
 
 const stainingHandlers = [
-  graphql.query<GetStainInfoQuery, GetStainInfoQueryVariables>('GetStainInfo', () => {
-    return HttpResponse.json(
-      {
-        data: {
-          stainTypes: stainTypeRepository.findAll()
-        }
-      },
-      { status: 200 }
+  graphql.query<GetStainInfoQuery, GetStainInfoQueryVariables>('GetStainInfo', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        stainTypes: stainTypeRepository.findAll()
+      })
     );
   }),
 
-  graphql.mutation<StainMutation, StainMutationVariables>('Stain', () => {
-    return HttpResponse.json({
-      data: {
+  graphql.mutation<StainMutation, StainMutationVariables>('Stain', (req, res, ctx) => {
+    return res(
+      ctx.data({
         stain: {
           operations: [
             {
@@ -31,13 +28,26 @@ const stainingHandlers = [
             }
           ]
         }
-      }
-    });
+      })
+    );
   }),
 
-  graphql.mutation<RecordComplexStainMutation, RecordComplexStainMutationVariables>('RecordComplexStain', () => {
-    return HttpResponse.json({ data: { recordComplexStain: { operations: [{ id: 1 }] } } });
-  })
+  graphql.mutation<RecordComplexStainMutation, RecordComplexStainMutationVariables>(
+    'RecordComplexStain',
+    (req, res, ctx) => {
+      return res(
+        ctx.data({
+          recordComplexStain: {
+            operations: [
+              {
+                id: 1
+              }
+            ]
+          }
+        })
+      );
+    }
+  )
 ];
 
 export default stainingHandlers;

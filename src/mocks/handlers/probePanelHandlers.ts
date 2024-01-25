@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   AddProbePanelMutation,
   AddProbePanelMutationVariables,
@@ -11,27 +11,28 @@ import probePanelRepository from '../repositories/probePanelRepository';
 import probePanelFactory from '../../lib/factories/probePanelFactory';
 
 const probePanelHandlers = [
-  graphql.query<GetProbePanelsQuery, GetProbePanelsQueryVariables>('GetProbePanels', () => {
-    return HttpResponse.json({ data: { probePanels: probePanelRepository.findAll() } }, { status: 200 });
+  graphql.query<GetProbePanelsQuery, GetProbePanelsQueryVariables>('GetProbePanels', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        probePanels: probePanelRepository.findAll()
+      })
+    );
   }),
-  graphql.mutation<AddProbePanelMutation, AddProbePanelMutationVariables>('AddProbePanel', ({ variables }) => {
-    const addProbePanel = probePanelFactory.build({ name: variables.name });
+  graphql.mutation<AddProbePanelMutation, AddProbePanelMutationVariables>('AddProbePanel', (req, res, ctx) => {
+    const addProbePanel = probePanelFactory.build({ name: req.variables.name });
     probePanelRepository.save(addProbePanel);
-    return HttpResponse.json({ data: { addProbePanel } }, { status: 200 });
+    return res(ctx.data({ addProbePanel }));
   }),
   graphql.mutation<SetProbePanelEnabledMutation, SetProbePanelEnabledMutationVariables>(
     'SetProbePanelEnabled',
-    ({ variables }) => {
-      const probePanel = probePanelRepository.find('name', variables.name);
+    (req, res, ctx) => {
+      const probePanel = probePanelRepository.find('name', req.variables.name);
       if (probePanel) {
-        probePanel.enabled = variables.enabled;
+        probePanel.enabled = req.variables.enabled;
         probePanelRepository.save(probePanel);
-        return HttpResponse.json({ data: { setProbePanelEnabled: probePanel } }, { status: 200 });
+        return res(ctx.data({ setProbePanelEnabled: probePanel }));
       } else {
-        return HttpResponse.json(
-          { errors: [{ message: `Could not find Probe panel: "${variables.name}"` }] },
-          { status: 404 }
-        );
+        return res(ctx.errors([{ message: `Could not find Probe panel: "${req.variables.name}"` }]));
       }
     }
   )

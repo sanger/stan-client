@@ -1,5 +1,3 @@
-import { HttpResponse } from 'msw';
-
 describe('Login', () => {
   context('When user is already logged in', () => {
     it('redirects to /', () => {
@@ -17,12 +15,12 @@ describe('Login', () => {
       beforeEach(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation('Login', () => {
-              return HttpResponse.json({
-                data: {
+            graphql.mutation('Login', (req, res, ctx) => {
+              return res.once(
+                ctx.data({
                   user: null
-                }
-              });
+                })
+              );
             })
           );
         });

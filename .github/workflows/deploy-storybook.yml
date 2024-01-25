@@ -12,13 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
         name: Checkout
+      - name: Export node version
+        id: node_version
+        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v2
         with:
-          node-version-file: '.nvmrc'
-          cache: 'yarn'
+          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
       - name: Build storybook
         run: |
           yarn --frozen-lockfile --silent

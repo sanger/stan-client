@@ -5,7 +5,6 @@ import {
   selectOptionForMultiple,
   shouldDisplaySelectedValue
 } from '../shared/customReactSelect.cy';
-import { HttpResponse } from 'msw';
 
 describe('Work Allocation', () => {
   before(() => {
@@ -65,14 +64,14 @@ describe('Work Allocation', () => {
           before(() => {
             cy.msw().then(({ graphql, worker }) => {
               worker.use(
-                graphql.mutation<CreateWorkMutation, CreateWorkMutationVariables>('CreateWork', () => {
-                  return HttpResponse.json({
-                    errors: [
+                graphql.mutation<CreateWorkMutation, CreateWorkMutationVariables>('CreateWork', (req, res, ctx) => {
+                  return res.once(
+                    ctx.errors([
                       {
                         message: 'Exception while fetching data (/createWork) : An error occurred'
                       }
-                    ]
-                  });
+                    ])
+                  );
                 })
               );
             });

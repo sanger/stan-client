@@ -5,7 +5,6 @@ import {
   RecordAnalyserMutation,
   RecordAnalyserMutationVariables
 } from '../../../src/types/sdk';
-import { HttpResponse } from 'msw';
 
 describe('Xenium Analyser', () => {
   before(() => {
@@ -16,13 +15,16 @@ describe('Xenium Analyser', () => {
       //FindLatestOperationQuery should return null
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>('FindLatestOperation', () => {
-            return HttpResponse.json({
-              data: {
-                findLatestOp: null
-              }
-            });
-          })
+          graphql.query<FindLatestOperationQuery, FindLatestOperationQueryVariables>(
+            'FindLatestOperation',
+            (req, res, ctx) => {
+              return res.once(
+                ctx.data({
+                  findLatestOp: null
+                })
+              );
+            }
+          )
         );
       });
     });
@@ -83,18 +85,21 @@ describe('Xenium Analyser', () => {
       before(() => {
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>('RecordAnalyser', () => {
-              return HttpResponse.json({
-                errors: [
-                  {
-                    message: 'Exception while fetching data (/CytAssist) : The operation could not be validated.',
-                    extensions: {
-                      problems: ['Labware is discarded: [STAN-3111]']
+            graphql.mutation<RecordAnalyserMutation, RecordAnalyserMutationVariables>(
+              'RecordAnalyser',
+              (req, res, ctx) => {
+                return res.once(
+                  ctx.errors([
+                    {
+                      message: 'Exception while fetching data (/CytAssist) : The operation could not be validated.',
+                      extensions: {
+                        problems: ['Labware is discarded: [STAN-3111]']
+                      }
                     }
-                  }
-                ]
-              });
-            })
+                  ])
+                );
+              }
+            )
           );
         });
 

@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import { GetPrintersQuery, GetPrintersQueryVariables, PrintMutation, PrintMutationVariables } from '../../types/sdk';
 import { labwareTypeInstances } from '../../lib/factories/labwareTypeFactory';
 
@@ -28,12 +28,20 @@ const printers = labwareTypeInstances.reduce<GetPrintersQuery['printers']>((memo
 }, []);
 
 const printHandlers = [
-  graphql.query<GetPrintersQuery, GetPrintersQueryVariables>('GetPrinters', ({ variables }) => {
-    return HttpResponse.json({ data: { printers: printers } }, { status: 200 });
+  graphql.query<GetPrintersQuery, GetPrintersQueryVariables>('GetPrinters', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        printers: printers
+      })
+    );
   }),
 
-  graphql.mutation<PrintMutation, PrintMutationVariables>('Print', ({ variables }) => {
-    return HttpResponse.json({ data: { printLabware: 'OK' } }, { status: 200 });
+  graphql.mutation<PrintMutation, PrintMutationVariables>('Print', (req, res, ctx) => {
+    return res(
+      ctx.data({
+        printLabware: 'OK'
+      })
+    );
   })
 ];
 
