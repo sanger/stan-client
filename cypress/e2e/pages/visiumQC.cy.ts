@@ -1,6 +1,8 @@
 import {
   RecordOpWithSlotCommentsMutation,
   RecordOpWithSlotCommentsMutationVariables,
+  RecordOpWithSlotMeasurementsMutation,
+  RecordOpWithSlotMeasurementsMutationVariables,
   RecordVisiumQcMutation,
   RecordVisiumQcMutationVariables,
   SlideCosting
@@ -613,8 +615,8 @@ describe('Visium QC Page', () => {
         before(() => {
           cy.msw().then(({ worker, graphql }) => {
             worker.use(
-              graphql.mutation<RecordVisiumQcMutation, RecordVisiumQcMutationVariables>(
-                'RecordVisiumQC',
+              graphql.mutation<RecordOpWithSlotMeasurementsMutation, RecordOpWithSlotMeasurementsMutationVariables>(
+                'RecordOpWithSlotMeasurements',
                 (req, res, ctx) => {
                   return res.once(
                     ctx.errors([
