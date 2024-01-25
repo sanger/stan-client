@@ -19,6 +19,8 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'yarn'
+        env:
+          NODE_OPTIONS: "--openssl-legacy-provider"
       - name: Build storybook
         run: |
           yarn --frozen-lockfile --silent
