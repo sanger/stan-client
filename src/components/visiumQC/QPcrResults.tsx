@@ -35,14 +35,12 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) =>
     }
     setFieldValue('barcode', labware.barcode);
     const slotMeasurements: SlotMeasurement[] = labware.slots.filter(isSlotFilled).flatMap((slot) => {
-      return memoMeasurementConfig.map((measurement) => {
-        return {
-          address: slot.address,
-          name: measurement.name,
-          value: measurement.initialMeasurementVal,
-          samples: slot.samples
-        };
-      });
+      return {
+        address: slot.address,
+        name: 'Cq value',
+        value: '',
+        samples: slot.samples
+      };
     });
     setFieldValue('slotMeasurements', slotMeasurements);
   }, [labware, setErrors, setTouched, setFieldValue, memoMeasurementConfig]);
@@ -55,16 +53,14 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) =>
   );
 
   const handleChangeAllMeasurements = React.useCallback(
-    (measurementName: string, measurementValue: string) => {
+    (measurementValue: string) => {
       //Reset Errors
       setErrors({});
       setTouched({});
       const measurements = values?.slotMeasurements ? [...values.slotMeasurements] : [];
-      measurements
-        ?.filter((measurement) => measurement.name === measurementName)
-        .forEach((measuerementReq) => {
-          measuerementReq.value = measurementValue;
-        });
+      measurements.forEach((measuerementReq) => {
+        measuerementReq.value = measurementValue;
+      });
       setFieldValue('slotMeasurements', values.slotMeasurements, true);
     },
     [values, setErrors, setTouched, setFieldValue]
@@ -110,21 +106,19 @@ const QPcrResults = ({ labware, slotMeasurements, removeLabware }: CDNAProps) =>
             </div>
             {
               <div className={'flex flex-row w-1/2 ml-2 space-x-6'}>
-                {memoMeasurementConfig.map((measurement) => (
-                  <div className={'flex flex-col'} key={measurement.name}>
-                    <label className={'mt-2'}>{measurement.name}</label>
-                    <input
-                      className={'rounded-md'}
-                      type={'number'}
-                      data-testid={`all-${measurement.name}`}
-                      step={measurement.stepIncrement}
-                      onChange={(e: any) => {
-                        handleChangeAllMeasurements(measurement.name, e.currentTarget.value);
-                      }}
-                      min={0}
-                    />
-                  </div>
-                ))}
+                <div className={'flex flex-col'}>
+                  <label className={'mt-2'}>Cq value</label>
+                  <input
+                    className={'rounded-md'}
+                    type={'number'}
+                    data-testid="all-Cq value"
+                    step="0.1"
+                    onChange={(e: any) => {
+                      handleChangeAllMeasurements(e.currentTarget.value);
+                    }}
+                    min={0}
+                  />
+                </div>
               </div>
             }
 
