@@ -1,4 +1,6 @@
 import {
+  FindMeasurementByBarcodeAndNameQuery,
+  FindMeasurementByBarcodeAndNameQueryVariables,
   RecordOpWithSlotCommentsMutation,
   RecordOpWithSlotCommentsMutationVariables,
   RecordOpWithSlotMeasurementsMutation,
@@ -294,30 +296,46 @@ describe('Visium QC Page', () => {
         });
       });
 
-      it('display text boxes to enter cq value for all slots with samples', () => {
-        cy.findByRole('table').within(() => {
-          cy.findAllByTestId('Cq value-input').should('have.length.above', 0);
-          cy.findAllByTestId('Cycles-input').should('have.length.above', 0);
-        });
-      });
       it('displays scan field as disabled', () => {
         cy.get('#labwareScanInput').should('be.disabled');
       });
     });
-    context('When user enters a value in CQ value text box', () => {
-      before(() => {
-        cy.findByTestId('all-Cq value').type('5');
-      });
-      it('shows cq value in all text fields in CQ column of table', () => {
-        cy.findAllByTestId('Cq value-input').should('have.value', 5);
-      });
-    });
+
     context('When user enters a value in Cycles text box', () => {
       before(() => {
         cy.findByTestId('all-Cycles').type('3');
       });
       it('shows cq value in all text fields in CQ column of table', () => {
         cy.findAllByTestId('Cycles-input').should('have.value', 3);
+      });
+    });
+
+    describe('When the scanned labware slots does not contain Cq values', () => {
+      before(() => {
+        cy.msw().then(({ worker, graphql }) => {
+          worker.use(
+            graphql.mutation<FindMeasurementByBarcodeAndNameQuery, FindMeasurementByBarcodeAndNameQueryVariables>(
+              'FindMeasurementByBarcodeAndName',
+              (req, res, ctx) => {
+                return res.once(
+                  ctx.data({
+                    measurementValueFromLabwareOrParent: []
+                  })
+                );
+              }
+            )
+          );
+        });
+      });
+      it('displays error message', () => {
+        cy.findByText('No Cq values associated to the labware slots').should('be.visible');
+      });
+      it('hides Cycles table and input', () => {
+        cy.findByRole('table').should('not.exist');
+        cy.findByTestId('all-Cycles').should('not.exist');
+      });
+      it('displays the labware layout', () => {
+        cy.findByRole('labware').should('be.visible');
       });
     });
 

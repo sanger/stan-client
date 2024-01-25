@@ -6,13 +6,13 @@ import FormikInput from '../forms/Input';
 import { selectOptionValues } from '../forms';
 import CustomReactSelect, { OptionType } from '../forms/CustomReactSelect';
 import { Dictionary, groupBy } from 'lodash';
-import { TableCell } from '../Table';
 
 export type MeasurementConfigProps = {
   name: string;
-  stepIncrement: string;
+  stepIncrement?: string;
   validateFunction?: (value: string) => void;
-  initialMeasurementVal: string;
+  initialMeasurementVal?: string;
+  readOnly?: boolean;
 };
 
 export interface SlotMeasurement extends SlotMeasurementRequest {
@@ -61,26 +61,12 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
 
   const measurementRowValues: MeasurementRow[] = React.useMemo(() => {
     const groupedMeasurements: Dictionary<SlotMeasurement[]> = groupBy(slotMeasurements, 'address');
-    const values: MeasurementRow[] = [];
-    if (isWithSampleInfo) {
-      for (const address in groupedMeasurements) {
-        groupedMeasurements[address].forEach((measurement) => {
-          values.push({
-            address,
-            measurements: groupedMeasurements[address],
-            samples: measurement.samples
-          });
-        });
-      }
-    } else {
-      for (const address in groupedMeasurements) {
-        values.push({
-          address,
-          measurements: groupedMeasurements[address]
-        });
-      }
-    }
-    return values;
+
+    return Object.entries(groupedMeasurements).map(([address, measurements]) => ({
+      address,
+      measurements,
+      samples: isWithSampleInfo ? measurements[0]?.samples : undefined
+    }));
   }, [slotMeasurements, isWithSampleInfo]);
 
   const columns = React.useMemo(() => {
@@ -95,17 +81,19 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
             {
               Header: 'External ID',
               id: 'externalId',
+              className: 'text-wrap',
+              cellClassName: 'text-wrap',
               Cell: ({ row }: { row: Row<MeasurementRow> }) => {
                 return (
-                  <TableCell>
+                  <div className="grid grid-cols-1 text-wrap">
                     {row.original.samples?.map((sample) => {
                       return (
-                        <div className="flex px-6">
-                          <label>{sample.tissue.externalName}</label>
-                        </div>
+                        <label className="py-1" key={sample.id}>
+                          {sample.tissue.externalName}
+                        </label>
                       );
                     })}
-                  </TableCell>
+                  </div>
                 );
               }
             },
@@ -114,15 +102,15 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
               id: 'sectionNumber',
               Cell: ({ row }: { row: Row<MeasurementRow> }) => {
                 return (
-                  <TableCell>
+                  <div className="grid grid-cols-1">
                     {row.original.samples?.map((sample) => {
                       return (
-                        <div className="flex items-right px-6">
-                          <label>{sample.section}</label>
-                        </div>
+                        <label className="py-1" key={sample.id}>
+                          {sample.section}
+                        </label>
                       );
                     })}
-                  </TableCell>
+                  </div>
                 );
               }
             }
@@ -134,7 +122,9 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
           id: measurementProp.name,
           allCapital: false,
           Cell: ({ row }: { row: Row<MeasurementRow> }) => {
-            return (
+            return measurementProp.readOnly ? (
+              <span>{row.original.measurements[0].value}</span>
+            ) : (
               <>
                 <FormikInput
                   key={row.original.address + measurementProp.name + row.index}
@@ -192,7 +182,11 @@ const SlotMeasurements = ({ slotMeasurements, measurementConfig, onChangeField, 
     <>
       {slotMeasurements && slotMeasurements.length > 0 && (
         <>
-          <DataTable columns={columns} data={measurementRowValues ?? []} />
+          <DataTable
+            columns={columns}
+            data={measurementRowValues ?? []}
+            cellClassName="overflow-hidden whitespace-nowrap hover:overflow-visible text-sm"
+          />
         </>
       )}
     </>

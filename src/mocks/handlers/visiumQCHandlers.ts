@@ -1,5 +1,8 @@
 import { graphql } from 'msw';
 import {
+  FindMeasurementByBarcodeAndNameQuery,
+  FindMeasurementByBarcodeAndNameQueryVariables,
+  Labware,
   RecordOpWithSlotCommentsMutation,
   RecordOpWithSlotCommentsMutationVariables,
   RecordOpWithSlotMeasurementsMutation,
@@ -7,6 +10,9 @@ import {
   RecordVisiumQcMutation,
   RecordVisiumQcMutationVariables
 } from '../../types/sdk';
+import { isSlotFilled } from '../../lib/helpers/slotHelper';
+import { faker } from '@faker-js/faker';
+import { createLabware } from './labwareHandlers';
 
 const visiumQCHandllers = [
   graphql.mutation<RecordVisiumQcMutation, RecordVisiumQcMutationVariables>('RecordVisiumQC', (req, res, ctx) => {
@@ -50,6 +56,27 @@ const visiumQCHandllers = [
               }
             ]
           }
+        })
+      );
+    }
+  ),
+
+  graphql.query<FindMeasurementByBarcodeAndNameQuery, FindMeasurementByBarcodeAndNameQueryVariables>(
+    'FindMeasurementByBarcodeAndName',
+    (req, res, ctx) => {
+      const labwareJson = sessionStorage.getItem(`labware-${req.variables.barcode}`);
+      const labware: Labware = labwareJson ? JSON.parse(labwareJson) : createLabware(req.variables.barcode);
+      const fakeCqValues = labware.slots
+        .filter((slot) => isSlotFilled(slot))
+        .map((slot) => {
+          return {
+            address: slot.address,
+            string: faker.number.float({ min: 0.1, max: 5, precision: 0.1 }).toString()
+          };
+        });
+      return res(
+        ctx.data({
+          measurementValueFromLabwareOrParent: fakeCqValues
         })
       );
     }

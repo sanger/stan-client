@@ -1,12 +1,14 @@
 import Panel from '../Panel';
 import React from 'react';
-import { LabwareFlaggedFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
+import { AddressString, LabwareFlaggedFieldsFragment, SlotMeasurementRequest } from '../../types/sdk';
 import Labware from '../labware/Labware';
 import { isSlotFilled } from '../../lib/helpers/slotHelper';
 import RemoveButton from '../buttons/RemoveButton';
-import SlotMeasurements, { MeasurementConfigProps } from '../slotMeasurement/SlotMeasurements';
+import SlotMeasurements, { MeasurementConfigProps, SlotMeasurement } from '../slotMeasurement/SlotMeasurements';
 import { useFormikContext } from 'formik';
 import { VisiumQCFormData } from '../../pages/VisiumQC';
+import { stanCore } from '../../lib/sdk';
+import Warning from '../notifications/Warning';
 
 export type CDNAProps = {
   labware: LabwareFlaggedFieldsFragment;
@@ -14,16 +16,22 @@ export type CDNAProps = {
   removeLabware: (barcode: string) => void;
 };
 
-const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) => {
-  const { values, setErrors, setTouched, setFieldValue } = useFormikContext<VisiumQCFormData>();
+const fetchCqMeasurements = async (barcode: string): Promise<Array<AddressString>> => {
+  const response = await stanCore.FindMeasurementByBarcodeAndName({
+    barcode: barcode,
+    measurementName: 'Cq value'
+  });
+  return response.measurementValueFromLabwareOrParent;
+};
+
+const Amplification = ({ labware, removeLabware }: CDNAProps) => {
+  const { values, setErrors, setTouched, setFieldValue, errors, setFieldError } = useFormikContext<VisiumQCFormData>();
 
   const memoMeasurementConfig: MeasurementConfigProps[] = React.useMemo(
     () => [
       {
         name: 'Cq value',
-        stepIncrement: '.01',
-        validateFunction: validateCqMeasurementValue,
-        initialMeasurementVal: ''
+        readOnly: true
       },
       {
         name: 'Cycles',
@@ -47,17 +55,35 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) 
       return;
     }
     setFieldValue('barcode', labware.barcode);
-    const slotMeasurements: SlotMeasurementRequest[] = labware.slots.filter(isSlotFilled).flatMap((slot) => {
-      return memoMeasurementConfig.map((measurement) => {
-        return {
-          address: slot.address,
-          name: measurement.name,
-          value: measurement.initialMeasurementVal
-        };
+    fetchCqMeasurements(labware.barcode).then((measurementValues) => {
+      if (measurementValues.length === 0) {
+        setFieldValue('slotMeasurements', [], false);
+        setFieldError('barcode', 'No Cq values associated with the labware slots');
+        return;
+      }
+      const slotMeasurements: SlotMeasurement[] = [];
+      labware.slots.filter(isSlotFilled).forEach((slot) => {
+        slotMeasurements.push(
+          ...[
+            {
+              address: slot.address,
+              name: 'Cq value',
+              value:
+                measurementValues.find((measurementValue) => measurementValue.address === slot.address)?.string ?? '',
+              samples: slot.samples
+            },
+            {
+              address: slot.address,
+              name: 'Cycles',
+              value: '',
+              samples: slot.samples
+            }
+          ]
+        );
       });
+      setFieldValue('slotMeasurements', slotMeasurements);
     });
-    setFieldValue('slotMeasurements', slotMeasurements);
-  }, [labware, setErrors, setTouched, setFieldValue, memoMeasurementConfig]);
+  }, [labware, setErrors, setTouched, setFieldValue, memoMeasurementConfig, setFieldError]);
 
   const handleChangeMeasurement = React.useCallback(
     (measurementName: string, measurementValue: string) => {
@@ -67,13 +93,13 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) 
   );
 
   const handleChangeAllMeasurements = React.useCallback(
-    (measurementName: string, measurementValue: string) => {
+    (measurementValue: string) => {
       //Reset Errors
       setErrors({});
       setTouched({});
       const measurements = values?.slotMeasurements ? [...values.slotMeasurements] : [];
       measurements
-        ?.filter((measurement) => measurement.name === measurementName)
+        ?.filter((measurement) => measurement.name === 'Cycles')
         .forEach((measuerementReq) => {
           measuerementReq.value = measurementValue;
         });
@@ -81,22 +107,6 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) 
     },
     [values, setErrors, setTouched, setFieldValue]
   );
-
-  /***
-   * Accept values with two decimal values for cq value
-   * @param value
-   */
-  function validateCqMeasurementValue(value: string) {
-    let error;
-    if (value === '') {
-      error = 'Required';
-    } else {
-      if (Number(value) < 0) {
-        error = 'Positive value required';
-      }
-    }
-    return error;
-  }
 
   /***
    * Only accept integer values for cDNA Amplification
@@ -128,8 +138,9 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) 
     <div className="max-w-screen-xl mx-auto">
       {labware && (
         <div className={'flex flex-col mt-2'}>
+          {errors?.barcode && <Warning className={'mt-4'} message={errors.barcode} />}
           <Panel>
-            <div className="flex flex-row items-center justify-end">
+            <div className="flex flex-row justify-end">
               {
                 <RemoveButton
                   data-testid={'remove'}
@@ -139,37 +150,34 @@ const Amplification = ({ labware, slotMeasurements, removeLabware }: CDNAProps) 
                 />
               }
             </div>
-            {
-              <div className={'flex flex-row w-1/2 ml-2 space-x-6'}>
-                {memoMeasurementConfig.map((measurement) => (
-                  <div className={'flex flex-col'} key={measurement.name}>
-                    <label className={'mt-2'}>{measurement.name}</label>
-                    <input
-                      className={'rounded-md'}
-                      type={'number'}
-                      data-testid={`all-${measurement.name}`}
-                      step={measurement.stepIncrement}
-                      onChange={(e: any) => {
-                        handleChangeAllMeasurements(measurement.name, e.currentTarget.value);
-                      }}
-                      min={0}
-                    />
-                  </div>
-                ))}
+            {!errors?.barcode && (
+              <div className={'flex flex-row w-1/2 mb-2'}>
+                <div className={'flex flex-col'}>
+                  <label>Cycles</label>
+                  <input
+                    className={'rounded-md'}
+                    type={'number'}
+                    data-testid={`all-Cycles`}
+                    step={1}
+                    onChange={(e: any) => {
+                      handleChangeAllMeasurements(e.currentTarget.value);
+                    }}
+                    min={0}
+                  />
+                </div>
               </div>
-            }
-
-            <div className={'flex flex-row mt-8 justify-between'}>
-              <div className="flex flex-col w-full">
-                {slotMeasurements && slotMeasurements.length > 0 && (
+            )}
+            <div className={'grid grid-cols-11 gap-2 justify-between'}>
+              <div className="col-span-6">
+                {values.slotMeasurements && values.slotMeasurements.length > 0 && (
                   <SlotMeasurements
-                    slotMeasurements={slotMeasurements}
+                    slotMeasurements={values.slotMeasurements}
                     onChangeField={handleChangeMeasurement}
                     measurementConfig={memoMeasurementConfig}
                   />
                 )}
               </div>
-              <div className="flex flex-col w-full items-end justify-center p-4" data-testid={'labware'}>
+              <div className="col-span-5 w-full flex items-center justify-center p-4" data-testid={'labware'}>
                 <Labware labware={labware} name={labware.labwareType.name} />
               </div>
             </div>

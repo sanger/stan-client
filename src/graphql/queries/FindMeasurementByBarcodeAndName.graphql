@@ -1,0 +1,6 @@
+query FindMeasurementByBarcodeAndName($barcode: String!, $measurementName: String!) {
+  measurementValueFromLabwareOrParent(barcode: $barcode, name: $measurementName) {
+    address
+    string
+  }
+}
