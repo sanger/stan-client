@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   AddDestructionReasonMutation,
   AddDestructionReasonMutationVariables,
@@ -13,41 +13,45 @@ import destructionReasonFactory from '../../lib/factories/destructionReasonFacto
 const destructionReasonHandlers = [
   graphql.query<GetDestructionReasonsQuery, GetDestructionReasonsQueryVariables>(
     'GetDestructionReasons',
-    ({ variables }) => {
+    (req, res, ctx) => {
       let destructionReasons = destructionReasonRepository.findAll();
 
-      const includeDisabled = variables.includeDisabled ?? false;
+      const includeDisabled = req.variables.includeDisabled ?? false;
 
       if (!includeDisabled) {
         destructionReasons = destructionReasons.filter((dr) => dr.enabled);
       }
-      return HttpResponse.json({ data: { destructionReasons } }, { status: 200 });
+
+      return res(ctx.data({ destructionReasons: destructionReasons }));
     }
   ),
 
   graphql.mutation<AddDestructionReasonMutation, AddDestructionReasonMutationVariables>(
     'AddDestructionReason',
-    ({ variables }) => {
+    (req, res, ctx) => {
       const addDestructionReason = destructionReasonFactory.build({
-        text: variables.text
+        text: req.variables.text
       });
       destructionReasonRepository.save(addDestructionReason);
-      return HttpResponse.json({ data: { addDestructionReason } }, { status: 200 });
+      return res(ctx.data({ addDestructionReason }));
     }
   ),
 
   graphql.mutation<SetDestructionReasonEnabledMutation, SetDestructionReasonEnabledMutationVariables>(
     'SetDestructionReasonEnabled',
-    ({ variables }) => {
-      const destructionReason = destructionReasonRepository.find('text', variables.text);
+    (req, res, ctx) => {
+      const destructionReason = destructionReasonRepository.find('text', req.variables.text);
       if (destructionReason) {
-        destructionReason.enabled = variables.enabled;
+        destructionReason.enabled = req.variables.enabled;
         destructionReasonRepository.save(destructionReason);
-        return HttpResponse.json({ data: { setDestructionReasonEnabled: destructionReason } }, { status: 200 });
+        return res(ctx.data({ setDestructionReasonEnabled: destructionReason }));
       } else {
-        return HttpResponse.json(
-          { errors: [{ message: `Could not find destruction reason: "${variables.text}"` }] },
-          { status: 404 }
+        return res(
+          ctx.errors([
+            {
+              message: `Could not find destruction reason: "${req.variables.text}"`
+            }
+          ])
         );
       }
     }

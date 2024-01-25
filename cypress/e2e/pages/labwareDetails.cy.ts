@@ -1,8 +1,17 @@
 import { FindLabwareQuery, FindLabwareQueryVariables, LabwareState } from '../../../src/types/sdk';
 import labwareFactory from '../../../src/lib/factories/labwareFactory';
-import { HttpResponse } from 'msw';
 
 describe('Labware Info Page', () => {
+  context('when I visit as a guest', () => {
+    before(() => {
+      cy.visitAsGuest('/labware/STAN-0001F');
+    });
+
+    it('does not show the label printer', () => {
+      cy.findByText('Print Labels').should('not.exist');
+    });
+  });
+
   context('when I visit as a logged in user', () => {
     before(() => {
       cy.visit('/labware/STAN-0001F');
@@ -19,14 +28,14 @@ describe('Labware Info Page', () => {
 
       cy.msw().then(({ worker, graphql }) => {
         worker.use(
-          graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', () => {
-            return HttpResponse.json({
-              data: {
+          graphql.query<FindLabwareQuery, FindLabwareQueryVariables>('FindLabware', (req, res, ctx) => {
+            return res.once(
+              ctx.data({
                 labware: labwareFactory.build({
                   state: LabwareState.Destroyed
                 })
-              }
-            });
+              })
+            );
           })
         );
       });
@@ -39,15 +48,12 @@ describe('Labware Info Page', () => {
 
   context('when I check a flagged labware details', () => {
     before(() => {
-      cy.visitAsGuest('/labware/STAN-100');
+      cy.visit('/labware/STAN-100'); // barcodes ending 00 are flagged
     });
 
     it('display the related flags table', () => {
       cy.findByText('Related Flags').should('be.visible');
       cy.findAllByTestId('flag-icon').should('have.length.at.least', 1);
-    });
-    it('does not show the label printer', () => {
-      cy.findByText('Print Labels').should('not.exist');
     });
   });
 });

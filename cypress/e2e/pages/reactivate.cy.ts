@@ -1,6 +1,5 @@
 import { selectOption, selectSGPNumber } from '../shared/customReactSelect.cy';
 import { ReactivateLabwareMutation, ReactivateLabwareMutationVariables } from '../../../src/types/sdk';
-import { HttpResponse } from 'msw';
 
 describe('Reactivate', () => {
   describe('Validation', () => {
@@ -47,18 +46,21 @@ describe('Reactivate', () => {
         cy.visit('/admin/reactivate');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.mutation<ReactivateLabwareMutation, ReactivateLabwareMutationVariables>('ReactivateLabware', () => {
-              return HttpResponse.json({
-                errors: [
-                  {
-                    message: 'The request could not be performed.',
-                    extensions: {
-                      problems: ['Something wrong happened.']
+            graphql.mutation<ReactivateLabwareMutation, ReactivateLabwareMutationVariables>(
+              'ReactivateLabware',
+              (req, res, ctx) => {
+                return res.once(
+                  ctx.errors([
+                    {
+                      message: 'The request could not be performed.',
+                      extensions: {
+                        problems: ['Something wrong happened.']
+                      }
                     }
-                  }
-                ]
-              });
-            })
+                  ])
+                );
+              }
+            )
           );
         });
         selectSGPNumber('SGP1008');

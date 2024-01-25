@@ -1,6 +1,5 @@
 import { AliquotMutation, AliquotMutationVariables } from '../../../src/types/sdk';
 import { selectSGPNumber } from '../shared/customReactSelect.cy';
-import { HttpResponse } from 'msw';
 
 function scanInLabware() {
   cy.get('#labwareScanInput').type('STAN-011{enter}');
@@ -40,6 +39,39 @@ describe('Aliquoting', () => {
     });
     it('disables the Aliquot button', () => {
       cy.findByRole('button', { name: 'Aliquot' }).should('be.disabled');
+    });
+  });
+
+  context('when aliquoting fails', () => {
+    before(() => {
+      cy.visit('/lab/aliquoting');
+
+      cy.msw().then(({ worker, graphql }) => {
+        worker.use(
+          graphql.mutation<AliquotMutation, AliquotMutationVariables>('Aliquot', (req, res, ctx) => {
+            return res.once(
+              ctx.errors([
+                {
+                  message: 'Exception while fetching data (/aliquot) : Failed to aliquot'
+                }
+              ])
+            );
+          })
+        );
+      });
+
+      scanInLabware();
+      selectSGPNumber('SGP1008');
+      enterNumberOfDestinationTubes('4');
+      cy.findByText('Aliquot').click();
+    });
+
+    it("doesn't disable the Aliquot button", () => {
+      cy.findByRole('button', { name: 'Aliquot' }).should('not.be.disabled');
+    });
+
+    it('shows an error message', () => {
+      cy.findByText('Failed to aliquot').should('be.visible');
     });
   });
 
@@ -100,38 +132,5 @@ describe('Aliquoting', () => {
     it('should display store page', () => {
       cy.url().should('be.equal', 'http://localhost:3000/store');
     });
-  });
-
-  context('when aliquoting fails', () => {
-    before(() => {
-      cy.visit('/lab/aliquoting');
-      cy.msw().then(({ worker, graphql }) => {
-        worker.use(
-          graphql.mutation<AliquotMutation, AliquotMutationVariables>('Aliquot', () => {
-            return HttpResponse.json({
-              errors: [
-                {
-                  message: 'Exception while fetching data (/aliquot) : Failed to aliquot'
-                }
-              ]
-            });
-          })
-        );
-      });
-
-      scanInLabware();
-      selectSGPNumber('SGP1008');
-      enterNumberOfDestinationTubes('4');
-      cy.findByText('Aliquot').click();
-    });
-
-    it("doesn't disable the Aliquot button", () => {
-      cy.findByRole('button', { name: 'Aliquot' }).should('not.be.disabled');
-    });
-
-    it('shows an error message', () => {
-      cy.findByText('Failed to aliquot').should('be.visible');
-    });
-    after(() => {});
   });
 });

@@ -1,4 +1,4 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 import {
   DestroyMutation,
   DestroyMutationVariables,
@@ -8,20 +8,26 @@ import {
 import destructionReasonRepository from '../repositories/destructionReasonRepository';
 
 const destroyHandlers = [
-  graphql.query<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>('GetDestroyInfo', ({ variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query<GetDestroyInfoQuery, GetDestroyInfoQueryVariables>('GetDestroyInfo', (req, res, ctx) => {
+    return res(
+      ctx.data({
         destructionReasons: destructionReasonRepository.findAll().filter((dr) => dr.enabled)
-      }
-    });
+      })
+    );
   }),
 
-  graphql.mutation<DestroyMutation, DestroyMutationVariables>('Destroy', ({ variables }) => {
-    const destructions = variables.request.barcodes.map((barcode) => ({
+  graphql.mutation<DestroyMutation, DestroyMutationVariables>('Destroy', (req, res, ctx) => {
+    const destructions = req.variables.request.barcodes.map((barcode) => ({
       labware: { barcode }
     }));
 
-    return HttpResponse.json({ data: { destroy: { destructions } } }, { status: 200 });
+    return res(
+      ctx.data({
+        destroy: {
+          destructions
+        }
+      })
+    );
   })
 ];
 
