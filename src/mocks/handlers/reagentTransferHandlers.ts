@@ -1,4 +1,4 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import {
   FindLabwareQueryVariables,
   FindReagentPlateQuery,
@@ -9,27 +9,13 @@ import {
 const reagentTransferHandlers = [
   graphql.mutation<RecordReagentTransferMutation, RecordReagentTransferMutationVariables>(
     'RecordReagentTransfer',
-    (req, res, ctx) => {
-      return res(
-        ctx.data({
-          reagentTransfer: {
-            operations: [
-              {
-                id: 1
-              }
-            ]
-          }
-        })
-      );
+    () => {
+      return HttpResponse.json({ data: { reagentTransfer: { operations: [{ id: 1 }] } } }, { status: 200 });
     }
   ),
 
-  graphql.query<FindReagentPlateQuery, FindLabwareQueryVariables>('FindReagentPlate', (req, res, ctx) => {
-    return res(
-      ctx.data({
-        reagentPlate: undefined
-      })
-    );
+  graphql.query<FindReagentPlateQuery, FindLabwareQueryVariables>('FindReagentPlate', () => {
+    return HttpResponse.json({ data: { reagentPlate: undefined } }, { status: 200 });
   })
 ];
 

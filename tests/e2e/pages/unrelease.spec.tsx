@@ -7,7 +7,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Unrelease from '../../../src/pages/Unrelease';
 import { selectFocusBlur, selectSGPNumber, waitFor } from '../../generic/utilities';
 import { server } from '../../../src/mocks/server';
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 describe('Unrelease', () => {
   beforeEach(() => {
     render(
@@ -68,16 +68,16 @@ describe('Unrelease', () => {
     describe('when the submission fails server side', () => {
       beforeEach(() => {
         server.use(
-          graphql.mutation('Unrelease', (req, res, ctx) => {
-            return res(
-              ctx.errors([
+          graphql.mutation('Unrelease', () => {
+            return HttpResponse.json({
+              errors: [
                 {
                   extensions: {
                     problems: ['This thing went wrong', 'This other thing went wrong']
                   }
                 }
-              ])
-            );
+              ]
+            });
           })
         );
       });

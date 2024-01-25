@@ -1,30 +1,33 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import { GetLabwareCostingQuery, GetLabwareCostingQueryVariables, SlideCosting } from '../../types/sdk';
 
 export const labwareCostingHandlers = [
-  graphql.query<GetLabwareCostingQuery, GetLabwareCostingQueryVariables>('GetLabwareCosting', (req, res, ctx) => {
-    if (req.variables.barcode.startsWith('STAN')) {
+  graphql.query<GetLabwareCostingQuery, GetLabwareCostingQueryVariables>('GetLabwareCosting', ({ variables }) => {
+    if (variables.barcode.startsWith('STAN')) {
       let payload: GetLabwareCostingQuery = {
         labwareCosting: null
       };
-      if (req.variables.barcode.endsWith('1')) {
+      if (variables.barcode.endsWith('1')) {
         payload = {
           labwareCosting: SlideCosting.Sgp
         };
       }
-      if (req.variables.barcode.endsWith('2')) {
+      if (variables.barcode.endsWith('2')) {
         payload = {
           labwareCosting: SlideCosting.Faculty
         };
       }
-      return res(ctx.data(payload));
+      return HttpResponse.json({ data: payload }, { status: 200 });
     } else {
-      return res(
-        ctx.errors([
-          {
-            message: `Exception while fetching data (/labware) : No labware found with barcode: ${req.variables.barcode}`
-          }
-        ])
+      return HttpResponse.json(
+        {
+          errors: [
+            {
+              message: `Exception while fetching data (/labware) : No labware found with barcode: ${variables.barcode}`
+            }
+          ]
+        },
+        { status: 404 }
       );
     }
   })

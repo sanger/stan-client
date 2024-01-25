@@ -1,13 +1,10 @@
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 import { RecordOrientationQcMutation, RecordOrientationQcMutationVariables } from '../../types/sdk';
 
 const orientationQCHandlers = [
-  graphql.mutation<RecordOrientationQcMutation, RecordOrientationQcMutationVariables>(
-    'RecordOrientationQC',
-    (req, res, ctx) => {
-      return res(ctx.data({ recordOrientationQC: { operations: [] } }));
-    }
-  )
+  graphql.mutation<RecordOrientationQcMutation, RecordOrientationQcMutationVariables>('RecordOrientationQC', () => {
+    return HttpResponse.json({ data: { recordOrientationQC: { operations: [] } } }, { status: 200 });
+  })
 ];
 
 export default orientationQCHandlers;

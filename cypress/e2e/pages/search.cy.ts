@@ -1,6 +1,7 @@
 import { FindQuery, FindQueryVariables } from '../../../src/types/sdk';
 import { buildFindResult } from '../../../src/mocks/handlers/findHandlers';
 import { shouldDisplaySelectedValue } from '../shared/customReactSelect.cy';
+import { HttpResponse } from 'msw';
 
 describe('Search', () => {
   context('when URL query params are set', () => {
@@ -134,8 +135,12 @@ describe('Search', () => {
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.query<FindQuery, FindQueryVariables>('Find', (req, res, ctx) => {
-              return res(ctx.data({ find: buildFindResult(200, 150) }));
+            graphql.query<FindQuery, FindQueryVariables>('Find', () => {
+              return HttpResponse.json({
+                data: {
+                  find: buildFindResult(200, 150)
+                }
+              });
             })
           );
         });
@@ -167,12 +172,15 @@ describe('Search', () => {
         cy.visit('/search');
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.query<FindQuery, FindQueryVariables>('Find', (req, res, ctx) => {
-              return res(ctx.data({ find: buildFindResult(0, 40) }));
+            graphql.query<FindQuery, FindQueryVariables>('Find', () => {
+              return HttpResponse.json({
+                data: {
+                  find: buildFindResult(0, 40)
+                }
+              });
             })
           );
         });
-
         cy.findByLabelText('Donor ID').type('DNR123');
         cy.findByRole('button', { name: /Search/i }).click();
       });
@@ -192,14 +200,14 @@ describe('Search', () => {
 
         cy.msw().then(({ worker, graphql }) => {
           worker.use(
-            graphql.query<FindQuery, FindQueryVariables>('Find', (req, res, ctx) => {
-              return res(
-                ctx.errors([
+            graphql.query<FindQuery, FindQueryVariables>('Find', () => {
+              return HttpResponse.json({
+                errors: [
                   {
                     message: 'Exception while fetching data (/find) : Something went wrong'
                   }
-                ])
-              );
+                ]
+              });
             })
           );
         });
