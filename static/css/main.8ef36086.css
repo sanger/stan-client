@@ -1629,6 +1629,12 @@ svg.logo.loading rect:nth-child(3n+1) {
 .z-10 {
   z-index: 10;
 }
+.col-span-6 {
+  grid-column: span 6 / span 6;
+}
+.col-span-5 {
+  grid-column: span 5 / span 5;
+}
 .col-span-2 {
   grid-column: span 2 / span 2;
 }
@@ -4397,4 +4403,4 @@ svg.logo.loading rect:nth-child(3n+1) {
   }
 }
 
-/*# sourceMappingURL=main.9eb4eae7.css.map*/
+/*# sourceMappingURL=main.8ef36086.css.map*/
