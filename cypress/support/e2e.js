@@ -22,7 +22,9 @@ import { worker } from "../../src/mocks/mswSetup";
 //https://github.com/testing-library/cypress-testing-library/issues/253
 //This is the suggested workaround to ensure this.get('prev') is always defined by the time your test runs.
 beforeEach(() => {
-  cy.then(() => null)
+  cy.then(() => null);
+  worker.resetHandlers();
+  worker.stop();
 })
 
 before(async () => {
